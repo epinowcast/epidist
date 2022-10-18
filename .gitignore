@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.rda
+*.Rout
+*.Rlog
+*.pdf
+makestuff
