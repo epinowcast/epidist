@@ -25,3 +25,4 @@ Makefile currently doesn't work because I had to switch to my Windows pc to run 
 * `param.R` sets parameters
 * `data_exponential.R` generates data
 * `fit_exponential.R` performs fits
+* `figure_exponential.R` generates the main figure
