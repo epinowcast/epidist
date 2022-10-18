@@ -9,6 +9,10 @@ Our goal is to estimate $f_s(\tau)$, where $s$ represents cohort time (i.e., the
 * Right truncation+dynamical correction: $b(\tau)/B(t_{max}-s)$
 * Left trunction+dynamical correction: $b(\tau)/B(s-t_{min})$. Again, we fit a single lognormal distribution with left truncation and then correct for underlying dynamics after the fit
 
+## Results
+
+![](figure/figure_exponential.png)<!-- -->
+
 ## Flow
 Makefile currently doesn't work because I had to switch to my Windows pc to run brms. I'm saving rda files to the rdacache directory so that I can move between machines (which you don't need to update)...
 
