@@ -5,21 +5,23 @@ load("data_exponential.rda")
 ## but I can't use make on my pc so I'm doing this clunky thing...
 ## feel free to change up however you want
 
+options(mc.cores=4)
+
 # Fit lognormal model with no corrections
 naive_model <- brm(
-  bf(delay ~ as.factor(r), sigma ~ as.factor(r)), data = truncated_obs, family = lognormal(),
+  bf(delay ~ -1 + as.factor(r), sigma ~ -1 + as.factor(r)), data = truncated_obs, family = lognormal(),
   backend = "cmdstanr"
 )
 
 # right truncation only (if we're looking forward in time)
 rtrunc_model <- brm(
-  bf(delay | trunc(lb=0, ub=obs_time) ~ as.factor(r), sigma ~ as.factor(r)), data = truncated_obs, family = lognormal(),
+  bf(delay | trunc(lb=0, ub=obs_time) ~ -1 + as.factor(r), sigma ~ -1 + as.factor(r)), data = truncated_obs, family = lognormal(),
   backend = "cmdstanr"
 )
 
 # left truncation only (if we're looking backward in time)
 ltrunc_model <- brm(
-  bf(delay | trunc(lb=0, ub=obs_delay) ~ as.factor(r), sigma ~ as.factor(r)), data = truncated_obs, family = lognormal(),
+  bf(delay | trunc(lb=0, ub=obs_delay) ~ -1 + as.factor(r), sigma ~ -1 + as.factor(r)), data = truncated_obs, family = lognormal(),
   backend = "cmdstanr"
 )
 
