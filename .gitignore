@@ -6,4 +6,7 @@
 *.Rout
 *.Rlog
 *.pdf
+*.mk
+*.Rproj
+*.html
 makestuff
