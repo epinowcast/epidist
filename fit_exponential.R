@@ -21,7 +21,7 @@ rtrunc_model <- brm(
 
 # left truncation only (if we're looking backward in time)
 ltrunc_model <- brm(
-  bf(delay | trunc(lb=0, ub=obs_delay) ~ -1 + as.factor(r), sigma ~ -1 + as.factor(r)), data = truncated_obs, family = lognormal(),
+  bf(delay | trunc(lb=0, ub=stime) ~ -1 + as.factor(r), sigma ~ -1 + as.factor(r)), data = truncated_obs, family = lognormal(),
   backend = "cmdstanr"
 )
 
