@@ -8,19 +8,6 @@ load("fit_exponential.rda")
 r <- seq(-0.2, 0.2, length.out=11)
 truemean <- exp(logmean + logsd^2/2)
 
-organize <- function(x) {
-  x <- as.data.frame(x)
-  x$names <- rownames(x)
-  
-  x %>%
-    filter(!grepl("sigma", names)) %>%
-    mutate(
-      names=gsub("as\\.factorr", "", names),
-      names=gsub("M", "-", names),
-      r=as.numeric(names)
-    )
-}
-
 ## not subsampling despite its name...
 
 ff_naive <- naive_model %>%
