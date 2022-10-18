@@ -11,6 +11,8 @@ Our goal is to estimate $f_s(\tau)$, where $s$ represents cohort time (i.e., the
 
 ## Results
 
+$r=0$ is a bit weird but maybe OK given that we'd expect 95\% coverage? So one thing being off isn't so bad...
+
 ![](figure/figure_exponential.png)<!-- -->
 
 ## Flow
