@@ -2,7 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-*.rda
 *.Rout
 *.Rlog
 *.pdf

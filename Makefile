@@ -28,11 +28,11 @@ Ignore += asymptomaticvariant ## For testing instructions
 
 Sources += $(wildcard *.R)
 
-param.Rout: param.R
-	$(wrapR)
+# param.Rout: param.R 
+# 	$(wrapR)
 	
-data_exponential.Rout: data_exponential.R param.rda
-	$(pipeR)
+# data_exponential.Rout: data_exponential.R param.rda
+# 	$(pipeR)
 
 ######################################################################
 ### Makestuff

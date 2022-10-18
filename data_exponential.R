@@ -1,8 +1,6 @@
 library(data.table) # here we use the development version of data.table install it with data.table::update_dev_pkg
 library(purrr)
-library(shellpipes)
-
-loadEnvironments()
+source("param.R")
 
 samples <- 400
 max_t <- 20
@@ -44,4 +42,4 @@ obs <- linelist |>
 truncated_obs <- obs  |>
   DT(obs_delay <= max_t) ## let's not worry about double censoring for now
 
-saveEnvironment()
+save.image(file="data_exponential.rda")
