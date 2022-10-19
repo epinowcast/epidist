@@ -19,6 +19,11 @@ Our goal is to estimate $f_s(\tau)$, where $s$ represents cohort time (i.e., the
 * Right truncation + dynamical correction overcompensates and goes crazy
 * Left truncation + dynamical correction is as good as right truncation but starts to give super wide CIs for high $r$ values. Need to check integration step.
 
+![](figure/figure_doublecensor.png)<!-- -->
+
+* Doubly censored likelihood performs just as well as if we knew exact time points
+* Couldn't try negative binomial with truncation because it takes forever
+
 ## Flow
 Makefile currently doesn't work because I had to switch to my Windows pc to run brms. I'm saving rda files to the rdacache directory so that I can move between machines (which you don't need to update)...
 

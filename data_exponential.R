@@ -20,7 +20,7 @@ linelist <- data.table(
   DT(, ptime := ifelse(r==0, quant * max_t, log(1 + quant * (exp(r * max_t) - 1))/r)) |>
   # this represents when primary time is reported
   DT(, ptime_daily := floor(ptime)) |>
-  DT(, ptime_lwr := ptime_daily-1) |>
+  DT(, ptime_lwr := ptime_daily) |>
   DT(, ptime_upr := ptime_daily+1)
 
 cases <- linelist[, .(cases = .N), by = c("ptime_daily", "r")][order(r, ptime_daily)]
@@ -35,7 +35,7 @@ obs <- linelist |>
   DT(, stime := ptime + delay) |>
   # How the second event would be recorded in the data
   DT(, stime_daily := floor(stime)) |>
-  DT(, stime_lwr := stime_daily-1) |>
+  DT(, stime_lwr := stime_daily) |>
   DT(, stime_upr := stime_daily+1) |>
   # Time observe for
   DT(, obs_time := max_t - ptime) |>
