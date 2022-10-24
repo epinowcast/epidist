@@ -1,10 +1,7 @@
 ##' @param x brms object
 ##' @param r growth rate
 ##' @param subsample number of subsamples
-dcorrect <- function(x,
-                     r,
-                     subsample,
-                     correct=FALSE) {
+apply_dynamic_correction <- function(x, r, subsample, correct = FALSE) {
   pp <- posterior_samples(x)
   
   npost <- nrow(pp)
