@@ -39,6 +39,10 @@ We explore a range of models for estimating the log normal distribution. Startin
 
 - Basic censoring adjustment (i.e two day window for all delays).
 
+#### Naive with filtering
+
+#### Naive with filtering and censoring
+
 #### Right truncation adjusted
 
 - Right truncation adjusted by normalising using the CMF of time from primary event to estimation time.
