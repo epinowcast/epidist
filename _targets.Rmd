@@ -57,8 +57,9 @@ We explore a range of models for estimating the log normal distribution. Startin
 
 #### Setup
 
-- 3 distribution assumptions ("short", "medium", "long")
+- 3 distribution assumptions ("short" (1.2, 0.4), "medium" (1.6, 0.6), "long" (2, 0.8))
 - Simulate an outbreak going from high growth to decay (ie. r = 0.2 for 20 days, decreasing linearly to -0.2 for 20 days, and then stable at -0.2 for 20 days).
+- Alternatively we could stick with the current grid of growth rates approach and explore across it. 
 
 #### Estimate distributions
 

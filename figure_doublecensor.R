@@ -2,15 +2,15 @@ library(brms)
 library(dplyr)
 library(ggplot2); theme_set(theme_bw(base_family="Times"))
 source("param.R")
-source("correct.R")
-load("fit_exponential.rda")
-load("fit_exponential_doublecensor.rda")
+source("R/apply_dynamic_correction.R")
+load("rdacache/fit_exponential.rda")
+load("rdacache/fit_exponential_doublecensor.rda")
 
 r <- seq(-0.2, 0.2, length.out=11)
 truemean <- exp(logmean + logsd^2/2)
 
 ff_rtrunc <- rtrunc_model %>%
-  dcorrect(r=r, subsample=4000) %>%
+  apply_dynamic_correction(r=r, subsample=4000) %>%
   mutate(
     fit="Exact time known + right truncation"
   )
