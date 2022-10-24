@@ -8,68 +8,106 @@ output: html_document
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-## Models
+## Introduction
 
-### Naive
+- Reliable estimates of epidemiological distributions are required for many applications in real-time. Examples include estimates of the incubation period, the time from onset to report, and the time from onset to death. These quantities are typically assumed to follow parametric distributions but may vary over time and due to the characteristics of cases
+- The data used  to estimate these distributions can suffer from a range of common biases due to censoring and truncation.
+- These are... 
+- These are a particular issues for infectious diseases due to the exponential nature of transmission...
+
+- What have other people done? 
+  - Examples of good practice
+  - Examples of bad practice (maybe?)
+  - Options for tools to address this issue
+
+
+- In this study we explore the impact of these biases on naive estimates of a distribution during a simulated outbreak. We then evaluate a range of approaches to mitigate these biases and compare and contrast there performance. In particular, we focus on the role of right-truncation and dynamic adjustments to explore the relative advantages as well as if they should be used together.
+We then apply these approaches to a case study.... and discuss the difference in estimates. We aim to highlight the implications of common biases found when estimating epidemiological distributions and suggest approaches to mitigate them.
+
+
+## Methods
+
+### Models
+
+We explore a range of models for estimating the log normal distribution. Starting with the naive continuous model and then gradually adding complexity to adjust for censoring to dates and right truncation. 
+
+#### Naive
 
 - Lognormal distribution (I think we should restrict to a single dist for clarity).
 
-### Naive with censoring
+#### Naive with censoring
 
 - Basic censoring adjustment (i.e two day window for all delays).
 
-### Right truncation adjusted
+#### Right truncation adjusted
 
 - Right truncation adjusted by normalising using the CMF of time from primary event to estimation time.
 
-### Right truncation and censoring adjusted
+#### Right truncation and censoring adjusted
 
 - Right truncation adjusted by normalising using the CMF of time from primary event to estimation time.
 - Censoring adjusted using uniform window
 
-### Right truncation and censoring adjusted using latent process
+#### Right truncation and censoring adjusted using latent process
 
 - Latent variable approach assuming uniform prior.
 - We can do this using `brms` or the direct stan approach. Potentially we should do both and compare in the SI as the `brms` one is likely good for less sophisticated practioners and the `stan` one is nice if people are more advanaced and looking to implement in their own models.
 
-## Simulation
+### Simulation
 
-### Setup
+#### Setup
 
 - 3 distribution assumptions ("short", "medium", "long")
-- Simulate an outbreak going from high growth to decay
-- Estimate the distribution across snapshots of this outbreak
+- Simulate an outbreak going from high growth to decay (ie. r = 0.2 for 20 days, decreasing linearly to -0.2 for 20 days, and then stable at -0.2 for 20 days).
 
-### Estimate distributions
+#### Estimate distributions
 
-- Estimate all models at chosen points across the outbreak (suggestion: "early outbreak", "near peak", "past peak", "late outbreak")
+- Estimate all models at chosen points across the outbreak (suggestion: "early outbreak" (15 days), "near peak" (30 days), "past peak" (45  days), "late outbreak" (60 days))
+- Estimate across sample size ranges (N = 10, 100, 1000). Present 1000 as the main case.
+- Plot distribution summary parameters (log mean and sd) vs true values (y facet) by outbreak point (x facet).
 
-### Post-process for dynamic bias
+#### Post-process for dynamic bias
 
 - Post process all models using dynamic correction and known growth rate
+- Same structure as simple distribution estimates
+- Suggest this figure is for SI
 
-### Summarise runtimes
+#### Summarise runtimes
 
 - In addition to estimate quality we care about tractibility for the SI plot the runtimes of various methods.
 
-## Case study
+### Case study
 
-### Data
+#### Data
 
 - Need some outbreak linelist data. The UKHSA paper may contain this.
 
-### Estimate distributions
+#### Estimate distributions
 
 - Estimate distributions for similar points as in the simulation setting
 
-### Estimate growth rate
+#### Estimate growth rate
 
 - Estimate the growth rate retrospectively and comment on this. 
 
-### Post-process for dynamic bias
+#### Post-process for dynamic bias
 
 - Apply growth rate correction to all estimates 
 
-### Summarise runtimes
+#### Summarise runtimes
 
-- Summarise runtimes
+- Summarise
+
+
+## Results
+
+
+
+## Discussion
+
+### Summary
+
+ß
+- Longer or more complex sensoring
+- Joint estimation of the transmission process and distributions
+- Time-varying distributions
