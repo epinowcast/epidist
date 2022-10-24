@@ -1,99 +1,75 @@
 ---
-title: "Target Markdown"
+title: "Analysis Pipeline: Dynamic Truncation"
 output: html_document
+  toc: true
 ---
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-Target Markdown is a powerful R Markdown interface for reproducible analysis pipelines, and the chapter at https://books.ropensci.org/targets/markdown.html walks through it in detail. This R Markdown report the example from the chapter. Try it out in both interactive and non-interactive modes, either by running the code chunks in different ways or setting the `tar_interactive` chunk option.
+## Models
 
-# Packages
+### Naive
 
-The example requires several R packages, and `targets` must be version 0.5.0.9000 or above. 
+- Lognormal distribution (I think we should restrict to a single dist for clarity).
 
-```{r, eval = FALSE}
-install.packages(c("biglm", "dplyr", "ggplot2", "readr", "targets", "tidyr"))
-```
+### Naive with censoring
 
-# Setup
+- Basic censoring adjustment (i.e two day window for all delays).
 
-If you are using old versions of `targets` (<= 0.7.0) and/or `knitr` (<= 1.33), you will need to load the `targets` package in the R Markdown document in order for Target Markdown code chunks to work.
+### Right truncation adjusted
 
-```{r}
-library(targets)
-```
+- Right truncation adjusted by normalising using the CMF of time from primary event to estimation time.
 
-Near the top of the document, you may also wish to remove the `_targets_r` directory previously written by non-interactive runs of the report. Otherwise, your pipeline may contain superfluous targets.
+### Right truncation and censoring adjusted
 
-```{r}
-library(targets)
-tar_unscript()
-```
+- Right truncation adjusted by normalising using the CMF of time from primary event to estimation time.
+- Censoring adjusted using uniform window
 
-# Globals
+### Right truncation and censoring adjusted using latent process
 
-We first define some global options/functions common to all targets. The function below plots a histogram of ozone concentrations, and our histogram target will need it.
+- Latent variable approach assuming uniform prior.
+- We can do this using `brms` or the direct stan approach. Potentially we should do both and compare in the SI as the `brms` one is likely good for less sophisticated practioners and the `stan` one is nice if people are more advanaced and looking to implement in their own models.
 
-```{targets example-globals, tar_globals = TRUE}
-options(tidyverse.quiet = TRUE)
-tar_option_set(packages = c("biglm", "dplyr", "ggplot2", "readr", "tidyr"))
-create_plot <- function(data) {
-  ggplot(data) +
-    geom_histogram(aes(x = Ozone), bins = 12) +
-    theme_gray(24)
-}
-```
+## Simulation
 
-# Targets
+### Setup
 
-Our first target borrows the `airquality` dataset built into base R.
+- 3 distribution assumptions ("short", "medium", "long")
+- Simulate an outbreak going from high growth to decay
+- Estimate the distribution across snapshots of this outbreak
 
-```{targets raw-data}
-tar_target(raw_data, airquality)
-```
+### Estimate distributions
 
-Our next targets preprocess the data, make a histogram, and fit a model.
+- Estimate all models at chosen points across the outbreak (suggestion: "early outbreak", "near peak", "past peak", "late outbreak")
 
-```{targets downstream-targets}
-list(
-  tar_target(data, raw_data %>% filter(!is.na(Ozone))),
-  tar_target(hist, create_plot(data))
-)
-```
+### Post-process for dynamic bias
 
-Set the `tar_simple` chunk option to `TRUE` to define a single target with the command in the code chunk. The chunk below only contains `biglm(Ozone ~ Wind + Temp, data)` in the source, but because `tar_simple` is `TRUE`, it is shorthand for `tar_target(name = fit, command = biglm(Ozone ~ Wind + Temp, data))`. All other arguments to `tar_target()` are set to their default values (configurable with `tar_option_set()`).
+- Post process all models using dynamic correction and known growth rate
 
-```{targets fit, tar_simple = TRUE}
-biglm(Ozone ~ Wind + Temp, data)
-```
+### Summarise runtimes
 
-# Pipeline
+- In addition to estimate quality we care about tractibility for the SI plot the runtimes of various methods.
 
-If you ran all the `{targets}` chunks in non-interactive mode, then your R scripts are set up to run the pipeline.
+## Case study
 
-```{r}
-tar_make()
-```
+### Data
 
-# Output
+- Need some outbreak linelist data. The UKHSA paper may contain this.
 
-You can retrieve results from the `_targets/` data store using `tar_read()` or `tar_load()`.
+### Estimate distributions
 
-```{r, message = FALSE}
-library(biglm)
-tar_read(fit)
-```
+- Estimate distributions for similar points as in the simulation setting
 
-```{r}
-tar_read(hist)
-```
+### Estimate growth rate
 
-The `targets` dependency graph helps your readers understand the steps of your pipeline at a high level.
+- Estimate the growth rate retrospectively and comment on this. 
 
-```{r}
-tar_visnetwork()
-```
+### Post-process for dynamic bias
 
-At this point, you can go back and run `{targets}` chunks in interactive mode without interfering with the code or data of the non-interactive pipeline.
+- Apply growth rate correction to all estimates 
+
+### Summarise runtimes
+
+- Summarise runtimes
