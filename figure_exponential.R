@@ -3,7 +3,7 @@ library(dplyr)
 library(ggplot2); theme_set(theme_bw(base_family="Times"))
 source("param.R")
 source("correct.R")
-load("fit_exponential.rda")
+load("rdacache/fit_exponential.rda")
 
 r <- seq(-0.2, 0.2, length.out=11)
 truemean <- exp(logmean + logsd^2/2)
