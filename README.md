@@ -31,3 +31,47 @@ Makefile currently doesn't work because I had to switch to my Windows pc to run 
 * `data_exponential.R` generates data
 * `fit_exponential.R` performs fits
 * `figure_exponential.R` generates the main figure
+
+## Analyses
+
+This analysis in this repository has been implemented using the [`targets`](https://docs.ropensci.org/targets/) package and associated packages. The workflow is defined in [`_targets.md`](https://github.com/parksw3/dynamicaltruncation/blob/main/_targets.md) and can be explored interactively using [`_targets.Rmd`](https://github.com/parksw3/dynamicaltruncation/blob/main/_targets.Rmd) `Rmarkdown` document. The workflow can be visualised as the following graph.
+
+
+This complete analysis can be recreated using the following (note this may take quite some time even with a fairly large amount of available compute),
+
+```{bash}
+bash bin/update-targets.sh
+```
+
+Alternative the following `targets` functions may be used to interactively explore the workflow:
+
+- Run the workflow sequentially.
+
+```{r}
+targets::tar_make()
+```
+
+- Run the workflow using all available workers.
+
+```{r}
+targets::tar_make_future(workers = future::availableCores())
+```
+
+- Explore a graph of the workflow.
+
+```{r}
+targets::tar_visnetwork(targets_only = TRUE)
+```
+
+Watch the workflow as it runs in a `shiny` app.
+
+```{r}
+targets::tar_watch(targets_only = TRUE)
+```
+
+To use our archived version of the interim results (and so avoid long run times) use the following to download it. Note that this process has not been rigorously tested across environments and so may not work seamlessly).
+
+```{r}
+source(here::here("R", "targets-archive.R"))
+get_targets_archive()
+```
