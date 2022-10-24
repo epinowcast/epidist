@@ -1,7 +1,6 @@
 ---
 title: "Analysis Pipeline: Dynamic Truncation"
-output: html_document
-  toc: true
+output: github_document
 ---
 
 ```{r setup, include = FALSE}
@@ -75,7 +74,6 @@ library(targets)
 library(tarchetypes)
 library(cmdstanr)
 library(data.table)
-library(epinowcast)
 library(ggplot2)
 library(purrr, quietly = TRUE)
 library(here)
@@ -132,14 +130,51 @@ We explore a range of models for estimating the log normal distribution. Startin
 
 ### Setup
 
-- 3 distribution assumptions ("short" (1.2, 0.4), "medium" (1.6, 0.6), "long" (2, 0.8))
-- Simulate an outbreak going from high growth to decay (ie. r = 0.2 for 20 days, decreasing linearly to -0.2 for 20 days, and then stable at -0.2 for 20 days).
-- Alternatively we could stick with the current grid of growth rates approach and explore across it. 
+- We assume 3 distribution scenarios: short, medium, and long.
+
+```{targets distributions, tar_simple = TRUE}
+data.table(
+  scenario = c("short", "medium", "long"),
+  meanlog = c(1.2, 1.6, 2),
+  sdlog = c(0.4, 0.6, 0.8)
+) |>
+  DT(, mean := exp(meanlog + sdlog^2/2)) |>
+  DT(, sd := exp(meanlog + (1/2)*sdlog^2)*sqrt(exp(sdlog^2) - 1))
+```
+
+- We simulate an outbreak that starts with an initially high and stable growth rate that then declines linearly until reaching a stable decay rate.
+
+```{targets growth_rate, tar_simple = TRUE}
+data.table(
+  time = 0:59,
+  r = c(rep(0.2, 20), 0.2 - 0.02 * 1:20, rep(-0.2, 20))
+)
+```
+
+We initialise the outbreak to have 20 cases.
+
+```{targets init_cases, tar_simpe = TRUE}
+20
+```
 
 ### Estimate distributions
 
 - Estimate all models at chosen points across the outbreak (suggestion: "early outbreak" (15 days), "near peak" (30 days), "past peak" (45  days), "late outbreak" (60 days))
+
+```{targets estimation_times, tar_simple = TRUE}
+data.table(
+  scenario = c("early outbreak", "near peak", "past peak", "late outbreak"),
+  time = c(15, 30, 45, 60)
+)
+```
 - Estimate across sample size ranges (N = 10, 100, 1000). Present 1000 as the main case.
+
+```{targets sample_sizes, tar_simple = TRUE}
+c(10, 100, 1000)
+```
+
+- Estimate distribution using each model for each sample size and time.
+
 - Plot distribution summary parameters (log mean and sd) vs true values (y facet) by outbreak point (x facet).
 
 ### Post-process for dynamic bias

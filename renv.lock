@@ -394,10 +394,10 @@
     },
     "data.table": {
       "Package": "data.table",
-      "Version": "1.14.4",
+      "Version": "1.14.5",
       "Source": "Repository",
-      "Repository": "RSPM",
-      "Hash": "b9b912b41064aaa79270f24d123c887d",
+      "Repository": "CRAN",
+      "Hash": "8ea5a8118b6de8cc60055585a22dacdf",
       "Requirements": []
     },
     "desc": {
@@ -566,6 +566,17 @@
         "parallelly"
       ]
     },
+    "future.callr": {
+      "Package": "future.callr",
+      "Version": "0.8.0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "d56e31f531c20af2415a3971ca0b3c3c",
+      "Requirements": [
+        "callr",
+        "future"
+      ]
+    },
     "generics": {
       "Package": "generics",
       "Version": "0.1.3",
@@ -670,6 +681,16 @@
       "Repository": "RSPM",
       "Hash": "32600a0bea839c4d0ac998d7c547ecf7",
       "Requirements": []
+    },
+    "here": {
+      "Package": "here",
+      "Version": "1.0.1",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "24b224366f9c2e7534d2344d10d59211",
+      "Requirements": [
+        "rprojroot"
+      ]
     },
     "highr": {
       "Package": "highr",
@@ -1195,6 +1216,25 @@
       "Hash": "4ed1f8336c8d52c3e750adcdc57228a7",
       "Requirements": []
     },
+    "rmarkdown": {
+      "Package": "rmarkdown",
+      "Version": "2.17",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "e97c8be593e010f93520e8215c0f9189",
+      "Requirements": [
+        "bslib",
+        "evaluate",
+        "htmltools",
+        "jquerylib",
+        "jsonlite",
+        "knitr",
+        "stringr",
+        "tinytex",
+        "xfun",
+        "yaml"
+      ]
+    },
     "rprojroot": {
       "Package": "rprojroot",
       "Version": "2.0.3",
@@ -1507,6 +1547,16 @@
         "rlang",
         "vctrs",
         "withr"
+      ]
+    },
+    "tinytex": {
+      "Package": "tinytex",
+      "Version": "0.42",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "7629c6c1540835d5248e6e7df265fa74",
+      "Requirements": [
+        "xfun"
       ]
     },
     "utf8": {
