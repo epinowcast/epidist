@@ -34,7 +34,7 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
     data.table::copy() |>
     DT(, obs_time := obs_time - ptime) |>
     DT(, censored_obs_time := obs_time - ptime_daily) |>
-    DT(, censored := "interval")
-    DT(stime <= estimation_time)
+    DT(, censored := "interval") |>
+    DT(stime <= obs_time)
   return(truncated_linelist)
 }
