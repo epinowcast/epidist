@@ -280,8 +280,8 @@ tar_target(
 #> Establish _targets.R and _targets_r/targets/truncated_obs.R.
 ```
 
-- Estimate across sample size ranges (N = 10, 100, 1000). Present 1000
-  as the main case.
+- Estimate across sample size ranges (N = 10, 100, 1000). `N = 1000` is
+  the main case.
 
 ``` r
 tar_target(sample_sizes, {
@@ -291,7 +291,25 @@ tar_target(sample_sizes, {
 #> Establish _targets.R and _targets_r/targets/sample_sizes.R.
 ```
 
+- Sample observations
+
+``` r
+tar_target(
+  sampled_observations,
+  truncated_obs[sample(1:.N, sample_sizes, replace = FALSE),],
+  pattern = sample_sizes
+)
+#> Establish _targets.R and _targets_r/targets/sampled_observations.R.
+```
+
 - Estimate distribution using each model for each sample size and time.
+  This is slightly complicated by needing to avoid compilation across
+  multiple model fits. See \*\*\*\*.R for a more standard implementation
+  of fitting these models.
+
+- Summarise posteriors for each model and sampled data.
+
+- Sample model runtimes for each sampled data.
 
 - Plot distribution summary parameters (log mean and sd) vs true values
   (y facet) by outbreak point (x facet).
@@ -300,7 +318,6 @@ tar_target(sample_sizes, {
 
 - Post process all models using dynamic correction and known growth rate
 - Same structure as simple distribution estimates
-- Suggest this figure is for SI
 
 ### Summarise runtimes
 
@@ -312,10 +329,12 @@ tar_target(sample_sizes, {
 ### Data
 
 - Need some outbreak linelist data. The UKHSA paper may contain this.
+  - Seb suggest some Ebola linelist data that may be public domain.
 
 ### Estimate distributions
 
-- Estimate distributions for similar points as in the simulation setting
+- Estimate distributions for similar points as in the simulation
+  setting.
 
 ### Estimate growth rate
 
