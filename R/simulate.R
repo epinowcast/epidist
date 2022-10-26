@@ -30,7 +30,7 @@ simulate_observations <- function(linelist) {
 }
 
 filter_obs_by_obs_time <- function(linelist, obs_time) {
-  truncated_linelist <- linelist  |>
+  truncated_linelist <- linelist |>
     data.table::copy() |>
     DT(, obs_time := obs_time - ptime) |>
     DT(, censored_obs_time := obs_time - ptime_daily) |>
