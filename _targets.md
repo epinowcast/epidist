@@ -168,16 +168,17 @@ complexity to adjust for censoring to dates and right truncation.
 - We assume 3 distribution scenarios: short, medium, and long.
 
 ``` r
-tar_target(distributions, {
-  data.table(
+tar_group_by(
+  distributions,
+    data.table(
     scenario = c("short", "medium", "long"),
     meanlog = c(1.2, 1.6, 2),
     sdlog = c(0.4, 0.6, 0.8)
   ) |>
     DT(, mean := exp(meanlog + sdlog^2/2)) |>
-    DT(, sd := exp(meanlog + (1/2)*sdlog^2)*sqrt(exp(sdlog^2) - 1))
-})
-#> Define target distributions from chunk code.
+    DT(, sd := exp(meanlog + (1/2)*sdlog^2)*sqrt(exp(sdlog^2) - 1)),
+  scenario
+)
 #> Establish _targets.R and _targets_r/targets/distributions.R.
 ```
 
@@ -196,11 +197,55 @@ tar_target(growth_rate, {
 #> Establish _targets.R and _targets_r/targets/growth_rate.R.
 ```
 
-We initialise the outbreak to have 20 cases.
+- We initialise the outbreak to have 20 cases.
 
 ``` r
-20
+tar_target(init_cases, {
+  20
+})
+#> Define target init_cases from chunk code.
 #> Establish _targets.R and _targets_r/targets/init_cases.R.
+```
+
+- Simulate the outbreak. This is temporary and we should fill with a
+  stochastic SIR (? or other).
+
+``` r
+tar_target(simulated_cases, {
+  data.table(
+    case = 1:1000,
+    ptime = runif(1000, 0, 60)
+  )
+})
+#> Define target simulated_cases from chunk code.
+#> Establish _targets.R and _targets_r/targets/simulated_cases.R.
+```
+
+- Simulate observations of primary and secondary events as linelist for
+  each distribution scenario.
+
+``` r
+tar_target(
+  simulated_secondary, 
+  simulated_cases |>
+    simulate_secondary(
+      meanlog = distributions[, "meanlog"][[1]],
+      sdlog = distributions[, "sdlog"][[1]]
+    ),
+  pattern = map(distributions)
+)
+#> Establish _targets.R and _targets_r/targets/simulated_secondary.R.
+```
+
+- Simulate the observation process
+
+``` r
+tar_target(simulated_observations, {
+  simulated_secondary |>
+    simulate_observations()
+})
+#> Define target simulated_observations from chunk code.
+#> Establish _targets.R and _targets_r/targets/simulated_observations.R.
 ```
 
 ### Estimate distributions
@@ -210,14 +255,29 @@ We initialise the outbreak to have 20 cases.
   days), “late outbreak” (60 days))
 
 ``` r
-tar_target(estimation_times, {
+tar_group_by(
+  estimation_times,
   data.table(
     scenario = c("early outbreak", "near peak", "past peak", "late outbreak"),
     time = c(15, 30, 45, 60)
-  )
-})
-#> Define target estimation_times from chunk code.
+  ),
+  scenario
+)
 #> Establish _targets.R and _targets_r/targets/estimation_times.R.
+```
+
+- Truncate the available simulate observations based on the estimation
+  time for each scenario.
+
+``` r
+tar_target(
+  truncated_obs,
+  simulated_observations |>
+    filter_obs_by_obs_time(obs_time = estimation_times[, "time"][[1]]) |>
+    DT(, scenario := estimation_times[, "scenario"][[1]]),
+  pattern = map(estimation_times)
+)
+#> Establish _targets.R and _targets_r/targets/truncated_obs.R.
 ```
 
 - Estimate across sample size ranges (N = 10, 100, 1000). Present 1000
