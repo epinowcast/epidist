@@ -10,3 +10,4 @@
 makestuff
 .DS_Store
 _targets
+*.log
