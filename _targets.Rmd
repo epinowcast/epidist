@@ -200,7 +200,7 @@ data.table(
 - Simulate the outbreak. This is temporary and we should fill with a stochastic SIR (? or other).
 
 ```{targets simulated_cases, tar_simple = TRUE}
-simulate_uniform_cases(sample_size = 1000, t = 60)
+simulate_uniform_cases(sample_size = 5000, t = 60)
 ```
 
 - Simulate observations of primary and secondary events as linelist for each distribution scenario.
@@ -274,7 +274,7 @@ tar_target(
   sampled_observations,
   group_truncated_obs |>
     as.data.table() |>
-    DT(sample(1:.N, sample_sizes, replace = FALSE)) |>
+    DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
     DT(, sample_size := as.factor(sample_sizes)),
   pattern = cross(sample_sizes, group_truncated_obs)
 )
