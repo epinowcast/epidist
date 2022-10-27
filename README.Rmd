@@ -105,7 +105,7 @@ Adjust for right truncation and date censoring.
 
 ```{r}
 truncation_censoring_fit <- truncation_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0, fn = brms::make_stancode
+  data = truncated_obs, cores = 4, refresh = 0
 )
 summary(truncation_censoring_fit)
 ```
@@ -114,7 +114,7 @@ Adjust for right truncation and date censoring using a latent variable approach.
 
 ```{r}
 latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0
+  data = obs, cores = 4, refresh = 0, fn = brms::make_stancode
 )
 summary(latent_truncation_censoring_fit)
 ```
