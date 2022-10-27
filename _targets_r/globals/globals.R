@@ -1,5 +1,6 @@
 library(targets)
 library(tarchetypes)
+library(stantargets)
 library(cmdstanr)
 library(data.table)
 library(ggplot2)
