@@ -26,9 +26,9 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
     # Update observation time by when we are looking
     DT(, obs_at := obs_time) |>
     DT(, obs_time := obs_time - ptime) |>
-    # I've assumed truncation at the top of the censoring window to avoid
-    # probabilites that sum to greater than 1. For discussion.
-    DT(, censored_obs_time := obs_time - (ptime_daily)) |>
+    # I've assumed truncation in the middle of the censoring window.
+    # For discussion.
+    DT(, censored_obs_time := obs_time - (ptime_daily + 0.5)) |>
     DT(, censored := "interval") |>
     DT(stime <= obs_time)
   return(truncated_linelist)
