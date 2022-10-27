@@ -12,8 +12,9 @@ functions <- list.files(here("R"), full.names = TRUE)
 walk(functions, source)
 rm("functions")
 set_cmdstan_path()  
+
 tar_option_set(
-  packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "here"),
+  packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here"),
   deployment = "worker",
   memory = "transient",
   workspace_on_error = TRUE,

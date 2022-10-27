@@ -109,8 +109,9 @@ functions <- list.files(here("R"), full.names = TRUE)
 walk(functions, source)
 rm("functions")
 set_cmdstan_path()  
+
 tar_option_set(
-  packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "here"),
+  packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here"),
   deployment = "worker",
   memory = "transient",
   workspace_on_error = TRUE,
@@ -128,40 +129,78 @@ We explore a range of models for estimating the log normal distribution.
 Starting with the naive continuous model and then gradually adding
 complexity to adjust for censoring to dates and right truncation.
 
-### Naive
+``` r
+tar_target(models, {
+  list(
+    "Naive" = naive_delay,
+    "Censoring adjusted" = censoring_adjusted_delay,
+    "Filtered" = function(data, ...) {
+      data <- data |>
+        data.table::copy() |>
+        DT(stime_daily <= (obs_at - 15))
+      naive_delay(data = data, ...)
+    },
+    "Filtered and censoring adjusted" = function(data, ...) {
+      data <- data |>
+        data.table::copy() |>
+        DT(stime_daily <= (obs_at - 15))
+      censoring_adjusted_delay(data = data, ...)
+    },
+    "Truncation adjusted" = truncation_adjusted_delay,
+    "Truncation and censoring adjusted" = truncation_censoring_adjusted_delay,
+    "Latent variable truncation and censoring adjusted" =
+      latent_truncation_censoring_adjusted_delay
+  )
+})
+#> Define target models from chunk code.
+#> Establish _targets.R and _targets_r/targets/models.R.
+```
 
-- Lognormal distribution (I think we should restrict to a single dist
-  for clarity).
+- File path for each saved model.
 
-### Naive with censoring
+``` r
+tar_target(
+  model_paths,
+  paste0(
+    "data/models/", gsub(" ", "_", tolower(names(models))), ".stan"
+  ) |>
+    fs::file_create(),
+  format = "file",
+  pattern = map(models)
+)
+#> Establish _targets.R and _targets_r/targets/model_paths.R.
+```
 
-- Basic censoring adjustment (i.e two day window for all delays).
+- Dummy data required for model creation.
 
-### Naive with filtering
+``` r
+tar_target(dummy_obs, {
+  data.table(
+    ptime = 1, stime = 2, delay_daily = 1, delay_lwr = 1, delay_upr = 2, 
+    ptime_lwr = 1, ptime_upr = 2, stime_lwr = 1, stime_upr = 2, obs_at = 100,
+    censored = "interval", censored_obs_time = 10, ptime_daily = 1,
+    stime_daily = 1
+  )
+})
+#> Define target dummy_obs from chunk code.
+#> Establish _targets.R and _targets_r/targets/dummy_obs.R.
+```
 
-### Naive with filtering and censoring
+- Generate stan code for each model and compile.
 
-### Right truncation adjusted
+``` r
+tar_target(
+  model_stan_code, 
+  do.call(
+    models[[1]],
+    list(data = dummy_obs, fn = brms::make_stancode, save_model = model_paths)
+  ),
+  pattern = map(models, model_paths)
+)
+#> Establish _targets.R and _targets_r/targets/model_stan_code.R.
+```
 
-- Right truncation adjusted by normalising using the CMF of time from
-  primary event to estimation time.
-
-### Right truncation and censoring adjusted
-
-- Right truncation adjusted by normalising using the CMF of time from
-  primary event to estimation time.
-- Censoring adjusted using uniform window
-
-### Right truncation and censoring adjusted using latent process
-
-- Latent variable approach assuming uniform prior.
-- We can do this using `brms` or the direct stan approach. Potentially
-  we should do both and compare in the SI as the `brms` one is likely
-  good for less sophisticated practioners and the `stan` one is nice if
-  people are more advanaced and looking to implement in their own
-  models.
-
-## Simulation
+### Simulation
 
 ### Setup
 
@@ -300,6 +339,8 @@ tar_target(
 )
 #> Establish _targets.R and _targets_r/targets/sampled_observations.R.
 ```
+
+- Create data in the format used by stan for each model
 
 - Estimate distribution using each model for each sample size and time.
   This is slightly complicated by needing to avoid compilation across

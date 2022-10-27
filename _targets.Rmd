@@ -86,7 +86,7 @@ rm("functions")
 set_cmdstan_path()  
 
 tar_option_set(
-  packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "here"),
+  packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here"),
   deployment = "worker",
   memory = "transient",
   workspace_on_error = TRUE,
@@ -101,7 +101,7 @@ tar_option_set(
 
 We explore a range of models for estimating the log normal distribution. Starting with the naive continuous model and then gradually adding complexity to adjust for censoring to dates and right truncation. 
 
-```{targets models}
+```{targets models, tar_simple = TRUE}
 list(
   "Naive" = naive_delay,
   "Censoring adjusted" = censoring_adjusted_delay,
@@ -109,18 +109,56 @@ list(
     data <- data |>
       data.table::copy() |>
       DT(stime_daily <= (obs_at - 15))
-    naive_delay(data, ...)
+    naive_delay(data = data, ...)
   },
   "Filtered and censoring adjusted" = function(data, ...) {
     data <- data |>
       data.table::copy() |>
       DT(stime_daily <= (obs_at - 15))
-    censoring_adjusted_delay(data, ...)
+    censoring_adjusted_delay(data = data, ...)
   },
   "Truncation adjusted" = truncation_adjusted_delay,
   "Truncation and censoring adjusted" = truncation_censoring_adjusted_delay,
   "Latent variable truncation and censoring adjusted" =
     latent_truncation_censoring_adjusted_delay
+)
+```
+
+- File path for each saved model.
+
+```{targets model_paths}
+tar_target(
+  model_paths,
+  paste0(
+    "data/models/", gsub(" ", "_", tolower(names(models))), ".stan"
+  ) |>
+    fs::file_create(),
+  format = "file",
+  pattern = map(models)
+)
+```
+
+- Dummy data required for model creation.
+
+```{targets dummy_obs, tar_simple = TRUE}
+data.table(
+  ptime = 1, stime = 2, delay_daily = 1, delay_lwr = 1, delay_upr = 2, 
+  ptime_lwr = 1, ptime_upr = 2, stime_lwr = 1, stime_upr = 2, obs_at = 100,
+  censored = "interval", censored_obs_time = 10, ptime_daily = 1,
+  stime_daily = 1
+)
+```
+
+- Generate stan code for each model and compile.
+
+```{targets model_stan_code}
+tar_target(
+  model_stan_code, 
+  do.call(
+    models[[1]],
+    list(data = dummy_obs, fn = brms::make_stancode, save_model = model_paths)
+  ),
+  pattern = map(models, model_paths)
 )
 ```
 
@@ -231,23 +269,6 @@ tar_target(
 )
 ```
 
-- Generate stan code for each model
-
-```{targets model_stan_code}
-tar_target(
-  model_stan_code, 
-  do.call(
-    models, list(data = simulated_observations, fn = brms::make_stancode)
-  ),
-  pattern = map(models)
-)
-```
-
-- Compile each model
-
-```{r}
-
-```
 - Create data in the format used by stan for each model
 - Estimate distribution using each model for each sample size and time. This is slightly complicated by needing to avoid compilation across multiple model fits. See ****.R for a more standard implementation of fitting these models.
 
