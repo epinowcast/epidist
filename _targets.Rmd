@@ -212,7 +212,8 @@ tar_target(
     simulate_secondary(
       meanlog = distributions[, "meanlog"][[1]],
       sdlog = distributions[, "sdlog"][[1]]
-    ),
+    ) |>
+    DT(, distribution := distributions[, "scenario"][[1]]),
   pattern = map(distributions)
 )
 ```
@@ -247,8 +248,16 @@ tar_target(
   truncated_obs,
   simulated_observations |>
     filter_obs_by_obs_time(obs_time = estimation_times[, "time"][[1]]) |>
-    DT(, scenario := estimation_times[, "scenario"][[1]]),
+    DT(, estimation_time := estimation_times[, "scenario"][[1]]),
   pattern = map(estimation_times)
+)
+```
+
+```{targets group_truncated_obs}
+tar_group_by(
+  group_truncated_obs,
+  truncated_obs,
+  estimation_time, distribution
 )
 ```
 
@@ -263,15 +272,23 @@ c(10, 100, 1000)
 ```{targets sampled_observations}
 tar_target(
   sampled_observations,
-  truncated_obs[sample(1:.N, sample_sizes, replace = FALSE),] |>
+  group_truncated_obs |>
+    as.data.table() |>
+    DT(sample(1:.N, sample_sizes, replace = FALSE)) |>
     DT(, sample_size := as.factor(sample_sizes)),
-  pattern = sample_sizes
+  pattern = cross(sample_sizes, group_truncated_obs)
 )
 ```
 
-- Create data in the format used by stan for each model
-- Estimate distribution using each model for each sample size and time. This is slightly complicated by needing to avoid compilation across multiple model fits. See ****.R for a more standard implementation of fitting these models.
+```{targets group_sampled_observations}
+tar_group_by(
+  group_sampled_observations,
+  sampled_observations,
+  estimation_time, distribution, sample_size
+)
+```
 
+- Create data for each group and model and then fit models to this data.
 
 - Summarise posteriors for each model and sampled data.
 
