@@ -16,40 +16,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Methods
-
-Our goal is to estimate $f_s(\tau)$, where $s$ represents cohort time (i.e., the timing of the primaruy event), from truncated data. Five fits:
-* Naive: $f_s(\tau)$
-* Right truncation: $f_s(\tau)/F_s(t_{max}-s)$
-* Dynamical correction: $b(\tau) = \exp(-r\tau) f_s(\tau)/(\int \exp(-r\tau) f_s(\tau) d\tau)$. This is a bit trickier to fit because we have to do some integration. Instead, we fit a lognormal distribution that represents $b(\tau)$ and calculate $f_s(\tau)$ after the fit for each posterior sample.
-* Right truncation+dynamical correction: $b(\tau)/B(t_{max}-s)$
-* Left trunction+dynamical correction: $b(\tau)/B(s-t_{min})$. Again, we fit a single lognormal distribution with left truncation and then correct for underlying dynamics after the fit
-
-## Results
-
-![](figures/figure_exponential.png)<!-- -->
-
-* Naive fits are not too bad for $r < 0$ because not much right truncation
-* Dynamical correction alone is not so good for $r < 0$ because we're missing left truncation (because we're starting from high incidence at $t=0$ and neglecting infections starting $t < 0$)
-* Right truncation is good
-* Right truncation + dynamical correction overcompensates and goes crazy
-* Left truncation + dynamical correction is as good as right truncation but starts to give super wide CIs for high $r$ values. Need to check integration step.
-
-![](figures/figure_doublecensor.png)<!-- -->
-
-* Doubly censored likelihood performs just as well as if we knew exact time points
-* Couldn't try negative binomial with truncation because it takes forever
-
-## Flow
-
-Makefile currently doesn't work because I had to switch to my Windows pc to run brms. I'm saving rda files to the rdacache directory so that I can move between machines (which you don't need to update)...
-
-* `param.R` sets parameters
-* `data_exponential.R` generates data
-* `fit_exponential.R` performs fits
-* `figure_exponential.R` generates the main figure
-
-
 ## A simple example
 
 First load required packages and functions.
@@ -63,16 +29,22 @@ functions <- list.files(here("R"), full.names = TRUE)
 walk(functions, source)
 ```
 
-Now simulate data from an outbreak, simulate an observation process for a secondary event using a lognormal distribution, and finally simulate observing this event.
+Now simulate data from an outbreak.
+```{r simulate-outbreak}
+outbreak <- simulate_gillespie(seed=101)
+```
+
+
+Simulate an observation process during the growth phase for a secondary event using a lognormal distribution, and finally simulate observing this event.
 
 ```{r simulate-data}
-truncated_obs <- simulate_uniform_cases(sample_size = 1000, t = 60) |>
+truncated_obs <- outbreak |>
   simulate_secondary(
     meanlog = 1.8,
     sdlog = 0.3
   ) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = 45)
+  filter_obs_by_obs_time(obs_time = 20)
 ```
 
 First fit a naive lognormal model with no adjustment.
@@ -114,7 +86,7 @@ Adjust for right truncation and date censoring using a latent variable approach.
 
 ```{r}
 latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
-  data = obs, cores = 4, refresh = 0, fn = brms::make_stancode
+  data = truncated_obs, cores = 4, refresh = 0, fn = brms::make_stancode
 )
 summary(latent_truncation_censoring_fit)
 ```

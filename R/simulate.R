@@ -1,11 +1,15 @@
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
   data.table::data.table(
     case = 1:sample_size, ptime = runif(sample_size, 0, t)
+  )
+}
 
 simulate_gillespie <- function(r=0.2,
                                gamma=1/7,
                                I0=50, ## to avoid extinction
-                               N=10000) {
+                               N=10000,
+                               seed) {
+  if(!missing(seed)) set.seed(seed)
   t <- 0
   
   state <- c(N-I0, I0, 0)
@@ -40,7 +44,7 @@ simulate_gillespie <- function(r=0.2,
   }
   
   data.table::data.table(
-    id=1:length(ptime),
+    case=1:length(ptime),
     ptime=ptime
   )
 }
