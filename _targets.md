@@ -184,7 +184,8 @@ tar_group_by(
 
 - We simulate an outbreak that starts with an initially high and stable
   growth rate that then declines linearly until reaching a stable decay
-  rate.
+  rate. **I am now wondering if we want to investigate more than one
+  scenario.**
 
 ``` r
 tar_target(growth_rate, {
@@ -212,10 +213,7 @@ tar_target(init_cases, {
 
 ``` r
 tar_target(simulated_cases, {
-  data.table(
-    case = 1:1000,
-    ptime = runif(1000, 0, 60)
-  )
+  simulate_uniform_cases(sample_size = 1000, t = 60)
 })
 #> Define target simulated_cases from chunk code.
 #> Establish _targets.R and _targets_r/targets/simulated_cases.R.
@@ -242,7 +240,7 @@ tar_target(
 ``` r
 tar_target(simulated_observations, {
   simulated_secondary |>
-    simulate_observations()
+    observe_process()
 })
 #> Define target simulated_observations from chunk code.
 #> Establish _targets.R and _targets_r/targets/simulated_observations.R.
