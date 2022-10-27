@@ -44,7 +44,7 @@ truncated_obs <- outbreak |>
     sdlog = 0.3
   ) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = 20)
+  filter_obs_by_obs_time(obs_time = 25)
 ```
 
 First fit a naive lognormal model with no adjustment.
@@ -86,7 +86,7 @@ Adjust for right truncation and date censoring using a latent variable approach.
 
 ```{r}
 latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0, fn = brms::make_stancode
+  data = truncated_obs, cores = 4, refresh = 0
 )
 summary(latent_truncation_censoring_fit)
 ```
