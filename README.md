@@ -25,12 +25,18 @@ Our goal is to estimate $f_s(\tau)$, where $s$ represents cohort time (i.e., the
 * Couldn't try negative binomial with truncation because it takes forever
 
 ## Flow
+
 Makefile currently doesn't work because I had to switch to my Windows pc to run brms. I'm saving rda files to the rdacache directory so that I can move between machines (which you don't need to update)...
 
 * `param.R` sets parameters
 * `data_exponential.R` generates data
 * `fit_exponential.R` performs fits
 * `figure_exponential.R` generates the main figure
+
+
+## Simple example
+
+A simple example of fitting the models we discuss here.
 
 ## Analyses
 
