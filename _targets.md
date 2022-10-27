@@ -271,7 +271,8 @@ tar_target(
     simulate_secondary(
       meanlog = distributions[, "meanlog"][[1]],
       sdlog = distributions[, "sdlog"][[1]]
-    ),
+    ) |>
+    DT(, distribution := distributions[, "scenario"][[1]]),
   pattern = map(distributions)
 )
 #> Establish _targets.R and _targets_r/targets/simulated_secondary.R.
@@ -314,10 +315,19 @@ tar_target(
   truncated_obs,
   simulated_observations |>
     filter_obs_by_obs_time(obs_time = estimation_times[, "time"][[1]]) |>
-    DT(, scenario := estimation_times[, "scenario"][[1]]),
+    DT(, estimation_time := estimation_times[, "scenario"][[1]]),
   pattern = map(estimation_times)
 )
 #> Establish _targets.R and _targets_r/targets/truncated_obs.R.
+```
+
+``` r
+tar_group_by(
+  group_truncated_obs,
+  truncated_obs,
+  estimation_time, distribution
+)
+#> Establish _targets.R and _targets_r/targets/group_truncated_obs.R.
 ```
 
 -   Estimate across sample size ranges (N = 10, 100, 1000). `N = 1000`
@@ -336,19 +346,26 @@ tar_target(sample_sizes, {
 ``` r
 tar_target(
   sampled_observations,
-  truncated_obs[sample(1:.N, sample_sizes, replace = FALSE),] |>
+  group_truncated_obs |>
+    as.data.table() |>
+    DT(sample(1:.N, sample_sizes, replace = FALSE)) |>
     DT(, sample_size := as.factor(sample_sizes)),
-  pattern = sample_sizes
+  pattern = cross(sample_sizes, group_truncated_obs)
 )
 #> Establish _targets.R and _targets_r/targets/sampled_observations.R.
 ```
 
--   Create data in the format used by stan for each model
+``` r
+tar_group_by(
+  group_sampled_observations,
+  sampled_observations,
+  estimation_time, distribution, sample_size
+)
+#> Establish _targets.R and _targets_r/targets/group_sampled_observations.R.
+```
 
--   Estimate distribution using each model for each sample size and
-    time. This is slightly complicated by needing to avoid compilation
-    across multiple model fits. See \*\*\*\*.R for a more standard
-    implementation of fitting these models.
+-   Create data for each group and model and then fit models to this
+    data.
 
 -   Summarise posteriors for each model and sampled data.
 
