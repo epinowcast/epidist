@@ -1,21 +1,12 @@
-naive_delay <- function(formula = bf(delay_daily ~ 1, sigma ~ 1), data,
+naive_delay <- function(formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data,
                         fn = brms::brm, family = "lognormal", ...) {
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
   )
 }
 
-truncation_adjusted_delay <- function(
-  formula = bf(
-    delay_daily | trunc(lb = 1, ub = censored_obs_time) ~ 1, sigma ~ 1
-  ), data, fn = brms::brm, family ="lognormal", ...) {
-  fn(
-    formula, data = data, family = family, backend = "cmdstanr", ...
-  )
-}
-
 censoring_adjusted_delay <- function(
-  formula = bf(
+  formula = brms::bf(
     delay_lwr | cens(censored, delay_upr) ~ 1, sigma ~ 1
   ), data, fn = brms::brm, family = "lognormal", ...) {
   fn(
@@ -23,8 +14,19 @@ censoring_adjusted_delay <- function(
   )
 }
 
+truncation_adjusted_delay <- function(
+  formula = brms::bf(
+    # The low bound here was present to deal with issues having zeros in the
+    # data. This is definitely not correct so needs some thought.
+    delay_daily | trunc(lb = 1, ub = censored_obs_time) ~ 1, sigma ~ 1
+  ), data, fn = brms::brm, family ="lognormal", ...) {
+  fn(
+    formula, data = data, family = family, backend = "cmdstanr", ...
+  )
+}
+
 truncation_censoring_adjusted_delay <- function(
-  formula = bf(
+  formula = brms::bf(
     delay_lwr | cens(censored, delay_upr) +
       trunc(lb = 1, ub = censored_obs_time) ~ 1,
     sigma ~ 1
@@ -35,8 +37,8 @@ truncation_censoring_adjusted_delay <- function(
 }
 
 latent_truncation_censoring_adjusted_delay <- function(
-  formula = bf(
-    ptime | vreal(stime, max_t) ~ 1,
+  formula = brms::bf(
+    ptime | vreal(stime, obs_at) ~ 1,
     sigma ~ 1,
     pwindow ~ 0 + as.factor(id),
     swindow ~ 0 + as.factor(id)
@@ -68,11 +70,15 @@ latent_truncation_censoring_adjusted_delay <- function(
   ...
 ) {
 
-  stanvars <- stanvar(block = "functions", scode = scode)
-
+  stanvars <- brms::stanvar(block = "functions", scode = scode)
+  
+  data <- data |>
+    data.table::copy() |>
+    DT(, id := 1:.N)
+  
   fit <- fn(
-    family = family, stanvars = stanvars, prior = priors,
-    backend = "cmdstanr", ...
+    formula = formula, family = family, stanvars = stanvars, prior = priors,
+    backend = "cmdstanr", data = data, ...
   )
   return(fit)
 }
