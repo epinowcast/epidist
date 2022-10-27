@@ -1,0 +1,35 @@
+observe_process <- function(linelist) {
+  clinelist <- linelist |>
+    data.table::copy() |>
+    DT(, ptime_daily := floor(ptime)) |>
+    DT(, ptime_lwr := ptime_daily) |>
+    DT(, ptime_upr := ptime_daily + 1) |>
+    # How the second event would be recorded in the data
+    DT(, stime_daily := floor(stime)) |>
+    DT(, stime_lwr := stime_daily) |>
+    DT(, stime_upr := stime_daily + 1) |>
+    # How would we observe the delay distribution
+    DT(, delay_daily := floor(delay)) |>
+    DT(, delay_lwr := purrr::map_dbl(delay_daily, ~ max(0, . - 1))) |>
+    DT(, delay_upr := delay_daily + 1) |>
+    # We assume observation time is the ceiling of the maximum delay
+    DT(, obs_at := stime |>
+        max() |>
+        ceiling()
+    )
+  return(clinelist)
+}
+
+filter_obs_by_obs_time <- function(linelist, obs_time) {
+  truncated_linelist <- linelist |>
+    data.table::copy() |>
+    # Update observation time by when we are looking
+    DT(, obs_at := obs_time) |>
+    DT(, obs_time := obs_time - ptime) |>
+    # I've assumed truncation at the top of the censoring window to avoid
+    # probabilites that sum to greater than 1. For discussion.
+    DT(, censored_obs_time := obs_time - (ptime_daily)) |>
+    DT(, censored := "interval") |>
+    DT(stime <= obs_time)
+  return(truncated_linelist)
+}
