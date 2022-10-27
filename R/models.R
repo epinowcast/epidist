@@ -38,10 +38,10 @@ latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
     ptime | vreal(stime, obs_at) ~ 1,
     sigma ~ 1,
-    pwindow ~ 0 + as.factor(id),
-    swindow ~ 0 + as.factor(id)
+    pwindow ~ 0 + id,
+    swindow ~ 0 + id
   ), data, fn = brms::brm,
-  family = custom_family(
+  family = brms::custom_family(
     "latent_lognormal",
     dpars = c("mu", "sigma", "pwindow", "swindow"),
     links = c("identity", "log", "identity", "identity"),
@@ -73,6 +73,10 @@ latent_truncation_censoring_adjusted_delay <- function(
   data <- data |>
     data.table::copy() |>
     DT(, id := 1:.N)
+
+  if (nrow(data) > 1) {
+    data <- data[, id := as.factor(id)]
+  }
   
   fit <- fn(
     formula = formula, family = family, stanvars = stanvars, prior = priors,
