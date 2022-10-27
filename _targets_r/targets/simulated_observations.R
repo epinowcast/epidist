@@ -1,4 +1,4 @@
 tar_target(simulated_observations, {
   simulated_secondary |>
-    simulate_observations()
+    observe_process()
 })
