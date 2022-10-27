@@ -255,7 +255,7 @@ tar_target(init_cases, {
 
 ``` r
 tar_target(simulated_cases, {
-  simulate_uniform_cases(sample_size = 1000, t = 60)
+  simulate_uniform_cases(sample_size = 5000, t = 60)
 })
 #> Define target simulated_cases from chunk code.
 #> Establish _targets.R and _targets_r/targets/simulated_cases.R.
@@ -348,7 +348,7 @@ tar_target(
   sampled_observations,
   group_truncated_obs |>
     as.data.table() |>
-    DT(sample(1:.N, sample_sizes, replace = FALSE)) |>
+    DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
     DT(, sample_size := as.factor(sample_sizes)),
   pattern = cross(sample_sizes, group_truncated_obs)
 )
