@@ -78,21 +78,25 @@ truncated_obs <- simulate_uniform_cases(sample_size = 1000, t = 60) |>
 First fit a naive lognormal model with no adjustment.
 
 ```{r}
-naive_fit <- naive_delay(data = truncated_obs, cores = 4)
+naive_fit <- naive_delay(data = truncated_obs, cores = 4, refresh = 0)
 summary(naive_fit)
 ```
 
 Adjust for date censoring.
 
 ```{r}
-censored_fit <- censoring_adjusted_delay(data = truncated_obs, cores = 4)
+censored_fit <- censoring_adjusted_delay(
+  data = truncated_obs, cores = 4, refresh = 0
+)
 summary(censored_fit)
 ```
 
 Adjust for right truncation.
 
 ```{r}
-truncation_fit <- truncation_adjusted_delay(data = truncated_obs, cores = 4)
+truncation_fit <- truncation_adjusted_delay(
+  data = truncated_obs, cores = 4, refresh = 0
+)
 summary(truncation_fit)
 ```
 
@@ -101,7 +105,7 @@ Adjust for right truncation and date censoring.
 
 ```{r}
 truncation_censoring_fit <- truncation_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4
+  data = truncated_obs, cores = 4, refresh = 0, fn = brms::make_stancode
 )
 summary(truncation_censoring_fit)
 ```
@@ -110,7 +114,7 @@ Adjust for right truncation and date censoring using a latent variable approach.
 
 ```{r}
 latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4
+  data = truncated_obs, cores = 4, refresh = 0
 )
 summary(latent_truncation_censoring_fit)
 ```
