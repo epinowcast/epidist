@@ -1,3 +1,3 @@
 tar_target(simulated_cases, {
-  simulate_uniform_cases(sample_size = 1000, t = 60)
+  simulate_uniform_cases(sample_size = 5000, t = 60)
 })
