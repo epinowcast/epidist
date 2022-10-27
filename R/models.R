@@ -16,9 +16,7 @@ censoring_adjusted_delay <- function(
 
 truncation_adjusted_delay <- function(
   formula = brms::bf(
-    # The low bound here was present to deal with issues having zeros in the
-    # data. This is definitely not correct so needs some thought.
-    delay_daily | trunc(lb = 1, ub = censored_obs_time) ~ 1, sigma ~ 1
+    delay_daily | trunc(lb = 0, ub = censored_obs_time) ~ 1, sigma ~ 1
   ), data, fn = brms::brm, family ="lognormal", ...) {
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
@@ -28,7 +26,7 @@ truncation_adjusted_delay <- function(
 truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
     delay_lwr | cens(censored, delay_upr) +
-      trunc(lb = 1, ub = censored_obs_time) ~ 1,
+      trunc(lb = 0, ub = censored_obs_time) ~ 1,
     sigma ~ 1
   ), data, fn = brms::brm, family = "lognormal", ...) {
   fn(
