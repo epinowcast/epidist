@@ -14,7 +14,15 @@ truncation_adjusted_delay <- function(
   )
 }
 
-censoring_adjusted_delay <- function
+censoring_adjusted_delay <- function(
+  formula = bf(
+    delay_daily | trunc(lb = 1, ub = censored_obs_time) ~ 1, sigma ~ 1
+  ), data, fn = brms::brm, family ="lognormal", ...) {
+  fn(
+    formula, data = data, family = family, backend = "cmdstanr", ...
+  )
+}
+
 
 # Correct for censoring
 censor_model <- brm(
