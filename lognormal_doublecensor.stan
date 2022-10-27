@@ -39,5 +39,5 @@ model {
 generated quantities {
   real lognormal_mean;
   
-  lognormal_mean = exp(mu + sigma^2/2)
-;}
+  lognormal_mean = exp(mu + sigma^2/2);
+}

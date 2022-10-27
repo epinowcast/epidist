@@ -8,3 +8,6 @@
 *.Rproj
 *.html
 makestuff
+.DS_Store
+_targets
+*.log
