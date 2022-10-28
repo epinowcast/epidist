@@ -5,6 +5,8 @@ functions {
 data {
   int<lower=1> N; // total number of observations
   vector[N] Y; // response variable
+  array[N] int<lower=-1, upper=2> cens; // indicates censoring
+  vector[N] rcens; // right censor points for interval censoring
   int prior_only; // should the likelihood be ignored?
 }
 transformed data {
@@ -29,7 +31,19 @@ model {
     mu += Intercept;
     sigma += Intercept_sigma;
     sigma = exp(sigma);
-    target += lognormal_lpdf(Y | mu, sigma);
+    for (n in 1 : N) {
+      // special treatment of censored data
+      if (cens[n] == 0) {
+        target += lognormal_lpdf(Y[n] | mu[n], sigma[n]);
+      } else if (cens[n] == 1) {
+        target += lognormal_lccdf(Y[n] | mu[n], sigma[n]);
+      } else if (cens[n] == -1) {
+        target += lognormal_lcdf(Y[n] | mu[n], sigma[n]);
+      } else if (cens[n] == 2) {
+        target += log_diff_exp(lognormal_lcdf(rcens[n] | mu[n], sigma[n]),
+                               lognormal_lcdf(Y[n] | mu[n], sigma[n]));
+      }
+    }
   }
   // priors including constants
   target += lprior;
