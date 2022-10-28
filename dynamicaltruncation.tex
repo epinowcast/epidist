@@ -78,6 +78,15 @@
 
 \newcommand{\total}{{\mathcal T}} %% total number of serial intervals
 
+\newcommand{\tend}{{t_{\mathrm{end}}}}
+\newcommand{\tmin}{{t_{\mathrm{max}}}}
+\newcommand{\tmax}{{t_{\mathrm{max}}}}
+\newcommand{\trep}{{t_{\mathrm{rep}}}}
+\newcommand{\pmin}{{p_{\mathrm{min}}}}
+\newcommand{\pmax}{{p_{\mathrm{max}}}}
+\newcommand{\smin}{{s_{\mathrm{min}}}}
+\newcommand{\smax}{{s_{\mathrm{max}}}}
+
 \usepackage{lettrine}
 
 \newcommand{\dropcapfont}{\fontfamily{lmss}\bfseries\fontsize{26pt}{28pt}\selectfont}
@@ -117,7 +126,7 @@ In addition, event times are often reported in \emph{censored} intervals that ca
 inaccurate estimates of event times can further translate to biases in the estimates of delay distributions.
 Recent studies have also highlighted the role of dynamical biases ...
 
-\section{Methods}
+\section{General theory for understanding epidemiological delay distributions}
 
 \swp{I think we need to build up some theory before we introduce actual methods?}
 
@@ -131,13 +140,27 @@ While it is possible (and perhaps more convenient) to characterize the backward 
 
 \subsection{Truncation bias}
 
-
-
+When an epidemic is ongoing, we cannot observe events that have not happened yet.
+Therefore, in order to observe ...
+The truncated distribution then follows:
+\begin{equation}
+\frac{f_p(\tau)}{F_p(\tend-p) }
+\end{equation}
 
 \subsection{Censoring bias}
 
+There are broadly two kinds of censoring in epidemic data: explicit and implicit.
+Explicit censoring refers to a scenario in which a focal event is recorded as having occurred within a censored interval between $\tmin$ and $\tmax$.
+For example, infection events are often explicitly censored because the exact timing of infection is difficult to identify.
+Implicit censoring refers to a scenario in which a focal event is recorded as having occurred at a specific time point $\trep$ but implicitly has an associated .
+For example, an individual who developed symptoms on a given day could have started showing symptoms at any time within the 24 hour cycle.
 
-\section{Results}
+
+\section{Methods for inferring epidemiological delay distributions from data}
+
+\section{Simulation study}
+
+\section{Case study with real data}
 
 \section{Discussion}
 
