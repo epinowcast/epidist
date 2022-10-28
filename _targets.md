@@ -348,7 +348,25 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 #> Establish _targets.R and _targets_r/globals/models.R.
 ```
 
-### Save and compile model files
+### Fit models to simulated and case study data
+
+- Combine simulated and case study scenarios and observations
+
+``` r
+tar_target(scenarios, {
+  simulated_scenarios
+})
+#> Define target scenarios from chunk code.
+#> Establish _targets.R and _targets_r/targets/scenarios.R.
+```
+
+``` r
+tar_target(list_observations, {
+  list_simulated_observations
+})
+#> Define target list_observations from chunk code.
+#> Establish _targets.R and _targets_r/targets/list_observations.R.
+```
 
 - Dummy data required for model creation.
 
@@ -362,13 +380,26 @@ dummy_obs <- data.table::data.table(
 #> Establish _targets.R and _targets_r/globals/dummy_obs.R.
 ```
 
-- Create a file for each model, generate stancode for that model, save
-  the stancode to file, and finally compile the stan code to avoid
-  recompilation during model fitting.
+- Iterate over compiled models and all scenarios being investigated. For
+  each model:
+  - Create a model file
+  - Generate stan code
+  - Save the model to file
+  - Compile the model
+  - Generate stan data for each scenario
+  - Fit the model to each scenario
+  - Summarise the posterior parameters of interest
+  - Extract posterior samples for the parameters of interest
+  - Combine posterior samples and summaries with the scenarios they are
+    linked to
+  - Summarise the model run time and other diagnostics by scenario.
 
 ``` r
 tar_map(
-  values = list(model_name = machine_model_names, model = models),
+  values = list(
+    model_name = machine_model_names,
+    model = models
+  ),
   names = model_name,
   tar_file(
     model_path,
@@ -390,45 +421,7 @@ tar_map(
       stan_code <- model_stan_code
       cmdstan_model(model_path)$stan_file()
     }
-  )
-)
-#> Establish _targets.R and _targets_r/targets/save_and_compile.R.
-```
-
-### Fit models to simulated and case study data
-
-- Combine simulated and case study scenarios and observations
-
-``` r
-tar_target(scenarios, {
-  simulated_scenarios
-})
-#> Define target scenarios from chunk code.
-#> Establish _targets.R and _targets_r/targets/scenarios.R.
-```
-
-``` r
-tar_target(list_observations, {
-  list_simulated_observations
-})
-#> Define target list_observations from chunk code.
-#> Establish _targets.R and _targets_r/targets/list_observations.R.
-```
-
-- Iterate over compiled models and all scenarios being investigated. For
-  each model:
-  - Generate stan data for each scenario
-  - Fit each the model to that scenario
-  - Summarise the posterior parameters of interest
-  - Extract posterior samples for the parameters of interest
-  - Combine posterior samples and summaries with the scenarios they are
-    linked to
-  - Summarise the model run time and other diagnostics by scenario.
-
-``` r
-tar_map(
-  values = list(model_name = machine_model_names, model = models),
-  names = model_name,
+  ),
   tar_target(
     standata,
     do.call(
@@ -436,6 +429,15 @@ tar_map(
       list(data = list_observations[[1]], fn = brms::make_standata)
     ),
     pattern = map(list_observations)
+  ),
+  tar_target(
+    fit, 
+    cmdstan_model(compiled_model_path)$sample(
+      data = standata[[1]],
+      adapt_delta = 0.95,
+      seed = 123
+    ),
+    pattern = map(standata)
   )
 )
 #> Establish _targets.R and _targets_r/targets/fit_models.R.
