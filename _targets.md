@@ -391,7 +391,7 @@ dummy_obs <- data.table::data.table(
   - Summarise the posterior parameters of interest
   - Extract posterior samples for the parameters of interest
   - Combine posterior samples and summaries with the scenarios they are
-    linked to
+    linked to.
   - Summarise the model run time and other diagnostics by scenario.
 
 ``` r
@@ -432,12 +432,16 @@ tar_map(
   ),
   tar_target(
     fit, 
-    cmdstan_model(compiled_model_path)$sample(
-      data = standata,
-      adapt_delta = 0.95,
-      seed = 123
-    ),
-    pattern = map(standata)
+      sample_model(
+        model = compiled_model_path,
+        data = standata,
+        scenario = scenarios,
+        adapt_delta = 0.95,
+        refresh = 0, 
+        show_messages = FALSE,
+        seed = 123
+      ),
+    pattern = map(standata, scenarios)
   )
 )
 #> Establish _targets.R and _targets_r/targets/fit_models.R.
