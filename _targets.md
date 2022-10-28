@@ -233,22 +233,22 @@ tar_group_by(
 
 ``` r
 tar_target(
-  truncated_obs,
+  truncated_sim_obs,
   simulated_observations |>
     filter_obs_by_obs_time(obs_time = estimation_times[, "time"][[1]]) |>
     DT(, estimation_time := estimation_times[, "scenario"][[1]]),
   pattern = map(estimation_times)
 )
-#> Establish _targets.R and _targets_r/targets/truncated_obs.R.
+#> Establish _targets.R and _targets_r/targets/truncated_sim_obs.R.
 ```
 
 ``` r
 tar_group_by(
-  group_truncated_obs,
-  truncated_obs,
+  group_truncated_sim_obs,
+  truncated_sim_obs,
   estimation_time, distribution
 )
-#> Establish _targets.R and _targets_r/targets/group_truncated_obs.R.
+#> Establish _targets.R and _targets_r/targets/group_truncated_sim_obs.R.
 ```
 
 - Estimate across sample size ranges (N = 10, 100, 1000). `N = 1000` is
@@ -266,48 +266,38 @@ tar_target(sample_sizes, {
 
 ``` r
 tar_target(
-  sampled_observations,
-  group_truncated_obs |>
+  sampled_simulated_observations,
+  group_truncated_sim_obs |>
     as.data.table() |>
     DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
     DT(, sample_size := as.factor(sample_sizes)),
-  pattern = cross(sample_sizes, group_truncated_obs)
+  pattern = cross(sample_sizes, group_truncated_sim_obs)
 )
-#> Establish _targets.R and _targets_r/targets/sampled_observations.R.
+#> Establish _targets.R and _targets_r/targets/sampled_simulated_observations.R.
 ```
 
 ``` r
-tar_target(list_sampled_observations, {
-  sampled_observations |>
+tar_target(list_simulated_observations, {
+  sampled_simulated_observations |>
     split(by = c("estimation_time", "distribution", "sample_size"))
 })
-#> Define target list_sampled_observations from chunk code.
-#> Establish _targets.R and _targets_r/targets/list_sampled_observations.R.
+#> Define target list_simulated_observations from chunk code.
+#> Establish _targets.R and _targets_r/targets/list_simulated_observations.R.
 ```
 
 ``` r
-tar_target(scenarios, {
-  sampled_observations |>
+tar_target(simulated_scenarios, {
+  sampled_simulated_observations |>
     DT(, .(estimation_time, distribution, sample_size)) |>
     unique() |>
     DT(, id := 1:.N)
 })
-#> Define target scenarios from chunk code.
-#> Establish _targets.R and _targets_r/targets/scenarios.R.
+#> Define target simulated_scenarios from chunk code.
+#> Establish _targets.R and _targets_r/targets/simulated_scenarios.R.
 ```
 
 - Plot distribution summary parameters (log mean and sd) vs true values
   (y facet) by outbreak point (x facet).
-
-### Post-process for dynamic bias
-
-- Post process all models using dynamic correction and known growth rate
-- Same structure as simple distribution estimates
-
-### Summarise runtimes
-
-- In addition to estimate quality we care about tractibility for the SI
-  plot the runtimes of various methods.
 
 ## Case study
 
@@ -407,22 +397,48 @@ tar_map(
 
 ### Fit models to simulated and case study data
 
-- Iterate over named models and
-
-- Fit each model to each data slice
+- Combine simulated and case study scenarios and observations
 
 ``` r
-tar_stan_mcmc(
-  model_fits, 
-  stan_files = model_paths,
-  data = do.call(
-    models[[1]], 
-    list(data = group_sampled_observations, fn = make_standata_target, 
-         stan_model = model_stan_code[[1]])
-  ),
-  refresh = 0, init = 1, show_messages = FALSE,
-  pattern = cross(map(models, model_stan_code), group_sampled_observations)
+tar_target(scenarios, {
+  simulated_scenarios
+})
+#> Define target scenarios from chunk code.
+#> Establish _targets.R and _targets_r/targets/scenarios.R.
+```
+
+``` r
+tar_target(list_observations, {
+  list_simulated_observations
+})
+#> Define target list_observations from chunk code.
+#> Establish _targets.R and _targets_r/targets/list_observations.R.
+```
+
+- Iterate over compiled models and all scenarios being investigated. For
+  each model:
+  - Generate stan data for each scenario
+  - Fit each the model to that scenario
+  - Summarise the posterior parameters of interest
+  - Extract posterior samples for the parameters of interest
+  - Combine posterior samples and summaries with the scenarios they are
+    linked to
+  - Summarise the model run time and other diagnostics by scenario.
+
+``` r
+tar_map(
+  values = list(model_name = machine_model_names, model = models),
+  names = model_name,
+  tar_target(
+    standata,
+    do.call(
+      model,
+      list(data = list_observations[[1]], fn = brms::make_standata)
+    ),
+    pattern = map(list_observations)
+  )
 )
+#> Establish _targets.R and _targets_r/targets/fit_models.R.
 ```
 
 - Create data for each group and model and then fit models to this data.
@@ -430,5 +446,9 @@ tar_stan_mcmc(
 - Summarise posteriors for each model and sampled data.
 
 - Sample model runtimes for each sampled data.
+
+## Post-process for dynamic bias
+
+- Post process all models using dynamic correction and known growth rate
 
 ## Results
