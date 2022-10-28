@@ -395,9 +395,14 @@
     "data.table": {
       "Package": "data.table",
       "Version": "1.14.5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "8ea5a8118b6de8cc60055585a22dacdf",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "data.table",
+      "RemoteUsername": "Rdatatable",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "0895fa247afcf6b38044bd5f56c0d209691ddb31",
+      "Hash": "f35f414e1d657b8aa2b07dcbd070371c",
       "Requirements": []
     },
     "desc": {
