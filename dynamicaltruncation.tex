@@ -112,7 +112,34 @@ Epidemiological delay distributions (i.e., the distribution of time between two 
 Accurate characterization of epidemiological delay distributions are also critical to understanding population-level outbreak dynamics. \swp{maybe need examples or not.}
 
 Estimating epidemiological delay distributions from data can be challenging due to observational biases.
-First, when the epidemic is ongoing, 
+For example, when the epidemic is ongoing, we cannot observe events that have not happened yet---this \emph{truncation bias}, in turn, causes us to observe shorter intervals and underestimate the mean of the focal distribution.
+In addition, event times are often reported in \emph{censored} intervals that can span over a day or even several weeks;
+inaccurate estimates of event times can further translate to biases in the estimates of delay distributions.
+Recent studies have also highlighted the role of dynamical biases ...
+
+\section{Methods}
+
+\swp{I think we need to build up some theory before we introduce actual methods?}
+
+\subsection{Notation}
+
+Throughout this paper, we use $p$ and $s$ to denote primary and secondary event times, where $s-p$ is the focal epidemiological delay.
+In particular we are interested in estimating the forward distribution $f_p(\tau)$, measured from the cohort of individuals who experienced the primary event at the same time $p$.
+For now, we focus on the scenario in which the forward distribution remain stable over the course of an epidemic, $f_p(\tau) = f(\tau)$---this is true for many distributions that reflect the course of infection, such as the incubation-period distribution (i.e., time between infection and symptom onset).
+Other distributions, such as the generation-interval distribution (i.e., time between infection and transmission) and reporting distributions, are expected to change throughout.
+While it is possible (and perhaps more convenient) to characterize the backward distribution $b_s(\tau)$, measured from the cohort of individuals who experienced the secondary event at the same time $s$, these distributions are subject to dynamical biases as we discuss later.
+
+\subsection{Truncation bias}
+
+
+
+
+\subsection{Censoring bias}
+
+
+\section{Results}
+
+\section{Discussion}
 
 \pagebreak
 
