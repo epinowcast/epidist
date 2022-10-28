@@ -1,5 +1,14 @@
+pad_zero <- function(data, pad = 1e-3) {
+  data <- data |>
+    data.table::copy() |>
+    DT(delay_lwr == 0, delay_lwr := pad) |>
+    DT(delay_daily == 0, delay_daily := pad)
+}
+
 naive_delay <- function(formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data,
                         fn = brms::brm, family = "lognormal", ...) {
+
+  data <- pad_zero(data)
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
   )
@@ -7,10 +16,12 @@ naive_delay <- function(formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data,
 
 filtered_naive_delay <- function(
   formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data, fn = brms::brm,
-  family = "lognormal", truncation = 15, ...) {
+  family = "lognormal", truncation = 10, ...) {
   data <- data |>
     data.table::copy() |>
     DT(stime_daily <= (obs_at - truncation))
+
+  data <- pad_zero(data)
 
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
@@ -21,6 +32,7 @@ censoring_adjusted_delay <- function(
   formula = brms::bf(
     delay_lwr | cens(censored, delay_upr) ~ 1, sigma ~ 1
   ), data, fn = brms::brm, family = "lognormal", ...) {
+  data <- pad_zero(data)
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
   )
@@ -29,11 +41,13 @@ censoring_adjusted_delay <- function(
 filtered_censoring_adjusted_delay <- function(
   formula = brms::bf(
     delay_lwr | cens(censored, delay_upr) ~ 1, sigma ~ 1
-  ), data, fn = brms::brm, family = "lognormal", truncation = 15, ...) {
+  ), data, fn = brms::brm, family = "lognormal", truncation = 10, ...) {
 
   data <- data |>
     data.table::copy() |>
     DT(stime_daily <= (obs_at - truncation))
+
+  data <- pad_zero(data)
 
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
@@ -42,8 +56,11 @@ filtered_censoring_adjusted_delay <- function(
 
 truncation_adjusted_delay <- function(
   formula = brms::bf(
-    delay_daily | trunc(lb = 0, ub = censored_obs_time) ~ 1, sigma ~ 1
-  ), data, fn = brms::brm, family ="lognormal", ...) {
+    delay_daily | trunc(lb = 1e-3, ub = censored_obs_time) ~ 1, sigma ~ 1
+  ), data, fn = brms::brm, family = "lognormal", ...) {
+
+  data <- pad_zero(data)
+
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
   )
@@ -52,9 +69,12 @@ truncation_adjusted_delay <- function(
 truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
     delay_lwr | cens(censored, delay_upr) +
-      trunc(lb = 0, ub = censored_obs_time) ~ 1,
+      trunc(lb = 1e-3, ub = censored_obs_time) ~ 1,
     sigma ~ 1
   ), data, fn = brms::brm, family = "lognormal", ...) {
+
+  data <- pad_zero(data)
+
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
   )
@@ -95,7 +115,7 @@ latent_truncation_censoring_adjusted_delay <- function(
 ) {
 
   stanvars <- brms::stanvar(block = "functions", scode = scode)
-  
+
   data <- data |>
     data.table::copy() |>
     DT(, id := 1:.N)
@@ -103,7 +123,7 @@ latent_truncation_censoring_adjusted_delay <- function(
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
   }
-  
+
   fit <- fn(
     formula = formula, family = family, stanvars = stanvars, prior = priors,
     backend = "cmdstanr", data = data, ...
