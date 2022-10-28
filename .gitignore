@@ -14,3 +14,4 @@ _targets
 data/models/*adjusted
 data/models/*filtered
 data/models/*naive
+*.zip
