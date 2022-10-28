@@ -79,13 +79,15 @@
 \newcommand{\total}{{\mathcal T}} %% total number of serial intervals
 
 \newcommand{\tend}{{t_{\mathrm{end}}}}
-\newcommand{\tmin}{{t_{\mathrm{max}}}}
+\newcommand{\tmin}{{t_{\mathrm{min}}}}
 \newcommand{\tmax}{{t_{\mathrm{max}}}}
 \newcommand{\trep}{{t_{\mathrm{rep}}}}
 \newcommand{\pmin}{{p_{\mathrm{min}}}}
 \newcommand{\pmax}{{p_{\mathrm{max}}}}
+\newcommand{\prep}{{p_{\mathrm{rep}}}}
 \newcommand{\smin}{{s_{\mathrm{min}}}}
 \newcommand{\smax}{{s_{\mathrm{max}}}}
+\newcommand{\srep}{{s_{\mathrm{rep}}}}
 
 \usepackage{lettrine}
 
@@ -126,9 +128,13 @@ In addition, event times are often reported in \emph{censored} intervals that ca
 inaccurate estimates of event times can further translate to biases in the estimates of delay distributions.
 Recent studies have also highlighted the role of dynamical biases ...
 
-\section{General theory for understanding epidemiological delay distributions}
+\swp{A paragraph on what's been done. Some people have focused on truncation. Some people on dynamical bias. Some people tried to correct for both. Censoring is also often under-appreciated, at least at a daily time step.}
 
-\swp{I think we need to build up some theory before we introduce actual methods?}
+\section{General theory for estimating epidemiological delay distributions}
+
+\swp{I started writing this section thinking that we need to build up some theory before we introduce actual methods. But now I feel like we can combine this section with the methods section to derive some theory and show likelihood...if that makes sense...}
+We present general theory for understanding observational biases in estimating epidemiological delay distributions and derive likelihood for each scenario.
+We also provide approximations of each methods, which we compare later.
 
 \subsection{Notation}
 
@@ -138,25 +144,62 @@ For now, we focus on the scenario in which the forward distribution remain stabl
 Other distributions, such as the generation-interval distribution (i.e., time between infection and transmission) and reporting distributions, are expected to change throughout.
 While it is possible (and perhaps more convenient) to characterize the backward distribution $b_s(\tau)$, measured from the cohort of individuals who experienced the secondary event at the same time $s$, these distributions are subject to dynamical biases as we discuss later.
 
-\subsection{Truncation bias}
+\subsection{Accounting for truncation bias}
 
 When an epidemic is ongoing, we cannot observe events that have not happened yet.
 Therefore, in order to observe ...
-The truncated distribution then follows:
+Then, the likelihood of observing a delay of $X_i$ from the right-truncated distribution is given by:
 \begin{equation}
-\frac{f_p(\tau)}{F_p(\tend-p) }
+\mathcal L(\theta|X_i) = \frac{f(X_i)}{F(\tend-p)}.
 \end{equation}
 
-\subsection{Censoring bias}
+\subsection{Accounting for censoring bias}
 
 There are broadly two kinds of censoring in epidemic data: explicit and implicit.
-Explicit censoring refers to a scenario in which a focal event is recorded as having occurred within a censored interval between $\tmin$ and $\tmax$.
+Explicit censoring refers to a scenario in which a focal event is reported as having occurred within a censored interval between $\tmin$ and $\tmax$.
 For example, infection events are often explicitly censored because the exact timing of infection is difficult to identify.
-Implicit censoring refers to a scenario in which a focal event is recorded as having occurred at a specific time point $\trep$ but implicitly has an associated .
+Implicit censoring refers to a scenario in which focal events that occur between some interval are reported as having occurred at a specific time point $\trep$.
 For example, an individual who developed symptoms on a given day could have started showing symptoms at any time within the 24 hour cycle.
+\swp{would be good to mention that people often ignore the implicit censoring}
+In this paper, we will be primarily dealing with censoring that occurs at a daily time step and therefore will focus on implicit censoring---the implicit censoring also allows for a convenient framing of the problem as we will show here.
 
+Here, we take the cohort-based approach to understanding censored data.
+We begin by assuming that an individual who experiences a focal event at time $\tmin leq t < \tmax$ has a probability $g_t(\trep)$ of having their event reported at time $\trep$.
+Then, for a cohort of individuals who reported the focal event at time $\trep$, the distribution of their true event time $\pi(t)$ depend on the reporting distribution $g_t(\trep)$ as well as the incidence of focal event $i(t)$:
+\begin{equation}
+\pi(t) = \frac{i(t) g_t(\trep)}{\int_{\tmin}^\tmax i(z) g_z(\trep) \dd z}.
+\end{equation}
+For example, for an idealized daily reporting scenario, in which all events happening at time $n \leq t < n+1$ is reported as having occurred at time $n$, the reporting distribution corresponds to $g_t(n) = 1$ for $n \leq t < n+1$;
+in this case, if we further assume that the incidence is exponentially changing at rate $r$, the distribution of their true event time simplifies to:
+\begin{equation}
+\pi(t) = \frac{\exp(rt)}{\exp(nr) (\exp(r) - 1)/r}.
+\end{equation}
+We note that the denominator can be ignored in the likelihood for the purpose of parameter estimation because it is a constant value.
 
-\section{Methods for inferring epidemiological delay distributions from data}
+Finally, given that primary and secondary events are reported at time $P_i$ and $S_i$, respectively, the likelihood of this data is given by:
+\begin{equation}
+\mathcal L(\theta|P_i, S_i) = \int_{S_i}^{S_i+1} \int_{P_i}^{P_i+1} \pi_s(t_2) \pi_p(t_1) f(t_2-t_1) \dd t_1 \dd t_2,
+\end{equation}
+where $t_1$ and $t_2$ represent latent variables for the timing of primary and secondary events, respectively;
+and $\pi_p$ and $\pi_s$ represent distributions of the true timing of primary and secondary events, respectively.
+Other studies have typically assumed uniform distributions for $\pi$, thereby neglecting underlying epidemioligical dynamics.
+\swp{Need to say we're going to compare uniform vs exponential?}
+
+\subsection{Accounting for both truncation and censoring bias}
+
+Correct method:
+\begin{equation}
+\mathcal L(\theta|P_i, S_i) = \int_{S_i}^{S_i+1} \int_{P_i}^{P_i+1} \pi_s(t_2) \pi_p(t_1) \frac{f(t_2 - t_1)}{F_p(\tend-t_1)} \dd t_1 \dd t_2
+\end{equation}
+
+The correct method is complex because we have to rely on latent variables. In particular, the truncation time now depends on censoring. Instead, we can approximate using half-points and what not...
+
+\section{Implementation}
+
+\begin{itemize}
+  \item Let's define likelihood with theory in the previous section
+  \item Primarily focus on actual implementation here. Stan, brms, blah blah blah
+\end{itemize}
 
 \section{Simulation study}
 
