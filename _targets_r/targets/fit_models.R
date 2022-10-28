@@ -36,7 +36,7 @@ tar_map(
   tar_target(
     fit, 
     cmdstan_model(compiled_model_path)$sample(
-      data = standata[[1]],
+      data = standata,
       adapt_delta = 0.95,
       seed = 123
     ),

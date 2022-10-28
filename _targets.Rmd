@@ -200,7 +200,7 @@ tar_group_by(
 - Estimate across sample size ranges (N = 10, 100, 1000). `N = 1000` is the main case.
 
 ```{targets sample_sizes, tar_simple = TRUE}
-c(10, 100, 1000)
+c(10)
 ```
 
 - Sample observations
@@ -350,7 +350,7 @@ tar_map(
   tar_target(
     fit, 
     cmdstan_model(compiled_model_path)$sample(
-      data = standata[[1]],
+      data = standata,
       adapt_delta = 0.95,
       seed = 123
     ),
