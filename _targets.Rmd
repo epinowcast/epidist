@@ -179,9 +179,9 @@ tar_group_by(
 
 - Truncate the available simulate observations based on the estimation time for each scenario.
 
-```{targets truncated_obs} 
+```{targets truncated_sim_obs} 
 tar_target(
-  truncated_obs,
+  truncated_sim_obs,
   simulated_observations |>
     filter_obs_by_obs_time(obs_time = estimation_times[, "time"][[1]]) |>
     DT(, estimation_time := estimation_times[, "scenario"][[1]]),
@@ -189,10 +189,10 @@ tar_target(
 )
 ```
 
-```{targets group_truncated_obs}
+```{targets group_truncated_sim_obs}
 tar_group_by(
-  group_truncated_obs,
-  truncated_obs,
+  group_truncated_sim_obs,
+  truncated_sim_obs,
   estimation_time, distribution
 )
 ```
@@ -205,42 +205,31 @@ c(10, 100, 1000)
 
 - Sample observations
 
-```{targets sampled_observations}
+```{targets sampled_simulated_observations}
 tar_target(
-  sampled_observations,
-  group_truncated_obs |>
+  sampled_simulated_observations,
+  group_truncated_sim_obs |>
     as.data.table() |>
     DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
     DT(, sample_size := as.factor(sample_sizes)),
-  pattern = cross(sample_sizes, group_truncated_obs)
+  pattern = cross(sample_sizes, group_truncated_sim_obs)
 )
 ```
 
-```{targets list_sampled_observations, tar_simple = TRUE}
-sampled_observations |>
+```{targets list_simulated_observations, tar_simple = TRUE}
+sampled_simulated_observations |>
   split(by = c("estimation_time", "distribution", "sample_size"))
 ```
 
 
 ```{targets simulated_scenarios, tar_simple = TRUE}
-sampled_observations |>
+sampled_simulated_observations |>
   DT(, .(estimation_time, distribution, sample_size)) |>
   unique() |>
   DT(, id := 1:.N)
 ```
 
-
 - Plot distribution summary parameters (log mean and sd) vs true values (y facet) by outbreak point (x facet).
-
-### Post-process for dynamic bias
-
-- Post process all models using dynamic correction and known growth rate
-- Same structure as simple distribution estimates
-
-### Summarise runtimes
-
-
-- In addition to estimate quality we care about tractibility for the SI plot the runtimes of various methods.
 
 ## Case study
 
@@ -333,6 +322,16 @@ tar_map(
 
 ### Fit models to simulated and case study data
 
+- Combine simulated and case study scenarios and observations
+
+```{targets scenarios, tar_simple = TRUE}
+simulated_scenarios
+```
+
+```{targets list_observations, tar_simple = TRUE}
+list_simulated_observations
+```
+
 - Iterate over compiled models and all scenarios being investigated. For each model:
   - Generate stan data for each scenario
   - Fit each the model to that scenario
@@ -341,11 +340,18 @@ tar_map(
   - Combine posterior samples and summaries with the scenarios they are linked to
   - Summarise the model run time and other diagnostics by scenario.
 
-```{targets save_and_compile}
+```{targets fit_models}
 tar_map(
   values = list(model_name = machine_model_names, model = models),
   names = model_name,
-  
+  tar_target(
+    standata,
+    do.call(
+      model,
+      list(data = list_observations[[1]], fn = brms::make_standata)
+    ),
+    pattern = map(list_observations)
+  )
 )
 ```
 
@@ -354,6 +360,10 @@ tar_map(
 - Summarise posteriors for each model and sampled data.
 
 - Sample model runtimes for each sampled data.
+
+## Post-process for dynamic bias
+
+- Post process all models using dynamic correction and known growth rate
 
 ## Results
 
