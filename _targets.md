@@ -277,12 +277,23 @@ tar_target(
 ```
 
 ``` r
-tar_group_by(
-  group_sampled_observations,
-  sampled_observations,
-  estimation_time, distribution, sample_size
-)
-#> Establish _targets.R and _targets_r/targets/group_sampled_observations.R.
+tar_target(list_sampled_observations, {
+  sampled_observations |>
+    split(by = c("estimation_time", "distribution", "sample_size"))
+})
+#> Define target list_sampled_observations from chunk code.
+#> Establish _targets.R and _targets_r/targets/list_sampled_observations.R.
+```
+
+``` r
+tar_target(scenarios, {
+  sampled_observations |>
+    DT(, .(estimation_time, distribution, sample_size)) |>
+    unique() |>
+    DT(, id := 1:.N)
+})
+#> Define target scenarios from chunk code.
+#> Establish _targets.R and _targets_r/targets/scenarios.R.
 ```
 
 - Plot distribution summary parameters (log mean and sd) vs true values
@@ -324,8 +335,6 @@ tar_group_by(
 
 ## Models
 
-## Models
-
 ### Define models
 
 We explore a range of models for estimating the log normal distribution.
@@ -364,7 +373,8 @@ dummy_obs <- data.table::data.table(
 ```
 
 - Create a file for each model, generate stancode for that model, save
-  the stancode to file, and finally compile the stan code.
+  the stancode to file, and finally compile the stan code to avoid
+  recompilation during model fitting.
 
 ``` r
 tar_map(
