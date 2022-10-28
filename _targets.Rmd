@@ -329,28 +329,9 @@ tar_group_by(
 
 - Summarise
 
+## Models
 
 ## Results
 
 
 
-## Discussion
-
-### Summary
-
-### Strengths and weaknesses
-
-### Literature
-
-### Further work
-
-- Longer or more complex censoring
-- Joint estimation of the transmission process and distributions
-- Time-varying distributions
-
-## Conclusions
-
-## Ackowledgements
-
-# References
-### For discussion ?
