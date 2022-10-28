@@ -256,7 +256,7 @@ tar_group_by(
 
 ``` r
 tar_target(sample_sizes, {
-  c(10, 100, 1000)
+  c(10)
 })
 #> Define target sample_sizes from chunk code.
 #> Establish _targets.R and _targets_r/targets/sample_sizes.R.
@@ -433,7 +433,7 @@ tar_map(
   tar_target(
     fit, 
     cmdstan_model(compiled_model_path)$sample(
-      data = standata[[1]],
+      data = standata,
       adapt_delta = 0.95,
       seed = 123
     ),
