@@ -5,10 +5,36 @@ naive_delay <- function(formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data,
   )
 }
 
+filtered_naive_delay <- function(
+  formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data, fn = brms::brm,
+  family = "lognormal", truncation = 15, ...) {
+  data <- data |>
+    data.table::copy() |>
+    DT(stime_daily <= (obs_at - truncation))
+
+  fn(
+    formula, data = data, family = family, backend = "cmdstanr", ...
+  )
+}
+
 censoring_adjusted_delay <- function(
   formula = brms::bf(
     delay_lwr | cens(censored, delay_upr) ~ 1, sigma ~ 1
   ), data, fn = brms::brm, family = "lognormal", ...) {
+  fn(
+    formula, data = data, family = family, backend = "cmdstanr", ...
+  )
+}
+
+filtered_censoring_adjusted_delay <- function(
+  formula = brms::bf(
+    delay_lwr | cens(censored, delay_upr) ~ 1, sigma ~ 1
+  ), data, fn = brms::brm, family = "lognormal", truncation = 15, ...) {
+
+  data <- data |>
+    data.table::copy() |>
+    DT(stime_daily <= (obs_at - truncation))
+
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
   )
