@@ -124,84 +124,7 @@ tar_option_set(
 
 # Methods
 
-## Models
-
-We explore a range of models for estimating the log normal distribution.
-Starting with the naive continuous model and then gradually adding
-complexity to adjust for censoring to dates and right truncation.
-
-``` r
-tar_target(models, {
-  list(
-    "Naive" = naive_delay,
-    "Censoring adjusted" = censoring_adjusted_delay,
-    "Filtered" = function(data, ...) {
-      data <- data |>
-        data.table::copy() |>
-        DT(stime_daily <= (obs_at - 15))
-      naive_delay(data = data, ...)
-    },
-    "Filtered and censoring adjusted" = function(data, ...) {
-      data <- data |>
-        data.table::copy() |>
-        DT(stime_daily <= (obs_at - 15))
-      censoring_adjusted_delay(data = data, ...)
-    },
-    "Truncation adjusted" = truncation_adjusted_delay,
-    "Truncation and censoring adjusted" = truncation_censoring_adjusted_delay,
-    "Latent variable truncation and censoring adjusted" =
-      latent_truncation_censoring_adjusted_delay
-  )
-})
-#> Define target models from chunk code.
-#> Establish _targets.R and _targets_r/targets/models.R.
-```
-
-- File path for each saved model.
-
-``` r
-tar_target(
-  model_paths,
-  paste0(
-    "data/models/", gsub(" ", "_", tolower(names(models))), ".stan"
-  ) |>
-    fs::file_create(),
-  format = "file",
-  pattern = map(models)
-)
-#> Establish _targets.R and _targets_r/targets/model_paths.R.
-```
-
-- Dummy data required for model creation.
-
-``` r
-tar_target(dummy_obs, {
-  data.table(
-    ptime = 1, stime = 2, delay_daily = 1, delay_lwr = 1, delay_upr = 2, 
-    ptime_lwr = 1, ptime_upr = 2, stime_lwr = 1, stime_upr = 2, obs_at = 100,
-    censored = "interval", censored_obs_time = 10, ptime_daily = 1,
-    stime_daily = 1
-  )
-})
-#> Define target dummy_obs from chunk code.
-#> Establish _targets.R and _targets_r/targets/dummy_obs.R.
-```
-
-- Generate stan code for each model and compile.
-
-``` r
-tar_target(
-  model_stan_code, 
-  do.call(
-    models[[1]],
-    list(data = dummy_obs, fn = brms::make_stancode, save_model = model_paths)
-  ),
-  pattern = map(models, model_paths)
-)
-#> Establish _targets.R and _targets_r/targets/model_stan_code.R.
-```
-
-### Simulation
+## Simulation
 
 ### Setup
 
@@ -310,22 +233,22 @@ tar_group_by(
 
 ``` r
 tar_target(
-  truncated_obs,
+  truncated_sim_obs,
   simulated_observations |>
     filter_obs_by_obs_time(obs_time = estimation_times[, "time"][[1]]) |>
     DT(, estimation_time := estimation_times[, "scenario"][[1]]),
   pattern = map(estimation_times)
 )
-#> Establish _targets.R and _targets_r/targets/truncated_obs.R.
+#> Establish _targets.R and _targets_r/targets/truncated_sim_obs.R.
 ```
 
 ``` r
 tar_group_by(
-  group_truncated_obs,
-  truncated_obs,
+  group_truncated_sim_obs,
+  truncated_sim_obs,
   estimation_time, distribution
 )
-#> Establish _targets.R and _targets_r/targets/group_truncated_obs.R.
+#> Establish _targets.R and _targets_r/targets/group_truncated_sim_obs.R.
 ```
 
 - Estimate across sample size ranges (N = 10, 100, 1000). `N = 1000` is
@@ -333,7 +256,7 @@ tar_group_by(
 
 ``` r
 tar_target(sample_sizes, {
-  c(10, 100, 1000)
+  c(10)
 })
 #> Define target sample_sizes from chunk code.
 #> Establish _targets.R and _targets_r/targets/sample_sizes.R.
@@ -343,60 +266,38 @@ tar_target(sample_sizes, {
 
 ``` r
 tar_target(
-  sampled_observations,
-  group_truncated_obs |>
+  sampled_simulated_observations,
+  group_truncated_sim_obs |>
     as.data.table() |>
     DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
     DT(, sample_size := as.factor(sample_sizes)),
-  pattern = cross(sample_sizes, group_truncated_obs)
+  pattern = cross(sample_sizes, group_truncated_sim_obs)
 )
-#> Establish _targets.R and _targets_r/targets/sampled_observations.R.
+#> Establish _targets.R and _targets_r/targets/sampled_simulated_observations.R.
 ```
 
 ``` r
-tar_group_by(
-  group_sampled_observations,
-  sampled_observations,
-  estimation_time, distribution, sample_size
-)
-#> Establish _targets.R and _targets_r/targets/group_sampled_observations.R.
+tar_target(list_simulated_observations, {
+  sampled_simulated_observations |>
+    split(by = c("estimation_time", "distribution", "sample_size"))
+})
+#> Define target list_simulated_observations from chunk code.
+#> Establish _targets.R and _targets_r/targets/list_simulated_observations.R.
 ```
-
-- Fit each model to each data slice
 
 ``` r
-tar_stan_mcmc(
-  model_fits, 
-  stan_files = model_paths,
-  data = do.call(
-    models[[1]], 
-    list(data = group_sampled_observations, fn = make_standata_target, 
-         stan_model = model_stan_code[[1]])
-  ),
-  refresh = 0, init = 1, show_messages = FALSE,
-  pattern = cross(map(models, model_stan_code), group_sampled_observations)
-)
-#> Establish _targets.R and _targets_r/targets/model_fits.R.
+tar_target(simulated_scenarios, {
+  sampled_simulated_observations |>
+    DT(, .(estimation_time, distribution, sample_size)) |>
+    unique() |>
+    DT(, id := 1:.N)
+})
+#> Define target simulated_scenarios from chunk code.
+#> Establish _targets.R and _targets_r/targets/simulated_scenarios.R.
 ```
-
-- Create data for each group and model and then fit models to this data.
-
-- Summarise posteriors for each model and sampled data.
-
-- Sample model runtimes for each sampled data.
 
 - Plot distribution summary parameters (log mean and sd) vs true values
   (y facet) by outbreak point (x facet).
-
-### Post-process for dynamic bias
-
-- Post process all models using dynamic correction and known growth rate
-- Same structure as simple distribution estimates
-
-### Summarise runtimes
-
-- In addition to estimate quality we care about tractibility for the SI
-  plot the runtimes of various methods.
 
 ## Case study
 
@@ -422,26 +323,134 @@ tar_stan_mcmc(
 
 - Summarise
 
+## Models
+
+### Define models
+
+We explore a range of models for estimating the log normal distribution.
+Starting with the naive continuous model and then gradually adding
+complexity to adjust for censoring to dates and right truncation.
+
+``` r
+models <- list(
+  "Naive" = quote(naive_delay),
+  "Filtered" = quote(filtered_naive_delay),
+  "Censoring adjusted" = quote(censoring_adjusted_delay),
+  "Filtered and censoring adjusted" = quote(filtered_censoring_adjusted_delay),
+  "Truncation adjusted" = quote(truncation_adjusted_delay),
+  "Truncation and censoring adjusted" =
+     quote(truncation_censoring_adjusted_delay),
+  "Latent variable truncation and censoring adjusted" =
+    quote(latent_truncation_censoring_adjusted_delay)
+)
+
+machine_model_names <- gsub(" ", "_", tolower(names(models)))
+#> Establish _targets.R and _targets_r/globals/models.R.
+```
+
+### Fit models to simulated and case study data
+
+- Combine simulated and case study scenarios and observations
+
+``` r
+tar_target(scenarios, {
+  simulated_scenarios
+})
+#> Define target scenarios from chunk code.
+#> Establish _targets.R and _targets_r/targets/scenarios.R.
+```
+
+``` r
+tar_target(list_observations, {
+  list_simulated_observations
+})
+#> Define target list_observations from chunk code.
+#> Establish _targets.R and _targets_r/targets/list_observations.R.
+```
+
+- Dummy data required for model creation.
+
+``` r
+dummy_obs <- data.table::data.table(
+  ptime = 1, stime = 2, delay_daily = 1, delay_lwr = 1, delay_upr = 2, 
+  ptime_lwr = 1, ptime_upr = 2, stime_lwr = 1, stime_upr = 2, obs_at = 100,
+  censored = "interval", censored_obs_time = 10, ptime_daily = 1,
+  stime_daily = 1
+)
+#> Establish _targets.R and _targets_r/globals/dummy_obs.R.
+```
+
+- Iterate over compiled models and all scenarios being investigated. For
+  each model:
+  - Create a model file
+  - Generate stan code
+  - Save the model to file
+  - Compile the model
+  - Generate stan data for each scenario
+  - Fit the model to each scenario
+  - Summarise the posterior parameters of interest
+  - Extract posterior samples for the parameters of interest
+  - Combine posterior samples and summaries with the scenarios they are
+    linked to
+  - Summarise the model run time and other diagnostics by scenario.
+
+``` r
+tar_map(
+  values = list(
+    model_name = machine_model_names,
+    model = models
+  ),
+  names = model_name,
+  tar_file(
+    model_path,
+    paste0(
+      "data/models/", model_name, ".stan"
+    ) |>
+      fs::file_create()
+  ),
+  tar_target(
+    model_stan_code, 
+    do.call(
+      model,
+      list(data = dummy_obs, fn = brms::make_stancode, save_model = model_path)
+    )
+  ),
+  tar_file(
+    compiled_model_path,
+    {
+      stan_code <- model_stan_code
+      cmdstan_model(model_path)$stan_file()
+    }
+  ),
+  tar_target(
+    standata,
+    do.call(
+      model,
+      list(data = list_observations[[1]], fn = brms::make_standata)
+    ),
+    pattern = map(list_observations)
+  ),
+  tar_target(
+    fit, 
+    cmdstan_model(compiled_model_path)$sample(
+      data = standata,
+      adapt_delta = 0.95,
+      seed = 123
+    ),
+    pattern = map(standata)
+  )
+)
+#> Establish _targets.R and _targets_r/targets/fit_models.R.
+```
+
+- Create data for each group and model and then fit models to this data.
+
+- Summarise posteriors for each model and sampled data.
+
+- Sample model runtimes for each sampled data.
+
+## Post-process for dynamic bias
+
+- Post process all models using dynamic correction and known growth rate
+
 ## Results
-
-## Discussion
-
-### Summary
-
-### Strengths and weaknesses
-
-### Literature
-
-### Further work
-
-- Longer or more complex censoring
-- Joint estimation of the transmission process and distributions
-- Time-varying distributions
-
-## Conclusions
-
-## Ackowledgements
-
-# References
-
-### For discussion ?
