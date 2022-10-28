@@ -216,13 +216,19 @@ tar_target(
 )
 ```
 
-```{targets group_sampled_observations}
-tar_group_by(
-  group_sampled_observations,
-  sampled_observations,
-  estimation_time, distribution, sample_size
-)
+```{targets list_sampled_observations, tar_simple = TRUE}
+sampled_observations |>
+  split(by = c("estimation_time", "distribution", "sample_size"))
 ```
+
+
+```{targets simulated_scenarios, tar_simple = TRUE}
+sampled_observations |>
+  DT(, .(estimation_time, distribution, sample_size)) |>
+  unique() |>
+  DT(, id := 1:.N)
+```
+
 
 - Plot distribution summary parameters (log mean and sd) vs true values (y facet) by outbreak point (x facet).
 
@@ -258,9 +264,6 @@ tar_group_by(
 ### Summarise runtimes
 
 - Summarise
-
-## Models
-
 
 ## Models
 
@@ -330,23 +333,22 @@ tar_map(
 
 ### Fit models to simulated and case study data
 
-- Iterate over named models and 
+- Iterate over compiled models and all scenarios being investigated. For each model:
+  - Generate stan data for each scenario
+  - Fit each the model to that scenario
+  - Summarise the posterior parameters of interest
+  - Extract posterior samples for the parameters of interest
+  - Combine posterior samples and summaries with the scenarios they are linked to
+  - Summarise the model run time and other diagnostics by scenario.
 
-- Fit each model to each data slice
-
-```{r model_fits, eval = FALSE}
-tar_stan_mcmc(
-  model_fits, 
-  stan_files = model_paths,
-  data = do.call(
-    models[[1]], 
-    list(data = group_sampled_observations, fn = make_standata_target, 
-         stan_model = model_stan_code[[1]])
-  ),
-  refresh = 0, init = 1, show_messages = FALSE,
-  pattern = cross(map(models, model_stan_code), group_sampled_observations)
+```{targets save_and_compile}
+tar_map(
+  values = list(model_name = machine_model_names, model = models),
+  names = model_name,
+  
 )
 ```
+
 - Create data for each group and model and then fit models to this data.
 
 - Summarise posteriors for each model and sampled data.
