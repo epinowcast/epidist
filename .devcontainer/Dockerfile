@@ -71,7 +71,7 @@ RUN chmod -R ugo+rw /workspaces/dynamictruncation
 # install dependencies
 WORKDIR /workspaces/dynamictruncation
 COPY renv.lock renv.lock
-RUN R -e 'renv::restore()'
+RUN R -e 'install.packages("renv"); renv::restore()'
 RUN rm renv.lock
 
 # install latex
