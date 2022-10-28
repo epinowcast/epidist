@@ -72,6 +72,7 @@ We now define shared global options across our workflow and load R functions fro
 ```{targets globals, tar_globals = TRUE}
 library(targets)
 library(tarchetypes)
+library(stantargets)
 library(cmdstanr)
 library(data.table)
 library(ggplot2)
@@ -288,6 +289,21 @@ tar_group_by(
 )
 ```
 
+- Fit each model to each data slice
+
+```{targets model_fits}
+tar_stan_mcmc(
+  model_fits, 
+  stan_files = model_paths,
+  data = do.call(
+    models[[1]], 
+    list(data = group_sampled_observations, fn = make_standata_target, 
+         stan_model = model_stan_code[[1]])
+  ),
+  refresh = 0, init = 1, show_messages = FALSE,
+  pattern = cross(map(models, model_stan_code), group_sampled_observations)
+)
+```
 - Create data for each group and model and then fit models to this data.
 
 - Summarise posteriors for each model and sampled data.
