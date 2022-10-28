@@ -11,3 +11,6 @@ makestuff
 .DS_Store
 _targets
 *.log
+data/models/*adjusted
+data/models/*filtered
+data/models/*naive
