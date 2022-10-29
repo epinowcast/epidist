@@ -118,25 +118,30 @@ tar_group_by(
 )
 ```
 
-- We simulate an outbreak that starts with an initially high and stable growth rate that then declines linearly until reaching a stable decay rate. **I am now wondering if we want to investigate more than one scenario.** 
+- We first simulate a scenario in which the incidence of primary event is changing exponentially. We consider $r$ ranging from -0.2 to 0.2 **I am now wondering if we want to investigate more than one scenario.** **such as? would exponential + outbreak be enough?**
 
-```{targets growth_rate, tar_simple = TRUE}
+```{targets growth_rate, tar_simple=TRUE}
 data.table(
-  time = 0:59,
-  r = c(rep(0.2, 20), 0.2 - 0.02 * 1:20, rep(-0.2, 20))
+  r = seq(-0.2, 0.2, length.out=5)
 )
 ```
 
-- We initialise the outbreak to have 20 cases.
+Simulate data:
 
-```{targets init_cases, tar_simple = TRUE}
-20
+```{targets simulated_cases_exponential}
+tar_target(
+  simulated_cases_exponential, 
+  simulate_exponential_cases(
+    r=growth_rate[,"r"][[1]]
+  ),
+  pattern = map(growth_rate)
+)
 ```
 
-- Simulate the outbreak. This is temporary and we should fill with a stochastic SIR (? or other).
+- We also consider an outbreak case. Simulate the outbreak.
 
 ```{targets simulated_cases, tar_simple = TRUE}
-simulate_uniform_cases(sample_size = 5000, t = 60)
+simulate_gillespie(r = 0.2, gamma = 1 / 7, init_I = 50, n = 2000, seed = 101)
 ```
 
 - Simulate observations of primary and secondary events as linelist for each distribution scenario.
