@@ -156,8 +156,8 @@ tar_group_by(
 ``` r
 tar_target(growth_rate, {
   data.table(
-      r = c(0.2),
-      scenario = c("fast growth")
+      r = c(-0.2, 0, 0.2),
+      scenario = c("fast decay", "stable", "fast growth")
     )
   
 })
@@ -444,9 +444,10 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 
 ``` r
 tar_target(scenarios, {
-  rbind(simulated_scenarios, simulated_scenarios_exponential) |>
-    as.data.table() |> 
-    DT(, id := 1:.N)
+  # rbind(simulated_scenarios, simulated_scenarios_exponential) |>
+  #   as.data.table() |> 
+  #   DT(, id := 1:.N)
+  simulated_scenarios_exponential
 })
 #> Define target scenarios from chunk code.
 #> Establish _targets.R and _targets_r/targets/scenarios.R.
@@ -454,7 +455,8 @@ tar_target(scenarios, {
 
 ``` r
 tar_target(list_observations, {
-  c(list_simulated_observations, list_simulated_observations_exponential)
+  # c(list_simulated_observations, list_simulated_observations_exponential)
+  list_simulated_observations_exponential
 })
 #> Define target list_observations from chunk code.
 #> Establish _targets.R and _targets_r/targets/list_observations.R.
