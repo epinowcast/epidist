@@ -46,13 +46,11 @@ tar_map(
       ),
     pattern = map(standata, scenarios)
   ),
-  tar_target(
-    diagnostics,
-    fit[, fit := NULL]
-  ),
   tar_file(
     save_diagnostics,
-    save_csv(diagnostics, paste0("data/diagnostics/", model_name, '.csv'))
+    save_csv(
+      fit[, -c("fit")], paste0(model_name, ".csv"), path = "data/diagnostics"
+    )
   ),
   tar_target(
     draws,
@@ -61,7 +59,7 @@ tar_map(
   ),
   tar_file(
     save_lognormal_draws,
-    save_csv(draws, paste0("data/posteriors/", model_name, '.csv'))
+    save_csv(draws, paste0(model_name, ".csv"), path = "data/posteriors")
   ),
   tar_target(
     summarised_draws,
@@ -69,6 +67,9 @@ tar_map(
   ),
   tar_file(
     save_summarised_draws,
-    save_csv(summarised_draws, paste0("data/summarise_posteriors/", model_name, '.csv'))
+    save_csv(
+      summarised_draws, paste0(model_name, ".csv"),
+      path = "data/summarised_posteriors"
+    )
   )
 )
