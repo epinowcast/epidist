@@ -25,6 +25,7 @@ fit <- sample_model("../data/models/naive.stan", data=standata,
                     scenario=data.frame(dummy=1),
                     diagnostics = FALSE)
 
+## this gets screwed up
 draws <- fit$fit[[1]]$draws(variables = c("Intercept", "Intercept_sigma"))
 draws <- posterior::as_draws_df(draws) |>
   data.table::as.data.table()
@@ -32,9 +33,40 @@ data.table::setnames(
   draws, c("Intercept", "Intercept_sigma"), c("meanlog", "sdlog")
 )
 
-## this gets screwed up
 draws |>
   data.table::DT(, sdlog := exp(sdlog)) |>
+  data.table::DT(, mean := exp(meanlog + sdlog ^ 2 / 2)) |>
+  data.table::DT(,
+                 sd := exp(meanlog + (1 / 2) * sdlog ^ 2) * sqrt(exp(sdlog ^ 2) - 1)
+  )
+
+## a test to show that sdlog gets exponentiated yet again...
+draws <- fit$fit[[1]]$draws(variables = c("Intercept", "Intercept_sigma"))
+draws <- posterior::as_draws_df(draws) |>
+  data.table::as.data.table()
+data.table::setnames(
+  draws, c("Intercept", "Intercept_sigma"), c("meanlog", "sdlog")
+)
+
+draws |>
+  data.table::DT(, sdlog := exp(sdlog)) |>
+  data.table::DT(, mean := exp(meanlog + sdlog ^ 2 / 2)) |>
+  data.table::DT(,
+                 sd := exp(meanlog + (1 / 2) * sdlog ^ 2) * sqrt(exp(sdlog ^ 2) - 1)
+  ) |>
+  data.table::DT(, test := 1)
+
+
+## this is OK
+draws <- fit$fit[[1]]$draws(variables = c("Intercept", "Intercept_sigma"))
+draws <- posterior::as_draws_df(draws) |>
+  data.table::as.data.table()
+data.table::setnames(
+  draws, c("Intercept", "Intercept_sigma"), c("meanlog", "log_sdlog")
+)
+
+draws |>
+  data.table::DT(, sdlog := exp(log_sdlog)) |>
   data.table::DT(, mean := exp(meanlog + sdlog ^ 2 / 2)) |>
   data.table::DT(,
                  sd := exp(meanlog + (1 / 2) * sdlog ^ 2) * sqrt(exp(sdlog ^ 2) - 1)
