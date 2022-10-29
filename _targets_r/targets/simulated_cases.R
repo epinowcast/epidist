@@ -1,3 +1,3 @@
 tar_target(simulated_cases, {
-  simulate_uniform_cases(sample_size = 5000, t = 60)
+  simulate_gillespie(r = 0.2, gamma = 1 / 7, init_I = 50, n = 10000, seed = 101)
 })
