@@ -444,7 +444,9 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 
 ``` r
 tar_target(scenarios, {
-  simulated_scenarios
+  rbind(simulated_scenarios, simulated_scenarios_exponential) |>
+    as.data.table() |> 
+    DT(, id := 1:.N)
 })
 #> Define target scenarios from chunk code.
 #> Establish _targets.R and _targets_r/targets/scenarios.R.
@@ -452,7 +454,7 @@ tar_target(scenarios, {
 
 ``` r
 tar_target(list_observations, {
-  list_simulated_observations
+  c(list_simulated_observations, list_simulated_observations_exponential)
 })
 #> Define target list_observations from chunk code.
 #> Establish _targets.R and _targets_r/targets/list_observations.R.
