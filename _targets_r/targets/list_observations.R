@@ -1,3 +1,3 @@
 tar_target(list_observations, {
-  list_simulated_observations
+  c(list_simulated_observations, list_simulated_observations_exponential)
 })
