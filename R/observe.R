@@ -29,7 +29,7 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
     DT(, obs_time := obs_time - ptime) |>
     # I've assumed truncation in the middle of the censoring window.
     # For discussion.
-    DT(, censored_obs_time := obs_time - (ptime_daily + 0.5)) |>
+    DT(, censored_obs_time := obs_at - (ptime_daily + 0.5)) |>
     DT(, censored := "interval") |>
     DT(stime <= obs_time)
   return(truncated_linelist)
