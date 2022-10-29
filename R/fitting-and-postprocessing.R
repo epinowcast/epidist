@@ -56,11 +56,11 @@ extract_lognormal_draws <- function(
 summarise_lognormal_draws <- function(draws) {
   by_cols <- setdiff(
     colnames(draws),
-    c("meanlog", "sdlog", "mean", "sd", ".chain", ".iteration", ".draw")
+    c("meanlog", "log_sdlog", "sdlog", "mean", "sd", ".chain", ".iteration", ".draw")
   )
   long_draws <- melt(
     draws,
-    measure.vars = c("meanlog", "sdlog", "mean", "sd"),
+    measure.vars = c("meanlog", "log_sdlog", "sdlog", "mean", "sd"),
     variable.name = "parameter"
   )
 
