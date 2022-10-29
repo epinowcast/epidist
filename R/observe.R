@@ -9,7 +9,8 @@ observe_process <- function(linelist) {
     DT(, stime_lwr := stime_daily) |>
     DT(, stime_upr := stime_daily + 1) |>
     # How would we observe the delay distribution
-    DT(, delay_daily := floor(delay)) |>
+    # previously: delay_daily=floor(delay)
+    DT(, delay_daily := stime_daily - ptime_daily) |>
     DT(, delay_lwr := purrr::map_dbl(delay_daily, ~ max(0, . - 1))) |>
     DT(, delay_upr := delay_daily + 1) |>
     # We assume observation time is the ceiling of the maximum delay
