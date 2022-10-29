@@ -5,9 +5,9 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 }
 
 simulate_exponential_cases <- function(r = 0.2,
-                                       sample_size = 1000,
+                                       sample_size = 10000,
                                        seed,
-                                       t = 60) {
+                                       t = 30) {
   if (!missing(seed)) {
     set.seed(seed)
   }
