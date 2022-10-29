@@ -355,7 +355,7 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 
 ```{targets scenarios, tar_simple = TRUE}
 rbind(simulated_scenarios, simulated_scenarios_exponential) |>
-  as.data.table |> 
+  as.data.table() |> 
   DT(, id := 1:.N)
 ```
 
