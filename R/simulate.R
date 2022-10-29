@@ -4,6 +4,28 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
   )
 }
 
+simulate_exponential_cases <- function(r = 0.2,
+                                       sample_size = 1000,
+                                       seed,
+                                       t = 60) {
+  if (!missing(seed)) {
+    set.seed(seed)
+  }
+  quant <- runif(sample_size, 0, 1)
+  
+  if (r == 0) {
+    ptime <- quant * t
+  } else {
+    ptime <- log(1 + quant * (exp(r * t) - 1))/r
+  }
+  
+  cases <- data.table::data.table(
+    case = seq_along(ptime),
+    ptime = ptime
+  )
+  return(cases)
+}
+
 simulate_gillespie <- function(r = 0.2,
                                gamma = 1 / 7,
                                init_I = 50, ## to avoid extinction
