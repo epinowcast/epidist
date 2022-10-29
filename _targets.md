@@ -137,9 +137,9 @@ tar_option_set(
 tar_group_by(
   distributions,
     data.table(
-    scenario = c("short", "medium", "long"),
-    meanlog = c(1.2, 1.6, 2),
-    sdlog = c(0.4, 0.6, 0.8)
+    scenario = c("short"),
+    meanlog = c(1.2),
+    sdlog = c(0.4)
   ) |>
     DT(, mean := exp(meanlog + sdlog^2/2)) |>
     DT(, sd := exp(meanlog + (1/2)*sdlog^2)*sqrt(exp(sdlog^2) - 1)),
@@ -156,8 +156,8 @@ tar_group_by(
 ``` r
 tar_target(growth_rate, {
   data.table(
-      r = c(-0.2, -0.1, 0, 0.1, 0.2),
-      scenario = c("fast decay", "slow decay", "stable", "slow growth", "fast growth")
+      r = c(0.2),
+      scenario = c("fast growth")
     )
   
 })
@@ -254,7 +254,7 @@ tar_target(simulated_observations, {
 
 ``` r
 tar_target(sample_sizes, {
-  c(10, 100, 1000)
+  c(1000)
 })
 #> Define target sample_sizes from chunk code.
 #> Establish _targets.R and _targets_r/targets/sample_sizes.R.
