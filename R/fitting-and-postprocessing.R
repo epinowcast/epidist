@@ -39,6 +39,7 @@ extract_lognormal_draws <- function(
     draws, c("Intercept", "Intercept_sigma"), c("meanlog", "sdlog")
   )
   draws <- draws |>
+    data.table::DT(, sdlog := exp(sdlog)) |>
     data.table::DT(, mean := exp(meanlog + sdlog ^ 2 / 2)) |>
     data.table::DT(,
      sd := exp(meanlog + (1 / 2) * sdlog ^ 2) * sqrt(exp(sdlog ^ 2) - 1)
