@@ -122,7 +122,8 @@ tar_group_by(
 
 ```{targets growth_rate, tar_simple=TRUE}
 data.table(
-    r = c(-0.2, -0.1, 0, 0.1, 0.2)
+    r = c(-0.2, -0.1, 0, 0.1, 0.2),
+    scenario = c("fast decay", "slow decay", "stable", "slow growth", "fast growth")
   )
 
 ```
@@ -135,7 +136,8 @@ tar_target(
   simulate_exponential_cases(
     r=growth_rate[,"r"][[1]]
   ) |>
-    DT(, r := growth_rate[,"r"][[1]]),
+    DT(, r := growth_rate[,"r"][[1]]) |>
+    DT(, scenario := growth_rate[,"scenario"][[1]]),
   pattern = map(growth_rate)
 )
 ```
@@ -214,7 +216,7 @@ tar_target(
 tar_group_by(
   group_sim_obs_exponential,
   truncated_sim_obs_exponential,
-  r, distribution
+  scenario, distribution
 )
 ```
 
@@ -226,19 +228,20 @@ tar_target(
   group_sim_obs_exponential |>
     as.data.table() |>
     DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
-    DT(, sample_size := as.factor(sample_sizes)),
+    DT(, sample_size := as.factor(sample_sizes)) |>
+    DT(, datatype := "exponential"),
   pattern = cross(sample_sizes, group_sim_obs_exponential)
 )
 ```
 
 ```{targets list_simulated_observations_exponential, tar_simple = TRUE}
 sampled_simulated_observations_exponential |>
-  split(by = c("r", "distribution", "sample_size"))
+  split(by = c("scenario", "distribution", "sample_size", "datatype"))
 ```
 
 ```{targets simulated_scenarios_exponential, tar_simple = TRUE}
 sampled_simulated_observations_exponential |>
-  DT(, .(r, distribution, sample_size)) |>
+  DT(, .(scenario, distribution, sample_size, datatype)) |>
   unique() |>
   DT(, id := 1:.N)
 ```
@@ -263,7 +266,7 @@ tar_target(
   truncated_sim_obs,
   simulated_observations |>
     filter_obs_by_obs_time(obs_time = estimation_times[, "time"][[1]]) |>
-    DT(, estimation_time := estimation_times[, "scenario"][[1]]),
+    DT(, scenario := estimation_times[, "scenario"][[1]]),
   pattern = map(estimation_times)
 )
 ```
@@ -272,7 +275,7 @@ tar_target(
 tar_group_by(
   group_truncated_sim_obs,
   truncated_sim_obs,
-  estimation_time, distribution
+  scenario, distribution
 )
 ```
 
@@ -284,20 +287,21 @@ tar_target(
   group_truncated_sim_obs |>
     as.data.table() |>
     DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
-    DT(, sample_size := as.factor(sample_sizes)),
+    DT(, sample_size := as.factor(sample_sizes)) |>
+    DT(, datatype := "outbreak"),
   pattern = cross(sample_sizes, group_truncated_sim_obs)
 )
 ```
 
 ```{targets list_simulated_observations, tar_simple = TRUE}
 sampled_simulated_observations |>
-  split(by = c("estimation_time", "distribution", "sample_size"))
+  split(by = c("scenario", "distribution", "sample_size", "datatype"))
 ```
 
 
 ```{targets simulated_scenarios, tar_simple = TRUE}
 sampled_simulated_observations |>
-  DT(, .(estimation_time, distribution, sample_size)) |>
+  DT(, .(scenario, distribution, sample_size, datatype)) |>
   unique() |>
   DT(, id := 1:.N)
 ```
@@ -350,11 +354,13 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 - Combine simulated and case study scenarios and observations
 
 ```{targets scenarios, tar_simple = TRUE}
-simulated_scenarios
+rbind(simulated_scenarios, simulated_scenarios_exponential) |>
+  as.data.table |> 
+  DT(, id := 1:.N)
 ```
 
 ```{targets list_observations, tar_simple = TRUE}
-list_simulated_observations
+c(list_simulated_observations, list_simulated_observations_exponential)
 ```
 
 - Dummy data required for model creation.
