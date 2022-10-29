@@ -108,9 +108,9 @@ tar_option_set(
 tar_group_by(
   distributions,
     data.table(
-    scenario = c("short", "medium", "long"),
-    meanlog = c(1.2, 1.6, 2),
-    sdlog = c(0.4, 0.6, 0.8)
+    scenario = c("short"),
+    meanlog = c(1.2),
+    sdlog = c(0.4)
   ) |>
     DT(, mean := exp(meanlog + sdlog^2/2)) |>
     DT(, sd := exp(meanlog + (1/2)*sdlog^2)*sqrt(exp(sdlog^2) - 1)),
@@ -122,8 +122,8 @@ tar_group_by(
 
 ```{targets growth_rate, tar_simple=TRUE}
 data.table(
-    r = c(-0.2, -0.1, 0, 0.1, 0.2),
-    scenario = c("fast decay", "slow decay", "stable", "slow growth", "fast growth")
+    r = c(-0.2, 0, 0.2),
+    scenario = c("fast decay", "stable", "fast growth")
   )
 
 ```
@@ -198,7 +198,7 @@ simulated_secondary |>
 - For both the exponential and outbreak simulations, we estimate across sample size ranges (N = 10, 100, 1000). `N = 1000` is the main case.
 
 ```{targets sample_sizes, tar_simple = TRUE}
-c(10, 100, 1000)
+c(1000)
 ```
 
 - For the exponential simulation, we truncate at `t = 30`
@@ -354,13 +354,15 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 - Combine simulated and case study scenarios and observations
 
 ```{targets scenarios, tar_simple = TRUE}
-rbind(simulated_scenarios, simulated_scenarios_exponential) |>
-  as.data.table() |> 
-  DT(, id := 1:.N)
+# rbind(simulated_scenarios, simulated_scenarios_exponential) |>
+#   as.data.table() |> 
+#   DT(, id := 1:.N)
+simulated_scenarios_exponential
 ```
 
 ```{targets list_observations, tar_simple = TRUE}
-c(list_simulated_observations, list_simulated_observations_exponential)
+# c(list_simulated_observations, list_simulated_observations_exponential)
+list_simulated_observations_exponential
 ```
 
 - Dummy data required for model creation.
