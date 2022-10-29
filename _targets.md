@@ -3,37 +3,37 @@ Analysis Pipeline: Dynamic Truncation
 
 # Introduction
 
-- Reliable estimates of epidemiological distributions are required for
-  many applications in real-time. Examples include estimates of the
-  incubation period, the time from onset to report, and the time from
-  onset to death. These quantities are typically assumed to follow
-  parametric distributions but may vary over time and due to the
-  characteristics of cases
+-   Reliable estimates of epidemiological distributions are required for
+    many applications in real-time. Examples include estimates of the
+    incubation period, the time from onset to report, and the time from
+    onset to death. These quantities are typically assumed to follow
+    parametric distributions but may vary over time and due to the
+    characteristics of cases
 
-- The data used to estimate these distributions can suffer from a range
-  of common biases due to censoring and truncation.
+-   The data used to estimate these distributions can suffer from a
+    range of common biases due to censoring and truncation.
 
-- These are…
+-   These are…
 
-- These are a particular issues for infectious diseases due to the
-  exponential nature of transmission…
+-   These are a particular issues for infectious diseases due to the
+    exponential nature of transmission…
 
-- What have other people done?
+-   What have other people done?
 
-  - Examples of good practice
-  - Examples of bad practice (maybe?)
-  - Options for tools to address this issue
+    -   Examples of good practice
+    -   Examples of bad practice (maybe?)
+    -   Options for tools to address this issue
 
-- In this study we explore the impact of these biases on naive estimates
-  of a distribution during a simulated outbreak. We then evaluate a
-  range of approaches to mitigate these biases and compare and contrast
-  there performance. In particular, we focus on the role of
-  right-truncation and dynamic adjustments to explore the relative
-  advantages as well as if they should be used together. We then apply
-  these approaches to a case study…. and discuss the difference in
-  estimates. We aim to highlight the implications of common biases found
-  when estimating epidemiological distributions and suggest approaches
-  to mitigate them.
+-   In this study we explore the impact of these biases on naive
+    estimates of a distribution during a simulated outbreak. We then
+    evaluate a range of approaches to mitigate these biases and compare
+    and contrast there performance. In particular, we focus on the role
+    of right-truncation and dynamic adjustments to explore the relative
+    advantages as well as if they should be used together. We then apply
+    these approaches to a case study…. and discuss the difference in
+    estimates. We aim to highlight the implications of common biases
+    found when estimating epidemiological distributions and suggest
+    approaches to mitigate them.
 
 # Pipeline
 
@@ -75,8 +75,11 @@ package and remove the potentially outdated workflow.
 ``` r
 library(targets)
 library(stantargets)
+#> Warning in as.POSIXlt.POSIXct(Sys.time()): unable to identify current timezone 'H':
+#> please set environment variable 'TZ'
 library(tarchetypes)
 library(data.table)
+#> Warning: package 'data.table' was built under R version 4.1.3
 library(ggplot2)
 library(purrr, quietly = TRUE)
 #> 
@@ -85,7 +88,7 @@ library(purrr, quietly = TRUE)
 #> 
 #>     transpose
 library(here)
-#> here() starts at /workspaces/dynamicaltruncation
+#> here() starts at C:/Users/sangw/Documents/Math/Research/dynamicaltruncation
 library(future)
 library(future.callr)
 tar_unscript()
@@ -128,7 +131,7 @@ tar_option_set(
 
 ### Setup
 
-- We assume 3 distribution scenarios: short, medium, and long.
+-   We assume 3 distribution scenarios: short, medium, and long.
 
 ``` r
 tar_group_by(
@@ -145,45 +148,76 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/distributions.R.
 ```
 
-- We simulate an outbreak that starts with an initially high and stable
-  growth rate that then declines linearly until reaching a stable decay
-  rate. **I am now wondering if we want to investigate more than one
-  scenario.**
+-   We first simulate a scenario in which the incidence of primary event
+    is changing exponentially. We consider $r$ ranging from -0.2 to 0.2
+    **I am now wondering if we want to investigate more than one
+    scenario.** **such as? would exponential + outbreak be enough?**
 
 ``` r
 tar_target(growth_rate, {
   data.table(
-    time = 0:59,
-    r = c(rep(0.2, 20), 0.2 - 0.02 * 1:20, rep(-0.2, 20))
-  )
+      r = c(-0.2, -0.1, 0, 0.1, 0.2)
+    )
+  
 })
 #> Define target growth_rate from chunk code.
 #> Establish _targets.R and _targets_r/targets/growth_rate.R.
 ```
 
-- We initialise the outbreak to have 20 cases.
+Simulate data:
 
 ``` r
-tar_target(init_cases, {
-  20
-})
-#> Define target init_cases from chunk code.
-#> Establish _targets.R and _targets_r/targets/init_cases.R.
+tar_target(
+  simulated_cases_exponential, 
+  simulate_exponential_cases(
+    r=growth_rate[,"r"][[1]]
+  ) |>
+    DT(, r := growth_rate[,"r"][[1]]),
+  pattern = map(growth_rate)
+)
+#> Establish _targets.R and _targets_r/targets/simulated_cases_exponential.R.
 ```
 
-- Simulate the outbreak. This is temporary and we should fill with a
-  stochastic SIR (? or other).
+-   Simulate observations of primary and secondary events as linelist
+    for each distribution scenario.
+
+``` r
+tar_target(
+  simulated_secondary_exponential, 
+  simulated_cases_exponential |>
+    simulate_secondary(
+      meanlog = distributions[, "meanlog"][[1]],
+      sdlog = distributions[, "sdlog"][[1]]
+    ) |>
+    DT(, distribution := distributions[, "scenario"][[1]]),
+  pattern = map(distributions)
+)
+#> Establish _targets.R and _targets_r/targets/simulated_secondary_exponential.R.
+```
+
+-   Simulate the observation process
+
+``` r
+tar_target(simulated_observations_exponential, {
+  simulated_secondary_exponential |>
+    observe_process()
+})
+#> Define target simulated_observations_exponential from chunk code.
+#> Establish _targets.R and _targets_r/targets/simulated_observations_exponential.R.
+```
+
+-   We also consider an outbreak case. Simulate the outbreak.
 
 ``` r
 tar_target(simulated_cases, {
-  simulate_uniform_cases(sample_size = 5000, t = 60)
+  simulate_gillespie(r = 0.2, gamma = 1 / 7, init_I = 50, n = 10000, seed = 101)
 })
 #> Define target simulated_cases from chunk code.
 #> Establish _targets.R and _targets_r/targets/simulated_cases.R.
 ```
 
-- Simulate observations of primary and secondary events as linelist for
-  each distribution scenario.
+-   Simulate observations of primary and secondary events as linelist
+    for each distribution scenario.
 
 ``` r
 tar_target(
@@ -199,7 +233,7 @@ tar_target(
 #> Establish _targets.R and _targets_r/targets/simulated_secondary.R.
 ```
 
-- Simulate the observation process
+-   Simulate the observation process
 
 ``` r
 tar_target(simulated_observations, {
@@ -212,9 +246,76 @@ tar_target(simulated_observations, {
 
 ### Estimate distributions
 
-- Estimate all models at chosen points across the outbreak (suggestion:
-  “early outbreak” (15 days), “near peak” (30 days), “past peak” (45
-  days), “late outbreak” (60 days))
+-   For both the exponential and outbreak simulations, we estimate
+    across sample size ranges (N = 10, 100, 1000). `N = 1000` is the
+    main case.
+
+``` r
+tar_target(sample_sizes, {
+  c(10, 100, 1000)
+})
+#> Define target sample_sizes from chunk code.
+#> Establish _targets.R and _targets_r/targets/sample_sizes.R.
+```
+
+-   For the exponential simulation, we truncate at `t = 30`
+
+``` r
+tar_target(
+  truncated_sim_obs_exponential,
+  simulated_observations_exponential |>
+    filter_obs_by_obs_time(obs_time = 30) |>
+    DT(, estimation_time := 30)
+)
+#> Establish _targets.R and _targets_r/targets/truncated_sim_obs_exponential.R.
+```
+
+``` r
+tar_group_by(
+  group_sim_obs_exponential,
+  truncated_sim_obs_exponential,
+  r, distribution
+)
+#> Establish _targets.R and _targets_r/targets/group_sim_obs_exponential.R.
+```
+
+-   Sample observations
+
+``` r
+tar_target(
+  sampled_simulated_observations_exponential,
+  group_sim_obs_exponential |>
+    as.data.table() |>
+    DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
+    DT(, sample_size := as.factor(sample_sizes)),
+  pattern = cross(sample_sizes, group_sim_obs_exponential)
+)
+#> Establish _targets.R and _targets_r/targets/sampled_simulated_observations_exponential.R.
+```
+
+``` r
+tar_target(list_simulated_observations_exponential, {
+  sampled_simulated_observations_exponential |>
+    split(by = c("r", "distribution", "sample_size"))
+})
+#> Define target list_simulated_observations_exponential from chunk code.
+#> Establish _targets.R and _targets_r/targets/list_simulated_observations_exponential.R.
+```
+
+``` r
+tar_target(simulated_scenarios_exponential, {
+  sampled_simulated_observations_exponential |>
+    DT(, .(r, distribution, sample_size)) |>
+    unique() |>
+    DT(, id := 1:.N)
+})
+#> Define target simulated_scenarios_exponential from chunk code.
+#> Establish _targets.R and _targets_r/targets/simulated_scenarios_exponential.R.
+```
+
+-   For the outbreak simulation, we estimate all models at chosen points
+    across the outbreak (suggestion: “early outbreak” (15 days), “near
+    peak” (30 days), “past peak” (45 days), “late outbreak” (60 days))
 
 ``` r
 tar_group_by(
@@ -228,8 +329,8 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/estimation_times.R.
 ```
 
-- Truncate the available simulate observations based on the estimation
-  time for each scenario.
+-   Truncate the available simulate observations based on the estimation
+    time for each scenario.
 
 ``` r
 tar_target(
@@ -251,18 +352,7 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/group_truncated_sim_obs.R.
 ```
 
-- Estimate across sample size ranges (N = 10, 100, 1000). `N = 1000` is
-  the main case.
-
-``` r
-tar_target(sample_sizes, {
-  c(10, 100, 1000)
-})
-#> Define target sample_sizes from chunk code.
-#> Establish _targets.R and _targets_r/targets/sample_sizes.R.
-```
-
-- Sample observations
+-   Sample observations
 
 ``` r
 tar_target(
@@ -296,28 +386,28 @@ tar_target(simulated_scenarios, {
 #> Establish _targets.R and _targets_r/targets/simulated_scenarios.R.
 ```
 
-- Plot distribution summary parameters (log mean and sd) vs true values
-  (y facet) by outbreak point (x facet).
+-   Plot distribution summary parameters (log mean and sd) vs true
+    values (y facet) by outbreak point (x facet).
 
 ## Case study
 
 ### Data
 
-- Need some outbreak linelist data.
-  - Suggested (by Seb) source:
+-   Need some outbreak linelist data.
+    -   Suggested (by Seb) source:
 
 ### Estimate distributions
 
-- Estimate distributions for similar points as in the simulation
-  setting.
+-   Estimate distributions for similar points as in the simulation
+    setting.
 
 ### Estimate growth rate
 
-- Estimate the growth rate retrospectively and comment on this.
+-   Estimate the growth rate retrospectively and comment on this.
 
 ### Summarise runtimes
 
-- Summarise
+-   Summarise
 
 ## Models
 
@@ -346,7 +436,7 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 
 ### Fit models to simulated and case study data
 
-- Combine simulated and case study scenarios and observations
+-   Combine simulated and case study scenarios and observations
 
 ``` r
 tar_target(scenarios, {
@@ -364,7 +454,7 @@ tar_target(list_observations, {
 #> Establish _targets.R and _targets_r/targets/list_observations.R.
 ```
 
-- Dummy data required for model creation.
+-   Dummy data required for model creation.
 
 ``` r
 dummy_obs <- data.table::data.table(
@@ -376,20 +466,20 @@ dummy_obs <- data.table::data.table(
 #> Establish _targets.R and _targets_r/globals/dummy_obs.R.
 ```
 
-- Iterate over compiled models and all scenarios being investigated. For
-  each model:
-  - Create a model file
-  - Generate stan code
-  - Save the model to file
-  - Compile the model
-  - Generate stan data for each scenario
-  - Fit the model to each scenario
-  - Extract posterior samples for the parameters of interest
-  - Summarise the posterior parameters of interest
-  - Combine posterior samples and summaries with the scenarios they are
-    linked to.
-  - Summarise the model run time and other diagnostics by scenario.
-  - Save posterior draws and model diagnostics
+-   Iterate over compiled models and all scenarios being investigated.
+    For each model:
+    -   Create a model file
+    -   Generate stan code
+    -   Save the model to file
+    -   Compile the model
+    -   Generate stan data for each scenario
+    -   Fit the model to each scenario
+    -   Extract posterior samples for the parameters of interest
+    -   Summarise the posterior parameters of interest
+    -   Combine posterior samples and summaries with the scenarios they
+        are linked to.
+    -   Summarise the model run time and other diagnostics by scenario.
+    -   Save posterior draws and model diagnostics
 
 ``` r
 tar_map(
@@ -472,6 +562,7 @@ tar_map(
 
 ## Post-process for dynamic bias
 
-- Post process all models using dynamic correction and known growth rate
+-   Post process all models using dynamic correction and known growth
+    rate
 
 ## Results

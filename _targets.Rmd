@@ -122,8 +122,9 @@ tar_group_by(
 
 ```{targets growth_rate, tar_simple=TRUE}
 data.table(
-  r = seq(-0.2, 0.2, length.out=5)
-)
+    r = c(-0.2, -0.1, 0, 0.1, 0.2)
+  )
+
 ```
 
 Simulate data:
@@ -133,15 +134,39 @@ tar_target(
   simulated_cases_exponential, 
   simulate_exponential_cases(
     r=growth_rate[,"r"][[1]]
-  ),
+  ) |>
+    DT(, r := growth_rate[,"r"][[1]]),
   pattern = map(growth_rate)
 )
 ```
 
+- Simulate observations of primary and secondary events as linelist for each distribution scenario.
+
+```{targets simulated_secondary_exponential}
+tar_target(
+  simulated_secondary_exponential, 
+  simulated_cases_exponential |>
+    simulate_secondary(
+      meanlog = distributions[, "meanlog"][[1]],
+      sdlog = distributions[, "sdlog"][[1]]
+    ) |>
+    DT(, distribution := distributions[, "scenario"][[1]]),
+  pattern = map(distributions)
+)
+```
+
+- Simulate the observation process
+
+```{targets simulated_observations_exponential, tar_simple = TRUE}
+simulated_secondary_exponential |>
+  observe_process()
+```
+
+
 - We also consider an outbreak case. Simulate the outbreak.
 
 ```{targets simulated_cases, tar_simple = TRUE}
-simulate_gillespie(r = 0.2, gamma = 1 / 7, init_I = 50, n = 2000, seed = 101)
+simulate_gillespie(r = 0.2, gamma = 1 / 7, init_I = 50, n = 10000, seed = 101)
 ```
 
 - Simulate observations of primary and secondary events as linelist for each distribution scenario.
@@ -166,10 +191,59 @@ simulated_secondary |>
   observe_process()
 ```
 
-
 ### Estimate distributions
 
-- Estimate all models at chosen points across the outbreak (suggestion: "early outbreak" (15 days), "near peak" (30 days), "past peak" (45  days), "late outbreak" (60 days))
+- For both the exponential and outbreak simulations, we estimate across sample size ranges (N = 10, 100, 1000). `N = 1000` is the main case.
+
+```{targets sample_sizes, tar_simple = TRUE}
+c(10, 100, 1000)
+```
+
+- For the exponential simulation, we truncate at `t = 30`
+
+```{targets truncated_sim_obs_exponential} 
+tar_target(
+  truncated_sim_obs_exponential,
+  simulated_observations_exponential |>
+    filter_obs_by_obs_time(obs_time = 30) |>
+    DT(, estimation_time := 30)
+)
+```
+
+```{targets group_sim_obs_exponential}
+tar_group_by(
+  group_sim_obs_exponential,
+  truncated_sim_obs_exponential,
+  r, distribution
+)
+```
+
+- Sample observations
+
+```{targets sampled_simulated_observations_exponential}
+tar_target(
+  sampled_simulated_observations_exponential,
+  group_sim_obs_exponential |>
+    as.data.table() |>
+    DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
+    DT(, sample_size := as.factor(sample_sizes)),
+  pattern = cross(sample_sizes, group_sim_obs_exponential)
+)
+```
+
+```{targets list_simulated_observations_exponential, tar_simple = TRUE}
+sampled_simulated_observations_exponential |>
+  split(by = c("r", "distribution", "sample_size"))
+```
+
+```{targets simulated_scenarios_exponential, tar_simple = TRUE}
+sampled_simulated_observations_exponential |>
+  DT(, .(r, distribution, sample_size)) |>
+  unique() |>
+  DT(, id := 1:.N)
+```
+
+- For the outbreak simulation, we estimate all models at chosen points across the outbreak (suggestion: "early outbreak" (15 days), "near peak" (30 days), "past peak" (45  days), "late outbreak" (60 days))
 
 ```{targets estimation_times}
 tar_group_by(
@@ -200,12 +274,6 @@ tar_group_by(
   truncated_sim_obs,
   estimation_time, distribution
 )
-```
-
-- Estimate across sample size ranges (N = 10, 100, 1000). `N = 1000` is the main case.
-
-```{targets sample_sizes, tar_simple = TRUE}
-c(10, 100, 1000)
 ```
 
 - Sample observations
