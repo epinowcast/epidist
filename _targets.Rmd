@@ -195,10 +195,10 @@ simulated_secondary |>
 
 ### Estimate distributions
 
-- For both the exponential and outbreak simulations, we estimate across sample size ranges (N = 10, 100, 1000). `N = 1000` is the main case.
+- For both the exponential and outbreak simulations, we estimate across sample size ranges (N = 10, 100, 1000). `N = 100` is the main case. **1000 might take too long for latent approaches. We might want to take something smaller for the main sim. Trying 200 for now.**
 
 ```{targets sample_sizes, tar_simple = TRUE}
-c(1000)
+c(200)
 ```
 
 - For the exponential simulation, we truncate at `t = 30`
