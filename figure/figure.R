@@ -15,10 +15,10 @@ allsumm <- lapply(allfiles, function(x) {
 }) %>%
   bind_rows
 
-g1 <- ggplot(filter(allsumm, parameter=="mean")) +
+g1 <- ggplot(filter(allsumm, parameter=="meanlog")) +
   geom_point(aes(mean, method)) +
   geom_errorbarh(aes(xmin=q2.5, xmax=q97.5, y=method), height=0) +
-  geom_vline(xintercept=exp(1.2 + 0.4^2/2), lty=2) +
+  geom_vline(xintercept=1.6, lty=2) +
   facet_wrap(~scenario)
 
 ggsave("figure.pdf", g1, width=8, height=6)
