@@ -1,4 +1,4 @@
 scenario,distribution,sample_size,datatype,id,samples,max_rhat,divergent_transitions,per_divergent_transitions,max_treedepth,no_at_max_treedepth,per_at_max_treedepth,run_time
-fast decay,short,1000,exponential,1,4000,1,0,0,3,1437,0.35925,50.8
-fast growth,short,1000,exponential,2,4000,1,0,0,3,1411,0.35275,17.1
-stable,short,1000,exponential,3,4000,1,0,0,3,1696,0.424,54.6
+fast decay,short,200,exponential,1,4000,1,0,0,3,1511,0.37775,17.4
+fast growth,short,200,exponential,2,4000,1,1,0.00025,3,1671,0.41775,17.2
+stable,short,200,exponential,3,4000,1,0,0,3,1435,0.35875,17.2
