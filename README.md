@@ -40,14 +40,14 @@ First fit a naive lognormal model with no adjustment.
 naive_fit <- naive_delay(data = truncated_obs, cores = 4, refresh = 0)
 #> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 0.6 seconds.
-#> Chain 2 finished in 0.6 seconds.
-#> Chain 3 finished in 0.6 seconds.
-#> Chain 4 finished in 0.5 seconds.
+#> Chain 1 finished in 0.7 seconds.
+#> Chain 4 finished in 0.7 seconds.
+#> Chain 2 finished in 0.8 seconds.
+#> Chain 3 finished in 0.7 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 0.6 seconds.
-#> Total execution time: 0.8 seconds.
+#> Mean chain execution time: 0.7 seconds.
+#> Total execution time: 0.9 seconds.
 summary(naive_fit)
 #>  Family: lognormal 
 #>   Links: mu = identity; sigma = log 
@@ -59,8 +59,8 @@ summary(naive_fit)
 #> 
 #> Population-Level Effects: 
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.65      0.02     1.63     1.69 1.00     3071     2449
-#> sigma_Intercept    -1.12      0.03    -1.18    -1.06 1.00     3295     2115
+#> Intercept           1.74      0.01     1.71     1.77 1.00     2897     2406
+#> sigma_Intercept    -1.20      0.03    -1.26    -1.13 1.00     3753     2771
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -75,14 +75,14 @@ censored_fit <- censoring_adjusted_delay(
 )
 #> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 2.3 seconds.
-#> Chain 4 finished in 2.3 seconds.
-#> Chain 2 finished in 2.5 seconds.
-#> Chain 3 finished in 2.5 seconds.
+#> Chain 2 finished in 2.9 seconds.
+#> Chain 1 finished in 3.0 seconds.
+#> Chain 3 finished in 3.1 seconds.
+#> Chain 4 finished in 3.1 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 2.4 seconds.
-#> Total execution time: 2.6 seconds.
+#> Mean chain execution time: 3.0 seconds.
+#> Total execution time: 3.2 seconds.
 summary(censored_fit)
 #>  Family: lognormal 
 #>   Links: mu = identity; sigma = log 
@@ -94,8 +94,8 @@ summary(censored_fit)
 #> 
 #> Population-Level Effects: 
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.66      0.02     1.63     1.69 1.00     3109     2357
-#> sigma_Intercept    -1.20      0.04    -1.28    -1.13 1.00     3136     2553
+#> Intercept           1.75      0.01     1.72     1.77 1.00     3396     2533
+#> sigma_Intercept    -1.27      0.04    -1.35    -1.20 1.00     2957     2279
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -110,18 +110,18 @@ truncation_fit <- truncation_adjusted_delay(
 )
 #> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 1.8 seconds.
-#> Chain 2 finished in 1.8 seconds.
-#> Chain 4 finished in 1.8 seconds.
-#> Chain 3 finished in 2.0 seconds.
+#> Chain 2 finished in 4.0 seconds.
+#> Chain 1 finished in 4.3 seconds.
+#> Chain 3 finished in 4.6 seconds.
+#> Chain 4 finished in 4.6 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 1.8 seconds.
-#> Total execution time: 2.1 seconds.
+#> Mean chain execution time: 4.4 seconds.
+#> Total execution time: 4.8 seconds.
 summary(truncation_fit)
 #>  Family: lognormal 
 #>   Links: mu = identity; sigma = log 
-#> Formula: delay_daily | trunc(lb = 0, ub = censored_obs_time) ~ 1 
+#> Formula: delay_daily | trunc(lb = 0.001, ub = censored_obs_time) ~ 1 
 #>          sigma ~ 1
 #>    Data: data (Number of observations: 461) 
 #>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
@@ -129,8 +129,8 @@ summary(truncation_fit)
 #> 
 #> Population-Level Effects: 
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.70      0.02     1.67     1.74 1.00     3025     2715
-#> sigma_Intercept    -1.07      0.04    -1.14    -1.00 1.00     2576     2290
+#> Intercept           1.74      0.01     1.71     1.77 1.00     3323     2749
+#> sigma_Intercept    -1.20      0.03    -1.26    -1.13 1.00     2424     2206
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -145,18 +145,18 @@ truncation_censoring_fit <- truncation_censoring_adjusted_delay(
 )
 #> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 3.6 seconds.
-#> Chain 4 finished in 3.5 seconds.
-#> Chain 2 finished in 3.7 seconds.
-#> Chain 3 finished in 3.8 seconds.
+#> Chain 3 finished in 5.8 seconds.
+#> Chain 2 finished in 6.0 seconds.
+#> Chain 1 finished in 6.4 seconds.
+#> Chain 4 finished in 6.4 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 3.7 seconds.
-#> Total execution time: 3.9 seconds.
+#> Mean chain execution time: 6.2 seconds.
+#> Total execution time: 6.7 seconds.
 summary(truncation_censoring_fit)
 #>  Family: lognormal 
 #>   Links: mu = identity; sigma = log 
-#> Formula: delay_lwr | cens(censored, delay_upr) + trunc(lb = 0, ub = censored_obs_time) ~ 1 
+#> Formula: delay_lwr | cens(censored, delay_upr) + trunc(lb = 0.001, ub = censored_obs_time) ~ 1 
 #>          sigma ~ 1
 #>    Data: data (Number of observations: 461) 
 #>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
@@ -164,8 +164,8 @@ summary(truncation_censoring_fit)
 #> 
 #> Population-Level Effects: 
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.71      0.02     1.67     1.74 1.00     3466     2190
-#> sigma_Intercept    -1.16      0.04    -1.24    -1.08 1.00     3307     2568
+#> Intercept           1.75      0.01     1.72     1.78 1.00     3602     2530
+#> sigma_Intercept    -1.27      0.04    -1.35    -1.20 1.00     3155     2550
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -181,14 +181,14 @@ latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
 )
 #> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 2 finished in 60.5 seconds.
-#> Chain 1 finished in 61.0 seconds.
-#> Chain 3 finished in 61.5 seconds.
-#> Chain 4 finished in 62.0 seconds.
+#> Chain 3 finished in 79.0 seconds.
+#> Chain 2 finished in 79.3 seconds.
+#> Chain 4 finished in 79.8 seconds.
+#> Chain 1 finished in 80.3 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 61.3 seconds.
-#> Total execution time: 62.2 seconds.
+#> Mean chain execution time: 79.6 seconds.
+#> Total execution time: 80.5 seconds.
 summary(latent_truncation_censoring_fit)
 #>  Family: latent_lognormal 
 #>   Links: mu = identity; sigma = log; pwindow = identity; swindow = identity 
