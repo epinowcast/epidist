@@ -249,12 +249,14 @@ tar_target(simulated_observations, {
 ### Estimate distributions
 
 -   For both the exponential and outbreak simulations, we estimate
-    across sample size ranges (N = 10, 100, 1000). `N = 1000` is the
-    main case.
+    across sample size ranges (N = 10, 100, 1000). `N = 100` is the main
+    case. **1000 might take too long for latent approaches. We might
+    want to take something smaller for the main sim. Trying 200 for
+    now.**
 
 ``` r
 tar_target(sample_sizes, {
-  c(1000)
+  c(200)
 })
 #> Define target sample_sizes from chunk code.
 #> Establish _targets.R and _targets_r/targets/sample_sizes.R.
