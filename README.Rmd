@@ -41,10 +41,11 @@ Simulate an observation process during the growth phase for a secondary event us
 truncated_obs <- outbreak |>
   simulate_secondary(
     meanlog = 1.8,
-    sdlog = 0.3
+    sdlog = 0.5
   ) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = 25)
+  filter_obs_by_obs_time(obs_time = 25) |>
+    DT(sample(1:.N, 100, replace = FALSE))
 ```
 
 First fit a naive lognormal model with no adjustment.
