@@ -46,7 +46,7 @@ filtered_censoring_adjusted_delay <- function(
 
   data <- data |>
     data.table::copy() |>
-    DT(stime_daily <= (obs_at - truncation))
+    DT(ptime_daily <= (obs_at - truncation))
 
   data <- pad_zero(data)
 
