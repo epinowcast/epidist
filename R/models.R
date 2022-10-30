@@ -19,7 +19,8 @@ filtered_naive_delay <- function(
   family = "lognormal", truncation = 10, ...) {
   data <- data |>
     data.table::copy() |>
-    DT(stime_daily <= (obs_at - truncation))
+    ## NEED TO FILTER BASED ON PTIME
+    DT(ptime_daily <= (obs_at - truncation))
 
   data <- pad_zero(data)
 
