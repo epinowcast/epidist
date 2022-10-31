@@ -8,7 +8,8 @@ plot_relative_recovery <- function(relative_data, alpha = 0.8,
       quantiles = quantiles
     ) +
     scale_x_continuous(
-      trans = "log", limits = c(NA, NA)
+      trans = "log", limits = c(NA, NA),
+      labels = ~ scales::comma(.x, accuracy = 0.1),
     ) +
     geom_vline(xintercept = 1, linetype = 2, size = 1.05, alpha = 0.8) +
     theme_bw() +
