@@ -40,7 +40,7 @@ tar_map(
         data = standata,
         scenario = scenarios,
         adapt_delta = 0.95,
-        parallel_chains = parallel_chains
+        parallel_chains = parallel_chains,
         refresh = 0, 
         show_messages = FALSE,
         iter_sampling = 1000,

@@ -118,7 +118,8 @@ tar_group_by(
     meanlog = c(1.2, 1.6, 1.8),
     sdlog = c(0.4, 0.6, 0.8)
   ) |>
-    add_natural_scale_mean_sd()
+    add_natural_scale_mean_sd(),
+  scenario
 )
 #> Establish _targets.R and _targets_r/targets/distributions.R.
 ```
@@ -504,7 +505,7 @@ tar_map(
         data = standata,
         scenario = scenarios,
         adapt_delta = 0.95,
-        parallel_chains = parallel_chains
+        parallel_chains = parallel_chains,
         refresh = 0, 
         show_messages = FALSE,
         iter_sampling = 1000,
