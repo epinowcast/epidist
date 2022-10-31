@@ -37,6 +37,12 @@ linelist_to_cases <- function(linelist) {
   return(cases[])
 }
 
+reverse_obs_at <- function(dt) {
+  dt |>
+    DT(, obs_at := factor(obs_at)) |>
+    DT(, obs_at := factor(obs_at, levels = rev(levels(obs_at))))
+}
+
 construct_cases_by_obs_window <- function(linelist, windows = c(25, 45)) {
   lower_window <- c(0, windows)
   upper_window <- c(windows, max(linelist$stime_daily))
@@ -48,7 +54,7 @@ construct_cases_by_obs_window <- function(linelist, windows = c(25, 45)) {
       data.table::DT(stime > .x)
   ) |>
   data.table::rbindlist()
-  
+
   primary_cases <- cases |>
     linelist_to_counts(additional_by = "obs_at")
 
@@ -60,7 +66,16 @@ construct_cases_by_obs_window <- function(linelist, windows = c(25, 45)) {
     secondary_cases[, case_type := "secondary"]
   )
 
-  cases[, obs_at := factor(obs_at)]
-  cases[, obs_at := factor(obs_at, levels = rev(levels(obs_at)))]
+  cases <- reverse_obs_at(cases)
   return(cases[])
+
+}
+
+combine_obs <- function(truncated_obs, obs) {
+  cobs <- rbind(
+    truncated_obs,
+    obs[, obs_at := max(stime_daily)],
+    fill = TRUE
+  ) |>
+    reverse_obs_at()
 }
