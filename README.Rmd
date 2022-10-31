@@ -65,23 +65,28 @@ Observe the outbreak after 25 days and take 100 samples.
 truncated_obs <- obs |>
   filter_obs_by_obs_time(obs_time = 25) |>
   DT(sample(1:.N, 200, replace = FALSE))
-
-truncated_obs2 <- obs |>
-  filter_obs_by_obs_time(obs_time = 45) |>
-  DT(sample(1:.N, 200, replace = FALSE))
 ```
 
-Plot the outbreak, and empirical delay distribution.
+Plot primary cases (dots), and secondary cases (columns) by observation window.
 
-```{r}
+```{r observed-cases}
 truncated_cases <- construct_cases_by_obs_window(
-  linelist, windows = c(45)
+  obs, windows = c(25)
 )
 
 plot_cases_by_obs_window(truncated_cases)
 ```
 
+Plot the true continuous delay distribution and the empirical observed distribution for each observation window.
 
+```{r empirical-dist}
+combined_obs <- combine_obs(truncated_obs, obs)
+
+plot_empirical_delay(
+  combined_obs, meanlog = secondary_dist$meanlog[[1]],
+  sdlog = secondary_dist$sdlog[[1]]
+)
+```
 ### Models
 
 First fit a naive lognormal model with no adjustment.
