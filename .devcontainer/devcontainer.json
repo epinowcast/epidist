@@ -39,7 +39,8 @@
 				"github.vscode-pull-request-github",
 				"formulahendry.code-runner",
 				"mutantdino.resourcemonitor",
-				"searking.preview-vscode"
+				"searking.preview-vscode",
+				"eamodio.gitlens"
 			]
 		}
 	},
