@@ -64,7 +64,7 @@ Observe the outbreak after 25 days and take 100 samples.
 ```{r observe-data}
 truncated_obs <- obs |>
   filter_obs_by_obs_time(obs_time = 25) |>
-  DT(sample(1:.N, 100, replace = FALSE))
+  DT(sample(1:.N, 200, replace = FALSE))
 ```
 
 Plot the outbreak, and empirical delay distribution.
@@ -149,7 +149,8 @@ Extract and summarise lognormal posterior estimates.
 draws <- models |>
   map(extract_lognormal_draws) |>
   map(draws_to_long) |>
-  rbindlist(idcol = "model")
+  rbindlist(idcol = "model") |>
+  DT(, model := factor(model, levels = rev(names(models))))
 
 summarised_draws <- summarise_lognormal_draws(draws, sf = 2)
 
@@ -158,12 +159,16 @@ knitr::kable(summarised_draws)
 
 Plot summarised posterior estimates from each model compared to the ground truth.
 
-```{r}
+```{r, fig.width = 9, fig.height = 4}
 draws |>
   make_relative_to_truth(secondary_dist) |>
-  plot_relative_recovery() +
-  facet_wrap(vars(parameter))
-
+  plot_relative_recovery(fill = model) +
+  facet_wrap(vars(parameter), nrow = 1, scales = "free_x") +
+  scale_fill_brewer(palette = "Dark2") +
+  guides(fill = guide_none()) +
+  labs(
+    y = "Model", x = "Relative to ground truth"
+  )
 ```
 
 
