@@ -23,36 +23,66 @@ First load required packages and functions.
 ```{r load-requirements}
 library(data.table)
 library(purrr, quietly = TRUE)
+library(ggplot2)
+library(patchwork)
 library(here)
 library(brms)
 functions <- list.files(here("R"), full.names = TRUE)
 walk(functions, source)
 ```
 
-Now simulate data from an outbreak.
+### Simulate the data
+
+Simulate data from an outbreak.
+
 ```{r simulate-outbreak}
-outbreak <- simulate_gillespie(seed=101)
+outbreak <- simulate_gillespie(seed = 101)
 ```
 
+Define the secondary distribution to use in the simulation
+
+```{r secondary-dist}
+secondary_dist <- data.table(
+  meanlog = 1.8, sdlog = 0.5
+) |>
+  add_natural_scale_mean_sd()
+```
 
 Simulate an observation process during the growth phase for a secondary event using a lognormal distribution, and finally simulate observing this event.
 
 ```{r simulate-data}
-truncated_obs <- outbreak |>
+obs <- outbreak |>
   simulate_secondary(
-    meanlog = 1.8,
-    sdlog = 0.5
+    meanlog = secondary_dist$meanlog[[1]],
+    sdlog = secondary_dist$sdlog[[1]]
   ) |>
-  observe_process() |>
-  filter_obs_by_obs_time(obs_time = 25) |>
-    DT(sample(1:.N, 100, replace = FALSE))
+  observe_process()
 ```
+
+Observe the outbreak after 25 days and take 100 samples.
+
+```{r observe-data}
+truncated_obs <- obs |>
+  filter_obs_by_obs_time(obs_time = 25) |>
+  DT(sample(1:.N, 100, replace = FALSE))
+```
+
+Plot the outbreak, and empirical delay distribution.
+
+### Models
 
 First fit a naive lognormal model with no adjustment.
 
 ```{r}
 naive_fit <- naive_delay(data = truncated_obs, cores = 4, refresh = 0)
-summary(naive_fit)
+```
+
+Estimate the delay after filtering out the most recent data as crude adjustement for right truncation.
+
+```{r}
+filtered_fit <- filtered_naive_delay(
+  data = truncated_obs, cores = 4, refresh = 0
+)
 ```
 
 Adjust for date censoring.
@@ -61,7 +91,14 @@ Adjust for date censoring.
 censored_fit <- censoring_adjusted_delay(
   data = truncated_obs, cores = 4, refresh = 0
 )
-summary(censored_fit)
+```
+
+Adjust for censoring and filter to crudely adjust for right truncation.
+
+```{r}
+filtered_censored_fit <- filtered_censoring_adjusted_delay(
+  data = truncated_obs, cores = 4, refresh = 0
+)
 ```
 
 Adjust for right truncation.
@@ -70,7 +107,6 @@ Adjust for right truncation.
 truncation_fit <- truncation_adjusted_delay(
   data = truncated_obs, cores = 4, refresh = 0
 )
-summary(truncation_fit)
 ```
 
 
@@ -80,7 +116,6 @@ Adjust for right truncation and date censoring.
 truncation_censoring_fit <- truncation_censoring_adjusted_delay(
   data = truncated_obs, cores = 4, refresh = 0
 )
-summary(truncation_censoring_fit)
 ```
 
 Adjust for right truncation and date censoring using a latent variable approach.
@@ -89,7 +124,46 @@ Adjust for right truncation and date censoring using a latent variable approach.
 latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
   data = truncated_obs, cores = 4, refresh = 0
 )
-summary(latent_truncation_censoring_fit)
+```
+
+### Summarise model posteriors and compare to known truth
+
+Combine models into a named list.
+
+```{r}
+models <- list(
+  "Naive" = naive_fit,
+  "Filtered" = filtered_fit,
+  "Censoring adjusted" = censored_fit,
+  "Filtered and censoring adjusted" = filtered_censored_fit,
+  "Truncation adjusted" = truncation_fit,
+  "Truncation and censoring adjusted" = truncation_censoring_fit,
+  "Latent variable truncation and censoring adjusted" =
+    latent_truncation_censoring_fit
+)
+```
+
+Extract and summarise lognormal posterior estimates.
+
+```{r lognormal-draws}
+draws <- models |>
+  map(extract_lognormal_draws) |>
+  map(draws_to_long) |>
+  rbindlist(idcol = "model")
+
+summarised_draws <- summarise_lognormal_draws(draws, sf = 2)
+
+knitr::kable(summarised_draws)
+```
+
+Plot summarised posterior estimates from each model compared to the ground truth.
+
+```{r}
+draws |>
+  make_relative_to_truth(secondary_dist) |>
+  plot_relative_recovery() +
+  facet_wrap(vars(parameter))
+
 ```
 
 

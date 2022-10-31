@@ -29,21 +29,37 @@ sample_model <- function(model, data, scenario, diagnostics = TRUE, ...) {
   return(out[])
 }
 
-extract_lognormal_draws <- function(
-  data, id_vars, variables = c("Intercept", "Intercept_sigma")
-) {
-  draws <- data$fit[[1]]$draws(variables = variables)
-  draws <- posterior::as_draws_df(draws) |>
-    data.table::as.data.table()
-  data.table::setnames(
-    draws, c("Intercept", "Intercept_sigma"), c("meanlog", "log_sdlog")
-  )
-  draws <- draws |>
-    data.table::DT(, sdlog := exp(log_sdlog)) |>
+add_natural_scale_mean_sd <- function(dt) {
+  nat_dt <- dt |>
     data.table::DT(, mean := exp(meanlog + sdlog ^ 2 / 2)) |>
     data.table::DT(,
      sd := exp(meanlog + (1 / 2) * sdlog ^ 2) * sqrt(exp(sdlog ^ 2) - 1)
     )
+  return(nat_dt[])
+}
+
+extract_lognormal_draws <- function(
+  data, id_vars, from_dt = FALSE
+) {
+  if (from_dt) {
+    draws <- data$fit[[1]]$draws(variables = c("Intercept", "Intercept_sigma"))
+  }else {
+    draws <- data
+  }
+
+  draws <- posterior::as_draws_df(draws) |>
+    data.table::as.data.table()
+  data.table::setnames(
+    draws, c("Intercept", "Intercept_sigma"), c("meanlog", "sdlog"),
+    skip_absent = TRUE
+  )
+  data.table::setnames(
+    draws, c("b_Intercept", "b_sigma_Intercept"), c("meanlog", "sdlog"),
+    skip_absent = TRUE
+  )
+  draws <- draws[, .(meanlog, sdlog)]
+  draws <- draws[, sdlog := exp(sdlog)]
+  draws <- add_natural_scale_mean_sd(draws)
 
   if (!missing(id_vars)) {
     draws <- merge(
@@ -53,18 +69,33 @@ extract_lognormal_draws <- function(
   return(draws[])
 }
 
-summarise_lognormal_draws <- function(draws) {
-  by_cols <- setdiff(
-    colnames(draws),
-    c("meanlog", "log_sdlog", "sdlog", "mean", "sd", ".chain", ".iteration", ".draw")
-  )
-  long_draws <- melt(
+draws_to_long <- function(draws) {
+  long_draws <- data.table::melt(
     draws,
-    measure.vars = c("meanlog", "log_sdlog", "sdlog", "mean", "sd"),
+    measure.vars = c("meanlog", "sdlog", "mean", "sd"),
     variable.name = "parameter"
   )
+  return(long_draws[])
+}
 
-  summarised_draws <- long_draws[,
+make_relative_to_truth <- function(draws, secondary_dist) {
+  secondary_dist <- draws_to_long(secondary_dist)
+
+  draws <- merge(
+    draws,
+    secondary_dist[, true_value := value][, value := NULL],
+    by = "parameter"
+  )
+
+  draws <- draws[, rel_value := value / true_value]
+  return(draws[])
+}
+
+summarise_lognormal_draws <- function(draws, sf, not_by = "value") {
+  by_cols <- setdiff(
+    colnames(draws), not_by
+  )
+  summarised_draws <- draws[,
     .(
       mean = mean(value),
       median = median(value),
@@ -77,8 +108,16 @@ summarise_lognormal_draws <- function(draws) {
       q95 = quantile(value, 0.95),
       q97.5 = quantile(value, 0.975)
     ),
-    by = c("parameter", by_cols)
+    by = by_cols
   ]
+
+  if (!missing(sf)) {
+    cols <- setdiff(colnames(summarised_draws), by_cols)
+    summarised_draws <- summarised_draws[,
+     (cols) := lapply(.SD, signif, digits = sf),
+     .SDcols = cols
+    ]
+  }
 
   return(summarised_draws[])
 }
