@@ -3,5 +3,4 @@ tar_target(growth_rate, {
       r = c(-0.2, 0, 0.2),
       scenario = c("fast decay", "stable", "fast growth")
     )
-  
 })

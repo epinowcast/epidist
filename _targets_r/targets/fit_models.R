@@ -40,6 +40,7 @@ tar_map(
         data = standata,
         scenario = scenarios,
         adapt_delta = 0.95,
+        parallel_chains = parallel_chains
         refresh = 0, 
         show_messages = FALSE,
         seed = 123
@@ -54,7 +55,9 @@ tar_map(
   ),
   tar_target(
     draws,
-    extract_lognormal_draws(fit, scenarios),
+    fit |>
+      extract_lognormal_draws(scenarios, from_dt = TRUE) |>
+      draws_to_long(),
     pattern = map(fit, scenarios)
   ),
   tar_file(
@@ -63,7 +66,7 @@ tar_map(
   ),
   tar_target(
     summarised_draws,
-    summarise_lognormal_draws(draws)
+    summarise_lognormal_draws(draws, sf = 2)
   ),
   tar_file(
     save_summarised_draws,
