@@ -65,9 +65,22 @@ Observe the outbreak after 25 days and take 100 samples.
 truncated_obs <- obs |>
   filter_obs_by_obs_time(obs_time = 25) |>
   DT(sample(1:.N, 200, replace = FALSE))
+
+truncated_obs2 <- obs |>
+  filter_obs_by_obs_time(obs_time = 45) |>
+  DT(sample(1:.N, 200, replace = FALSE))
 ```
 
 Plot the outbreak, and empirical delay distribution.
+
+```{r}
+truncated_cases <- construct_cases_by_obs_window(
+  linelist, windows = c(45)
+)
+
+plot_cases_by_obs_window(truncated_cases)
+```
+
 
 ### Models
 
@@ -154,7 +167,7 @@ draws <- models |>
 
 summarised_draws <- summarise_lognormal_draws(draws, sf = 2)
 
-knitr::kable(summarised_draws)
+knitr::kable(summarised_draws[parameter %in% c("meanlog", "sdlog")])
 ```
 
 Plot summarised posterior estimates from each model compared to the ground truth.
