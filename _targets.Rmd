@@ -86,6 +86,10 @@ walk(functions, source)
 rm("functions")
 set_cmdstan_path()  
 
+# Set the number of chains to run in parallel (more than 4 will have no impact
+# on runtimes)
+parallel_chains <- 4
+
 tar_option_set(
   packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here"),
   deployment = "worker",
@@ -107,25 +111,23 @@ tar_option_set(
 ```{targets distributions}
 tar_group_by(
   distributions,
-    data.table(
+  data.table(
     scenario = c("medium"),
     meanlog = c(1.6),
     sdlog = c(0.6)
   ) |>
-    DT(, mean := exp(meanlog + sdlog^2/2)) |>
-    DT(, sd := exp(meanlog + (1/2)*sdlog^2)*sqrt(exp(sdlog^2) - 1)),
+    add_natural_scale_mean_sd()
   scenario
 )
 ```
 
-- We first simulate a scenario in which the incidence of primary event is changing exponentially. We consider $r$ ranging from -0.2 to 0.2 **I am now wondering if we want to investigate more than one scenario.** **such as? would exponential + outbreak be enough?**
+- We first simulate a scenario in which the incidence of primary event is changing exponentially. We consider $r$ ranging from -0.2 to 0.2.
 
 ```{targets growth_rate, tar_simple=TRUE}
 data.table(
     r = c(-0.2, 0, 0.2),
     scenario = c("fast decay", "stable", "fast growth")
   )
-
 ```
 
 Simulate data:
@@ -432,6 +434,7 @@ tar_map(
         data = standata,
         scenario = scenarios,
         adapt_delta = 0.95,
+        parallel_chains = parallel_chains
         refresh = 0, 
         show_messages = FALSE,
         seed = 123
@@ -446,7 +449,9 @@ tar_map(
   ),
   tar_target(
     draws,
-    extract_lognormal_draws(fit, scenarios),
+    fit |>
+      extract_lognormal_draws(scenarios, from_dt = TRUE) |>
+      draws_to_long(),
     pattern = map(fit, scenarios)
   ),
   tar_file(
@@ -455,7 +460,7 @@ tar_map(
   ),
   tar_target(
     summarised_draws,
-    summarise_lognormal_draws(draws)
+    summarise_lognormal_draws(draws, sf = 2)
   ),
   tar_file(
     save_summarised_draws,
