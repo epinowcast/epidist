@@ -114,12 +114,11 @@ tar_option_set(
 tar_group_by(
   distributions,
   data.table(
-    scenario = c("medium"),
-    meanlog = c(1.6),
-    sdlog = c(0.6)
+    scenario = c("short", "medium", "long"),
+    meanlog = c(1.2, 1.6, 1.8),
+    sdlog = c(0.4, 0.6, 0.8)
   ) |>
     add_natural_scale_mean_sd()
-  scenario
 )
 #> Establish _targets.R and _targets_r/targets/distributions.R.
 ```
