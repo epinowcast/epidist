@@ -43,6 +43,7 @@ tar_map(
         parallel_chains = parallel_chains
         refresh = 0, 
         show_messages = FALSE,
+        iter_sampling = 1000,
         seed = 123
       ),
     pattern = map(standata, scenarios)
