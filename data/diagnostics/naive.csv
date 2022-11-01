@@ -1,0 +1,64 @@
+scenario,distribution,sample_size,datatype,id,samples,max_rhat,divergent_transitions,per_divergent_transitions,max_treedepth,no_at_max_treedepth,per_at_max_treedepth,run_time
+early outbreak,long,10,outbreak,1,4000,1,0,0,4,89,0.02225,0.5
+early outbreak,medium,10,outbreak,2,4000,1.01,0,0,4,2,5e-04,0.3
+early outbreak,short,10,outbreak,3,4000,1,0,0,4,3,0.00075,0.3
+late outbreak,long,10,outbreak,4,4000,1,0,0,3,1682,0.4205,0.3
+late outbreak,medium,10,outbreak,5,4000,1,0,0,4,7,0.00175,0.3
+late outbreak,short,10,outbreak,6,4000,1.01,0,0,4,3,0.00075,0.3
+near peak,long,10,outbreak,7,4000,1,0,0,4,44,0.011,0.3
+near peak,medium,10,outbreak,8,4000,1,0,0,4,41,0.01025,0.3
+near peak,short,10,outbreak,9,4000,1,0,0,4,14,0.0035,0.3
+past peak,long,10,outbreak,10,4000,1.01,0,0,4,77,0.01925,0.3
+past peak,medium,10,outbreak,11,4000,1,0,0,4,3,0.00075,0.3
+past peak,short,10,outbreak,12,4000,1,0,0,4,10,0.0025,0.3
+early outbreak,long,100,outbreak,13,4000,1,0,0,3,1719,0.42975,0.4
+early outbreak,medium,100,outbreak,14,4000,1,0,0,3,1650,0.4125,0.4
+early outbreak,short,100,outbreak,15,4000,1,0,0,3,1583,0.39575,0.4
+late outbreak,long,100,outbreak,16,4000,1,0,0,3,1797,0.44925,0.4
+late outbreak,medium,100,outbreak,17,4000,1,0,0,3,1477,0.36925,0.4
+late outbreak,short,100,outbreak,18,4000,1,0,0,3,1608,0.402,0.4
+near peak,long,100,outbreak,19,4000,1,0,0,3,1514,0.3785,0.6
+near peak,medium,100,outbreak,20,4000,1,0,0,3,1592,0.398,0.4
+near peak,short,100,outbreak,21,4000,1,0,0,3,1643,0.41075,0.4
+past peak,long,100,outbreak,22,4000,1,0,0,3,1717,0.42925,0.4
+past peak,medium,100,outbreak,23,4000,1,0,0,3,1586,0.3965,0.4
+past peak,short,100,outbreak,24,4000,1,0,0,3,1633,0.40825,0.4
+early outbreak,long,1000,outbreak,25,4000,1,0,0,3,1643,0.41075,0.9
+early outbreak,medium,1000,outbreak,26,4000,1,0,0,3,1655,0.41375,1.3
+early outbreak,short,1000,outbreak,27,4000,1,0,0,3,1549,0.38725,1.3
+late outbreak,long,1000,outbreak,28,4000,1,0,0,3,1450,0.3625,1.9
+late outbreak,medium,1000,outbreak,29,4000,1,0,0,3,1724,0.431,2.5
+late outbreak,short,1000,outbreak,30,4000,1,0,0,3,1608,0.402,2.8
+near peak,long,1000,outbreak,31,4000,1,0,0,3,1446,0.3615,1.9
+near peak,medium,1000,outbreak,32,4000,1,0,0,3,1472,0.368,1.9
+near peak,short,1000,outbreak,33,4000,1,0,0,3,1653,0.41325,2.1
+past peak,long,1000,outbreak,34,4000,1,0,0,3,1587,0.39675,1.7
+past peak,medium,1000,outbreak,35,4000,1,0,0,3,1516,0.379,2.1
+past peak,short,1000,outbreak,36,4000,1,0,0,3,1450,0.3625,1.9
+fast decay,long,10,exponential,37,4000,1,0,0,4,145,0.03625,0.3
+fast decay,medium,10,exponential,38,4000,1,0,0,4,17,0.00425,0.3
+fast decay,short,10,exponential,39,4000,1,0,0,3,1559,0.38975,0.3
+fast growth,long,10,exponential,40,4000,1,0,0,4,2,5e-04,0.3
+fast growth,medium,10,exponential,41,4000,1,0,0,4,1,0.00025,0.3
+fast growth,short,10,exponential,42,4000,1,0,0,3,1546,0.3865,0.3
+stable,long,10,exponential,43,4000,1,0,0,4,13,0.00325,0.3
+stable,medium,10,exponential,44,4000,1,0,0,3,1695,0.42375,0.5
+stable,short,10,exponential,45,4000,1,0,0,4,65,0.01625,0.3
+fast decay,long,100,exponential,46,4000,1,0,0,3,1584,0.396,0.4
+fast decay,medium,100,exponential,47,4000,1,0,0,3,1698,0.4245,0.6
+fast decay,short,100,exponential,48,4000,1,0,0,3,1584,0.396,0.7
+fast growth,long,100,exponential,49,4000,1,0,0,3,1575,0.39375,0.5
+fast growth,medium,100,exponential,50,4000,1,0,0,3,1627,0.40675,0.6
+fast growth,short,100,exponential,51,4000,1,0,0,3,1665,0.41625,0.4
+stable,long,100,exponential,52,4000,1,0,0,3,1673,0.41825,0.4
+stable,medium,100,exponential,53,4000,1,0,0,3,1601,0.40025,0.5
+stable,short,100,exponential,54,4000,1,0,0,3,1553,0.38825,0.5
+fast decay,long,1000,exponential,55,4000,1,0,0,3,1782,0.4455,2.3
+fast decay,medium,1000,exponential,56,4000,1,0,0,3,1757,0.43925,1.9
+fast decay,short,1000,exponential,57,4000,1,0,0,3,1669,0.41725,2.1
+fast growth,long,1000,exponential,58,4000,1,0,0,3,1604,0.401,1.8
+fast growth,medium,1000,exponential,59,4000,1,0,0,3,1569,0.39225,1.9
+fast growth,short,1000,exponential,60,4000,1,0,0,3,1580,0.395,1.9
+stable,long,1000,exponential,61,4000,1,0,0,3,1682,0.4205,2.1
+stable,medium,1000,exponential,62,4000,1,0,0,3,1645,0.41125,2.1
+stable,short,1000,exponential,63,4000,1,0,0,3,1517,0.37925,2

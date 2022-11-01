@@ -21,14 +21,7 @@ knitr::opts_chunk$set(
 First load required packages and functions.
 
 ```{r load-requirements}
-library(data.table)
-library(purrr, quietly = TRUE)
-library(ggplot2)
-library(patchwork)
-library(here)
-library(brms)
-functions <- list.files(here("R"), full.names = TRUE)
-walk(functions, source)
+library(dynamictruncation)
 ```
 
 ### Simulate the data
