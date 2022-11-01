@@ -27,7 +27,7 @@ plot_cases_by_obs_window <- function(cases) {
     aes(x = time, y = cases) +
     geom_col(aes(fill = factor(obs_at)), alpha = 1, col = "#696767b1") +
     geom_point(
-      data = truncated_cases[case_type == "secondary"],
+      data = cases[case_type == "secondary"],
       col = "#292828b1"
     ) +
     geom_vline(
