@@ -70,7 +70,8 @@ gcomb <- ggarrange(g1, g2, nrow=1, draw=FALSE)
 
 ggsave("test_inftime_exp.png", gcomb, width=8, height=6)
 
+plot(stime_est$est, ptime_est$est)
+
 plot(stime_est$est-ptime_est$est)
- 
 
 plot(stime_est$true-ptime_est$true)
