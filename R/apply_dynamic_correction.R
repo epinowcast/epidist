@@ -1,6 +1,8 @@
-##' @param x brms object
-##' @param r growth rate
-##' @param subsample number of subsamples
+#' Dynamically correct lognormal estimates biased by right truncation
+#' @param x brms object
+#' @param r growth rate
+#' @param subsample number of subsamples
+#' @export
 apply_dynamic_correction <- function(x, r, subsample, correct = FALSE) {
   pp <- posterior_samples(x)
   
