@@ -18,10 +18,13 @@ knitr::opts_chunk$set(
 
 ## A simple example
 
-First load required packages and functions.
+First load our analysis (from GitHub or locally using `devtools::load_all()`) package and other required packages.
 
 ```{r load-requirements}
-library(dynamictruncation)
+library(dynamicaltruncation)
+library(data.table)
+library(purrr)
+library(ggplot2)
 ```
 
 ### Simulate the data
@@ -190,7 +193,7 @@ This analysis in this repository has been implemented using the [`targets`](http
 
 This complete analysis can be recreated using the following (note this may take quite some time even with a fairly large amount of available compute),
 
-```{bash}
+```{bash, eval = FALSE}
 bash bin/update-targets.sh
 ```
 
