@@ -3,37 +3,13 @@ Analysis Pipeline: Dynamic Truncation
 
 # Introduction
 
-- Reliable estimates of epidemiological distributions are required for
-  many applications in real-time. Examples include estimates of the
-  incubation period, the time from onset to report, and the time from
-  onset to death. These quantities are typically assumed to follow
-  parametric distributions but may vary over time and due to the
-  characteristics of cases
-
-- The data used to estimate these distributions can suffer from a range
-  of common biases due to censoring and truncation.
-
-- These are…
-
-- These are a particular issues for infectious diseases due to the
-  exponential nature of transmission…
-
-- What have other people done?
-
-  - Examples of good practice
-  - Examples of bad practice (maybe?)
-  - Options for tools to address this issue
-
-- In this study we explore the impact of these biases on naive estimates
-  of a distribution during a simulated outbreak. We then evaluate a
-  range of approaches to mitigate these biases and compare and contrast
-  there performance. In particular, we focus on the role of
-  right-truncation and dynamic adjustments to explore the relative
-  advantages as well as if they should be used together. We then apply
-  these approaches to a case study…. and discuss the difference in
-  estimates. We aim to highlight the implications of common biases found
-  when estimating epidemiological distributions and suggest approaches
-  to mitigate them.
+This reproducible pipeline can be used to reproduce our analysis up to
+fitting models to our simulated scenarios and case studies and post
+processing these results. This workflow uses the `targets` package and
+you may find reviewing an overview of how this package works (i.e in the
+package documentation) helpful if making use of our code. For a
+simplified version of our analysis that does not make use of `targets`
+see the repository README.
 
 # Pipeline
 
@@ -77,16 +53,24 @@ library(targets)
 library(stantargets)
 library(tarchetypes)
 library(data.table)
+#> data.table 1.14.5 IN DEVELOPMENT built 2022-10-28 16:36:39 UTC; rstudio using 2 threads (see ?getDTthreads).  Latest news: r-datatable.com
 library(ggplot2)
 library(purrr, quietly = TRUE)
 #> 
 #> Attaching package: 'purrr'
+#> 
 #> The following object is masked from 'package:data.table':
 #> 
 #>     transpose
 library(here)
 #> here() starts at /workspaces/dynamicaltruncation
 library(future)
+#> 
+#> Attaching package: 'future'
+#> 
+#> The following object is masked from 'package:rmarkdown':
+#> 
+#>     run
 library(future.callr)
 tar_unscript()
 ```
@@ -138,11 +122,11 @@ tar_option_set(
 tar_group_by(
   distributions,
   data.table(
-    scenario = c("medium"),
-    meanlog = c(1.6),
-    sdlog = c(0.6)
+    scenario = c("short", "medium", "long"),
+    meanlog = c(1.2, 1.6, 1.8),
+    sdlog = c(0.4, 0.6, 0.8)
   ) |>
-    add_natural_scale_mean_sd()
+    add_natural_scale_mean_sd(),
   scenario
 )
 #> Establish _targets.R and _targets_r/targets/distributions.R.
@@ -168,7 +152,7 @@ Simulate data:
 tar_target(
   simulated_cases_exponential, 
   simulate_exponential_cases(
-    r=growth_rate[,"r"][[1]]
+    r = growth_rate[,"r"][[1]]
   ) |>
     DT(, r := growth_rate[,"r"][[1]]) |>
     DT(, scenario := growth_rate[,"scenario"][[1]]),
@@ -252,11 +236,13 @@ tar_target(simulated_observations, {
 
 ``` r
 tar_target(sample_sizes, {
-  c(400)
+  c(10, 100, 1000)
 })
 #> Define target sample_sizes from chunk code.
 #> Establish _targets.R and _targets_r/targets/sample_sizes.R.
 ```
+
+#### Exponential scenarios
 
 - For the exponential simulation, we truncate at `t = 30`
 
@@ -313,6 +299,8 @@ tar_target(simulated_scenarios_exponential, {
 #> Define target simulated_scenarios_exponential from chunk code.
 #> Establish _targets.R and _targets_r/targets/simulated_scenarios_exponential.R.
 ```
+
+#### Outbreak scenarios
 
 - For the outbreak simulation, we estimate all models at chosen points
   across the outbreak (suggestion: “early outbreak” (15 days), “near
@@ -388,9 +376,6 @@ tar_target(simulated_scenarios, {
 #> Establish _targets.R and _targets_r/targets/simulated_scenarios.R.
 ```
 
-- Plot distribution summary parameters (log mean and sd) vs true values
-  (y facet) by outbreak point (x facet).
-
 ## Case study
 
 ### Data
@@ -442,10 +427,9 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 
 ``` r
 tar_target(scenarios, {
-  # rbind(simulated_scenarios, simulated_scenarios_exponential) |>
-  #   as.data.table() |> 
-  #   DT(, id := 1:.N)
-  simulated_scenarios_exponential
+  rbind(simulated_scenarios, simulated_scenarios_exponential) |> 
+    as.data.table() |> 
+    DT(, id := 1:.N)
 })
 #> Define target scenarios from chunk code.
 #> Establish _targets.R and _targets_r/targets/scenarios.R.
@@ -453,8 +437,7 @@ tar_target(scenarios, {
 
 ``` r
 tar_target(list_observations, {
-  # c(list_simulated_observations, list_simulated_observations_exponential)
-  list_simulated_observations_exponential
+  c(list_simulated_observations, list_simulated_observations_exponential)
 })
 #> Define target list_observations from chunk code.
 #> Establish _targets.R and _targets_r/targets/list_observations.R.
@@ -530,9 +513,10 @@ tar_map(
         data = standata,
         scenario = scenarios,
         adapt_delta = 0.95,
-        parallel_chains = parallel_chains
+        parallel_chains = parallel_chains,
         refresh = 0, 
         show_messages = FALSE,
+        iter_sampling = 1000,
         seed = 123
       ),
     pattern = map(standata, scenarios)
@@ -552,7 +536,7 @@ tar_map(
   ),
   tar_file(
     save_lognormal_draws,
-    save_csv(draws, paste0(model_name, ".csv"), path = "data/posteriors")
+    save_rds(draws, paste0(model_name, ".rds"), path = "data/posteriors")
   ),
   tar_target(
     summarised_draws,

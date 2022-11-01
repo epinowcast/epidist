@@ -1,10 +1,5 @@
-pad_zero <- function(data, pad = 1e-3) {
-  data <- data |>
-    data.table::copy() |>
-    DT(delay_lwr == 0, delay_lwr := pad) |>
-    DT(delay_daily == 0, delay_daily := pad)
-}
-
+#' Estimate delays naively
+#' @export
 naive_delay <- function(formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data,
                         fn = brms::brm, family = "lognormal", ...) {
 
@@ -14,6 +9,8 @@ naive_delay <- function(formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data,
   )
 }
 
+#' Estimate delays with filtering of the most recent data
+#' @export
 filtered_naive_delay <- function(
   formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data, fn = brms::brm,
   family = "lognormal", truncation = 10, ...) {
@@ -29,6 +26,8 @@ filtered_naive_delay <- function(
   )
 }
 
+#' Estimate delays adjusted for censoring
+#' @export
 censoring_adjusted_delay <- function(
   formula = brms::bf(
     delay_lwr | cens(censored, delay_upr) ~ 1, sigma ~ 1
@@ -39,6 +38,9 @@ censoring_adjusted_delay <- function(
   )
 }
 
+#' Estimate delays with filtering of the most recent data and
+#' censoring adjustment
+#' @export
 filtered_censoring_adjusted_delay <- function(
   formula = brms::bf(
     delay_lwr | cens(censored, delay_upr) ~ 1, sigma ~ 1
@@ -55,6 +57,8 @@ filtered_censoring_adjusted_delay <- function(
   )
 }
 
+#' Estimate delays adjusted for right truncation
+#' @export
 truncation_adjusted_delay <- function(
   formula = brms::bf(
     delay_daily | trunc(lb = 1e-3, ub = censored_obs_time) ~ 1, sigma ~ 1
@@ -67,6 +71,8 @@ truncation_adjusted_delay <- function(
   )
 }
 
+#' Estimate delays adjusted for censoring and right truncation
+#' @export
 truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
     delay_lwr | cens(censored, delay_upr) +
@@ -81,6 +87,9 @@ truncation_censoring_adjusted_delay <- function(
   )
 }
 
+#' Estimate delays adjusted for right truncation and censoring using a
+#' latent model
+#' @export
 latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
     ptime | vreal(stime, obs_at) ~ 1,
