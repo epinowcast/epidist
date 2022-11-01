@@ -1,3 +1,5 @@
+#' Sample from the posterior of a model with additional diagnositics
+#' @export
 sample_model <- function(model, data, scenario, diagnostics = TRUE, ...) {
   fit <- cmdstanr::cmdstan_model(model)$sample(data = data, ...)
 
@@ -29,6 +31,8 @@ sample_model <- function(model, data, scenario, diagnostics = TRUE, ...) {
   return(out[])
 }
 
+#' Add natural scale summary parameters for a lognormal distribution
+#' @export
 add_natural_scale_mean_sd <- function(dt) {
   nat_dt <- dt |>
     data.table::DT(, mean := exp(meanlog + sdlog ^ 2 / 2)) |>
@@ -38,6 +42,8 @@ add_natural_scale_mean_sd <- function(dt) {
   return(nat_dt[])
 }
 
+#' Extract posterior samples for a lognormal brms model
+#' @export
 extract_lognormal_draws <- function(
   data, id_vars, from_dt = FALSE
 ) {
@@ -69,6 +75,8 @@ extract_lognormal_draws <- function(
   return(draws[])
 }
 
+#' Convert posterior lognormal samples to long format
+#' @export
 draws_to_long <- function(draws) {
   long_draws <- data.table::melt(
     draws,
@@ -78,6 +86,8 @@ draws_to_long <- function(draws) {
   return(long_draws[])
 }
 
+#' Make posterior lognormal samples relative to true values
+#' @export
 make_relative_to_truth <- function(draws, secondary_dist) {
   secondary_dist <- draws_to_long(secondary_dist)
 
@@ -91,6 +101,8 @@ make_relative_to_truth <- function(draws, secondary_dist) {
   return(draws[])
 }
 
+#' Summarise lognormal posterior estimates
+#' @export
 summarise_lognormal_draws <- function(draws, sf, not_by = "value") {
   by_cols <- setdiff(
     colnames(draws), not_by
