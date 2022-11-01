@@ -63,7 +63,7 @@ tar_map(
   ),
   tar_file(
     save_lognormal_draws,
-    save_csv(draws, paste0(model_name, ".csv"), path = "data/posteriors")
+    save_rds(draws, paste0(model_name, ".rds"), path = "data/posteriors")
   ),
   tar_target(
     summarised_draws,

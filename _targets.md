@@ -53,16 +53,24 @@ library(targets)
 library(stantargets)
 library(tarchetypes)
 library(data.table)
+#> data.table 1.14.5 IN DEVELOPMENT built 2022-10-28 16:36:39 UTC; rstudio using 2 threads (see ?getDTthreads).  Latest news: r-datatable.com
 library(ggplot2)
 library(purrr, quietly = TRUE)
 #> 
 #> Attaching package: 'purrr'
+#> 
 #> The following object is masked from 'package:data.table':
 #> 
 #>     transpose
 library(here)
 #> here() starts at /workspaces/dynamicaltruncation
 library(future)
+#> 
+#> Attaching package: 'future'
+#> 
+#> The following object is masked from 'package:rmarkdown':
+#> 
+#>     run
 library(future.callr)
 tar_unscript()
 ```
@@ -528,7 +536,7 @@ tar_map(
   ),
   tar_file(
     save_lognormal_draws,
-    save_csv(draws, paste0(model_name, ".csv"), path = "data/posteriors")
+    save_rds(draws, paste0(model_name, ".rds"), path = "data/posteriors")
   ),
   tar_target(
     summarised_draws,
