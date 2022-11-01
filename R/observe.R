@@ -38,3 +38,12 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
     DT(stime <= obs_at)
   return(truncated_linelist)
 }
+
+#' Pad zero observations as unstable in a lognormal distribution
+#' @export
+pad_zero <- function(data, pad = 1e-3) {
+  data <- data |>
+    data.table::copy() |>
+    DT(delay_lwr == 0, delay_lwr := pad) |>
+    DT(delay_daily == 0, delay_daily := pad)
+}
