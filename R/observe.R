@@ -1,3 +1,5 @@
+#' Observation process for primary and secondary events
+#' @export
 observe_process <- function(linelist) {
   clinelist <- linelist |>
     data.table::copy() |>
@@ -21,6 +23,8 @@ observe_process <- function(linelist) {
   return(clinelist)
 }
 
+#' Filter observations based on a observation time of secondary events
+#' @export
 filter_obs_by_obs_time <- function(linelist, obs_time) {
   truncated_linelist <- linelist |>
     data.table::copy() |>
