@@ -40,9 +40,10 @@ tar_map(
         data = standata,
         scenario = scenarios,
         adapt_delta = 0.95,
-        parallel_chains = parallel_chains
+        parallel_chains = parallel_chains,
         refresh = 0, 
         show_messages = FALSE,
+        iter_sampling = 1000,
         seed = 123
       ),
     pattern = map(standata, scenarios)
@@ -62,7 +63,7 @@ tar_map(
   ),
   tar_file(
     save_lognormal_draws,
-    save_csv(draws, paste0(model_name, ".csv"), path = "data/posteriors")
+    save_rds(draws, paste0(model_name, ".rds"), path = "data/posteriors")
   ),
   tar_target(
     summarised_draws,
