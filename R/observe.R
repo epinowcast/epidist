@@ -1,3 +1,5 @@
+#' Observation process for primary and secondary events
+#' @export
 observe_process <- function(linelist) {
   clinelist <- linelist |>
     data.table::copy() |>
@@ -21,6 +23,8 @@ observe_process <- function(linelist) {
   return(clinelist)
 }
 
+#' Filter observations based on a observation time of secondary events
+#' @export
 filter_obs_by_obs_time <- function(linelist, obs_time) {
   truncated_linelist <- linelist |>
     data.table::copy() |>
@@ -33,4 +37,13 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
     DT(, censored := "interval") |>
     DT(stime <= obs_at)
   return(truncated_linelist)
+}
+
+#' Pad zero observations as unstable in a lognormal distribution
+#' @export
+pad_zero <- function(data, pad = 1e-3) {
+  data <- data |>
+    data.table::copy() |>
+    DT(delay_lwr == 0, delay_lwr := pad) |>
+    DT(delay_daily == 0, delay_daily := pad)
 }

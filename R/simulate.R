@@ -1,9 +1,13 @@
+#' Simulate cases from a uniform distribution
+#' @export
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
   data.table::data.table(
     case = 1:sample_size, ptime = runif(sample_size, 0, t)
   )
 }
 
+#' Simulate exponential cases
+#' @export
 simulate_exponential_cases <- function(r = 0.2,
                                        sample_size = 10000,
                                        seed,
@@ -12,7 +16,7 @@ simulate_exponential_cases <- function(r = 0.2,
     set.seed(seed)
   }
   quant <- runif(sample_size, 0, 1)
-  
+
   if (r == 0) {
     ptime <- quant * t
   } else {
@@ -26,6 +30,8 @@ simulate_exponential_cases <- function(r = 0.2,
   return(cases)
 }
 
+#' Simulate cases from a Stochastic SIR model
+#' @export
 simulate_gillespie <- function(r = 0.2,
                                gamma = 1 / 7,
                                init_I = 50, ## to avoid extinction
@@ -69,6 +75,8 @@ simulate_gillespie <- function(r = 0.2,
   return(cases)
 }
 
+#' Simulate  secondary events based on a delay distribution
+#' @export
 simulate_secondary <- function(linelist, dist = rlnorm, ...) {
   obs <- linelist |>
     data.table::copy() |>
