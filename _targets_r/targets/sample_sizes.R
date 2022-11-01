@@ -1,3 +1,3 @@
 tar_target(sample_sizes, {
-  c(400)
+  c(10, 100, 1000)
 })
