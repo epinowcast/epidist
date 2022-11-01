@@ -1,3 +1,5 @@
+#' Plot the relative difference between true values and posterior estimates
+#' @export
 plot_relative_recovery <- function(relative_data, alpha = 0.8,
                                    quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {
   relative_data |>
@@ -16,6 +18,8 @@ plot_relative_recovery <- function(relative_data, alpha = 0.8,
     labs(x = "Relative value")
 }
 
+#' Plot cases by observation window
+#' @export
 plot_cases_by_obs_window <- function(cases) {
   cases |>
     DT(case_type == "primary") |>
@@ -37,6 +41,8 @@ plot_cases_by_obs_window <- function(cases) {
     guides(fill = guide_legend(title = "Observation day", reverse = TRUE))
 }
 
+#' Plot the empirical delay distribution
+#' @export
 plot_empirical_delay <- function(cases, meanlog, sdlog) {
   cases |>
     ggplot() +

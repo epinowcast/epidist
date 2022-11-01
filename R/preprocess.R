@@ -1,3 +1,5 @@
+#' For a target variable convert from individual data to counts
+#' @export
 linelist_to_counts <- function(linelist, target_time = "ptime_daily",
                                additional_by = c(), pad_zeros = FALSE) {
   cases <- linelist |>
@@ -18,7 +20,8 @@ linelist_to_counts <- function(linelist, target_time = "ptime_daily",
   return(cases[])
 }
 
-
+#' Convert primary and secondary observations to counts in long format
+#' @export
 linelist_to_cases <- function(linelist) {
   primary_cases <- linelist_to_counts(linelist)
   secondary_cases <- linelist_to_counts(linelist, "stime_daily")
@@ -37,12 +40,16 @@ linelist_to_cases <- function(linelist) {
   return(cases[])
 }
 
+#' For the observation observed at variable reverse the factor ordering
+#' @export
 reverse_obs_at <- function(dt) {
   dt |>
     DT(, obs_at := factor(obs_at)) |>
     DT(, obs_at := factor(obs_at, levels = rev(levels(obs_at))))
 }
 
+#' Construct case counts by observation window based on secondary observations
+#' @export
 construct_cases_by_obs_window <- function(linelist, windows = c(25, 45)) {
   lower_window <- c(0, windows)
   upper_window <- c(windows, max(linelist$stime_daily))
@@ -71,6 +78,8 @@ construct_cases_by_obs_window <- function(linelist, windows = c(25, 45)) {
 
 }
 
+#' Combine truncated and fully observed observations
+#' @export
 combine_obs <- function(truncated_obs, obs) {
   cobs <- rbind(
     truncated_obs,
