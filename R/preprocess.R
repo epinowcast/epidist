@@ -89,6 +89,8 @@ combine_obs <- function(truncated_obs, obs) {
     reverse_obs_at()
 }
 
+#' Calculate the mean difference between continuous and discrete event time
+#' @export
 calculate_censor_delay <- function(truncated_obs) {
   truncated_obs_psumm <- truncated_obs |>
     copy() |>
