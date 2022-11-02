@@ -99,11 +99,11 @@ calculate_censor_delay <- function(truncated_obs) {
       mean = mean(ptime_delay),
       lwr = ifelse(length(ptime_delay) > 1, t.test(ptime_delay)[[4]][1], 0),
       upr = ifelse(length(ptime_delay) > 1, t.test(ptime_delay)[[4]][2], 1)),
-      by="ptime_daily") |>
-    DT(, lwr := ifelse (lwr < 0 , 0, lwr)) |>
-    DT(, upr := ifelse (upr > 1 , 1, upr)) |>
+      by = "ptime_daily") |>
+    DT(, lwr := ifelse(lwr < 0, 0, lwr)) |>
+    DT(, upr := ifelse(upr > 1, 1, upr)) |>
     DT(, type := "ptime")
-  
+
   truncated_obs_ssumm <- truncated_obs |>
     copy() |>
     DT(, stime_delay := stime - stime_daily) |>
@@ -111,14 +111,14 @@ calculate_censor_delay <- function(truncated_obs) {
       mean = mean(stime_delay),
       lwr = ifelse(length(stime_delay) > 1, t.test(stime_delay)[[4]][1], 0),
       upr = ifelse(length(stime_delay) > 1, t.test(stime_delay)[[4]][2], 1)),
-      by="stime_daily") |>
-    DT(, lwr := ifelse (lwr < 0 , 0, lwr)) |>
-    DT(, upr := ifelse (upr > 1 , 1, upr)) |>
+      by = "stime_daily") |>
+    DT(, lwr := ifelse(lwr < 0, 0, lwr)) |>
+    DT(, upr := ifelse(upr > 1, 1, upr)) |>
     DT(, type := "stime")
-  
+
   names(truncated_obs_psumm)[1] <- names(truncated_obs_ssumm)[1] <- "cohort"
-  
+
   censor_delay <- rbind(truncated_obs_psumm, truncated_obs_ssumm)
-  
-  censor_delay
+
+  return(censor_delay[])
 }

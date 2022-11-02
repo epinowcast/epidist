@@ -5,7 +5,6 @@ library(ggplot2)
 
 tfun <- function(r = 0.2, t = 1) {
   (exp(r * t) * (r * t - 1) + 1) / (r * (exp(r * t) - 1))
-  
 }
 
 outbreak <- simulate_exponential_cases(sample_size = 100000)
