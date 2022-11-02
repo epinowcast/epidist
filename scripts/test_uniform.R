@@ -48,3 +48,11 @@ draws |>
   labs(
     y = "Model", x = "Relative to ground truth"
   )
+
+summ <- draws |>
+  DT(, .(mean=mean(value),
+         lwr=quantile(value, 0.025),
+         upr=quantile(value, 0.975)), by=c("model", "parameter"))
+
+
+save(summ, file="test_uniform.rda")
