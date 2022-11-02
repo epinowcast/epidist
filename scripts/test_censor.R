@@ -28,18 +28,18 @@ cases <- construct_cases_by_obs_window(
 plot_cases_by_obs_window(cases) +
   scale_y_log10()
 
-censor_delay1 <- dynamicaltruncation:::calculate_censor_delay(obs)
+censor_delay1 <- calculate_censor_delay(obs)
 
-dynamicaltruncation:::plot_censor_delay(censor_delay1) +
+plot_censor_delay(censor_delay1) +
   geom_hline(yintercept = tfun(), lty = 2)
 
 truncated_obs <- obs |>
   filter_obs_by_obs_time(obs_time = 30)
 
 
-censor_delay <- dynamicaltruncation:::calculate_censor_delay(truncated_obs)
+censor_delay <- calculate_censor_delay(truncated_obs)
 
-dynamicaltruncation:::plot_censor_delay(censor_delay)  +
+plot_censor_delay(censor_delay)  +
   geom_hline(yintercept = tfun(), lty = 2)
 
 cases2 <- construct_cases_by_obs_window(
@@ -61,14 +61,11 @@ truncated_obs2 <- obs2 |>
   filter_obs_by_obs_time(obs_time = 30)
 
 
-censor_delay2 <- dynamicaltruncation:::calculate_censor_delay(truncated_obs2)
+censor_delay2 <- calculate_censor_delay(truncated_obs2)
 
-dynamicaltruncation:::plot_censor_delay(censor_delay2)
-
-
-censor_delay2 <- dynamicaltruncation:::calculate_censor_delay(obs2)
-
-dynamicaltruncation:::plot_censor_delay(censor_delay2)
+plot_censor_delay(censor_delay2)
 
 
-sample_obs <- map(1:20, )
+censor_delay2 <- calculate_censor_delay(obs2)
+
+plot_censor_delay(censor_delay2)

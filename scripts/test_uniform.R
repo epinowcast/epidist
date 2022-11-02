@@ -58,13 +58,14 @@ draws <- fitlist |>
   rbindlist(idcol = "model")
 
 relative_draws <- draws |>
-  make_relative_to_truth(secondary_dist) 
+  make_relative_to_truth(secondary_dist)
 
 scores <- relative_draws |>
   copy() |>
-  DT(, sample := 1:.N, by = "model") |>
+  DT(, sample := 1:.N, by = c("model", "parameter")) |>
   DT(, prediction := value) |>
   DT(, value := NULL) |>
+  DT(, .()) |>
   score() |>
   summarise_scores(by = "parameter") |>
   summarise_scores(fun = signif, digits = 2)
@@ -81,7 +82,7 @@ relative_draws |>
 summ <- draws |>
   DT(, .(mean = mean(value),
          lwr = quantile(value, 0.025),
-         upr = quantile(value, 0.975)), by = c("model", "parameter"))
-
+         upr = quantile(value, 0.975)), by = c("model", "parameter")
+  )
 
 save(summ, file = "test_uniform.rda")
