@@ -32,7 +32,7 @@ plot_cases_by_obs_window(cases) +
 censor_delay1 <- dynamicaltruncation:::calculate_censor_delay(obs)
 
 dynamicaltruncation:::plot_censor_delay(censor_delay1) +
-  geom_hline(yintercept=tfun(), lty=2)
+  geom_hline(yintercept = tfun(), lty = 2)
 
 truncated_obs <- obs |>
   filter_obs_by_obs_time(obs_time = 30)
@@ -41,7 +41,7 @@ truncated_obs <- obs |>
 censor_delay <- dynamicaltruncation:::calculate_censor_delay(truncated_obs)
 
 dynamicaltruncation:::plot_censor_delay(censor_delay)  +
-  geom_hline(yintercept=tfun(), lty=2)
+  geom_hline(yintercept = tfun(), lty = 2)
 
 cases2 <- construct_cases_by_obs_window(
   obs, windows = c(30)
@@ -49,7 +49,7 @@ cases2 <- construct_cases_by_obs_window(
 
 plot_cases_by_obs_window(cases2)
 
-outbreak2 <- simulate_exponential_cases(r=0, sample_size = 100000)
+outbreak2 <- simulate_exponential_cases(r = 0, sample_size = 100000)
 
 obs2 <- outbreak2 |>
   simulate_secondary(
