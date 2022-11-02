@@ -4,7 +4,13 @@
 \alias{sample_model}
 \title{Sample from the posterior of a model with additional diagnositics}
 \usage{
-sample_model(model, data, scenario, diagnostics = TRUE, ...)
+sample_model(
+  model,
+  data,
+  scenario = data.table::data.table(id = 1),
+  diagnostics = TRUE,
+  ...
+)
 }
 \description{
 Sample from the posterior of a model with additional diagnositics
