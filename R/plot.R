@@ -62,3 +62,12 @@ plot_empirical_delay <- function(cases, meanlog, sdlog) {
     labs(x = "Days", y = "Density") +
     guides(fill = guide_legend(title = "Observation day", reverse = TRUE))
 }
+
+plot_censor_delay <- function(censor_delay) {
+  ggplot(linelist_comb) +
+    geom_point(aes(cohort, mean))  +
+    geom_errorbar(aes(cohort, ymin=lwr, ymax=upr), width=0) +
+    facet_wrap(~type)  +
+    theme_bw() +
+    labs(x = "Cohort time (day)", y = "Mean different between continuous and discrete event time")  
+}
