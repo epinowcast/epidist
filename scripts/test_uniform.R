@@ -42,7 +42,8 @@ fitlist <- lapply(1:nrep, function(x) {
     data = data,
     diagnostics = TRUE,
     cores = 4,
-    refresh = 0
+    refresh = 0,
+    show_messages = FALSE
   )
   return(fit[])
 })
