@@ -10,7 +10,7 @@ tfun <- function(r = 0.2, t = 1) {
 outbreak <- simulate_exponential_cases(sample_size = 100000)
 
 secondary_dist <- data.table(
-  meanlog = 2, sdlog = 0.5
+  meanlog = 1.8, sdlog = 0.5
 ) |>
   add_natural_scale_mean_sd()
 
@@ -70,3 +70,5 @@ censor_delay2 <- dynamicaltruncation:::calculate_censor_delay(obs2)
 
 dynamicaltruncation:::plot_censor_delay(censor_delay2)
 
+
+sample_obs <- map(1:20, )
