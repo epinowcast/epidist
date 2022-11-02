@@ -39,7 +39,8 @@ plot_cases_by_obs_window <- function(cases) {
     theme_bw() +
     theme(legend.position = "bottom") +
     labs(x = "Days", y = "Cases") + 
-    guides(fill = guide_legend(title = "Observation day", reverse = TRUE))
+    guides(fill = guide_legend(title = "Observation day", reverse = TRUE),
+           color = guide_legend(title = "Observation day", reverse = TRUE))
 }
 
 #' Plot the empirical delay distribution
