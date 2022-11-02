@@ -33,45 +33,45 @@ latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
 summ <- summary(latent_truncation_censoring_fit)
 
 ptime_est <- data.frame(
-  id=factor(1:200),
-  true=truncated_obs$ptime-truncated_obs$ptime_daily,
-  est=summ$fixed[3:202,1],
-  lwr=summ$fixed[3:202,3],
-  upr=summ$fixed[3:202,4]
+  id = factor(1:200),
+  true = truncated_obs$ptime - truncated_obs$ptime_daily,
+  est = summ$fixed[3:202, 1],
+  lwr = summ$fixed[3:202, 3],
+  upr=summ$fixed[3:202, 4]
 )
 
 stime_est <- data.frame(
-  id=factor(1:200),
-  true=truncated_obs$stime-truncated_obs$stime_daily,
-  est=summ$fixed[203:402,1],
-  lwr=summ$fixed[203:402,3],
-  upr=summ$fixed[203:402,4]
+  id = factor(1:200),
+  true = truncated_obs$stime - truncated_obs$stime_daily,
+  est = summ$fixed[203:402,1],
+  lwr = summ$fixed[203:402, 3],
+  upr = summ$fixed[203:402, 4]
 )
 
 g1 <- ggplot(ptime_est) +
-  geom_point(aes(true, id), col="red") +
+  geom_point(aes(true, id), col = "red") +
   geom_point(aes(est, id)) +
-  geom_errorbar(aes(xmin=lwr, xmax=upr, y=id), width=0) +
+  geom_errorbar(aes(xmin = lwr, xmax = upr, y = id), width = 0) +
   scale_x_continuous("Estimated ptime") +
   theme(
     axis.text.y = element_blank()
   )
 
 g2 <- ggplot(stime_est) +
-  geom_point(aes(true, id), col="red") +
+  geom_point(aes(true, id), col = "red") +
   geom_point(aes(est, id)) +
-  geom_errorbar(aes(xmin=lwr, xmax=upr, y=id), width=0) +
+  geom_errorbar(aes(xmin = lwr, xmax = upr, y = id), width = 0) +
   scale_x_continuous("Estimated stime") +
   theme(
     axis.text.y = element_blank()
   )
 
-gcomb <- ggarrange(g1, g2, nrow=1, draw=FALSE)
+gcomb <- ggarrange(g1, g2, nrow = 1, draw = FALSE)
 
-ggsave("test_inftime_exp.png", gcomb, width=8, height=6)
+ggsave("test_inftime_exp.png", gcomb, width = 8, height  6)
 
 plot(stime_est$est, ptime_est$est)
 
-plot(stime_est$est-ptime_est$est)
+plot(stime_est$est - ptime_est$est)
 
-plot(stime_est$true-ptime_est$true)
+plot(stime_est$true - ptime_est$true)
