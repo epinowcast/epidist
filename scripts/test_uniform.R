@@ -65,10 +65,12 @@ scores <- relative_draws |>
   DT(, sample := 1:.N, by = c("model", "parameter")) |>
   DT(, prediction := value) |>
   DT(, value := NULL) |>
-  DT(, .()) |>
+  DT(, .(model, parameter, prediction, true_value, sample)) |>
   score() |>
-  summarise_scores(by = "parameter") |>
+  summarise_scores(by = c("parameter")) |>
   summarise_scores(fun = signif, digits = 2)
+
+scores
 
 relative_draws |>
   plot_relative_recovery(fill = model) +
