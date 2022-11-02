@@ -83,6 +83,13 @@ plot_empirical_delay(
   sdlog = secondary_dist$sdlog[[1]]
 )
 ```
+Plot the mean difference between continuous and discrete event time:
+
+```{r censor_delay}
+censor_delay <- calculate_censor_delay(truncated_obs)
+plot_censor_delay(censor_delay)
+```
+
 ### Models
 
 First fit a naive lognormal model with no adjustment.
@@ -122,7 +129,6 @@ truncation_fit <- truncation_adjusted_delay(
   data = truncated_obs, cores = 4, refresh = 0
 )
 ```
-
 
 Adjust for right truncation and date censoring.
 
