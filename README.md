@@ -76,8 +76,9 @@ plot_empirical_delay(
 )
 ```
 
-<img src="figures/README-empirical-dist-1.png" width="100%" /> Plot the
-mean difference between continuous and discrete event time:
+<img src="figures/README-empirical-dist-1.png" width="100%" />
+
+Plot the mean difference between continuous and discrete event time:
 
 ``` r
 censor_delay <- calculate_censor_delay(truncated_obs)
@@ -92,16 +93,16 @@ First fit a naive lognormal model with no adjustment.
 
 ``` r
 naive_fit <- naive_delay(data = truncated_obs, cores = 4, refresh = 0)
-#> -\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/ Running MCMC with 4 parallel chains...
+#> Running MCMC with 4 parallel chains...
 #> 
 #> Chain 1 finished in 0.3 seconds.
 #> Chain 2 finished in 0.3 seconds.
 #> Chain 3 finished in 0.3 seconds.
-#> Chain 4 finished in 0.2 seconds.
+#> Chain 4 finished in 0.3 seconds.
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.3 seconds.
-#> Total execution time: 0.4 seconds.
+#> Total execution time: 0.5 seconds.
 ```
 
 Estimate the delay after filtering out the most recent data as crude
@@ -111,16 +112,16 @@ adjustement for right truncation.
 filtered_fit <- filtered_naive_delay(
   data = truncated_obs, cores = 4, refresh = 0
 )
-#> -\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\ Running MCMC with 4 parallel chains...
+#> Running MCMC with 4 parallel chains...
 #> 
 #> Chain 1 finished in 0.2 seconds.
 #> Chain 2 finished in 0.2 seconds.
-#> Chain 4 finished in 0.2 seconds.
 #> Chain 3 finished in 0.2 seconds.
+#> Chain 4 finished in 0.2 seconds.
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.2 seconds.
-#> Total execution time: 0.4 seconds.
+#> Total execution time: 0.3 seconds.
 ```
 
 Adjust for date censoring.
@@ -129,15 +130,15 @@ Adjust for date censoring.
 censored_fit <- censoring_adjusted_delay(
   data = truncated_obs, cores = 4, refresh = 0
 )
-#> -\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- Running MCMC with 4 parallel chains...
+#> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 1.0 seconds.
-#> Chain 2 finished in 1.0 seconds.
-#> Chain 3 finished in 1.0 seconds.
+#> Chain 1 finished in 0.9 seconds.
+#> Chain 2 finished in 0.9 seconds.
+#> Chain 3 finished in 0.9 seconds.
 #> Chain 4 finished in 1.0 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 1.0 seconds.
+#> Mean chain execution time: 0.9 seconds.
 #> Total execution time: 1.1 seconds.
 ```
 
@@ -147,12 +148,16 @@ Adjust for censoring and filter to crudely adjust for right truncation.
 filtered_censored_fit <- filtered_censoring_adjusted_delay(
   data = truncated_obs, cores = 4, refresh = 0
 )
-#> -\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- Running MCMC with 4 parallel chains...
+#> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 0.6 seconds.
-#> Chain 2 finished in 0.6 seconds.
+#> Chain 1 finished in 0.5 seconds.
+#> Chain 2 finished in 0.5 seconds.
 #> Chain 3 finished in 0.6 seconds.
-#> The remaining chains had a mean execution time of 0.7 seconds.
+#> Chain 4 finished in 0.6 seconds.
+#> 
+#> All 4 chains finished successfully.
+#> Mean chain execution time: 0.6 seconds.
+#> Total execution time: 0.7 seconds.
 ```
 
 Adjust for right truncation.
@@ -161,12 +166,16 @@ Adjust for right truncation.
 truncation_fit <- truncation_adjusted_delay(
   data = truncated_obs, cores = 4, refresh = 0
 )
-#> -\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- Running MCMC with 4 parallel chains...
+#> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 1.5 seconds.
-#> Chain 2 finished in 1.5 seconds.
-#> Chain 3 finished in 1.5 seconds.
-#> The remaining chains had a mean execution time of 1.6 seconds.
+#> Chain 1 finished in 1.1 seconds.
+#> Chain 2 finished in 1.1 seconds.
+#> Chain 3 finished in 1.2 seconds.
+#> Chain 4 finished in 1.2 seconds.
+#> 
+#> All 4 chains finished successfully.
+#> Mean chain execution time: 1.1 seconds.
+#> Total execution time: 1.4 seconds.
 ```
 
 Adjust for right truncation and date censoring.
@@ -175,16 +184,16 @@ Adjust for right truncation and date censoring.
 truncation_censoring_fit <- truncation_censoring_adjusted_delay(
   data = truncated_obs, cores = 4, refresh = 0
 )
-#> -\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\| Running MCMC with 4 parallel chains...
+#> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 2.2 seconds.
-#> Chain 3 finished in 2.3 seconds.
-#> Chain 2 finished in 2.3 seconds.
+#> Chain 1 finished in 2.3 seconds.
+#> Chain 2 finished in 2.2 seconds.
+#> Chain 3 finished in 2.2 seconds.
 #> Chain 4 finished in 2.3 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 2.3 seconds.
-#> Total execution time: 2.5 seconds.
+#> Mean chain execution time: 2.2 seconds.
+#> Total execution time: 2.4 seconds.
 ```
 
 Adjust for right truncation and date censoring using a latent variable
@@ -194,16 +203,16 @@ approach.
 latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
   data = truncated_obs, cores = 4, refresh = 0
 )
-#> -\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/-\|/- Running MCMC with 4 parallel chains...
+#> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 9.7 seconds.
-#> Chain 3 finished in 10.0 seconds.
-#> Chain 2 finished in 10.1 seconds.
-#> Chain 4 finished in 10.4 seconds.
+#> Chain 1 finished in 18.2 seconds.
+#> Chain 2 finished in 18.9 seconds.
+#> Chain 3 finished in 18.9 seconds.
+#> Chain 4 finished in 18.8 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 10.0 seconds.
-#> Total execution time: 10.5 seconds.
+#> Mean chain execution time: 18.7 seconds.
+#> Total execution time: 19.0 seconds.
 ```
 
 ### Summarise model posteriors and compare to known truth
@@ -242,17 +251,17 @@ knitr::kable(summarised_draws[parameter %in% c("meanlog", "sdlog")])
 | Naive                                             | meanlog   | 1.60 |   1.60 | 1.50 | 1.50 | 1.50 | 1.60 | 1.60 | 1.60 | 1.60 |  1.60 |
 | Naive                                             | sdlog     | 0.49 |   0.49 | 0.44 | 0.45 | 0.47 | 0.48 | 0.50 | 0.51 | 0.53 |  0.54 |
 | Filtered                                          | meanlog   | 1.70 |   1.70 | 1.60 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 |  1.80 |
-| Filtered                                          | sdlog     | 0.45 |   0.45 | 0.40 | 0.40 | 0.42 | 0.44 | 0.46 | 0.48 | 0.50 |  0.51 |
+| Filtered                                          | sdlog     | 0.45 |   0.45 | 0.40 | 0.41 | 0.43 | 0.44 | 0.46 | 0.48 | 0.50 |  0.51 |
 | Censoring adjusted                                | meanlog   | 1.60 |   1.60 | 1.50 | 1.50 | 1.50 | 1.60 | 1.60 | 1.60 | 1.60 |  1.60 |
 | Censoring adjusted                                | sdlog     | 0.45 |   0.45 | 0.40 | 0.41 | 0.43 | 0.44 | 0.46 | 0.47 | 0.49 |  0.50 |
 | Filtered and censoring adjusted                   | meanlog   | 1.70 |   1.70 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 |  1.80 |
 | Filtered and censoring adjusted                   | sdlog     | 0.42 |   0.42 | 0.37 | 0.37 | 0.40 | 0.41 | 0.43 | 0.45 | 0.48 |  0.49 |
 | Truncation adjusted                               | meanlog   | 1.80 |   1.80 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 | 1.90 | 1.90 |  2.00 |
-| Truncation adjusted                               | sdlog     | 0.57 |   0.56 | 0.50 | 0.50 | 0.53 | 0.55 | 0.58 | 0.60 | 0.64 |  0.66 |
+| Truncation adjusted                               | sdlog     | 0.57 |   0.56 | 0.49 | 0.50 | 0.53 | 0.55 | 0.58 | 0.60 | 0.64 |  0.65 |
 | Truncation and censoring adjusted                 | meanlog   | 1.80 |   1.80 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 | 1.90 |  1.90 |
-| Truncation and censoring adjusted                 | sdlog     | 0.51 |   0.50 | 0.44 | 0.45 | 0.47 | 0.49 | 0.52 | 0.54 | 0.57 |  0.59 |
+| Truncation and censoring adjusted                 | sdlog     | 0.51 |   0.50 | 0.44 | 0.45 | 0.47 | 0.49 | 0.52 | 0.54 | 0.58 |  0.59 |
 | Latent variable truncation and censoring adjusted | meanlog   | 1.80 |   1.80 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 | 1.90 | 1.90 |  1.90 |
-| Latent variable truncation and censoring adjusted | sdlog     | 0.48 |   0.47 | 0.41 | 0.42 | 0.45 | 0.46 | 0.49 | 0.50 | 0.54 |  0.55 |
+| Latent variable truncation and censoring adjusted | sdlog     | 0.47 |   0.47 | 0.42 | 0.42 | 0.45 | 0.46 | 0.49 | 0.50 | 0.53 |  0.54 |
 
 Plot summarised posterior estimates from each model compared to the
 ground truth.
@@ -293,19 +302,19 @@ bash bin/update-targets.sh
 Alternative the following `targets` functions may be used to
 interactively explore the workflow:
 
--   Run the workflow sequentially.
+- Run the workflow sequentially.
 
 ``` r
 targets::tar_make()
 ```
 
--   Run the workflow using all available workers.
+- Run the workflow using all available workers.
 
 ``` r
 targets::tar_make_future(workers = future::availableCores())
 ```
 
--   Explore a graph of the workflow.
+- Explore a graph of the workflow.
 
 ``` r
 targets::tar_visnetwork(targets_only = TRUE)

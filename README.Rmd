@@ -83,6 +83,7 @@ plot_empirical_delay(
   sdlog = secondary_dist$sdlog[[1]]
 )
 ```
+
 Plot the mean difference between continuous and discrete event time:
 
 ```{r censor_delay}

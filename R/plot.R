@@ -48,7 +48,7 @@ plot_cases_by_obs_window <- function(cases) {
 plot_empirical_delay <- function(cases, meanlog, sdlog) {
   cases |>
     ggplot() +
-    aes(x = delay_daily, fill = factor(obs_at)) +
+    aes(x = delay_daily, fill = obs_at) +
     geom_histogram(
       aes(y = ..density..), binwidth = 1, position = "dodge",
       col = "#696767b1"
@@ -57,7 +57,7 @@ plot_empirical_delay <- function(cases, meanlog, sdlog) {
     fun = dlnorm, args = c(meanlog, sdlog), n = 100,
     col = "#696767b1", fill = NULL
     ) +
-    scale_fill_brewer(palette = "Blues", direction = -1) +
+    scale_fill_brewer(palette = "Blues", direction = 1) +
     theme_bw() +
     theme(legend.position = "bottom") +
     labs(x = "Days", y = "Density") +
@@ -72,5 +72,8 @@ plot_censor_delay <- function(censor_delay) {
     geom_errorbar(aes(cohort, ymin=lwr, ymax=upr), width=0) +
     facet_wrap(~type)  +
     theme_bw() +
-    labs(x = "Cohort time (day)", y = "Mean different between continuous and discrete event time")  
+    labs(
+      x = "Cohort time (day)",
+      y = "Mean different between continuous and discrete event time"
+    )  
 }
