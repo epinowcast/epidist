@@ -1,6 +1,7 @@
 #' Sample from the posterior of a model with additional diagnositics
 #' @export
-sample_model <- function(model, data, scenario, diagnostics = TRUE, ...) {
+sample_model <- function(model, data, scenario = data.table::data.table(),
+                         diagnostics = TRUE, ...) {
   fit <- cmdstanr::cmdstan_model(model)$sample(data = data, ...)
 
   out <- scenario |>
