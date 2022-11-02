@@ -2,6 +2,7 @@ library(dynamicaltruncation)
 library(data.table)
 library(purrr)
 library(ggplot2)
+library(scoringutils)
 
 nrep <- 20
 
@@ -56,8 +57,19 @@ draws <- fitlist |>
   map(draws_to_long) |>
   rbindlist(idcol = "model")
 
-draws |>
-  make_relative_to_truth(secondary_dist) |>
+relative_draws <- draws |>
+  make_relative_to_truth(secondary_dist) 
+
+scores <- relative_draws |>
+  copy() |>
+  DT(, sample := 1:.N, by = "model") |>
+  DT(, prediction := value) |>
+  DT(, value := NULL) |>
+  score() |>
+  summarise_scores(by = "parameter") |>
+  summarise_scores(fun = signif, digits = 2)
+
+relative_draws |>
   plot_relative_recovery(fill = model) +
   facet_wrap(vars(parameter), nrow = 1, scales = "free_x") +
   scale_fill_viridis_d() +
