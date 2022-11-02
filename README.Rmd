@@ -63,7 +63,7 @@ truncated_obs <- obs |>
   DT(sample(1:.N, 200, replace = FALSE))
 ```
 
-Plot primary cases (dots), and secondary cases (columns) by observation window.
+Plot primary cases (columns), and secondary cases (dots) by observation window.
 
 ```{r observed-cases}
 truncated_cases <- construct_cases_by_obs_window(
