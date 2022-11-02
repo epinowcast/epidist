@@ -3,15 +3,15 @@ library(data.table)
 library(purrr)
 library(ggplot2)
 
-tfun <- function(r=0.2, t=1) {
-  (exp(r * t) * (r * t - 1) + 1)/(r * (exp(r * t) - 1))
+tfun <- function(r = 0.2, t = 1) {
+  (exp(r * t) * (r * t - 1) + 1) / (r * (exp(r * t) - 1))
   
 }
 
 outbreak <- simulate_exponential_cases(sample_size = 100000)
 
 secondary_dist <- data.table(
-  meanlog = 1.8, sdlog = 0.5
+  meanlog = 2, sdlog = 0.5
 ) |>
   add_natural_scale_mean_sd()
 
