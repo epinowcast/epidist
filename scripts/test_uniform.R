@@ -42,14 +42,14 @@ fitlist <- lapply(1:nrep, function(x) {
     model = model_path,
     data = data,
     diagnostics = TRUE,
-    cores = 4,
+    parallel_chains = 4,
     refresh = 0,
     show_messages = FALSE
   )
   return(fit[])
 })
 
-names(fitlist) <- paste0("fit", 1:20)
+names(fitlist) <- paste0("fit", 1:nrep)
 
 draws <- fitlist |>
   map(extract_lognormal_draws, from_dt = TRUE) |>
