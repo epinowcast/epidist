@@ -40,7 +40,7 @@
 \usepackage[pdfencoding=auto, psdextra]{hyperref}
 
 \usepackage{natbib}
-\bibliographystyle{unsrt}
+\bibliographystyle{chicago}
 \date{\today}
 
 \usepackage{xspace}
@@ -118,14 +118,18 @@ Authors
 \section{Introduction}
 
 \swp{Maybe we don't have to define what a delay distribution is. But I think we need to talk about why these delays are useful and why we should care.}
-Epidemiological delay distributions (i.e., the distribution of time between two events associated with infection) provide useful means of summarizing the course of infection, such as disease progression \citep{lauer2020incubation,verity2020estimates} and temporal variation in infectiousness.
+Epidemiological delay distributions (i.e., the distribution of time between two events associated with infection) provide useful means of summarizing the course of infection, such as disease progression \citep{lauer2020incubation,verity2020estimates} and temporal variation in infectiousness \citep{madewell2022serial}.
 \swp{A sentence about using delays to measure NPIS?}
 Accurate characterization of epidemiological delay distributions are also critical to understanding population-level outbreak dynamics. \swp{maybe need examples or not.}
 
-Estimating epidemiological delay distributions from data can be challenging due to observational biases.
-For example, when the epidemic is ongoing, we cannot observe events that have not happened yet---this \emph{truncation bias}, in turn, causes us to observe shorter intervals and underestimate the mean of the focal distribution.
-In addition, event times are often reported in \emph{censored} intervals that can span over a day or even several weeks;
-inaccurate estimates of event times can further translate to biases in the estimates of delay distributions.
+However, epidemiological delays can be difficult to measure in many cases because focal events cannot be observed directly or may be known imprecisely.
+In these cases, event times are often reported in \emph{censored} intervals that can span over a day or even several weeks.
+In addition, when an epidemic is ongoing, epidemiological delay distributions can be \emph{truncated} because we cannot observe events that have not happened yet.
+Although both censoring and truncation problems have been widely discussed in epidemiology and other literatures, there are remaining gaps.
+For example, most methods assume the the true event time is uniformly distributed within the censored interval;
+but as we show later, the distribution of event time depends on epidemiological dynamics.
+Other studies neglect the possibility that censoring of event times can also affect the truncation problem.
+
 Recent studies have also highlighted the role of dynamical biases ...
 
 \swp{A paragraph on what's been done. Some people have focused on truncation. Some people on dynamical bias. Some people tried to correct for both. Censoring is also often under-appreciated, at least at a daily time step.}
