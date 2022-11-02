@@ -30,6 +30,7 @@ model_code <- latent_truncation_censoring_adjusted_delay(
 compiled_model <- cmdstanr::cmdstan_model(model_path)
 
 fitlist <- lapply(1:nrep, function(x) {
+  message("Starting rep: ", x)
   set.seed(x)
   sample_obs <- truncated_obs |>
     DT(sample(1:.N, 200, replace = FALSE))
