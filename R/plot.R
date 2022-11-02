@@ -28,13 +28,14 @@ plot_cases_by_obs_window <- function(cases) {
     geom_col(aes(fill = factor(obs_at)), alpha = 1, col = "#696767b1") +
     geom_point(
       data = cases[case_type == "secondary"],
-      col = "#292828b1"
+      aes(col = factor(obs_at))
     ) +
     geom_vline(
       aes(xintercept = as.numeric(as.character(obs_at))),
       linetype = 2, alpha = 0.9
     ) +
     scale_fill_brewer(palette = "Blues", direction = 1) +
+    scale_color_brewer(palette = "Reds", direction = 1) +
     theme_bw() +
     theme(legend.position = "bottom") +
     labs(x = "Days", y = "Cases") + 
