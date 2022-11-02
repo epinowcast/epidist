@@ -64,6 +64,8 @@ plot_empirical_delay <- function(cases, meanlog, sdlog) {
     guides(fill = guide_legend(title = "Observation day", reverse = TRUE))
 }
 
+#' Plot the mean difference between continuous and discrete event time
+#' @export
 plot_censor_delay <- function(censor_delay) {
   ggplot(censor_delay) +
     geom_point(aes(cohort, mean))  +
