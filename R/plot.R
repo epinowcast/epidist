@@ -65,7 +65,7 @@ plot_empirical_delay <- function(cases, meanlog, sdlog) {
 }
 
 plot_censor_delay <- function(censor_delay) {
-  ggplot(linelist_comb) +
+  ggplot(censor_delay) +
     geom_point(aes(cohort, mean))  +
     geom_errorbar(aes(cohort, ymin=lwr, ymax=upr), width=0) +
     facet_wrap(~type)  +
