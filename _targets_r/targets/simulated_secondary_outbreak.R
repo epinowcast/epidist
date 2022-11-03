@@ -1,6 +1,6 @@
 tar_target(
-  simulated_secondary, 
-  simulated_cases |>
+  simulated_secondary_outbreak, 
+  simulated_cases_outbreak |>
     simulate_secondary(
       meanlog = distributions[, "meanlog"][[1]],
       sdlog = distributions[, "sdlog"][[1]]
