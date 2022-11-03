@@ -53,24 +53,10 @@ library(targets)
 library(stantargets)
 library(tarchetypes)
 library(data.table)
-#> data.table 1.14.5 IN DEVELOPMENT built 2022-10-28 16:36:39 UTC; rstudio using 2 threads (see ?getDTthreads).  Latest news: r-datatable.com
 library(ggplot2)
 library(purrr, quietly = TRUE)
-#> 
-#> Attaching package: 'purrr'
-#> 
-#> The following object is masked from 'package:data.table':
-#> 
-#>     transpose
 library(here)
-#> here() starts at /workspaces/dynamicaltruncation
 library(future)
-#> 
-#> Attaching package: 'future'
-#> 
-#> The following object is masked from 'package:rmarkdown':
-#> 
-#>     run
 library(future.callr)
 tar_unscript()
 ```
@@ -107,14 +93,13 @@ tar_option_set(
   error = "continue",
   garbage_collection = TRUE
 )
-#> Establish _targets.R and _targets_r/globals/globals.R.
 ```
 
 # Methods
 
 ## Simulation
 
-### Setup
+### Generic setup
 
 - We assume 3 distribution scenarios: short, medium, and long.
 
@@ -129,24 +114,139 @@ tar_group_by(
     add_natural_scale_mean_sd(),
   scenario
 )
-#> Establish _targets.R and _targets_r/targets/distributions.R.
 ```
 
-- We first simulate a scenario in which the incidence of primary event
-  is changing exponentially. We consider $r$ ranging from -0.2 to 0.2.
+### Outbreak scenarios
+
+#### Simulation
+
+- Simulate the outbreak.
+
+``` r
+tar_target(simulated_cases_outbreak, {
+  simulate_gillespie(r = 0.2, gamma = 1 / 7, init_I = 50, n = 10000, seed = 101)
+})
+```
+
+- Simulate observations of primary and secondary events as linelist for
+  each distribution scenario.
+
+``` r
+tar_target(
+  simulated_secondary_outbreak, 
+  simulated_cases_outbreak |>
+    simulate_secondary(
+      meanlog = distributions[, "meanlog"][[1]],
+      sdlog = distributions[, "sdlog"][[1]]
+    ) |>
+    DT(, distribution := distributions[, "scenario"][[1]]),
+  pattern = map(distributions)
+)
+```
+
+- Simulate the observation process
+
+``` r
+tar_target(simulated_observations_outbreak, {
+  simulated_secondary_outbreak |>
+    observe_process()
+})
+```
+
+#### Observation
+
+- For outbreak simulations, we estimate across sample size ranges (N =
+  10, 100, 2000). `N = 200` is the default case
+
+``` r
+tar_target(sample_sizes, {
+  c(10, 100, 200)
+})
+```
+
+- For the outbreak simulation, we estimate all models at chosen points
+  across the outbreak (suggestion: “early outbreak” (15 days), “near
+  peak” (30 days), “past peak” (45 days), “late outbreak” (60 days))
+
+``` r
+tar_group_by(
+  outbreak_estimation_times,
+  data.table(
+    scenario = c("early outbreak", "near peak", "past peak", "late outbreak"),
+    time = c(15, 30, 45, 60)
+  ),
+  scenario
+)
+```
+
+- Truncate the available simulate observations based on the estimation
+  time for each scenario.
+
+``` r
+tar_target(
+  truncated_sim_obs_outbreak,
+  simulated_observations_outbreak |>
+    filter_obs_by_obs_time(
+      obs_time = outbreak_estimation_times[, "time"][[1]]
+    ) |>
+    DT(, scenario := outbreak_estimation_times[, "scenario"][[1]]),
+  pattern = map(outbreak_estimation_times)
+)
+```
+
+``` r
+tar_group_by(
+  group_truncated_sim_obs_outbreak,
+  truncated_sim_obs_outbreak,
+  scenario, distribution
+)
+```
+
+- Sample observations
+
+``` r
+tar_target(
+  sampled_simulated_observations_outbreak,
+  group_truncated_sim_obs_outbreak |>
+    as.data.table() |>
+    DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
+    DT(, sample_size := as.factor(sample_sizes)) |>
+    DT(, data_type := "outbreak"),
+  pattern = cross(sample_sizes, group_truncated_sim_obs_outbreak)
+)
+```
+
+``` r
+tar_target(list_simulated_observations_outbreak, {
+  sampled_simulated_observations_outbreak |>
+    split(by = c("scenario", "distribution", "sample_size", "data_type"))
+})
+```
+
+``` r
+tar_target(simulated_scenarios_outbreak, {
+  sampled_simulated_observations_outbreak |>
+    DT(, .(scenario, distribution, sample_size, data_type)) |>
+    unique() |>
+    DT(, id := 1:.N)
+})
+```
+
+### Exponential scenarios
+
+- We simulate scenarios in which the incidence of primary event is
+  changing exponentially. We consider $r$ ranging from -0.2 to 0.2.
 
 ``` r
 tar_target(growth_rate, {
   data.table(
-      r = c(-0.2, 0, 0.2),
+      r = c(-0.2, -0.1, 0, 0.1, 0.2),
       scenario = c("fast decay", "stable", "fast growth")
     )
 })
-#> Define target growth_rate from chunk code.
-#> Establish _targets.R and _targets_r/targets/growth_rate.R.
 ```
 
-Simulate data:
+- Simulate data.
 
 ``` r
 tar_target(
@@ -158,7 +258,6 @@ tar_target(
     DT(, scenario := growth_rate[,"scenario"][[1]]),
   pattern = map(growth_rate)
 )
-#> Establish _targets.R and _targets_r/targets/simulated_cases_exponential.R.
 ```
 
 - Simulate observations of primary and secondary events as linelist for
@@ -175,7 +274,6 @@ tar_target(
     DT(, distribution := distributions[, "scenario"][[1]]),
   pattern = map(distributions)
 )
-#> Establish _targets.R and _targets_r/targets/simulated_secondary_exponential.R.
 ```
 
 - Simulate the observation process
@@ -185,66 +283,11 @@ tar_target(simulated_observations_exponential, {
   simulated_secondary_exponential |>
     observe_process()
 })
-#> Define target simulated_observations_exponential from chunk code.
-#> Establish _targets.R and _targets_r/targets/simulated_observations_exponential.R.
 ```
 
-- We also consider an outbreak case. Simulate the outbreak.
+#### Observation
 
-``` r
-tar_target(simulated_cases, {
-  simulate_gillespie(r = 0.2, gamma = 1 / 7, init_I = 50, n = 10000, seed = 101)
-})
-#> Define target simulated_cases from chunk code.
-#> Establish _targets.R and _targets_r/targets/simulated_cases.R.
-```
-
-- Simulate observations of primary and secondary events as linelist for
-  each distribution scenario.
-
-``` r
-tar_target(
-  simulated_secondary, 
-  simulated_cases |>
-    simulate_secondary(
-      meanlog = distributions[, "meanlog"][[1]],
-      sdlog = distributions[, "sdlog"][[1]]
-    ) |>
-    DT(, distribution := distributions[, "scenario"][[1]]),
-  pattern = map(distributions)
-)
-#> Establish _targets.R and _targets_r/targets/simulated_secondary.R.
-```
-
-- Simulate the observation process
-
-``` r
-tar_target(simulated_observations, {
-  simulated_secondary |>
-    observe_process()
-})
-#> Define target simulated_observations from chunk code.
-#> Establish _targets.R and _targets_r/targets/simulated_observations.R.
-```
-
-### Estimate distributions
-
-- For both the exponential and outbreak simulations, we estimate across
-  sample size ranges (N = 10, 100, 1000). `N = 100` is the main case.
-  **1000 might take too long for latent approaches. We might want to
-  take something smaller for the main sim. Trying 400 for now.**
-
-``` r
-tar_target(sample_sizes, {
-  c(10, 100, 1000)
-})
-#> Define target sample_sizes from chunk code.
-#> Establish _targets.R and _targets_r/targets/sample_sizes.R.
-```
-
-#### Exponential scenarios
-
-- For the exponential simulation, we truncate at `t = 30`
+- For the exponential simulation, we truncate at `t = 30`.
 
 ``` r
 tar_target(
@@ -253,7 +296,6 @@ tar_target(
     filter_obs_by_obs_time(obs_time = 30) |>
     DT(, estimation_time := 30)
 )
-#> Establish _targets.R and _targets_r/targets/truncated_sim_obs_exponential.R.
 ```
 
 ``` r
@@ -262,7 +304,14 @@ tar_group_by(
   truncated_sim_obs_exponential,
   scenario, distribution
 )
-#> Establish _targets.R and _targets_r/targets/group_sim_obs_exponential.R.
+```
+
+- Number of replicate observation processes
+
+``` r
+tar_target(replicates_exponential, {
+  1:20
+})
 ```
 
 - Sample observations
@@ -272,129 +321,58 @@ tar_target(
   sampled_simulated_observations_exponential,
   group_sim_obs_exponential |>
     as.data.table() |>
-    DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
-    DT(, sample_size := as.factor(sample_sizes)) |>
-    DT(, datatype := "exponential"),
-  pattern = cross(sample_sizes, group_sim_obs_exponential)
+    DT(sample(1:.N, min(.N, 200), replace = FALSE)) |>
+    DT(, sample_size := as.factor(200)) |>
+    DT(, data_type := "exponential") |>
+    DT(, replicate := replicates_exponential),
+  pattern = cross(
+    sample_sizes, group_sim_obs_exponential, replicates_exponential
+  )
 )
-#> Establish _targets.R and _targets_r/targets/sampled_simulated_observations_exponential.R.
 ```
+
+- Group and list unique scenarios for downstream modelling.
 
 ``` r
 tar_target(list_simulated_observations_exponential, {
   sampled_simulated_observations_exponential |>
-    split(by = c("scenario", "distribution", "sample_size", "datatype"))
+    split(
+      by = c("scenario", "distribution", "sample_size", "data_type", "replicate")
+    )
 })
-#> Define target list_simulated_observations_exponential from chunk code.
-#> Establish _targets.R and _targets_r/targets/list_simulated_observations_exponential.R.
 ```
 
 ``` r
 tar_target(simulated_scenarios_exponential, {
   sampled_simulated_observations_exponential |>
-    DT(, .(scenario, distribution, sample_size, datatype)) |>
+    DT(, .(scenario, distribution, sample_size, data_type, replicate)) |>
     unique() |>
     DT(, id := 1:.N)
 })
-#> Define target simulated_scenarios_exponential from chunk code.
-#> Establish _targets.R and _targets_r/targets/simulated_scenarios_exponential.R.
-```
-
-#### Outbreak scenarios
-
-- For the outbreak simulation, we estimate all models at chosen points
-  across the outbreak (suggestion: “early outbreak” (15 days), “near
-  peak” (30 days), “past peak” (45 days), “late outbreak” (60 days))
-
-``` r
-tar_group_by(
-  estimation_times,
-  data.table(
-    scenario = c("early outbreak", "near peak", "past peak", "late outbreak"),
-    time = c(15, 30, 45, 60)
-  ),
-  scenario
-)
-#> Establish _targets.R and _targets_r/targets/estimation_times.R.
-```
-
-- Truncate the available simulate observations based on the estimation
-  time for each scenario.
-
-``` r
-tar_target(
-  truncated_sim_obs,
-  simulated_observations |>
-    filter_obs_by_obs_time(obs_time = estimation_times[, "time"][[1]]) |>
-    DT(, scenario := estimation_times[, "scenario"][[1]]),
-  pattern = map(estimation_times)
-)
-#> Establish _targets.R and _targets_r/targets/truncated_sim_obs.R.
-```
-
-``` r
-tar_group_by(
-  group_truncated_sim_obs,
-  truncated_sim_obs,
-  scenario, distribution
-)
-#> Establish _targets.R and _targets_r/targets/group_truncated_sim_obs.R.
-```
-
-- Sample observations
-
-``` r
-tar_target(
-  sampled_simulated_observations,
-  group_truncated_sim_obs |>
-    as.data.table() |>
-    DT(sample(1:.N, min(.N, sample_sizes), replace = FALSE)) |>
-    DT(, sample_size := as.factor(sample_sizes)) |>
-    DT(, datatype := "outbreak"),
-  pattern = cross(sample_sizes, group_truncated_sim_obs)
-)
-#> Establish _targets.R and _targets_r/targets/sampled_simulated_observations.R.
-```
-
-``` r
-tar_target(list_simulated_observations, {
-  sampled_simulated_observations |>
-    split(by = c("scenario", "distribution", "sample_size", "datatype"))
-})
-#> Define target list_simulated_observations from chunk code.
-#> Establish _targets.R and _targets_r/targets/list_simulated_observations.R.
-```
-
-``` r
-tar_target(simulated_scenarios, {
-  sampled_simulated_observations |>
-    DT(, .(scenario, distribution, sample_size, datatype)) |>
-    unique() |>
-    DT(, id := 1:.N)
-})
-#> Define target simulated_scenarios from chunk code.
-#> Establish _targets.R and _targets_r/targets/simulated_scenarios.R.
 ```
 
 ## Case study
 
 ### Data
 
-- Need some outbreak linelist data.
-  - Suggested (by Seb) source:
+- Case study using data from [“Transmission dynamics of Ebola virus
+  disease and intervention effectiveness in Sierra LeoneTransmission
+  dynamics of Ebola virus disease and intervention effectiveness in
+  Sierra Leone”](https://doi.org/10.1073/pnas.1518587113)
 
-### Estimate distributions
+- Import data as a csv (ideally from a web URL)
 
-- Estimate distributions for similar points as in the simulation
-  setting.
+- Save data
 
-### Estimate growth rate
+- Load saved data
 
-- Estimate the growth rate retrospectively and comment on this.
+- Data is for the full outbreak and has date of symptom onset and date
+  of sample tested so we estimate the distribution from onset to test.
 
-### Summarise runtimes
+- We estimate the distribution across the outbreak at key points. 3
 
-- Summarise
+- Data has 3500 samples in total. We use all samples available for a
+  given time period.
 
 ## Models
 
@@ -418,7 +396,6 @@ models <- list(
 )
 
 machine_model_names <- gsub(" ", "_", tolower(names(models)))
-#> Establish _targets.R and _targets_r/globals/models.R.
 ```
 
 ### Fit models to simulated and case study data
@@ -427,20 +404,16 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 
 ``` r
 tar_target(scenarios, {
-  rbind(simulated_scenarios, simulated_scenarios_exponential) |> 
+  rbind(simulated_scenarios_outbreak, simulated_scenarios_exponential) |> 
     as.data.table() |> 
     DT(, id := 1:.N)
 })
-#> Define target scenarios from chunk code.
-#> Establish _targets.R and _targets_r/targets/scenarios.R.
 ```
 
 ``` r
 tar_target(list_observations, {
-  c(list_simulated_observations, list_simulated_observations_exponential)
+  c(list_simulated_observations_outbreak, list_simulated_observations_exponential)
 })
-#> Define target list_observations from chunk code.
-#> Establish _targets.R and _targets_r/targets/list_observations.R.
 ```
 
 - Dummy data required for model creation.
@@ -452,7 +425,6 @@ dummy_obs <- data.table::data.table(
   censored = "interval", censored_obs_time = 10, ptime_daily = 1,
   stime_daily = 1
 )
-#> Establish _targets.R and _targets_r/globals/dummy_obs.R.
 ```
 
 - Iterate over compiled models and all scenarios being investigated. For
@@ -550,7 +522,6 @@ tar_map(
     )
   )
 )
-#> Establish _targets.R and _targets_r/targets/fit_models.R.
 ```
 
 ## Post-process for dynamic bias
