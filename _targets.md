@@ -404,7 +404,9 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 
 ``` r
 tar_target(scenarios, {
-  rbind(simulated_scenarios_outbreak, simulated_scenarios_exponential) |> 
+  rbind(simulated_scenarios_outbreak[, replicate := 1],
+        simulated_scenarios_exponential
+  ) |> 
     as.data.table() |> 
     DT(, id := 1:.N)
 })
