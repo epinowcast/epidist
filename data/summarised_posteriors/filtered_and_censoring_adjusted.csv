@@ -1,4 +1,4 @@
-parameter,id,scenario,distribution,sample_size,datatype,mean,median,q2.5,q5,q20,q35,q65,q80,q95,q97.5
+parameter,id,scenario,distribution,sample_size,data_type,mean,median,q2.5,q5,q20,q35,q65,q80,q95,q97.5
 meanlog,1,fast decay,medium,400,exponential,1.555835985,1.55567,1.494295,1.503386,1.530278,1.54491,1.5680835,1.582112,1.6054445,1.61495375
 meanlog,2,fast growth,medium,400,exponential,1.48650453,1.48701,1.39009975,1.406667,1.446376,1.468166,1.50538,1.526656,1.5659535,1.58040125
 meanlog,3,stable,medium,400,exponential,1.5484851775,1.54911,1.48483725,1.49417,1.521824,1.53707,1.5605935,1.576178,1.599351,1.60921625

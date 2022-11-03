@@ -1,4 +1,4 @@
-id,scenario,distribution,sample_size,datatype,parameter,mean,median,q2.5,q5,q20,q35,q65,q80,q95,q97.5
+id,scenario,distribution,sample_size,data_type,parameter,mean,median,q2.5,q5,q20,q35,q65,q80,q95,q97.5
 1,early outbreak,long,10,outbreak,meanlog,7.7,6.1,0.67,1.5,3.4,4.7,7.8,11,19,24
 1,early outbreak,long,10,outbreak,sdlog,340,3.8,2.3,2.5,3,3.4,4.2,4.9,7.2,10
 1,early outbreak,long,10,outbreak,mean,Inf,990000,150,380,6800,71000,2.8e+07,9.4e+09,2.9e+19,5.5e+36

@@ -1,4 +1,4 @@
-scenario,distribution,sample_size,datatype,id,samples,max_rhat,divergent_transitions,per_divergent_transitions,max_treedepth,no_at_max_treedepth,per_at_max_treedepth,run_time
+scenario,distribution,sample_size,data_type,id,samples,max_rhat,divergent_transitions,per_divergent_transitions,max_treedepth,no_at_max_treedepth,per_at_max_treedepth,run_time
 early outbreak,long,10,outbreak,1,4000,1.02,0,0,6,4,0.001,0.5
 early outbreak,medium,10,outbreak,2,4000,1.01,0,0,6,12,0.003,0.5
 early outbreak,short,10,outbreak,3,4000,1.01,0,0,6,5,0.00125,0.4
