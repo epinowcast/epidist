@@ -88,10 +88,22 @@ plot_posterior_pred_check <- function(fit,
                                       data,
                                       type=c("cohort", "cumulative"),
                                       truncate,
-                                      obs_at) {
+                                      obs_at,
+                                      draw=TRUE) {
   type <- match.arg(type)
   
+  gplot <- plot_cohort_mean(data, type, draw=FALSE)
+  
+  prange <- range(data$ptime_daily)
+  pvec <- seq(prange[1], prange[2], by=1)
+  
+  ee <- extract_lognormal_draws(fit)
+  
   if (truncate) {
+    if (type=="cumulative") {
+      stop("Don't use the truncate option with cumulative mean.")
+    }
+    
     if (missing(obs_at)) {
       ## FIXME: is this safe for more general usage? our data always have obs_at
       ## option 1: spit out a warning and take the maximum secondary event time
@@ -99,17 +111,61 @@ plot_posterior_pred_check <- function(fit,
       obs_at <- unique(truncated_obs$obs_at)
     }
     
+    estmat <- matrix(NA, nrow=nrow(ee), ncol=length(pvec))
+    
+    ## calculate truncated mean
+    message("Calculating truncated means...")
+    for (j in 1:length(pvec)) {
+      estvec <- rep(NA, nrow(ee))
+      
+      for (i in 1:nrow(ee)) {
+          
+        p <- pvec[j]
+        
+        numer <- integrate(function(x) x * dlnorm(x, meanlog = ee$meanlog[i], sdlog = ee$sdlog[i]),
+                           lower=0, upper=obs_at - p)[[1]]
+        
+        denom <- integrate(function(x) dlnorm(x, meanlog = ee$meanlog[i], sdlog = ee$sdlog[i]),
+                           lower=0, upper=obs_at - p)[[1]]
+        
+        estmat[i,j] <- numer/denom
+      }
+    }
+  
+    fitted <- data.table(
+      pvec=pvec,
+      mean=apply(estmat, 2, mean),
+      lwr=apply(estmat, 2, quantile, 0.025),
+      upr=apply(estmat, 2, quantile, 0.975)
+    )
+  } else {
+    fitted <- data.table(
+      pvec=pvec,
+      mean=mean(ee$mean),
+      lwr=quantile(ee$mean, 0.025),
+      upr=quantile(ee$mean, 0.975)
+    )  
   }
   
+  gplot <- gplot +
+    geom_ribbon(data=fitted, aes(pvec, ymin=lwr, ymax=upr), alpha=0.3, lty=2, col="black") +
+    geom_line(data=fitted, aes(pvec, mean))
+
+  if (draw) {
+    plot(gplot)
+  }
+  
+  invisible(gplot)
 }
 
 #' @export
 plot_cohort_mean <- function(data,
-                             type=c("cohort", "cumulative")) {
+                             type=c("cohort", "cumulative"),
+                             draw=TRUE) {
   
   out <- plot_cohort_mean_internal(data, type)
   
-  ggplot(out) +
+  gplot <- ggplot(out) +
     geom_point(aes(ptime_daily, mean, size=n), shape=1) +
     theme_bw() +
     scale_size("Number of samples") +
@@ -117,7 +173,12 @@ plot_cohort_mean <- function(data,
       x = "Cohort time (day)",
       y = "Mean delay (days)"
     )  
+  
+  if (draw) {
+    plot(gplot)
+  }
     
+  invisible(gplot)
 }
 
 plot_cohort_mean_internal <- function(data,
