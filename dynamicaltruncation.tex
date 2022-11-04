@@ -148,6 +148,10 @@ For now, we focus on the scenario in which the forward distribution remain stabl
 Other distributions, such as the generation-interval distribution (i.e., time between infection and transmission) and reporting distributions, are expected to change throughout.
 While it is possible (and perhaps more convenient) to characterize the backward distribution $b_s(\tau)$, measured from the cohort of individuals who experienced the secondary event at the same time $s$, these distributions are subject to dynamical biases as we discuss later.
 
+\begin{figure}
+\caption{Maybe a schematic diagram showing truncation and censoring}
+\end{figure}
+
 \subsection{Accounting for truncation bias}
 
 When an epidemic is ongoing, we cannot observe events that have not happened yet.
@@ -207,13 +211,39 @@ The correct method is complex because we have to rely on latent variables. In pa
 
 \section{Simulation study}
 
-\subsection{Comparing censoring and truncation methods}
+\begin{figure}
+\caption{
+(A) Outbreak simulation with 200 samples. 
+(B) Empirical distribution.
+(C) Fits.
+}
+\end{figure}
 
-\subsection{Discrete- vs continuous-time distributions}
+\begin{figure}
+\caption{
+20 replicates of exponential simulation with 200 samples (no need to show) for three different growth rates. Bias and coverage for three methods (truncation, truncation+censoring, latent variable)? 
+}
+\end{figure}
 
-\subsection{Dynamical correction}
+\begin{figure}
+\caption{
+Something about censoring
+}
+\end{figure}
+
+\begin{figure}
+\caption{
+Dynamical bias.
+}
+\end{figure}
 
 \section{Case study with real data}
+
+\begin{figure}
+\caption{
+Case study.
+}
+\end{figure}
 
 \section{Discussion}
 
