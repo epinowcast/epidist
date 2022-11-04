@@ -78,7 +78,7 @@ plot_censor_delay <- function(censor_delay) {
     )  
 }
 
-#' plot empirical cohort-based or cumulative mean vs posterior distribution
+#' plot empirical cohort-based or cumulative mean vs posterior mean
 #' @param fit fitted objects
 #' @param data data used for object fitting
 #' @param type type of mean to plot
@@ -158,6 +158,7 @@ plot_posterior_pred_check <- function(fit,
   invisible(gplot)
 }
 
+#' Plot empirical cohort-based or cumulative mean 
 #' @export
 plot_cohort_mean <- function(data,
                              type=c("cohort", "cumulative"),
