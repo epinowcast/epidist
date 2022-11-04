@@ -77,3 +77,64 @@ plot_censor_delay <- function(censor_delay) {
       y = "Mean different between continuous and discrete event time"
     )  
 }
+
+#' plot empirical cohort-based or cumulative mean vs posterior distribution
+#' @param fit fitted objects
+#' @param data data used for object fitting
+#' @param type type of mean to plot
+#' @param truncate account for truncation?
+#' @export
+plot_posterior_pred_check <- function(fit,
+                                      data,
+                                      type=c("cohort", "cumulative"),
+                                      truncate,
+                                      obs_at) {
+  type <- match.arg(type)
+  
+  if (truncate) {
+    if (missing(obs_at)) {
+      ## FIXME: is this safe for more general usage? our data always have obs_at
+      ## option 1: spit out a warning and take the maximum secondary event time
+      ## the problem with option 1 is  that if someone's looking at old data..?
+      obs_at <- unique(truncated_obs$obs_at)
+    }
+    
+  }
+  
+}
+
+#' @export
+plot_cohort_mean <- function(data,
+                             type=c("cohort", "cumulative")) {
+  
+  out <- plot_cohort_mean_internal(data, type)
+  
+  ggplot(out) +
+    geom_point(aes(ptime_daily, mean, size=n), shape=1) +
+    theme_bw() +
+    scale_size("Number of samples") +
+    labs(
+      x = "Cohort time (day)",
+      y = "Mean delay (days)"
+    )  
+    
+}
+
+plot_cohort_mean_internal <- function(data,
+                                      type=c("cohort", "cumulative")) {
+  type <- match.arg(type)
+  
+  out <- data |>
+    copy() |>
+    DT(, .(mean = mean(delay_daily),
+           n = .N), by = "ptime_daily") |>
+    DT(order(rank(ptime_daily)))
+  
+  if (type=="cumulative") {
+    out[, mean := cumsum(mean * n)/cumsum(n)]
+    out[, n := cumsum(n)]
+    
+  }
+  
+  out
+}
