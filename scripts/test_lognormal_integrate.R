@@ -1,4 +1,3 @@
-library(rstan)
 library(cmdstanr)
 
 model <- cmdstan_model("scripts/lognormal_integrate.stan")
