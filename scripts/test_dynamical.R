@@ -18,6 +18,7 @@ obs <- outbreak |>
 
 set.seed(101)
 truncated_obs <- obs |>
+  filter_obs_by_obs_time(obs_time = 25) |>
   DT(sample(1:.N, 200, replace = FALSE))
 
 standata <- list(
@@ -34,7 +35,3 @@ myfit <- model$sample(data=standata, chains = 1)
 myfit
 
 msumm <- summary(myfit)
-
-plot(msumm$summary[201:400,1], msumm$summary[1:200,1])
-
-msumm$summary[401:402,]
