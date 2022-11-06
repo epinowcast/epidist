@@ -21,15 +21,9 @@ truncated_obs <- obs |>
   filter_obs_by_obs_time(obs_time = 25) |>
   DT(sample(1:.N, 200, replace = FALSE))
 
-standata <- list(
-  r=0.2,
-  max_delay=20,
-  N=nrow(truncated_obs),
-  Y=truncated_obs$delay_daily
-)
+truncated_obs$r <- 0.2
+truncated_obs$max_delay <- 20
 
-model <- cmdstan_model("scripts/lognormal_dynamical.stan")
-
-myfit <- model$sample(data=standata, chains = 1)
+myfit <- exponential_delay(data=truncated_obs, cores = 4)
 
 myfit
