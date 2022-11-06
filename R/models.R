@@ -140,3 +140,58 @@ latent_truncation_censoring_adjusted_delay <- function(
   )
   return(fit)
 }
+
+#' Estimate delays adjusted for epidemic growth rate
+#' @export
+exponential_delay <- function(
+  formula = brms::bf(
+    delay_daily | vreal(r, max_delay) ~ 1,
+    sigma ~ 1
+  ), data, fn = brms::brm,
+  family = brms::custom_family(
+    "exponential_lognormal",
+    dpars = c("mu", "sigma"),
+    links = c("identity", "log"),
+    lb = c(NA, 0),
+    ub = c(NA, NA),
+    type = "real",
+    vars = c("vreal1[n]", "vreal2[n]", "x_r", "x_i")
+  ),
+  scode_functions = "
+  real denom(real x, real xc, real[] theta,
+                      real[] x_r, int[] x_i) {
+    real r = theta[1];
+    real mu = theta[2];
+    real sigma = theta[3];
+    
+    return exp(lognormal_lpdf(x | mu, sigma) - r * x);                    
+  }
+  
+  real exponential_lognormal_lpdf(real y, real mu, real sigma, real r,
+                             real max_delay, data real[] x_r, data int[] x_i) {
+    // it looks like we can skip - r * y because that's just a contant value???
+    return lognormal_lpdf(y | mu, sigma) - log(integrate_1d(denom, 0, max_delay, {r, mu, sigma}, x_r, x_i, 1e-4));
+  }
+  ",
+  scode_tdata = "
+  real x_r[0]; 
+  int x_i[0];
+  ",
+  ...
+) {
+  
+  stanvars_functions <- brms::stanvar(block = "functions", scode = scode_functions)
+  stanvars_tdata <- brms::stanvar(block="tdata", scode=scode_tdata)
+    
+  stanvars_all <- stanvars_functions + stanvars_tdata
+  
+  data <- pad_zero(data)
+  
+  fit <- fn(
+    formula = formula, family = family, stanvars = stanvars_all,
+    backend = "cmdstanr", data = data, ...
+  )
+  
+  
+  return(fit)
+}
