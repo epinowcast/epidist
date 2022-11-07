@@ -62,7 +62,7 @@ RUN if [ "${ENABLE_JUPYTER}" = "true" ]; then \
 RUN apt-get update \
      && export DEBIAN_FRONTEND=noninteractive \
      && apt-get -y install --no-install-recommends libglpk-dev libv8-dev \
-            pandoc-citeproc tmux
+            pandoc pandoc-citeproc tmux
 
 # make workspace directory
 RUN mkdir -p /workspaces/dynamictruncation

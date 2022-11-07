@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.2.1",
+    "Version": "4.2.2",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -55,16 +55,16 @@
       "Package": "MASS",
       "Version": "7.3-57",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Hash": "71476c1d88d1ebdf31580e5a257d5d31",
       "Requirements": []
     },
     "Matrix": {
       "Package": "Matrix",
-      "Version": "1.4-1",
+      "Version": "1.5-1",
       "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "699c47c606293bdfbc9fd78a93c9c8fe",
+      "Repository": "RSPM",
+      "Hash": "539dc0c0c05636812f1080f473d2c177",
       "Requirements": [
         "lattice"
       ]
@@ -986,7 +986,7 @@
       "Package": "mgcv",
       "Version": "1.8-40",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Hash": "c6b2fdb18cf68ab613bd564363e1ba0d",
       "Requirements": [
         "Matrix",
@@ -1042,7 +1042,7 @@
       "Package": "nlme",
       "Version": "3.1-157",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Hash": "dbca60742be0c9eddc5205e5c7ca1f44",
       "Requirements": [
         "lattice"
@@ -1464,14 +1464,14 @@
       "Package": "stantargets",
       "Version": "0.0.5.9000",
       "Source": "GitHub",
-      "Remotes": "stan-dev/cmdstanr,",
       "RemoteType": "github",
+      "Remotes": "stan-dev/cmdstanr,",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "stantargets",
       "RemoteUsername": "ropensci",
       "RemoteRef": "HEAD",
       "RemoteSha": "b42cea6de7d263eba1a5c787b52c07514dcfa492",
-      "Hash": "87af9eb03c34b8ed8eb16e6bcd9146aa",
+      "Hash": "c21fb6b00bf68cc1abd5501f6a3034a8",
       "Requirements": [
         "cmdstanr",
         "digest",
