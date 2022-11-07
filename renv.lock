@@ -203,6 +203,14 @@
         "tidyselect"
       ]
     },
+    "boot": {
+      "Package": "boot",
+      "Version": "1.3-28",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "0baa960e3b49c6176a4f42addcbacc59",
+      "Requirements": []
+    },
     "bridgesampling": {
       "Package": "bridgesampling",
       "Version": "1.1-2",
@@ -217,6 +225,14 @@
         "scales",
         "stringr"
       ]
+    },
+    "brio": {
+      "Package": "brio",
+      "Version": "1.1.3",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "976cf154dfb043c012d87cddd8bca363",
+      "Requirements": []
     },
     "brms": {
       "Package": "brms",
@@ -308,11 +324,11 @@
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteRepo": "cmdstanr",
       "RemoteUsername": "stan-dev",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "53084da4a8a283dc436df6f3514c99132914d565",
-      "Hash": "4842bf178a7a1450d79cf1f925c38f4c",
+      "RemoteRepo": "cmdstanr",
+      "RemoteRef": "master",
+      "RemoteSha": "b12c99b78494eaeca1fa3d5b96a275a584c60291",
+      "Hash": "01c801ec8dac32ae638aa3d47f0b686c",
       "Requirements": [
         "R6",
         "checkmate",
@@ -435,6 +451,16 @@
         "rprojroot"
       ]
     },
+    "diffobj": {
+      "Package": "diffobj",
+      "Version": "0.3.5",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "bcaa8b95f8d7d01a5dedfd959ce88ab8",
+      "Requirements": [
+        "crayon"
+      ]
+    },
     "digest": {
       "Package": "digest",
       "Version": "0.6.30",
@@ -502,6 +528,30 @@
       "Hash": "bb0eec2fe32e88d9e2836c2f73ea2077",
       "Requirements": [
         "rlang"
+      ]
+    },
+    "epinowcast": {
+      "Package": "epinowcast",
+      "Version": "0.1.0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "epinowcast",
+      "RemoteRepo": "epinowcast",
+      "RemoteRef": "main",
+      "RemoteSha": "ba417c8c45444392a0d35d6503e7b528930aaafa",
+      "Remotes": "stan-dev/cmdstanr, stan-dev/loo",
+      "Hash": "bd10c8daedd4daccf450c70a3a04cf25",
+      "Requirements": [
+        "cmdstanr",
+        "data.table",
+        "ggplot2",
+        "lme4",
+        "lubridate",
+        "posterior",
+        "purrr",
+        "rstan",
+        "scales"
       ]
     },
     "evaluate": {
@@ -922,12 +972,35 @@
       "Hash": "0bde42ee282efb18c7c4e63822f5b4f7",
       "Requirements": []
     },
+    "lme4": {
+      "Package": "lme4",
+      "Version": "1.1-31",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "67581bdc21e3d5e6881cf47c0c3113eb",
+      "Requirements": [
+        "MASS",
+        "Matrix",
+        "Rcpp",
+        "RcppEigen",
+        "boot",
+        "lattice",
+        "minqa",
+        "nlme",
+        "nloptr"
+      ]
+    },
     "loo": {
       "Package": "loo",
       "Version": "2.5.1",
-      "Source": "Repository",
-      "Repository": "RSPM",
-      "Hash": "31b53df2593afd03a4969ae028c437b1",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "stan-dev",
+      "RemoteRepo": "loo",
+      "RemoteRef": "master",
+      "RemoteSha": "160f13d0167a882d8f6f71c548268bb00325ec80",
+      "Hash": "d4003ed64e7baacba33627e301ea0177",
       "Requirements": [
         "checkmate",
         "matrixStats"
@@ -1012,6 +1085,16 @@
         "shiny"
       ]
     },
+    "minqa": {
+      "Package": "minqa",
+      "Version": "1.2.5",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "587ce77fd3c7bada7eadb2d18b62930d",
+      "Requirements": [
+        "Rcpp"
+      ]
+    },
     "munsell": {
       "Package": "munsell",
       "Version": "0.5.0",
@@ -1046,6 +1129,16 @@
       "Hash": "dbca60742be0c9eddc5205e5c7ca1f44",
       "Requirements": [
         "lattice"
+      ]
+    },
+    "nloptr": {
+      "Package": "nloptr",
+      "Version": "2.0.3",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "277c67a08f358f42b6a77826e4492f79",
+      "Requirements": [
+        "testthat"
       ]
     },
     "numDeriv": {
@@ -1132,6 +1225,23 @@
       "Hash": "01f28d4278f15c76cddbea05899c5d6f",
       "Requirements": []
     },
+    "pkgload": {
+      "Package": "pkgload",
+      "Version": "1.3.1",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "3c0918b1792c75de2e640d1d8d12dead",
+      "Requirements": [
+        "cli",
+        "crayon",
+        "desc",
+        "fs",
+        "glue",
+        "rlang",
+        "rprojroot",
+        "withr"
+      ]
+    },
     "plyr": {
       "Package": "plyr",
       "Version": "1.8.7",
@@ -1159,6 +1269,14 @@
         "tibble",
         "vctrs"
       ]
+    },
+    "praise": {
+      "Package": "praise",
+      "Version": "1.0.0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "a555924add98c99d2f411e37e7d25e9f",
+      "Requirements": []
     },
     "prettyunits": {
       "Package": "prettyunits",
@@ -1231,6 +1349,16 @@
       "Repository": "RSPM",
       "Hash": "5e3c5dc0b071b21fa128676560dbe94d",
       "Requirements": []
+    },
+    "rematch2": {
+      "Package": "rematch2",
+      "Version": "2.1.2",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "76c9e04c712a05848ae7a23d2f170a40",
+      "Requirements": [
+        "tibble"
+      ]
     },
     "renv": {
       "Package": "renv",
@@ -1576,6 +1704,33 @@
       "Hash": "fd792ceac77f96b647fa8d6e1788969a",
       "Requirements": []
     },
+    "testthat": {
+      "Package": "testthat",
+      "Version": "3.1.5",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "6e3c4843f1ed0d3d90f35498671a001c",
+      "Requirements": [
+        "R6",
+        "brio",
+        "callr",
+        "cli",
+        "desc",
+        "digest",
+        "ellipsis",
+        "evaluate",
+        "jsonlite",
+        "lifecycle",
+        "magrittr",
+        "pkgload",
+        "praise",
+        "processx",
+        "ps",
+        "rlang",
+        "waldo",
+        "withr"
+      ]
+    },
     "threejs": {
       "Package": "threejs",
       "Version": "0.3.3",
@@ -1657,6 +1812,22 @@
       "Repository": "RSPM",
       "Hash": "62f4b5da3e08d8e5bcba6cac15603f70",
       "Requirements": []
+    },
+    "waldo": {
+      "Package": "waldo",
+      "Version": "0.4.0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "035fba89d0c86e2113120f93301b98ad",
+      "Requirements": [
+        "cli",
+        "diffobj",
+        "fansi",
+        "glue",
+        "rematch2",
+        "rlang",
+        "tibble"
+      ]
     },
     "withr": {
       "Package": "withr",
