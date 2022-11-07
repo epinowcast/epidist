@@ -43,7 +43,7 @@ ptime_est <- data.frame(
 stime_est <- data.frame(
   id = factor(1:200),
   true = truncated_obs$stime - truncated_obs$stime_daily,
-  est = summ$fixed[203:402,1],
+  est = summ$fixed[203:402, 1],
   lwr = summ$fixed[203:402, 3],
   upr = summ$fixed[203:402, 4]
 )
@@ -68,7 +68,7 @@ g2 <- ggplot(stime_est) +
 
 gcomb <- ggarrange(g1, g2, nrow = 1, draw = FALSE)
 
-ggsave("test_inftime_exp.png", gcomb, width = 8, height  6)
+ggsave("test_inftime_exp.png", gcomb, width = 8, height = 6)
 
 plot(stime_est$est, ptime_est$est)
 
