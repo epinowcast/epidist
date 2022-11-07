@@ -22,7 +22,7 @@ truncated_obs <- obs |>
   DT(sample(1:.N, 400, replace = FALSE))
 
 latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
-  data = truncated_obs, chains = 4, refresh = 100, cores = 4,
+  data = truncated_obs, chains = 4, refresh = 0, cores = 4,
   adapt_delta = 0.8
 )
 
