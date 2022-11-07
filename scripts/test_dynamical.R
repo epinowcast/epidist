@@ -2,7 +2,11 @@ library(dynamicaltruncation)
 library(data.table)
 library(cmdstanr)
 
-outbreak <- simulate_exponential_cases(sample_size = 10000, seed=101)
+growth_rate <- 0.2
+
+outbreak <- simulate_exponential_cases(
+  r = growth_rate, sample_size = 10000, seed=101
+)
 
 secondary_dist <- data.table(
   meanlog = 1.8, sdlog = 0.5
@@ -22,14 +26,14 @@ truncated_obs <- obs |>
   DT(sample(1:.N, 200, replace = FALSE))
 
 standata <- list(
-  r=0.2,
-  max_delay=20,
-  N=nrow(truncated_obs),
-  Y=truncated_obs$delay_daily
+  r = growth_rate,
+  max_delay = 20,
+  N = nrow(truncated_obs),
+  Y = truncated_obs$delay_daily
 )
 
 model <- cmdstan_model("scripts/lognormal_dynamical.stan")
 
-myfit <- model$sample(data=standata, chains = 1)
+myfit <- model$sample(data = standata, chains = 2, parallel_chains = 2)
 
 myfit
