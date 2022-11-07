@@ -71,8 +71,16 @@ RUN chmod -R ugo+rw /workspaces/dynamictruncation
 # install dependencies
 WORKDIR /workspaces/dynamictruncation
 COPY renv.lock renv.lock
+RUN mkdir -p renv
+COPY .Rprofile .Rprofile
+COPY renv/activate.R renv/activate.R
+COPY renv/settings.dcf renv/settings.dcf
 RUN R -e 'install.packages("renv"); renv::restore()'
-RUN rm renv.lock
 
 # install latex
 RUN Rscript -e "tinytex::install_tinytex()"
+
+# clean up renv
+RUN rm renv.lock
+RUN rm -r renv
+RUN rm .Rprofile
