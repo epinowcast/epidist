@@ -11,7 +11,8 @@ functions {
   real dynamical_lognormal_lpdf(real y, real mu, real sigma, real r,
                              real max_delay, data real[] x_r, data int[] x_i) {
     // it looks like we can skip - r * y because that's just a contant value???
-    return lognormal_lpdf(y | mu, sigma) - log(integrate_1d(denom, 0, max_delay, {r, mu, sigma}, x_r, x_i, 1e-4));
+    return lognormal_lpdf(y | mu, sigma) -
+       log(integrate_1d(denom, 0, max_delay, {r, mu, sigma}, x_r, x_i, 1e-4));
   }
 }
 
@@ -29,14 +30,16 @@ transformed data {
 
 parameters {
   real mu;
-  real sigma;
+  real<lower = 0> sigma;
 }
 
 model {
   mu ~ normal(0, 10);
-  sigma ~ normal(0, 10);
+  sigma ~ normal(0, 10) T[0,];
   
   for (n in 1 : N) {
-      target += dynamical_lognormal_lpdf(Y[n] | mu, exp(sigma), r, max_delay, x_r, x_i);
+      target += dynamical_lognormal_lpdf(
+        Y[n] | mu, sigma, r, max_delay, x_r, x_i
+      );
   }
 }
