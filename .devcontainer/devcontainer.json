@@ -2,20 +2,7 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/r
 {
 	"name": "R (Community)",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"args": {
-			// Update VARIANT to pick a R version: 4, 4.2, 4.1, 4.0
-			"VARIANT": "4.2",
-			// Start with a minimal image (rocker/r-ver) or a expanded image.
-			// See more details about rocker/r-ver's derived images: https://github.com/rocker-org/rocker-versioned2
-			"BASE_IMAGE": "rocker/binder",
-			// Options
-			"ENABLE_JUPYTER": "true",
-			"UPGRADE_PACKAGES": "true"
-		}
-	},
-
+	"image": "ghcr.io/parksw3/dynamicaltruncation:main",
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
