@@ -161,7 +161,11 @@ plot_posterior_pred_check <- function(fit,
     ) +
     geom_line(data=fitted, aes(pvec, mean))
 
+<<<<<<< HEAD
   return(gplot)
+=======
+  gplot
+>>>>>>> 99d3fbca595c43943b32314f05ef78ff1f470650
 }
 
 #' Plot empirical cohort-based or cumulative mean 
@@ -179,7 +183,11 @@ plot_cohort_mean <- function(data, type=c("cohort", "cumulative")) {
       y = "Mean delay (days)"
     )  
   
+<<<<<<< HEAD
   return(gplot)
+=======
+  gplot
+>>>>>>> 99d3fbca595c43943b32314f05ef78ff1f470650
 }
 
 plot_cohort_mean_internal <- function(data, type=c("cohort", "cumulative")) {
