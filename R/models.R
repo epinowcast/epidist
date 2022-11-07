@@ -92,7 +92,7 @@ truncation_censoring_adjusted_delay <- function(
 #' @export
 latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
-    ptime | vreal(stime, obs_at) ~ 1,
+    ptime_daily | vreal(stime_daily, obs_at) ~ 1,
     sigma ~ 1,
     pwindow ~ 0 + id,
     swindow ~ 0 + id
