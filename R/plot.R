@@ -151,11 +151,7 @@ plot_posterior_pred_check <- function(fit,
     geom_ribbon(data=fitted, aes(pvec, ymin=lwr, ymax=upr), alpha=0.3, lty=2, col="black") +
     geom_line(data=fitted, aes(pvec, mean))
 
-  if (draw) {
-    plot(gplot)
-  }
-  
-  invisible(gplot)
+  gplot
 }
 
 #' Plot empirical cohort-based or cumulative mean 
@@ -175,11 +171,7 @@ plot_cohort_mean <- function(data,
       y = "Mean delay (days)"
     )  
   
-  if (draw) {
-    plot(gplot)
-  }
-    
-  invisible(gplot)
+  gplot
 }
 
 plot_cohort_mean_internal <- function(data,
