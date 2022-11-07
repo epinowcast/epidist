@@ -3,7 +3,7 @@ library(purrr, quietly = TRUE)
 library(dplyr)
 library(here)
 library(rstan)
-options(mc.cores=4)
+options(mc.cores = 4)
 
 functions <- list.files(here("R"), full.names = TRUE)
 walk(functions, source)
@@ -28,20 +28,20 @@ truncated_obs <- obs |>
   DT(sample(1:.N, 200, replace = FALSE))
 
 standata <- list(
-  N=nrow(truncated_obs),
-  ptime_lwr=truncated_obs$ptime_lwr,
-  ptime_upr=truncated_obs$ptime_upr,
-  stime_lwr=truncated_obs$stime_lwr,
-  stime_upr=truncated_obs$stime_upr,
-  end_t=46
+  N = nrow(truncated_obs),
+  ptime_lwr = truncated_obs$ptime_lwr,
+  ptime_upr = truncated_obs$ptime_upr,
+  stime_lwr = truncated_obs$stime_lwr,
+  stime_upr = truncated_obs$stime_upr,
+  end_t = 46
 )
 
 model <- stan_model("scripts/lognormal_doublecensor_reparam.stan")
 
-myfit <- sampling(model,standata,iter=2000,chains=4)
+myfit <- sampling(model, standata, iter = 2000, chains = 4)
 
 msumm <- summary(myfit)
 
-plot(msumm$summary[201:400,1], msumm$summary[1:200,1])
+plot(msumm$summary[201:400, 1], msumm$summary[1:200, 1])
 
-msumm$summary[401:402,]
+msumm$summary[401:402, ]
