@@ -8,10 +8,10 @@ data {
 }
 
 parameters {
-  vector<lower=0, upper=1>[N] ptime_uniform;
-  vector<lower=0, upper=1>[N] stime_uniform;
   real mu;
   real logsigma;
+  vector<lower=0, upper=1>[N] ptime_uniform;
+  vector<lower=0, upper=1>[N] stime_uniform;
 }
 
 transformed parameters {
@@ -19,7 +19,7 @@ transformed parameters {
   vector[N] stime;
   vector[N] delay;
   vector[N] obs_time;
-  real sigma;
+  real<lower=0> sigma;
   
   ptime = ptime_uniform .* (ptime_upr-ptime_lwr) + ptime_lwr;
   stime = stime_uniform .* (stime_upr-stime_lwr) + stime_lwr;
@@ -33,6 +33,8 @@ model {
   ptime_uniform ~ uniform(0, 1);
   stime_uniform ~ uniform(0, 1);
   
+  target += student_t_lpdf(mu | 3, 1, 2.5);
+  target += student_t_lpdf(logsigma | 3, 0, 2.5);
   target += lognormal_lpdf(delay|mu, sigma) - lognormal_lcdf(obs_time| mu, sigma);
 }
 
