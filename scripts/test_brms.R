@@ -22,17 +22,17 @@ truncated_obs <- obs |>
   DT(sample(1:.N, 400, replace = FALSE))
 
 latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
-  data = truncated_obs, chains = 4, refresh = 100, parallel_chains = 4,
-  adapt_delta = 0.8, show_messages = FALSE
+  data = truncated_obs, chains = 4, refresh = 100, cores = 4,
+  adapt_delta = 0.8
 )
 
 standata <- list(
-  N=nrow(truncated_obs),
-  ptime_lwr=truncated_obs$ptime_lwr,
-  ptime_upr=truncated_obs$ptime_upr,
-  stime_lwr=truncated_obs$stime_lwr,
-  stime_upr=truncated_obs$stime_upr,
-  end_t=30
+  N = nrow(truncated_obs),
+  ptime_lwr = truncated_obs$ptime_lwr,
+  ptime_upr = truncated_obs$ptime_upr,
+  stime_lwr = truncated_obs$stime_lwr,
+  stime_upr = truncated_obs$stime_upr,
+  end_t = 30
 )
 
 model <- cmdstan_model("scripts/lognormal_doublecensor.stan")
