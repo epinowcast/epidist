@@ -104,16 +104,18 @@ latent_truncation_censoring_adjusted_delay <- function(
     lb = c(NA, 0, 0, 0),
     ub = c(NA, NA, 1, 1),
     type = "real",
-    vars = c("vreal1[n]", "vreal2[n]")
+    vars = c("vreal1", "vreal2"),
+    loop = FALSE
   ),
   scode = "
-  real latent_lognormal_lpdf(real y, real mu, real sigma, real pwindow,
-                              real swindow, real stime,
-                              real obs_t) {
-    real p = y + pwindow;
-    real s = stime + swindow;
-    real d = s - p;
-    real obs_time = obs_t - p;
+  real latent_lognormal_lpdf(vector y, vector mu, vector sigma, vector pwindow,
+                             vector swindow, array[] real stime,
+                             array[] real obs_t) {
+    int n = num_elements(y);
+    vector[n] p = y + pwindow;
+    vector[n] s = to_vector(stime) + swindow;
+    vector[n] d = s - p;
+    vector[n] obs_time = to_vector(obs_t) - p;
     return lognormal_lpdf(d | mu, sigma) - lognormal_lcdf(obs_time | mu, sigma);
     }
   ",
