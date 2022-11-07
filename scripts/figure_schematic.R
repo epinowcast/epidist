@@ -81,7 +81,7 @@ censoring <- generate_base_plot(future = FALSE) |>
   add_arrow(x=0.1, y = 0.1, xend = 2.45, ends = "last", angle = 90) |>
   add_arrow(x=3.55, y = 0.1, xend = 3.9, ends = "first", angle = 90) |>
   add_arrow(x=4.1, y = 0.1, xend = 4.45, ends = "last", angle = 90) |>
-  add_arrow(x=0.55, y = 0.2, xend = 0.95, ends = "first", angle = 90) |>
+  add_arrow(x=0.55, y = 0.2, xend = 0.9, ends = "first", angle = 90) |>
   add_arrow(x=1.1, y = 0.2, xend = 1.45, ends = "last", angle = 90) |>
   add_arrow(x=4.55, y = 0.3, xend = 4.9, ends = "first", angle = 90) |>
   add_arrow(x=5.1, y = 0.3, xend = 5.45, ends = "last", angle = 90) +

@@ -86,13 +86,12 @@ plot_censor_delay <- function(censor_delay) {
 #' @export
 plot_posterior_pred_check <- function(fit,
                                       data,
-                                      type=c("cohort", "cumulative"),
+                                      type = c("cohort", "cumulative"),
                                       truncate,
-                                      obs_at,
-                                      draw=TRUE) {
+                                      obs_at) {
   type <- match.arg(type)
   
-  gplot <- plot_cohort_mean(data, type, draw=FALSE)
+  gplot <- plot_cohort_mean(data, type)
   
   prange <- range(data$ptime_daily)
   pvec <- seq(prange[1], prange[2], by=1)
@@ -100,7 +99,7 @@ plot_posterior_pred_check <- function(fit,
   ee <- extract_lognormal_draws(fit)
   
   if (truncate) {
-    if (type=="cumulative") {
+    if (type == "cumulative") {
       stop("Don't use the truncate option with cumulative mean.")
     }
     
@@ -108,7 +107,7 @@ plot_posterior_pred_check <- function(fit,
       ## FIXME: is this safe for more general usage? our data always have obs_at
       ## option 1: spit out a warning and take the maximum secondary event time
       ## the problem with option 1 is  that if someone's looking at old data..?
-      obs_at <- unique(truncated_obs$obs_at)
+      obs_at <- unique(data$obs_at)
     }
     
     estmat <- matrix(NA, nrow=nrow(ee), ncol=length(pvec))
@@ -122,47 +121,52 @@ plot_posterior_pred_check <- function(fit,
           
         p <- pvec[j]
         
-        numer <- integrate(function(x) x * dlnorm(x, meanlog = ee$meanlog[i], sdlog = ee$sdlog[i]),
-                           lower=0, upper=obs_at - p)[[1]]
+        numer <- integrate(
+          function(x) {
+            x * dlnorm(x, meanlog = ee$meanlog[i], sdlog = ee$sdlog[i])
+          },
+          lower=0, upper=obs_at - p
+        )[[1]]
         
-        denom <- integrate(function(x) dlnorm(x, meanlog = ee$meanlog[i], sdlog = ee$sdlog[i]),
-                           lower=0, upper=obs_at - p)[[1]]
+        denom <- integrate(
+          function(x) {
+            dlnorm(x, meanlog = ee$meanlog[i], sdlog = ee$sdlog[i])
+          },
+          lower=0, upper=obs_at - p
+        )[[1]]
         
-        estmat[i,j] <- numer/denom
+        estmat[i,j] <- numer / denom
       }
     }
   
     fitted <- data.table(
-      pvec=pvec,
-      mean=apply(estmat, 2, mean),
-      lwr=apply(estmat, 2, quantile, 0.025),
-      upr=apply(estmat, 2, quantile, 0.975)
+      pvec = pvec,
+      mean = apply(estmat, 2, mean),
+      lwr = apply(estmat, 2, quantile, 0.025),
+      upr = apply(estmat, 2, quantile, 0.975)
     )
   } else {
     fitted <- data.table(
-      pvec=pvec,
-      mean=mean(ee$mean),
-      lwr=quantile(ee$mean, 0.025),
-      upr=quantile(ee$mean, 0.975)
+      pvec = pvec,
+      mean = mean(ee$mean),
+      lwr = quantile(ee$mean, 0.025),
+      upr = quantile(ee$mean, 0.975)
     )  
   }
   
   gplot <- gplot +
-    geom_ribbon(data=fitted, aes(pvec, ymin=lwr, ymax=upr), alpha=0.3, lty=2, col="black") +
+    geom_ribbon(
+      data = fitted, aes(pvec, ymin=lwr, ymax=upr), alpha=0.3,
+      lty=2, col="black"
+    ) +
     geom_line(data=fitted, aes(pvec, mean))
 
-  if (draw) {
-    plot(gplot)
-  }
-  
-  invisible(gplot)
+  return(gplot)
 }
 
 #' Plot empirical cohort-based or cumulative mean 
 #' @export
-plot_cohort_mean <- function(data,
-                             type=c("cohort", "cumulative"),
-                             draw=TRUE) {
+plot_cohort_mean <- function(data, type=c("cohort", "cumulative")) {
   
   out <- plot_cohort_mean_internal(data, type)
   
@@ -175,15 +179,10 @@ plot_cohort_mean <- function(data,
       y = "Mean delay (days)"
     )  
   
-  if (draw) {
-    plot(gplot)
-  }
-    
-  invisible(gplot)
+  return(gplot)
 }
 
-plot_cohort_mean_internal <- function(data,
-                                      type=c("cohort", "cumulative")) {
+plot_cohort_mean_internal <- function(data, type=c("cohort", "cumulative")) {
   type <- match.arg(type)
   
   out <- data |>
@@ -198,5 +197,5 @@ plot_cohort_mean_internal <- function(data,
     
   }
   
-  out
+  return(out[])
 }

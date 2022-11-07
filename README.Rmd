@@ -194,7 +194,9 @@ draws |>
 
 Finally, posterior predictive check plot for the latent fit:
 ```{r postcheck}
-plot_posterior_pred_check(latent_truncation_censoring_fit, truncated_obs, truncate=TRUE)
+plot_posterior_pred_check(
+  latent_truncation_censoring_fit, truncated_obs, truncate = TRUE
+)
 ```
 
 ## Analyses
