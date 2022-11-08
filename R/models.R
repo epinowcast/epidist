@@ -92,7 +92,7 @@ truncation_censoring_adjusted_delay <- function(
 #' @export
 latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
-    ptime_daily | vreal(stime_daily, obs_at) ~ 1,
+    delay_daily | vreal(obs_t) ~ 1,
     sigma ~ 1,
     pwindow ~ 0 + id,
     swindow ~ 0 + id
@@ -104,16 +104,15 @@ latent_truncation_censoring_adjusted_delay <- function(
     lb = c(NA, 0, 0, 0),
     ub = c(NA, NA, 1, 1),
     type = "real",
-    vars = c("vreal1[n]", "vreal2[n]")
+    vars = c("vreal1"),
+    loop = FALSE
   ),
   scode = "
-  real latent_lognormal_lpdf(real y, real mu, real sigma, real pwindow,
-                              real swindow, real stime,
-                              real obs_t) {
-    real p = y + pwindow;
-    real s = stime + swindow;
-    real d = s - p;
-    real obs_time = obs_t - p;
+  real latent_lognormal_lpdf(vector y, vector mu, vector sigma, vector pwindow,
+                             vector swindow, array[] real obs_t) {
+    int n = num_elements(y);
+    vector[n] d = y - pwindow + swindow;
+    vector[n] obs_time = to_vector(obs_t) - pwindow;
     return lognormal_lpdf(d | mu, sigma) - lognormal_lcdf(obs_time | mu, sigma);
     }
   ",
@@ -128,7 +127,8 @@ latent_truncation_censoring_adjusted_delay <- function(
 
   data <- data |>
     data.table::copy() |>
-    DT(, id := 1:.N)
+    DT(, id := 1:.N) |>
+    DT(, obs_t := obs_at - ptime_daily)
 
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
