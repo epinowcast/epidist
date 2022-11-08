@@ -73,9 +73,8 @@ scores <- relative_draws |>
 scores
 
 relative_draws |>
-  plot_relative_recovery(fill = model) +
+  plot_relative_recovery() +
   facet_wrap(vars(parameter), nrow = 1, scales = "free_x") +
-  scale_fill_viridis_d() +
   guides(fill = guide_none()) +
   labs(
     y = "Model", x = "Relative to ground truth"
