@@ -92,7 +92,7 @@ truncation_censoring_adjusted_delay <- function(
 #' @export
 latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
-    delay_central | vreal(obs_at, pwindow_upr, swindow_upr) ~ 1,
+    delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1,
     sigma ~ 1
   ), data, fn = brms::brm,
   family = brms::custom_family(
@@ -112,7 +112,7 @@ latent_truncation_censoring_adjusted_delay <- function(
       int n = num_elements(y);
       vector[n] d = y - pwindow + swindow;
       vector[n] obs_time = to_vector(obs_t) - pwindow;
-      return lognormal_lpdf(d | mu, sigma) -
+      return lognormal_lpdf(d | mu, sigma) - 
         lognormal_lcdf(obs_time | mu, sigma);
       }
   ",
