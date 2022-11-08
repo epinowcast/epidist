@@ -92,7 +92,7 @@ truncation_censoring_adjusted_delay <- function(
 #' @export
 latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
-    ptime_daily | vreal(stime_daily, obs_at) ~ 1,
+    ptime_lwr | vreal(ptime_upr, stime_lwr, stime_upr, obs_at) ~ 1,
     sigma ~ 1
   ), data, fn = brms::brm,
   family = brms::custom_family(
@@ -120,10 +120,10 @@ latent_truncation_censoring_adjusted_delay <- function(
     vector[N] delay;
     vector[N] obs_time;
     
-    ptime = Y + pwindow;
-    stime = to_vector(vreal1) + swindow;
+    ptime = pwindow .* (to_vector(vreal1)-Y) + Y;
+    stime = swindow .* (to_vector(vreal3)-to_vector(vreal2)) + to_vector(vreal2);
     delay = stime - ptime;
-    obs_time = to_vector(vreal2) - ptime;
+    obs_time = to_vector(vreal4) - ptime;
   ",
   scode_prior = "
     pwindow ~ uniform(0, 1);
