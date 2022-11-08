@@ -92,60 +92,6 @@ truncation_censoring_adjusted_delay <- function(
 #' @export
 latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
-    delay_daily | vreal(obs_t) ~ 1,
-    sigma ~ 1,
-    pwindow ~ 0 + id,
-    swindow ~ 0 + id
-  ), data, fn = brms::brm,
-  family = brms::custom_family(
-    "latent_lognormal",
-    dpars = c("mu", "sigma", "pwindow", "swindow"),
-    links = c("identity", "log", "identity", "identity"),
-    lb = c(NA, 0, 0, 0),
-    ub = c(NA, NA, 1, 1),
-    type = "real",
-    vars = c("vreal1"),
-    loop = FALSE
-  ),
-  scode = "
-  real latent_lognormal_lpdf(vector y, vector mu, vector sigma, vector pwindow,
-                             vector swindow, array[] real obs_t) {
-    int n = num_elements(y);
-    vector[n] d = y - pwindow + swindow;
-    vector[n] obs_time = to_vector(obs_t) - pwindow;
-    return lognormal_lpdf(d | mu, sigma) - lognormal_lcdf(obs_time | mu, sigma);
-    }
-  ",
-  priors = c(
-    prior(uniform(0, 1), class = "b", dpar = "pwindow", lb = 0, ub = 1),
-    prior(uniform(0, 1), class = "b", dpar = "swindow", lb = 0, ub = 1)
-  ),
-  ...
-) {
-
-  stanvars <- brms::stanvar(block = "functions", scode = scode)
-
-  data <- data |>
-    data.table::copy() |>
-    DT(, id := 1:.N) |>
-    DT(, obs_t := obs_at - ptime_daily)
-
-  if (nrow(data) > 1) {
-    data <- data[, id := as.factor(id)]
-  }
-
-  fit <- fn(
-    formula = formula, family = family, stanvars = stanvars, prior = priors,
-    backend = "cmdstanr", data = data, ...
-  )
-  return(fit)
-}
-
-#' Estimate delays adjusted for right truncation and censoring using a
-#' latent model
-#' @export
-latent_truncation_censoring_adjusted_delay_hack <- function(
-  formula = brms::bf(
     ptime_daily | vreal(stime_daily, obs_at) ~ 1,
     sigma ~ 1
   ), data, fn = brms::brm,
@@ -174,12 +120,14 @@ latent_truncation_censoring_adjusted_delay_hack <- function(
     vector[N] delay;
     vector[N] obs_time;
     
-    for (i in 1:N) {
-      ptime[i] = Y[i] + pwindow[i];
-      stime[i] = vreal1[i] + swindow[i];
-      delay[i] = stime[i] - ptime[i];
-      obs_time[i] = vreal2[i] - ptime[i];
-    }
+    ptime = Y + pwindow;
+    stime = to_vector(vreal1) + swindow;
+    delay = stime - ptime;
+    obs_time = to_vector(vreal2) - ptime;
+  ",
+  scode_prior = "
+    pwindow ~ uniform(0, 1);
+    swindow ~ uniform(0, 1);
   ",
   ...
 ) {
@@ -187,8 +135,9 @@ latent_truncation_censoring_adjusted_delay_hack <- function(
   stanvars_functions <- brms::stanvar(block = "functions", scode = scode_functions)
   stanvars_parameters <- brms::stanvar(block = "parameters", scode = scode_parameters)
   stanvars_tparameters <- brms::stanvar(block = "tparameters", scode = scode_tparameters)
+  stanvars_prior <- brms::stanvar(block = "model", scode = scode_prior)
   
-  stanvars_all <- stanvars_functions + stanvars_parameters + stanvars_tparameters
+  stanvars_all <- stanvars_functions + stanvars_parameters + stanvars_tparameters + stanvars_prior
   
   data <- data |>
     data.table::copy() |>

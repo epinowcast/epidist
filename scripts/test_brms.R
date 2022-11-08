@@ -21,7 +21,7 @@ truncated_obs <- obs |>
   filter_obs_by_obs_time(obs_time = 30) |>
   DT(sample(1:.N, 400, replace = FALSE))
 
-latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay_hack(
+latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
   data = truncated_obs, chains = 4, refresh = 0, cores = 4,
   adapt_delta = 0.8
 )
@@ -43,4 +43,4 @@ myfit <- model$sample(data = standata, parallel_chains = 4, adapt_delta = 0.8, r
 
 myfit$time()
 
-rstan::get_elapsed_time(latent_truncation_censoring_fit$fit) 
+rstan::get_elapsed_time(latent_truncation_censoring_fit$fit)
