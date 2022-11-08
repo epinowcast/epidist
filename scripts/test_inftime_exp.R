@@ -4,8 +4,7 @@ library(dplyr)
 library(here)
 library(ggplot2); theme_set(theme_bw())
 library(egg)
-functions <- list.files(here("R"), full.names = TRUE)
-walk(functions, source)
+library(dynamicaltruncation)
 
 outbreak <- simulate_exponential_cases(sample_size = 10000, seed=101)
 
@@ -30,22 +29,23 @@ latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
   data = truncated_obs, cores = 4, refresh = 100
 )
 
-summ <- summary(latent_truncation_censoring_fit)
+summ <- latent_truncation_censoring_fit |>
+  posterior_summary()
 
 ptime_est <- data.frame(
   id = factor(1:200),
   true = truncated_obs$ptime - truncated_obs$ptime_daily,
-  est = summ$fixed[3:202, 1],
-  lwr = summ$fixed[3:202, 3],
-  upr=summ$fixed[3:202, 4]
+  est = summ[5:204, 1],
+  lwr = summ[5:204, 3],
+  upr= summ[5:204, 4]
 )
 
 stime_est <- data.frame(
   id = factor(1:200),
   true = truncated_obs$stime - truncated_obs$stime_daily,
-  est = summ$fixed[203:402, 1],
-  lwr = summ$fixed[203:402, 3],
-  upr = summ$fixed[203:402, 4]
+  est = summ[205:404, 1],
+  lwr = summ[205:404, 3],
+  upr = summ[205:404, 4]
 )
 
 g1 <- ggplot(ptime_est) +
