@@ -117,7 +117,7 @@ latent_truncation_censoring_adjusted_delay <- function(
   scode_tparameters = "
     vector[N] ptime;
     vector[N] stime;
-    vector[N] delay;
+    vector<lower = 0>[N] delay;
     vector[N] obs_time;
     
     ptime = pwindow .* (to_vector(vreal1)-Y) + Y;
