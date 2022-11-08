@@ -43,4 +43,4 @@ myfit <- model$sample(data = standata, parallel_chains = 4, adapt_delta = 0.8, r
 
 myfit$time()
 
-rstan::get_elapsed_time(latent_truncation_censoring_fit$fit)
+rstan::get_elapsed_time(latent_truncation_censoring_fit$fit) 
