@@ -141,6 +141,71 @@ latent_truncation_censoring_adjusted_delay <- function(
   return(fit)
 }
 
+#' Estimate delays adjusted for right truncation and censoring using a
+#' latent model
+#' @export
+latent_truncation_censoring_adjusted_delay_hack <- function(
+  formula = brms::bf(
+    ptime_daily | vreal(stime_daily, obs_at) ~ 1,
+    sigma ~ 1
+  ), data, fn = brms::brm,
+  family = brms::custom_family(
+    "latent_lognormal",
+    dpars = c("mu", "sigma"),
+    links = c("identity", "log"),
+    lb = c(NA, 0),
+    ub = c(NA, NA),
+    type = "real",
+    vars = c("delay", "obs_time"),
+    loop = FALSE
+  ),
+  scode_functions = "
+  real latent_lognormal_lpdf(vector y, vector mu, vector sigma, vector delay, vector obs_time) {
+    return lognormal_lpdf(delay | mu, sigma) - lognormal_lcdf(obs_time | mu, sigma);
+    }
+  ",
+  scode_parameters = "
+    vector<lower=0, upper=1>[N] pwindow;
+    vector<lower=0, upper=1>[N] swindow;
+  ",
+  scode_tparameters = "
+    vector[N] ptime;
+    vector[N] stime;
+    vector[N] delay;
+    vector[N] obs_time;
+    
+    for (i in 1:N) {
+      ptime[i] = Y[i] + pwindow[i];
+      stime[i] = vreal1[i] + swindow[i];
+      delay[i] = stime[i] - ptime[i];
+      obs_time[i] = vreal2[i] - ptime[i];
+    }
+  ",
+  ...
+) {
+  
+  stanvars_functions <- brms::stanvar(block = "functions", scode = scode_functions)
+  stanvars_parameters <- brms::stanvar(block = "parameters", scode = scode_parameters)
+  stanvars_tparameters <- brms::stanvar(block = "tparameters", scode = scode_tparameters)
+  
+  stanvars_all <- stanvars_functions + stanvars_parameters + stanvars_tparameters
+  
+  data <- data |>
+    data.table::copy() |>
+    DT(, id := 1:.N) |>
+    DT(, obs_t := obs_at - ptime_daily)
+  
+  if (nrow(data) > 1) {
+    data <- data[, id := as.factor(id)]
+  }
+  
+  fit <- fn(
+    formula = formula, family = family, stanvars = stanvars_all,
+    backend = "cmdstanr", data = data, ...
+  )
+  return(fit)
+}
+
 #' Estimate delays adjusted for epidemic growth rate
 #' @export
 exponential_delay <- function(
