@@ -92,7 +92,7 @@ truncation_censoring_adjusted_delay <- function(
 #' @export
 latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
-    ptime_lwr | vreal(stime_lwr, obs_at) ~ 1,
+    ptime_lwr | vreal(stime_lwr, obs_at, pwindow_upr, swindow_upr) ~ 1,
     sigma ~ 1
   ), data, fn = brms::brm,
   family = brms::custom_family(
@@ -119,12 +119,12 @@ latent_truncation_censoring_adjusted_delay <- function(
       }
   ",
   scode_parameters = "
-    vector<lower=0, upper=1>[N] pwindow;
-    vector<lower=0, upper=1>[N] swindow;
+    vector<lower = 0, upper = to_vector(vreal3)>[N] pwindow;
+    vector<lower = 0, upper = to_vector(vreal4)>[N] swindow;
   ",
   scode_prior = "
-    pwindow ~ uniform(0, 1);
-    swindow ~ uniform(0, 1);
+    pwindow ~ uniform(0, to_vector(vreal3));
+    swindow ~ uniform(0, to_vector(vreal4));
   ",
   ...
 ) {
@@ -142,7 +142,9 @@ latent_truncation_censoring_adjusted_delay <- function(
   data <- data |>
     data.table::copy() |>
     DT(, id := 1:.N) |>
-    DT(, obs_t := obs_at - ptime_lwr)
+    DT(, obs_t := obs_at - ptime_lwr) |>
+    DT(, pwindow_upr := ptime_upr - ptime_lwr) |>
+    DT(, swindow_upr := stime_upr - stime_lwr)
   
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
