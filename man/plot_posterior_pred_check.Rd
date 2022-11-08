@@ -9,8 +9,7 @@ plot_posterior_pred_check(
   data,
   type = c("cohort", "cumulative"),
   truncate,
-  obs_at,
-  draw = TRUE
+  obs_at
 )
 }
 \arguments{
