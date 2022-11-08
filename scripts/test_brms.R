@@ -21,10 +21,12 @@ truncated_obs <- obs |>
   filter_obs_by_obs_time(obs_time = 30) |>
   DT(sample(1:.N, 400, replace = FALSE))
 
-latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
+latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay_hack(
   data = truncated_obs, chains = 4, refresh = 0, cores = 4,
   adapt_delta = 0.8
 )
+
+latent_truncation_censoring_fit
 
 standata <- list(
   N = nrow(truncated_obs),
@@ -37,7 +39,7 @@ standata <- list(
 
 model <- cmdstan_model("scripts/lognormal_doublecensor.stan")
 
-myfit <- model$sample(data = standata, parallel_chains = 4, adapt_delta = 0.8)
+myfit <- model$sample(data = standata, parallel_chains = 4, adapt_delta = 0.8, refresh=0)
 
 myfit$time()
 
