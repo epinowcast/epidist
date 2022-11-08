@@ -92,7 +92,7 @@ truncation_censoring_adjusted_delay <- function(
 #' @export
 latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
-    ptime_lwr | vreal(stime_lwr, obs_at, pwindow_upr, swindow_upr) ~ 1,
+    delay_central | vreal(obs_at, pwindow_upr, swindow_upr) ~ 1,
     sigma ~ 1
   ), data, fn = brms::brm,
   family = brms::custom_family(
@@ -102,29 +102,27 @@ latent_truncation_censoring_adjusted_delay <- function(
     lb = c(NA, 0),
     ub = c(NA, NA),
     type = "real",
-    vars = c("pwindow", "swindow", "vreal1", "vreal2"),
+    vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE
   ),
   scode_functions = "
     real latent_lognormal_lpdf(vector y, vector mu, vector sigma,
                                vector pwindow, vector swindow,
-                               array[] real stime, array[] real obs_t) {
+                               array[] real obs_t) {
       int n = num_elements(y);
-      vector[n] p = y + pwindow;
-      vector[n] s = to_vector(stime) + swindow;
-      vector[n] d = s - p;
-      vector[n] obs_time = to_vector(obs_t) - p;
+      vector[n] d = y - pwindow + swindow;
+      vector[n] obs_time = to_vector(obs_t) - pwindow;
       return lognormal_lpdf(d | mu, sigma) -
         lognormal_lcdf(obs_time | mu, sigma);
       }
   ",
   scode_parameters = "
-    vector<lower = 0, upper = to_vector(vreal3)>[N] pwindow;
-    vector<lower = 0, upper = to_vector(vreal4)>[N] swindow;
+    vector<lower = 0, upper = to_vector(vreal2)>[N] pwindow;
+    vector<lower = 0, upper = to_vector(vreal3)>[N] swindow;
   ",
   scode_prior = "
-    pwindow ~ uniform(0, to_vector(vreal3));
-    swindow ~ uniform(0, to_vector(vreal4));
+    pwindow ~ uniform(0, to_vector(vreal2));
+    swindow ~ uniform(0, to_vector(vreal3));
   ",
   ...
 ) {
@@ -144,7 +142,8 @@ latent_truncation_censoring_adjusted_delay <- function(
     DT(, id := 1:.N) |>
     DT(, obs_t := obs_at - ptime_lwr) |>
     DT(, pwindow_upr := ptime_upr - ptime_lwr) |>
-    DT(, swindow_upr := stime_upr - stime_lwr)
+    DT(, swindow_upr := stime_upr - stime_lwr) |>
+    DT(, delay_central := stime_lwr - ptime_lwr)
   
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
