@@ -6,17 +6,20 @@
 latent model}
 \usage{
 latent_truncation_censoring_adjusted_delay(
-  formula = brms::bf(ptime | vreal(stime, obs_at) ~ 1, sigma ~ 1, pwindow ~ 0 + id,
-    swindow ~ 0 + id),
+  formula = brms::bf(ptime_lwr | vreal(ptime_upr, stime_lwr, stime_upr, obs_at) ~ 1,
+    sigma ~ 1),
   data,
   fn = brms::brm,
-  family = brms::custom_family("latent_lognormal", dpars = c("mu", "sigma", "pwindow",
-    "swindow"), links = c("identity", "log", "identity", "identity"), lb = c(NA, 0, 0,
-    0), ub = c(NA, NA, 1, 1), type = "real", vars = c("vreal1[n]", "vreal2[n]")),
-  scode =
-    "\\n  real latent_lognormal_lpdf(real y, real mu, real sigma, real pwindow,\\n                              real swindow, real stime,\\n                              real obs_t) {\\n    real p = y + pwindow;\\n    real s = stime + swindow;\\n    real d = s - p;\\n    real obs_time = obs_t - p;\\n    return lognormal_lpdf(d | mu, sigma) - lognormal_lcdf(obs_time | mu, sigma);\\n    }\\n  ",
-  priors = c(prior(uniform(0, 1), class = "b", dpar = "pwindow", lb = 0, ub = 1),
-    prior(uniform(0, 1), class = "b", dpar = "swindow", lb = 0, ub = 1)),
+  family = brms::custom_family("latent_lognormal", dpars = c("mu", "sigma"), links =
+    c("identity", "log"), lb = c(NA, 0), ub = c(NA, NA), type = "real", vars = c("delay",
+    "obs_time"), loop = FALSE),
+  scode_functions =
+    "\\n  real latent_lognormal_lpdf(vector y, vector mu, vector sigma, vector delay, vector obs_time) {\\n    return lognormal_lpdf(delay | mu, sigma) - lognormal_lcdf(obs_time | mu, sigma);\\n    }\\n  ",
+  scode_parameters =
+    "\\n    vector<lower=0, upper=1>[N] pwindow;\\n    vector<lower=0, upper=1>[N] swindow;\\n  ",
+  scode_tparameters =
+    "\\n    vector[N] ptime;\\n    vector[N] stime;\\n    vector[N] delay;\\n    vector[N] obs_time;\\n    \\n    ptime = pwindow .* (to_vector(vreal1)-Y) + Y;\\n    stime = swindow .* (to_vector(vreal3)-to_vector(vreal2)) + to_vector(vreal2);\\n    delay = stime - ptime;\\n    obs_time = to_vector(vreal4) - ptime;\\n  ",
+  scode_prior = "\\n    pwindow ~ uniform(0, 1);\\n    swindow ~ uniform(0, 1);\\n  ",
   ...
 )
 }
