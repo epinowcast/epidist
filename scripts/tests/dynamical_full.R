@@ -35,7 +35,7 @@ cases <- data.frame(
 
 cases$cases[match(truncated_cases$time, cases$time)]<- truncated_cases$cases
 
-model <- cmdstan_model("scripts/lognormal_dynamical_full.stan")
+model <- cmdstan_model("data/models/lognormal_dynamical_full.stan")
 
 standata <- list(
   N = nrow(truncated_obs),

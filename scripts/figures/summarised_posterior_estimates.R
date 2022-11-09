@@ -34,4 +34,4 @@ g2 <- ggplot(filter(allsumm, parameter=="sdlog")) +
 
 gcomb <- ggarrange(g1, g2, nrow=2, draw=FALSE)
 
-ggsave("figure.png", gcomb, width=8, height=6)
+ggsave("summarised_posterior_estimates.png", gcomb, width=8, height=6)

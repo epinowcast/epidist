@@ -1,6 +1,6 @@
 library(cmdstanr)
 
-model <- cmdstan_model("scripts/lognormal_integrate.stan")
+model <- cmdstan_model("data/models/lognormal_integrate.stan")
 
 standata <- list(
   r=0.2,
