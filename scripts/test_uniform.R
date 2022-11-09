@@ -20,8 +20,9 @@ obs <- outbreak |>
   ) |>
   observe_process()
 
+## no truncation
 truncated_obs <- obs |>
-    filter_obs_by_obs_time(obs_time = 25)
+    filter_obs_by_obs_time(obs_time = max(obs$obs_at))
 
 model_path <- file.path(tempdir(), "model.stan")
 model_code <- latent_truncation_censoring_adjusted_delay(

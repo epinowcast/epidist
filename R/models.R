@@ -38,6 +38,71 @@ censoring_adjusted_delay <- function(
   )
 }
 
+#' Estimate delays adjusted forcensoring using a
+#' latent model
+#' @export
+latent_censoring_adjusted_delay <- function(
+  formula = brms::bf(
+    delay_central | vreal(pwindow_upr, swindow_upr) ~ 1,
+    sigma ~ 1
+  ), data, fn = brms::brm,
+  family = brms::custom_family(
+    "latent_lognormal",
+    dpars = c("mu", "sigma"),
+    links = c("identity", "log"),
+    lb = c(NA, 0),
+    ub = c(NA, NA),
+    type = "real",
+    vars = c("pwindow", "swindow"),
+    loop = FALSE
+  ),
+  scode_functions = "
+    real latent_lognormal_lpdf(vector y, vector mu, vector sigma,
+                               vector pwindow, vector swindow) {
+      int n = num_elements(y);
+      vector[n] d = y - pwindow + swindow;
+      return lognormal_lpdf(d | mu, sigma);
+      }
+  ",
+  scode_parameters = "
+    vector<lower = 0, upper = to_vector(vreal1)>[N] pwindow;
+    vector<lower = 0, upper = to_vector(vreal2)>[N] swindow;
+  ",
+  scode_prior = "
+    pwindow ~ uniform(0, to_vector(vreal1));
+    swindow ~ uniform(0, to_vector(vreal2));
+  ",
+  ...
+) {
+  
+  stanvars_functions <- brms::stanvar(
+    block = "functions", scode = scode_functions
+  )
+  stanvars_parameters <- brms::stanvar(
+    block = "parameters", scode = scode_parameters
+  )
+  stanvars_prior <- brms::stanvar(block = "model", scode = scode_prior)
+  
+  stanvars_all <- stanvars_functions + stanvars_parameters + stanvars_prior
+  
+  data <- data |>
+    data.table::copy() |>
+    DT(, id := 1:.N) |>
+    DT(, pwindow_upr := ptime_upr - ptime_lwr) |>
+    DT(, swindow_upr := stime_upr - stime_lwr) |>
+    DT(, delay_central := stime_lwr - ptime_lwr)
+  
+  if (nrow(data) > 1) {
+    data <- data[, id := as.factor(id)]
+  }
+  
+  fit <- fn(
+    formula = formula, family = family, stanvars = stanvars_all,
+    backend = "cmdstanr", data = data, ...
+  )
+  return(fit)
+}
+
 #' Estimate delays with filtering of the most recent data and
 #' censoring adjustment
 #' @export
