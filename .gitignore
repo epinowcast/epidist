@@ -17,3 +17,8 @@ data/models/*filtered
 data/models/*naive
 *.zip
 test_*.rda
+test_*.png
+data/models/*doublecensor
+data/models/*full
+data/models/*integrate
+data/models/*reparam
