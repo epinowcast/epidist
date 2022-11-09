@@ -37,7 +37,7 @@ standata <- list(
   end_t = 30
 )
 
-model <- cmdstan_model("scripts/lognormal_doublecensor.stan")
+model <- cmdstan_model("data/models/lognormal_doublecensor.stan")
 
 myfit <- model$sample(
   data = standata, parallel_chains = 4, adapt_delta = 0.8
