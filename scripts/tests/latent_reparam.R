@@ -36,7 +36,7 @@ standata <- list(
   end_t = 46
 )
 
-model <- stan_model("scripts/lognormal_doublecensor_reparam.stan")
+model <- stan_model("data/models/lognormal_doublecensor_reparam.stan")
 
 myfit <- sampling(model, standata, iter = 2000, chains = 4)
 

@@ -32,7 +32,7 @@ standata <- list(
   Y = truncated_obs$delay_daily
 )
 
-model <- cmdstan_model("scripts/lognormal_dynamical.stan")
+model <- cmdstan_model("data/models/lognormal_dynamical.stan")
 
 myfit <- model$sample(data = standata, chains = 2, parallel_chains = 2)
 
