@@ -62,6 +62,16 @@ library(purrr, quietly = TRUE)
 #>     transpose
 library(here)
 #> here() starts at /workspaces/dynamicaltruncation
+library(lubridate)
+#> 
+#> Attaching package: 'lubridate'
+#> The following objects are masked from 'package:data.table':
+#> 
+#>     hour, isoweek, mday, minute, month, quarter, second, wday, week,
+#>     yday, year
+#> The following objects are masked from 'package:base':
+#> 
+#>     date, intersect, setdiff, union
 library(future)
 library(future.callr)
 tar_unscript()
@@ -427,14 +437,67 @@ tar_target(simulated_scenarios_exponential, {
 
 ### Data
 
-  - Case study using data from [“Transmission dynamics of Ebola virus
-    disease and intervention effectiveness in Sierra LeoneTransmission
-    dynamics of Ebola virus disease and intervention effectiveness in
-    Sierra Leone”](https://doi.org/10.1073/pnas.1518587113)
+  - Case study using linelist data from [“Transmission dynamics of Ebola
+    virus disease and intervention effectiveness in Sierra
+    LeoneTransmission dynamics of Ebola virus disease and intervention
+    effectiveness in Sierra
+    Leone”](https://doi.org/10.1073/pnas.1518587113). We download and
+    save only confirmed cases. Note this was done manually due to the
+    journal blocking automated downloads.
 
-  - Import data as a csv (ideally from a web URL)
+<!-- end list -->
 
-  - Save data
+``` r
+tar_target(raw_case_study_data, {
+  fread(here("data-raw", "pnas.1518587113.sd02.csv"))
+})
+#> Define target raw_case_study_data from chunk code.
+#> Establish _targets.R and _targets_r/targets/raw_case_study_data.R.
+```
+
+  - The data contains ages, sex, symptom onset date, date of sample
+    testing, the district of the case, and the Chiefdom of the case.
+    Here we convert these dates into the primary and secondary events
+    `dynamicaltruncation` requires by assuming daily censoring. This
+    means we are estimating the delay between symptom onset and a sample
+    being tested. As we are considering overall cases only we keep only
+    dates and our newly created delay variables.
+
+<!-- end list -->
+
+``` r
+tar_target(case_study_data, {
+  raw_case_study_data |>
+    DT(,
+      .(
+        id = 1:.N, onset_date = lubridate::dmy(`Date of symptom onset`),
+        test_date = lubridate::dmy(`Date of sample tested`)
+      )
+    ) |>
+    DT(, `:=`(
+        ptime = as.numeric(onset_date - min(onset_date)),
+        stime = as.numeric(test_date - min(onset_date))
+      )
+    ) |>
+    observe_process()
+})
+#> Define target case_study_data from chunk code.
+#> Establish _targets.R and _targets_r/targets/case_study_data.R.
+```
+
+  - Save the processed data
+
+<!-- end list -->
+
+``` r
+tar_file(
+    save_case_study_data,
+    save_csv(
+     case_study_data, "ebola_case_study.csv", path = "data/scenarios"
+    )
+  )
+#> Establish _targets.R and _targets_r/targets/save_case_study_data.R.
+```
 
   - Load saved data
 
