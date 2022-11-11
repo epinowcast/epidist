@@ -50,6 +50,7 @@ library(data.table)
 library(ggplot2)
 library(purrr, quietly = TRUE)
 library(here)
+library(lubridate)
 library(future)
 library(future.callr)
 tar_unscript()
@@ -325,11 +326,40 @@ sampled_simulated_observations_exponential |>
 
 ### Data
 
-- Case study using data from ["Transmission dynamics of Ebola virus disease and intervention effectiveness in Sierra LeoneTransmission dynamics of Ebola virus disease and intervention effectiveness in Sierra Leone"](https://doi.org/10.1073/pnas.1518587113)
+- Case study using linelist data from ["Transmission dynamics of Ebola virus disease and intervention effectiveness in Sierra LeoneTransmission dynamics of Ebola virus disease and intervention effectiveness in Sierra Leone"](https://doi.org/10.1073/pnas.1518587113). We download and save only confirmed cases. Note this was done manually due to the journal blocking automated downloads.
 
-- Import data as a csv (ideally from a web URL)
+```{targets raw_case_study_data, tar_simple = TRUE}
+fread(here("data-raw", "pnas.1518587113.sd02.csv"))
+```
 
-- Save data
+- The data contains ages, sex, symptom onset date, date of sample testing, the district of the case, and the Chiefdom of the case. Here we convert these dates into the primary and secondary events `dynamicaltruncation` requires by assuming daily censoring. This means we are estimating the delay between symptom onset and a sample being tested. As we are considering overall cases only we keep only dates and our newly created delay variables.
+
+```{targets case_study_data, tar_simple = TRUE}
+raw_case_study_data |>
+  DT(,
+    .(
+      id = 1:.N, onset_date = lubridate::dmy(`Date of symptom onset`),
+      test_date = lubridate::dmy(`Date of sample tested`)
+    )
+  ) |>
+  DT(, `:=`(
+      ptime = as.numeric(onset_date - min(onset_date)),
+      stime = as.numeric(test_date - min(onset_date))
+    )
+  ) |>
+  observe_process()
+```
+
+- Save the processed data
+
+```{targets save_case_study_data}
+tar_file(
+    save_case_study_data,
+    save_csv(
+     case_study_data, "ebola_case_study.csv", path = "data/scenarios"
+    )
+  )
+```
 
 - Load saved data
 
