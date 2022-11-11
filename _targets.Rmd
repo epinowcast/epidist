@@ -216,6 +216,7 @@ sampled_simulated_observations_outbreak |>
 
 ### Exponential scenarios
 
+#### Simulation
 
 - We simulate scenarios in which the incidence of primary event is changing exponentially. We consider $r$ ranging from -0.2 to 0.2.
 
@@ -361,13 +362,77 @@ tar_file(
   )
 ```
 
+### Observaton scenarios
+
+
+- For our Ebola case study we estimate at 60, 120, 180, and 240 days from the first cases symptom onset.
+
+```{targets ebola_estimation_times}
+tar_group_by(
+  ebola_estimation_times,
+  data.table(
+    scenario = c("60 days", "120 days", "180 days", "240 days"),
+    time = c(60, 120, 180, 240)
+  ),
+  scenario
+)
+```
+
+- Truncate the available simulate observations based on the estimation time for each scenario.
+
+```{targets truncated_ebola_obs} 
+tar_target(
+  truncated_ebola_obs,
+  case_study_data |>
+    filter_obs_by_obs_time(
+      obs_time = ebola_estimation_times[, "time"][[1]]
+    ) |>
+    DT(, scenario := ebola_estimation_times[, "scenario"][[1]]),
+  pattern = map(ebola_estimation_times)
+)
+```
+
+```{targets group_truncated_ebola_obs}
+tar_group_by(
+  group_truncated_ebola_obs,
+  truncated_ebola_obs,
+  scenario
+)
+```
+
+- Sample observations with 200 observations each
+
+```{targets sampled_ebola_observations}
+tar_target(
+  sampled_ebola_observations,
+  group_truncated_ebola_obs |>
+    as.data.table() |>
+    DT(sample(1:.N, min(.N, 200), replace = FALSE)) |>
+    DT(, sample_size := 200) |>
+    DT(, data_type := "ebola_case_study"),
+  pattern = map(group_truncated_ebola_obs)
+)
+```
+
+```{targets list_ebola_observations, tar_simple = TRUE}
+sampled_ebola_observations |>
+  split(by = c("scenario", "sample_size", "data_type"))
+```
+
+
+```{targets ebola_scenarios, tar_simple = TRUE}
+sampled_ebola_observations |>
+  DT(, .(scenario, sample_size, data_type)) |>
+  unique() |>
+  DT(, id := 1:.N)
+```
 - Load saved data
 
 - Data is for the full outbreak and has date of symptom onset and date of sample tested so we estimate the distribution from onset to test.
 
 - We estimate the distribution across the outbreak at key points.
 3
-- Data has 3500 samples in total. We use all samples available for a given time period.
+
 
 ## Models
 
