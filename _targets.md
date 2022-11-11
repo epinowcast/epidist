@@ -283,6 +283,8 @@ tar_target(simulated_scenarios_outbreak, {
 
 ### Exponential scenarios
 
+#### Simulation
+
   - We simulate scenarios in which the incidence of primary event is
     changing exponentially. We consider
     ![r](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;r
@@ -499,15 +501,95 @@ tar_file(
 #> Establish _targets.R and _targets_r/targets/save_case_study_data.R.
 ```
 
+### Observaton scenarios
+
+  - For our Ebola case study we estimate at 60, 120, 180, and 240 days
+    from the first cases symptom onset.
+
+<!-- end list -->
+
+``` r
+tar_group_by(
+  ebola_estimation_times,
+  data.table(
+    scenario = c("60 days", "120 days", "180 days", "240 days"),
+    time = c(60, 120, 180, 240)
+  ),
+  scenario
+)
+#> Establish _targets.R and _targets_r/targets/ebola_estimation_times.R.
+```
+
+  - Truncate the available simulate observations based on the estimation
+    time for each scenario.
+
+<!-- end list -->
+
+``` r
+tar_target(
+  truncated_ebola_obs,
+  case_study_data |>
+    filter_obs_by_obs_time(
+      obs_time = ebola_estimation_times[, "time"][[1]]
+    ) |>
+    DT(, scenario := ebola_estimation_times[, "scenario"][[1]]),
+  pattern = map(ebola_estimation_times)
+)
+#> Establish _targets.R and _targets_r/targets/truncated_ebola_obs.R.
+```
+
+``` r
+tar_group_by(
+  group_truncated_ebola_obs,
+  truncated_ebola_obs,
+  scenario
+)
+#> Establish _targets.R and _targets_r/targets/group_truncated_ebola_obs.R.
+```
+
+  - Sample observations with 200 observations each
+
+<!-- end list -->
+
+``` r
+tar_target(
+  sampled_ebola_observations,
+  group_truncated_ebola_obs |>
+    as.data.table() |>
+    DT(sample(1:.N, min(.N, 200), replace = FALSE)) |>
+    DT(, sample_size := 200) |>
+    DT(, data_type := "ebola_case_study"),
+  pattern = map(group_truncated_ebola_obs)
+)
+#> Establish _targets.R and _targets_r/targets/sampled_ebola_observations.R.
+```
+
+``` r
+tar_target(list_ebola_observations, {
+  sampled_ebola_observations |>
+    split(by = c("scenario", "sample_size", "data_type"))
+})
+#> Define target list_ebola_observations from chunk code.
+#> Establish _targets.R and _targets_r/targets/list_ebola_observations.R.
+```
+
+``` r
+tar_target(ebola_scenarios, {
+  sampled_ebola_observations |>
+    DT(, .(scenario, sample_size, data_type)) |>
+    unique() |>
+    DT(, id := 1:.N)
+})
+#> Define target ebola_scenarios from chunk code.
+#> Establish _targets.R and _targets_r/targets/ebola_scenarios.R.
+```
+
   - Load saved data
 
   - Data is for the full outbreak and has date of symptom onset and date
     of sample tested so we estimate the distribution from onset to test.
 
   - We estimate the distribution across the outbreak at key points. 3
-
-  - Data has 3500 samples in total. We use all samples available for a
-    given time period.
 
 ## Models
 
