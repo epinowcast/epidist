@@ -483,10 +483,6 @@ tar_map(
 )
 ```
 
-## Post-process for dynamic bias
-
-- Post process all models using dynamic correction and known growth rate
-
 ## Results
 
 
