@@ -46,22 +46,30 @@ plot_cases_by_obs_window <- function(cases) {
 #' Plot the empirical delay distribution
 #' @export
 plot_empirical_delay <- function(cases, meanlog, sdlog) {
-  cases |>
+  plot <- cases |>
     ggplot() +
     aes(x = delay_daily, fill = obs_at) +
     geom_histogram(
       aes(y = ..density..), binwidth = 1, position = "dodge",
       col = "#696767b1"
-    ) +
-    stat_function(
-    fun = dlnorm, args = c(meanlog, sdlog), n = 100,
-    col = "#696767b1", fill = NULL
-    ) +
+    )
+
+  if (!missing(meanlog) && !missing(sdlog)) {
+    plot <- plot + 
+      stat_function(
+        fun = dlnorm, args = c(meanlog, sdlog), n = 100,
+        col = "#696767b1", fill = NULL
+      )
+  }
+
+  plot <- plot +
     scale_fill_brewer(palette = "Blues", direction = 1) +
     theme_bw() +
     theme(legend.position = "bottom") +
     labs(x = "Days", y = "Density") +
     guides(fill = guide_legend(title = "Observation day", reverse = TRUE))
+
+  return(plot)
 }
 
 #' Plot the mean difference between continuous and discrete event time
