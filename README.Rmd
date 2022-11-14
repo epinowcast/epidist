@@ -63,11 +63,21 @@ truncated_obs <- obs |>
   DT(sample(1:.N, 200, replace = FALSE))
 ```
 
-Plot primary cases (columns), and secondary cases (dots) by observation window.
+Plot primary cases (columns), and secondary cases (dots) by the observation time of their secondary events. This reflects would could be observed in real-time.
 
 ```{r observed-cases}
 truncated_cases <- construct_cases_by_obs_window(
-  obs, windows = c(25)
+  obs, windows = c(25), obs_type = "stime"
+)
+
+plot_cases_by_obs_window(truncated_cases)
+```
+
+We can alternatively plot the observed data based on primary events. This corresponds to a retrospective cohort based view of the data.
+
+```{r cohort-observed-cases}
+truncated_cases <- construct_cases_by_obs_window(
+  obs, windows = c(25), obs_type = "ptime"
 )
 
 plot_cases_by_obs_window(truncated_cases)
