@@ -532,17 +532,37 @@ tar_target(
     filter_obs_by_obs_time(
       obs_time = ebola_estimation_times[, "time"][[1]]
     ) |>
-    DT(, scenario := ebola_estimation_times[, "scenario"][[1]]),
+    DT(, scenario := ebola_estimation_times[, "scenario"][[1]]) |>
+    DT(, obs_type := "real-time"),
   pattern = map(ebola_estimation_times)
 )
 #> Establish _targets.R and _targets_r/targets/truncated_ebola_obs.R.
 ```
 
+  - Create completely observed retrospective cohorts for the same
+    estimation time windows.
+
+<!-- end list -->
+
+``` r
+tar_target(
+  retrospective_ebola_obs,
+  case_study_data |>
+    filter_obs_by_ptime(
+      obs_time = ebola_estimation_times[, "time"][[1]]
+    ) |>
+    DT(, scenario := ebola_estimation_times[, "scenario"][[1]]) |>
+    DT(, obs_type := "retrospective"),
+  pattern = map(ebola_estimation_times)
+)
+#> Establish _targets.R and _targets_r/targets/retro_ebola_obs.R.
+```
+
 ``` r
 tar_group_by(
   group_truncated_ebola_obs,
-  truncated_ebola_obs,
-  scenario
+  rbindlist(truncated_ebola_obs, retrospective_ebola_obs),
+  scenario, obs_type
 )
 #> Establish _targets.R and _targets_r/targets/group_truncated_ebola_obs.R.
 ```
@@ -567,7 +587,7 @@ tar_target(
 ``` r
 tar_target(list_ebola_observations, {
   sampled_ebola_observations |>
-    split(by = c("scenario", "sample_size", "data_type"))
+    split(by = c("scenario", "obs_type", "sample_size", "data_type"))
 })
 #> Define target list_ebola_observations from chunk code.
 #> Establish _targets.R and _targets_r/targets/list_ebola_observations.R.
@@ -576,20 +596,13 @@ tar_target(list_ebola_observations, {
 ``` r
 tar_target(ebola_scenarios, {
   sampled_ebola_observations |>
-    DT(, .(scenario, sample_size, data_type)) |>
+    DT(, .(scenario, obs_type, sample_size, data_type)) |>
     unique() |>
     DT(, id := 1:.N)
 })
 #> Define target ebola_scenarios from chunk code.
 #> Establish _targets.R and _targets_r/targets/ebola_scenarios.R.
 ```
-
-  - Load saved data
-
-  - Data is for the full outbreak and has date of symptom onset and date
-    of sample tested so we estimate the distribution from onset to test.
-
-  - We estimate the distribution across the outbreak at key points. 3
 
 ## Models
 
@@ -755,10 +768,5 @@ tar_map(
 )
 #> Establish _targets.R and _targets_r/targets/fit_models.R.
 ```
-
-## Post-process for dynamic bias
-
-  - Post process all models using dynamic correction and known growth
-    rate
 
 ## Results
