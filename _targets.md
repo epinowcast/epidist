@@ -546,7 +546,7 @@ tar_file(
 tar_group_by(
   ebola_estimation_times,
   data.table(
-    scenario = c("60 days", "120 days", "180 days", "240 days"),
+    scenario = as.factor(c("60 days", "120 days", "180 days", "240 days")),
     time = c(60, 120, 180, 240)
   ),
   scenario
@@ -595,7 +595,7 @@ tar_target(
 ``` r
 tar_group_by(
   group_truncated_ebola_obs,
-  rbindlist(truncated_ebola_obs, retrospective_ebola_obs),
+  rbind(truncated_ebola_obs, retrospective_ebola_obs),
   scenario, obs_type
 )
 #> Establish _targets.R and _targets_r/targets/group_truncated_ebola_obs.R.
@@ -689,7 +689,7 @@ tar_target(scenarios, {
   rbind(
     simulated_scenarios_outbreak[, replicate := 1],
     simulated_scenarios_exponential,
-    ebola_scenarios
+    ebola_scenarios,
     fill = TRUE
   ) |> 
     as.data.table() |> 
