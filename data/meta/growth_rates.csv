@@ -1,0 +1,6 @@
+r,scenario
+-0.2,fast decay
+-0.1,decay
+0,stable
+0.1,growth
+0.2,fast growth
