@@ -50,15 +50,27 @@ reverse_obs_at <- function(dt) {
 
 #' Construct case counts by observation window based on secondary observations
 #' @export
-construct_cases_by_obs_window <- function(linelist, windows = c(25, 45)) {
+construct_cases_by_obs_window <- function(linelist, windows = c(25, 45),
+                                          obs_type = c("stime", "ptime")) {
   lower_window <- c(0, windows)
   upper_window <- c(windows, max(linelist$stime_daily))
 
+  obs_type <- match.arg(obs_type)
+  if (obs_type == "stime") {
+    filter_fn <- function(dt, lw, uw) {
+      dt |>
+        filter_obs_by_obs_time(obs_time = uw) |>
+        data.table::DT(stime > lw)
+    }
+  }else{
+    filter_fn <- function(dt, lw, uw) {
+      dt |>
+        filter_obs_by_ptime(obs_time = uw) |>
+        data.table::DT(ptime > lw)
+    }
+  }
   cases <- purrr::map2(
-    lower_window, upper_window,
-    ~ linelist |>
-      filter_obs_by_obs_time(obs_time = .y) |>
-      data.table::DT(stime > .x)
+    lower_window, upper_window, ~ filter_fn(linelist, .x, .y)
   ) |>
   data.table::rbindlist()
 
@@ -66,7 +78,9 @@ construct_cases_by_obs_window <- function(linelist, windows = c(25, 45)) {
     linelist_to_counts(additional_by = "obs_at")
 
   secondary_cases <- cases |>
-    linelist_to_counts(target_time = "stime_daily", additional_by = "obs_at")
+    linelist_to_counts(
+      target_time = "stime_daily", additional_by = "obs_at"
+    )
 
   cases <- rbind(
     primary_cases[, case_type := "primary"],
