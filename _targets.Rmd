@@ -51,6 +51,7 @@ library(ggplot2)
 library(purrr, quietly = TRUE)
 library(here)
 library(lubridate)
+library(arrow)
 library(future)
 library(future.callr)
 tar_unscript()
@@ -66,6 +67,7 @@ library(cmdstanr)
 library(data.table)
 library(ggplot2)
 library(purrr, quietly = TRUE)
+library(arrow)
 library(here)
 library(future)
 library(future.callr)
@@ -107,6 +109,15 @@ tar_group_by(
   ) |>
     add_natural_scale_mean_sd(),
   scenario
+)
+```
+
+- Save distribution scenarios
+
+```{targets save_distributions}
+tar_file(
+  save_distributions,
+  save_csv(distributions, "distributions.csv", path = "data/meta")
 )
 ```
 
@@ -223,8 +234,17 @@ sampled_simulated_observations_outbreak |>
 ```{targets growth_rate, tar_simple=TRUE}
 data.table(
     r = c(-0.2, -0.1, 0, 0.1, 0.2),
-    scenario = c("fast decay", "stable", "fast growth")
+    scenario = c("fast decay", "decay", "stable", "growth", "fast growth")
   )
+```
+
+- Save growth rate scenarios.
+
+```{targets save_growth_rate}
+tar_file(
+  save_growth_rate,
+  save_csv(growth_rate, "growth_rates.csv", path = "data/meta")
+)
 ```
 
 - Simulate data.
@@ -465,20 +485,48 @@ models <- list(
 machine_model_names <- gsub(" ", "_", tolower(names(models)))
 ```
 
+- Save a look-up of model names.
+
+```{targets save_models}
+tar_file(
+  save_models,
+  data.table(
+    model = names(models), in_code = machine_model_names
+  ) |>
+    save_csv("models.csv", path = "data/meta")
+)
+```
+
 ### Fit models to simulated and case study data
 
 - Combine simulated and case study scenarios and observations
 
 ```{targets scenarios, tar_simple = TRUE}
-rbind(simulated_scenarios_outbreak[, replicate := 1],
-      simulated_scenarios_exponential
+rbind(
+  simulated_scenarios_outbreak[, replicate := 1],
+  simulated_scenarios_exponential,
+  ebola_scenarios
+  fill = TRUE
 ) |> 
   as.data.table() |> 
   DT(, id := 1:.N)
 ```
 
+- Save scenarios for postprocessing
+
+```{targets save_scenarios}
+tar_file(
+  save_scenarios,
+  save_csv(scenarios, "scenarios.csv", path = "data/meta")
+)
+```
+
+- Make a list of observations to fit models for.
+
 ```{targets list_observations, tar_simple = TRUE}
-c(list_simulated_observations_outbreak, list_simulated_observations_exponential)
+c(list_simulated_observations_outbreak, 
+  list_simulated_observations_exponential,
+  list_ebola_observations)
 ```
 
 - Dummy data required for model creation.
@@ -565,17 +613,21 @@ tar_map(
   tar_target(
     draws,
     fit |>
-      extract_lognormal_draws(scenarios, from_dt = TRUE) |>
-      draws_to_long(),
+      extract_lognormal_draws(scenarios, from_dt = TRUE),
     pattern = map(fit, scenarios)
   ),
   tar_file(
     save_lognormal_draws,
-    save_rds(draws, paste0(model_name, ".rds"), path = "data/posteriors")
+    save_dataset(
+      draws, path = paste0("data/posteriors/", model_name),
+      partitioning = "id"
+    )
   ),
   tar_target(
     summarised_draws,
-    summarise_lognormal_draws(draws, sf = 2)
+    draws |> 
+      draws_to_long() |>
+      summarise_lognormal_draws(sf = 2)
   ),
   tar_file(
     save_summarised_draws,

@@ -72,6 +72,15 @@ library(lubridate)
 #> The following objects are masked from 'package:base':
 #> 
 #>     date, intersect, setdiff, union
+library(arrow)
+#> 
+#> Attaching package: 'arrow'
+#> The following object is masked from 'package:lubridate':
+#> 
+#>     duration
+#> The following object is masked from 'package:utils':
+#> 
+#>     timestamp
 library(future)
 library(future.callr)
 tar_unscript()
@@ -88,6 +97,7 @@ library(cmdstanr)
 library(data.table)
 library(ggplot2)
 library(purrr, quietly = TRUE)
+library(arrow)
 library(here)
 library(future)
 library(future.callr)
@@ -134,6 +144,18 @@ tar_group_by(
   scenario
 )
 #> Establish _targets.R and _targets_r/targets/distributions.R.
+```
+
+  - Save distribution scenarios
+
+<!-- end list -->
+
+``` r
+tar_file(
+  save_distributions,
+  save_csv(distributions, "distributions.csv", path = "data/meta")
+)
+#> Establish _targets.R and _targets_r/targets/save_distributions.R.
 ```
 
 ### Outbreak scenarios
@@ -296,11 +318,23 @@ tar_target(simulated_scenarios_outbreak, {
 tar_target(growth_rate, {
   data.table(
       r = c(-0.2, -0.1, 0, 0.1, 0.2),
-      scenario = c("fast decay", "stable", "fast growth")
+      scenario = c("fast decay", "decay", "stable", "growth", "fast growth")
     )
 })
 #> Define target growth_rate from chunk code.
 #> Establish _targets.R and _targets_r/targets/growth_rate.R.
+```
+
+  - Save growth rate scenarios.
+
+<!-- end list -->
+
+``` r
+tar_file(
+  save_growth_rate,
+  save_csv(growth_rate, "growth_rates.csv", path = "data/meta")
+)
+#> Establish _targets.R and _targets_r/targets/save_growth_rate.R.
 ```
 
   - Simulate data.
@@ -567,7 +601,7 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/group_truncated_ebola_obs.R.
 ```
 
-  - Sample observations with 200 observations each
+  - Sample observations with 200 observations each.
 
 <!-- end list -->
 
@@ -629,6 +663,21 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 #> Establish _targets.R and _targets_r/globals/models.R.
 ```
 
+  - Save a look-up of model names.
+
+<!-- end list -->
+
+``` r
+tar_file(
+  save_models,
+  data.table(
+    model = names(models), in_code = machine_model_names
+  ) |>
+    save_csv("models.csv", path = "data/meta")
+)
+#> Establish _targets.R and _targets_r/targets/save_models.R.
+```
+
 ### Fit models to simulated and case study data
 
   - Combine simulated and case study scenarios and observations
@@ -637,8 +686,11 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 
 ``` r
 tar_target(scenarios, {
-  rbind(simulated_scenarios_outbreak[, replicate := 1],
-        simulated_scenarios_exponential
+  rbind(
+    simulated_scenarios_outbreak[, replicate := 1],
+    simulated_scenarios_exponential,
+    ebola_scenarios
+    fill = TRUE
   ) |> 
     as.data.table() |> 
     DT(, id := 1:.N)
@@ -647,9 +699,27 @@ tar_target(scenarios, {
 #> Establish _targets.R and _targets_r/targets/scenarios.R.
 ```
 
+  - Save scenarios for postprocessing
+
+<!-- end list -->
+
+``` r
+tar_file(
+  save_scenarios,
+  save_csv(scenarios, "scenarios.csv", path = "data/meta")
+)
+#> Establish _targets.R and _targets_r/targets/save_scenarios.R.
+```
+
+  - Make a list of observations to fit models for.
+
+<!-- end list -->
+
 ``` r
 tar_target(list_observations, {
-  c(list_simulated_observations_outbreak, list_simulated_observations_exponential)
+  c(list_simulated_observations_outbreak, 
+    list_simulated_observations_exponential,
+    list_ebola_observations)
 })
 #> Define target list_observations from chunk code.
 #> Establish _targets.R and _targets_r/targets/list_observations.R.
@@ -746,17 +816,21 @@ tar_map(
   tar_target(
     draws,
     fit |>
-      extract_lognormal_draws(scenarios, from_dt = TRUE) |>
-      draws_to_long(),
+      extract_lognormal_draws(scenarios, from_dt = TRUE),
     pattern = map(fit, scenarios)
   ),
   tar_file(
     save_lognormal_draws,
-    save_rds(draws, paste0(model_name, ".rds"), path = "data/posteriors")
+    save_dataset(
+      draws, path = paste0("data/posteriors/", model_name),
+      partitioning = "id"
+    )
   ),
   tar_target(
     summarised_draws,
-    summarise_lognormal_draws(draws, sf = 2)
+    draws |> 
+      draws_to_long() |>
+      summarise_lognormal_draws(sf = 2)
   ),
   tar_file(
     save_summarised_draws,
