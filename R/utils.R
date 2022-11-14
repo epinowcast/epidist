@@ -30,3 +30,11 @@ save_rds <- function(dt, filename, path, allow_empty = TRUE) {
   }
   return(path)
 }
+
+#' Save a dataframe as an Arrow dataset
+#' @export
+save_dataset <- function(dt, path, ...) {
+  dir.create(path, recursive = TRUE, showWarnings = FALSE)
+  arrow::write_dataset(dt, path = path, ...)
+  return(path)
+}

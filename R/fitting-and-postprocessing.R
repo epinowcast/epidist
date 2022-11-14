@@ -89,13 +89,11 @@ draws_to_long <- function(draws) {
 
 #' Make posterior lognormal samples relative to true values
 #' @export
-make_relative_to_truth <- function(draws, secondary_dist) {
-  secondary_dist <- draws_to_long(secondary_dist)
-
+make_relative_to_truth <- function(draws, secondary_dist, by = "parameter") {
   draws <- merge(
     draws,
     secondary_dist[, true_value := value][, value := NULL],
-    by = "parameter"
+    by = by
   )
 
   draws <- draws[, rel_value := value / true_value]
