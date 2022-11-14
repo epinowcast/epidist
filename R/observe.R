@@ -33,9 +33,32 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
     DT(, obs_time := obs_time - ptime) |>
     # I've assumed truncation in the middle of the censoring window.
     # For discussion.
-    DT(, censored_obs_time := obs_at - (ptime_daily + 0.5)) |>
+    DT(, 
+      censored_obs_time := obs_at - (ptime_lwr + (ptime_upr - ptime_lwr) / 2)
+    ) |>
     DT(, censored := "interval") |>
     DT(stime <= obs_at)
+  return(truncated_linelist)
+}
+
+#' Filter observations based on the observation time of primary events
+#' @export
+filter_obs_by_ptime <- function(linelist, obs_time) {
+  pfilt_t <- obs_time
+  truncated_linelist <- linelist |>
+    data.table::copy() |>
+    # Update observation time to be the same as the maximum secondary time
+    # Assume in the middle of the censoring window
+    DT(, obs_at := stime_upr) |>
+    DT(, obs_time := obs_at - ptime) |>
+    # I've assumed truncation in the middle of the censoring window.
+    # For discussion.
+    DT(,
+     censored_obs_time := obs_at - (ptime_lwr + (ptime_upr - ptime_lwr) / 2)
+    ) |>
+    DT(, censored := "interval") |>
+    DT(ptime <= pfilt_t) |>
+    DT(, obs_at := pfilt_t)
   return(truncated_linelist)
 }
 

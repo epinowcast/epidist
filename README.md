@@ -51,18 +51,32 @@ truncated_obs <- obs |>
   DT(sample(1:.N, 200, replace = FALSE))
 ```
 
-Plot primary cases (columns), and secondary cases (dots) by observation
-window.
+Plot primary cases (columns), and secondary cases (dots) by the
+observation time of their secondary events. This reflects would could be
+observed in real-time.
 
 ``` r
 truncated_cases <- construct_cases_by_obs_window(
-  obs, windows = c(25)
+  obs, windows = c(25), obs_type = "stime"
 )
 
 plot_cases_by_obs_window(truncated_cases)
 ```
 
 <img src="figures/README-observed-cases-1.png" width="100%" />
+
+We can alternatively plot the observed data based on primary events.
+This corresponds to a retrospective cohort based view of the data.
+
+``` r
+truncated_cases <- construct_cases_by_obs_window(
+  obs, windows = c(25), obs_type = "ptime"
+)
+
+plot_cases_by_obs_window(truncated_cases)
+```
+
+<img src="figures/README-cohort-observed-cases-1.png" width="100%" />
 
 Plot the true continuous delay distribution and the empirical observed
 distribution for each observation window.
@@ -97,12 +111,12 @@ naive_fit <- naive_delay(data = truncated_obs, cores = 4, refresh = 0)
 #> 
 #> Chain 1 finished in 0.3 seconds.
 #> Chain 2 finished in 0.3 seconds.
-#> Chain 3 finished in 0.2 seconds.
+#> Chain 3 finished in 0.3 seconds.
 #> Chain 4 finished in 0.3 seconds.
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.3 seconds.
-#> Total execution time: 0.5 seconds.
+#> Total execution time: 0.6 seconds.
 ```
 
 Estimate the delay after filtering out the most recent data as crude
@@ -121,7 +135,7 @@ filtered_fit <- filtered_naive_delay(
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.2 seconds.
-#> Total execution time: 0.3 seconds.
+#> Total execution time: 0.4 seconds.
 ```
 
 Adjust for date censoring.
@@ -132,14 +146,14 @@ censored_fit <- censoring_adjusted_delay(
 )
 #> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 0.9 seconds.
-#> Chain 2 finished in 1.0 seconds.
-#> Chain 4 finished in 0.9 seconds.
+#> Chain 1 finished in 0.8 seconds.
+#> Chain 2 finished in 0.9 seconds.
 #> Chain 3 finished in 1.0 seconds.
+#> Chain 4 finished in 0.9 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 1.0 seconds.
-#> Total execution time: 1.2 seconds.
+#> Mean chain execution time: 0.9 seconds.
+#> Total execution time: 1.1 seconds.
 ```
 
 Adjust for censoring and filter to crudely adjust for right truncation.
@@ -152,12 +166,12 @@ filtered_censored_fit <- filtered_censoring_adjusted_delay(
 #> 
 #> Chain 1 finished in 0.6 seconds.
 #> Chain 2 finished in 0.5 seconds.
+#> Chain 3 finished in 0.5 seconds.
 #> Chain 4 finished in 0.5 seconds.
-#> Chain 3 finished in 0.6 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 0.6 seconds.
-#> Total execution time: 0.8 seconds.
+#> Mean chain execution time: 0.5 seconds.
+#> Total execution time: 0.7 seconds.
 ```
 
 Adjust for right truncation.
@@ -168,14 +182,14 @@ truncation_fit <- truncation_adjusted_delay(
 )
 #> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 1.2 seconds.
-#> Chain 3 finished in 1.2 seconds.
+#> Chain 1 finished in 1.1 seconds.
 #> Chain 2 finished in 1.2 seconds.
-#> Chain 4 finished in 1.3 seconds.
+#> Chain 3 finished in 1.1 seconds.
+#> Chain 4 finished in 1.2 seconds.
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 1.2 seconds.
-#> Total execution time: 1.5 seconds.
+#> Total execution time: 1.4 seconds.
 ```
 
 Adjust for right truncation and date censoring.
@@ -186,14 +200,14 @@ truncation_censoring_fit <- truncation_censoring_adjusted_delay(
 )
 #> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 2.4 seconds.
-#> Chain 2 finished in 2.4 seconds.
-#> Chain 3 finished in 2.5 seconds.
-#> Chain 4 finished in 2.5 seconds.
+#> Chain 1 finished in 1.8 seconds.
+#> Chain 2 finished in 1.8 seconds.
+#> Chain 3 finished in 1.9 seconds.
+#> Chain 4 finished in 1.8 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 2.4 seconds.
-#> Total execution time: 2.6 seconds.
+#> Mean chain execution time: 1.8 seconds.
+#> Total execution time: 2.0 seconds.
 ```
 
 Adjust for right truncation and date censoring using a latent variable
@@ -205,14 +219,14 @@ latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
 )
 #> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 4 finished in 6.4 seconds.
-#> Chain 1 finished in 6.7 seconds.
-#> Chain 3 finished in 6.7 seconds.
-#> Chain 2 finished in 6.8 seconds.
+#> Chain 4 finished in 6.1 seconds.
+#> Chain 1 finished in 6.4 seconds.
+#> Chain 3 finished in 6.3 seconds.
+#> Chain 2 finished in 6.4 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 6.7 seconds.
-#> Total execution time: 6.9 seconds.
+#> Mean chain execution time: 6.3 seconds.
+#> Total execution time: 6.6 seconds.
 ```
 
 ### Summarise model posteriors and compare to known truth
