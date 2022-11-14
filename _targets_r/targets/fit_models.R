@@ -57,17 +57,21 @@ tar_map(
   tar_target(
     draws,
     fit |>
-      extract_lognormal_draws(scenarios, from_dt = TRUE) |>
-      draws_to_long(),
+      extract_lognormal_draws(scenarios, from_dt = TRUE),
     pattern = map(fit, scenarios)
   ),
   tar_file(
     save_lognormal_draws,
-    save_rds(draws, paste0(model_name, ".rds"), path = "data/posteriors")
+    save_dataset(
+      draws, path = paste0("data/posteriors/", model_name),
+      partitioning = "id"
+    )
   ),
   tar_target(
     summarised_draws,
-    summarise_lognormal_draws(draws, sf = 2)
+    draws |> 
+      draws_to_long() |>
+      summarise_lognormal_draws(sf = 2)
   ),
   tar_file(
     save_summarised_draws,
