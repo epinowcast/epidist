@@ -192,7 +192,7 @@ Plot summarised posterior estimates from each model compared to the ground truth
 
 ```{r, fig.width = 9, fig.height = 4}
 draws |>
-  make_relative_to_truth(secondary_dist) |>
+  make_relative_to_truth(draws_to_long(secondary_dist)) |>
   plot_relative_recovery(fill = model) +
   facet_wrap(vars(parameter), nrow = 1, scales = "free_x") +
   scale_fill_brewer(palette = "Dark2") +
