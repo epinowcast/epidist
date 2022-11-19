@@ -221,6 +221,92 @@ latent_truncation_censoring_adjusted_delay <- function(
   return(fit)
 }
 
+#' Estimate delays adjusted for right truncation and censoring using a
+#' latent model
+#' @export
+latent_truncation_censoring_adjusted_delay_zero <- function(
+    formula = brms::bf(
+      delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1,
+      sigma ~ 1
+    ), data, fn = brms::brm,
+    family = brms::custom_family(
+      "latent_lognormal",
+      dpars = c("mu", "sigma"),
+      links = c("identity", "log"),
+      lb = c(NA, 0),
+      ub = c(NA, NA),
+      type = "real",
+      vars = c("pwindow", "swindow", "vreal1"),
+      loop = FALSE
+    ),
+    scode_functions = "
+    real latent_lognormal_lpdf(vector y, vector mu, vector sigma,
+                               vector pwindow, vector swindow,
+                               array[] real obs_t) {
+      int n = num_elements(y);
+      vector[n] d = y - pwindow + swindow;
+      vector[n] obs_time = to_vector(obs_t) - pwindow;
+      return lognormal_lpdf(d | mu, sigma) - 
+        lognormal_lcdf(obs_time | mu, sigma);
+      }
+  ",
+    scode_parameters = "
+    vector<lower = 0, upper = 1>[N] pwindow_raw;
+    vector<lower = 0, upper = 1>[N] swindow_raw;
+  ",
+    scode_tparameters = "
+    vector<lower=0>[N] pwindow;
+    vector<lower=0>[N] swindow;
+    
+    swindow = to_vector(vreal3) .* swindow_raw;
+    
+    for (i in 1:N) {
+      if (Y[i]==0) {
+        pwindow[i] = swindow[i] * pwindow_raw[i];
+      } else {
+        pwindow[i] = vreal2[i] * pwindow_raw[i];
+      }
+    }
+  ",
+    scode_prior = "
+    pwindow ~ uniform(0, to_vector(vreal2));
+    swindow ~ uniform(0, to_vector(vreal3));
+  ",
+    ...
+) {
+  
+  stanvars_functions <- brms::stanvar(
+    block = "functions", scode = scode_functions
+  )
+  stanvars_parameters <- brms::stanvar(
+    block = "parameters", scode = scode_parameters
+  )
+  stanvars_tparameters <- brms::stanvar(
+    block = "tparameters", scode = scode_tparameters
+  )
+  stanvars_prior <- brms::stanvar(block = "model", scode = scode_prior)
+  
+  stanvars_all <- stanvars_functions + stanvars_parameters + stanvars_tparameters + stanvars_prior
+  
+  data <- data |>
+    data.table::copy() |>
+    DT(, id := 1:.N) |>
+    DT(, obs_t := obs_at - ptime_lwr) |>
+    DT(, pwindow_upr := ptime_upr - ptime_lwr) |>
+    DT(, swindow_upr := stime_upr - stime_lwr) |>
+    DT(, delay_central := stime_lwr - ptime_lwr)
+  
+  if (nrow(data) > 1) {
+    data <- data[, id := as.factor(id)]
+  }
+  
+  fit <- fn(
+    formula = formula, family = family, stanvars = stanvars_all,
+    backend = "cmdstanr", data = data, ...
+  )
+  return(fit)
+}
+
 #' Estimate delays adjusted for epidemic growth rate
 #' @export
 exponential_delay <- function(
