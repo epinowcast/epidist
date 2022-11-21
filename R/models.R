@@ -189,26 +189,14 @@ latent_truncation_censoring_adjusted_delay <- function(
     vector[N] pwindow;
     vector[N] swindow;
     swindow = to_vector(vreal3) .* swindow_raw;
-    pwindow = pwindow_raw .* (to_vector(vreal2) + swindow .* to_vector(vreal4));
+    pwindow[noverlap] = to_vector(vreal2[noverlap]) .* pwindow_raw[noverlap];
+    pwindow[woverlap] = (to_vector(vreal2[woverlap]) +  swindow) .*
+      pwindow_raw[woverlap];
   ",
   scode_priors = "
   ",
   ...
 ) {
-  
-  stanvars_functions <- brms::stanvar(
-    block = "functions", scode = scode_functions
-  )
-  stanvars_parameters <- brms::stanvar(
-    block = "parameters", scode = scode_parameters
-  )
-  stanvars_tparameters <- brms::stanvar(
-    block = "tparameters", scode = scode_tparameters
-  )
-  stanvars_priors <- brms::stanvar(block = "model", scode = scode_priors)
-  
-  stanvars_all <- stanvars_functions + stanvars_parameters + 
-    stanvars_tparameters + stanvars_priors
   
   data <- data |>
     data.table::copy() |>
@@ -225,15 +213,47 @@ latent_truncation_censoring_adjusted_delay <- function(
         as.numeric((stime_lwr - ptime_lwr + 1) <= (ptime_upr - ptime_lwr))
     ) |>
     DT(, swindow_upr := stime_upr - stime_lwr) |>
-    DT(, delay_central := stime_lwr - ptime_lwr)
+    DT(, delay_central := stime_lwr - ptime_lwr) |>
+    DT(, row_id := 1:.N)
   
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
   }
+
+  stanvars_functions <- brms::stanvar(
+    block = "functions", scode = scode_functions
+  )
+  stanvars_data <- brms::stanvar(
+    block = "data", scode = "int nN;",
+    x = length(data[woverlap == 0][, noverlap := row_id][, noverlap]),
+    name = "nN"
+  ) +
+  brms::stanvar(
+    block = "data", scode = "array[nN] int noverlap;",
+    x = data[woverlap == 0][, noverlap := row_id][, noverlap],
+    name = "noverlap"
+  ) +
+  brms::stanvar(
+    block = "data", scode = "array[N - nN] int woverlap;",
+    x = data[woverlap > 0][, woverlap := row_id][, woverlap],
+    name = "woverlap"
+  )
+
+  stanvars_parameters <- brms::stanvar(
+    block = "parameters", scode = scode_parameters
+  )
+  stanvars_tparameters <- brms::stanvar(
+    block = "tparameters", scode = scode_tparameters
+  )
+  stanvars_priors <- brms::stanvar(block = "model", scode = scode_priors)
+  
+  stanvars_all <- stanvars_functions + stanvars_data + stanvars_parameters + 
+    stanvars_tparameters + stanvars_priors
   
   fit <- fn(
     formula = formula, family = family, stanvars = stanvars_all,
-    backend = "cmdstanr", data = data, ...
+    backend = "cmdstanr", data = data, 
+    ...
   )
   return(fit)
 }
@@ -300,7 +320,7 @@ latent_truncation_censoring_adjusted_delay_zero <- function(
     block = "tparameters", scode = scode_tparameters
   )
   stanvars_priors <- brms::stanvar(block = "model", scode = scode_priors)
-  
+
   stanvars_all <- stanvars_functions + stanvars_parameters +    
     stanvars_tparameters + stanvars_priors
   
