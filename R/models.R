@@ -278,10 +278,6 @@ latent_truncation_censoring_adjusted_delay_zero <- function(
       }
     }
   ",
-    scode_prior = "
-    pwindow ~ uniform(0, to_vector(vreal2));
-    swindow ~ uniform(0, to_vector(vreal3));
-  ",
     ...
 ) {
   
