@@ -182,16 +182,16 @@ latent_truncation_censoring_adjusted_delay <- function(
       }
   ",
   scode_parameters = "
-    vector<lower = 0, upper = to_vector(vreal3)>[N] swindow;
+    vector<lower = 0, upper = 1>[N] swindow_raw;
     vector<lower = 0, upper = 1>[N] pwindow_raw;
   ",
   scode_tparameters = "
     vector[N] pwindow;
+    vector[N] swindow;
+    swindow = to_vector(vreal3) .* swindow_raw;
     pwindow = pwindow_raw .* (to_vector(vreal2) + swindow .* to_vector(vreal4));
   ",
   scode_priors = "
-    swindow ~ uniform(0, to_vector(vreal3));
-    pwindow_raw ~ uniform(0, 1);
   ",
   ...
 ) {
@@ -285,6 +285,8 @@ latent_truncation_censoring_adjusted_delay_zero <- function(
       }
     }
   ",
+  scode_priors = "
+  ",
     ...
 ) {
   
@@ -297,9 +299,10 @@ latent_truncation_censoring_adjusted_delay_zero <- function(
   stanvars_tparameters <- brms::stanvar(
     block = "tparameters", scode = scode_tparameters
   )
+  stanvars_priors <- brms::stanvar(block = "model", scode = scode_priors)
   
   stanvars_all <- stanvars_functions + stanvars_parameters +    
-    stanvars_tparameters
+    stanvars_tparameters + stanvars_priors
   
   data <- data |>
     data.table::copy() |>
@@ -361,7 +364,7 @@ exponential_delay <- function(
   
   stanvars_functions <- brms::stanvar(block = "functions", scode = scode_functions)
   stanvars_tdata <- brms::stanvar(block="tdata", scode=scode_tdata)
-    
+  
   stanvars_all <- stanvars_functions + stanvars_tdata
   
   data <- pad_zero(data)
