@@ -203,14 +203,13 @@ latent_truncation_censoring_adjusted_delay <- function(
     DT(, id := 1:.N) |>
     DT(, obs_t := obs_at - ptime_lwr) |>
     DT(, pwindow_upr := ifelse(
-          (stime_lwr - ptime_upr + 1) <= (ptime_upr - ptime_lwr), 
+          (stime_lwr - ptime_upr) <= -1, 
           stime_lwr - ptime_lwr,
           ptime_upr - ptime_lwr
         )
     ) |>
     DT(, 
-      woverlap := 
-        as.numeric((stime_lwr - ptime_upr + 1) <= (ptime_upr - ptime_lwr))
+      woverlap := as.numeric((stime_lwr - ptime_upr) <= -1)
     ) |>
     DT(, swindow_upr := stime_upr - stime_lwr) |>
     DT(, delay_central := stime_lwr - ptime_lwr) |>
