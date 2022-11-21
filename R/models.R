@@ -188,10 +188,13 @@ latent_truncation_censoring_adjusted_delay <- function(
   scode_tparameters = "
     vector[N] pwindow;
     vector[N] swindow;
-    swindow = to_vector(vreal3) .* swindow_raw;
-    pwindow[noverlap] = to_vector(vreal2[noverlap]) .* pwindow_raw[noverlap];
-    pwindow[woverlap] = (to_vector(vreal2[woverlap]) +  swindow[woverlap]) .*
-      pwindow_raw[woverlap];
+    pwindow = to_vector(vreal2) .* pwindow_raw;
+    swindow[noverlap] = to_vector(vreal3[noverlap]) .* swindow_raw[noverlap];
+    if (wN) {
+      swindow[woverlap] = pwindow[woverlap] - Y[woverlap] + (
+        to_vector(vreal3[woverlap]) - (pwindow[woverlap] - Y[woverlap])
+      ) .* swindow_raw[woverlap];
+    }
   ",
   scode_priors = "
   ",
@@ -203,8 +206,8 @@ latent_truncation_censoring_adjusted_delay <- function(
     DT(, id := 1:.N) |>
     DT(, obs_t := obs_at - ptime_lwr) |>
     DT(, pwindow_upr := ifelse(
-          stime_lwr < ptime_upr, 
-          stime_lwr - ptime_lwr,
+          stime_upr < ptime_upr, 
+          stime_upr - ptime_lwr,
           ptime_upr - ptime_lwr
         )
     ) |>
@@ -223,17 +226,17 @@ latent_truncation_censoring_adjusted_delay <- function(
     block = "functions", scode = scode_functions
   )
   stanvars_data <- brms::stanvar(
-    block = "data", scode = "int nN;",
-    x = length(data[woverlap == 0]),
-    name = "nN"
+    block = "data", scode = "int wN;",
+    x = nrow(data[woverlap > 0]),
+    name = "wN"
   ) +
   brms::stanvar(
-    block = "data", scode = "array[nN] int noverlap;",
+    block = "data", scode = "array[N - wN] int noverlap;",
     x = data[woverlap == 0][, row_id],
     name = "noverlap"
   ) +
   brms::stanvar(
-    block = "data", scode = "array[N - nN] int woverlap;",
+    block = "data", scode = "array[wN] int woverlap;",
     x = data[woverlap > 0][, row_id],
     name = "woverlap"
   )
