@@ -22,6 +22,10 @@ truncated_obs <- obs |>
   filter_obs_by_obs_time(obs_time = 25) |>
   DT(sample(1:.N, 1000, replace = FALSE))
 
-myfit <- latent_truncation_censoring_adjusted_delay_zero(data=truncated_obs, cores = 4, refresh=0)
+myfit <- latent_truncation_censoring_adjusted_delay_zero(
+  data = truncated_obs, cores = 4, refresh = 0
+)
 
-myfit2 <- latent_truncation_censoring_adjusted_delay(data=truncated_obs, cores = 4, refresh=0)
+myfit2 <- latent_truncation_censoring_adjusted_delay(
+  data = truncated_obs, cores = 4, refresh=0
+)
