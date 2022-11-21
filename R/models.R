@@ -157,7 +157,7 @@ truncation_censoring_adjusted_delay <- function(
 #' @export
 latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
-    delay_central | vreal(obs_t, pwindow_upr, swindow_upr, woverlap) ~ 1,
+    delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1,
     sigma ~ 1
   ), data, fn = brms::brm,
   family = brms::custom_family(
@@ -203,13 +203,13 @@ latent_truncation_censoring_adjusted_delay <- function(
     DT(, id := 1:.N) |>
     DT(, obs_t := obs_at - ptime_lwr) |>
     DT(, pwindow_upr := ifelse(
-          (stime_lwr - ptime_upr) <= -1, 
+          stime_lwr < ptime_upr, 
           stime_lwr - ptime_lwr,
           ptime_upr - ptime_lwr
         )
     ) |>
     DT(, 
-      woverlap := as.numeric((stime_lwr - ptime_upr) <= -1)
+      woverlap := as.numeric(stime_lwr < ptime_upr)
     ) |>
     DT(, swindow_upr := stime_upr - stime_lwr) |>
     DT(, delay_central := stime_lwr - ptime_lwr) |>
@@ -224,17 +224,17 @@ latent_truncation_censoring_adjusted_delay <- function(
   )
   stanvars_data <- brms::stanvar(
     block = "data", scode = "int nN;",
-    x = length(data[woverlap == 0][, noverlap := row_id][, noverlap]),
+    x = length(data[woverlap == 0]),
     name = "nN"
   ) +
   brms::stanvar(
     block = "data", scode = "array[nN] int noverlap;",
-    x = data[woverlap == 0][, noverlap := row_id][, noverlap],
+    x = data[woverlap == 0][, row_id],
     name = "noverlap"
   ) +
   brms::stanvar(
     block = "data", scode = "array[N - nN] int woverlap;",
-    x = data[woverlap > 0][, woverlap := row_id][, woverlap],
+    x = data[woverlap > 0][, row_id],
     name = "woverlap"
   )
 
