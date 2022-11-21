@@ -6,7 +6,7 @@ outbreak <- simulate_exponential_cases(sample_size = 10000, seed=101)
 
 ## super short delays
 secondary_dist <- data.table(
-  meanlog = 1.8, sdlog = 0.4
+  meanlog = 0.6, sdlog = 0.4
 ) |>
   add_natural_scale_mean_sd()
 
