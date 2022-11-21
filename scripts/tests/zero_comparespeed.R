@@ -27,5 +27,5 @@ myfit <- latent_truncation_censoring_adjusted_delay_zero(
 )
 
 myfit2 <- latent_truncation_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh=0
+  data = truncated_obs, cores = 4
 )
