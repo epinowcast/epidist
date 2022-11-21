@@ -193,8 +193,8 @@ latent_truncation_censoring_adjusted_delay <- function(
     if (wN) {
       vector[wN] pwindow_overlap = pwindow[woverlap] - Y[woverlap];
       swindow[woverlap] = pwindow_overlap + (
-        to_vector(vreal3[woverlap]) - pwindow_overlap
-      ) .* swindow_raw[woverlap];
+          to_vector(vreal3[woverlap]) - pwindow_overlap
+        ) .* swindow_raw[woverlap];
     }
   ",
   scode_priors = "
