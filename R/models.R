@@ -187,12 +187,13 @@ latent_truncation_censoring_adjusted_delay <- function(
   ",
   scode_tparameters = "
     vector[N] pwindow;
-    vector[N] swindow;
+    vector<lower = 0>[N] swindow;
     pwindow = to_vector(vreal2) .* pwindow_raw;
     swindow[noverlap] = to_vector(vreal3[noverlap]) .* swindow_raw[noverlap];
     if (wN) {
-      swindow[woverlap] = pwindow[woverlap] - Y[woverlap] + (
-        to_vector(vreal3[woverlap]) - (pwindow[woverlap] - Y[woverlap])
+      vector[wN] pwindow_overlap = pwindow[woverlap] - Y[woverlap];
+      swindow[woverlap] = pwindow_overlap + (
+        to_vector(vreal3[woverlap]) - pwindow_overlap
       ) .* swindow_raw[woverlap];
     }
   ",
