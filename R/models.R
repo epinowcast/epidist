@@ -157,7 +157,7 @@ truncation_censoring_adjusted_delay <- function(
 #' @export
 latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
-    delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1,
+    delay_central | vreal(obs_t, pwindow_upr, swindow_upr, woverlap) ~ 1,
     sigma ~ 1
   ), data, fn = brms::brm,
   family = brms::custom_family(
@@ -182,12 +182,13 @@ latent_truncation_censoring_adjusted_delay <- function(
       }
   ",
   scode_parameters = "
-    vector<lower = 0, upper = to_vector(vreal2)>[N] pwindow;
     vector<lower = 0, upper = to_vector(vreal3)>[N] swindow;
+    vector<lower = 0, 
+           upper = to_vector(vreal2) + swindow .* to_vector(vreal4)>[N] pwindow;
   ",
   scode_prior = "
-    pwindow ~ uniform(0, to_vector(vreal2));
     swindow ~ uniform(0, to_vector(vreal3));
+    pwindow ~ uniform(0, to_vector(vreal2) + swindow .* to_vector(vreal4));
   ",
   ...
 ) {
@@ -206,7 +207,16 @@ latent_truncation_censoring_adjusted_delay <- function(
     data.table::copy() |>
     DT(, id := 1:.N) |>
     DT(, obs_t := obs_at - ptime_lwr) |>
-    DT(, pwindow_upr := ptime_upr - ptime_lwr) |>
+    DT(, pwindow_upr := ifelse(
+          (stime_lwr - ptime_lwr + 1) <= (ptime_upr - ptime_lwr), 
+          stime_lwr - ptime_lwr,
+          ptime_upr - ptime_lwr
+        )
+    ) |>
+    DT(, 
+      woverlap := 
+        as.numeric((stime_lwr - ptime_lwr + 1) <= (ptime_upr - ptime_lwr))
+    ) |>
     DT(, swindow_upr := stime_upr - stime_lwr) |>
     DT(, delay_central := stime_lwr - ptime_lwr)
   
