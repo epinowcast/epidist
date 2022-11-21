@@ -290,9 +290,9 @@ latent_truncation_censoring_adjusted_delay_zero <- function(
   stanvars_tparameters <- brms::stanvar(
     block = "tparameters", scode = scode_tparameters
   )
-  stanvars_prior <- brms::stanvar(block = "model", scode = scode_prior)
   
-  stanvars_all <- stanvars_functions + stanvars_parameters + stanvars_tparameters + stanvars_prior
+  stanvars_all <- stanvars_functions + stanvars_parameters +    
+    stanvars_tparameters
   
   data <- data |>
     data.table::copy() |>
