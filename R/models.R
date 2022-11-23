@@ -186,18 +186,17 @@ latent_truncation_censoring_adjusted_delay <- function(
     vector<lower = 0, upper = 1>[N] pwindow_raw;
   ",
   scode_tparameters = "
-    vector[N] pwindow;
+    vector<lower = 0>[N] pwindow;
     vector<lower = 0>[N] swindow;
-    pwindow = to_vector(vreal2) .* pwindow_raw;
-    swindow[noverlap] = to_vector(vreal3[noverlap]) .* swindow_raw[noverlap];
+    swindow = to_vector(vreal3) .* swindow_raw;
+    pwindow[noverlap] = to_vector(vreal2[noverlap]) .* pwindow_raw[noverlap];
     if (wN) {
-      vector[wN] pwindow_overlap = pwindow[woverlap] - Y[woverlap];
-      swindow[woverlap] = pwindow_overlap + (
-          to_vector(vreal3[woverlap]) - pwindow_overlap
-        ) .* swindow_raw[woverlap];
+      pwindow[woverlap] = swindow[woverlap] .* pwindow_raw[woverlap];
     }
   ",
   scode_priors = "
+    swindow_raw ~ uniform(0, 1);
+    pwindow_raw ~ uniform(0, 1);
   ",
   ...
 ) {
@@ -207,7 +206,7 @@ latent_truncation_censoring_adjusted_delay <- function(
     DT(, id := 1:.N) |>
     DT(, obs_t := obs_at - ptime_lwr) |>
     DT(, pwindow_upr := ifelse(
-          stime_upr < ptime_upr, 
+          stime_lwr < ptime_upr, ## if overlap 
           stime_upr - ptime_lwr,
           ptime_upr - ptime_lwr
         )
