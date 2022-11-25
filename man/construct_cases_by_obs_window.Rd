@@ -4,7 +4,11 @@
 \alias{construct_cases_by_obs_window}
 \title{Construct case counts by observation window based on secondary observations}
 \usage{
-construct_cases_by_obs_window(linelist, windows = c(25, 45))
+construct_cases_by_obs_window(
+  linelist,
+  windows = c(25, 45),
+  obs_type = c("stime", "ptime")
+)
 }
 \description{
 Construct case counts by observation window based on secondary observations
