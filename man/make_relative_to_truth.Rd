@@ -4,7 +4,7 @@
 \alias{make_relative_to_truth}
 \title{Make posterior lognormal samples relative to true values}
 \usage{
-make_relative_to_truth(draws, secondary_dist)
+make_relative_to_truth(draws, secondary_dist, by = "parameter")
 }
 \description{
 Make posterior lognormal samples relative to true values
