@@ -597,7 +597,7 @@
       "RemoteRef": "main",
       "RemoteSha": "ba417c8c45444392a0d35d6503e7b528930aaafa",
       "Remotes": "stan-dev/cmdstanr, stan-dev/loo",
-      "Hash": "bd10c8daedd4daccf450c70a3a04cf25",
+      "Hash": "697af69338904c36b18f19f62f9f9caf",
       "Requirements": [
         "cmdstanr",
         "data.table",
@@ -1420,7 +1420,7 @@
       "Package": "renv",
       "Version": "0.16.0",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Hash": "c9e8442ab69bc21c9697ecf856c1e6c7",
       "Requirements": []
     },
