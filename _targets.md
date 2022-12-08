@@ -51,6 +51,8 @@ package and remove the potentially outdated workflow.
 ``` r
 library(targets)
 library(stantargets)
+#> Warning in as.POSIXlt.POSIXct(Sys.time()): unable to identify current timezone 'H':
+#> please set environment variable 'TZ'
 library(tarchetypes)
 library(data.table)
 library(ggplot2)
@@ -61,7 +63,7 @@ library(purrr, quietly = TRUE)
 #> 
 #>     transpose
 library(here)
-#> here() starts at /workspaces/dynamicaltruncation
+#> here() starts at C:/Users/sangw/Documents/Math/Research/dynamicaltruncation
 library(lubridate)
 #> 
 #> Attaching package: 'lubridate'
@@ -73,6 +75,7 @@ library(lubridate)
 #> 
 #>     date, intersect, setdiff, union
 library(arrow)
+#> The tzdb package is not installed. Timezones will not be available to Arrow compute functions.
 #> 
 #> Attaching package: 'arrow'
 #> The following object is masked from 'package:lubridate':
@@ -128,9 +131,7 @@ tar_option_set(
 
 ### Generic setup
 
-  - We assume 3 distribution scenarios: short, medium, and long.
-
-<!-- end list -->
+- We assume 3 distribution scenarios: short, medium, and long.
 
 ``` r
 tar_group_by(
@@ -146,9 +147,7 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/distributions.R.
 ```
 
-  - Save distribution scenarios
-
-<!-- end list -->
+- Save distribution scenarios
 
 ``` r
 tar_file(
@@ -162,9 +161,7 @@ tar_file(
 
 #### Simulation
 
-  - Simulate the outbreak.
-
-<!-- end list -->
+- Simulate the outbreak.
 
 ``` r
 tar_target(simulated_cases_outbreak, {
@@ -174,10 +171,8 @@ tar_target(simulated_cases_outbreak, {
 #> Establish _targets.R and _targets_r/targets/simulated_cases_outbreak.R.
 ```
 
-  - Simulate observations of primary and secondary events as linelist
-    for each distribution scenario.
-
-<!-- end list -->
+- Simulate observations of primary and secondary events as linelist for
+  each distribution scenario.
 
 ``` r
 tar_target(
@@ -193,9 +188,7 @@ tar_target(
 #> Establish _targets.R and _targets_r/targets/simulated_secondary_outbreak.R.
 ```
 
-  - Simulate the observation process
-
-<!-- end list -->
+- Simulate the observation process
 
 ``` r
 tar_target(simulated_observations_outbreak, {
@@ -208,10 +201,8 @@ tar_target(simulated_observations_outbreak, {
 
 #### Observation
 
-  - For outbreak simulations, we estimate across sample size ranges (N =
-    10, 100, 2000). `N = 200` is the default case
-
-<!-- end list -->
+- For outbreak simulations, we estimate across sample size ranges (N =
+  10, 100, 2000). `N = 200` is the default case
 
 ``` r
 tar_target(sample_sizes, {
@@ -221,11 +212,9 @@ tar_target(sample_sizes, {
 #> Establish _targets.R and _targets_r/targets/sample_sizes.R.
 ```
 
-  - For the outbreak simulation, we estimate all models at chosen points
-    across the outbreak (suggestion: “early outbreak” (15 days), “near
-    peak” (30 days), “past peak” (45 days), “late outbreak” (60 days))
-
-<!-- end list -->
+- For the outbreak simulation, we estimate all models at chosen points
+  across the outbreak (suggestion: “early outbreak” (15 days), “near
+  peak” (30 days), “past peak” (45 days), “late outbreak” (60 days))
 
 ``` r
 tar_group_by(
@@ -239,10 +228,8 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/outbreak_estimation_times.R.
 ```
 
-  - Truncate the available simulate observations based on the estimation
-    time for each scenario.
-
-<!-- end list -->
+- Truncate the available simulate observations based on the estimation
+  time for each scenario.
 
 ``` r
 tar_target(
@@ -266,9 +253,7 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/group_truncated_sim_obs_outbreak.R.
 ```
 
-  - Sample observations
-
-<!-- end list -->
+- Sample observations
 
 ``` r
 tar_target(
@@ -307,12 +292,8 @@ tar_target(simulated_scenarios_outbreak, {
 
 #### Simulation
 
-  - We simulate scenarios in which the incidence of primary event is
-    changing exponentially. We consider
-    ![r](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;r
-    "r") ranging from -0.2 to 0.2.
-
-<!-- end list -->
+- We simulate scenarios in which the incidence of primary event is
+  changing exponentially. We consider $r$ ranging from -0.2 to 0.2.
 
 ``` r
 tar_target(growth_rate, {
@@ -325,9 +306,7 @@ tar_target(growth_rate, {
 #> Establish _targets.R and _targets_r/targets/growth_rate.R.
 ```
 
-  - Save growth rate scenarios.
-
-<!-- end list -->
+- Save growth rate scenarios.
 
 ``` r
 tar_file(
@@ -337,9 +316,7 @@ tar_file(
 #> Establish _targets.R and _targets_r/targets/save_growth_rate.R.
 ```
 
-  - Simulate data.
-
-<!-- end list -->
+- Simulate data.
 
 ``` r
 tar_target(
@@ -354,10 +331,8 @@ tar_target(
 #> Establish _targets.R and _targets_r/targets/simulated_cases_exponential.R.
 ```
 
-  - Simulate observations of primary and secondary events as linelist
-    for each distribution scenario.
-
-<!-- end list -->
+- Simulate observations of primary and secondary events as linelist for
+  each distribution scenario.
 
 ``` r
 tar_target(
@@ -373,9 +348,7 @@ tar_target(
 #> Establish _targets.R and _targets_r/targets/simulated_secondary_exponential.R.
 ```
 
-  - Simulate the observation process
-
-<!-- end list -->
+- Simulate the observation process
 
 ``` r
 tar_target(simulated_observations_exponential, {
@@ -388,9 +361,7 @@ tar_target(simulated_observations_exponential, {
 
 #### Observation
 
-  - For the exponential simulation, we truncate at `t = 30`.
-
-<!-- end list -->
+- For the exponential simulation, we truncate at `t = 30`.
 
 ``` r
 tar_target(
@@ -411,9 +382,7 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/group_sim_obs_exponential.R.
 ```
 
-  - Number of replicate observation processes
-
-<!-- end list -->
+- Number of replicate observation processes
 
 ``` r
 tar_target(replicates_exponential, {
@@ -423,9 +392,7 @@ tar_target(replicates_exponential, {
 #> Establish _targets.R and _targets_r/targets/replicates_exponential.R.
 ```
 
-  - Sample observations
-
-<!-- end list -->
+- Sample observations
 
 ``` r
 tar_target(
@@ -443,9 +410,7 @@ tar_target(
 #> Establish _targets.R and _targets_r/targets/sampled_simulated_observations_exponential.R.
 ```
 
-  - Group and list unique scenarios for downstream modelling.
-
-<!-- end list -->
+- Group and list unique scenarios for downstream modelling.
 
 ``` r
 tar_target(list_simulated_observations_exponential, {
@@ -473,15 +438,13 @@ tar_target(simulated_scenarios_exponential, {
 
 ### Data
 
-  - Case study using linelist data from [“Transmission dynamics of Ebola
-    virus disease and intervention effectiveness in Sierra
-    LeoneTransmission dynamics of Ebola virus disease and intervention
-    effectiveness in Sierra
-    Leone”](https://doi.org/10.1073/pnas.1518587113). We download and
-    save only confirmed cases. Note this was done manually due to the
-    journal blocking automated downloads.
-
-<!-- end list -->
+- Case study using linelist data from [“Transmission dynamics of Ebola
+  virus disease and intervention effectiveness in Sierra
+  LeoneTransmission dynamics of Ebola virus disease and intervention
+  effectiveness in Sierra
+  Leone”](https://doi.org/10.1073/pnas.1518587113). We download and save
+  only confirmed cases. Note this was done manually due to the journal
+  blocking automated downloads.
 
 ``` r
 tar_target(raw_case_study_data, {
@@ -491,15 +454,13 @@ tar_target(raw_case_study_data, {
 #> Establish _targets.R and _targets_r/targets/raw_case_study_data.R.
 ```
 
-  - The data contains ages, sex, symptom onset date, date of sample
-    testing, the district of the case, and the Chiefdom of the case.
-    Here we convert these dates into the primary and secondary events
-    `dynamicaltruncation` requires by assuming daily censoring. This
-    means we are estimating the delay between symptom onset and a sample
-    being tested. As we are considering overall cases only we keep only
-    dates and our newly created delay variables.
-
-<!-- end list -->
+- The data contains ages, sex, symptom onset date, date of sample
+  testing, the district of the case, and the Chiefdom of the case. Here
+  we convert these dates into the primary and secondary events
+  `dynamicaltruncation` requires by assuming daily censoring. This means
+  we are estimating the delay between symptom onset and a sample being
+  tested. As we are considering overall cases only we keep only dates
+  and our newly created delay variables.
 
 ``` r
 tar_target(case_study_data, {
@@ -521,9 +482,7 @@ tar_target(case_study_data, {
 #> Establish _targets.R and _targets_r/targets/case_study_data.R.
 ```
 
-  - Save the processed data
-
-<!-- end list -->
+- Save the processed data
 
 ``` r
 tar_file(
@@ -537,10 +496,8 @@ tar_file(
 
 ### Observaton scenarios
 
-  - For our Ebola case study we estimate at 60, 120, 180, and 240 days
-    from the first cases symptom onset.
-
-<!-- end list -->
+- For our Ebola case study we estimate at 60, 120, 180, and 240 days
+  from the first cases symptom onset.
 
 ``` r
 tar_group_by(
@@ -554,10 +511,8 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/ebola_estimation_times.R.
 ```
 
-  - Truncate the available simulate observations based on the estimation
-    time for each scenario.
-
-<!-- end list -->
+- Truncate the available simulate observations based on the estimation
+  time for each scenario.
 
 ``` r
 tar_target(
@@ -573,10 +528,8 @@ tar_target(
 #> Establish _targets.R and _targets_r/targets/truncated_ebola_obs.R.
 ```
 
-  - Create completely observed retrospective cohorts for the same
-    estimation time windows.
-
-<!-- end list -->
+- Create completely observed retrospective cohorts for the same
+  estimation time windows.
 
 ``` r
 tar_target(
@@ -601,9 +554,7 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/group_truncated_ebola_obs.R.
 ```
 
-  - Sample observations with 200 observations each.
-
-<!-- end list -->
+- Sample observations with 200 observations each.
 
 ``` r
 tar_target(
@@ -663,9 +614,7 @@ machine_model_names <- gsub(" ", "_", tolower(names(models)))
 #> Establish _targets.R and _targets_r/globals/models.R.
 ```
 
-  - Save a look-up of model names.
-
-<!-- end list -->
+- Save a look-up of model names.
 
 ``` r
 tar_file(
@@ -680,9 +629,7 @@ tar_file(
 
 ### Fit models to simulated and case study data
 
-  - Combine simulated and case study scenarios and observations
-
-<!-- end list -->
+- Combine simulated and case study scenarios and observations
 
 ``` r
 tar_target(scenarios, {
@@ -699,9 +646,7 @@ tar_target(scenarios, {
 #> Establish _targets.R and _targets_r/targets/scenarios.R.
 ```
 
-  - Save scenarios for postprocessing
-
-<!-- end list -->
+- Save scenarios for postprocessing
 
 ``` r
 tar_file(
@@ -711,9 +656,7 @@ tar_file(
 #> Establish _targets.R and _targets_r/targets/save_scenarios.R.
 ```
 
-  - Make a list of observations to fit models for.
-
-<!-- end list -->
+- Make a list of observations to fit models for.
 
 ``` r
 tar_target(list_observations, {
@@ -725,9 +668,7 @@ tar_target(list_observations, {
 #> Establish _targets.R and _targets_r/targets/list_observations.R.
 ```
 
-  - Dummy data required for model creation.
-
-<!-- end list -->
+- Dummy data required for model creation.
 
 ``` r
 dummy_obs <- data.table::data.table(
@@ -739,22 +680,20 @@ dummy_obs <- data.table::data.table(
 #> Establish _targets.R and _targets_r/globals/dummy_obs.R.
 ```
 
-  - Iterate over compiled models and all scenarios being investigated.
-    For each model:
-      - Create a model file
-      - Generate stan code
-      - Save the model to file
-      - Compile the model
-      - Generate stan data for each scenario
-      - Fit the model to each scenario
-      - Extract posterior samples for the parameters of interest
-      - Summarise the posterior parameters of interest
-      - Combine posterior samples and summaries with the scenarios they
-        are linked to.
-      - Summarise the model run time and other diagnostics by scenario.
-      - Save posterior draws and model diagnostics
-
-<!-- end list -->
+- Iterate over compiled models and all scenarios being investigated. For
+  each model:
+  - Create a model file
+  - Generate stan code
+  - Save the model to file
+  - Compile the model
+  - Generate stan data for each scenario
+  - Fit the model to each scenario
+  - Extract posterior samples for the parameters of interest
+  - Summarise the posterior parameters of interest
+  - Combine posterior samples and summaries with the scenarios they are
+    linked to.
+  - Summarise the model run time and other diagnostics by scenario.
+  - Save posterior draws and model diagnostics
 
 ``` r
 tar_map(
