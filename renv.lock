@@ -103,7 +103,7 @@
     },
     "RcppArmadillo": {
       "Package": "RcppArmadillo",
-      "Version": "0.11.4.0.1",
+      "Version": "0.11.4.2.1",
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "411952f0aca6398392dad34f225753b9",
@@ -151,7 +151,7 @@
     },
     "arrow": {
       "Package": "arrow",
-      "Version": "10.0.0",
+      "Version": "10.0.1",
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "05f9b803e1f6a5d47ff0a885ed04ebd2",
@@ -472,7 +472,7 @@
     },
     "data.table": {
       "Package": "data.table",
-      "Version": "1.14.5",
+      "Version": "1.14.7",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
@@ -953,7 +953,7 @@
     },
     "jsonlite": {
       "Package": "jsonlite",
-      "Version": "1.8.3",
+      "Version": "1.8.4",
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "8b1bd0be62956f2a6b91ce84fac79a45",
@@ -1083,7 +1083,7 @@
     },
     "markdown": {
       "Package": "markdown",
-      "Version": "1.2",
+      "Version": "1.4",
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "295690cfe43b7ea23de079b52c134b13",
@@ -1207,7 +1207,7 @@
     },
     "openssl": {
       "Package": "openssl",
-      "Version": "2.0.4",
+      "Version": "2.0.5",
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "e86c5ffeb8474a9e03d75f5d2919683e",
@@ -1851,7 +1851,7 @@
     },
     "vctrs": {
       "Package": "vctrs",
-      "Version": "0.4.2",
+      "Version": "0.5.1",
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "0e3dfc070b2a8f0478fcdf86fb33355d",
@@ -1895,7 +1895,7 @@
     },
     "xfun": {
       "Package": "xfun",
-      "Version": "0.34",
+      "Version": "0.35",
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "9eba2411b0b1f879797141bd24df7407",
