@@ -20,6 +20,9 @@ data {
   // data for custom real vectors
   array[N] real vreal3;
   int prior_only; // should the likelihood be ignored?
+  int wN;
+  array[N - wN] int noverlap;
+  array[wN] int woverlap;
 }
 transformed data {
   
@@ -28,17 +31,26 @@ parameters {
   real Intercept; // temporary intercept for centered predictors
   real Intercept_sigma; // temporary intercept for centered predictors
   
-  vector<lower=0, upper=to_vector(vreal2)>[N] pwindow;
-  vector<lower=0, upper=to_vector(vreal3)>[N] swindow;
+  vector<lower=0, upper=1>[N] swindow_raw;
+  vector<lower=0, upper=1>[N] pwindow_raw;
 }
 transformed parameters {
   real lprior = 0; // prior contributions to the log posterior
+  
+  vector<lower=0>[N] pwindow;
+  vector<lower=0>[N] swindow;
+  swindow = to_vector(vreal3) .* swindow_raw;
+  pwindow[noverlap] = to_vector(vreal2[noverlap]) .* pwindow_raw[noverlap];
+  if (wN) {
+    pwindow[woverlap] = swindow[woverlap] .* pwindow_raw[woverlap];
+  }
+  
   lprior += student_t_lpdf(Intercept | 3, 0, 2.5);
   lprior += student_t_lpdf(Intercept_sigma | 3, 0, 2.5);
 }
 model {
-  pwindow ~ uniform(0, to_vector(vreal2));
-  swindow ~ uniform(0, to_vector(vreal3));
+  swindow_raw ~ uniform(0, 1);
+  pwindow_raw ~ uniform(0, 1);
   
   // likelihood including constants
   if (!prior_only) {
