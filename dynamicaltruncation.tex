@@ -117,12 +117,11 @@ Authors
 
 \section{Introduction}
 
-\swp{Maybe we don't have to define what a delay distribution is. But I think we need to talk about why these delays are useful and why we should care.}
-Epidemiological delay distributions (i.e., the distribution of time between two events associated with infection) provide useful means of summarizing the course of infection, such as disease progression \citep{lauer2020incubation,verity2020estimates} and temporal variation in infectiousness \citep{madewell2022serial}.
-\swp{A sentence about using delays to measure NPIS?}
-Accurate characterization of epidemiological delay distributions are also critical to understanding population-level outbreak dynamics. \swp{maybe need examples or not.}
+Characterizing delay distributions of time between two epidemiological events is essential to understanding the course of an infectious disease outbreak.
+At the individual level, epidemiological delay distributions provide useful means of summarizing the course of infection, such as disease progression \citep{lauer2020incubation,verity2020estimates} and temporal variation in infectiousness \citep{madewell2022serial}.
+Population-level changes in these distributions can further provide information about changes in epidemic dynamics, such as the emergence of new variants and the impact of non-pharmaceutical interventions \citep{ali2020serial}.
 
-However, epidemiological delays can be difficult to measure in many cases because focal events cannot be observed directly or may be known imprecisely.
+Measuring epidemiological delays can be difficult in practice because some events, such as the exact timing of infection, are difficult to observe directly.
 In these cases, event times are often reported in \emph{censored} intervals that can span over a day or even several weeks.
 In addition, when an epidemic is ongoing, epidemiological delay distributions can be \emph{truncated} because we cannot observe events that have not happened yet.
 Although both censoring and truncation problems have been widely discussed in epidemiology and other literatures, there are remaining gaps.
@@ -134,19 +133,35 @@ Recent studies have also highlighted the role of dynamical biases ...
 
 \swp{A paragraph on what's been done. Some people have focused on truncation. Some people on dynamical bias. Some people tried to correct for both. Censoring is also often under-appreciated, at least at a daily time step.}
 
-\section{General theory for estimating epidemiological delay distributions}
+\section{Methods}
 
-\swp{I started writing this section thinking that we need to build up some theory before we introduce actual methods. But now I feel like we can combine this section with the methods section to derive some theory and show likelihood...if that makes sense...}
-We present general theory for understanding observational biases in estimating epidemiological delay distributions and derive likelihood for each scenario.
-We also provide approximations of each methods, which we compare later.
+\subsection{General theory for characterizing epidemiological delay distributions}
 
-\subsection{Notation}
+Here, we use the term epidemiological delay to refer to time between two epidemiological events, which we refer to as \emph{primary} and \emph{secondary} events.
+In most cases, the primary event always occurs before the secondary event (e.g., symptom onset followed by infection).
+However, there are exceptions: for example, an infectee may develop symptoms before their infector, but it is more convenient to define the symptom onset of the infector as the primary event due to the direction of transmission.
+For simplicity, we focus on the case where the secondary event always happens after the primary event in this study.
 
-Throughout this paper, we use $p$ and $s$ to denote primary and secondary event times, where $s-p$ is the focal epidemiological delay.
-In particular we are interested in estimating the forward distribution $f_p(\tau)$, measured from the cohort of individuals who experienced the primary event at the same time $p$.
-For now, we focus on the scenario in which the forward distribution remain stable over the course of an epidemic, $f_p(\tau) = f(\tau)$---this is true for many distributions that reflect the course of infection, such as the incubation-period distribution (i.e., time between infection and symptom onset).
-Other distributions, such as the generation-interval distribution (i.e., time between infection and transmission) and reporting distributions, are expected to change throughout.
-While it is possible (and perhaps more convenient) to characterize the backward distribution $b_s(\tau)$, measured from the cohort of individuals who experienced the secondary event at the same time $s$, these distributions are subject to dynamical biases as we discuss later.
+All epidemiological delays can be measured in two different ways: forward (starting from the primary event) and backward (starting from the secondary event).
+At the individual level, the length of a single delay is not affected whether it is measured forward or backward.
+At the population level, however, the shape of a delay distribution depends on how it is measured.
+
+The forward distribution $f_p(\tau)$ is measured from the cohort of individuals who experienced the primary event at the same time $p$.
+In many cases, the forward distribution remains stable over the course of an epidemic, $f_p(\tau) = f(\tau)$---this is generally true for distributions that describe the course of infection of a single individual, such as the incubation-period distribution (i.e., time between infection and symptom onset).
+Other distributions, such as the generation-interval distribution (i.e., time between infection and transmission) and reporting distributions, can change throughout over the course of an outbreak, reflecting changes in transmission dynamics and human behavior.
+The backward distribution $b_s(\tau)$ is measured from the cohort of individuals who experienced the secondary event at the same time $s$.
+The shape of this distribution now depends on the previous incidence of primary events: 
+\begin{equation}
+b_s(\tau) = \frac{i(s-\tau) f_{s-\tau}(\tau)}{\int_0^\infty i(s-\tau) f_{s-\tau}(\tau) \dtau}.
+\end{equation}
+For example, when the incidence of primary event is growing exponentially, the backward distribution will have a shorter mean than the corresponding forward distribution because we are more likely to observe individuals who experienced the primary event recently---we refer to this effect as a dynamical bias.
+Throughout the paper, we focus on estimating the forward distribution for the most part and return to the discussion of dynamical biases later on.
+
+\subsection{Biases in estimating forward distributions}
+
+There are two main sources of biases in estimating the forward distributions: truncation and censoring.
+When an epidemic is ongoing, we cannot observe events that have not happened yet.
+
 
 \begin{figure}
 \caption{Maybe a schematic diagram showing truncation and censoring}
