@@ -21,7 +21,7 @@ parallel_chains <- 4
 
 tar_option_set(
   packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here"),
-  deployment = "worker",
+  deployment = "main",
   memory = "transient",
   workspace_on_error = TRUE,
   error = "continue",
