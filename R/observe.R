@@ -37,7 +37,7 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
       censored_obs_time := obs_at - (ptime_lwr + (ptime_upr - ptime_lwr) / 2)
     ) |>
     DT(, censored := "interval") |>
-    DT(stime <= obs_at) ## FIXME: THIS IS POTENTIALLY PROBLEMATIC FOR DISCRETE CASES
+    DT(floor(stime) + 1 <= obs_at)
   return(truncated_linelist)
 }
 
