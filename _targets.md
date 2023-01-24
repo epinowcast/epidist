@@ -113,7 +113,7 @@ parallel_chains <- 4
 
 tar_option_set(
   packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here"),
-  deployment = "worker",
+  deployment = "main",
   memory = "transient",
   workspace_on_error = TRUE,
   error = "continue",
@@ -805,7 +805,8 @@ tar_map(
         iter_sampling = 1000,
         seed = 123
       ),
-    pattern = map(standata, scenarios)
+    pattern = map(standata, scenarios),
+    deployment = "worker"
   ),
   tar_file(
     save_diagnostics,
