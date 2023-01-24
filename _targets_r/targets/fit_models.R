@@ -46,7 +46,8 @@ tar_map(
         iter_sampling = 1000,
         seed = 123
       ),
-    pattern = map(standata, scenarios)
+    pattern = map(standata, scenarios),
+    deployment = "worker"
   ),
   tar_file(
     save_diagnostics,
