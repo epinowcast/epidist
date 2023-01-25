@@ -74,7 +74,7 @@ latent_censoring_adjusted_delay <- function(
   ",
   ...
 ) {
-  
+
   stanvars_functions <- brms::stanvar(
     block = "functions", scode = scode_functions
   )
@@ -82,20 +82,20 @@ latent_censoring_adjusted_delay <- function(
     block = "parameters", scode = scode_parameters
   )
   stanvars_prior <- brms::stanvar(block = "model", scode = scode_prior)
-  
+
   stanvars_all <- stanvars_functions + stanvars_parameters + stanvars_prior
-  
+
   data <- data |>
     data.table::copy() |>
     DT(, id := 1:.N) |>
     DT(, pwindow_upr := ptime_upr - ptime_lwr) |>
     DT(, swindow_upr := stime_upr - stime_lwr) |>
     DT(, delay_central := stime_lwr - ptime_lwr)
-  
+
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
   }
-  
+
   fit <- fn(
     formula = formula, family = family, stanvars = stanvars_all,
     backend = "cmdstanr", data = data, ...
