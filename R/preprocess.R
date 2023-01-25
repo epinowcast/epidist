@@ -62,7 +62,7 @@ construct_cases_by_obs_window <- function(linelist, windows = c(25, 45),
         filter_obs_by_obs_time(obs_time = uw) |>
         data.table::DT(stime > lw)
     }
-  }else{
+  }else {
     filter_fn <- function(dt, lw, uw) {
       dt |>
         filter_obs_by_ptime(obs_time = uw) |>
