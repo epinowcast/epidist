@@ -1,253 +1,1377 @@
-id,scenario,distribution,sample_size,data_type,parameter,mean,median,q2.5,q5,q20,q35,q65,q80,q95,q97.5
-1,early outbreak,long,10,outbreak,meanlog,4.1,3.3,1.3,1.5,2.1,2.7,4.1,5.4,8.7,11
-1,early outbreak,long,10,outbreak,sdlog,1.5,1.4,0.68,0.74,0.98,1.2,1.6,1.9,2.5,3
-1,early outbreak,long,10,outbreak,mean,1.8e+29,70,5.4,6.4,15,31,230,1300,180000,1900000
-1,early outbreak,long,10,outbreak,sd,6.8e+36,170,4.2,6,20,54,780,7600,3100000,1.4e+08
-2,early outbreak,medium,10,outbreak,meanlog,3.2,2.3,1.1,1.2,1.6,1.9,2.9,4,8.4,11
-2,early outbreak,medium,10,outbreak,sdlog,1.3,1.1,0.5,0.55,0.76,0.92,1.3,1.6,2.5,3
-2,early outbreak,medium,10,outbreak,mean,6.7e+15,19,3.7,4.2,6.9,11,44,200,92000,5100000
-2,early outbreak,medium,10,outbreak,sd,5.6e+20,28,2.3,2.8,6.2,12,94,730,1800000,3.8e+08
-3,early outbreak,short,10,outbreak,meanlog,1.1,0.96,0.6,0.67,0.82,0.89,1,1.1,1.8,2.6
-3,early outbreak,short,10,outbreak,sdlog,0.52,0.41,0.22,0.23,0.28,0.34,0.5,0.65,1.2,1.5
-3,early outbreak,short,10,outbreak,mean,44,2.8,2.1,2.2,2.5,2.6,3.1,3.7,13,37
-3,early outbreak,short,10,outbreak,sd,13000,1.2,0.53,0.58,0.75,0.92,1.6,2.5,24,110
-4,late outbreak,long,10,outbreak,meanlog,2.1,2,1.5,1.6,1.8,1.9,2.1,2.3,3,3.6
-4,late outbreak,long,10,outbreak,sdlog,0.82,0.7,0.42,0.45,0.55,0.62,0.82,1,1.6,2
-4,late outbreak,long,10,outbreak,mean,3900,9.7,6,6.5,7.7,8.6,11,15,63,250
-4,late outbreak,long,10,outbreak,sd,4.3e+08,7.5,3.2,3.6,4.8,6,10,19,230,1900
-5,late outbreak,medium,10,outbreak,meanlog,2.2,1.9,1.1,1.2,1.5,1.7,2.1,2.4,4.5,6.2
-5,late outbreak,medium,10,outbreak,sdlog,1.3,1.1,0.64,0.68,0.85,0.97,1.3,1.7,2.8,3.4
-5,late outbreak,medium,10,outbreak,mean,4.6e+16,12,5.1,5.6,7.5,9.2,18,40,3900,160000
-5,late outbreak,medium,10,outbreak,sd,2.2e+30,19,4.3,5,7.9,12,39,150,190000,4.5e+07
-6,late outbreak,short,10,outbreak,meanlog,1.1,1.1,0.62,0.71,0.9,0.99,1.1,1.2,1.4,1.5
-6,late outbreak,short,10,outbreak,sdlog,0.57,0.53,0.32,0.34,0.42,0.48,0.6,0.69,0.92,1
-6,late outbreak,short,10,outbreak,mean,4.9,3.4,2.3,2.5,2.9,3.2,3.6,4,5.3,6.3
-6,late outbreak,short,10,outbreak,sd,140,1.9,0.97,1.1,1.4,1.6,2.2,2.9,5.4,7.6
-7,near peak,long,10,outbreak,meanlog,3.4,2.7,1.3,1.5,1.9,2.2,3.4,4.4,7.2,9.1
-7,near peak,long,10,outbreak,sdlog,1.5,1.4,0.64,0.69,0.92,1.1,1.6,2,2.8,3.2
-7,near peak,long,10,outbreak,mean,2.4e+11,39,5.7,6.5,11,19,120,630,49000,1200000
-7,near peak,long,10,outbreak,sd,2.5e+20,90,4.5,5.6,13,31,480,4600,2100000,1.3e+08
-8,near peak,medium,10,outbreak,meanlog,3.5,2.8,1.4,1.5,2,2.3,3.4,4.4,7.7,9.6
-8,near peak,medium,10,outbreak,sdlog,1.3,1.2,0.55,0.6,0.82,0.97,1.4,1.7,2.4,2.8
-8,near peak,medium,10,outbreak,mean,2.1e+16,32,5.1,6,10,17,79,310,36000,520000
-8,near peak,medium,10,outbreak,sd,1.3e+22,53,3.5,4.3,10,22,190,1200,5e+05,2.2e+07
-9,near peak,short,10,outbreak,meanlog,0.98,0.97,0.62,0.7,0.84,0.91,1,1.1,1.3,1.4
-9,near peak,short,10,outbreak,sdlog,0.43,0.38,0.22,0.24,0.29,0.34,0.45,0.54,0.76,0.89
-9,near peak,short,10,outbreak,mean,3.1,2.9,2.1,2.2,2.5,2.7,3.1,3.4,4.4,5.2
-9,near peak,short,10,outbreak,sd,1.9,1.1,0.59,0.63,0.8,0.95,1.4,1.8,3.5,5.1
-10,past peak,long,10,outbreak,meanlog,1.7,1.4,0.7,0.81,1.1,1.3,1.6,1.9,3.5,5.1
-10,past peak,long,10,outbreak,sdlog,1.3,1,0.52,0.56,0.72,0.85,1.2,1.7,2.9,3.6
-10,past peak,long,10,outbreak,mean,8.7e+15,6.7,3.2,3.5,4.5,5.4,9.5,24,2000,51000
-10,past peak,long,10,outbreak,sd,6.9e+32,8.4,2.2,2.5,3.8,5.5,17,89,130000,4.7e+07
-11,past peak,medium,10,outbreak,meanlog,1.7,1.6,1.2,1.3,1.5,1.6,1.7,1.8,2,2.2
-11,past peak,medium,10,outbreak,sdlog,0.58,0.52,0.31,0.34,0.4,0.46,0.59,0.7,1,1.2
-11,past peak,medium,10,outbreak,mean,8.2,5.9,4.2,4.4,5.1,5.5,6.4,7.3,12,17
-11,past peak,medium,10,outbreak,sd,38,3.2,1.6,1.8,2.3,2.7,4,5.4,15,31
-12,past peak,short,10,outbreak,meanlog,1.1,1.1,0.79,0.85,0.97,1,1.1,1.2,1.4,1.4
-12,past peak,short,10,outbreak,sdlog,0.39,0.35,0.22,0.23,0.28,0.31,0.39,0.47,0.66,0.8
-12,past peak,short,10,outbreak,mean,3.6,3.2,2.4,2.5,2.8,3,3.4,3.6,4.3,5
-12,past peak,short,10,outbreak,sd,4.1,1.1,0.65,0.69,0.85,0.99,1.3,1.6,2.9,4.6
-13,early outbreak,long,100,outbreak,meanlog,1.6,1.5,1.3,1.3,1.4,1.5,1.6,1.7,1.9,2
-13,early outbreak,long,100,outbreak,sdlog,0.69,0.68,0.52,0.54,0.6,0.64,0.72,0.77,0.9,0.97
-13,early outbreak,long,100,outbreak,mean,6.4,5.8,4.4,4.5,5,5.4,6.3,7.1,9.7,11
-13,early outbreak,long,100,outbreak,sd,5.5,4.4,2.5,2.7,3.3,3.8,5.1,6.3,11,14
-14,early outbreak,medium,100,outbreak,meanlog,1.6,1.5,1.4,1.4,1.4,1.5,1.6,1.7,1.8,1.9
-14,early outbreak,medium,100,outbreak,sdlog,0.6,0.59,0.46,0.47,0.52,0.55,0.62,0.67,0.77,0.83
-14,early outbreak,medium,100,outbreak,mean,6.1,5.5,4.4,4.5,4.9,5.2,5.9,6.4,8.2,9.5
-14,early outbreak,medium,100,outbreak,sd,4.6,3.5,2.2,2.3,2.8,3.1,4,4.8,7.1,9.2
-15,early outbreak,short,100,outbreak,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
-15,early outbreak,short,100,outbreak,sdlog,0.22,0.22,0.21,0.21,0.21,0.22,0.22,0.23,0.24,0.25
-15,early outbreak,short,100,outbreak,mean,3.5,3.5,3.3,3.3,3.4,3.4,3.5,3.6,3.7,3.7
-15,early outbreak,short,100,outbreak,sd,0.78,0.77,0.71,0.72,0.74,0.76,0.79,0.81,0.86,0.89
-16,late outbreak,long,100,outbreak,meanlog,1.7,1.7,1.5,1.5,1.6,1.7,1.7,1.8,1.8,1.9
-16,late outbreak,long,100,outbreak,sdlog,0.82,0.82,0.69,0.7,0.75,0.79,0.85,0.88,0.96,1
-16,late outbreak,long,100,outbreak,mean,7.6,7.5,6.1,6.3,6.8,7.2,7.9,8.3,9.4,9.8
-16,late outbreak,long,100,outbreak,sd,7.6,7.3,5,5.3,6.1,6.7,8,8.9,11,13
-17,late outbreak,medium,100,outbreak,meanlog,1.7,1.7,1.6,1.6,1.6,1.7,1.7,1.7,1.8,1.8
-17,late outbreak,medium,100,outbreak,sdlog,0.57,0.57,0.49,0.5,0.53,0.55,0.59,0.61,0.66,0.67
-17,late outbreak,medium,100,outbreak,mean,6.3,6.3,5.6,5.7,6,6.1,6.4,6.7,7.1,7.2
-17,late outbreak,medium,100,outbreak,sd,3.9,3.9,3.1,3.2,3.5,3.7,4.1,4.4,4.9,5.2
-18,late outbreak,short,100,outbreak,meanlog,1.2,1.2,1.1,1.2,1.2,1.2,1.2,1.3,1.3,1.3
-18,late outbreak,short,100,outbreak,sdlog,0.41,0.4,0.34,0.35,0.38,0.39,0.42,0.43,0.47,0.48
-18,late outbreak,short,100,outbreak,mean,3.7,3.7,3.4,3.4,3.6,3.7,3.8,3.9,4,4.1
-18,late outbreak,short,100,outbreak,sd,1.6,1.6,1.3,1.3,1.4,1.5,1.6,1.7,1.9,2
-19,near peak,long,100,outbreak,meanlog,1.7,1.7,1.5,1.5,1.6,1.6,1.8,1.8,2,2.1
-19,near peak,long,100,outbreak,sdlog,0.8,0.79,0.63,0.65,0.72,0.76,0.83,0.89,1,1.1
-19,near peak,long,100,outbreak,mean,8,7.5,5.5,5.7,6.4,7,8.1,9.1,12,14
-19,near peak,long,100,outbreak,sd,8,7,4,4.3,5.3,6.2,8.1,9.8,15,19
-20,near peak,medium,100,outbreak,meanlog,1.8,1.8,1.6,1.6,1.7,1.7,1.8,1.9,2,2.1
-20,near peak,medium,100,outbreak,sdlog,0.66,0.65,0.53,0.54,0.59,0.62,0.68,0.71,0.8,0.85
-20,near peak,medium,100,outbreak,mean,7.4,7.1,5.8,6,6.5,6.8,7.5,8.1,9.9,11
-20,near peak,medium,100,outbreak,sd,5.6,5.1,3.4,3.6,4.2,4.7,5.7,6.5,9.2,11
-21,near peak,short,100,outbreak,meanlog,1.2,1.2,1.1,1.1,1.1,1.2,1.2,1.2,1.3,1.3
-21,near peak,short,100,outbreak,sdlog,0.4,0.4,0.33,0.34,0.37,0.38,0.41,0.43,0.47,0.48
-21,near peak,short,100,outbreak,mean,3.6,3.5,3.2,3.3,3.4,3.5,3.6,3.7,3.9,3.9
-21,near peak,short,100,outbreak,sd,1.5,1.5,1.2,1.2,1.3,1.4,1.5,1.6,1.9,2
-22,past peak,long,100,outbreak,meanlog,1.8,1.8,1.6,1.6,1.7,1.7,1.8,1.8,1.9,1.9
-22,past peak,long,100,outbreak,sdlog,0.71,0.7,0.59,0.6,0.65,0.68,0.73,0.77,0.84,0.87
-22,past peak,long,100,outbreak,mean,7.5,7.4,6.2,6.4,6.8,7.1,7.7,8.2,9.1,9.7
-22,past peak,long,100,outbreak,sd,6.2,5.9,4.2,4.4,5,5.4,6.5,7.2,8.9,9.8
-23,past peak,medium,100,outbreak,meanlog,1.7,1.7,1.5,1.5,1.6,1.6,1.7,1.7,1.8,1.8
-23,past peak,medium,100,outbreak,sdlog,0.66,0.66,0.55,0.56,0.6,0.63,0.68,0.71,0.78,0.8
-23,past peak,medium,100,outbreak,mean,6.6,6.6,5.6,5.7,6.1,6.3,6.8,7.1,7.8,8.2
-23,past peak,medium,100,outbreak,sd,5,4.8,3.5,3.6,4.1,4.5,5.2,5.7,6.9,7.6
-24,past peak,short,100,outbreak,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.2,1.3,1.3
-24,past peak,short,100,outbreak,sdlog,0.38,0.38,0.32,0.33,0.35,0.37,0.39,0.41,0.44,0.46
-24,past peak,short,100,outbreak,mean,3.6,3.6,3.3,3.4,3.5,3.6,3.7,3.8,3.9,4
-24,past peak,short,100,outbreak,sd,1.4,1.4,1.2,1.2,1.3,1.4,1.5,1.6,1.7,1.8
-25,early outbreak,long,1000,outbreak,meanlog,1.8,1.8,1.6,1.6,1.7,1.8,1.8,1.9,2.1,2.1
-25,early outbreak,long,1000,outbreak,sdlog,0.77,0.76,0.66,0.67,0.71,0.74,0.78,0.82,0.89,0.92
-25,early outbreak,long,1000,outbreak,mean,8.4,8.1,6.3,6.5,7.2,7.6,8.6,9.4,11,13
-25,early outbreak,long,1000,outbreak,sd,7.7,7.1,4.7,5,5.8,6.5,7.9,9.1,12,15
-26,early outbreak,medium,1000,outbreak,meanlog,1.5,1.5,1.4,1.4,1.5,1.5,1.5,1.5,1.6,1.6
-26,early outbreak,medium,1000,outbreak,sdlog,0.55,0.54,0.49,0.5,0.52,0.53,0.56,0.57,0.6,0.61
-26,early outbreak,medium,1000,outbreak,mean,5.2,5.2,4.7,4.8,5,5.1,5.3,5.5,5.8,5.9
-26,early outbreak,medium,1000,outbreak,sd,3.1,3,2.5,2.6,2.8,2.9,3.2,3.4,3.8,4
-27,early outbreak,short,1000,outbreak,meanlog,1.2,1.2,1.1,1.2,1.2,1.2,1.2,1.2,1.2,1.2
-27,early outbreak,short,1000,outbreak,sdlog,0.35,0.35,0.32,0.32,0.33,0.34,0.35,0.36,0.37,0.38
-27,early outbreak,short,1000,outbreak,mean,3.5,3.5,3.3,3.4,3.4,3.4,3.5,3.5,3.6,3.6
-27,early outbreak,short,1000,outbreak,sd,1.2,1.2,1.1,1.1,1.2,1.2,1.3,1.3,1.4,1.4
-28,late outbreak,long,1000,outbreak,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.8,1.8
-28,late outbreak,long,1000,outbreak,sdlog,0.82,0.82,0.77,0.78,0.8,0.81,0.83,0.84,0.86,0.87
-28,late outbreak,long,1000,outbreak,mean,8.4,8.4,7.8,7.9,8.1,8.2,8.5,8.7,8.9,9.1
-28,late outbreak,long,1000,outbreak,sd,8.2,8.2,7.2,7.3,7.7,7.9,8.4,8.7,9.2,9.4
-29,late outbreak,medium,1000,outbreak,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6
-29,late outbreak,medium,1000,outbreak,sdlog,0.59,0.59,0.56,0.57,0.58,0.59,0.6,0.6,0.62,0.62
-29,late outbreak,medium,1000,outbreak,mean,6,6,5.7,5.8,5.9,5.9,6,6.1,6.2,6.2
-29,late outbreak,medium,1000,outbreak,sd,3.9,3.9,3.5,3.6,3.7,3.8,3.9,4,4.1,4.2
-30,late outbreak,short,1000,outbreak,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
-30,late outbreak,short,1000,outbreak,sdlog,0.38,0.38,0.36,0.36,0.37,0.38,0.39,0.39,0.4,0.4
-30,late outbreak,short,1000,outbreak,mean,3.5,3.5,3.4,3.5,3.5,3.5,3.6,3.6,3.6,3.6
-30,late outbreak,short,1000,outbreak,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.4,1.4,1.5,1.5
-31,near peak,long,1000,outbreak,meanlog,1.7,1.7,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.8
-31,near peak,long,1000,outbreak,sdlog,0.75,0.75,0.69,0.7,0.73,0.74,0.76,0.78,0.8,0.81
-31,near peak,long,1000,outbreak,mean,7.5,7.5,6.7,6.8,7.1,7.3,7.7,7.9,8.4,8.5
-31,near peak,long,1000,outbreak,sd,6.6,6.5,5.4,5.5,6,6.2,6.8,7.2,7.9,8.2
-32,near peak,medium,1000,outbreak,meanlog,1.7,1.7,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.7
-32,near peak,medium,1000,outbreak,sdlog,0.59,0.58,0.55,0.55,0.57,0.58,0.59,0.6,0.62,0.63
-32,near peak,medium,1000,outbreak,mean,6.2,6.2,5.8,5.9,6,6.1,6.3,6.4,6.6,6.6
-32,near peak,medium,1000,outbreak,sd,4,3.9,3.5,3.6,3.7,3.8,4.1,4.2,4.5,4.5
-33,near peak,short,1000,outbreak,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
-33,near peak,short,1000,outbreak,sdlog,0.35,0.35,0.33,0.33,0.34,0.35,0.36,0.36,0.37,0.38
-33,near peak,short,1000,outbreak,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.6,3.6,3.6
-33,near peak,short,1000,outbreak,sd,1.3,1.3,1.2,1.2,1.2,1.3,1.3,1.3,1.4,1.4
-34,past peak,long,1000,outbreak,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9
-34,past peak,long,1000,outbreak,sdlog,0.77,0.77,0.72,0.73,0.75,0.76,0.78,0.79,0.82,0.82
-34,past peak,long,1000,outbreak,mean,8.3,8.3,7.7,7.8,8,8.2,8.5,8.6,9,9.1
-34,past peak,long,1000,outbreak,sd,7.6,7.5,6.5,6.6,7.1,7.3,7.8,8.1,8.6,8.9
-35,past peak,medium,1000,outbreak,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
-35,past peak,medium,1000,outbreak,sdlog,0.6,0.6,0.57,0.58,0.59,0.6,0.61,0.62,0.63,0.64
-35,past peak,medium,1000,outbreak,mean,6.1,6.1,5.8,5.9,6,6.1,6.2,6.3,6.4,6.4
-35,past peak,medium,1000,outbreak,sd,4.1,4.1,3.7,3.7,3.9,4,4.1,4.2,4.4,4.5
-36,past peak,short,1000,outbreak,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
-36,past peak,short,1000,outbreak,sdlog,0.38,0.38,0.36,0.37,0.38,0.38,0.39,0.39,0.4,0.41
-36,past peak,short,1000,outbreak,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.6,3.6,3.7,3.7
-36,past peak,short,1000,outbreak,sd,1.4,1.4,1.3,1.4,1.4,1.4,1.5,1.5,1.5,1.5
-37,fast decay,long,10,exponential,meanlog,1.6,1.6,1.2,1.3,1.5,1.6,1.7,1.8,1.9,2
-37,fast decay,long,10,exponential,sdlog,0.51,0.47,0.29,0.31,0.38,0.42,0.52,0.61,0.84,0.96
-37,fast decay,long,10,exponential,mean,6.2,5.7,4.2,4.4,5,5.3,6.1,6.6,8.4,10
-37,fast decay,long,10,exponential,sd,21,2.8,1.5,1.7,2.1,2.4,3.2,4.1,7.6,11
-38,fast decay,medium,10,exponential,meanlog,1.6,1.6,1.1,1.2,1.4,1.5,1.7,1.8,2.1,2.3
-38,fast decay,medium,10,exponential,sdlog,0.72,0.64,0.39,0.42,0.5,0.57,0.73,0.88,1.3,1.5
-38,fast decay,medium,10,exponential,mean,19,6.2,4.1,4.4,5.2,5.7,6.9,8.1,16,28
-38,fast decay,medium,10,exponential,sd,9400,4.3,2.1,2.3,2.9,3.5,5.5,8.1,31,78
-39,fast decay,short,10,exponential,meanlog,1.2,1.2,0.75,0.85,1.1,1.2,1.3,1.4,1.6,1.7
-39,fast decay,short,10,exponential,sdlog,0.63,0.56,0.33,0.36,0.44,0.5,0.63,0.74,1.1,1.3
-39,fast decay,short,10,exponential,mean,140000,4,2.7,2.9,3.4,3.7,4.4,4.9,7.3,11
-39,fast decay,short,10,exponential,sd,4.5e+11,2.4,1.2,1.3,1.7,2,2.9,3.9,9.8,22
-40,fast growth,long,10,exponential,meanlog,1.9,1.5,0.96,1,1.2,1.4,1.7,2.3,4.3,5.3
-40,fast growth,long,10,exponential,sdlog,0.87,0.72,0.35,0.39,0.5,0.6,0.88,1.2,1.9,2.2
-40,fast growth,long,10,exponential,mean,730000,5.8,3.1,3.4,4.1,4.8,8.3,19,410,2200
-40,fast growth,long,10,exponential,sd,4.9e+09,4.7,1.3,1.5,2.2,3.1,8.9,32,2300,25000
-41,fast growth,medium,10,exponential,meanlog,2,1.7,1.4,1.4,1.6,1.7,1.8,2,3.3,4.5
-41,fast growth,medium,10,exponential,sdlog,0.57,0.45,0.25,0.27,0.33,0.39,0.54,0.68,1.3,1.7
-41,fast growth,medium,10,exponential,mean,2.3e+07,6.3,4.4,4.6,5.2,5.7,7.1,9.5,59,290
-41,fast growth,medium,10,exponential,sd,1.3e+11,2.8,1.3,1.4,1.9,2.3,4,7.2,120,1000
-42,fast growth,short,10,exponential,meanlog,1.2,1.2,0.93,0.98,1.1,1.1,1.2,1.3,1.4,1.5
-42,fast growth,short,10,exponential,sdlog,0.33,0.29,0.21,0.22,0.24,0.26,0.34,0.4,0.57,0.65
-42,fast growth,short,10,exponential,mean,3.6,3.4,2.7,2.8,3.1,3.3,3.6,3.8,4.4,4.9
-42,fast growth,short,10,exponential,sd,1.3,1,0.67,0.7,0.81,0.91,1.2,1.5,2.5,3.2
-43,stable,long,10,exponential,meanlog,2.1,2,1.6,1.7,1.8,1.9,2.1,2.3,3.1,3.6
-43,stable,long,10,exponential,sdlog,0.61,0.52,0.3,0.32,0.4,0.45,0.6,0.76,1.2,1.5
-43,stable,long,10,exponential,mean,430,8.3,5.7,6,6.9,7.6,9.5,12,43,110
-43,stable,long,10,exponential,sd,46000,4.5,2,2.2,2.9,3.6,6.1,10,76,320
-44,stable,medium,10,exponential,meanlog,2.7,2.1,1.5,1.6,1.8,2,2.4,2.9,5.4,8.2
-44,stable,medium,10,exponential,sdlog,0.97,0.77,0.38,0.42,0.54,0.64,0.96,1.3,2.1,2.8
-44,stable,medium,10,exponential,mean,8.1e+15,11,5.6,6.1,7.5,8.8,17,42,1900,130000
-44,stable,medium,10,exponential,sd,1.5e+22,9.9,2.6,2.9,4.4,6.4,20,82,16000,7600000
-45,stable,short,10,exponential,meanlog,1.1,1.1,0.66,0.75,0.94,1,1.2,1.3,1.5,1.7
-45,stable,short,10,exponential,sdlog,0.56,0.49,0.28,0.3,0.38,0.43,0.56,0.68,1,1.3
-45,stable,short,10,exponential,mean,27,3.4,2.3,2.5,2.9,3.1,3.7,4.2,6.7,12
-45,stable,short,10,exponential,sd,12000,1.7,0.84,0.92,1.2,1.4,2.1,2.9,8.7,24
-46,fast decay,long,100,exponential,meanlog,1.8,1.8,1.6,1.7,1.7,1.8,1.8,1.9,2,2
-46,fast decay,long,100,exponential,sdlog,0.77,0.76,0.63,0.65,0.7,0.73,0.79,0.83,0.91,0.95
-46,fast decay,long,100,exponential,mean,8.4,8.2,6.7,6.9,7.4,7.8,8.6,9.1,10,11
-46,fast decay,long,100,exponential,sd,7.6,7.2,4.9,5.2,6,6.6,7.9,8.9,11,13
-47,fast decay,medium,100,exponential,meanlog,1.7,1.6,1.5,1.5,1.6,1.6,1.7,1.7,1.8,1.8
-47,fast decay,medium,100,exponential,sdlog,0.61,0.61,0.52,0.53,0.57,0.59,0.63,0.65,0.7,0.73
-47,fast decay,medium,100,exponential,mean,6.3,6.3,5.5,5.6,5.9,6.1,6.4,6.7,7.1,7.3
-47,fast decay,medium,100,exponential,sd,4.3,4.2,3.2,3.3,3.7,4,4.4,4.8,5.5,5.9
-48,fast decay,short,100,exponential,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.3,1.3,1.3
-48,fast decay,short,100,exponential,sdlog,0.42,0.41,0.35,0.36,0.39,0.4,0.43,0.44,0.48,0.49
-48,fast decay,short,100,exponential,mean,3.7,3.7,3.4,3.4,3.6,3.6,3.8,3.9,4,4.1
-48,fast decay,short,100,exponential,sd,1.6,1.6,1.3,1.3,1.5,1.5,1.7,1.8,2,2
-49,fast growth,long,100,exponential,meanlog,2.1,2,1.7,1.7,1.8,1.9,2.1,2.3,2.6,2.8
-49,fast growth,long,100,exponential,sdlog,0.78,0.76,0.58,0.6,0.67,0.72,0.81,0.88,1,1.1
-49,fast growth,long,100,exponential,mean,13,10,6.3,6.7,7.9,8.9,11,14,24,31
-49,fast growth,long,100,exponential,sd,15,8.8,4.1,4.6,6,7.4,11,15,32,47
-50,fast growth,medium,100,exponential,meanlog,1.6,1.6,1.4,1.4,1.5,1.5,1.6,1.6,1.7,1.8
-50,fast growth,medium,100,exponential,sdlog,0.54,0.54,0.42,0.44,0.48,0.51,0.56,0.6,0.66,0.7
-50,fast growth,medium,100,exponential,mean,5.6,5.5,4.5,4.6,5,5.2,5.8,6.1,7,7.6
-50,fast growth,medium,100,exponential,sd,3.4,3.2,2.1,2.2,2.6,2.9,3.5,4,5.1,5.9
-51,fast growth,short,100,exponential,meanlog,1.3,1.3,1.2,1.2,1.2,1.2,1.3,1.3,1.3,1.3
-51,fast growth,short,100,exponential,sdlog,0.27,0.27,0.22,0.23,0.25,0.26,0.28,0.3,0.33,0.34
-51,fast growth,short,100,exponential,mean,3.7,3.7,3.4,3.4,3.5,3.6,3.7,3.8,3.9,4
-51,fast growth,short,100,exponential,sd,1,1,0.81,0.83,0.9,0.96,1.1,1.1,1.3,1.3
-52,stable,long,100,exponential,meanlog,1.8,1.8,1.6,1.6,1.7,1.7,1.8,1.9,2,2.1
-52,stable,long,100,exponential,sdlog,0.82,0.81,0.65,0.67,0.73,0.77,0.84,0.9,1,1.1
-52,stable,long,100,exponential,mean,8.6,8.2,6.3,6.5,7.2,7.7,8.8,9.7,12,14
-52,stable,long,100,exponential,sd,8.8,7.9,4.8,5.1,6.2,7,9,11,16,19
-53,stable,medium,100,exponential,meanlog,1.5,1.5,1.4,1.4,1.5,1.5,1.6,1.6,1.7,1.7
-53,stable,medium,100,exponential,sdlog,0.65,0.65,0.54,0.56,0.59,0.62,0.67,0.7,0.77,0.81
-53,stable,medium,100,exponential,mean,5.8,5.7,4.8,4.9,5.3,5.5,5.9,6.2,6.8,7.2
-53,stable,medium,100,exponential,sd,4.3,4.1,3,3.1,3.5,3.8,4.4,4.9,6,6.6
-54,stable,short,100,exponential,meanlog,1.2,1.2,1.1,1.1,1.1,1.2,1.2,1.2,1.3,1.3
-54,stable,short,100,exponential,sdlog,0.42,0.42,0.35,0.36,0.38,0.4,0.43,0.45,0.49,0.51
-54,stable,short,100,exponential,mean,3.5,3.5,3.2,3.3,3.4,3.5,3.6,3.7,3.8,3.9
-54,stable,short,100,exponential,sd,1.5,1.5,1.2,1.3,1.4,1.5,1.6,1.7,1.9,2
-55,fast decay,long,1000,exponential,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9
-55,fast decay,long,1000,exponential,sdlog,0.8,0.8,0.75,0.76,0.78,0.79,0.81,0.82,0.84,0.85
-55,fast decay,long,1000,exponential,mean,8.5,8.5,7.9,7.9,8.2,8.3,8.6,8.8,9.1,9.3
-55,fast decay,long,1000,exponential,sd,8,8,6.9,7.1,7.5,7.7,8.2,8.6,9.2,9.4
-56,fast decay,medium,1000,exponential,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6
-56,fast decay,medium,1000,exponential,sdlog,0.59,0.59,0.56,0.57,0.58,0.59,0.6,0.61,0.62,0.63
-56,fast decay,medium,1000,exponential,mean,5.9,5.9,5.7,5.7,5.8,5.9,6,6,6.2,6.2
-56,fast decay,medium,1000,exponential,sd,3.9,3.9,3.5,3.6,3.7,3.8,3.9,4,4.2,4.2
-57,fast decay,short,1000,exponential,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
-57,fast decay,short,1000,exponential,sdlog,0.38,0.38,0.36,0.36,0.37,0.37,0.38,0.39,0.4,0.4
-57,fast decay,short,1000,exponential,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.5,3.6,3.6
-57,fast decay,short,1000,exponential,sd,1.4,1.4,1.3,1.3,1.3,1.4,1.4,1.4,1.5,1.5
-58,fast growth,long,1000,exponential,meanlog,1.7,1.7,1.6,1.6,1.7,1.7,1.7,1.8,1.8,1.8
-58,fast growth,long,1000,exponential,sdlog,0.73,0.72,0.67,0.68,0.7,0.71,0.74,0.75,0.78,0.79
-58,fast growth,long,1000,exponential,mean,7.3,7.3,6.5,6.6,6.9,7.1,7.5,7.7,8.3,8.5
-58,fast growth,long,1000,exponential,sd,6.1,6,4.9,5.1,5.5,5.8,6.3,6.7,7.5,7.8
-59,fast growth,medium,1000,exponential,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
-59,fast growth,medium,1000,exponential,sdlog,0.54,0.54,0.51,0.51,0.52,0.53,0.55,0.56,0.58,0.58
-59,fast growth,medium,1000,exponential,mean,5.6,5.6,5.2,5.3,5.4,5.5,5.7,5.8,5.9,6
-59,fast growth,medium,1000,exponential,sd,3.3,3.2,2.9,2.9,3.1,3.2,3.3,3.5,3.7,3.8
-60,fast growth,short,1000,exponential,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
-60,fast growth,short,1000,exponential,sdlog,0.36,0.36,0.34,0.34,0.35,0.36,0.37,0.37,0.38,0.39
-60,fast growth,short,1000,exponential,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.7,3.7,3.7,3.8
-60,fast growth,short,1000,exponential,sd,1.4,1.4,1.2,1.3,1.3,1.3,1.4,1.4,1.5,1.5
-61,stable,long,1000,exponential,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.8
-61,stable,long,1000,exponential,sdlog,0.73,0.73,0.68,0.69,0.71,0.72,0.74,0.75,0.77,0.78
-61,stable,long,1000,exponential,mean,7.6,7.5,7,7.1,7.3,7.4,7.6,7.8,8.1,8.3
-61,stable,long,1000,exponential,sd,6.3,6.3,5.4,5.6,5.9,6.1,6.5,6.8,7.3,7.5
-62,stable,medium,1000,exponential,meanlog,1.5,1.5,1.5,1.5,1.5,1.5,1.6,1.6,1.6,1.6
-62,stable,medium,1000,exponential,sdlog,0.56,0.56,0.53,0.54,0.55,0.55,0.57,0.57,0.59,0.59
-62,stable,medium,1000,exponential,mean,5.5,5.5,5.3,5.3,5.4,5.5,5.6,5.6,5.7,5.8
-62,stable,medium,1000,exponential,sd,3.4,3.3,3,3.1,3.2,3.3,3.4,3.5,3.6,3.7
-63,stable,short,1000,exponential,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
-63,stable,short,1000,exponential,sdlog,0.39,0.39,0.36,0.37,0.38,0.38,0.39,0.4,0.41,0.41
-63,stable,short,1000,exponential,mean,3.7,3.7,3.6,3.6,3.6,3.7,3.7,3.7,3.8,3.8
-63,stable,short,1000,exponential,sd,1.5,1.5,1.4,1.4,1.4,1.5,1.5,1.5,1.6,1.6
+id,scenario,distribution,sample_size,data_type,replicate,obs_type,parameter,mean,median,q2.5,q5,q20,q35,q65,q80,q95,q97.5
+1,early outbreak,long,10,outbreak,1,,meanlog,2.8,2.2,0.97,1.1,1.5,1.8,2.8,3.9,6.8,8.4
+2,early outbreak,medium,10,outbreak,1,,meanlog,2.2,1.7,1.3,1.4,1.5,1.6,1.9,2.2,5,6.9
+3,early outbreak,short,10,outbreak,1,,meanlog,2.7,2.1,1,1.1,1.4,1.7,2.6,3.5,6.3,7.9
+4,late outbreak,long,10,outbreak,1,,meanlog,1.8,1.7,1,1.2,1.4,1.6,1.8,2,2.8,3.2
+5,late outbreak,medium,10,outbreak,1,,meanlog,1.9,1.9,1.5,1.5,1.7,1.8,2,2.1,2.3,2.5
+6,late outbreak,short,10,outbreak,1,,meanlog,1.3,1.3,1,1.1,1.2,1.2,1.3,1.3,1.4,1.5
+7,near peak,long,10,outbreak,1,,meanlog,2,1.8,1.3,1.4,1.6,1.7,1.9,2.2,3.5,4.7
+8,near peak,medium,10,outbreak,1,,meanlog,2.8,2.1,1.1,1.2,1.5,1.8,2.6,3.5,6.8,9.6
+9,near peak,short,10,outbreak,1,,meanlog,1.1,1.1,0.79,0.84,0.96,1,1.1,1.2,1.3,1.3
+10,past peak,long,10,outbreak,1,,meanlog,2,1.7,0.96,1.1,1.4,1.5,1.9,2.2,3.9,5.2
+11,past peak,medium,10,outbreak,1,,meanlog,2.7,2.3,1.6,1.7,1.9,2.1,2.6,3.1,5.3,6.6
+12,past peak,short,10,outbreak,1,,meanlog,0.99,1,0.58,0.65,0.84,0.93,1.1,1.1,1.3,1.4
+13,early outbreak,long,100,outbreak,1,,meanlog,2.7,2.4,1.7,1.8,2,2.2,2.6,3.1,4.6,5.7
+14,early outbreak,medium,100,outbreak,1,,meanlog,1.5,1.5,1.3,1.3,1.4,1.4,1.5,1.6,1.7,1.7
+15,early outbreak,short,100,outbreak,1,,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.3,1.3,1.3
+16,late outbreak,long,100,outbreak,1,,meanlog,1.8,1.8,1.6,1.6,1.7,1.7,1.8,1.9,1.9,2
+17,late outbreak,medium,100,outbreak,1,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.7,1.7,1.7,1.7
+18,late outbreak,short,100,outbreak,1,,meanlog,1.1,1.1,1.1,1.1,1.1,1.1,1.2,1.2,1.2,1.2
+19,near peak,long,100,outbreak,1,,meanlog,1.8,1.8,1.6,1.6,1.7,1.7,1.8,1.9,2,2
+20,near peak,medium,100,outbreak,1,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.7,1.8
+21,near peak,short,100,outbreak,1,,meanlog,1.2,1.2,1.1,1.1,1.1,1.2,1.2,1.2,1.2,1.3
+22,past peak,long,100,outbreak,1,,meanlog,1.7,1.7,1.5,1.6,1.6,1.7,1.7,1.8,1.8,1.9
+23,past peak,medium,100,outbreak,1,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.7,1.7
+24,past peak,short,100,outbreak,1,,meanlog,1.2,1.2,1.1,1.1,1.1,1.1,1.2,1.2,1.2,1.2
+25,early outbreak,long,200,outbreak,1,,meanlog,2,1.9,1.6,1.7,1.8,1.8,2,2.1,2.4,2.5
+26,early outbreak,medium,200,outbreak,1,,meanlog,1.5,1.5,1.4,1.4,1.5,1.5,1.5,1.6,1.6,1.6
+27,early outbreak,short,200,outbreak,1,,meanlog,1.1,1.1,1,1.1,1.1,1.1,1.1,1.1,1.2,1.2
+28,late outbreak,long,200,outbreak,1,,meanlog,1.7,1.6,1.5,1.5,1.6,1.6,1.7,1.7,1.8,1.8
+29,late outbreak,medium,200,outbreak,1,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.7
+30,late outbreak,short,200,outbreak,1,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3,1.3
+31,near peak,long,200,outbreak,1,,meanlog,1.8,1.7,1.6,1.6,1.7,1.7,1.8,1.8,1.9,2
+32,near peak,medium,200,outbreak,1,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.7,1.7
+33,near peak,short,200,outbreak,1,,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.2,1.2,1.2
+34,past peak,long,200,outbreak,1,,meanlog,1.9,1.9,1.7,1.7,1.8,1.8,1.9,1.9,2,2
+35,past peak,medium,200,outbreak,1,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.6,1.7
+36,past peak,short,200,outbreak,1,,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.2,1.2,1.2
+37,decay,long,200,exponential,1,,meanlog,1.7,1.7,1.6,1.7,1.7,1.7,1.7,1.7,1.8,1.8
+38,decay,long,200,exponential,2,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+39,decay,long,200,exponential,3,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+40,decay,long,200,exponential,4,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.8
+41,decay,long,200,exponential,5,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9
+42,decay,long,200,exponential,6,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+43,decay,long,200,exponential,7,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.8,1.9
+44,decay,long,200,exponential,8,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9
+45,decay,long,200,exponential,9,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+46,decay,long,200,exponential,10,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+47,decay,long,200,exponential,11,,meanlog,1.8,1.8,1.7,1.7,1.7,1.8,1.8,1.8,1.8,1.9
+48,decay,long,200,exponential,12,,meanlog,1.8,1.8,1.7,1.8,1.8,1.8,1.8,1.8,1.9,1.9
+49,decay,long,200,exponential,13,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+50,decay,long,200,exponential,14,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+51,decay,long,200,exponential,15,,meanlog,1.8,1.8,1.7,1.7,1.7,1.8,1.8,1.8,1.8,1.9
+52,decay,long,200,exponential,16,,meanlog,1.8,1.8,1.7,1.7,1.7,1.8,1.8,1.8,1.8,1.9
+53,decay,long,200,exponential,17,,meanlog,1.8,1.8,1.7,1.8,1.8,1.8,1.8,1.9,1.9,1.9
+54,decay,long,200,exponential,18,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+55,decay,long,200,exponential,19,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.8,1.9
+56,decay,long,200,exponential,20,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+57,decay,medium,200,exponential,1,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+58,decay,medium,200,exponential,2,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.6,1.6
+59,decay,medium,200,exponential,3,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+60,decay,medium,200,exponential,4,,meanlog,1.7,1.7,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.7
+61,decay,medium,200,exponential,5,,meanlog,1.6,1.6,1.5,1.6,1.6,1.6,1.6,1.6,1.6,1.7
+62,decay,medium,200,exponential,6,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7
+63,decay,medium,200,exponential,7,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+64,decay,medium,200,exponential,8,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+65,decay,medium,200,exponential,9,,meanlog,1.6,1.6,1.5,1.6,1.6,1.6,1.6,1.6,1.6,1.7
+66,decay,medium,200,exponential,10,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+67,decay,medium,200,exponential,11,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7
+68,decay,medium,200,exponential,12,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+69,decay,medium,200,exponential,13,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7
+70,decay,medium,200,exponential,14,,meanlog,1.6,1.6,1.5,1.6,1.6,1.6,1.6,1.6,1.6,1.6
+71,decay,medium,200,exponential,15,,meanlog,1.6,1.6,1.5,1.6,1.6,1.6,1.6,1.6,1.6,1.6
+72,decay,medium,200,exponential,16,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+73,decay,medium,200,exponential,17,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6
+74,decay,medium,200,exponential,18,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+75,decay,medium,200,exponential,19,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.6,1.6
+76,decay,medium,200,exponential,20,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+77,decay,short,200,exponential,1,,meanlog,1.2,1.2,1.1,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+78,decay,short,200,exponential,2,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+79,decay,short,200,exponential,3,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+80,decay,short,200,exponential,4,,meanlog,1.2,1.2,1.1,1.1,1.1,1.2,1.2,1.2,1.2,1.2
+81,decay,short,200,exponential,5,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+82,decay,short,200,exponential,6,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3
+83,decay,short,200,exponential,7,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+84,decay,short,200,exponential,8,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+85,decay,short,200,exponential,9,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+86,decay,short,200,exponential,10,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+87,decay,short,200,exponential,11,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+88,decay,short,200,exponential,12,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+89,decay,short,200,exponential,13,,meanlog,1.2,1.2,1.1,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+90,decay,short,200,exponential,14,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3
+91,decay,short,200,exponential,15,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3,1.3
+92,decay,short,200,exponential,16,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+93,decay,short,200,exponential,17,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+94,decay,short,200,exponential,18,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+95,decay,short,200,exponential,19,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+96,decay,short,200,exponential,20,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+97,fast decay,long,200,exponential,1,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+98,fast decay,long,200,exponential,2,,meanlog,1.8,1.8,1.7,1.7,1.7,1.8,1.8,1.8,1.8,1.8
+99,fast decay,long,200,exponential,3,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+100,fast decay,long,200,exponential,4,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.8,1.9
+101,fast decay,long,200,exponential,5,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.8
+102,fast decay,long,200,exponential,6,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9
+103,fast decay,long,200,exponential,7,,meanlog,1.9,1.9,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+104,fast decay,long,200,exponential,8,,meanlog,1.8,1.8,1.7,1.8,1.8,1.8,1.8,1.9,1.9,1.9
+105,fast decay,long,200,exponential,9,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+106,fast decay,long,200,exponential,10,,meanlog,1.8,1.8,1.7,1.8,1.8,1.8,1.8,1.9,1.9,1.9
+107,fast decay,long,200,exponential,11,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+108,fast decay,long,200,exponential,12,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9
+109,fast decay,long,200,exponential,13,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.8
+110,fast decay,long,200,exponential,14,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.8
+111,fast decay,long,200,exponential,15,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9
+112,fast decay,long,200,exponential,16,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+113,fast decay,long,200,exponential,17,,meanlog,1.7,1.7,1.6,1.6,1.7,1.7,1.7,1.7,1.8,1.8
+114,fast decay,long,200,exponential,18,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9
+115,fast decay,long,200,exponential,19,,meanlog,1.9,1.9,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+116,fast decay,long,200,exponential,20,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+117,fast decay,medium,200,exponential,1,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+118,fast decay,medium,200,exponential,2,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+119,fast decay,medium,200,exponential,3,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.6,1.6
+120,fast decay,medium,200,exponential,4,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7
+121,fast decay,medium,200,exponential,5,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+122,fast decay,medium,200,exponential,6,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7
+123,fast decay,medium,200,exponential,7,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7
+124,fast decay,medium,200,exponential,8,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+125,fast decay,medium,200,exponential,9,,meanlog,1.5,1.5,1.5,1.5,1.5,1.5,1.6,1.6,1.6,1.6
+126,fast decay,medium,200,exponential,10,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.7
+127,fast decay,medium,200,exponential,11,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+128,fast decay,medium,200,exponential,12,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+129,fast decay,medium,200,exponential,13,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7
+130,fast decay,medium,200,exponential,14,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.6,1.6
+131,fast decay,medium,200,exponential,15,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+132,fast decay,medium,200,exponential,16,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+133,fast decay,medium,200,exponential,17,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+134,fast decay,medium,200,exponential,18,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6
+135,fast decay,medium,200,exponential,19,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+136,fast decay,medium,200,exponential,20,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+137,fast decay,short,200,exponential,1,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+138,fast decay,short,200,exponential,2,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+139,fast decay,short,200,exponential,3,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+140,fast decay,short,200,exponential,4,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+141,fast decay,short,200,exponential,5,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+142,fast decay,short,200,exponential,6,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+143,fast decay,short,200,exponential,7,,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.2,1.2,1.2
+144,fast decay,short,200,exponential,8,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+145,fast decay,short,200,exponential,9,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+146,fast decay,short,200,exponential,10,,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.2,1.2,1.2
+147,fast decay,short,200,exponential,11,,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.2,1.2,1.2
+148,fast decay,short,200,exponential,12,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+149,fast decay,short,200,exponential,13,,meanlog,1.2,1.2,1.1,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+150,fast decay,short,200,exponential,14,,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.2,1.2,1.2
+151,fast decay,short,200,exponential,15,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+152,fast decay,short,200,exponential,16,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3
+153,fast decay,short,200,exponential,17,,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.2,1.2,1.2
+154,fast decay,short,200,exponential,18,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+155,fast decay,short,200,exponential,19,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+156,fast decay,short,200,exponential,20,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+157,fast growth,long,200,exponential,1,,meanlog,1.8,1.7,1.6,1.7,1.7,1.7,1.8,1.8,1.9,1.9
+158,fast growth,long,200,exponential,2,,meanlog,1.7,1.7,1.6,1.6,1.7,1.7,1.8,1.8,1.8,1.9
+159,fast growth,long,200,exponential,3,,meanlog,1.9,1.9,1.7,1.7,1.8,1.8,1.9,1.9,2,2.1
+160,fast growth,long,200,exponential,4,,meanlog,1.8,1.8,1.7,1.7,1.7,1.8,1.8,1.8,1.9,1.9
+161,fast growth,long,200,exponential,5,,meanlog,1.8,1.8,1.6,1.7,1.7,1.7,1.8,1.8,1.9,1.9
+162,fast growth,long,200,exponential,6,,meanlog,1.7,1.7,1.6,1.6,1.7,1.7,1.7,1.8,1.8,1.9
+163,fast growth,long,200,exponential,7,,meanlog,1.8,1.8,1.7,1.7,1.7,1.8,1.8,1.9,1.9,2
+164,fast growth,long,200,exponential,8,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.9,1.9,2,2
+165,fast growth,long,200,exponential,9,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.9,1.9,2,2
+166,fast growth,long,200,exponential,10,,meanlog,1.6,1.6,1.5,1.6,1.6,1.6,1.7,1.7,1.7,1.7
+167,fast growth,long,200,exponential,11,,meanlog,1.7,1.7,1.6,1.6,1.7,1.7,1.7,1.8,1.8,1.8
+168,fast growth,long,200,exponential,12,,meanlog,1.7,1.7,1.6,1.7,1.7,1.7,1.8,1.8,1.8,1.9
+169,fast growth,long,200,exponential,13,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.9,1.9
+170,fast growth,long,200,exponential,14,,meanlog,1.9,1.9,1.7,1.7,1.8,1.8,1.9,1.9,2,2
+171,fast growth,long,200,exponential,15,,meanlog,1.8,1.8,1.6,1.7,1.7,1.7,1.8,1.8,1.9,1.9
+172,fast growth,long,200,exponential,16,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.9,1.9,2,2
+173,fast growth,long,200,exponential,17,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.9,1.9,2,2
+174,fast growth,long,200,exponential,18,,meanlog,1.6,1.6,1.5,1.6,1.6,1.6,1.7,1.7,1.7,1.7
+175,fast growth,long,200,exponential,19,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.9,1.9,2,2.1
+176,fast growth,long,200,exponential,20,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.9,1.9
+177,fast growth,medium,200,exponential,1,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.6,1.6
+178,fast growth,medium,200,exponential,2,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.7,1.7
+179,fast growth,medium,200,exponential,3,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.7,1.7
+180,fast growth,medium,200,exponential,4,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.7,1.7
+181,fast growth,medium,200,exponential,5,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.7,1.7
+182,fast growth,medium,200,exponential,6,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.7,1.7
+183,fast growth,medium,200,exponential,7,,meanlog,1.5,1.5,1.5,1.5,1.5,1.5,1.6,1.6,1.6,1.6
+184,fast growth,medium,200,exponential,8,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7
+185,fast growth,medium,200,exponential,9,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.7
+186,fast growth,medium,200,exponential,10,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.6,1.7
+187,fast growth,medium,200,exponential,11,,meanlog,1.7,1.7,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.8
+188,fast growth,medium,200,exponential,12,,meanlog,1.5,1.5,1.5,1.5,1.5,1.5,1.6,1.6,1.6,1.6
+189,fast growth,medium,200,exponential,13,,meanlog,1.5,1.5,1.4,1.4,1.5,1.5,1.5,1.5,1.5,1.6
+190,fast growth,medium,200,exponential,14,,meanlog,1.7,1.7,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.7
+191,fast growth,medium,200,exponential,15,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.7,1.7
+192,fast growth,medium,200,exponential,16,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.7,1.7
+193,fast growth,medium,200,exponential,17,,meanlog,1.5,1.5,1.4,1.5,1.5,1.5,1.5,1.5,1.6,1.6
+194,fast growth,medium,200,exponential,18,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7
+195,fast growth,medium,200,exponential,19,,meanlog,1.5,1.5,1.5,1.5,1.5,1.5,1.6,1.6,1.6,1.6
+196,fast growth,medium,200,exponential,20,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.7,1.7
+197,fast growth,short,200,exponential,1,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+198,fast growth,short,200,exponential,2,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+199,fast growth,short,200,exponential,3,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+200,fast growth,short,200,exponential,4,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+201,fast growth,short,200,exponential,5,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+202,fast growth,short,200,exponential,6,,meanlog,1.3,1.3,1.2,1.2,1.2,1.2,1.3,1.3,1.3,1.3
+203,fast growth,short,200,exponential,7,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3,1.3
+204,fast growth,short,200,exponential,8,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+205,fast growth,short,200,exponential,9,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+206,fast growth,short,200,exponential,10,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+207,fast growth,short,200,exponential,11,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3,1.3
+208,fast growth,short,200,exponential,12,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3,1.3,1.3
+209,fast growth,short,200,exponential,13,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3,1.3
+210,fast growth,short,200,exponential,14,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3,1.3
+211,fast growth,short,200,exponential,15,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+212,fast growth,short,200,exponential,16,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+213,fast growth,short,200,exponential,17,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+214,fast growth,short,200,exponential,18,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+215,fast growth,short,200,exponential,19,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3
+216,fast growth,short,200,exponential,20,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3
+217,growth,long,200,exponential,1,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+218,growth,long,200,exponential,2,,meanlog,1.7,1.7,1.6,1.6,1.6,1.7,1.7,1.7,1.8,1.8
+219,growth,long,200,exponential,3,,meanlog,1.8,1.8,1.7,1.7,1.7,1.8,1.8,1.8,1.9,1.9
+220,growth,long,200,exponential,4,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.9,1.9
+221,growth,long,200,exponential,5,,meanlog,1.7,1.7,1.6,1.7,1.7,1.7,1.7,1.8,1.8,1.8
+222,growth,long,200,exponential,6,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.9,1.9
+223,growth,long,200,exponential,7,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.9,1.9
+224,growth,long,200,exponential,8,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.8
+225,growth,long,200,exponential,9,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.9,1.9,2
+226,growth,long,200,exponential,10,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.9
+227,growth,long,200,exponential,11,,meanlog,1.7,1.7,1.6,1.6,1.7,1.7,1.7,1.8,1.8,1.8
+228,growth,long,200,exponential,12,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.9
+229,growth,long,200,exponential,13,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.9,1.9,1.9
+230,growth,long,200,exponential,14,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.9,1.9
+231,growth,long,200,exponential,15,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.9,1.9,1.9
+232,growth,long,200,exponential,16,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.9,1.9
+233,growth,long,200,exponential,17,,meanlog,1.8,1.8,1.7,1.7,1.7,1.8,1.8,1.8,1.9,1.9
+234,growth,long,200,exponential,18,,meanlog,1.8,1.8,1.7,1.8,1.8,1.8,1.9,1.9,1.9,2
+235,growth,long,200,exponential,19,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.9,1.9,1.9
+236,growth,long,200,exponential,20,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.9,1.9,1.9
+237,growth,medium,200,exponential,1,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.7,1.7
+238,growth,medium,200,exponential,2,,meanlog,1.7,1.7,1.6,1.6,1.7,1.7,1.7,1.7,1.8,1.8
+239,growth,medium,200,exponential,3,,meanlog,1.5,1.5,1.5,1.5,1.5,1.5,1.6,1.6,1.6,1.6
+240,growth,medium,200,exponential,4,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.7
+241,growth,medium,200,exponential,5,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.6,1.6
+242,growth,medium,200,exponential,6,,meanlog,1.6,1.6,1.5,1.5,1.5,1.5,1.6,1.6,1.6,1.6
+243,growth,medium,200,exponential,7,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.6,1.6
+244,growth,medium,200,exponential,8,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7
+245,growth,medium,200,exponential,9,,meanlog,1.5,1.5,1.5,1.5,1.5,1.5,1.5,1.6,1.6,1.6
+246,growth,medium,200,exponential,10,,meanlog,1.7,1.7,1.6,1.6,1.7,1.7,1.7,1.7,1.7,1.8
+247,growth,medium,200,exponential,11,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+248,growth,medium,200,exponential,12,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.7,1.7
+249,growth,medium,200,exponential,13,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+250,growth,medium,200,exponential,14,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.6,1.6
+251,growth,medium,200,exponential,15,,meanlog,1.6,1.6,1.5,1.5,1.5,1.6,1.6,1.6,1.6,1.6
+252,growth,medium,200,exponential,16,,meanlog,1.5,1.5,1.5,1.5,1.5,1.5,1.5,1.5,1.6,1.6
+253,growth,medium,200,exponential,17,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+254,growth,medium,200,exponential,18,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+255,growth,medium,200,exponential,19,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.7,1.7
+256,growth,medium,200,exponential,20,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+257,growth,short,200,exponential,1,,meanlog,1.2,1.2,1.1,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+258,growth,short,200,exponential,2,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+259,growth,short,200,exponential,3,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+260,growth,short,200,exponential,4,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+261,growth,short,200,exponential,5,,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.2,1.2,1.2
+262,growth,short,200,exponential,6,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+263,growth,short,200,exponential,7,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+264,growth,short,200,exponential,8,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+265,growth,short,200,exponential,9,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+266,growth,short,200,exponential,10,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+267,growth,short,200,exponential,11,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+268,growth,short,200,exponential,12,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3,1.3,1.3
+269,growth,short,200,exponential,13,,meanlog,1.3,1.3,1.2,1.2,1.2,1.2,1.3,1.3,1.3,1.3
+270,growth,short,200,exponential,14,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+271,growth,short,200,exponential,15,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+272,growth,short,200,exponential,16,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3
+273,growth,short,200,exponential,17,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+274,growth,short,200,exponential,18,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+275,growth,short,200,exponential,19,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+276,growth,short,200,exponential,20,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+277,stable,long,200,exponential,1,,meanlog,1.7,1.7,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.8
+278,stable,long,200,exponential,2,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.9,1.9,1.9
+279,stable,long,200,exponential,3,,meanlog,1.8,1.8,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.8
+280,stable,long,200,exponential,4,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+281,stable,long,200,exponential,5,,meanlog,1.8,1.8,1.7,1.7,1.7,1.8,1.8,1.8,1.9,1.9
+282,stable,long,200,exponential,6,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.9,1.9,1.9
+283,stable,long,200,exponential,7,,meanlog,1.9,1.8,1.7,1.8,1.8,1.8,1.9,1.9,1.9,2
+284,stable,long,200,exponential,8,,meanlog,1.8,1.8,1.7,1.7,1.7,1.8,1.8,1.8,1.9,1.9
+285,stable,long,200,exponential,9,,meanlog,1.9,1.9,1.8,1.8,1.9,1.9,1.9,2,2,2
+286,stable,long,200,exponential,10,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+287,stable,long,200,exponential,11,,meanlog,1.9,1.9,1.8,1.8,1.8,1.8,1.9,1.9,1.9,2
+288,stable,long,200,exponential,12,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+289,stable,long,200,exponential,13,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+290,stable,long,200,exponential,14,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+291,stable,long,200,exponential,15,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+292,stable,long,200,exponential,16,,meanlog,1.9,1.9,1.8,1.8,1.8,1.8,1.9,1.9,2,2
+293,stable,long,200,exponential,17,,meanlog,1.7,1.7,1.7,1.7,1.7,1.7,1.7,1.8,1.8,1.8
+294,stable,long,200,exponential,18,,meanlog,1.7,1.7,1.7,1.7,1.7,1.7,1.8,1.8,1.8,1.8
+295,stable,long,200,exponential,19,,meanlog,1.8,1.8,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+296,stable,long,200,exponential,20,,meanlog,1.8,1.8,1.7,1.7,1.8,1.8,1.8,1.8,1.9,1.9
+297,stable,medium,200,exponential,1,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+298,stable,medium,200,exponential,2,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+299,stable,medium,200,exponential,3,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7
+300,stable,medium,200,exponential,4,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7
+301,stable,medium,200,exponential,5,,meanlog,1.7,1.7,1.6,1.6,1.7,1.7,1.7,1.7,1.7,1.7
+302,stable,medium,200,exponential,6,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+303,stable,medium,200,exponential,7,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+304,stable,medium,200,exponential,8,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.7
+305,stable,medium,200,exponential,9,,meanlog,1.6,1.6,1.5,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+306,stable,medium,200,exponential,10,,meanlog,1.6,1.6,1.5,1.6,1.6,1.6,1.6,1.6,1.6,1.7
+307,stable,medium,200,exponential,11,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.7
+308,stable,medium,200,exponential,12,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+309,stable,medium,200,exponential,13,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+310,stable,medium,200,exponential,14,,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
+311,stable,medium,200,exponential,15,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+312,stable,medium,200,exponential,16,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7
+313,stable,medium,200,exponential,17,,meanlog,1.7,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.7
+314,stable,medium,200,exponential,18,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+315,stable,medium,200,exponential,19,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7
+316,stable,medium,200,exponential,20,,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+317,stable,short,200,exponential,1,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+318,stable,short,200,exponential,2,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+319,stable,short,200,exponential,3,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+320,stable,short,200,exponential,4,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+321,stable,short,200,exponential,5,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+322,stable,short,200,exponential,6,,meanlog,1.2,1.2,1.1,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+323,stable,short,200,exponential,7,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3,1.3
+324,stable,short,200,exponential,8,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3
+325,stable,short,200,exponential,9,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+326,stable,short,200,exponential,10,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3
+327,stable,short,200,exponential,11,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+328,stable,short,200,exponential,12,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.3,1.3
+329,stable,short,200,exponential,13,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+330,stable,short,200,exponential,14,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+331,stable,short,200,exponential,15,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+332,stable,short,200,exponential,16,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+333,stable,short,200,exponential,17,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+334,stable,short,200,exponential,18,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+335,stable,short,200,exponential,19,,meanlog,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2,1.2
+336,stable,short,200,exponential,20,,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.2,1.2,1.2
+337,120 days,,200,ebola_case_study,,real-time,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.7
+338,120 days,,200,ebola_case_study,,retrospective,meanlog,3.4,3.4,3.1,3.1,3.2,3.3,3.5,3.5,3.6,3.7
+339,180 days,,200,ebola_case_study,,real-time,meanlog,1.9,1.9,1.8,1.8,1.8,1.8,1.9,1.9,1.9,1.9
+340,180 days,,200,ebola_case_study,,retrospective,meanlog,3.6,3.6,3.2,3.2,3.4,3.6,3.7,3.8,3.8,3.9
+341,240 days,,200,ebola_case_study,,real-time,meanlog,1.7,1.7,1.6,1.6,1.7,1.7,1.7,1.7,1.8,1.8
+342,240 days,,200,ebola_case_study,,retrospective,meanlog,3.2,3.3,2.9,3,3.1,3.2,3.3,3.4,3.5,3.5
+343,60 days,,200,ebola_case_study,,real-time,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7
+344,60 days,,200,ebola_case_study,,retrospective,meanlog,3.2,3.2,2.8,2.9,3,3.1,3.2,3.4,3.5,3.6
+1,early outbreak,long,10,outbreak,1,,sdlog,1.5,1.3,0.53,0.6,0.87,1.1,1.6,2,2.9,3.4
+2,early outbreak,medium,10,outbreak,1,,sdlog,0.57,0.42,0.24,0.25,0.3,0.35,0.53,0.71,1.5,1.9
+3,early outbreak,short,10,outbreak,1,,sdlog,1.2,1.1,0.46,0.52,0.71,0.89,1.3,1.6,2.4,2.8
+4,late outbreak,long,10,outbreak,1,,sdlog,1.1,0.95,0.56,0.6,0.73,0.83,1.1,1.3,2,2.4
+5,late outbreak,medium,10,outbreak,1,,sdlog,0.69,0.63,0.4,0.43,0.51,0.57,0.7,0.82,1.1,1.3
+6,late outbreak,short,10,outbreak,1,,sdlog,0.28,0.26,0.21,0.22,0.23,0.24,0.29,0.33,0.42,0.47
+7,near peak,long,10,outbreak,1,,sdlog,0.76,0.65,0.34,0.37,0.47,0.56,0.77,0.97,1.5,1.8
+8,near peak,medium,10,outbreak,1,,sdlog,1.4,1.2,0.55,0.61,0.81,0.98,1.4,1.9,2.8,3.3
+9,near peak,short,10,outbreak,1,,sdlog,0.33,0.29,0.21,0.22,0.24,0.26,0.33,0.39,0.53,0.64
+10,past peak,long,10,outbreak,1,,sdlog,1.2,1,0.57,0.62,0.77,0.89,1.2,1.6,2.5,3
+11,past peak,medium,10,outbreak,1,,sdlog,1.2,0.99,0.5,0.54,0.7,0.83,1.2,1.6,2.4,2.9
+12,past peak,short,10,outbreak,1,,sdlog,0.52,0.48,0.27,0.3,0.37,0.43,0.55,0.64,0.86,0.97
+13,early outbreak,long,100,outbreak,1,,sdlog,1,0.98,0.69,0.72,0.82,0.9,1.1,1.2,1.6,1.8
+14,early outbreak,medium,100,outbreak,1,,sdlog,0.55,0.54,0.42,0.44,0.48,0.51,0.56,0.6,0.69,0.73
+15,early outbreak,short,100,outbreak,1,,sdlog,0.35,0.35,0.29,0.3,0.32,0.34,0.37,0.38,0.42,0.44
+16,late outbreak,long,100,outbreak,1,,sdlog,0.81,0.8,0.68,0.7,0.75,0.78,0.83,0.87,0.94,0.97
+17,late outbreak,medium,100,outbreak,1,,sdlog,0.6,0.59,0.51,0.52,0.55,0.57,0.61,0.63,0.68,0.7
+18,late outbreak,short,100,outbreak,1,,sdlog,0.39,0.39,0.33,0.34,0.36,0.38,0.41,0.42,0.46,0.47
+19,near peak,long,100,outbreak,1,,sdlog,0.66,0.65,0.53,0.55,0.6,0.63,0.68,0.72,0.8,0.84
+20,near peak,medium,100,outbreak,1,,sdlog,0.56,0.55,0.46,0.48,0.51,0.53,0.57,0.6,0.66,0.68
+21,near peak,short,100,outbreak,1,,sdlog,0.38,0.37,0.31,0.32,0.35,0.36,0.39,0.41,0.45,0.46
+22,past peak,long,100,outbreak,1,,sdlog,0.73,0.72,0.61,0.63,0.67,0.7,0.75,0.79,0.86,0.89
+23,past peak,medium,100,outbreak,1,,sdlog,0.55,0.55,0.47,0.48,0.51,0.53,0.57,0.59,0.64,0.66
+24,past peak,short,100,outbreak,1,,sdlog,0.36,0.35,0.3,0.3,0.33,0.34,0.37,0.39,0.42,0.43
+25,early outbreak,long,200,outbreak,1,,sdlog,0.79,0.77,0.62,0.64,0.7,0.74,0.81,0.87,1,1.1
+26,early outbreak,medium,200,outbreak,1,,sdlog,0.51,0.51,0.44,0.45,0.48,0.5,0.53,0.55,0.59,0.61
+27,early outbreak,short,200,outbreak,1,,sdlog,0.37,0.37,0.31,0.32,0.34,0.36,0.38,0.39,0.42,0.44
+28,late outbreak,long,200,outbreak,1,,sdlog,0.82,0.82,0.73,0.75,0.78,0.8,0.84,0.87,0.91,0.93
+29,late outbreak,medium,200,outbreak,1,,sdlog,0.57,0.57,0.51,0.52,0.54,0.56,0.58,0.6,0.63,0.64
+30,late outbreak,short,200,outbreak,1,,sdlog,0.38,0.37,0.33,0.34,0.36,0.37,0.38,0.4,0.42,0.43
+31,near peak,long,200,outbreak,1,,sdlog,0.81,0.81,0.69,0.7,0.75,0.78,0.83,0.87,0.94,0.97
+32,near peak,medium,200,outbreak,1,,sdlog,0.6,0.59,0.52,0.53,0.56,0.58,0.61,0.63,0.67,0.69
+33,near peak,short,200,outbreak,1,,sdlog,0.38,0.38,0.33,0.34,0.36,0.37,0.39,0.4,0.43,0.44
+34,past peak,long,200,outbreak,1,,sdlog,0.82,0.81,0.71,0.72,0.77,0.79,0.83,0.86,0.92,0.95
+35,past peak,medium,200,outbreak,1,,sdlog,0.63,0.62,0.56,0.57,0.59,0.61,0.64,0.66,0.69,0.71
+36,past peak,short,200,outbreak,1,,sdlog,0.35,0.35,0.31,0.31,0.33,0.34,0.35,0.36,0.39,0.39
+37,decay,long,200,exponential,1,,sdlog,0.74,0.74,0.68,0.69,0.71,0.72,0.75,0.76,0.79,0.8
+38,decay,long,200,exponential,2,,sdlog,0.75,0.75,0.7,0.71,0.73,0.74,0.76,0.78,0.81,0.82
+39,decay,long,200,exponential,3,,sdlog,0.78,0.78,0.72,0.73,0.75,0.77,0.79,0.81,0.84,0.85
+40,decay,long,200,exponential,4,,sdlog,0.75,0.75,0.69,0.7,0.72,0.73,0.76,0.77,0.8,0.81
+41,decay,long,200,exponential,5,,sdlog,0.79,0.79,0.73,0.74,0.76,0.78,0.8,0.82,0.85,0.86
+42,decay,long,200,exponential,6,,sdlog,0.79,0.79,0.73,0.74,0.76,0.78,0.8,0.82,0.85,0.86
+43,decay,long,200,exponential,7,,sdlog,0.76,0.76,0.7,0.71,0.73,0.75,0.77,0.79,0.81,0.83
+44,decay,long,200,exponential,8,,sdlog,0.78,0.78,0.72,0.73,0.75,0.77,0.79,0.81,0.84,0.85
+45,decay,long,200,exponential,9,,sdlog,0.81,0.81,0.74,0.75,0.78,0.8,0.82,0.84,0.87,0.88
+46,decay,long,200,exponential,10,,sdlog,0.8,0.8,0.73,0.74,0.77,0.79,0.81,0.83,0.86,0.87
+47,decay,long,200,exponential,11,,sdlog,0.77,0.77,0.71,0.72,0.74,0.75,0.78,0.79,0.82,0.83
+48,decay,long,200,exponential,12,,sdlog,0.78,0.78,0.72,0.73,0.75,0.77,0.79,0.81,0.84,0.85
+49,decay,long,200,exponential,13,,sdlog,0.79,0.79,0.73,0.74,0.76,0.78,0.8,0.82,0.85,0.86
+50,decay,long,200,exponential,14,,sdlog,0.79,0.79,0.73,0.74,0.76,0.78,0.8,0.82,0.85,0.86
+51,decay,long,200,exponential,15,,sdlog,0.79,0.79,0.73,0.74,0.76,0.78,0.8,0.82,0.85,0.86
+52,decay,long,200,exponential,16,,sdlog,0.78,0.78,0.72,0.73,0.75,0.76,0.79,0.8,0.83,0.84
+53,decay,long,200,exponential,17,,sdlog,0.75,0.75,0.7,0.71,0.73,0.74,0.77,0.78,0.81,0.82
+54,decay,long,200,exponential,18,,sdlog,0.79,0.79,0.73,0.74,0.76,0.78,0.8,0.82,0.85,0.86
+55,decay,long,200,exponential,19,,sdlog,0.73,0.73,0.67,0.68,0.7,0.72,0.74,0.75,0.78,0.79
+56,decay,long,200,exponential,20,,sdlog,0.77,0.77,0.72,0.73,0.75,0.76,0.79,0.8,0.83,0.84
+57,decay,medium,200,exponential,1,,sdlog,0.6,0.6,0.56,0.57,0.58,0.59,0.61,0.62,0.64,0.65
+58,decay,medium,200,exponential,2,,sdlog,0.62,0.62,0.58,0.59,0.6,0.61,0.63,0.64,0.66,0.66
+59,decay,medium,200,exponential,3,,sdlog,0.6,0.6,0.56,0.57,0.58,0.59,0.61,0.62,0.64,0.65
+60,decay,medium,200,exponential,4,,sdlog,0.6,0.6,0.56,0.57,0.58,0.59,0.61,0.62,0.64,0.65
+61,decay,medium,200,exponential,5,,sdlog,0.62,0.62,0.57,0.58,0.6,0.61,0.62,0.63,0.65,0.66
+62,decay,medium,200,exponential,6,,sdlog,0.59,0.59,0.55,0.56,0.58,0.59,0.6,0.61,0.63,0.64
+63,decay,medium,200,exponential,7,,sdlog,0.58,0.58,0.54,0.55,0.56,0.57,0.59,0.6,0.61,0.62
+64,decay,medium,200,exponential,8,,sdlog,0.6,0.6,0.56,0.57,0.58,0.59,0.61,0.62,0.64,0.64
+65,decay,medium,200,exponential,9,,sdlog,0.61,0.61,0.57,0.57,0.59,0.6,0.62,0.63,0.64,0.65
+66,decay,medium,200,exponential,10,,sdlog,0.59,0.59,0.55,0.56,0.57,0.58,0.6,0.61,0.63,0.63
+67,decay,medium,200,exponential,11,,sdlog,0.6,0.6,0.56,0.57,0.58,0.59,0.61,0.62,0.64,0.64
+68,decay,medium,200,exponential,12,,sdlog,0.57,0.57,0.53,0.54,0.55,0.56,0.58,0.59,0.6,0.61
+69,decay,medium,200,exponential,13,,sdlog,0.56,0.56,0.53,0.53,0.55,0.56,0.57,0.58,0.6,0.6
+70,decay,medium,200,exponential,14,,sdlog,0.6,0.6,0.56,0.57,0.59,0.6,0.61,0.62,0.64,0.65
+71,decay,medium,200,exponential,15,,sdlog,0.6,0.59,0.56,0.56,0.58,0.59,0.6,0.61,0.63,0.64
+72,decay,medium,200,exponential,16,,sdlog,0.61,0.6,0.56,0.57,0.59,0.6,0.61,0.62,0.64,0.65
+73,decay,medium,200,exponential,17,,sdlog,0.55,0.55,0.52,0.52,0.54,0.55,0.56,0.57,0.59,0.59
+74,decay,medium,200,exponential,18,,sdlog,0.58,0.58,0.54,0.54,0.56,0.57,0.58,0.59,0.61,0.62
+75,decay,medium,200,exponential,19,,sdlog,0.61,0.61,0.57,0.57,0.59,0.6,0.62,0.62,0.64,0.65
+76,decay,medium,200,exponential,20,,sdlog,0.6,0.6,0.56,0.56,0.58,0.59,0.61,0.62,0.63,0.64
+77,decay,short,200,exponential,1,,sdlog,0.36,0.36,0.33,0.33,0.34,0.35,0.36,0.37,0.38,0.38
+78,decay,short,200,exponential,2,,sdlog,0.39,0.39,0.37,0.37,0.38,0.39,0.4,0.41,0.42,0.42
+79,decay,short,200,exponential,3,,sdlog,0.37,0.37,0.34,0.35,0.36,0.36,0.37,0.38,0.39,0.4
+80,decay,short,200,exponential,4,,sdlog,0.42,0.42,0.39,0.39,0.41,0.41,0.43,0.43,0.45,0.45
+81,decay,short,200,exponential,5,,sdlog,0.39,0.39,0.36,0.37,0.38,0.38,0.39,0.4,0.41,0.42
+82,decay,short,200,exponential,6,,sdlog,0.4,0.4,0.37,0.37,0.38,0.39,0.4,0.41,0.42,0.43
+83,decay,short,200,exponential,7,,sdlog,0.39,0.39,0.36,0.37,0.38,0.38,0.39,0.4,0.41,0.42
+84,decay,short,200,exponential,8,,sdlog,0.37,0.37,0.34,0.35,0.36,0.36,0.37,0.38,0.39,0.4
+85,decay,short,200,exponential,9,,sdlog,0.37,0.37,0.34,0.34,0.36,0.36,0.37,0.38,0.39,0.4
+86,decay,short,200,exponential,10,,sdlog,0.38,0.38,0.35,0.35,0.36,0.37,0.38,0.39,0.4,0.41
+87,decay,short,200,exponential,11,,sdlog,0.37,0.37,0.35,0.35,0.36,0.37,0.38,0.38,0.4,0.4
+88,decay,short,200,exponential,12,,sdlog,0.37,0.37,0.34,0.34,0.36,0.36,0.37,0.38,0.39,0.39
+89,decay,short,200,exponential,13,,sdlog,0.42,0.42,0.39,0.39,0.4,0.41,0.42,0.43,0.44,0.45
+90,decay,short,200,exponential,14,,sdlog,0.38,0.38,0.35,0.36,0.37,0.37,0.39,0.39,0.4,0.41
+91,decay,short,200,exponential,15,,sdlog,0.38,0.38,0.35,0.35,0.37,0.37,0.38,0.39,0.4,0.41
+92,decay,short,200,exponential,16,,sdlog,0.37,0.37,0.34,0.35,0.36,0.37,0.38,0.38,0.39,0.4
+93,decay,short,200,exponential,17,,sdlog,0.39,0.39,0.36,0.36,0.37,0.38,0.39,0.4,0.41,0.42
+94,decay,short,200,exponential,18,,sdlog,0.39,0.38,0.36,0.36,0.37,0.38,0.39,0.4,0.41,0.41
+95,decay,short,200,exponential,19,,sdlog,0.4,0.4,0.37,0.37,0.38,0.39,0.4,0.41,0.42,0.43
+96,decay,short,200,exponential,20,,sdlog,0.38,0.38,0.35,0.35,0.36,0.37,0.38,0.39,0.4,0.4
+97,fast decay,long,200,exponential,1,,sdlog,0.83,0.83,0.76,0.78,0.8,0.81,0.84,0.86,0.89,0.9
+98,fast decay,long,200,exponential,2,,sdlog,0.81,0.81,0.75,0.76,0.78,0.79,0.82,0.84,0.87,0.88
+99,fast decay,long,200,exponential,3,,sdlog,0.81,0.8,0.75,0.75,0.78,0.79,0.82,0.83,0.87,0.88
+100,fast decay,long,200,exponential,4,,sdlog,0.78,0.78,0.72,0.73,0.76,0.77,0.8,0.81,0.84,0.85
+101,fast decay,long,200,exponential,5,,sdlog,0.82,0.82,0.75,0.76,0.79,0.8,0.83,0.84,0.87,0.88
+102,fast decay,long,200,exponential,6,,sdlog,0.79,0.79,0.73,0.74,0.76,0.77,0.8,0.81,0.84,0.85
+103,fast decay,long,200,exponential,7,,sdlog,0.83,0.83,0.77,0.78,0.8,0.82,0.84,0.86,0.89,0.9
+104,fast decay,long,200,exponential,8,,sdlog,0.8,0.8,0.74,0.75,0.77,0.79,0.82,0.83,0.86,0.87
+105,fast decay,long,200,exponential,9,,sdlog,0.8,0.8,0.74,0.74,0.77,0.78,0.81,0.83,0.86,0.87
+106,fast decay,long,200,exponential,10,,sdlog,0.78,0.78,0.73,0.74,0.76,0.77,0.8,0.81,0.84,0.85
+107,fast decay,long,200,exponential,11,,sdlog,0.79,0.79,0.73,0.74,0.76,0.78,0.8,0.82,0.85,0.86
+108,fast decay,long,200,exponential,12,,sdlog,0.81,0.81,0.75,0.76,0.78,0.79,0.82,0.84,0.87,0.88
+109,fast decay,long,200,exponential,13,,sdlog,0.78,0.78,0.72,0.73,0.76,0.77,0.8,0.81,0.84,0.85
+110,fast decay,long,200,exponential,14,,sdlog,0.79,0.79,0.73,0.74,0.77,0.78,0.8,0.82,0.85,0.86
+111,fast decay,long,200,exponential,15,,sdlog,0.79,0.79,0.74,0.74,0.77,0.78,0.8,0.82,0.85,0.86
+112,fast decay,long,200,exponential,16,,sdlog,0.87,0.87,0.8,0.81,0.84,0.86,0.89,0.9,0.94,0.95
+113,fast decay,long,200,exponential,17,,sdlog,0.76,0.76,0.71,0.72,0.74,0.75,0.77,0.79,0.81,0.82
+114,fast decay,long,200,exponential,18,,sdlog,0.74,0.74,0.69,0.7,0.72,0.73,0.75,0.76,0.79,0.8
+115,fast decay,long,200,exponential,19,,sdlog,0.85,0.85,0.78,0.79,0.82,0.83,0.86,0.88,0.91,0.92
+116,fast decay,long,200,exponential,20,,sdlog,0.81,0.8,0.74,0.75,0.78,0.79,0.82,0.83,0.86,0.87
+117,fast decay,medium,200,exponential,1,,sdlog,0.58,0.58,0.54,0.55,0.56,0.57,0.59,0.6,0.61,0.62
+118,fast decay,medium,200,exponential,2,,sdlog,0.57,0.57,0.54,0.54,0.56,0.57,0.58,0.59,0.61,0.61
+119,fast decay,medium,200,exponential,3,,sdlog,0.57,0.57,0.54,0.54,0.56,0.57,0.58,0.59,0.61,0.61
+120,fast decay,medium,200,exponential,4,,sdlog,0.58,0.57,0.54,0.54,0.56,0.57,0.58,0.59,0.61,0.62
+121,fast decay,medium,200,exponential,5,,sdlog,0.57,0.57,0.54,0.54,0.56,0.56,0.58,0.59,0.6,0.61
+122,fast decay,medium,200,exponential,6,,sdlog,0.57,0.57,0.53,0.54,0.55,0.56,0.58,0.59,0.6,0.61
+123,fast decay,medium,200,exponential,7,,sdlog,0.55,0.55,0.52,0.52,0.54,0.55,0.56,0.57,0.58,0.59
+124,fast decay,medium,200,exponential,8,,sdlog,0.59,0.59,0.55,0.56,0.57,0.58,0.6,0.61,0.63,0.63
+125,fast decay,medium,200,exponential,9,,sdlog,0.58,0.58,0.55,0.55,0.57,0.58,0.59,0.6,0.62,0.63
+126,fast decay,medium,200,exponential,10,,sdlog,0.57,0.57,0.53,0.54,0.55,0.56,0.58,0.59,0.6,0.61
+127,fast decay,medium,200,exponential,11,,sdlog,0.59,0.59,0.55,0.56,0.57,0.58,0.6,0.61,0.62,0.63
+128,fast decay,medium,200,exponential,12,,sdlog,0.59,0.59,0.55,0.56,0.57,0.58,0.6,0.61,0.63,0.63
+129,fast decay,medium,200,exponential,13,,sdlog,0.57,0.57,0.53,0.54,0.55,0.56,0.58,0.59,0.6,0.61
+130,fast decay,medium,200,exponential,14,,sdlog,0.61,0.61,0.57,0.58,0.6,0.61,0.62,0.63,0.65,0.66
+131,fast decay,medium,200,exponential,15,,sdlog,0.62,0.62,0.58,0.59,0.61,0.62,0.63,0.64,0.66,0.67
+132,fast decay,medium,200,exponential,16,,sdlog,0.57,0.57,0.54,0.54,0.56,0.56,0.58,0.59,0.61,0.61
+133,fast decay,medium,200,exponential,17,,sdlog,0.56,0.56,0.53,0.53,0.55,0.56,0.57,0.58,0.6,0.6
+134,fast decay,medium,200,exponential,18,,sdlog,0.6,0.6,0.56,0.56,0.58,0.59,0.6,0.61,0.63,0.64
+135,fast decay,medium,200,exponential,19,,sdlog,0.55,0.55,0.52,0.52,0.54,0.54,0.56,0.57,0.58,0.59
+136,fast decay,medium,200,exponential,20,,sdlog,0.59,0.59,0.56,0.56,0.58,0.58,0.6,0.61,0.63,0.64
+137,fast decay,short,200,exponential,1,,sdlog,0.37,0.37,0.34,0.35,0.36,0.37,0.38,0.38,0.39,0.4
+138,fast decay,short,200,exponential,2,,sdlog,0.36,0.36,0.33,0.33,0.34,0.35,0.36,0.37,0.38,0.38
+139,fast decay,short,200,exponential,3,,sdlog,0.36,0.36,0.33,0.34,0.35,0.35,0.36,0.37,0.38,0.38
+140,fast decay,short,200,exponential,4,,sdlog,0.37,0.37,0.35,0.35,0.36,0.37,0.38,0.39,0.4,0.4
+141,fast decay,short,200,exponential,5,,sdlog,0.38,0.38,0.35,0.36,0.37,0.37,0.38,0.39,0.4,0.41
+142,fast decay,short,200,exponential,6,,sdlog,0.37,0.37,0.35,0.35,0.36,0.37,0.38,0.38,0.4,0.4
+143,fast decay,short,200,exponential,7,,sdlog,0.39,0.39,0.36,0.37,0.38,0.39,0.4,0.4,0.42,0.42
+144,fast decay,short,200,exponential,8,,sdlog,0.37,0.37,0.35,0.35,0.36,0.37,0.38,0.39,0.4,0.4
+145,fast decay,short,200,exponential,9,,sdlog,0.36,0.36,0.34,0.34,0.35,0.36,0.37,0.37,0.39,0.39
+146,fast decay,short,200,exponential,10,,sdlog,0.38,0.38,0.35,0.36,0.37,0.38,0.39,0.39,0.41,0.41
+147,fast decay,short,200,exponential,11,,sdlog,0.39,0.39,0.36,0.37,0.38,0.39,0.4,0.4,0.42,0.42
+148,fast decay,short,200,exponential,12,,sdlog,0.38,0.38,0.35,0.36,0.37,0.37,0.38,0.39,0.4,0.41
+149,fast decay,short,200,exponential,13,,sdlog,0.38,0.38,0.35,0.35,0.37,0.37,0.38,0.39,0.4,0.41
+150,fast decay,short,200,exponential,14,,sdlog,0.38,0.38,0.35,0.35,0.36,0.37,0.38,0.39,0.4,0.4
+151,fast decay,short,200,exponential,15,,sdlog,0.36,0.36,0.34,0.34,0.35,0.36,0.37,0.37,0.38,0.39
+152,fast decay,short,200,exponential,16,,sdlog,0.37,0.37,0.34,0.35,0.36,0.37,0.38,0.38,0.39,0.4
+153,fast decay,short,200,exponential,17,,sdlog,0.37,0.37,0.34,0.35,0.35,0.36,0.37,0.38,0.39,0.4
+154,fast decay,short,200,exponential,18,,sdlog,0.37,0.37,0.34,0.35,0.36,0.37,0.38,0.38,0.39,0.4
+155,fast decay,short,200,exponential,19,,sdlog,0.38,0.38,0.36,0.36,0.37,0.38,0.39,0.4,0.41,0.41
+156,fast decay,short,200,exponential,20,,sdlog,0.39,0.39,0.36,0.36,0.37,0.38,0.39,0.4,0.41,0.42
+157,fast growth,long,200,exponential,1,,sdlog,0.7,0.69,0.63,0.64,0.66,0.68,0.71,0.73,0.76,0.78
+158,fast growth,long,200,exponential,2,,sdlog,0.7,0.7,0.64,0.64,0.67,0.69,0.72,0.74,0.77,0.78
+159,fast growth,long,200,exponential,3,,sdlog,0.79,0.79,0.71,0.72,0.75,0.77,0.81,0.83,0.88,0.89
+160,fast growth,long,200,exponential,4,,sdlog,0.71,0.71,0.64,0.65,0.68,0.69,0.72,0.74,0.78,0.8
+161,fast growth,long,200,exponential,5,,sdlog,0.68,0.68,0.61,0.62,0.65,0.66,0.69,0.71,0.74,0.76
+162,fast growth,long,200,exponential,6,,sdlog,0.7,0.7,0.63,0.64,0.67,0.68,0.71,0.73,0.77,0.78
+163,fast growth,long,200,exponential,7,,sdlog,0.72,0.72,0.64,0.65,0.68,0.7,0.74,0.76,0.79,0.81
+164,fast growth,long,200,exponential,8,,sdlog,0.74,0.74,0.66,0.67,0.71,0.72,0.76,0.78,0.82,0.83
+165,fast growth,long,200,exponential,9,,sdlog,0.74,0.74,0.67,0.68,0.71,0.73,0.76,0.78,0.82,0.84
+166,fast growth,long,200,exponential,10,,sdlog,0.65,0.65,0.59,0.6,0.63,0.64,0.66,0.68,0.71,0.72
+167,fast growth,long,200,exponential,11,,sdlog,0.67,0.67,0.6,0.61,0.64,0.66,0.68,0.7,0.73,0.75
+168,fast growth,long,200,exponential,12,,sdlog,0.66,0.66,0.6,0.61,0.63,0.65,0.67,0.69,0.73,0.74
+169,fast growth,long,200,exponential,13,,sdlog,0.67,0.66,0.6,0.61,0.64,0.65,0.68,0.7,0.73,0.74
+170,fast growth,long,200,exponential,14,,sdlog,0.78,0.78,0.7,0.71,0.74,0.76,0.8,0.82,0.86,0.88
+171,fast growth,long,200,exponential,15,,sdlog,0.68,0.68,0.62,0.62,0.65,0.67,0.69,0.71,0.75,0.76
+172,fast growth,long,200,exponential,16,,sdlog,0.72,0.72,0.64,0.65,0.68,0.7,0.73,0.75,0.79,0.8
+173,fast growth,long,200,exponential,17,,sdlog,0.77,0.77,0.69,0.7,0.74,0.75,0.79,0.81,0.86,0.87
+174,fast growth,long,200,exponential,18,,sdlog,0.66,0.66,0.6,0.61,0.63,0.65,0.67,0.69,0.72,0.73
+175,fast growth,long,200,exponential,19,,sdlog,0.8,0.79,0.71,0.72,0.75,0.77,0.81,0.84,0.89,0.91
+176,fast growth,long,200,exponential,20,,sdlog,0.71,0.71,0.64,0.65,0.68,0.69,0.73,0.74,0.78,0.8
+177,fast growth,medium,200,exponential,1,,sdlog,0.54,0.54,0.5,0.5,0.52,0.53,0.55,0.57,0.59,0.59
+178,fast growth,medium,200,exponential,2,,sdlog,0.56,0.56,0.51,0.52,0.54,0.55,0.57,0.59,0.61,0.62
+179,fast growth,medium,200,exponential,3,,sdlog,0.58,0.58,0.53,0.53,0.55,0.57,0.59,0.6,0.63,0.64
+180,fast growth,medium,200,exponential,4,,sdlog,0.55,0.55,0.5,0.51,0.53,0.54,0.56,0.57,0.6,0.61
+181,fast growth,medium,200,exponential,5,,sdlog,0.57,0.57,0.52,0.53,0.55,0.56,0.58,0.6,0.62,0.63
+182,fast growth,medium,200,exponential,6,,sdlog,0.59,0.59,0.54,0.54,0.57,0.58,0.6,0.62,0.64,0.65
+183,fast growth,medium,200,exponential,7,,sdlog,0.55,0.55,0.5,0.5,0.52,0.54,0.56,0.57,0.59,0.6
+184,fast growth,medium,200,exponential,8,,sdlog,0.59,0.59,0.53,0.54,0.56,0.57,0.6,0.61,0.64,0.65
+185,fast growth,medium,200,exponential,9,,sdlog,0.54,0.54,0.49,0.5,0.52,0.53,0.55,0.56,0.58,0.6
+186,fast growth,medium,200,exponential,10,,sdlog,0.55,0.55,0.5,0.51,0.53,0.54,0.56,0.57,0.59,0.6
+187,fast growth,medium,200,exponential,11,,sdlog,0.55,0.55,0.5,0.51,0.53,0.54,0.56,0.57,0.6,0.61
+188,fast growth,medium,200,exponential,12,,sdlog,0.57,0.57,0.52,0.53,0.55,0.56,0.58,0.59,0.62,0.63
+189,fast growth,medium,200,exponential,13,,sdlog,0.53,0.53,0.48,0.49,0.51,0.52,0.54,0.55,0.57,0.58
+190,fast growth,medium,200,exponential,14,,sdlog,0.52,0.52,0.48,0.48,0.5,0.51,0.53,0.54,0.57,0.58
+191,fast growth,medium,200,exponential,15,,sdlog,0.52,0.52,0.48,0.48,0.5,0.51,0.53,0.54,0.57,0.57
+192,fast growth,medium,200,exponential,16,,sdlog,0.59,0.59,0.53,0.54,0.56,0.57,0.6,0.61,0.64,0.65
+193,fast growth,medium,200,exponential,17,,sdlog,0.54,0.54,0.5,0.5,0.52,0.53,0.55,0.57,0.59,0.6
+194,fast growth,medium,200,exponential,18,,sdlog,0.55,0.55,0.5,0.51,0.53,0.54,0.56,0.57,0.6,0.61
+195,fast growth,medium,200,exponential,19,,sdlog,0.63,0.62,0.57,0.58,0.6,0.61,0.64,0.65,0.68,0.69
+196,fast growth,medium,200,exponential,20,,sdlog,0.57,0.56,0.51,0.52,0.54,0.55,0.58,0.59,0.61,0.62
+197,fast growth,short,200,exponential,1,,sdlog,0.34,0.34,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38
+198,fast growth,short,200,exponential,2,,sdlog,0.35,0.34,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38
+199,fast growth,short,200,exponential,3,,sdlog,0.37,0.37,0.34,0.34,0.36,0.36,0.38,0.38,0.4,0.4
+200,fast growth,short,200,exponential,4,,sdlog,0.33,0.33,0.3,0.31,0.32,0.32,0.34,0.34,0.36,0.36
+201,fast growth,short,200,exponential,5,,sdlog,0.36,0.36,0.33,0.33,0.35,0.35,0.37,0.37,0.39,0.4
+202,fast growth,short,200,exponential,6,,sdlog,0.36,0.36,0.33,0.33,0.34,0.35,0.36,0.37,0.39,0.39
+203,fast growth,short,200,exponential,7,,sdlog,0.38,0.38,0.35,0.36,0.37,0.38,0.39,0.4,0.42,0.42
+204,fast growth,short,200,exponential,8,,sdlog,0.31,0.31,0.28,0.28,0.3,0.3,0.31,0.32,0.33,0.34
+205,fast growth,short,200,exponential,9,,sdlog,0.32,0.32,0.3,0.3,0.31,0.32,0.33,0.34,0.35,0.36
+206,fast growth,short,200,exponential,10,,sdlog,0.35,0.35,0.32,0.32,0.34,0.34,0.36,0.36,0.38,0.38
+207,fast growth,short,200,exponential,11,,sdlog,0.34,0.34,0.31,0.31,0.32,0.33,0.34,0.35,0.36,0.37
+208,fast growth,short,200,exponential,12,,sdlog,0.35,0.35,0.32,0.32,0.33,0.34,0.35,0.36,0.38,0.38
+209,fast growth,short,200,exponential,13,,sdlog,0.38,0.38,0.34,0.35,0.36,0.37,0.38,0.39,0.41,0.41
+210,fast growth,short,200,exponential,14,,sdlog,0.36,0.36,0.33,0.33,0.34,0.35,0.36,0.37,0.39,0.39
+211,fast growth,short,200,exponential,15,,sdlog,0.38,0.38,0.35,0.36,0.37,0.38,0.39,0.4,0.41,0.42
+212,fast growth,short,200,exponential,16,,sdlog,0.33,0.33,0.3,0.31,0.32,0.32,0.34,0.34,0.36,0.36
+213,fast growth,short,200,exponential,17,,sdlog,0.34,0.34,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38
+214,fast growth,short,200,exponential,18,,sdlog,0.34,0.34,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38
+215,fast growth,short,200,exponential,19,,sdlog,0.33,0.33,0.3,0.3,0.31,0.32,0.33,0.34,0.35,0.36
+216,fast growth,short,200,exponential,20,,sdlog,0.35,0.35,0.32,0.32,0.33,0.34,0.35,0.36,0.37,0.38
+217,growth,long,200,exponential,1,,sdlog,0.75,0.75,0.68,0.69,0.72,0.74,0.77,0.78,0.82,0.83
+218,growth,long,200,exponential,2,,sdlog,0.7,0.7,0.64,0.65,0.68,0.69,0.71,0.73,0.76,0.77
+219,growth,long,200,exponential,3,,sdlog,0.79,0.79,0.72,0.73,0.76,0.77,0.81,0.83,0.86,0.88
+220,growth,long,200,exponential,4,,sdlog,0.75,0.75,0.68,0.69,0.72,0.73,0.76,0.78,0.81,0.82
+221,growth,long,200,exponential,5,,sdlog,0.73,0.72,0.66,0.67,0.69,0.71,0.74,0.76,0.79,0.8
+222,growth,long,200,exponential,6,,sdlog,0.74,0.74,0.67,0.68,0.71,0.72,0.75,0.77,0.8,0.81
+223,growth,long,200,exponential,7,,sdlog,0.77,0.77,0.7,0.71,0.74,0.76,0.79,0.8,0.84,0.85
+224,growth,long,200,exponential,8,,sdlog,0.71,0.71,0.65,0.66,0.69,0.7,0.73,0.74,0.77,0.79
+225,growth,long,200,exponential,9,,sdlog,0.81,0.81,0.73,0.74,0.77,0.79,0.82,0.84,0.89,0.9
+226,growth,long,200,exponential,10,,sdlog,0.71,0.71,0.65,0.66,0.69,0.7,0.73,0.74,0.77,0.79
+227,growth,long,200,exponential,11,,sdlog,0.74,0.74,0.68,0.68,0.71,0.72,0.75,0.77,0.8,0.81
+228,growth,long,200,exponential,12,,sdlog,0.73,0.73,0.67,0.68,0.7,0.71,0.74,0.76,0.79,0.8
+229,growth,long,200,exponential,13,,sdlog,0.81,0.81,0.73,0.75,0.78,0.8,0.83,0.85,0.89,0.9
+230,growth,long,200,exponential,14,,sdlog,0.75,0.75,0.68,0.69,0.72,0.73,0.76,0.78,0.81,0.83
+231,growth,long,200,exponential,15,,sdlog,0.79,0.79,0.72,0.73,0.76,0.77,0.81,0.83,0.86,0.88
+232,growth,long,200,exponential,16,,sdlog,0.75,0.75,0.69,0.7,0.72,0.74,0.77,0.78,0.82,0.83
+233,growth,long,200,exponential,17,,sdlog,0.75,0.75,0.68,0.69,0.72,0.74,0.76,0.78,0.82,0.83
+234,growth,long,200,exponential,18,,sdlog,0.77,0.76,0.69,0.7,0.73,0.75,0.78,0.8,0.83,0.85
+235,growth,long,200,exponential,19,,sdlog,0.8,0.8,0.72,0.74,0.76,0.78,0.81,0.83,0.87,0.88
+236,growth,long,200,exponential,20,,sdlog,0.77,0.76,0.69,0.7,0.73,0.75,0.78,0.8,0.83,0.85
+237,growth,medium,200,exponential,1,,sdlog,0.6,0.6,0.55,0.56,0.58,0.59,0.61,0.62,0.64,0.65
+238,growth,medium,200,exponential,2,,sdlog,0.61,0.61,0.56,0.57,0.59,0.6,0.62,0.64,0.66,0.67
+239,growth,medium,200,exponential,3,,sdlog,0.59,0.59,0.54,0.55,0.57,0.58,0.6,0.61,0.63,0.64
+240,growth,medium,200,exponential,4,,sdlog,0.56,0.56,0.52,0.53,0.54,0.55,0.57,0.58,0.6,0.61
+241,growth,medium,200,exponential,5,,sdlog,0.56,0.55,0.51,0.52,0.54,0.55,0.56,0.57,0.59,0.6
+242,growth,medium,200,exponential,6,,sdlog,0.55,0.55,0.51,0.52,0.54,0.54,0.56,0.57,0.59,0.6
+243,growth,medium,200,exponential,7,,sdlog,0.55,0.55,0.51,0.52,0.53,0.54,0.56,0.57,0.59,0.59
+244,growth,medium,200,exponential,8,,sdlog,0.59,0.59,0.55,0.55,0.57,0.58,0.6,0.62,0.64,0.65
+245,growth,medium,200,exponential,9,,sdlog,0.54,0.53,0.5,0.5,0.52,0.53,0.54,0.55,0.57,0.58
+246,growth,medium,200,exponential,10,,sdlog,0.6,0.6,0.55,0.56,0.58,0.59,0.61,0.62,0.64,0.65
+247,growth,medium,200,exponential,11,,sdlog,0.51,0.51,0.47,0.48,0.5,0.51,0.52,0.53,0.55,0.56
+248,growth,medium,200,exponential,12,,sdlog,0.57,0.57,0.53,0.53,0.55,0.56,0.58,0.59,0.61,0.62
+249,growth,medium,200,exponential,13,,sdlog,0.6,0.6,0.55,0.55,0.57,0.59,0.6,0.62,0.64,0.65
+250,growth,medium,200,exponential,14,,sdlog,0.58,0.58,0.53,0.54,0.56,0.57,0.59,0.6,0.63,0.64
+251,growth,medium,200,exponential,15,,sdlog,0.6,0.6,0.55,0.56,0.58,0.59,0.61,0.62,0.64,0.65
+252,growth,medium,200,exponential,16,,sdlog,0.54,0.54,0.5,0.5,0.52,0.53,0.55,0.56,0.58,0.59
+253,growth,medium,200,exponential,17,,sdlog,0.52,0.52,0.48,0.48,0.5,0.51,0.52,0.53,0.55,0.56
+254,growth,medium,200,exponential,18,,sdlog,0.57,0.57,0.53,0.54,0.55,0.56,0.58,0.59,0.61,0.62
+255,growth,medium,200,exponential,19,,sdlog,0.56,0.55,0.51,0.52,0.54,0.55,0.56,0.57,0.59,0.6
+256,growth,medium,200,exponential,20,,sdlog,0.57,0.57,0.52,0.53,0.55,0.56,0.57,0.59,0.61,0.62
+257,growth,short,200,exponential,1,,sdlog,0.38,0.38,0.35,0.36,0.37,0.37,0.39,0.39,0.41,0.41
+258,growth,short,200,exponential,2,,sdlog,0.4,0.4,0.37,0.37,0.38,0.39,0.4,0.41,0.42,0.43
+259,growth,short,200,exponential,3,,sdlog,0.39,0.39,0.36,0.37,0.38,0.39,0.4,0.4,0.42,0.42
+260,growth,short,200,exponential,4,,sdlog,0.35,0.34,0.32,0.32,0.33,0.34,0.35,0.36,0.37,0.38
+261,growth,short,200,exponential,5,,sdlog,0.36,0.36,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.39
+262,growth,short,200,exponential,6,,sdlog,0.37,0.37,0.34,0.34,0.35,0.36,0.37,0.38,0.39,0.4
+263,growth,short,200,exponential,7,,sdlog,0.37,0.37,0.34,0.35,0.36,0.36,0.38,0.38,0.4,0.4
+264,growth,short,200,exponential,8,,sdlog,0.39,0.39,0.36,0.36,0.38,0.38,0.4,0.4,0.42,0.42
+265,growth,short,200,exponential,9,,sdlog,0.35,0.35,0.33,0.33,0.34,0.35,0.36,0.37,0.38,0.38
+266,growth,short,200,exponential,10,,sdlog,0.38,0.38,0.35,0.35,0.36,0.37,0.38,0.39,0.4,0.41
+267,growth,short,200,exponential,11,,sdlog,0.35,0.35,0.32,0.32,0.33,0.34,0.35,0.36,0.37,0.38
+268,growth,short,200,exponential,12,,sdlog,0.36,0.36,0.33,0.34,0.35,0.35,0.37,0.37,0.39,0.39
+269,growth,short,200,exponential,13,,sdlog,0.37,0.37,0.34,0.35,0.36,0.36,0.38,0.38,0.4,0.4
+270,growth,short,200,exponential,14,,sdlog,0.33,0.33,0.3,0.31,0.32,0.32,0.33,0.34,0.35,0.36
+271,growth,short,200,exponential,15,,sdlog,0.35,0.35,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39
+272,growth,short,200,exponential,16,,sdlog,0.39,0.39,0.36,0.37,0.38,0.38,0.4,0.4,0.42,0.42
+273,growth,short,200,exponential,17,,sdlog,0.36,0.36,0.33,0.34,0.35,0.35,0.36,0.37,0.38,0.39
+274,growth,short,200,exponential,18,,sdlog,0.38,0.38,0.35,0.35,0.37,0.37,0.39,0.39,0.41,0.41
+275,growth,short,200,exponential,19,,sdlog,0.35,0.35,0.33,0.33,0.34,0.35,0.36,0.37,0.38,0.38
+276,growth,short,200,exponential,20,,sdlog,0.37,0.37,0.34,0.34,0.35,0.36,0.37,0.38,0.39,0.4
+277,stable,long,200,exponential,1,,sdlog,0.71,0.71,0.66,0.66,0.69,0.7,0.72,0.73,0.76,0.77
+278,stable,long,200,exponential,2,,sdlog,0.76,0.76,0.69,0.7,0.73,0.74,0.77,0.78,0.81,0.83
+279,stable,long,200,exponential,3,,sdlog,0.75,0.74,0.68,0.69,0.72,0.73,0.76,0.77,0.8,0.81
+280,stable,long,200,exponential,4,,sdlog,0.77,0.77,0.71,0.72,0.74,0.76,0.78,0.8,0.83,0.84
+281,stable,long,200,exponential,5,,sdlog,0.77,0.77,0.71,0.72,0.74,0.76,0.79,0.8,0.83,0.85
+282,stable,long,200,exponential,6,,sdlog,0.81,0.81,0.74,0.75,0.78,0.8,0.83,0.84,0.87,0.89
+283,stable,long,200,exponential,7,,sdlog,0.83,0.83,0.75,0.77,0.8,0.81,0.84,0.86,0.9,0.91
+284,stable,long,200,exponential,8,,sdlog,0.73,0.73,0.67,0.68,0.7,0.71,0.74,0.75,0.78,0.79
+285,stable,long,200,exponential,9,,sdlog,0.82,0.82,0.75,0.76,0.79,0.8,0.83,0.85,0.89,0.9
+286,stable,long,200,exponential,10,,sdlog,0.73,0.72,0.67,0.68,0.7,0.71,0.74,0.75,0.78,0.79
+287,stable,long,200,exponential,11,,sdlog,0.79,0.79,0.72,0.73,0.76,0.77,0.8,0.82,0.85,0.86
+288,stable,long,200,exponential,12,,sdlog,0.76,0.75,0.69,0.7,0.73,0.74,0.77,0.78,0.82,0.83
+289,stable,long,200,exponential,13,,sdlog,0.75,0.75,0.69,0.7,0.72,0.74,0.76,0.78,0.81,0.82
+290,stable,long,200,exponential,14,,sdlog,0.8,0.8,0.73,0.75,0.77,0.79,0.82,0.83,0.87,0.88
+291,stable,long,200,exponential,15,,sdlog,0.8,0.8,0.73,0.74,0.77,0.78,0.81,0.83,0.86,0.87
+292,stable,long,200,exponential,16,,sdlog,0.77,0.77,0.7,0.71,0.74,0.75,0.78,0.8,0.83,0.84
+293,stable,long,200,exponential,17,,sdlog,0.74,0.74,0.68,0.69,0.71,0.72,0.75,0.76,0.79,0.8
+294,stable,long,200,exponential,18,,sdlog,0.67,0.67,0.62,0.63,0.65,0.66,0.68,0.7,0.72,0.73
+295,stable,long,200,exponential,19,,sdlog,0.76,0.76,0.7,0.71,0.73,0.75,0.77,0.79,0.82,0.83
+296,stable,long,200,exponential,20,,sdlog,0.79,0.79,0.72,0.73,0.76,0.78,0.8,0.82,0.86,0.87
+297,stable,medium,200,exponential,1,,sdlog,0.54,0.54,0.51,0.51,0.53,0.54,0.55,0.56,0.58,0.59
+298,stable,medium,200,exponential,2,,sdlog,0.56,0.56,0.52,0.53,0.54,0.55,0.57,0.58,0.59,0.6
+299,stable,medium,200,exponential,3,,sdlog,0.59,0.59,0.55,0.55,0.57,0.58,0.6,0.61,0.63,0.64
+300,stable,medium,200,exponential,4,,sdlog,0.56,0.56,0.52,0.53,0.55,0.56,0.57,0.58,0.6,0.61
+301,stable,medium,200,exponential,5,,sdlog,0.59,0.59,0.55,0.55,0.57,0.58,0.6,0.61,0.63,0.64
+302,stable,medium,200,exponential,6,,sdlog,0.58,0.58,0.54,0.55,0.56,0.57,0.59,0.6,0.62,0.63
+303,stable,medium,200,exponential,7,,sdlog,0.56,0.56,0.52,0.53,0.54,0.55,0.57,0.58,0.6,0.61
+304,stable,medium,200,exponential,8,,sdlog,0.58,0.58,0.54,0.55,0.56,0.57,0.59,0.6,0.62,0.63
+305,stable,medium,200,exponential,9,,sdlog,0.61,0.61,0.57,0.57,0.59,0.6,0.62,0.63,0.65,0.66
+306,stable,medium,200,exponential,10,,sdlog,0.59,0.58,0.55,0.55,0.57,0.58,0.59,0.6,0.62,0.63
+307,stable,medium,200,exponential,11,,sdlog,0.61,0.61,0.56,0.57,0.59,0.6,0.62,0.63,0.65,0.66
+308,stable,medium,200,exponential,12,,sdlog,0.55,0.54,0.51,0.51,0.53,0.54,0.55,0.56,0.58,0.59
+309,stable,medium,200,exponential,13,,sdlog,0.57,0.57,0.53,0.54,0.56,0.57,0.58,0.59,0.61,0.62
+310,stable,medium,200,exponential,14,,sdlog,0.55,0.55,0.52,0.52,0.54,0.55,0.56,0.57,0.59,0.6
+311,stable,medium,200,exponential,15,,sdlog,0.61,0.61,0.56,0.57,0.59,0.6,0.61,0.62,0.64,0.65
+312,stable,medium,200,exponential,16,,sdlog,0.6,0.6,0.56,0.56,0.58,0.59,0.61,0.62,0.64,0.65
+313,stable,medium,200,exponential,17,,sdlog,0.6,0.6,0.56,0.57,0.58,0.59,0.61,0.62,0.64,0.65
+314,stable,medium,200,exponential,18,,sdlog,0.55,0.55,0.51,0.52,0.53,0.54,0.56,0.57,0.59,0.59
+315,stable,medium,200,exponential,19,,sdlog,0.57,0.57,0.52,0.53,0.55,0.56,0.57,0.58,0.6,0.61
+316,stable,medium,200,exponential,20,,sdlog,0.57,0.57,0.54,0.54,0.56,0.57,0.58,0.59,0.61,0.62
+317,stable,short,200,exponential,1,,sdlog,0.35,0.35,0.32,0.33,0.34,0.34,0.35,0.36,0.37,0.38
+318,stable,short,200,exponential,2,,sdlog,0.39,0.39,0.36,0.37,0.38,0.38,0.39,0.4,0.41,0.42
+319,stable,short,200,exponential,3,,sdlog,0.39,0.39,0.36,0.36,0.37,0.38,0.39,0.4,0.41,0.42
+320,stable,short,200,exponential,4,,sdlog,0.38,0.38,0.35,0.35,0.36,0.37,0.38,0.39,0.4,0.4
+321,stable,short,200,exponential,5,,sdlog,0.4,0.4,0.37,0.38,0.39,0.39,0.41,0.41,0.43,0.43
+322,stable,short,200,exponential,6,,sdlog,0.37,0.37,0.34,0.34,0.35,0.36,0.37,0.38,0.39,0.39
+323,stable,short,200,exponential,7,,sdlog,0.36,0.36,0.33,0.34,0.35,0.35,0.36,0.37,0.38,0.39
+324,stable,short,200,exponential,8,,sdlog,0.38,0.38,0.35,0.36,0.37,0.37,0.38,0.39,0.4,0.41
+325,stable,short,200,exponential,9,,sdlog,0.37,0.37,0.34,0.34,0.35,0.36,0.37,0.38,0.39,0.39
+326,stable,short,200,exponential,10,,sdlog,0.38,0.38,0.35,0.35,0.36,0.37,0.38,0.39,0.4,0.41
+327,stable,short,200,exponential,11,,sdlog,0.37,0.36,0.34,0.34,0.35,0.36,0.37,0.38,0.39,0.39
+328,stable,short,200,exponential,12,,sdlog,0.4,0.4,0.37,0.38,0.39,0.4,0.41,0.42,0.43,0.43
+329,stable,short,200,exponential,13,,sdlog,0.37,0.37,0.34,0.34,0.35,0.36,0.37,0.38,0.39,0.39
+330,stable,short,200,exponential,14,,sdlog,0.38,0.38,0.36,0.36,0.37,0.38,0.39,0.4,0.41,0.41
+331,stable,short,200,exponential,15,,sdlog,0.41,0.41,0.38,0.38,0.39,0.4,0.41,0.42,0.43,0.44
+332,stable,short,200,exponential,16,,sdlog,0.4,0.39,0.37,0.37,0.38,0.39,0.4,0.41,0.42,0.43
+333,stable,short,200,exponential,17,,sdlog,0.38,0.38,0.36,0.36,0.37,0.38,0.39,0.4,0.41,0.41
+334,stable,short,200,exponential,18,,sdlog,0.4,0.4,0.37,0.38,0.39,0.4,0.41,0.41,0.43,0.43
+335,stable,short,200,exponential,19,,sdlog,0.4,0.4,0.37,0.37,0.39,0.39,0.41,0.41,0.43,0.43
+336,stable,short,200,exponential,20,,sdlog,0.36,0.36,0.34,0.34,0.35,0.36,0.37,0.37,0.39,0.39
+337,120 days,,200,ebola_case_study,,real-time,sdlog,0.47,0.47,0.42,0.43,0.45,0.46,0.48,0.5,0.52,0.53
+338,120 days,,200,ebola_case_study,,retrospective,sdlog,0.27,0.27,0.26,0.26,0.26,0.26,0.27,0.27,0.27,0.28
+339,180 days,,200,ebola_case_study,,real-time,sdlog,0.46,0.46,0.41,0.42,0.44,0.45,0.47,0.48,0.5,0.51
+340,180 days,,200,ebola_case_study,,retrospective,sdlog,0.27,0.27,0.26,0.26,0.27,0.27,0.28,0.28,0.28,0.28
+341,240 days,,200,ebola_case_study,,real-time,sdlog,0.58,0.57,0.52,0.53,0.55,0.56,0.59,0.6,0.63,0.64
+342,240 days,,200,ebola_case_study,,retrospective,sdlog,0.26,0.26,0.26,0.26,0.26,0.26,0.27,0.27,0.27,0.27
+343,60 days,,200,ebola_case_study,,real-time,sdlog,0.35,0.35,0.32,0.32,0.34,0.34,0.36,0.37,0.39,0.39
+344,60 days,,200,ebola_case_study,,retrospective,sdlog,0.26,0.26,0.25,0.25,0.26,0.26,0.26,0.27,0.27,0.27
+1,early outbreak,long,10,outbreak,1,,mean,1.1e+14,24,3.8,4.3,6.8,12,69,350,41000,430000
+2,early outbreak,medium,10,outbreak,1,,mean,5.1e+16,6.1,4.1,4.3,4.9,5.4,7.4,12,450,5100
+3,early outbreak,short,10,outbreak,1,,mean,7.6e+14,15,3.5,3.9,5.7,8.4,32,130,9200,99000
+4,late outbreak,long,10,outbreak,1,,mean,24000,8.5,4.4,4.8,6.1,7.1,11,17,91,290
+5,late outbreak,medium,10,outbreak,1,,mean,17,8.1,5.5,5.8,6.8,7.5,9,10,17,26
+6,late outbreak,short,10,outbreak,1,,mean,3.7,3.6,3,3.1,3.4,3.5,3.8,4,4.3,4.5
+7,near peak,long,10,outbreak,1,,mean,9600000,7.4,4.4,4.7,5.6,6.3,9.1,14,110,530
+8,near peak,medium,10,outbreak,1,,mean,1.7e+15,17,4.1,4.6,7,10,38,180,33000,2300000
+9,near peak,short,10,outbreak,1,,mean,3.1,3,2.4,2.5,2.8,2.9,3.2,3.3,3.8,4.1
+10,past peak,long,10,outbreak,1,,mean,3200000,9,4.2,4.6,5.9,7.2,13,28,1200,13000
+11,past peak,medium,10,outbreak,1,,mean,1e+13,16,6.9,7.3,9.4,12,26,74,2700,29000
+12,past peak,short,10,outbreak,1,,mean,13,3.1,2.1,2.3,2.7,2.9,3.3,3.6,4.6,5.4
+13,early outbreak,long,100,outbreak,1,,mean,2900,17,7.4,7.9,11,13,24,46,350,1600
+14,early outbreak,medium,100,outbreak,1,,mean,5.2,5,4.2,4.3,4.6,4.8,5.2,5.6,6.6,7.3
+15,early outbreak,short,100,outbreak,1,,mean,3.6,3.6,3.3,3.4,3.5,3.5,3.7,3.8,3.9,4
+16,late outbreak,long,100,outbreak,1,,mean,8.3,8.2,6.8,6.9,7.5,7.9,8.6,9.1,10,11
+17,late outbreak,medium,100,outbreak,1,,mean,6.1,6.1,5.3,5.4,5.7,5.9,6.2,6.4,6.8,7
+18,late outbreak,short,100,outbreak,1,,mean,3.4,3.4,3.1,3.2,3.3,3.3,3.5,3.5,3.7,3.7
+19,near peak,long,100,outbreak,1,,mean,7.5,7.2,5.9,6.1,6.6,6.9,7.6,8.1,9.6,11
+20,near peak,medium,100,outbreak,1,,mean,5.7,5.7,4.9,5,5.3,5.5,5.9,6.1,6.7,7
+21,near peak,short,100,outbreak,1,,mean,3.5,3.5,3.2,3.2,3.3,3.4,3.5,3.6,3.7,3.8
+22,past peak,long,100,outbreak,1,,mean,7.1,7,5.8,6,6.4,6.7,7.3,7.7,8.6,9
+23,past peak,medium,100,outbreak,1,,mean,5.7,5.7,5,5.1,5.4,5.5,5.8,6,6.4,6.5
+24,past peak,short,100,outbreak,1,,mean,3.4,3.4,3.1,3.2,3.3,3.3,3.4,3.5,3.6,3.7
+25,early outbreak,long,200,outbreak,1,,mean,11,9.1,6.4,6.6,7.6,8.3,10,12,18,22
+26,early outbreak,medium,200,outbreak,1,,mean,5.2,5.2,4.6,4.6,4.9,5,5.3,5.5,6,6.2
+27,early outbreak,short,200,outbreak,1,,mean,3.3,3.3,3.1,3.1,3.2,3.2,3.3,3.4,3.5,3.5
+28,late outbreak,long,200,outbreak,1,,mean,7.3,7.3,6.3,6.5,6.9,7.1,7.5,7.8,8.4,8.7
+29,late outbreak,medium,200,outbreak,1,,mean,6.1,6.1,5.6,5.7,5.9,6,6.2,6.3,6.6,6.7
+30,late outbreak,short,200,outbreak,1,,mean,3.7,3.7,3.5,3.5,3.6,3.6,3.7,3.8,3.9,3.9
+31,near peak,long,200,outbreak,1,,mean,8.1,7.9,6.3,6.5,7.1,7.5,8.4,9,10,11
+32,near peak,medium,200,outbreak,1,,mean,5.8,5.8,5.1,5.2,5.5,5.6,5.9,6.1,6.6,6.8
+33,near peak,short,200,outbreak,1,,mean,3.5,3.5,3.3,3.3,3.4,3.5,3.5,3.6,3.7,3.7
+34,past peak,long,200,outbreak,1,,mean,9.1,8.9,7.5,7.7,8.3,8.6,9.3,9.8,11,11
+35,past peak,medium,200,outbreak,1,,mean,5.9,5.9,5.3,5.4,5.6,5.7,6,6.1,6.4,6.6
+36,past peak,short,200,outbreak,1,,mean,3.5,3.5,3.3,3.3,3.4,3.5,3.5,3.6,3.7,3.7
+37,decay,long,200,exponential,1,,mean,7.3,7.3,6.7,6.8,7,7.2,7.4,7.6,7.9,8
+38,decay,long,200,exponential,2,,mean,8.4,8.3,7.6,7.7,8,8.2,8.5,8.7,9.1,9.3
+39,decay,long,200,exponential,3,,mean,8.3,8.2,7.4,7.6,7.9,8.1,8.4,8.6,9.1,9.2
+40,decay,long,200,exponential,4,,mean,7.6,7.6,7,7.1,7.3,7.5,7.8,7.9,8.3,8.5
+41,decay,long,200,exponential,5,,mean,8.6,8.5,7.7,7.8,8.1,8.3,8.7,9,9.5,9.7
+42,decay,long,200,exponential,6,,mean,8.2,8.1,7.4,7.5,7.8,8,8.3,8.5,9,9.2
+43,decay,long,200,exponential,7,,mean,8,8,7.2,7.4,7.6,7.8,8.1,8.3,8.7,8.9
+44,decay,long,200,exponential,8,,mean,8.5,8.4,7.7,7.8,8.1,8.3,8.7,8.9,9.4,9.6
+45,decay,long,200,exponential,9,,mean,8.8,8.8,7.8,8,8.3,8.5,9,9.2,9.8,10
+46,decay,long,200,exponential,10,,mean,8.3,8.2,7.5,7.6,7.9,8.1,8.4,8.7,9.1,9.2
+47,decay,long,200,exponential,11,,mean,8,8,7.3,7.4,7.6,7.8,8.1,8.3,8.7,8.9
+48,decay,long,200,exponential,12,,mean,8.4,8.3,7.6,7.7,8,8.1,8.5,8.7,9.2,9.4
+49,decay,long,200,exponential,13,,mean,8.6,8.5,7.7,7.9,8.2,8.4,8.7,9,9.5,9.7
+50,decay,long,200,exponential,14,,mean,8.4,8.3,7.6,7.7,8,8.2,8.5,8.7,9.2,9.4
+51,decay,long,200,exponential,15,,mean,8.1,8,7.2,7.3,7.7,7.8,8.2,8.4,8.9,9
+52,decay,long,200,exponential,16,,mean,8,8,7.2,7.3,7.6,7.8,8.1,8.3,8.7,8.9
+53,decay,long,200,exponential,17,,mean,8.2,8.2,7.4,7.6,7.9,8,8.3,8.5,9,9.1
+54,decay,long,200,exponential,18,,mean,8.2,8.2,7.4,7.5,7.8,8,8.4,8.6,9,9.2
+55,decay,long,200,exponential,19,,mean,7.8,7.8,7.2,7.2,7.5,7.6,7.9,8.1,8.5,8.6
+56,decay,long,200,exponential,20,,mean,8.6,8.5,7.7,7.9,8.2,8.4,8.7,9,9.4,9.6
+57,decay,medium,200,exponential,1,,mean,6.1,6.1,5.7,5.8,5.9,6,6.1,6.2,6.4,6.5
+58,decay,medium,200,exponential,2,,mean,5.8,5.8,5.5,5.5,5.6,5.7,5.9,6,6.1,6.2
+59,decay,medium,200,exponential,3,,mean,6,6,5.7,5.7,5.8,5.9,6.1,6.2,6.3,6.4
+60,decay,medium,200,exponential,4,,mean,6.3,6.3,5.9,6,6.1,6.2,6.3,6.4,6.6,6.7
+61,decay,medium,200,exponential,5,,mean,6,6,5.6,5.7,5.8,5.9,6,6.1,6.3,6.4
+62,decay,medium,200,exponential,6,,mean,6.1,6.1,5.8,5.8,6,6.1,6.2,6.3,6.5,6.5
+63,decay,medium,200,exponential,7,,mean,5.7,5.7,5.4,5.5,5.6,5.6,5.8,5.9,6,6.1
+64,decay,medium,200,exponential,8,,mean,5.8,5.8,5.5,5.5,5.7,5.7,5.9,6,6.1,6.2
+65,decay,medium,200,exponential,9,,mean,5.9,5.9,5.6,5.7,5.8,5.9,6,6.1,6.3,6.3
+66,decay,medium,200,exponential,10,,mean,5.8,5.8,5.4,5.5,5.6,5.7,5.8,5.9,6.1,6.1
+67,decay,medium,200,exponential,11,,mean,6.1,6.1,5.8,5.8,6,6.1,6.2,6.3,6.5,6.5
+68,decay,medium,200,exponential,12,,mean,5.9,5.9,5.6,5.7,5.8,5.9,6,6.1,6.2,6.3
+69,decay,medium,200,exponential,13,,mean,5.8,5.8,5.5,5.5,5.7,5.7,5.9,6,6.1,6.2
+70,decay,medium,200,exponential,14,,mean,5.9,5.9,5.6,5.6,5.8,5.8,6,6.1,6.2,6.3
+71,decay,medium,200,exponential,15,,mean,5.9,5.9,5.6,5.6,5.7,5.8,6,6,6.2,6.2
+72,decay,medium,200,exponential,16,,mean,5.8,5.8,5.5,5.5,5.7,5.8,5.9,6,6.2,6.2
+73,decay,medium,200,exponential,17,,mean,5.8,5.8,5.5,5.5,5.6,5.7,5.8,5.9,6,6.1
+74,decay,medium,200,exponential,18,,mean,5.8,5.8,5.5,5.5,5.6,5.7,5.8,5.9,6,6.1
+75,decay,medium,200,exponential,19,,mean,5.8,5.8,5.4,5.5,5.6,5.7,5.8,5.9,6.1,6.2
+76,decay,medium,200,exponential,20,,mean,5.8,5.8,5.5,5.5,5.7,5.7,5.9,6,6.1,6.2
+77,decay,short,200,exponential,1,,mean,3.5,3.5,3.4,3.4,3.4,3.5,3.5,3.5,3.6,3.6
+78,decay,short,200,exponential,2,,mean,3.6,3.6,3.4,3.4,3.5,3.5,3.6,3.6,3.7,3.7
+79,decay,short,200,exponential,3,,mean,3.6,3.6,3.5,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+80,decay,short,200,exponential,4,,mean,3.5,3.5,3.4,3.4,3.4,3.5,3.5,3.6,3.6,3.6
+81,decay,short,200,exponential,5,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.6,3.7,3.7,3.8
+82,decay,short,200,exponential,6,,mean,3.7,3.7,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+83,decay,short,200,exponential,7,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.6,3.7,3.7,3.7
+84,decay,short,200,exponential,8,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.6,3.6,3.6
+85,decay,short,200,exponential,9,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.6,3.6,3.6
+86,decay,short,200,exponential,10,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+87,decay,short,200,exponential,11,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.6,3.7
+88,decay,short,200,exponential,12,,mean,3.6,3.6,3.5,3.5,3.5,3.6,3.6,3.6,3.7,3.7
+89,decay,short,200,exponential,13,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+90,decay,short,200,exponential,14,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.6,3.7,3.7,3.8
+91,decay,short,200,exponential,15,,mean,3.7,3.7,3.6,3.6,3.7,3.7,3.7,3.8,3.8,3.8
+92,decay,short,200,exponential,16,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.6,3.7
+93,decay,short,200,exponential,17,,mean,3.7,3.7,3.5,3.6,3.6,3.6,3.7,3.7,3.8,3.8
+94,decay,short,200,exponential,18,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+95,decay,short,200,exponential,19,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.6,3.7,3.7,3.8
+96,decay,short,200,exponential,20,,mean,3.6,3.6,3.5,3.5,3.5,3.6,3.6,3.6,3.7,3.7
+97,fast decay,long,200,exponential,1,,mean,8.5,8.5,7.6,7.8,8.1,8.3,8.7,8.9,9.3,9.5
+98,fast decay,long,200,exponential,2,,mean,8.1,8.1,7.3,7.5,7.8,7.9,8.3,8.5,8.9,9
+99,fast decay,long,200,exponential,3,,mean,8.3,8.3,7.5,7.6,7.9,8.1,8.4,8.7,9.1,9.3
+100,fast decay,long,200,exponential,4,,mean,8.1,8.1,7.4,7.5,7.8,7.9,8.2,8.5,8.9,9
+101,fast decay,long,200,exponential,5,,mean,8.1,8.1,7.3,7.4,7.7,7.9,8.2,8.5,8.9,9.1
+102,fast decay,long,200,exponential,6,,mean,8.6,8.5,7.8,7.9,8.2,8.4,8.7,8.9,9.3,9.5
+103,fast decay,long,200,exponential,7,,mean,9.1,9,8.1,8.3,8.6,8.9,9.3,9.5,10,10
+104,fast decay,long,200,exponential,8,,mean,8.5,8.5,7.7,7.8,8.1,8.3,8.7,8.9,9.3,9.5
+105,fast decay,long,200,exponential,9,,mean,8.4,8.4,7.6,7.7,8,8.2,8.6,8.8,9.2,9.4
+106,fast decay,long,200,exponential,10,,mean,8.4,8.4,7.7,7.8,8,8.2,8.5,8.8,9.2,9.4
+107,fast decay,long,200,exponential,11,,mean,8.7,8.7,7.9,8,8.3,8.5,8.8,9.1,9.5,9.7
+108,fast decay,long,200,exponential,12,,mean,8.7,8.6,7.8,7.9,8.3,8.4,8.8,9.1,9.6,9.8
+109,fast decay,long,200,exponential,13,,mean,7.9,7.9,7.2,7.3,7.6,7.8,8.1,8.3,8.7,8.8
+110,fast decay,long,200,exponential,14,,mean,8,7.9,7.3,7.3,7.6,7.8,8.1,8.3,8.7,8.8
+111,fast decay,long,200,exponential,15,,mean,8.5,8.5,7.7,7.8,8.1,8.3,8.7,8.9,9.3,9.5
+112,fast decay,long,200,exponential,16,,mean,9.2,9.2,8.1,8.3,8.7,8.9,9.4,9.7,10,11
+113,fast decay,long,200,exponential,17,,mean,7.4,7.3,6.7,6.8,7.1,7.2,7.5,7.6,7.9,8
+114,fast decay,long,200,exponential,18,,mean,8.2,8.2,7.5,7.6,7.9,8,8.3,8.5,8.8,9
+115,fast decay,long,200,exponential,19,,mean,9.2,9.1,8.1,8.3,8.7,8.9,9.3,9.6,10,11
+116,fast decay,long,200,exponential,20,,mean,8.4,8.3,7.5,7.7,8,8.1,8.5,8.7,9.2,9.4
+117,fast decay,medium,200,exponential,1,,mean,5.7,5.7,5.4,5.4,5.6,5.6,5.8,5.8,6,6
+118,fast decay,medium,200,exponential,2,,mean,6,6,5.7,5.7,5.8,5.9,6,6.1,6.2,6.3
+119,fast decay,medium,200,exponential,3,,mean,5.6,5.6,5.4,5.4,5.5,5.6,5.7,5.8,5.9,6
+120,fast decay,medium,200,exponential,4,,mean,5.9,5.9,5.6,5.6,5.8,5.8,6,6,6.2,6.2
+121,fast decay,medium,200,exponential,5,,mean,6,6,5.7,5.7,5.8,5.9,6,6.1,6.3,6.3
+122,fast decay,medium,200,exponential,6,,mean,5.8,5.8,5.6,5.6,5.7,5.8,5.9,6,6.1,6.2
+123,fast decay,medium,200,exponential,7,,mean,5.8,5.8,5.5,5.6,5.7,5.7,5.9,5.9,6.1,6.1
+124,fast decay,medium,200,exponential,8,,mean,6.1,6.1,5.7,5.8,5.9,6,6.1,6.2,6.4,6.4
+125,fast decay,medium,200,exponential,9,,mean,5.6,5.6,5.3,5.3,5.5,5.5,5.6,5.7,5.8,5.9
+126,fast decay,medium,200,exponential,10,,mean,6.1,6.1,5.8,5.8,6,6,6.2,6.3,6.4,6.5
+127,fast decay,medium,200,exponential,11,,mean,5.9,5.9,5.6,5.7,5.8,5.9,6,6.1,6.2,6.3
+128,fast decay,medium,200,exponential,12,,mean,6,6,5.7,5.7,5.9,5.9,6.1,6.2,6.3,6.4
+129,fast decay,medium,200,exponential,13,,mean,5.9,5.9,5.6,5.6,5.7,5.8,5.9,6,6.1,6.2
+130,fast decay,medium,200,exponential,14,,mean,5.8,5.8,5.5,5.5,5.7,5.7,5.9,6,6.1,6.2
+131,fast decay,medium,200,exponential,15,,mean,6,6,5.6,5.7,5.8,5.9,6,6.1,6.3,6.3
+132,fast decay,medium,200,exponential,16,,mean,6,6,5.6,5.7,5.8,5.9,6,6.1,6.2,6.3
+133,fast decay,medium,200,exponential,17,,mean,5.7,5.7,5.5,5.5,5.6,5.7,5.8,5.9,6,6.1
+134,fast decay,medium,200,exponential,18,,mean,5.9,5.9,5.6,5.6,5.8,5.8,6,6,6.2,6.2
+135,fast decay,medium,200,exponential,19,,mean,5.9,5.9,5.6,5.7,5.8,5.8,6,6,6.2,6.2
+136,fast decay,medium,200,exponential,20,,mean,6,6,5.7,5.7,5.8,5.9,6,6.1,6.3,6.3
+137,fast decay,short,200,exponential,1,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.6,3.7,3.7,3.7
+138,fast decay,short,200,exponential,2,,mean,3.6,3.6,3.5,3.5,3.5,3.6,3.6,3.6,3.7,3.7
+139,fast decay,short,200,exponential,3,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.6,3.6,3.6
+140,fast decay,short,200,exponential,4,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+141,fast decay,short,200,exponential,5,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.6,3.6,3.6
+142,fast decay,short,200,exponential,6,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.6,3.7
+143,fast decay,short,200,exponential,7,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.6,3.6,3.6
+144,fast decay,short,200,exponential,8,,mean,3.7,3.6,3.5,3.6,3.6,3.6,3.7,3.7,3.8,3.8
+145,fast decay,short,200,exponential,9,,mean,3.5,3.5,3.4,3.4,3.4,3.5,3.5,3.5,3.6,3.6
+146,fast decay,short,200,exponential,10,,mean,3.5,3.5,3.3,3.4,3.4,3.4,3.5,3.5,3.6,3.6
+147,fast decay,short,200,exponential,11,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.6,3.6,3.6
+148,fast decay,short,200,exponential,12,,mean,3.6,3.6,3.5,3.5,3.5,3.6,3.6,3.6,3.7,3.7
+149,fast decay,short,200,exponential,13,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.6,3.6,3.6
+150,fast decay,short,200,exponential,14,,mean,3.5,3.5,3.3,3.4,3.4,3.4,3.5,3.5,3.6,3.6
+151,fast decay,short,200,exponential,15,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+152,fast decay,short,200,exponential,16,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.7,3.7,3.7,3.8
+153,fast decay,short,200,exponential,17,,mean,3.5,3.5,3.3,3.4,3.4,3.4,3.5,3.5,3.6,3.6
+154,fast decay,short,200,exponential,18,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.6,3.7
+155,fast decay,short,200,exponential,19,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+156,fast decay,short,200,exponential,20,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.6,3.7
+157,fast growth,long,200,exponential,1,,mean,7.4,7.3,6.4,6.5,6.9,7.1,7.6,7.9,8.5,8.9
+158,fast growth,long,200,exponential,2,,mean,7.3,7.2,6.2,6.4,6.7,7,7.4,7.8,8.4,8.7
+159,fast growth,long,200,exponential,3,,mean,8.9,8.8,7.2,7.4,8,8.4,9.2,9.8,11,12
+160,fast growth,long,200,exponential,4,,mean,7.7,7.6,6.5,6.7,7.1,7.3,7.9,8.2,9,9.4
+161,fast growth,long,200,exponential,5,,mean,7.3,7.2,6.4,6.5,6.8,7,7.5,7.8,8.3,8.6
+162,fast growth,long,200,exponential,6,,mean,7.2,7.1,6.2,6.3,6.6,6.9,7.4,7.7,8.4,8.6
+163,fast growth,long,200,exponential,7,,mean,7.9,7.8,6.6,6.8,7.2,7.5,8.2,8.6,9.4,9.9
+164,fast growth,long,200,exponential,8,,mean,8.2,8.1,6.9,7,7.5,7.8,8.5,8.9,9.8,10
+165,fast growth,long,200,exponential,9,,mean,8.3,8.2,6.9,7.1,7.6,7.9,8.6,9,10,10
+166,fast growth,long,200,exponential,10,,mean,6.4,6.4,5.7,5.8,6,6.2,6.6,6.8,7.2,7.3
+167,fast growth,long,200,exponential,11,,mean,7.1,7,6.1,6.3,6.6,6.8,7.3,7.5,8.1,8.3
+168,fast growth,long,200,exponential,12,,mean,7.2,7.1,6.3,6.4,6.7,6.9,7.3,7.6,8.2,8.4
+169,fast growth,long,200,exponential,13,,mean,7.3,7.2,6.3,6.4,6.8,7,7.5,7.7,8.4,8.6
+170,fast growth,long,200,exponential,14,,mean,8.8,8.7,7.3,7.5,8,8.3,9.1,9.6,11,11
+171,fast growth,long,200,exponential,15,,mean,7.3,7.3,6.3,6.5,6.8,7.1,7.5,7.8,8.4,8.7
+172,fast growth,long,200,exponential,16,,mean,8.3,8.2,6.9,7.1,7.6,7.9,8.5,8.9,9.8,10
+173,fast growth,long,200,exponential,17,,mean,8.6,8.5,7,7.2,7.8,8.1,8.8,9.4,10,11
+174,fast growth,long,200,exponential,18,,mean,6.4,6.4,5.6,5.7,6,6.2,6.5,6.7,7.2,7.4
+175,fast growth,long,200,exponential,19,,mean,8.8,8.6,7,7.2,7.8,8.3,9.1,9.6,11,12
+176,fast growth,long,200,exponential,20,,mean,7.7,7.6,6.5,6.7,7.1,7.3,7.9,8.2,9,9.3
+177,fast growth,medium,200,exponential,1,,mean,5.6,5.6,5.1,5.2,5.4,5.5,5.7,5.8,6.1,6.2
+178,fast growth,medium,200,exponential,2,,mean,5.7,5.7,5.2,5.3,5.5,5.6,5.8,6,6.3,6.4
+179,fast growth,medium,200,exponential,3,,mean,5.9,5.9,5.4,5.4,5.7,5.8,6,6.2,6.5,6.7
+180,fast growth,medium,200,exponential,4,,mean,5.8,5.8,5.3,5.3,5.5,5.7,5.9,6,6.3,6.4
+181,fast growth,medium,200,exponential,5,,mean,5.8,5.8,5.3,5.3,5.6,5.7,5.9,6.1,6.4,6.5
+182,fast growth,medium,200,exponential,6,,mean,5.9,5.9,5.3,5.4,5.6,5.8,6,6.2,6.5,6.7
+183,fast growth,medium,200,exponential,7,,mean,5.4,5.4,5,5.1,5.2,5.3,5.5,5.6,5.9,6
+184,fast growth,medium,200,exponential,8,,mean,6.1,6.1,5.5,5.6,5.8,5.9,6.2,6.4,6.7,6.9
+185,fast growth,medium,200,exponential,9,,mean,6,6,5.5,5.6,5.8,5.9,6.1,6.3,6.5,6.7
+186,fast growth,medium,200,exponential,10,,mean,5.6,5.6,5.2,5.2,5.4,5.5,5.7,5.9,6.1,6.3
+187,fast growth,medium,200,exponential,11,,mean,6.2,6.1,5.6,5.7,5.9,6,6.3,6.4,6.7,6.9
+188,fast growth,medium,200,exponential,12,,mean,5.5,5.5,5,5.1,5.3,5.4,5.6,5.8,6,6.2
+189,fast growth,medium,200,exponential,13,,mean,5.1,5.1,4.7,4.8,4.9,5,5.2,5.3,5.5,5.6
+190,fast growth,medium,200,exponential,14,,mean,6,6,5.5,5.6,5.7,5.9,6.1,6.2,6.5,6.6
+191,fast growth,medium,200,exponential,15,,mean,5.7,5.7,5.2,5.3,5.5,5.6,5.8,5.9,6.2,6.3
+192,fast growth,medium,200,exponential,16,,mean,5.8,5.8,5.2,5.3,5.5,5.6,5.9,6.1,6.4,6.5
+193,fast growth,medium,200,exponential,17,,mean,5.3,5.2,4.8,4.9,5,5.1,5.3,5.4,5.7,5.8
+194,fast growth,medium,200,exponential,18,,mean,5.9,5.9,5.4,5.5,5.6,5.8,6,6.1,6.4,6.5
+195,fast growth,medium,200,exponential,19,,mean,5.7,5.7,5.1,5.2,5.5,5.6,5.8,6,6.4,6.5
+196,fast growth,medium,200,exponential,20,,mean,5.7,5.7,5.2,5.3,5.5,5.6,5.8,6,6.3,6.4
+197,fast growth,short,200,exponential,1,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.6,3.6,3.7
+198,fast growth,short,200,exponential,2,,mean,3.5,3.5,3.4,3.4,3.4,3.5,3.5,3.6,3.6,3.7
+199,fast growth,short,200,exponential,3,,mean,3.6,3.6,3.4,3.4,3.5,3.5,3.6,3.6,3.7,3.7
+200,fast growth,short,200,exponential,4,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.7,3.7,3.7,3.8
+201,fast growth,short,200,exponential,5,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+202,fast growth,short,200,exponential,6,,mean,3.7,3.7,3.6,3.6,3.7,3.7,3.8,3.8,3.9,3.9
+203,fast growth,short,200,exponential,7,,mean,3.7,3.7,3.6,3.6,3.6,3.7,3.8,3.8,3.9,3.9
+204,fast growth,short,200,exponential,8,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.6,3.7
+205,fast growth,short,200,exponential,9,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.6,3.7
+206,fast growth,short,200,exponential,10,,mean,3.7,3.6,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+207,fast growth,short,200,exponential,11,,mean,3.7,3.7,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+208,fast growth,short,200,exponential,12,,mean,3.7,3.7,3.5,3.6,3.6,3.7,3.7,3.7,3.8,3.8
+209,fast growth,short,200,exponential,13,,mean,3.7,3.7,3.5,3.6,3.6,3.7,3.7,3.8,3.8,3.9
+210,fast growth,short,200,exponential,14,,mean,3.7,3.7,3.5,3.6,3.6,3.6,3.7,3.7,3.8,3.8
+211,fast growth,short,200,exponential,15,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+212,fast growth,short,200,exponential,16,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.7,3.7
+213,fast growth,short,200,exponential,17,,mean,3.5,3.5,3.3,3.4,3.4,3.5,3.5,3.5,3.6,3.6
+214,fast growth,short,200,exponential,18,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.6,3.6,3.7
+215,fast growth,short,200,exponential,19,,mean,3.6,3.6,3.4,3.4,3.5,3.5,3.6,3.6,3.7,3.7
+216,fast growth,short,200,exponential,20,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+217,growth,long,200,exponential,1,,mean,8.1,8,7,7.2,7.5,7.8,8.2,8.5,9.2,9.5
+218,growth,long,200,exponential,2,,mean,6.9,6.9,6.2,6.3,6.6,6.7,7.1,7.2,7.7,7.8
+219,growth,long,200,exponential,3,,mean,8.2,8.1,7,7.1,7.6,7.8,8.3,8.7,9.5,9.9
+220,growth,long,200,exponential,4,,mean,7.8,7.7,6.8,6.9,7.3,7.5,7.9,8.2,8.9,9.1
+221,growth,long,200,exponential,5,,mean,7.4,7.3,6.5,6.6,6.9,7.1,7.5,7.8,8.3,8.5
+222,growth,long,200,exponential,6,,mean,7.7,7.7,6.8,6.9,7.3,7.5,7.9,8.2,8.7,9
+223,growth,long,200,exponential,7,,mean,7.8,7.8,6.8,6.9,7.3,7.6,8,8.3,9,9.2
+224,growth,long,200,exponential,8,,mean,7.5,7.4,6.6,6.8,7.1,7.2,7.6,7.9,8.3,8.5
+225,growth,long,200,exponential,9,,mean,8.6,8.5,7.3,7.5,8,8.3,8.8,9.2,10,11
+226,growth,long,200,exponential,10,,mean,7.5,7.4,6.7,6.8,7.1,7.3,7.6,7.9,8.4,8.7
+227,growth,long,200,exponential,11,,mean,7.4,7.3,6.5,6.6,6.9,7.1,7.5,7.8,8.3,8.6
+228,growth,long,200,exponential,12,,mean,7.6,7.5,6.7,6.8,7.1,7.3,7.7,8,8.5,8.7
+229,growth,long,200,exponential,13,,mean,8.6,8.5,7.2,7.4,7.9,8.2,8.8,9.2,9.9,10
+230,growth,long,200,exponential,14,,mean,7.8,7.7,6.8,7,7.3,7.5,8,8.3,8.9,9.2
+231,growth,long,200,exponential,15,,mean,8.4,8.3,7.2,7.4,7.8,8.1,8.6,9,9.8,10
+232,growth,long,200,exponential,16,,mean,7.8,7.8,6.8,7,7.3,7.6,8,8.3,8.8,9.1
+233,growth,long,200,exponential,17,,mean,8,7.9,6.9,7,7.4,7.7,8.1,8.5,9.1,9.4
+234,growth,long,200,exponential,18,,mean,8.5,8.4,7.3,7.5,7.9,8.2,8.7,9.1,9.8,10
+235,growth,long,200,exponential,19,,mean,8.4,8.3,7.2,7.4,7.8,8,8.6,8.9,9.7,10
+236,growth,long,200,exponential,20,,mean,8.3,8.3,7.2,7.4,7.8,8,8.5,8.9,9.5,9.8
+237,growth,medium,200,exponential,1,,mean,5.9,5.9,5.5,5.6,5.7,5.8,6,6.2,6.4,6.5
+238,growth,medium,200,exponential,2,,mean,6.7,6.7,6.1,6.2,6.4,6.5,6.8,6.9,7.2,7.3
+239,growth,medium,200,exponential,3,,mean,5.6,5.5,5.2,5.2,5.4,5.5,5.6,5.7,5.9,6
+240,growth,medium,200,exponential,4,,mean,5.7,5.7,5.3,5.4,5.6,5.6,5.8,5.9,6.1,6.2
+241,growth,medium,200,exponential,5,,mean,5.7,5.6,5.3,5.3,5.5,5.6,5.7,5.8,6,6.1
+242,growth,medium,200,exponential,6,,mean,5.5,5.5,5.1,5.2,5.3,5.4,5.6,5.7,5.9,5.9
+243,growth,medium,200,exponential,7,,mean,5.6,5.6,5.2,5.3,5.4,5.5,5.7,5.8,5.9,6
+244,growth,medium,200,exponential,8,,mean,6.1,6.1,5.7,5.7,5.9,6,6.2,6.4,6.6,6.7
+245,growth,medium,200,exponential,9,,mean,5.3,5.3,5,5.1,5.2,5.3,5.4,5.5,5.6,5.7
+246,growth,medium,200,exponential,10,,mean,6.4,6.4,5.9,6,6.2,6.3,6.5,6.7,7,7.1
+247,growth,medium,200,exponential,11,,mean,5.5,5.5,5.2,5.3,5.4,5.5,5.6,5.7,5.9,5.9
+248,growth,medium,200,exponential,12,,mean,5.8,5.8,5.4,5.5,5.6,5.7,5.9,6,6.2,6.3
+249,growth,medium,200,exponential,13,,mean,6,6,5.6,5.6,5.8,5.9,6.1,6.2,6.5,6.6
+250,growth,medium,200,exponential,14,,mean,5.7,5.7,5.3,5.4,5.5,5.6,5.8,5.9,6.2,6.3
+251,growth,medium,200,exponential,15,,mean,5.7,5.7,5.3,5.4,5.5,5.6,5.8,5.9,6.2,6.2
+252,growth,medium,200,exponential,16,,mean,5.2,5.2,4.9,4.9,5.1,5.1,5.3,5.4,5.5,5.6
+253,growth,medium,200,exponential,17,,mean,5.5,5.5,5.2,5.3,5.4,5.5,5.6,5.7,5.8,5.9
+254,growth,medium,200,exponential,18,,mean,5.7,5.7,5.3,5.4,5.6,5.6,5.8,5.9,6.1,6.2
+255,growth,medium,200,exponential,19,,mean,5.8,5.8,5.4,5.4,5.6,5.7,5.9,6,6.2,6.2
+256,growth,medium,200,exponential,20,,mean,5.9,5.9,5.5,5.6,5.7,5.8,6,6.1,6.3,6.4
+257,growth,short,200,exponential,1,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.7,3.7
+258,growth,short,200,exponential,2,,mean,3.7,3.7,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+259,growth,short,200,exponential,3,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+260,growth,short,200,exponential,4,,mean,3.5,3.5,3.4,3.4,3.4,3.5,3.5,3.5,3.6,3.6
+261,growth,short,200,exponential,5,,mean,3.5,3.5,3.3,3.4,3.4,3.4,3.5,3.5,3.6,3.6
+262,growth,short,200,exponential,6,,mean,3.6,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.7,3.7
+263,growth,short,200,exponential,7,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+264,growth,short,200,exponential,8,,mean,3.7,3.7,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+265,growth,short,200,exponential,9,,mean,3.6,3.6,3.5,3.5,3.5,3.6,3.6,3.6,3.7,3.7
+266,growth,short,200,exponential,10,,mean,3.7,3.7,3.5,3.6,3.6,3.7,3.7,3.7,3.8,3.8
+267,growth,short,200,exponential,11,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+268,growth,short,200,exponential,12,,mean,3.7,3.7,3.6,3.6,3.6,3.7,3.7,3.8,3.8,3.8
+269,growth,short,200,exponential,13,,mean,3.8,3.8,3.6,3.6,3.7,3.7,3.8,3.8,3.9,3.9
+270,growth,short,200,exponential,14,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.6,3.7
+271,growth,short,200,exponential,15,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+272,growth,short,200,exponential,16,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+273,growth,short,200,exponential,17,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.6,3.6,3.7,3.7
+274,growth,short,200,exponential,18,,mean,3.7,3.7,3.5,3.6,3.6,3.6,3.7,3.7,3.8,3.8
+275,growth,short,200,exponential,19,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.6,3.7,3.7,3.8
+276,growth,short,200,exponential,20,,mean,3.5,3.5,3.4,3.4,3.5,3.5,3.5,3.6,3.6,3.7
+277,stable,long,200,exponential,1,,mean,7.3,7.3,6.7,6.8,7.1,7.2,7.5,7.6,8,8.1
+278,stable,long,200,exponential,2,,mean,8.2,8.1,7.3,7.5,7.8,8,8.3,8.6,9.1,9.3
+279,stable,long,200,exponential,3,,mean,7.6,7.6,6.9,7,7.3,7.4,7.8,8,8.4,8.6
+280,stable,long,200,exponential,4,,mean,8.2,8.2,7.3,7.4,7.8,8,8.4,8.6,9.2,9.3
+281,stable,long,200,exponential,5,,mean,8,8,7.2,7.3,7.6,7.8,8.2,8.4,9,9.2
+282,stable,long,200,exponential,6,,mean,8.7,8.6,7.6,7.8,8.1,8.4,8.8,9.2,9.8,10
+283,stable,long,200,exponential,7,,mean,9,8.9,7.8,8,8.4,8.7,9.2,9.6,10,11
+284,stable,long,200,exponential,8,,mean,7.7,7.7,7,7.1,7.4,7.5,7.9,8.1,8.5,8.7
+285,stable,long,200,exponential,9,,mean,9.5,9.4,8.2,8.4,8.9,9.1,9.7,10,11,11
+286,stable,long,200,exponential,10,,mean,8,8,7.2,7.3,7.6,7.8,8.2,8.4,8.8,9
+287,stable,long,200,exponential,11,,mean,8.8,8.7,7.8,7.9,8.3,8.5,8.9,9.2,9.8,10
+288,stable,long,200,exponential,12,,mean,8.4,8.4,7.6,7.7,8,8.2,8.6,8.9,9.4,9.6
+289,stable,long,200,exponential,13,,mean,8,8,7.2,7.3,7.6,7.8,8.2,8.4,8.8,9
+290,stable,long,200,exponential,14,,mean,8.4,8.4,7.4,7.6,7.9,8.1,8.6,8.9,9.5,9.8
+291,stable,long,200,exponential,15,,mean,8.7,8.6,7.6,7.8,8.2,8.4,8.8,9.1,9.7,10
+292,stable,long,200,exponential,16,,mean,8.7,8.7,7.8,7.9,8.3,8.5,8.9,9.2,9.8,10
+293,stable,long,200,exponential,17,,mean,7.4,7.4,6.7,6.8,7.1,7.2,7.5,7.8,8.1,8.3
+294,stable,long,200,exponential,18,,mean,7.2,7.1,6.6,6.7,6.9,7,7.3,7.4,7.7,7.8
+295,stable,long,200,exponential,19,,mean,8.4,8.4,7.5,7.6,8,8.2,8.6,8.8,9.4,9.6
+296,stable,long,200,exponential,20,,mean,8.3,8.3,7.3,7.5,7.8,8.1,8.5,8.8,9.4,9.6
+297,stable,medium,200,exponential,1,,mean,5.9,5.9,5.6,5.6,5.7,5.8,5.9,6,6.2,6.2
+298,stable,medium,200,exponential,2,,mean,5.9,5.9,5.6,5.6,5.7,5.8,6,6,6.2,6.3
+299,stable,medium,200,exponential,3,,mean,6.1,6.1,5.7,5.8,5.9,6,6.2,6.3,6.5,6.5
+300,stable,medium,200,exponential,4,,mean,6,6,5.7,5.7,5.9,6,6.1,6.2,6.4,6.4
+301,stable,medium,200,exponential,5,,mean,6.4,6.4,6,6,6.2,6.3,6.4,6.6,6.7,6.8
+302,stable,medium,200,exponential,6,,mean,5.8,5.8,5.5,5.5,5.6,5.7,5.9,6,6.1,6.2
+303,stable,medium,200,exponential,7,,mean,5.9,5.9,5.6,5.6,5.7,5.8,6,6.1,6.2,6.3
+304,stable,medium,200,exponential,8,,mean,6.2,6.2,5.8,5.8,6,6.1,6.2,6.3,6.5,6.6
+305,stable,medium,200,exponential,9,,mean,6,6,5.6,5.7,5.8,5.9,6.1,6.2,6.4,6.4
+306,stable,medium,200,exponential,10,,mean,5.9,5.9,5.5,5.6,5.7,5.8,6,6.1,6.2,6.3
+307,stable,medium,200,exponential,11,,mean,5.9,5.9,5.6,5.6,5.8,5.9,6,6.1,6.3,6.4
+308,stable,medium,200,exponential,12,,mean,5.6,5.6,5.3,5.4,5.5,5.6,5.7,5.8,5.9,6
+309,stable,medium,200,exponential,13,,mean,5.7,5.7,5.4,5.4,5.6,5.6,5.8,5.9,6,6.1
+310,stable,medium,200,exponential,14,,mean,5.7,5.7,5.4,5.4,5.6,5.6,5.8,5.9,6,6.1
+311,stable,medium,200,exponential,15,,mean,6,6,5.6,5.7,5.8,5.9,6.1,6.2,6.4,6.4
+312,stable,medium,200,exponential,16,,mean,6.1,6.1,5.7,5.8,5.9,6,6.2,6.3,6.5,6.6
+313,stable,medium,200,exponential,17,,mean,6.3,6.2,5.8,5.9,6.1,6.2,6.3,6.4,6.6,6.7
+314,stable,medium,200,exponential,18,,mean,5.9,5.9,5.6,5.6,5.7,5.8,6,6,6.2,6.3
+315,stable,medium,200,exponential,19,,mean,6,6,5.7,5.7,5.8,5.9,6.1,6.2,6.3,6.4
+316,stable,medium,200,exponential,20,,mean,5.9,5.9,5.6,5.6,5.8,5.8,6,6.1,6.2,6.3
+317,stable,short,200,exponential,1,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+318,stable,short,200,exponential,2,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.6,3.7,3.7,3.8
+319,stable,short,200,exponential,3,,mean,3.7,3.7,3.5,3.6,3.6,3.6,3.7,3.7,3.8,3.8
+320,stable,short,200,exponential,4,,mean,3.7,3.7,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+321,stable,short,200,exponential,5,,mean,3.6,3.6,3.4,3.4,3.5,3.5,3.6,3.6,3.7,3.7
+322,stable,short,200,exponential,6,,mean,3.5,3.5,3.4,3.4,3.4,3.5,3.5,3.5,3.6,3.6
+323,stable,short,200,exponential,7,,mean,3.7,3.7,3.6,3.6,3.6,3.7,3.7,3.7,3.8,3.8
+324,stable,short,200,exponential,8,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.7,3.7,3.8,3.8
+325,stable,short,200,exponential,9,,mean,3.6,3.6,3.5,3.5,3.5,3.6,3.6,3.6,3.7,3.7
+326,stable,short,200,exponential,10,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.7,3.7,3.7,3.8
+327,stable,short,200,exponential,11,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+328,stable,short,200,exponential,12,,mean,3.7,3.7,3.6,3.6,3.7,3.7,3.8,3.8,3.8,3.9
+329,stable,short,200,exponential,13,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+330,stable,short,200,exponential,14,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+331,stable,short,200,exponential,15,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+332,stable,short,200,exponential,16,,mean,3.6,3.6,3.5,3.5,3.6,3.6,3.6,3.7,3.7,3.8
+333,stable,short,200,exponential,17,,mean,3.6,3.6,3.5,3.5,3.5,3.6,3.6,3.6,3.7,3.7
+334,stable,short,200,exponential,18,,mean,3.6,3.6,3.4,3.5,3.5,3.5,3.6,3.6,3.7,3.7
+335,stable,short,200,exponential,19,,mean,3.6,3.6,3.5,3.5,3.5,3.6,3.6,3.7,3.7,3.7
+336,stable,short,200,exponential,20,,mean,3.4,3.4,3.3,3.3,3.4,3.4,3.5,3.5,3.5,3.6
+337,120 days,,200,ebola_case_study,,real-time,mean,5.5,5.5,5.1,5.1,5.3,5.4,5.5,5.6,5.8,5.9
+338,120 days,,200,ebola_case_study,,retrospective,mean,30,30,22,23,25,27,33,36,39,41
+339,180 days,,200,ebola_case_study,,real-time,mean,7.2,7.2,6.7,6.7,6.9,7,7.3,7.4,7.6,7.7
+340,180 days,,200,ebola_case_study,,retrospective,mean,39,39,26,27,32,36,42,45,49,54
+341,240 days,,200,ebola_case_study,,real-time,mean,6.5,6.5,6,6.1,6.3,6.4,6.6,6.8,7,7.2
+342,240 days,,200,ebola_case_study,,retrospective,mean,27,27,19,20,22,24,29,31,35,36
+343,60 days,,200,ebola_case_study,,real-time,mean,5.3,5.3,5,5.1,5.2,5.3,5.4,5.4,5.6,5.6
+344,60 days,,200,ebola_case_study,,retrospective,mean,25,24,18,18,21,23,27,30,36,38
+1,early outbreak,long,10,outbreak,1,,sd,1.7e+27,54,2.4,3,7.4,18,240,2900,2300000,9.6e+07
+2,early outbreak,medium,10,outbreak,1,,sd,5.7e+21,2.6,1.1,1.2,1.5,1.9,4,9.4,1300,31000
+3,early outbreak,short,10,outbreak,1,,sd,2.9e+24,22,1.9,2.3,4.7,9.4,67,510,170000,4600000
+4,late outbreak,long,10,outbreak,1,,sd,5.4e+08,9.8,3.3,3.6,5.4,7,16,34,600,4500
+5,late outbreak,medium,10,outbreak,1,,sd,460,5.5,2.8,3.1,3.9,4.6,6.9,9.6,26,55
+6,late outbreak,short,10,outbreak,1,,sd,1.1,0.97,0.72,0.75,0.83,0.9,1.1,1.3,1.7,2
+7,near peak,long,10,outbreak,1,,sd,5.1e+11,5.3,1.7,2,2.8,3.9,8.1,17,320,2400
+8,near peak,medium,10,outbreak,1,,sd,8.7e+29,29,2.8,3.3,6.8,13,100,1000,1700000,6.8e+08
+9,near peak,short,10,outbreak,1,,sd,1.2,0.89,0.6,0.62,0.72,0.8,1,1.2,1.9,2.6
+10,past peak,long,10,outbreak,1,,sd,9.3e+12,12,3.1,3.5,5.4,7.9,23,87,33000,770000
+11,past peak,medium,10,outbreak,1,,sd,2.9e+22,20,4.2,4.8,7.6,12,48,250,59000,1600000
+12,past peak,short,10,outbreak,1,,sd,18000,1.5,0.8,0.87,1.1,1.3,1.8,2.3,4.2,6
+13,early outbreak,long,100,outbreak,1,,sd,130000,22,5.9,6.6,11,15,36,86,1200,8800
+14,early outbreak,medium,100,outbreak,1,,sd,3.1,2.9,1.9,2,2.4,2.6,3.2,3.7,5.1,6
+15,early outbreak,short,100,outbreak,1,,sd,1.3,1.3,1,1.1,1.2,1.2,1.4,1.5,1.7,1.7
+16,late outbreak,long,100,outbreak,1,,sd,8.1,7.8,5.5,5.7,6.6,7.2,8.5,9.4,12,13
+17,late outbreak,medium,100,outbreak,1,,sd,4,3.9,3.1,3.2,3.5,3.7,4.1,4.4,5,5.2
+18,late outbreak,short,100,outbreak,1,,sd,1.4,1.4,1.1,1.2,1.3,1.3,1.5,1.5,1.7,1.8
+19,near peak,long,100,outbreak,1,,sd,5.9,5.3,3.5,3.7,4.3,4.8,5.8,6.6,8.9,10
+20,near peak,medium,100,outbreak,1,,sd,3.5,3.4,2.5,2.6,2.9,3.1,3.6,4,4.8,5.2
+21,near peak,short,100,outbreak,1,,sd,1.4,1.3,1.1,1.1,1.2,1.3,1.4,1.5,1.7,1.7
+22,past peak,long,100,outbreak,1,,sd,6.1,5.8,4.1,4.3,5,5.4,6.3,7,8.8,9.7
+23,past peak,medium,100,outbreak,1,,sd,3.4,3.4,2.6,2.7,3,3.2,3.6,3.8,4.3,4.6
+24,past peak,short,100,outbreak,1,,sd,1.3,1.2,1,1,1.1,1.2,1.3,1.4,1.5,1.6
+25,early outbreak,long,200,outbreak,1,,sd,11,8.2,4.4,4.8,6.1,7.1,9.8,13,24,31
+26,early outbreak,medium,200,outbreak,1,,sd,2.9,2.8,2.1,2.2,2.5,2.6,3,3.2,3.8,4.1
+27,early outbreak,short,200,outbreak,1,,sd,1.3,1.2,1,1,1.1,1.2,1.3,1.4,1.5,1.6
+28,late outbreak,long,200,outbreak,1,,sd,7.3,7.1,5.6,5.7,6.4,6.8,7.6,8.2,9.3,9.8
+29,late outbreak,medium,200,outbreak,1,,sd,3.8,3.8,3.2,3.3,3.5,3.6,3.9,4.1,4.4,4.6
+30,late outbreak,short,200,outbreak,1,,sd,1.4,1.4,1.2,1.3,1.3,1.4,1.5,1.5,1.6,1.7
+31,near peak,long,200,outbreak,1,,sd,8.1,7.6,5,5.3,6.2,6.9,8.3,9.5,12,14
+32,near peak,medium,200,outbreak,1,,sd,3.8,3.7,2.9,3,3.3,3.5,3.9,4.2,4.9,5.2
+33,near peak,short,200,outbreak,1,,sd,1.4,1.4,1.2,1.2,1.3,1.3,1.4,1.5,1.6,1.7
+34,past peak,long,200,outbreak,1,,sd,8.9,8.6,6.3,6.6,7.4,8,9.2,10,12,14
+35,past peak,medium,200,outbreak,1,,sd,4.1,4.1,3.3,3.4,3.7,3.9,4.2,4.4,4.9,5.1
+36,past peak,short,200,outbreak,1,,sd,1.3,1.2,1.1,1.1,1.2,1.2,1.3,1.3,1.4,1.5
+37,decay,long,200,exponential,1,,sd,6.2,6.2,5.2,5.4,5.7,6,6.4,6.7,7.2,7.5
+38,decay,long,200,exponential,2,,sd,7.3,7.3,6.1,6.3,6.7,7,7.5,7.9,8.6,8.9
+39,decay,long,200,exponential,3,,sd,7.6,7.5,6.2,6.4,6.9,7.2,7.8,8.2,9,9.3
+40,decay,long,200,exponential,4,,sd,6.6,6.6,5.6,5.7,6.1,6.3,6.8,7.1,7.8,8
+41,decay,long,200,exponential,5,,sd,8,7.9,6.5,6.7,7.3,7.6,8.3,8.7,9.7,10
+42,decay,long,200,exponential,6,,sd,7.6,7.6,6.2,6.4,6.9,7.3,7.9,8.3,9.1,9.4
+43,decay,long,200,exponential,7,,sd,7.1,7,5.9,6,6.5,6.8,7.3,7.7,8.3,8.6
+44,decay,long,200,exponential,8,,sd,7.8,7.8,6.5,6.6,7.1,7.4,8.1,8.5,9.4,9.7
+45,decay,long,200,exponential,9,,sd,8.5,8.4,6.8,7.1,7.7,8.1,8.8,9.3,10,11
+46,decay,long,200,exponential,10,,sd,7.8,7.8,6.4,6.6,7.1,7.5,8.1,8.5,9.3,9.7
+47,decay,long,200,exponential,11,,sd,7.2,7.1,6,6.1,6.5,6.8,7.4,7.7,8.5,8.8
+48,decay,long,200,exponential,12,,sd,7.7,7.6,6.3,6.5,7,7.3,7.9,8.3,9.2,9.6
+49,decay,long,200,exponential,13,,sd,8,7.9,6.6,6.8,7.3,7.6,8.3,8.7,9.6,10
+50,decay,long,200,exponential,14,,sd,7.8,7.7,6.5,6.6,7.1,7.5,8.1,8.5,9.3,9.7
+51,decay,long,200,exponential,15,,sd,7.5,7.4,6.2,6.3,6.8,7.1,7.8,8.2,9,9.3
+52,decay,long,200,exponential,16,,sd,7.3,7.2,6,6.2,6.7,7,7.5,7.9,8.6,9
+53,decay,long,200,exponential,17,,sd,7.2,7.1,6,6.2,6.6,6.9,7.4,7.8,8.4,8.8
+54,decay,long,200,exponential,18,,sd,7.7,7.6,6.3,6.5,7,7.3,7.9,8.3,9.2,9.5
+55,decay,long,200,exponential,19,,sd,6.5,6.5,5.5,5.6,6,6.3,6.7,7,7.6,7.9
+56,decay,long,200,exponential,20,,sd,7.8,7.7,6.4,6.6,7.1,7.4,8,8.5,9.2,9.6
+57,decay,medium,200,exponential,1,,sd,4,4,3.6,3.6,3.8,3.9,4.1,4.2,4.5,4.6
+58,decay,medium,200,exponential,2,,sd,4,4,3.5,3.6,3.8,3.9,4,4.2,4.4,4.5
+59,decay,medium,200,exponential,3,,sd,4,4,3.5,3.6,3.8,3.9,4,4.2,4.4,4.5
+60,decay,medium,200,exponential,4,,sd,4.2,4.1,3.7,3.7,3.9,4,4.2,4.4,4.6,4.8
+61,decay,medium,200,exponential,5,,sd,4.1,4.1,3.6,3.7,3.8,4,4.2,4.3,4.5,4.6
+62,decay,medium,200,exponential,6,,sd,4,4,3.6,3.6,3.8,3.9,4.1,4.2,4.5,4.6
+63,decay,medium,200,exponential,7,,sd,3.6,3.6,3.2,3.3,3.4,3.5,3.7,3.8,4,4.1
+64,decay,medium,200,exponential,8,,sd,3.8,3.8,3.4,3.5,3.6,3.7,3.9,4,4.3,4.3
+65,decay,medium,200,exponential,9,,sd,4,4,3.5,3.6,3.8,3.9,4.1,4.2,4.4,4.5
+66,decay,medium,200,exponential,10,,sd,3.7,3.7,3.3,3.4,3.5,3.6,3.8,3.9,4.2,4.2
+67,decay,medium,200,exponential,11,,sd,4.1,4,3.6,3.7,3.8,3.9,4.1,4.3,4.5,4.6
+68,decay,medium,200,exponential,12,,sd,3.7,3.7,3.3,3.3,3.5,3.6,3.7,3.9,4,4.1
+69,decay,medium,200,exponential,13,,sd,3.6,3.6,3.2,3.2,3.4,3.5,3.6,3.7,3.9,4
+70,decay,medium,200,exponential,14,,sd,3.9,3.9,3.5,3.6,3.7,3.8,4,4.1,4.4,4.5
+71,decay,medium,200,exponential,15,,sd,3.8,3.8,3.4,3.5,3.6,3.7,3.9,4,4.3,4.4
+72,decay,medium,200,exponential,16,,sd,3.9,3.9,3.4,3.5,3.7,3.8,4,4.1,4.3,4.4
+73,decay,medium,200,exponential,17,,sd,3.5,3.4,3.1,3.1,3.3,3.4,3.5,3.6,3.8,3.9
+74,decay,medium,200,exponential,18,,sd,3.6,3.6,3.2,3.3,3.5,3.5,3.7,3.8,4,4.1
+75,decay,medium,200,exponential,19,,sd,3.9,3.8,3.4,3.5,3.7,3.8,3.9,4.1,4.3,4.4
+76,decay,medium,200,exponential,20,,sd,3.8,3.8,3.4,3.4,3.6,3.7,3.9,4,4.2,4.3
+77,decay,short,200,exponential,1,,sd,1.3,1.3,1.2,1.2,1.2,1.3,1.3,1.3,1.4,1.4
+78,decay,short,200,exponential,2,,sd,1.5,1.5,1.3,1.4,1.4,1.4,1.5,1.5,1.6,1.6
+79,decay,short,200,exponential,3,,sd,1.4,1.4,1.2,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+80,decay,short,200,exponential,4,,sd,1.5,1.5,1.4,1.4,1.5,1.5,1.6,1.6,1.7,1.7
+81,decay,short,200,exponential,5,,sd,1.5,1.5,1.3,1.4,1.4,1.4,1.5,1.5,1.6,1.6
+82,decay,short,200,exponential,6,,sd,1.5,1.5,1.4,1.4,1.5,1.5,1.5,1.6,1.6,1.7
+83,decay,short,200,exponential,7,,sd,1.5,1.5,1.3,1.4,1.4,1.4,1.5,1.5,1.6,1.6
+84,decay,short,200,exponential,8,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.4,1.4,1.4,1.5
+85,decay,short,200,exponential,9,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.4,1.4,1.4,1.5
+86,decay,short,200,exponential,10,,sd,1.4,1.4,1.3,1.3,1.3,1.4,1.4,1.4,1.5,1.5
+87,decay,short,200,exponential,11,,sd,1.4,1.4,1.3,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+88,decay,short,200,exponential,12,,sd,1.4,1.4,1.2,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+89,decay,short,200,exponential,13,,sd,1.6,1.6,1.4,1.4,1.5,1.5,1.6,1.6,1.7,1.7
+90,decay,short,200,exponential,14,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.5,1.5,1.5,1.6
+91,decay,short,200,exponential,15,,sd,1.5,1.4,1.3,1.3,1.4,1.4,1.5,1.5,1.6,1.6
+92,decay,short,200,exponential,16,,sd,1.4,1.4,1.3,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+93,decay,short,200,exponential,17,,sd,1.5,1.5,1.3,1.4,1.4,1.4,1.5,1.5,1.6,1.6
+94,decay,short,200,exponential,18,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.4,1.5,1.5,1.6
+95,decay,short,200,exponential,19,,sd,1.5,1.5,1.4,1.4,1.4,1.5,1.5,1.6,1.6,1.6
+96,decay,short,200,exponential,20,,sd,1.4,1.4,1.3,1.3,1.3,1.4,1.4,1.4,1.5,1.5
+97,fast decay,long,200,exponential,1,,sd,8.5,8.4,6.9,7.1,7.7,8.1,8.8,9.2,10,11
+98,fast decay,long,200,exponential,2,,sd,7.8,7.7,6.5,6.6,7.1,7.4,8,8.4,9.3,9.6
+99,fast decay,long,200,exponential,3,,sd,8,7.9,6.5,6.7,7.3,7.6,8.2,8.6,9.5,9.9
+100,fast decay,long,200,exponential,4,,sd,7.5,7.4,6.2,6.4,6.8,7.2,7.7,8.1,8.8,9.2
+101,fast decay,long,200,exponential,5,,sd,7.9,7.8,6.5,6.7,7.2,7.5,8.2,8.6,9.4,9.8
+102,fast decay,long,200,exponential,6,,sd,8,7.9,6.6,6.8,7.3,7.6,8.2,8.6,9.4,9.8
+103,fast decay,long,200,exponential,7,,sd,9.1,9,7.4,7.6,8.3,8.7,9.4,9.9,11,11
+104,fast decay,long,200,exponential,8,,sd,8.1,8.1,6.7,6.9,7.4,7.7,8.4,8.8,9.7,10
+105,fast decay,long,200,exponential,9,,sd,7.9,7.9,6.5,6.7,7.2,7.6,8.2,8.6,9.4,9.8
+106,fast decay,long,200,exponential,10,,sd,7.8,7.7,6.5,6.7,7.1,7.4,8,8.4,9.2,9.5
+107,fast decay,long,200,exponential,11,,sd,8.1,8.1,6.7,6.9,7.4,7.7,8.4,8.8,9.7,10
+108,fast decay,long,200,exponential,12,,sd,8.4,8.3,6.9,7.1,7.6,8,8.6,9.1,10,10
+109,fast decay,long,200,exponential,13,,sd,7.3,7.3,6.1,6.3,6.7,7,7.5,7.9,8.6,9
+110,fast decay,long,200,exponential,14,,sd,7.5,7.4,6.2,6.4,6.9,7.1,7.7,8.1,8.8,9.1
+111,fast decay,long,200,exponential,15,,sd,8,7.9,6.6,6.8,7.3,7.6,8.2,8.7,9.4,9.7
+112,fast decay,long,200,exponential,16,,sd,9.9,9.8,7.8,8.1,8.8,9.3,10,11,12,13
+113,fast decay,long,200,exponential,17,,sd,6.5,6.5,5.5,5.7,6.1,6.3,6.7,7,7.6,7.8
+114,fast decay,long,200,exponential,18,,sd,7,7,5.9,6.1,6.5,6.7,7.2,7.5,8.1,8.4
+115,fast decay,long,200,exponential,19,,sd,9.4,9.3,7.5,7.8,8.5,8.9,9.7,10,12,12
+116,fast decay,long,200,exponential,20,,sd,8,7.9,6.6,6.8,7.3,7.6,8.3,8.7,9.5,9.9
+117,fast decay,medium,200,exponential,1,,sd,3.6,3.6,3.2,3.3,3.4,3.5,3.7,3.8,4,4
+118,fast decay,medium,200,exponential,2,,sd,3.7,3.7,3.3,3.4,3.5,3.6,3.8,3.9,4.1,4.2
+119,fast decay,medium,200,exponential,3,,sd,3.5,3.5,3.2,3.2,3.4,3.4,3.6,3.7,3.9,3.9
+120,fast decay,medium,200,exponential,4,,sd,3.7,3.7,3.3,3.4,3.5,3.6,3.8,3.9,4.1,4.1
+121,fast decay,medium,200,exponential,5,,sd,3.7,3.7,3.3,3.4,3.5,3.6,3.8,3.9,4.1,4.2
+122,fast decay,medium,200,exponential,6,,sd,3.6,3.6,3.2,3.3,3.5,3.5,3.7,3.8,4,4.1
+123,fast decay,medium,200,exponential,7,,sd,3.5,3.5,3.1,3.2,3.3,3.4,3.5,3.6,3.8,3.9
+124,fast decay,medium,200,exponential,8,,sd,3.9,3.9,3.5,3.6,3.7,3.8,4,4.1,4.3,4.4
+125,fast decay,medium,200,exponential,9,,sd,3.6,3.6,3.2,3.2,3.4,3.5,3.6,3.7,3.9,4
+126,fast decay,medium,200,exponential,10,,sd,3.8,3.8,3.4,3.5,3.6,3.7,3.9,4,4.2,4.3
+127,fast decay,medium,200,exponential,11,,sd,3.8,3.8,3.4,3.5,3.7,3.8,3.9,4,4.2,4.3
+128,fast decay,medium,200,exponential,12,,sd,3.9,3.9,3.5,3.5,3.7,3.8,4,4.1,4.3,4.4
+129,fast decay,medium,200,exponential,13,,sd,3.6,3.6,3.3,3.3,3.5,3.6,3.7,3.8,4,4.1
+130,fast decay,medium,200,exponential,14,,sd,3.9,3.9,3.5,3.6,3.7,3.8,4,4.1,4.4,4.5
+131,fast decay,medium,200,exponential,15,,sd,4.1,4.1,3.7,3.7,3.9,4,4.2,4.3,4.6,4.7
+132,fast decay,medium,200,exponential,16,,sd,3.7,3.7,3.3,3.4,3.5,3.6,3.8,3.9,4.1,4.2
+133,fast decay,medium,200,exponential,17,,sd,3.5,3.5,3.2,3.2,3.3,3.4,3.6,3.7,3.9,3.9
+134,fast decay,medium,200,exponential,18,,sd,3.9,3.9,3.5,3.5,3.7,3.8,3.9,4,4.3,4.3
+135,fast decay,medium,200,exponential,19,,sd,3.5,3.5,3.2,3.2,3.4,3.4,3.6,3.7,3.9,3.9
+136,fast decay,medium,200,exponential,20,,sd,3.9,3.9,3.5,3.5,3.7,3.8,4,4.1,4.3,4.4
+137,fast decay,short,200,exponential,1,,sd,1.4,1.4,1.3,1.3,1.3,1.4,1.4,1.4,1.5,1.5
+138,fast decay,short,200,exponential,2,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.3,1.4,1.4,1.4
+139,fast decay,short,200,exponential,3,,sd,1.3,1.3,1.2,1.2,1.2,1.3,1.3,1.3,1.4,1.4
+140,fast decay,short,200,exponential,4,,sd,1.4,1.4,1.3,1.3,1.3,1.4,1.4,1.4,1.5,1.5
+141,fast decay,short,200,exponential,5,,sd,1.4,1.4,1.3,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+142,fast decay,short,200,exponential,6,,sd,1.4,1.4,1.3,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+143,fast decay,short,200,exponential,7,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.5,1.5,1.5,1.6
+144,fast decay,short,200,exponential,8,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.4,1.5,1.5,1.5
+145,fast decay,short,200,exponential,9,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.3,1.4,1.4,1.4
+146,fast decay,short,200,exponential,10,,sd,1.4,1.4,1.3,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+147,fast decay,short,200,exponential,11,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.5,1.5,1.5,1.6
+148,fast decay,short,200,exponential,12,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.4,1.5,1.5,1.5
+149,fast decay,short,200,exponential,13,,sd,1.4,1.4,1.3,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+150,fast decay,short,200,exponential,14,,sd,1.3,1.3,1.2,1.3,1.3,1.3,1.4,1.4,1.4,1.5
+151,fast decay,short,200,exponential,15,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.4,1.4,1.4,1.4
+152,fast decay,short,200,exponential,16,,sd,1.4,1.4,1.3,1.3,1.3,1.4,1.4,1.4,1.5,1.5
+153,fast decay,short,200,exponential,17,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.3,1.4,1.4,1.4
+154,fast decay,short,200,exponential,18,,sd,1.4,1.4,1.2,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+155,fast decay,short,200,exponential,19,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.4,1.5,1.5,1.6
+156,fast decay,short,200,exponential,20,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.4,1.5,1.5,1.6
+157,fast growth,long,200,exponential,1,,sd,5.9,5.8,4.5,4.7,5.1,5.5,6.1,6.6,7.5,8
+158,fast growth,long,200,exponential,2,,sd,5.9,5.7,4.5,4.6,5.1,5.4,6.1,6.6,7.5,8
+159,fast growth,long,200,exponential,3,,sd,8.5,8.2,5.9,6.2,7,7.6,8.8,9.7,12,13
+160,fast growth,long,200,exponential,4,,sd,6.3,6.1,4.7,4.9,5.4,5.8,6.5,7,8.1,8.7
+161,fast growth,long,200,exponential,5,,sd,5.6,5.5,4.4,4.5,5,5.2,5.8,6.2,7.1,7.5
+162,fast growth,long,200,exponential,6,,sd,5.8,5.6,4.3,4.5,5,5.3,6,6.4,7.5,7.9
+163,fast growth,long,200,exponential,7,,sd,6.6,6.5,4.7,5,5.6,6,6.9,7.5,8.8,9.4
+164,fast growth,long,200,exponential,8,,sd,7.1,6.9,5.1,5.3,6,6.5,7.4,8.1,9.5,10
+165,fast growth,long,200,exponential,9,,sd,7.2,7.1,5.2,5.5,6.1,6.6,7.5,8.2,9.8,10
+166,fast growth,long,200,exponential,10,,sd,4.7,4.6,3.7,3.9,4.2,4.4,4.9,5.1,5.7,6
+167,fast growth,long,200,exponential,11,,sd,5.4,5.3,4.1,4.2,4.7,5,5.6,6,6.8,7.1
+168,fast growth,long,200,exponential,12,,sd,5.4,5.2,4.2,4.3,4.7,5,5.6,5.9,6.8,7.1
+169,fast growth,long,200,exponential,13,,sd,5.5,5.4,4.2,4.4,4.8,5.1,5.7,6.1,6.9,7.3
+170,fast growth,long,200,exponential,14,,sd,8.2,8,5.9,6.1,6.9,7.4,8.5,9.3,11,12
+171,fast growth,long,200,exponential,15,,sd,5.7,5.6,4.3,4.5,5,5.3,5.9,6.3,7.2,7.7
+172,fast growth,long,200,exponential,16,,sd,6.8,6.7,5,5.2,5.8,6.3,7.1,7.7,9.1,9.6
+173,fast growth,long,200,exponential,17,,sd,7.9,7.6,5.5,5.7,6.6,7.1,8.2,9,11,12
+174,fast growth,long,200,exponential,18,,sd,4.8,4.7,3.8,3.9,4.2,4.5,4.9,5.3,5.9,6.2
+175,fast growth,long,200,exponential,19,,sd,8.4,8.1,5.7,6,6.9,7.5,8.8,9.6,12,13
+176,fast growth,long,200,exponential,20,,sd,6.3,6.1,4.7,4.9,5.4,5.8,6.5,7,8.2,8.7
+177,fast growth,medium,200,exponential,1,,sd,3.3,3.3,2.8,2.8,3,3.1,3.4,3.5,3.8,3.9
+178,fast growth,medium,200,exponential,2,,sd,3.5,3.5,2.9,3,3.2,3.3,3.6,3.8,4.1,4.3
+179,fast growth,medium,200,exponential,3,,sd,3.8,3.7,3.1,3.1,3.4,3.6,3.9,4.1,4.5,4.7
+180,fast growth,medium,200,exponential,4,,sd,3.4,3.4,2.9,2.9,3.1,3.3,3.6,3.7,4.1,4.2
+181,fast growth,medium,200,exponential,5,,sd,3.6,3.6,3,3.1,3.3,3.5,3.8,4,4.3,4.5
+182,fast growth,medium,200,exponential,6,,sd,3.8,3.8,3.1,3.2,3.5,3.6,4,4.2,4.6,4.9
+183,fast growth,medium,200,exponential,7,,sd,3.2,3.2,2.7,2.8,3,3.1,3.3,3.5,3.8,3.9
+184,fast growth,medium,200,exponential,8,,sd,3.9,3.9,3.2,3.3,3.6,3.7,4,4.2,4.7,4.9
+185,fast growth,medium,200,exponential,9,,sd,3.5,3.5,2.9,3,3.2,3.3,3.6,3.8,4.1,4.3
+186,fast growth,medium,200,exponential,10,,sd,3.3,3.3,2.8,2.9,3.1,3.2,3.4,3.6,3.9,4.1
+187,fast growth,medium,200,exponential,11,,sd,3.7,3.6,3,3.1,3.4,3.5,3.8,4,4.3,4.5
+188,fast growth,medium,200,exponential,12,,sd,3.4,3.4,2.8,2.9,3.1,3.3,3.5,3.7,4.1,4.2
+189,fast growth,medium,200,exponential,13,,sd,2.9,2.9,2.5,2.5,2.7,2.8,3,3.1,3.4,3.5
+190,fast growth,medium,200,exponential,14,,sd,3.4,3.3,2.8,2.9,3.1,3.2,3.5,3.6,3.9,4.1
+191,fast growth,medium,200,exponential,15,,sd,3.2,3.2,2.7,2.7,2.9,3,3.3,3.4,3.7,3.9
+192,fast growth,medium,200,exponential,16,,sd,3.7,3.7,3,3.1,3.4,3.5,3.9,4.1,4.5,4.6
+193,fast growth,medium,200,exponential,17,,sd,3.1,3.1,2.6,2.7,2.8,3,3.2,3.3,3.6,3.7
+194,fast growth,medium,200,exponential,18,,sd,3.5,3.5,2.9,3,3.2,3.4,3.6,3.8,4.1,4.3
+195,fast growth,medium,200,exponential,19,,sd,4,3.9,3.2,3.3,3.6,3.8,4.1,4.4,4.8,5.1
+196,fast growth,medium,200,exponential,20,,sd,3.5,3.5,2.9,3,3.2,3.4,3.6,3.8,4.2,4.4
+197,fast growth,short,200,exponential,1,,sd,1.3,1.2,1.1,1.1,1.2,1.2,1.3,1.3,1.4,1.4
+198,fast growth,short,200,exponential,2,,sd,1.2,1.2,1.1,1.1,1.2,1.2,1.3,1.3,1.4,1.4
+199,fast growth,short,200,exponential,3,,sd,1.4,1.4,1.2,1.2,1.3,1.3,1.4,1.4,1.5,1.5
+200,fast growth,short,200,exponential,4,,sd,1.2,1.2,1.1,1.1,1.2,1.2,1.3,1.3,1.4,1.4
+201,fast growth,short,200,exponential,5,,sd,1.4,1.3,1.2,1.2,1.3,1.3,1.4,1.4,1.5,1.5
+202,fast growth,short,200,exponential,6,,sd,1.4,1.4,1.2,1.3,1.3,1.3,1.4,1.5,1.5,1.6
+203,fast growth,short,200,exponential,7,,sd,1.5,1.5,1.3,1.3,1.4,1.4,1.5,1.6,1.7,1.7
+204,fast growth,short,200,exponential,8,,sd,1.1,1.1,1,1,1.1,1.1,1.1,1.2,1.2,1.3
+205,fast growth,short,200,exponential,9,,sd,1.2,1.2,1.1,1.1,1.1,1.2,1.2,1.2,1.3,1.3
+206,fast growth,short,200,exponential,10,,sd,1.3,1.3,1.2,1.2,1.2,1.3,1.3,1.4,1.5,1.5
+207,fast growth,short,200,exponential,11,,sd,1.3,1.3,1.1,1.2,1.2,1.2,1.3,1.3,1.4,1.4
+208,fast growth,short,200,exponential,12,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.4,1.4,1.5,1.5
+209,fast growth,short,200,exponential,13,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.5,1.5,1.6,1.7
+210,fast growth,short,200,exponential,14,,sd,1.4,1.4,1.2,1.2,1.3,1.3,1.4,1.4,1.5,1.5
+211,fast growth,short,200,exponential,15,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.5,1.5,1.6,1.7
+212,fast growth,short,200,exponential,16,,sd,1.2,1.2,1.1,1.1,1.1,1.2,1.2,1.3,1.3,1.4
+213,fast growth,short,200,exponential,17,,sd,1.2,1.2,1.1,1.1,1.2,1.2,1.3,1.3,1.4,1.4
+214,fast growth,short,200,exponential,18,,sd,1.2,1.2,1.1,1.1,1.2,1.2,1.3,1.3,1.4,1.4
+215,fast growth,short,200,exponential,19,,sd,1.2,1.2,1.1,1.1,1.1,1.2,1.2,1.3,1.3,1.3
+216,fast growth,short,200,exponential,20,,sd,1.3,1.3,1.1,1.2,1.2,1.2,1.3,1.3,1.4,1.4
+217,growth,long,200,exponential,1,,sd,7.1,7,5.5,5.6,6.2,6.6,7.3,7.8,8.9,9.3
+218,growth,long,200,exponential,2,,sd,5.6,5.5,4.5,4.6,5,5.3,5.7,6,6.6,6.9
+219,growth,long,200,exponential,3,,sd,7.7,7.5,5.8,6,6.7,7.1,8,8.6,9.9,11
+220,growth,long,200,exponential,4,,sd,6.8,6.6,5.3,5.5,6,6.3,7,7.5,8.5,8.8
+221,growth,long,200,exponential,5,,sd,6.2,6.1,4.8,5,5.5,5.8,6.4,6.8,7.6,8
+222,growth,long,200,exponential,6,,sd,6.6,6.5,5.2,5.3,5.9,6.2,6.8,7.3,8.1,8.5
+223,growth,long,200,exponential,7,,sd,7.1,7,5.5,5.7,6.3,6.6,7.4,7.9,8.9,9.5
+224,growth,long,200,exponential,8,,sd,6.1,6,4.9,5.1,5.5,5.8,6.3,6.7,7.5,7.8
+225,growth,long,200,exponential,9,,sd,8.4,8.2,6.3,6.5,7.2,7.7,8.7,9.4,11,12
+226,growth,long,200,exponential,10,,sd,6.1,6,4.9,5.1,5.5,5.8,6.3,6.7,7.5,7.9
+227,growth,long,200,exponential,11,,sd,6.3,6.2,5,5.2,5.6,5.9,6.5,7,7.9,8.2
+228,growth,long,200,exponential,12,,sd,6.4,6.3,5.1,5.2,5.7,6,6.6,7,7.8,8.1
+229,growth,long,200,exponential,13,,sd,8.4,8.2,6.2,6.5,7.2,7.7,8.7,9.4,11,11
+230,growth,long,200,exponential,14,,sd,6.8,6.7,5.3,5.5,6,6.4,7.1,7.5,8.5,9
+231,growth,long,200,exponential,15,,sd,7.9,7.7,6,6.2,6.9,7.3,8.2,8.9,10,11
+232,growth,long,200,exponential,16,,sd,6.9,6.8,5.4,5.6,6.1,6.4,7.1,7.6,8.5,8.9
+233,growth,long,200,exponential,17,,sd,7,6.9,5.4,5.6,6.1,6.5,7.2,7.8,8.8,9.3
+234,growth,long,200,exponential,18,,sd,7.6,7.5,5.8,6,6.7,7.1,7.9,8.5,9.7,10
+235,growth,long,200,exponential,19,,sd,8,7.8,6.1,6.3,6.9,7.4,8.3,8.9,10,11
+236,growth,long,200,exponential,20,,sd,7.5,7.4,5.7,6,6.6,7,7.8,8.3,9.4,9.9
+237,growth,medium,200,exponential,1,,sd,3.9,3.9,3.3,3.4,3.6,3.7,4,4.2,4.5,4.6
+238,growth,medium,200,exponential,2,,sd,4.5,4.5,3.8,3.9,4.2,4.3,4.6,4.9,5.3,5.5
+239,growth,medium,200,exponential,3,,sd,3.6,3.6,3.1,3.1,3.3,3.5,3.7,3.8,4.1,4.2
+240,growth,medium,200,exponential,4,,sd,3.5,3.5,3,3.1,3.3,3.4,3.6,3.7,4,4.1
+241,growth,medium,200,exponential,5,,sd,3.4,3.4,2.9,3,3.2,3.3,3.5,3.6,3.9,4
+242,growth,medium,200,exponential,6,,sd,3.3,3.3,2.9,2.9,3.1,3.2,3.4,3.5,3.8,3.9
+243,growth,medium,200,exponential,7,,sd,3.3,3.3,2.9,3,3.1,3.2,3.4,3.5,3.8,3.8
+244,growth,medium,200,exponential,8,,sd,4,4,3.4,3.5,3.7,3.8,4.1,4.3,4.6,4.8
+245,growth,medium,200,exponential,9,,sd,3.1,3.1,2.7,2.7,2.9,3,3.2,3.3,3.5,3.6
+246,growth,medium,200,exponential,10,,sd,4.2,4.2,3.6,3.6,3.9,4.1,4.3,4.5,4.9,5.1
+247,growth,medium,200,exponential,11,,sd,3.1,3,2.7,2.7,2.9,3,3.1,3.2,3.4,3.5
+248,growth,medium,200,exponential,12,,sd,3.6,3.6,3.1,3.2,3.4,3.5,3.7,3.9,4.2,4.3
+249,growth,medium,200,exponential,13,,sd,3.9,3.9,3.3,3.4,3.7,3.8,4.1,4.2,4.6,4.7
+250,growth,medium,200,exponential,14,,sd,3.7,3.6,3.1,3.2,3.4,3.5,3.8,3.9,4.2,4.4
+251,growth,medium,200,exponential,15,,sd,3.8,3.7,3.2,3.3,3.5,3.6,3.9,4,4.3,4.5
+252,growth,medium,200,exponential,16,,sd,3,3,2.6,2.7,2.8,2.9,3.1,3.2,3.4,3.5
+253,growth,medium,200,exponential,17,,sd,3.1,3,2.7,2.7,2.9,3,3.1,3.2,3.4,3.5
+254,growth,medium,200,exponential,18,,sd,3.6,3.6,3.1,3.1,3.3,3.5,3.7,3.8,4.1,4.2
+255,growth,medium,200,exponential,19,,sd,3.5,3.5,3,3.1,3.2,3.4,3.6,3.7,4,4.1
+256,growth,medium,200,exponential,20,,sd,3.6,3.6,3.1,3.2,3.4,3.5,3.7,3.9,4.2,4.3
+257,growth,short,200,exponential,1,,sd,1.4,1.4,1.3,1.3,1.3,1.4,1.4,1.5,1.5,1.5
+258,growth,short,200,exponential,2,,sd,1.5,1.5,1.4,1.4,1.4,1.5,1.5,1.6,1.7,1.7
+259,growth,short,200,exponential,3,,sd,1.5,1.5,1.3,1.3,1.4,1.4,1.5,1.5,1.6,1.6
+260,growth,short,200,exponential,4,,sd,1.2,1.2,1.1,1.1,1.2,1.2,1.3,1.3,1.4,1.4
+261,growth,short,200,exponential,5,,sd,1.3,1.3,1.2,1.2,1.2,1.3,1.3,1.4,1.4,1.5
+262,growth,short,200,exponential,6,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.4,1.4,1.5,1.5
+263,growth,short,200,exponential,7,,sd,1.4,1.4,1.3,1.3,1.3,1.4,1.4,1.5,1.5,1.5
+264,growth,short,200,exponential,8,,sd,1.5,1.5,1.3,1.4,1.4,1.5,1.5,1.6,1.6,1.7
+265,growth,short,200,exponential,9,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.3,1.4,1.4,1.5
+266,growth,short,200,exponential,10,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.5,1.5,1.6,1.6
+267,growth,short,200,exponential,11,,sd,1.3,1.3,1.2,1.2,1.2,1.3,1.3,1.4,1.4,1.4
+268,growth,short,200,exponential,12,,sd,1.4,1.4,1.2,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+269,growth,short,200,exponential,13,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.5,1.5,1.6,1.6
+270,growth,short,200,exponential,14,,sd,1.2,1.2,1.1,1.1,1.1,1.2,1.2,1.2,1.3,1.3
+271,growth,short,200,exponential,15,,sd,1.3,1.3,1.2,1.2,1.2,1.3,1.3,1.4,1.4,1.5
+272,growth,short,200,exponential,16,,sd,1.5,1.5,1.3,1.4,1.4,1.4,1.5,1.5,1.6,1.6
+273,growth,short,200,exponential,17,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.3,1.4,1.4,1.5
+274,growth,short,200,exponential,18,,sd,1.5,1.5,1.3,1.3,1.4,1.4,1.5,1.5,1.6,1.6
+275,growth,short,200,exponential,19,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.3,1.4,1.4,1.5
+276,growth,short,200,exponential,20,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.4,1.4,1.4,1.5
+277,stable,long,200,exponential,1,,sd,6,5.9,5,5.1,5.5,5.7,6.1,6.4,6.9,7.2
+278,stable,long,200,exponential,2,,sd,7.2,7.1,5.9,6,6.5,6.8,7.4,7.9,8.7,9
+279,stable,long,200,exponential,3,,sd,6.6,6.6,5.4,5.6,6,6.3,6.8,7.2,7.9,8.1
+280,stable,long,200,exponential,4,,sd,7.4,7.3,6,6.2,6.7,7,7.7,8.1,9,9.4
+281,stable,long,200,exponential,5,,sd,7.3,7.2,5.9,6.1,6.6,6.9,7.6,8,8.9,9.4
+282,stable,long,200,exponential,6,,sd,8.4,8.3,6.6,6.9,7.5,7.9,8.7,9.3,10,11
+283,stable,long,200,exponential,7,,sd,9,8.9,6.9,7.2,8,8.4,9.4,10,11,12
+284,stable,long,200,exponential,8,,sd,6.5,6.4,5.4,5.5,5.9,6.2,6.7,7,7.7,8
+285,stable,long,200,exponential,9,,sd,9.4,9.2,7.2,7.5,8.2,8.7,9.7,10,12,12
+286,stable,long,200,exponential,10,,sd,6.7,6.6,5.5,5.7,6.1,6.4,6.9,7.3,7.9,8.2
+287,stable,long,200,exponential,11,,sd,8.2,8.1,6.5,6.7,7.3,7.7,8.5,9,10,10
+288,stable,long,200,exponential,12,,sd,7.4,7.3,6,6.2,6.7,7,7.7,8.1,9.1,9.4
+289,stable,long,200,exponential,13,,sd,7,7,5.7,5.9,6.4,6.7,7.3,7.7,8.4,8.7
+290,stable,long,200,exponential,14,,sd,8.1,7.9,6.4,6.6,7.2,7.6,8.3,8.9,10,11
+291,stable,long,200,exponential,15,,sd,8.2,8.1,6.5,6.7,7.3,7.7,8.5,9,10,11
+292,stable,long,200,exponential,16,,sd,7.9,7.8,6.3,6.5,7.1,7.5,8.1,8.7,9.6,10
+293,stable,long,200,exponential,17,,sd,6.3,6.3,5.2,5.4,5.8,6,6.5,6.9,7.5,7.8
+294,stable,long,200,exponential,18,,sd,5.4,5.4,4.6,4.7,5,5.2,5.6,5.8,6.3,6.5
+295,stable,long,200,exponential,19,,sd,7.5,7.4,6,6.2,6.7,7.1,7.7,8.1,9.1,9.6
+296,stable,long,200,exponential,20,,sd,7.8,7.7,6.2,6.4,7,7.3,8.1,8.6,9.6,10
+297,stable,medium,200,exponential,1,,sd,3.4,3.4,3.1,3.1,3.3,3.4,3.5,3.6,3.8,3.9
+298,stable,medium,200,exponential,2,,sd,3.6,3.6,3.2,3.2,3.4,3.5,3.6,3.8,4,4.1
+299,stable,medium,200,exponential,3,,sd,3.9,3.9,3.4,3.5,3.7,3.8,4,4.2,4.4,4.5
+300,stable,medium,200,exponential,4,,sd,3.7,3.7,3.3,3.3,3.5,3.6,3.8,3.9,4.1,4.2
+301,stable,medium,200,exponential,5,,sd,4.1,4.1,3.6,3.7,3.9,4,4.2,4.3,4.6,4.7
+302,stable,medium,200,exponential,6,,sd,3.7,3.7,3.2,3.3,3.5,3.6,3.8,3.9,4.1,4.2
+303,stable,medium,200,exponential,7,,sd,3.6,3.6,3.2,3.2,3.4,3.5,3.7,3.8,4,4.1
+304,stable,medium,200,exponential,8,,sd,3.9,3.9,3.4,3.5,3.7,3.8,4,4.2,4.4,4.5
+305,stable,medium,200,exponential,9,,sd,4,4,3.5,3.6,3.8,3.9,4.1,4.3,4.6,4.7
+306,stable,medium,200,exponential,10,,sd,3.8,3.8,3.3,3.4,3.5,3.7,3.9,4,4.2,4.3
+307,stable,medium,200,exponential,11,,sd,4,4,3.5,3.5,3.7,3.9,4.1,4.2,4.5,4.6
+308,stable,medium,200,exponential,12,,sd,3.3,3.3,2.9,3,3.1,3.2,3.4,3.5,3.7,3.8
+309,stable,medium,200,exponential,13,,sd,3.6,3.6,3.2,3.2,3.4,3.5,3.7,3.8,4,4.1
+310,stable,medium,200,exponential,14,,sd,3.4,3.4,3,3.1,3.2,3.3,3.5,3.6,3.9,3.9
+311,stable,medium,200,exponential,15,,sd,4,4,3.5,3.6,3.8,3.9,4.1,4.3,4.5,4.6
+312,stable,medium,200,exponential,16,,sd,4,4,3.5,3.6,3.8,3.9,4.1,4.3,4.5,4.6
+313,stable,medium,200,exponential,17,,sd,4.1,4.1,3.6,3.7,3.9,4,4.2,4.4,4.7,4.8
+314,stable,medium,200,exponential,18,,sd,3.5,3.5,3.1,3.2,3.3,3.4,3.6,3.7,3.9,4
+315,stable,medium,200,exponential,19,,sd,3.7,3.7,3.2,3.3,3.5,3.6,3.8,3.9,4.1,4.2
+316,stable,medium,200,exponential,20,,sd,3.7,3.7,3.3,3.3,3.5,3.6,3.8,3.9,4.1,4.2
+317,stable,short,200,exponential,1,,sd,1.3,1.3,1.2,1.2,1.2,1.3,1.3,1.3,1.4,1.4
+318,stable,short,200,exponential,2,,sd,1.5,1.5,1.3,1.3,1.4,1.4,1.5,1.5,1.6,1.6
+319,stable,short,200,exponential,3,,sd,1.5,1.5,1.3,1.4,1.4,1.4,1.5,1.5,1.6,1.6
+320,stable,short,200,exponential,4,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.4,1.5,1.5,1.6
+321,stable,short,200,exponential,5,,sd,1.5,1.5,1.3,1.4,1.4,1.5,1.5,1.6,1.6,1.7
+322,stable,short,200,exponential,6,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.3,1.4,1.4,1.5
+323,stable,short,200,exponential,7,,sd,1.4,1.4,1.2,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+324,stable,short,200,exponential,8,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.5,1.5,1.5,1.6
+325,stable,short,200,exponential,9,,sd,1.4,1.4,1.2,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+326,stable,short,200,exponential,10,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.4,1.5,1.5,1.6
+327,stable,short,200,exponential,11,,sd,1.3,1.3,1.2,1.3,1.3,1.3,1.4,1.4,1.5,1.5
+328,stable,short,200,exponential,12,,sd,1.6,1.6,1.4,1.4,1.5,1.5,1.6,1.6,1.7,1.7
+329,stable,short,200,exponential,13,,sd,1.3,1.3,1.2,1.2,1.3,1.3,1.4,1.4,1.5,1.5
+330,stable,short,200,exponential,14,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.5,1.5,1.5,1.6
+331,stable,short,200,exponential,15,,sd,1.5,1.5,1.4,1.4,1.5,1.5,1.5,1.6,1.6,1.7
+332,stable,short,200,exponential,16,,sd,1.5,1.5,1.4,1.4,1.4,1.5,1.5,1.5,1.6,1.6
+333,stable,short,200,exponential,17,,sd,1.4,1.4,1.3,1.3,1.4,1.4,1.5,1.5,1.6,1.6
+334,stable,short,200,exponential,18,,sd,1.5,1.5,1.4,1.4,1.4,1.5,1.5,1.6,1.6,1.6
+335,stable,short,200,exponential,19,,sd,1.5,1.5,1.4,1.4,1.4,1.5,1.5,1.6,1.6,1.7
+336,stable,short,200,exponential,20,,sd,1.3,1.3,1.2,1.2,1.2,1.3,1.3,1.3,1.4,1.4
+337,120 days,,200,ebola_case_study,,real-time,sd,2.7,2.7,2.3,2.4,2.5,2.6,2.8,2.9,3.2,3.3
+338,120 days,,200,ebola_case_study,,retrospective,sd,8.3,8.2,5.9,6,6.6,7.4,9,9.9,11,11
+339,180 days,,200,ebola_case_study,,real-time,sd,3.5,3.4,3,3,3.2,3.3,3.6,3.7,4,4.1
+340,180 days,,200,ebola_case_study,,retrospective,sd,11,11,6.8,7.2,8.8,10,12,13,14,16
+341,240 days,,200,ebola_case_study,,real-time,sd,4.1,4.1,3.4,3.5,3.8,3.9,4.2,4.4,4.8,5
+342,240 days,,200,ebola_case_study,,retrospective,sd,7.2,7.3,5,5.2,5.9,6.5,7.8,8.3,9.7,9.9
+343,60 days,,200,ebola_case_study,,real-time,sd,1.9,1.9,1.7,1.7,1.8,1.9,2,2,2.2,2.2
+344,60 days,,200,ebola_case_study,,retrospective,sd,6.8,6.4,4.6,4.7,5.5,6,7.2,8.2,9.8,11
