@@ -31,13 +31,12 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
     # Update observation time by when we are looking
     DT(, obs_at := obs_time) |>
     DT(, obs_time := obs_time - ptime) |>
-    # I've assumed truncation in the middle of the censoring window.
-    # For discussion.
-    DT(, 
-      censored_obs_time := obs_at - (ptime_lwr + (ptime_upr - ptime_lwr) / 2)
+    # Assuming truncation at the end of the censoring window
+    DT(,
+      censored_obs_time := obs_at - (ptime_lwr + (ptime_upr - ptime_lwr))
     ) |>
     DT(, censored := "interval") |>
-    DT(floor(stime) + 1 <= obs_at)
+    DT(stime_upr <= obs_at)
   return(truncated_linelist)
 }
 
@@ -48,16 +47,14 @@ filter_obs_by_ptime <- function(linelist, obs_time) {
   truncated_linelist <- linelist |>
     data.table::copy() |>
     # Update observation time to be the same as the maximum secondary time
-    # Assume in the middle of the censoring window
     DT(, obs_at := stime_upr) |>
     DT(, obs_time := obs_at - ptime) |>
-    # I've assumed truncation in the middle of the censoring window.
-    # For discussion.
+   # Assuming truncation at the end of the censoring window
     DT(,
-     censored_obs_time := obs_at - (ptime_lwr + (ptime_upr - ptime_lwr) / 2)
+     censored_obs_time := obs_at - (ptime_lwr + (ptime_upr - ptime_lwr))
     ) |>
     DT(, censored := "interval") |>
-    DT(ptime <= pfilt_t) |>
+    DT(ptime_upr <= pfilt_t) |>
     DT(, obs_at := pfilt_t)
   return(truncated_linelist)
 }
