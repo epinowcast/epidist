@@ -16,5 +16,7 @@ Imports:
     data.table,
     ggplot2,
     purrr
+Suggests:
+    arrow
 Remotes:
     Rdata.table/data.table
