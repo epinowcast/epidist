@@ -33,7 +33,7 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
     DT(, obs_time := obs_time - ptime) |>
     # Assuming truncation at the end of the censoring window
     DT(,
-      censored_obs_time := obs_at - (ptime_lwr + (ptime_upr - ptime_lwr))
+      censored_obs_time := obs_at - ptime_upr
     ) |>
     DT(, censored := "interval") |>
     DT(stime_upr <= obs_at)
@@ -51,7 +51,7 @@ filter_obs_by_ptime <- function(linelist, obs_time) {
     DT(, obs_time := obs_at - ptime) |>
    # Assuming truncation at the end of the censoring window
     DT(,
-     censored_obs_time := obs_at - (ptime_lwr + (ptime_upr - ptime_lwr))
+     censored_obs_time := obs_at - ptime_upr
     ) |>
     DT(, censored := "interval") |>
     DT(ptime_upr <= pfilt_t) |>
@@ -64,6 +64,8 @@ filter_obs_by_ptime <- function(linelist, obs_time) {
 pad_zero <- function(data, pad = 1e-3) {
   data <- data |>
     data.table::copy() |>
+    # Need upper bound to be greater than lower bound
+    DT(censored_obs_time == 0, censored_obs_time := 2 * pad) |>
     DT(delay_lwr == 0, delay_lwr := pad) |>
     DT(delay_daily == 0, delay_daily := pad)
 }
