@@ -7,6 +7,6 @@ tar_target(
     DT(, data_type := "exponential") |>
     DT(, replicate := replicates_exponential),
   pattern = cross(
-    sample_sizes, group_sim_obs_exponential, replicates_exponential
+    group_sim_obs_exponential, replicates_exponential
   )
 )

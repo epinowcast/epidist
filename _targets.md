@@ -112,9 +112,10 @@ set_cmdstan_path()
 parallel_chains <- 4
 
 tar_option_set(
-  packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here"),
+  packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here",
+  "arrow"),
   deployment = "main",
-  memory = "transient",
+  memory = "persistent",
   workspace_on_error = TRUE,
   error = "continue",
   garbage_collection = TRUE
@@ -437,7 +438,7 @@ tar_target(
     DT(, data_type := "exponential") |>
     DT(, replicate := replicates_exponential),
   pattern = cross(
-    sample_sizes, group_sim_obs_exponential, replicates_exponential
+    group_sim_obs_exponential, replicates_exponential
   )
 )
 #> Establish _targets.R and _targets_r/targets/sampled_simulated_observations_exponential.R.
