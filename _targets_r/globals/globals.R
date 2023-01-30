@@ -20,9 +20,10 @@ set_cmdstan_path()
 parallel_chains <- 4
 
 tar_option_set(
-  packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here"),
+  packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here",
+  "arrow"),
   deployment = "main",
-  memory = "transient",
+  memory = "persistent",
   workspace_on_error = TRUE,
   error = "continue",
   garbage_collection = TRUE
