@@ -7,6 +7,9 @@ library(dplyr) # for manipulating arrow data
 library(purrr) # for iterating over lists
 library(ggplot2) # for plotting
 
+# Load case study data
+case_study_obs <- fread("data/scenarios/ebola_case_study.csv")
+
 # Load available models
 models <- fread("data/meta/models.csv")
 
@@ -31,10 +34,27 @@ read_case_study <- function(target_model) {
 # Load case study samples for each model and combine
 cs_samples <- map_dfr(models$model, read_case_study)
 
-
+# Get observation times
+obs_times <- cs_samples |>
+  DT(, unique(scenario)) |>
+  gsub(" days", x = _, "") |>
+  as.numeric() |>
+  (\(x) x[order(x)])()
 
 # Make inidividual plots
 
+# Plot observed cases by observation window
+truncated_cs_obs <- construct_cases_by_obs_window(
+  case_study_obs, windows = obs_times, obs_type = "stime"
+)
+
+obs_plot <- plot_cases_by_obs_window(truncated_cs_obs)
+
+# Plot empirical PMF for each observation window
+# Need truncated observations by window or samples used to fit the model here
+# combined_cs_obs <- combine_obs(truncated_obs, case_study_obs)
+
+# plot_empirical_delay(truncated_cs_obs)
 # Combine plots
 
 # - plot observations by estimation time (plot_cases_by_obs_window())
