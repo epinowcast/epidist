@@ -6,6 +6,7 @@ library(arrow) # for loading data in arrow format
 library(dplyr) # for manipulating arrow data
 library(purrr) # for iterating over lists
 library(ggplot2) # for plotting
+library(patchwork) # for combining plots
 
 # Load case study data
 case_study_obs <- fread("data/scenarios/ebola_case_study.csv")
