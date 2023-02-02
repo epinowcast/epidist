@@ -44,19 +44,58 @@ obs_times <- cs_samples |>
 # Make inidividual plots
 
 # Plot observed cases by observation window
-truncated_cs_obs <- construct_cases_by_obs_window(
+truncated_cs_obs_by_window <- construct_cases_by_obs_window(
   case_study_obs, windows = obs_times, obs_type = "stime"
 )
 
-obs_plot <- plot_cases_by_obs_window(truncated_cs_obs)
+obs_plot <- plot_cases_by_obs_window(truncated_cs_obs_by_window)
 
 # Plot empirical PMF for each observation window
-# Need truncated observations by window or samples used to fit the model here
-# combined_cs_obs <- combine_obs(truncated_obs, case_study_obs)
+# First construct observed and retrospective data by window and join with
+# complete data
+# Retrict to 20 days delay
+truncated_cs_obs <-  obs_times |>
+  map_dfr(~ filter_obs_by_obs_time(case_study_obs, obs_time = .x)) |>
+  combine_obs(case_study_obs) |>
+  DT(, type := "Real-time")
 
-# plot_empirical_delay(truncated_cs_obs)
-# Combine plots
+retro_cs_obs <- obs_times |>
+  map_dfr(~ filter_obs_by_ptime(case_study_obs, obs_time = .x)) |>
+  combine_obs(case_study_obs) |>
+  DT(, type := "Retrospective")
 
+combined_cs_obs <- rbind(truncated_cs_obs, retro_cs_obs)
+
+empirical_pmf_plot <- combined_cs_obs |>
+  DT(delay_daily <= 20) |>
+  plot_empirical_delay() +
+  facet_wrap(vars(type), ncol = 1)
+
+# Summarise draws
+
+# Plot posterior densities for each parameter by model and observation type.
+# Filter out outlier values for the sake of plotting
+paramter_density_plot <- cs_samples |>
+  draws_to_long() |>
+  DT(value <= 10) |>
+  DT(value >= -10) |>
+  DT(parameter %in% c("mean", "sd")) |>
+  DT(, scenario := factor(scenario, levels = paste0(obs_times, " days"))) |>
+  ggplot() +
+    aes(x = value, y = model, fill = obs_type) +
+    ggridges::geom_density_ridges(
+      scale = 1.5, alpha = 0.8
+    ) +
+  theme_bw() +
+  facet_grid(vars(parameter), vars(scenario), scales = "free_x") +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(
+    y = "Model", x = "Distribution summary parameter values"
+  ) +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(title = "Observation type"))
+
+# Combine plots into a single figure
 # - plot observations by estimation time (plot_cases_by_obs_window())
 # - plot empirical discretised PMF for each observation window (plot_empirical_pmf()).
 # - plot delay summary parameters for each observation window, method and type (i.e real-time and retrospective).
