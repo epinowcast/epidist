@@ -17,6 +17,8 @@ Imports:
     ggplot2,
     purrr
 Suggests:
-    arrow
+    arrow,
+    dplyr,
+    here
 Remotes:
     Rdata.table/data.table
