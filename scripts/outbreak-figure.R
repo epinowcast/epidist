@@ -6,7 +6,7 @@ library(arrow) # for loading data in arrow format
 library(dplyr) # for manipulating arrow data
 library(purrr) # for iterating over lists
 library(ggplot2) # for plotting
-
+library(patchwork) # for combining plots
 
 # Load case study data
 outbreak_obs <- fread(here("data/scenarios/outbreak-simulation.csv"))
@@ -39,6 +39,9 @@ o_samples <- map_dfr(models$model, read_outbreak)
 obs_times <- fread(here("data/meta/outbreak_estimation_times.csv")) |>
   DT(, time)
 
+# Load distributions
+distributions <- fread(here("data/meta/distributions.csv"))
+
 # Make inidividual plots
 
 # Plot observed cases by observation window
@@ -62,49 +65,37 @@ obs_plot <- plot_cases_by_obs_window(truncated_cs_obs_by_window) +
 # First construct observed and retrospective data by window and join with
 # complete data
 # Retrict to 20 days delay
-truncated_cs_obs <-  obs_times |>
-  map_dfr(~ filter_obs_by_obs_time(case_study_obs, obs_time = .x)) |>
-  combine_obs(case_study_obs) |>
-  DT(, type := "Real-time")
+truncated_outbreak_obs <-  c(obs_times, 100) |>
+  map_dfr(~ filter_obs_by_obs_time(outbreak_obs, obs_time = .x))
 
-retro_cs_obs <- obs_times |>
-  map_dfr(~ filter_obs_by_ptime(case_study_obs, obs_time = .x)) |>
-  combine_obs(case_study_obs) |>
-  DT(, type := "Retrospective")
 
-combined_cs_obs <- rbind(truncated_cs_obs, retro_cs_obs)
-
-empirical_pmf_plot <- combined_cs_obs |>
+empirical_pmf_plot <- truncated_outbreak_obs |>
+  reverse_obs_at() |>
   DT(delay_daily <= 20) |>
   plot_empirical_delay() +
-  facet_wrap(vars(type), ncol = 1)
+  facet_wrap(vars(distribution), ncol = 1)
 
 # Summarise draws
 
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
-paramter_density_plot <- cs_samples |>
+paramter_density_plot <- o_samples |>
   draws_to_long() |>
-  DT(value <= 10) |>
-  DT(value >= -10) |>
   DT(parameter %in% c("mean", "sd")) |>
-  DT(, scenario := factor(scenario, levels = paste0(obs_times, " days"))) |>
-  ggplot() +
-    aes(x = value, y = model, fill = obs_type) +
-    ggridges::geom_density_ridges(
-      scale = 1.5, alpha = 0.8
-    ) +
-  theme_bw() +
-  facet_grid(vars(parameter), vars(scenario), scales = "free_x") +
+  make_relative_to_truth(
+    draws_to_long(distributions) |>
+    setnames("scenario", "distribution"),
+    by = c("parameter", "distribution")
+  ) |>
+  DT(value <= 5) |>
+  DT(value >= 0.05) |>
+  DT(,
+    distribution := factor(distribution, levels = c("short", "medium", "long"))
+  ) |>
+  plot_relative_recovery(fill = model) +
+  facet_grid(vars(parameter), vars(distribution, scenario), scales = "free_x") +
   scale_fill_brewer(palette = "Dark2") +
+  guides(fill = guide_none()) +
   labs(
-    y = "Model", x = "Distribution summary parameter values"
-  ) +
-  theme(legend.position = "bottom") +
-  guides(fill = guide_legend(title = "Observation type"))
-
-# Combine plots into a single figure
-# - plot observations by estimation time (plot_cases_by_obs_window())
-# - plot empirical discretised PMF for each observation window (plot_empirical_pmf()).
-# - plot delay summary parameters for each observation window, method and type (i.e real-time and retrospective).
-# Save combined plots
+    y = "Model", x = "Relative to ground truth"
+  )

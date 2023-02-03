@@ -72,7 +72,6 @@ empirical_pmf_plot <- combined_cs_obs |>
   plot_empirical_delay() +
   facet_wrap(vars(type), ncol = 1)
 
-# Summarise draws
 
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
@@ -95,9 +94,3 @@ paramter_density_plot <- cs_samples |>
   ) +
   theme(legend.position = "bottom") +
   guides(fill = guide_legend(title = "Observation type"))
-
-# Combine plots into a single figure
-# - plot observations by estimation time (plot_cases_by_obs_window())
-# - plot empirical discretised PMF for each observation window (plot_empirical_pmf()).
-# - plot delay summary parameters for each observation window, method and type (i.e real-time and retrospective).
-# Save combined plots
