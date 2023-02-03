@@ -6,17 +6,17 @@ library(arrow) # for loading data in arrow format
 library(dplyr) # for manipulating arrow data
 library(purrr) # for iterating over lists
 library(ggplot2) # for plotting
-library(patchwork) # for combining plots
+
 
 # Load case study data
-case_study_obs <- fread(here("data/scenarios/ebola_case_study.csv"))
+outbreak_obs <- fread(here("data/scenarios/outbreak-simulation.csv"))
 
 # Load available models
 models <- fread(here("data/meta/models.csv"))
 
 # Function to read each arrow dataset, filter for the case study
 # and attach the model name
-read_case_study <- function(target_model) {
+read_outbreak <- function(target_model) {
   # Load posterior samples as an arrow dataset
   dataset <- open_dataset(
     here("data", "posteriors", models[model %in% target_model, in_code])
@@ -25,31 +25,38 @@ read_case_study <- function(target_model) {
   # Filter for the case study related samples
   # Add model name to each row
   samples <- dataset |>
-    filter(data_type %in% "ebola_case_study") |>
+    filter(data_type %in% "outbreak") |>
     mutate(model = target_model) |>
     collect()
 
   return(samples)
 }
 
-# Load case study samples for each model and combine
-cs_samples <- map_dfr(models$model, read_case_study)
+# Load outbreak samples for each model and combine
+o_samples <- map_dfr(models$model, read_outbreak)
 
 # Get observation times
-obs_times <- cs_samples |>
-  DT(, unique(scenario)) |>
-  gsub(" days", x = _, "") |>
-  as.numeric() |>
-  (\(x) x[order(x)])()
+obs_times <- fread(here("data/meta/outbreak_estimation_times.csv")) |>
+  DT(, time)
 
 # Make inidividual plots
 
 # Plot observed cases by observation window
-truncated_cs_obs_by_window <- construct_cases_by_obs_window(
-  case_study_obs, windows = obs_times, obs_type = "stime"
-)
+# Observe at 100 days in addition to estimation times
+truncated_cs_obs_by_window <- outbreak_obs |>
+  split(by = "distribution") |>
+  map_dfr(
+    ~ construct_cases_by_obs_window(
+      ., windows = obs_times, obs_type = "stime", upper_window = 100
+    ),
+    .id = "distribution"
+  ) |>
+  DT(,
+    distribution := factor(distribution, levels = c("short", "medium", "long"))
+  )
 
-obs_plot <- plot_cases_by_obs_window(truncated_cs_obs_by_window)
+obs_plot <- plot_cases_by_obs_window(truncated_cs_obs_by_window) +
+  facet_wrap(vars(distribution), ncol = 1)
 
 # Plot empirical PMF for each observation window
 # First construct observed and retrospective data by window and join with
