@@ -51,9 +51,9 @@ reverse_obs_at <- function(dt) {
 #' Construct case counts by observation window based on secondary observations
 #' @export
 construct_cases_by_obs_window <- function(linelist, windows = c(25, 45),
-                                          obs_type = c("stime", "ptime")) {
+  obs_type = c("stime", "ptime"), upper_window = max(linelist$stime_daily)) {
   lower_window <- c(0, windows)
-  upper_window <- c(windows, max(linelist$stime_daily))
+  upper_window <- c(windows, upper_window)
 
   obs_type <- match.arg(obs_type)
   if (obs_type == "stime") {
