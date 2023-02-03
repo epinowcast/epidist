@@ -23,7 +23,7 @@ tar_option_set(
   packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here",
   "arrow"),
   deployment = "main",
-  memory = "transcient",
+  memory = "transient",
   workspace_on_error = TRUE,
   error = "continue",
   garbage_collection = TRUE
