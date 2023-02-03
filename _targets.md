@@ -115,7 +115,7 @@ tar_option_set(
   packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here",
   "arrow"),
   deployment = "main",
-  memory = "transcient",
+  memory = "transient",
   workspace_on_error = TRUE,
   error = "continue",
   garbage_collection = TRUE
@@ -207,6 +207,16 @@ tar_target(simulated_observations_outbreak, {
 #> Establish _targets.R and _targets_r/targets/simulated_observations_outbreak.R.
 ```
 
+``` r
+tar_file(
+    save_outbreak_data,
+    save_csv(
+     simulated_observations_outbreak, "outbreak-simulation.csv", path = "data/scenarios"
+    )
+  )
+#> Establish _targets.R and _targets_r/targets/save_outbreak_data.R.
+```
+
 #### Observation
 
   - For outbreak simulations, we estimate across sample size ranges (N =
@@ -238,6 +248,21 @@ tar_group_by(
   scenario
 )
 #> Establish _targets.R and _targets_r/targets/outbreak_estimation_times.R.
+```
+
+  - Save outbreak observation times
+
+<!-- end list -->
+
+``` r
+tar_file(
+  save_outbreak_estimation_times,
+  save_csv(
+    outbreak_estimation_times, "outbreak_estimation_times.csv",
+    path = "data/meta"
+  )
+)
+#> Establish _targets.R and _targets_r/targets/save_outbreak_estimation_times.R.
 ```
 
   - Truncate the available simulate observations based on the estimation
@@ -292,6 +317,10 @@ tar_target(list_simulated_observations_outbreak, {
 #> Define target list_simulated_observations_outbreak from chunk code.
 #> Establish _targets.R and _targets_r/targets/list_simulated_observations_outbreak.R.
 ```
+
+  - Get simulated outbreak scenarios
+
+<!-- end list -->
 
 ``` r
 tar_target(simulated_scenarios_outbreak, {
