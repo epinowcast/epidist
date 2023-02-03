@@ -48,17 +48,17 @@ plot_cases_by_obs_window <- function(cases) {
 plot_empirical_delay <- function(cases, meanlog, sdlog) {
   plot <- cases |>
     ggplot() +
-    aes(x = delay_daily, fill = obs_at) +
+    aes(x = delay_daily) +
     geom_histogram(
-      aes(y = ..density..), binwidth = 1, position = "dodge",
+      aes(y = ..density.., fill = obs_at), binwidth = 1, position = "dodge",
       col = "#696767b1"
     )
 
   if (!missing(meanlog) && !missing(sdlog)) {
-    plot <- plot + 
+    plot <- plot +
       stat_function(
         fun = dlnorm, args = c(meanlog, sdlog), n = 100,
-        col = "#696767b1", fill = NULL
+        col = "#696767b1"
       )
   }
 
