@@ -20,5 +20,3 @@ Suggests:
     arrow,
     dplyr,
     here
-Remotes:
-    Rdata.table/data.table
