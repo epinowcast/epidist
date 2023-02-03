@@ -1,0 +1,5 @@
+scenario,time,tar_group
+early outbreak,15,1
+near peak,30,3
+past peak,45,4
+late outbreak,60,2

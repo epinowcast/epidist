@@ -85,7 +85,7 @@ tar_option_set(
   packages = c("data.table", "ggplot2", "purrr", "cmdstanr", "brms", "here",
   "arrow"),
   deployment = "main",
-  memory = "transcient",
+  memory = "transient",
   workspace_on_error = TRUE,
   error = "continue",
   garbage_collection = TRUE
@@ -154,6 +154,15 @@ simulated_secondary_outbreak |>
   observe_process()
 ```
 
+```{targets save_outbreak_data}
+tar_file(
+    save_outbreak_data,
+    save_csv(
+     simulated_observations_outbreak, "outbreak-simulation.csv", path = "data/scenarios"
+    )
+  )
+```
+
 #### Observation
 
 
@@ -162,7 +171,6 @@ simulated_secondary_outbreak |>
 ```{targets sample_sizes, tar_simple = TRUE}
 c(10, 100, 200)
 ```
-
 
 - For the outbreak simulation, we estimate all models at chosen points across the outbreak (suggestion: "early outbreak" (15 days), "near peak" (30 days), "past peak" (45  days), "late outbreak" (60 days))
 
@@ -174,6 +182,19 @@ tar_group_by(
     time = c(15, 30, 45, 60)
   ),
   scenario
+)
+```
+
+
+- Save outbreak observation times
+
+```{targets save_outbreak_estimation_times}
+tar_file(
+  save_outbreak_estimation_times,
+  save_csv(
+    outbreak_estimation_times, "outbreak_estimation_times.csv",
+    path = "data/meta"
+  )
 )
 ```
 
@@ -218,6 +239,7 @@ sampled_simulated_observations_outbreak |>
   split(by = c("scenario", "distribution", "sample_size", "data_type"))
 ```
 
+- Get simulated outbreak scenarios
 
 ```{targets simulated_scenarios_outbreak, tar_simple = TRUE}
 sampled_simulated_observations_outbreak |>
