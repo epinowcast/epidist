@@ -56,8 +56,8 @@ obs_times <- outbreak_estimation_times |>
 distributions <- fread(here("data/meta/distributions.csv")) |>
   DT(, distribution_stat := paste0(
     str_to_sentence(scenario),
-    " (Mean: ", round(mean, 1),
-    ", SD: ", round(sd, 1), ")"
+    " (mean: ", round(mean, 1),
+    ", sd: ", round(sd, 1), ")"
   )) |>
   DT(, distribution_stat := factor(distribution_stat) |>
     fct_rev()
@@ -81,7 +81,7 @@ truncated_cs_obs_by_window <- outbreak_obs |>
   )
 
 obs_plot <- plot_cases_by_obs_window(truncated_cs_obs_by_window) +
-  facet_wrap(vars(distribution_stat), ncol = 1)
+  facet_wrap(vars(distribution_stat), nrow = 1)
 
 # Plot empirical PMF for each observation window
 # First construct observed and retrospective data by window and join with
@@ -119,17 +119,17 @@ parameter_density_plot <- o_samples |>
   DT(value >= 0.05) |>
   merge(outbreak_estimation_times, by = "scenario") |>
   DT(,
-      c("distribution",  "scenario_days") :=
+      c("distribution_stat",  "scenario_days") :=
         map(.SD, ~ . |>
           str_to_sentence() |>
           factor() |>
           fct_rev()
         ),
-      .SDcols = c("distribution",  "scenario_days")
+      .SDcols = c("distribution_stat",  "scenario_days")
   ) |>
   DT(, parameter := str_to_sentence(parameter)) |>
   DT(, model := factor(model, levels = models$model)) |>
-  plot_relative_recovery(y = scenario_days, fill = distribution) +
+  plot_relative_recovery(y = scenario_days, fill = distribution_stat) +
   facet_grid(
     vars(model), vars(parameter),
     labeller = label_wrap_gen(multi_line = TRUE),
@@ -141,3 +141,21 @@ parameter_density_plot <- o_samples |>
     y = "Observation time", x = "Relative to ground truth"
   ) +
   theme(legend.position = "bottom")
+
+
+# Combine plots
+outbreak_plot <- obs_plot / (
+  (empirical_pmf_plot + guides(fill = guide_none())) +
+  parameter_density_plot +
+  plot_layout(width = c(1, 2))
+) +
+plot_annotation(tag_levels = "A") +
+plot_layout(guides = "collect", height = c(1, 4)) &
+theme(legend.position = "bottom")
+
+
+# Save combined plots
+ggsave(
+  here("figures", "outbreak.png"), outbreak_plot,
+  height = 20, width = 16, dpi = 330
+)
