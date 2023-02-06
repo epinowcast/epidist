@@ -105,7 +105,6 @@ facet_wrap(vars(distribution_stat), ncol = 1)
 
 # TODO: Due to the number of samples this plot is very slow to make. Can we speed it up? # nolint
 
-# TODO: This plot has the same issue as the outbreak version where it looks like the longer delays are not corret. I think this is likely an issue in our  simulation setup vs plotting. # nolint
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
 parameter_density_plot <- e_samples |>
@@ -122,8 +121,6 @@ parameter_density_plot <- e_samples |>
       setnames("scenario", "distribution"),
     by = c("parameter", "distribution")
   ) |>
-  DT(value <= 5) |>
-  DT(value >= 0.05) |>
   DT(, distribution_stat :=  distribution_stat |>
         str_to_sentence() |>
         factor() |>
@@ -133,6 +130,8 @@ parameter_density_plot <- e_samples |>
   DT(, model := factor(model, levels = models$model)) |>
   DT(growth_rates, on = "scenario") |>
   DT(, r := factor(r)) |>
+  DT(rel_value <= 2) |>
+  DT(rel_value >= 0.1) |>
   plot_relative_recovery(y = r, fill = distribution_stat) +
   facet_grid(
     vars(model), vars(parameter),
@@ -148,12 +147,10 @@ parameter_density_plot <- e_samples |>
 
 
 # Combine plots
-exponential_plot <- (empirical_pmf_plot + guides(fill = guide_none())) +
-  parameter_density_plot +
+exponential_plot <- empirical_pmf_plot + parameter_density_plot +
 plot_annotation(tag_levels = "A") +
 plot_layout(guides = "collect", width = c(1, 2)) &
 theme(legend.position = "bottom")
-
 
 # Save combined plots
 ggsave(
