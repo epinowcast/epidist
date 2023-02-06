@@ -21,4 +21,5 @@ Suggests:
     dplyr,
     here,
     patchwork,
-    ggh4x
+    stringr,
+    forcats
