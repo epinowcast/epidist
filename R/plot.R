@@ -4,7 +4,7 @@ plot_relative_recovery <- function(relative_data, alpha = 0.8,
                                    quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {
   relative_data |>
     ggplot() +
-    aes(x = rel_value, y = model, ...) +
+    aes(x = rel_value, ...) +
     ggridges::geom_density_ridges(
       scale = 1.5, alpha = alpha, quantile_lines = TRUE,
       quantiles = quantiles
@@ -50,7 +50,7 @@ plot_empirical_delay <- function(cases, meanlog, sdlog) {
     ggplot() +
     aes(x = delay_daily) +
     geom_histogram(
-      aes(y = ..density.., fill = obs_at), binwidth = 1, position = "dodge",
+      aes(y = after_stat(density), fill = obs_at), binwidth = 1, position = "dodge",
       col = "#696767b1"
     )
 
