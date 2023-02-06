@@ -168,7 +168,7 @@ tar_file(
 #### Observation
 
 
-- For outbreak simulations, we estimate across sample size ranges (N = 10, 100, 2000). `N = 200` is the default case
+- For outbreak simulations, we estimate across sample size ranges (N = 10, 100, 200). `N = 200` is the default case
 
 ```{targets sample_sizes, tar_simple = TRUE}
 c(10, 100, 200)
