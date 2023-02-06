@@ -61,6 +61,11 @@ distributions <- fread(here("data/meta/distributions.csv")) |>
   )) |>
   DT(, distribution_stat := factor(distribution_stat) |>
     fct_rev()
+  ) |>
+  DT(, pmf := map2(
+    meanlog, sdlog,
+    ~ dlnorm(seq(0, 20, by = 0.1), meanlog = .x, sdlog = .y)
+    )
   )
 
 # Make inidividual plots
@@ -90,7 +95,6 @@ obs_plot <- plot_cases_by_obs_window(truncated_cs_obs_by_window) +
 truncated_outbreak_obs <-  c(obs_times, 100) |>
   map_dfr(~ filter_obs_by_obs_time(outbreak_obs, obs_time = .x))
 
-# TODO: Add Simulation delay to PMF plot
 empirical_pmf_plot <- truncated_outbreak_obs |>
   reverse_obs_at() |>
   DT(, obs_at := factor(obs_at, levels = rev(unique(as.character(obs_at))))) |>
@@ -100,6 +104,14 @@ empirical_pmf_plot <- truncated_outbreak_obs |>
     on = "distribution"
   ) |>
   plot_empirical_delay() +
+  geom_line(
+    data = distributions |>
+      DT(,
+        .(pmf = unlist(pmf), delay_daily = seq(0, 20, by = 0.1)),
+        by = "distribution_stat"
+      ),
+      aes(y = pmf, fill = NULL), col = "black"
+  ) +
   facet_wrap(vars(distribution_stat), ncol = 1)
 
 # Summarise draws
@@ -118,18 +130,15 @@ parameter_density_plot <- o_samples |>
   DT(value <= 5) |>
   DT(value >= 0.05) |>
   merge(outbreak_estimation_times, by = "scenario") |>
-  DT(,
-      c("distribution_stat",  "scenario_days") :=
-        map(.SD, ~ . |>
-          str_to_sentence() |>
-          factor() |>
-          fct_rev()
-        ),
-      .SDcols = c("distribution_stat",  "scenario_days")
+  DT(, distribution_stat :=  distribution_stat |>
+        str_to_sentence() |>
+        factor() |>
+        fct_rev()
   ) |>
+  DT(, time := factor(time) |> fct_rev()) |>
   DT(, parameter := str_to_sentence(parameter)) |>
   DT(, model := factor(model, levels = models$model)) |>
-  plot_relative_recovery(y = scenario_days, fill = distribution_stat) +
+  plot_relative_recovery(y = time, fill = distribution_stat) +
   facet_grid(
     vars(model), vars(parameter),
     labeller = label_wrap_gen(multi_line = TRUE),
@@ -138,7 +147,7 @@ parameter_density_plot <- o_samples |>
   scale_fill_brewer(palette = "Dark2") +
   guides(fill = guide_legend(title = "Distribution"), col = guide_none()) +
   labs(
-    y = "Observation time", x = "Relative to ground truth"
+    y = "Observation day", x = "Relative to ground truth"
   ) +
   theme(legend.position = "bottom")
 
