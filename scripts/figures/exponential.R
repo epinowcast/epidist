@@ -78,38 +78,48 @@ empirical_pmf_plot <- truncated_exponential_obs |>
     distributions[, .(distribution = scenario, distribution_stat)],
     on = "distribution"
   ) |>
- ggplot() +
-    aes(x = delay_daily) +
-    geom_histogram(
-      aes(y = after_stat(density), fill = growth_rate),
-      binwidth = 1, position = "dodge",
-      col = "#696767b1"
-    ) +
-    scale_fill_brewer(palette = "Blues", direction = 1) +
-    theme_bw() +
-    theme(legend.position = "bottom") +
-    labs(x = "Days", y = "Density") +
-    guides(fill = guide_legend(title = "Growth rate", reverse = TRUE))
+  DT(, r := factor(r)) |>
+  ggplot() +
+  aes(x = delay_daily) +
+  geom_histogram(
+  aes(y = after_stat(density), fill = r),
+    binwidth = 1, position = "dodge",
+    col = "#696767b1"
+  ) +
+  scale_fill_brewer(palette = "Blues", direction = 1) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(x = "Days", y = "Density") +
+  guides(fill = guide_legend(title = "Growth rate", reverse = FALSE)) +
   geom_line(
     data = distributions |>
       DT(,
         .(pmf = unlist(pmf), delay_daily = seq(0, 20, by = 0.1)),
         by = "distribution_stat"
       ),
-      aes(y = pmf, fill = NULL), col = "black"
-  ) +
-  facet_wrap(vars(distribution_stat), ncol = 1)
+    aes(y = pmf, fill = NULL), col = "black"
+) +
+facet_wrap(vars(distribution_stat), ncol = 1)
 
 # Summarise draws
 
+# TODO: Due to the number of samples this plot is very slow to make. Can we speed it up? # nolint
+
+# TODO: This plot has the same issue as the outbreak version where it looks like the longer delays are not corret. I think this is likely an issue in our  simulation setup vs plotting. # nolint
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
 parameter_density_plot <- e_samples |>
+  DT(,
+    c(
+      "sample_size", "data_type", "id", "obs_type"
+    ) := NULL
+  ) |>
   draws_to_long() |>
   DT(parameter %in% c("mean", "sd")) |>
   make_relative_to_truth(
-    draws_to_long(distributions) |>
-    setnames("scenario", "distribution"),
+    draws_to_long(distributions)[parameter %in% c("mean", "sd")] |>
+      DT(, pmf := NULL) |>
+      setnames("scenario", "distribution"),
     by = c("parameter", "distribution")
   ) |>
   DT(value <= 5) |>
@@ -121,6 +131,8 @@ parameter_density_plot <- e_samples |>
   ) |>
   DT(, parameter := str_to_sentence(parameter)) |>
   DT(, model := factor(model, levels = models$model)) |>
+  DT(growth_rates, on = "scenario") |>
+  DT(, r := factor(r)) |>
   plot_relative_recovery(y = r, fill = distribution_stat) +
   facet_grid(
     vars(model), vars(parameter),
@@ -139,12 +151,12 @@ parameter_density_plot <- e_samples |>
 exponential_plot <- (empirical_pmf_plot + guides(fill = guide_none())) +
   parameter_density_plot +
 plot_annotation(tag_levels = "A") +
-plot_layout(guides = "collect", height = c(1, 2)) &
+plot_layout(guides = "collect", width = c(1, 2)) &
 theme(legend.position = "bottom")
 
 
 # Save combined plots
 ggsave(
   here("figures", "exponential.png"), exponential_plot,
-  height = 20, width = 16, dpi = 330
+  height = 16, width = 16, dpi = 330
 )
