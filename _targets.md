@@ -207,6 +207,10 @@ tar_target(simulated_observations_outbreak, {
 #> Establish _targets.R and _targets_r/targets/simulated_observations_outbreak.R.
 ```
 
+  - Save the outbreak simulation
+
+<!-- end list -->
+
 ``` r
 tar_file(
     save_outbreak_data,
@@ -234,7 +238,9 @@ tar_target(sample_sizes, {
 
   - For the outbreak simulation, we estimate all models at chosen points
     across the outbreak (suggestion: “early outbreak” (15 days), “near
-    peak” (30 days), “past peak” (45 days), “late outbreak” (60 days))
+    peak” (30 days), “past peak” (45 days), “late outbreak” (60 days)).
+    *TODO: These aren’t lining up very well with the outbreak
+    simulation*.
 
 <!-- end list -->
 
@@ -414,6 +420,21 @@ tar_target(simulated_observations_exponential, {
 })
 #> Define target simulated_observations_exponential from chunk code.
 #> Establish _targets.R and _targets_r/targets/simulated_observations_exponential.R.
+```
+
+  - Save the exponential simulation
+
+<!-- end list -->
+
+``` r
+tar_file(
+    save_exponential_data,
+    save_csv(
+     simulated_observations_exponential, "exponential-simulation.csv",
+     path = "data/scenarios"
+    )
+  )
+#> Establish _targets.R and _targets_r/targets/save_exponential_data.R.
 ```
 
 #### Observation
@@ -604,7 +625,9 @@ tar_target(
 ```
 
   - Create completely observed retrospective cohorts for the same
-    estimation time windows.
+    estimation time windows. *TODO: The current definition of obs at is
+    causing fitting issues for retrospective models as it is not the
+    actual time of observation but the time of secondary event.*
 
 <!-- end list -->
 
