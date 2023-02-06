@@ -435,7 +435,7 @@ tar_target(
 )
 ```
 
-- Create completely observed retrospective cohorts for the same estimation time windows.
+- Create completely observed retrospective cohorts for the same estimation time windows. *TODO: The current definition of obs at is causing fitting issues for retrospective models as it is not the actual time of observation but the time of secondary event.*
 
 ```{targets retro_ebola_obs} 
 tar_target(
