@@ -117,9 +117,14 @@ empirical_pmf_plot <- truncated_outbreak_obs |>
 # Summarise draws
 
 # TODO: Plotting error or is mean recovery really so bad? It looks to me like an issue with the simulation grid rather than in this script # nolint
+
+# TODO: Need to consider sample size. I'd suggest we just have 10, and 100 in the SI using this plot # nolint
+
+# TODO: Some estimates appear to be missing. Need to explore why this is.
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
 parameter_density_plot <- o_samples |>
+  DT(sample_size == 200) |>
   draws_to_long() |>
   DT(parameter %in% c("mean", "sd")) |>
   make_relative_to_truth(
