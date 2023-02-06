@@ -148,9 +148,9 @@ parameter_density_plot <- e_samples |>
 
 # Combine plots
 exponential_plot <- empirical_pmf_plot + parameter_density_plot +
-plot_annotation(tag_levels = "A") +
-plot_layout(guides = "collect", width = c(1, 2)) &
-theme(legend.position = "bottom")
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "collect", width = c(1, 2)) &
+  theme(legend.position = "bottom")
 
 # Save combined plots
 ggsave(
