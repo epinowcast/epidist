@@ -7,6 +7,8 @@ library(dplyr) # for manipulating arrow data
 library(purrr) # for iterating over lists
 library(ggplot2) # for plotting
 library(patchwork) # for combining plots
+library(stringr) # for string manipulation
+library(forcats) # manipulate factors
 
 # Load case study data
 case_study_obs <- fread(here("data/scenarios/ebola_case_study.csv"))
@@ -75,22 +77,46 @@ empirical_pmf_plot <- combined_cs_obs |>
 
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
-paramter_density_plot <- cs_samples |>
+parameter_density_plot <- cs_samples |>
   draws_to_long() |>
   DT(value <= 10) |>
   DT(value >= -10) |>
   DT(parameter %in% c("mean", "sd")) |>
-  DT(, scenario := factor(scenario, levels = paste0(obs_times, " days"))) |>
-  ggplot() +
-    aes(x = value, y = model, fill = obs_type) +
-    ggridges::geom_density_ridges(
-      scale = 1.5, alpha = 0.8
+  DT(, scenario := gsub(" days", x = scenario, replacement = "") |>
+    factor(levels = obs_times) |>
+    fct_rev()
+  ) |>
+  DT(, obs_type := str_to_sentence(obs_type)) |>
+  DT(, parameter := str_to_sentence(parameter)) |>
+  DT(, model := factor(model, levels = models$model)) |>
+  plot_recovery(y = scenario, fill = obs_type) +
+  facet_grid(
+    vars(model), vars(parameter),
+    labeller = label_wrap_gen(multi_line = TRUE),
+    scales = "free_x"
     ) +
-  theme_bw() +
-  facet_grid(vars(parameter), vars(scenario), scales = "free_x") +
   scale_fill_brewer(palette = "Dark2") +
-  labs(
-    y = "Model", x = "Distribution summary parameter values"
+  guides(
+    fill = guide_legend(title = "Estimation method"), col = guide_none()
   ) +
-  theme(legend.position = "bottom") +
-  guides(fill = guide_legend(title = "Observation type"))
+  labs(
+    y = "Observation day", x = "Parameter estimate"
+  ) +
+  theme(legend.position = "bottom")
+
+# Combine plots
+case_study_plot <- obs_plot / (
+  (empirical_pmf_plot + guides(fill = guide_none())) +
+  parameter_density_plot +
+  plot_layout(width = c(1, 2))
+) +
+plot_annotation(tag_levels = "A") +
+plot_layout(guides = "collect", height = c(1, 4)) &
+theme(legend.position = "bottom")
+
+
+# Save combined plots
+ggsave(
+  here("figures", "case_study.png"), case_study_plot,
+  height = 20, width = 16, dpi = 330
+)
