@@ -154,6 +154,8 @@ simulated_secondary_outbreak |>
   observe_process()
 ```
 
+- Save the outbreak simulation
+
 ```{targets save_outbreak_data}
 tar_file(
     save_outbreak_data,
@@ -303,6 +305,19 @@ tar_target(
 ```{targets simulated_observations_exponential, tar_simple = TRUE}
 simulated_secondary_exponential |>
   observe_process()
+```
+
+
+- Save the exponential simulation
+
+```{targets save_exponential_data}
+tar_file(
+    save_exponential_data,
+    save_csv(
+     simulated_observations_exponential, "exponential-simulation.csv",
+     path = "data/scenarios"
+    )
+  )
 ```
 
 #### Observation
