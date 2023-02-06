@@ -172,7 +172,7 @@ tar_file(
 c(10, 100, 200)
 ```
 
-- For the outbreak simulation, we estimate all models at chosen points across the outbreak (suggestion: "early outbreak" (15 days), "near peak" (30 days), "past peak" (45  days), "late outbreak" (60 days))
+- For the outbreak simulation, we estimate all models at chosen points across the outbreak (suggestion: "early outbreak" (15 days), "near peak" (30 days), "past peak" (45  days), "late outbreak" (60 days)). *TODO: These aren't lining up very well with the outbreak simulation*.
 
 ```{targets outbreak_estimation_times}
 tar_group_by(
@@ -184,7 +184,6 @@ tar_group_by(
   scenario
 )
 ```
-
 
 - Save outbreak observation times
 
