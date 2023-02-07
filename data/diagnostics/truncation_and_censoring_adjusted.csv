@@ -336,10 +336,10 @@ stable,short,200,exponential,334,18,,4000,1,0,0,3,1615,0.40375,2
 stable,short,200,exponential,335,19,,4000,1,0,0,3,1575,0.39375,1.9
 stable,short,200,exponential,336,20,,4000,1,0,0,3,1576,0.394,1.9
 120 days,,200,ebola_case_study,337,,real-time,4000,1,0,0,3,1657,0.41425,1.9
-120 days,,200,ebola_case_study,338,,retrospective,4000,2.92,3383,0.84575,10,43,0.01075,60.8
+120 days,,200,ebola_case_study,338,,retrospective,4000,1,0,0,3,1635,0.40875,1.4
 180 days,,200,ebola_case_study,339,,real-time,4000,1,0,0,3,1513,0.37825,1.9
-180 days,,200,ebola_case_study,340,,retrospective,4000,2.71,3409,0.85225,9,2,5e-04,21.5
+180 days,,200,ebola_case_study,340,,retrospective,4000,1,0,0,3,1511,0.37775,1.4
 240 days,,200,ebola_case_study,341,,real-time,4000,1,0,0,3,1676,0.419,1.8
-240 days,,200,ebola_case_study,342,,retrospective,4000,3.47,3379,0.84475,8,16,0.004,13.8
+240 days,,200,ebola_case_study,342,,retrospective,4000,1,0,0,3,1674,0.4185,1.5
 60 days,,200,ebola_case_study,343,,real-time,4000,1,0,0,3,1759,0.43975,1.9
-60 days,,200,ebola_case_study,344,,retrospective,4000,4.53,3454,0.8635,9,95,0.02375,30.7
+60 days,,200,ebola_case_study,344,,retrospective,4000,1,0,0,3,1475,0.36875,1.4
