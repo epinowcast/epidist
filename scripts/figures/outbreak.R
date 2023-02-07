@@ -118,7 +118,7 @@ empirical_pmf_plot <- truncated_outbreak_obs |>
 
 # TODO: Need to consider sample size. I'd suggest we just have 10, and 100 in the SI using this plot # nolint
 
-# TODO: Some estimates appear to be missing. Need to explore why this is.
+# TODO: Make CRPS scoring plot
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
 parameter_density_plot <- o_samples |>
