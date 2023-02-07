@@ -224,7 +224,9 @@ tar_file(
 #### Observation
 
   - For outbreak simulations, we estimate across sample size ranges (N =
-    10, 100, 2000). `N = 200` is the default case
+    10, 100, 200). `N = 200` is the default case. *TODO: Are we happy
+    with these sample sizes? Now the model runs quickly do we want to
+    consider large sample sizes?*.
 
 <!-- end list -->
 
@@ -625,9 +627,7 @@ tar_target(
 ```
 
   - Create completely observed retrospective cohorts for the same
-    estimation time windows. *TODO: The current definition of obs at is
-    causing fitting issues for retrospective models as it is not the
-    actual time of observation but the time of secondary event.*
+    estimation time windows.
 
 <!-- end list -->
 
@@ -636,7 +636,8 @@ tar_target(
   retrospective_ebola_obs,
   case_study_data |>
     filter_obs_by_ptime(
-      obs_time = ebola_estimation_times[, "time"][[1]]
+      obs_time = ebola_estimation_times[, "time"][[1]],
+      obs_at = "max_secondary"
     ) |>
     DT(, scenario := ebola_estimation_times[, "scenario"][[1]]) |>
     DT(, obs_type := "retrospective"),
