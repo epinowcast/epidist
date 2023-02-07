@@ -32,7 +32,7 @@ diagnostics <- map_dfr(models$model, read_diagnostics)
 
 # Metrics of interest
 # - run_time
-# - rhat
+# - rhat (per with rhat > 1.05)?
 # - per_divergent transitions
 # - per_at _max_tree_depth and max_tree_depth == 10 (or whatever max we set)
 # - Effective sample size (not currently collected). Both bulk and tail.
@@ -51,3 +51,10 @@ diagnostics <- map_dfr(models$model, read_diagnostics)
 # - violin
 # - density
 # - mean as point/line?
+
+# Plot Percentage with an Rhat greater than 1.05
+# - Line and point plot
+# - X axis: Models
+# - Y axis: Percentage with Rhat > 1.05
+# - Colour: Distribution
+# - 
