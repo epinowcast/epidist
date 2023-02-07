@@ -336,13 +336,13 @@ id,scenario,distribution,sample_size,data_type,replicate,obs_type,parameter,mean
 335,stable,short,200,exponential,19,,meanlog,1.2,1.2,1.1,1.1,1.2,1.2,1.2,1.2,1.3,1.3
 336,stable,short,200,exponential,20,,meanlog,1.2,1.2,1.1,1.1,1.1,1.2,1.2,1.2,1.2,1.2
 337,120 days,,200,ebola_case_study,,real-time,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.7,1.7,1.7
-338,120 days,,200,ebola_case_study,,retrospective,meanlog,-290,1.7,-1200,-1200,-1200,1.7,1.7,6.6,6.6,6.6
+338,120 days,,200,ebola_case_study,,retrospective,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.7
 339,180 days,,200,ebola_case_study,,real-time,meanlog,1.7,1.7,1.7,1.7,1.7,1.7,1.7,1.8,1.8,1.8
-340,180 days,,200,ebola_case_study,,retrospective,meanlog,3800,1.9,1.9,1.9,1.9,1.9,1.9,15000,15000,15000
+340,180 days,,200,ebola_case_study,,retrospective,meanlog,1.7,1.7,1.6,1.7,1.7,1.7,1.7,1.7,1.8,1.8
 341,240 days,,200,ebola_case_study,,real-time,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7
-342,240 days,,200,ebola_case_study,,retrospective,meanlog,1.6,1.6,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.7
+342,240 days,,200,ebola_case_study,,retrospective,meanlog,1.7,1.7,1.6,1.6,1.6,1.6,1.7,1.7,1.7,1.7
 343,60 days,,200,ebola_case_study,,real-time,meanlog,1.6,1.6,1.5,1.5,1.6,1.6,1.6,1.6,1.6,1.6
-344,60 days,,200,ebola_case_study,,retrospective,meanlog,4200,2.1,1.7,1.7,1.7,1.7,2.5,17000,17000,17000
+344,60 days,,200,ebola_case_study,,retrospective,meanlog,1.5,1.5,1.5,1.5,1.5,1.5,1.6,1.6,1.6,1.6
 1,early outbreak,long,10,outbreak,1,,sdlog,1.2,1,0.48,0.53,0.71,0.85,1.3,1.6,2.4,2.8
 2,early outbreak,medium,10,outbreak,1,,sdlog,0.56,0.45,0.24,0.26,0.32,0.38,0.54,0.7,1.3,1.5
 3,early outbreak,short,10,outbreak,1,,sdlog,0.45,0.38,0.19,0.21,0.28,0.33,0.45,0.56,0.92,1.1
@@ -680,13 +680,13 @@ id,scenario,distribution,sample_size,data_type,replicate,obs_type,parameter,mean
 335,stable,short,200,exponential,19,,sdlog,0.42,0.42,0.38,0.38,0.4,0.41,0.43,0.44,0.47,0.48
 336,stable,short,200,exponential,20,,sdlog,0.41,0.41,0.37,0.37,0.39,0.4,0.42,0.43,0.46,0.46
 337,120 days,,200,ebola_case_study,,real-time,sdlog,0.64,0.64,0.57,0.58,0.61,0.63,0.66,0.68,0.71,0.73
-338,120 days,,200,ebola_case_study,,retrospective,sdlog,3.3e+149,0.5,0.11,0.11,0.11,0.13,0.87,1.3e+150,1.3e+150,1.3e+150
+338,120 days,,200,ebola_case_study,,retrospective,sdlog,0.62,0.62,0.56,0.57,0.59,0.6,0.63,0.65,0.67,0.69
 339,180 days,,200,ebola_case_study,,real-time,sdlog,0.46,0.46,0.42,0.43,0.44,0.45,0.47,0.49,0.51,0.52
-340,180 days,,200,ebola_case_study,,retrospective,sdlog,5.9e+137,0.21,0.17,0.17,0.17,0.2,0.21,2.3e+138,2.3e+138,2.3e+138
+340,180 days,,200,ebola_case_study,,retrospective,sdlog,0.51,0.51,0.46,0.47,0.49,0.5,0.52,0.53,0.56,0.57
 341,240 days,,200,ebola_case_study,,real-time,sdlog,0.57,0.57,0.52,0.53,0.55,0.56,0.58,0.6,0.63,0.64
-342,240 days,,200,ebola_case_study,,retrospective,sdlog,0.31,0.3,0.27,0.27,0.27,0.28,0.32,0.34,0.34,0.34
+342,240 days,,200,ebola_case_study,,retrospective,sdlog,0.63,0.63,0.57,0.58,0.6,0.62,0.64,0.66,0.69,0.7
 343,60 days,,200,ebola_case_study,,real-time,sdlog,0.41,0.41,0.36,0.37,0.39,0.4,0.42,0.43,0.45,0.46
-344,60 days,,200,ebola_case_study,,retrospective,sdlog,3.8e+106,0.33,0.13,0.13,0.13,0.22,0.44,1.5e+107,1.5e+107,1.5e+107
+344,60 days,,200,ebola_case_study,,retrospective,sdlog,0.49,0.49,0.45,0.45,0.47,0.48,0.5,0.52,0.54,0.55
 1,early outbreak,long,10,outbreak,1,,mean,1.1e+10,9.9,3.1,3.4,4.7,6.4,20,68,3900,67000
 2,early outbreak,medium,10,outbreak,1,,mean,150000,6.1,4.1,4.3,4.9,5.4,7.2,11,96,450
 3,early outbreak,short,10,outbreak,1,,mean,21,3.4,2.5,2.6,3,3.2,3.8,4.5,11,19
@@ -1024,13 +1024,13 @@ id,scenario,distribution,sample_size,data_type,replicate,obs_type,parameter,mean
 335,stable,short,200,exponential,19,,mean,3.6,3.6,3.4,3.4,3.5,3.6,3.7,3.8,3.9,3.9
 336,stable,short,200,exponential,20,,mean,3.5,3.5,3.3,3.3,3.4,3.5,3.6,3.6,3.7,3.8
 337,120 days,,200,ebola_case_study,,real-time,mean,6.2,6.2,5.6,5.7,5.9,6.1,6.3,6.5,6.9,7
-338,120 days,,200,ebola_case_study,,retrospective,mean,Inf,550,5.6,5.6,5.6,5.6,1100,Inf,Inf,Inf
+338,120 days,,200,ebola_case_study,,retrospective,mean,6.3,6.3,5.8,5.8,6.1,6.2,6.4,6.6,6.8,6.9
 339,180 days,,200,ebola_case_study,,real-time,mean,6.3,6.3,5.9,5.9,6.1,6.2,6.4,6.5,6.7,6.8
-340,180 days,,200,ebola_case_study,,retrospective,mean,Inf,6.7,6.6,6.6,6.6,6.6,6.7,Inf,Inf,Inf
+340,180 days,,200,ebola_case_study,,retrospective,mean,6.3,6.3,5.9,5.9,6.1,6.2,6.4,6.5,6.7,6.8
 341,240 days,,200,ebola_case_study,,real-time,mean,6,6,5.6,5.6,5.8,5.9,6.1,6.3,6.5,6.6
-342,240 days,,200,ebola_case_study,,retrospective,mean,5.4,5.4,5.3,5.3,5.4,5.4,5.5,5.5,5.6,5.6
+342,240 days,,200,ebola_case_study,,retrospective,mean,6.4,6.4,5.8,5.9,6.1,6.3,6.5,6.7,6.9,7.1
 343,60 days,,200,ebola_case_study,,real-time,mean,5.3,5.3,5,5,5.1,5.2,5.4,5.4,5.6,5.7
-344,60 days,,200,ebola_case_study,,retrospective,mean,Inf,9.3,5.6,5.6,5.6,5.7,13,Inf,Inf,Inf
+344,60 days,,200,ebola_case_study,,retrospective,mean,5.3,5.3,4.9,4.9,5.1,5.2,5.3,5.4,5.6,5.7
 1,early outbreak,long,10,outbreak,1,,sd,2.7e+14,13,1.8,2.1,3.7,6.9,40,240,62000,2700000
 2,early outbreak,medium,10,outbreak,1,,sd,8900000,2.8,1.1,1.2,1.7,2.1,4.1,8.8,180,1200
 3,early outbreak,short,10,outbreak,1,,sd,150,1.3,0.58,0.65,0.87,1.1,1.7,2.6,11,30
@@ -1368,10 +1368,10 @@ id,scenario,distribution,sample_size,data_type,replicate,obs_type,parameter,mean
 335,stable,short,200,exponential,19,,sd,1.6,1.6,1.4,1.4,1.5,1.6,1.7,1.7,1.9,1.9
 336,stable,short,200,exponential,20,,sd,1.5,1.5,1.3,1.3,1.4,1.5,1.6,1.6,1.7,1.8
 337,120 days,,200,ebola_case_study,,real-time,sd,4.5,4.4,3.6,3.7,4,4.2,4.6,4.9,5.4,5.7
-338,120 days,,200,ebola_case_study,,retrospective,sd,Inf,580,0.61,0.61,0.61,0.74,1200,Inf,Inf,Inf
+338,120 days,,200,ebola_case_study,,retrospective,sd,4.3,4.3,3.6,3.7,4,4.1,4.4,4.6,5,5.2
 339,180 days,,200,ebola_case_study,,real-time,sd,3.1,3.1,2.7,2.7,2.9,3,3.2,3.3,3.5,3.6
-340,180 days,,200,ebola_case_study,,retrospective,sd,Inf,1.4,1.1,1.1,1.1,1.3,1.4,Inf,Inf,Inf
+340,180 days,,200,ebola_case_study,,retrospective,sd,3.5,3.4,3,3,3.2,3.3,3.6,3.7,4,4.1
 341,240 days,,200,ebola_case_study,,real-time,sd,3.8,3.8,3.2,3.3,3.5,3.6,3.9,4.1,4.4,4.6
-342,240 days,,200,ebola_case_study,,retrospective,sd,1.7,1.7,1.5,1.5,1.5,1.5,1.8,1.9,2,2
+342,240 days,,200,ebola_case_study,,retrospective,sd,4.5,4.4,3.7,3.8,4.1,4.3,4.6,4.8,5.3,5.5
 343,60 days,,200,ebola_case_study,,real-time,sd,2.3,2.3,1.9,2,2.1,2.2,2.3,2.4,2.6,2.7
-344,60 days,,200,ebola_case_study,,retrospective,sd,Inf,3.6,0.75,0.75,0.76,1.2,6,Inf,Inf,Inf
+344,60 days,,200,ebola_case_study,,retrospective,sd,2.8,2.7,2.4,2.4,2.6,2.7,2.8,2.9,3.2,3.3
