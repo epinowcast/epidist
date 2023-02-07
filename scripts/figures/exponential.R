@@ -105,6 +105,8 @@ facet_wrap(vars(distribution_stat), ncol = 1)
 
 # TODO: Due to the number of samples this plot is very slow to make. Can we speed it up? # nolint
 
+
+# TODO: This currently roles all the replicates into one plot. We might want another version (for the SI) that splits these out so we can explore the amount of variation. # nolint
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
 parameter_density_plot <- e_samples |>
