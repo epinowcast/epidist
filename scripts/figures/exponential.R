@@ -110,6 +110,9 @@ facet_wrap(vars(distribution_stat), ncol = 1)
 # TODO: This currently roles all the replicates into one plot. We might want another version (for the SI) that splits these out so we can explore the amount of variation. # nolint
 
 # TODO: Add coverage plot for each model
+
+# TODO: Make CRPS scoring plot
+
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
 parameter_density_plot <- e_samples |>
