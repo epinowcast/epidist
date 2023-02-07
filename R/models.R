@@ -311,7 +311,7 @@ latent_truncation_censoring_adjusted_delay_zero <- function(
   ",
     ...
 ) {
-  
+
   stanvars_functions <- brms::stanvar(
     block = "functions", scode = scode_functions
   )
@@ -323,9 +323,9 @@ latent_truncation_censoring_adjusted_delay_zero <- function(
   )
   stanvars_priors <- brms::stanvar(block = "model", scode = scode_priors)
 
-  stanvars_all <- stanvars_functions + stanvars_parameters +    
+  stanvars_all <- stanvars_functions + stanvars_parameters +
     stanvars_tparameters + stanvars_priors
-  
+
   data <- data |>
     data.table::copy() |>
     DT(, id := 1:.N) |>
@@ -333,11 +333,11 @@ latent_truncation_censoring_adjusted_delay_zero <- function(
     DT(, pwindow_upr := ptime_upr - ptime_lwr) |>
     DT(, swindow_upr := stime_upr - stime_lwr) |>
     DT(, delay_central := stime_lwr - ptime_lwr)
-  
+
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
   }
-  
+
   fit <- fn(
     formula = formula, family = family, stanvars = stanvars_all,
     backend = "cmdstanr", data = data, ...
