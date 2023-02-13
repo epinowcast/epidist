@@ -38,7 +38,7 @@ read_case_study <- function(target_model) {
 cs_samples <- map_dfr(models$model, read_case_study)
 
 # Get samples sizes
-sample_sizes <- cs_samples[,.(sample_size, obs_type, scenario)] |>
+sample_sizes <- cs_samples[, .(sample_size, obs_type, scenario)] |>
     unique() |>
     DT(, sample_size := as.numeric(as.character(sample_size))) |>
     dcast(scenario  ~ obs_type, value.var = "sample_size") |>
