@@ -109,10 +109,10 @@ runtime_plot <- clean_diagnostics |>
   ) +
   scale_x_log10() +
   scale_fill_brewer(palette = "Dark2", aesthetics = c("colour", "fill")) +
-  guides(fill = guide_legend(title = "Sample size"),
+  guides(fill = guide_legend(title = "Sample size", nrow = 1),
          col =  guide_none()) +
   labs(
-    y = "Observation day", x = "Run time (minutes)"
+    y = "Model", x = "Run time (minutes)"
   ) +
   theme(legend.position = "bottom")
 
@@ -122,14 +122,15 @@ divergent_transitions_plot <- clean_diagnostics |>
   ggplot() +
   aes(
     y = data_type, x = per_divergent_transitions,
-    col = distribution, size = sample_size
+    col = distribution, size = sample_size,
+    shape = model
   ) +
   geom_point(position = position_jitter(width = 0), alpha = 0.6) +
   scale_x_continuous(labels = scales::percent, trans = "logit") +
   theme_bw() +
   scale_fill_brewer(palette = "Dark2", aesthetics = c("colour", "fill")) +
   labs(
-    x = "Percentage of divergent transitions",
+    x = "Divergent transitions",
     y = "Data type"
   ) +
   guides(
@@ -137,7 +138,7 @@ divergent_transitions_plot <- clean_diagnostics |>
     col = guide_legend(title = "Distribution"),
     ncol = 2
   ) +
-  theme(legend.position = "bottom", legend.direction = "vertical")
+  theme(legend.position = "bottom")
 
 
 exponential_divergent_transitions_plot <- clean_diagnostics |>
@@ -147,7 +148,8 @@ exponential_divergent_transitions_plot <- clean_diagnostics |>
   aes(
     y = scenario,
     x = per_divergent_transitions,
-    col = distribution
+    col = distribution,
+    shape = model
   ) +
   geom_point(position = position_jitter(width = 0), alpha = 0.6) +
   scale_x_continuous(labels = scales::percent, trans = "logit") +
@@ -156,13 +158,13 @@ exponential_divergent_transitions_plot <- clean_diagnostics |>
     palette = "Dark2", aesthetics = c("colour", "fill")
   ) +
   labs(
-    x = "Percentage of divergent transitions",
+    x = "Divergent transitions",
     y = "Growth rate"
   ) +
   guides(
     col = guide_legend(title = "Distribution")
   ) +
-  theme(legend.position = "bottom", legend.direction = "vertical")
+  theme(legend.position = "bottom")
 
 
 
@@ -174,7 +176,8 @@ outbreak_divergent_transitions_plot <- clean_diagnostics |>
     y = scenario,
     x = per_divergent_transitions,
     col = distribution,
-    size = sample_size
+    size = sample_size,
+    shape = model
   ) +
   geom_point(position = position_jitter(width = 0), alpha = 0.6) +
   scale_x_continuous(labels = scales::percent, trans = "logit") +
@@ -183,22 +186,29 @@ outbreak_divergent_transitions_plot <- clean_diagnostics |>
     palette = "Dark2", aesthetics = c("colour", "fill")
   ) +
   labs(
-    x = "Percentage of divergent transitions",
-    y = "Observation day"
+    x = "Divergent transitions",
+    y = "Outbreak observation day"
   ) +
   guides(
     size = guide_legend(title = "Sample size"),
     col = guide_legend(title = "Distribution")
   ) +
-  theme(legend.position = "bottom", legend.direction = "vertical")
+  theme(legend.position = "bottom")
 
   ## Combine plots
-  runtime_plot /
+  diagnostic_plot <- (runtime_plot + plot_layout(guides = "keep")) /
   (
     divergent_transitions_plot +
     exponential_divergent_transitions_plot +
-    outbreak_divergent_transitions_plot
+    outbreak_divergent_transitions_plot +
+    plot_layout(guides = "collect")
   ) +
     plot_annotation(tag_levels = "A") +
-    plot_layout(guides = "collect") &
+    plot_layout(guides = "keep") &
     theme(legend.position = "bottom")
+
+# Save combined plots
+ggsave(
+  here("figures", "diagnostic.png"),  diagnostic_plot,
+  height = 12, width = 16, dpi = 330
+)
