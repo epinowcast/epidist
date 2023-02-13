@@ -21,7 +21,7 @@ read_diagnostics <- function(target_model) {
 
   # Add model name to each row
   diagnostics <- diagnostics |>
-    DT(, model := model)
+    DT(, model := target_model)
 
   return(diagnostics)
 }
@@ -57,4 +57,40 @@ diagnostics <- map_dfr(models$model, read_diagnostics)
 # - X axis: Models
 # - Y axis: Percentage with Rhat > 1.05
 # - Colour: Distribution
-# - 
+
+runtime_plot <- diagnostics |>
+  copy() |>
+  DT(, model := factor(model, levels = rev(models$model))) |>
+  DT(, value := run_time) |>
+  DT(!(obs_type %in% "retrospective")) |>
+  setkey(sample_size) |>
+  DT(,
+   sample_size := factor(
+    sample_size, levels = unique(sample_size[order(sample_size)])
+    )
+  ) |>
+  DT(,
+   mean_run_time := mean(value),
+   keyby = c("sample_size", "data_type", "model")
+  ) |>
+  DT(, data_type := data_type |>
+    gsub("_", " ", x = _)  |>
+    str_to_sentence(data_type) |>
+    factor(levels = c("Exponential", "Outbreak", "Ebola case study"))) |>
+  plot_recovery(y = model, fill = sample_size, alpha = 0.6) +
+  geom_point(
+    aes(x = mean_run_time, col = sample_size),
+    size = 2, shape = 5, alpha = 1,
+    position = position_nudge(y = 0)
+  ) +
+  facet_wrap(
+    vars(data_type),
+    scales = "free_x"
+  ) +
+  scale_x_log10() +
+  scale_fill_brewer(palette = "Dark2", aesthetics = c("colour", "fill")) +
+  guides(fill = guide_legend(title = "Sample size"), col = guide_none()) +
+  labs(
+    y = "Observation day", x = "Run time (minutes)"
+  ) +
+  theme(legend.position = "bottom")
