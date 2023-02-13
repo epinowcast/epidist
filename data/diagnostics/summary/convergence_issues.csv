@@ -1,0 +1,16 @@
+scenario,distribution,sample_size,data_type,id,replicate,obs_type,samples,max_rhat,divergent_transitions,per_divergent_transitions,max_treedepth,no_at_max_treedepth,per_at_max_treedepth,run_time,model
+early outbreak,short,10,Outbreak,3,1,"",4000,2.43,395,0.09875,10,431,0.10775,2.8,Filtered
+early outbreak,long,200,Outbreak,25,1,"",4000,1.21,3420,0.855,10,82,0.0205,61.4,Truncation and censoring adjusted
+fast growth,long,200,Exponential,170,2,"",4000,1.21,3449,0.86225,8,8,0.002,15.7,Truncation and censoring adjusted
+fast growth,long,200,Exponential,172,4,"",4000,1.55,3519,0.87975,7,42,0.0105,13.3,Truncation and censoring adjusted
+fast growth,long,200,Exponential,174,6,"",4000,1.27,3502,0.8755,9,42,0.0105,28.1,Truncation and censoring adjusted
+fast growth,long,200,Exponential,179,11,"",4000,1.11,3454,0.8635,10,76,0.019,52.9,Truncation and censoring adjusted
+fast growth,long,200,Exponential,180,12,"",4000,3.3,3507,0.87675,9,11,0.00275,25.4,Truncation and censoring adjusted
+fast growth,long,200,Exponential,181,13,"",4000,1.26,3467,0.86675,9,112,0.028,35.9,Truncation and censoring adjusted
+fast growth,long,200,Exponential,182,14,"",4000,1.35,3504,0.876,9,2,5e-04,19.8,Truncation and censoring adjusted
+fast growth,long,200,Exponential,184,16,"",4000,1.27,3463,0.86575,9,12,0.003,23.6,Truncation and censoring adjusted
+fast growth,long,200,Exponential,186,18,"",4000,1.08,3493,0.87325,7,90,0.0225,15.6,Truncation and censoring adjusted
+fast growth,long,200,Exponential,187,19,"",4000,2.71,3489,0.87225,9,2,5e-04,20.3,Truncation and censoring adjusted
+growth,long,200,Exponential,234,6,"",4000,1.09,3404,0.851,9,5,0.00125,20.3,Truncation and censoring adjusted
+growth,long,200,Exponential,238,10,"",4000,1.08,3452,0.863,8,2,5e-04,12.5,Truncation and censoring adjusted
+growth,long,200,Exponential,244,16,"",4000,1.12,3403,0.85075,7,5,0.00125,10.2,Truncation and censoring adjusted
