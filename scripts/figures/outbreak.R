@@ -114,15 +114,8 @@ empirical_pmf_plot <- truncated_outbreak_obs |>
   ) +
   facet_wrap(vars(distribution_stat), ncol = 1)
 
-# Summarise draws
-
-# TODO: Need to consider sample size. I'd suggest we just have 10, 100, 200 in the SI using this plot # nolint
-
-# TODO: Make CRPS scoring plot
-# Plot posterior densities for each parameter by model and observation type.
-# Filter out outlier values for the sake of plotting
-parameter_density_plot <- o_samples |>
-  DT(sample_size == 400) |>
+# Make a clean samples data.frame for plotting
+clean_o_samples <- o_samples |>
   draws_to_long() |>
   DT(parameter %in% c("mean", "sd")) |>
   make_relative_to_truth(
@@ -130,8 +123,6 @@ parameter_density_plot <- o_samples |>
     setnames("scenario", "distribution"),
     by = c("parameter", "distribution")
   ) |>
-  DT(rel_value <= 2) |>
-  DT(rel_value >= 0.1) |>
   merge(outbreak_estimation_times, by = "scenario") |>
   DT(, distribution_stat :=  distribution_stat |>
         str_to_sentence() |>
@@ -140,7 +131,18 @@ parameter_density_plot <- o_samples |>
   ) |>
   DT(, time := factor(time) |> fct_rev()) |>
   DT(, parameter := str_to_sentence(parameter)) |>
-  DT(, model := factor(model, levels = models$model)) |>
+  DT(, model := factor(model, levels = models$model))
+
+# Summarise draws
+
+# TODO: Need to consider sample size. I'd suggest we just have 10, 100, 200 in the SI using this plot # nolint
+
+# Plot posterior densities for each parameter by model and observation type.
+# Filter out outlier values for the sake of plotting
+parameter_density_plot <- clean_o_samples |>
+  DT(sample_size == 400) |>
+  DT(rel_value <= 2) |>
+  DT(rel_value >= 0.1) |>
   plot_relative_recovery(y = time, fill = distribution_stat) +
   facet_grid(
     vars(model), vars(parameter),
@@ -148,22 +150,91 @@ parameter_density_plot <- o_samples |>
     scales = "free_x"
   ) +
   scale_fill_brewer(palette = "Dark2") +
-  guides(fill = guide_legend(title = "Distribution"), col = guide_none()) +
+  guides(
+    fill = guide_legend(title = "Distribution", nrow = 2),
+    col = guide_none()
+  ) +
   labs(
     y = "Observation day", x = "Relative to ground truth"
   ) +
   theme(legend.position = "bottom")
 
+# Score models against known values
+scores <- clean_o_samples |>
+  DT(sample_size == 400) |>
+  copy() |>
+  DT(,
+   sample := 1:.N,
+   keyby = c("model", "scenario", "parameter", "distribution_stat", "time")
+  ) |>
+  DT(, pmf := NULL) |>
+  DT(, true_value := 0) |>
+  DT(, prediction := log(rel_value)) |>
+  DT(,
+   c("model", "scenario", "parameter", "distribution_stat", "time", "sample",
+     "prediction", "true_value"
+    )
+  ) |>
+  score()
+
+# overall scores
+overall_scores <- scores |>
+  summarise_scores(by = "model")
+
+# scores by distribution and time
+scores_by_distribution <- scores |>
+  summarise_scores(by = c("model", "distribution_stat", "time", "parameter"))
+
+# plot scores
+scores_plot <- scores_by_distribution |>
+  DT(, time := time |>
+    fct_rev()
+  ) |>
+  DT(, model := model |>
+    fct_rev()
+  ) |>
+  ggplot() +
+  aes(
+    x = crps, y = model, col = distribution_stat, size = time,
+    shape = parameter
+  ) +
+  geom_point(position = position_jitter(width = 0, height = 0.2), alpha = 0.6) +
+  geom_point(
+    data = overall_scores |>
+      DT(, model := model |>
+        fct_rev()
+      ),
+      col = "black", shape = 5, size = 4, alpha = 1
+  ) +
+  theme_bw() +
+  guides(
+    col = guide_none(),
+    size = guide_legend(title = "Observation day", nrow = 2),
+    shape = guide_legend(title = "Parameter", nrow = 2)
+  ) +
+  scale_colour_brewer(palette = "Dark2") +
+  # add a linebreak to y axis labels
+  scale_y_discrete(labels = (\(x) str_wrap(x, width = 20))) +
+  scale_x_log10() +
+  theme(legend.position = "bottom") +
+  labs(y = "Model", x = "CRPS")
 
 # Combine plots
-outbreak_plot <- obs_plot / (
-  (empirical_pmf_plot + guides(fill = guide_none())) +
-  parameter_density_plot +
-  plot_layout(width = c(1, 2))
-) +
-plot_annotation(tag_levels = "A") +
-plot_layout(guides = "collect", height = c(1, 4)) &
-theme(legend.position = "bottom")
+outbreak_plot <- obs_plot /
+  (
+    (
+      (
+        (empirical_pmf_plot + guides(fill = guide_none())) /
+        scores_plot
+      ) + plot_layout(height = c(2, 1)) |
+      parameter_density_plot
+    ) +
+    plot_layout(width = c(1, 2))
+  ) +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "collect", height = c(1, 4)) &
+  theme(legend.position = "bottom")
+  # break legends into two columns
 
 
 # Save combined plots

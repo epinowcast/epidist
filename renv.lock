@@ -1791,14 +1791,15 @@
     },
     "scoringutils": {
       "Package": "scoringutils",
-      "Version": "1.0.1",
+      "Version": "1.1.0",
       "Source": "Repository",
       "Repository": "RSPM",
-      "Hash": "173471bf1b316ed65a534d819ff35650",
+      "Hash": "bf946af9b68c5ca2103fa08c2201bdfb",
       "Requirements": [
         "data.table",
         "ggdist",
         "ggplot2",
+        "lifecycle",
         "rlang",
         "scoringRules"
       ]
