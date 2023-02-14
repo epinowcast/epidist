@@ -168,10 +168,10 @@ tar_file(
 #### Observation
 
 
-- For outbreak simulations, we estimate across sample size ranges (N = 10, 100, 200). `N = 200` is the default case. *TODO: Are we happy with these sample sizes? Now the model runs quickly do we want to consider large sample sizes?*.
+- For outbreak simulations, we estimate across sample size ranges (N = 10, 100, 200, 400). `N = 400` is the default case.
 
 ```{targets sample_sizes, tar_simple = TRUE}
-c(10, 100, 200)
+c(10, 100, 200, 400)
 ```
 
 - For the outbreak simulation, we estimate all models at chosen points across the outbreak (suggestion: "early outbreak" (15 days), "near peak" (30 days), "past peak" (45  days), "late outbreak" (60 days)). *TODO: These aren't lining up very well with the outbreak simulation*.
@@ -474,15 +474,14 @@ tar_group_by(
 )
 ```
 
-- Sample observations with 200 observations each.
+- Add sample size to observations and data type
 
 ```{targets sampled_ebola_observations}
 tar_target(
   sampled_ebola_observations,
   group_truncated_ebola_obs |>
     as.data.table() |>
-    DT(sample(1:.N, min(.N, 200), replace = FALSE)) |>
-    DT(, sample_size := 200) |>
+    DT(, sample_size := .N) |>
     DT(, data_type := "ebola_case_study"),
   pattern = map(group_truncated_ebola_obs)
 )
@@ -490,7 +489,7 @@ tar_target(
 
 ```{targets list_ebola_observations, tar_simple = TRUE}
 sampled_ebola_observations |>
-  split(by = c("scenario", "obs_type", "sample_size", "data_type"))
+  split(by = c("scenario", "obs_type", "data_type"))
 ```
 
 ```{targets ebola_scenarios, tar_simple = TRUE}
