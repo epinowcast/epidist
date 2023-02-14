@@ -9,7 +9,6 @@ library(ggplot2) # for plotting
 library(patchwork) # for combining plots
 library(stringr) # for string manipulation
 library(forcats) # manipulate factors
-
 # Load case study data
 case_study_obs <- fread(here("data/scenarios/ebola_case_study.csv"))
 
