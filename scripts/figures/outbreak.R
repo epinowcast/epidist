@@ -9,6 +9,7 @@ library(ggplot2) # for plotting
 library(patchwork) # for combining plots
 library(stringr) # for string manipulation
 library(forcats) # manipulate factors
+library(scoringutils) # for scoring forecasts/posterior predictions
 
 # Load case study data
 outbreak_obs <- fread(here("data/scenarios/outbreak-simulation.csv"))
