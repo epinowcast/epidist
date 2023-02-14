@@ -1,9 +1,13 @@
 # Load packages
+# Load packages
+devtools::load_all() # for loading the local package functions
 library(here) # for finding files
 library(data.table) # for general data manipulation
 library(purrr) # for iterating over lists
 library(ggplot2) # for plotting
 library(patchwork) # for combining plots
+library(stringr) # for string manipulation
+library(forcats) # manipulate factors
 
 # Load available models
 models <- fread(here("data/meta/models.csv")) |>
@@ -29,6 +33,35 @@ read_diagnostics <- function(target_model) {
 # Load diagnostics for each model and combine
 diagnostics <- map_dfr(models$model, read_diagnostics)
 
+# Load growth rates
+growth_rates <- fread(here("data/meta/growth_rates.csv")) |>
+  DT(, growth_rate := paste0(
+    str_to_sentence(scenario),
+    " (", round(r, 1), ")"
+  )) |>
+  DT(, growth_rate := factor(growth_rate))
+
+# Load distributions
+distributions <- fread(here("data/meta/distributions.csv")) |>
+  DT(, distribution_stat := paste0(
+    str_to_sentence(scenario),
+    " (mean: ", round(mean, 1),
+    ", sd: ", round(sd, 1), ")"
+  )) |>
+  DT(, distribution_stat := factor(distribution_stat) |>
+    fct_rev()
+  )
+
+# Get observation times
+outbreak_estimation_times <- fread(
+  here("data/meta/outbreak_estimation_times.csv")
+) |>
+  DT(, scenario_days := paste0(
+       scenario, " (day ", time, ")"
+    )
+  ) |>
+  DT(, scenario := factor(scenario)) |>
+  DT(, scenario_days := factor(scenario_days))
 
 # Add labels
 clean_diagnostics <- diagnostics |>
@@ -45,7 +78,16 @@ clean_diagnostics <- diagnostics |>
     str_to_sentence(data_type) |>
     factor(levels = c("Exponential", "Outbreak", "Ebola case study"))
   ) |>
-  DT(!(obs_type %in% "retrospective")) # Drop retrospective estimates
+  DT(!(obs_type %in% "retrospective")) |> # Drop retrospective estimates
+  merge(outbreak_estimation_times, by = "scenario", all = TRUE) |>
+  merge(distributions,  by.x = "distribution", by.y = "scenario", all = TRUE) |>
+  merge(growth_rates, by = "scenario", all = TRUE) |>
+  DT(, distribution_stat :=  distribution_stat |>
+        str_to_sentence() |>
+        factor() |>
+        fct_rev()
+  ) |>
+  DT(, r := factor(r))
 
 # Save fits with convergence issues
 clean_diagnostics |>
@@ -100,7 +142,7 @@ runtime_plot <- clean_diagnostics |>
   plot_recovery(y = model, fill = sample_size, alpha = 0.6) +
   geom_point(
     aes(x = mean_run_time, col = sample_size),
-    size = 2, shape = 5, alpha = 1,
+    size = 4, shape = 5, alpha = 1,
     position = position_nudge(y = 0)
   ) +
   facet_wrap(
@@ -108,6 +150,7 @@ runtime_plot <- clean_diagnostics |>
     scales = "free_x"
   ) +
   scale_x_log10() +
+  scale_y_discrete(labels = (\(x) str_wrap(x, width = 20))) +
   scale_fill_brewer(palette = "Dark2", aesthetics = c("colour", "fill")) +
   guides(fill = guide_legend(title = "Sample size", nrow = 1),
          col =  guide_none()) +
@@ -122,7 +165,7 @@ divergent_transitions_plot <- clean_diagnostics |>
   ggplot() +
   aes(
     y = data_type, x = per_divergent_transitions,
-    col = distribution, size = sample_size,
+    col = distribution_stat, size = sample_size,
     shape = model
   ) +
   geom_point(position = position_jitter(width = 0), alpha = 0.6) +
@@ -134,21 +177,30 @@ divergent_transitions_plot <- clean_diagnostics |>
     y = "Data type"
   ) +
   guides(
-    size = guide_legend(title = "Sample size"),
-    col = guide_legend(title = "Distribution"),
-    ncol = 2
+    size = guide_legend(title = "Sample size", nrow = 2),
+    col = guide_legend(title = "Distribution", nrow = 2),
+    shape = guide_legend(title = "Model", nrow = 2)
   ) +
   theme(legend.position = "bottom")
 
+if (
+  clean_diagnostics |>
+    DT(per_divergent_transitions > 0.01) |>
+    DT(data_type %in% "Exponential") |>
+    DT(, unique(model)) |>
+    (\(x) x != "Truncation and censoring adjusted") ()
+  ) {
+    stop("Exponential data type should only have one model")
+}
 
 exponential_divergent_transitions_plot <- clean_diagnostics |>
   DT(per_divergent_transitions > 0.01) |>
   DT(data_type %in% "Exponential") |>
   ggplot() +
   aes(
-    y = scenario,
+    y = r,
     x = per_divergent_transitions,
-    col = distribution,
+    col = distribution_stat,
     shape = model
   ) +
   geom_point(position = position_jitter(width = 0), alpha = 0.6) +
@@ -162,7 +214,8 @@ exponential_divergent_transitions_plot <- clean_diagnostics |>
     y = "Growth rate"
   ) +
   guides(
-    col = guide_legend(title = "Distribution")
+    col = guide_legend(title = "Distribution", nrow = 2),
+    shape = guide_none()
   ) +
   theme(legend.position = "bottom")
 
@@ -171,11 +224,12 @@ exponential_divergent_transitions_plot <- clean_diagnostics |>
 outbreak_divergent_transitions_plot <- clean_diagnostics |>
   DT(per_divergent_transitions > 0.01) |>
   DT(data_type %in% "Outbreak") |>
+  DT(, time  := time |> factor() |> fct_rev()) |>
   ggplot() +
   aes(
-    y = scenario,
+    y = time,
     x = per_divergent_transitions,
-    col = distribution,
+    col = distribution_stat,
     size = sample_size,
     shape = model
   ) +
@@ -190,8 +244,9 @@ outbreak_divergent_transitions_plot <- clean_diagnostics |>
     y = "Outbreak observation day"
   ) +
   guides(
-    size = guide_legend(title = "Sample size"),
-    col = guide_legend(title = "Distribution")
+    size = guide_legend(title = "Sample size", nrow = 2),
+    col = guide_legend(title = "Distribution", nrow = 2),
+    shape = guide_legend(title = "Model", nrow = 2)
   ) +
   theme(legend.position = "bottom")
 
