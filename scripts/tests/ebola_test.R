@@ -19,18 +19,15 @@ case_study_data <- raw_case_study_data |>
   ) |>
   observe_process()
 
-ggplot(case_study_data) +
-  geom_smooth(aes(ptime, delay_daily))
-
 case_study_data_trunc <- case_study_data |>
   filter_obs_by_obs_time(
-    obs_time = 240
+    obs_time = 60
   ) |>
   DT(, obs_type := "real-time")
 
 case_study_data_retro <- case_study_data |>
   filter_obs_by_ptime(
-    obs_time = 240,
+    obs_time = 60,
     obs_at = "max_secondary"
   ) |>
   DT(, obs_type := "retrospective")
@@ -56,31 +53,38 @@ naive_retro_draws <- extract_lognormal_draws(naive_retro)
 plot(density(naive_trunc_draws$mean))
 lines(density(naive_retro_draws$mean), col=2)
 
-tar_load("sampled_ebola_observations")
-sampled_ebola_observations_240 <- sampled_ebola_observations %>%
-  filter(scenario=="240 days")
+hist(case_study_data_trunc$delay_daily, freq=FALSE)
+curve(dlnorm(x, 1.47, exp(0.11)), add=T)
 
+case_study_data_trunc2 <- case_study_data_trunc
+case_study_data_trunc2 <- case_study_data_trunc2[case_study_data_trunc2$delay_daily!=0,]
 
-sampled_ebola_observations_240_rt <- sampled_ebola_observations_240 %>%
-  filter(obs_type=="real-time")
-
-sampled_ebola_observations_240_ret <- sampled_ebola_observations_240 %>%
-  filter(obs_type=="retrospective")
-
-mean(sampled_ebola_observations_240_rt$stime-sampled_ebola_observations_240_rt$ptime)
-mean(sampled_ebola_observations_240_ret$stime-sampled_ebola_observations_240_ret$ptime)
-
-sd(sampled_ebola_observations_240_rt$stime-sampled_ebola_observations_240_rt$ptime)
-sd(sampled_ebola_observations_240_ret$stime-sampled_ebola_observations_240_ret$ptime)
-
-plot(density(case_study_data_trunc$stime-case_study_data_trunc$ptime), lwd=2)
-lines(density(sampled_ebola_observations_240_rt$stime-sampled_ebola_observations_240_rt$ptime), col=2, lwd=2)
-
-naive_retro_sub <- naive_delay(
-  data = sampled_ebola_observations_240_ret, cores = 4, refresh = 0
+naive_trunc2 <- naive_delay(
+  data = case_study_data_trunc2, cores = 4, refresh = 0
 )
 
-naive_retro_sub_draws <- extract_lognormal_draws(naive_retro_sub)
+dd <- case_study_data_trunc$delay_daily
+dd[dd==0] <- 1e-3
 
-hist(sampled_ebola_observations_240_ret$delay_daily, breaks=50, freq=FALSE)
-curve(dlnorm(x, meanlog=1.59, sdlog=exp(-0.17)), add=TRUE)
+hist(log(dd), freq=FALSE)
+curve(dnorm(x, 1.47, exp(0.11)), add=T)
+
+censor_trunc <- censoring_adjusted_delay(
+  data = case_study_data_trunc, cores = 4, refresh = 0
+)
+
+censor_trunc_draws <- extract_lognormal_draws(censor_trunc)
+
+trunc_trunc <- truncation_adjusted_delay(
+  data = case_study_data_trunc, cores = 4, refresh = 0
+)
+
+trunc_trunc2 <- truncation_adjusted_delay(
+  data = case_study_data_trunc2, cores = 4, refresh = 0
+)
+
+trunc_trunc_draws2 <- extract_lognormal_draws(naive_trunc2)
+
+quantile(trunc_trunc_draws2$mean, c(0.025, 0.5, 0.975))
+quantile(trunc_trunc_draws2$sd, c(0.025, 0.5, 0.975))
+
