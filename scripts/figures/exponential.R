@@ -159,7 +159,9 @@ parameter_density_plot <- clean_e_samples |>
     scales = "free_x"
   ) +
   scale_fill_brewer(palette = "Dark2") +
-  guides(fill = guide_legend(title = "Distribution"), col = guide_none()) +
+  guides(
+    fill = guide_legend(title = "Distribution", nrow = 2), col = guide_none()
+  ) +
   labs(
     y = "Growth rate", x = "Relative to ground truth"
   ) +
