@@ -9,6 +9,7 @@ library(ggplot2) # for plotting
 library(patchwork) # for combining plots
 library(stringr) # for string manipulation
 library(forcats) # manipulate factors
+library(scoringutils) # for scoring forecasts/posterior predictions
 
 # Load simulated cases
 exponential_obs <- fread(here("data/scenarios/exponential-simulation.csv"))
@@ -90,7 +91,9 @@ empirical_pmf_plot <- truncated_exponential_obs |>
   theme_bw() +
   theme(legend.position = "bottom") +
   labs(x = "Days", y = "Density") +
-  guides(fill = guide_legend(title = "Growth rate", reverse = FALSE)) +
+  guides(
+    fill = guide_legend(title = "Growth rate", reverse = FALSE, ncol = 2)
+  ) +
   geom_line(
     data = distributions |>
       DT(,
@@ -103,19 +106,15 @@ facet_wrap(vars(distribution_stat), ncol = 1)
 
 # Summarise draws
 
-# TODO: Due to the number of samples this plot is very slow to make. Can we speed it up? # nolint
-
 # TODO: The non-latent truncation and censoring model currently has a very odd looking posterior. Does this indicate a bug or just some kind of bias in the model. # nolint
 
 # TODO: This currently roles all the replicates into one plot. We might want another version (for the SI) that splits these out so we can explore the amount of variation. # nolint
 
 # TODO: Add coverage plot for each model
 
-# TODO: Make CRPS scoring plot
-
-# Plot posterior densities for each parameter by model and observation type.
-# Filter out outlier values for the sake of plotting
-parameter_density_plot <- e_samples |>
+# Make a clean samples data.frame for plotting
+clean_e_samples <- e_samples |>
+  copy() |>
   DT(,
     c(
       "sample_size", "data_type", "id", "obs_type"
@@ -124,9 +123,8 @@ parameter_density_plot <- e_samples |>
   draws_to_long() |>
   DT(parameter %in% c("mean", "sd")) |>
   make_relative_to_truth(
-    draws_to_long(distributions)[parameter %in% c("mean", "sd")] |>
-      DT(, pmf := NULL) |>
-      setnames("scenario", "distribution"),
+    draws_to_long(distributions) |>
+    setnames("scenario", "distribution"),
     by = c("parameter", "distribution")
   ) |>
   DT(, distribution_stat :=  distribution_stat |>
@@ -138,6 +136,20 @@ parameter_density_plot <- e_samples |>
   DT(, model := factor(model, levels = models$model)) |>
   DT(growth_rates, on = "scenario") |>
   DT(, r := factor(r)) |>
+  DT(,
+   sample := 1:.N,
+   keyby = c("model", "scenario", "parameter", "distribution_stat", "r",
+             "replicate"
+            )
+  )
+
+# Clean this up to save save memory
+rm(e_samples)
+
+# Plot posterior densities for each parameter by model and observation type.
+# Filter out outlier values for the sake of plotting
+parameter_density_plot <- clean_e_samples |>
+  DT(sample <= 1000) |> # Limit to 1000 samples for plotting speed and memory
   DT(rel_value <= 2) |>
   DT(rel_value >= 0.1) |>
   plot_relative_recovery(y = r, fill = distribution_stat) +
@@ -154,8 +166,62 @@ parameter_density_plot <- e_samples |>
   theme(legend.position = "bottom")
 
 
+scores <- clean_e_samples |>
+  DT(, true_value := 0) |>
+  DT(, prediction := log(rel_value)) |>
+  DT(,
+   c("model", "scenario", "parameter", "distribution_stat", "r", "replicate",
+     "sample", "prediction", "true_value"
+    )
+  ) |>
+  score()
+
+# overall scores
+overall_scores <- scores |>
+  summarise_scores(by = "model")
+
+# scores by distribution and growth rate
+scores_by_distribution <- scores |>
+  summarise_scores(by = c("model", "distribution_stat", "r", "parameter"))
+
+# Clean up scores to save memory
+rm(scores)
+
+# plot scores
+scores_plot <- scores_by_distribution |>
+  DT(, model := model |>
+    fct_rev()
+  ) |>
+  ggplot() +
+  aes(
+    x = crps, y = model, col = distribution_stat, size = r,
+    shape = parameter
+  ) +
+  geom_point(position = position_jitter(width = 0, height = 0.2), alpha = 0.6) +
+  geom_point(
+    data = overall_scores |>
+      DT(, model := model |>
+        fct_rev()
+      ),
+      col = "black", shape = 5, size = 4, alpha = 1
+  ) +
+  theme_bw() +
+  guides(
+    col = guide_none(),
+    size = guide_legend(title = "Growth rate", nrow = 2),
+    shape = guide_legend(title = "Parameter", nrow = 2)
+  ) +
+  scale_colour_brewer(palette = "Dark2") +
+  # add a linebreak to y axis labels
+  scale_y_discrete(labels = (\(x) str_wrap(x, width = 20))) +
+  scale_x_log10() +
+  theme(legend.position = "bottom") +
+  labs(y = "Model", x = "CRPS")
+
 # Combine plots
-exponential_plot <- empirical_pmf_plot + parameter_density_plot +
+exponential_plot <- ((empirical_pmf_plot / scores_plot) +
+  plot_layout(height = c(2, 1)) |
+  parameter_density_plot) +
   plot_annotation(tag_levels = "A") +
   plot_layout(guides = "collect", width = c(1, 2)) &
   theme(legend.position = "bottom")
