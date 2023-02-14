@@ -1,0 +1,51 @@
+scenario,distribution,sample_size,data_type,id,replicate,obs_type,samples,max_rhat,divergent_transitions,per_divergent_transitions,max_treedepth,no_at_max_treedepth,per_at_max_treedepth,run_time,model
+early outbreak,short,10,Outbreak,3,1,"",4000,2.43,395,0.09875,10,431,0.10775,2.8,Filtered
+early outbreak,short,10,Outbreak,3,1,"",4000,1.02,707,0.17675,6,50,0.0125,0.4,Filtered and censoring adjusted
+early outbreak,medium,10,Outbreak,2,1,"",4000,1.03,458,0.1145,6,33,0.00825,0.4,Truncation adjusted
+early outbreak,short,10,Outbreak,3,1,"",4000,1.01,231,0.05775,6,7,0.00175,0.3,Truncation adjusted
+late outbreak,medium,10,Outbreak,5,1,"",4000,1,77,0.01925,4,42,0.0105,0.2,Truncation adjusted
+late outbreak,short,10,Outbreak,6,1,"",4000,1,667,0.16675,5,246,0.0615,0.4,Truncation adjusted
+near peak,short,10,Outbreak,9,1,"",4000,1,292,0.073,5,5,0.00125,0.3,Truncation adjusted
+early outbreak,medium,10,Outbreak,2,1,"",4000,1.03,1728,0.432,7,2,5e-04,0.7,Truncation and censoring adjusted
+early outbreak,short,10,Outbreak,3,1,"",4000,1.03,2399,0.59975,8,4,0.001,0.9,Truncation and censoring adjusted
+late outbreak,medium,10,Outbreak,5,1,"",4000,1,364,0.091,5,286,0.0715,0.4,Truncation and censoring adjusted
+late outbreak,short,10,Outbreak,6,1,"",4000,1.01,2275,0.56875,6,2,5e-04,1,Truncation and censoring adjusted
+near peak,short,10,Outbreak,9,1,"",4000,1,875,0.21875,7,151,0.03775,0.9,Truncation and censoring adjusted
+early outbreak,short,100,Outbreak,15,1,"",4000,1,160,0.04,4,28,0.007,1,Truncation and censoring adjusted
+early outbreak,long,200,Outbreak,25,1,"",4000,1.21,3420,0.855,10,82,0.0205,61.4,Truncation and censoring adjusted
+fast growth,long,200,Exponential,170,2,"",4000,1.21,3449,0.86225,8,8,0.002,15.7,Truncation and censoring adjusted
+fast growth,long,200,Exponential,172,4,"",4000,1.55,3519,0.87975,7,42,0.0105,13.3,Truncation and censoring adjusted
+fast growth,long,200,Exponential,174,6,"",4000,1.27,3502,0.8755,9,42,0.0105,28.1,Truncation and censoring adjusted
+fast growth,long,200,Exponential,179,11,"",4000,1.11,3454,0.8635,10,76,0.019,52.9,Truncation and censoring adjusted
+fast growth,long,200,Exponential,180,12,"",4000,3.3,3507,0.87675,9,11,0.00275,25.4,Truncation and censoring adjusted
+fast growth,long,200,Exponential,181,13,"",4000,1.26,3467,0.86675,9,112,0.028,35.9,Truncation and censoring adjusted
+fast growth,long,200,Exponential,182,14,"",4000,1.35,3504,0.876,9,2,5e-04,19.8,Truncation and censoring adjusted
+fast growth,long,200,Exponential,184,16,"",4000,1.27,3463,0.86575,9,12,0.003,23.6,Truncation and censoring adjusted
+fast growth,long,200,Exponential,186,18,"",4000,1.08,3493,0.87325,7,90,0.0225,15.6,Truncation and censoring adjusted
+fast growth,long,200,Exponential,187,19,"",4000,2.71,3489,0.87225,9,2,5e-04,20.3,Truncation and censoring adjusted
+fast growth,medium,200,Exponential,205,17,"",4000,1.01,1948,0.487,7,37,0.00925,9.3,Truncation and censoring adjusted
+fast growth,short,200,Exponential,209,1,"",4000,1.02,3163,0.79075,8,25,0.00625,16.3,Truncation and censoring adjusted
+fast growth,short,200,Exponential,210,2,"",4000,1.01,2526,0.6315,10,56,0.014,50.4,Truncation and censoring adjusted
+fast growth,short,200,Exponential,211,3,"",4000,1.02,2797,0.69925,8,35,0.00875,14.2,Truncation and censoring adjusted
+fast growth,short,200,Exponential,212,4,"",4000,1.01,2679,0.66975,8,9,0.00225,13.4,Truncation and censoring adjusted
+fast growth,short,200,Exponential,213,5,"",4000,1.01,2849,0.71225,8,4,0.001,15.4,Truncation and censoring adjusted
+fast growth,short,200,Exponential,214,6,"",4000,1.01,2951,0.73775,8,177,0.04425,20,Truncation and censoring adjusted
+fast growth,short,200,Exponential,215,7,"",4000,1.03,3023,0.75575,6,279,0.06975,9.2,Truncation and censoring adjusted
+fast growth,short,200,Exponential,216,8,"",4000,1.04,2984,0.746,7,4,0.001,6.9,Truncation and censoring adjusted
+fast growth,short,200,Exponential,217,9,"",4000,1,171,0.04275,4,376,0.094,1.9,Truncation and censoring adjusted
+fast growth,short,200,Exponential,218,10,"",4000,1,105,0.02625,3,1567,0.39175,1.7,Truncation and censoring adjusted
+fast growth,short,200,Exponential,219,11,"",4000,1.02,3222,0.8055,8,30,0.0075,16.3,Truncation and censoring adjusted
+fast growth,short,200,Exponential,220,12,"",4000,1,2452,0.613,5,449,0.11225,9.8,Truncation and censoring adjusted
+fast growth,short,200,Exponential,221,13,"",4000,1.03,2919,0.72975,8,5,0.00125,12.2,Truncation and censoring adjusted
+fast growth,short,200,Exponential,222,14,"",4000,1.02,2851,0.71275,8,6,0.0015,14.6,Truncation and censoring adjusted
+fast growth,short,200,Exponential,223,15,"",4000,1.01,2039,0.50975,6,109,0.02725,9.4,Truncation and censoring adjusted
+fast growth,short,200,Exponential,224,16,"",4000,1,525,0.13125,5,322,0.0805,3.8,Truncation and censoring adjusted
+fast growth,short,200,Exponential,225,17,"",4000,1.02,2489,0.62225,9,121,0.03025,35.3,Truncation and censoring adjusted
+fast growth,short,200,Exponential,226,18,"",4000,1.01,2796,0.699,7,38,0.0095,10.5,Truncation and censoring adjusted
+fast growth,short,200,Exponential,227,19,"",4000,1.01,3055,0.76375,9,5,0.00125,22.5,Truncation and censoring adjusted
+fast growth,short,200,Exponential,228,20,"",4000,1.02,2734,0.6835,10,31,0.00775,43.2,Truncation and censoring adjusted
+growth,long,200,Exponential,232,4,"",4000,1.04,3256,0.814,10,214,0.0535,72.2,Truncation and censoring adjusted
+growth,long,200,Exponential,234,6,"",4000,1.09,3404,0.851,9,5,0.00125,20.3,Truncation and censoring adjusted
+growth,long,200,Exponential,237,9,"",4000,1.05,3443,0.86075,8,18,0.0045,15.1,Truncation and censoring adjusted
+growth,long,200,Exponential,238,10,"",4000,1.08,3452,0.863,8,2,5e-04,12.5,Truncation and censoring adjusted
+growth,long,200,Exponential,244,16,"",4000,1.12,3403,0.85075,7,5,0.00125,10.2,Truncation and censoring adjusted

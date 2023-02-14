@@ -37,6 +37,14 @@ read_case_study <- function(target_model) {
 # Load case study samples for each model and combine
 cs_samples <- map_dfr(models$model, read_case_study)
 
+# Get samples sizes
+sample_sizes <- cs_samples[, .(sample_size, obs_type, scenario)] |>
+    unique() |>
+    DT(, sample_size := as.numeric(as.character(sample_size))) |>
+    dcast(scenario  ~ obs_type, value.var = "sample_size") |>
+    DT(, per := round(100 * `real-time` / retrospective, 1))
+sample_sizes
+
 # Get observation times
 obs_times <- cs_samples |>
   DT(, unique(scenario)) |>
@@ -73,6 +81,7 @@ empirical_pmf_plot <- combined_cs_obs |>
   DT(delay_daily <= 20) |>
   plot_empirical_delay() +
   facet_wrap(vars(type), ncol = 1)
+
 
 
 # Plot posterior densities for each parameter by model and observation type.
