@@ -87,7 +87,11 @@ truncated_cs_obs_by_window <- outbreak_obs |>
   )
 
 obs_plot <- plot_cases_by_obs_window(truncated_cs_obs_by_window) +
-  facet_wrap(vars(distribution_stat), nrow = 1)
+  facet_wrap(vars(distribution_stat), nrow = 1) +
+  guides(
+    fill = guide_legend(title = "Observation day", reverse = TRUE, nrow = 2),
+    color = guide_legend(title = "Observation day", reverse = TRUE, nrow = 2)
+  )
 
 # Plot empirical PMF for each observation window
 # First construct observed and retrospective data by window and join with
@@ -218,7 +222,7 @@ scores_plot <- scores_by_distribution |>
   scale_y_discrete(labels = (\(x) str_wrap(x, width = 20))) +
   scale_x_log10() +
   theme(legend.position = "bottom") +
-  labs(y = "Model", x = "CRPS")
+  labs(y = "Model", x = "Relative CRPS")
 
 # Combine plots
 outbreak_plot <- obs_plot /
