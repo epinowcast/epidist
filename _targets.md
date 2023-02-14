@@ -224,15 +224,13 @@ tar_file(
 #### Observation
 
   - For outbreak simulations, we estimate across sample size ranges (N =
-    10, 100, 200). `N = 200` is the default case. *TODO: Are we happy
-    with these sample sizes? Now the model runs quickly do we want to
-    consider large sample sizes?*.
+    10, 100, 200, 400). `N = 400` is the default case.
 
 <!-- end list -->
 
 ``` r
 tar_target(sample_sizes, {
-  c(10, 100, 200)
+  c(10, 100, 200, 400)
 })
 #> Define target sample_sizes from chunk code.
 #> Establish _targets.R and _targets_r/targets/sample_sizes.R.
@@ -655,7 +653,7 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/group_truncated_ebola_obs.R.
 ```
 
-  - Sample observations with 200 observations each.
+  - Add sample size to observations and data type
 
 <!-- end list -->
 
@@ -664,8 +662,7 @@ tar_target(
   sampled_ebola_observations,
   group_truncated_ebola_obs |>
     as.data.table() |>
-    DT(sample(1:.N, min(.N, 200), replace = FALSE)) |>
-    DT(, sample_size := 200) |>
+    DT(, sample_size := .N) |>
     DT(, data_type := "ebola_case_study"),
   pattern = map(group_truncated_ebola_obs)
 )
@@ -675,7 +672,7 @@ tar_target(
 ``` r
 tar_target(list_ebola_observations, {
   sampled_ebola_observations |>
-    split(by = c("scenario", "obs_type", "sample_size", "data_type"))
+    split(by = c("scenario", "obs_type", "data_type"))
 })
 #> Define target list_ebola_observations from chunk code.
 #> Establish _targets.R and _targets_r/targets/list_ebola_observations.R.
