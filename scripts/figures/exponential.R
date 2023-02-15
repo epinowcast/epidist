@@ -218,7 +218,7 @@ scores_plot <- scores_by_distribution |>
   scale_y_discrete(labels = (\(x) str_wrap(x, width = 20))) +
   scale_x_log10() +
   theme(legend.position = "bottom") +
-  labs(y = "Model", x = "CRPS")
+  labs(y = "Model", x = "Relative CRPS")
 
 # Combine plots
 exponential_plot <- ((empirical_pmf_plot / scores_plot) +
