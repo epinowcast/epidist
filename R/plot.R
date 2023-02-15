@@ -57,8 +57,9 @@ plot_empirical_delay <- function(cases, meanlog, sdlog) {
     ggplot() +
     aes(x = delay_daily) +
     geom_histogram(
-      aes(y = after_stat(density), fill = obs_at), binwidth = 1, position = "dodge",
-      col = "#696767b1"
+      aes(
+        y = after_stat(density), fill = obs_at), binwidth = 1,
+        position = "dodge", col = "#696767b1"
     )
 
   if (!missing(meanlog) && !missing(sdlog)) {
@@ -90,7 +91,7 @@ plot_censor_delay <- function(censor_delay) {
     labs(
       x = "Cohort time (day)",
       y = "Mean different between continuous and discrete event time"
-    )  
+    )
 }
 
 #' plot empirical cohort-based or cumulative mean vs posterior mean
@@ -105,55 +106,55 @@ plot_posterior_pred_check <- function(fit,
                                       truncate,
                                       obs_at) {
   type <- match.arg(type)
-  
+
   gplot <- plot_cohort_mean(data, type)
-  
+
   prange <- range(data$ptime_daily)
   pvec <- seq(prange[1], prange[2], by=1)
-  
+
   ee <- extract_lognormal_draws(fit)
-  
+
   if (truncate) {
     if (type == "cumulative") {
       stop("Don't use the truncate option with cumulative mean.")
     }
-    
+
     if (missing(obs_at)) {
       ## FIXME: is this safe for more general usage? our data always have obs_at
       ## option 1: spit out a warning and take the maximum secondary event time
       ## the problem with option 1 is  that if someone's looking at old data..?
       obs_at <- unique(data$obs_at)
     }
-    
-    estmat <- matrix(NA, nrow=nrow(ee), ncol=length(pvec))
-    
+
+    estmat <- matrix(NA, nrow = nrow(ee), ncol = length(pvec))
+
     ## calculate truncated mean
     message("Calculating truncated means...")
-    for (j in 1:length(pvec)) {
+    for (j in seq_along(pvec)) {
       estvec <- rep(NA, nrow(ee))
-      
-      for (i in 1:nrow(ee)) {
-          
+
+      for (i in seq_len(nrow(ee))) {
+
         p <- pvec[j]
-        
+
         numer <- integrate(
           function(x) {
             x * dlnorm(x, meanlog = ee$meanlog[i], sdlog = ee$sdlog[i])
           },
-          lower=0, upper=obs_at - p
+          lower = 0, upper = obs_at - p
         )[[1]]
-        
+
         denom <- integrate(
           function(x) {
             dlnorm(x, meanlog = ee$meanlog[i], sdlog = ee$sdlog[i])
           },
-          lower=0, upper=obs_at - p
+          lower = 0, upper = obs_at - p
         )[[1]]
-        
-        estmat[i,j] <- numer / denom
+
+        estmat[i, j] <- numer / denom
       }
     }
-  
+
     fitted <- data.table(
       pvec = pvec,
       mean = apply(estmat, 2, mean),
@@ -166,51 +167,51 @@ plot_posterior_pred_check <- function(fit,
       mean = mean(ee$mean),
       lwr = quantile(ee$mean, 0.025),
       upr = quantile(ee$mean, 0.975)
-    )  
+    )
   }
-  
+
   gplot <- gplot +
     geom_ribbon(
-      data = fitted, aes(pvec, ymin=lwr, ymax=upr), alpha=0.3,
-      lty=2, col="black"
+      data = fitted, aes(pvec, ymin = lwr, ymax  upr), alpha = 0.3,
+      lty = 2, col = "black"
     ) +
-    geom_line(data=fitted, aes(pvec, mean))
+    geom_line(data = fitted, aes(pvec, mean))
 
   return(gplot)
 }
 
-#' Plot empirical cohort-based or cumulative mean 
+#' Plot empirical cohort-based or cumulative mean
 #' @export
-plot_cohort_mean <- function(data, type=c("cohort", "cumulative")) {
-  
+plot_cohort_mean <- function(data, type = c("cohort", "cumulative")) {
+
   out <- plot_cohort_mean_internal(data, type)
-  
+
   gplot <- ggplot(out) +
-    geom_point(aes(ptime_daily, mean, size=n), shape=1) +
+    geom_point(aes(ptime_daily, mean, size = n), shape = 1) +
     theme_bw() +
     scale_size("Number of samples") +
     labs(
       x = "Cohort time (day)",
       y = "Mean delay (days)"
-    )  
-  
+    )
+
   return(gplot)
 }
 
 plot_cohort_mean_internal <- function(data, type=c("cohort", "cumulative")) {
   type <- match.arg(type)
-  
+
   out <- data |>
     copy() |>
     DT(, .(mean = mean(delay_daily),
            n = .N), by = "ptime_daily") |>
     DT(order(rank(ptime_daily)))
-  
+
   if (type=="cumulative") {
     out[, mean := cumsum(mean * n)/cumsum(n)]
     out[, n := cumsum(n)]
-    
+
   }
-  
+
   return(out[])
 }
