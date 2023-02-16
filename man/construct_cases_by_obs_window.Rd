@@ -7,7 +7,8 @@
 construct_cases_by_obs_window(
   linelist,
   windows = c(25, 45),
-  obs_type = c("stime", "ptime")
+  obs_type = c("stime", "ptime"),
+  upper_window = max(linelist$stime_daily)
 )
 }
 \description{
