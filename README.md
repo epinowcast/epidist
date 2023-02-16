@@ -109,7 +109,7 @@ First fit a naive lognormal model with no adjustment.
 naive_fit <- naive_delay(data = truncated_obs, cores = 4, refresh = 0)
 #> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 0.1 seconds.
+#> Chain 1 finished in 0.2 seconds.
 #> Chain 2 finished in 0.2 seconds.
 #> Chain 3 finished in 0.1 seconds.
 #> Chain 4 finished in 0.1 seconds.
@@ -135,7 +135,7 @@ filtered_fit <- filtered_naive_delay(
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.1 seconds.
-#> Total execution time: 0.3 seconds.
+#> Total execution time: 0.2 seconds.
 ```
 
 Adjust for date censoring.
@@ -171,7 +171,7 @@ filtered_censored_fit <- filtered_censoring_adjusted_delay(
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.3 seconds.
-#> Total execution time: 0.5 seconds.
+#> Total execution time: 0.4 seconds.
 ```
 
 Adjust for right truncation.
@@ -185,11 +185,11 @@ truncation_fit <- truncation_adjusted_delay(
 #> Chain 1 finished in 0.7 seconds.
 #> Chain 2 finished in 0.7 seconds.
 #> Chain 3 finished in 0.7 seconds.
-#> Chain 4 finished in 0.7 seconds.
+#> Chain 4 finished in 0.8 seconds.
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.7 seconds.
-#> Total execution time: 0.9 seconds.
+#> Total execution time: 1.0 seconds.
 ```
 
 Adjust for right truncation and date censoring.
@@ -220,13 +220,13 @@ latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
 #> Running MCMC with 4 parallel chains...
 #> 
 #> Chain 1 finished in 3.4 seconds.
-#> Chain 2 finished in 3.4 seconds.
 #> Chain 3 finished in 3.4 seconds.
 #> Chain 4 finished in 3.3 seconds.
+#> Chain 2 finished in 3.4 seconds.
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 3.4 seconds.
-#> Total execution time: 3.5 seconds.
+#> Total execution time: 3.6 seconds.
 ```
 
 ### Summarise model posteriors and compare to known truth
@@ -251,11 +251,12 @@ Extract and summarise lognormal posterior estimates.
 ``` r
 draws <- models |>
   map(extract_lognormal_draws) |>
-  map(draws_to_long) |>
   rbindlist(idcol = "model") |>
   DT(, model := factor(model, levels = rev(names(models))))
 
-summarised_draws <- summarise_lognormal_draws(draws, sf = 2)
+summarised_draws <- draws |>
+  draws_to_long() |>
+  summarise_draws(sf = 2)
 
 knitr::kable(summarised_draws[parameter %in% c("meanlog", "sdlog")])
 ```
@@ -263,18 +264,18 @@ knitr::kable(summarised_draws[parameter %in% c("meanlog", "sdlog")])
 | model                                             | parameter | mean | median | q2.5 |   q5 |  q20 |  q35 |  q65 |  q80 |  q95 | q97.5 |
 | :------------------------------------------------ | :-------- | ---: | -----: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ----: |
 | Naive                                             | meanlog   | 1.60 |   1.60 | 1.50 | 1.50 | 1.50 | 1.60 | 1.60 | 1.60 | 1.60 |  1.60 |
-| Naive                                             | sdlog     | 0.49 |   0.49 | 0.44 | 0.45 | 0.47 | 0.48 | 0.50 | 0.51 | 0.53 |  0.54 |
 | Filtered                                          | meanlog   | 1.70 |   1.70 | 1.60 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 |  1.80 |
-| Filtered                                          | sdlog     | 0.45 |   0.45 | 0.40 | 0.41 | 0.43 | 0.44 | 0.46 | 0.48 | 0.50 |  0.51 |
 | Censoring adjusted                                | meanlog   | 1.60 |   1.60 | 1.50 | 1.50 | 1.50 | 1.60 | 1.60 | 1.60 | 1.60 |  1.60 |
-| Censoring adjusted                                | sdlog     | 0.45 |   0.45 | 0.40 | 0.41 | 0.43 | 0.44 | 0.46 | 0.47 | 0.49 |  0.51 |
 | Filtered and censoring adjusted                   | meanlog   | 1.70 |   1.70 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 |  1.80 |
-| Filtered and censoring adjusted                   | sdlog     | 0.42 |   0.42 | 0.37 | 0.37 | 0.40 | 0.41 | 0.43 | 0.45 | 0.48 |  0.49 |
 | Truncation adjusted                               | meanlog   | 1.90 |   1.80 | 1.70 | 1.70 | 1.80 | 1.80 | 1.90 | 1.90 | 2.00 |  2.00 |
-| Truncation adjusted                               | sdlog     | 0.56 |   0.55 | 0.49 | 0.50 | 0.52 | 0.54 | 0.57 | 0.59 | 0.63 |  0.65 |
 | Truncation and censoring adjusted                 | meanlog   | 1.80 |   1.80 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 | 1.90 | 1.90 |  1.90 |
-| Truncation and censoring adjusted                 | sdlog     | 0.48 |   0.48 | 0.41 | 0.42 | 0.45 | 0.46 | 0.49 | 0.51 | 0.54 |  0.56 |
 | Latent variable truncation and censoring adjusted | meanlog   | 1.80 |   1.80 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 | 1.90 |  1.90 |
+| Naive                                             | sdlog     | 0.49 |   0.49 | 0.44 | 0.45 | 0.47 | 0.48 | 0.50 | 0.51 | 0.53 |  0.54 |
+| Filtered                                          | sdlog     | 0.45 |   0.45 | 0.40 | 0.41 | 0.43 | 0.44 | 0.46 | 0.48 | 0.50 |  0.51 |
+| Censoring adjusted                                | sdlog     | 0.45 |   0.45 | 0.40 | 0.41 | 0.43 | 0.44 | 0.46 | 0.47 | 0.49 |  0.51 |
+| Filtered and censoring adjusted                   | sdlog     | 0.42 |   0.42 | 0.37 | 0.37 | 0.40 | 0.41 | 0.43 | 0.45 | 0.48 |  0.49 |
+| Truncation adjusted                               | sdlog     | 0.56 |   0.55 | 0.49 | 0.50 | 0.52 | 0.54 | 0.57 | 0.59 | 0.63 |  0.65 |
+| Truncation and censoring adjusted                 | sdlog     | 0.48 |   0.48 | 0.41 | 0.42 | 0.45 | 0.46 | 0.49 | 0.51 | 0.54 |  0.56 |
 | Latent variable truncation and censoring adjusted | sdlog     | 0.54 |   0.53 | 0.46 | 0.47 | 0.50 | 0.52 | 0.55 | 0.57 | 0.61 |  0.63 |
 
 Plot summarised posterior estimates from each model compared to the
@@ -282,8 +283,9 @@ ground truth.
 
 ``` r
 draws |>
+  draws_to_long() |>
   make_relative_to_truth(draws_to_long(secondary_dist)) |>
-  plot_relative_recovery(y= model, fill = model) +
+  plot_relative_recovery(y = model, fill = model) +
   facet_wrap(vars(parameter), nrow = 1, scales = "free_x") +
   scale_fill_brewer(palette = "Dark2") +
   guides(fill = guide_none()) +
@@ -294,12 +296,33 @@ draws |>
 
 <img src="figures/README-unnamed-chunk-10-1.png" width="100%" />
 
-Finally, posterior predictive check plot for the latent fit:
+Finally, check the mean posterior predictions for each model against the
+observed daily cohort mean.
 
 ``` r
-plot_posterior_pred_check(
-  latent_truncation_censoring_fit, truncated_obs, truncate = TRUE
-)
+truncated_draws <- draws |>
+  calculate_truncated_means(
+    obs_at = max(truncated_obs$stime_daily),
+    ptime = range(truncated_obs$ptime_daily)
+  ) |>
+  summarise_variable(variable = "trunc_mean", by = c("obs_horizon", "model")) |>
+  DT(, model := factor(model, levels = rev(names(models))))
+
+
+truncated_draws |>
+  plot_mean_posterior_pred(
+    truncated_obs |>
+      calculate_cohort_mean(
+        type = "cohort", obs_at = max(truncated_obs$stime_daily)
+      ),
+    col = model, fill = model, mean = TRUE, ribbon = TRUE
+  ) +
+  guides(
+    fill = guide_legend(title = "Model", nrow = 4),
+    col = guide_legend(title = "Model", nrow = 4)
+  ) +
+  scale_fill_brewer(palette = "Dark2", aesthetics = c("fill", "colour")) +
+  theme(legend.direction = "vertical")
 ```
 
 <img src="figures/README-postcheck-1.png" width="100%" />

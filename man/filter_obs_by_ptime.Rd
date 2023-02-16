@@ -4,7 +4,11 @@
 \alias{filter_obs_by_ptime}
 \title{Filter observations based on the observation time of primary events}
 \usage{
-filter_obs_by_ptime(linelist, obs_time)
+filter_obs_by_ptime(
+  linelist,
+  obs_time,
+  obs_at = c("obs_secondary", "max_secondary")
+)
 }
 \description{
 Filter observations based on the observation time of primary events
