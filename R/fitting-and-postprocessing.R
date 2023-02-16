@@ -100,12 +100,20 @@ make_relative_to_truth <- function(draws, secondary_dist, by = "parameter") {
   return(draws[])
 }
 
-#' Summarise lognormal posterior estimates
+#' Summarise posterior draws
+#' @param not_by A vector of columns to exclude from the grouping
+#' This will be overridden if by is specified.
+#' @inheritParams summarise_variable
 #' @export
-summarise_lognormal_draws <- function(draws, sf, not_by = "value") {
-  by_cols <- setdiff(
-    colnames(draws), not_by
-  )
+summarise_draws <- function(draws, sf, not_by = "value", by) {
+  if (missing(by)) {
+    by_cols <- setdiff(
+      colnames(draws), not_by
+    )
+  }else {
+    by_cols <- by
+  }
+
   summarised_draws <- draws[,
     .(
       mean = mean(value),
@@ -130,5 +138,22 @@ summarise_lognormal_draws <- function(draws, sf, not_by = "value") {
     ]
   }
 
+  return(summarised_draws[])
+}
+
+#' Summarise a variable
+#' @param draws A data.table of posterior draws
+#' @param sf The number of significant figures to use
+#' @param variable The variable to summarise
+#' @param by A vector of columns to group by
+#' @export
+summarise_variable <- function(draws, variable, sf = 6, by = c()) {
+  if (missing(variable)) {
+    stop("variable must be specified")
+  }
+  summarised_draws <- draws |>
+    copy() |>
+    DT(, value := variable, env = list(variable = variable)) |>
+    summarise_draws(sf = sf, by = by)
   return(summarised_draws[])
 }

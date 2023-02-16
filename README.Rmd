@@ -179,11 +179,12 @@ Extract and summarise lognormal posterior estimates.
 ```{r lognormal-draws}
 draws <- models |>
   map(extract_lognormal_draws) |>
-  map(draws_to_long) |>
   rbindlist(idcol = "model") |>
   DT(, model := factor(model, levels = rev(names(models))))
 
-summarised_draws <- summarise_lognormal_draws(draws, sf = 2)
+summarised_draws <- draws |>
+  draws_to_long() |>
+  summarise_draws(sf = 2)
 
 knitr::kable(summarised_draws[parameter %in% c("meanlog", "sdlog")])
 ```
@@ -192,6 +193,7 @@ Plot summarised posterior estimates from each model compared to the ground truth
 
 ```{r, fig.width = 9, fig.height = 4}
 draws |>
+  draws_to_long() |>
   make_relative_to_truth(draws_to_long(secondary_dist)) |>
   plot_relative_recovery(y = model, fill = model) +
   facet_wrap(vars(parameter), nrow = 1, scales = "free_x") +
@@ -202,11 +204,31 @@ draws |>
   )
 ```
 
-Finally, posterior predictive check plot for the latent fit:
+Finally, check the mean posterior predictions for each model against the observed daily cohort mean.
 ```{r postcheck}
-plot_posterior_pred_check(
-  latent_truncation_censoring_fit, truncated_obs, truncate = TRUE
-)
+truncated_draws <- draws |>
+  calculate_truncated_means(
+    obs_at = max(truncated_obs$stime_daily),
+    ptime = range(truncated_obs$ptime_daily)
+  ) |>
+  summarise_variable(variable = "trunc_mean", by = c("obs_horizon", "model")) |>
+  DT(, model := factor(model, levels = rev(names(models))))
+
+
+truncated_draws |>
+  plot_mean_posterior_pred(
+    truncated_obs |>
+      calculate_cohort_mean(
+        type = "cohort", obs_at = max(truncated_obs$stime_daily)
+      ),
+    col = model, fill = model, mean = TRUE, ribbon = TRUE
+  ) +
+  guides(
+    fill = guide_legend(title = "Model", nrow = 4),
+    col = guide_legend(title = "Model", nrow = 4)
+  ) +
+  scale_fill_brewer(palette = "Dark2", aesthetics = c("fill", "colour")) +
+  theme(legend.direction = "vertical")
 ```
 
 ## Analyses

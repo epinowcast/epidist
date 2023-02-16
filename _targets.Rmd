@@ -667,7 +667,7 @@ tar_map(
     summarised_draws,
     draws |> 
       draws_to_long() |>
-      summarise_lognormal_draws(sf = 2)
+      summarise_draws(sf = 2)
   ),
   tar_file(
     save_summarised_draws,

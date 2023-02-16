@@ -95,123 +95,70 @@ plot_censor_delay <- function(censor_delay) {
 }
 
 #' plot empirical cohort-based or cumulative mean vs posterior mean
-#' @param fit fitted objects
+#' @param summarised_mean Summarised mean as produced by [summarise_variable()]
 #' @param data data used for object fitting
-#' @param type type of mean to plot
 #' @param truncate account for truncation?
+#' @param mean Should the mean be plotted? Logical, defaults to `FALSE`.
+#' @param ribbon Should the quantile ribbon be plotted? Logical, defaults to
+#' `TRUE`.
+#' @param ribbon_bounds Bounds of the quantile ribbon. Defaults to 
+#' `c(0.05, 0.95)` which corresponds to the 90% credible interval.
+#' @param ... Additional arguments passed to [ggplot2::aes()].
 #' @export
-plot_posterior_pred_check <- function(fit,
-                                      data,
-                                      type = c("cohort", "cumulative"),
-                                      truncate,
-                                      obs_at) {
-  type <- match.arg(type)
+plot_mean_posterior_pred <- function(summarised_mean, obs_mean,
+                                     alpha = 0.3, mean = FALSE, ribbon = TRUE,
+                                     ribbon_bounds = c(0.05, 0.95), ...) {
+  gplot <- summarised_mean |>
+    ggplot()
 
-  gplot <- plot_cohort_mean(data, type)
-
-  prange <- range(data$ptime_daily)
-  pvec <- seq(prange[1], prange[2], by=1)
-
-  ee <- extract_lognormal_draws(fit)
-
-  if (truncate) {
-    if (type == "cumulative") {
-      stop("Don't use the truncate option with cumulative mean.")
-    }
-
-    if (missing(obs_at)) {
-      ## FIXME: is this safe for more general usage? our data always have obs_at
-      ## option 1: spit out a warning and take the maximum secondary event time
-      ## the problem with option 1 is  that if someone's looking at old data..?
-      obs_at <- unique(data$obs_at)
-    }
-
-    estmat <- matrix(NA, nrow = nrow(ee), ncol = length(pvec))
-
-    ## calculate truncated mean
-    message("Calculating truncated means...")
-    for (j in seq_along(pvec)) {
-      estvec <- rep(NA, nrow(ee))
-
-      for (i in seq_len(nrow(ee))) {
-
-        p <- pvec[j]
-
-        numer <- integrate(
-          function(x) {
-            x * dlnorm(x, meanlog = ee$meanlog[i], sdlog = ee$sdlog[i])
-          },
-          lower = 0, upper = obs_at - p
-        )[[1]]
-
-        denom <- integrate(
-          function(x) {
-            dlnorm(x, meanlog = ee$meanlog[i], sdlog = ee$sdlog[i])
-          },
-          lower = 0, upper = obs_at - p
-        )[[1]]
-
-        estmat[i, j] <- numer / denom
-      }
-    }
-
-    fitted <- data.table(
-      pvec = pvec,
-      mean = apply(estmat, 2, mean),
-      lwr = apply(estmat, 2, quantile, 0.025),
-      upr = apply(estmat, 2, quantile, 0.975)
-    )
-  } else {
-    fitted <- data.table(
-      pvec = pvec,
-      mean = mean(ee$mean),
-      lwr = quantile(ee$mean, 0.025),
-      upr = quantile(ee$mean, 0.975)
-    )
+  if (!missing(obs_mean)) {
+    gplot <- gplot +
+      geom_point(
+        data = obs_mean,
+        aes(x = ptime_daily, y = mean, size = n),
+        col = "black", shape = 1
+      ) +
+      guides(size = guide_legend(title = "Number of samples"))
   }
 
   gplot <- gplot +
-    geom_ribbon(
-      data = fitted, aes(pvec, ymin = lwr, ymax  upr), alpha = 0.3,
-      lty = 2, col = "black"
-    ) +
-    geom_line(data = fitted, aes(pvec, mean))
+    labs(x = "Days prior to observation", y = "Mean delay (days)") +
+    theme_bw() +
+    theme(legend.position = "bottom")
 
+  if (ribbon) {
+    gplot <- gplot +
+      geom_ribbon(
+        aes(
+          x = obs_horizon,
+          ymin = .data[[make_ribbon_bound(ribbon_bounds[1])]],
+          ymax = .data[[make_ribbon_bound(ribbon_bounds[2])]],
+          ...
+        ),
+        alpha = alpha, col = NA
+      )
+  }
+  if (mean) {
+    gplot <- gplot +
+      geom_line(aes(x = obs_horizon, y = mean, ...))
+  }
   return(gplot)
+}
+
+make_ribbon_bound <- function(quantile) {
+  paste0("q", 100 * quantile)
 }
 
 #' Plot empirical cohort-based or cumulative mean
 #' @export
-plot_cohort_mean <- function(data, type = c("cohort", "cumulative")) {
-
-  out <- plot_cohort_mean_internal(data, type)
-
-  gplot <- ggplot(out) +
-    geom_point(aes(ptime_daily, mean, size = n), shape = 1) +
+plot_cohort_mean <- function(data) {
+  gplot <- ggplot(data) +
+    geom_point(aes(x = ptime_daily, y = mean, size = n), shape = 1) +
     theme_bw() +
     scale_size("Number of samples") +
     labs(
       x = "Cohort time (day)",
       y = "Mean delay (days)"
     )
-
   return(gplot)
-}
-
-plot_cohort_mean_internal <- function(data, type=c("cohort", "cumulative")) {
-  type <- match.arg(type)
-
-  out <- data |>
-    copy() |>
-    DT(, .(mean = mean(delay_daily),
-           n = .N), by = "ptime_daily") |>
-    DT(order(rank(ptime_daily)))
-
-  if (type=="cumulative") {
-    out[, mean := cumsum(mean * n)/cumsum(n)]
-    out[, n := cumsum(n)]
-
-  }
-
-  return(out[])
 }
