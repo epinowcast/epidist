@@ -73,4 +73,4 @@ extract_epinowcast_lognormal_draws <- function(fit, id_vars) {
 fit |>
   extract_epinowcast_lognormal_draws() |>
   draws_to_long() |>
-  summarise_lognormal_draws(sf = 3)
+  summarise_draws(sf = 3)

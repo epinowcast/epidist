@@ -4,7 +4,7 @@
 \alias{plot_cohort_mean}
 \title{Plot empirical cohort-based or cumulative mean}
 \usage{
-plot_cohort_mean(data, type = c("cohort", "cumulative"))
+plot_cohort_mean(data)
 }
 \description{
 Plot empirical cohort-based or cumulative mean
