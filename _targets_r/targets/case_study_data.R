@@ -6,7 +6,7 @@ tar_target(case_study_data, {
         test_date = lubridate::dmy(`Date of sample tested`)
       )
     ) |>
-    DT(, `:=`( ## FIXME: THIS IS DEFINITELY PROBLEMATIC
+    DT(, `:=`(
         ptime = as.numeric(onset_date - min(onset_date)),
         stime = as.numeric(test_date - min(onset_date))
       )

@@ -3,7 +3,7 @@
 naive_delay <- function(formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data,
                         fn = brms::brm, family = "lognormal", ...) {
 
-  data <- pad_zero(data)
+  data <- drop_zero(data)
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
   )
@@ -19,7 +19,7 @@ filtered_naive_delay <- function(
     ## NEED TO FILTER BASED ON PTIME
     DT(ptime_daily <= (obs_at - truncation))
 
-  data <- pad_zero(data)
+  data <- drop_zero(data)
 
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
@@ -126,10 +126,10 @@ filtered_censoring_adjusted_delay <- function(
 #' @export
 truncation_adjusted_delay <- function(
   formula = brms::bf(
-    delay_daily | trunc(lb = 1e-3, ub = censored_obs_time) ~ 1, sigma ~ 1
+    delay_daily | trunc(lb = 1, ub = censored_obs_time) ~ 1, sigma ~ 1
   ), data, fn = brms::brm, family = "lognormal", ...) {
 
-  data <- pad_zero(data)
+  data <- drop_zero(data)
 
   fn(
     formula, data = data, family = family, backend = "cmdstanr", ...
@@ -200,13 +200,13 @@ latent_truncation_censoring_adjusted_delay <- function(
   ",
   ...
 ) {
-  
+
   data <- data |>
     data.table::copy() |>
     DT(, id := 1:.N) |>
     DT(, obs_t := obs_at - ptime_lwr) |>
     DT(, pwindow_upr := ifelse(
-          stime_lwr < ptime_upr, ## if overlap 
+          stime_lwr < ptime_upr, ## if overlap
           stime_upr - ptime_lwr,
           ptime_upr - ptime_lwr
         )
@@ -217,7 +217,7 @@ latent_truncation_censoring_adjusted_delay <- function(
     DT(, swindow_upr := stime_upr - stime_lwr) |>
     DT(, delay_central := stime_lwr - ptime_lwr) |>
     DT(, row_id := 1:.N)
-  
+
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
   }
@@ -248,10 +248,10 @@ latent_truncation_censoring_adjusted_delay <- function(
     block = "tparameters", scode = scode_tparameters
   )
   stanvars_priors <- brms::stanvar(block = "model", scode = scode_priors)
-  
+
   stanvars_all <- stanvars_functions + stanvars_data + stanvars_parameters + 
     stanvars_tparameters + stanvars_priors
-  
+
   fit <- fn(
     formula = formula, family = family, stanvars = stanvars_all,
     backend = "cmdstanr", data = data, 
