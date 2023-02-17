@@ -60,6 +60,68 @@ truncated_cs_obs_by_window <- construct_cases_by_obs_window(
 
 obs_plot <- plot_cases_by_obs_window(truncated_cs_obs_by_window)
 
+case_study_obs_summ_forward <- case_study_obs |>
+  group_by(ptime_daily) |>
+  summarize(
+    mean=mean(delay_daily),
+    lwr=ifelse(length(delay_daily) > 10, t.test(delay_daily)[[4]][1], NA),
+    upr=ifelse(length(delay_daily) > 10, t.test(delay_daily)[[4]][2], NA)
+  ) %>%
+  mutate(
+    type="Forward"
+  )
+
+case_study_obs_summ_retro <- case_study_obs |>
+  group_by(ptime_daily) |>
+  summarize(
+    sum1=sum(delay_daily),
+    sum2=sum(delay_daily^2),
+    n=n()
+  ) |>
+  arrange(ptime_daily) |>
+  mutate(
+    ntotal=cumsum(n),
+    mean=cumsum(sum1)/ntotal,
+    sd=sqrt((cumsum(sum2)-2*cumsum(sum1)*mean+mean^2*ntotal)/ntotal),
+    se=sd/sqrt(ntotal),
+    lwr=mean-1.96*se,
+    upr=mean+1.96*se
+  )
+
+case_study_obs_summ_realt <- case_study_obs |>
+  group_by(stime_daily) |>
+  summarize(
+    sum1=sum(delay_daily),
+    sum2=sum(delay_daily^2),
+    n=n()
+  ) |>
+  arrange(stime_daily) |>
+  mutate(
+    ntotal=cumsum(n),
+    mean=cumsum(sum1)/ntotal,
+    sd=sqrt((cumsum(sum2)-2*cumsum(sum1)*mean+mean^2*ntotal)/ntotal),
+    se=sd/sqrt(ntotal),
+    lwr=mean-1.96*se,
+    upr=mean+1.96*se
+  )
+
+tv_plot <- ggplot(case_study_obs) +
+  geom_smooth(aes(ptime_daily, delay_daily, col="Forward", fill="Forward"), alpha=0.2) +
+  geom_ribbon(data=case_study_obs_summ_retro, aes(ptime_daily, ymin=lwr, ymax=upr, fill="Retrospective"), alpha=0.2) +
+  geom_line(data=case_study_obs_summ_retro, aes(ptime_daily, mean, col="Retrospective")) +
+  geom_ribbon(data=case_study_obs_summ_realt, aes(stime_daily, ymin=lwr, ymax=upr, fill="Real-time"), alpha=0.2) +
+  geom_line(data=case_study_obs_summ_realt, aes(stime_daily, mean, col="Real-time")) +
+  geom_vline(xintercept=c(60, 120, 180, 240), lty=2, alpha=0.9) +
+  scale_x_continuous("Days") +
+  scale_y_continuous("Mean delay (days)") +
+  scale_fill_brewer("Estimation method", palette = "Dark2") +
+  scale_color_brewer("Estimation method", palette = "Dark2") +
+  theme_bw() +
+  theme(
+    legend.position = "bottom"
+  )
+
+
 # Plot empirical PMF for each observation window
 # First construct observed and retrospective data by window and join with
 # complete data
@@ -76,11 +138,57 @@ retro_cs_obs <- obs_times |>
 
 combined_cs_obs <- rbind(truncated_cs_obs, retro_cs_obs)
 
+## couldn't figure out how to change the fill... sorry!
 empirical_pmf_plot <- combined_cs_obs |>
   DT(delay_daily <= 20) |>
-  plot_empirical_delay() +
-  facet_wrap(vars(type), ncol = 1)
+  DT(obs_at != 483) |>
+  mutate(
+    obs_at=factor(obs_at, levels=c("60", "120", "180", "240"))
+  ) |>
+  ggplot() +
+  aes(x = delay_daily) +
+  geom_histogram(
+    aes(
+      y = after_stat(density), fill = type), binwidth = 1,
+    position = "dodge", col = "#696767b1", alpha=0.5
+  ) +
+  scale_fill_manual(values=palette.colors(3, "Dark2")[2:3]) +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(x = "Days", y = "Density") +
+  facet_wrap(vars(obs_at), nrow = 1)
 
+case_study_obs_trunc_prop <- merge(
+  case_study_obs %>%
+    group_by(ptime_daily) %>%
+    summarize(
+      n_total=n()
+    ) %>%
+    mutate(
+      n_total=cumsum(n_total)
+    ) %>%
+    rename(cohort=ptime_daily),
+  case_study_obs %>%
+    group_by(stime_daily) %>%
+    summarize(
+      n_obs=n()
+    ) %>%
+    mutate(
+      n_obs=cumsum(n_obs)
+    ) %>%
+    rename(cohort=stime_daily)
+) %>%
+  arrange(cohort) %>%
+  mutate(
+    trunc=n_obs/n_total
+  )
+
+trunc_prop_plot <- ggplot(case_study_obs_trunc_prop) +
+  geom_line(aes(cohort, trunc)) +
+  geom_vline(xintercept=c(60, 120, 180, 240), lty=2, alpha=0.9) +
+  scale_x_continuous("Days") +
+  scale_y_continuous("Proportion observation truncated") +
+  theme_bw()
 
 
 # Plot posterior densities for each parameter by model and observation type.
@@ -112,19 +220,28 @@ parameter_density_plot <- cs_samples |>
   ) +
   theme(legend.position = "bottom")
 
+case_study_plot1 <- obs_plot +
+  tv_plot +
+  empirical_pmf_plot +
+  trunc_prop_plot +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides= "collect", nrow=4) &
+  theme(legend.position = "bottom")
+
 # Combine plots
-case_study_plot <- obs_plot / (
-  (empirical_pmf_plot + guides(fill = guide_none())) +
-  parameter_density_plot +
-  plot_layout(width = c(1, 2))
-) +
+case_study_plot2 <- parameter_density_plot +
 plot_annotation(tag_levels = "A") +
-plot_layout(guides = "collect", height = c(1, 4)) &
 theme(legend.position = "bottom")
 
 
 # Save combined plots
 ggsave(
-  here("figures", "case_study.png"), case_study_plot,
-  height = 20, width = 16, dpi = 330
+  here("figures", "case_study1.png"), case_study_plot1,
+  height = 12, width = 10, dpi = 330
+)
+
+# Save combined plots
+ggsave(
+  here("figures", "case_study2.png"), case_study_plot2,
+  height = 12, width = 10, dpi = 330
 )
