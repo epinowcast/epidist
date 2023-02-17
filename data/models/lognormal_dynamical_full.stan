@@ -17,13 +17,15 @@ parameters {
 transformed parameters {
   real cdenom[tlength];
   
-  for (i in 1:tlength) {
+  cdenom[1] = 0;
+  
+  for (i in 2:tlength) {
     cdenom[i] = 0;
     for (j in 1:(i-1)) {
-      if (j==i) {
+      if (j==0) {
         cdenom[i] += exp(lognormal_lcdf(j | mu, sigma) + log(incidence_p[i-j]));
       } else {
-        cdenom[i] += exp(log_diff_exp(lognormal_lcdf(j | mu, sigma), lognormal_lcdf(j-1 | mu, sigma)) + log(incidence_p[i-j]));
+        cdenom[i] += exp(log_diff_exp(lognormal_lcdf(j | mu, sigma), lognormal_lcdf(j | mu, sigma)) + log(incidence_p[i-j]));
       }
     }
   }
