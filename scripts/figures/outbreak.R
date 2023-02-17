@@ -44,9 +44,8 @@ outbreak_estimation_times <- fread(
   here("data/meta/outbreak_estimation_times.csv")
 ) |>
   DT(, scenario_days := paste0(
-       scenario, " (day ", time, ")"
-    )
-  ) |>
+    scenario, " (day ", time, ")"
+  )) |>
   DT(, scenario := factor(scenario)) |>
   DT(, scenario_days := factor(scenario_days))
 
@@ -61,13 +60,11 @@ distributions <- fread(here("data/meta/distributions.csv")) |>
     ", sd: ", round(sd, 1), ")"
   )) |>
   DT(, distribution_stat := factor(distribution_stat) |>
-    fct_rev()
-  ) |>
+    fct_rev()) |>
   DT(, pmf := map2(
     meanlog, sdlog,
     ~ dlnorm(seq(0, 20, by = 0.1), meanlog = .x, sdlog = .y)
-    )
-  )
+  ))
 
 # Make inidividual plots
 
@@ -77,7 +74,8 @@ truncated_cs_obs_by_window <- outbreak_obs |>
   split(by = "distribution") |>
   map_dfr(
     ~ construct_cases_by_obs_window(
-      ., windows = obs_times, obs_type = "stime", upper_window = 100
+      .,
+      windows = obs_times, obs_type = "stime", upper_window = 100
     ),
     .id = "distribution"
   ) |>
@@ -97,7 +95,7 @@ obs_plot <- plot_cases_by_obs_window(truncated_cs_obs_by_window) +
 # First construct observed and retrospective data by window and join with
 # complete data
 # Retrict to 20 days delay
-truncated_outbreak_obs <-  c(obs_times, 100) |>
+truncated_outbreak_obs <- c(obs_times, 100) |>
   map_dfr(~ filter_obs_by_obs_time(outbreak_obs, obs_time = .x))
 
 empirical_pmf_plot <- truncated_outbreak_obs |>
@@ -115,7 +113,7 @@ empirical_pmf_plot <- truncated_outbreak_obs |>
         .(pmf = unlist(pmf), delay_daily = seq(0, 20, by = 0.1)),
         by = "distribution_stat"
       ),
-      aes(y = pmf, fill = NULL), col = "black"
+    aes(y = pmf, fill = NULL), col = "black"
   ) +
   facet_wrap(vars(distribution_stat), ncol = 1)
 
@@ -125,15 +123,14 @@ clean_o_samples <- o_samples |>
   DT(parameter %in% c("mean", "sd")) |>
   make_relative_to_truth(
     draws_to_long(distributions) |>
-    setnames("scenario", "distribution"),
+      setnames("scenario", "distribution"),
     by = c("parameter", "distribution")
   ) |>
   merge(outbreak_estimation_times, by = "scenario") |>
-  DT(, distribution_stat :=  distribution_stat |>
-        str_to_sentence() |>
-        factor() |>
-        fct_rev()
-  ) |>
+  DT(, distribution_stat := distribution_stat |>
+    str_to_sentence() |>
+    factor() |>
+    fct_rev()) |>
   DT(, time := factor(time) |> fct_rev()) |>
   DT(, parameter := str_to_sentence(parameter)) |>
   DT(, model := factor(model, levels = models$model))
@@ -169,15 +166,17 @@ scores <- clean_o_samples |>
   DT(sample_size == 400) |>
   copy() |>
   DT(,
-   sample := 1:.N,
-   keyby = c("model", "scenario", "parameter", "distribution_stat", "time")
+    sample := 1:.N,
+    keyby = c("model", "scenario", "parameter", "distribution_stat", "time")
   ) |>
   DT(, pmf := NULL) |>
   DT(, true_value := 0) |>
   DT(, prediction := log(rel_value)) |>
-  DT(,
-   c("model", "scenario", "parameter", "distribution_stat", "time", "sample",
-     "prediction", "true_value"
+  DT(
+    ,
+    c(
+      "model", "scenario", "parameter", "distribution_stat", "time", "sample",
+      "prediction", "true_value"
     )
   ) |>
   score()
@@ -193,11 +192,9 @@ scores_by_distribution <- scores |>
 # plot scores
 scores_plot <- scores_by_distribution |>
   DT(, time := time |>
-    fct_rev()
-  ) |>
+    fct_rev()) |>
   DT(, model := model |>
-    fct_rev()
-  ) |>
+    fct_rev()) |>
   ggplot() +
   aes(
     x = crps, y = model, col = distribution_stat, size = time,
@@ -207,9 +204,8 @@ scores_plot <- scores_by_distribution |>
   geom_point(
     data = overall_scores |>
       DT(, model := model |>
-        fct_rev()
-      ),
-      col = "black", shape = 5, size = 4, alpha = 1
+        fct_rev()),
+    col = "black", shape = 5, size = 4, alpha = 1
   ) +
   theme_bw() +
   guides(
@@ -230,16 +226,16 @@ outbreak_plot <- obs_plot /
     (
       (
         (empirical_pmf_plot + guides(fill = guide_none())) /
-        scores_plot
+          scores_plot
       ) + plot_layout(height = c(2, 1)) |
-      parameter_density_plot
+        parameter_density_plot
     ) +
-    plot_layout(width = c(1, 2))
+      plot_layout(width = c(1, 2))
   ) +
   plot_annotation(tag_levels = "A") +
   plot_layout(guides = "collect", height = c(1, 4)) &
   theme(legend.position = "bottom")
-  # break legends into two columns
+# break legends into two columns
 
 
 # Save combined plots
