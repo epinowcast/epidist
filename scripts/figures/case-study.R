@@ -214,20 +214,29 @@ trunc_prop_plot <- ggplot(case_study_obs_trunc_prop) +
   scale_y_continuous("Unobserved secondary events", labels = scales::percent) +
   theme_bw()
 
-# Plot posterior densities for each parameter by model and observation type.
-# Filter out outlier values for the sake of plotting
-parameter_density_plot <- cs_samples |>
-  draws_to_long() |>
-  DT(value <= 10) |>
-  DT(value >= -10) |>
-  DT(parameter %in% c("mean", "sd")) |>
+# Clean posterior draws
+clean_cs_samples <- cs_samples |>
   DT(, scenario := gsub(" days", x = scenario, replacement = "") |>
     factor(levels = obs_times) |>
     fct_rev()
   ) |>
   DT(, obs_type := str_to_sentence(obs_type)) |>
-  DT(, parameter := str_to_sentence(parameter)) |>
   DT(, model := factor(model, levels = models$model)) |>
+  DT(,
+    sample := 1:.N,
+    keyby = c(
+      "model", "scenario", "obs_type"
+    )
+  )
+
+# Plot posterior densities for each parameter by model and observation type.
+# Filter out outlier values for the sake of plotting
+parameter_density_plot <- clean_cs_samples |>
+  draws_to_long() |>
+  DT(value <= 10) |>
+  DT(value >= -10) |>
+  DT(parameter %in% c("mean", "sd")) |>
+  DT(, parameter := str_to_sentence(parameter)) |>
   plot_recovery(y = scenario, fill = obs_type) +
   facet_grid(
     vars(model), vars(parameter),
@@ -243,6 +252,56 @@ parameter_density_plot <- cs_samples |>
   ) +
   theme(legend.position = "bottom")
 
+# Plot posterior predictions for each observation window of the cohort mean
+truncated_draws <- clean_cs_samples |>
+  DT(sample <= 10) |> # use only 1000 samples for plotting
+  DT(obs_type %in% "Real-time") |>
+  DT(, obs_at := as.numeric(as.character(scenario))) |>
+  DT(,
+      {
+        message(
+          "Estimating truncated mean at: ", .SD[, unique(obs_at)], " days"
+        )
+        calculate_truncated_means(
+        .SD,
+        obs_at = .SD[, unique(obs_at)],
+        ptime = c(.SD[, unique(obs_at)] - 30, .SD[, unique(obs_at)] - 1)
+        )
+      },
+    by = "obs_at"
+  ) |>
+  summarise_variable(
+    variable = "trunc_mean",
+    by = c("obs_horizon", "model", "obs_at", "scenario")
+  )
+
+cohort_mean <- map_dfr(obs_times,
+    ~ case_study_obs |>
+      filter_obs_by_obs_time(obs_time = .) |>
+      calculate_cohort_mean(
+        type = "cohort",
+        obs_at = .
+      ) |>
+      DT(, obs_at := .),
+  .progress = TRUE
+) |>
+  DT(ptime_daily >= -30)
+
+
+mean_pp <- truncated_draws |>
+  plot_mean_posterior_pred(
+    obs_mean = cohort_mean, col = model, fill = model,
+    mean = TRUE, ribbon = TRUE
+  ) +
+  guides(
+    fill = guide_legend(title = "Model", nrow = 4),
+    col = guide_legend(title = "Model", nrow = 4)
+  ) +
+  scale_fill_brewer(palette = "Dark2", aesthetics = c("fill", "colour")) +
+  theme(legend.direction = "vertical") +
+  facet_grid(vars(obs_at),
+        labeller = label_wrap_gen(multi_line = TRUE),
+  )
 
 case_study_plot1 <- obs_plot +
   tv_plot +
@@ -254,7 +313,9 @@ case_study_plot1 <- obs_plot +
 
 # Combine plots
 case_study_plot2 <- parameter_density_plot +
+  mean_pp +
   plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "collect", widths = c(2, 1)) &
   theme(legend.position = "bottom")
 
 
