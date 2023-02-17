@@ -5,8 +5,7 @@
 \title{Estimate delays adjusted for right truncation}
 \usage{
 truncation_adjusted_delay(
-  formula = brms::bf(delay_daily | trunc(lb = 0.001, ub = censored_obs_time) ~ 1, sigma ~
-    1),
+  formula = brms::bf(delay_daily | trunc(lb = 1, ub = censored_obs_time) ~ 1, sigma ~ 1),
   data,
   fn = brms::brm,
   family = "lognormal",
