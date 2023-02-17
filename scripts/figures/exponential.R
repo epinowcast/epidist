@@ -144,6 +144,12 @@ clean_e_samples <- e_samples |>
 # Clean this up to save save memory
 rm(e_samples)
 
+# Drop infinite values and flag
+inf_samples <- clean_e_samples[is.infinite(rel_value)]
+inf_samples[]
+
+clean_e_samples <- clean_e_samples[!is.infinite(rel_value)]
+
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
 parameter_density_plot <- clean_e_samples |>
