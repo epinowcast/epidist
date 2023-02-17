@@ -4,7 +4,7 @@
 \alias{calculate_censor_delay}
 \title{Calculate the mean difference between continuous and discrete event time}
 \usage{
-calculate_censor_delay(truncated_obs)
+calculate_censor_delay(truncated_obs, additional_by = c())
 }
 \description{
 Calculate the mean difference between continuous and discrete event time
