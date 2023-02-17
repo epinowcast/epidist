@@ -55,13 +55,11 @@ distributions <- fread(here("data/meta/distributions.csv")) |>
     ", sd: ", round(sd, 1), ")"
   )) |>
   DT(, distribution_stat := factor(distribution_stat) |>
-    fct_rev()
-  ) |>
+    fct_rev()) |>
   DT(, pmf := map2(
     meanlog, sdlog,
     ~ dlnorm(seq(0, 20, by = 0.1), meanlog = .x, sdlog = .y)
-    )
-  )
+  ))
 
 # Make inidividual plots
 
@@ -70,7 +68,8 @@ distributions <- fread(here("data/meta/distributions.csv")) |>
 # complete data
 # Retrict to 20 days delay
 truncated_exponential_obs <- filter_obs_by_obs_time(
-  exponential_obs, obs_time = 30
+  exponential_obs,
+  obs_time = 30
 )
 
 empirical_pmf_plot <- truncated_exponential_obs |>
@@ -83,7 +82,7 @@ empirical_pmf_plot <- truncated_exponential_obs |>
   ggplot() +
   aes(x = delay_daily) +
   geom_histogram(
-  aes(y = after_stat(density), fill = r),
+    aes(y = after_stat(density), fill = r),
     binwidth = 1, position = "dodge",
     col = "#696767b1"
   ) +
@@ -101,12 +100,10 @@ empirical_pmf_plot <- truncated_exponential_obs |>
         by = "distribution_stat"
       ),
     aes(y = pmf, fill = NULL), col = "black"
-) +
-facet_wrap(vars(distribution_stat), ncol = 1)
+  ) +
+  facet_wrap(vars(distribution_stat), ncol = 1)
 
 # Summarise draws
-
-# TODO: The non-latent truncation and censoring model currently has a very odd looking posterior. Does this indicate a bug or just some kind of bias in the model. # nolint
 
 # TODO: This currently roles all the replicates into one plot. We might want another version (for the SI) that splits these out so we can explore the amount of variation. # nolint
 
@@ -115,7 +112,8 @@ facet_wrap(vars(distribution_stat), ncol = 1)
 # Make a clean samples data.frame for plotting
 clean_e_samples <- e_samples |>
   copy() |>
-  DT(,
+  DT(
+    ,
     c(
       "sample_size", "data_type", "id", "obs_type"
     ) := NULL
@@ -124,27 +122,33 @@ clean_e_samples <- e_samples |>
   DT(parameter %in% c("mean", "sd")) |>
   make_relative_to_truth(
     draws_to_long(distributions) |>
-    setnames("scenario", "distribution"),
+      setnames("scenario", "distribution"),
     by = c("parameter", "distribution")
   ) |>
-  DT(, distribution_stat :=  distribution_stat |>
-        str_to_sentence() |>
-        factor() |>
-        fct_rev()
-  ) |>
+  DT(, distribution_stat := distribution_stat |>
+    str_to_sentence() |>
+    factor() |>
+    fct_rev()) |>
   DT(, parameter := str_to_sentence(parameter)) |>
   DT(, model := factor(model, levels = models$model)) |>
   DT(growth_rates, on = "scenario") |>
   DT(, r := factor(r)) |>
   DT(,
-   sample := 1:.N,
-   keyby = c("model", "scenario", "parameter", "distribution_stat", "r",
-             "replicate"
-            )
+    sample := 1:.N,
+    keyby = c(
+      "model", "scenario", "parameter", "distribution_stat", "r",
+      "replicate"
+    )
   )
 
 # Clean this up to save save memory
 rm(e_samples)
+
+# Drop infinite values and flag
+inf_samples <- clean_e_samples[is.infinite(rel_value)]
+inf_samples[]
+
+clean_e_samples <- clean_e_samples[!is.infinite(rel_value)]
 
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
@@ -171,9 +175,11 @@ parameter_density_plot <- clean_e_samples |>
 scores <- clean_e_samples |>
   DT(, true_value := 0) |>
   DT(, prediction := log(rel_value)) |>
-  DT(,
-   c("model", "scenario", "parameter", "distribution_stat", "r", "replicate",
-     "sample", "prediction", "true_value"
+  DT(
+    ,
+    c(
+      "model", "scenario", "parameter", "distribution_stat", "r", "replicate",
+      "sample", "prediction", "true_value"
     )
   ) |>
   score()
@@ -192,8 +198,7 @@ rm(scores)
 # plot scores
 scores_plot <- scores_by_distribution |>
   DT(, model := model |>
-    fct_rev()
-  ) |>
+    fct_rev()) |>
   ggplot() +
   aes(
     x = crps, y = model, col = distribution_stat, size = r,
@@ -203,9 +208,8 @@ scores_plot <- scores_by_distribution |>
   geom_point(
     data = overall_scores |>
       DT(, model := model |>
-        fct_rev()
-      ),
-      col = "black", shape = 5, size = 4, alpha = 1
+        fct_rev()),
+    col = "black", shape = 5, size = 4, alpha = 1
   ) +
   theme_bw() +
   guides(

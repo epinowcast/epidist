@@ -16,7 +16,8 @@ library(scoringutils) # for scoring forecasts/posterior predictions
 exponential_obs <- fread(here("data/scenarios/exponential-simulation.csv"))
 
 truncated_exponential_obs <- filter_obs_by_obs_time(
-  exponential_obs, obs_time = 30
+  exponential_obs,
+  obs_time = 30
 )
 
 # Load available models
@@ -30,14 +31,14 @@ read_exponential <- function(target_model) {
   dataset <- open_dataset(
     here("data", "posteriors", models[model %in% target_model, in_code])
   )
-  
+
   # Filter for the case study related samples
   # Add model name to each row
   samples <- dataset |>
     filter(data_type %in% "exponential") |>
     mutate(model = target_model) |>
     collect()
-  
+
   return(samples)
 }
 
@@ -52,25 +53,24 @@ distributions <- fread(here("data/meta/distributions.csv")) |>
     ", sd: ", round(sd, 1), ")"
   )) |>
   DT(, distribution_stat := factor(distribution_stat) |>
-       fct_rev()
-  ) |>
+    fct_rev()) |>
   DT(, pmf := map2(
     meanlog, sdlog,
     ~ dlnorm(seq(0, 20, by = 0.1), meanlog = .x, sdlog = .y)
-  )
-)
+  ))
 
 e_samples_filter <- e_samples %>%
-  filter(distribution=="long") %>%
+  filter(distribution == "long") %>%
   filter(scenario %in% c("fast growth", "fast decay", "stable"))
 
 # Make a clean samples data.frame for plotting
 clean_e_samples <- e_samples_filter |>
   copy() |>
-  DT(,
-     c(
-       "sample_size", "data_type", "id", "obs_type"
-     ) := NULL
+  DT(
+    ,
+    c(
+      "sample_size", "data_type", "id", "obs_type"
+    ) := NULL
   ) |>
   draws_to_long() |>
   DT(parameter %in% c("mean", "sd")) |>
@@ -79,121 +79,126 @@ clean_e_samples <- e_samples_filter |>
       setnames("scenario", "distribution"),
     by = c("parameter", "distribution")
   ) |>
-  DT(, distribution_stat :=  distribution_stat |>
-       str_to_sentence() |>
-       factor() |>
-       fct_rev()
-  ) |>
+  DT(, distribution_stat := distribution_stat |>
+    str_to_sentence() |>
+    factor() |>
+    fct_rev()) |>
   DT(, parameter := str_to_sentence(parameter)) |>
   DT(, model := factor(model, levels = models$model)) |>
   DT(,
-     sample := 1:.N,
-     keyby = c("model", "scenario", "parameter", "distribution_stat",
-               "replicate"
-     )
+    sample := 1:.N,
+    keyby = c(
+      "model", "scenario", "parameter", "distribution_stat",
+      "replicate"
+    )
   )
 
 scores <- clean_e_samples |>
   DT(, true_value := 0) |>
   DT(, prediction := log(rel_value)) |>
-  DT(,
-     c("model", "scenario", "parameter", "distribution_stat", "replicate",
-       "sample", "prediction", "true_value"
-     )
+  DT(
+    ,
+    c(
+      "model", "scenario", "parameter", "distribution_stat", "replicate",
+      "sample", "prediction", "true_value"
+    )
   ) |>
   score() %>%
   mutate(
-    scenario=factor(scenario, 
-                    levels=c("fast growth", "stable", "fast decay"))
+    scenario = factor(scenario,
+      levels = c("fast growth", "stable", "fast decay")
+    )
   )
 
 mean_scores <- scores %>%
   group_by(parameter, scenario) %>%
   summarize(
-    mean=mean(bias)
+    mean = mean(bias)
   )
 
 clean_e_samples_summ <- clean_e_samples %>%
   group_by(parameter, replicate, scenario) %>%
   summarize(
-    median=median(value),
-    lwr=quantile(value, 0.025),
-    upr=quantile(value, 0.975)
+    median = median(value),
+    lwr = quantile(value, 0.025),
+    upr = quantile(value, 0.975)
   )
 
 distributions_long <- distributions %>%
-  filter(scenario=="short") %>%
+  filter(scenario == "short") %>%
   select(mean, sd) %>%
-  melt %>%
+  melt() %>%
   rename(
-    parameter=variable
+    parameter = variable
   ) %>%
   mutate(
-    parameter=factor(parameter,
-                     levels=c("mean", "sd"),
-                     labels=c("Mean", "Sd"))
+    parameter = factor(parameter,
+      levels = c("mean", "sd"),
+      labels = c("Mean", "Sd")
+    )
   )
 
 truncated_exponential_obs_filter <- truncated_exponential_obs %>%
-  filter(distribution=="long", scenario %in% c("fast decay", "fast growth", "stable"))
+  filter(distribution == "long", scenario %in% c("fast decay", "fast growth", "stable"))
 
 truncated_exponential_obs_censor <- truncated_exponential_obs_filter %>%
-  calculate_censor_delay(additional_by="scenario") %>%
+  calculate_censor_delay(additional_by = "scenario") %>%
   mutate(
-    scenario=factor(scenario, 
-                    levels=c("fast growth", "stable", "fast decay"))
+    scenario = factor(scenario,
+      levels = c("fast growth", "stable", "fast decay")
+    )
   )
 
 dd <- truncated_exponential_obs %>%
-  filter(distribution=="long", scenario=="stable") |>
+  filter(distribution == "long", scenario == "stable") |>
   DT(sample(1:400, replace = FALSE))
 
-fit <- latent_truncation_censoring_adjusted_delay(data=dd)
+fit <- latent_truncation_censoring_adjusted_delay(data = dd)
 
 ss <- posterior_summary(fit)
 
 ctime_est <- data.frame(
-  id=1:200,
-  stime=ss[5:204,1],
-  ptime=ss[205:404,1]
+  id = 1:200,
+  stime = ss[5:204, 1],
+  ptime = ss[205:404, 1]
 )
 
-g1 <- ggplot(filter(truncated_exponential_obs_censor, type=="ptime")) +
+g1 <- ggplot(filter(truncated_exponential_obs_censor, type == "ptime")) +
   geom_point(aes(cohort, mean)) +
-  geom_errorbar(aes(cohort, ymin=lwr, ymax=upr), width=0) +
+  geom_errorbar(aes(cohort, ymin = lwr, ymax = upr), width = 0) +
   scale_x_continuous("Daily primary event time") +
   scale_y_continuous("Mean daily censoring") +
-  facet_wrap(~scenario, nrow=3) +
+  facet_wrap(~scenario, nrow = 3) +
   ggtitle("A") +
   theme_bw()
 
-g2 <- ggplot(filter(truncated_exponential_obs_censor, type=="stime")) +
+g2 <- ggplot(filter(truncated_exponential_obs_censor, type == "stime")) +
   geom_point(aes(cohort, mean)) +
-  geom_errorbar(aes(cohort, ymin=lwr, ymax=upr), width=0) +
+  geom_errorbar(aes(cohort, ymin = lwr, ymax = upr), width = 0) +
   scale_x_continuous("Daily secondary event time") +
   scale_y_continuous("Mean daily censoring") +
-  facet_wrap(~scenario, nrow=3) +
+  facet_wrap(~scenario, nrow = 3) +
   ggtitle("B") +
   theme_bw()
 
 g3 <- ggplot(scores) +
   geom_density(aes(bias)) +
-  geom_vline(data=mean_scores, aes(xintercept=mean), lty=2) +
+  geom_vline(data = mean_scores, aes(xintercept = mean), lty = 2) +
   scale_x_continuous("Bias") +
   scale_y_continuous("Density") +
-  facet_grid(scenario~parameter) +
+  facet_grid(scenario ~ parameter) +
   ggtitle("C") +
   theme_bw()
 
 g4 <- ggplot(ctime_est) +
-  geom_point(aes(ptime, stime), size=0.5) +
+  geom_point(aes(ptime, stime), size = 0.5) +
   scale_x_continuous("Latent primary event time") +
   scale_y_continuous("Latent primary event time") +
   ggtitle("D") +
   theme_bw()
 
 gfinal <- g1 + g2 + g3 + g4 +
-  plot_layout(height = c(2, 1)) 
+  plot_layout(height = c(2, 1))
 
 # Save combined plots
 ggsave(

@@ -164,13 +164,13 @@ divergent_transitions_plot <- clean_diagnostics |>
   DT(per_divergent_transitions > 0.01) |>
   ggplot() +
   aes(
-    y = data_type, x = per_divergent_transitions,
-    col = distribution_stat, size = sample_size,
-    shape = model
+    y = model, x = per_divergent_transitions,
+    col = distribution_stat, size = sample_size
   ) +
   geom_point(position = position_jitter(width = 0), alpha = 0.6) +
   scale_x_continuous(labels = scales::percent, trans = "logit") +
   theme_bw() +
+  scale_y_discrete(labels = (\(x) str_wrap(x, width = 20))) +
   scale_fill_brewer(palette = "Dark2", aesthetics = c("colour", "fill")) +
   labs(
     x = "Divergent transitions",
@@ -178,92 +178,87 @@ divergent_transitions_plot <- clean_diagnostics |>
   ) +
   guides(
     size = guide_legend(title = "Sample size", nrow = 2),
-    col = guide_legend(title = "Distribution", nrow = 2),
-    shape = guide_legend(title = "Model", nrow = 2)
+    col = guide_legend(title = "Distribution", nrow = 2)
   ) +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  facet_grid(, vars(data_type))
 
-if (
-  clean_diagnostics |>
-    DT(per_divergent_transitions > 0.01) |>
-    DT(data_type %in% "Exponential") |>
-    DT(, unique(model)) |>
-    (\(x) x != "Truncation and censoring adjusted") ()
-  ) {
-    stop("Exponential data type should only have one model")
-}
+# if (
+#   clean_diagnostics |>
+#     DT(per_divergent_transitions > 0.01) |>
+#     DT(data_type %in% "Exponential") |>
+#     DT(, unique(model)) |>
+#     (\(x) x != "Truncation and censoring adjusted") ()
+#   ) {
+#     stop("Exponential data type should only have one model")
+# }
 
-exponential_divergent_transitions_plot <- clean_diagnostics |>
-  DT(per_divergent_transitions > 0.01) |>
-  DT(data_type %in% "Exponential") |>
-  ggplot() +
-  aes(
-    y = r,
-    x = per_divergent_transitions,
-    col = distribution_stat,
-    shape = model
-  ) +
-  geom_point(position = position_jitter(width = 0), alpha = 0.6) +
-  scale_x_continuous(labels = scales::percent, trans = "logit") +
-  theme_bw() +
-  scale_fill_brewer(
-    palette = "Dark2", aesthetics = c("colour", "fill")
-  ) +
-  labs(
-    x = "Divergent transitions",
-    y = "Growth rate"
-  ) +
-  guides(
-    col = guide_legend(title = "Distribution", nrow = 2),
-    shape = guide_none()
-  ) +
-  theme(legend.position = "bottom")
+# exponential_divergent_transitions_plot <- clean_diagnostics |>
+#   DT(per_divergent_transitions > 0.01) |>
+#   DT(data_type %in% "Exponential") |>
+#   ggplot() +
+#   aes(
+#     y = r,
+#     x = per_divergent_transitions,
+#     col = distribution_stat,
+#     shape = model
+#   ) +
+#   geom_point(position = position_jitter(width = 0), alpha = 0.6) +
+#   scale_x_continuous(labels = scales::percent, trans = "logit") +
+#   theme_bw() +
+#   scale_fill_brewer(
+#     palette = "Dark2", aesthetics = c("colour", "fill")
+#   ) +
+#   labs(
+#     x = "Divergent transitions",
+#     y = "Growth rate"
+#   ) +
+#   guides(
+#     col = guide_legend(title = "Distribution", nrow = 2),
+#     shape = guide_none()
+#   ) +
+#   theme(legend.position = "bottom")
 
 
 
-outbreak_divergent_transitions_plot <- clean_diagnostics |>
-  DT(per_divergent_transitions > 0.01) |>
-  DT(data_type %in% "Outbreak") |>
-  DT(, time  := time |> factor() |> fct_rev()) |>
-  ggplot() +
-  aes(
-    y = time,
-    x = per_divergent_transitions,
-    col = distribution_stat,
-    size = sample_size,
-    shape = model
-  ) +
-  geom_point(position = position_jitter(width = 0), alpha = 0.6) +
-  scale_x_continuous(labels = scales::percent, trans = "logit") +
-  theme_bw() +
-  scale_fill_brewer(
-    palette = "Dark2", aesthetics = c("colour", "fill")
-  ) +
-  labs(
-    x = "Divergent transitions",
-    y = "Outbreak observation day"
-  ) +
-  guides(
-    size = guide_legend(title = "Sample size", nrow = 2),
-    col = guide_legend(title = "Distribution", nrow = 2),
-    shape = guide_legend(title = "Model", nrow = 2)
-  ) +
-  theme(legend.position = "bottom")
+# outbreak_divergent_transitions_plot <- clean_diagnostics |>
+#   DT(per_divergent_transitions > 0.01) |>
+#   DT(data_type %in% "Outbreak") |>
+#   DT(, time  := time |> factor() |> fct_rev()) |>
+#   ggplot() +
+#   aes(
+#     y = time,
+#     x = per_divergent_transitions,
+#     col = distribution_stat,
+#     size = sample_size,
+#     shape = model
+#   ) +
+#   geom_point(position = position_jitter(width = 0), alpha = 0.6) +
+#   scale_x_continuous(labels = scales::percent, trans = "logit") +
+#   theme_bw() +
+#   scale_fill_brewer(
+#     palette = "Dark2", aesthetics = c("colour", "fill")
+#   ) +
+#   labs(
+#     x = "Divergent transitions",
+#     y = "Outbreak observation day"
+#   ) +
+#   guides(
+#     size = guide_legend(title = "Sample size", nrow = 2),
+#     col = guide_legend(title = "Distribution", nrow = 2),
+#     shape = guide_legend(title = "Model", nrow = 2)
+#   ) +
+#   theme(legend.position = "bottom")
 
   ## Combine plots
-  diagnostic_plot <- (runtime_plot + plot_layout(guides = "keep")) /
-  (
+  diagnostic_plot <- runtime_plot +
     divergent_transitions_plot +
-    exponential_divergent_transitions_plot +
-    outbreak_divergent_transitions_plot +
-    plot_layout(guides = "collect")
-  ) +
     plot_annotation(tag_levels = "A") +
-    plot_layout(guides = "keep") &
-    theme(legend.position = "bottom")
+    plot_layout(guides = "keep", heights = c(3, 1)) &
+    theme(legend.position = "bottom", legend.direction = "vertical")
 
 # Save combined plots
 ggsave(
   here("figures", "diagnostic.png"),  diagnostic_plot,
-  height = 12, width = 16, dpi = 330
+  height = 12, width = 12, dpi = 330
 )

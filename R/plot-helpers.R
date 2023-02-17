@@ -3,9 +3,9 @@
 calculate_cohort_mean <- function(data, type = c("cohort", "cumulative"),
                                   by = c(), obs_at) {
   type <- match.arg(type)
-
-  out <- data |>
-    copy() |>
+  out <- copy(data)
+  
+  out <- out |>
     DT(, .(
       mean = mean(delay_daily), n = .N),
       by = c("ptime_daily", by)
