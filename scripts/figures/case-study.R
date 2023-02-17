@@ -126,7 +126,7 @@ tv_plot <- ggplot(case_study_obs) +
 # First construct observed and retrospective data by window and join with
 # complete data
 # Retrict to 20 days delay
-truncated_cs_obs <-  obs_times |>
+truncated_cs_obs <- obs_times |>
   map_dfr(~ filter_obs_by_obs_time(case_study_obs, obs_time = .x)) |>
   combine_obs(case_study_obs) |>
   DT(, type := "Real-time")
@@ -203,8 +203,16 @@ parameter_density_plot <- cs_samples |>
     fct_rev()
   ) |>
   DT(, obs_type := str_to_sentence(obs_type)) |>
+  DT(, model := factor(model, levels = models$model))
+
+# Plot posterior densities for each parameter by model and observation type.
+# Filter out outlier values for the sake of plotting
+parameter_density_plot <- clean_cs_samples |>
+  draws_to_long() |>
+  DT(value <= 10) |>
+  DT(value >= -10) |>
+  DT(parameter %in% c("mean", "sd")) |>
   DT(, parameter := str_to_sentence(parameter)) |>
-  DT(, model := factor(model, levels = models$model)) |>
   plot_recovery(y = scenario, fill = obs_type) +
   facet_grid(
     vars(model), vars(parameter),
