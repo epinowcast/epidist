@@ -7,10 +7,11 @@ outbreak <- simulate_gillespie(seed=101)
 
 obs <- outbreak |>
   simulate_secondary(
+    meanlog=1.8, sdlog=0.8
   ) |>
   observe_process()
 
-obs_window <- 30
+obs_window <- 90
 
 truncated_obs <- obs |>
   filter_obs_by_obs_time(obs_time = obs_window )
@@ -68,3 +69,9 @@ ggplot(backward) +
   geom_point(aes(stime_daily, mean)) +
   geom_ribbon(data = ss2, aes(time, ymin = q5, ymax = q95), alpha = 0.3) +
   geom_line(data = ss2, aes(time, mean))
+
+cdenom <- ss |>
+  as.data.table() |>
+  DT(grepl("cdenom", variable))
+
+plot(cdenom$median)
