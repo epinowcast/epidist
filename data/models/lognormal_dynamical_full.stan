@@ -10,7 +10,8 @@ data {
 }
 
 parameters {
-  real<lower=0> lambda;
+  real mu;
+  real<lower=0> sigma;
 }
 
 transformed parameters {
@@ -18,17 +19,22 @@ transformed parameters {
   
   for (i in 1:tlength) {
     cdenom[i] = 0;
-    for (j in 0:(i-1)) {
-      cdenom[i] += exp(poisson_lpmf(j | lambda) + log(incidence_p[i-j]));
+    for (j in 1:(i-1)) {
+      if (j==i) {
+        cdenom[i] += exp(lognormal_lcdf(j | mu, sigma) + log(incidence_p[i-j]));
+      } else {
+        cdenom[i] += exp(log_diff_exp(lognormal_lcdf(j | mu, sigma), lognormal_lcdf(j-1 | mu, sigma)) + log(incidence_p[i-j]));
+      }
     }
   }
 }
 
 model {
-  lambda ~ normal(0, 10);
+  mu ~ normal(0, 10);
+  sigma ~ normal(0, 10);
   
   for (i in 1:N) {
-    target += poisson_lpmf(delay_daily[i] | lambda) - log(cdenom[stime_daily[i] - tmin + 1]);
+    target += lognormal_lpdf(delay_daily[i] | mu, sigma) - log(cdenom[stime_daily[i] - tmin + 1]);
   }
 }
 
@@ -38,8 +44,8 @@ generated quantities {
   for (i in 1:tlength) {
     backwardmean[i] = 0;
     
-    for (j in 0:(i-1)) {
-      backwardmean[i] += exp(poisson_lpmf(j | lambda) + log(incidence_p[i-j]) + log(j) - log(cdenom[i]));
+    for (j in 1:(i-1)) {
+      backwardmean[i] += exp(lognormal_lpdf(j | mu, sigma) + log(incidence_p[i-j]) + log(j) - log(cdenom[i]));
     }
   }
 }
