@@ -259,3 +259,144 @@ latent_truncation_censoring_adjusted_delay <- function(
   )
   return(fit)
 }
+
+#' Estimate delays from the backward delay distribution
+#' @export
+backward_delay <- function(data, data_cases, ...) {
+  data <- drop_zero(data)
+  
+  if(!all(c("time", "cases") %in% colnames(data_cases))) {
+    stop("`data_cases` must be a data.frame object containing `time` and `cases` columns")
+  }
+  
+  tmin <- pmin(min(data$ptime_daily), min(data_cases$time)) 
+  tmax <- pmax(max(data$stime_daily), max(data_cases$time))
+  
+  data_cases_tmp <- data.frame(
+    time=tmin:tmax,
+    cases=0
+  )
+  
+  data_cases_tmp$cases[match(data_cases$time, data_cases_tmp$time)] <- data_cases$cases
+  data_cases_tmp$cases[data_cases_tmp$cases==0] <- 1e-3
+  data_cases <- data_cases_tmp
+  
+  cases <- data_cases$cases
+  tmin <- min(data_cases$time)
+  tlength <- nrow(data_cases)
+  
+  model <- cmdstan_model("data/models/lognormal_dynamical_full.stan")
+  
+  standata <- list(
+    N = nrow(data),
+    delay_lwr = data$delay_lwr,
+    delay_upr = data$delay_upr,
+    stime_daily = data$stime_daily,
+    tlength = nrow(data_cases),
+    tmin = min(data_cases$time),
+    cases = data_cases$cases
+  )
+  
+  fit <- model$sample(data = standata, ...)
+  
+}
+
+## this doesn't run right now...
+#' Estimate delays from the backward delay distribution + brms
+#' @param data_cases data frame consisting of integer time column and incidence column
+backward_delay_brms <- function(
+    formula = brms::bf(
+      delay_daily ~ 1, sigma ~ 1
+    ), 
+    data,
+    data_cases,
+    fn = brms::brm, 
+    family = "lognormal", 
+    scode_data = "
+      int stime_daily[N];
+      int<lower=1> tlength; // time series length
+      int tmin;
+  
+      int cases[tlength];
+    ",
+    scode_tparameters = "
+      real cdenom[tlength];
+  
+      cdenom[1] = 0;
+  
+      for (i in 2:tlength) {
+        cdenom[i] = 0;
+        for (j in 1:(i-1)) {
+          if (j==1) {
+            cdenom[i] += 
+              exp(lognormal_lcdf(j | Intercept, exp(Intercept_sigma)) + log(cases[i-j]));
+          } else {
+            cdenom[i] += 
+              exp(
+                log_diff_exp(
+                  lognormal_lcdf(j | Intercept, exp(Intercept_sigma)), 
+                  lognormal_lcdf(j - 1 | Intercept, exp(Intercept_sigma))
+                ) + 
+                log(cases[i-j])
+              );
+          }
+        }
+      }
+    ",
+    scode_model = "
+      if (!prior_only) {
+        for (i in 1:N) {
+          target += - log(cdenom[stime_daily[i] - tmin + 1]);
+        }
+      }
+    ",
+    ...) {
+  
+  data <- drop_zero(data)
+  
+  if(!all(c("time", "cases") %in% colnames(data_cases))) {
+    stop("`data_cases` must be a data.frame containing `time` and `cases` columns")
+  }
+  
+  data_cases_tmp <- data.frame(
+    time=min(data_cases$time):max(data_cases$time),
+    cases=0
+  )
+  
+  data_cases_tmp$cases[match(data_cases$time, data_cases_tmp$time)] <- data_cases$cases
+  data_cases_tmp$cases[data_cases_tmp$cases==0] <- 1e-3
+  data_cases <- data_cases_tmp
+  
+  cases <- data_cases$cases
+  tmin <- min(data_cases$time)
+  tlength <- nrow(data_cases)
+  
+  x <- list(
+    stime_daily = data$stime_daily,
+    cases=cases, tmin=tmin, tlength=tlength
+  )
+  
+  stanvars_data <- brms::stanvar(
+    x = x, block = "data", scode = scode_data
+  )
+  
+  stanvars_tparameters <- brms::stanvar(
+    block = "tparameters", scode = scode_tparameters
+  )
+  
+  stanvars_model <- brms::stanvar(
+    block = "model", scode = scode_model
+  )
+  
+  stanvars_all <- stanvars_data + stanvars_tparameters + stanvars_model
+  
+  ## TODO: need to figure out 
+  fit <- fn(
+    formula, data = data,
+    family = family, stanvars = stanvars_all,
+    backend = "cmdstanr",
+    ...
+  )
+  
+  return(fit)
+}
