@@ -153,7 +153,7 @@ censored_fit <- censoring_adjusted_delay(
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.6 seconds.
-#> Total execution time: 0.8 seconds.
+#> Total execution time: 0.7 seconds.
 ```
 
 Adjust for censoring and filter to crudely adjust for right truncation.
@@ -183,13 +183,13 @@ truncation_fit <- truncation_adjusted_delay(
 #> Running MCMC with 4 parallel chains...
 #> 
 #> Chain 1 finished in 0.7 seconds.
-#> Chain 2 finished in 0.7 seconds.
-#> Chain 3 finished in 0.7 seconds.
-#> Chain 4 finished in 0.8 seconds.
+#> Chain 3 finished in 0.8 seconds.
+#> Chain 4 finished in 0.7 seconds.
+#> Chain 2 finished in 0.8 seconds.
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.7 seconds.
-#> Total execution time: 1.0 seconds.
+#> Total execution time: 0.9 seconds.
 ```
 
 Adjust for right truncation and date censoring.
@@ -200,14 +200,14 @@ truncation_censoring_fit <- truncation_censoring_adjusted_delay(
 )
 #> Running MCMC with 4 parallel chains...
 #> 
-#> Chain 1 finished in 1.1 seconds.
+#> Chain 1 finished in 1.0 seconds.
 #> Chain 2 finished in 1.1 seconds.
-#> Chain 3 finished in 1.1 seconds.
+#> Chain 3 finished in 1.0 seconds.
 #> Chain 4 finished in 1.1 seconds.
 #> 
 #> All 4 chains finished successfully.
-#> Mean chain execution time: 1.1 seconds.
-#> Total execution time: 1.3 seconds.
+#> Mean chain execution time: 1.0 seconds.
+#> Total execution time: 1.2 seconds.
 ```
 
 Adjust for right truncation and date censoring using a latent variable
@@ -222,11 +222,11 @@ latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
 #> Chain 1 finished in 3.4 seconds.
 #> Chain 3 finished in 3.4 seconds.
 #> Chain 4 finished in 3.3 seconds.
-#> Chain 2 finished in 3.4 seconds.
+#> Chain 2 finished in 3.5 seconds.
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 3.4 seconds.
-#> Total execution time: 3.6 seconds.
+#> Total execution time: 3.7 seconds.
 ```
 
 ### Summarise model posteriors and compare to known truth
@@ -267,15 +267,15 @@ knitr::kable(summarised_draws[parameter %in% c("meanlog", "sdlog")])
 | Filtered                                          | meanlog   | 1.70 |   1.70 | 1.60 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 |  1.80 |
 | Censoring adjusted                                | meanlog   | 1.60 |   1.60 | 1.50 | 1.50 | 1.50 | 1.60 | 1.60 | 1.60 | 1.60 |  1.60 |
 | Filtered and censoring adjusted                   | meanlog   | 1.70 |   1.70 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 |  1.80 |
-| Truncation adjusted                               | meanlog   | 1.90 |   1.80 | 1.70 | 1.70 | 1.80 | 1.80 | 1.90 | 1.90 | 2.00 |  2.00 |
-| Truncation and censoring adjusted                 | meanlog   | 1.80 |   1.80 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 | 1.90 | 1.90 |  1.90 |
+| Truncation adjusted                               | meanlog   | 1.80 |   1.80 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.90 |  1.90 |
+| Truncation and censoring adjusted                 | meanlog   | 1.80 |   1.70 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 |  1.90 |
 | Latent variable truncation and censoring adjusted | meanlog   | 1.80 |   1.80 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 | 1.90 |  1.90 |
 | Naive                                             | sdlog     | 0.49 |   0.49 | 0.44 | 0.45 | 0.47 | 0.48 | 0.50 | 0.51 | 0.53 |  0.54 |
 | Filtered                                          | sdlog     | 0.45 |   0.45 | 0.40 | 0.41 | 0.43 | 0.44 | 0.46 | 0.48 | 0.50 |  0.51 |
 | Censoring adjusted                                | sdlog     | 0.45 |   0.45 | 0.40 | 0.41 | 0.43 | 0.44 | 0.46 | 0.47 | 0.49 |  0.51 |
 | Filtered and censoring adjusted                   | sdlog     | 0.42 |   0.42 | 0.37 | 0.37 | 0.40 | 0.41 | 0.43 | 0.45 | 0.48 |  0.49 |
-| Truncation adjusted                               | sdlog     | 0.56 |   0.55 | 0.49 | 0.50 | 0.52 | 0.54 | 0.57 | 0.59 | 0.63 |  0.65 |
-| Truncation and censoring adjusted                 | sdlog     | 0.48 |   0.48 | 0.41 | 0.42 | 0.45 | 0.46 | 0.49 | 0.51 | 0.54 |  0.56 |
+| Truncation adjusted                               | sdlog     | 0.58 |   0.57 | 0.50 | 0.51 | 0.54 | 0.56 | 0.59 | 0.61 | 0.66 |  0.68 |
+| Truncation and censoring adjusted                 | sdlog     | 0.51 |   0.51 | 0.44 | 0.46 | 0.48 | 0.50 | 0.53 | 0.55 | 0.58 |  0.60 |
 | Latent variable truncation and censoring adjusted | sdlog     | 0.54 |   0.53 | 0.46 | 0.47 | 0.50 | 0.52 | 0.55 | 0.57 | 0.61 |  0.63 |
 
 Plot summarised posterior estimates from each model compared to the
