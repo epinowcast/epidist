@@ -105,7 +105,7 @@ combine_obs <- function(truncated_obs, obs) {
 
 #' Calculate the mean difference between continuous and discrete event time
 #' @export
-calculate_censor_delay <- function(truncated_obs) {
+calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
   truncated_obs_psumm <- truncated_obs |>
     copy() |>
     DT(, ptime_delay := ptime - ptime_daily) |>
@@ -113,7 +113,7 @@ calculate_censor_delay <- function(truncated_obs) {
       mean = mean(ptime_delay),
       lwr = ifelse(length(ptime_delay) > 1, t.test(ptime_delay)[[4]][1], 0),
       upr = ifelse(length(ptime_delay) > 1, t.test(ptime_delay)[[4]][2], 1)),
-      by = "ptime_daily") |>
+      by = c("ptime_daily", additional_by)) |>
     DT(, lwr := ifelse(lwr < 0, 0, lwr)) |>
     DT(, upr := ifelse(upr > 1, 1, upr)) |>
     DT(, type := "ptime")
@@ -125,7 +125,7 @@ calculate_censor_delay <- function(truncated_obs) {
       mean = mean(stime_delay),
       lwr = ifelse(length(stime_delay) > 1, t.test(stime_delay)[[4]][1], 0),
       upr = ifelse(length(stime_delay) > 1, t.test(stime_delay)[[4]][2], 1)),
-      by = "stime_daily") |>
+      by = c("stime_daily", additional_by)) |>
     DT(, lwr := ifelse(lwr < 0, 0, lwr)) |>
     DT(, upr := ifelse(upr > 1, 1, upr)) |>
     DT(, type := "stime")
