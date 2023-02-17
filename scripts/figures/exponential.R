@@ -105,8 +105,6 @@ empirical_pmf_plot <- truncated_exponential_obs |>
 
 # Summarise draws
 
-# TODO: The non-latent truncation and censoring model currently has a very odd looking posterior. Does this indicate a bug or just some kind of bias in the model. # nolint
-
 # TODO: This currently roles all the replicates into one plot. We might want another version (for the SI) that splits these out so we can explore the amount of variation. # nolint
 
 # TODO: Add coverage plot for each model
