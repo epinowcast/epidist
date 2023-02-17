@@ -7,8 +7,6 @@ outbreak <- simulate_gillespie(seed=101)
 
 obs <- outbreak |>
   simulate_secondary(
-    dist = rpois,
-    lambda = 5
   ) |>
   observe_process()
 
@@ -37,10 +35,13 @@ cases$cases[match(truncated_cases$time, cases$time)]<- truncated_cases$cases
 
 model <- cmdstan_model("data/models/lognormal_dynamical_full.stan")
 
+truncated_obs_dropzero <-  truncated_obs |>
+  DT(delay_daily != 0)
+
 standata <- list(
-  N = nrow(truncated_obs),
-  delay_daily = truncated_obs$delay_daily,
-  stime_daily = truncated_obs$stime_daily,
+  N = nrow(truncated_obs_dropzero),
+  delay_daily = truncated_obs_dropzero$delay_daily,
+  stime_daily = truncated_obs_dropzero$stime_daily,
   tlength = nrow(cases),
   tmin = min(cases$time),
   incidence_p = cases$cases
