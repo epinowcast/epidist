@@ -22,7 +22,8 @@ type_vec <- c("real time", "retrospective")
 
 paramdata <- expand.grid(obs_window_vec, type_vec)
 
-reslist <- vector('list', nrow(paramdata))
+summlist <- vector('list', nrow(paramdata))
+drawlist <- vector('list', nrow(paramdata))
 
 for (i in 1:nrow(paramdata)) {
   pp <- paramdata[i,]
@@ -48,15 +49,41 @@ for (i in 1:nrow(paramdata)) {
     
     data_cases <- cases_by_window |>
       DT(case_type=="primary") |>
-      DT(time<=obs_t)
+      DT(time<obs_t)
     
   }
   
   bfit <- backward_delay(data=truncated_obs, data_cases=data_cases, cores=4)
   
-  reslist[[i]] <- bfit
+  ss <- bfit$summary()
+  
+  ss2 <- ss |>
+    as.data.table() |>
+    DT(grepl("backward", variable)) |>
+    DT(, time := 0:(obs_t-1)) |>
+    DT(, obs_t := obs_t) |>
+    DT(, type := type)
+  
+  bfit_summ <- bfit$draws(variables = c("Intercept", "Intercept_sigma"), format=c("draws_matrix")) |>
+    as.data.table() |>
+    mutate(
+      meanlog=Intercept,
+      sdlog=exp(Intercept_sigma),
+      Mean=exp(meanlog + sdlog^2/2)/exp(1.8 + 0.8^2/2),
+      Sd=sqrt((exp(sdlog^2)-1)*exp(2*meanlog+sdlog^2))/sqrt((exp(0.8^2)-1)*exp(2*1.8+0.8^2))
+    )
+  
+  bfit_summ2 <- bfit_summ |>
+    select(Mean, Sd) |>
+    melt() |>
+    DT(, obs_t := obs_t) |>
+    DT(, type := type)
+  
+  summlist[[i]] <- ss2
+  drawlist[[i]] <- bfit_summ2
 }
 
-backward_simulation <- reslist
+backward_simulation_summ <- summlist |> bind_rows()
+backward_simulation_draw <- drawlist |> bind_rows()
 
-save("backward_simulation", file="backward_simulation.rda")
+save("backward_simulation_summ", "backward_simulation_draw", file=here("scripts/simulations", "backward_simulation.rda"))
