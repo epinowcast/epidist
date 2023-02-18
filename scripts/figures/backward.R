@@ -10,6 +10,7 @@ library(patchwork) # for combining plots
 library(stringr) # for string manipulation
 library(forcats) # manipulate factors
 library(scoringutils) # for scoring forecasts/posterior predictions
+load(here("scripts/simulations", "backward_simulation.rda"))
 
 # Load case study data
 outbreak_obs <- fread(here("data/scenarios/outbreak-simulation.csv"))
@@ -22,61 +23,49 @@ obs_window <- 60
 truncated_obs <- outbreak_long |>
   filter_obs_by_obs_time(obs_time = obs_window)
 
-cases_by_window <- construct_cases_by_obs_window(
-  outbreak_long, windows = c(obs_window)
-)
-
-data_cases <- cases_by_window |>
-  DT(case_type=="primary") |>
-  DT(obs_at==obs_window)
-
-bfit <- backward_delay(data=truncated_obs, data_cases=data_cases, cores=4)
-
 backward <- truncated_obs |>
   copy() |>
   DT(, .(mean = mean(delay_daily)), by = stime_daily)
 
-ss <- bfit$summary()
-
-ss2 <- ss |>
-  as.data.table() |>
-  DT(grepl("backward", variable)) |>
-  DT(, time := 0:59)
-
-g1 <- ggplot(backward) +
-  geom_point(aes(stime_daily, mean)) +
-  geom_ribbon(data = ss2, aes(time, ymin = q5, ymax = q95), alpha = 0.3) +
-  geom_line(data = ss2, aes(time, mean)) +
+g1 <- ggplot(backward_simulation_summ) +
+  geom_point(data=backward, aes(stime_daily, mean)) +
+  geom_ribbon(aes(time, ymin=q5, ymax=q95, fill=factor(obs_t)), alpha=0.3) +
+  geom_line(aes(time, mean, col=factor(obs_t))) +
   scale_x_continuous("Secondary event time (days)") +
   scale_y_continuous("Mean backward delay (days)") +
-  theme_bw()
+  scale_fill_viridis_d("Time") + 
+  scale_color_viridis_d("Time") + 
+  facet_wrap(~type, nrow=2) +
+  theme_bw() +
+  theme(legend.position = "bottom")
 
-bfit_summ <- bfit$draws(variables = c("Intercept", "Intercept_sigma"), format=c("draws_matrix")) |>
-  as.data.table() |>
-  mutate(
-    meanlog=Intercept,
-    sdlog=exp(Intercept_sigma),
-    Mean=exp(meanlog + sdlog^2/2)/exp(1.8 + 0.8^2/2),
-    Sd=sqrt((exp(sdlog^2)-1)*exp(2*meanlog+sdlog^2))/sqrt((exp(0.8^2)-1)*exp(2*1.8+0.8^2))
-  )
-
-bfit_summ2 <- bfit_summ |>
-  select(Mean, Sd) |>
-  melt()
-
-g2 <-ggplot(bfit_summ2) +
-  geom_density(aes(value)) +
-  scale_x_continuous("Relative to ground truth") +
-  scale_y_continuous("Density") +
-  facet_wrap(~variable) +
-  theme_bw()
+g2 <- ggplot(filter(backward_simulation_draw, value < 2)) +
+  ggridges::geom_density_ridges(
+    aes(x=value, y=factor(obs_t, levels=c(60, 45, 30, 15)), fill=type),
+    scale = 1.5, quantile_lines = TRUE, alpha = 0.8,
+    quantiles = c(0.05, 0.35, 0.65, 0.95)
+  ) +
+  geom_vline(xintercept = 1, linetype = 2, size = 1.05, alpha = 0.8) +
+  facet_wrap(~type, scales = "free_x") +
+  scale_fill_brewer(palette = "Dark2") +
+  guides(
+    fill = guide_legend(title = "Estimation method", nrow = 2),
+    col = guide_none()
+  ) +
+  labs(
+    y = "Observation day", x = "Relative to ground truth"
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom")
 
 gcomb <- g1 + g2 +
-  plot_layout(nrow=2)
-
+  plot_layout(nrow=2, height=c(3, 1)) +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
 
 # Save combined plots
 ggsave(
   here("figures", "backward.png"), gcomb,
-  height = 10, width = 8, dpi = 330
+  height = 12, width = 8, dpi = 330
 )
