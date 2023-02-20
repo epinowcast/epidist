@@ -16,7 +16,7 @@ load(here("scripts/simulations", "backward_simulation.rda"))
 outbreak_obs <- fread(here("data/scenarios/outbreak-simulation.csv"))
 
 outbreak_long <- outbreak_obs |>
-  DT(distribution=="long")
+  DT(distribution == "long")
 
 obs_window <- 60
 
@@ -28,20 +28,22 @@ backward <- truncated_obs |>
   DT(, .(mean = mean(delay_daily)), by = stime_daily)
 
 g1 <- ggplot(backward_simulation_summ) +
-  geom_point(data=backward, aes(stime_daily, mean)) +
-  geom_ribbon(aes(time, ymin=q5, ymax=q95, fill=factor(obs_t)), alpha=0.3) +
-  geom_line(aes(time, mean, col=factor(obs_t))) +
+  geom_point(data = backward, aes(stime_daily, mean)) +
+  geom_ribbon(
+    aes(time, ymin = q5, ymax = q95, fill = factor(obs_t)), alpha = 0.3
+  ) +
+  geom_line(aes(time, mean, col = factor(obs_t))) +
   scale_x_continuous("Secondary event time (days)") +
   scale_y_continuous("Mean backward delay (days)") +
-  scale_fill_viridis_d("Time") + 
-  scale_color_viridis_d("Time") + 
-  facet_wrap(~type, nrow=2) +
+  scale_fill_viridis_d("Time") +
+  scale_color_viridis_d("Time") +
+  facet_wrap(~type, nrow = 2) +
   theme_bw() +
   theme(legend.position = "bottom")
 
 g2 <- ggplot(filter(backward_simulation_draw, value < 2)) +
   ggridges::geom_density_ridges(
-    aes(x=value, y=factor(obs_t, levels=c(60, 45, 30, 15)), fill=type),
+    aes(x = value, y = factor(obs_t, levels = c(60, 45, 30, 15)), fill = type),
     scale = 1.5, quantile_lines = TRUE, alpha = 0.8,
     quantiles = c(0.05, 0.35, 0.65, 0.95)
   ) +
@@ -59,7 +61,7 @@ g2 <- ggplot(filter(backward_simulation_draw, value < 2)) +
   theme(legend.position = "bottom")
 
 gcomb <- g1 + g2 +
-  plot_layout(nrow=2, height=c(3, 1)) +
+  plot_layout(nrow = 2, height = c(3, 1)) +
   plot_annotation(tag_levels = "A") +
   plot_layout(guides = "collect") &
   theme(legend.position = "bottom")
