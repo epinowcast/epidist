@@ -43,7 +43,9 @@ read_exponential <- function(target_model) {
 }
 
 # Load exponential samples for each model and combine
-e_samples <- map_dfr("Latent variable truncation and censoring adjusted", read_exponential)
+e_samples <- map_dfr(
+  "Latent variable truncation and censoring adjusted", read_exponential
+)
 
 # Load distributions
 distributions <- fread(here("data/meta/distributions.csv")) |>

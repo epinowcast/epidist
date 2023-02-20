@@ -605,8 +605,9 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/ebola_estimation_times.R.
 ```
 
-  - Truncate the available simulate observations based on the estimation
-    time for each scenario.
+  - Truncate the available observations based on the estimation time for
+    each scenario and the secondary event time. Restrict to a window up
+    to 60 days before the estimation time using the primary event time.
 
 <!-- end list -->
 
@@ -618,7 +619,8 @@ tar_target(
       obs_time = ebola_estimation_times[, "time"][[1]]
     ) |>
     DT(, scenario := ebola_estimation_times[, "scenario"][[1]]) |>
-    DT(, obs_type := "real-time"),
+    DT(, obs_type := "real-time") |>
+    DT(ptime_lwr >= ebola_estimation_times[, "time"][[1]] - 60),
   pattern = map(ebola_estimation_times)
 )
 #> Establish _targets.R and _targets_r/targets/truncated_ebola_obs.R.
@@ -638,7 +640,8 @@ tar_target(
       obs_at = "max_secondary"
     ) |>
     DT(, scenario := ebola_estimation_times[, "scenario"][[1]]) |>
-    DT(, obs_type := "retrospective"),
+    DT(, obs_type := "retrospective") |> 
+    DT(ptime_lwr >= ebola_estimation_times[, "time"][[1]] - 60),
   pattern = map(ebola_estimation_times)
 )
 #> Establish _targets.R and _targets_r/targets/retro_ebola_obs.R.
