@@ -359,6 +359,9 @@ backward_delay_brms <- function(
       "`data_cases` must be a data.frame containing `time` and `cases` columns"
     )
   }
+  cols <- colnames(data)[map_lgl(data, is.integer)]
+  data <- data |>
+    DT(, (cols) := lapply(.SD, as.double), .SDcols = cols)
 
   data <- pad_zero(data)
 
