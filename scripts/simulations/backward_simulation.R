@@ -54,8 +54,9 @@ for (i in seq_len(nrow(paramdata))) {
       DT(time < obs_t)
   }
 
-  bfit <- backward_delay(
-    data = truncated_obs, data_cases = data_cases,
+  bfit <- backward_delay_brms(
+    data = truncated_obs,
+    data_cases = data_cases,
     cores = 4
   )
 
