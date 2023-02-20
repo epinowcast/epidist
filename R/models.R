@@ -365,8 +365,11 @@ backward_delay_brms <- function(
 
   data <- pad_zero(data)
 
+  tmin <- pmin(min(data$ptime_daily), min(data_cases$time))
+  tmax <- pmax(max(data$stime_daily), max(data_cases$time))
+
   data_cases_tmp <- data.table(
-    time = min(data_cases$time):max(data_cases$time),
+    time = tmin:tmax,
     cases = 1e-3
   )
 
