@@ -354,6 +354,20 @@ backward_delay_brms <- function(
     ",
     ...) {
 
+  if (as.character(formula)[1] != "delay_lwr | cens(censored, delay_upr) ~ 1") {
+    warning(
+      "Only `delay_lwr | cens(censored, delay_upr) ~ 1` has been tested. The current implementation is not robust to non-daily censoring or the use of multiple time series" # nolint
+    )
+  }
+
+  if (missing(data_cases)) {
+    message("No `data_cases` provided. Using `data` to calculate incidence")
+    data_cases <- data |>
+      DT(, .(cases = .N), by = "ptime_daily") |>
+      DT(order(ptime_daily)) |>
+      setnames(old = c("ptime_daily"), new = c("time"))
+  }
+
   if (!all(c("time", "cases") %in% colnames(data_cases))) {
     stop(
       "`data_cases` must be a data.frame containing `time` and `cases` columns"

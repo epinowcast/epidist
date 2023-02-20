@@ -35,14 +35,10 @@ for (i in seq_len(nrow(paramdata))) {
     filter_obs_by_obs_time(obs_time = obs_t)
 
   if (type == "real time") {
-    cases_by_window <- construct_cases_by_obs_window(
-      outbreak_long,
-      windows = c(obs_t)
+    bfit <- backward_delay_brms(
+      data = truncated_obs,
+      cores = 4
     )
-
-    data_cases <- cases_by_window |>
-      DT(case_type == "primary") |>
-      DT(obs_at == obs_t)
   } else {
     cases_by_window <- construct_cases_by_obs_window(
       outbreak_long,
@@ -52,13 +48,12 @@ for (i in seq_len(nrow(paramdata))) {
     data_cases <- cases_by_window |>
       DT(case_type == "primary") |>
       DT(time < obs_t)
+    bfit <- backward_delay_brms(
+      data = truncated_obs,
+      data_cases = data_cases,
+      cores = 4
+    )
   }
-
-  bfit <- backward_delay_brms(
-    data = truncated_obs,
-    data_cases = data_cases,
-    cores = 4
-  )
 
   ss <- posterior::summarise_draws(bfit)
 
