@@ -24,12 +24,17 @@ transformed parameters {
     cdenom[i] = 0;
     for (j in 1:(i-1)) {
       if (j == 1) {
-        cdenom[i] += exp(lognormal_lcdf(j | Intercept, exp(Intercept_sigma)) + log(cases[i-j]));
+        cdenom[i] += exp(
+          lognormal_cdf(j | Intercept, exp(Intercept_sigma)) + log(cases[i-j])
+        );
       } else {
         cdenom[i] += exp(
-          log_diff_exp(lognormal_lcdf(j | Intercept, exp(Intercept_sigma)), 
-          lognormal_lcdf(j - 1 | Intercept, exp(Intercept_sigma))) + 
-          log(cases[i-j]));
+          log_diff_exp(
+            lognormal_lcdf(j | Intercept, exp(Intercept_sigma)), 
+            lognormal_lcdf(j - 1 | Intercept, exp(Intercept_sigma))
+          ) + 
+          log(cases[i-j])
+        );
       }
     }
   }
@@ -40,8 +45,10 @@ model {
   target += student_t_lpdf(Intercept_sigma | 3, 0, 2.5);
   
   for (i in 1:N) {
-    target += log_diff_exp(lognormal_lcdf(delay_upr[i] | Intercept, exp(Intercept_sigma)),
-                               lognormal_lcdf(delay_lwr[i] | Intercept, exp(Intercept_sigma)));
+    target += log_diff_exp(
+      lognormal_lcdf(delay_upr[i] | Intercept, exp(Intercept_sigma)),
+      lognormal_lcdf(delay_lwr[i] | Intercept, exp(Intercept_sigma))
+    );
     target += - log(cdenom[stime_daily[i] - tmin + 1]);
   }
 }
