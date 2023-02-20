@@ -5,6 +5,7 @@ tar_target(
       obs_time = ebola_estimation_times[, "time"][[1]]
     ) |>
     DT(, scenario := ebola_estimation_times[, "scenario"][[1]]) |>
-    DT(, obs_type := "real-time"),
+    DT(, obs_type := "real-time") |>
+    DT(ptime_lwr >= ebola_estimation_times[, "time"][[1]] - 60),
   pattern = map(ebola_estimation_times)
 )

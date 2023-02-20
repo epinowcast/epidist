@@ -6,6 +6,7 @@ tar_target(
       obs_at = "max_secondary"
     ) |>
     DT(, scenario := ebola_estimation_times[, "scenario"][[1]]) |>
-    DT(, obs_type := "retrospective"),
+    DT(, obs_type := "retrospective") |> 
+    DT(ptime_lwr >= ebola_estimation_times[, "time"][[1]] - 60),
   pattern = map(ebola_estimation_times)
 )
