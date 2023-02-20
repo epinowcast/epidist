@@ -15,70 +15,77 @@ library(scoringutils) # for scoring forecasts/posterior predictions
 outbreak_obs <- fread(here("data/scenarios/outbreak-simulation.csv"))
 
 outbreak_long <- outbreak_obs |>
-  DT(distribution=="long")
+  DT(distribution == "long")
 
 obs_window_vec <- c(15, 30, 45, 60)
 type_vec <- c("real time", "retrospective")
 
 paramdata <- expand.grid(obs_window_vec, type_vec)
 
-summlist <- vector('list', nrow(paramdata))
-drawlist <- vector('list', nrow(paramdata))
+summlist <- vector("list", nrow(paramdata))
+drawlist <- vector("list", nrow(paramdata))
 
-for (i in 1:nrow(paramdata)) {
-  pp <- paramdata[i,]
-  
+for (i in seq_len(paramdata)) {
+  pp <- paramdata[i, ]
+
   obs_t <- pp[[1]]
   type <- pp[[2]]
-  
+
   truncated_obs <- outbreak_long |>
     filter_obs_by_obs_time(obs_time = obs_t)
-  
-  if (type=="real time") {
+
+  if (type == "real time") {
     cases_by_window <- construct_cases_by_obs_window(
-      outbreak_long, windows = c(obs_t)
+      outbreak_long,
+      windows = c(obs_t)
     )
-    
+
     data_cases <- cases_by_window |>
-      DT(case_type=="primary") |>
-      DT(obs_at==obs_t)
+      DT(case_type == "primary") |>
+      DT(obs_at == obs_t)
   } else {
     cases_by_window <- construct_cases_by_obs_window(
-      outbreak_long, windows = c(max(outbreak_long$stime_upr))
+      outbreak_long,
+      windows = c(max(outbreak_long$stime_upr))
     )
-    
+
     data_cases <- cases_by_window |>
-      DT(case_type=="primary") |>
-      DT(time<obs_t)
-    
+      DT(case_type == "primary") |>
+      DT(time < obs_t)
   }
-  
-  bfit <- backward_delay(data=truncated_obs, data_cases=data_cases, cores=4)
-  
+
+  bfit <- backward_delay(
+    data = truncated_obs, data_cases = data_cases,
+    cores = 4
+  )
+
   ss <- bfit$summary()
-  
+
   ss2 <- ss |>
     as.data.table() |>
     DT(grepl("backward", variable)) |>
-    DT(, time := 0:(obs_t-1)) |>
+    DT(, time := 0:(obs_t - 1)) |>
     DT(, obs_t := obs_t) |>
     DT(, type := type)
-  
-  bfit_summ <- bfit$draws(variables = c("Intercept", "Intercept_sigma"), format=c("draws_matrix")) |>
+
+  bfit_summ <- bfit$draws(
+    variables = c("Intercept", "Intercept_sigma"), format = c("draws_matrix")
+  ) |>
     as.data.table() |>
     mutate(
-      meanlog=Intercept,
-      sdlog=exp(Intercept_sigma),
-      Mean=exp(meanlog + sdlog^2/2)/exp(1.8 + 0.8^2/2),
-      Sd=sqrt((exp(sdlog^2)-1)*exp(2*meanlog+sdlog^2))/sqrt((exp(0.8^2)-1)*exp(2*1.8+0.8^2))
+      meanlog = Intercept,
+      sdlog = exp(Intercept_sigma),
+      Mean = exp(meanlog + sdlog^2 / 2) / exp(1.8 + 0.8^2 / 2),
+      Sd = sqrt((exp(sdlog^2) - 1) * exp(2 * meanlog + sdlog^2)) /
+       sqrt((exp(0.8^2) - 1) * exp(2 * 1.8 + 0.8^2))
     )
-  
+
   bfit_summ2 <- bfit_summ |>
     select(Mean, Sd) |>
     melt() |>
     DT(, obs_t := obs_t) |>
     DT(, type := type)
-  
+
   summlist[[i]] <- ss2
   drawlist[[i]] <- bfit_summ2
 }
@@ -86,4 +93,7 @@ for (i in 1:nrow(paramdata)) {
 backward_simulation_summ <- summlist |> bind_rows()
 backward_simulation_draw <- drawlist |> bind_rows()
 
-save("backward_simulation_summ", "backward_simulation_draw", file=here("scripts/simulations", "backward_simulation.rda"))
+save(
+  "backward_simulation_summ", "backward_simulation_draw",
+  file = here("scripts/simulations", "backward_simulation.rda")
+)
