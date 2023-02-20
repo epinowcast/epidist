@@ -314,14 +314,14 @@ backward_delay_brms <- function(
     fn = brms::brm,
     family = "lognormal",
     scode_data = "
-      int stime_daily[N];
+      array[N] int stime_daily;
       int<lower=1> tlength; // time series length
       int tmin;
   
-      int cases[tlength];
+      array[tlength] int cases;
     ",
     scode_tparameters = "
-      real cdenom[tlength];
+      array[tlength] real cdenom;
   
       cdenom[1] = 0;
   
@@ -377,15 +377,27 @@ backward_delay_brms <- function(
   tmin <- min(data_cases$time)
   tlength <- nrow(data_cases)
 
-  x <- list(
-    stime_daily = data$stime_daily,
-    cases = cases,
-    tmin = tmin,
-    tlength = tlength
-  )
-
-  stanvars_data <- brms::stanvar(
-    x = x, block = "data", scode = scode_data
+  stanvars_data <- c(
+    brms::stanvar(
+      x = tmin, block = "data",
+      scode = "int tmin;",
+      name = "tmin"
+    ),
+    brms::stanvar(
+      x = tlength, block = "data",
+      scode = "int<lower=1> tlength; // time series length",
+      name = "tlength"
+    ),
+    brms::stanvar(
+      x = data$stime_daily, block = "data",
+      scode = "array[N] int stime_daily;",
+      name = "stime_daily"
+    ),
+    brms::stanvar(
+      x = cases, block = "data",
+      scode = "array[tlength] int cases;",
+      name = "cases"
+    )
   )
 
   stanvars_tparameters <- brms::stanvar(
@@ -401,7 +413,8 @@ backward_delay_brms <- function(
   ## TODO: need to figure out
   fit <- fn(
     formula, data = data,
-    family = family, stanvars = stanvars_all,
+    family = family,
+    stanvars = stanvars_all,
     backend = "cmdstanr",
     ...
   )
