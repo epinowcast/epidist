@@ -25,7 +25,7 @@ paramdata <- expand.grid(obs_window_vec, type_vec)
 summlist <- vector("list", nrow(paramdata))
 drawlist <- vector("list", nrow(paramdata))
 
-for (i in seq_len(paramdata)) {
+for (i in seq_len(nrow(paramdata))) {
   pp <- paramdata[i, ]
 
   obs_t <- pp[[1]]
