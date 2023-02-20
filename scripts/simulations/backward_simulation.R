@@ -60,7 +60,7 @@ for (i in seq_len(nrow(paramdata))) {
     cores = 4
   )
 
-  ss <- bfit$summary()
+  ss <- posterior::summarise_draws(bfit)
 
   ss2 <- ss |>
     as.data.table() |>
@@ -69,20 +69,10 @@ for (i in seq_len(nrow(paramdata))) {
     DT(, obs_t := obs_t) |>
     DT(, type := type)
 
-  bfit_summ <- bfit$draws(
-    variables = c("Intercept", "Intercept_sigma"), format = c("draws_matrix")
-  ) |>
-    as.data.table() |>
-    mutate(
-      meanlog = Intercept,
-      sdlog = exp(Intercept_sigma),
-      Mean = exp(meanlog + sdlog^2 / 2) / exp(1.8 + 0.8^2 / 2),
-      Sd = sqrt((exp(sdlog^2) - 1) * exp(2 * meanlog + sdlog^2)) /
-       sqrt((exp(0.8^2) - 1) * exp(2 * 1.8 + 0.8^2))
-    )
+  bfit_summ <- extract_lognormal_draws(bfit)
 
   bfit_summ2 <- bfit_summ |>
-    select(Mean, Sd) |>
+    select(Mean = mean, Sd = sd) |>
     melt() |>
     DT(, obs_t := obs_t) |>
     DT(, type := type)
