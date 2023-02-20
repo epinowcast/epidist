@@ -1,13 +1,13 @@
 data {
   int<lower=1> N; // total number of observations
-  int delay_lwr[N];
-  int delay_upr[N];
-  int stime_daily[N];
+  array[N] int delay_lwr;
+  array[N] int delay_upr;
+  array[N] int stime_daily;
   
   int<lower=1> tlength; // time series length
   int tmin;
   
-  int cases[tlength];
+  array[tlength] int cases;
 }
 
 parameters {
@@ -16,14 +16,14 @@ parameters {
 }
 
 transformed parameters {
-  real cdenom[tlength];
+  array[tlength] real cdenom;
   
   cdenom[1] = 0;
   
   for (i in 2:tlength) {
     cdenom[i] = 0;
     for (j in 1:(i-1)) {
-      if (j==1) {
+      if (j == 1) {
         cdenom[i] += exp(lognormal_lcdf(j | Intercept, exp(Intercept_sigma)) + log(cases[i-j]));
       } else {
         cdenom[i] += exp(
@@ -47,7 +47,7 @@ model {
 }
 
 generated quantities {
-  real backwardmean[tlength];
+  array[tlength] real backwardmean;
   
   for (i in 1:tlength) {
     backwardmean[i] = 0;
