@@ -254,7 +254,7 @@ latent_truncation_censoring_adjusted_delay <- function(
 
   fit <- fn(
     formula = formula, family = family, stanvars = stanvars_all,
-    backend = "cmdstanr", data = data, 
+    backend = "cmdstanr", data = data,
     ...
   )
   return(fit)
@@ -307,7 +307,7 @@ backward_delay <- function(data, data_cases, ...) {
 #' @param data_cases data frame consisting of integer time column and incidence column
 backward_delay_brms <- function(
     formula = brms::bf(
-      delay_daily ~ 1, sigma ~ 1
+      delay_lwr | cens(censored, delay_upr) ~ 1, sigma ~ 1
     ),
     data,
     data_cases,
@@ -354,17 +354,17 @@ backward_delay_brms <- function(
     ",
     ...) {
 
-  data <- drop_zero(data)
-
   if (!all(c("time", "cases") %in% colnames(data_cases))) {
     stop(
       "`data_cases` must be a data.frame containing `time` and `cases` columns"
     )
   }
 
+  data <- pad_zero(data)
+
   data_cases_tmp <- data.table(
     time = min(data_cases$time):max(data_cases$time),
-    cases = 0
+    cases = 1e-3
   )
 
   data_cases_tmp[match(data_cases$time, time), cases := data_cases$cases]
@@ -376,7 +376,9 @@ backward_delay_brms <- function(
 
   x <- list(
     stime_daily = data$stime_daily,
-    cases = cases, tmin = tmin, tlength = tlength
+    cases = cases,
+    tmin = tmin,
+    tlength = tlength
   )
 
   stanvars_data <- brms::stanvar(
