@@ -15,6 +15,10 @@ load(here("scripts/simulations", "backward_simulation.rda"))
 # Load case study data
 outbreak_obs <- fread(here("data/scenarios/outbreak-simulation.csv"))
 
+# Load distributions
+distributions <- fread(here("data/meta/distributions.csv")) |>
+  DT(scenario == "long")
+
 outbreak_long <- outbreak_obs |>
   DT(distribution == "long")
 
@@ -41,9 +45,19 @@ g1 <- ggplot(backward_simulation_summ) +
   theme_bw() +
   theme(legend.position = "bottom")
 
-g2 <- ggplot(filter(backward_simulation_draw, value < 2)) +
+g2 <- backward_simulation_draw |>
+  make_relative_to_truth(
+    distributions |>
+      draws_to_long() |>
+      DT(, variable := str_to_sentence(parameter)) ,
+    by = "variable"
+  ) |>
+  filter(rel_value < 2) |>
+  ggplot() +
   ggridges::geom_density_ridges(
-    aes(x = value, y = factor(obs_t, levels = c(60, 45, 30, 15)), fill = type),
+    aes(x = rel_value, y = factor(obs_t, levels = c(60, 45, 30, 15)),
+        fill = type
+    ),
     scale = 1.5, quantile_lines = TRUE, alpha = 0.8,
     quantiles = c(0.05, 0.35, 0.65, 0.95)
   ) +
