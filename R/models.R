@@ -264,29 +264,30 @@ latent_truncation_censoring_adjusted_delay <- function(
 #' @export
 backward_delay <- function(data, data_cases, ...) {
   data <- drop_zero(data)
-  
-  if(!all(c("time", "cases") %in% colnames(data_cases))) {
-    stop("`data_cases` must be a data.frame object containing `time` and `cases` columns")
+
+  if (!all(c("time", "cases") %in% colnames(data_cases))) {
+    stop(
+      "`data_cases` must be a data.frame object containing `time` and `cases` columns" # nolint
+    )
   }
-  
-  tmin <- pmin(min(data$ptime_daily), min(data_cases$time)) 
+
+  tmin <- pmin(min(data$ptime_daily), min(data_cases$time))
   tmax <- pmax(max(data$stime_daily), max(data_cases$time))
-  
-  data_cases_tmp <- data.frame(
-    time=tmin:tmax,
-    cases=0
+
+  data_cases_tmp <- data.table(
+    time = tmin:tmax,
+    cases = 1e-3
   )
-  
-  data_cases_tmp$cases[match(data_cases$time, data_cases_tmp$time)] <- data_cases$cases
-  data_cases_tmp$cases[data_cases_tmp$cases==0] <- 1e-3
+
+  data_cases_tmp[match(data_cases$time, time), cases := data_cases$cases]
   data_cases <- data_cases_tmp
-  
+
   cases <- data_cases$cases
   tmin <- min(data_cases$time)
   tlength <- nrow(data_cases)
-  
+
   model <- cmdstan_model("data/models/lognormal_dynamical_full.stan")
-  
+
   standata <- list(
     N = nrow(data),
     delay_lwr = data$delay_lwr,
@@ -296,9 +297,9 @@ backward_delay <- function(data, data_cases, ...) {
     tmin = min(data_cases$time),
     cases = data_cases$cases
   )
-  
+
   fit <- model$sample(data = standata, ...)
-  
+
 }
 
 ## this doesn't run right now...
@@ -307,11 +308,11 @@ backward_delay <- function(data, data_cases, ...) {
 backward_delay_brms <- function(
     formula = brms::bf(
       delay_daily ~ 1, sigma ~ 1
-    ), 
+    ),
     data,
     data_cases,
-    fn = brms::brm, 
-    family = "lognormal", 
+    fn = brms::brm,
+    family = "lognormal",
     scode_data = "
       int stime_daily[N];
       int<lower=1> tlength; // time series length
@@ -329,7 +330,8 @@ backward_delay_brms <- function(
         for (j in 1:(i-1)) {
           if (j==1) {
             cdenom[i] += 
-              exp(lognormal_lcdf(j | Intercept, exp(Intercept_sigma)) + log(cases[i-j]));
+              exp(lognormal_lcdf(j | Intercept, exp(Intercept_sigma)) +
+                log(cases[i-j]));
           } else {
             cdenom[i] += 
               exp(
@@ -351,52 +353,53 @@ backward_delay_brms <- function(
       }
     ",
     ...) {
-  
+
   data <- drop_zero(data)
-  
-  if(!all(c("time", "cases") %in% colnames(data_cases))) {
-    stop("`data_cases` must be a data.frame containing `time` and `cases` columns")
+
+  if (!all(c("time", "cases") %in% colnames(data_cases))) {
+    stop(
+      "`data_cases` must be a data.frame containing `time` and `cases` columns"
+    )
   }
-  
-  data_cases_tmp <- data.frame(
-    time=min(data_cases$time):max(data_cases$time),
-    cases=0
+
+  data_cases_tmp <- data.table(
+    time = min(data_cases$time):max(data_cases$time),
+    cases = 0
   )
-  
-  data_cases_tmp$cases[match(data_cases$time, data_cases_tmp$time)] <- data_cases$cases
-  data_cases_tmp$cases[data_cases_tmp$cases==0] <- 1e-3
+
+  data_cases_tmp[match(data_cases$time, time), cases := data_cases$cases]
   data_cases <- data_cases_tmp
-  
+
   cases <- data_cases$cases
   tmin <- min(data_cases$time)
   tlength <- nrow(data_cases)
-  
+
   x <- list(
     stime_daily = data$stime_daily,
-    cases=cases, tmin=tmin, tlength=tlength
+    cases = cases, tmin = tmin, tlength = tlength
   )
-  
+
   stanvars_data <- brms::stanvar(
     x = x, block = "data", scode = scode_data
   )
-  
+
   stanvars_tparameters <- brms::stanvar(
     block = "tparameters", scode = scode_tparameters
   )
-  
+
   stanvars_model <- brms::stanvar(
     block = "model", scode = scode_model
   )
-  
+
   stanvars_all <- stanvars_data + stanvars_tparameters + stanvars_model
-  
-  ## TODO: need to figure out 
+
+  ## TODO: need to figure out
   fit <- fn(
     formula, data = data,
     family = family, stanvars = stanvars_all,
     backend = "cmdstanr",
     ...
   )
-  
+
   return(fit)
 }
