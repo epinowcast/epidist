@@ -73,73 +73,22 @@ case_study_obs_summ_forward <- case_study_obs |>
   ) %>%
   mutate(
     type = "Forward"
-  )
-
-case_study_obs_summ_retro <- case_study_obs |>
-  group_by(ptime_daily) |>
-  summarize(
-    sum1 = sum(delay_daily),
-    sum2 = sum(delay_daily^2),
-    n = n()
-  ) |>
-  arrange(ptime_daily) |>
-  mutate(
-    ntotal = cumsum(n),
-    mean = cumsum(sum1) / ntotal,
-    sd = sqrt(
-      (cumsum(sum2) - 2 * cumsum(sum1) * mean + mean^2 * ntotal) / ntotal
-    ),
-    se = sd / sqrt(ntotal),
-    lwr = mean - 1.96 * se,
-    upr = mean + 1.96 * se
-  )
-
-case_study_obs_summ_realt <- case_study_obs |>
-  group_by(stime_daily) |>
-  summarize(
-    sum1 = sum(delay_daily),
-    sum2 = sum(delay_daily^2),
-    n = n()
-  ) |>
-  arrange(stime_daily) |>
-  mutate(
-    ntotal = cumsum(n),
-    mean = cumsum(sum1) / ntotal,
-    sd = sqrt(
-      (cumsum(sum2) - 2 * cumsum(sum1) * mean + mean^2 * ntotal) / ntotal
-    ),
-    se = sd / sqrt(ntotal),
-    lwr = mean - 1.96 * se,
-    upr = mean + 1.96 * se
+  ) %>%
+  rename(
+    time=ptime_daily
   )
 
 # Plot mean estimates
-tv_plot <- list(
-  case_study_obs |>
-    DT(, `:=`(time = ptime_daily, obs = delay_daily, type = "Forward")),
-  case_study_obs_summ_retro |>
-    DT(, `:=`(time = ptime_daily, type = "Retrospective")),
-  case_study_obs_summ_realt |>
-    DT(, `:=`(time = stime_daily, type = "Real-time"))
-  ) |>
-  rbindlist(fill = TRUE) |>
-  DT(,
-   type := factor(
-    type, levels = c("Real-time", "Retrospective", "Forward"))
-  ) |>
+tv_plot <- case_study_obs |>
+  DT(, `:=`(time = ptime_daily, obs = delay_daily)) |>
   ggplot() +
-  aes(x = time, col = type, fill = type) +
-  geom_ribbon(
-    aes(ymin = lwr, ymax = upr), alpha = 0.2
-  ) +
-  geom_line(aes(y = mean)) +
-  geom_smooth(aes(y = obs), alpha = 0.2) +
+  aes(x = time) +
+  geom_point(data=case_study_obs_summ_forward, aes(y=mean)) +
+  geom_errorbar(data=case_study_obs_summ_forward, aes(ymin=lwr, ymax=upr), width=0) +
+  geom_smooth(aes(y = obs), alpha = 0.2, col="black") +
   geom_vline(xintercept = c(60, 120, 180, 240), lty = 2, alpha = 0.9) +
   scale_x_continuous("Days") +
-  scale_y_continuous("Mean delay (days)") +
-  scale_fill_brewer(
-    "Estimation method", palette = "Dark2", aesthetics = c("fill", "colour")
-  ) +
+  scale_y_continuous("Mean forward delay (days)") +
   theme_bw() +
   theme(
     legend.position = "bottom"
@@ -150,26 +99,43 @@ tv_plot <- list(
 # First construct observed and retrospective data by window and join with
 # complete data
 # Retrict to 20 days delay
-truncated_cs_obs <- obs_times |>
-  map_dfr(~ filter_obs_by_obs_time(case_study_obs, obs_time = .x)) |>
-  combine_obs(case_study_obs) |>
-  DT(, type := "Real-time")
+obs_t_group <- c(0, 60, 120, 180, 240)
 
-retro_cs_obs <- obs_times |>
-  map_dfr(~ filter_obs_by_ptime(case_study_obs, obs_time = .x)) |>
-  combine_obs(case_study_obs) |>
+case_study_obs_retro <- case_study_obs |>
+  copy() |>
+  DT(, group := cut(ptime_daily, obs_t_group)) |>
+  DT(!is.na(group)) |>
   DT(, type := "Retrospective")
 
-combined_cs_obs <- rbind(truncated_cs_obs, retro_cs_obs)
+## ensuring that both ptime and stime are observed between observation time
+case_study_obs_realtime <- case_study_obs |>
+  copy() |>
+  DT(, group_s := cut(stime_daily, obs_t_group)) |>
+  DT(, group_p := cut(ptime_daily, obs_t_group)) |>
+  DT(group_s == group_p) |>
+  DT(, group := group_p) |>
+  dplyr::select(-group_s, -group_p) |>
+  DT(, type := "Real-time")
+
+combined_cs_obs <- rbind(case_study_obs_retro, case_study_obs_realtime)
+
+combined_cs_obs_mean <- combined_cs_obs |>
+  mutate(
+    obs_at = factor(group, labels = c("60", "120", "180", "240"))
+  ) |>
+  group_by(obs_at, type) |>
+  summarize(
+    mean=mean(delay_daily)
+  )
 
 empirical_pmf_plot <- combined_cs_obs |>
-  DT(delay_daily <= 20) |>
-  DT(obs_at != 483) |>
+  DT(delay_daily <= 15) |>
   mutate(
-    obs_at = factor(obs_at, levels = c("60", "120", "180", "240"))
+    obs_at = factor(group, labels = c("60", "120", "180", "240"))
   ) |>
   ggplot() +
   aes(x = delay_daily) +
+  geom_vline(data=combined_cs_obs_mean, aes(xintercept=mean, col=type), lty=2) +
   geom_histogram(
     aes(
       y = after_stat(density), fill = type
@@ -177,14 +143,15 @@ empirical_pmf_plot <- combined_cs_obs |>
     binwidth = 1, position = "dodge", alpha = 0.6, col = "#696767b1"
   ) +
   scale_fill_brewer("Estimation method", palette = "Dark2") +
+  scale_color_brewer("Estimation method", palette = "Dark2") +
   theme_bw() +
   theme(legend.position = "bottom") +
   labs(x = "Days", y = "Density") +
   facet_wrap(vars(obs_at), nrow = 1)
 
 case_study_obs_trunc_prop <- merge(
-  case_study_obs %>%
-    group_by(ptime_daily) %>%
+  case_study_obs_retro %>%
+    group_by(group, ptime_daily) %>%
     summarize(
       n_total = n()
     ) %>%
@@ -192,8 +159,8 @@ case_study_obs_trunc_prop <- merge(
       n_total = cumsum(n_total)
     ) %>%
     rename(cohort = ptime_daily),
-  case_study_obs %>%
-    group_by(stime_daily) %>%
+  case_study_obs_realtime %>%
+    group_by(group, stime_daily) %>%
     summarize(
       n_obs = n()
     ) %>%
@@ -208,7 +175,7 @@ case_study_obs_trunc_prop <- merge(
   )
 
 trunc_prop_plot <- ggplot(case_study_obs_trunc_prop) +
-  geom_line(aes(cohort, trunc)) +
+  geom_line(aes(cohort, trunc, group=group)) +
   geom_vline(xintercept = c(60, 120, 180, 240), lty = 2, alpha = 0.9) +
   scale_x_continuous("Days") +
   scale_y_continuous("Unobserved secondary events", labels = scales::percent) +
@@ -305,7 +272,7 @@ mean_pp <- truncated_draws |>
 
 case_study_plot1 <- obs_plot +
   tv_plot +
-  (empirical_pmf_plot + guides(fill = guide_none())) +
+  (empirical_pmf_plot + guides(color = guide_none())) +
   trunc_prop_plot +
   plot_annotation(tag_levels = "A") +
   plot_layout(guides = "collect", nrow = 4) &
@@ -317,7 +284,6 @@ case_study_plot2 <- parameter_density_plot +
   plot_annotation(tag_levels = "A") +
   plot_layout(guides = "collect", widths = c(2, 1)) &
   theme(legend.position = "bottom")
-
 
 # Save combined plots
 ggsave(
