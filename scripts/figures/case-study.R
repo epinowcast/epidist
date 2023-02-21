@@ -83,9 +83,11 @@ tv_plot <- case_study_obs |>
   DT(, `:=`(time = ptime_daily, obs = delay_daily)) |>
   ggplot() +
   aes(x = time) +
-  geom_point(data=case_study_obs_summ_forward, aes(y=mean)) +
-  geom_errorbar(data=case_study_obs_summ_forward, aes(ymin=lwr, ymax=upr), width=0) +
-  geom_smooth(aes(y = obs), alpha = 0.2, col="black") +
+  geom_point(data = case_study_obs_summ_forward, aes(y = mean)) +
+  geom_errorbar(
+    data = case_study_obs_summ_forward, aes(ymin = lwr, ymax = upr), width = 0
+  ) +
+  geom_smooth(aes(y = obs), alpha = 0.2, col = "black") +
   geom_vline(xintercept = c(60, 120, 180, 240), lty = 2, alpha = 0.9) +
   scale_x_continuous("Days") +
   scale_y_continuous("Mean forward delay (days)") +
@@ -125,7 +127,7 @@ combined_cs_obs_mean <- combined_cs_obs |>
   ) |>
   group_by(obs_at, type) |>
   summarize(
-    mean=mean(delay_daily)
+    mean = mean(delay_daily)
   )
 
 empirical_pmf_plot <- combined_cs_obs |>
@@ -135,7 +137,9 @@ empirical_pmf_plot <- combined_cs_obs |>
   ) |>
   ggplot() +
   aes(x = delay_daily) +
-  geom_vline(data=combined_cs_obs_mean, aes(xintercept=mean, col=type), lty=2) +
+  geom_vline(
+    data = combined_cs_obs_mean, aes(xintercept = mean, col = type), lty=2
+  ) +
   geom_histogram(
     aes(
       y = after_stat(density), fill = type
@@ -221,7 +225,7 @@ parameter_density_plot <- clean_cs_samples |>
 
 # Plot posterior predictions for each observation window of the cohort mean
 truncated_draws <- clean_cs_samples |>
-  DT(sample <= 10) |> # use only 1000 samples for plotting
+  DT(sample <= 1000) |> # use only 1000 samples for plotting
   DT(obs_type %in% "Real-time") |>
   DT(, obs_at := as.numeric(as.character(scenario))) |>
   DT(,
@@ -232,7 +236,7 @@ truncated_draws <- clean_cs_samples |>
         calculate_truncated_means(
         .SD,
         obs_at = .SD[, unique(obs_at)],
-        ptime = c(.SD[, unique(obs_at)] - 30, .SD[, unique(obs_at)] - 1)
+        ptime = c(.SD[, unique(obs_at)] - 60, .SD[, unique(obs_at)] - 1)
         )
       },
     by = "obs_at"
@@ -252,7 +256,7 @@ cohort_mean <- map_dfr(obs_times,
       DT(, obs_at := .),
   .progress = TRUE
 ) |>
-  DT(ptime_daily >= -30)
+  DT(ptime_daily >= -60)
 
 
 mean_pp <- truncated_draws |>
