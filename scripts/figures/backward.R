@@ -62,7 +62,7 @@ g2 <- backward_simulation_draw |>
     quantiles = c(0.05, 0.35, 0.65, 0.95)
   ) +
   geom_vline(xintercept = 1, linetype = 2, size = 1.05, alpha = 0.8) +
-  facet_wrap(~type, scales = "free_x") +
+  facet_wrap(vars(variable), scales = "free_x") +
   scale_fill_brewer(palette = "Dark2") +
   guides(
     fill = guide_legend(title = "Estimation method", nrow = 2),

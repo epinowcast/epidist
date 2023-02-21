@@ -18,7 +18,7 @@ outbreak_long <- outbreak_obs |>
   DT(distribution == "long")
 
 obs_window_vec <- c(15, 30, 45, 60)
-type_vec <- c("real time", "retrospective")
+type_vec <- c("Real-time", "Retrospective")
 
 paramdata <- expand.grid(obs_window_vec, type_vec)
 
@@ -34,7 +34,7 @@ for (i in seq_len(nrow(paramdata))) {
   truncated_obs <- outbreak_long |>
     filter_obs_by_obs_time(obs_time = obs_t)
 
-  if (type == "real time") {
+  if (type == "Real-time") {
     bfit <- backward_delay_brms(
       data = truncated_obs,
       cores = 4
