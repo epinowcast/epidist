@@ -24,6 +24,14 @@ truncated_exponential_obs <- filter_obs_by_obs_time(
 models <- fread(here("data/meta/models.csv")) |>
   DT(, model := factor(model))
 
+# Load growth rates
+growth_rates <- fread(here("data/meta/growth_rates.csv")) |>
+  DT(, growth_rate := paste0(
+    str_to_sentence(scenario),
+    " (", round(r, 1), ")"
+  )) |>
+  DT(, growth_rate := factor(growth_rate))
+
 # Function to read each arrow dataset, filter for the simulation
 # and attach the model name
 read_exponential <- function(target_model) {
@@ -63,7 +71,9 @@ distributions <- fread(here("data/meta/distributions.csv")) |>
 
 e_samples_filter <- e_samples %>%
   filter(distribution == "long") %>%
-  filter(scenario %in% c("fast growth", "fast decay", "stable"))
+  filter(scenario %in% c("fast growth", "fast decay", "stable")) |>
+  DT(growth_rates, on = "scenario") |>
+  DT(, r := factor(r))
 
 # Make a clean samples data.frame for plotting
 clean_e_samples <- e_samples_filter |>
@@ -90,7 +100,7 @@ clean_e_samples <- e_samples_filter |>
   DT(,
     sample := 1:.N,
     keyby = c(
-      "model", "scenario", "parameter", "distribution_stat",
+      "model", "r", "parameter", "distribution_stat",
       "replicate"
     )
   )
@@ -101,25 +111,20 @@ scores <- clean_e_samples |>
   DT(
     ,
     c(
-      "model", "scenario", "parameter", "distribution_stat", "replicate",
+      "model", "r", "parameter", "distribution_stat", "replicate",
       "sample", "prediction", "true_value"
     )
   ) |>
-  score() %>%
-  mutate(
-    scenario = factor(scenario,
-      levels = c("fast growth", "stable", "fast decay")
-    )
-  )
+  score()
 
 mean_scores <- scores %>%
-  group_by(parameter, scenario) %>%
+  group_by(parameter, r) %>%
   summarize(
     mean = mean(bias)
   )
 
 clean_e_samples_summ <- clean_e_samples %>%
-  group_by(parameter, replicate, scenario) %>%
+  group_by(parameter, replicate, r) %>%
   summarize(
     median = median(value),
     lwr = quantile(value, 0.025),
@@ -141,18 +146,16 @@ distributions_long <- distributions %>%
   )
 
 truncated_exponential_obs_filter <- truncated_exponential_obs %>%
-  filter(distribution == "long", scenario %in% c("fast decay", "fast growth", "stable"))
-
-truncated_exponential_obs_censor <- truncated_exponential_obs_filter %>%
-  calculate_censor_delay(additional_by = "scenario") %>%
-  mutate(
-    scenario = factor(scenario,
-      levels = c("fast growth", "stable", "fast decay")
-    )
+  filter(
+    distribution == "long",
+    scenario %in% c("fast decay", "fast growth", "stable")
   )
 
+truncated_exponential_obs_censor <- truncated_exponential_obs_filter %>%
+  calculate_censor_delay(additional_by = "r")
+
 dd <- truncated_exponential_obs %>%
-  filter(distribution == "long", scenario == "stable") |>
+  filter(distribution == "long", r == "0") |>
   DT(sample(1:400, replace = FALSE))
 
 fit <- latent_truncation_censoring_adjusted_delay(data = dd)
@@ -170,7 +173,7 @@ g1 <- ggplot(filter(truncated_exponential_obs_censor, type == "ptime")) +
   geom_errorbar(aes(cohort, ymin = lwr, ymax = upr), width = 0) +
   scale_x_continuous("Daily primary event time") +
   scale_y_continuous("Mean daily censoring") +
-  facet_wrap(~scenario, nrow = 3) +
+  facet_wrap(~r, nrow = 3) +
   ggtitle("A") +
   theme_bw()
 
@@ -179,23 +182,24 @@ g2 <- ggplot(filter(truncated_exponential_obs_censor, type == "stime")) +
   geom_errorbar(aes(cohort, ymin = lwr, ymax = upr), width = 0) +
   scale_x_continuous("Daily secondary event time") +
   scale_y_continuous("Mean daily censoring") +
-  facet_wrap(~scenario, nrow = 3) +
+  facet_wrap(~r, nrow = 3) +
   ggtitle("B") +
   theme_bw()
 
 g3 <- ggplot(scores) +
   geom_density(aes(bias)) +
+  geom_vline(xintercept = 0, lty = 1) +
   geom_vline(data = mean_scores, aes(xintercept = mean), lty = 2) +
   scale_x_continuous("Bias") +
   scale_y_continuous("Density") +
-  facet_grid(scenario ~ parameter) +
+  facet_grid(r ~ parameter) +
   ggtitle("C") +
   theme_bw()
 
 g4 <- ggplot(ctime_est) +
-  geom_point(aes(ptime, stime), size = 0.5) +
+  geom_point(aes(x = ptime, y = stime), size = 0.5) +
   scale_x_continuous("Latent primary event time") +
-  scale_y_continuous("Latent primary event time") +
+  scale_y_continuous("Latent secondary event time") +
   ggtitle("D") +
   theme_bw()
 
