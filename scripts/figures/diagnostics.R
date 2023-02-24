@@ -124,7 +124,7 @@ if (any(colnames(clean_diagnostics) %in% "error")) {
   failed_fits <- clean_diagnostics |>
     DT(!is.na(error)) |>
     DT(!error %in% "")
-    
+
   message(
     "There were ", nrow(failed_fits), " failed fits"
   )
@@ -132,6 +132,15 @@ if (any(colnames(clean_diagnostics) %in% "error")) {
     failed_fits, here("data", "diagnostics", "summary", "failed_fits.csv")
   )
 }
+
+data.table(
+  `Failed fits` = nrow(failed_fits),
+  `Convergence issues` = nrow(convergence_issues),
+  `Divergent transitions` = nrow(divergent_transitions)
+) |>
+  fwrite(
+    here("data", "diagnostics", "summary", "summary.csv")
+  )
 
 # Plot mean and distribution of runtimes by model and case study for each
 # sample size
