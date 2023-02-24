@@ -4,7 +4,7 @@ calculate_cohort_mean <- function(data, type = c("cohort", "cumulative"),
                                   by = c(), obs_at) {
   type <- match.arg(type)
   out <- copy(data)
-  
+
   out <- out |>
     DT(, .(
       mean = mean(delay_daily), n = .N),
@@ -34,6 +34,28 @@ calculate_truncated_means <- function(draws, obs_at, ptime,
   if (length(ptime) != 2) {
     stop("ptime must be a vector of length 2.")
   }
+
+  integrate_for_trunc_mean <- function(x, m, s) {
+    numer <- integrate(
+      function(y) {
+        y * distribution(y, m, s)
+      },
+      lower = 0, upper = abs(x)
+    )[[1]]
+
+    denom <- integrate(
+      function(y) {
+        distribution(y, m, s)
+      },
+      lower = 0, upper = abs(x)
+    )[[1]]
+
+    return(numer / denom)
+  }
+  safe_integrate_for_trunc_mean <- purrr::possibly(
+    integrate_for_trunc_mean, otherwise = NA_real_
+  )
+
   trunc_mean <- draws |>
     copy() |>
     DT(,
@@ -46,23 +68,7 @@ calculate_truncated_means <- function(draws, obs_at, ptime,
     DT(,
       trunc_mean := purrr::pmap_dbl(
         list(x = obs_horizon, m = meanlog, s = sdlog),
-        \(x, m, s) {
-          numer <- integrate(
-            function(y) {
-              y * distribution(y, m, s)
-            },
-            lower = 0, upper = abs(x)
-          )[[1]]
-
-          denom <- integrate(
-            function(y) {
-              distribution(y, m, s)
-            },
-            lower = 0, upper = abs(x)
-          )[[1]]
-
-          return(numer / denom)
-        },
+        safe_integrate_for_trunc_mean,
         .progress = TRUE
       )
     )
