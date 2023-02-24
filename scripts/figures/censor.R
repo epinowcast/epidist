@@ -208,6 +208,6 @@ gfinal <- g1 + g2 + g3 + g4 +
 
 # Save combined plots
 ggsave(
-  here("figures", "censor.png"), gfinal,
+  here("figures", "censor.pdf"), gfinal,
   height = 10, width = 8, dpi = 330
 )
