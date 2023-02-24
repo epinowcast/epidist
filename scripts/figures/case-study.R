@@ -62,40 +62,37 @@ truncated_cs_obs_by_window <- construct_cases_by_obs_window(
 
 obs_plot <- plot_cases_by_obs_window(truncated_cs_obs_by_window)
 
-
-# Calculate forward, retrospective and real-time mean estimates
+# Calculate forward and backward mean delay and plot
 case_study_obs_summ_forward <- case_study_obs |>
   group_by(ptime_daily) |>
-  summarize(
-    mean = mean(delay_daily),
-    lwr = ifelse(length(delay_daily) > 10, t.test(delay_daily)[[4]][1], NA),
-    upr = ifelse(length(delay_daily) > 10, t.test(delay_daily)[[4]][2], NA)
-  ) %>%
-  mutate(
-    type = "Forward"
-  ) %>%
-  rename(
-    time=ptime_daily
-  )
+  summarize(mean = mean(delay_daily)) |>
+  mutate(type = "Forward") |>
+  rename(time = ptime_daily)
+
+case_study_obs_summ_backward <- case_study_obs |>
+  group_by(stime_daily) |>
+  summarize(mean = mean(delay_daily)) |>
+  mutate(type = "Backward") |>
+  rename(time = stime_daily)
 
 # Plot mean estimates
-tv_plot <- case_study_obs |>
-  DT(, `:=`(time = ptime_daily, obs = delay_daily)) |>
+mean_plot <- list(case_study_obs_summ_forward, case_study_obs_summ_backward) |>
+  rbindlist(fill = TRUE) |>
+  DT(,
+   type := factor(
+    type, levels = c("Forward", "Backward"))
+  ) |>
   ggplot() +
-  aes(x = time) +
-  geom_point(data = case_study_obs_summ_forward, aes(y = mean)) +
-  geom_errorbar(
-    data = case_study_obs_summ_forward, aes(ymin = lwr, ymax = upr), width = 0
-  ) +
-  geom_smooth(aes(y = obs), alpha = 0.2, col = "black") +
-  geom_vline(xintercept = c(60, 120, 180, 240), lty = 2, alpha = 0.9) +
+  aes(x = time, y = mean, col = type, fill = type) +
+  geom_smooth(alpha = 0.4) +
+  geom_vline(xintercept = c(60, 120, 180, 240), linetype = 2, alpha = 0.9) +
   scale_x_continuous("Days") +
-  scale_y_continuous("Mean forward delay (days)") +
+  scale_y_continuous("Mean delay (days)") +
+  scale_fill_brewer(
+    "Mean type", palette = "Accent", aesthetics = c("fill", "colour")
+  ) +
   theme_bw() +
-  theme(
-    legend.position = "bottom"
-  )
-
+  theme(legend.position = "bottom")
 
 # Plot empirical PMF for each observation window
 # First construct observed and retrospective data by window and join with
@@ -138,7 +135,7 @@ empirical_pmf_plot <- combined_cs_obs |>
   ggplot() +
   aes(x = delay_daily) +
   geom_vline(
-    data = combined_cs_obs_mean, aes(xintercept = mean, col = type), lty=2
+    data = combined_cs_obs_mean, aes(xintercept = mean, col = type), lty = 2
   ) +
   geom_histogram(
     aes(
@@ -275,7 +272,7 @@ mean_pp <- truncated_draws |>
   )
 
 case_study_plot1 <- obs_plot +
-  tv_plot +
+  mean_plot +
   (empirical_pmf_plot + guides(color = guide_none())) +
   trunc_prop_plot +
   plot_annotation(tag_levels = "A") +
