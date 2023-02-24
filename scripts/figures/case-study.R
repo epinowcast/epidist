@@ -84,7 +84,7 @@ mean_plot <- list(case_study_obs_summ_forward, case_study_obs_summ_backward) |>
   ) |>
   ggplot() +
   aes(x = time, y = mean, col = type, fill = type) +
-  geom_smooth(alpha = 0.4) +
+  geom_smooth(alpha = 0.4, method = "gam") +
   geom_vline(xintercept = c(60, 120, 180, 240), linetype = 2, alpha = 0.9) +
   scale_x_continuous("Days") +
   scale_y_continuous("Mean delay (days)") +
@@ -150,36 +150,48 @@ empirical_pmf_plot <- combined_cs_obs |>
   labs(x = "Days", y = "Density") +
   facet_wrap(vars(obs_at), nrow = 1)
 
+# Plot the proportion of secondary events that are truncated within a rolling
+# 60 day observation window
 case_study_obs_trunc_prop <- merge(
-  case_study_obs_retro %>%
-    group_by(group, ptime_daily) %>%
+  case_study_obs |>
+    group_by(ptime_daily) |>
     summarize(
       n_total = n()
-    ) %>%
+    ) |>
     mutate(
       n_total = cumsum(n_total)
-    ) %>%
+    ) |>
     rename(cohort = ptime_daily),
-  case_study_obs_realtime %>%
-    group_by(group, stime_daily) %>%
+  case_study_obs |>
+    group_by(stime_daily) |>
     summarize(
       n_obs = n()
-    ) %>%
+    ) |>
     mutate(
       n_obs = cumsum(n_obs)
-    ) %>%
+    ) |>
     rename(cohort = stime_daily)
-) %>%
-  arrange(cohort) %>%
+) |>
+  arrange(cohort) |>
+  mutate(
+    n_obs = n_obs - lag(n_obs, 60, default = 0),
+    n_total = n_total - lag(n_total, 60, default = 0)
+  ) |>
   mutate(
     trunc = 1 - n_obs / n_total
   )
 
 trunc_prop_plot <- ggplot(case_study_obs_trunc_prop) +
-  geom_line(aes(cohort, trunc, group=group)) +
+  geom_smooth(aes(x = cohort, y = trunc), method = "gam", col = "black") +
   geom_vline(xintercept = c(60, 120, 180, 240), lty = 2, alpha = 0.9) +
   scale_x_continuous("Days") +
-  scale_y_continuous("Unobserved secondary events", labels = scales::percent) +
+  scale_y_continuous(
+    str_wrap(
+      "Unobserved secondary events from primary events in the past 60 days",
+      width = 40
+    ),
+    labels = scales::percent
+  ) +
   theme_bw()
 
 # Clean posterior draws
