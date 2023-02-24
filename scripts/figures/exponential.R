@@ -105,8 +105,6 @@ empirical_pmf_plot <- truncated_exponential_obs |>
 
 # Summarise draws
 
-# TODO: This currently roles all the replicates into one plot. We might want another version (for the SI) that splits these out so we can explore the amount of variation. # nolint
-
 # Make a clean samples data.frame for plotting
 clean_e_samples <- e_samples |>
   copy() |>

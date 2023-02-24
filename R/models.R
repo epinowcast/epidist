@@ -211,7 +211,7 @@ latent_truncation_censoring_adjusted_delay <- function(
           ptime_upr - ptime_lwr
         )
     ) |>
-    DT(, 
+    DT(,
       woverlap := as.numeric(stime_lwr < ptime_upr)
     ) |>
     DT(, swindow_upr := stime_upr - stime_lwr) |>
@@ -260,52 +260,11 @@ latent_truncation_censoring_adjusted_delay <- function(
   return(fit)
 }
 
-#' Estimate delays from the backward delay distribution
-#' @export
-backward_delay <- function(data, data_cases, ...) {
-  data <- drop_zero(data)
-
-  if (!all(c("time", "cases") %in% colnames(data_cases))) {
-    stop(
-      "`data_cases` must be a data.frame object containing `time` and `cases` columns" # nolint
-    )
-  }
-
-  tmin <- pmin(min(data$ptime_daily), min(data_cases$time))
-  tmax <- pmax(max(data$stime_daily), max(data_cases$time))
-
-  data_cases_tmp <- data.table(
-    time = tmin:tmax,
-    cases = 1e-3
-  )
-
-  data_cases_tmp[match(data_cases$time, time), cases := data_cases$cases]
-  data_cases <- data_cases_tmp
-
-  cases <- data_cases$cases
-  tmin <- min(data_cases$time)
-  tlength <- nrow(data_cases)
-
-  model <- cmdstan_model("data/models/lognormal_dynamical_full.stan")
-
-  standata <- list(
-    N = nrow(data),
-    delay_lwr = data$delay_lwr,
-    delay_upr = data$delay_upr,
-    stime_daily = data$stime_daily,
-    tlength = nrow(data_cases),
-    tmin = min(data_cases$time),
-    cases = data_cases$cases
-  )
-
-  fit <- model$sample(data = standata, ...)
-
-}
-
 ## this doesn't run right now...
 #' Estimate delays from the backward delay distribution + brms
-#' @param data_cases data frame consisting of integer time column and incidence column
-backward_delay_brms <- function(
+#' @param data_cases data frame consisting of integer time column and incidence
+#' column
+dynamical_censoring_adjusted_delay <- function(
     formula = brms::bf(
       delay_lwr | cens(censored, delay_upr) ~ 1, sigma ~ 1
     ),
@@ -313,13 +272,6 @@ backward_delay_brms <- function(
     data_cases,
     fn = brms::brm,
     family = "lognormal",
-    scode_data = "
-      array[N] int stime_daily;
-      int<lower=1> tlength; // time series length
-      int tmin;
-  
-      array[tlength] int cases;
-    ",
     scode_tparameters = "
       array[tlength] real cdenom;
   
@@ -331,7 +283,7 @@ backward_delay_brms <- function(
           if (j==1) {
             cdenom[i] += 
               exp(lognormal_lcdf(j | Intercept, exp(Intercept_sigma)) +
-                log(cases[i-j]));
+                log_cases[i-j]);
           } else {
             cdenom[i] += 
               exp(
@@ -339,7 +291,7 @@ backward_delay_brms <- function(
                   lognormal_lcdf(j | Intercept, exp(Intercept_sigma)), 
                   lognormal_lcdf(j - 1 | Intercept, exp(Intercept_sigma))
                 ) + 
-                log(cases[i-j])
+                log_cases[i-j]
               );
           }
         }
@@ -356,7 +308,7 @@ backward_delay_brms <- function(
 
   if (as.character(formula)[1] != "delay_lwr | cens(censored, delay_upr) ~ 1") {
     warning(
-      "Only `delay_lwr | cens(censored, delay_upr) ~ 1` has been tested. The current implementation is not robust to non-daily censoring or the use of multiple time series" # nolint
+      "Only `delay_lwr | cens(censored, delay_upr) ~ 1` has been tested. The current implementation is not robust to non-daily censoring, the use of multiple time series, or models that have more than simple intercepts" # nolint
     )
   }
 
@@ -384,13 +336,14 @@ backward_delay_brms <- function(
 
   data_cases_tmp <- data.table(
     time = tmin:tmax,
-    cases = 1e-3
+    cases = 0.1
   )
 
   data_cases_tmp[match(data_cases$time, time), cases := data_cases$cases]
   data_cases <- data_cases_tmp
 
   cases <- data_cases$cases
+  log_cases <- log(cases)
   tmin <- min(data_cases$time)
   tlength <- nrow(data_cases)
 
@@ -411,9 +364,9 @@ backward_delay_brms <- function(
       name = "stime_daily"
     ),
     brms::stanvar(
-      x = cases, block = "data",
-      scode = "array[tlength] int cases;",
-      name = "cases"
+      x = log_cases, block = "data",
+      scode = "array[tlength] int log_cases;",
+      name = "log_cases"
     )
   )
 
@@ -433,10 +386,16 @@ backward_delay_brms <- function(
           backwardmean[i] = 0;
           
           // this is quite approximate...
-          // but sort of the best we can do without sacrificing a ton of computational power
+          // but sort of the best we can do without sacrificing a ton of
+          // computational power
           for (j in 1:(i-1)) {
-            backwardmean[i] += exp(log_diff_exp(lognormal_lcdf(j | Intercept, exp(Intercept_sigma)), 
-                lognormal_lcdf(j - 1 | Intercept, exp(Intercept_sigma))) + log(cases[i-j]) + log(j-0.5) - log(cdenom[i]));
+            backwardmean[i] += exp(
+              log_diff_exp(
+                lognormal_lcdf(j | Intercept, exp(Intercept_sigma)), 
+                lognormal_lcdf(j - 1 | Intercept, exp(Intercept_sigma))
+              ) +
+              log_cases[i-j] + log(j-0.5) - log(cdenom[i])
+            );
           }
         }
   "
@@ -445,7 +404,6 @@ backward_delay_brms <- function(
   stanvars_all <- stanvars_data + stanvars_tparameters + stanvars_model +
    stanvars_gp
 
-  ## TODO: need to figure out
   fit <- fn(
     formula, data = data,
     family = family,
