@@ -508,8 +508,6 @@ sampled_ebola_observations |>
 
 We explore a range of models for estimating the log normal distribution. Starting with the naive continuous model and then gradually adding complexity to adjust for censoring to dates and right truncation. 
 
-*TODO: Add dynamic model and work out how to process in the same control flow as used below. We may be able to integrate into a `brms` model by making incidence wide (i.e having the related incidence as features for every observation or by passing incidence as additional data and then having a look up location for each observation). Its not clear to me putting effort into this makes sense?*
-
 ```{targets models, tar_globals = TRUE}
 models <- list(
   "Naive" = quote(naive_delay),
@@ -520,7 +518,8 @@ models <- list(
   "Truncation and censoring adjusted" =
      quote(truncation_censoring_adjusted_delay),
   "Latent variable truncation and censoring adjusted" =
-    quote(latent_truncation_censoring_adjusted_delay)
+    quote(latent_truncation_censoring_adjusted_delay),
+  "Dynamical and censoring adjusted" = quote(dynamical_censoring_adjusted_delay)
 )
 
 machine_model_names <- gsub(" ", "_", tolower(names(models)))

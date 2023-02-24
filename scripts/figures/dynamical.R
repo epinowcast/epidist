@@ -10,7 +10,7 @@ library(patchwork) # for combining plots
 library(stringr) # for string manipulation
 library(forcats) # manipulate factors
 library(scoringutils) # for scoring forecasts/posterior predictions
-load(here("scripts/simulations", "backward_simulation.rda"))
+load(here("scripts/simulations", "dynamical_simulation.rda"))
 
 # Load case study data
 outbreak_obs <- fread(here("data/scenarios/outbreak-simulation.csv"))
@@ -82,6 +82,6 @@ gcomb <- g1 + g2 +
 
 # Save combined plots
 ggsave(
-  here("figures", "backward.png"), gcomb,
+  here("figures", "dynamical.png"), gcomb,
   height = 12, width = 8, dpi = 330
 )

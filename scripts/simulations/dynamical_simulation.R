@@ -35,7 +35,7 @@ for (i in seq_len(nrow(paramdata))) {
     filter_obs_by_obs_time(obs_time = obs_t)
 
   if (type == "Real-time") {
-    bfit <- backward_delay_brms(
+    bfit <- dynamical_censoring_adjusted_delay(
       data = truncated_obs,
       cores = 4
     )
@@ -48,7 +48,7 @@ for (i in seq_len(nrow(paramdata))) {
     data_cases <- cases_by_window |>
       DT(case_type == "primary") |>
       DT(time < obs_t)
-    bfit <- backward_delay_brms(
+    bfit <- dynamical_censoring_adjusted_delay(
       data = truncated_obs,
       data_cases = data_cases,
       cores = 4
