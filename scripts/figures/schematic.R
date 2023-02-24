@@ -101,4 +101,4 @@ p <- truncation + censoring +
   plot_layout(nrow = 1) +
   plot_annotation(tag_levels = "A")
 
-ggsave("figures/schematic.png", p, width = 9, height = 4)
+ggsave("figures/schematic.pdf", p, width = 9, height = 4)

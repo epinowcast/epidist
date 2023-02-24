@@ -230,6 +230,6 @@ exponential_plot <- ((empirical_pmf_plot / scores_plot) +
 
 # Save combined plots
 ggsave(
-  here("figures", "exponential.png"), exponential_plot,
+  here("figures", "exponential.pdf"), exponential_plot,
   height = 16, width = 16, dpi = 330
 )

@@ -273,6 +273,6 @@ divergent_transitions_plot <- clean_diagnostics |>
 
 # Save combined plots
 ggsave(
-  here("figures", "diagnostic.png"),  diagnostic_plot,
+  here("figures", "diagnostic.pdf"),  diagnostic_plot,
   height = 12, width = 12, dpi = 330
 )
