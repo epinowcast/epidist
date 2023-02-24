@@ -7,7 +7,8 @@ models <- list(
   "Truncation and censoring adjusted" =
      quote(truncation_censoring_adjusted_delay),
   "Latent variable truncation and censoring adjusted" =
-    quote(latent_truncation_censoring_adjusted_delay)
+    quote(latent_truncation_censoring_adjusted_delay),
+  "Dynamical and censoring adjusted" = quote(dynamical_censoring_adjusted_delay)
 )
 
 machine_model_names <- gsub(" ", "_", tolower(names(models)))

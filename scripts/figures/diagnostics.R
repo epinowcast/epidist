@@ -90,44 +90,46 @@ clean_diagnostics <- diagnostics |>
   DT(, r := factor(r))
 
 # Save fits with convergence issues
-clean_diagnostics |>
-  DT(max_rhat > 1.05) |>
-  fwrite(
-    here("data", "diagnostics", "summary", "convergence_issues.csv")
+convergence_issues <- clean_diagnostics |>
+  DT(max_rhat > 1.05)
+
+if (nrow(convergence_issues) > 0) {
+  message(
+    "There were ", nrow(convergence_issues), " convergence issues"
   )
+}
+
+fwrite(
+  convergence_issues, 
+  here("data", "diagnostics", "summary", "convergence_issues.csv")
+)
+
 # Save fits with issues with divergent transitions
-clean_diagnostics |>
-  DT(per_divergent_transitions > 0.01) |>
-  fwrite(
-    here("data", "diagnostics", "summary", "divergent_transitions.csv")
+divergent_transitions <- clean_diagnostics |>
+  DT(per_divergent_transitions > 0.01)
+
+if (nrow(divergent_transitions) > 0) {
+  message(
+    "There were ", nrow(divergent_transitions), " divergent transitions"
   )
-# Metrics of interest
-# - run_time
-# - rhat (per with rhat > 1.05)?
-# - per_divergent transitions
-# - per_at _max_tree_depth and max_tree_depth == 10 (or whatever max we set)
-# - Effective sample size (not currently collected). Both bulk and tail.
+}
 
-# Strata of interest
-# - model
-# - data type (outbreak/exponential/case study)
-# - scenario/observation day
-# - distribution (short, medium, long)
+fwrite(
+  divergent_transitions,
+  here("data", "diagnostics", "summary", "divergent_transitions.csv")
+)
 
-# Variables to control for
-# - sample size - just focus on 200 for now and perhaps include diagnostics for other samples in the the SI? # nolint
-# - observation type (i.e real-time or retrospective). Suggest we drop retrospective and focus on real-time. # nolint
-
-# Plot types
-# - violin
-# - density
-# - mean as point/line?
-
-# Plot Percentage with an Rhat greater than 1.05
-# - Line and point plot
-# - X axis: Models
-# - Y axis: Percentage with Rhat > 1.05
-# - Colour: Distribution
+# Save any failed fits
+if (any(colnames(clean_diagnostics) %in% "error")) {
+  failed_fits <- clean_diagnostics |>
+    DT(!is.na(error))
+  message(
+    "There were ", nrow(failed_fits), " failed fits"
+  )
+  fwrite(
+    failed_fits, here("data", "diagnostics", "summary", "failed_fits.csv")
+  )
+}
 
 # Plot mean and distribution of runtimes by model and case study for each
 # sample size
@@ -160,8 +162,9 @@ runtime_plot <- clean_diagnostics |>
   theme(legend.position = "bottom")
 
 # Plot Percentage with divergent transitions
+# Filter for >0.1% divergent transitions
 divergent_transitions_plot <- clean_diagnostics |>
-  DT(per_divergent_transitions > 0.01) |>
+  DT(per_divergent_transitions > 0.001) |>
   ggplot() +
   aes(
     y = model, x = per_divergent_transitions,
@@ -222,7 +225,7 @@ divergent_transitions_plot <- clean_diagnostics |>
 
 
 # outbreak_divergent_transitions_plot <- clean_diagnostics |>
-#   DT(per_divergent_transitions > 0.01) |>
+#   DT(per_divergent_transitions > 0.001) |>
 #   DT(data_type %in% "Outbreak") |>
 #   DT(, time  := time |> factor() |> fct_rev()) |>
 #   ggplot() +

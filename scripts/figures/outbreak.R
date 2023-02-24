@@ -137,8 +137,6 @@ clean_o_samples <- o_samples |>
 
 # Summarise draws
 
-# TODO: Need to consider sample size. I'd suggest we just have 10, 100, 200 in the SI using this plot # nolint
-
 # Plot posterior densities for each parameter by model and observation type.
 # Filter out outlier values for the sake of plotting
 parameter_density_plot <- clean_o_samples |>
