@@ -178,7 +178,7 @@ ptime_rolling_sum <- case_study_obs |>
 case_study_obs_trunc_prop <- ptime_rolling_sum |>
   mutate(obs = list(case_study_obs)) |>
   unnest(cols = c(obs)) |>
-  filter(ptime_daily >= (cohort - 60)) |>
+  filter(ptime_daily > (cohort - 60)) |>
   filter(ptime_daily <= cohort) |>
   filter(stime_daily <= cohort) |>
   group_by(cohort) |>
