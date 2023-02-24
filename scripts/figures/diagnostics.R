@@ -100,7 +100,7 @@ if (nrow(convergence_issues) > 0) {
 }
 
 fwrite(
-  convergence_issues, 
+  convergence_issues,
   here("data", "diagnostics", "summary", "convergence_issues.csv")
 )
 
@@ -122,7 +122,9 @@ fwrite(
 # Save any failed fits
 if (any(colnames(clean_diagnostics) %in% "error")) {
   failed_fits <- clean_diagnostics |>
-    DT(!is.na(error))
+    DT(!is.na(error)) |>
+    DT(!error %in% "")
+    
   message(
     "There were ", nrow(failed_fits), " failed fits"
   )
