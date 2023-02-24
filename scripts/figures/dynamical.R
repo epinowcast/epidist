@@ -41,7 +41,7 @@ g1 <- ggplot(backward_simulation_summ) +
   scale_y_continuous("Mean backward delay (days)") +
   scale_fill_viridis_d("Time") +
   scale_color_viridis_d("Time") +
-  facet_wrap(~type, nrow = 2) +
+  facet_wrap(~type, ncol = 1) +
   theme_bw() +
   theme(legend.position = "bottom")
 
@@ -82,6 +82,6 @@ gcomb <- g1 + g2 +
 
 # Save combined plots
 ggsave(
-  here("figures", "dynamical.png"), gcomb,
+  here("figures", "dynamical.pdf"), gcomb,
   height = 12, width = 8, dpi = 330
 )

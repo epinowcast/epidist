@@ -18,7 +18,7 @@ outbreak_long <- outbreak_obs |>
   DT(distribution == "long")
 
 obs_window_vec <- c(15, 30, 45, 60)
-type_vec <- c("Real-time", "Retrospective")
+type_vec <- c("Real-time", "Real-time (filtered)", "Retrospective")
 
 paramdata <- expand.grid(obs_window_vec, type_vec)
 
@@ -30,6 +30,7 @@ for (i in seq_len(nrow(paramdata))) {
 
   obs_t <- pp[[1]]
   type <- pp[[2]]
+  message("Estimating ", type, " model for ", obs_t, " days")
 
   truncated_obs <- outbreak_long |>
     filter_obs_by_obs_time(obs_time = obs_t)
@@ -39,17 +40,30 @@ for (i in seq_len(nrow(paramdata))) {
       data = truncated_obs,
       cores = 4
     )
+
+    filter_t <- obs_t
   } else {
+    if (type == "Real-time (filtered)") {
+      window <- obs_t
+      filter_t <- obs_t - 10
+      delay_obs <- outbreak_long |>
+        filter_obs_by_obs_time(obs_time = filter_t)
+    }else {
+      window <- max(outbreak_long$stime_upr)
+      delay_obs <- truncated_obs
+      filter_t <- obs_t
+    }
     cases_by_window <- construct_cases_by_obs_window(
       outbreak_long,
-      windows = c(max(outbreak_long$stime_upr))
+      windows = c(window)
     )
 
     data_cases <- cases_by_window |>
       DT(case_type == "primary") |>
-      DT(time < obs_t)
+      DT(time < filter_t)
+
     bfit <- dynamical_censoring_adjusted_delay(
-      data = truncated_obs,
+      data = delay_obs,
       data_cases = data_cases,
       cores = 4
     )
@@ -60,7 +74,7 @@ for (i in seq_len(nrow(paramdata))) {
   ss2 <- ss |>
     as.data.table() |>
     DT(grepl("backward", variable)) |>
-    DT(, time := 0:(obs_t - 1)) |>
+    DT(, time := 0:(filter_t - 1)) |>
     DT(, obs_t := obs_t) |>
     DT(, type := type)
 
@@ -76,10 +90,12 @@ for (i in seq_len(nrow(paramdata))) {
   drawlist[[i]] <- bfit_summ2
 }
 
-backward_simulation_summ <- summlist |> bind_rows()
-backward_simulation_draw <- drawlist |> bind_rows()
+backward_simulation_summ <- summlist |>
+ bind_rows()
+backward_simulation_draw <- drawlist |>
+ bind_rows()
 
 save(
   "backward_simulation_summ", "backward_simulation_draw",
-  file = here("scripts/simulations", "backward_simulation.rda")
+  file = here("scripts/simulations", "dynamical_simulation.rda")
 )

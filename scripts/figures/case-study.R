@@ -152,39 +152,50 @@ empirical_pmf_plot <- combined_cs_obs |>
 
 # Plot the proportion of secondary events that are truncated within a rolling
 # 60 day observation window
-case_study_obs_trunc_prop <- merge(
-  case_study_obs |>
-    group_by(ptime_daily) |>
-    summarize(
-      n_total = n()
-    ) |>
-    mutate(
-      n_total = cumsum(n_total)
-    ) |>
-    rename(cohort = ptime_daily),
-  case_study_obs |>
-    group_by(stime_daily) |>
-    summarize(
-      n_obs = n()
-    ) |>
-    mutate(
-      n_obs = cumsum(n_obs)
-    ) |>
-    rename(cohort = stime_daily)
-) |>
-  arrange(cohort) |>
-  mutate(
-    n_obs = n_obs - lag(n_obs, 60, default = 0),
-    n_total = n_total - lag(n_total, 60, default = 0)
+# FIXME: THis is completely wrong as we need to know which secondary events
+# are observed within the 60 day primary event window
+# FIXME: This is also wrong as we need all days to be present and not just 
+# those with events if attempting to filter backwards.
+ptime_rolling_sum <- case_study_obs |>
+  group_by(ptime_daily) |>
+  summarize(
+    n_total = n()
   ) |>
+  full_join(
+    tibble(
+      ptime_daily = seq(
+        min(case_study_obs$ptime_daily),
+        max(case_study_obs$ptime_daily)
+      )
+    ),
+     by = "ptime_daily"
+  ) |>
+  mutate(n_total = ifelse(is.na(n_total), 0, n_total)) |>
+  arrange(ptime_daily) |>
+  mutate(n_total = frollsum(n_total, 60, fill = NA)) |>
+  rename(cohort = ptime_daily)
+
+case_study_obs_trunc_prop <- ptime_rolling_sum |>
+  mutate(obs = list(case_study_obs)) |>
+  unnest(cols = c(obs)) |>
+  filter(ptime_daily >= (cohort - 60)) |>
+  filter(ptime_daily <= cohort) |>
+  filter(stime_daily <= cohort) |>
+  group_by(cohort) |>
+  summarize(
+    n_obs = n(),
+    n_total = first(n_total)
+  ) |>
+  ungroup() |>
   mutate(
-    trunc = 1 - n_obs / n_total
-  )
+    trunc_prop = 1 - n_obs / n_total
+  ) |>
+  filter(!is.na(trunc_prop))
 
 trunc_prop_plot <- ggplot(case_study_obs_trunc_prop) +
-  geom_smooth(aes(x = cohort, y = trunc), method = "gam", col = "black") +
+  geom_smooth(aes(x = cohort, y = trunc_prop), method = "gam", col = "black") +
   geom_vline(xintercept = c(60, 120, 180, 240), lty = 2, alpha = 0.9) +
-  scale_x_continuous("Days") +
+  scale_x_continuous("Days", limits = c(0, NA)) +
   scale_y_continuous(
     str_wrap(
       "Unobserved secondary events from primary events in the past 60 days",
@@ -300,12 +311,12 @@ case_study_plot2 <- parameter_density_plot +
 
 # Save combined plots
 ggsave(
-  here("figures", "case_study1.png"), case_study_plot1,
+  here("figures", "case_study1.pdf"), case_study_plot1,
   height = 16, width = 16, dpi = 330
 )
 
 # Save combined plots
 ggsave(
-  here("figures", "case_study2.png"), case_study_plot2,
+  here("figures", "case_study2.pdf"), case_study_plot2,
   height = 16, width = 16, dpi = 330
 )

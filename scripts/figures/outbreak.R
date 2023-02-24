@@ -238,6 +238,6 @@ outbreak_plot <- obs_plot /
 
 # Save combined plots
 ggsave(
-  here("figures", "outbreak.png"), outbreak_plot,
+  here("figures", "outbreak.pdf"), outbreak_plot,
   height = 20, width = 16, dpi = 330
 )
