@@ -87,7 +87,11 @@ censoring <- generate_base_plot(future = FALSE) |>
   add_arrow(x = 0.55, y = 0.2, xend = 0.9, ends = "first", angle = 90) |>
   add_arrow(x = 1.1, y = 0.2, xend = 1.45, ends = "last", angle = 90) |>
   add_arrow(x = 4.55, y = 0.3, xend = 4.9, ends = "first", angle = 90) |>
-  add_arrow(x = 5.1, y = 0.3, xend = 5.45, ends = "last", angle = 90) +
+  add_arrow(x = 5.1, y = 0.3, xend = 5.45, ends = "last", angle = 90) |>
+  add_arrow(x = 2.45, y = 0.125, xend = 3.55, ends = "both", angle = 0, lty=2) |>
+  add_arrow(x = -0.45, y = 0.075, xend = 4.45, ends = "both", angle = 0, lty=2) +
+  annotate("text", x=3, y=0.15, label="Minimum delay") +
+  annotate("text", x=3, y=0.05, label="Maximum delay") +
   theme(
     panel.grid = element_blank(),
     panel.border = element_blank(),
