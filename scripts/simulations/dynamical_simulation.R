@@ -17,7 +17,7 @@ outbreak_obs <- fread(here("data/scenarios/outbreak-simulation.csv"))
 outbreak_long <- outbreak_obs |>
   DT(distribution == "long")
 
-obs_window_vec <- c(15, 30, 45, 60)
+obs_window_vec <- c(60)
 type_vec <- c("Real-time", "Real-time (filtered)", "Retrospective")
 
 paramdata <- expand.grid(obs_window_vec, type_vec)
@@ -53,14 +53,17 @@ for (i in seq_len(nrow(paramdata))) {
       delay_obs <- truncated_obs
       filter_t <- obs_t
     }
-    cases_by_window <- construct_cases_by_obs_window(
-      outbreak_long,
+    cases_by_window <- outbreak_long |>
+    copy() |>
+    construct_cases_by_obs_window(
       windows = c(window)
     )
 
     data_cases <- cases_by_window |>
       DT(case_type == "primary") |>
-      DT(time < filter_t)
+      DT(time < filter_t) |>
+      DT(, .(cases = sum(cases)), by = "time") |>
+      DT(order(time))
 
     bfit <- dynamical_censoring_adjusted_delay(
       data = delay_obs,
