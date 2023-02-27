@@ -336,7 +336,7 @@ dynamical_censoring_adjusted_delay <- function(
 
   data_cases_tmp <- data.table(
     time = tmin:tmax,
-    cases = 1e-3
+    cases = 1e-4
   )
 
   data_cases_tmp[match(data_cases$time, time), cases := data_cases$cases]
