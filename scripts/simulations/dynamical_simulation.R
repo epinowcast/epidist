@@ -17,7 +17,7 @@ outbreak_obs <- fread(here("data/scenarios/outbreak-simulation.csv"))
 outbreak_long <- outbreak_obs |>
   DT(distribution == "long")
 
-obs_window_vec <- c(60)
+obs_window_vec <- c(15, 30, 45, 60)
 type_vec <- c("Real-time", "Real-time (filtered)", "Retrospective")
 
 paramdata <- expand.grid(obs_window_vec, type_vec)
