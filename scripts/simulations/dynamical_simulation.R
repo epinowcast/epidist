@@ -30,6 +30,13 @@ for (i in seq_len(nrow(paramdata))) {
 
   obs_t <- pp[[1]]
   type <- pp[[2]]
+  if (obs_t == 15 && type == "Real-time (filtered)") {
+    message(
+      "Skipping ", type, " model for ", obs_t, " days",
+      " as it is not possible to fit the model with these data"
+    )
+    next;
+  }
   message("Estimating ", type, " model for ", obs_t, " days")
 
   truncated_obs <- outbreak_long |>
