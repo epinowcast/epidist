@@ -260,7 +260,6 @@ latent_truncation_censoring_adjusted_delay <- function(
   return(fit)
 }
 
-## this doesn't run right now...
 #' Estimate delays from the backward delay distribution + brms
 #' @param data_cases data frame consisting of integer time column and incidence
 #' column
@@ -307,7 +306,7 @@ dynamical_censoring_adjusted_delay <- function(
     ...) {
 
   if (as.character(formula)[1] != "delay_lwr | cens(censored, delay_upr) ~ 1") {
-    warning(
+    stop(
       "Only `delay_lwr | cens(censored, delay_upr) ~ 1` has been tested. The current implementation is not robust to non-daily censoring, the use of multiple time series, or models that have more than simple intercepts" # nolint
     )
   }
@@ -336,7 +335,7 @@ dynamical_censoring_adjusted_delay <- function(
 
   data_cases_tmp <- data.table(
     time = tmin:tmax,
-    cases = 1e-4
+    cases = 1e-3
   )
 
   data_cases_tmp[match(data_cases$time, time), cases := data_cases$cases]

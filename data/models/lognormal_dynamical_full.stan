@@ -25,7 +25,7 @@ transformed parameters {
     for (j in 1:(i-1)) {
       if (j == 1) {
         cdenom[i] += exp(
-          lognormal_cdf(j | Intercept, exp(Intercept_sigma)) + log(cases[i-j])
+          lognormal_lcdf(j | Intercept, exp(Intercept_sigma)) + log(cases[i-j])
         );
       } else {
         cdenom[i] += exp(
