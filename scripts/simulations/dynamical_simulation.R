@@ -55,7 +55,7 @@ for (i in seq_len(nrow(paramdata))) {
       filter_t <- obs_t - 10
       delay_obs <- outbreak_long |>
         filter_obs_by_obs_time(obs_time = filter_t)
-    }else {
+    } else {
       window <- max(outbreak_long$stime_upr)
       delay_obs <- truncated_obs
       filter_t <- obs_t
