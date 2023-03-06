@@ -157,6 +157,17 @@ latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
 )
 ```
 
+Fit a joint model to estimate primary incidence and the delay to reporting secondary incidence (this is a thin wrapper around the `epinowcast` package that is not suggested for real-world usage).
+
+```{r}
+epinowcast_fit <- epinowcast_delay(
+  data = truncated_obs, parallel_chains = 4, adapt_delta = 0.95,
+  show_messages = FALSE, refresh = 0
+)
+epinowcast_draws <- extract_epinowcast_draws(epinowcast_fit) |>
+  DT(, model := "Joint incidence and forward delay")
+```
+
 ### Summarise model posteriors and compare to known truth
 
 Combine models into a named list.
@@ -180,11 +191,16 @@ Extract and summarise lognormal posterior estimates.
 draws <- models |>
   map(extract_lognormal_draws) |>
   rbindlist(idcol = "model") |>
-  DT(, model := factor(model, levels = rev(names(models))))
+  rbind(epinowcast_draws, use.names = TRUE) |>
+  DT(,
+   model := factor(
+    model, levels = c("Joint incidence and forward delay", rev(names(models)))
+   )
+  )
 
 summarised_draws <- draws |>
   draws_to_long() |>
-  summarise_draws(sf = 2)
+  summarise_draws(sf = 3)
 
 knitr::kable(summarised_draws[parameter %in% c("meanlog", "sdlog")])
 ```
@@ -212,8 +228,10 @@ truncated_draws <- draws |>
     ptime = range(truncated_obs$ptime_daily)
   ) |>
   summarise_variable(variable = "trunc_mean", by = c("obs_horizon", "model")) |>
-  DT(, model := factor(model, levels = rev(names(models))))
-
+  DT(, model := factor(
+      model, levels = c("Joint incidence and forward delay", rev(names(models)))
+    )
+  )
 
 truncated_draws |>
   plot_mean_posterior_pred(
