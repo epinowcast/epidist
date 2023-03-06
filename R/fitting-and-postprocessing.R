@@ -50,6 +50,61 @@ sample_model <- function(model, data, scenario = data.table::data.table(id = 1),
   return(out[])
 }
 
+#' Sample from the posterior of a model with additional diagnositics
+#' @export
+#' #TODO: This is a temporary function to allow for the use of epinowcast models it needs to be integrated into sample_model if/when all models are otherwise going to be refit.
+sample_epinowcast_model <- function(model, data,
+                                   scenario = data.table::data.table(id = 1),diagnostics = TRUE, ...) {
+
+  out <- scenario |>
+    copy()
+
+  # Setup failure tolerant model fitting
+  fit_model <- function(model, data, ...) {
+    fit <- epinowcast::enw_model(
+      target_dir = here::here("data", "models")
+    )$sample(data = data, ...)
+    print(fit)
+    return(fit)
+  }
+  safe_fit_model <- purrr::safely(fit_model)
+  fit <- safe_fit_model(model, data, ...)
+
+  if (!is.null(fit$error)) {
+    out <- out |>
+      DT(, error := list(fit$error[[1]]))
+    diagnostics <- FALSE
+  }else {
+    out <- out |>
+      DT(, fit := list(fit$result))
+    fit <- fit$result
+  }
+
+  if (diagnostics) {
+    diag <- fit$sampler_diagnostics(format = "df")
+    diagnostics <- data.table(
+      samples = nrow(diag),
+      max_rhat = round(max(
+        fit$summary(
+          variables = NULL, posterior::rhat,
+          .args = list(na.rm = TRUE)
+        )$`posterior::rhat`,
+        na.rm = TRUE
+      ), 2),
+      divergent_transitions = sum(diag$divergent__),
+      per_divergent_transitions = sum(diag$divergent__) / nrow(diag),
+      max_treedepth = max(diag$treedepth__)
+    )
+    diagnostics[, no_at_max_treedepth := sum(diag$treedepth__ == max_treedepth)]
+    diagnostics[, per_at_max_treedepth := no_at_max_treedepth / nrow(diag)]
+    out <- cbind(out, diagnostics)
+
+    timing <- round(fit$time()$total, 1)
+    out[, run_time := timing]
+  }
+  return(out[])
+}
+
 #' Add natural scale summary parameters for a lognormal distribution
 #' @export
 add_natural_scale_mean_sd <- function(dt) {
@@ -87,6 +142,42 @@ extract_lognormal_draws <- function(
   )
   draws <- draws[, .(meanlog, sdlog)]
   draws <- draws[, sdlog := exp(sdlog)]
+  draws <- add_natural_scale_mean_sd(draws)
+
+  if (!missing(id_vars)) {
+    draws <- merge(
+      draws[, id := id_vars$id], id_vars, by = "id"
+    )
+  }
+  return(draws[])
+}
+
+#' Extract posterior samples for a lognormal epinowcast model
+#' @export
+extract_epinowcast_draws <- function(
+  data, id_vars, from_dt = FALSE
+) {
+  if (from_dt) {
+    if (!any(colnames(data) %in% "fit")) {
+      return(id_vars[])
+    }
+    draws <- data$fit[[1]]$draws(
+      variables = c("refp_mean_int[1]", "refp_sd_int[1]"), format = "draws_df"
+    )
+  }else {
+    draws <- data$fit[[1]]$draws(
+      variables = c("refp_mean_int[1]", "refp_sd_int[1]"), format = "draws_df"
+    )
+  }
+
+  draws <- draws |>
+    data.table::setDT()
+
+  data.table::setnames(
+    draws, c("refp_mean_int[1]", "refp_sd_int[1]"), c("meanlog", "sdlog"),
+    skip_absent = TRUE
+  )
+  draws <- draws[, .(meanlog, sdlog)]
   draws <- add_natural_scale_mean_sd(draws)
 
   if (!missing(id_vars)) {
