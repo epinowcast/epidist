@@ -4,6 +4,7 @@ library(here) # for finding files
 library(data.table) # for general data manipulation
 library(arrow) # for loading data in arrow format
 library(dplyr) # for manipulating arrow data
+library(tidyr) # for tidying data
 library(purrr) # for iterating over lists
 library(ggplot2) # for plotting
 library(patchwork) # for combining plots
@@ -14,7 +15,13 @@ library(forcats) # manipulate factors
 case_study_obs <- fread(here("data/scenarios/ebola_case_study.csv"))
 
 # Load available models
-models <- fread(here("data/meta/models.csv"))
+models <- fread(here("data/meta/models.csv")) |>
+  rbind(data.table(
+    model = "Joint incidence and delay estimation",
+    in_code = "epinowcast"
+  )) |>
+  DT(, model := factor(model))
+
 
 # Function to read each arrow dataset, filter for the case study
 # and attach the model name

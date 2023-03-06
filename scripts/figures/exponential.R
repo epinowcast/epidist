@@ -16,7 +16,12 @@ exponential_obs <- fread(here("data/scenarios/exponential-simulation.csv"))
 
 # Load available models
 models <- fread(here("data/meta/models.csv")) |>
+  rbind(data.table(
+    model = "Joint incidence and delay estimation",
+    in_code = "epinowcast"
+  )) |>
   DT(, model := factor(model))
+
 
 # Function to read each arrow dataset, filter for the simulation
 # and attach the model name

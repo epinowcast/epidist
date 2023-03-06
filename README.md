@@ -116,7 +116,7 @@ naive_fit <- naive_delay(data = truncated_obs, cores = 4, refresh = 0)
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.1 seconds.
-#> Total execution time: 0.4 seconds.
+#> Total execution time: 0.3 seconds.
 ```
 
 Estimate the delay after filtering out the most recent data as crude
@@ -153,7 +153,7 @@ censored_fit <- censoring_adjusted_delay(
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.6 seconds.
-#> Total execution time: 0.7 seconds.
+#> Total execution time: 0.8 seconds.
 ```
 
 Adjust for censoring and filter to crudely adjust for right truncation.
@@ -166,7 +166,7 @@ filtered_censored_fit <- filtered_censoring_adjusted_delay(
 #> 
 #> Chain 1 finished in 0.4 seconds.
 #> Chain 2 finished in 0.3 seconds.
-#> Chain 3 finished in 0.4 seconds.
+#> Chain 3 finished in 0.3 seconds.
 #> Chain 4 finished in 0.3 seconds.
 #> 
 #> All 4 chains finished successfully.
@@ -183,13 +183,13 @@ truncation_fit <- truncation_adjusted_delay(
 #> Running MCMC with 4 parallel chains...
 #> 
 #> Chain 1 finished in 0.7 seconds.
+#> Chain 2 finished in 0.8 seconds.
 #> Chain 3 finished in 0.8 seconds.
 #> Chain 4 finished in 0.7 seconds.
-#> Chain 2 finished in 0.8 seconds.
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 0.7 seconds.
-#> Total execution time: 0.9 seconds.
+#> Total execution time: 0.8 seconds.
 ```
 
 Adjust for right truncation and date censoring.
@@ -201,13 +201,13 @@ truncation_censoring_fit <- truncation_censoring_adjusted_delay(
 #> Running MCMC with 4 parallel chains...
 #> 
 #> Chain 1 finished in 1.0 seconds.
-#> Chain 2 finished in 1.1 seconds.
+#> Chain 2 finished in 1.0 seconds.
 #> Chain 3 finished in 1.0 seconds.
 #> Chain 4 finished in 1.1 seconds.
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 1.0 seconds.
-#> Total execution time: 1.2 seconds.
+#> Total execution time: 1.3 seconds.
 ```
 
 Adjust for right truncation and date censoring using a latent variable
@@ -220,13 +220,36 @@ latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
 #> Running MCMC with 4 parallel chains...
 #> 
 #> Chain 1 finished in 3.4 seconds.
+#> Chain 2 finished in 3.4 seconds.
 #> Chain 3 finished in 3.4 seconds.
 #> Chain 4 finished in 3.3 seconds.
-#> Chain 2 finished in 3.5 seconds.
 #> 
 #> All 4 chains finished successfully.
 #> Mean chain execution time: 3.4 seconds.
-#> Total execution time: 3.7 seconds.
+#> Total execution time: 3.5 seconds.
+```
+
+Fit a joint model to estimate primary incidence and the delay to
+reporting secondary incidence (this is a thin wrapper around the
+`epinowcast` package that is not suggested for real-world usage).
+
+``` r
+epinowcast_fit <- epinowcast_delay(
+  data = truncated_obs, parallel_chains = 4, adapt_delta = 0.95,
+  show_messages = FALSE, refresh = 0
+)
+#> Running MCMC with 4 parallel chains...
+#> 
+#> Chain 4 finished in 9.4 seconds.
+#> Chain 2 finished in 9.6 seconds.
+#> Chain 3 finished in 9.5 seconds.
+#> Chain 1 finished in 9.7 seconds.
+#> 
+#> All 4 chains finished successfully.
+#> Mean chain execution time: 9.6 seconds.
+#> Total execution time: 9.8 seconds.
+epinowcast_draws <- extract_epinowcast_draws(epinowcast_fit) |>
+  DT(, model := "Joint incidence and forward delay")
 ```
 
 ### Summarise model posteriors and compare to known truth
@@ -252,31 +275,38 @@ Extract and summarise lognormal posterior estimates.
 draws <- models |>
   map(extract_lognormal_draws) |>
   rbindlist(idcol = "model") |>
-  DT(, model := factor(model, levels = rev(names(models))))
+  rbind(epinowcast_draws, use.names = TRUE) |>
+  DT(,
+   model := factor(
+    model, levels = c("Joint incidence and forward delay", rev(names(models)))
+   )
+  )
 
 summarised_draws <- draws |>
   draws_to_long() |>
-  summarise_draws(sf = 2)
+  summarise_draws(sf = 3)
 
 knitr::kable(summarised_draws[parameter %in% c("meanlog", "sdlog")])
 ```
 
-| model                                             | parameter | mean | median | q2.5 |   q5 |  q20 |  q35 |  q65 |  q80 |  q95 | q97.5 |
-| :------------------------------------------------ | :-------- | ---: | -----: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ----: |
-| Naive                                             | meanlog   | 1.60 |   1.60 | 1.50 | 1.50 | 1.50 | 1.60 | 1.60 | 1.60 | 1.60 |  1.60 |
-| Filtered                                          | meanlog   | 1.70 |   1.70 | 1.60 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 |  1.80 |
-| Censoring adjusted                                | meanlog   | 1.60 |   1.60 | 1.50 | 1.50 | 1.50 | 1.60 | 1.60 | 1.60 | 1.60 |  1.60 |
-| Filtered and censoring adjusted                   | meanlog   | 1.70 |   1.70 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 |  1.80 |
-| Truncation adjusted                               | meanlog   | 1.80 |   1.80 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.90 |  1.90 |
-| Truncation and censoring adjusted                 | meanlog   | 1.80 |   1.70 | 1.70 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 |  1.90 |
-| Latent variable truncation and censoring adjusted | meanlog   | 1.80 |   1.80 | 1.70 | 1.70 | 1.70 | 1.80 | 1.80 | 1.80 | 1.90 |  1.90 |
-| Naive                                             | sdlog     | 0.49 |   0.49 | 0.44 | 0.45 | 0.47 | 0.48 | 0.50 | 0.51 | 0.53 |  0.54 |
-| Filtered                                          | sdlog     | 0.45 |   0.45 | 0.40 | 0.41 | 0.43 | 0.44 | 0.46 | 0.48 | 0.50 |  0.51 |
-| Censoring adjusted                                | sdlog     | 0.45 |   0.45 | 0.40 | 0.41 | 0.43 | 0.44 | 0.46 | 0.47 | 0.49 |  0.51 |
-| Filtered and censoring adjusted                   | sdlog     | 0.42 |   0.42 | 0.37 | 0.37 | 0.40 | 0.41 | 0.43 | 0.45 | 0.48 |  0.49 |
-| Truncation adjusted                               | sdlog     | 0.58 |   0.57 | 0.50 | 0.51 | 0.54 | 0.56 | 0.59 | 0.61 | 0.66 |  0.68 |
-| Truncation and censoring adjusted                 | sdlog     | 0.51 |   0.51 | 0.44 | 0.46 | 0.48 | 0.50 | 0.53 | 0.55 | 0.58 |  0.60 |
-| Latent variable truncation and censoring adjusted | sdlog     | 0.54 |   0.53 | 0.46 | 0.47 | 0.50 | 0.52 | 0.55 | 0.57 | 0.61 |  0.63 |
+| model                                             | parameter |  mean | median |  q2.5 |    q5 |   q20 |   q35 |   q65 |   q80 |   q95 | q97.5 |
+| :------------------------------------------------ | :-------- | ----: | -----: | ----: | ----: | ----: | ----: | ----: | ----: | ----: | ----: |
+| Naive                                             | meanlog   | 1.560 |  1.560 | 1.500 | 1.510 | 1.540 | 1.550 | 1.580 | 1.590 | 1.620 | 1.630 |
+| Filtered                                          | meanlog   | 1.730 |  1.730 | 1.650 | 1.660 | 1.700 | 1.710 | 1.750 | 1.770 | 1.800 | 1.810 |
+| Censoring adjusted                                | meanlog   | 1.580 |  1.580 | 1.510 | 1.520 | 1.550 | 1.560 | 1.590 | 1.610 | 1.630 | 1.640 |
+| Filtered and censoring adjusted                   | meanlog   | 1.740 |  1.740 | 1.660 | 1.670 | 1.710 | 1.730 | 1.760 | 1.770 | 1.810 | 1.820 |
+| Truncation adjusted                               | meanlog   | 1.770 |  1.770 | 1.660 | 1.680 | 1.720 | 1.750 | 1.790 | 1.820 | 1.880 | 1.910 |
+| Truncation and censoring adjusted                 | meanlog   | 1.750 |  1.750 | 1.660 | 1.670 | 1.710 | 1.730 | 1.770 | 1.790 | 1.840 | 1.860 |
+| Latent variable truncation and censoring adjusted | meanlog   | 1.790 |  1.790 | 1.680 | 1.700 | 1.740 | 1.770 | 1.810 | 1.840 | 1.910 | 1.940 |
+| Joint incidence and forward delay                 | meanlog   | 1.870 |  1.860 | 1.770 | 1.780 | 1.820 | 1.840 | 1.880 | 1.910 | 1.950 | 1.970 |
+| Naive                                             | sdlog     | 0.489 |  0.487 | 0.441 | 0.449 | 0.467 | 0.478 | 0.497 | 0.510 | 0.534 | 0.544 |
+| Filtered                                          | sdlog     | 0.452 |  0.450 | 0.398 | 0.407 | 0.427 | 0.440 | 0.461 | 0.475 | 0.503 | 0.513 |
+| Censoring adjusted                                | sdlog     | 0.450 |  0.449 | 0.404 | 0.410 | 0.428 | 0.439 | 0.460 | 0.472 | 0.494 | 0.506 |
+| Filtered and censoring adjusted                   | sdlog     | 0.422 |  0.421 | 0.367 | 0.375 | 0.396 | 0.409 | 0.433 | 0.448 | 0.476 | 0.486 |
+| Truncation adjusted                               | sdlog     | 0.578 |  0.574 | 0.503 | 0.513 | 0.540 | 0.559 | 0.591 | 0.613 | 0.656 | 0.676 |
+| Truncation and censoring adjusted                 | sdlog     | 0.515 |  0.512 | 0.445 | 0.456 | 0.482 | 0.498 | 0.527 | 0.547 | 0.580 | 0.599 |
+| Latent variable truncation and censoring adjusted | sdlog     | 0.536 |  0.533 | 0.460 | 0.470 | 0.500 | 0.517 | 0.549 | 0.569 | 0.614 | 0.630 |
+| Joint incidence and forward delay                 | sdlog     | 0.471 |  0.469 | 0.415 | 0.422 | 0.444 | 0.458 | 0.482 | 0.497 | 0.528 | 0.543 |
 
 Plot summarised posterior estimates from each model compared to the
 ground truth.
@@ -294,7 +324,7 @@ draws |>
   )
 ```
 
-<img src="figures/README-unnamed-chunk-10-1.png" width="100%" />
+<img src="figures/README-unnamed-chunk-11-1.png" width="100%" />
 
 Finally, check the mean posterior predictions for each model against the
 observed daily cohort mean.
@@ -306,8 +336,10 @@ truncated_draws <- draws |>
     ptime = range(truncated_obs$ptime_daily)
   ) |>
   summarise_variable(variable = "trunc_mean", by = c("obs_horizon", "model")) |>
-  DT(, model := factor(model, levels = rev(names(models))))
-
+  DT(, model := factor(
+      model, levels = c("Joint incidence and forward delay", rev(names(models)))
+    )
+  )
 
 truncated_draws |>
   plot_mean_posterior_pred(
