@@ -328,7 +328,8 @@ dynamical_censoring_adjusted_delay <- function(
   data <- data |>
     DT(, (cols) := lapply(.SD, as.double), .SDcols = cols)
 
-  data <- pad_zero(data)
+  data <- drop_zero(data)
+  data$delay_lwr <- 1e-3
 
   tmin <- pmin(min(data$ptime_daily), min(data_cases$time))
   tmax <- pmax(max(data$stime_daily), max(data_cases$time))
@@ -364,7 +365,7 @@ dynamical_censoring_adjusted_delay <- function(
     ),
     brms::stanvar(
       x = log_cases, block = "data",
-      scode = "array[tlength] int log_cases;",
+      scode = "array[tlength] real log_cases;",
       name = "log_cases"
     )
   )
