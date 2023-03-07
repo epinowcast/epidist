@@ -330,7 +330,7 @@ dynamical_censoring_adjusted_delay <- function(
     DT(, (cols) := lapply(.SD, as.double), .SDcols = cols)
 
   data <- drop_zero(data)
-  data$delay_lwr <- 1e-3
+  data$delay_lwr[data$delay_lwr==0] <- 1e-3 ## need to do this because lognormal doesn't like zero
 
   tmin <- pmin(min(data$ptime_daily), min(data_cases$time))
   tmax <- pmax(max(data$stime_daily), max(data_cases$time))
