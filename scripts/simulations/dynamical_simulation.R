@@ -61,17 +61,17 @@ for (i in seq_len(nrow(paramdata))) {
       filter_t <- obs_t
     }
     cases_by_window <- outbreak_long |>
-    copy() |>
-    construct_cases_by_obs_window(
-      windows = c(window)
-    )
+      copy() |>
+      construct_cases_by_obs_window(
+        windows = c(window)
+      )
 
     data_cases <- cases_by_window |>
       DT(case_type == "primary") |>
       DT(time < filter_t) |>
       DT(, .(cases = sum(cases)), by = "time") |>
       DT(order(time))
-
+    
     bfit <- dynamical_censoring_adjusted_delay(
       data = delay_obs,
       data_cases = data_cases,
