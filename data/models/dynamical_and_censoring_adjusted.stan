@@ -11,7 +11,7 @@ data {
   int tmin;
   int<lower=1> tlength; // time series length
   array[N] int stime_daily;
-  array[tlength] int log_cases;
+  array[tlength] real log_cases;
 }
 transformed data {
   
