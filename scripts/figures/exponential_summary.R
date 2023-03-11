@@ -121,7 +121,7 @@ g3 <- ggplot(exp_summary) +
   geom_point(aes(coverage, r, col=distribution), size=2, alpha=0.7) +
   facet_grid(model~parameter,
              labeller = label_wrap_gen(multi_line = TRUE)) +
-  scale_x_continuous("RMSE") +
+  scale_x_continuous("Coverage") +
   scale_y_discrete("Growth rate") +
   scale_color_brewer(palette = "Dark2") +
   theme_bw() +
