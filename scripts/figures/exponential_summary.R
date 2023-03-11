@@ -118,6 +118,8 @@ g2 <- ggplot(exp_summary) +
   )
 
 g3 <- ggplot(exp_summary) +
+  annotate("rect", xmin=binom.test(18, 20)[[4]][1], xmax=binom.test(18, 20)[[4]][2], ymin=-Inf, ymax=Inf, fill="gray", alpha=0.5) +
+  geom_vline(xintercept = 0.9, lty=2) +
   geom_point(aes(coverage, r, col=distribution), size=2, alpha=0.7) +
   facet_grid(model~parameter,
              labeller = label_wrap_gen(multi_line = TRUE)) +
