@@ -94,9 +94,9 @@ exp_summary <- clean_e_samples |>
 
 g1 <- ggplot(exp_summary) +
   geom_vline(xintercept = 0, lty=2) +
-  geom_point(aes(bias, r, col=distribution), size=2, alpha=0.7) +
+  geom_point(aes(bias, r, col=distribution), size=4, alpha=0.7) +
   facet_grid(model~parameter,
-             labeller = label_wrap_gen(multi_line = TRUE)) +
+             labeller = label_wrap_gen(multi_line = TRUE, width=20)) +
   scale_x_continuous("Bias") +
   scale_y_discrete("Growth rate") +
   scale_color_brewer(palette = "Dark2") +
@@ -106,9 +106,9 @@ g1 <- ggplot(exp_summary) +
   )
 
 g2 <- ggplot(exp_summary) +
-  geom_point(aes(rmse, r, col=distribution), size=2, alpha=0.7) +
+  geom_point(aes(rmse, r, col=distribution), size=4, alpha=0.7) +
   facet_grid(model~parameter,
-             labeller = label_wrap_gen(multi_line = TRUE)) +
+             labeller = label_wrap_gen(multi_line = TRUE, width=20)) +
   scale_x_sqrt("RMSE") +
   scale_y_discrete("Growth rate") +
   scale_color_brewer(palette = "Dark2") +
@@ -120,9 +120,9 @@ g2 <- ggplot(exp_summary) +
 g3 <- ggplot(exp_summary) +
   annotate("rect", xmin=binom.test(18, 20)[[4]][1], xmax=binom.test(18, 20)[[4]][2], ymin=-Inf, ymax=Inf, fill="gray", alpha=0.5) +
   geom_vline(xintercept = 0.9, lty=2) +
-  geom_point(aes(coverage, r, col=distribution), size=2, alpha=0.7) +
+  geom_point(aes(coverage, r, col=distribution), size=4, alpha=0.7) +
   facet_grid(model~parameter,
-             labeller = label_wrap_gen(multi_line = TRUE)) +
+             labeller = label_wrap_gen(multi_line = TRUE, width=20)) +
   scale_x_continuous("Coverage") +
   scale_y_discrete("Growth rate") +
   scale_color_brewer(palette = "Dark2") +
@@ -134,20 +134,20 @@ g3 <- ggplot(exp_summary) +
 # Save combined plots
 ggsave(
   here("figures", "exponential_bias.pdf"), g1,
-  height = 16, width = 16, dpi = 330
+  height = 12, width = 12, dpi = 330
 )
 
 
 # Save combined plots
 ggsave(
   here("figures", "exponential_rmse.pdf"), g2,
-  height = 16, width = 16, dpi = 330
+  height = 12, width = 12, dpi = 330
 )
 
 
 # Save combined plots
 ggsave(
   here("figures", "exponential_coverage.pdf"), g3,
-  height = 16, width = 16, dpi = 330
+  height = 12, width = 12, dpi = 330
 )
 
