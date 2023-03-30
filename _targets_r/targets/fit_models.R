@@ -15,7 +15,8 @@ tar_map(
     model_stan_code, 
     do.call(
       model,
-      list(data = dummy_obs, fn = brms::make_stancode, save_model = model_path)
+      list(
+        data = dummy_obs, fn = brms::make_stancode, save_model = model_path)
     )
   ),
   tar_file(
@@ -29,7 +30,10 @@ tar_map(
     standata,
     do.call(
       model,
-      list(data = list_observations[[1]], fn = brms::make_standata)
+      list(
+        data = list_observations[[1]], fn = brms::make_standata,
+        data_cases = list_observations[[1]]$retrospective_incidence[[1]]
+      )
     ),
     pattern = map(list_observations)
   ),
