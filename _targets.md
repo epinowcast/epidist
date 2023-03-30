@@ -239,8 +239,6 @@ tar_target(sample_sizes, {
   - For the outbreak simulation, we estimate all models at chosen points
     across the outbreak (suggestion: “early outbreak” (15 days), “near
     peak” (30 days), “past peak” (45 days), “late outbreak” (60 days)).
-    *TODO: These aren’t lining up very well with the outbreak
-    simulation*.
 
 <!-- end list -->
 
@@ -296,6 +294,28 @@ tar_group_by(
   scenario, distribution
 )
 #> Establish _targets.R and _targets_r/targets/group_truncated_sim_obs_outbreak.R.
+```
+
+  - Retrospective incidence
+
+<!-- end list -->
+
+``` r
+tar_target(retro_outbreak_incidence, {
+  tar_target(
+    retro_outbreak_incidence,
+    simulated_observations_outbreak |> 
+      filter_obs_by_ptime(
+          obs_time = outbreak_estimation_times[, "time"][[1]],
+          obs_at = "max_secondary"
+      ) |>
+      event_to_incidence() |>
+      DT(, obs_time := outbreak_estimation_times[, "time"][[1]]),
+    pattern = map(outbreak_estimation_times)
+  )
+})
+#> Define target retro_outbreak_incidence from chunk code.
+#> Establish _targets.R and _targets_r/targets/retro_outbreak_incidence.R.
 ```
 
   - Sample observations
@@ -460,6 +480,24 @@ tar_group_by(
   scenario, distribution
 )
 #> Establish _targets.R and _targets_r/targets/group_sim_obs_exponential.R.
+```
+
+  - Retrospective incidence
+
+<!-- end list -->
+
+``` r
+tar_target(retro_exponential_incidence, {
+  simulated_observations_exponential |> 
+    filter_obs_by_ptime(
+        obs_time = 30,
+        obs_at = "max_secondary"
+    ) |>
+    event_to_incidence()  |>
+    DT(, obs_time := 30)
+})
+#> Define target retro_exponential_incidence from chunk code.
+#> Establish _targets.R and _targets_r/targets/retro_exponential_incidence.R.
 ```
 
   - Number of replicate observation processes
@@ -656,6 +694,18 @@ tar_group_by(
 #> Establish _targets.R and _targets_r/targets/group_truncated_ebola_obs.R.
 ```
 
+  - Retrospective incidence
+
+<!-- end list -->
+
+``` r
+tar_target(retro_ebola_incidence, {
+  event_to_incidence(retrospective_ebola_obs)
+})
+#> Define target retro_ebola_incidence from chunk code.
+#> Establish _targets.R and _targets_r/targets/retro_ebola_incidence.R.
+```
+
   - Add sample size to observations and data type
 
 <!-- end list -->
@@ -711,7 +761,8 @@ models <- list(
      quote(truncation_censoring_adjusted_delay),
   "Latent variable truncation and censoring adjusted" =
     quote(latent_truncation_censoring_adjusted_delay),
-  "Dynamical and censoring adjusted" = quote(dynamical_censoring_adjusted_delay)
+  "Dynamical and censoring adjusted (real-time incidence)" = quote(dynamical_censoring_adjusted_delay_wrapper)
+  "Dynamical and censoring adjusted (retrospective incidence)" = quote(dynamical_censoring_adjusted_delay)
 )
 
 machine_model_names <- gsub(" ", "_", tolower(names(models)))
@@ -829,7 +880,8 @@ tar_map(
     model_stan_code, 
     do.call(
       model,
-      list(data = dummy_obs, fn = brms::make_stancode, save_model = model_path)
+      list(
+        data = dummy_obs, fn = brms::make_stancode, save_model = model_path)
     )
   ),
   tar_file(
@@ -843,7 +895,10 @@ tar_map(
     standata,
     do.call(
       model,
-      list(data = list_observations[[1]], fn = brms::make_standata)
+      list(
+        data = list_observations[[1]], fn = brms::make_standata,
+        data_cases = list_observations[[1]]$retrospective_incidence[[1]]
+      )
     ),
     pattern = map(list_observations)
   ),
@@ -951,7 +1006,8 @@ list(
   tar_target(
     epinowcast_draws,
     epinowcast_fit |>
-      extract_epinowcast_draws(scenarios, from_dt = TRUE),
+      extract_epinowcast_draws(scenarios, from_dt = TRUE) |>
+      primary_censoring_bias_correction(),
     pattern = map(epinowcast_fit, scenarios)
   ),
   tar_file(
