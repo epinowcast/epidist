@@ -223,7 +223,7 @@ tar_group_by(
 
 - Retrospective incidence
 
-```{targets retro_outbreak_incidence, tar_simple = TRUE}
+```{targets retro_outbreak_incidence}
 tar_target(
   retro_outbreak_incidence,
   simulated_observations_outbreak |> 
@@ -231,8 +231,8 @@ tar_target(
         obs_time = outbreak_estimation_times[, "time"][[1]],
         obs_at = "max_secondary"
     ) |>
-    event_to_incidence() |>
-    DT(, obs_time := outbreak_estimation_times[, "time"][[1]]),
+    DT(, scenario := outbreak_estimation_times[, "scenario"][[1]]) |>
+    event_to_incidence(c("scenario", "distribution")),
   pattern = map(outbreak_estimation_times)
 )
 ```
@@ -365,8 +365,7 @@ simulated_observations_exponential |>
       obs_time = 30,
       obs_at = "max_secondary"
   ) |>
-  event_to_incidence()  |>
-  DT(, obs_time := 30)
+  event_to_incidence(by = c("r", "scenario", "distribution"))
 ```
 
 - Number of replicate observation processes
@@ -480,7 +479,7 @@ tar_target(
 
 - Create completely observed retrospective cohorts for the same estimation time windows.
 
-```{targets retro_ebola_obs} 
+```{targets retrospective_ebola_obs} 
 tar_target(
   retrospective_ebola_obs,
   case_study_data |>
@@ -506,7 +505,7 @@ tar_group_by(
 - Retrospective incidence
 
 ```{targets retro_ebola_incidence, tar_simple = TRUE}
-event_to_incidence(retrospective_ebola_obs)
+event_to_incidence(retrospective_ebola_obs, by = "scenario")
 ```
 
 - Add sample size to observations and data type
@@ -552,11 +551,15 @@ models <- list(
      quote(truncation_censoring_adjusted_delay),
   "Latent variable truncation and censoring adjusted" =
     quote(latent_truncation_censoring_adjusted_delay),
-  "Dynamical and censoring adjusted (real-time incidence)" = quote(dynamical_censoring_adjusted_delay_wrapper)
+  "Dynamical and censoring adjusted (real-time incidence)" = quote(dynamical_censoring_adjusted_delay_wrapper),
   "Dynamical and censoring adjusted (retrospective incidence)" = quote(dynamical_censoring_adjusted_delay)
 )
 
 machine_model_names <- gsub(" ", "_", tolower(names(models)))
+machine_model_names <- gsub("\\(", "", machine_model_names)
+machine_model_names <- gsub("\\)", "", machine_model_names)
+machine_model_names <- gsub("\\.", "_", machine_model_names)
+machine_model_names <- gsub("-", "_", machine_model_names)
 ```
 
 - Save a look-up of model names.

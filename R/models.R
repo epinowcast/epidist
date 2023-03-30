@@ -328,7 +328,7 @@ dynamical_censoring_adjusted_delay <- function(
 
   data <- drop_zero(data)
    ## need to do this because lognormal doesn't like zero
-  data[delat_lwr == 0, delay_lwr := 1e-3]
+  data[delay_lwr == 0, delay_lwr := 1e-3]
 
   tmin <- pmin(min(data$ptime_daily), min(data_cases$time))
   tmax <- pmax(max(data$stime_daily), max(data_cases$time))
