@@ -43,7 +43,8 @@ list(
   tar_target(
     epinowcast_draws,
     epinowcast_fit |>
-      extract_epinowcast_draws(scenarios, from_dt = TRUE),
+      extract_epinowcast_draws(scenarios, from_dt = TRUE) |>
+      primary_censoring_bias_correction(),
     pattern = map(epinowcast_fit, scenarios)
   ),
   tar_file(
