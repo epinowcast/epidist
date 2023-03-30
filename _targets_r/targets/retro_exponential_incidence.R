@@ -4,6 +4,5 @@ tar_target(retro_exponential_incidence, {
         obs_time = 30,
         obs_at = "max_secondary"
     ) |>
-    event_to_incidence()  |>
-    DT(, obs_time := 30)
+    event_to_incidence(by = c("r", "scenario", "distribution"))
 })

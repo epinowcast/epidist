@@ -6,4 +6,5 @@ Filtered and censoring adjusted,filtered_and_censoring_adjusted
 Truncation adjusted,truncation_adjusted
 Truncation and censoring adjusted,truncation_and_censoring_adjusted
 Latent variable truncation and censoring adjusted,latent_variable_truncation_and_censoring_adjusted
-Dynamical and censoring adjusted,dynamical_and_censoring_adjusted
+Dynamical and censoring adjusted (real-time incidence),dynamical_and_censoring_adjusted_real_time_incidence
+Dynamical and censoring adjusted (retrospective incidence),dynamical_and_censoring_adjusted_retrospective_incidence

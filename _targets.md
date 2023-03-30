@@ -301,20 +301,17 @@ tar_group_by(
 <!-- end list -->
 
 ``` r
-tar_target(retro_outbreak_incidence, {
-  tar_target(
-    retro_outbreak_incidence,
-    simulated_observations_outbreak |> 
-      filter_obs_by_ptime(
-          obs_time = outbreak_estimation_times[, "time"][[1]],
-          obs_at = "max_secondary"
-      ) |>
-      event_to_incidence() |>
-      DT(, obs_time := outbreak_estimation_times[, "time"][[1]]),
-    pattern = map(outbreak_estimation_times)
-  )
-})
-#> Define target retro_outbreak_incidence from chunk code.
+tar_target(
+  retro_outbreak_incidence,
+  simulated_observations_outbreak |> 
+    filter_obs_by_ptime(
+        obs_time = outbreak_estimation_times[, "time"][[1]],
+        obs_at = "max_secondary"
+    ) |>
+    DT(, scenario := outbreak_estimation_times[, "scenario"][[1]]) |>
+    event_to_incidence(c("scenario", "distribution")),
+  pattern = map(outbreak_estimation_times)
+)
 #> Establish _targets.R and _targets_r/targets/retro_outbreak_incidence.R.
 ```
 
@@ -493,8 +490,7 @@ tar_target(retro_exponential_incidence, {
         obs_time = 30,
         obs_at = "max_secondary"
     ) |>
-    event_to_incidence()  |>
-    DT(, obs_time := 30)
+    event_to_incidence(by = c("r", "scenario", "distribution"))
 })
 #> Define target retro_exponential_incidence from chunk code.
 #> Establish _targets.R and _targets_r/targets/retro_exponential_incidence.R.
@@ -682,7 +678,7 @@ tar_target(
     DT(ptime_lwr >= ebola_estimation_times[, "time"][[1]] - 60),
   pattern = map(ebola_estimation_times)
 )
-#> Establish _targets.R and _targets_r/targets/retro_ebola_obs.R.
+#> Establish _targets.R and _targets_r/targets/retrospective_ebola_obs.R.
 ```
 
 ``` r
@@ -700,7 +696,7 @@ tar_group_by(
 
 ``` r
 tar_target(retro_ebola_incidence, {
-  event_to_incidence(retrospective_ebola_obs)
+  event_to_incidence(retrospective_ebola_obs, by = "scenario")
 })
 #> Define target retro_ebola_incidence from chunk code.
 #> Establish _targets.R and _targets_r/targets/retro_ebola_incidence.R.
@@ -761,11 +757,15 @@ models <- list(
      quote(truncation_censoring_adjusted_delay),
   "Latent variable truncation and censoring adjusted" =
     quote(latent_truncation_censoring_adjusted_delay),
-  "Dynamical and censoring adjusted (real-time incidence)" = quote(dynamical_censoring_adjusted_delay_wrapper)
+  "Dynamical and censoring adjusted (real-time incidence)" = quote(dynamical_censoring_adjusted_delay_wrapper),
   "Dynamical and censoring adjusted (retrospective incidence)" = quote(dynamical_censoring_adjusted_delay)
 )
 
 machine_model_names <- gsub(" ", "_", tolower(names(models)))
+machine_model_names <- gsub("\\(", "", machine_model_names)
+machine_model_names <- gsub("\\)", "", machine_model_names)
+machine_model_names <- gsub("\\.", "_", machine_model_names)
+machine_model_names <- gsub("-", "_", machine_model_names)
 #> Establish _targets.R and _targets_r/globals/models.R.
 ```
 
