@@ -314,10 +314,7 @@ dynamical_censoring_adjusted_delay <- function(
 
   if (missing(data_cases)) {
     message("No `data_cases` provided. Using `data` to calculate incidence")
-    data_cases <- data |>
-      DT(, .(cases = .N), by = "ptime_daily") |>
-      DT(order(ptime_daily)) |>
-      setnames(old = c("ptime_daily"), new = c("time"))
+    data_cases <- event_to_incidence(data)
   }
 
   if (!all(c("time", "cases") %in% colnames(data_cases))) {
@@ -330,7 +327,8 @@ dynamical_censoring_adjusted_delay <- function(
     DT(, (cols) := lapply(.SD, as.double), .SDcols = cols)
 
   data <- drop_zero(data)
-  data$delay_lwr[data$delay_lwr==0] <- 1e-3 ## need to do this because lognormal doesn't like zero
+   ## need to do this because lognormal doesn't like zero
+  data[delat_lwr == 0, delay_lwr := 1e-3]
 
   tmin <- pmin(min(data$ptime_daily), min(data_cases$time))
   tmax <- pmax(max(data$stime_daily), max(data_cases$time))
@@ -414,6 +412,11 @@ dynamical_censoring_adjusted_delay <- function(
   )
 
   return(fit)
+}
+
+#' @export
+dynamical_censoring_adjusted_delay_wrapper <- function(data, data_cases, ...) {
+  dynamical_censoring_adjusted_delay(data = data, ...)
 }
 
 #' @export
