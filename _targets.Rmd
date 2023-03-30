@@ -421,7 +421,6 @@ tar_file(
 
 ### Observaton scenarios
 
-
 - For our Ebola case study we estimate at 60, 120, 180, and 240 days from the first cases symptom onset.
 
 ```{targets ebola_estimation_times}
@@ -728,7 +727,8 @@ list(
   tar_target(
     epinowcast_draws,
     epinowcast_fit |>
-      extract_epinowcast_draws(scenarios, from_dt = TRUE),
+      extract_epinowcast_draws(scenarios, from_dt = TRUE) |>
+      primary_censoring_bias_correction(),
     pattern = map(epinowcast_fit, scenarios)
   ),
   tar_file(

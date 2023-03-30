@@ -50,9 +50,8 @@ sample_model <- function(model, data, scenario = data.table::data.table(id = 1),
   return(out[])
 }
 
-#' Sample from the posterior of a model with additional diagnositics
+#' Sample from the posterior of an epinowcast model with additional diagnositics
 #' @export
-#' #TODO: This is a temporary function to allow for the use of epinowcast models it needs to be integrated into sample_model if/when all models are otherwise going to be refit.
 sample_epinowcast_model <- function(model, data,
                                    scenario = data.table::data.table(id = 1),diagnostics = TRUE, ...) {
 
@@ -185,6 +184,16 @@ extract_epinowcast_draws <- function(
       draws[, id := id_vars$id], id_vars, by = "id"
     )
   }
+  return(draws[])
+}
+
+#' Primary event bias correction
+#' @export
+primary_censoring_bias_correction <- function(draws) {
+  draws <- draws |>
+    DT(, mean := mean + runif(.N, min = 0, max = 1)) |>
+    DT(, meanlog := log(mean^2 / sqrt(sd^2 + mean^2))) |>
+    DT(, sdlog := sqrt(log(1 + (sd^2 / mean^2))))
   return(draws[])
 }
 
