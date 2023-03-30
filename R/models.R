@@ -423,7 +423,7 @@ epinowcast_delay <- function(formula = ~ 1, data, by = c(),
                              sampler = epinowcast::enw_sample, ...) {
   data_as_counts <- data |>
     DT(, .(new_confirm = .N), by = c("ptime_daily", "stime_daily", by)) |>
-    DT(order(ptime_daily)) |>
+    DT(order(ptime_daily, stime_daily)) |>
     DT(, reference_date := as.Date("2000-01-01") + ptime_daily) |>
     DT(, report_date := as.Date("2000-01-01") + stime_daily)
 
