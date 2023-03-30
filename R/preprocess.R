@@ -139,9 +139,9 @@ calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
 
 #' Convert from event based to incidence based data
 #' @export
-event_to_incidence <- function(data) {
+event_to_incidence <- function(data, by = c()) {
   data |>
-    DT(, .(cases = .N), by = "ptime_daily") |>
+    DT(, .(cases = .N), by = c("ptime_daily", by)) |>
     DT(order(ptime_daily)) |>
     setnames(old = c("ptime_daily"), new = c("time"))
 }

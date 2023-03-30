@@ -8,8 +8,12 @@ models <- list(
      quote(truncation_censoring_adjusted_delay),
   "Latent variable truncation and censoring adjusted" =
     quote(latent_truncation_censoring_adjusted_delay),
-  "Dynamical and censoring adjusted (real-time incidence)" = quote(dynamical_censoring_adjusted_delay_wrapper)
+  "Dynamical and censoring adjusted (real-time incidence)" = quote(dynamical_censoring_adjusted_delay_wrapper),
   "Dynamical and censoring adjusted (retrospective incidence)" = quote(dynamical_censoring_adjusted_delay)
 )
 
 machine_model_names <- gsub(" ", "_", tolower(names(models)))
+machine_model_names <- gsub("\\(", "", machine_model_names)
+machine_model_names <- gsub("\\)", "", machine_model_names)
+machine_model_names <- gsub("\\.", "_", machine_model_names)
+machine_model_names <- gsub("-", "_", machine_model_names)
