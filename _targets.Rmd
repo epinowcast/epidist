@@ -174,7 +174,7 @@ tar_file(
 c(10, 100, 200, 400)
 ```
 
-- For the outbreak simulation, we estimate all models at chosen points across the outbreak (suggestion: "early outbreak" (15 days), "near peak" (30 days), "past peak" (45  days), "late outbreak" (60 days)). *TODO: These aren't lining up very well with the outbreak simulation*.
+- For the outbreak simulation, we estimate all models at chosen points across the outbreak (suggestion: "early outbreak" (15 days), "near peak" (30 days), "past peak" (45  days), "late outbreak" (60 days)).
 
 ```{targets outbreak_estimation_times}
 tar_group_by(
@@ -218,6 +218,22 @@ tar_group_by(
   group_truncated_sim_obs_outbreak,
   truncated_sim_obs_outbreak,
   scenario, distribution
+)
+```
+
+- Retrospective incidence
+
+```{targets retro_outbreak_incidence, tar_simple = TRUE}
+tar_target(
+  retro_outbreak_incidence,
+  simulated_observations_outbreak |> 
+    filter_obs_by_ptime(
+        obs_time = outbreak_estimation_times[, "time"][[1]],
+        obs_at = "max_secondary"
+    ) |>
+    event_to_incidence() |>
+    DT(, obs_time := outbreak_estimation_times[, "time"][[1]]),
+  pattern = map(outbreak_estimation_times)
 )
 ```
 
@@ -339,6 +355,18 @@ tar_group_by(
   truncated_sim_obs_exponential,
   scenario, distribution
 )
+```
+
+- Retrospective incidence
+
+```{targets retro_exponential_incidence, tar_simple = TRUE}
+simulated_observations_exponential |> 
+  filter_obs_by_ptime(
+      obs_time = 30,
+      obs_at = "max_secondary"
+  ) |>
+  event_to_incidence()  |>
+  DT(, obs_time := 30)
 ```
 
 - Number of replicate observation processes
@@ -473,6 +501,12 @@ tar_group_by(
   rbind(truncated_ebola_obs, retrospective_ebola_obs),
   scenario, obs_type
 )
+```
+
+- Retrospective incidence
+
+```{targets retro_ebola_incidence, tar_simple = TRUE}
+event_to_incidence(retrospective_ebola_obs)
 ```
 
 - Add sample size to observations and data type
@@ -610,7 +644,8 @@ tar_map(
     model_stan_code, 
     do.call(
       model,
-      list(data = dummy_obs, fn = brms::make_stancode, save_model = model_path)
+      list(
+        data = dummy_obs, fn = brms::make_stancode, save_model = model_path)
     )
   ),
   tar_file(
@@ -624,7 +659,10 @@ tar_map(
     standata,
     do.call(
       model,
-      list(data = list_observations[[1]], fn = brms::make_standata)
+      list(
+        data = list_observations[[1]], fn = brms::make_standata,
+        data_cases = list_observations[[1]]$retrospective_incidence[[1]]
+      )
     ),
     pattern = map(list_observations)
   ),
