@@ -603,7 +603,18 @@ tar_file(
 ```{targets list_observations, tar_simple = TRUE}
 c(list_simulated_observations_outbreak, 
   list_simulated_observations_exponential,
-  list_ebola_observations)
+  list_ebola_observations
+)
+```
+
+- Make a list of retrospective incidence estimates by observation strata.
+
+```{targets list_retro_incidence, tar_simple = TRUE}
+c(
+  retro_outbreak_incidence,
+  retro_exponential_incidence,
+  retro_ebola_incidence
+)
 ```
 
 - Dummy data required for model creation.
