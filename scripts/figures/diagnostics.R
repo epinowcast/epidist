@@ -167,7 +167,7 @@ runtime_plot <- clean_diagnostics |>
     scales = "free_x"
   ) +
   scale_x_log10() +
-  scale_y_discrete(labels = (\(x) str_wrap(x, width = 20))) +
+  scale_y_discrete(labels = (\(x) str_wrap(x, width = 30))) +
   scale_fill_brewer(palette = "Dark2", aesthetics = c("colour", "fill")) +
   guides(fill = guide_legend(title = "Sample size", nrow = 1),
          col =  guide_none()) +
@@ -188,7 +188,7 @@ divergent_transitions_plot <- clean_diagnostics |>
   geom_point(position = position_jitter(width = 0), alpha = 0.6) +
   scale_x_continuous(labels = scales::percent, trans = "logit") +
   theme_bw() +
-  scale_y_discrete(labels = (\(x) str_wrap(x, width = 20))) +
+  scale_y_discrete(labels = (\(x) str_wrap(x, width = 30))) +
   scale_fill_brewer(palette = "Dark2", aesthetics = c("colour", "fill")) +
   labs(
     x = "Divergent transitions",
