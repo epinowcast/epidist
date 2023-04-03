@@ -191,7 +191,7 @@ extract_epinowcast_draws <- function(
 #' @export
 primary_censoring_bias_correction <- function(draws) {
   draws <- draws |>
-    DT(, mean := mean + runif(.N, min = 0, max = 1)) |>
+    DT(, mean := mean - runif(.N, min = 0, max = 1)) |>
     DT(, meanlog := log(mean^2 / sqrt(sd^2 + mean^2))) |>
     DT(, sdlog := sqrt(log(1 + (sd^2 / mean^2))))
   return(draws[])

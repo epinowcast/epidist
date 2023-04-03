@@ -825,10 +825,41 @@ tar_file(
 tar_target(list_observations, {
   c(list_simulated_observations_outbreak, 
     list_simulated_observations_exponential,
-    list_ebola_observations)
+    list_ebola_observations
+  )
 })
 #> Define target list_observations from chunk code.
 #> Establish _targets.R and _targets_r/targets/list_observations.R.
+```
+
+  - Make a list of retrospective incidence estimates by observation
+    strata.
+
+<!-- end list -->
+
+``` r
+tar_target(list_retro_incidence, {
+  rbindlist(list(
+    merge(
+      scenarios[data_type %in% "outbreak"], retro_outbreak_incidence,
+      by = c("scenario", "distribution"), allow.cartesian = TRUE
+    ),
+    merge(
+      scenarios[data_type %in% "exponential"], retro_exponential_incidence,
+      by = c("scenario", "distribution"), allow.cartesian = TRUE
+    ),
+    merge(
+      scenarios[data_type %in% "ebola_case_study"], retro_ebola_incidence,
+      by = c("scenario"), allow.cartesian = TRUE
+    )),
+    fill = TRUE
+  ) |>
+    setorder("id") |>
+    DT(, .(id, time, cases)) |>
+    split(by = "id")
+})
+#> Define target list_retro_incidence from chunk code.
+#> Establish _targets.R and _targets_r/targets/list_retro_incidence.R.
 ```
 
   - Dummy data required for model creation.
@@ -897,10 +928,10 @@ tar_map(
       model,
       list(
         data = list_observations[[1]], fn = brms::make_standata,
-        data_cases = list_observations[[1]]$retrospective_incidence[[1]]
+        data_cases = list_retro_incidence[[1]]
       )
     ),
-    pattern = map(list_observations)
+    pattern = map(list_observations, list_retro_incidence)
   ),
   tar_target(
     fit, 

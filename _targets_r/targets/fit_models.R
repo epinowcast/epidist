@@ -32,10 +32,10 @@ tar_map(
       model,
       list(
         data = list_observations[[1]], fn = brms::make_standata,
-        data_cases = list_observations[[1]]$retrospective_incidence[[1]]
+        data_cases = list_retro_incidence[[1]]
       )
     ),
-    pattern = map(list_observations)
+    pattern = map(list_observations, list_retro_incidence)
   ),
   tar_target(
     fit, 
