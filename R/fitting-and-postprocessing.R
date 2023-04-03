@@ -190,10 +190,10 @@ extract_epinowcast_draws <- function(
 #' Primary event bias correction
 #' @export
 primary_censoring_bias_correction <- function(draws) {
-  draws <- draws |>
-    DT(, mean := mean - runif(.N, min = 0, max = 1)) |>
-    DT(, meanlog := log(mean^2 / sqrt(sd^2 + mean^2))) |>
-    DT(, sdlog := sqrt(log(1 + (sd^2 / mean^2))))
+  draws <- data.table::copy(draws)
+  draws[, mean := mean - 0.5]
+  draws[, meanlog := log(mean^2 / sqrt(sd^2 + mean^2))]
+  draws[, sdlog := sqrt(log(1 + (sd^2 / mean^2)))]
   return(draws[])
 }
 

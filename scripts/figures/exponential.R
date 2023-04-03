@@ -220,7 +220,7 @@ scores_plot <- scores_by_distribution |>
   ) +
   scale_colour_brewer(palette = "Dark2") +
   # add a linebreak to y axis labels
-  scale_y_discrete(labels = (\(x) str_wrap(x, width = 20))) +
+  scale_y_discrete(labels = (\(x) str_wrap(x, width = 30))) +
   scale_x_log10() +
   theme(legend.position = "bottom") +
   labs(y = "Model", x = "Relative CRPS")
