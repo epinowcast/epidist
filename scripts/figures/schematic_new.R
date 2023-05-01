@@ -137,4 +137,4 @@ p <- g1 + (forward + forward_delay +
   plot_layout(nrow=2)) +
   plot_layout(nrow=1, widths=c(1, 2))
 
-ggsave("figures/schematic_new.pdf", p, width = 20, height = 8)
+ggsave("figures/schematic_new.pdf", p, width = 15, height = 6)
