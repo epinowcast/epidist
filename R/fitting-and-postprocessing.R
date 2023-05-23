@@ -52,8 +52,10 @@ sample_model <- function(model, data, scenario = data.table::data.table(id = 1),
 
 #' Sample from the posterior of an epinowcast model with additional diagnositics
 #' @export
-sample_epinowcast_model <- function(model, data,
-                                   scenario = data.table::data.table(id = 1),diagnostics = TRUE, ...) {
+sample_epinowcast_model <- function(
+  model, data, scenario = data.table::data.table(id = 1),
+  diagnostics = TRUE, ...
+) {
 
   out <- scenario |>
     copy()
@@ -89,7 +91,21 @@ sample_epinowcast_model <- function(model, data,
           .args = list(na.rm = TRUE)
         )$`posterior::rhat`,
         na.rm = TRUE
+      ), 0),
+      min_ess_bulk = round(min(
+        fit$summary(
+          variables = NULL, posterior::ess_bulk,
+          .args = list(na.rm = TRUE)
+        )$`posterior::ess_bulk`,
+        na.rm = TRUE
       ), 2),
+      min_ess_tail = round(min(
+        fit$summary(
+          variables = NULL, posterior::ess_tail,
+          .args = list(na.rm = TRUE)
+        )$`posterior::ess_tail`,
+        na.rm = TRUE
+      ), 0),
       divergent_transitions = sum(diag$divergent__),
       per_divergent_transitions = sum(diag$divergent__) / nrow(diag),
       max_treedepth = max(diag$treedepth__)
@@ -98,7 +114,7 @@ sample_epinowcast_model <- function(model, data,
     diagnostics[, per_at_max_treedepth := no_at_max_treedepth / nrow(diag)]
     out <- cbind(out, diagnostics)
 
-    timing <- round(fit$time()$total, 1)
+    timing <- round(max(fit$metadata()$time$total), 1)
     out[, run_time := timing]
   }
   return(out[])
@@ -190,10 +206,10 @@ extract_epinowcast_draws <- function(
 #' Primary event bias correction
 #' @export
 primary_censoring_bias_correction <- function(draws) {
-  draws <- data.table::copy(draws)
-  draws[, mean := mean - runif(.N, min = 0, max = 1)]
-  draws[, meanlog := log(mean^2 / sqrt(sd^2 + mean^2))]
-  draws[, sdlog := sqrt(log(1 + (sd^2 / mean^2)))]
+  draws <- data.table::copy(draws) |>
+    DT(, mean := mean - runif(.N, min = 0, max = 1)) |>
+    DT(, meanlog := log(mean^2 / sqrt(sd^2 + mean^2))) |>
+    DT(, sdlog := sqrt(log(1 + (sd^2 / mean^2))))
   return(draws[])
 }
 
