@@ -1,108 +1,167 @@
+devtools::load_all()
+library(here)
+library(dplyr)
 library(ggplot2)
 library(patchwork)
 
-epsilon <- 0.1
+size <- 16
 
-generate_base_plot <- function(future = FALSE) {
-  future_alpha <- ifelse(future, 0.5, 1)
-  base_plot <- ggplot(NULL) +
-    geom_point(aes(0, 0), size = 3, shape = 21, fill = "red", stroke = 1) +
-    geom_point(aes(1, 0), size = 3, shape = 21, fill = "blue", stroke = 1) +
-    geom_point(aes(0, 0.1), size = 3, shape = 21, fill = "red", stroke = 1) +
-    geom_point(
-      aes(4, 0.1),
-      size = 3, shape = 21, fill = "blue", stroke = 1,
-      alpha = future_alpha
-    ) +
-    geom_point(aes(1, 0.2), size = 3, shape = 21, fill = "red", stroke = 1) +
-    geom_point(aes(2, 0.2), size = 3, shape = 21, fill = "blue", stroke = 1) +
-    geom_point(
-      aes(4, 0.3),
-      size = 3, shape = 21, fill = "red", stroke = 1,
-      alpha = future_alpha
-    ) +
-    geom_point(
-      aes(5, 0.3),
-      size = 3, shape = 21, fill = "blue", stroke = 1,
-      alpha = future_alpha
-    ) +
-    scale_x_continuous("Day",
-      limits = c(-0.6, 5.5),
-      expand = c(0, 0),
-      breaks = 0:5,
-      labels = c(
-        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
-      )
-    ) +
-    scale_y_continuous("Subject",
-      breaks = c(0, 0.1, 0.2, 0.3),
-      labels = c(1, 2, 3, 4),
-      limits = c(-0.05, 0.38),
-      expand = c(0, 0)
-    ) +
-    theme_bw() +
-    theme(
-      panel.grid = element_blank(),
-      panel.border = element_blank(),
-      axis.line = element_line(),
-      axis.line.y = element_blank()
-    )
-  return(base_plot)
-}
-
-add_arrow <- function(plot, y, ends, angle = 30, lty = 1, length = 0.1, ...) {
-  plot <- plot +
-    geom_segment(
-      aes(..., y = y, yend = y),
-      arrow = arrow(length = unit(length, "inches"), ends = ends, angle = angle), lwd = 1, lty = lty, col = "black", alpha = 0.95
-    )
-  return(plot)
-}
-
-truncation <- generate_base_plot(future = TRUE) |>
-  add_arrow(x = 0.1, y = 0, xend = 0.9, ends = "last") |>
-  add_arrow(x = 1.1, y = 0.2, xend = 1.9, ends = "last") |>
-  add_arrow(x = 0.1, y = 0.1, xend = 3.9, ends = "last", lty = 2, length = 0) |>
-  add_arrow(x = 4.1, y = 0.3, xend = 4.9, ends = "last", lty = 2, length = 0) +
-  geom_rect(
-    aes(xmin = 3, ymin = -0.05, xmax = 5.5, ymax = 0.35),
-    fill = "gray",
-    alpha = 0.2
-  ) +
-  geom_segment(aes(3, -0.05, xend = 3, yend = 0.35), lty = 1, col = "gray50") +
-  annotate("text", x = 0.5, y = 0.01, label = "Observed delay", vjust = -0.5) +
-  annotate("text", x = 2, y = 0.11, label = "Truncated delay", vjust = -0.5) +
-  annotate("text", x = 3, y = 0.35, label = "Observation time", vjust = -0.5) +
-  annotate("text", x = 4.5, y = -0.05, label = "Future events", vjust = -1)
-
-censoring <- generate_base_plot(future = FALSE) |>
-  add_arrow(x = -0.45, y = 0, xend = -.1, ends = "first", angle = 90) |>
-  add_arrow(x = 0.1, y = 0, xend = 0.45, ends = "last", angle = 90) |>
-  add_arrow(x = 0.55, y = 0, xend = 0.9, ends = "first", angle = 90) |>
-  add_arrow(x = 1.1, y = 0, xend = 1.45, ends = "last", angle = 90) |>
-  add_arrow(x = -0.45, y = 0.1, xend = -.1, ends = "first", angle = 90) |>
-  add_arrow(x = 0.1, y = 0.1, xend = 2.45, ends = "last", angle = 90) |>
-  add_arrow(x = 3.55, y = 0.1, xend = 3.9, ends = "first", angle = 90) |>
-  add_arrow(x = 4.1, y = 0.1, xend = 4.45, ends = "last", angle = 90) |>
-  add_arrow(x = 0.55, y = 0.2, xend = 0.9, ends = "first", angle = 90) |>
-  add_arrow(x = 1.1, y = 0.2, xend = 1.45, ends = "last", angle = 90) |>
-  add_arrow(x = 4.55, y = 0.3, xend = 4.9, ends = "first", angle = 90) |>
-  add_arrow(x = 5.1, y = 0.3, xend = 5.45, ends = "last", angle = 90) |>
-  add_arrow(x = 2.45, y = 0.125, xend = 3.55, ends = "both", angle = 0, lty=2) |>
-  add_arrow(x = -0.45, y = 0.075, xend = 4.45, ends = "both", angle = 0, lty=2) +
-  annotate("text", x=3, y=0.15, label="Minimum delay") +
-  annotate("text", x=3, y=0.05, label="Maximum delay") +
-  theme(
-    panel.grid = element_blank(),
-    panel.border = element_blank(),
-    axis.line.x = element_line(),
-    axis.title.y = element_blank(),
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank()
+outbreak <- simulate_exponential_cases(
+  sample_size = 10000, seed = 123, t = 30
+) |>
+  arrange(ptime) |>
+  mutate(
+    case = 1:10000
   )
 
-p <- truncation + censoring +
-  plot_layout(nrow = 1) +
-  plot_annotation(tag_levels = "A")
+secondary_dist <- data.table(
+  meanlog = 1.8, sdlog = 0.5
+) |>
+  add_natural_scale_mean_sd()
 
-ggsave("figures/schematic.pdf", p, width = 9, height = 4)
+obs <- outbreak |>
+  simulate_secondary(
+    meanlog = secondary_dist$meanlog[[1]],
+    sdlog = secondary_dist$sdlog[[1]]
+  ) |>
+  observe_process()
+
+g1 <- ggplot(obs) +
+  geom_point(aes(ptime, case), size = 1, shape = 1, col = "orange") +
+  geom_point(aes(stime, case), size = 0.1, shape = 2, col = "purple") +
+  geom_vline(xintercept = 25, lty = 2, lwd = 1) +
+  ggtitle("A. Empirical density") +
+  scale_x_continuous("Time (days)", expand = c(0, 0), limits = c(0, 60)) +
+  scale_y_continuous("id", expand = c(0, 0)) +
+  theme_bw(base_size = size)
+
+obs_forward <- obs |>
+  filter(ptime_daily == 25)
+
+set.seed(101)
+obs_forward_sample <- obs_forward |>
+  DT(sample(1:.N, size = 10))
+
+forward <- ggplot(obs_forward_sample) +
+  geom_segment(
+    aes(ptime, as.factor(case), xend = stime, yend = as.factor(case)), lwd = 1
+  ) +
+  geom_point(
+    aes(ptime, as.factor(case)), size = 4, shape = 21, fill = "orange"
+  ) +
+  geom_point(
+    aes(stime, as.factor(case)), size = 4, shape = 24, fill = "purple"
+  ) +
+  ggtitle("B. Forward") +
+  scale_x_continuous("Time (days)") +
+  scale_y_discrete("id") +
+  theme_bw(base_size = size)
+
+forward_delay <- ggplot(obs_forward) +
+  geom_density(aes(delay), fill = "orange", alpha = 0.3) +
+  geom_function(fun = function(x) dlnorm(x, 1.8, 0.5), lwd = 1, n = 201) +
+  scale_x_continuous("Delay (days)", limits = c(0, 35)) +
+  scale_y_continuous("Density") +
+  theme_bw(base_size = size)
+
+obs_backward <- obs |>
+  filter(stime_daily == 25)
+
+set.seed(101)
+obs_backward_sample <- obs_backward |>
+  DT(sample(1:.N, size = 10))
+
+backward <- ggplot(obs_backward_sample) +
+  geom_segment(
+    aes(ptime, as.factor(case), xend = stime, yend = as.factor(case)), lwd = 1
+  ) +
+  geom_point(
+    aes(ptime, as.factor(case)), size = 4, shape = 21, fill = "orange"
+  ) +
+  geom_point(
+    aes(stime, as.factor(case)), size = 4, shape = 24, fill = "purple"
+  ) +
+  ggtitle("C. Backward") +
+  scale_x_continuous("Time (days)") +
+  scale_y_discrete("id") +
+  theme_bw(base_size = size)
+
+backward_delay <- ggplot(obs_backward) +
+  geom_density(aes(delay), fill = "purple", alpha = 0.3) +
+  geom_function(fun = function(x) dlnorm(x, 1.8, 0.5), lwd = 1, n = 201) +
+  scale_x_continuous("Delay (days)", limits = c(0, 35)) +
+  scale_y_continuous("Density") +
+  theme_bw(base_size = size)
+
+obs_truncation <- obs |>
+  filter(ptime < 25)
+
+set.seed(107)
+obs_truncation_sample <- obs_truncation |>
+  DT(sample(1:.N, size = 10)) |>
+  mutate(
+    type = stime < 25
+  )
+
+truncation <- ggplot(obs_truncation_sample) +
+  geom_segment(
+    aes(ptime, as.factor(case), xend = stime, yend = as.factor(case),
+    lty = type), lwd = 1
+  ) +
+  geom_point(
+    aes(ptime, as.factor(case)), size = 4, shape = 21, fill = "orange"
+  ) +
+  geom_point(aes(stime, as.factor(case), fill = type), size = 4, shape = 24) +
+  geom_vline(xintercept = 25, lty = 2) +
+  ggtitle("D. Truncation") +
+  scale_x_continuous("Time (days)", limits = c(0, 35)) +
+  scale_y_discrete("id") +
+  scale_linetype_manual(values = c(3, 1)) +
+  scale_fill_manual(values = c("#EEBFF2", "purple")) +
+  theme_bw(base_size = size) +
+  theme(
+    legend.position = "none"
+  )
+
+truncation_delay <- ggplot(filter(obs_truncation, stime < 25)) +
+  geom_density(aes(delay), fill = "orange", alpha = 0.3) +
+  geom_function(fun = function(x) dlnorm(x, 1.8, 0.5), lwd = 1, n = 201) +
+  scale_x_continuous("Delay (days)", limits = c(0, 35)) +
+  scale_y_continuous("Density") +
+  theme_bw(base_size = size)
+
+censor <- ggplot(obs_truncation_sample) +
+  geom_point(
+    aes(ptime_daily, as.factor(case)), size = 4, shape = 21, fill = "orange"
+  ) +
+  geom_point(aes(ptime, as.factor(case)), size = 4, shape = 21) +
+  geom_point(
+    aes(stime_daily, as.factor(case)), size = 4, shape = 24, fill = "purple"
+  ) +
+  geom_point(aes(stime, as.factor(case)), size = 4, shape = 24) +
+  ggtitle("E. Daily censoring") +
+  scale_x_continuous("Time (days)", limits = c(0, 35)) +
+  scale_y_discrete("id") +
+  theme_bw(base_size = size) +
+  theme(
+    legend.position = "none"
+  )
+
+censor_delay <- ggplot(obs_truncation) +
+  geom_bar(
+    aes(x = delay_daily, y = after_stat(count) / sum(after_stat(count))),
+    fill = "orange", alpha = 0.3, col = "black"
+  ) +
+  geom_function(fun = function(x) dlnorm(x, 1.8, 0.5), lwd = 1, n = 201) +
+  scale_x_continuous("Delay (days)", limits = c(0, 35)) +
+  scale_y_continuous("Density") +
+  theme_bw(base_size = size)
+
+p <- g1 + (forward + forward_delay +
+  backward + backward_delay +
+  truncation + truncation_delay +
+  censor + censor_delay +
+  plot_layout(nrow = 2)) +
+  plot_layout(nrow = 2, heights = c(1, 2))
+
+ggsave("figures/schematic_new.pdf", p, width = 20, height = 12)
