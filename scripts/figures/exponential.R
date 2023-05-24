@@ -16,10 +16,6 @@ exponential_obs <- fread(here("data/scenarios/exponential-simulation.csv"))
 
 # Load available models
 models <- fread(here("data/meta/models.csv")) |>
-  rbind(data.table(
-    model = "Joint incidence and delay estimation",
-    in_code = "epinowcast"
-  )) |>
   DT(, model := factor(model))
 
 
@@ -236,5 +232,5 @@ exponential_plot <- ((empirical_pmf_plot / scores_plot) +
 # Save combined plots
 ggsave(
   here("figures", "exponential.pdf"), exponential_plot,
-  height = 16, width = 16, dpi = 330
+  height = 20, width = 16, dpi = 330
 )
