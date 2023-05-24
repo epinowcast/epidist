@@ -16,10 +16,6 @@ case_study_obs <- fread(here("data/scenarios/ebola_case_study.csv"))
 
 # Load available models
 models <- fread(here("data/meta/models.csv")) |>
-  rbind(data.table(
-    model = "Joint incidence and delay estimation",
-    in_code = "epinowcast"
-  )) |>
   DT(, model := factor(model))
 
 
@@ -325,5 +321,5 @@ ggsave(
 # Save combined plots
 ggsave(
   here("figures", "case_study2.pdf"), case_study_plot2,
-  height = 16, width = 16, dpi = 330
+  height = 20, width = 16, dpi = 330
 )

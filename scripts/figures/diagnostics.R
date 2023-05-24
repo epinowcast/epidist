@@ -11,10 +11,6 @@ library(forcats) # manipulate factors
 
 # Load available models
 models <- fread(here("data/meta/models.csv")) |>
-  rbind(data.table(
-    model = "Joint incidence and delay estimation",
-    in_code = "epinowcast"
-  )) |>
   DT(, model := factor(model))
 
 # Define a function to read diagnostics from a model
