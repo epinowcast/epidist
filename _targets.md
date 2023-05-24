@@ -748,15 +748,15 @@ complexity to adjust for censoring to dates and right truncation.
 
 ``` r
 models <- list(
-  "Naive" = quote(naive_delay),
-  "Filtered" = quote(filtered_naive_delay),
-  "Censoring adjusted" = quote(censoring_adjusted_delay),
-  "Filtered and censoring adjusted" = quote(filtered_censoring_adjusted_delay),
-  "Truncation adjusted" = quote(truncation_adjusted_delay),
-  "Truncation and censoring adjusted" =
-     quote(truncation_censoring_adjusted_delay),
   "Latent variable truncation and censoring adjusted" =
     quote(latent_truncation_censoring_adjusted_delay),
+  "Truncation and censoring adjusted" =
+     quote(truncation_censoring_adjusted_delay),
+  "Truncation adjusted" = quote(truncation_adjusted_delay),
+  "Censoring adjusted" = quote(censoring_adjusted_delay),
+  "Filtered" = quote(filtered_naive_delay),
+  "Filtered and censoring adjusted" = quote(filtered_censoring_adjusted_delay),
+  "Naive" = quote(naive_delay),
   "Dynamical and censoring adjusted (real-time incidence)" = quote(dynamical_censoring_adjusted_delay_wrapper),
   "Dynamical and censoring adjusted (retrospective incidence)" = quote(dynamical_censoring_adjusted_delay)
 )
@@ -779,6 +779,10 @@ tar_file(
   data.table(
     model = names(models), in_code = machine_model_names
   ) |>
+    rbind(data.table(
+      model = "Joint incidence and delay estimation",
+      in_code = "epinowcast"
+    )) |>
     save_csv("models.csv", path = "data/meta")
 )
 #> Establish _targets.R and _targets_r/targets/save_models.R.
@@ -1023,16 +1027,17 @@ list(
         show_messages = FALSE,
         iter_sampling = 1000,
         seed = 123,
-        sampler = sample_epinowcast_model
+        sampler = sample_epinowcast_model,
+        with_epinowcast_output = FALSE
       ),
     pattern = map(list_observations, scenarios),
     deployment = "worker"
   ),
   tar_file(
     epinowcast_save_diagnostics,
-    save_csv(
-      epinowcast_fit[, -c("fit")], "epinowcast.csv", path = "data/diagnostics"
-    )
+        epinowcast_fit |>
+      DT(, -c("fit")) |>
+      save_csv("epinowcast.csv", path = "data/diagnostics")
   ),
   tar_target(
     epinowcast_draws,
