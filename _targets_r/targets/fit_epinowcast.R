@@ -29,16 +29,17 @@ list(
         show_messages = FALSE,
         iter_sampling = 1000,
         seed = 123,
-        sampler = sample_epinowcast_model
+        sampler = sample_epinowcast_model,
+        with_epinowcast_output = FALSE
       ),
     pattern = map(list_observations, scenarios),
     deployment = "worker"
   ),
   tar_file(
     epinowcast_save_diagnostics,
-    save_csv(
-      epinowcast_fit[, -c("fit")], "epinowcast.csv", path = "data/diagnostics"
-    )
+        epinowcast_fit |>
+      DT(, -c("fit")) |>
+      save_csv("epinowcast.csv", path = "data/diagnostics")
   ),
   tar_target(
     epinowcast_draws,

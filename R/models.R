@@ -423,7 +423,9 @@ dynamical_censoring_adjusted_delay_wrapper <- function(data, data_cases, ...) {
 epinowcast_delay <- function(formula = ~ 1, data, by = c(),
                              family = "lognormal", max_delay = 30,
                              model = epinowcast::enw_model(),
-                             sampler = epinowcast::enw_sample, ...) {
+                             sampler = epinowcast::enw_sample,
+                             with_epinowcast_output = TRUE,
+                             ...) {
   data_as_counts <- data |>
     DT(, .(new_confirm = .N), by = c("ptime_daily", "stime_daily", by)) |>
     DT(order(ptime_daily, stime_daily)) |>
@@ -465,7 +467,7 @@ epinowcast_delay <- function(formula = ~ 1, data, by = c(),
     data = epinowcast_data
   )
 
-  epinowcast::epinowcast(
+  fit <- epinowcast::epinowcast(
     data = epinowcast_data,
     reference = reference,
     expectation = expectation,
@@ -476,4 +478,14 @@ epinowcast_delay <- function(formula = ~ 1, data, by = c(),
       ...
     )
   )
+
+  if (!with_epinowcast_output) {
+    fit <- fit[, -c(
+        "obs", "new_confirm", "latest", "missing_reference",
+        "reporting_triangle", "metareference", "metareport",
+        "metadelay", "time", "snapshots", "by", "groups",
+        "max_delay", "max_date", "data", "fit_args"
+      )]
+  }
+  return(fit[])
 }
