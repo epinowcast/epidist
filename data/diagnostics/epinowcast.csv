@@ -1,0 +1,357 @@
+scenario,distribution,sample_size,data_type,id,replicate,obs_type,samples,max_rhat,min_ess_bulk,min_ess_tail,divergent_transitions,per_divergent_transitions,max_treedepth,no_at_max_treedepth,per_at_max_treedepth,run_time
+early outbreak,long,10,outbreak,1,1,,4000,1,1518.12,1069,0,0,6,26,0.0065,2.6
+early outbreak,medium,10,outbreak,2,1,,4000,1,1225.46,889,0,0,5,244,0.061,1.9
+early outbreak,short,10,outbreak,3,1,,4000,1,1494.62,1223,0,0,6,11,0.00275,3.2
+late outbreak,long,10,outbreak,4,1,,4000,1,986.63,859,0,0,6,11,0.00275,10.8
+late outbreak,medium,10,outbreak,5,1,,4000,1,1236.46,1041,0,0,6,75,0.01875,16.1
+late outbreak,short,10,outbreak,6,1,,4000,1,1181.8,728,1,0.00025,6,26,0.0065,6.5
+near peak,long,10,outbreak,7,1,,4000,1,1424.74,1334,0,0,6,51,0.01275,5.3
+near peak,medium,10,outbreak,8,1,,4000,1,1329.59,1362,0,0,6,1,0.00025,3.6
+near peak,short,10,outbreak,9,1,,4000,1,833.83,607,930,0.2325,7,1,0.00025,7.7
+past peak,long,10,outbreak,10,1,,4000,1,1306.36,830,0,0,6,12,0.003,10.7
+past peak,medium,10,outbreak,11,1,,4000,1,1141.59,1086,0,0,6,25,0.00625,12.1
+past peak,short,10,outbreak,12,1,,3000,1,836.92,487,0,0,6,18,0.006,9.1
+early outbreak,long,100,outbreak,13,1,,4000,1,1249.75,1063,0,0,6,85,0.02125,3.6
+early outbreak,medium,100,outbreak,14,1,,4000,1,1333.53,1010,0,0,6,6,0.0015,3.4
+early outbreak,short,100,outbreak,15,1,,4000,1,1277.72,864,0,0,6,16,0.004,3.2
+late outbreak,long,100,outbreak,16,1,,4000,1,1188.81,1275,0,0,6,166,0.0415,24.5
+late outbreak,medium,100,outbreak,17,1,,4000,1,1126.66,975,0,0,6,134,0.0335,24.3
+late outbreak,short,100,outbreak,18,1,,4000,1,1229.3,875,0,0,6,100,0.025,21.3
+near peak,long,100,outbreak,19,1,,4000,1,995.78,834,0,0,7,1,0.00025,11.8
+near peak,medium,100,outbreak,20,1,,4000,1,1249.22,955,0,0,7,1,0.00025,12.8
+near peak,short,100,outbreak,21,1,,4000,1,1152.13,787,1,0.00025,6,702,0.1755,11.2
+past peak,long,100,outbreak,22,1,,3000,1,727.25,658,0,0,7,5,0.00166666666666667,20
+past peak,medium,100,outbreak,23,1,,3000,1,802.9,682,0,0,6,89,0.0296666666666667,13.8
+past peak,short,100,outbreak,24,1,,3000,1,769.25,637,0,0,6,120,0.04,12.4
+early outbreak,long,200,outbreak,25,1,,4000,1,1180.85,891,0,0,6,28,0.007,3.5
+early outbreak,medium,200,outbreak,26,1,,4000,1,901.39,1360,0,0,6,44,0.011,4
+early outbreak,short,200,outbreak,27,1,,4000,1,1052.01,1193,0,0,6,39,0.00975,4.1
+late outbreak,long,200,outbreak,28,1,,4000,1,1087,1174,0,0,6,262,0.0655,24.7
+late outbreak,medium,200,outbreak,29,1,,4000,1,1170.2,1060,0,0,6,400,0.1,24.8
+late outbreak,short,200,outbreak,30,1,,4000,1,823.14,616,0,0,6,336,0.084,26
+near peak,long,200,outbreak,31,1,,4000,1,1044.24,765,0,0,7,57,0.01425,14.9
+near peak,medium,200,outbreak,32,1,,3000,1,814.39,498,0,0,7,9,0.003,14.1
+near peak,short,200,outbreak,33,1,,4000,1,945.94,754,0,0,6,665,0.16625,12.1
+past peak,long,200,outbreak,34,1,,4000,1,1013.77,1089,0,0,7,2,5e-04,22
+past peak,medium,200,outbreak,35,1,,4000,1,1092.05,856,0,0,7,3,0.00075,21.6
+past peak,short,200,outbreak,36,1,,4000,1,1100.86,1366,0,0,6,790,0.1975,22.4
+early outbreak,long,400,outbreak,37,1,,4000,1,1099.26,828,0,0,6,109,0.02725,3.6
+early outbreak,medium,400,outbreak,38,1,,4000,1,1176.48,974,0,0,6,23,0.00575,3.8
+early outbreak,short,400,outbreak,39,1,,4000,1,1258.81,1387,0,0,6,11,0.00275,3.9
+late outbreak,long,400,outbreak,40,1,,4000,1,1376.02,990,0,0,6,617,0.15425,30.9
+late outbreak,medium,400,outbreak,41,1,,4000,1,1194.14,901,0,0,6,655,0.16375,32.4
+late outbreak,short,400,outbreak,42,1,,4000,1,843.16,891,0,0,6,99,0.02475,23.7
+near peak,long,400,outbreak,43,1,,4000,1,1047.97,876,0,0,7,5,0.00125,13.6
+near peak,medium,400,outbreak,44,1,,4000,1,1146.47,1230,0,0,7,1,0.00025,14.6
+near peak,short,400,outbreak,45,1,,4000,1,1128.89,964,0,0,7,4,0.001,14.7
+past peak,long,400,outbreak,46,1,,4000,1,1146.96,759,0,0,7,6,0.0015,23.6
+past peak,medium,400,outbreak,47,1,,4000,1,1130.35,875,0,0,7,2,5e-04,25
+past peak,short,400,outbreak,48,1,,4000,1,863.62,530,0,0,7,6,0.0015,21.7
+decay,long,200,exponential,49,1,,4000,1,1240.35,758,0,0,5,468,0.117,6.3
+decay,long,200,exponential,50,2,,4000,1,1327.83,1331,0,0,6,3,0.00075,6.7
+decay,long,200,exponential,51,3,,4000,1,1041.53,628,0,0,6,18,0.0045,6.6
+decay,long,200,exponential,52,4,,4000,1,1148.26,704,0,0,5,658,0.1645,6.3
+decay,long,200,exponential,53,5,,4000,1,1286.37,1336,0,0,5,268,0.067,6.3
+decay,long,200,exponential,54,6,,4000,1,1207.76,828,0,0,5,439,0.10975,6
+decay,long,200,exponential,55,7,,4000,1,1184.25,1069,0,0,5,216,0.054,5.6
+decay,long,200,exponential,56,8,,4000,1,1282.58,1119,0,0,5,292,0.073,5.8
+decay,long,200,exponential,57,9,,4000,1,1335.4,979,0,0,6,2,5e-04,6.3
+decay,long,200,exponential,58,10,,4000,1,1225.95,982,0,0,5,576,0.144,6
+decay,long,200,exponential,59,11,,4000,1,1046.46,1231,0,0,6,1,0.00025,6.4
+decay,long,200,exponential,60,12,,4000,1,1105.87,1203,0,0,6,4,0.001,6.7
+decay,long,200,exponential,61,13,,4000,1,1308.86,846,0,0,5,573,0.14325,6.6
+decay,long,200,exponential,62,14,,4000,1,1443.32,1265,0,0,6,1,0.00025,6.7
+decay,long,200,exponential,63,15,,3000,1,927.2,790,0,0,6,2,0.000666666666666667,5.9
+decay,long,200,exponential,64,16,,4000,1,1372.28,1044,0,0,5,205,0.05125,5.3
+decay,long,200,exponential,65,17,,4000,1,1091.86,718,0,0,5,235,0.05875,5.8
+decay,long,200,exponential,66,18,,4000,1,1317.74,1017,0,0,6,2,5e-04,6.2
+decay,long,200,exponential,67,19,,4000,1,1106.45,1157,0,0,5,351,0.08775,5.6
+decay,long,200,exponential,68,20,,4000,1,1185.29,812,0,0,5,504,0.126,5.9
+decay,medium,200,exponential,69,1,,3000,1,1035.52,775,0,0,5,327,0.109,5.9
+decay,medium,200,exponential,70,2,,4000,1,1152.9,1425,0,0,5,348,0.087,6
+decay,medium,200,exponential,71,3,,4000,1,1282.89,1098,0,0,6,1,0.00025,6.4
+decay,medium,200,exponential,72,4,,4000,1,1278.66,943,0,0,5,447,0.11175,6.2
+decay,medium,200,exponential,73,5,,4000,1,1243.51,1064,0,0,6,2,5e-04,6.8
+decay,medium,200,exponential,74,6,,4000,1,1405.82,1034,0,0,6,3,0.00075,5.9
+decay,medium,200,exponential,75,7,,4000,1,1208.85,1177,0,0,6,89,0.02225,8.3
+decay,medium,200,exponential,76,8,,4000,1,1196.16,781,0,0,6,1,0.00025,6.4
+decay,medium,200,exponential,77,9,,4000,1,1293.42,1021,0,0,5,392,0.098,6.9
+decay,medium,200,exponential,78,10,,4000,1,1396.71,1095,0,0,6,1,0.00025,6.9
+decay,medium,200,exponential,79,11,,4000,1,1411.48,1200,0,0,6,1,0.00025,6
+decay,medium,200,exponential,80,12,,4000,1,1381.82,914,0,0,5,723,0.18075,6.2
+decay,medium,200,exponential,81,13,,4000,1,1003.77,510,0,0,6,1,0.00025,6.9
+decay,medium,200,exponential,82,14,,4000,1,1159.39,759,0,0,6,1,0.00025,6.2
+decay,medium,200,exponential,83,15,,4000,1,1307,1203,0,0,5,394,0.0985,6.1
+decay,medium,200,exponential,84,16,,4000,1,1288.16,833,0,0,5,775,0.19375,6.4
+decay,medium,200,exponential,85,17,,4000,1,1150.26,713,0,0,6,2,5e-04,6.3
+decay,medium,200,exponential,86,18,,3000,1,1018.44,769,0,0,6,9,0.003,7.3
+decay,medium,200,exponential,87,19,,4000,1,1298.94,1195,0,0,5,373,0.09325,6.1
+decay,medium,200,exponential,88,20,,4000,1,1237.67,1105,0,0,6,1,0.00025,6.2
+decay,short,200,exponential,89,1,,4000,1,1345.81,1041,0,0,6,4,0.001,6
+decay,short,200,exponential,90,2,,4000,1,1330.83,1212,0,0,6,2,5e-04,7.3
+decay,short,200,exponential,91,3,,4000,1,1379.41,1450,0,0,6,1,0.00025,7
+decay,short,200,exponential,92,4,,4000,1,1100.81,1311,0,0,5,467,0.11675,6.1
+decay,short,200,exponential,93,5,,4000,1,1229.09,1192,0,0,6,1,0.00025,6.6
+decay,short,200,exponential,94,6,,4000,1,1242.46,1097,0,0,6,1,0.00025,6.2
+decay,short,200,exponential,95,7,,4000,1,1307.14,978,0,0,5,604,0.151,6.9
+decay,short,200,exponential,96,8,,4000,1,1378.58,1057,0,0,6,1,0.00025,6.3
+decay,short,200,exponential,97,9,,4000,1,1174.73,909,0,0,5,502,0.1255,6.7
+decay,short,200,exponential,98,10,,4000,1,1540.06,1541,0,0,6,2,5e-04,7.2
+decay,short,200,exponential,99,11,,4000,1,1415.19,1054,0,0,6,1,0.00025,6.5
+decay,short,200,exponential,100,12,,4000,1,1237.25,1023,0,0,6,8,0.002,6.9
+decay,short,200,exponential,101,13,,4000,1,1431.92,1134,0,0,6,4,0.001,7.7
+decay,short,200,exponential,102,14,,4000,1,1326.42,1091,0,0,6,11,0.00275,7.2
+decay,short,200,exponential,103,15,,4000,1,1548.7,1361,0,0,6,6,0.0015,7.1
+decay,short,200,exponential,104,16,,4000,1,1328.72,1131,0,0,6,3,0.00075,7.5
+decay,short,200,exponential,105,17,,3000,1,919.06,786,0,0,5,329,0.109666666666667,6
+decay,short,200,exponential,106,18,,4000,1,1333.8,887,0,0,6,3,0.00075,6.8
+decay,short,200,exponential,107,19,,4000,1,1167.95,924,0,0,6,2,5e-04,8.1
+decay,short,200,exponential,108,20,,3000,1,1005.17,875,0,0,6,5,0.00166666666666667,6.9
+fast decay,long,200,exponential,109,1,,4000,1,1481.83,1052,0,0,5,155,0.03875,4.9
+fast decay,long,200,exponential,110,2,,3000,1,998.56,700,0,0,6,1,0.000333333333333333,5.5
+fast decay,long,200,exponential,111,3,,3000,1,681.89,690,0,0,5,175,0.0583333333333333,5.1
+fast decay,long,200,exponential,112,4,,4000,1,1327.49,1122,0,0,5,26,0.0065,4.3
+fast decay,long,200,exponential,113,5,,4000,1,1445.51,1316,0,0,5,132,0.033,5.1
+fast decay,long,200,exponential,114,6,,4000,1,1311.44,1071,0,0,6,1,0.00025,5
+fast decay,long,200,exponential,115,7,,4000,1,1361.78,764,0,0,5,172,0.043,5.1
+fast decay,long,200,exponential,116,8,,4000,1,1077.36,593,0,0,5,272,0.068,5
+fast decay,long,200,exponential,117,9,,4000,1,1187.18,1011,0,0,5,81,0.02025,4.9
+fast decay,long,200,exponential,118,10,,4000,1,1252.61,1000,0,0,5,76,0.019,4.4
+fast decay,long,200,exponential,119,11,,4000,1,1574.34,808,0,0,5,134,0.0335,4.7
+fast decay,long,200,exponential,120,12,,4000,1,1378.75,923,0,0,5,112,0.028,4.9
+fast decay,long,200,exponential,121,13,,4000,1,1209.96,1326,0,0,5,126,0.0315,4.8
+fast decay,long,200,exponential,122,14,,4000,1,1556.72,1316,0,0,5,49,0.01225,4.6
+fast decay,long,200,exponential,123,15,,4000,1,1514.59,1223,0,0,5,12,0.003,4.5
+fast decay,long,200,exponential,124,16,,4000,1,1456.85,971,0,0,6,4,0.001,5.6
+fast decay,long,200,exponential,125,17,,4000,1,1393.99,944,0,0,6,6,0.0015,5.9
+fast decay,long,200,exponential,126,18,,3000,1,1032.83,812,0,0,5,68,0.0226666666666667,4.8
+fast decay,long,200,exponential,127,19,,4000,1,1667.9,1564,0,0,5,38,0.0095,4.8
+fast decay,long,200,exponential,128,20,,4000,1,1552.33,1123,0,0,5,243,0.06075,5.3
+fast decay,medium,200,exponential,129,1,,3000,1,1022.75,699,0,0,5,16,0.00533333333333333,3.7
+fast decay,medium,200,exponential,130,2,,4000,1,1470.85,1220,0,0,5,48,0.012,4.9
+fast decay,medium,200,exponential,131,3,,4000,1,1217.39,813,0,0,6,2,5e-04,6.4
+fast decay,medium,200,exponential,132,4,,4000,1,1271.84,1213,0,0,5,59,0.01475,4.9
+fast decay,medium,200,exponential,133,5,,4000,1,1336.87,824,0,0,6,1,0.00025,5.5
+fast decay,medium,200,exponential,134,6,,4000,1,1236.02,1448,0,0,5,74,0.0185,5.1
+fast decay,medium,200,exponential,135,7,,4000,1,1714.34,1409,0,0,5,25,0.00625,4.9
+fast decay,medium,200,exponential,136,8,,4000,1,1574.97,1446,0,0,5,55,0.01375,4.2
+fast decay,medium,200,exponential,137,9,,4000,1,1271.41,1163,0,0,5,32,0.008,5
+fast decay,medium,200,exponential,138,10,,4000,1,1449.58,977,0,0,5,46,0.0115,5.1
+fast decay,medium,200,exponential,139,11,,4000,1,1583.83,1604,0,0,5,71,0.01775,4
+fast decay,medium,200,exponential,140,12,,4000,1,1078.99,604,0,0,5,251,0.06275,5
+fast decay,medium,200,exponential,141,13,,4000,1,1639.19,1455,0,0,5,217,0.05425,5.7
+fast decay,medium,200,exponential,142,14,,4000,1,1165.14,773,0,0,6,2,5e-04,5.3
+fast decay,medium,200,exponential,143,15,,4000,1,1363.8,1024,0,0,5,98,0.0245,4.6
+fast decay,medium,200,exponential,144,16,,4000,1,1490.28,1400,0,0,5,30,0.0075,4.6
+fast decay,medium,200,exponential,145,17,,4000,1,1485.66,1318,0,0,5,50,0.0125,4.4
+fast decay,medium,200,exponential,146,18,,4000,1,1443.09,1489,0,0,5,27,0.00675,4.5
+fast decay,medium,200,exponential,147,19,,4000,1,1157.76,845,0,0,5,445,0.11125,4.9
+fast decay,medium,200,exponential,148,20,,4000,1,1573.84,1239,0,0,5,44,0.011,4.4
+fast decay,short,200,exponential,149,1,,4000,1,962.14,654,0,0,5,277,0.06925,5.5
+fast decay,short,200,exponential,150,2,,4000,1,1260.44,906,0,0,6,4,0.001,6.2
+fast decay,short,200,exponential,151,3,,4000,1,1541.2,1142,0,0,5,44,0.011,5.1
+fast decay,short,200,exponential,152,4,,4000,1,1267.53,535,0,0,5,46,0.0115,4.9
+fast decay,short,200,exponential,153,5,,4000,1,1369.51,1163,0,0,5,41,0.01025,4.2
+fast decay,short,200,exponential,154,6,,4000,1,1341.38,745,0,0,5,79,0.01975,4.4
+fast decay,short,200,exponential,155,7,,3000,1,997.59,772,0,0,5,34,0.0113333333333333,4.5
+fast decay,short,200,exponential,156,8,,4000,1,1294.25,1301,0,0,5,74,0.0185,5.3
+fast decay,short,200,exponential,157,9,,4000,1,1130.44,727,0,0,5,149,0.03725,5.6
+fast decay,short,200,exponential,158,10,,4000,1,1301.29,1326,0,0,5,68,0.017,4.3
+fast decay,short,200,exponential,159,11,,4000,1,1614.77,1321,0,0,5,93,0.02325,5
+fast decay,short,200,exponential,160,12,,4000,1,1329.6,1285,0,0,5,51,0.01275,4.8
+fast decay,short,200,exponential,161,13,,3000,1,871,1246,0,0,6,1,0.000333333333333333,5.8
+fast decay,short,200,exponential,162,14,,4000,1,1630.51,1299,0,0,5,16,0.004,5.7
+fast decay,short,200,exponential,163,15,,4000,1,1356.5,1045,0,0,5,12,0.003,5.4
+fast decay,short,200,exponential,164,16,,4000,1,1199.09,1497,0,0,5,228,0.057,6.1
+fast decay,short,200,exponential,165,17,,4000,1,1157.58,1346,0,0,5,33,0.00825,5.2
+fast decay,short,200,exponential,166,18,,4000,1,1572.49,1378,0,0,5,17,0.00425,4.6
+fast decay,short,200,exponential,167,19,,4000,1,1260,745,0,0,5,88,0.022,5.1
+fast decay,short,200,exponential,168,20,,4000,1,1359.42,1312,0,0,5,23,0.00575,5.3
+fast growth,long,200,exponential,169,1,,4000,1,1161.16,1119,0,0,7,59,0.01475,13.3
+fast growth,long,200,exponential,170,2,,4000,1,1033.28,702,0,0,7,65,0.01625,14.5
+fast growth,long,200,exponential,171,3,,4000,1,644.15,231,0,0,7,110,0.0275,15.3
+fast growth,long,200,exponential,172,4,,4000,1,792.15,918,0,0,7,226,0.0565,15.6
+fast growth,long,200,exponential,173,5,,3000,1,811.48,614,0,0,7,107,0.0356666666666667,17.6
+fast growth,long,200,exponential,174,6,,3000,1,929.39,811,0,0,7,137,0.0456666666666667,16.7
+fast growth,long,200,exponential,175,7,,3000,1,878.04,774,0,0,7,253,0.0843333333333333,18.8
+fast growth,long,200,exponential,176,8,,4000,1,1172.01,924,0,0,7,69,0.01725,13.6
+fast growth,long,200,exponential,177,9,,4000,1,1200.69,1047,0,0,7,32,0.008,12.6
+fast growth,long,200,exponential,178,10,,4000,1,1156.01,859,0,0,7,185,0.04625,15.7
+fast growth,long,200,exponential,179,11,,4000,1,1090.32,576,0,0,7,68,0.017,14.1
+fast growth,long,200,exponential,180,12,,3000,1,789.23,915,0,0,7,139,0.0463333333333333,15.8
+fast growth,long,200,exponential,181,13,,4000,1,1114.94,1153,0,0,7,181,0.04525,19.1
+fast growth,long,200,exponential,182,14,,4000,1,1154.66,927,0,0,7,64,0.016,16.3
+fast growth,long,200,exponential,183,15,,4000,1,1241.43,985,0,0,8,17,0.00425,21.7
+fast growth,long,200,exponential,184,16,,4000,1,1159.73,766,0,0,7,64,0.016,13.4
+fast growth,long,200,exponential,185,17,,3000,1,707.09,537,0,0,7,308,0.102666666666667,18.3
+fast growth,long,200,exponential,186,18,,4000,1,1047.9,883,0,0,7,106,0.0265,15.5
+fast growth,long,200,exponential,187,19,,4000,1,806.85,729,0,0,7,201,0.05025,17.1
+fast growth,long,200,exponential,188,20,,4000,1,1164.16,1046,0,0,7,285,0.07125,18.5
+fast growth,medium,200,exponential,189,1,,4000,1,980.4,825,0,0,7,140,0.035,17.2
+fast growth,medium,200,exponential,190,2,,4000,1,1110.18,1073,0,0,7,246,0.0615,18.3
+fast growth,medium,200,exponential,191,3,,4000,1,1216.12,1052,0,0,7,602,0.1505,21.2
+fast growth,medium,200,exponential,192,4,,4000,1,1351.17,906,0,0,7,487,0.12175,19.9
+fast growth,medium,200,exponential,193,5,,4000,1,1096.85,991,0,0,7,208,0.052,19
+fast growth,medium,200,exponential,194,6,,4000,1,1191.48,1074,0,0,7,37,0.00925,11.9
+fast growth,medium,200,exponential,195,7,,4000,1,1138.85,1043,0,0,7,368,0.092,20.9
+fast growth,medium,200,exponential,196,8,,4000,1,1244.39,1028,0,0,7,195,0.04875,17
+fast growth,medium,200,exponential,197,9,,4000,1,1162.36,887,0,0,7,78,0.0195,17
+fast growth,medium,200,exponential,198,10,,4000,1,1159.14,762,0,0,7,235,0.05875,18.7
+fast growth,medium,200,exponential,199,11,,4000,1,1052,1320,0,0,7,170,0.0425,17.8
+fast growth,medium,200,exponential,200,12,,4000,1,953.02,1091,0,0,7,76,0.019,13.9
+fast growth,medium,200,exponential,201,13,,4000,1,929.43,995,0,0,7,403,0.10075,20.9
+fast growth,medium,200,exponential,202,14,,4000,1,1159.76,1163,0,0,7,224,0.056,17.5
+fast growth,medium,200,exponential,203,15,,4000,1,1029.44,907,0,0,7,188,0.047,16.4
+fast growth,medium,200,exponential,204,16,,4000,1,1107.03,942,0,0,7,120,0.03,14.6
+fast growth,medium,200,exponential,205,17,,4000,1,958.65,773,0,0,7,54,0.0135,14.4
+fast growth,medium,200,exponential,206,18,,3000,1,882.82,822,0,0,7,105,0.035,13
+fast growth,medium,200,exponential,207,19,,4000,1,1150.31,904,0,0,7,202,0.0505,18
+fast growth,medium,200,exponential,208,20,,4000,1,762.98,603,0,0,7,37,0.00925,13
+fast growth,short,200,exponential,209,1,,4000,1,1089.54,930,0,0,7,79,0.01975,13.6
+fast growth,short,200,exponential,210,2,,3000,1,737.62,773,0,0,7,63,0.021,14.9
+fast growth,short,200,exponential,211,3,,4000,1,1086.97,781,0,0,7,87,0.02175,18.5
+fast growth,short,200,exponential,212,4,,4000,1,1219.69,913,0,0,7,259,0.06475,20.5
+fast growth,short,200,exponential,213,5,,4000,1,991.77,1164,0,0,7,110,0.0275,14
+fast growth,short,200,exponential,214,6,,4000,1,1041.18,827,0,0,7,198,0.0495,16.7
+fast growth,short,200,exponential,215,7,,4000,1,1010.67,1031,0,0,7,125,0.03125,13.3
+fast growth,short,200,exponential,216,8,,3000,1,964.26,676,0,0,7,432,0.144,22.3
+fast growth,short,200,exponential,217,9,,4000,1,1082,839,0,0,7,207,0.05175,15.7
+fast growth,short,200,exponential,218,10,,4000,1,886.56,604,0,0,7,111,0.02775,15.3
+fast growth,short,200,exponential,219,11,,4000,1,880.5,689,0,0,7,159,0.03975,17.6
+fast growth,short,200,exponential,220,12,,4000,1,770.83,540,0,0,7,11,0.00275,11.9
+fast growth,short,200,exponential,221,13,,4000,1,835.04,1023,0,0,7,97,0.02425,15.1
+fast growth,short,200,exponential,222,14,,4000,1,1161.38,986,0,0,7,158,0.0395,14.7
+fast growth,short,200,exponential,223,15,,4000,1,1097.19,697,0,0,7,185,0.04625,18.7
+fast growth,short,200,exponential,224,16,,4000,1,931.75,832,0,0,7,35,0.00875,14.8
+fast growth,short,200,exponential,225,17,,4000,1,1286.78,999,0,0,7,75,0.01875,15.5
+fast growth,short,200,exponential,226,18,,4000,1,1144.33,1035,0,0,7,165,0.04125,16
+fast growth,short,200,exponential,227,19,,4000,1,985.27,1064,0,0,7,181,0.04525,18.8
+fast growth,short,200,exponential,228,20,,4000,1,1075.36,598,0,0,7,11,0.00275,12.5
+growth,long,200,exponential,229,1,,4000,1,947.11,454,0,0,7,7,0.00175,13.6
+growth,long,200,exponential,230,2,,4000,1,1079.21,889,0,0,7,4,0.001,12.1
+growth,long,200,exponential,231,3,,4000,1,1132.23,909,0,0,6,696,0.174,13
+growth,long,200,exponential,232,4,,3000,1,834.15,716,0,0,6,349,0.116333333333333,12.7
+growth,long,200,exponential,233,5,,4000,1,1096.59,960,0,0,7,11,0.00275,13.8
+growth,long,200,exponential,234,6,,4000,1,883.12,1065,0,0,7,3,0.00075,12.7
+growth,long,200,exponential,235,7,,4000,1,1205.06,687,0,0,7,12,0.003,13
+growth,long,200,exponential,236,8,,4000,1,1024.85,1233,0,0,7,25,0.00625,13.3
+growth,long,200,exponential,237,9,,4000,1,1113.75,1013,0,0,7,64,0.016,14.4
+growth,long,200,exponential,238,10,,4000,1,1199.43,645,0,0,7,7,0.00175,13.4
+growth,long,200,exponential,239,11,,3000,1,633.98,545,0,0,6,259,0.0863333333333333,12
+growth,long,200,exponential,240,12,,3000,1,732.22,338,0,0,7,30,0.01,13.4
+growth,long,200,exponential,241,13,,4000,1,1276.91,1039,0,0,7,4,0.001,13.9
+growth,long,200,exponential,242,14,,4000,1,981.79,1202,0,0,7,2,5e-04,12.5
+growth,long,200,exponential,243,15,,4000,1,969.44,1182,0,0,7,5,0.00125,12.6
+growth,long,200,exponential,244,16,,4000,1,1059.79,1192,0,0,6,457,0.11425,13.3
+growth,long,200,exponential,245,17,,3000,1,585.21,522,0,0,7,2,0.000666666666666667,13.7
+growth,long,200,exponential,246,18,,4000,1,982.73,755,0,0,7,12,0.003,13.3
+growth,long,200,exponential,247,19,,3000,1,896.4,682,0,0,6,505,0.168333333333333,11.9
+growth,long,200,exponential,248,20,,4000,1,1134.97,772,0,0,7,17,0.00425,15.2
+growth,medium,200,exponential,249,1,,4000,1,1268.28,958,0,0,7,2,5e-04,13.5
+growth,medium,200,exponential,250,2,,4000,1,1139.88,707,0,0,6,146,0.0365,10.1
+growth,medium,200,exponential,251,3,,4000,1,1226.84,1287,0,0,6,820,0.205,14.1
+growth,medium,200,exponential,252,4,,4000,1,1166.15,1252,0,0,7,7,0.00175,13.8
+growth,medium,200,exponential,253,5,,4000,1,1213.59,769,0,0,6,487,0.12175,13.2
+growth,medium,200,exponential,254,6,,4000,1,1207.7,1192,0,0,7,4,0.001,13.6
+growth,medium,200,exponential,255,7,,4000,1,1155.88,710,0,0,7,1,0.00025,12.6
+growth,medium,200,exponential,256,8,,4000,1,1172.38,1171,0,0,7,13,0.00325,14.6
+growth,medium,200,exponential,257,9,,4000,1,1024.15,1038,0,0,6,352,0.088,12.7
+growth,medium,200,exponential,258,10,,4000,1,1224.3,773,0,0,6,550,0.1375,12.3
+growth,medium,200,exponential,259,11,,4000,1,1141.94,829,0,0,7,6,0.0015,13.7
+growth,medium,200,exponential,260,12,,4000,1,1158.4,955,0,0,7,17,0.00425,14.2
+growth,medium,200,exponential,261,13,,4000,1,1017.8,850,0,0,7,4,0.001,13.8
+growth,medium,200,exponential,262,14,,4000,1,1197.42,852,0,0,7,2,5e-04,13.7
+growth,medium,200,exponential,263,15,,4000,1,1328.31,973,0,0,7,7,0.00175,13.7
+growth,medium,200,exponential,264,16,,4000,1,1206.96,1180,0,0,7,3,0.00075,13.7
+growth,medium,200,exponential,265,17,,4000,1,972.96,1181,0,0,7,1,0.00025,13.3
+growth,medium,200,exponential,266,18,,4000,1,1041.51,1273,0,0,6,673,0.16825,13.6
+growth,medium,200,exponential,267,19,,4000,1,850.6,596,0,0,6,368,0.092,11.4
+growth,medium,200,exponential,268,20,,4000,1,938.76,786,0,0,7,1,0.00025,11.5
+growth,short,200,exponential,269,1,,4000,1,1182.1,777,0,0,7,12,0.003,14.2
+growth,short,200,exponential,270,2,,4000,1,1220.18,859,0,0,7,4,0.001,13.9
+growth,short,200,exponential,271,3,,4000,1,1260.07,949,0,0,7,5,0.00125,14.7
+growth,short,200,exponential,272,4,,3000,1,794.51,723,0,0,7,10,0.00333333333333333,14.3
+growth,short,200,exponential,273,5,,4000,1,950.1,517,0,0,6,686,0.1715,12.5
+growth,short,200,exponential,274,6,,4000,1,1219.85,1018,0,0,7,8,0.002,14.5
+growth,short,200,exponential,275,7,,4000,1,1294.1,1079,0,0,7,1,0.00025,13.7
+growth,short,200,exponential,276,8,,4000,1,1195.23,1368,0,0,7,46,0.0115,16.2
+growth,short,200,exponential,277,9,,4000,1,937.15,1125,0,0,7,11,0.00275,14.1
+growth,short,200,exponential,278,10,,4000,1,1027.67,713,0,0,7,3,0.00075,13.9
+growth,short,200,exponential,279,11,,3000,1,531.54,705,0,0,7,1,0.000333333333333333,13.9
+growth,short,200,exponential,280,12,,4000,1,1151.51,987,0,0,7,3,0.00075,14.5
+growth,short,200,exponential,281,13,,4000,1,1175.17,1353,0,0,7,6,0.0015,14.8
+growth,short,200,exponential,282,14,,4000,1,1109.49,847,0,0,7,96,0.024,17.5
+growth,short,200,exponential,283,15,,4000,1,850.53,1050,0,0,7,8,0.002,13.8
+growth,short,200,exponential,284,16,,4000,1,1161.04,866,0,0,7,6,0.0015,13.8
+growth,short,200,exponential,285,17,,4000,1,1107.31,859,0,0,7,1,0.00025,13.2
+growth,short,200,exponential,286,18,,4000,1,1112.21,810,0,0,6,782,0.1955,13.9
+growth,short,200,exponential,287,19,,4000,1,919.55,549,0,0,7,10,0.0025,13
+growth,short,200,exponential,288,20,,4000,1,1167.12,917,0,0,7,6,0.0015,15
+stable,long,200,exponential,289,1,,4000,1,1072.4,635,0,0,6,92,0.023,10.1
+stable,long,200,exponential,290,2,,4000,1,1090.68,804,0,0,6,47,0.01175,9.4
+stable,long,200,exponential,291,3,,4000,1,978.43,878,0,0,6,210,0.0525,9.8
+stable,long,200,exponential,292,4,,3000,1,1084.07,906,0,0,6,29,0.00966666666666667,8.5
+stable,long,200,exponential,293,5,,4000,1,1134.4,775,0,0,6,93,0.02325,8.3
+stable,long,200,exponential,294,6,,4000,1,1042.72,727,0,0,6,75,0.01875,9.4
+stable,long,200,exponential,295,7,,4000,1,1174.27,994,0,0,6,70,0.0175,9.3
+stable,long,200,exponential,296,8,,4000,1,1346.69,1034,0,0,6,40,0.01,9.5
+stable,long,200,exponential,297,9,,4000,1,1148.95,920,0,0,6,82,0.0205,8.5
+stable,long,200,exponential,298,10,,4000,1,1243.79,784,0,0,6,196,0.049,9
+stable,long,200,exponential,299,11,,4000,1,1286.6,871,0,0,6,97,0.02425,8.9
+stable,long,200,exponential,300,12,,4000,1,1122.35,806,0,0,6,117,0.02925,9
+stable,long,200,exponential,301,13,,4000,1,1086.46,1078,0,0,6,158,0.0395,9.4
+stable,long,200,exponential,302,14,,4000,1,1311.23,861,0,0,6,53,0.01325,8.8
+stable,long,200,exponential,303,15,,4000,1,1185.03,767,0,0,6,91,0.02275,8.4
+stable,long,200,exponential,304,16,,4000,1,1113.44,831,0,0,6,31,0.00775,8.8
+stable,long,200,exponential,305,17,,4000,1,1264.36,1067,0,0,6,149,0.03725,10
+stable,long,200,exponential,306,18,,4000,1,1291.33,1233,0,0,6,114,0.0285,9.6
+stable,long,200,exponential,307,19,,4000,1,1086.1,1013,0,0,6,124,0.031,9.7
+stable,long,200,exponential,308,20,,4000,1,1205.41,1001,0,0,6,73,0.01825,8.7
+stable,medium,200,exponential,309,1,,4000,1,1098.14,1045,0,0,6,140,0.035,9.8
+stable,medium,200,exponential,310,2,,4000,1,1191.21,1331,0,0,6,78,0.0195,9.4
+stable,medium,200,exponential,311,3,,4000,1,1269.34,1038,0,0,6,102,0.0255,9.6
+stable,medium,200,exponential,312,4,,4000,1,1251.58,894,0,0,6,78,0.0195,9.9
+stable,medium,200,exponential,313,5,,4000,1,1212.95,1017,0,0,6,23,0.00575,9.5
+stable,medium,200,exponential,314,6,,4000,1,1376.96,1400,0,0,6,19,0.00475,9
+stable,medium,200,exponential,315,7,,4000,1,1128.07,1057,0,0,6,10,0.0025,8.5
+stable,medium,200,exponential,316,8,,4000,1,1145.1,1065,0,0,6,21,0.00525,9.5
+stable,medium,200,exponential,317,9,,4000,1,1564.01,1085,0,0,6,15,0.00375,8.5
+stable,medium,200,exponential,318,10,,4000,1,1281.85,1031,0,0,6,127,0.03175,9.8
+stable,medium,200,exponential,319,11,,4000,1,946.82,811,0,0,6,131,0.03275,9.3
+stable,medium,200,exponential,320,12,,4000,1,1011.86,1100,0,0,6,37,0.00925,9.7
+stable,medium,200,exponential,321,13,,4000,1,1065.47,518,0,0,6,36,0.009,8.3
+stable,medium,200,exponential,322,14,,4000,1,1386.71,1131,0,0,6,15,0.00375,8.2
+stable,medium,200,exponential,323,15,,4000,1,1100.58,765,0,0,6,26,0.0065,8.9
+stable,medium,200,exponential,324,16,,4000,1,1296.55,711,0,0,6,18,0.0045,9.1
+stable,medium,200,exponential,325,17,,4000,1,1186.83,805,0,0,6,182,0.0455,9.7
+stable,medium,200,exponential,326,18,,3000,1,1002.48,732,0,0,6,9,0.003,8.9
+stable,medium,200,exponential,327,19,,4000,1,1320.83,1281,0,0,6,21,0.00525,9.3
+stable,medium,200,exponential,328,20,,4000,1,1126.78,1079,0,0,6,19,0.00475,8.4
+stable,short,200,exponential,329,1,,3000,1,1009.32,989,0,0,6,12,0.004,8.7
+stable,short,200,exponential,330,2,,4000,1,1242.67,1011,0,0,6,29,0.00725,8.7
+stable,short,200,exponential,331,3,,4000,1,1301.72,1133,0,0,6,33,0.00825,9.6
+stable,short,200,exponential,332,4,,4000,1,1007.92,742,0,0,6,176,0.044,9.6
+stable,short,200,exponential,333,5,,4000,1,1153.84,900,0,0,6,139,0.03475,10.3
+stable,short,200,exponential,334,6,,4000,1,1115.77,1143,0,0,6,86,0.0215,10.2
+stable,short,200,exponential,335,7,,4000,1,1303.78,961,0,0,6,62,0.0155,10.1
+stable,short,200,exponential,336,8,,4000,1,884.29,611,0,0,6,11,0.00275,8.4
+stable,short,200,exponential,337,9,,4000,1,1081.79,729,0,0,6,22,0.0055,10.2
+stable,short,200,exponential,338,10,,4000,1,1343.5,962,0,0,6,17,0.00425,8.9
+stable,short,200,exponential,339,11,,4000,1,1301.5,1147,0,0,6,168,0.042,9.5
+stable,short,200,exponential,340,12,,4000,1,1149.69,989,0,0,6,50,0.0125,9.7
+stable,short,200,exponential,341,13,,4000,1,1171.59,743,0,0,6,20,0.005,9.7
+stable,short,200,exponential,342,14,,4000,1,862.01,680,0,0,6,46,0.0115,8.8
+stable,short,200,exponential,343,15,,4000,1,1280.43,913,0,0,6,112,0.028,9.9
+stable,short,200,exponential,344,16,,3000,1,867.7,932,0,0,6,19,0.00633333333333333,9.9
+stable,short,200,exponential,345,17,,4000,1,1095.4,791,0,0,6,75,0.01875,9.9
+stable,short,200,exponential,346,18,,4000,1,1230.99,1128,0,0,6,33,0.00825,9.9
+stable,short,200,exponential,347,19,,4000,1,1074.96,1003,0,0,6,63,0.01575,10.3
+stable,short,200,exponential,348,20,,4000,1,1282.04,853,0,0,6,38,0.0095,8.6
+120 days,,834,ebola_case_study,349,,real-time,4000,1,1437.03,1561,0,0,6,1129,0.28225,35.7
+120 days,,1032,ebola_case_study,350,,retrospective,4000,1,1735.27,1876,0,0,6,1217,0.30425,81.3
+180 days,,3149,ebola_case_study,351,,real-time,4000,1,1425.52,1766,0,0,6,883,0.22075,35.8
+180 days,,3532,ebola_case_study,352,,retrospective,4000,1,1499.07,1825,0,0,7,25,0.00625,72.8
+240 days,,2399,ebola_case_study,353,,real-time,4000,1,1403.97,2013,0,0,7,1,0.00025,35.9
+240 days,,2483,ebola_case_study,354,,retrospective,4000,1,1624.31,1840,0,0,7,1,0.00025,53.6
+60 days,,401,ebola_case_study,355,,real-time,4000,1,1588.59,1884,0,0,7,2,5e-04,36.7
+60 days,,428,ebola_case_study,356,,retrospective,4000,1,1460.09,1866,0,0,7,23,0.00575,57
