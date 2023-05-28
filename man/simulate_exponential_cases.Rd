@@ -6,6 +6,23 @@
 \usage{
 simulate_exponential_cases(r = 0.2, sample_size = 10000, seed, t = 30)
 }
+\arguments{
+\item{r}{The rate parameter for the exponential distribution. Defaults to 0.2.}
+
+\item{sample_size}{The number of cases to simulate. Defaults to 10000.}
+
+\item{seed}{The random seed to be used in the simulation process.}
+
+\item{t}{Upper bound of the survival time. Defaults to 30.}
+}
+\value{
+A data table with two columns: case (case number) and ptime (primary
+event time).
+}
 \description{
-Simulate exponential cases
+This function simulates cases from an exponential distribution. The user may
+specify the rate parameter r, the sample size, and the upper bound of the
+survival time.
+If the rate parameter is 0, then this function defaults to the uniform
+distribution.
 }

@@ -2,10 +2,23 @@
 % Please edit documentation in R/simulate.R
 \name{simulate_secondary}
 \alias{simulate_secondary}
-\title{Simulate  secondary events based on a delay distribution}
+\title{Simulate secondary events based on a delay distribution}
 \usage{
 simulate_secondary(linelist, dist = rlnorm, ...)
 }
+\arguments{
+\item{linelist}{A data frame with the primary event times.}
+
+\item{dist}{The delay distribution to be used. Defaults to rlnorm.}
+
+\item{...}{Arguments to be passed to the delay distribution function.}
+}
+\value{
+A data table that augments linelist with two new columns: delay
+(secondary event latency) and stime (the time of the secondary event).
+}
 \description{
-Simulate  secondary events based on a delay distribution
+This function simulates secondary events based on a given delay
+distribution. The input dataset should have the primary event times in a
+column named 'ptime'.
 }

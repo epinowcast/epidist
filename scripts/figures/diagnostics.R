@@ -75,7 +75,7 @@ clean_diagnostics <- diagnostics |>
   ) |>
   DT(, data_type := data_type |>
     gsub("_", " ", x = _)  |>
-    str_to_sentence(data_type) |>
+    map(str_to_sentence) |>
     factor(levels = c("Exponential", "Outbreak", "Ebola case study"))
   ) |>
   DT(!(obs_type %in% "retrospective")) |> # Drop retrospective estimates
@@ -134,7 +134,7 @@ if (any(colnames(clean_diagnostics) %in% "error")) {
 }
 
 data.table(
-  `Failed fits` = nrow(failed_fits),
+  `Failed fits` = if (exists("failed_fits")) nrow(failed_fits) else 0,
   `Convergence issues` = nrow(convergence_issues),
   `Divergent transitions` = nrow(divergent_transitions)
 ) |>
@@ -172,6 +172,41 @@ runtime_plot <- clean_diagnostics |>
   ) +
   theme(legend.position = "bottom")
 
+# Plot percentage of fits with divergent transitions above >0.1% by model and
+# case study for each sample size
+divergent_transitons_summary_plot <- clean_diagnostics |>
+  copy() |>
+  DT(, dt := per_divergent_transitions > 0.001) |>
+  DT(,
+   .(per_dt = mean(dt)),
+   keyby = c("data_type", "model", "distribution_stat", "sample_size")
+  ) |>
+  DT(!data_type %in% "Ebola case study") |>
+  ggplot() +
+  aes(
+    y = model, x = per_dt,
+    col = distribution_stat,
+    size = sample_size
+  ) +
+  geom_point(position = position_jitter(width = 0), alpha = 1) +
+  scale_x_continuous(labels = scales::percent, trans = "logit") +
+  scale_y_discrete(labels = (\(x) str_wrap(x, width = 30))) +
+  theme_bw() +
+  scale_fill_brewer(palette = "Dark2", aesthetics = c("colour", "fill")) +
+  labs(
+    x = str_wrap(
+      "Model fits where divergent transitions made up more than 0.1% of the posterior", # nolint
+      width = 50
+    ),
+    y = "Model"
+  ) +
+  guides(
+    size = guide_none(),
+    col = guide_none()
+  ) +
+  theme(legend.position = "bottom") +
+  facet_grid(, vars(data_type), scales = "free_x")
+
 # Plot Percentage with divergent transitions
 # Filter for >0.1% divergent transitions
 divergent_transitions_plot <- clean_diagnostics |>
@@ -187,8 +222,11 @@ divergent_transitions_plot <- clean_diagnostics |>
   scale_y_discrete(labels = (\(x) str_wrap(x, width = 30))) +
   scale_fill_brewer(palette = "Dark2", aesthetics = c("colour", "fill")) +
   labs(
-    x = "Divergent transitions",
-    y = "Data type"
+    x = str_wrap(
+      "Mean divergent transitions for fits with more than 0.1% of samples that had divergent transitions", # nolint
+      width = 50
+    ),
+    y = "Model"
   ) +
   guides(
     size = guide_legend(title = "Sample size", nrow = 2),
@@ -265,14 +303,20 @@ divergent_transitions_plot <- clean_diagnostics |>
 #   theme(legend.position = "bottom")
 
   ## Combine plots
-  diagnostic_plot <- runtime_plot +
-    divergent_transitions_plot +
-    plot_annotation(tag_levels = "A") +
-    plot_layout(guides = "keep", heights = c(3, 1)) &
-    theme(legend.position = "bottom", legend.direction = "vertical")
+diagnostic_plot <- runtime_plot +
+  (
+    divergent_transitons_summary_plot +
+    (divergent_transitions_plot +
+      theme(axis.text.y = element_blank(), axis.title.y = element_blank())
+    ) +
+    plot_layout(guides = "collect", widths = c(1, 1))
+  ) +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "keep", heights = c(3, 1.5)) &
+  theme(legend.position = "bottom", legend.direction = "vertical")
 
 # Save combined plots
 ggsave(
   here("figures", "diagnostic.pdf"),  diagnostic_plot,
-  height = 12, width = 12, dpi = 330
+  height = 14, width = 12, dpi = 330
 )
