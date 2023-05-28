@@ -1,4 +1,15 @@
 #' Simulate cases from a uniform distribution
+#'
+#' This function simulates cases from a uniform distribution, where the primary
+#' event times are uniformly distributed between 0 and t.
+#'
+#' @param sample_size The number of cases to simulate.
+#' @param t Upper bound of the uniform distribution to generate primary event
+#' times.
+#'
+#' @return A data table with two columns: case (case number) and ptime (primar
+#' event time).
+#'
 #' @export
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
   data.table::data.table(
@@ -7,6 +18,21 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 }
 
 #' Simulate exponential cases
+#'
+#' This function simulates cases from an exponential distribution. The user may
+#' specify the rate parameter r, the sample size, and the upper bound of the
+#' survival time.
+#' If the rate parameter is 0, then this function defaults to the uniform
+#' distribution.
+#'
+#' @param r The rate parameter for the exponential distribution. Defaults to 0.2.
+#' @param sample_size The number of cases to simulate. Defaults to 10000.
+#' @param seed The random seed to be used in the simulation process. 
+#' @param t Upper bound of the survival time. Defaults to 30.
+#'
+#' @return A data table with two columns: case (case number) and ptime (primary
+#' event time).
+#'
 #' @export
 simulate_exponential_cases <- function(r = 0.2,
                                        sample_size = 10000,
@@ -31,6 +57,20 @@ simulate_exponential_cases <- function(r = 0.2,
 }
 
 #' Simulate cases from a Stochastic SIR model
+#'
+#' This function simulates cases from an Stochastic SIR model. The user may
+#' specify the rate of infection r, the rate of recovery gamma, the initial
+#' number of infected cases I0, and the total population size N.
+#' 
+#' @param r The rate of infection. Defaults to 0.2.
+#' @param gamma The rate of recovery. Defaults to 1/7.
+#' @param init_I The initial number of infected people. Defaults to 50.
+#' @param n The total population size. Defaults to 10000.
+#' @param seed The random seed to be used in the simulation process. 
+#'
+#' @return A data table with two columns: case (case number) and ptime (primary
+#' event time).
+#'
 #' @export
 simulate_gillespie <- function(r = 0.2,
                                gamma = 1 / 7,
@@ -75,7 +115,19 @@ simulate_gillespie <- function(r = 0.2,
   return(cases)
 }
 
-#' Simulate  secondary events based on a delay distribution
+#' Simulate secondary events based on a delay distribution
+#'
+#' This function simulates secondary events based on a given delay
+#' distribution. The input dataset should have the primary event times in a
+#' column named 'ptime'.
+#'
+#' @param linelist A data frame with the primary event times.
+#' @param dist The delay distribution to be used. Defaults to rlnorm.
+#' @param ... Arguments to be passed to the delay distribution function.
+#'
+#' @return A data table that augments linelist with two new columns: delay
+#' (secondary event latency) and stime (the time of the secondary event).
+#'
 #' @export
 simulate_secondary <- function(linelist, dist = rlnorm, ...) {
   obs <- linelist |>
@@ -84,4 +136,41 @@ simulate_secondary <- function(linelist, dist = rlnorm, ...) {
     # When the second event actually happens
     DT(, stime := ptime + delay)
   return(obs)
+}
+
+#' Simulate a censored PMF
+#'
+#' This function simulates a double-censored probability mass function (PMF).
+#' The user may specify the alpha, beta, and upper bound of the event times. 
+#' Additionally, the user can specify the random number generator functions for
+#' primary events, secondary events, and delays.
+#'
+#' @param alpha The shape parameter of the delay distribution.
+#' @param beta The scale parameter of the delay distribution.
+#' @param max The upper bound of event time.
+#' @param n The total number of cases to simulate.
+#' @param rprimary Random number generator function for primary events.
+#' Defaults to runif.
+#' @param rsecondary Random number generator function for secondary events.
+#' Defaults to runif.
+#' @param rdelay Random number generator function for delays. Defaults to
+#' rlnorm.
+#'
+#' @return A probability mass function that represents the distribution of the
+#' delays.
+#'
+#' @export
+#' @examples
+#' simulate_double_censored_pmf(0.6, 0.5, 10, 1000)
+simulate_double_censored_pmf <- function(
+  alpha, beta, max, n = 1000,
+  rprimary = \(x)(runif(x, 0, 1)), rsecondary = \(x)(runif(x, 0, 1)),
+  rdelay = rlnorm
+) {
+  primary <- rprimary(n)
+  secondary <- primary + rsecondary(n) + rdelay(n, alpha, beta)
+  delay <- floor(secondary) - floor(primary)
+  cdf <- ecdf(delay)(0:max)
+  pmf <- c(cdf[1], diff(cdf))
+  return(pmf)
 }

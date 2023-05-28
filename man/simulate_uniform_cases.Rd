@@ -6,6 +6,17 @@
 \usage{
 simulate_uniform_cases(sample_size = 1000, t = 60)
 }
+\arguments{
+\item{sample_size}{The number of cases to simulate.}
+
+\item{t}{Upper bound of the uniform distribution to generate primary event
+times.}
+}
+\value{
+A data table with two columns: case (case number) and ptime (primar
+event time).
+}
 \description{
-Simulate cases from a uniform distribution
+This function simulates cases from a uniform distribution, where the primary
+event times are uniformly distributed between 0 and t.
 }
