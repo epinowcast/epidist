@@ -164,12 +164,13 @@ simulate_secondary <- function(linelist, dist = rlnorm, ...) {
 #' simulate_double_censored_pmf(0.6, 0.5, 10, 1000)
 simulate_double_censored_pmf <- function(
   alpha, beta, max, n = 1000,
-  rprimary = \(x)(runif(x, 0, 1)), rsecondary = \(x)(runif(x, 0, 1)),
+  rprimary = \(x) (runif(x, 0, 1)), rsecondary = \(x) (runif(x, 0, 1)),
   rdelay = rlnorm
 ) {
   primary <- rprimary(n)
   secondary <- primary + rsecondary(n) + rdelay(n, alpha, beta)
   delay <- floor(secondary) - floor(primary)
+  delay <- pmax(delay, 0)
   cdf <- ecdf(delay)(0:max)
   pmf <- c(cdf[1], diff(cdf))
   return(pmf)
