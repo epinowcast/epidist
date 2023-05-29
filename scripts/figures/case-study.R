@@ -161,7 +161,8 @@ combined_cs_obs_summ <- combined_cs_obs |>
   rename(
     empirical_value=value
   ) |>
-  select(-key)
+  filter(type=="Retrospective") |>
+  select(-key, -type)
 
 # Plot the proportion of secondary events that are truncated within a rolling
 # 60 day observation window
@@ -283,7 +284,6 @@ normalized_parameter_density_plot <- clean_cs_samples |>
     y = "Observation day", x = "Days"
   ) +
   theme(legend.position = "bottom")
-
 
 # Plot posterior predictions for each observation window of the cohort mean
 truncated_draws <- clean_cs_samples |>
