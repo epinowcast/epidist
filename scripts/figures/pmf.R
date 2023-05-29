@@ -47,8 +47,34 @@ simulate_double_censored_pmf_dt <- function(
 }
 
 # Define a prior on the delay censoring for each approach 
-prior <- rbindlist(list(
-))
+prior_samples <- rbindlist(list(
+  # PMF using growth rate primary event prior and secondary event uniform prior
+  growth_rate = data.table(
+    sample = 1:samples,
+    value = (\(x) (runif(x, 0, 1) - runif(x, 0, 1)))(samples)
+  ),
+  # PMF using uniform prior for both events
+  double_uniform = data.table(
+    sample = 1:samples,
+    value = (\(x) (runif(x, 0, 1) - runif(x, 0, 1)))(samples)
+  ),
+  # PMF using a uniform prior on the delay rather than on the event of two days.
+  two_day_uniform = data.table(
+    sample = 1:samples,
+    value = (\(x) (runif(x, -1, 1)))(samples)
+  ),
+  # PMF using no prior for the primary event and a uniform prior for the
+  # secondary event
+  one_day_uniform = data.table(
+    sample = 1:samples,
+    value = (\(x) (runif(x, 0, 1)))(samples)
+  ),
+  # PMF using no prior for either event
+  no_prior = data.table(
+    sample = 1:samples,
+    value = 0
+  )
+), idcol = "method")
 
 #  Simulate PMFs for each approach
 simulated_pmfs <- rbindlist(list(
@@ -92,3 +118,15 @@ simulated_pmfs |>
   theme_bw() +
   theme(legend.position = "bottom") +
   facet_wrap(vars(method))
+
+# Plot the prior for each method
+prior_samples |>
+  ggplot() +
+  aes(x = value, col = method) +
+  geom_density() +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  guides(
+    fill = guide_none(),
+    col = guide_legend(title = "Method", nrow = 2)
+  )
