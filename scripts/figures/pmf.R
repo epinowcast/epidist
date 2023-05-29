@@ -27,7 +27,7 @@ meanlog <- distributions[scenario %in% "medium", meanlog]
 sdlog <- distributions[scenario %in% "medium", sdlog]
 
 # Number of samples
-samples <- 10000
+samples <- 100000
 
 # Maximum delay
 max_delay <- 20
@@ -113,7 +113,7 @@ simulated_pmfs |>
   geom_bar(stat = "identity", position = "dodge", alpha = 0.8) +
   stat_function(
     fun = dlnorm, args = c(meanlog, sdlog), n = 100,
-    col = "#000000b1", fill = NA
+    col = "#000000b1"
   ) +
   theme_bw() +
   theme(legend.position = "bottom") +
@@ -129,4 +129,28 @@ prior_samples |>
   guides(
     fill = guide_none(),
     col = guide_legend(title = "Method", nrow = 2)
+  )
+
+# Summarise the mean and standard deviation of the PMF for each method
+pmf_mean_and_sd <- simulated_pmfs |>
+  DT(, .(
+    mean = round(sum(delay * pmf), 2),
+    sd = round(
+      sqrt(sum(delay^2 * pmf) - sum(delay * pmf)^2),
+      2
+    )
+  ), by = "method"
+)
+
+# Plot the mean and standard deviation of the PMF for each method
+pmf_mean_and_sd |>
+  ggplot() +
+  aes(x = mean, y = sd, col = method, shape = method) +
+  geom_point(size = 2) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  labs(x = "Mean", y = "Standard deviation") +
+  guides(
+    col = guide_legend(title = "Method", nrow = 2),
+    shape = guide_legend(title = "Method", nrow = 2)
   )
