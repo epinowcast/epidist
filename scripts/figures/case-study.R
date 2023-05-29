@@ -121,15 +121,6 @@ case_study_obs_realtime <- case_study_obs |>
 
 combined_cs_obs <- rbind(case_study_obs_retro, case_study_obs_realtime)
 
-combined_cs_obs_mean <- combined_cs_obs |>
-  mutate(
-    obs_at = factor(group, labels = c("60", "120", "180", "240"))
-  ) |>
-  group_by(obs_at, type) |>
-  summarize(
-    mean = mean(delay_daily)
-  )
-
 empirical_pmf_plot <- combined_cs_obs |>
   DT(delay_daily <= 15) |>
   mutate(
@@ -152,6 +143,25 @@ empirical_pmf_plot <- combined_cs_obs |>
   theme(legend.position = "bottom") +
   labs(x = "Days", y = "Density") +
   facet_wrap(vars(obs_at), nrow = 1)
+
+combined_cs_obs_summ <- combined_cs_obs |>
+  mutate(
+    obs_at = factor(group, labels = c("60", "120", "180", "240"))
+  ) |>
+  group_by(obs_at, type) |>
+  summarize(
+    mean = mean(delay_daily),
+    sd=sd(delay_daily)
+  ) |>
+  gather(key, value, -type, -obs_at) |>
+  mutate(
+    parameter=factor(key, levels=c("mean", "sd"),
+                     labels=c("Mean", "Sd"))
+  ) |>
+  rename(
+    empirical_value=value
+  ) |>
+  select(-key)
 
 # Plot the proportion of secondary events that are truncated within a rolling
 # 60 day observation window
@@ -246,6 +256,35 @@ parameter_density_plot <- clean_cs_samples |>
   ) +
   theme(legend.position = "bottom")
 
+normalized_parameter_density_plot <- clean_cs_samples |>
+  rename(obs_at=scenario) |>
+  draws_to_long() |>
+  DT(value <= 10) |>
+  DT(value >= -10) |>
+  DT(parameter %in% c("mean", "sd")) |>
+  DT(, parameter := str_to_sentence(parameter)) |>
+  left_join(combined_cs_obs_summ, multiple="all") |>
+  mutate(
+    value=value/empirical_value
+  ) |>
+  rename(scenario=obs_at) |>
+  plot_recovery(y = scenario, fill = obs_type) +
+  geom_vline(xintercept=1, lty=2, lwd=1) +
+  facet_grid(
+    vars(model), vars(parameter),
+    labeller = label_wrap_gen(multi_line = TRUE),
+    scales = "free_x"
+  ) +
+  scale_fill_brewer(palette = "Dark2") +
+  guides(
+    fill = guide_legend(title = "Estimation method"), col = guide_none()
+  ) +
+  labs(
+    y = "Observation day", x = "Days"
+  ) +
+  theme(legend.position = "bottom")
+
+
 # Plot posterior predictions for each observation window of the cohort mean
 truncated_draws <- clean_cs_samples |>
   DT(sample <= 1000) |> # use only 1000 samples for plotting
@@ -312,6 +351,9 @@ case_study_plot2 <- parameter_density_plot +
   plot_layout(guides = "collect", widths = c(2, 1)) &
   theme(legend.position = "bottom")
 
+# Combine plots
+case_study_plot3 <- normalized_parameter_density_plot
+
 # Save combined plots
 ggsave(
   here("figures", "case_study1.pdf"), case_study_plot1,
@@ -321,5 +363,10 @@ ggsave(
 # Save combined plots
 ggsave(
   here("figures", "case_study2.pdf"), case_study_plot2,
+  height = 20, width = 16, dpi = 330
+)
+
+ggsave(
+  here("figures", "case_study3.pdf"), case_study_plot3,
   height = 20, width = 16, dpi = 330
 )
