@@ -4,7 +4,6 @@ library(here) # for finding files
 library(ggplot2) # for plotting
 library(patchwork) # for combining plots
 library(stringr) # for string manipulation
-library(lmomco) # for truncated exponential distribution
 
 # Define a continuous PMF (could consider more than one delay but not likely
 # we want to)
@@ -46,12 +45,24 @@ simulate_double_censored_pmf_dt <- function(
   )[]
 }
 
-# Define a prior on the delay censoring for each approach 
+# Define the function to generate random samples
+rboundedgrowth <- function(n, r, p_L, p_R) {
+  # Generate uniform random numbers
+  u <- runif(n)
+
+  # Use the inverse transform sampling method
+  # P(x| P_L, P_R) = r * exp(rx) / (exp(r * P_R) - exp(r * P_L)) # nolint
+   samples <- log(u * (exp(r * p_R) - exp(r * p_L)) + exp(r * p_L)) / r
+
+  return(samples)
+}
+
+# Define a prior on the delay censoring for each approach
 prior_samples <- rbindlist(list(
   # PMF using growth rate primary event prior and secondary event uniform prior
   growth_rate = data.table(
     sample = 1:samples,
-    value = (\(x) (runif(x, 0, 1) - runif(x, 0, 1)))(samples)
+    value = (\(x) (runif(x, 0, 1) - rboundedgrowth(x, 2, 0, 1)))(samples)
   ),
   # PMF using uniform prior for both events
   double_uniform = data.table(
@@ -69,6 +80,12 @@ prior_samples <- rbindlist(list(
     sample = 1:samples,
     value = (\(x) (runif(x, 0, 1)))(samples)
   ),
+  # PMF using a 0.5 shift for the primary event and a uniform prior for the
+  # secondary event
+  one_day_uniform_with_shift = data.table(
+    sample = 1:samples,
+    value = (\(x) (runif(x, 0, 1) - 0.5))(samples)
+  ),
   # PMF using no prior for either event
   no_prior = data.table(
     sample = 1:samples,
@@ -80,7 +97,7 @@ prior_samples <- rbindlist(list(
 simulated_pmfs <- rbindlist(list(
   # PMF using growth rate primary event prior and secondary event uniform prior
   growth_rate = simulate_double_censored_pmf_dt(
-    rprimary = \(x) (runif(x, 0, 1)),
+    rprimary = \(x) (rboundedgrowth(x, 1, 0, 1)),
     rsecondary = \(x) (runif(x, 0, 1))
   ),
   # PMF using uniform prior for both events
@@ -97,6 +114,12 @@ simulated_pmfs <- rbindlist(list(
   # secondary event
   one_day_uniform = simulate_double_censored_pmf_dt(
     rprimary = \(x) (0),
+    rsecondary = \(x) (runif(x, 0, 1))
+  ),
+  # PMF using a 0.5 shift for the primary event and a uniform prior for the
+  # secondary event
+  one_day_uniform_with_shift = simulate_double_censored_pmf_dt(
+    rprimary = \(x) (0.5),
     rsecondary = \(x) (runif(x, 0, 1))
   ),
   # PMF using no prior for either event
