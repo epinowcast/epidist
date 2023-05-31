@@ -27,7 +27,7 @@ meanlog <- distributions[scenario %in% "medium", meanlog]
 sdlog <- distributions[scenario %in% "medium", sdlog]
 
 # Number of samples
-samples <- 100000
+samples <- 1e6
 
 # Maximum delay
 max_delay <- 20
@@ -70,7 +70,10 @@ growth_rate_primary_samples <- growth_rates |>
     \(x) (
         data.table(
         sample = 1:samples,
-        pmf = rboundedgrowth(samples, x, 0, 1)
+        primary_value = rboundedgrowth(samples, x, 0, 1)
+      ) |>
+      DT(,
+        value := runif(samples, 0, 1) - primary_value
       )
     )
 ) |>
@@ -84,8 +87,7 @@ growth_rate_pmfs <- growth_rates |>
       simulate_double_censored_pmf_dt(
         rprimary = \(x) (rboundedgrowth(x, r, 0, 1)),
         rsecondary = \(x) (runif(x, 0, 1))
-      ) |>
-        DT(, growth_rate := r)
+      )
     )
   ) |>
   rbindlist(idcol = "growth_rate")
@@ -113,16 +115,11 @@ approximate_primary_samples <- rbindlist(list(
   one_day_uniform_with_shift = data.table(
     sample = 1:samples,
     value = (\(x) (runif(x, 0, 1) - 0.5))(samples)
-  ),
-  # PMF using no prior for either event
-  no_prior = data.table(
-    sample = 1:samples,
-    value = 0
   )
 ), idcol = "method")
 
 #  Simulate PMFs for each approach
-approximiate_pmfs <- rbindlist(list(
+approximate_pmfs <- rbindlist(list(
   # PMF using uniform prior for both events
   double_uniform = simulate_double_censored_pmf_dt(
     rprimary = \(x) (runif(x, 0, 1)),
@@ -152,57 +149,96 @@ approximiate_pmfs <- rbindlist(list(
   )
 ), idcol = "method")
 
+# Plot censoring interval for a range of methods
+plot_censoring_interval <- function(data, col, col_title, vintercept = 0) {
+  data |>
+    ggplot() +
+    aes(x = value, col = .data[[col]]) +
+    geom_density(linewidth = 1.2) +
+    geom_vline(
+      xintercept = vintercept, linetype = "dashed"
+    ) +
+    theme_bw() +
+    theme(legend.position = "bottom") +
+    guides(
+      fill = guide_none(),
+      col = guide_legend(title = col_title, nrow = 2)
+    ) +
+    labs(
+      x = "Censoring interval (days)",
+      y = "Density"
+    )
+}
+
+# Plot the primary censoring interval for each growth rat
+growth_rate_primary_plot <- growth_rate_primary_samples |>
+  copy() |>
+  DT(, value := primary_value) |>
+  plot_censoring_interval("growth_rate", "Growth rate", vintercept = 0.5)
+
+# Plot the censoring interval for each growth rate
+growth_rate_censoring_plot <- growth_rate_primary_samples |>
+  plot_censoring_interval("growth_rate", "Growth rate")
+
+# Plot the censoring interval for each method
+approximate_censoring_plot <- approximate_primary_samples |>
+  plot_censoring_interval("method", "Method")
+
 # Plot the PMF for each method
-simulated_pmfs |>
+approximiate_pmfs_plot <- approximate_pmfs |>
   ggplot() +
   aes(x = delay, y = pmf) +
-  geom_bar(stat = "identity", position = "dodge", alpha = 0.8) +
+  geom_bar(stat = "identity", position = "dodge", alpha = 0.4) +
   stat_function(
     fun = dlnorm, args = c(meanlog, sdlog), n = 100,
     col = "#000000b1"
   ) +
   theme_bw() +
+  geom_point(
+    data = growth_rate_pmfs,
+    aes(col = growth_rate),
+  ) +
+  labs(x = "Delay (days)", y = "Probability") +
   theme(legend.position = "bottom") +
-  facet_wrap(vars(method))
+  facet_wrap(vars(method), nrow = 1)
 
-# Plot the prior for each method
-prior_samples |>
-  ggplot() +
-  aes(x = value, col = method) +
-  geom_density() +
-  theme_bw() +
-  theme(legend.position = "bottom") +
-  guides(
-    fill = guide_none(),
-    col = guide_legend(title = "Method", nrow = 2)
-  )
 
 # Summarise the mean and standard deviation of the PMF for each method
-pmf_mean_and_sd <- simulated_pmfs |>
-  DT(, .(
-    mean = round(sum(delay * pmf), 2),
-    sd = round(
-      sqrt(sum(delay^2 * pmf) - sum(delay * pmf)^2),
-      2
-    )
-  ), by = "method"
-)
+calc_empirical_summary_stat <- function(data, by) {
+  data |>
+    DT(, .(
+      mean = round(mean(delay), 2),
+      sd = round(sd(delay), 2)
+    ), by = by)
+}
+
+approximate_pmf_mean_and_sd <- approximate_pmfs |>
+      DT(, .(
+      mean = round(mean(pmf * delay), 2),
+      sd = round(sd(pmf * delay), 2)
+    ), by = "method")
+
+growth_rate_pmf_mean_and_sd <- growth_rate_pmfs |>
+  calc_empirical_summary_stat(by = "growth_rate")
 
 # Plot the mean and standard deviation of the PMF for each method
-pmf_mean_and_sd |>
+approximate_pmf_mean_and_sd  |>
   ggplot() +
-  aes(x = mean, y = sd, col = method, shape = method) +
+  aes(x = mean, y = sd, shape = method) +
   geom_point(size = 2) +
+  geom_point(
+    data = growth_rate_pmf_mean_and_sd,
+    aes(col = growth_rate), shape = 1,
+  ) +
   theme_bw() +
   theme(legend.position = "bottom") +
   labs(x = "Mean", y = "Standard deviation") +
   guides(
-    col = guide_legend(title = "Method", nrow = 2),
+    col = guide_legend(title = "Growth rate", nrow = 2),
     shape = guide_legend(title = "Method", nrow = 2)
   )
 
-# Plot:
-# Primary event censoring interval for each method
+# Plot
 # Primary event censoring interval under different growth rates
 # Realised censoring interval for each method
 # Realised censoring interval under a range of growth rate assumptions
