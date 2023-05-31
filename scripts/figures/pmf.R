@@ -1,5 +1,6 @@
 devtools::load_all()
 library(data.table) # for general data manipulation
+library(purrr) # for functional programming
 library(here) # for finding files
 library(ggplot2) # for plotting
 library(patchwork) # for combining plots
@@ -52,18 +53,45 @@ rboundedgrowth <- function(n, r, p_L, p_R) {
 
   # Use the inverse transform sampling method
   # P(x| P_L, P_R) = r * exp(rx) / (exp(r * P_R) - exp(r * P_L)) # nolint
-   samples <- log(u * (exp(r * p_R) - exp(r * p_L)) + exp(r * p_L)) / r
-
+  if (r != 0) {
+    samples <- log(u * (exp(r * p_R) - exp(r * p_L)) + exp(r * p_L)) / r
+  } else {
+    samples <- u * (p_R - p_L) + p_L
+  }
   return(samples)
 }
 
-# Define a prior on the delay censoring for each approach
-prior_samples <- rbindlist(list(
-  # PMF using growth rate primary event prior and secondary event uniform prior
-  growth_rate = data.table(
-    sample = 1:samples,
-    value = (\(x) (runif(x, 0, 1) - rboundedgrowth(x, 2, 0, 1)))(samples)
-  ),
+growth_rates <- c(-2, -0.2, 0, 0.2, 2)
+names(growth_rates) <- growth_rates
+
+# Define growth rate samples
+growth_rate_primary_samples <- growth_rates |>
+  map(
+    \(x) (
+        data.table(
+        sample = 1:samples,
+        pmf = rboundedgrowth(samples, x, 0, 1)
+      )
+    )
+) |>
+  rbindlist(idcol = "growth_rate")
+
+# Define PMFs when the primary censoring interval is defined
+# by the growth rate
+growth_rate_pmfs <- growth_rates |>
+  map(
+    \(r) (
+      simulate_double_censored_pmf_dt(
+        rprimary = \(x) (rboundedgrowth(x, r, 0, 1)),
+        rsecondary = \(x) (runif(x, 0, 1))
+      ) |>
+        DT(, growth_rate := r)
+    )
+  ) |>
+  rbindlist(idcol = "growth_rate")
+
+# Define a prior on the delay censoring for each approximate approach
+approximate_primary_samples <- rbindlist(list(
   # PMF using uniform prior for both events
   double_uniform = data.table(
     sample = 1:samples,
@@ -94,12 +122,7 @@ prior_samples <- rbindlist(list(
 ), idcol = "method")
 
 #  Simulate PMFs for each approach
-simulated_pmfs <- rbindlist(list(
-  # PMF using growth rate primary event prior and secondary event uniform prior
-  growth_rate = simulate_double_censored_pmf_dt(
-    rprimary = \(x) (rboundedgrowth(x, 1, 0, 1)),
-    rsecondary = \(x) (runif(x, 0, 1))
-  ),
+approximiate_pmfs <- rbindlist(list(
   # PMF using uniform prior for both events
   double_uniform = simulate_double_censored_pmf_dt(
     rprimary = \(x) (runif(x, 0, 1)),
@@ -177,3 +200,11 @@ pmf_mean_and_sd |>
     col = guide_legend(title = "Method", nrow = 2),
     shape = guide_legend(title = "Method", nrow = 2)
   )
+
+# Plot:
+# Primary event censoring interval for each method
+# Primary event censoring interval under different growth rates
+# Realised censoring interval for each method
+# Realised censoring interval under a range of growth rate assumptions
+# PMF for each approximation vs growth rate pmfs (super imposed as points)
+# Emipirical mean and standard deviation of the PMF for each method using colour
