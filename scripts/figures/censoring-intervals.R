@@ -150,10 +150,10 @@ approximate_pmfs <- rbindlist(list(
 ), idcol = "method")
 
 # Plot censoring interval for a range of methods
-plot_censoring_interval <- function(data, col, col_title, vintercept = 0) {
+plot_censoring_interval <- function(data, vintercept = 0, ...) {
   data |>
     ggplot() +
-    aes(x = value, col = .data[[col]]) +
+    aes(...) +
     geom_density(linewidth = 1.2) +
     geom_vline(
       xintercept = vintercept, linetype = "dashed"
@@ -161,8 +161,7 @@ plot_censoring_interval <- function(data, col, col_title, vintercept = 0) {
     theme_bw() +
     theme(legend.position = "bottom") +
     guides(
-      fill = guide_none(),
-      col = guide_legend(title = col_title, nrow = 2)
+      fill = guide_none()
     ) +
     labs(
       x = "Censoring interval (days)",
@@ -174,18 +173,24 @@ plot_censoring_interval <- function(data, col, col_title, vintercept = 0) {
 growth_rate_primary_plot <- growth_rate_primary_samples |>
   copy() |>
   DT(, value := primary_value) |>
-  plot_censoring_interval("growth_rate", "Growth rate", vintercept = 0.5)
+  plot_censoring_interval(x = value, col = growth_rate, vintercept = 0.5) +
+  guides(col = guide_legend(title = "Growth rate")) +
+  scale_colour_brewer(palette = "Dark2")
 
 # Plot the censoring interval for each growth rate
 growth_rate_censoring_plot <- growth_rate_primary_samples |>
-  plot_censoring_interval("growth_rate", "Growth rate")
+  plot_censoring_interval(x = value, col = growth_rate, ) +
+  guides(col = guide_legend(title = "Growth rate")) +
+  scale_colour_brewer(palette = "Dark2")
 
 # Plot the censoring interval for each method
 approximate_censoring_plot <- approximate_primary_samples |>
-  plot_censoring_interval("method", "Method")
+  plot_censoring_interval(x = value, col = method) +
+  guides(col = guide_legend(title = "Method")) +
+  scale_colour_brewer(palette = "Accent")
 
 # Plot the PMF for each method
-approximiate_pmfs_plot <- approximate_pmfs |>
+approximate_pmfs_plot <- approximate_pmfs |>
   ggplot() +
   aes(x = delay, y = pmf) +
   geom_bar(stat = "identity", position = "dodge", alpha = 0.4) +
@@ -200,43 +205,42 @@ approximiate_pmfs_plot <- approximate_pmfs |>
   ) +
   labs(x = "Delay (days)", y = "Probability") +
   theme(legend.position = "bottom") +
-  facet_wrap(vars(method), nrow = 1)
-
+  facet_wrap(vars(method), nrow = 1) +
+  guides(col = guide_legend(title = "Growth rate")) +
+  scale_colour_brewer(palette = "Dark2")
 
 # Summarise the mean and standard deviation of the PMF for each method
 calc_empirical_summary_stat <- function(data, by) {
   data |>
     DT(, .(
-      mean = round(mean(delay), 2),
-      sd = round(sd(delay), 2)
+      mean = round(sum(pmf * delay), 2),
+      sd = round(sqrt(sum(((delay - sum(pmf * delay))^2) * pmf)), 2)
     ), by = by)
 }
 
 approximate_pmf_mean_and_sd <- approximate_pmfs |>
-      DT(, .(
-      mean = round(mean(pmf * delay), 2),
-      sd = round(sd(pmf * delay), 2)
-    ), by = "method")
+  calc_empirical_summary_stat(by = "method")
 
 growth_rate_pmf_mean_and_sd <- growth_rate_pmfs |>
   calc_empirical_summary_stat(by = "growth_rate")
 
 # Plot the mean and standard deviation of the PMF for each method
-approximate_pmf_mean_and_sd  |>
+pmf_mean_and_sd_plot <- approximate_pmf_mean_and_sd  |>
   ggplot() +
   aes(x = mean, y = sd, shape = method) +
-  geom_point(size = 2) +
+  geom_point(size = 5, col = "#6d6d6d") +
   geom_point(
     data = growth_rate_pmf_mean_and_sd,
-    aes(col = growth_rate), shape = 1,
+    aes(col = growth_rate), shape = 1, size = 5
   ) +
   theme_bw() +
   theme(legend.position = "bottom") +
   labs(x = "Mean", y = "Standard deviation") +
   guides(
     col = guide_legend(title = "Growth rate", nrow = 2),
-    shape = guide_legend(title = "Method", nrow = 2)
-  )
+    shape = guide_legend(title = "Method", nrow = 1)
+  ) +
+  scale_colour_brewer(palette = "Dark2")
 
 # Plot
 # Primary event censoring interval under different growth rates
@@ -244,3 +248,28 @@ approximate_pmf_mean_and_sd  |>
 # Realised censoring interval under a range of growth rate assumptions
 # PMF for each approximation vs growth rate pmfs (super imposed as points)
 # Emipirical mean and standard deviation of the PMF for each method using colour
+censoring_interval_plot <- (
+  (
+    (
+      (
+        (
+          growth_rate_primary_plot |
+          growth_rate_censoring_plot
+        ) +
+        plot_layout(widths = c(1, 1), guides = "collect", nrow = 1)
+      ) |
+      approximate_censoring_plot
+    ) +
+    plot_layout(widths = c(1, 1, 1), guides = "collect", nrow = 1)
+  ) /
+    (approximate_pmfs_plot + guides(col = guide_none())) /
+    (pmf_mean_and_sd_plot + guides(col = guide_none()))
+) +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(heights = c(2, 2, 2), guides = "collect", nrow = 3) &
+  theme(legend.position = "bottom")
+
+ggsave(
+  here("figures", "censoring-intervals.pdf"), censoring_interval_plot,
+  height = 16, width = 12, dpi = 330
+)
