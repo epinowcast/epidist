@@ -259,7 +259,8 @@ parameter_density_plot <- clean_cs_samples |>
     ) +
   scale_fill_brewer(palette = "Dark2") +
   guides(
-    fill = guide_legend(title = "Estimation method"), col = guide_none()
+    fill = guide_legend(title = "Estimation method", nrow = 2),
+    col = guide_none()
   ) +
   labs(
     y = "Observation day", x = "Days"
@@ -267,19 +268,19 @@ parameter_density_plot <- clean_cs_samples |>
   theme(legend.position = "bottom")
 
 normalized_parameter_density_plot <- clean_cs_samples |>
-  rename(obs_at=scenario) |>
+  rename(obs_at = scenario) |>
   draws_to_long() |>
   DT(value <= 10) |>
   DT(value >= -10) |>
   DT(parameter %in% c("mean", "sd")) |>
   DT(, parameter := str_to_sentence(parameter)) |>
-  left_join(combined_cs_obs_summ, multiple="all") |>
+  left_join(combined_cs_obs_summ, multiple = "all") |>
   mutate(
-    value=value/empirical_value
+    value = value / empirical_value
   ) |>
-  rename(scenario=obs_at) |>
+  rename(scenario = obs_at) |>
   plot_recovery(y = scenario, fill = obs_type) +
-  geom_vline(xintercept=1, lty=2, lwd=1) +
+  geom_vline(xintercept = 1, lty = 2, lwd = 1) +
   facet_grid(
     vars(model), vars(parameter),
     labeller = label_wrap_gen(multi_line = TRUE),
@@ -287,7 +288,8 @@ normalized_parameter_density_plot <- clean_cs_samples |>
   ) +
   scale_fill_brewer(palette = "Dark2") +
   guides(
-    fill = guide_legend(title = "Estimation method"), col = guide_none()
+    fill = guide_legend(title = "Estimation method", nrow = 2),
+    col = guide_none()
   ) +
   labs(
     y = "Observation day", x = "Days"
@@ -339,7 +341,7 @@ mean_pp <- truncated_draws |>
     fill = guide_legend(title = "Model", nrow = 4),
     col = guide_legend(title = "Model", nrow = 4)
   ) +
-  scale_fill_brewer(palette = "Dark2", aesthetics = c("fill", "colour")) +
+  scale_fill_viridis_d(option = "C", aesthetics = c("fill", "colour")) +
   theme(legend.direction = "vertical") +
   facet_grid(vars(obs_at),
         labeller = label_wrap_gen(multi_line = TRUE),
