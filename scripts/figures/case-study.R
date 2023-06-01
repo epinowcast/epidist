@@ -121,6 +121,15 @@ case_study_obs_realtime <- case_study_obs |>
 
 combined_cs_obs <- rbind(case_study_obs_retro, case_study_obs_realtime)
 
+combined_cs_obs_mean <- combined_cs_obs |>
+  mutate(
+    obs_at = factor(group, labels = c("60", "120", "180", "240"))
+  ) |>
+  group_by(obs_at, type) |>
+  summarize(
+    mean = mean(delay_daily)
+  )
+
 empirical_pmf_plot <- combined_cs_obs |>
   DT(delay_daily <= 15) |>
   mutate(
@@ -352,7 +361,11 @@ case_study_plot2 <- parameter_density_plot +
   theme(legend.position = "bottom")
 
 # Combine plots
-case_study_plot3 <- normalized_parameter_density_plot
+case_study_plot3 <- normalized_parameter_density_plot +
+  mean_pp +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "collect", widths = c(2, 1)) &
+  theme(legend.position = "bottom")
 
 # Save combined plots
 ggsave(
