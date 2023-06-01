@@ -78,7 +78,7 @@ growth_rate_primary_samples <- growth_rates |>
     )
 ) |>
   rbindlist(idcol = "growth_rate") |>
-  DT(, growth_rate := factor(growth_rate, levels = names(growth_rates))
+  DT(, growth_rate := factor(growth_rate, levels = names(growth_rates)))
 
 # Define PMFs when the primary censoring interval is defined
 # by the growth rate
@@ -92,7 +92,7 @@ growth_rate_pmfs <- growth_rates |>
     )
   ) |>
   rbindlist(idcol = "growth_rate") |>
-  DT(, growth_rate := factor(growth_rate, levels = names(growth_rates))
+  DT(, growth_rate := factor(growth_rate, levels = names(growth_rates)))
 
 # Define a prior on the delay censoring for each approximate approach
 approximate_primary_samples <- rbindlist(list(
@@ -151,6 +151,35 @@ approximate_pmfs <- rbindlist(list(
   )
 ), idcol = "method")
 
+# Define meaningful names for the methods
+methods <- data.table(
+  method = c(
+    "double_uniform",
+    "two_day_uniform",
+    "one_day_uniform",
+    "one_day_uniform_with_shift",
+    "no_prior"
+  ),
+  method_name = c(
+    "Uniform(0, 1) interval for each event",
+    "Uniform(-1, 1) interval across both events",
+    "Uniform(0, 1) interval across both events", # nolint
+    "Assume primary event at 0.5 and a Uniform(0, 1) interval for the secondary event", # nolint
+    "No interval for either event"
+  )
+)
+
+methods[, method_name := factor(method_name, levels = method_name)]
+
+# Merge the methods with the sampled censoring intervals
+approximate_primary_samples <- approximate_primary_samples |>
+  merge(methods, by = "method")
+
+# Merge the methods with the approximate PMFs
+approximate_pmfs <- approximate_pmfs |>
+  merge(methods, by = "method")
+
+
 # Plot censoring interval for a range of methods
 plot_censoring_interval <- function(data, vintercept = 0, ...) {
   data |>
@@ -176,19 +205,19 @@ growth_rate_primary_plot <- growth_rate_primary_samples |>
   copy() |>
   DT(, value := primary_value) |>
   plot_censoring_interval(x = value, col = growth_rate, vintercept = 0.5) +
-  guides(col = guide_legend(title = "Growth rate")) +
+  guides(col = guide_legend(title = "Growth rate", nrow = 2)) +
   scale_colour_viridis_d(option = "C")
 
 # Plot the censoring interval for each growth rate
 growth_rate_censoring_plot <- growth_rate_primary_samples |>
   plot_censoring_interval(x = value, col = growth_rate, ) +
-  guides(col = guide_legend(title = "Growth rate")) +
-  scale_colour_brewer(palette = "Dark2")
+  guides(col = guide_legend(title = "Growth rate", nrow = 2)) +
+  scale_colour_viridis_d(option = "C")
 
 # Plot the censoring interval for each method
 approximate_censoring_plot <- approximate_primary_samples |>
-  plot_censoring_interval(x = value, col = method) +
-  guides(col = guide_legend(title = "Method")) +
+  plot_censoring_interval(x = value, col = method_name) +
+  guides(col = guide_legend(title = "Method", nrow = 2)) +
   scale_colour_brewer(palette = "Dark2")
 
 # Plot the PMF for each method
@@ -207,8 +236,10 @@ approximate_pmfs_plot <- approximate_pmfs |>
   ) +
   labs(x = "Delay (days)", y = "Probability") +
   theme(legend.position = "bottom") +
-  facet_wrap(vars(method), nrow = 1) +
-  guides(col = guide_legend(title = "Growth rate"))  +
+  facet_wrap(
+    vars(method_name), nrow = 1, labeller = label_wrap_gen(multi_line = TRUE)
+  ) +
+  guides(col = guide_legend(title = "Growth rate", nrow = 2))  +
   scale_colour_viridis_d(option = "C")
 
 # Summarise the mean and standard deviation of the PMF for each method
@@ -221,7 +252,7 @@ calc_empirical_summary_stat <- function(data, by) {
 }
 
 approximate_pmf_mean_and_sd <- approximate_pmfs |>
-  calc_empirical_summary_stat(by = "method")
+  calc_empirical_summary_stat(by = "method_name")
 
 growth_rate_pmf_mean_and_sd <- growth_rate_pmfs |>
   calc_empirical_summary_stat(by = "growth_rate")
@@ -229,18 +260,18 @@ growth_rate_pmf_mean_and_sd <- growth_rate_pmfs |>
 # Plot the mean and standard deviation of the PMF for each method
 pmf_mean_and_sd_plot <- approximate_pmf_mean_and_sd  |>
   ggplot() +
-  aes(x = mean, y = sd, shape = method) +
+  aes(x = mean, y = sd, shape = method_name) +
   geom_point(size = 5, col = "#6d6d6d") +
   geom_point(
     data = growth_rate_pmf_mean_and_sd,
-    aes(col = growth_rate), shape = 1, size = 5
+    aes(col = growth_rate), shape = 5, size = 5
   ) +
   theme_bw() +
   theme(legend.position = "bottom") +
   labs(x = "Mean", y = "Standard deviation") +
   guides(
     col = guide_legend(title = "Growth rate", nrow = 2),
-    shape = guide_legend(title = "Method", nrow = 1)
+    shape = guide_legend(title = "Method", nrow = 3)
   ) +
   scale_colour_viridis_d(option = "C")
 
@@ -256,7 +287,7 @@ censoring_interval_plot <- (
       (
         (
           growth_rate_primary_plot |
-          growth_rate_censoring_plot
+          growth_rate_censoring_plot + guides(col = guide_none())
         ) +
         plot_layout(widths = c(1, 1), guides = "collect", nrow = 1)
       ) |
@@ -265,7 +296,7 @@ censoring_interval_plot <- (
     plot_layout(widths = c(1, 1, 1), guides = "collect", nrow = 1)
   ) /
     (approximate_pmfs_plot + guides(col = guide_none())) /
-    (pmf_mean_and_sd_plot + guides(col = guide_none()))
+    (pmf_mean_and_sd_plot)
 ) +
   plot_annotation(tag_levels = "A") +
   plot_layout(heights = c(2, 2, 2), guides = "collect", nrow = 3) &
