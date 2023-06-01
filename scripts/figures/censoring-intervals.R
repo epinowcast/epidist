@@ -77,7 +77,8 @@ growth_rate_primary_samples <- growth_rates |>
       )
     )
 ) |>
-  rbindlist(idcol = "growth_rate")
+  rbindlist(idcol = "growth_rate") |>
+  DT(, growth_rate := factor(growth_rate, levels = names(growth_rates))
 
 # Define PMFs when the primary censoring interval is defined
 # by the growth rate
@@ -90,7 +91,8 @@ growth_rate_pmfs <- growth_rates |>
       )
     )
   ) |>
-  rbindlist(idcol = "growth_rate")
+  rbindlist(idcol = "growth_rate") |>
+  DT(, growth_rate := factor(growth_rate, levels = names(growth_rates))
 
 # Define a prior on the delay censoring for each approximate approach
 approximate_primary_samples <- rbindlist(list(
@@ -175,7 +177,7 @@ growth_rate_primary_plot <- growth_rate_primary_samples |>
   DT(, value := primary_value) |>
   plot_censoring_interval(x = value, col = growth_rate, vintercept = 0.5) +
   guides(col = guide_legend(title = "Growth rate")) +
-  scale_colour_brewer(palette = "Dark2")
+  scale_colour_viridis_d(option = "C")
 
 # Plot the censoring interval for each growth rate
 growth_rate_censoring_plot <- growth_rate_primary_samples |>
@@ -187,7 +189,7 @@ growth_rate_censoring_plot <- growth_rate_primary_samples |>
 approximate_censoring_plot <- approximate_primary_samples |>
   plot_censoring_interval(x = value, col = method) +
   guides(col = guide_legend(title = "Method")) +
-  scale_colour_brewer(palette = "Accent")
+  scale_colour_brewer(palette = "Dark2")
 
 # Plot the PMF for each method
 approximate_pmfs_plot <- approximate_pmfs |>
@@ -206,8 +208,8 @@ approximate_pmfs_plot <- approximate_pmfs |>
   labs(x = "Delay (days)", y = "Probability") +
   theme(legend.position = "bottom") +
   facet_wrap(vars(method), nrow = 1) +
-  guides(col = guide_legend(title = "Growth rate")) +
-  scale_colour_brewer(palette = "Dark2")
+  guides(col = guide_legend(title = "Growth rate"))  +
+  scale_colour_viridis_d(option = "C")
 
 # Summarise the mean and standard deviation of the PMF for each method
 calc_empirical_summary_stat <- function(data, by) {
@@ -240,7 +242,7 @@ pmf_mean_and_sd_plot <- approximate_pmf_mean_and_sd  |>
     col = guide_legend(title = "Growth rate", nrow = 2),
     shape = guide_legend(title = "Method", nrow = 1)
   ) +
-  scale_colour_brewer(palette = "Dark2")
+  scale_colour_viridis_d(option = "C")
 
 # Plot
 # Primary event censoring interval under different growth rates
