@@ -304,5 +304,5 @@ censoring_interval_plot <- (
 
 ggsave(
   here("figures", "censoring-intervals.pdf"), censoring_interval_plot,
-  height = 16, width = 12, dpi = 330
+  height = 12, width = 12, dpi = 330
 )
