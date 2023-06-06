@@ -139,8 +139,8 @@ approximate_pmfs <- rbindlist(list(
   # PMF using a 0.5 shift for the primary event and a uniform prior for the
   # secondary event
   one_day_uniform_with_shift = simulate_double_censored_pmf_dt(
-    rprimary = \(x) (0.5),
-    delay_obs_process = \(s, p) (s - p + runif(length(s), 0, 1))
+    rprimary = \(x) (0),
+    delay_obs_process = \(s, p) (s - p + runif(length(s), 0, 1) - 0.5)
   ),
   # PMF using no prior for either event
   no_prior = simulate_double_censored_pmf_dt(
