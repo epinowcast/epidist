@@ -213,7 +213,7 @@ plot_scores <- function(scores_by_distribution, overall_scores) {
     ) +
     geom_point(
       data = overall_scores |>
-        DT(, model := model),
+        DT(, model := fct_rev(model)),
       col = "black", shape = 5, size = 4, alpha = 1
     ) +
     theme_bw() +
