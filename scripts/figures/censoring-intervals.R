@@ -6,6 +6,9 @@ library(ggplot2) # for plotting
 library(patchwork) # for combining plots
 library(stringr) # for string manipulation
 
+# Set the random seed
+set.seed(123)
+
 # Define a continuous PMF (could consider more than one delay but not likely
 # we want to)
 # Define a range of growth rates
@@ -244,8 +247,8 @@ approximate_pmfs_plot <- approximate_pmfs |>
 calc_empirical_summary_stat <- function(data, by) {
   data |>
     DT(, .(
-      mean = round(sum(pmf * delay), 2),
-      sd = round(sqrt(sum(((delay - sum(pmf * delay))^2) * pmf)), 2)
+      mean = round(sum(pmf * delay), 3),
+      sd = round(sqrt(sum(((delay - sum(pmf * delay))^2) * pmf)), 3)
     ), by = by)
 }
 
