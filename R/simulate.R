@@ -151,10 +151,11 @@ simulate_secondary <- function(linelist, dist = rlnorm, ...) {
 #' @param n The total number of cases to simulate.
 #' @param rprimary Random number generator function for primary events.
 #' Defaults to runif.
-#' @param rsecondary Random number generator function for secondary events.
-#' Defaults to runif.
 #' @param rdelay Random number generator function for delays. Defaults to
 #' rlnorm.
+#' @param delay_obs_process Observation process for delays. Defaults to
+#' using the `floor` function to round both primary and secondary events to the
+#' nearest integer. Internally the delay is also bounded to be non-negative.
 #'
 #' @return A probability mass function that represents the distribution of the
 #' delays.
@@ -164,12 +165,12 @@ simulate_secondary <- function(linelist, dist = rlnorm, ...) {
 #' simulate_double_censored_pmf(0.6, 0.5, 10, 1000)
 simulate_double_censored_pmf <- function(
   alpha, beta, max, n = 1000,
-  rprimary = \(x) (runif(x, 0, 1)), rsecondary = \(x) (runif(x, 0, 1)),
-  rdelay = rlnorm
+  rprimary = \(x) (runif(x, 0, 1)), rdelay = rlnorm,
+  delay_obs_process = \(s, p) (floor(s) - floor(p))
 ) {
   primary <- rprimary(n)
-  secondary <- primary + rsecondary(n) + rdelay(n, alpha, beta)
-  delay <- floor(secondary) - floor(primary)
+  secondary <- primary + rdelay(n, alpha, beta)
+  delay <- delay_obs_process(secondary, primary)
   delay <- pmax(delay, 0)
   cdf <- ecdf(delay)(0:max)
   pmf <- c(cdf[1], diff(cdf))

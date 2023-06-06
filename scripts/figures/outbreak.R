@@ -161,11 +161,13 @@ parameter_density_plot <- clean_o_samples |>
 
 # Score models against known values
 scores <- clean_o_samples |>
-  DT(sample_size == 400) |>
   copy() |>
   DT(,
     sample := 1:.N,
-    keyby = c("model", "scenario", "parameter", "distribution_stat", "time")
+    keyby = c(
+      "model", "scenario", "parameter", "distribution_stat", "time",
+      "sample_size"
+    )
   ) |>
   DT(, pmf := NULL) |>
   DT(, true_value := 0) |>
@@ -174,49 +176,73 @@ scores <- clean_o_samples |>
     ,
     c(
       "model", "scenario", "parameter", "distribution_stat", "time", "sample",
-      "prediction", "true_value"
+      "sample_size", "prediction", "true_value"
     )
   ) |>
+  DT(!is.infinite(prediction)) |> # remove infinite values
   score()
 
 # overall scores
 overall_scores <- scores |>
-  summarise_scores(by = "model")
+  summarise_scores(by = c("model"))
+
+scores_by_sample <- scores |>
+  summarise_scores(by = c("model", "sample_size"))
 
 # scores by distribution and time
 scores_by_distribution <- scores |>
   summarise_scores(by = c("model", "distribution_stat", "time", "parameter"))
 
-# plot scores
-scores_plot <- scores_by_distribution |>
-  DT(, time := time |>
-    fct_rev()) |>
-  DT(, model := model |>
-    fct_rev()) |>
-  ggplot() +
-  aes(
-    x = crps, y = model, col = distribution_stat, size = time,
-    shape = parameter
-  ) +
-  geom_point(position = position_jitter(width = 0, height = 0.2), alpha = 0.6) +
-  geom_point(
-    data = overall_scores |>
-      DT(, model := model |>
-        fct_rev()),
-    col = "black", shape = 5, size = 4, alpha = 1
-  ) +
-  theme_bw() +
-  guides(
-    col = guide_none(),
-    size = guide_legend(title = "Observation day", nrow = 2),
-    shape = guide_legend(title = "Parameter", nrow = 2)
-  ) +
-  scale_colour_brewer(palette = "Dark2") +
-  # add a linebreak to y axis labels
-  scale_y_discrete(labels = (\(x) str_wrap(x, width = 30))) +
-  scale_x_log10() +
-  theme(legend.position = "bottom") +
-  labs(y = "Model", x = "Relative CRPS")
+scores_by_distribution_and_sample <- scores |>
+  summarise_scores(
+    by = c("model", "sample_size", "distribution_stat", "time", "parameter")
+  )
+
+# Function to plot scores
+plot_scores <- function(scores_by_distribution, overall_scores) {
+  scores_by_distribution |>
+    DT(, model := fct_rev(model)) |> # reverse order of models
+    DT(, time := fct_rev(time)) |>
+    ggplot() +
+    aes(
+      x = crps, y = model, col = distribution_stat, size = time,
+      shape = parameter
+    ) +
+    geom_point(
+      position = position_jitter(width = 0, height = 0.2), alpha = 0.6
+    ) +
+    geom_point(
+      data = overall_scores |>
+        DT(, model := model),
+      col = "black", shape = 5, size = 4, alpha = 1
+    ) +
+    theme_bw() +
+    guides(
+      col = guide_none(),
+      size = guide_legend(title = "Observation day", nrow = 2),
+      shape = guide_legend(title = "Parameter", nrow = 2)
+    ) +
+    scale_colour_brewer(palette = "Dark2") +
+    # add a linebreak to y axis labels
+    scale_y_discrete(labels = (\(x) str_wrap(x, width = 30))) +
+    scale_x_log10() +
+    theme(legend.position = "bottom") +
+    labs(y = "Model", x = "Relative CRPS")
+}
+
+# Plot overall scores
+overall_scores_plot <- plot_scores(scores_by_distribution, overall_scores)
+
+# Plot scores by sample size
+scores_by_sample_plot <- plot_scores(
+  scores_by_distribution_and_sample, scores_by_sample
+) +
+  facet_wrap(vars(sample_size), nrow = 2, scales = "free_x")
+
+# Scores for 400 samples
+scores_plot_for_400_samples <- scores_by_distribution_and_sample |>
+  DT(sample_size == 400) |>
+  plot_scores(scores_by_sample[sample_size == 400])
 
 # Combine plots
 outbreak_plot <- obs_plot /
@@ -224,7 +250,7 @@ outbreak_plot <- obs_plot /
     (
       (
         (empirical_pmf_plot + guides(fill = guide_none())) /
-          scores_plot
+        scores_plot_for_400_samples
       ) + plot_layout(height = c(2, 1)) |
         parameter_density_plot
     ) +
@@ -235,9 +261,21 @@ outbreak_plot <- obs_plot /
   theme(legend.position = "bottom")
 # break legends into two columns
 
+# Combine score plots
+scores_plot <- (
+  overall_scores_plot + scores_by_sample_plot
+) +
+  plot_layout(heights = c(1, 2), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "bottom")
 
 # Save combined plots
 ggsave(
   here("figures", "outbreak.pdf"), outbreak_plot,
   height = 24, width = 16, dpi = 330
+)
+
+ggsave(
+  here("figures", "outbreak-scores.pdf"), scores_plot,
+  height = 16, width = 12, dpi = 330
 )
