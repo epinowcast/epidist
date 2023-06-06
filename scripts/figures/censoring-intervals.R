@@ -86,8 +86,7 @@ growth_rate_pmfs <- growth_rates |>
   map(
     \(r) (
       simulate_double_censored_pmf_dt(
-        rprimary = \(x) (rboundedgrowth(x, r, 0, 1)),
-        rsecondary = \(x) (runif(x, 0, 1))
+        rprimary = \(x) (rboundedgrowth(x, r, 0, 1))
       )
     )
   ) |>
@@ -124,30 +123,29 @@ approximate_primary_samples <- rbindlist(list(
 approximate_pmfs <- rbindlist(list(
   # PMF using uniform prior for both events
   double_uniform = simulate_double_censored_pmf_dt(
-    rprimary = \(x) (runif(x, 0, 1)),
-    rsecondary = \(x) (runif(x, 0, 1))
+    rprimary = \(x) (runif(x, 0, 1))
   ),
   # PMF using a uniform prior on the delay rather than on the event of two days.
   two_day_uniform = simulate_double_censored_pmf_dt(
     rprimary = \(x) (0),
-    rsecondary = \(x) (runif(x, -1, 1))
+    delay_obs_process = \(s, p) (s - p + runif(length(s), -1, 1))
   ),
   # PMF using no prior for the primary event and a uniform prior for the
   # secondary event
   one_day_uniform = simulate_double_censored_pmf_dt(
     rprimary = \(x) (0),
-    rsecondary = \(x) (runif(x, 0, 1))
+    delay_obs_process = \(s, p) (s - p + runif(length(s), 0, 1))
   ),
   # PMF using a 0.5 shift for the primary event and a uniform prior for the
   # secondary event
   one_day_uniform_with_shift = simulate_double_censored_pmf_dt(
     rprimary = \(x) (0.5),
-    rsecondary = \(x) (runif(x, 0, 1))
+    delay_obs_process = \(s, p) (s - p + runif(length(s), 0, 1))
   ),
   # PMF using no prior for either event
   no_prior = simulate_double_censored_pmf_dt(
     rprimary = \(x) (0),
-    rsecondary = \(x) (0)
+    delay_obs_process = \(s, p) (s - p)
   )
 ), idcol = "method")
 
