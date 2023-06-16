@@ -194,18 +194,14 @@ rm(scores)
 
 # plot scores
 scores_plot <- scores_by_distribution |>
-  DT(, model := model |>
-    fct_rev()) |>
   ggplot() +
   aes(
-    x = crps, y = model, col = distribution_stat, size = r,
+    x = crps, y = fct_rev(model), col = distribution_stat, size = r,
     shape = parameter
   ) +
   geom_point(position = position_jitter(width = 0, height = 0.2), alpha = 0.6) +
   geom_point(
-    data = overall_scores |>
-      DT(, model := model |>
-        fct_rev()),
+    data = overall_scores,
     col = "black", shape = 5, size = 4, alpha = 1
   ) +
   theme_bw() +
