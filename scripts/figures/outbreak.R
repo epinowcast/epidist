@@ -201,24 +201,21 @@ scores_by_distribution_and_sample <- scores |>
 # Function to plot scores
 plot_scores <- function(scores_by_distribution, overall_scores) {
   scores_by_distribution |>
-    DT(, model := fct_rev(model)) |> # reverse order of models
-    DT(, time := fct_rev(time)) |>
     ggplot() +
     aes(
-      x = crps, y = model, col = distribution_stat, size = time,
-      shape = parameter
+      x = crps, y = fct_rev(model), col = distribution_stat,
+      size = fct_rev(time), shape = parameter
     ) +
     geom_point(
       position = position_jitter(width = 0, height = 0.2), alpha = 0.6
     ) +
     geom_point(
-      data = overall_scores |>
-        DT(, model := fct_rev(model)),
+      data = overall_scores,
       col = "black", shape = 5, size = 4, alpha = 1
     ) +
     theme_bw() +
     guides(
-      col = guide_none(),
+      col = guide_legend(title = "Distribution", nrow = 2),
       size = guide_legend(title = "Observation day", nrow = 2),
       shape = guide_legend(title = "Parameter", nrow = 2)
     ) +
