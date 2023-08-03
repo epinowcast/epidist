@@ -1,5 +1,5 @@
 
-# Adjusting for common biases in infectious disease data when estimating distributions.
+# Estimating delay distributions accounting for common biases.
 
 ## A simple example
 
