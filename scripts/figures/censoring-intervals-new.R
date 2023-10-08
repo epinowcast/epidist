@@ -73,18 +73,23 @@ for (i in 1:length(rvec)) {
   
   g1 <- ggplot(ss_obs) +
     geom_density(aes((ptime-ptime_daily))) +
-    theme_bw()
+    theme_bw() +
+    scale_x_continuous("Primary event time (days)") +
+    scale_y_continuous("Density")
   
   g2 <- ggplot(approximate_primary_samples) +
     geom_density(data=ss_obs, aes((stime-stime_daily)-(ptime-ptime_daily)), lwd=1) +
     geom_density(aes(value, col=method)) +
-    theme_bw()
+    theme_bw() +
+    scale_x_continuous("Censoring interval (days)") +
+    scale_y_continuous("Density")
   
   g3 <- ggplot(approximate_primary_summ) +
-    geom_point(aes(mean, sd, col=method, shape=method)) +
+    geom_point(aes(mean, sd, col=method, shape=method), size=2) +
     geom_hline(yintercept=distributions[scenario %in% "medium", sd]) +
     geom_vline(xintercept=distributions[scenario %in% "medium", mean]) +
-    scale_x_continuous(limits=c(5.3, 6.8)) +
+    scale_x_continuous("Mean", limits=c(5.3, 6.8))  +
+    scale_y_continuous("Sd", limits=c(3.8, 4.1)) +
     theme_bw()
   
   glist[[i]] <- g1 + g2 + g3+
@@ -92,8 +97,11 @@ for (i in 1:length(rvec)) {
     theme(legend.position = "bottom")
 }
 
-glist[[1]] + glist[[2]] + glist[[3]] + glist[[4]] + glist[[5]] +
+censoring_interval_new_plot <- ((((glist[[1]])/(glist[[2]]))/(glist[[3]]))/glist[[4]])/glist[[5]] +
+  plot_annotation(tag_levels="A") +
   plot_layout(guides = "collect", ncol=5)
 
-
-
+ggsave(
+  here("figures", "censoring-intervals-new.pdf"), censoring_interval_new_plot,
+  height = 12, width = 15, dpi = 330
+)
