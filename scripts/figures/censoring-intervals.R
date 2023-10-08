@@ -282,7 +282,7 @@ pmf_mean_and_sd_plot <- approximate_pmf_mean_and_sd  |>
 # Realised censoring interval under a range of growth rate assumptions
 # PMF for each approximation vs growth rate pmfs (super imposed as points)
 # Emipirical mean and standard deviation of the PMF for each method using colour
-censoring_interval_plot <- (
+censoring_interval_main_plot <- (
   (
     (
       (
@@ -295,15 +295,24 @@ censoring_interval_plot <- (
       approximate_censoring_plot
     ) +
     plot_layout(widths = c(1, 1, 1), guides = "collect", nrow = 1)
-  ) /
-    (approximate_pmfs_plot + guides(col = guide_none())) /
-    (pmf_mean_and_sd_plot)
+  )
 ) +
   plot_annotation(tag_levels = "A") +
-  plot_layout(heights = c(2, 2, 2), guides = "collect", nrow = 3) &
+  plot_layout(guides = "collect", nrow = 1) &
+  theme(legend.position = "bottom")
+
+censoring_interval_supp_plot <- (approximate_pmfs_plot) /
+  (pmf_mean_and_sd_plot)+
+  plot_annotation(tag_levels = "A") +
+  plot_layout(guides = "collect", nrow = 2) &
   theme(legend.position = "bottom")
 
 ggsave(
-  here("figures", "censoring-intervals.pdf"), censoring_interval_plot,
-  height = 12, width = 12, dpi = 330
+  here("figures", "censoring-intervals-main.pdf"), censoring_interval_main_plot,
+  height = 4, width = 12, dpi = 330
+)
+
+ggsave(
+  here("figures", "censoring-intervals-supp.pdf"), censoring_interval_supp_plot,
+  height = 8, width = 12, dpi = 330
 )
