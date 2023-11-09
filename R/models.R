@@ -15,7 +15,7 @@ filtered_naive_delay <- function(
   formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data, fn = brms::brm,
   family = "lognormal", truncation = 10, ...) {
   data <- data |>
-    data.table::copy() |>
+    data.table::as.data.table() |>
     ## NEED TO FILTER BASED ON PTIME
     DT(ptime_daily <= (obs_at - truncation))
 
@@ -86,7 +86,7 @@ latent_censoring_adjusted_delay <- function(
   stanvars_all <- stanvars_functions + stanvars_parameters + stanvars_prior
 
   data <- data |>
-    data.table::copy() |>
+    data.table::as.data.table() |>
     DT(, id := 1:.N) |>
     DT(, pwindow_upr := ptime_upr - ptime_lwr) |>
     DT(, swindow_upr := stime_upr - stime_lwr) |>
@@ -112,7 +112,7 @@ filtered_censoring_adjusted_delay <- function(
   ), data, fn = brms::brm, family = "lognormal", truncation = 10, ...) {
 
   data <- data |>
-    data.table::copy() |>
+    data.table::as.data.table() |>
     DT(ptime_daily <= (obs_at - truncation))
 
   data <- pad_zero(data)
@@ -202,7 +202,7 @@ latent_truncation_censoring_adjusted_delay <- function(
 ) {
 
   data <- data |>
-    data.table::copy() |>
+    data.table::as.data.table() |>
     DT(, id := 1:.N) |>
     DT(, obs_t := obs_at - ptime_lwr) |>
     DT(, pwindow_upr := ifelse(
@@ -324,6 +324,7 @@ dynamical_censoring_adjusted_delay <- function(
   }
   cols <- colnames(data)[map_lgl(data, is.integer)]
   data <- data |>
+    data.table::as.data.table() |>
     DT(, (cols) := lapply(.SD, as.double), .SDcols = cols)
 
   data <- drop_zero(data)
@@ -427,6 +428,7 @@ epinowcast_delay <- function(formula = ~ 1, data, by = c(),
                              with_epinowcast_output = TRUE,
                              ...) {
   data_as_counts <- data |>
+    data.table::as.data.table() |>
     DT(, .(new_confirm = .N), by = c("ptime_daily", "stime_daily", by)) |>
     DT(order(ptime_daily, stime_daily)) |>
     DT(, reference_date := as.Date("2000-01-01") + ptime_daily) |>
