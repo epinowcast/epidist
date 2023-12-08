@@ -2,19 +2,93 @@
 output: github_document
 ---
 
-# Adjusting for common biases in infectious disease data when estimating distributions.
-
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
-  fig.path = "figures/README-",
+  comment = "",
+  fig.path = file.path("man", "figures", "README-"),
   out.width = "100%",
   dpi = 330,
   message = FALSE, warning = FALSE
 )
 ```
+
+# Estimate epidemiological delay distributions for infectious diseases<a href='https://epidist.epinowcast.org'><img src='man/figures/logo.png' align="right" height="139" /></a>
+
+<!-- badges: start -->
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![R-CMD-check](https://github.com/epinowcast/epidist/workflows/R-CMD-check/badge.svg)](https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml) [![Codecov test coverage](https://codecov.io/gh/epinowcast/epidist/branch/main/graph/badge.svg)](https://app.codecov.io/gh/epinowcast/epidist)
+</br>
+[![Universe](https://epinowcast.r-universe.dev/badges/epidist)](https://epinowcast.r-universe.dev/epidist)
+[![MIT
+license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/epinowcast/epidist/blob/master/LICENSE.md/)
+[![GitHub contributors](https://img.shields.io/github/contributors/epinowcast/epidist)](https://github.com/epinowcast/epidist/graphs/contributors)
+</br>
+[![DOI](https://zenodo.org/badge/422611952.svg)](https://zenodo.org/badge/latestdoi/422611952)
+<!-- badges: end -->
+
+*Warning: This package is a prototype and is under active development. Breaking changes are likely.*
+
+## Summary
+
+```{r, results = "asis", echo=FALSE}
+cat(gsub("\n[ ]+"," ",packageDescription("epidist")$Description))
+```
+
+## Installation
+  
+<details><summary>Installing the package</summary>
+
+You can install the latest released version using the normal `R` function, though you need to point to `r-universe` instead of CRAN:
+
+```{r, eval = FALSE}
+install.packages(
+  "epidist", repos = "https://epinowcast.r-universe.dev"
+)
+```
+
+Alternatively, you can use the [`remotes` package](https://remotes.r-lib.org/) to install the development version from Github (warning! this version may contain breaking changes and/or bugs):
+
+```{r, eval = FALSE}
+remotes::install_github(
+  "epinowcast/epidist", dependencies = TRUE
+)
+```
+
+Similarly, you can install historical versions by specifying the release tag (e.g. this installs [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)):
+
+```{r, eval = FALSE}
+remotes::install_github(
+  "epinowcast/epidist", dependencies = TRUE, ref = "v0.2.0"
+)
+```
+
+*Note: You can also use that last approach to install a specific commit if needed, e.g. if you want to try out a specific unreleased feature, but not the absolute latest developmental version.*
+
+</details>
+
+<details><summary>Installing CmdStan</summary>
+
+If you wish to do model fitting and nowcasting, you will need to install [CmdStan](https://mc-stan.org/users/interfaces/cmdstan), which also entails having a suitable C++ toolchain setup. We recommend using the [`cmdstanr` package](https://mc-stan.org/cmdstanr/). The Stan team provides instructions in the [_Getting started with
+`cmdstanr`_](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) vignette, with other details and support at the [package site](https://mc-stan.org/cmdstanr/), but the brief version is:
+
+```{r, eval = FALSE}
+# if you not yet installed `epinowcast`, or you installed it without `Suggests` dependencies
+install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
+# once `cmdstanr` is installed:
+cmdstanr::install_cmdstan()
+```
+
+*Note: You can speed up CmdStan installation using the `cores` argument. If you are installing a particular version of `epinowcast`, you may also need to install a past version of CmdStan, which you can do with the `version` argument.*
+
+</details>
+
+<details><summary>Alternative: Docker</summary>
+
+We also provide a [Docker](https://www.docker.com/get-started/) image with [`epinowcast` and all dependencies installed](https://github.com/orgs/epinowcast/packages/container/package/epidist). You can use this image to run `epidist` without installing dependencies.
+
+</details>
 
 ## A simple example
 
@@ -247,48 +321,4 @@ truncated_draws |>
   ) +
   scale_fill_brewer(palette = "Dark2", aesthetics = c("fill", "colour")) +
   theme(legend.direction = "vertical")
-```
-
-## Analyses
-
-This analysis in this repository has been implemented using the [`targets`](https://docs.ropensci.org/targets/) package and associated packages. The workflow is defined in [`_targets.md`](https://github.com/parksw3/epidist/blob/main/_targets.md) and can be explored interactively using [`_targets.Rmd`](https://github.com/parksw3/epidist/blob/main/_targets.Rmd) `Rmarkdown` document. The workflow can be visualised as the following graph.
-
-
-This complete analysis can be recreated using the following (note this may take quite some time even with a fairly large amount of available compute),
-
-```{bash, eval = FALSE}
-bash bin/update-targets.sh
-```
-
-Alternative the following `targets` functions may be used to interactively explore the workflow:
-
-- Run the workflow sequentially.
-
-```{r, eval = FALSE}
-targets::tar_make()
-```
-
-- Run the workflow using all available workers.
-
-```{r, eval = FALSE}
-targets::tar_make_future(workers = future::availableCores())
-```
-
-- Explore a graph of the workflow.
-
-```{r, eval = FALSE}
-targets::tar_visnetwork(targets_only = TRUE)
-```
-
-Watch the workflow as it runs in a `shiny` app.
-
-```{r, eval = FALSE}
-targets::tar_watch(targets_only = TRUE)
-```
-
-To use our archived version of the interim results (and so avoid long run times) use the following to download it. Note that this process has not been rigorously tested across environments and so may not work seamlessly).
-
-```{r, eval = FALSE}
-source(here::here("R", "targets-archive.R"))
-get_targets_archive()
 ```
