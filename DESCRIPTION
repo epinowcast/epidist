@@ -1,4 +1,4 @@
-Package: dynamicaltruncation
+Package: epidist
 Title: Adjusting for Common Biases in Infectious Disease Data when Estimating Distributions
 Version: 0.0.0.9000
 Authors@R: 
