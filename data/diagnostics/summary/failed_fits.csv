@@ -1,7 +1,0 @@
-scenario,distribution,sample_size,data_type,id,replicate,obs_type,samples,max_rhat,divergent_transitions,per_divergent_transitions,max_treedepth,no_at_max_treedepth,per_at_max_treedepth,run_time,model,error,time,tar_group.x,scenario_days,meanlog,sdlog,mean,sd,tar_group.y,distribution_stat,r,growth_rate
-180 days,"",3149,Ebola case study,351,,real-time,,,,,,,,,Dynamical and censoring adjusted,Fitting failed. Unable to print.,,,,,,,,,,,
-decay,long,200,Exponential,54,6,"",,,,,,,,,Dynamical and censoring adjusted,Fitting failed. Unable to print.,,,,1.8,0.8,8.33113748768769,7.88814376435135,1,"Long (mean: 8.3, sd: 7.9)",-0.1,Decay (-0.1)
-fast decay,long,200,Exponential,112,4,"",,,,,,,,,Dynamical and censoring adjusted,Fitting failed. Unable to print.,,,,1.8,0.8,8.33113748768769,7.88814376435135,1,"Long (mean: 8.3, sd: 7.9)",-0.2,Fast decay (-0.2)
-fast decay,long,200,Exponential,121,13,"",,,,,,,,,Dynamical and censoring adjusted,Fitting failed. Unable to print.,,,,1.8,0.8,8.33113748768769,7.88814376435135,1,"Long (mean: 8.3, sd: 7.9)",-0.2,Fast decay (-0.2)
-fast decay,long,200,Exponential,122,14,"",,,,,,,,,Dynamical and censoring adjusted,Fitting failed. Unable to print.,,,,1.8,0.8,8.33113748768769,7.88814376435135,1,"Long (mean: 8.3, sd: 7.9)",-0.2,Fast decay (-0.2)
-fast decay,long,200,Exponential,126,18,"",,,,,,,,,Dynamical and censoring adjusted,Fitting failed. Unable to print.,,,,1.8,0.8,8.33113748768769,7.88814376435135,1,"Long (mean: 8.3, sd: 7.9)",-0.2,Fast decay (-0.2)
