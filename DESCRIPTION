@@ -1,7 +1,6 @@
 Package: epidist
 Title: Estimate epidemiological delay distributions for infectious diseases 
 Version: 0.0.0.9000
-Authors@R: 
 Authors@R:
   c(person(given = "Sang Woo",
            family = "Park",
@@ -28,3 +27,6 @@ Imports:
 Remotes:
     stan-dev/cmdstanr
     Rdatatable/data.table
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
