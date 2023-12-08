@@ -1,0 +1,82 @@
+# For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
+# https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '5 4 * * 1'
+  pull_request:
+    branches:
+      - main
+  merge_group:
+  workflow_dispatch:
+
+name: R-CMD-check
+
+jobs:
+  R-CMD-check:
+    if: "! contains(github.event.head_commit.message, '[ci skip]')"
+    runs-on: ${{ matrix.config.os }}
+
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: macOS-latest,   r: 'release', rtools: ''}
+          - {os: windows-latest, r: 'release', rtools: '43'}
+          - {os: ubuntu-latest,   r: 'release', rtools: ''}
+          - {os: ubuntu-latest,   r: 'oldrel-1', rtools: ''}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      NOT_CRAN: true
+      
+    steps:
+      - name: cmdstan env vars
+        run: |
+          echo "CMDSTAN_PATH=${HOME}/.cmdstan" >> $GITHUB_ENV
+        shell: bash
+
+      - uses: n1hility/cancel-previous-runs@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+        if: "!startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/heads/main'"
+
+      - uses: actions/checkout@v4
+        
+      - name: Install cmdstan Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev || true
+          sudo apt-get install -y openmpi-bin openmpi-common libopenmpi-dev || true
+          sudo apt-get install -y libpng-dev || true
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
+          rtools-version: ${{ matrix.config.rtools }}
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      - name: Install cmdstan
+        run: |
+          print(list.files("C:/rtools43"))
+          cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+          cmdstanr::install_cmdstan(cores = 2, quiet = TRUE)
+        shell: Rscript {0}
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
