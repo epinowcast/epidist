@@ -2,7 +2,7 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/r
 {
 	"name": "R (Community)",
-	"image": "ghcr.io/parksw3/dynamicaltruncation:main",
+	"image": "ghcr.io/parksw3/epidist:main",
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
