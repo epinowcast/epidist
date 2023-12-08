@@ -1,3 +1,12 @@
 ^LICENSE\.md$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^inst/make_hexsticker\.R$
+^\.github$
+^\.pre-commit-config\.yaml$
+^\.devcontainer$
+^\.Rprofile
+^_pkgdown\.yml$
+^docs$
+^data-raw$
+^CITATION\.cff$
