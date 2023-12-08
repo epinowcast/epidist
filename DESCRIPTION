@@ -1,11 +1,20 @@
 Package: epidist
-Title: Adjusting for Common Biases in Infectious Disease Data when Estimating Distributions
+Title: Estimate epidemiological delay distributions for infectious diseases 
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: Adjusting for common biases in infectious disease data when
-    estimating distributions
+Authors@R:
+  c(person(given = "Sang Woo",
+           family = "Park",
+           role = c("aut", "cre"),
+           email = "swp2@princeton.edu",
+           comment = c(ORCID = "0000-0003-2202-3361")),
+    person(given = "Sam Abbott",
+           role = c("aut"),
+           email = "contact@samabbott.co.uk",
+           comment = c(ORCID = "0000-0001-8057-8037")))
+Description: Understanding and accurately estimating epidemiological delay
+    distributions is important for public health policy. These estimates
+    directly influence epidemic situational awareness, control strategies, and resource allocation. In this package, we provide methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. Despite their importance, these issues are frequently overlooked, often resulting in biased conclusions.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -16,10 +25,6 @@ Imports:
     data.table,
     ggplot2,
     purrr
-Suggests:
-    arrow,
-    dplyr,
-    here,
-    patchwork,
-    stringr,
-    forcats
+Remotes:
+    stan-dev/cmdstanr
+    Rdatatable/data.table
