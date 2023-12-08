@@ -90,235 +90,59 @@ We also provide a [Docker](https://www.docker.com/get-started/) image with [`epi
 
 </details>
 
-## A simple example
 
-First load our analysis (from GitHub or locally using `devtools::load_all()`) package and other required packages.
+## Resources
 
-```{r load-requirements}
-library(epidist)
-library(data.table)
-library(purrr)
-library(ggplot2)
-```
+As you use the package, the documentation available via `?enw_` should be your first stop for troubleshooting. We also provide a range of other documentation, case studies, and community spaces to ask (and answer!) questions:
 
-### Simulate the data
+<details><summary>Package Website</summary>
 
-Simulate data from an outbreak.
+The [`epinowcast` website](https://package.epinowcast.org/) includes a function reference, model outline, and case studies using the package. The site mainly concerns the release version, but you can also find documentation for [the latest development version](https://package.epinowcast.org/dev/).
 
-```{r simulate-outbreak}
-outbreak <- simulate_gillespie(seed = 101)
-```
+</details>
 
-Define the secondary distribution to use in the simulation
+<details><summary>R Vignettes</summary>
 
-```{r secondary-dist}
-secondary_dist <- data.table(
-  meanlog = 1.8, sdlog = 0.5
-) |>
-  add_natural_scale_mean_sd()
-```
+We have created [package vignettes](https://package.epinowcast.org/articles) to help you [get started nowcasting](https://package.epinowcast.org/articles/epinowcast.html) and to [highlight other features with case studies](https://package.epinowcast.org/articles/germany-age-stratified-nowcasting.html).
 
-Simulate an observation process during the growth phase for a secondary event using a lognormal distribution, and finally simulate observing this event.
+</details>
 
-```{r simulate-data}
-obs <- outbreak |>
-  simulate_secondary(
-    meanlog = secondary_dist$meanlog[[1]],
-    sdlog = secondary_dist$sdlog[[1]]
-  ) |>
-  observe_process()
-```
+<details><summary>Organisation Website</summary>
 
-Observe the outbreak after 25 days and take 100 samples.
+Our [organisation website](https://www.epinowcast.org/) includes links to other resources, [guest posts](https://www.epinowcast.org/blog.html), and [seminar schedule](https://www.epinowcast.org/seminars.html) for both upcoming and past recordings.
 
-```{r observe-data}
-truncated_obs <- obs |>
-  filter_obs_by_obs_time(obs_time = 25) |>
-  DT(sample(1:.N, 200, replace = FALSE))
-```
+</details>
 
-Plot primary cases (columns), and secondary cases (dots) by the observation time of their secondary events. This reflects would could be observed in real-time.
+<details><summary>Community Forum</summary>
 
-```{r observed-cases}
-truncated_cases <- construct_cases_by_obs_window(
-  obs, windows = c(25), obs_type = "stime"
-)
+Our [community forum](https://community.epinowcast.org/) has areas for [question and answer](https://community.epinowcast.org/c/interface/15) and [considering new methods and tools](https://community.epinowcast.org/c/projects/11), among others. If you are generally interested in real-time analysis of infectious disease, you may find this useful even if do not use `epinowcast`.
 
-plot_cases_by_obs_window(truncated_cases)
-```
+</details>
 
-We can alternatively plot the observed data based on primary events. This corresponds to a retrospective cohort based view of the data.
+<details><summary>Package Analysis Scripts</summary>
 
-```{r cohort-observed-cases}
-truncated_cases <- construct_cases_by_obs_window(
-  obs, windows = c(25), obs_type = "ptime"
-)
+In addition to the vignettes, the package also comes with [example analyses](https://github.com/epinowcast/epinowcast/tree/main/inst/examples). These are not as polished as the vignettes, but we typically explore new features with these and they may help you if you are using a development version. After installing `epinowcast`, you can find them via:
 
-plot_cases_by_obs_window(truncated_cases)
-```
-
-Plot the true continuous delay distribution and the empirical observed distribution for each observation window.
-
-```{r empirical-dist}
-combined_obs <- combine_obs(truncated_obs, obs)
-
-plot_empirical_delay(
-  combined_obs, meanlog = secondary_dist$meanlog[[1]],
-  sdlog = secondary_dist$sdlog[[1]]
+```{r, eval = FALSE}
+list.files(
+  system.file("examples", package = "epinowcast"), full.names = TRUE
 )
 ```
 
-Plot the mean difference between continuous and discrete event time:
+</details>
 
-```{r censor_delay}
-censor_delay <- calculate_censor_delay(truncated_obs)
-plot_censor_delay(censor_delay)
-```
+## Contributing
 
-### Models
+We welcome contributions and new contributors! We particularly appreciate help on [identifying and identified issues](https://github.com/epinowcast/epidist/issues). Please check and add to the issues, and/or add a [pull request](https://github.com/epinowcast/epidist/pulls) and see our [contributing guide](CONTRIBUTING.md) for more information.
 
-First fit a naive lognormal model with no adjustment.
+### How to make a bug report or feature request
 
-```{r}
-naive_fit <- naive_delay(data = truncated_obs, cores = 4, refresh = 0)
-```
+Please briefly describe your problem and what output you expect in an [issue](https://github.com/epinowcast/epidist/issues). If you have a question, please don't open an issue. Instead, ask on our [Q and A page](https://github.com/epinowcast/dist/discussions/categories/q-a). See our [contributing guide](CONTRIBUTING.md) for more information.
 
-Estimate the delay after filtering out the most recent data as crude adjustement for right truncation.
+### Code of Conduct
+  
+Please note that the `epidist` project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.
 
-```{r}
-filtered_fit <- filtered_naive_delay(
-  data = truncated_obs, cores = 4, refresh = 0
-)
-```
+## Citation
 
-Adjust for date censoring.
-
-```{r}
-censored_fit <- censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0
-)
-```
-
-Adjust for censoring and filter to crudely adjust for right truncation.
-
-```{r}
-filtered_censored_fit <- filtered_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0
-)
-```
-
-Adjust for right truncation.
-
-```{r}
-truncation_fit <- truncation_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0
-)
-```
-
-Adjust for right truncation and date censoring.
-
-```{r}
-truncation_censoring_fit <- truncation_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0
-)
-```
-
-Adjust for right truncation and date censoring using a latent variable approach.
-
-```{r}
-latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0
-)
-```
-
-Fit a joint model to estimate primary incidence and the delay to reporting secondary incidence (this is a thin wrapper around the `epinowcast` package that is not suggested for real-world usage).
-
-```{r}
-epinowcast_fit <- epinowcast_delay(
-  data = truncated_obs, parallel_chains = 4, adapt_delta = 0.95,
-  show_messages = FALSE, refresh = 0, with_epinowcast_output = FALSE
-)
-epinowcast_draws <- extract_epinowcast_draws(epinowcast_fit) |>
-  DT(, model := "Joint incidence and forward delay")
-```
-
-### Summarise model posteriors and compare to known truth
-
-Combine models into a named list.
-
-```{r}
-models <- list(
-  "Naive" = naive_fit,
-  "Filtered" = filtered_fit,
-  "Censoring adjusted" = censored_fit,
-  "Filtered and censoring adjusted" = filtered_censored_fit,
-  "Truncation adjusted" = truncation_fit,
-  "Truncation and censoring adjusted" = truncation_censoring_fit,
-  "Latent variable truncation and censoring adjusted" =
-    latent_truncation_censoring_fit
-)
-```
-
-Extract and summarise lognormal posterior estimates.
-
-```{r lognormal-draws}
-draws <- models |>
-  map(extract_lognormal_draws) |>
-  rbindlist(idcol = "model") |>
-  rbind(epinowcast_draws, use.names = TRUE) |>
-  DT(,
-   model := factor(
-    model, levels = c("Joint incidence and forward delay", rev(names(models)))
-   )
-  )
-
-summarised_draws <- draws |>
-  draws_to_long() |>
-  summarise_draws(sf = 3)
-
-knitr::kable(summarised_draws[parameter %in% c("meanlog", "sdlog")])
-```
-
-Plot summarised posterior estimates from each model compared to the ground truth.
-
-```{r, fig.width = 9, fig.height = 4}
-draws |>
-  draws_to_long() |>
-  make_relative_to_truth(draws_to_long(secondary_dist)) |>
-  plot_relative_recovery(y = model, fill = model) +
-  facet_wrap(vars(parameter), nrow = 1, scales = "free_x") +
-  scale_fill_brewer(palette = "Dark2") +
-  guides(fill = guide_none()) +
-  labs(
-    y = "Model", x = "Relative to ground truth"
-  )
-```
-
-Finally, check the mean posterior predictions for each model against the observed daily cohort mean.
-```{r postcheck}
-truncated_draws <- draws |>
-  calculate_truncated_means(
-    obs_at = max(truncated_obs$stime_daily),
-    ptime = range(truncated_obs$ptime_daily)
-  ) |>
-  summarise_variable(variable = "trunc_mean", by = c("obs_horizon", "model")) |>
-  DT(, model := factor(
-      model, levels = c("Joint incidence and forward delay", rev(names(models)))
-    )
-  )
-
-truncated_draws |>
-  plot_mean_posterior_pred(
-    truncated_obs |>
-      calculate_cohort_mean(
-        type = "cohort", obs_at = max(truncated_obs$stime_daily)
-      ),
-    col = model, fill = model, mean = TRUE, ribbon = TRUE
-  ) +
-  guides(
-    fill = guide_legend(title = "Model", nrow = 4),
-    col = guide_legend(title = "Model", nrow = 4)
-  ) +
-  scale_fill_brewer(palette = "Dark2", aesthetics = c("fill", "colour")) +
-  theme(legend.direction = "vertical")
-```
+If making use of our methodology or the methodology on which ours is based, please cite the relevant papers from our [model outline](https://epidist.epinowcast.org/articles/model.html). If you use `epidist` in your work, please consider citing it with `citation("epidist")`.
