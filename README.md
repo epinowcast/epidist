@@ -7,7 +7,7 @@ First load our analysis (from GitHub or locally using
 `devtools::load_all()`) package and other required packages.
 
 ``` r
-library(dynamicaltruncation)
+library(epidist)
 library(data.table)
 library(purrr)
 library(ggplot2)
@@ -364,9 +364,9 @@ truncated_draws |>
 This analysis in this repository has been implemented using the
 [`targets`](https://docs.ropensci.org/targets/) package and associated
 packages. The workflow is defined in
-[`_targets.md`](https://github.com/parksw3/dynamicaltruncation/blob/main/_targets.md)
+[`_targets.md`](https://github.com/parksw3/epidist/blob/main/_targets.md)
 and can be explored interactively using
-[`_targets.Rmd`](https://github.com/parksw3/dynamicaltruncation/blob/main/_targets.Rmd)
+[`_targets.Rmd`](https://github.com/parksw3/epidist/blob/main/_targets.Rmd)
 `Rmarkdown` document. The workflow can be visualised as the following
 graph.
 
