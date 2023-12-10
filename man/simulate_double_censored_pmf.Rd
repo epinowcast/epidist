@@ -10,8 +10,8 @@ simulate_double_censored_pmf(
   max,
   n = 1000,
   rprimary = function(x) (runif(x, 0, 1)),
-  rsecondary = function(x) (runif(x, 0, 1)),
-  rdelay = rlnorm
+  rdelay = rlnorm,
+  delay_obs_process = function(s, p) (floor(s) - floor(p))
 )
 }
 \arguments{
@@ -26,11 +26,12 @@ simulate_double_censored_pmf(
 \item{rprimary}{Random number generator function for primary events.
 Defaults to runif.}
 
-\item{rsecondary}{Random number generator function for secondary events.
-Defaults to runif.}
-
 \item{rdelay}{Random number generator function for delays. Defaults to
 rlnorm.}
+
+\item{delay_obs_process}{Observation process for delays. Defaults to
+using the \code{floor} function to round both primary and secondary events to the
+nearest integer. Internally the delay is also bounded to be non-negative.}
 }
 \value{
 A probability mass function that represents the distribution of the
