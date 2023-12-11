@@ -427,6 +427,12 @@ epinowcast_delay <- function(formula = ~ 1, data, by = c(),
                              sampler = epinowcast::enw_sample,
                              with_epinowcast_output = TRUE,
                              ...) {
+  # check if the epinowcast package is installed and error if not
+  if (!requireNamespace("epinowcast", quietly = TRUE)) {
+    stop(
+      "epinowcast is not installed. Please install it to use this function"
+    )
+  }
   data_as_counts <- data |>
     data.table::as.data.table() |>
     DT(, .(new_confirm = .N), by = c("ptime_daily", "stime_daily", by)) |>
