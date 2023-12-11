@@ -23,10 +23,13 @@ Imports:
     cmdstanr,
     data.table,
     ggplot2,
+    posterior,
     purrr
+Suggests: 
+    epinowcast,
+    testthat (>= 3.0.0)
 Remotes:
     stan-dev/cmdstanr,
-    Rdatatable/data.table
-Suggests: 
-    testthat (>= 3.0.0)
+    Rdatatable/data.table,
+    epinowcast/epinowcast
 Config/testthat/edition: 3
