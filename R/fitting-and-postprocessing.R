@@ -133,6 +133,7 @@ add_natural_scale_mean_sd <- function(dt) {
 
 #' Extract posterior samples for a lognormal brms model
 #' @export
+#' @importFrom posterior as_draws_df
 extract_lognormal_draws <- function(
   data, id_vars, from_dt = FALSE
 ) {
