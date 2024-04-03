@@ -3,8 +3,7 @@
 sample_model <- function(model, data, scenario = data.table::data.table(id = 1),
                          diagnostics = TRUE, ...) {
 
-  out <- scenario |>
-    copy()
+  out <- data.table::copy(scenario)
 
   # Setup failure tolerant model fitting
   fit_model <- function(model, data, ...) {
@@ -16,12 +15,10 @@ sample_model <- function(model, data, scenario = data.table::data.table(id = 1),
   fit <- safe_fit_model(model, data, ...)
 
   if (!is.null(fit$error)) {
-    out <- out |>
-      DT(, error := list(fit$error[[1]]))
+    out[, error := list(fit$error[[1]])]
     diagnostics <- FALSE
   }else {
-    out <- out |>
-      DT(, fit := list(fit$result))
+    out[, fit := list(fit$result)]
     fit <- fit$result
   }
 
@@ -57,8 +54,7 @@ sample_epinowcast_model <- function(
   diagnostics = TRUE, ...
 ) {
 
-  out <- scenario |>
-    copy()
+  out <- data.table::copy(scenario)
 
   # Setup failure tolerant model fitting
   fit_model <- function(model, data, ...) {
@@ -72,12 +68,10 @@ sample_epinowcast_model <- function(
   fit <- safe_fit_model(model, data, ...)
 
   if (!is.null(fit$error)) {
-    out <- out |>
-      DT(, error := list(fit$error[[1]]))
+    out[, error := list(fit$error[[1]])]
     diagnostics <- FALSE
   }else {
-    out <- out |>
-      DT(, fit := list(fit$result))
+    out[, fit := list(fit$result)]
     fit <- fit$result
   }
 
@@ -123,11 +117,12 @@ sample_epinowcast_model <- function(
 #' Add natural scale summary parameters for a lognormal distribution
 #' @export
 add_natural_scale_mean_sd <- function(dt) {
-  nat_dt <- dt |>
-    data.table::DT(, mean := exp(meanlog + sdlog ^ 2 / 2)) |>
-    data.table::DT(,
-     sd := exp(meanlog + (1 / 2) * sdlog ^ 2) * sqrt(exp(sdlog ^ 2) - 1)
-    )
+  nat_dt <- data.table::copy(dt)
+  
+  nat_dt <- nat_dt[,mean := exp(meanlog + sdlog ^ 2 / 2)]
+  
+  nat_dt <- nat_dt[,sd := exp(meanlog + (1 / 2) * sdlog ^ 2) * sqrt(exp(sdlog ^ 2) - 1)]
+  
   return(nat_dt[])
 }
 
@@ -186,8 +181,7 @@ extract_epinowcast_draws <- function(
     )
   }
 
-  draws <- draws |>
-    data.table::setDT()
+  draws <- data.table::setDT(draws)
 
   data.table::setnames(
     draws, c("refp_mean_int[1]", "refp_sd_int[1]"), c("meanlog", "sdlog"),
@@ -207,10 +201,11 @@ extract_epinowcast_draws <- function(
 #' Primary event bias correction
 #' @export
 primary_censoring_bias_correction <- function(draws) {
-  draws <- data.table::copy(draws) |>
-    DT(, mean := mean - runif(.N, min = 0, max = 1)) |>
-    DT(, meanlog := log(mean^2 / sqrt(sd^2 + mean^2))) |>
-    DT(, sdlog := sqrt(log(1 + (sd^2 / mean^2))))
+  draws <- data.table::copy(draws)
+  draws[, mean := mean - runif(.N, min = 0, max = 1)]
+  draws[, meanlog := log(mean^2 / sqrt(sd^2 + mean^2))]
+  draw[, sdlog := sqrt(log(1 + (sd^2 / mean^2)))]
+  
   return(draws[])
 }
 
@@ -234,7 +229,8 @@ make_relative_to_truth <- function(draws, secondary_dist, by = "parameter") {
     by = by
   )
 
-  draws <- draws[, rel_value := value / true_value]
+  draws[, rel_value := value / true_value]
+  
   return(draws[])
 }
 
@@ -289,9 +285,11 @@ summarise_variable <- function(draws, variable, sf = 6, by = c()) {
   if (missing(variable)) {
     stop("variable must be specified")
   }
-  summarised_draws <- draws |>
-    copy() |>
-    DT(, value := variable, env = list(variable = variable)) |>
-    summarise_draws(sf = sf, by = by)
+  summarised_draws <- data.table::copy(draws)
+  
+  summarised_draws[, value := variable, env = list(variable = variable)]
+  
+  summarised_draws <- summarise_draws(summarised_draws, sf = sf, by = by)
+  
   return(summarised_draws[])
 }
