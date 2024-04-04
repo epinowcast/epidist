@@ -14,11 +14,10 @@ naive_delay <- function(formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data,
 filtered_naive_delay <- function(
   formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data, fn = brms::brm,
   family = "lognormal", truncation = 10, ...) {
-  data <- data |>
-    data.table::as.data.table() |>
-    ## NEED TO FILTER BASED ON PTIME
-    DT(ptime_daily <= (obs_at - truncation))
-
+  data <-  data.table::as.data.table(data)
+  ## NEED TO FILTER BASED ON PTIME
+  data <- data[ptime_daily <= (obs_at - truncation)]
+  
   data <- drop_zero(data)
 
   fn(
@@ -85,12 +84,11 @@ latent_censoring_adjusted_delay <- function(
 
   stanvars_all <- stanvars_functions + stanvars_parameters + stanvars_prior
 
-  data <- data |>
-    data.table::as.data.table() |>
-    DT(, id := 1:.N) |>
-    DT(, pwindow_upr := ptime_upr - ptime_lwr) |>
-    DT(, swindow_upr := stime_upr - stime_lwr) |>
-    DT(, delay_central := stime_lwr - ptime_lwr)
+  data <- data.table::as.data.table(data)
+  data[, id := 1:.N]
+  data[, pwindow_upr := ptime_upr - ptime_lwr]
+  data[, swindow_upr := stime_upr - stime_lwr]
+  data[, delay_central := stime_lwr - ptime_lwr]
 
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
@@ -111,9 +109,8 @@ filtered_censoring_adjusted_delay <- function(
     delay_lwr | cens(censored, delay_upr) ~ 1, sigma ~ 1
   ), data, fn = brms::brm, family = "lognormal", truncation = 10, ...) {
 
-  data <- data |>
-    data.table::as.data.table() |>
-    DT(ptime_daily <= (obs_at - truncation))
+  data <- data.table::as.data.table(data)
+  data <- data[ptime_daily <= (obs_at - truncation)]
 
   data <- pad_zero(data)
 
@@ -201,22 +198,18 @@ latent_truncation_censoring_adjusted_delay <- function(
   ...
 ) {
 
-  data <- data |>
-    data.table::as.data.table() |>
-    DT(, id := 1:.N) |>
-    DT(, obs_t := obs_at - ptime_lwr) |>
-    DT(, pwindow_upr := ifelse(
-          stime_lwr < ptime_upr, ## if overlap
-          stime_upr - ptime_lwr,
-          ptime_upr - ptime_lwr
-        )
-    ) |>
-    DT(,
-      woverlap := as.numeric(stime_lwr < ptime_upr)
-    ) |>
-    DT(, swindow_upr := stime_upr - stime_lwr) |>
-    DT(, delay_central := stime_lwr - ptime_lwr) |>
-    DT(, row_id := 1:.N)
+  data <- data.table::as.data.table(data)
+  data[, id := 1:.N]
+  data[, obs_t := obs_at - ptime_lwr]
+  data[, pwindow_upr := ifelse(
+    stime_lwr < ptime_upr, ## if overlap
+    stime_upr - ptime_lwr,
+    ptime_upr - ptime_lwr
+  )]
+  data[, woverlap := as.numeric(stime_lwr < ptime_upr)]
+  data[, swindow_upr := stime_upr - stime_lwr]
+  data[, delay_central := stime_lwr - ptime_lwr]
+  data[, row_id := 1:.N]
 
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
@@ -323,9 +316,8 @@ dynamical_censoring_adjusted_delay <- function(
     )
   }
   cols <- colnames(data)[map_lgl(data, is.integer)]
-  data <- data |>
-    data.table::as.data.table() |>
-    DT(, (cols) := lapply(.SD, as.double), .SDcols = cols)
+  data <- data.table::as.data.table(data)
+  data[, (cols) := lapply(.SD, as.double), .SDcols = cols]
 
   data <- drop_zero(data)
    ## need to do this because lognormal doesn't like zero
@@ -433,12 +425,11 @@ epinowcast_delay <- function(formula = ~ 1, data, by = c(),
       "epinowcast is not installed. Please install it to use this function"
     )
   }
-  data_as_counts <- data |>
-    data.table::as.data.table() |>
-    DT(, .(new_confirm = .N), by = c("ptime_daily", "stime_daily", by)) |>
-    DT(order(ptime_daily, stime_daily)) |>
-    DT(, reference_date := as.Date("2000-01-01") + ptime_daily) |>
-    DT(, report_date := as.Date("2000-01-01") + stime_daily)
+  data_as_counts <- data.table::as.data.table(data)
+  data_as_counts <- data_as_counts[, .(new_confirm = .N), by = c("ptime_daily", "stime_daily", by)]
+  data_as_counts <- data_as_counts[order(ptime_daily, stime_daily)]
+  data_as_counts[, reference_date := as.Date("2000-01-01") + ptime_daily]
+  data_as_counts[, report_date := as.Date("2000-01-01") + stime_daily]
 
   # Actual largest observerable delay
   preprocess_delay <- min(
