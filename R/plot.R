@@ -28,8 +28,7 @@ plot_relative_recovery <- function(relative_data, alpha = 0.8,
 #' Plot cases by observation window
 #' @export
 plot_cases_by_obs_window <- function(cases) {
-  cases |>
-    DT(case_type == "primary") |>
+  cases[case_type == "primary"] |>
     ggplot() +
     aes(x = time, y = cases) +
     geom_col(aes(fill = factor(obs_at)), alpha = 1, col = "#696767b1") +
