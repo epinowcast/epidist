@@ -74,8 +74,8 @@ Observe the outbreak after 25 days and take 100 samples.
 
 ```{r observe-data}
 truncated_obs <- obs |>
-  filter_obs_by_obs_time(obs_time = 25) |>
-  DT(sample(1:.N, 200, replace = FALSE))
+  filter_obs_by_obs_time(obs_time = 25)
+truncated_obs <- truncated_obs[sample(1:.N, 200, replace = FALSE)]
 ```
 
 Plot primary cases (columns), and secondary cases (dots) by the observation time of their secondary events. This reflects would could be observed in real-time.
@@ -179,8 +179,9 @@ epinowcast_fit <- epinowcast_delay(
   data = truncated_obs, parallel_chains = 4, adapt_delta = 0.95,
   show_messages = FALSE, refresh = 0, with_epinowcast_output = FALSE
 )
-epinowcast_draws <- extract_epinowcast_draws(epinowcast_fit) |>
-  DT(, model := "Joint incidence and forward delay")
+epinowcast_draws <- extract_epinowcast_draws(epinowcast_fit) 
+epinowcast_draws[, model := "Joint incidence and forward delay"]
+
 ```
 
 ### Summarise model posteriors and compare to known truth
@@ -206,12 +207,12 @@ Extract and summarise lognormal posterior estimates.
 draws <- models |>
   map(extract_lognormal_draws) |>
   rbindlist(idcol = "model") |>
-  rbind(epinowcast_draws, use.names = TRUE) |>
-  DT(,
+  rbind(epinowcast_draws, use.names = TRUE)
+
+draws <- draws[,
    model := factor(
     model, levels = c("Joint incidence and forward delay", rev(names(models)))
-   )
-  )
+   )]
 
 summarised_draws <- draws |>
   draws_to_long() |>
@@ -242,11 +243,11 @@ truncated_draws <- draws |>
     obs_at = max(truncated_obs$stime_daily),
     ptime = range(truncated_obs$ptime_daily)
   ) |>
-  summarise_variable(variable = "trunc_mean", by = c("obs_horizon", "model")) |>
-  DT(, model := factor(
+  summarise_variable(variable = "trunc_mean", by = c("obs_horizon", "model")) 
+
+truncated_draws[, model := factor(
       model, levels = c("Joint incidence and forward delay", rev(names(models)))
-    )
-  )
+    )]
 
 truncated_draws |>
   plot_mean_posterior_pred(

@@ -4,22 +4,20 @@ calculate_cohort_mean <- function(data, type = c("cohort", "cumulative"),
                                   by = c(), obs_at) {
   type <- match.arg(type)
   out <- copy(data)
-
-  out <- out |>
-    DT(, .(
-      mean = mean(delay_daily), n = .N),
-      by = c("ptime_daily", by)
-     ) |>
-    DT(order(rank(ptime_daily)))
-
+  
+  out <- out[, .(
+    mean = mean(delay_daily), n = .N),
+    by = c("ptime_daily", by)]
+  
+  out[order(rank(ptime_daily))]
+  
   if (type == "cumulative") {
     out[, mean := cumsum(mean * n) / cumsum(n), by = by]
     out[, n := cumsum(n), by = by]
   }
 
   if (!missing(obs_at)) {
-    out <- out |>
-      DT(, ptime_daily := ptime_daily - obs_at)
+    out[, ptime_daily := ptime_daily - obs_at]
   }
 
   return(out[])
@@ -56,21 +54,18 @@ calculate_truncated_means <- function(draws, obs_at, ptime,
     integrate_for_trunc_mean, otherwise = NA_real_
   )
 
-  trunc_mean <- draws |>
-    copy() |>
-    DT(,
-      obs_horizon := list(seq(ptime[1] - obs_at, ptime[2] - obs_at))
-    ) |>
-    DT(,
-      .(obs_horizon = unlist(obs_horizon)),
-      by = setdiff(colnames(draws), "obs_horizon")
-    ) |>
-    DT(,
-      trunc_mean := purrr::pmap_dbl(
-        list(x = obs_horizon, m = meanlog, s = sdlog),
-        safe_integrate_for_trunc_mean,
-        .progress = TRUE
-      )
-    )
+  trunc_mean <- data.table::copy(draws)
+  
+  trunc_mean[, obs_horizon := list(seq(ptime[1] - obs_at, ptime[2] - obs_at))]
+  trunc_mean <- trunc_mean[,
+             .(obs_horizon = unlist(obs_horizon)),
+             by = setdiff(colnames(draws), "obs_horizon")]
+  trunc_mean[,
+             trunc_mean := purrr::pmap_dbl(
+               list(x = obs_horizon, m = meanlog, s = sdlog),
+               safe_integrate_for_trunc_mean,
+               .progress = TRUE
+             )]
+  
   return(trunc_mean)
 }
