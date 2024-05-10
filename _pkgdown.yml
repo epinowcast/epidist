@@ -16,3 +16,23 @@ development:
 authors:
   Sam Abbott:
     href: "https://www.samabbott.co.uk/"
+
+reference:
+- title: Simulation
+  contents:
+  - has_concept("simulate")
+- title: Preprocess
+  contents:
+  - has_concept("preprocess")
+- title: Plot
+  contents:
+  - has_concept("plot")
+- title: Observe
+  contents:
+  - has_concept("observe")
+- title: Model
+  contents:
+  - has_concept("model")
+- title: Postprocess
+  contents:
+  - has_concept("postprocess")
