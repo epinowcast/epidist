@@ -9,7 +9,7 @@ calculate_cohort_mean <- function(data, type = c("cohort", "cumulative"),
     mean = mean(delay_daily), n = .N),
     by = c("ptime_daily", by)]
   
-  out[order(rank(ptime_daily))]
+  out <- out[order(rank(ptime_daily))]
   
   if (type == "cumulative") {
     out[, mean := cumsum(mean * n) / cumsum(n), by = by]
