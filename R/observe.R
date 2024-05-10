@@ -82,7 +82,7 @@ pad_zero <- function(data, pad = 1e-3) {
 #' @export
 drop_zero <- function(data) {
   data <- data.table::copy(data)
-  data[delay_daily != 0]
+  data <- data[delay_daily != 0]
   
   return(data)
 }

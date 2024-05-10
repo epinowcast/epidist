@@ -142,7 +142,7 @@ event_to_incidence <- function(data, by = c()) {
   dd <- data.table::copy(data)
   
   dd[, .(cases = .N), by = c("ptime_daily", by)]
-  dd[order(ptime_daily)]
+  dd <- dd[order(ptime_daily)]
   
   setnames(dd, old = c("ptime_daily"), new = c("time"))
   
