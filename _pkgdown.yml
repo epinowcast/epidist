@@ -1,14 +1,9 @@
 url: epidist.epinowcast.org/
 template:
-  bootstrap: 5
-  bootswatch: flatly
-  theme: monokai
+  package: enwtheme
   twitter:
     creator: "@seabbs"
-    card: summary_large_imag
-    twitter:
-      creator: "@seabbs"
-      card: summary_large_image
+    card: summary_large_image
 
 development:
   mode: auto
