@@ -204,7 +204,7 @@ primary_censoring_bias_correction <- function(draws) {
   draws <- data.table::copy(draws)
   draws[, mean := mean - runif(.N, min = 0, max = 1)]
   draws[, meanlog := log(mean^2 / sqrt(sd^2 + mean^2))]
-  draw[, sdlog := sqrt(log(1 + (sd^2 / mean^2)))]
+  draws[, sdlog := sqrt(log(1 + (sd^2 / mean^2)))]
   
   return(draws[])
 }
