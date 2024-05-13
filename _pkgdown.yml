@@ -14,20 +14,26 @@ authors:
 
 reference:
 - title: Simulation
+  desc: Tools for simulating datasets
   contents:
   - has_concept("simulate")
 - title: Preprocess
+  desc: Functions for preprocessing observations
   contents:
   - has_concept("preprocess")
-- title: Plot
-  contents:
-  - has_concept("plot")
 - title: Observe
+  desc: Functions for observing data
   contents:
   - has_concept("observe")
 - title: Model
+  desc: Functions for estimating epidemiological delays
   contents:
   - has_concept("model")
 - title: Postprocess
+  desc: Functions for postprocessing model output
   contents:
   - has_concept("postprocess")
+- title: Plot
+  desc: Functions and helper functions for plotting
+  contents:
+  - has_concept("plot")
