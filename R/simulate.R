@@ -10,6 +10,7 @@
 #' @return A data table with two columns: case (case number) and ptime (primar
 #' event time).
 #'
+#' @family simulate
 #' @export
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
   data.table::data.table(
@@ -33,6 +34,7 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 #' @return A data table with two columns: case (case number) and ptime (primary
 #' event time).
 #'
+#' @family simulate
 #' @export
 simulate_exponential_cases <- function(r = 0.2,
                                        sample_size = 10000,
@@ -71,6 +73,7 @@ simulate_exponential_cases <- function(r = 0.2,
 #' @return A data table with two columns: case (case number) and ptime (primary
 #' event time).
 #'
+#' @family simulate
 #' @export
 simulate_gillespie <- function(r = 0.2,
                                gamma = 1 / 7,
@@ -128,6 +131,7 @@ simulate_gillespie <- function(r = 0.2,
 #' @return A data table that augments linelist with two new columns: delay
 #' (secondary event latency) and stime (the time of the secondary event).
 #'
+#' @family simulate
 #' @export
 simulate_secondary <- function(linelist, dist = rlnorm, ...) {
   obs <- data.table::copy(linelist)
@@ -160,6 +164,7 @@ simulate_secondary <- function(linelist, dist = rlnorm, ...) {
 #' @return A probability mass function that represents the distribution of the
 #' delays.
 #'
+#' @family simulate
 #' @export
 #' @examples
 #' simulate_double_censored_pmf(0.6, 0.5, 10, 1000)

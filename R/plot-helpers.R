@@ -1,4 +1,6 @@
 #' Calculate the cohort-based or cumulative mean
+#' 
+#' @family plot
 #' @export
 calculate_cohort_mean <- function(data, type = c("cohort", "cumulative"),
                                   by = c(), obs_at) {
@@ -24,6 +26,8 @@ calculate_cohort_mean <- function(data, type = c("cohort", "cumulative"),
 }
 
 #' Calculate the truncated mean by observation horizon
+#' 
+#' @family plot
 #' @export
 calculate_truncated_means <- function(draws, obs_at, ptime,
                                       distribution = function(x, y, z) {

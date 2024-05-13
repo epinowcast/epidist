@@ -1,4 +1,6 @@
 #' For a target variable convert from individual data to counts
+#' 
+#' @family preprocess
 #' @export
 linelist_to_counts <- function(linelist, target_time = "ptime_daily",
                                additional_by = c(), pad_zeros = FALSE) {
@@ -22,6 +24,8 @@ linelist_to_counts <- function(linelist, target_time = "ptime_daily",
 }
 
 #' Convert primary and secondary observations to counts in long format
+#' 
+#' @family preprocess
 #' @export
 linelist_to_cases <- function(linelist) {
   primary_cases <- linelist_to_counts(linelist)
@@ -42,6 +46,8 @@ linelist_to_cases <- function(linelist) {
 }
 
 #' For the observation observed at variable reverse the factor ordering
+#' 
+#' @family preprocess
 #' @export
 reverse_obs_at <- function(dt) {
   dt_rev <- data.table::copy(dt)
@@ -53,6 +59,8 @@ reverse_obs_at <- function(dt) {
 }
 
 #' Construct case counts by observation window based on secondary observations
+#' 
+#' @family preprocess
 #' @export
 construct_cases_by_obs_window <- function(linelist, windows = c(25, 45),
   obs_type = c("stime", "ptime"), upper_window = max(linelist$stime_daily)) {
@@ -94,6 +102,8 @@ construct_cases_by_obs_window <- function(linelist, windows = c(25, 45),
 }
 
 #' Combine truncated and fully observed observations
+#' 
+#' @family preprocess
 #' @export
 combine_obs <- function(truncated_obs, obs) {
   cobs <- rbind(
@@ -105,6 +115,8 @@ combine_obs <- function(truncated_obs, obs) {
 }
 
 #' Calculate the mean difference between continuous and discrete event time
+#' 
+#' @family preprocess
 #' @export
 calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
   truncated_obs_psumm <- data.table::copy(truncated_obs)
@@ -137,6 +149,8 @@ calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
 }
 
 #' Convert from event based to incidence based data
+#' 
+#' @family preprocess
 #' @export
 event_to_incidence <- function(data, by = c()) {
   dd <- data.table::copy(data)
