@@ -46,3 +46,11 @@ primary events, secondary events, and delays.
 \examples{
 simulate_double_censored_pmf(0.6, 0.5, 10, 1000)
 }
+\seealso{
+Other simulate: 
+\code{\link{simulate_exponential_cases}()},
+\code{\link{simulate_gillespie}()},
+\code{\link{simulate_secondary}()},
+\code{\link{simulate_uniform_cases}()}
+}
+\concept{simulate}

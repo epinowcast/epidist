@@ -9,3 +9,11 @@ filter_obs_by_obs_time(linelist, obs_time)
 \description{
 Filter observations based on a observation time of secondary events
 }
+\seealso{
+Other observe: 
+\code{\link{drop_zero}()},
+\code{\link{filter_obs_by_ptime}()},
+\code{\link{observe_process}()},
+\code{\link{pad_zero}()}
+}
+\concept{observe}
