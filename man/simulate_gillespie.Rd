@@ -26,3 +26,11 @@ This function simulates cases from an Stochastic SIR model. The user may
 specify the rate of infection r, the rate of recovery gamma, the initial
 number of infected cases I0, and the total population size N.
 }
+\seealso{
+Other simulate: 
+\code{\link{simulate_double_censored_pmf}()},
+\code{\link{simulate_exponential_cases}()},
+\code{\link{simulate_secondary}()},
+\code{\link{simulate_uniform_cases}()}
+}
+\concept{simulate}

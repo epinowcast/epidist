@@ -116,53 +116,7 @@ censor_delay <- calculate_censor_delay(truncated_obs)
 plot_censor_delay(censor_delay)
 ```
 
-### Models
-
-First fit a naive lognormal model with no adjustment.
-
-```{r}
-naive_fit <- naive_delay(data = truncated_obs, cores = 4, refresh = 0)
-```
-
-Estimate the delay after filtering out the most recent data as crude adjustement for right truncation.
-
-```{r}
-filtered_fit <- filtered_naive_delay(
-  data = truncated_obs, cores = 4, refresh = 0
-)
-```
-
-Adjust for date censoring.
-
-```{r}
-censored_fit <- censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0
-)
-```
-
-Adjust for censoring and filter to crudely adjust for right truncation.
-
-```{r}
-filtered_censored_fit <- filtered_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0
-)
-```
-
-Adjust for right truncation.
-
-```{r}
-truncation_fit <- truncation_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0
-)
-```
-
-Adjust for right truncation and date censoring.
-
-```{r}
-truncation_censoring_fit <- truncation_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0
-)
-```
+### Model
 
 Adjust for right truncation and date censoring using a latent variable approach.
 
@@ -172,32 +126,13 @@ latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
 )
 ```
 
-Fit a joint model to estimate primary incidence and the delay to reporting secondary incidence (this is a thin wrapper around the `epinowcast` package that is not suggested for real-world usage).
-
-```{r}
-epinowcast_fit <- epinowcast_delay(
-  data = truncated_obs, parallel_chains = 4, adapt_delta = 0.95,
-  show_messages = FALSE, refresh = 0, with_epinowcast_output = FALSE
-)
-epinowcast_draws <- extract_epinowcast_draws(epinowcast_fit) 
-epinowcast_draws[, model := "Joint incidence and forward delay"]
-
-```
-
-### Summarise model posteriors and compare to known truth
+### Summarise model posterior and compare to known truth
 
 Combine models into a named list.
 
 ```{r}
 models <- list(
-  "Naive" = naive_fit,
-  "Filtered" = filtered_fit,
-  "Censoring adjusted" = censored_fit,
-  "Filtered and censoring adjusted" = filtered_censored_fit,
-  "Truncation adjusted" = truncation_fit,
-  "Truncation and censoring adjusted" = truncation_censoring_fit,
-  "Latent variable truncation and censoring adjusted" =
-    latent_truncation_censoring_fit
+  "Latent variable truncation and censoring adjusted" = latent_truncation_censoring_fit
 )
 ```
 
