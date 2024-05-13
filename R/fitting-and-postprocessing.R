@@ -1,4 +1,6 @@
 #' Sample from the posterior of a model with additional diagnositics
+#' 
+#' @family postprocess
 #' @export
 sample_model <- function(model, data, scenario = data.table::data.table(id = 1),
                          diagnostics = TRUE, ...) {
@@ -48,6 +50,8 @@ sample_model <- function(model, data, scenario = data.table::data.table(id = 1),
 }
 
 #' Sample from the posterior of an epinowcast model with additional diagnositics
+#' 
+#' @family postprocess
 #' @export
 sample_epinowcast_model <- function(
   model, data, scenario = data.table::data.table(id = 1),
@@ -115,6 +119,8 @@ sample_epinowcast_model <- function(
 }
 
 #' Add natural scale summary parameters for a lognormal distribution
+#' 
+#' @family postprocess
 #' @export
 add_natural_scale_mean_sd <- function(dt) {
   nat_dt <- data.table::copy(dt)
@@ -127,6 +133,8 @@ add_natural_scale_mean_sd <- function(dt) {
 }
 
 #' Extract posterior samples for a lognormal brms model
+#' 
+#' @family postprocess
 #' @export
 #' @importFrom posterior as_draws_df
 extract_lognormal_draws <- function(
@@ -164,6 +172,8 @@ extract_lognormal_draws <- function(
 }
 
 #' Extract posterior samples for a lognormal epinowcast model
+#' 
+#' @family postprocess
 #' @export
 extract_epinowcast_draws <- function(
   data, id_vars, from_dt = FALSE
@@ -199,6 +209,8 @@ extract_epinowcast_draws <- function(
 }
 
 #' Primary event bias correction
+#' 
+#' @family postprocess
 #' @export
 primary_censoring_bias_correction <- function(draws) {
   draws <- data.table::copy(draws)
@@ -210,6 +222,8 @@ primary_censoring_bias_correction <- function(draws) {
 }
 
 #' Convert posterior lognormal samples to long format
+#' 
+#' @family postprocess
 #' @export
 draws_to_long <- function(draws) {
   long_draws <- data.table::melt(
@@ -221,6 +235,8 @@ draws_to_long <- function(draws) {
 }
 
 #' Make posterior lognormal samples relative to true values
+#' 
+#' @family postprocess
 #' @export
 make_relative_to_truth <- function(draws, secondary_dist, by = "parameter") {
   draws <- merge(
@@ -238,6 +254,8 @@ make_relative_to_truth <- function(draws, secondary_dist, by = "parameter") {
 #' @param not_by A vector of columns to exclude from the grouping
 #' This will be overridden if by is specified.
 #' @inheritParams summarise_variable
+#' 
+#' @family postprocess
 #' @export
 summarise_draws <- function(draws, sf, not_by = "value", by) {
   if (missing(by)) {
@@ -280,6 +298,8 @@ summarise_draws <- function(draws, sf, not_by = "value", by) {
 #' @param sf The number of significant figures to use
 #' @param variable The variable to summarise
 #' @param by A vector of columns to group by
+#' 
+#' @family postprocess
 #' @export
 summarise_variable <- function(draws, variable, sf = 6, by = c()) {
   if (missing(variable)) {

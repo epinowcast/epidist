@@ -1,4 +1,6 @@
 #' Estimate delays naively
+#' 
+#' @family model
 #' @export
 naive_delay <- function(formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data,
                         fn = brms::brm, family = "lognormal", ...) {
@@ -10,6 +12,8 @@ naive_delay <- function(formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data,
 }
 
 #' Estimate delays with filtering of the most recent data
+#' 
+#' @family model
 #' @export
 filtered_naive_delay <- function(
   formula = brms::bf(delay_daily ~ 1, sigma ~ 1), data, fn = brms::brm,
@@ -26,6 +30,8 @@ filtered_naive_delay <- function(
 }
 
 #' Estimate delays adjusted for censoring
+#' 
+#' @family model
 #' @export
 censoring_adjusted_delay <- function(
   formula = brms::bf(
@@ -39,6 +45,8 @@ censoring_adjusted_delay <- function(
 
 #' Estimate delays adjusted forcensoring using a
 #' latent model
+#' 
+#' @family model
 #' @export
 latent_censoring_adjusted_delay <- function(
   formula = brms::bf(
@@ -103,6 +111,8 @@ latent_censoring_adjusted_delay <- function(
 
 #' Estimate delays with filtering of the most recent data and
 #' censoring adjustment
+#' 
+#' @family model
 #' @export
 filtered_censoring_adjusted_delay <- function(
   formula = brms::bf(
@@ -120,6 +130,8 @@ filtered_censoring_adjusted_delay <- function(
 }
 
 #' Estimate delays adjusted for right truncation
+#' 
+#' @family model
 #' @export
 truncation_adjusted_delay <- function(
   formula = brms::bf(
@@ -134,6 +146,8 @@ truncation_adjusted_delay <- function(
 }
 
 #' Estimate delays adjusted for censoring and right truncation
+#' 
+#' @family model
 #' @export
 truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
@@ -151,6 +165,8 @@ truncation_censoring_adjusted_delay <- function(
 
 #' Estimate delays adjusted for right truncation and censoring using a
 #' latent model
+#' 
+#' @family model
 #' @export
 latent_truncation_censoring_adjusted_delay <- function(
   formula = brms::bf(
@@ -256,6 +272,8 @@ latent_truncation_censoring_adjusted_delay <- function(
 #' Estimate delays from the backward delay distribution + brms
 #' @param data_cases data frame consisting of integer time column and incidence
 #' column
+#' 
+#' @family model
 #' @export
 dynamical_censoring_adjusted_delay <- function(
     formula = brms::bf(
@@ -407,11 +425,13 @@ dynamical_censoring_adjusted_delay <- function(
   return(fit)
 }
 
+#' @family model
 #' @export
 dynamical_censoring_adjusted_delay_wrapper <- function(data, data_cases, ...) {
   dynamical_censoring_adjusted_delay(data = data, ...)
 }
 
+#' @family model
 #' @export
 epinowcast_delay <- function(formula = ~ 1, data, by = c(),
                              family = "lognormal", max_delay = 30,
