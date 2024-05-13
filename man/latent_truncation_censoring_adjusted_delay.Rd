@@ -28,3 +28,4 @@ latent_truncation_censoring_adjusted_delay(
 Estimate delays adjusted for right truncation and censoring using a
 latent model
 }
+\concept{model}

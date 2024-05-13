@@ -9,3 +9,11 @@ pad_zero(data, pad = 0.001)
 \description{
 Pad zero observations as unstable in a lognormal distribution
 }
+\seealso{
+Other observe: 
+\code{\link{drop_zero}()},
+\code{\link{filter_obs_by_obs_time}()},
+\code{\link{filter_obs_by_ptime}()},
+\code{\link{observe_process}()}
+}
+\concept{observe}

@@ -22,3 +22,11 @@ This function simulates secondary events based on a given delay
 distribution. The input dataset should have the primary event times in a
 column named 'ptime'.
 }
+\seealso{
+Other simulate: 
+\code{\link{simulate_double_censored_pmf}()},
+\code{\link{simulate_exponential_cases}()},
+\code{\link{simulate_gillespie}()},
+\code{\link{simulate_uniform_cases}()}
+}
+\concept{simulate}

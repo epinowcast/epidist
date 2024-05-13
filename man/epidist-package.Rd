@@ -14,6 +14,7 @@ Understanding and accurately estimating epidemiological delay distributions is i
 Authors:
 \itemize{
   \item Sam Abbott \email{contact@samabbott.co.uk} (\href{https://orcid.org/0000-0001-8057-8037}{ORCID})
+  \item Adam Howes \email{adamthowes@gmail.com} (\href{https://orcid.org/0000-0003-2386-4031}{ORCID})
 }
 
 }
