@@ -9,3 +9,13 @@ event_to_incidence(data, by = c())
 \description{
 Convert from event based to incidence based data
 }
+\seealso{
+Other preprocess: 
+\code{\link{calculate_censor_delay}()},
+\code{\link{combine_obs}()},
+\code{\link{construct_cases_by_obs_window}()},
+\code{\link{linelist_to_cases}()},
+\code{\link{linelist_to_counts}()},
+\code{\link{reverse_obs_at}()}
+}
+\concept{preprocess}
