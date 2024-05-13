@@ -1,4 +1,6 @@
 #' Plot the posterior estimates as densities
+#' 
+#' @family plot
 #' @export
 plot_recovery <- function(data, alpha = 0.8,
                                    quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {
@@ -13,6 +15,8 @@ plot_recovery <- function(data, alpha = 0.8,
 }
 
 #' Plot the relative difference between true values and posterior estimates
+#' 
+#' @family plot
 #' @export
 plot_relative_recovery <- function(relative_data, alpha = 0.8,
                                    quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {
@@ -26,6 +30,8 @@ plot_relative_recovery <- function(relative_data, alpha = 0.8,
 }
 
 #' Plot cases by observation window
+#' 
+#' @family plot
 #' @export
 plot_cases_by_obs_window <- function(cases) {
   cases[case_type == "primary"] |>
@@ -50,6 +56,8 @@ plot_cases_by_obs_window <- function(cases) {
 }
 
 #' Plot the empirical delay distribution
+#' 
+#' @family plot
 #' @export
 plot_empirical_delay <- function(cases, meanlog, sdlog) {
   plot <- cases |>
@@ -80,6 +88,8 @@ plot_empirical_delay <- function(cases, meanlog, sdlog) {
 }
 
 #' Plot the mean difference between continuous and discrete event time
+#' 
+#' @family plot
 #' @export
 plot_censor_delay <- function(censor_delay) {
   ggplot(censor_delay) +
@@ -94,6 +104,7 @@ plot_censor_delay <- function(censor_delay) {
 }
 
 #' plot empirical cohort-based or cumulative mean vs posterior mean
+#' 
 #' @param summarised_mean Summarised mean as produced by [summarise_variable()]
 #' @param data data used for object fitting
 #' @param truncate account for truncation?
@@ -103,6 +114,8 @@ plot_censor_delay <- function(censor_delay) {
 #' @param ribbon_bounds Bounds of the quantile ribbon. Defaults to 
 #' `c(0.05, 0.95)` which corresponds to the 90% credible interval.
 #' @param ... Additional arguments passed to [ggplot2::aes()].
+#' 
+#' @family plot
 #' @export
 plot_mean_posterior_pred <- function(summarised_mean, obs_mean,
                                      alpha = 0.3, mean = FALSE, ribbon = TRUE,
@@ -149,6 +162,8 @@ make_ribbon_bound <- function(quantile) {
 }
 
 #' Plot empirical cohort-based or cumulative mean
+#' 
+#' @family plot
 #' @export
 plot_cohort_mean <- function(data) {
   gplot <- ggplot(data) +

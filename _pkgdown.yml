@@ -1,18 +1,33 @@
 url: epidist.epinowcast.org/
 template:
-  bootstrap: 5
-  bootswatch: flatly
-  theme: monokai
-  twitter:
-    creator: "@seabbs"
-    card: summary_large_imag
-    twitter:
-      creator: "@seabbs"
-      card: summary_large_image
+  package: enwtheme
 
 development:
   mode: auto
 
-authors:
-  Sam Abbott:
-    href: "https://www.samabbott.co.uk/"
+reference:
+- title: Simulation
+  desc: Tools for simulating datasets
+  contents:
+  - has_concept("simulate")
+- title: Preprocess
+  desc: Functions for preprocessing observations
+  contents:
+  - has_concept("preprocess")
+- title: Observe
+  desc: Functions for observing data
+  contents:
+  - has_concept("observe")
+- title: Model
+  desc: Functions for estimating epidemiological delays
+  contents:
+  - has_concept("model")
+- title: Postprocess
+  desc: Functions for postprocessing model output
+  contents:
+  - has_concept("postprocess")
+- title: Plot
+  desc: Functions and helper functions for plotting
+  contents:
+  - has_concept("plot")
+  
