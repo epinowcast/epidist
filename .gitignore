@@ -22,3 +22,4 @@ data/models/*doublecensor
 data/models/*full
 data/models/*integrate
 data/models/*reparam
+docs
