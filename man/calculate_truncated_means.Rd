@@ -16,3 +16,15 @@ calculate_truncated_means(
 \description{
 Calculate the truncated mean by observation horizon
 }
+\seealso{
+Other plot: 
+\code{\link{calculate_cohort_mean}()},
+\code{\link{plot_cases_by_obs_window}()},
+\code{\link{plot_censor_delay}()},
+\code{\link{plot_cohort_mean}()},
+\code{\link{plot_empirical_delay}()},
+\code{\link{plot_mean_posterior_pred}()},
+\code{\link{plot_recovery}()},
+\code{\link{plot_relative_recovery}()}
+}
+\concept{plot}

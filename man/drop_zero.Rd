@@ -9,3 +9,11 @@ drop_zero(data)
 \description{
 Drop zero observations as unstable in a lognormal distribution
 }
+\seealso{
+Other observe: 
+\code{\link{filter_obs_by_obs_time}()},
+\code{\link{filter_obs_by_ptime}()},
+\code{\link{observe_process}()},
+\code{\link{pad_zero}()}
+}
+\concept{observe}

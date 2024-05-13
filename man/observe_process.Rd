@@ -9,3 +9,11 @@ observe_process(linelist)
 \description{
 Observation process for primary and secondary events
 }
+\seealso{
+Other observe: 
+\code{\link{drop_zero}()},
+\code{\link{filter_obs_by_obs_time}()},
+\code{\link{filter_obs_by_ptime}()},
+\code{\link{pad_zero}()}
+}
+\concept{observe}

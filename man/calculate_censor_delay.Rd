@@ -9,3 +9,13 @@ calculate_censor_delay(truncated_obs, additional_by = c())
 \description{
 Calculate the mean difference between continuous and discrete event time
 }
+\seealso{
+Other preprocess: 
+\code{\link{combine_obs}()},
+\code{\link{construct_cases_by_obs_window}()},
+\code{\link{event_to_incidence}()},
+\code{\link{linelist_to_cases}()},
+\code{\link{linelist_to_counts}()},
+\code{\link{reverse_obs_at}()}
+}
+\concept{preprocess}

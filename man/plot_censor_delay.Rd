@@ -9,3 +9,15 @@ plot_censor_delay(censor_delay)
 \description{
 Plot the mean difference between continuous and discrete event time
 }
+\seealso{
+Other plot: 
+\code{\link{calculate_cohort_mean}()},
+\code{\link{calculate_truncated_means}()},
+\code{\link{plot_cases_by_obs_window}()},
+\code{\link{plot_cohort_mean}()},
+\code{\link{plot_empirical_delay}()},
+\code{\link{plot_mean_posterior_pred}()},
+\code{\link{plot_recovery}()},
+\code{\link{plot_relative_recovery}()}
+}
+\concept{plot}
