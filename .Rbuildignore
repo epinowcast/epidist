@@ -10,3 +10,4 @@
 ^docs$
 ^data-raw$
 ^CITATION\.cff$
+^pkgdown$
