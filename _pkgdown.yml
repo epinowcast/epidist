@@ -1,16 +1,9 @@
 url: epidist.epinowcast.org/
 template:
   package: enwtheme
-  twitter:
-    creator: "@seabbs"
-    card: summary_large_image
 
 development:
   mode: auto
-
-authors:
-  Sam Abbott:
-    href: "https://www.samabbott.co.uk/"
 
 reference:
 - title: Simulation
