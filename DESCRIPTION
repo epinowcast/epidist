@@ -37,3 +37,4 @@ Remotes:
     Rdatatable/data.table,
     epinowcast/epinowcast
 Config/testthat/edition: 3
+URL: https://epidist.epinowcast.org/
