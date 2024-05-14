@@ -55,6 +55,22 @@ Here we quickly generate some simulated example data.
 We focus on the format that the data needs to take for it to work with the fitting function.
 Eventually, we discuss the tools available in the package to get your data into the right format, or we link to a vignette about it.
 
+```{r}
+outbreak <- simulate_gillespie(seed = 101)
+
+secondary_dist <- data.table(meanlog = 1.8, sdlog = 0.5) |>
+  add_natural_scale_mean_sd()
+
+truncated_obs <- outbreak |>
+  simulate_secondary(
+    meanlog = secondary_dist[["meanlog"]],
+    sdlog = secondary_dist[["sdlog"]]
+  ) |>
+  observe_process() |>
+  filter_obs_by_obs_time(obs_time = 25) %>%
+  .[sample(1:.N, 200, replace = FALSE)]
+```
+
 ## Fit the model
 
 We fit the model adjusting for right truncation and date censoring using a latent variable approach.
@@ -62,9 +78,9 @@ We briefly describe the model, and the inference methodology.
 Eventually, we link to a vignette about common issues with model fitting and HMC.
 
 ```{r}
-# latent_truncation_censoring_fit <- latent_truncation_censoring_adjusted_delay(
-#   data = truncated_obs, cores = 4, refresh = 0
-# )
+fit <- latent_truncation_censoring_adjusted_delay(
+  data = truncated_obs, cores = 4, refresh = 0
+)
 ```
 
 ## Compare estimates to reality
@@ -72,3 +88,9 @@ Eventually, we link to a vignette about common issues with model fitting and HMC
 Compare modelled estimate to underlying truth here to convince user that it works.
 Perhaps as an exercise, we could show the "really simple" estimate being wrong here otherwise it won't be so impressive that the model is right.
 This section should also show the user how to get objects that they might want out of the fitted object.
+
+```{r}
+draws <- extract_lognormal_draws(fit)
+draws_long <- draws_to_long(draws)
+summarise_draws(draws_long, sf = 2)
+```
