@@ -78,34 +78,36 @@ obs <- outbreak |>
 head(obs)
 ```
 
-Now we are ready to simulate observation of the epidemic process at time `obs_time`:
-<!-- Note: Adam doesn't really understand `observe_process()` and `filter_obs_by_obs_time()` yet. -->
-<!-- When he does he'll write something better here. -->
+Now we are ready to simulate observation of the epidemic process with both interval censoring and right truncation.
+Using `observe_process` we censor primary and secondary event times with a daily interval:
+
+```{r}
+obs_cens <- obs |> observe_process()
+```
+
+Using `filter_obs_by_obs_time` we suppose that only individuals with a secondary event time before `obs_time` are observed:
 
 ```{r}
 obs_time <- 25
-
-obs <- obs |>
-  observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time)
+obs_cens_trunc <- filter_obs_by_obs_time(obs_cens_trunc, obs_time = obs_time)
 ```
 
 Finally, we suppose that only a random sample of individuals of size `sample_size` are observed:
 
 ```{r}
 sample_size <- 200
-obs <- obs[sample(1:.N, sample_size, replace = FALSE)]
+obs_cens_trunc_samp <- obs_cens_trunc[sample(1:.N, sample_size, replace = FALSE)]
 ```
 
 ## Fit the model
 
-We fit the model adjusting for right truncation and date censoring using a latent variable approach.
-We briefly describe the model, and the inference methodology.
-Eventually, we link to a vignette about common issues with model fitting and HMC.
+If we had access to the data `obs` it would be simple to estimate the delay distribution.
+However, with only access to the censored, truncated, sampled data `obs_cens_trunc_samp` it is not so easy...
+Fortunately we solve it!
 
 ```{r}
 fit <- latent_truncation_censoring_adjusted_delay(
-  data = obs, cores = 4, refresh = 0
+  data = obs_cens_trunc_samp, cores = 4, refresh = 0
 )
 ```
 
