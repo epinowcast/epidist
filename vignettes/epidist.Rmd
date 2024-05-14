@@ -31,19 +31,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-In epidemiology, many important quantities can be thought of as the time between two events, or as delays.
-Examples include:
-
-* the incubation period (time between infection and symptom onset)
-* serial interval (time between symptom onset of infectee and symptom onset of infected), and 
-* generation interval (time between infection of infectee and infection of infected).
-
-Unfortunately, estimating these quantities accurately from observational data is usually difficult.
-In our experience, the two main issues are interval censoring and right truncation.
-The `epidist` package makes it easy to estimate delays using a statistical model which properly accounts for these two issues.
-
-## Example data
-
 ```{r load-requirements}
 library(epidist)
 library(data.table)
@@ -51,24 +38,63 @@ library(purrr)
 library(ggplot2)
 ```
 
-Here we quickly generate some simulated example data.
-We focus on the format that the data needs to take for it to work with the fitting function.
-Eventually, we discuss the tools available in the package to get your data into the right format, or we link to a vignette about it.
+Many important quantities in epidemiology can be thought of as the time between two events, or "delays".
+Examples include:
+
+* the incubation period (time between infection and symptom onset)
+* serial interval (time between symptom onset of infectee and symptom onset of infected), and 
+* generation interval (time between infection of infectee and infection of infected).
+
+Unfortunately, estimating delays accurately from observational data is usually difficult.
+In our experience, the two main issues are interval censoring and right truncation.
+The `epidist` package makes it easy to estimate delays using a statistical model which properly accounts for these two issues.
+
+## Example data
+
+Data must be in a particular format to be used within the `epidist` package.
+In this section, we use package functions to simulate data of the appropriate format.
+<!-- Please see as of yet unwritten vignette for information about how to transform your data of other formats to the right format. -->
+
+We start by using the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data from a stochastic compartmental model:
 
 ```{r}
 outbreak <- simulate_gillespie(seed = 101)
+```
 
+`outbreak` is a `data.table` object, with two columns: the case number `case` and the time of primary event `ptime`.
+
+For the delay between primary and secondary event, we will use a lognormal distribution:
+
+```{r}
 secondary_dist <- data.table(meanlog = 1.8, sdlog = 0.5) |>
   add_natural_scale_mean_sd()
 
-truncated_obs <- outbreak |>
+obs <- outbreak |>
   simulate_secondary(
     meanlog = secondary_dist[["meanlog"]],
     sdlog = secondary_dist[["sdlog"]]
-  ) |>
+  )
+
+head(obs)
+```
+
+Now we are ready to simulate observation of the epidemic process at time `obs_time`:
+<!-- Note: Adam doesn't really understand `observe_process()` and `filter_obs_by_obs_time()` yet. -->
+<!-- When he does he'll write something better here. -->
+
+```{r}
+obs_time <- 25
+
+obs <- obs |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = 25) %>%
-  .[sample(1:.N, 200, replace = FALSE)]
+  filter_obs_by_obs_time(obs_time = obs_time)
+```
+
+Finally, we suppose that only a random sample of individuals of size `sample_size` are observed:
+
+```{r}
+sample_size <- 200
+obs <- obs[sample(1:.N, sample_size, replace = FALSE)]
 ```
 
 ## Fit the model
@@ -79,7 +105,7 @@ Eventually, we link to a vignette about common issues with model fitting and HMC
 
 ```{r}
 fit <- latent_truncation_censoring_adjusted_delay(
-  data = truncated_obs, cores = 4, refresh = 0
+  data = obs, cores = 4, refresh = 0
 )
 ```
 
