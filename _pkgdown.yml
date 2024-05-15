@@ -5,6 +5,12 @@ template:
 development:
   mode: auto
 
+authors:
+  Sam Abbott:
+    href: "https://www.samabbott.co.uk/"
+  Adam Howes:
+    href: "https://athowes.github.io/"
+
 reference:
 - title: Simulation
   desc: Tools for simulating datasets
