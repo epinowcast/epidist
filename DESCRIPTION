@@ -29,7 +29,8 @@ Imports:
     ggplot2,
     posterior,
     purrr
-Suggests: 
+Suggests:
+    bookdown,
     epinowcast,
     testthat (>= 3.0.0)
 Remotes:
