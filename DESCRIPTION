@@ -29,11 +29,16 @@ Imports:
     ggplot2,
     posterior,
     purrr
-Suggests: 
+Suggests:
+    bookdown,
     epinowcast,
     testthat (>= 3.0.0)
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
     epinowcast/epinowcast
+Config/Needs/website:
+    r-lib/pkgdown,
+    epinowcast/enwtheme
 Config/testthat/edition: 3
+URL: https://epidist.epinowcast.org/
