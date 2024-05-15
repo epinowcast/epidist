@@ -23,7 +23,7 @@ obs <- outbreak |>
 truncated_obs <- obs |>
   filter_obs_by_obs_time(obs_time = 25)
 
-truncated_obs <- truncated_obs[sample(1:.N, 200, replace = FALSE)]
+truncated_obs <- truncated_obs[sample(seq_len(.N), 200, replace = FALSE)]
 
 combined_obs <- combine_obs(truncated_obs, obs)
 meanlog <- secondary_dist$meanlog[[1]]
@@ -32,7 +32,10 @@ sdlog <- secondary_dist$sdlog[[1]]
 plot <- combined_obs |>
   ggplot() +
   aes(x = delay_daily) +
-  geom_histogram(aes(y = after_stat(density), fill = obs_at), binwidth = 1, position = "dodge") +
+  geom_histogram(
+    aes(y = after_stat(density), fill = obs_at),
+    binwidth = 1, position = "dodge"
+  ) +
   lims(x = c(0, 18))
 
 if (!missing(meanlog) && !missing(sdlog)) {
