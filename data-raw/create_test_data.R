@@ -16,4 +16,4 @@ example_obs <- simulate_gillespie() |>
   filter_obs_by_obs_time(obs_time = obs_time) %>%
   .[sample(seq_len(.N), sample_size, replace = FALSE)]
 
-usethis::use_data(example_obs, overwrite = TRUE)
+usethis::use_data(example_obs, overwrite = TRUE, internal = TRUE)
