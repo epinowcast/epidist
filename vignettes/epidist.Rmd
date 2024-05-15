@@ -5,6 +5,7 @@ output:
   bookdown::html_vignette2:
     fig_caption: yes
     code_folding: show
+    number_sections: true
 pkgdown:
   as_is: true
 csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
@@ -38,8 +39,8 @@ library(purrr)
 library(ggplot2)
 ```
 
-Many important quantities in epidemiology can be thought of as the time between two events, or "delays".
-Examples include:
+Many quantities in epidemiology can be thought of as the time between two events, or "delays".
+Important examples include:
 
 * the incubation period (time between infection and symptom onset)
 * serial interval (time between symptom onset of infectee and symptom onset of infected), and 
@@ -47,23 +48,26 @@ Examples include:
 
 Unfortunately, estimating delays accurately from observational data is usually difficult.
 In our experience, the two main issues are interval censoring and right truncation.
-The `epidist` package makes it easy to estimate delays using a statistical model which properly accounts for these two issues.
+Don't worry if you've not come across these terms before.
+By simulating example data, we will explain what they mean in Section \@ref(data)!
+Next, in Section \@ref(fit), we show how `epidist` can be used to estimate delays using a statistical model which properly accounts for these two issues.
+Finally, in Section \@ref(compare), we demonstrate that the fitted delay distribution accurately recovers the underlying truth.
 
-## Example data
+# Example data {#data}
 
-Data must be in a particular format to be used within the `epidist` package.
-In this section, we use package functions to simulate data of the appropriate format.
+Data should be in a certain format for use within the `epidist` package.
+In this section, we simulate data of the appropriate format, and in doing so explain the two main issues with observational delay data.
 <!-- Please see as of yet unwritten vignette for information about how to transform your data of other formats to the right format. -->
 
-We start by using the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data from a stochastic compartmental model:
+First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data from a stochastic compartmental model:
 
 ```{r}
 outbreak <- simulate_gillespie(seed = 101)
 ```
 
-`outbreak` is a `data.table` object, with two columns: the case number `case` and the time of primary event `ptime`.
+`outbreak` is a `data.table` with columns for the case number `case` and the time of primary event `ptime`.
 
-For the delay between primary and secondary event, we will use a lognormal distribution:
+Now, to generate secondary events, we will use a lognormal distribution ror the delay between primary and secondary events:
 
 ```{r}
 secondary_dist <- data.table(meanlog = 1.8, sdlog = 0.5) |>
@@ -78,28 +82,61 @@ obs <- outbreak |>
 head(obs)
 ```
 
-Now we are ready to simulate observation of the epidemic process with both interval censoring and right truncation.
-Using `observe_process` we censor primary and secondary event times with a daily interval:
+`obs` is a `data.table` object with additional columns for the delay `delay` and time of secondary event `stime`.
+The secondary event time is simply the primary event time plus the delay:
 
 ```{r}
+all(obs$ptime + obs$delay == obs$stime)
+```
+
+If we received the data `obs` as above then estimating the delay distribution would be easy, and this package wouldn't need to exist.
+However, in reality, we will almost never receive the data as above.
+
+First, the times of primary and secondary events will usually be censored.
+This means that rather than exact event times, we observe event times within an interval.
+Here we suppose that the interval is daily, resulting in an obscuring of the exact delay data (Figure \@ref(fig:cens)):
+
+```{r}
+# observe_process() should be renamed and include a "daily" i.e. 1 argument
 obs_cens <- obs |> observe_process()
 ```
 
-Using `filter_obs_by_obs_time` we suppose that only individuals with a secondary event time before `obs_time` are observed:
+(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times.
+
+```{r cens, fig.cap="(ref:cens)"}
+ggplot(obs_cens, aes(x = delay, y = delay_daily)) +
+  geom_point(alpha = 0.25) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  theme_minimal() +
+  coord_fixed() +
+  labs(x = "Exact delay time (days)", y = "Censored delay time (days)")
+```
+
+Next, during an outbreak we will usually be estimating delays in real time.
+The result is that only those cases with a secondary event occuring before some time will be observed.
+This is called (right) truncation, and biases the observation process towards shorter delays:
 
 ```{r}
 obs_time <- 25
-obs_cens_trunc <- filter_obs_by_obs_time(obs_cens_trunc, obs_time = obs_time)
+# filter_obs_by_obs_time() should be renamed to refer to stime
+obs_cens_trunc <- filter_obs_by_obs_time(obs_cens, obs_time = obs_time)
 ```
 
-Finally, we suppose that only a random sample of individuals of size `sample_size` are observed:
+Finally, in reality, it's not possible to observe every case. We suppose that a random sample of individuals of size `sample_size` are observed:
 
 ```{r}
 sample_size <- 200
+```
+
+This sample size corresponds to `r 100 * round(sample_size / nrow(obs_cens_trunc), 3)`% of the data.
+
+```{r}
 obs_cens_trunc_samp <- obs_cens_trunc[sample(1:.N, sample_size, replace = FALSE)]
 ```
 
-## Fit the model
+With our censored, truncated, and sampled data, we are now ready to attempt to recover the underlying delay distribution using `epidist`.
+
+# Fit the model {#fit}
 
 If we had access to the data `obs` it would be simple to estimate the delay distribution.
 However, with only access to the censored, truncated, sampled data `obs_cens_trunc_samp` it is not so easy...
@@ -111,7 +148,7 @@ fit <- latent_truncation_censoring_adjusted_delay(
 )
 ```
 
-## Compare estimates to reality
+# Compare estimates {#compare}
 
 Compare modelled estimate to underlying truth here to convince user that it works.
 Perhaps as an exercise, we could show the "really simple" estimate being wrong here otherwise it won't be so impressive that the model is right.
