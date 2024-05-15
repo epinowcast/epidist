@@ -90,22 +90,7 @@ We also provide a [Docker](https://www.docker.com/get-started/) image with [`epi
 
 </details>
 
-
 ## Resources
-
-As you use the package, the documentation available via `?enw_` should be your first stop for troubleshooting. We also provide a range of other documentation, case studies, and community spaces to ask (and answer!) questions:
-
-<details><summary>Package Website</summary>
-
-The [`epinowcast` website](https://package.epinowcast.org/) includes a function reference, model outline, and case studies using the package. The site mainly concerns the release version, but you can also find documentation for [the latest development version](https://package.epinowcast.org/dev/).
-
-</details>
-
-<details><summary>R Vignettes</summary>
-
-We have created [package vignettes](https://package.epinowcast.org/articles) to help you [get started nowcasting](https://package.epinowcast.org/articles/epinowcast.html) and to [highlight other features with case studies](https://package.epinowcast.org/articles/germany-age-stratified-nowcasting.html).
-
-</details>
 
 <details><summary>Organisation Website</summary>
 
@@ -116,18 +101,6 @@ Our [organisation website](https://www.epinowcast.org/) includes links to other 
 <details><summary>Community Forum</summary>
 
 Our [community forum](https://community.epinowcast.org/) has areas for [question and answer](https://community.epinowcast.org/c/interface/15) and [considering new methods and tools](https://community.epinowcast.org/c/projects/11), among others. If you are generally interested in real-time analysis of infectious disease, you may find this useful even if do not use `epinowcast`.
-
-</details>
-
-<details><summary>Package Analysis Scripts</summary>
-
-In addition to the vignettes, the package also comes with [example analyses](https://github.com/epinowcast/epinowcast/tree/main/inst/examples). These are not as polished as the vignettes, but we typically explore new features with these and they may help you if you are using a development version. After installing `epinowcast`, you can find them via:
-
-```{r, eval = FALSE}
-list.files(
-  system.file("examples", package = "epinowcast"), full.names = TRUE
-)
-```
 
 </details>
 
