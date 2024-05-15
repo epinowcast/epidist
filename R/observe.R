@@ -28,7 +28,7 @@ observe_process <- function(linelist) {
 #' 
 #' @family observe
 #' @export
-filter_obs_by_obs_time <- function(linelist, obs_time) {
+filter_obs_by_stime <- function(linelist, obs_time) {
   clinelist <- data.table::copy(linelist)
   clinelist[, obs_at := obs_time]
   clinelist[, obs_time := obs_time - ptime]
