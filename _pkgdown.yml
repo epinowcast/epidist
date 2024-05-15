@@ -30,3 +30,7 @@ reference:
   desc: Functions and helper functions for plotting
   contents:
   - has_concept("plot")
+- title: Data
+  desc: Data included with the package
+  contents:
+  - has_concept("data")
