@@ -42,3 +42,6 @@ Config/Needs/website:
     epinowcast/enwtheme
 Config/testthat/edition: 3
 URL: https://epidist.epinowcast.org/
+Depends: 
+    R (>= 2.10)
+LazyData: true
