@@ -1,4 +1,4 @@
-url: epidist.epinowcast.org/
+url: https://epidist.epinowcast.org/
 template:
   package: enwtheme
 
@@ -30,4 +30,3 @@ reference:
   desc: Functions and helper functions for plotting
   contents:
   - has_concept("plot")
-  
