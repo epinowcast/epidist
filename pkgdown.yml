@@ -3,7 +3,7 @@ pkgdown: 2.0.9.9000
 pkgdown_sha: cf719ba763fdaaf9b285cb2871dad8c746e9e6b7
 articles:
   epidist: epidist.html
-last_built: 2024-05-15T09:45Z
+last_built: 2024-05-15T09:55Z
 urls:
   reference: https://epidist.epinowcast.org/reference
   article: https://epidist.epinowcast.org/articles
