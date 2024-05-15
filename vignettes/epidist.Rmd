@@ -42,14 +42,18 @@ library(ggplot2)
 Many quantities in epidemiology can be thought of as the time between two events, or "delays".
 Important examples include:
 
-* the incubation period (time between infection and symptom onset)
+* the incubation period (time between infection and symptom onset),
 * serial interval (time between symptom onset of infectee and symptom onset of infected), and 
 * generation interval (time between infection of infectee and infection of infected).
 
 Unfortunately, estimating delays accurately from observational data is usually difficult.
-In our experience, the two main issues are interval censoring and right truncation.
-Don't worry if you've not come across these terms before.
-By simulating example data, we will explain what they mean in Section \@ref(data)!
+In our experience, the two main issues are:
+
+1. interval censoring, and
+2. right truncation.
+
+Don't worry if you've not come across these terms before!
+In Section \@ref(data), we will explain what they mean by simulating example data analogous to what we might observe during an ongoing infectious disease outbreak.
 Next, in Section \@ref(fit), we show how `epidist` can be used to estimate delays using a statistical model which properly accounts for these two issues.
 Finally, in Section \@ref(compare), we demonstrate that the fitted delay distribution accurately recovers the underlying truth.
 
@@ -138,14 +142,19 @@ With our censored, truncated, and sampled data, we are now ready to attempt to r
 
 # Fit the model {#fit}
 
-If we had access to the data `obs` it would be simple to estimate the delay distribution.
-However, with only access to the censored, truncated, sampled data `obs_cens_trunc_samp` it is not so easy...
-Fortunately we solve it!
+It would be simple to estimate the delay distribution if we had access to `obs`.
+However, with only access to `obs_cens_trunc_samp` we must use a more sophisticated statistical model to ensure that our estimates are not biased.
+
+The primary modelling function in `epidist` to do this is `latent_truncation_censoring_adjusted_delay`.
+In a future vignette, we will explain in more detail the structure of the model.
+We infer the parameters of the model using Bayesian inference via the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm.
 
 ```{r}
 fit <- latent_truncation_censoring_adjusted_delay(
   data = obs_cens_trunc_samp, cores = 4, refresh = 0
 )
+
+summary(fit)
 ```
 
 # Compare estimates {#compare}
