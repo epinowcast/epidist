@@ -16,4 +16,4 @@
 #' }
 #' @family data
 #' @source <https://www.pnas.org/doi/full/10.1073/pnas.1518587113>
-"sierra_leone_ebola_outbreak_data"
+"sierra_leone_ebola_data"
