@@ -63,10 +63,19 @@ Data should be in a certain format for use within the `epidist` package.
 In this section, we simulate data of the appropriate format, and in doing so explain the two main issues with observational delay data.
 <!-- Please see as of yet unwritten vignette for information about how to transform your data of other formats to the right format. -->
 
-First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data from a stochastic compartmental model:
+First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data (Figure \@ref(fig:outbreak)) from a stochastic compartmental model:
 
 ```{r}
 outbreak <- simulate_gillespie(seed = 101)
+```
+
+(ref:outbreak) Early on in the epidemic, there is a high rate of growth in new cases. As more people are infected, the rate of growth slows.
+
+```{r outbreak, fig.cap="(ref:outbreak)"}
+ggplot(outbreak, aes(x = ptime, y = case)) +
+  geom_point() +
+  labs(x = "Primary event time (day)", y = "Case number") +
+  theme_minimal()
 ```
 
 `outbreak` is a `data.table` with columns for the case number `case` and the time of primary event `ptime`.
@@ -82,8 +91,6 @@ obs <- outbreak |>
     meanlog = secondary_dist[["meanlog"]],
     sdlog = secondary_dist[["sdlog"]]
   )
-
-head(obs)
 ```
 
 `obs` is a `data.table` object with additional columns for the delay `delay` and time of secondary event `stime`.
