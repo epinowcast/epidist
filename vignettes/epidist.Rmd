@@ -66,16 +66,18 @@ First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_
 outbreak <- simulate_gillespie(seed = 101)
 ```
 
-(ref:outbreak) Early on in the epidemic, there is a high rate of growth in new cases. As more people are infected, the rate of growth slows.
+(ref:outbreak) Early on in the epidemic, there is a high rate of growth in new cases. As more people are infected, the rate of growth slows. (To make this figure easier to read, only every 50th case is shown.)
 
 ```{r outbreak, fig.cap="(ref:outbreak)"}
-ggplot(outbreak, aes(x = ptime, y = case)) +
+outbreak[case %% 50 == 0, ] |>
+  ggplot(aes(x = ptime, y = case)) +
   geom_point() +
   labs(x = "Primary event time (day)", y = "Case number") +
   theme_minimal()
 ```
 
 `outbreak` is a `data.table` with columns for the case number `case` and the time of primary event `ptime`.
+
 Now, to generate secondary events, we will use a lognormal distribution (Figure \@ref(fig:lognormal)) for the delay between primary and secondary events:
 
 ```{r}
@@ -87,7 +89,7 @@ secondary_dist <- data.table(meanlog = 1.8, sdlog = 0.5) |>
 
 ```{r lognormal, fig.cap="(ref:lognormal)"}
 ggplot(data.frame(x = c(0, 8)), aes(x = x)) +
-  geom_function(fun = dlnorm, meanlog = 1.8, sdlog = 0.5) +
+  geom_function(fun = dlnorm, meanlog = secondary_dist[["meanlog"]], sdlog = secondary_dist[["sdlog"]]) +
   theme_minimal() +
   labs(x = "Delay between primary and secondary event (days)", y = "Probability density")
 ```
@@ -98,6 +100,18 @@ obs <- outbreak |>
     meanlog = secondary_dist[["meanlog"]],
     sdlog = secondary_dist[["sdlog"]]
   )
+```
+
+(ref:delay) Delay (To make this figure easier to read, only every 50th case is shown.)
+
+```{r delay, fig.cap="(ref:delay)"}
+obs[case %% 50 == 0, ] |>
+  ggplot(aes(y = case)) +
+  geom_point(aes(x = ptime)) +
+  geom_point(aes(x = stime)) +
+  geom_segment(aes(x = ptime, xend = stime, y = case, yend = case)) +
+  labs(x = "Event time (day)", y = "Case number") +
+  theme_minimal()
 ```
 
 `obs` is a `data.table` object with additional columns for the delay `delay` and time of secondary event `stime`.
