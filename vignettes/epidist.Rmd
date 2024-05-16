@@ -21,14 +21,11 @@ vignette: >
 knitr::opts_chunk$set(
   fig.path = "figures/getting-started-nowcasting-",
   cache = TRUE,
-  dpi = 330,
   collapse = TRUE,
   comment = "#>",
-  out.width = "100%",
   message = FALSE,
   warning = FALSE,
-  error = FALSE,
-  eval = TRUE
+  error = FALSE
 )
 ```
 
@@ -79,13 +76,23 @@ ggplot(outbreak, aes(x = ptime, y = case)) +
 ```
 
 `outbreak` is a `data.table` with columns for the case number `case` and the time of primary event `ptime`.
-
-Now, to generate secondary events, we will use a lognormal distribution ror the delay between primary and secondary events:
+Now, to generate secondary events, we will use a lognormal distribution (Figure \@ref(fig:lognormal)) for the delay between primary and secondary events:
 
 ```{r}
 secondary_dist <- data.table(meanlog = 1.8, sdlog = 0.5) |>
   add_natural_scale_mean_sd()
+```
 
+(ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
+
+```{r lognormal, fig.cap="(ref:lognormal)"}
+ggplot(data.frame(x = c(0, 8)), aes(x = x)) +
+  geom_function(fun = dlnorm, meanlog = 1.8, sdlog = 0.5) +
+  theme_minimal() +
+  labs(x = "Delay between primary and secondary event (days)", y = "Probability density")
+```
+
+```{r}
 obs <- outbreak |>
   simulate_secondary(
     meanlog = secondary_dist[["meanlog"]],
@@ -124,7 +131,7 @@ ggplot(obs_cens, aes(x = delay, y = delay_daily)) +
 ```
 
 Next, during an outbreak we will usually be estimating delays in real time.
-The result is that only those cases with a secondary event occuring before some time will be observed.
+The result is that only those cases with a secondary event occurring before some time will be observed.
 This is called (right) truncation, and biases the observation process towards shorter delays:
 
 ```{r}
