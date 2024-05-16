@@ -14,7 +14,6 @@
 #'   \item{district}{The district (ADM2)}
 #'   \item{chiefdom}{The chiefdom (ADM3)}
 #' }
-#' 
 #' @family data
 #' @source <https://www.pnas.org/doi/full/10.1073/pnas.1518587113>
 "ebola_outbreak_sierra_leone"
