@@ -1,8 +1,18 @@
-#' Example epidist data
+#' Ebola linelist data from Fang et al. (2016)
 #'
-#' Simulated outbreak data with interval censoring and right truncation.
+#' Linelist data for the Ebola virus collected in Sierra Leone.
 #'
-#' @format A `data.table` with 200 rows and 17 columns.
+#' @format A `tibble` with 8,358 rows and 8 columns:
+#' \describe{
+#'   \item{id}{Unique identification number for the case}
+#'   \item{name}{Name as character, omitted}
+#'   \item{age}{Age as numeric}
+#'   \item{sex}{Sex as character, either "F", "M" or NA}
+#'   \item{date_of_symptom_onset}{The date symptoms began}
+#'   \item{date_of_sample_tested}{The date the sample was tested}
+#'   \item{district}{The district (ADM2)}
+#'   \item{chiefdom}{The chiefdom (ADM3)}
+#' }
 #' @family data
-#' @source <https://github.com/epinowcast/epidist/tree/main/data-raw/create_test_data.R>
-"example_obs"
+#' @source <https://www.pnas.org/doi/full/10.1073/pnas.1518587113>
+"ebola"
