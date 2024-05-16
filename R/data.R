@@ -1,6 +1,7 @@
 #' Ebola linelist data from Fang et al. (2016)
 #'
-#' Linelist data for the Ebola virus collected in Sierra Leone.
+#' Linelist data for the Ebola virus collected in Sierra Leone. If you use this
+#' data in your work, please cite the corresponding paper.
 #'
 #' @format A `tibble` with 8,358 rows and 8 columns:
 #' \describe{
@@ -13,6 +14,7 @@
 #'   \item{district}{The district (ADM2)}
 #'   \item{chiefdom}{The chiefdom (ADM3)}
 #' }
+#' 
 #' @family data
 #' @source <https://www.pnas.org/doi/full/10.1073/pnas.1518587113>
 "ebola"
