@@ -32,7 +32,9 @@ Imports:
 Suggests:
     bookdown,
     epinowcast,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    readxl,
+    janitor
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
@@ -42,3 +44,6 @@ Config/Needs/website:
     epinowcast/enwtheme
 Config/testthat/edition: 3
 URL: https://epidist.epinowcast.org/
+Depends: 
+    R (>= 2.10)
+LazyData: true
