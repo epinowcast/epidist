@@ -89,9 +89,16 @@ secondary_dist <- data.table(meanlog = 1.8, sdlog = 0.5) |>
 
 ```{r lognormal, fig.cap="(ref:lognormal)"}
 ggplot(data.frame(x = c(0, 8)), aes(x = x)) +
-  geom_function(fun = dlnorm, meanlog = secondary_dist[["meanlog"]], sdlog = secondary_dist[["sdlog"]]) +
+  geom_function(
+    fun = dlnorm,
+    meanlog = secondary_dist[["meanlog"]],
+    sdlog = secondary_dist[["sdlog"]]
+  ) +
   theme_minimal() +
-  labs(x = "Delay between primary and secondary event (days)", y = "Probability density")
+  labs(
+    x = "Delay between primary and secondary event (days)",
+    y = "Probability density"
+  )
 ```
 
 ```{r}
@@ -107,7 +114,10 @@ obs <- outbreak |>
 ```{r delay, fig.cap="(ref:delay)"}
 obs[case %% 50 == 0, ] |>
   ggplot(aes(y = case)) +
-  geom_segment(aes(x = ptime, xend = stime, y = case, yend = case), col = "grey") +
+  geom_segment(
+    aes(x = ptime, xend = stime, y = case, yend = case),
+    col = "grey"
+  ) +
   geom_point(aes(x = ptime), col = "#56B4E9") +
   geom_point(aes(x = stime), col = "#009E73") +
   labs(x = "Event time (day)", y = "Case number") +
@@ -164,7 +174,8 @@ sample_size <- 200
 This sample size corresponds to `r 100 * round(sample_size / nrow(obs_cens_trunc), 3)`% of the data.
 
 ```{r}
-obs_cens_trunc_samp <- obs_cens_trunc[sample(1:.N, sample_size, replace = FALSE)]
+obs_cens_trunc_samp <-
+  obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 ```
 
 With our censored, truncated, and sampled data, we are now ready to attempt to recover the underlying delay distribution using `epidist`.
