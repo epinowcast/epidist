@@ -71,7 +71,7 @@ outbreak <- simulate_gillespie(seed = 101)
 ```{r outbreak, fig.cap="(ref:outbreak)"}
 outbreak[case %% 50 == 0, ] |>
   ggplot(aes(x = ptime, y = case)) +
-  geom_point() +
+  geom_point(col = "#56B4E9") +
   labs(x = "Primary event time (day)", y = "Case number") +
   theme_minimal()
 ```
@@ -102,14 +102,14 @@ obs <- outbreak |>
   )
 ```
 
-(ref:delay) Delay (To make this figure easier to read, only every 50th case is shown.)
+(ref:delay) Secondary events (in green) occur at random  (As with Figure \@ref(fig:outbreak), to make this figure easier to read, only every 50th case is shown.)
 
 ```{r delay, fig.cap="(ref:delay)"}
 obs[case %% 50 == 0, ] |>
   ggplot(aes(y = case)) +
-  geom_point(aes(x = ptime)) +
-  geom_point(aes(x = stime)) +
-  geom_segment(aes(x = ptime, xend = stime, y = case, yend = case)) +
+  geom_segment(aes(x = ptime, xend = stime, y = case, yend = case), col = "grey") +
+  geom_point(aes(x = ptime), col = "#56B4E9") +
+  geom_point(aes(x = stime), col = "#009E73") +
   labs(x = "Event time (day)", y = "Case number") +
   theme_minimal()
 ```
@@ -137,8 +137,8 @@ obs_cens <- obs |> observe_process()
 
 ```{r cens, fig.cap="(ref:cens)"}
 ggplot(obs_cens, aes(x = delay, y = delay_daily)) +
-  geom_point(alpha = 0.25) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  geom_point(col = "#E69F00") +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", col = "grey") +
   theme_minimal() +
   coord_fixed() +
   labs(x = "Exact delay time (days)", y = "Censored delay time (days)")
@@ -147,6 +147,7 @@ ggplot(obs_cens, aes(x = delay, y = delay_daily)) +
 Next, during an outbreak we will usually be estimating delays in real time.
 The result is that only those cases with a secondary event occurring before some time will be observed.
 This is called (right) truncation, and biases the observation process towards shorter delays:
+<!-- I think possible to do a better job with showing what right truncation is with a figure here! -->
 
 ```{r}
 obs_time <- 25
@@ -170,12 +171,14 @@ With our censored, truncated, and sampled data, we are now ready to attempt to r
 
 # Fit the model {#fit}
 
-It would be simple to estimate the delay distribution if we had access to `obs`.
-However, with only access to `obs_cens_trunc_samp` we must use a more sophisticated statistical model to ensure that our estimates are not biased.
+If we had access to `obs`, then it would be simple to estimate the delay distribution 
+However, with only access to `obs_cens_trunc_samp`, we must use a more sophisticated statistical model to make sure that our estimates are not severely biased!
 
-The primary modelling function in `epidist` to do this is `latent_truncation_censoring_adjusted_delay`.
+The primary modelling function in `epidist` is `latent_truncation_censoring_adjusted_delay`.
 In a future vignette, we will explain in more detail the structure of the model.
-We infer the parameters of the model using Bayesian inference via the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm.
+
+The parameters of the model are inferred using Bayesian inference.
+In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the `brms` R package.
 
 ```{r}
 fit <- latent_truncation_censoring_adjusted_delay(
