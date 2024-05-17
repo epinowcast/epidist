@@ -26,6 +26,9 @@ observe_process <- function(linelist) {
 
 #' Filter observations based on the observation time of secondary events
 #' 
+#' @param linelist A `data.table` containing line list data.
+#' @param obs_time The observation time of secondary events.
+#' 
 #' @family observe
 #' @export
 filter_obs_by_stime <- function(linelist, obs_time) {
@@ -40,7 +43,11 @@ filter_obs_by_stime <- function(linelist, obs_time) {
 }
 
 #' Filter observations based on the observation time of primary events
-#' 
+#'
+#' @param linelist A `data.table` containing line list data.
+#' @param obs_time The observation time of primary events.
+#' @param obs_at Unknown argument.
+#'
 #' @family observe
 #' @export
 filter_obs_by_ptime <- function(linelist, obs_time,
