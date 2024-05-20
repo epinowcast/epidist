@@ -24,6 +24,20 @@ observe_process <- function(linelist) {
   return(clinelist)
 }
 
+#' Add a column to linelist data specifying the date of observation.
+#' 
+#' @param linelist A `data.table` containing line list data.
+#' @param obs_time The observation time.
+#' 
+#' @family observe
+#' @export
+include_obs_at <- function(linelist, obs_time) {
+  clinelist <- data.table::copy(linelist)
+  clinelist[, obs_at := obs_time]
+  
+  return(clinelist)
+}
+
 #' Filter observations based on the observation time of secondary events
 #' 
 #' @param linelist A `data.table` containing line list data.
