@@ -19,7 +19,7 @@ vignette: >
 ```{r setup, include=FALSE}
 # exclude compile warnings from cmdstanr
 knitr::opts_chunk$set(
-  fig.path = "figures/getting-started-nowcasting-",
+  fig.path = "figures/epidist-",
   cache = TRUE,
   collapse = TRUE,
   comment = "#>",
@@ -182,13 +182,12 @@ With our censored, truncated, and sampled data, we are now ready to attempt to r
 
 # Fit the model {#fit}
 
-If we had access to `obs`, then it would be simple to estimate the delay distribution 
-However, with only access to `obs_cens_trunc_samp`, we must use a more sophisticated statistical model to make sure that our estimates are not severely biased!
+If we had access to `obs`, then it would be simple to estimate the delay distribution.
+However, with only access to `obs_cens_trunc_samp`, we must use a statistical model to avoid severely biased estimates!
 
-The primary modelling function in `epidist` is `latent_truncation_censoring_adjusted_delay`.
-In a future vignette, we will explain in more detail the structure of the model.
-
-The parameters of the model are inferred using Bayesian inference.
+The main model function in `epidist` is `latent_truncation_censoring_adjusted_delay`.
+<!-- In a future vignette, we will explain in more detail the structure of the model. -->
+The parameters of this model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the `brms` R package.
 
 ```{r}
