@@ -38,14 +38,21 @@ jobs:
           needs: website
 
       - name: Install cmdstan
-        run: |
-          cmdstanr::check_cmdstan_toolchain(fix = TRUE)
-          cmdstanr::install_cmdstan(cores = 2, quiet = TRUE)
-        shell: Rscript {0}
+        uses: epinowcast/actions/install-cmdstan@v1
+        with:
+          cmdstan-version: 'latest'
+          num-cores: 2
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
+
+      - name: Upload website
+        uses: actions/upload-artifact@v4
+        with:
+          name: website
+          retention-days: 5
+          path: docs
 
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
