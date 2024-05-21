@@ -1,0 +1,57 @@
+---
+title: "Using `epidist` to estimate..."
+description: "A more detailed guide to using the `epidist` R package"
+output: 
+  bookdown::html_document2:
+    fig_caption: yes
+    code_folding: show
+    number_sections: true
+pkgdown:
+  as_is: true
+# csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Getting in depth with epidist}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+# exclude compile warnings from cmdstanr
+knitr::opts_chunk$set(
+  fig.path = "figures/epidist-",
+  cache = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE
+)
+```
+
+```{r load-requirements}
+library(epidist)
+library(data.table)
+library(purrr)
+library(ggplot2)
+```
+
+# Data preparation
+
+* Load the Ebola data, explain the columns and some of the context
+* Clean it up into the right format
+* Visualise the delay data. Perhaps any other relevant features -- we don't have geocoordinates right
+
+# Model fitting
+
+* Fit the lognormal model
+* Fit the gamma model
+* Other things here? Convergence checking?
+
+# Post-processing
+
+* Extract posterior predictions (of something) from both models -- posterior predictive checking?
+* Compare the models. Give suggestion of which is a better fit
+* Translate fitted distribution to probability mass function
+
+## Bibliography {-}
