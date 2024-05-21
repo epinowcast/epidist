@@ -59,7 +59,7 @@ If you would like more technical details, the `epidist` package implements model
 
 # Example data {#data}
 
-Data should be formatted as a [`data.table`]() with the following columns for use within the `epidist` package:
+Data should be formatted as a [`data.table`](https://cran.r-project.org/web/packages/data.table/index.html) with the following columns for use within the `epidist` package:
 
 * `case`: 
 * `ptime`:
@@ -84,7 +84,7 @@ outbreak[case %% 50 == 0, ] |>
   theme_minimal()
 ```
 
-`outbreak` is a [`data.table`]() with the columns `case` and `ptime`.
+`outbreak` is a [`data.table`](https://cran.r-project.org/web/packages/data.table/index.html) with the columns `case` and `ptime`.
 
 Now, to generate secondary events, we will use a lognormal distribution (Figure \@ref(fig:lognormal)) for the delay between primary and secondary events:
 
@@ -132,7 +132,7 @@ obs[case %% 50 == 0, ] |>
   theme_minimal()
 ```
 
-`obs` is now a [`data.table`]() object with further columns for `delay` and `stime`.
+`obs` is now a [`data.table`](https://cran.r-project.org/web/packages/data.table/index.html) object with further columns for `delay` and `stime`.
 The secondary event time is simply the primary event time plus the delay:
 
 ```{r}
@@ -191,21 +191,49 @@ With our censored, truncated, and sampled data, we are now ready to try to recov
 
 # Fit the model {#fit}
 
-If we had access to `obs`, then it would be simple to estimate the delay distribution.
+If we had access to the data `obs`, then it would be simple to estimate the delay distribution (Figure \@ref(fig:obs-est)).
+
+(ref:obs-est) The histogram of delays matches closely the underlying distribution. Edit: at the moment something is wrong here.
+
+```{r obs-est, fig.cap="(ref:obs-est)"}
+ggplot() +
+  geom_histogram(data = obs, aes(x = delay, y = stat(count / sum(count)))) +
+  geom_function(
+    data = data.frame(x = c(0, 30)),
+    aes(x = x),
+    fun = dlnorm,
+    meanlog = secondary_dist[["meanlog"]],
+    sdlog = secondary_dist[["sdlog"]],
+  ) +
+  labs(x = "Delay between primary and secondary event (days)", y = "Probability density") +
+  theme_minimal()
+```
+
 However, with only access to `obs_cens_trunc_samp`, we must use a statistical model to avoid severely biased estimates!
 
-The main model function in `epidist` is `latent_truncation_censoring_adjusted_delay`.
+The main `epidist` model function is `latent_truncation_censoring_adjusted_delay`.
 <!-- In a future vignette, we will explain in more detail the structure of the model. -->
-The parameters of this model are inferred using Bayesian inference.
-In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the `brms` R package.
+The parameters of the model are inferred using Bayesian inference.
+In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
 
 ```{r}
 fit <- latent_truncation_censoring_adjusted_delay(
   data = obs_cens_trunc_samp, cores = 4, refresh = 0
 )
-
-summary(fit)
 ```
+
+The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters (Table \@ref(tab:pars)) in the model.
+Many of these are so-called "latent variables".
+
+```{r pars}
+pars <- fit$fit@par_dims |>
+  map(.f = function(x) if(identical(x, integer(0))) return(1) else return(x))
+
+data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
+  gt::gt(caption = "All of the parameters that are included in the model")
+```
+
+Although some users may wish to work with `fit` directly, we will see in the following section that `epidist` provides functions to make common post-processing tasks easy.
 
 # Compare estimates {#compare}
 
