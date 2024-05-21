@@ -8,12 +8,13 @@ output:
     number_sections: true
 pkgdown:
   as_is: true
-csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
+# csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
 link-citations: true
 vignette: >
   %\VignetteIndexEntry{Getting started with epidist}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -49,15 +50,22 @@ In our experience, the two main issues are:
 1. interval censoring, and
 2. right truncation.
 
-Don't worry if you've not come across these terms before!
-In Section \@ref(data), we will explain what they mean by simulating example data analogous to what we might observe during an ongoing infectious disease outbreak.
+Don't worry if you've not come across these terms before.
+In Section \@ref(data), we will explain what they mean by simulating data like that we might observe during an ongoing infectious disease outbreak.
 Next, in Section \@ref(fit), we show how `epidist` can be used to estimate delays using a statistical model which properly accounts for these two issues.
 Finally, in Section \@ref(compare), we demonstrate that the fitted delay distribution accurately recovers the underlying truth.
 
+If you would like more technical details, the `epidist` package implements models following best practices as described in @park2024estimating and @charniga2024best.
+
 # Example data {#data}
 
-Data should be in a certain format for use within the `epidist` package.
-In this section, we simulate data of the appropriate format, and in doing so explain the two main issues with observational delay data.
+Data should be formatted as a [`data.table`]() with the following columns for use within the `epidist` package:
+
+* `case`: 
+* `ptime`:
+* `stime`:
+
+Here we simulate data in this format, and in doing so explain the two main issues with observational delay data.
 <!-- Please see as of yet unwritten vignette for information about how to transform your data of other formats to the right format. -->
 
 First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data (Figure \@ref(fig:outbreak)) from a stochastic compartmental model:
@@ -66,7 +74,7 @@ First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_
 outbreak <- simulate_gillespie(seed = 101)
 ```
 
-(ref:outbreak) Early on in the epidemic, there is a high rate of growth in new cases. As more people are infected, the rate of growth slows. (To make this figure easier to read, only every 50th case is shown.)
+(ref:outbreak) Early on in the epidemic, there is a high rate of growth in new cases. As more people are infected, the rate of growth slows. (Only every 50th case is shown to avoid over-plotting.)
 
 ```{r outbreak, fig.cap="(ref:outbreak)"}
 outbreak[case %% 50 == 0, ] |>
@@ -76,7 +84,7 @@ outbreak[case %% 50 == 0, ] |>
   theme_minimal()
 ```
 
-`outbreak` is a `data.table` with columns for the case number `case` and the time of primary event `ptime`.
+`outbreak` is a [`data.table`]() with the columns `case` and `ptime`.
 
 Now, to generate secondary events, we will use a lognormal distribution (Figure \@ref(fig:lognormal)) for the delay between primary and secondary events:
 
@@ -109,7 +117,7 @@ obs <- outbreak |>
   )
 ```
 
-(ref:delay) Secondary events (in green) occur at random  (As with Figure \@ref(fig:outbreak), to make this figure easier to read, only every 50th case is shown.)
+(ref:delay) Secondary events (in green) occur with a delay drawn from the lognormal distribution (Figure \@ref(fig:lognormal)). As with Figure \@ref(fig:outbreak), to make this figure easier to read, only every 50th case is shown.
 
 ```{r delay, fig.cap="(ref:delay)"}
 obs[case %% 50 == 0, ] |>
@@ -124,19 +132,19 @@ obs[case %% 50 == 0, ] |>
   theme_minimal()
 ```
 
-`obs` is a `data.table` object with additional columns for the delay `delay` and time of secondary event `stime`.
+`obs` is now a [`data.table`]() object with further columns for `delay` and `stime`.
 The secondary event time is simply the primary event time plus the delay:
 
 ```{r}
 all(obs$ptime + obs$delay == obs$stime)
 ```
 
-If we received the data `obs` as above then estimating the delay distribution would be easy, and this package wouldn't need to exist.
-However, in reality, we will almost never receive the data as above.
+If we were to receive the data `obs` as above then estimating the delay distribution would be easy, and the `epidist` package wouldn't need to exist.
+However, in reality, during an outbreak we almost never receive the data as above.
 
 First, the times of primary and secondary events will usually be censored.
 This means that rather than exact event times, we observe event times within an interval.
-Here we suppose that the interval is daily, resulting in an obscuring of the exact delay data (Figure \@ref(fig:cens)):
+Here we suppose that the interval is daily, meaning that only the date of the primary or secondary event, not the exact event time, is reported (Figure \@ref(fig:cens)):
 
 ```{r}
 # observe_process() should be renamed and include a "daily" i.e. 1 argument
@@ -165,7 +173,8 @@ obs_time <- 25
 obs_cens_trunc <- filter_obs_by_obs_time(obs_cens, obs_time = obs_time)
 ```
 
-Finally, in reality, it's not possible to observe every case. We suppose that a random sample of individuals of size `sample_size` are observed:
+Finally, in reality, it's not possible to observe every case.
+We suppose that a sample of individuals of size `sample_size` are observed:
 
 ```{r}
 sample_size <- 200
@@ -178,7 +187,7 @@ obs_cens_trunc_samp <-
   obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 ```
 
-With our censored, truncated, and sampled data, we are now ready to attempt to recover the underlying delay distribution using `epidist`.
+With our censored, truncated, and sampled data, we are now ready to try to recover the underlying delay distribution using `epidist`.
 
 # Fit the model {#fit}
 
@@ -209,3 +218,5 @@ draws <- extract_lognormal_draws(fit)
 draws_long <- draws_to_long(draws)
 summarise_draws(draws_long, sf = 2)
 ```
+
+## Bibliography {-}
