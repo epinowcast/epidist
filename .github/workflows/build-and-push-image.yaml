@@ -4,6 +4,10 @@ on:
   push:
     branches: ['release', 'main']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+  
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -16,12 +20,6 @@ jobs:
       packages: write
 
     steps:
-
-      - name: Cancel previous builds if present
-        uses: n1hility/cancel-previous-runs@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-        
       - name: Checkout repository
         uses: actions/checkout@v4
 
