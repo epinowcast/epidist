@@ -46,9 +46,6 @@
     <loc>https://epidist.epinowcast.org/reference/drop_zero.html</loc>
   </url>
   <url>
-    <loc>https://epidist.epinowcast.org/reference/ebola_outbreak_sierra_leone.html</loc>
-  </url>
-  <url>
     <loc>https://epidist.epinowcast.org/reference/epidist-package.html</loc>
   </url>
   <url>
@@ -119,6 +116,9 @@
   </url>
   <url>
     <loc>https://epidist.epinowcast.org/reference/sample_model.html</loc>
+  </url>
+  <url>
+    <loc>https://epidist.epinowcast.org/reference/sierra_leone_ebola_data.html</loc>
   </url>
   <url>
     <loc>https://epidist.epinowcast.org/reference/simulate_double_censored_pmf.html</loc>
