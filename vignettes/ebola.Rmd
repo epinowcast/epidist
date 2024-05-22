@@ -38,9 +38,28 @@ library(ggplot2)
 
 # Data preparation
 
-* Load the Ebola data, explain the columns and some of the context
-* Clean it up into the right format
-* Visualise the delay data. Perhaps any other relevant features -- we don't have geocoordinates right
+```{r}
+data("sierra_leone_ebola_data")
+```
+
+Ebola data available in package.
+Has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a unique case report.
+
+```{r}
+head(sierra_leone_ebola_data)
+```
+
+```{r}
+sierra_leone_ebola_data |>
+  dplyr::filter(id %% 10 == 0) |>
+  ggplot() +
+    geom_point(aes(x = date_of_symptom_onset, y = id), col = "#56B4E9") +
+    geom_point(aes(x = date_of_sample_tested, y = id), col = "#009E73") +
+    labs(x = "", y = "Case ID") +
+    theme_minimal()
+```
+
+* Clean it up into the right format -- I guess can use the paper code here
 
 # Model fitting
 
