@@ -151,7 +151,7 @@ Here we suppose that the interval is daily, meaning that only the date of the pr
 obs_cens <- obs |> observe_process()
 ```
 
-(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times.
+(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
 
 ```{r cens, fig.cap="(ref:cens)"}
 ggplot(obs_cens, aes(x = delay, y = delay_daily)) +
@@ -191,13 +191,26 @@ With our censored, truncated, and sampled data, we are now ready to try to recov
 
 # Fit the model {#fit}
 
-If we had access to the data `obs`, then it would be simple to estimate the delay distribution (Figure \@ref(fig:obs-est)).
+If we had access to the data `obs`, then it would be simple to estimate the delay distribution.
+However, with only access to `obs_cens_trunc_samp`, the delay distribution we observe is biased (Figure \@ref(fig:obs-est)) and we must use a statistical model.
 
-(ref:obs-est) The histogram of delays matches closely the underlying distribution. Edit: at the moment something is wrong here.
+(ref:obs-est) The histogram of delays from `obs` matches closely the underlying distribution, whereas those from `obs_cens_trunc_samp` are systematically biased.
 
 ```{r obs-est, fig.cap="(ref:obs-est)"}
-ggplot() +
-  geom_histogram(data = obs, aes(x = delay, y = stat(count / sum(count)))) +
+dplyr::bind_rows(
+  obs |>
+    dplyr::mutate(type = "Full data") |>
+    dplyr::select(delay, type),
+  obs_cens_trunc |>
+    dplyr::mutate(type = "Censored, truncated,\nsampled data") |>
+    dplyr::select(delay, type)
+) |>
+  ggplot() +
+  geom_histogram(
+    aes(x = delay, y = ..density.., fill = type, group = type),
+    position = "dodge"
+  ) +
+  scale_fill_manual(values = c("#0072B2", "#D55E00")) +
   geom_function(
     data = data.frame(x = c(0, 30)),
     aes(x = x),
@@ -205,11 +218,14 @@ ggplot() +
     meanlog = secondary_dist[["meanlog"]],
     sdlog = secondary_dist[["sdlog"]],
   ) +
-  labs(x = "Delay between primary and secondary event (days)", y = "Probability density") +
-  theme_minimal()
+  labs(
+    x = "Delay between primary and secondary event (days)",
+    y = "Probability density",
+    type = ""
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
-
-However, with only access to `obs_cens_trunc_samp`, we must use a statistical model to avoid severely biased estimates!
 
 The main `epidist` model function is `latent_truncation_censoring_adjusted_delay`.
 <!-- In a future vignette, we will explain in more detail the structure of the model. -->
@@ -233,7 +249,9 @@ data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
   gt::gt(caption = "All of the parameters that are included in the model")
 ```
 
-Although some users may wish to work with `fit` directly, we will see in the following section that `epidist` provides functions to make common post-processing tasks easy.
+In the following section, we show that `epidist` provides functions to make common post-processing tasks easy.
+Additionally, for users familiar with Stan and `brms`, they may like to work with `fit` directly.
+For example, any tool that supports `brms` fitted model objects will be compatible with `fit`.
 
 # Compare estimates {#compare}
 
