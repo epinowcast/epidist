@@ -34,7 +34,8 @@ Suggests:
     epinowcast,
     testthat (>= 3.0.0),
     readxl,
-    janitor
+    janitor,
+    gt
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
