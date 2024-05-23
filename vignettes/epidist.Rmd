@@ -256,12 +256,12 @@ Any tool that supports `brms` fitted model objects will be compatible with `fit`
 
 ```{r pars}
 pars <- fit$fit@par_dims |>
-  map(.f = function(x) if(identical(x, integer(0))) return(1) else return(x))
+  map(.f = function(x) if (identical(x, integer(0))) return(1) else return(x))
 
 data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
   gt::gt(caption =
-   "All of the parameters that are included in the model.
-   Many of these parameters are the so called latent variables in the model."
+      "All of the parameters that are included in the model.
+      Many of these parameters are the so called latent variables in the model."
   )
 ```
 
