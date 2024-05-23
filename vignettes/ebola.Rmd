@@ -82,7 +82,7 @@ Clean it up using the paper code:
 <!-- https://github.com/parksw3/epidist-paper/blob/d34a461c4d7526438d509eec99025abda30687c7/_targets.Rmd#L422 -->
 
 ```{r}
-dt <- sierra_leone_ebola_data |>
+sierra_leone_ebola_data <- sierra_leone_ebola_data |>
   dplyr::mutate(
     date_of_symptom_onset = lubridate::ymd(date_of_symptom_onset),
     date_of_sample_tested = lubridate::ymd(date_of_sample_tested),
@@ -92,11 +92,70 @@ dt <- sierra_leone_ebola_data |>
   dplyr::select(id, ptime, stime) |>
   data.table::as.data.table()
 
-head(dt)
+head(sierra_leone_ebola_data)
 
-dt <- epidist::observe_process(dt)
+obs_cens <- epidist::observe_process(sierra_leone_ebola_data)
 
-head(dt)
+head(obs_cens)
+```
+
+Estimate at 120 days from the first cases symptom onset.
+Subset of the paper (could do a larger subset).
+
+```{r}
+estimation_times <- data.table(
+  scenario = c("120 days"),
+  time = c(120)
+)
+
+obs_cens_trunc <- obs_cens |>
+  filter_obs_by_obs_time(obs_time = estimation_times[["time"]][1]) |>
+  dplyr::mutate(
+    scenario = estimation_times[["scenario"]][1],
+    obs_type = "real_time"
+  ) |>
+  dplyr::filter(ptime_lwr >= estimation_times[["time"]][1] - 60)
+
+head(obs_cens_trunc)
+dim(obs_cens_trunc)
+```
+
+Create retrospective observations:
+
+```{r}
+obs_retro <- obs_cens |>
+  filter_obs_by_ptime(
+    obs_time = estimation_times[["time"]][1],
+    obs_at = "max_secondary"
+  ) |>
+  dplyr::mutate(
+    scenario = estimation_times[["scenario"]][1],
+    obs_type = "retrospective"
+  ) |>
+  dplyr::filter(ptime_lwr >= estimation_times[["time"]][1] - 60)
+
+head(obs_retro)
+dim(obs_retro)
+```
+
+Retrospective incidence:
+
+```{r}
+inc <- event_to_incidence(obs_retro, by = "scenario")
+
+head(inc)
+dim(inc)
+```
+
+```{r}
+obs_combined <- dplyr::bind_rows(
+  obs_cens_trunc,
+  obs_retro
+) |>
+  dplyr::group_by() |>
+  dplyr::mutate(
+    sample_size = dplyr::n()
+  )
 ```
 
 # Model fitting
