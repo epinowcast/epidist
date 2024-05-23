@@ -96,11 +96,13 @@ secondary_dist <- data.table(meanlog = 1.8, sdlog = 0.5) |>
 (ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
 
 ```{r lognormal, fig.cap="(ref:lognormal)"}
-ggplot(data.frame(x = c(0, 8)), aes(x = x)) +
+ggplot(data.frame(x = c(0, 30)), aes(x = x)) +
   geom_function(
     fun = dlnorm,
-    meanlog = secondary_dist[["meanlog"]],
-    sdlog = secondary_dist[["sdlog"]]
+    args = list(
+      meanlog = secondary_dist[["meanlog"]],
+      sdlog = secondary_dist[["sdlog"]]
+    )
   ) +
   theme_minimal() +
   labs(
@@ -189,7 +191,7 @@ obs_cens_trunc_samp <-
 
 With our censored, truncated, and sampled data, we are now ready to try to recover the underlying delay distribution using `epidist`.
 
-# Fit the model {#fit}
+# Fit the model and compare estimates {#fit}
 
 If we had access to the data `obs`, then it would be simple to estimate the delay distribution.
 However, with only access to `obs_cens_trunc_samp`, the delay distribution we observe is biased (Figure \@ref(fig:obs-est)) and we must use a statistical model.
@@ -215,13 +217,15 @@ dplyr::bind_rows(
     data = data.frame(x = c(0, 30)),
     aes(x = x),
     fun = dlnorm,
-    meanlog = secondary_dist[["meanlog"]],
-    sdlog = secondary_dist[["sdlog"]],
+    args = list(
+      meanlog = secondary_dist[["meanlog"]],
+      sdlog = secondary_dist[["sdlog"]]
+    ),
   ) +
   labs(
     x = "Delay between primary and secondary event (days)",
     y = "Probability density",
-    type = ""
+    fill = ""
   ) +
   theme_minimal() +
   theme(legend.position = "bottom")
@@ -239,30 +243,57 @@ fit <- latent_truncation_censoring_adjusted_delay(
 ```
 
 The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters (Table \@ref(tab:pars)) in the model.
-Many of these are so-called "latent variables".
+Users familiar with Stan and `brms`, can work with `fit` directly.
+Any tool that supports `brms` fitted model objects will be compatible with `fit`.
 
 ```{r pars}
 pars <- fit$fit@par_dims |>
   map(.f = function(x) if(identical(x, integer(0))) return(1) else return(x))
 
 data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
-  gt::gt(caption = "All of the parameters that are included in the model")
+  gt::gt(caption =
+   "All of the parameters that are included in the model.
+   Many of these parameters are the so called latent variables in the model."
+  )
 ```
 
-In the following section, we show that `epidist` provides functions to make common post-processing tasks easy.
-Additionally, for users familiar with Stan and `brms`, they may like to work with `fit` directly.
-For example, any tool that supports `brms` fitted model objects will be compatible with `fit`.
-
-# Compare estimates {#compare}
-
-Compare modelled estimate to underlying truth here to convince user that it works.
-Perhaps as an exercise, we could show the "really simple" estimate being wrong here otherwise it won't be so impressive that the model is right.
-This section should also show the user how to get objects that they might want out of the fitted object.
+The `epidist` package also provides functions to make common post-processing tasks easy.
+For example, samples of the fitted lognormal `meanlog` and `sdlog` parameter can be extracted using:
 
 ```{r}
 draws <- extract_lognormal_draws(fit)
-draws_long <- draws_to_long(draws)
-summarise_draws(draws_long, sf = 2)
+```
+
+Figure \@ref(fig:fitted-lognormal) shows...
+
+(ref:fitted-lognormal) Figure caption.
+
+```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
+ggplot() +
+  geom_function(
+    data = data.frame(x = c(0, 30)),
+    aes(x = x),
+    fun = dlnorm,
+    args = list(
+      meanlog = secondary_dist[["meanlog"]],
+      sdlog = secondary_dist[["sdlog"]]
+    ),
+  ) +
+  geom_function(
+    data = data.frame(x = c(0, 30)),
+    aes(x = x),
+    fun = dlnorm,
+    args = list(
+      meanlog = mean(draws$meanlog),
+      sdlog = mean(draws$sdlog)
+    ),
+    col = "#D55E00"
+  ) +
+  labs(
+    x = "Delay between primary and secondary event (days)",
+    y = "Probability density"
+  ) +
+  theme_minimal()
 ```
 
 ## Bibliography {-}
