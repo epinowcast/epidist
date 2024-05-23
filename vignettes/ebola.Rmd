@@ -1,5 +1,5 @@
 ---
-title: "Using `epidist` to estimate..."
+title: "Using `epidist` to estimate delay in reporting cases for the 2014-2016 Ebola outbreak in Sierra Leone"
 description: "A more detailed guide to using the `epidist` R package"
 output: 
   bookdown::html_document2:
@@ -78,7 +78,26 @@ sierra_leone_ebola_data |>
     theme_minimal()
 ```
 
-* Clean it up into the right format -- I guess can use the paper code here
+Clean it up using the paper code:
+<!-- https://github.com/parksw3/epidist-paper/blob/d34a461c4d7526438d509eec99025abda30687c7/_targets.Rmd#L422 -->
+
+```{r}
+dt <- sierra_leone_ebola_data |>
+  dplyr::mutate(
+    date_of_symptom_onset = lubridate::ymd(date_of_symptom_onset),
+    date_of_sample_tested = lubridate::ymd(date_of_sample_tested),
+    ptime = as.numeric(date_of_symptom_onset - min(date_of_symptom_onset)),
+    stime = as.numeric(date_of_sample_tested - min(date_of_symptom_onset))
+  ) |>
+  dplyr::select(id, ptime, stime) |>
+  data.table::as.data.table()
+
+head(dt)
+
+dt <- epidist::observe_process(dt)
+
+head(dt)
+```
 
 # Model fitting
 
