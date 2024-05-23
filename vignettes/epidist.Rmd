@@ -57,13 +57,16 @@ Finally, in Section \@ref(compare), we demonstrate that the fitted delay distrib
 
 If you would like more technical details, the `epidist` package implements models following best practices as described in @park2024estimating and @charniga2024best.
 
+Finally, to run this vignette yourself, you will need the `data.table`, `purrr` and `ggplot2` packages installed.
+Note that to work with outputs from `epidist` you do not need to use `data.table`: any tool of your preference is suitable.
+
 # Example data {#data}
 
-Data should be formatted as a [`data.table`](https://cran.r-project.org/web/packages/data.table/index.html) with the following columns for use within the `epidist` package:
+Data should be formatted as a [`data.table`](https://cran.r-project.org/web/packages/data.table/index.html) with the following columns for use within `epidist`:
 
-* `case`: 
-* `ptime`:
-* `stime`:
+* `case`: The unique case ID.
+* `ptime`: The time of the primary event.
+* `stime`: The time of the secondary event.
 
 Here we simulate data in this format, and in doing so explain the two main issues with observational delay data.
 <!-- Please see as of yet unwritten vignette for information about how to transform your data of other formats to the right format. -->
@@ -188,6 +191,11 @@ This sample size corresponds to `r 100 * round(sample_size / nrow(obs_cens_trunc
 obs_cens_trunc_samp <-
   obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 ```
+
+Another issue, which `epidist` currently does not account for, is that sometimes only the secondary event might be observed, and not the primary event.
+For example, symptom onset may be reported, but start of infection unknown.
+Discarding events of this type leads to what are called ascertainment biases.
+Whereas each case is equally likely to appear in the sample above, under ascertainment bias some cases are more likely to appear in the data than others.
 
 With our censored, truncated, and sampled data, we are now ready to try to recover the underlying delay distribution using `epidist`.
 
