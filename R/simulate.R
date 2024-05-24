@@ -61,43 +61,42 @@ simulate_exponential_cases <- function(r = 0.2,
 #' Simulate cases from a Stochastic SIR model
 #'
 #' This function simulates cases from an Stochastic SIR model. The user may
-#' specify the rate of infection r, the rate of recovery gamma, the initial
-#' number of infected cases I0, and the total population size N.
+#' specify the initial epidemic growth rate $r$, the rate of recovery gamma
+#' $\gamma$, the initial number of infected cases $I_0$, and the total
+#' population size $N$.
 #' 
-#' @param r The rate of infection. Defaults to 0.2.
+#' @param r The initial epidemic growth rate. Defaults to 0.2.
 #' @param gamma The rate of recovery. Defaults to 1/7.
-#' @param init_I The initial number of infected people. Defaults to 50.
-#' @param n The total population size. Defaults to 10000.
+#' @param I0 The initial number of infected people. Defaults to 50.
+#' @param N The total population size. Defaults to 10000.
 #' @param seed The random seed to be used in the simulation process. 
 #'
-#' @return A data table with two columns: case (case number) and ptime (primary
-#' event time).
+#' @return A `data.table` with two columns: `case` (case number) and `ptime`
+#' (primary event time).
 #'
 #' @family simulate
 #' @export
 simulate_gillespie <- function(r = 0.2,
                                gamma = 1 / 7,
-                               init_I = 50, ## to avoid extinction
-                               n = 10000,
+                               I0 = 50, # to avoid extinction
+                               N = 10000,
                                seed) {
   if (!missing(seed)) {
     set.seed(seed)
   }
   t <- 0
-  state <- c(n - init_I, init_I, 0)
+  state <- c(n - I0, I0, 0)
   beta <- r + gamma
   go <- TRUE
   ptime <- NULL
 
   while (go) {
-    rates <- c(beta * state[1] * state[2] / n, gamma * state[2])
+    rates <- c(beta * state[1] * state[2] / N, gamma * state[2])
     srates <- sum(rates)
 
     if (srates > 0) {
       deltat <- rexp(1, rate = srates)
-
       t <- t + deltat
-
       wevent <- sample(seq_along(rates), size = 1, prob = rates)
 
       if (wevent == 1) {
@@ -106,6 +105,7 @@ simulate_gillespie <- function(r = 0.2,
       } else {
         state <- c(state[1], state[2] - 1, state[3] + 1)
       }
+      
     } else {
       go <- FALSE
     }
@@ -115,6 +115,7 @@ simulate_gillespie <- function(r = 0.2,
     case = seq_along(ptime),
     ptime = ptime
   )
+  
   return(cases)
 }
 
