@@ -61,9 +61,9 @@ simulate_exponential_cases <- function(r = 0.2,
 #' Simulate cases from a Stochastic SIR model
 #'
 #' This function simulates cases from an Stochastic SIR model. The user may
-#' specify the initial epidemic growth rate $r$, the rate of recovery gamma
-#' $\gamma$, the initial number of infected cases $I_0$, and the total
-#' population size $N$.
+#' specify the initial epidemic growth rate \eqn{r}, the rate of recovery gamma
+#' \eqn{\gamma}, the initial number of infected cases \eqn{I_0}, and the total
+#' population size \eqn{N}.
 #' 
 #' @param r The initial epidemic growth rate. Defaults to 0.2.
 #' @param gamma The rate of recovery. Defaults to 1/7.
@@ -71,7 +71,7 @@ simulate_exponential_cases <- function(r = 0.2,
 #' @param N The total population size. Defaults to 10000.
 #' @param seed The random seed to be used in the simulation process. 
 #'
-#' @return A `data.table` with two columns: `case` (case number) and `ptime`
+#' @return A `data.table` with two columns: `case` (case number) and `ptime` 
 #' (primary event time).
 #'
 #' @family simulate
