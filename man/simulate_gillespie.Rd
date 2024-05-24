@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulate.R
 \name{simulate_gillespie}
 \alias{simulate_gillespie}
-\title{Simulate cases from a Stochastic SIR model}
+\title{Simulate cases from a stochastic SIR model}
 \usage{
 simulate_gillespie(r = 0.2, gamma = 1/7, I0 = 50, N = 10000, seed)
 }
@@ -22,10 +22,10 @@ A \code{data.table} with two columns: \code{case} (case number) and \code{ptime}
 (primary event time).
 }
 \description{
-This function simulates cases from an Stochastic SIR model. The user may
-specify the initial epidemic growth rate $r$, the rate of recovery gamma
-$\gamma$, the initial number of infected cases $I_0$, and the total
-population size $N$.
+This function simulates cases from an stochastic SIR model. The user may
+specify the initial epidemic growth rate \eqn{r}, the rate of recovery gamma
+\eqn{\gamma}, the initial number of infected cases \eqn{I_0}, and the total
+population size \eqn{N}.
 }
 \seealso{
 Other simulate: 
