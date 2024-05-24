@@ -174,7 +174,8 @@ obs_combined <- dplyr::bind_rows(
   dplyr::group_by(scenario, obs_type) |>
   dplyr::mutate(
     sample_size = dplyr::n()
-  )
+  ) |>
+  as.data.table()
 
 nrow(obs_combined)
 ```
@@ -190,9 +191,28 @@ obs_combined |>
 
 # Model fitting
 
-* Fit the lognormal model
-* Fit the gamma model
-* Other things here? Convergence checking?
+Fit the lognormal model(s).
+
+```{r}
+obs_combined_list <- split(obs_combined, by = c("scenario", "obs_type"))
+
+fit_lognormal_models <- map(
+  obs_combined_list,
+  .f = function(x) latent_truncation_censoring_adjusted_delay(data = x)
+)
+```
+
+Fit the gamma model(s).
+
+```{r eval=FALSE}
+fit_lognormal_models <- map(
+  obs_combined_list,
+  .f = function(x) latent_truncation_censoring_adjusted_delay(data = x, delay_prior = "gamma")
+)
+```
+
+Other things here?
+Convergence checking?
 
 # Post-processing
 
