@@ -30,13 +30,14 @@ knitr::opts_chunk$set(
 )
 ```
 
-Many quantities in epidemiology can be thought of as the time between two events, or "delays".
+Many quantities in epidemiology can be thought of as the time between two events or "delays".
 Important examples include:
 
 * the incubation period (time between infection and symptom onset),
 * serial interval (time between symptom onset of infectee and symptom onset of infected), and 
 * generation interval (time between infection of infectee and infection of infected).
 
+We encompass all of these delays as the time between a "primary event" and "secondary event".
 Unfortunately, estimating delays accurately from observational data is usually difficult.
 In our experience, the two main issues are:
 
