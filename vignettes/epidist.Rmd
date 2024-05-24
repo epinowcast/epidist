@@ -44,9 +44,8 @@ In our experience, the two main issues are:
 2. right truncation.
 
 Don't worry if you've not come across these terms before.
-In Section \@ref(data), we will explain what they mean by simulating data like that we might observe during an ongoing infectious disease outbreak.
-Next, in Section \@ref(fit), we show how `epidist` can be used to estimate delays using a statistical model which properly accounts for these two issues.
-Finally, in Section \@ref(compare), we demonstrate that the fitted delay distribution accurately recovers the underlying truth.
+First, in Section \@ref(data), we explain interval censoring and right truncation by simulating data like that we might observe during an ongoing infectious disease outbreak.
+Then, in Section \@ref(fit), we show how `epidist` can be used to accurately estimate delay distributions by using a statistical model which properly accounts for these two issues.
 
 If you would like more technical details, the `epidist` package implements models following best practices as described in @park2024estimating and @charniga2024best.
 
