@@ -30,13 +30,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r load-requirements}
-library(epidist)
-library(data.table)
-library(purrr)
-library(ggplot2)
-```
-
 Many quantities in epidemiology can be thought of as the time between two events, or "delays".
 Important examples include:
 
@@ -57,8 +50,14 @@ Finally, in Section \@ref(compare), we demonstrate that the fitted delay distrib
 
 If you would like more technical details, the `epidist` package implements models following best practices as described in @park2024estimating and @charniga2024best.
 
-Finally, to run this vignette yourself, you will need the `data.table`, `purrr` and `ggplot2` packages installed.
-Note that to work with outputs from `epidist` you do not need to use `data.table`: any tool of your preference is suitable.
+To run this vignette yourself, as well as the `epidist` package, you will need the `data.table`^[Note that to work with outputs from `epidist` you do not need to use `data.table`: any tool of your preference is suitable!], `purrr` and `ggplot2` packages installed.
+
+```{r load-requirements}
+library(epidist)
+library(data.table)
+library(purrr)
+library(ggplot2)
+```
 
 # Example data {#data}
 
