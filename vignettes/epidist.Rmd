@@ -250,15 +250,15 @@ The `fit` object is a `brmsfit` object containing MCMC samples from each of the 
 Users familiar with Stan and `brms`, can work with `fit` directly.
 Any tool that supports `brms` fitted model objects will be compatible with `fit`.
 
+(ref:pars) All of the parameters that are included in the model. Many of these parameters (e.g. `swindow` and `pwindow`) the so called latent variables in the model, and have lengths corresponding to the `sample_size`.
+
 ```{r pars}
 pars <- fit$fit@par_dims |>
   map(.f = function(x) if (identical(x, integer(0))) return(1) else return(x))
 
 data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
-  gt::gt(caption =
-      "All of the parameters that are included in the model.
-      Many of these parameters are the so called latent variables in the model."
-  )
+  gt::gt() |>
+  gt::tab_caption("(ref:pars)")
 ```
 
 The `epidist` package also provides functions to make common post-processing tasks easy.
