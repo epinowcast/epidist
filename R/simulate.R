@@ -85,7 +85,7 @@ simulate_gillespie <- function(r = 0.2,
     set.seed(seed)
   }
   t <- 0
-  state <- c(n - I0, I0, 0)
+  state <- c(N - I0, I0, 0)
   beta <- r + gamma
   go <- TRUE
   ptime <- NULL
