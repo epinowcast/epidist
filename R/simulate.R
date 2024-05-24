@@ -58,9 +58,9 @@ simulate_exponential_cases <- function(r = 0.2,
   return(cases)
 }
 
-#' Simulate cases from a Stochastic SIR model
+#' Simulate cases from a stochastic SIR model
 #'
-#' This function simulates cases from an Stochastic SIR model. The user may
+#' This function simulates cases from an stochastic SIR model. The user may
 #' specify the initial epidemic growth rate \eqn{r}, the rate of recovery gamma
 #' \eqn{\gamma}, the initial number of infected cases \eqn{I_0}, and the total
 #' population size \eqn{N}.
