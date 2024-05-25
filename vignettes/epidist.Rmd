@@ -154,7 +154,7 @@ Here we suppose that the interval is daily, meaning that only the date of the pr
 obs_cens <- obs |> observe_process()
 ```
 
-(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
+(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. Many exact delay times (which can take any value) have the same censored delay times (which are restricted to a number of days). While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
 
 ```{r cens, fig.cap="(ref:cens)"}
 ggplot(obs_cens, aes(x = delay, y = delay_daily)) +
