@@ -269,9 +269,10 @@ For example, samples of the fitted lognormal `meanlog` and `sdlog` parameter can
 draws <- extract_lognormal_draws(fit)
 ```
 
-Figure \@ref(fig:fitted-lognormal) shows...
+Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained using the average of the `meanlog` and `sdlog` draws.
+Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using `epidist` we have obtained a much closer match to the truth.
 
-(ref:fitted-lognormal) Figure caption.
+(ref:fitted-lognormal) A fitted delay distribution (in blue) as compared with the true delay distribution (in black).
 
 ```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
 ggplot() +
@@ -291,7 +292,7 @@ ggplot() +
       meanlog = mean(draws$meanlog),
       sdlog = mean(draws$sdlog)
     ),
-    col = "#D55E00"
+    col = "#0072B2"
   ) +
   labs(
     x = "Delay between primary and secondary event (days)",
