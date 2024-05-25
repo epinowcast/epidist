@@ -7,7 +7,7 @@
 #' @param t Upper bound of the uniform distribution to generate primary event
 #' times.
 #'
-#' @return A data table with two columns: case (case number) and ptime (primar
+#' @return A data table with two columns: case (case number) and ptime (primary
 #' event time).
 #'
 #' @family simulate
@@ -26,9 +26,10 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 #' If the rate parameter is 0, then this function defaults to the uniform
 #' distribution.
 #'
-#' @param r The rate parameter for the exponential distribution. Defaults to 0.2.
+#' @param r The rate parameter for the exponential distribution. Defaults to
+#' 0.2.
 #' @param sample_size The number of cases to simulate. Defaults to 10000.
-#' @param seed The random seed to be used in the simulation process. 
+#' @param seed The random seed to be used in the simulation process.
 #' @param t Upper bound of the survival time. Defaults to 30.
 #'
 #' @return A data table with two columns: case (case number) and ptime (primary
@@ -48,9 +49,9 @@ simulate_exponential_cases <- function(r = 0.2,
   if (r == 0) {
     ptime <- quant * t
   } else {
-    ptime <- log(1 + quant * (exp(r * t) - 1))/r
+    ptime <- log(1 + quant * (exp(r * t) - 1)) / r
   }
-  
+
   cases <- data.table::data.table(
     case = seq_along(ptime),
     ptime = ptime
@@ -64,22 +65,22 @@ simulate_exponential_cases <- function(r = 0.2,
 #' specify the initial epidemic growth rate \eqn{r}, the rate of recovery gamma
 #' \eqn{\gamma}, the initial number of infected cases \eqn{I_0}, and the total
 #' population size \eqn{N}.
-#' 
+#'
 #' @param r The initial epidemic growth rate. Defaults to 0.2.
 #' @param gamma The rate of recovery. Defaults to 1/7.
 #' @param I0 The initial number of infected people. Defaults to 50.
 #' @param N The total population size. Defaults to 10000.
-#' @param seed The random seed to be used in the simulation process. 
+#' @param seed The random seed to be used in the simulation process.
 #'
-#' @return A `data.table` with two columns: `case` (case number) and `ptime` 
+#' @return A `data.table` with two columns: `case` (case number) and `ptime`
 #' (primary event time).
 #'
 #' @family simulate
 #' @export
 simulate_gillespie <- function(r = 0.2,
                                gamma = 1 / 7,
-                               I0 = 50, # to avoid extinction
-                               N = 10000,
+                               I0 = 50, # nolint: object_name_linter
+                               N = 10000, # nolint: object_name_linter
                                seed) {
   if (!missing(seed)) {
     set.seed(seed)
@@ -105,7 +106,7 @@ simulate_gillespie <- function(r = 0.2,
       } else {
         state <- c(state[1], state[2] - 1, state[3] + 1)
       }
-      
+
     } else {
       go <- FALSE
     }
