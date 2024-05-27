@@ -1,5 +1,5 @@
 ---
-title: "Using `epidist` to estimate reporting delays for the 2014-2016 Ebola outbreak in Sierra Leone"
+title: "Using `epidist` to estimate the delay between symptom onset and positive test for the 2014-2016 Ebola outbreak in Sierra Leone"
 description: "A more detailed guide to using the `epidist` R package"
 output: 
   bookdown::html_document2:
@@ -32,12 +32,13 @@ knitr::opts_chunk$set(
 
 The 2014-2016 outbreak of Ebola in West Africa, centered on Guinea, Liberia, and Sierra Leone, was the most widespread and severe in the disease's history.
 In this vignette, we use the `epidist` package to analyze data from the outbreak, as provided by @fang2016transmission.
-In doing so, we demonstrate some of the more advanced features of the package, such as:
+In doing so, we demonstrate some of the more advanced features of `epidist`, such as:
 
 1. Fitting multiple delay distributions, and selecting the best model.
 2. Investigating delay estimation scenarios. A subset of the analysis in @park2024estimating.
 3. Fitting location-sex stratified delay distribution estimates.
 
+The packages used in this analysis area:
 
 ```{r load-requirements}
 library(epidist)
@@ -49,20 +50,22 @@ library(sf)
 
 # Data preparation
 
-We begin by loading the Ebola linelist data, as provided in the `epidist` package (see `sierra_leone_ebola_data`):
+We begin by loading the Ebola line list data, as provided in the `epidist` package (see `sierra_leone_ebola_data`):
 
 ```{r}
 data("sierra_leone_ebola_data")
+
+sierra_leone_ebola_data <- dplyr::select(sierra_leone_ebola_data, -name)
 ```
 
-Has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a unique case report.
+The data has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a unique case report `id`.
+The other columns of the data are the individuals age, sex, the dates of symptom onset and positive sample, and their district and chiefdom.
 
 ```{r}
 head(sierra_leone_ebola_data)
 ```
 
-Here add plot of cases by geography.
-Question about whether to include shapefiles as data object in package.
+<!-- Question about whether to include shapefiles as data object in package. -->
 
 ```{r}
 sf <- sf::st_read("gadm41_SLE_shp")
@@ -79,7 +82,9 @@ sierra_leone_ebola_data |>
     labs(fill = "Cases")
 ```
 
-```{r}
+(ref:ebola-outbreak) Figure caption.
+
+```{r ebola-outbreak, fig.cap="(ref:ebola-outbreak)"}
 # Might want to move to using data.table code rather than dplyr here/everywhere
 sierra_leone_ebola_data |>
   dplyr::filter(id %% 10 == 0) |>
@@ -97,10 +102,7 @@ sierra_leone_ebola_data |>
     theme_minimal()
 ```
 
-Clean it up using the paper code.
-<!-- https://github.com/parksw3/epidist-paper/blob/d34a461c4d7526438d509eec99025abda30687c7/_targets.Rmd#L422 -->
-
-First make the columns into `ptime` and `stime` and it as a `data.table`.
+To prepare the data for use in `epidist`, we first rename the date columns as `ptime` (time of primary event) and `stime` (time of secondary event), as well as transforming to a `data.table`:
 
 ```{r}
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
@@ -116,7 +118,7 @@ sierra_leone_ebola_data <- sierra_leone_ebola_data |>
 head(sierra_leone_ebola_data)
 ```
 
-Now use `observe_process()` to do add interval censoring columns:
+Next, we use `observe_process()` to do add interval censoring columns:
 
 ```{r}
 obs_cens <- epidist::observe_process(sierra_leone_ebola_data)
@@ -143,13 +145,16 @@ The columns added are:
 * `delay_upr`:
 * `obs_at`: The maximum value of `stime`
 
-Estimate at 120 days from the first cases symptom onset.
-Subset of the paper (could do a larger subset).
+Of course, to obtain the best estimate of the delay distribution now that the epidemic is concluded, we should use all of the (censored) data.
+However, during a novel outbreak we do not have the luxury of waiting until the epidemic is over to begin estimating delays!
+One analysis made easier by the `epidist` package is to assess how the delay distribution changes depending on the time of estimation.
+Here, we consider estimation at 120 days, as well as after the epidemic is concluded at 483 days.
+In a more thorough analysis, @park2024estimating also consider estimation at X, Y and Z days.
 
 ```{r}
 estimation_times <- data.table(
-  scenario = c("120 days", "240 days"),
-  time = c(120, 240)
+  scenario = c("120 days", "483 days"),
+  time = c(120, 483)
 )
 
 obs_cens_trunc <- purrr::pmap(estimation_times, function(scenario, time) {
