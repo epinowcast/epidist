@@ -30,13 +30,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r load-requirements}
-library(epidist)
-library(data.table)
-library(purrr)
-library(ggplot2)
-```
-
 The 2014-2016 outbreak of Ebola in West Africa, centered on Guinea, Liberia, and Sierra Leone, was the most widespread and severe in the disease's history.
 In this vignette, we use the `epidist` package to analyze data from the outbreak, as provided by @fang2016transmission.
 In doing so, we demonstrate some of the more advanced features of the package, such as:
@@ -44,6 +37,15 @@ In doing so, we demonstrate some of the more advanced features of the package, s
 1. Fitting multiple delay distributions, and selecting the best model.
 2. Investigating delay estimation scenarios. A subset of the analysis in @park2024estimating.
 3. Fitting location-sex stratified delay distribution estimates.
+
+
+```{r load-requirements}
+library(epidist)
+library(data.table)
+library(purrr)
+library(ggplot2)
+library(sf)
+```
 
 # Data preparation
 
@@ -63,10 +65,18 @@ Here add plot of cases by geography.
 Question about whether to include shapefiles as data object in package.
 
 ```{r}
-sf <- sf::st_read("sle_adm_gov_ocha_20231215_ab_shp")
+sf <- sf::st_read("gadm41_SLE_shp")
 
-sf |>
-  dplyr::filter(admLevel == 2)
+sierra_leone_ebola_data |>
+  dplyr::group_by(chiefdom) |>
+  dplyr::summarise(cases = dplyr::n()) |>
+  dplyr::left_join(
+    dplyr::select(sf, chiefdom = NAME_3, geometry)
+  ) |>
+  ggplot(aes(fill = cases, geometry = geometry)) +
+    geom_sf() +
+    theme_minimal() +
+    labs(fill = "Cases")
 ```
 
 ```{r}
