@@ -116,7 +116,7 @@ simulate_gillespie <- function(r = 0.2,
     case = seq_along(ptime),
     ptime = ptime
   )
-  
+
   return(cases)
 }
 
@@ -136,18 +136,19 @@ simulate_gillespie <- function(r = 0.2,
 #' @family simulate
 #' @export
 simulate_secondary <- function(linelist, dist = rlnorm, ...) {
+  delay <- ptime <- stime <- NULL
   obs <- data.table::copy(linelist)
-  
+
   obs[, delay := dist(.N, ...)]
   obs[, stime := ptime + delay]
-  
+
   return(obs)
 }
 
 #' Simulate a censored PMF
 #'
 #' This function simulates a double-censored probability mass function (PMF).
-#' The user may specify the alpha, beta, and upper bound of the event times. 
+#' The user may specify the alpha, beta, and upper bound of the event times.
 #' Additionally, the user can specify the random number generator functions for
 #' primary events, secondary events, and delays.
 #'
