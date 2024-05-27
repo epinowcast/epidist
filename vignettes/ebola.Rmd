@@ -1,5 +1,5 @@
 ---
-title: "Using `epidist` to estimate delay in reporting cases for the 2014-2016 Ebola outbreak in Sierra Leone"
+title: "Using `epidist` to estimate reporting delays for the 2014-2016 Ebola outbreak in Sierra Leone"
 description: "A more detailed guide to using the `epidist` R package"
 output: 
   bookdown::html_document2:
@@ -37,6 +37,14 @@ library(purrr)
 library(ggplot2)
 ```
 
+The 2014-2016 outbreak of Ebola in West Africa, centered on Guinea, Liberia, and Sierra Leone, was the most widespread and severe in the disease's history.
+In this vignette, we use the `epidist` package to analyze data from the outbreak, as provided by @fang2016transmission.
+In doing so, we demonstrate some of the more advanced features of the package, such as:
+
+1. Fitting multiple delay distributions, and selecting the best model.
+2. Investigating delay estimation scenarios. A subset of the analysis in @park2024estimating.
+3. Fitting location-sex stratified delay distribution estimates.
+
 # Data preparation
 
 ```{r}
@@ -44,7 +52,6 @@ data("sierra_leone_ebola_data")
 ```
 
 Ebola data available in package.
-From @fang2016transmission.
 Has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a unique case report.
 
 ```{r}
