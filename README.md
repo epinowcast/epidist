@@ -170,3 +170,35 @@ based, please cite the relevant papers from our [model
 outline](https://epidist.epinowcast.org/articles/model.html). If you use
 `epidist` in your work, please consider citing it with
 `citation("epidist")`.
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+All contributions to this project are gratefully acknowledged using the
+[`allcontributors`
+package](https://github.com/ropenscilabs/allcontributors) following the
+[all-contributors](https://allcontributors.org) specification.
+Contributions of any kind are welcome!
+
+### Code
+
+<a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>
+
+### Issue Authors
+
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>
+
+### Issue Contributors
+
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
