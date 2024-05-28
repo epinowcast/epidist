@@ -199,7 +199,7 @@ With our censored, truncated, and sampled data, we are now ready to try to recov
 
 # Fit the model and compare estimates {#fit}
 
-If we had access to the data `obs`, then it would be simple to estimate the delay distribution.
+If we had access to the full data `obs`, then it would be simple to estimate the delay distribution.
 However, with only access to `obs_cens_trunc_samp`, the delay distribution we observe is biased (Figure \@ref(fig:obs-est)) and we must use a statistical model.
 
 (ref:obs-est) The histogram of delays from `obs` matches closely the underlying distribution, whereas those from `obs_cens_trunc_samp` are systematically biased.
@@ -208,15 +208,19 @@ However, with only access to `obs_cens_trunc_samp`, the delay distribution we ob
 dplyr::bind_rows(
   obs |>
     dplyr::mutate(type = "Full data") |>
-    dplyr::select(delay, type),
-  obs_cens_trunc |>
+    dplyr::select(delay, type) |>
+    dplyr::mutate(delay = floor(delay)),
+  obs_cens_trunc_samp |>
     dplyr::mutate(type = "Censored, truncated,\nsampled data") |>
-    dplyr::select(delay, type)
+    dplyr::select(delay = delay_daily, type)
 ) |>
+  dplyr::group_by(type, delay, .drop = FALSE) |>
+  dplyr::summarise(n = dplyr::n()) |>
+  dplyr::mutate(p = n / sum(n)) |>
   ggplot() +
-  geom_histogram(
-    aes(x = delay, y = ..density.., fill = type, group = type),
-    position = "dodge"
+  geom_col(
+    aes(x = delay, y = p, fill = type, group = type),
+    position = position_dodge2(preserve = "single")
   ) +
   scale_fill_manual(values = c("#0072B2", "#D55E00")) +
   geom_function(
