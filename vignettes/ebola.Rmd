@@ -30,15 +30,19 @@ knitr::opts_chunk$set(
 )
 ```
 
-The 2014-2016 outbreak of Ebola in West Africa, centered on Guinea, Liberia, and Sierra Leone, was the most widespread and severe in the disease's history.
-In this vignette, we use the `epidist` package to analyze data from the outbreak, as provided by @fang2016transmission.
-In doing so, we demonstrate some of the more advanced features of `epidist`, such as:
+The 2014-2016 outbreak of Ebola in West Africa began in Guinea, and quickly spread to neighbouring Liberia and Sierra Leone.
+It was the largest outbreak in the disease's history, and resulted in over 28,600 infections and 11,325 deaths [@who_ebola_2014_2016].
 
-1. Fitting multiple delay distributions, and selecting the best model.
+In this vignette, we use the `epidist` package to analyze line list data from the outbreak in Sierra Leone, as collated by @fang2016transmission.
+In doing so, we demonstrate some of the more advanced features of `epidist`, including:
+
+1. Fitting lognormal and gamma delay distributions, and selecting between fitted models.
 2. Investigating delay estimation scenarios. A subset of the analysis in @park2024estimating.
 3. Fitting location-sex stratified delay distribution estimates.
 
-The packages used in this analysis area:
+For users new to `epidist`, we recommend beginning with the [getting started vignette](http://epidist.epinowcast.org/articles/epidist.html) before reading this article.
+
+The packages used in this article are:
 
 ```{r load-requirements}
 library(epidist)
