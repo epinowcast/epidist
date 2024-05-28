@@ -1,0 +1,70 @@
+---
+title: "A guide to the `epidist` model"
+description: "..."
+output: 
+  bookdown::html_document2:
+    fig_caption: yes
+    code_folding: show
+    number_sections: true
+pkgdown:
+  as_is: true
+# csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Getting started with epidist}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+# exclude compile warnings from cmdstanr
+knitr::opts_chunk$set(
+  fig.path = "figures/epidist-",
+  cache = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE
+)
+```
+
+```{r load-requirements}
+library(epidist)
+library(data.table)
+library(purrr)
+library(ggplot2)
+```
+
+* Its generative form
+* An explanation of how it accounts for censoring and right truncation
+* How it is implemented in the package
+* What the extra arguments of the function do, if you'd like to change them
+* Which parts of the arguments we would imagine you might want to change and the potential use-cases
+* The limitations of the model (ways it's not ideal)
+
+```{r}
+formula <- brms::bf(delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1, sigma ~ 1)
+fn <- brms::brm
+
+family <- brms::custom_family(
+  "latent_lognormal",
+  dpars = c("mu", "sigma"),
+  links = c("identity", "log"),
+  lb = c(NA, 0),
+  ub = c(NA, NA),
+  type = "real",
+  vars = c("pwindow", "swindow", "vreal1"),
+  loop = FALSE)
+
+scode_functions <- "\n    real latent_lognormal_lpdf(vector y, vector mu, vector sigma,\n                               vector pwindow, vector swindow,\n                               array[] real obs_t) {\n      int n = num_elements(y);\n      vector[n] d = y - pwindow + swindow;\n      vector[n] obs_time = to_vector(obs_t) - pwindow;\n      return lognormal_lpdf(d | mu, sigma) - \n        lognormal_lcdf(obs_time | mu, sigma);\n      }\n  "
+
+scode_parameters <- "\n    vector<lower = 0, upper = 1>[N] swindow_raw;\n    vector<lower = 0, upper = 1>[N] pwindow_raw;\n  "
+
+scode_tparameters <- "\n    vector<lower = 0>[N] pwindow;\n    vector<lower = 0>[N] swindow;\n    swindow = to_vector(vreal3) .* swindow_raw;\n    pwindow[noverlap] = to_vector(vreal2[noverlap]) .* pwindow_raw[noverlap];\n    if (wN) {\n      pwindow[woverlap] = swindow[woverlap] .* pwindow_raw[woverlap];\n    }\n  "
+
+scode_priors <- "\n    swindow_raw ~ uniform(0, 1);\n    pwindow_raw ~ uniform(0, 1);\n  "
+```
+
+## Bibliography {-}
