@@ -27,7 +27,7 @@ simulate_double_censored_pmf(
 Defaults to runif.}
 
 \item{rdelay}{Random number generator function for delays. Defaults to
-rlnorm.}
+\code{\link[=rlnorm]{rlnorm()}}.}
 
 \item{delay_obs_process}{Observation process for delays. Defaults to
 using the \code{floor} function to round both primary and secondary events to the
@@ -39,7 +39,7 @@ delays.
 }
 \description{
 This function simulates a double-censored probability mass function (PMF).
-The user may specify the alpha, beta, and upper bound of the event times.
+The user may specify the \code{alpha}, \code{beta}, and upper bound of the event times.
 Additionally, the user can specify the random number generator functions for
 primary events, secondary events, and delays.
 }
