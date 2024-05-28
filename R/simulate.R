@@ -1,14 +1,14 @@
 #' Simulate cases from a uniform distribution
 #'
 #' This function simulates cases from a uniform distribution, where the primary
-#' event times are uniformly distributed between 0 and t.
+#' event times are uniformly distributed between 0 and `t`.
 #'
 #' @param sample_size The number of cases to simulate.
 #' @param t Upper bound of the uniform distribution to generate primary event
 #' times.
 #'
-#' @return A data table with two columns: case (case number) and ptime (primary
-#' event time).
+#' @return A `data.table` with two columns: `case` (case number) and `ptime`
+#' (primary event time).
 #'
 #' @family simulate
 #' @export
@@ -21,19 +21,17 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 #' Simulate exponential cases
 #'
 #' This function simulates cases from an exponential distribution. The user may
-#' specify the rate parameter r, the sample size, and the upper bound of the
-#' survival time.
-#' If the rate parameter is 0, then this function defaults to the uniform
-#' distribution.
+#' specify the rate parameter `r`, the sample size, and the upper bound of the
+#' survival time. If the rate parameter is 0, then this function defaults to the
+#' uniform distribution.
 #'
-#' @param r The rate parameter for the exponential distribution. Defaults to
-#' 0.2.
+#' @param r The exponential growth rate parameter. Defaults to 0.2.
 #' @param sample_size The number of cases to simulate. Defaults to 10000.
 #' @param seed The random seed to be used in the simulation process.
 #' @param t Upper bound of the survival time. Defaults to 30.
 #'
-#' @return A data table with two columns: case (case number) and ptime (primary
-#' event time).
+#' @return A `data.table` with two columns: `case` (case number) and `ptime`
+#' (primary event time).
 #'
 #' @family simulate
 #' @export
@@ -124,14 +122,14 @@ simulate_gillespie <- function(r = 0.2,
 #'
 #' This function simulates secondary events based on a given delay
 #' distribution. The input dataset should have the primary event times in a
-#' column named 'ptime'.
+#' column named `ptime`.
 #'
 #' @param linelist A data frame with the primary event times.
-#' @param dist The delay distribution to be used. Defaults to rlnorm.
+#' @param dist The delay distribution to be used. Defaults to [rlnorm()].
 #' @param ... Arguments to be passed to the delay distribution function.
 #'
-#' @return A data table that augments linelist with two new columns: delay
-#' (secondary event latency) and stime (the time of the secondary event).
+#' @return A `data.table` that augments `linelist` with two new columns: `delay`
+#' (secondary event latency) and `stime` (the time of the secondary event).
 #'
 #' @family simulate
 #' @export
@@ -148,7 +146,7 @@ simulate_secondary <- function(linelist, dist = rlnorm, ...) {
 #' Simulate a censored PMF
 #'
 #' This function simulates a double-censored probability mass function (PMF).
-#' The user may specify the alpha, beta, and upper bound of the event times.
+#' The user may specify the `alpha`, `beta`, and upper bound of the event times.
 #' Additionally, the user can specify the random number generator functions for
 #' primary events, secondary events, and delays.
 #'
@@ -159,7 +157,7 @@ simulate_secondary <- function(linelist, dist = rlnorm, ...) {
 #' @param rprimary Random number generator function for primary events.
 #' Defaults to runif.
 #' @param rdelay Random number generator function for delays. Defaults to
-#' rlnorm.
+#' [rlnorm()].
 #' @param delay_obs_process Observation process for delays. Defaults to
 #' using the `floor` function to round both primary and secondary events to the
 #' nearest integer. Internally the delay is also bounded to be non-negative.
