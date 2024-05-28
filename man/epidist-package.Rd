@@ -6,7 +6,16 @@
 \alias{epidist-package}
 \title{epidist: Estimate epidemiological delay distributions for infectious diseases}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Understanding and accurately estimating epidemiological delay distributions is important for public health policy. These estimates directly influence epidemic situational awareness, control strategies, and resource allocation. In this package, we provide methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. Despite their importance, these issues are frequently overlooked, often resulting in biased conclusions.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://epidist.epinowcast.org/}
+}
+
 }
 \author{
 \strong{Maintainer}: Sang Woo Park \email{swp2@princeton.edu} (\href{https://orcid.org/0000-0003-2202-3361}{ORCID})
