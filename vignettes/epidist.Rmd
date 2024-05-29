@@ -201,9 +201,10 @@ With our censored, truncated, and sampled data, we are now ready to try to recov
 
 # Fit the model and compare estimates {#fit}
 
-With only access to `obs_cens_trunc_samp`, the delay distribution we observe is biased (Figure \@ref(fig:obs-est)) and we must use a statistical model.
+If we had access to the complete and unaltered `obs`, it would be simple to estimate the delay distribution.
+However, with only access to `obs_cens_trunc_samp`, the delay distribution we observe is biased (Figure \@ref(fig:obs-est)) and we must use a statistical model.
 
-(ref:obs-est) The histogram of delays from the complete retrospective data (with censoring) match closely the underlying distribution, whereas those from `obs_cens_trunc_samp` are systematically biased.
+(ref:obs-est) The histogram of delays from the complete retrospective data `obs_cens` match closely the underlying distribution, whereas those from `obs_cens_trunc_samp` are systematically biased. In this instance, while the complete, retrospective data are still subject to censoring, the extent of this issue is quite minor as compared with that from right truncation.
 
 ```{r obs-est, fig.cap="(ref:obs-est)"}
 dplyr::bind_rows(
@@ -276,7 +277,7 @@ draws <- extract_lognormal_draws(fit)
 Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained using the average of the `meanlog` and `sdlog` draws.
 Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using `epidist` we have obtained a much closer match to the truth.
 
-(ref:fitted-lognormal) A fitted delay distribution (in blue) as compared with the true delay distribution (in black).
+(ref:fitted-lognormal) A fitted delay distribution (in pink) as compared with the true delay distribution (in black).
 
 ```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
 ggplot() +
