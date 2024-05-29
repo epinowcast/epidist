@@ -35,7 +35,8 @@ Suggests:
     testthat (>= 3.0.0),
     readxl,
     janitor,
-    gt
+    gt,
+    dplyr
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
