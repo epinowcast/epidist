@@ -204,7 +204,7 @@ With our censored, truncated, and sampled data, we are now ready to try to recov
 If we had access to the complete and unaltered `obs`, it would be simple to estimate the delay distribution.
 However, with only access to `obs_cens_trunc_samp`, the delay distribution we observe is biased (Figure \@ref(fig:obs-est)) and we must use a statistical model.
 
-(ref:obs-est) The histogram of delays from the complete retrospective data `obs_cens` match well with the underlying distribution, whereas those from `obs_cens_trunc_samp` are systematically biased. In this instance, while the complete, retrospective data are still subject to censoring, the extent of this issue is relatively minor as compared with that from right truncation.
+(ref:obs-est) The histogram of delays from the complete, retrospective data `obs_cens` match quite closely with the underlying distribution, whereas those from `obs_cens_trunc_samp` show more significant systematic bias. In this instance the extent of the bias caused by censoring is less than that caused by right truncation. Nonetheless, we always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present.
 
 ```{r obs-est, fig.cap="(ref:obs-est)"}
 dplyr::bind_rows(
