@@ -45,11 +45,17 @@ library(purrr)
 library(ggplot2)
 ```
 
-# Maths {#maths}
+# Model structure {#maths}
 
-Let $p$ be time of primary event with rate (incidence) $\mathcal{P}(p)$.
-Let $s$ be time of secondary event with rate (incidence) $\mathcal{S}(s)$.
-Let $f_p(\tau)$ be probability of delay $\tau$ after observing primary event at time $p$ such that $p + \tau = s$.
+To introduce the structure of the model, we require some notation.
+This section condenses the writing of @park2024estimating, which may be referred to for further information.
+
+First, let $p$ be time of primary event, and $s$ be time of secondary event.
+We assume that these events occur at rates, or equivalently incidences, $\mathcal{P}(p)$ and $\mathcal{S}(s)$, respectively.
+Let $\tau$ be a delay time such that $\tau = s - p$.
+
+One may either consider the forward or backward perspective
+Let $f_p(\tau)$ be probability of delay $\tau$ after observing primary event at time $p$.
 Let $b_s(\tau)$ be probability of delay $\tau$ after observing secondary event at time $s$.
 Let $\mathcal{T}(p, s)$ be density of individuals with primary event at time $p$ and secondary event at time $s$.
 Then forwards
@@ -110,7 +116,9 @@ $$
 $$
 This is the approach of `latent_truncation_censoring_adjusted_delay` and that of @ward2022transmission.
 
-# Implementation {#implementation}
+# Model implementation {#implementation}
+
+To explain how the model is implemented in `epidist`, we begin by simulating suitable data:
 
 ```{r}
 meanlog <- 1.8
@@ -131,19 +139,34 @@ obs_cens_trunc_samp <- obs_cens_trunc[sample(seq_len(.N), sample_size, replace =
 data <- obs_cens_trunc_samp
 ```
 
-* How it is implemented in the package
-* What the extra arguments of the function do, if you'd like to change them
-* Which parts of the arguments we would imagine you might want to change and the potential use-cases
+The function `latent_truncation_censoring_adjusted_delay` has eight arguments^[As well as the capacity to pass additional arguments to `brms` anonymously via `...`].
+Here, we shall explain and show how these arguments are used one-by-one.
 
-The equation `brms::bf` defines a model for the two parameters, `delay_central` and `sigma`, of the response distribution:
+First, in `formula`, the equation `brms::bf` defines a model for the two parameters, `delay_central` and `sigma`, of the response distribution:
 
 ```{r}
 formula <- brms::bf(delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1, sigma ~ 1)
 ```
 
+Next, this is the function used to fit the model.
+What other things could it be?
+Examples in `epidist-paper` here.
+
 ```{r}
 fn <- brms::brm
 ```
+
+Defines a custom `brms` family.
+See package vignette for more about this.
+
+Stan has `lognormal`: we copy their parameteristation.
+(Perhaps different to `meanlog` and `sdlog`.)
+
+`latent_gamma_lpdf` in `scode_functions`.
+
+Make Stan code in `brms` documentation and in the paper they make use.
+Some choices made to avoid recompiling the model every time that you fit it (in paper).
+Ways to interact include: `make_stancode`, `make_standata`, `fit` to get Stan code.
 
 ```{r}
 family <- brms::custom_family(
@@ -156,7 +179,12 @@ family <- brms::custom_family(
   vars = c("pwindow", "swindow", "vreal1"),
   loop = FALSE
 )
+```
 
+These are additional bits of Stan code passed to `brms`.
+(Adam to understand.)
+
+```{r}
 scode_functions <-
   "\n real latent_lognormal_lpdf(vector y, vector mu, vector sigma,
    \n vector pwindow, vector swindow,
@@ -189,6 +217,7 @@ scode_priors <-
    \n"
 ```
 
+Here is the whole function:
 
 ```{r}
 data <- data.table::as.data.table(data)
@@ -250,6 +279,9 @@ fit <- fn(
 )
 ```
 
-* The limitations of the model (ways it's not ideal)
+<!-- * How it is implemented in the package -->
+<!-- * What the extra arguments of the function do, if you'd like to change them -->
+<!-- * Which parts of the arguments we would imagine you might want to change and the potential use-cases -->
+<!-- * The limitations of the model (ways it's not ideal) -->
 
 ## Bibliography {-}
