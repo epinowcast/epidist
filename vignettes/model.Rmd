@@ -40,7 +40,7 @@ library(ggplot2)
 # Maths
 
 Let $p$ be time of primary event with rate (incidence) $\mathcal{P}(p)$.
-Let $s$ be time of secondary eveng with rate (incidence) $\mathcal{S}(s)$.
+Let $s$ be time of secondary event with rate (incidence) $\mathcal{S}(s)$.
 Let $f_p(\tau)$ be probability of delay $\tau$ after observing primary event at time $p$ such that $p + \tau = s$.
 Let $b_s(\tau)$ be probability of delay $\tau$ after observing secondary event at time $s$.
 Let $\mathcal{T}(p, s)$ be density of individuals with primary event at time $p$ and secondary event at time $s$.
@@ -100,18 +100,44 @@ then
 $$
 \mathcal{L}(\mathbf{Y}_i \, | \, \boldsymbol{\theta}) = \frac{f_\text{forward}(y_i - x_i)}{F_\text{forward}(T - x_i)}.
 $$
-This is the approach of @ward2022transmission.
+This is the approach of `latent_truncation_censoring_adjusted_delay` and that of @ward2022transmission.
 
 # Implementation
+
+```{r}
+meanlog <- 1.8
+sdlog <- 0.5
+obs_time <- 25
+sample_size <- 200
+
+obs_cens_trunc <- simulate_gillespie() |>
+  simulate_secondary(
+    meanlog = meanlog,
+    sdlog = sdlog
+  ) |>
+  observe_process() |>
+  filter_obs_by_obs_time(obs_time = obs_time)
+
+obs_cens_trunc_samp <- obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
+
+data <- obs_cens_trunc_samp
+```
 
 * How it is implemented in the package
 * What the extra arguments of the function do, if you'd like to change them
 * Which parts of the arguments we would imagine you might want to change and the potential use-cases
 
+The equation `brms::bf` defines a model for the two parameters, `delay_central` and `sigma`, of the response distribution:
+
 ```{r}
 formula <- brms::bf(delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1, sigma ~ 1)
-fn <- brms::brm
+```
 
+```{r}
+fn <- brms::brm
+```
+
+```{r}
 family <- brms::custom_family(
   "latent_lognormal",
   dpars = c("mu", "sigma"),
@@ -120,15 +146,100 @@ family <- brms::custom_family(
   ub = c(NA, NA),
   type = "real",
   vars = c("pwindow", "swindow", "vreal1"),
-  loop = FALSE)
+  loop = FALSE
+)
 
-scode_functions <- "\n    real latent_lognormal_lpdf(vector y, vector mu, vector sigma,\n                               vector pwindow, vector swindow,\n                               array[] real obs_t) {\n      int n = num_elements(y);\n      vector[n] d = y - pwindow + swindow;\n      vector[n] obs_time = to_vector(obs_t) - pwindow;\n      return lognormal_lpdf(d | mu, sigma) - \n        lognormal_lcdf(obs_time | mu, sigma);\n      }\n  "
+scode_functions <-
+  "\n real latent_lognormal_lpdf(vector y, vector mu, vector sigma,
+   \n vector pwindow, vector swindow,
+   \n array[] real obs_t) {
+   \n      int n = num_elements(y);
+   \n      vector[n] d = y - pwindow + swindow;
+   \n      vector[n] obs_time = to_vector(obs_t) - pwindow;
+   \n      return lognormal_lpdf(d | mu, sigma) -
+   \n        lognormal_lcdf(obs_time | mu, sigma);
+   \n      }
+   \n"
 
-scode_parameters <- "\n    vector<lower = 0, upper = 1>[N] swindow_raw;\n    vector<lower = 0, upper = 1>[N] pwindow_raw;\n  "
+scode_parameters <-
+  "\n    vector<lower = 0, upper = 1>[N] swindow_raw;
+   \n    vector<lower = 0, upper = 1>[N] pwindow_raw;
+   \n"
 
-scode_tparameters <- "\n    vector<lower = 0>[N] pwindow;\n    vector<lower = 0>[N] swindow;\n    swindow = to_vector(vreal3) .* swindow_raw;\n    pwindow[noverlap] = to_vector(vreal2[noverlap]) .* pwindow_raw[noverlap];\n    if (wN) {\n      pwindow[woverlap] = swindow[woverlap] .* pwindow_raw[woverlap];\n    }\n  "
+scode_tparameters <-
+  "\n    vector<lower = 0>[N] pwindow;\n    vector<lower = 0>[N] swindow;
+   \n    swindow = to_vector(vreal3) .* swindow_raw;
+   \n    pwindow[noverlap] = to_vector(vreal2[noverlap]) .* pwindow_raw[noverlap];
+   \n    if (wN) {
+   \n      pwindow[woverlap] = swindow[woverlap] .* pwindow_raw[woverlap];
+   \n    }
+   \n"
 
-scode_priors <- "\n    swindow_raw ~ uniform(0, 1);\n    pwindow_raw ~ uniform(0, 1);\n  "
+scode_priors <-
+  "\n    swindow_raw ~ uniform(0, 1);
+   \n    pwindow_raw ~ uniform(0, 1);
+   \n"
+```
+
+
+```{r}
+data <- data.table::as.data.table(data)
+data[, id := 1:.N]
+data[, obs_t := obs_at - ptime_lwr]
+
+data[, pwindow_upr := ifelse(
+  stime_lwr < ptime_upr, ## if overlap
+  stime_upr - ptime_lwr,
+  ptime_upr - ptime_lwr
+)]
+
+data[, woverlap := as.numeric(stime_lwr < ptime_upr)]
+data[, swindow_upr := stime_upr - stime_lwr]
+data[, delay_central := stime_lwr - ptime_lwr]
+data[, row_id := 1:.N]
+
+if (nrow(data) > 1) {
+  data <- data[, id := as.factor(id)]
+}
+
+stanvars_functions <- brms::stanvar(
+  block = "functions", scode = scode_functions
+)
+
+stanvars_data <- brms::stanvar(
+  block = "data", scode = "int wN;",
+  x = nrow(data[woverlap > 0]),
+  name = "wN"
+) +
+
+brms::stanvar(
+  block = "data", scode = "array[N - wN] int noverlap;",
+  x = data[woverlap == 0][, row_id],
+  name = "noverlap"
+) +
+brms::stanvar(
+  block = "data", scode = "array[wN] int woverlap;",
+  x = data[woverlap > 0][, row_id],
+  name = "woverlap"
+)
+
+stanvars_parameters <- brms::stanvar(
+  block = "parameters", scode = scode_parameters
+)
+
+stanvars_tparameters <- brms::stanvar(
+  block = "tparameters", scode = scode_tparameters
+)
+
+stanvars_priors <- brms::stanvar(block = "model", scode = scode_priors)
+
+stanvars_all <- stanvars_functions + stanvars_data + stanvars_parameters + 
+  stanvars_tparameters + stanvars_priors
+
+fit <- fn(
+  formula = formula, family = family, stanvars = stanvars_all,
+  backend = "cmdstanr", data = data
+)
 ```
 
 * The limitations of the model (ways it's not ideal)
