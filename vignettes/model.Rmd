@@ -1,6 +1,6 @@
 ---
-title: "A guide to the `epidist` model"
-description: "..."
+title: "A guide to the model"
+description: "How does the model work, and how can you modify it to suit your analysis needs?"
 output: 
   bookdown::html_document2:
     fig_caption: yes
@@ -30,6 +30,14 @@ knitr::opts_chunk$set(
 )
 ```
 
+The `epidist` package enables users to estimate delay distributions while accounting for common reporting biases.
+This is primarily done via the function `latent_truncation_censoring_adjusted_delay`, which implements a Bayesian hierarchical model.
+In Section \@ref(maths), we explain the model's mathematical structure.
+In Section \@ref(implementation), we outline how the model is implemented, making use of the `brms` R package for fitting Bayesian hierarchical models.
+After reading this vignette, we hope you are able to confidently use the `latent_truncation_censoring_adjusted_delay` function, as well as make modifications to the model's structure to suit your needs.
+
+This vignette uses the packages:
+
 ```{r load-requirements}
 library(epidist)
 library(data.table)
@@ -37,7 +45,7 @@ library(purrr)
 library(ggplot2)
 ```
 
-# Maths
+# Maths {#maths}
 
 Let $p$ be time of primary event with rate (incidence) $\mathcal{P}(p)$.
 Let $s$ be time of secondary event with rate (incidence) $\mathcal{S}(s)$.
@@ -102,7 +110,7 @@ $$
 $$
 This is the approach of `latent_truncation_censoring_adjusted_delay` and that of @ward2022transmission.
 
-# Implementation
+# Implementation {#implementation}
 
 ```{r}
 meanlog <- 1.8
