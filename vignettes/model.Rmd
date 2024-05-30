@@ -166,7 +166,6 @@ Stan has `lognormal`: we copy their parameteristation.
 
 Make Stan code in `brms` documentation and in the paper they make use.
 Some choices made to avoid recompiling the model every time that you fit it (in paper).
-Ways to interact include: `make_stancode`, `make_standata`, `fit` to get Stan code.
 
 ```{r}
 family <- brms::custom_family(
@@ -277,6 +276,16 @@ fit <- fn(
   formula = formula, family = family, stanvars = stanvars_all,
   backend = "cmdstanr", data = data
 )
+```
+
+Not in the function but other things you can do:
+
+```{r}
+stancode <- brms::make_stancode(fit)
+# stancode <- brms::stancode(fit)
+
+standata <- brms::make_standata(fit)
+# standata <- brms::standata(fit)
 ```
 
 <!-- * How it is implemented in the package -->
