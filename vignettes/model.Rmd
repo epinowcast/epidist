@@ -1,5 +1,5 @@
 ---
-title: "A guide to the model"
+title: "A guide to the `epidist` statistical model"
 description: "How does the model work, and how can you modify it to suit your analysis needs?"
 output: 
   bookdown::html_document2:
@@ -11,7 +11,7 @@ pkgdown:
 # csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
 link-citations: true
 vignette: >
-  %\VignetteIndexEntry{Getting started with epidist}
+  %\VignetteIndexEntry{Model guide}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: references.bib
@@ -31,10 +31,11 @@ knitr::opts_chunk$set(
 ```
 
 The `epidist` package enables users to estimate delay distributions while accounting for common reporting biases.
-This is primarily done via the function `latent_truncation_censoring_adjusted_delay`, which implements a Bayesian hierarchical model.
+This is primarily done via the function `latent_truncation_censoring_adjusted_delay`, which implements a Bayesian latent variable model.
 In Section \@ref(maths), we explain the model's mathematical structure.
-In Section \@ref(implementation), we outline how the model is implemented, making use of the `brms` R package for fitting Bayesian hierarchical models.
-After reading this vignette, we hope you are able to confidently use the `latent_truncation_censoring_adjusted_delay` function, as well as make modifications to the model's structure to suit your needs.
+In Section \@ref(implementation), we outline how the model is implemented, making use of the `brms` R package for fitting Bayesian hierarchical models [@brms].
+After reading this vignette, we hope you are able to confidently use the `latent_truncation_censoring_adjusted_delay` function.
+Additionally, due to the model's implementation using `brms`, readers will be able to make modifications to the model's structure to suit particular analysis needs.
 
 This vignette uses the packages:
 
@@ -47,37 +48,55 @@ library(ggplot2)
 
 # Model structure {#maths}
 
-To introduce the structure of the model, we require some notation.
-This section condenses the writing of @park2024estimating, which may be referred to for further information.
+Some notation is required to introduce the structure of the model.
+This section condenses @park2024estimating, which may be referred to for further information.
 
 First, let $p$ be time of primary event, and $s$ be time of secondary event.
 We assume that these events occur at rates, or equivalently incidences, $\mathcal{P}(p)$ and $\mathcal{S}(s)$, respectively.
 Let $\tau$ be a delay time such that $\tau = s - p$.
 
-One may either consider the forward or backward perspective
-Let $f_p(\tau)$ be probability of delay $\tau$ after observing primary event at time $p$.
-Let $b_s(\tau)$ be probability of delay $\tau$ after observing secondary event at time $s$.
-Let $\mathcal{T}(p, s)$ be density of individuals with primary event at time $p$ and secondary event at time $s$.
-Then forwards
+One may either consider the forward or backward perspective.
+Under the forward perspective, let $f_p(\tau)$ be probability of delay $\tau$ after observing primary event at time $p$.
+Under the backward perspective, let $b_s(\tau)$ be probability of delay $\tau$ after observing secondary event at time $s$.
+Finally, let $\mathcal{T}(p, s)$ be density of individuals with primary event at time $p$ and secondary event at time $s$.
+Then both
 $$
 \mathcal{T}(p, s) = \mathcal{P}(p) f_p(s - p),
 $$
-and backwards
+and
 $$
 \mathcal{T}(p, s) = \mathcal{S}(s) b_s(s - p).
 $$
-Therefore by equivalence of forwards and backwards
+So, by equivalence of the forwards and backwards perspectives then
 $$
-\mathcal{P}(p) f_p(s - p) = \mathcal{S}(s) b_s(s - p).
+\mathcal{P}(p) f_p(s - p) = \mathcal{S}(s) b_s(s - p). (\#eq:forwards-backwards)
 $$
-Rearranging gives
+Rearranging Equation \@ref(eq:forwards-backwards) gives
 $$
-b_s(\tau) = \frac{\mathcal{P}(s - \tau) f_{s - \tau}(\tau)}{\mathcal{S}(s)}.
+b_s(\tau) = \frac{\mathcal{P}(s - \tau) f_{s - \tau}(\tau)}{\mathcal{S}(s)}. (\#eq:forwards-backwards2)
 $$
-The denominator may be expressed as the integral over all possible delays
+The denominator of Equation \@ref(eq:forwards-backwards2), which corresponds to the incidence of secondary events, may be expressed as the integral over all possible delays
 $$
-\mathcal{S}(s) = \int_{-\infty}^\infty \mathcal{P}(s - \tau) f_{s - \tau}(\tau) \text{d} \tau.
+\mathcal{S}(s) = \int_{-\infty}^\infty \mathcal{P}(s - \tau) f_{s - \tau}(\tau) \text{d} \tau,
 $$
+such that
+$$
+b_s(\tau) = \frac{\mathcal{P}(s - \tau) f_{s - \tau}(\tau)}{\int_{-\infty}^\infty \mathcal{P}(s - \tau) f_{s - \tau}(\tau) \text{d} \tau}.
+$$
+
+Assume we don't observe secondary events past time $T$.
+Let $P$ and $S$ be random variables.
+Let $F_p$ be the forward cumulative distribution.
+Then
+\begin{align}
+\mathbb{P}(S = P + \tau \, | \, P = p, S < T) &= \frac{\mathbb{P}(S = P + \tau, P = p, S < T)}{\mathbb{P}(P = p, S < T)} \\
+&= \frac{\mathbb{P}(S = P + \tau < T \, | \, P = p)\mathbb{P}(P = p)}{\mathbb{P}(S < T \, | \, P = p)\mathbb{P}(P = p)} \\
+&= \frac{\mathbb{P}(S = P + \tau < T \, | \, P = p)}{\mathbb{P}(S < T \, | \, P = p)} \\
+&= \frac{f_p(\tau)}{\int_0^{T - p} f_p(x) \text{d}x} = \frac{f_p(\tau)}{F_p(T - p)}, \quad p + \tau < T.
+\end{align}
+
+Right truncation renormalises the density by the values which are possible.
+For example, if $x \sim \text{Unif}(0, 1)$ right truncated by $T = 0.5$ then $x \sim \text{Unif}(0, 0.5)$.
 
 ## Correct thing
 
