@@ -1,9 +1,57 @@
-epidist_priors.ltcad <- function() {
- # ...  
+epidist_data.ltcad <- function() {
+  data <- data.table::as.data.table(data)
+  data[, id := 1:.N]
+  data[, obs_t := obs_at - ptime_lwr]
+  data[, pwindow_upr := ifelse(
+    stime_lwr < ptime_upr, ## if overlap
+    stime_upr - ptime_lwr,
+    ptime_upr - ptime_lwr
+  )]
+  data[, woverlap := as.numeric(stime_lwr < ptime_upr)]
+  data[, swindow_upr := stime_upr - stime_lwr]
+  data[, delay_central := stime_lwr - ptime_lwr]
+  data[, row_id := 1:.N]
+  
+  if (nrow(data) > 1) {
+    data <- data[, id := as.factor(id)]
+  }
 }
 
 epidist_stancode.ltcad <- function() {
-  # ...  
+  stanvars_functions <- brms::stanvar(
+    block = "functions", scode = scode_functions
+  )
+  
+  stanvars_data <- brms::stanvar(
+    block = "data", scode = "int wN;",
+    x = nrow(data[woverlap > 0]),
+    name = "wN"
+  ) +
+    brms::stanvar(
+      block = "data", scode = "array[N - wN] int noverlap;",
+      x = data[woverlap == 0][, row_id],
+      name = "noverlap"
+    ) +
+    brms::stanvar(
+      block = "data", scode = "array[wN] int woverlap;",
+      x = data[woverlap > 0][, row_id],
+      name = "woverlap"
+    )
+  
+  stanvars_parameters <- brms::stanvar(
+    block = "parameters", scode = scode_parameters
+  )
+  
+  stanvars_tparameters <- brms::stanvar(
+    block = "tparameters", scode = scode_tparameters
+  )
+  
+  stanvars_priors <- brms::stanvar(block = "model", scode = scode_priors)
+  
+  stanvars_all <- stanvars_functions + stanvars_data + stanvars_parameters +
+    stanvars_tparameters + stanvars_priors
+
+  return(stanvars_all)
 }
 
 epidist_priors.ltcad <- function() {
@@ -15,7 +63,12 @@ epidist_formula.ltcad <- function() {
 }
 
 epidist.ltcad <- function() {
-  # ...
+  fit <- fn(
+    formula = formula, family = family, stanvars = stanvars_all,
+    backend = "cmdstanr", data = data,
+    ...
+  )
+  return(fit)
 }
 
 #' #' Estimate delays adjusted for right truncation and censoring using a
@@ -68,58 +121,4 @@ epidist.ltcad <- function() {
 #'   ",
 #'     ...
 #' ) {
-#'   
-#'   data <- data.table::as.data.table(data)
-#'   data[, id := 1:.N]
-#'   data[, obs_t := obs_at - ptime_lwr]
-#'   data[, pwindow_upr := ifelse(
-#'     stime_lwr < ptime_upr, ## if overlap
-#'     stime_upr - ptime_lwr,
-#'     ptime_upr - ptime_lwr
-#'   )]
-#'   data[, woverlap := as.numeric(stime_lwr < ptime_upr)]
-#'   data[, swindow_upr := stime_upr - stime_lwr]
-#'   data[, delay_central := stime_lwr - ptime_lwr]
-#'   data[, row_id := 1:.N]
-#'   
-#'   if (nrow(data) > 1) {
-#'     data <- data[, id := as.factor(id)]
-#'   }
-#'   
-#'   stanvars_functions <- brms::stanvar(
-#'     block = "functions", scode = scode_functions
-#'   )
-#'   stanvars_data <- brms::stanvar(
-#'     block = "data", scode = "int wN;",
-#'     x = nrow(data[woverlap > 0]),
-#'     name = "wN"
-#'   ) +
-#'     brms::stanvar(
-#'       block = "data", scode = "array[N - wN] int noverlap;",
-#'       x = data[woverlap == 0][, row_id],
-#'       name = "noverlap"
-#'     ) +
-#'     brms::stanvar(
-#'       block = "data", scode = "array[wN] int woverlap;",
-#'       x = data[woverlap > 0][, row_id],
-#'       name = "woverlap"
-#'     )
-#'   
-#'   stanvars_parameters <- brms::stanvar(
-#'     block = "parameters", scode = scode_parameters
-#'   )
-#'   stanvars_tparameters <- brms::stanvar(
-#'     block = "tparameters", scode = scode_tparameters
-#'   )
-#'   stanvars_priors <- brms::stanvar(block = "model", scode = scode_priors)
-#'   
-#'   stanvars_all <- stanvars_functions + stanvars_data + stanvars_parameters + 
-#'     stanvars_tparameters + stanvars_priors
-#'   
-#'   fit <- fn(
-#'     formula = formula, family = family, stanvars = stanvars_all,
-#'     backend = "cmdstanr", data = data,
-#'     ...
-#'   )
-#'   return(fit)
 #' }
