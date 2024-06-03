@@ -31,11 +31,14 @@ knitr::opts_chunk$set(
 ```
 
 The `epidist` package enables users to estimate delay distributions while accounting for common reporting biases.
-This is primarily done via the function `latent_truncation_censoring_adjusted_delay`, which implements a Bayesian latent variable model.
+This is primarily done using a Bayesian latent variable model implemented as the function `latent_truncation_censoring_adjusted_delay`.
+This vignette serves to enhance your understanding of the model and how it works.
+
 In Section \@ref(maths), we explain the model's mathematical structure.
-In Section \@ref(implementation), we outline how the model is implemented, making use of the `brms` R package for fitting Bayesian hierarchical models [@brms].
+Then, in Section \@ref(implementation), we outline how the model is implemented using the `brms` R package for fitting Bayesian hierarchical models [@brms].
+
 After reading this vignette, we hope you are able to confidently use the `latent_truncation_censoring_adjusted_delay` function.
-Additionally, due to the model's implementation using `brms`, readers will be able to make modifications to the model's structure to suit particular analysis needs.
+Additionally, as a result of the model's `brms` implementation, we will demonstrate how to make modifications to the model's structure to suit your particular analysis needs.
 
 This vignette uses the packages:
 
@@ -49,7 +52,7 @@ library(ggplot2)
 # Model structure {#maths}
 
 Some notation is required to introduce the structure of the model.
-This section condenses @park2024estimating, which may be referred to for further information.
+Note that this section condenses @park2024estimating, which may be referred to for further details.
 
 First, let $p$ be time of primary event, and $s$ be time of secondary event.
 We assume that these events occur at rates, or equivalently incidences, $\mathcal{P}(p)$ and $\mathcal{S}(s)$, respectively.
@@ -59,7 +62,7 @@ One may either consider the forward or backward perspective.
 Under the forward perspective, let $f_p(\tau)$ be probability of delay $\tau$ after observing primary event at time $p$.
 Under the backward perspective, let $b_s(\tau)$ be probability of delay $\tau$ after observing secondary event at time $s$.
 Finally, let $\mathcal{T}(p, s)$ be density of individuals with primary event at time $p$ and secondary event at time $s$.
-Then both
+Then, both
 $$
 \mathcal{T}(p, s) = \mathcal{P}(p) f_p(s - p),
 $$
@@ -84,6 +87,8 @@ $$
 b_s(\tau) = \frac{\mathcal{P}(s - \tau) f_{s - \tau}(\tau)}{\int_{-\infty}^\infty \mathcal{P}(s - \tau) f_{s - \tau}(\tau) \text{d} \tau}.
 $$
 
+## Right truncation
+
 Assume we don't observe secondary events past time $T$.
 Let $P$ and $S$ be random variables.
 Let $F_p$ be the forward cumulative distribution.
@@ -98,7 +103,9 @@ Then
 Right truncation renormalises the density by the values which are possible.
 For example, if $x \sim \text{Unif}(0, 1)$ right truncated by $T = 0.5$ then $x \sim \text{Unif}(0, 0.5)$.
 
-## Correct thing
+## Interval censoring
+
+## The exact method
 
 Let $\mathbf{Y}$ be the data vector and $\boldsymbol{\theta}$ be parameters.
 Then
@@ -118,7 +125,7 @@ y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
 Modelling $g_P$ $\iff$ modelling incidence in primary events.
 This is a tough thing to do.
 
-## Approximate thing that we do
+## The approximate method {#approximate}
 
 **Assume primary event incidence constant** leads to
 \begin{align}
@@ -137,7 +144,8 @@ This is the approach of `latent_truncation_censoring_adjusted_delay` and that of
 
 # Model implementation {#implementation}
 
-To explain how the model is implemented in `epidist`, we begin by simulating suitable data:
+We will now explain how the approximate model (Section \@ref(approximate)) is implemented in `epidist`.
+First, we begin by simulating example data:
 
 ```{r}
 meanlog <- 1.8
@@ -158,7 +166,7 @@ obs_cens_trunc_samp <- obs_cens_trunc[sample(seq_len(.N), sample_size, replace =
 data <- obs_cens_trunc_samp
 ```
 
-The function `latent_truncation_censoring_adjusted_delay` has eight arguments^[As well as the capacity to pass additional arguments to `brms` anonymously via `...`].
+The function `latent_truncation_censoring_adjusted_delay` has eight arguments^[As well as the capacity to pass additional arguments to `brms` anonymously via `...`]: `formula`, `data`, `fn`, `family`, and each of `scode_functions`, `scode_parameters`, `scode_tparameters` and `scode_priors`.
 Here, we shall explain and show how these arguments are used one-by-one.
 
 First, in `formula`, the equation `brms::bf` defines a model for the two parameters, `delay_central` and `sigma`, of the response distribution:
@@ -167,24 +175,28 @@ First, in `formula`, the equation `brms::bf` defines a model for the two paramet
 formula <- brms::bf(delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1, sigma ~ 1)
 ```
 
-Next, this is the function used to fit the model.
-What other things could it be?
-Examples in `epidist-paper` here.
+Next, `fn` defines the function used to fit the model.
+The default option is to use `brms::brm`.
+Alternatively, it could be certain other things (see examples in `epidist-paper`).
 
 ```{r}
 fn <- brms::brm
 ```
 
-Defines a custom `brms` family.
-See package vignette for more about this.
+The `family` option defines a custom `brms` family.
+For more information, see the ["Define Custom Response Distributions with `brms`"](https://paul-buerkner.github.io/brms/articles/brms_customfamilies.html) vignette from the `brms` package documentation.
 
-Stan has `lognormal`: we copy their parameteristation.
-(Perhaps different to `meanlog` and `sdlog`.)
+Here, the custom distribution has two parameters, $\mu$ and $\sigma > 0$ with respective identity and log link functions.
+The `vars` argument is used to pass data to the likelihood.
+Note: why do we have the difference between `vreal(obs_t, pwindow_upr, swindow_upr)` and `vars = c("pwindow", "swindow", "vreal1")`?
 
-`latent_gamma_lpdf` in `scode_functions`.
+<!-- Stan has `lognormal`: we copy their parameteristation. -->
+<!-- (Perhaps different to `meanlog` and `sdlog`.) -->
 
-Make Stan code in `brms` documentation and in the paper they make use.
-Some choices made to avoid recompiling the model every time that you fit it (in paper).
+<!-- `latent_gamma_lpdf` in `scode_functions`. -->
+
+<!-- Make Stan code in `brms` documentation and in the paper they make use. -->
+<!-- Some choices made to avoid recompiling the model every time that you fit it (in paper). -->
 
 ```{r}
 family <- brms::custom_family(
@@ -199,8 +211,10 @@ family <- brms::custom_family(
 )
 ```
 
-These are additional bits of Stan code passed to `brms`.
-(Adam to understand.)
+Finally, the arguments beginning in `scode_` pass additional Stan code to the `brms` model.
+For example, `scode_function` is passed to the Stan functions block via `brms::stanvar(block = "functions", scode = scode_functions)`.
+
+Here, the `latent_lognormal_lpdf` custom function defines a likelihood for...
 
 ```{r}
 scode_functions <-
@@ -214,28 +228,42 @@ scode_functions <-
    \n        lognormal_lcdf(obs_time | mu, sigma);
    \n      }
    \n"
+```
 
+Vectors of length `N` for numbers in the range $[0, 1]$.
+
+```{r}
 scode_parameters <-
   "\n    vector<lower = 0, upper = 1>[N] swindow_raw;
    \n    vector<lower = 0, upper = 1>[N] pwindow_raw;
    \n"
+```
 
+Something to do with overlap here.
+Figure this out.
+
+```{r}
 scode_tparameters <-
-  "\n    vector<lower = 0>[N] pwindow;\n    vector<lower = 0>[N] swindow;
+  "\n    vector<lower = 0>[N] pwindow;
+   \n    vector<lower = 0>[N] swindow;
    \n    swindow = to_vector(vreal3) .* swindow_raw;
    \n    pwindow[noverlap] = to_vector(vreal2[noverlap]) .* pwindow_raw[noverlap];
    \n    if (wN) {
    \n      pwindow[woverlap] = swindow[woverlap] .* pwindow_raw[woverlap];
    \n    }
    \n"
+```
 
+As `swindow_raw` and `pwindow_raw` are already constrained to be in $[0, 1]$ then do we need this?
+
+```{r}
 scode_priors <-
   "\n    swindow_raw ~ uniform(0, 1);
    \n    pwindow_raw ~ uniform(0, 1);
    \n"
 ```
 
-Here is the whole function:
+Given these inputs, the `latent_truncation_censoring_adjusted_delay` function proceeds as follows:
 
 ```{r}
 data <- data.table::as.data.table(data)
@@ -307,9 +335,7 @@ standata <- brms::make_standata(fit)
 # standata <- brms::standata(fit)
 ```
 
-<!-- * How it is implemented in the package -->
-<!-- * What the extra arguments of the function do, if you'd like to change them -->
-<!-- * Which parts of the arguments we would imagine you might want to change and the potential use-cases -->
-<!-- * The limitations of the model (ways it's not ideal) -->
+Remains to add which parts of the arguments we would imagine you might want to change and the potential use-cases.
+Also remains to discuss the limitations of the model (ways it's not ideal) both from a mathematical perspective, and also from an implementation perspective.
 
 ## Bibliography {-}
