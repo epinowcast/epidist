@@ -91,17 +91,6 @@ epidist.ltcad <- function() {
 #'       vars = c("pwindow", "swindow", "vreal1"),
 #'       loop = FALSE
 #'     ),
-#'     scode_functions = "
-#'     real latent_lognormal_lpdf(vector y, vector mu, vector sigma,
-#'                                vector pwindow, vector swindow,
-#'                                array[] real obs_t) {
-#'       int n = num_elements(y);
-#'       vector[n] d = y - pwindow + swindow;
-#'       vector[n] obs_time = to_vector(obs_t) - pwindow;
-#'       return lognormal_lpdf(d | mu, sigma) - 
-#'         lognormal_lcdf(obs_time | mu, sigma);
-#'       }
-#'   ",
 #'     scode_parameters = "
 #'     vector<lower = 0, upper = 1>[N] swindow_raw;
 #'     vector<lower = 0, upper = 1>[N] pwindow_raw;
