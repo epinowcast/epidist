@@ -19,7 +19,7 @@ epidist_data.epidist_ltcad <- function() {
 
 epidist_stancode.epidist_ltcad <- function() {
   stanvars_functions <- brms::stanvar(
-    block = "functions", scode = scode_functions
+    block = "functions", scode = epidist_stan_chunk("functions.stan")
   )
   
   stanvars_data <- brms::stanvar(
@@ -39,14 +39,16 @@ epidist_stancode.epidist_ltcad <- function() {
     )
   
   stanvars_parameters <- brms::stanvar(
-    block = "parameters", scode = scode_parameters
+    block = "parameters", scode = epidist_stan_chunk("parameters.stan")
   )
   
   stanvars_tparameters <- brms::stanvar(
-    block = "tparameters", scode = scode_tparameters
+    block = "tparameters", scode = epidist_stan_chunk("tparameters.stan")
   )
   
-  stanvars_priors <- brms::stanvar(block = "model", scode = scode_priors)
+  stanvars_priors <- brms::stanvar(
+    block = "model", scode = epidist_stan_chunk("priors.stan")
+  )
   
   stanvars_all <- stanvars_functions + stanvars_data + stanvars_parameters +
     stanvars_tparameters + stanvars_priors
