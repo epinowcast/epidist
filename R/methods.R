@@ -21,6 +21,24 @@ prepare.default <- function(data, model, ...) {
   prepare(data, ...)
 }
 
+#' Define a model specific formula
+#' 
+#' @export
+#' @inheritParams epidist_priors
+#' @param ... Additional arguments for method.
+epidist_formula <- function(data, ...) {
+  UseMethod("epidist_formula")
+}
+
+#' Define model specific family
+#' 
+#' @export
+#' @inheritParams epidist_priors
+#' @param ... Additional arguments for method.
+epidist_family <- function(data, ...) {
+  UseMethod("epidist_family")
+}
+
 #' Define model specific priors
 #' 
 #' @export
@@ -41,23 +59,14 @@ epidist_stancode <- function(data, ...) {
   UseMethod("epidist_stancode")
 }
 
-#' Define a model specific formula
-#' 
-#' @export
-#' @inheritParams epidist_priors
-#' @param ... Additional arguments for method.
-epidist_formula <- function(data, ...) {
-  UseMethod("epidist_formula")
-}
-
 #' Interface using `brms`
 #'
-#' @param data
-#' @param formula
-#' @param family
-#' @param priors
-#' @param custom_stancode
-#' @param dry
+#' @param data ...
+#' @param formula ... 
+#' @param family ...
+#' @param priors ...
+#' @param custom_stancode ...
+#' @param dry ...
 #' @param ... Additional arguments for method.
 #' @export
 epidist <- function(data, formula, family, priors, custom_stancode, dry = FALSE,

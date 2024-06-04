@@ -1,4 +1,6 @@
-epidist_data.epidist_ltcad <- function() {
+#' @method prepare epidist_ltcad
+#' @export
+prepare.epidist_ltcad <- function(data) {
   data <- data.table::as.data.table(data)
   data[, id := 1:.N]
   data[, obs_t := obs_at - ptime_lwr]
@@ -15,9 +17,13 @@ epidist_data.epidist_ltcad <- function() {
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
   }
+  
+  return(data)
 }
 
-epidist_stancode.epidist_ltcad <- function() {
+#' @method epidist_stancode epidist_ltcad
+#' @export
+epidist_stancode.epidist_ltcad <- function(data) {
   stanvars_functions <- brms::stanvar(
     block = "functions", scode = epidist_stan_chunk("functions.stan")
   )
@@ -56,18 +62,24 @@ epidist_stancode.epidist_ltcad <- function() {
   return(stanvars_all)
 }
 
-epidist_priors.epidist_ltcad <- function() {
-  # ...  
+#' @method epidist_priors epidist_ltcad
+#' @export
+epidist_priors.epidist_ltcad <- function(data) {
+  return(NULL)
 }
 
-epidist_formula.epidist_ltcad <- function() {
+#' @method epidist_formula epidist_ltcad
+#' @export
+epidist_formula.epidist_ltcad <- function(data) {
   brms::bf(
     delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1,
     sigma ~ 1
   )
 }
 
-epidist_family.epidist_ltcad <- function() {
+#' @method epidist_family epidist_ltcad
+#' @export
+epidist_family.epidist_ltcad <- function(data) {
   brms::custom_family(
     "latent_lognormal",
     dpars = c("mu", "sigma"),
@@ -80,10 +92,17 @@ epidist_family.epidist_ltcad <- function() {
   )
 }
 
-epidist.epidist_ltcad <- function() {
+#' @method epidist epidist_ltcad
+#' @export
+epidist.epidist_ltcad <- function(data, formula = epidist_formula(data),
+                                  family = epidist_family(data),
+                                  priors = epidist_priors(data),
+                                  custom_stancode = epidist_stancode(data),
+                                  ...) {
   fn <- brms::brm
+  
   fit <- fn(
-    formula = formula, family = family, stanvars = stanvars_all,
+    formula = formula, family = family, stanvars = custom_stancode,
     backend = "cmdstanr", data = data, ...
   )
   
