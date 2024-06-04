@@ -71,13 +71,22 @@ epidist_priors.epidist_ltcad <- function(data) {
   return(NULL)
 }
 
+#' Define a formula for the ltcad model
+#' 
+#' @param delay_central
+#' @param sigma
 #' @method epidist_formula epidist_ltcad
 #' @export
-epidist_formula.epidist_ltcad <- function(data) {
-  brms::bf(
-    delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1,
-    sigma ~ 1
+epidist_formula.epidist_ltcad <- function(data, delay_central = ~ 1,
+                                          sigma = ~ 1) {
+  delay_equation <- paste0(
+    "delay_central | vreal(obs_t, pwindow_upr, swindow_upr)",
+    paste(delay_central, collapse = " ")
   )
+
+  sigma_equation <- paste0("sigma", paste(sigma, collapse = " "))
+  form <- brms::bf(as.formula(delay_equation), as.formula(sigma_equation))
+  return(form)
 }
 
 #' @method epidist_family epidist_ltcad
