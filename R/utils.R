@@ -5,9 +5,6 @@
 #' @return A character string containing the Stan code chunk of interest.
 #' @export
 epidist_stan_chunk <- function(path) {
-  paste(
-    readLines(
-      system.file(paste0("stan/", path), package = "epidist")),
-    collapse = "\n"
-  )
+  local_path <- system.file(paste0("stan/", path), package = "epidist")
+  paste(readLines(local_path), collapse = "\n")
 }
