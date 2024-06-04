@@ -82,35 +82,8 @@ epidist.ltcad <- function() {
   fn <- brms::brm
   fit <- fn(
     formula = formula, family = family, stanvars = stanvars_all,
-    backend = "cmdstanr", data = data,
-    ...
+    backend = "cmdstanr", data = data, ...
   )
+  
   return(fit)
 }
-
-#' #' Estimate delays adjusted for right truncation and censoring using a
-#' #' latent model
-#' #' 
-#' #' @family model
-#' #' @export
-#' latent_truncation_censoring_adjusted_delay <- function(
-#'     scode_parameters = "
-#'     vector<lower = 0, upper = 1>[N] swindow_raw;
-#'     vector<lower = 0, upper = 1>[N] pwindow_raw;
-#'   ",
-#'     scode_tparameters = "
-#'     vector<lower = 0>[N] pwindow;
-#'     vector<lower = 0>[N] swindow;
-#'     swindow = to_vector(vreal3) .* swindow_raw;
-#'     pwindow[noverlap] = to_vector(vreal2[noverlap]) .* pwindow_raw[noverlap];
-#'     if (wN) {
-#'       pwindow[woverlap] = swindow[woverlap] .* pwindow_raw[woverlap];
-#'     }
-#'   ",
-#'     scode_priors = "
-#'     swindow_raw ~ uniform(0, 1);
-#'     pwindow_raw ~ uniform(0, 1);
-#'   ",
-#'     ...
-#' ) {
-#' }
