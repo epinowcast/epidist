@@ -1,3 +1,26 @@
+#' Prepare data for modelling
+#'
+#' @param data A dataframe to be used for modelling
+#' @rdname prepare
+#' @export
+prepare <- function(data, ...) {
+  UseMethod("prepare")
+}
+
+#' Default method used when preparing data
+#'
+#' @param model Character string, model type to prepare to use.
+#' Supported options are "ltcad".
+#' @param ... Additional arguments passed to model specific prepare functions
+#' @rdname prepare
+#' @method prepare default
+#' @export
+prepare.default <- function(data, model, ...) {
+  model <- match.arg(model, choices = c("ltcad"))
+  class(data) <- c(class(data), paste0("epidist_", model))
+  prepare(data, ...)
+}
+
 #' Define model specific priors
 #' 
 #' @export
@@ -38,6 +61,6 @@ epidist_formula <- function(data, ...) {
 #' @param ... Additional arguments for method.
 #' @export
 epidist <- function(data, formula, family, priors, custom_stancode, dry = FALSE,
-                  ...) {
+                    ...) {
   UseMethod("epidist")
 }
