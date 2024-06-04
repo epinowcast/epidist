@@ -36,3 +36,8 @@ fit <- epidist(
   priors = priors,
   custom_stancode = custom_stancode
 )
+
+# This is the same thing at fit
+fit2 <- epidist(prep_obs)
+
+stancode <- epidist(prep_obs, dry = TRUE)
