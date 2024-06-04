@@ -15,7 +15,7 @@ obs_cens_trunc_samp <- obs_cens_trunc[sample(seq_len(.N), sample_size, replace =
 
 obs <- obs_cens_trunc_samp
 
-prep_obs <- prepare(obs, model = "ltcad")
+prep_obs <- epidist_prepare(obs, model = "ltcad")
 
 formula <- epidist_formula(prep_obs)
 formula
@@ -36,5 +36,3 @@ fit <- epidist(
   priors = priors,
   custom_stancode = custom_stancode
 )
-
-fit

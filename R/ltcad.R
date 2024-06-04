@@ -1,6 +1,6 @@
-#' @method prepare epidist_ltcad
+#' @method epidist_prepare epidist_ltcad
 #' @export
-prepare.epidist_ltcad <- function(data) {
+epidist_prepare.epidist_ltcad <- function(data) {
   data <- data.table::as.data.table(data)
   data[, id := 1:.N]
   data[, obs_t := obs_at - ptime_lwr]
@@ -29,17 +29,20 @@ epidist_stancode.epidist_ltcad <- function(data) {
   )
   
   stanvars_data <- brms::stanvar(
-    block = "data", scode = "int wN;",
+    block = "data",
+    scode = "int wN;",
     x = nrow(data[woverlap > 0]),
     name = "wN"
   ) +
     brms::stanvar(
-      block = "data", scode = "array[N - wN] int noverlap;",
+      block = "data",
+      scode = "array[N - wN] int noverlap;",
       x = data[woverlap == 0][, row_id],
       name = "noverlap"
     ) +
     brms::stanvar(
-      block = "data", scode = "array[wN] int woverlap;",
+      block = "data",
+      scode = "array[wN] int woverlap;",
       x = data[woverlap > 0][, row_id],
       name = "woverlap"
     )
