@@ -59,10 +59,27 @@ epidist_priors.ltcad <- function() {
 }
 
 epidist_formula.ltcad <- function() {
-  # ...  
+  brms::bf(
+    delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1,
+    sigma ~ 1
+  )
+}
+
+epidist_family.ltcad <- function() {
+  brms::custom_family(
+    "latent_lognormal",
+    dpars = c("mu", "sigma"),
+    links = c("identity", "log"),
+    lb = c(NA, 0),
+    ub = c(NA, NA),
+    type = "real",
+    vars = c("pwindow", "swindow", "vreal1"),
+    loop = FALSE
+  )
 }
 
 epidist.ltcad <- function() {
+  fn <- brms::brm
   fit <- fn(
     formula = formula, family = family, stanvars = stanvars_all,
     backend = "cmdstanr", data = data,
@@ -77,20 +94,6 @@ epidist.ltcad <- function() {
 #' #' @family model
 #' #' @export
 #' latent_truncation_censoring_adjusted_delay <- function(
-#'     formula = brms::bf(
-#'       delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1,
-#'       sigma ~ 1
-#'     ), data, fn = brms::brm,
-#'     family = brms::custom_family(
-#'       "latent_lognormal",
-#'       dpars = c("mu", "sigma"),
-#'       links = c("identity", "log"),
-#'       lb = c(NA, 0),
-#'       ub = c(NA, NA),
-#'       type = "real",
-#'       vars = c("pwindow", "swindow", "vreal1"),
-#'       loop = FALSE
-#'     ),
 #'     scode_parameters = "
 #'     vector<lower = 0, upper = 1>[N] swindow_raw;
 #'     vector<lower = 0, upper = 1>[N] pwindow_raw;
