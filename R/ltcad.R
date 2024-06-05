@@ -103,9 +103,9 @@ epidist_formula.epidist_ltcad <- function(data, delay_central = ~ 1,
 #' @method epidist_family epidist_ltcad
 #' @family ltcad
 #' @export
-epidist_family.epidist_ltcad <- function(data) {
+epidist_family.epidist_ltcad <- function(data, family = "lognormal") {
   brms::custom_family(
-    "latent_lognormal",
+    paste0("latent_", family),
     dpars = c("mu", "sigma"),
     links = c("identity", "log"),
     lb = c(NA, 0),
