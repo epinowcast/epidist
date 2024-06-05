@@ -8,3 +8,13 @@ epidist_stan_chunk <- function(path) {
   local_path <- system.file(paste0("stan/", path), package = "epidist")
   paste(readLines(local_path), collapse = "\n")
 }
+
+#' Label a epidist Stan model with a version indicator
+#'
+#' @return A brms stanvar chunk containing the package version used to build
+#' the Stan code.
+epidist_version_stanvar <- function() {
+  version <- utils::packageVersion("epidist")
+  comment <- paste0("// code chunks used from epidist ", version, "\n")
+  stanvar(scode = comment, block = "functions")
+}

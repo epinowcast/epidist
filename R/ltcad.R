@@ -24,6 +24,8 @@ epidist_prepare.epidist_ltcad <- function(data) {
 #' @method epidist_stancode epidist_ltcad
 #' @export
 epidist_stancode.epidist_ltcad <- function(data) {
+  stanvars_version <- epidist_version_stanvar()
+  
   stanvars_functions <- brms::stanvar(
     block = "functions", scode = epidist_stan_chunk("functions.stan")
   )
@@ -59,8 +61,8 @@ epidist_stancode.epidist_ltcad <- function(data) {
     block = "model", scode = epidist_stan_chunk("priors.stan")
   )
   
-  stanvars_all <- stanvars_functions + stanvars_data + stanvars_parameters +
-    stanvars_tparameters + stanvars_priors
+  stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
+    stanvars_parameters + stanvars_tparameters + stanvars_priors
 
   return(stanvars_all)
 }
