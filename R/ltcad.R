@@ -23,11 +23,15 @@ epidist_prepare.epidist_ltcad <- function(data) {
 
 #' @method epidist_stancode epidist_ltcad
 #' @export
-epidist_stancode.epidist_ltcad <- function(data) {
+epidist_stancode.epidist_ltcad <- function(data, family = "lognormal") {
   stanvars_version <- epidist_version_stanvar()
   
   stanvars_functions <- brms::stanvar(
     block = "functions", scode = epidist_stan_chunk("functions.stan")
+  )
+  
+  stanvars_functions[[1]]$scode <- gsub(
+    "family", family, stanvars_functions[[1]]$scode
   )
   
   stanvars_data <- brms::stanvar(
