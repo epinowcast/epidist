@@ -38,3 +38,10 @@ fit <- epidist(
 
 stancode <- epidist(prep_obs, fn = brms::make_stancode)
 stancode
+
+fit_gamma <- epidist(
+  data = prep_obs,
+  formula = formula,
+  family = epidist_family(prep_obs, family = "gamma"),
+  priors = priors
+)
