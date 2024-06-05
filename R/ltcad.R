@@ -1,4 +1,5 @@
 #' @method epidist_prepare epidist_ltcad
+#' @family ltcad
 #' @export
 epidist_prepare.epidist_ltcad <- function(data) {
   data <- data.table::as.data.table(data)
@@ -22,6 +23,7 @@ epidist_prepare.epidist_ltcad <- function(data) {
 }
 
 #' @method epidist_stancode epidist_ltcad
+#' @family ltcad
 #' @export
 epidist_stancode.epidist_ltcad <- function(data, family = "lognormal") {
   stanvars_version <- epidist_version_stanvar()
@@ -72,6 +74,7 @@ epidist_stancode.epidist_ltcad <- function(data, family = "lognormal") {
 }
 
 #' @method epidist_priors epidist_ltcad
+#' @family ltcad
 #' @export
 epidist_priors.epidist_ltcad <- function(data) {
   return(NULL)
@@ -83,6 +86,7 @@ epidist_priors.epidist_ltcad <- function(data) {
 #' @param sigma Formula for the delay standard deviation. Defaults to intercept
 #' only.
 #' @method epidist_formula epidist_ltcad
+#' @family ltcad
 #' @export
 epidist_formula.epidist_ltcad <- function(data, delay_central = ~ 1,
                                           sigma = ~ 1) {
@@ -97,6 +101,7 @@ epidist_formula.epidist_ltcad <- function(data, delay_central = ~ 1,
 }
 
 #' @method epidist_family epidist_ltcad
+#' @family ltcad
 #' @export
 epidist_family.epidist_ltcad <- function(data) {
   brms::custom_family(
@@ -112,6 +117,7 @@ epidist_family.epidist_ltcad <- function(data) {
 }
 
 #' @method epidist epidist_ltcad
+#' @family ltcad
 #' @export
 epidist.epidist_ltcad <- function(data, formula = epidist_formula(data),
                                   family = epidist_family(data),
