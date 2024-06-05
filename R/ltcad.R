@@ -2,8 +2,10 @@
 #' @family ltcad
 #' @export
 epidist_prepare.epidist_ltcad <- function(data) {
+  id <- obs_t <- obs_at <- NULL
+  ptime_lwr <- pwindow_upr <- stime_lwr <- ptime_upr <- NULL
   data <- data.table::as.data.table(data)
-  data[, id := 1:.N]
+  data[, id := seq_len(.N)]
   data[, obs_t := obs_at - ptime_lwr]
   data[, pwindow_upr := ifelse(
     stime_lwr < ptime_upr, ## if overlap
@@ -13,7 +15,7 @@ epidist_prepare.epidist_ltcad <- function(data) {
   data[, woverlap := as.numeric(stime_lwr < ptime_upr)]
   data[, swindow_upr := stime_upr - stime_lwr]
   data[, delay_central := stime_lwr - ptime_lwr]
-  data[, row_id := 1:.N]
+  data[, row_id := seq_len(.N)]
   
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]

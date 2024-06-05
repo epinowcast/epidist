@@ -11,7 +11,8 @@ obs_cens_trunc <- simulate_gillespie() |>
   observe_process() |>
   filter_obs_by_obs_time(obs_time = obs_time)
 
-obs_cens_trunc_samp <- obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
+obs_cens_trunc_samp <-
+  obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 
 obs <- obs_cens_trunc_samp
 
@@ -33,8 +34,7 @@ fit <- epidist(
   priors = priors
 )
 
-# This is the same thing at fit
-# fit2 <- epidist(prep_obs)
+# This is the same thing as fit2 <- epidist(prep_obs)
 
 stancode <- epidist(prep_obs, fn = brms::make_stancode)
 stancode
