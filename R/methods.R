@@ -55,17 +55,6 @@ epidist_priors <- function(data, ...) {
   UseMethod("epidist_priors")
 }
 
-#' Define model specific stancode
-#' 
-#' @inheritParams epidist_prepare
-#' @param ... Additional arguments for method.
-#' @rdname id_stancode
-#' @family methods
-#' @export
-epidist_stancode <- function(data, ...) {
-  UseMethod("epidist_stancode")
-}
-
 #' Interface using `brms`
 #'
 #' @param formula A formula as defined using [epidist_formula()]

@@ -26,15 +26,11 @@ family
 priors <- epidist_priors(prep_obs)
 priors
 
-custom_stancode <- epidist_stancode(prep_obs)
-custom_stancode
-
 fit <- epidist(
   data = prep_obs,
   formula = formula,
   family = family,
-  priors = priors,
-  custom_stancode = custom_stancode
+  priors = priors
 )
 
 # This is the same thing at fit

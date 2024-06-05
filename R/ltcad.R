@@ -22,57 +22,6 @@ epidist_prepare.epidist_ltcad <- function(data) {
   return(data)
 }
 
-#' @method epidist_stancode epidist_ltcad
-#' @family ltcad
-#' @export
-epidist_stancode.epidist_ltcad <- function(data, family = "lognormal") {
-  stanvars_version <- epidist_version_stanvar()
-  
-  stanvars_functions <- brms::stanvar(
-    block = "functions", scode = epidist_stan_chunk("functions.stan")
-  )
-  
-  stanvars_functions[[1]]$scode <- gsub(
-    "family", family, stanvars_functions[[1]]$scode
-  )
-  
-  stanvars_data <- brms::stanvar(
-    block = "data",
-    scode = "int wN;",
-    x = nrow(data[woverlap > 0]),
-    name = "wN"
-  ) +
-    brms::stanvar(
-      block = "data",
-      scode = "array[N - wN] int noverlap;",
-      x = data[woverlap == 0][, row_id],
-      name = "noverlap"
-    ) +
-    brms::stanvar(
-      block = "data",
-      scode = "array[wN] int woverlap;",
-      x = data[woverlap > 0][, row_id],
-      name = "woverlap"
-    )
-  
-  stanvars_parameters <- brms::stanvar(
-    block = "parameters", scode = epidist_stan_chunk("parameters.stan")
-  )
-  
-  stanvars_tparameters <- brms::stanvar(
-    block = "tparameters", scode = epidist_stan_chunk("tparameters.stan")
-  )
-  
-  stanvars_priors <- brms::stanvar(
-    block = "model", scode = epidist_stan_chunk("priors.stan")
-  )
-  
-  stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
-    stanvars_parameters + stanvars_tparameters + stanvars_priors
-
-  return(stanvars_all)
-}
-
 #' @method epidist_priors epidist_ltcad
 #' @family ltcad
 #' @export
@@ -122,11 +71,57 @@ epidist_family.epidist_ltcad <- function(data, family = "lognormal") {
 epidist.epidist_ltcad <- function(data, formula = epidist_formula(data),
                                   family = epidist_family(data),
                                   priors = epidist_priors(data),
-                                  custom_stancode = epidist_stancode(data),
                                   fn = brms::brm,
                                   ...) {
+  
+  stanvars_version <- epidist_version_stanvar()
+  
+  stanvars_functions <- brms::stanvar(
+    block = "functions", scode = epidist_stan_chunk("functions.stan")
+  )
+
+  family_name <- gsub("latent_", "", family$name)
+  
+  stanvars_functions[[1]]$scode <- gsub(
+    "family", family_name, stanvars_functions[[1]]$scode
+  )
+  
+  stanvars_data <- brms::stanvar(
+    block = "data",
+    scode = "int wN;",
+    x = nrow(data[woverlap > 0]),
+    name = "wN"
+  ) +
+    brms::stanvar(
+      block = "data",
+      scode = "array[N - wN] int noverlap;",
+      x = data[woverlap == 0][, row_id],
+      name = "noverlap"
+    ) +
+    brms::stanvar(
+      block = "data",
+      scode = "array[wN] int woverlap;",
+      x = data[woverlap > 0][, row_id],
+      name = "woverlap"
+    )
+  
+  stanvars_parameters <- brms::stanvar(
+    block = "parameters", scode = epidist_stan_chunk("parameters.stan")
+  )
+  
+  stanvars_tparameters <- brms::stanvar(
+    block = "tparameters", scode = epidist_stan_chunk("tparameters.stan")
+  )
+  
+  stanvars_priors <- brms::stanvar(
+    block = "model", scode = epidist_stan_chunk("priors.stan")
+  )
+  
+  stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
+    stanvars_parameters + stanvars_tparameters + stanvars_priors
+  
   fit <- fn(
-    formula = formula, family = family, stanvars = custom_stancode,
+    formula = formula, family = family, stanvars = stanvars_all,
     backend = "cmdstanr", data = data, ...
   )
   
