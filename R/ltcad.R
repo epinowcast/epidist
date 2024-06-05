@@ -112,11 +112,8 @@ epidist.epidist_ltcad <- function(data, formula = epidist_formula(data),
                                   family = epidist_family(data),
                                   priors = epidist_priors(data),
                                   custom_stancode = epidist_stancode(data),
-                                  dry = FALSE,
+                                  fn = brms::brm,
                                   ...) {
-  
-  fn <- ifelse(dry, brms::make_stancode, brms::brm)
-  
   fit <- fn(
     formula = formula, family = family, stanvars = custom_stancode,
     backend = "cmdstanr", data = data, ...

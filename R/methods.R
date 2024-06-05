@@ -67,10 +67,10 @@ epidist_stancode <- function(data, ...) {
 #' @param family ...
 #' @param priors ...
 #' @param custom_stancode ...
-#' @param dry ...
+#' @param fn Likely `brms::brm`. Also possible to be `brms::make_stancode` or
+#' `brms::make_standata`.
 #' @param ... Additional arguments for method.
 #' @export
-epidist <- function(data, formula, family, priors, custom_stancode, dry = FALSE,
-                    ...) {
+epidist <- function(data, formula, family, priors, custom_stancode, fn, ...) {
   UseMethod("epidist")
 }
