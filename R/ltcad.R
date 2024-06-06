@@ -2,8 +2,9 @@
 #' @family ltcad
 #' @export
 epidist_prepare.epidist_ltcad <- function(data) {
-  id <- obs_t <- obs_at <- NULL
-  ptime_lwr <- pwindow_upr <- stime_lwr <- ptime_upr <- NULL
+  id <- obs_t <- obs_at <- ptime_lwr <- pwindow_upr <- stime_lwr <- NULL
+  stime_upr <- woverlap <- swindow_upr <- stime_upr <- delay_central <- NULL
+  row_id <- ptime_upr <- NULL
   data <- data.table::as.data.table(data)
   data[, id := seq_len(.N)]
   data[, obs_t := obs_at - ptime_lwr]
@@ -16,11 +17,11 @@ epidist_prepare.epidist_ltcad <- function(data) {
   data[, swindow_upr := stime_upr - stime_lwr]
   data[, delay_central := stime_lwr - ptime_lwr]
   data[, row_id := seq_len(.N)]
-  
+
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
   }
-  
+
   return(data)
 }
 
@@ -32,7 +33,7 @@ epidist_priors.epidist_ltcad <- function(data) {
 }
 
 #' Define a formula for the ltcad model
-#' 
+#'
 #' @param delay_central Formula for the delay mean. Defaults to intercept only.
 #' @param sigma Formula for the delay standard deviation. Defaults to intercept
 #' only.
@@ -118,7 +119,6 @@ epidist_stancode.epidist_ltcad <- function(data,
   stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
     stanvars_parameters + stanvars_tparameters + stanvars_priors
 }
-
 
 #' @method epidist epidist_ltcad
 #' @family ltcad
