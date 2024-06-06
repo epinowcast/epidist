@@ -2,9 +2,20 @@
 % Please edit documentation in R/methods.R
 \name{epidist}
 \alias{epidist}
+\alias{epidist.default}
 \title{Interface using \code{brms}}
 \usage{
 epidist(data, formula, family, priors, custom_stancode, fn, ...)
+
+\method{epidist}{default}(
+  data,
+  formula = epidist_formula(data),
+  family = epidist_family(data),
+  priors = epidist_priors(data),
+  stancode = epidist_stancode(data),
+  fn = brms::brm,
+  ...
+)
 }
 \arguments{
 \item{data}{A dataframe to be used for modelling.}
@@ -24,8 +35,17 @@ epidist(data, formula, family, priors, custom_stancode, fn, ...)
 }
 \description{
 Interface using \code{brms}
+
+Default method used for interface using \code{brms}
 }
 \seealso{
+Other methods: 
+\code{\link{epidist_family}()},
+\code{\link{epidist_formula}()},
+\code{\link{epidist_prepare}()},
+\code{\link{epidist_priors}()},
+\code{\link{epidist_stancode}()}
+
 Other methods: 
 \code{\link{epidist_family}()},
 \code{\link{epidist_formula}()},
