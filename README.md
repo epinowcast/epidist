@@ -186,8 +186,8 @@ Contributions of any kind are welcome!
 ### Code
 
 <a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>,
-<a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>
 
 ### Issue Authors
@@ -197,7 +197,8 @@ Contributions of any kind are welcome!
 
 ### Issue Contributors
 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Asbfnk">sbfnk</a>
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->

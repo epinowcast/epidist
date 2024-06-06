@@ -123,6 +123,7 @@ If making use of our methodology or the methodology on which ours is based, plea
 ## Contributors
 
 
+
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -133,8 +134,8 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 
 
 <a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>, 
-<a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>, 
 <a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>, 
+<a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>, 
 <a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>
 
 
@@ -150,10 +151,12 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 ### Issue Contributors
 
 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>, 
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Asbfnk">sbfnk</a>
 
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+
 
