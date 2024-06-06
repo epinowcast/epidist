@@ -67,21 +67,17 @@ epidist_family.epidist_ltcad <- function(data, family = "lognormal") {
   )
 }
 
-#' @method epidist epidist_ltcad
+#' @method epidist_stancode epidist_ltcad
 #' @family ltcad
 #' @export
-epidist.epidist_ltcad <- function(data, formula = epidist_formula(data),
-                                  family = epidist_family(data),
-                                  priors = epidist_priors(data),
-                                  fn = brms::brm,
-                                  ...) {
-  
+epidist_stancode.epidist_ltcad <- function(data,
+                                           family = epidist_family(data)) {
   stanvars_version <- epidist_version_stanvar()
   
   stanvars_functions <- brms::stanvar(
     block = "functions", scode = epidist_stan_chunk("functions.stan")
   )
-
+  
   family_name <- gsub("latent_", "", family$name)
   
   stanvars_functions[[1]]$scode <- gsub(
@@ -121,9 +117,21 @@ epidist.epidist_ltcad <- function(data, formula = epidist_formula(data),
   
   stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
     stanvars_parameters + stanvars_tparameters + stanvars_priors
+}
+
+
+#' @method epidist epidist_ltcad
+#' @family ltcad
+#' @export
+epidist.epidist_ltcad <- function(data, formula = epidist_formula(data),
+                                  family = epidist_family(data),
+                                  priors = epidist_priors(data),
+                                  stancode = epidist_stancode(data),
+                                  fn = brms::brm,
+                                  ...) {
   
   fit <- fn(
-    formula = formula, family = family, stanvars = stanvars_all,
+    formula = formula, family = family, stanvars = stancode,
     backend = "cmdstanr", data = data, ...
   )
   

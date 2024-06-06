@@ -27,11 +27,15 @@ family
 priors <- epidist_priors(prep_obs)
 priors
 
+stancode <- epidist_stancode(prep_obs)
+stancode
+
 fit <- epidist(
   data = prep_obs,
   formula = formula,
   family = family,
-  priors = priors
+  priors = priors,
+  stancode = stancode
 )
 
 # This is the same thing as fit2 <- epidist(prep_obs)
@@ -43,5 +47,6 @@ fit_gamma <- epidist(
   data = prep_obs,
   formula = formula,
   family = epidist_family(prep_obs, family = "gamma"),
-  priors = priors
+  priors = priors,
+  stancode = epidist_stancode(
 )
