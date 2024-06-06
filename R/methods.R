@@ -81,3 +81,26 @@ epidist_stancode <- function(data, ...) {
 epidist <- function(data, formula, family, priors, custom_stancode, fn, ...) {
   UseMethod("epidist")
 }
+
+#' Default method used for interface using `brms`
+#'
+#' @inheritParams epidist
+#' @rdname epidist
+#' @method epidist default
+#' @family methods
+#' @export
+epidist.default <- function(data, formula = epidist_formula(data),
+                            family = epidist_family(data),
+                            priors = epidist_priors(data),
+                            stancode = epidist_stancode(data), fn = brms::brm,
+                            ...) {
+  
+  fit <- fn(
+    formula = formula, family = family, stanvars = stancode,
+    backend = "cmdstanr", data = data, ...
+  )
+  
+  class(fit) <- c(class(fit), "epidist_fit")
+  
+  return(fit)
+}
