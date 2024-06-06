@@ -19,5 +19,5 @@ epidist_stan_chunk <- function(path) {
 epidist_version_stanvar <- function() {
   version <- utils::packageVersion("epidist")
   comment <- paste0("// code chunks used from epidist ", version, "\n")
-  stanvar(scode = comment, block = "functions")
+  brms::stanvar(scode = comment, block = "functions")
 }
