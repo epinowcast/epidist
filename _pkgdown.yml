@@ -24,10 +24,14 @@ reference:
   desc: Functions for observing data
   contents:
   - has_concept("observe")
-- title: Model
+- title: Methods
   desc: Functions for estimating epidemiological delays
   contents:
-  - has_concept("model")
+  - has_concept("methods")
+- title: Latent truncation censoring adjusted delay model
+  desc: Model-specific functions
+  contents:
+  - has_concept("ltcad")
 - title: Postprocess
   desc: Functions for postprocessing model output
   contents:
@@ -40,3 +44,6 @@ reference:
   desc: Data included with the package
   contents:
   - has_concept("data")
+- title: Utility functions
+  contents:
+  - has_concept("utils")
