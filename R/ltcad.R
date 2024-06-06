@@ -119,23 +119,3 @@ epidist_stancode.epidist_ltcad <- function(data,
   stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
     stanvars_parameters + stanvars_tparameters + stanvars_priors
 }
-
-#' @method epidist epidist_ltcad
-#' @family ltcad
-#' @export
-epidist.epidist_ltcad <- function(data, formula = epidist_formula(data),
-                                  family = epidist_family(data),
-                                  priors = epidist_priors(data),
-                                  stancode = epidist_stancode(data),
-                                  fn = brms::brm,
-                                  ...) {
-  
-  fit <- fn(
-    formula = formula, family = family, stanvars = stancode,
-    backend = "cmdstanr", data = data, ...
-  )
-  
-  class(fit) <- c(class(fit), "epidist_fit")
-  
-  return(fit)
-}
