@@ -49,4 +49,7 @@ fit_gamma <- epidist(
   family = epidist_family(prep_obs, family = "gamma"),
   priors = priors,
   stancode = epidist_stancode(
+    prep_obs,
+    family = epidist_family(prep_obs, family = "gamma")
+  )
 )
