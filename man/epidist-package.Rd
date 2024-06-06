@@ -2,7 +2,6 @@
 % Please edit documentation in R/epidist-package.R
 \docType{package}
 \name{epidist-package}
-\alias{epidist}
 \alias{epidist-package}
 \title{epidist: Estimate epidemiological delay distributions for infectious diseases}
 \description{
