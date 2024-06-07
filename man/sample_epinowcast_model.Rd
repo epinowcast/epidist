@@ -12,6 +12,17 @@ sample_epinowcast_model(
   ...
 )
 }
+\arguments{
+\item{model}{...}
+
+\item{data}{...}
+
+\item{scenario}{...}
+
+\item{diagnostics}{...}
+
+\item{...}{...}
+}
 \description{
 Sample from the posterior of an epinowcast model with additional diagnositics
 }

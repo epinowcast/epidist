@@ -11,8 +11,7 @@ summarise_draws(draws, sf, not_by = "value", by)
 
 \item{sf}{The number of significant figures to use}
 
-\item{not_by}{A vector of columns to exclude from the grouping
-This will be overridden if by is specified.}
+\item{not_by}{...}
 
 \item{by}{A vector of columns to group by}
 }

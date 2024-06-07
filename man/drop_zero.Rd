@@ -6,6 +6,9 @@
 \usage{
 drop_zero(data)
 }
+\arguments{
+\item{data}{...}
+}
 \description{
 Drop zero observations as unstable in a lognormal distribution
 }
