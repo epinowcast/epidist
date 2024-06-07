@@ -241,15 +241,24 @@ dplyr::bind_rows(
   theme(legend.position = "bottom")
 ```
 
-The main `epidist` model function is `latent_truncation_censoring_adjusted_delay`.
+The main function you will use for modelling is called `epidist`^[Technically, `epidist` is an [S3 generic](http://adv-r.had.co.nz/S3.html) which allows it to work differently for inputs of different classes. This is why inputs must be prepared first via `epidist_prepare` so that they are of the appropriate class!].
+We will fit the model `"ltcad"`, which stands for latent truncation censoring adjusted delay (LTCAD)^[Catchy!].
+To do so, we first prepare the `data` using `epidist_prepare`:
+
 <!-- In a future vignette, we will explain in more detail the structure of the model. -->
+
+```{r}
+data <- epidist_prepare(obs_cens_trunc_samp, model = "ltcad")
+class(data)
+```
+
+The `data` object now has the class `epidist_ltcad`.
+Using this `data`, we now call `epidist::epidist` to fit the LTCAD model.
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
 
 ```{r}
-fit <- latent_truncation_censoring_adjusted_delay(
-  data = obs_cens_trunc_samp, cores = 4, refresh = 0
-)
+fit <- epidist(data = data, cores = 4, refresh = 0)
 ```
 
 The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters (Table \@ref(tab:pars)) in the model.
