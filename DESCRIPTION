@@ -28,7 +28,9 @@ Imports:
     data.table,
     ggplot2,
     posterior,
-    purrr
+    purrr,
+    ggridges,
+    here
 Suggests:
     bookdown,
     epinowcast,
