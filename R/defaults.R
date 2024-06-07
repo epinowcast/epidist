@@ -21,7 +21,10 @@ epidist_prepare.default <- function(data, model, ...) {
 #' @family defaults
 #' @export
 epidist_formula.default <- function(data, ...) {
-  stop("No epidist_formula method implemented for class ", class(x))
+  stop(
+    "No epidist_formula method implemented for the class ", class(x), "\n",
+    "See methods(epidist_formula) for available methods"
+  )
 }
 
 #' Default method for defining a model specific family
@@ -31,7 +34,10 @@ epidist_formula.default <- function(data, ...) {
 #' @family defaults
 #' @export
 epidist_family.default <- function(data, ...) {
-  stop("No epidist_family method implemented for class ", class(x))
+  stop(
+    "No epidist_family method implemented for the class ", class(x), "\n",
+    "See methods(epidist_family) for available methods"
+  )
 }
 
 #' Default method for defining model specific priors
@@ -41,7 +47,10 @@ epidist_family.default <- function(data, ...) {
 #' @family defaults
 #' @export
 epidist_priors.default <- function(data, ...) {
-  stop("No epidist_priors method implemented for class ", class(x))
+  stop(
+    "No epidist_priors method implemented for the class ", class(x), "\n",
+    "See methods(epidist_priors) for available methods"
+  )
 }
 
 #' Default method for defining model specific Stan code
@@ -51,7 +60,10 @@ epidist_priors.default <- function(data, ...) {
 #' @family defaults
 #' @export
 epidist_stancode.default <- function(data, ...) {
-  stop("No epidist_stancode method implemented for class ", class(x))
+  stop(
+    "No epidist_stancode method implemented for the class ", class(x), "\n",
+    "See methods(epidist_stancode) for available methods"
+  )
 }
 
 #' Default method used for interface using `brms`
