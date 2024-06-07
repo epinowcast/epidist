@@ -38,7 +38,8 @@ Suggests:
     readxl,
     janitor,
     gt,
-    dplyr
+    dplyr,
+    knitr
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
@@ -51,3 +52,4 @@ URL: https://epidist.epinowcast.org/
 Depends: 
     R (>= 2.10)
 LazyData: true
+VignetteBuilder: knitr
