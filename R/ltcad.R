@@ -76,7 +76,7 @@ epidist_stancode.epidist_ltcad <- function(data,
   stanvars_version <- epidist_version_stanvar()
   
   stanvars_functions <- brms::stanvar(
-    block = "functions", scode = epidist_stan_chunk("functions.stan")
+    block = "functions", scode = epidist_stan_chunk("ltcad/functions.stan")
   )
   
   family_name <- gsub("latent_", "", family$name)
@@ -105,15 +105,15 @@ epidist_stancode.epidist_ltcad <- function(data,
     )
   
   stanvars_parameters <- brms::stanvar(
-    block = "parameters", scode = epidist_stan_chunk("parameters.stan")
+    block = "parameters", scode = epidist_stan_chunk("ltcad/parameters.stan")
   )
   
   stanvars_tparameters <- brms::stanvar(
-    block = "tparameters", scode = epidist_stan_chunk("tparameters.stan")
+    block = "tparameters", scode = epidist_stan_chunk("ltcad/tparameters.stan")
   )
   
   stanvars_priors <- brms::stanvar(
-    block = "model", scode = epidist_stan_chunk("priors.stan")
+    block = "model", scode = epidist_stan_chunk("ltcad/priors.stan")
   )
   
   stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
