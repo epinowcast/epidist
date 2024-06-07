@@ -1,9 +1,12 @@
 #' Plot the posterior estimates as densities
 #' 
+#' @param data ...
+#' @param alpha ...
+#' @param quantiles ...
 #' @family plot
 #' @export
 plot_recovery <- function(data, alpha = 0.8,
-                                   quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {
+                          quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {
   data |>
     ggplot() +
     aes(x = value, ...) +
@@ -15,7 +18,10 @@ plot_recovery <- function(data, alpha = 0.8,
 }
 
 #' Plot the relative difference between true values and posterior estimates
-#' 
+#'
+#' @param relative_data ...
+#' @param alpha ...
+#' @param quantiles ...
 #' @family plot
 #' @export
 plot_relative_recovery <- function(relative_data, alpha = 0.8,
@@ -31,6 +37,7 @@ plot_relative_recovery <- function(relative_data, alpha = 0.8,
 
 #' Plot cases by observation window
 #' 
+#' @param cases
 #' @family plot
 #' @export
 plot_cases_by_obs_window <- function(cases) {
@@ -57,6 +64,9 @@ plot_cases_by_obs_window <- function(cases) {
 
 #' Plot the empirical delay distribution
 #' 
+#' @param cases
+#' @param meanlog
+#' @param sdlog
 #' @family plot
 #' @export
 plot_empirical_delay <- function(cases, meanlog, sdlog) {
@@ -89,6 +99,7 @@ plot_empirical_delay <- function(cases, meanlog, sdlog) {
 
 #' Plot the mean difference between continuous and discrete event time
 #' 
+#' @param censor_delay ...
 #' @family plot
 #' @export
 plot_censor_delay <- function(censor_delay) {
@@ -163,6 +174,7 @@ make_ribbon_bound <- function(quantile) {
 
 #' Plot empirical cohort-based or cumulative mean
 #' 
+#' @param data ...
 #' @family plot
 #' @export
 plot_cohort_mean <- function(data) {
