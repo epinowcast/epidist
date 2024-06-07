@@ -24,12 +24,16 @@ reference:
   desc: Functions for observing data
   contents:
   - has_concept("observe")
-- title: Methods
-  desc: Functions for estimating epidemiological delays
+- title: S3 generics
+  desc: S3 generics for delay modelling
   contents:
-  - has_concept("methods")
+  - has_concept("generics")
+- title: Method default
+  desc: Default methods for S3 generics
+  contents:
+  - has_concept("defaults")
 - title: Latent truncation censoring adjusted delay model
-  desc: Model-specific functions
+  desc: Model-specific methods
   contents:
   - has_concept("ltcad")
 - title: Postprocess
