@@ -2,33 +2,17 @@
 #'
 #' @param data A dataframe to be used for modelling.
 #' @rdname epidist_prepare
-#' @family methods
+#' @family generics
 #' @export
 epidist_prepare <- function(data, ...) {
   UseMethod("epidist_prepare")
-}
-
-#' Default method used when preparing data
-#'
-#' @param model Character string, model type to prepare to use.
-#' Supported options are "ltcad".
-#' @param ... Additional arguments passed to model specific `epidist_prepare`
-#' functions
-#' @rdname epidist_prepare
-#' @method epidist_prepare default
-#' @family methods
-#' @export
-epidist_prepare.default <- function(data, model, ...) {
-  model <- match.arg(model, choices = c("ltcad"))
-  class(data) <- c(class(data), paste0("epidist_", model))
-  epidist_prepare(data, ...)
 }
 
 #' Define a model specific formula
 #' 
 #' @inheritParams epidist_prepare
 #' @param ... Additional arguments for method.
-#' @family methods
+#' @family generics
 #' @export
 epidist_formula <- function(data, ...) {
   UseMethod("epidist_formula")
@@ -38,7 +22,7 @@ epidist_formula <- function(data, ...) {
 #' 
 #' @inheritParams epidist_prepare
 #' @param ... Additional arguments for method.
-#' @family methods
+#' @family generics
 #' @export
 epidist_family <- function(data, ...) {
   UseMethod("epidist_family")
@@ -49,7 +33,7 @@ epidist_family <- function(data, ...) {
 #' @inheritParams epidist_prepare
 #' @param ... Additional arguments for method.
 #' @rdname epidist_priors
-#' @family methods
+#' @family generics
 #' @export
 epidist_priors <- function(data, ...) {
   UseMethod("epidist_priors")
@@ -60,7 +44,7 @@ epidist_priors <- function(data, ...) {
 #' @inheritParams epidist_prepare
 #' @param ... Additional arguments for method.
 #' @rdname epidist_stancode
-#' @family methods
+#' @family generics
 #' @export
 epidist_stancode <- function(data, ...) {
   UseMethod("epidist_stancode")
@@ -76,31 +60,8 @@ epidist_stancode <- function(data, ...) {
 #' `brms::make_standata`.
 #' @inheritParams epidist_prepare
 #' @param ... Additional arguments for method.
-#' @family methods
+#' @family generics
 #' @export
 epidist <- function(data, formula, family, priors, custom_stancode, fn, ...) {
   UseMethod("epidist")
-}
-
-#' Default method used for interface using `brms`
-#'
-#' @inheritParams epidist
-#' @rdname epidist
-#' @method epidist default
-#' @family methods
-#' @export
-epidist.default <- function(data, formula = epidist_formula(data),
-                            family = epidist_family(data),
-                            priors = epidist_priors(data),
-                            stancode = epidist_stancode(data), fn = brms::brm,
-                            ...) {
-  
-  fit <- fn(
-    formula = formula, family = family, stanvars = stancode,
-    backend = "cmdstanr", data = data, ...
-  )
-  
-  class(fit) <- c(class(fit), "epidist_fit")
-  
-  return(fit)
 }
