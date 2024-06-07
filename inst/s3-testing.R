@@ -53,3 +53,12 @@ fit_gamma <- epidist(
     family = epidist_family(prep_obs, family = "gamma")
   )
 )
+
+# Test the defaults
+
+x <- list()
+epidist_prepare(x)
+epidist_family(x)
+epidist_formula(x)
+epidist_priors(x)
+epidist_stancode(x)
