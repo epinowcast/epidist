@@ -34,9 +34,11 @@ epidist_priors.epidist_ltcad <- function(data, ...) {
 
 #' Define a formula for the ltcad model
 #'
+#' @param data ...
 #' @param delay_central Formula for the delay mean. Defaults to intercept only.
 #' @param sigma Formula for the delay standard deviation. Defaults to intercept
 #' only.
+#' @param ... ...
 #' @method epidist_formula epidist_ltcad
 #' @family ltcad
 #' @export

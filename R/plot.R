@@ -3,6 +3,7 @@
 #' @param data ...
 #' @param alpha ...
 #' @param quantiles ...
+#' @param ... ...
 #' @family plot
 #' @export
 plot_recovery <- function(data, alpha = 0.8,
@@ -22,6 +23,7 @@ plot_recovery <- function(data, alpha = 0.8,
 #' @param relative_data ...
 #' @param alpha ...
 #' @param quantiles ...
+#' @param ... ...
 #' @family plot
 #' @export
 plot_relative_recovery <- function(relative_data, alpha = 0.8,
@@ -37,7 +39,7 @@ plot_relative_recovery <- function(relative_data, alpha = 0.8,
 
 #' Plot cases by observation window
 #' 
-#' @param cases
+#' @param cases ...
 #' @family plot
 #' @export
 plot_cases_by_obs_window <- function(cases) {
@@ -64,9 +66,9 @@ plot_cases_by_obs_window <- function(cases) {
 
 #' Plot the empirical delay distribution
 #' 
-#' @param cases
-#' @param meanlog
-#' @param sdlog
+#' @param cases ...
+#' @param meanlog ...
+#' @param sdlog ...
 #' @family plot
 #' @export
 plot_empirical_delay <- function(cases, meanlog, sdlog) {
@@ -117,8 +119,8 @@ plot_censor_delay <- function(censor_delay) {
 #' plot empirical cohort-based or cumulative mean vs posterior mean
 #' 
 #' @param summarised_mean Summarised mean as produced by [summarise_variable()]
-#' @param data data used for object fitting
-#' @param truncate account for truncation?
+#' @param obs_mean ...
+#' @param alpha ...
 #' @param mean Should the mean be plotted? Logical, defaults to `FALSE`.
 #' @param ribbon Should the quantile ribbon be plotted? Logical, defaults to
 #' `TRUE`.

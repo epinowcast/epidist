@@ -4,6 +4,7 @@
 #' @param data ...
 #' @param scenario ...
 #' @param diagnostics ...
+#' @param ... ...
 #' @family postprocess
 #' @export
 sample_model <- function(model, data, scenario = data.table::data.table(id = 1),
@@ -269,7 +270,7 @@ make_relative_to_truth <- function(draws, secondary_dist, by = "parameter") {
 #'
 #' @param draws A data.table of posterior draws
 #' @param sf The number of significant figures to use
-#' @param variable The variable to summarise
+#' @param not_by ...
 #' @param by A vector of columns to group by
 #' @family postprocess
 #' @export
@@ -311,6 +312,7 @@ summarise_draws <- function(draws, sf, not_by = "value", by) {
 
 #' Summarise a variable
 #'
+#' @param variable The variable to summarise
 #' @inheritParams summarise_draws
 #' 
 #' @family postprocess
