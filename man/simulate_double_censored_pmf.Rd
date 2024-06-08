@@ -43,9 +43,6 @@ The user may specify the \code{alpha}, \code{beta}, and upper bound of the event
 Additionally, the user can specify the random number generator functions for
 primary events, secondary events, and delays.
 }
-\examples{
-simulate_double_censored_pmf(0.6, 0.5, 10, 1000)
-}
 \seealso{
 Other simulate: 
 \code{\link{simulate_exponential_cases}()},
