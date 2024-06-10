@@ -37,7 +37,7 @@ knitr::opts_chunk$set(
   * Why is it the default
   * What are its strengths
   * What are its drawbacks
-* What are the atlernatives
+* What are the alternatives
   * Why might you consider them
 
 ## Laplace 
