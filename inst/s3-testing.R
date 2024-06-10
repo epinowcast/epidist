@@ -62,34 +62,3 @@ epidist_family(x)
 epidist_formula(x)
 epidist_priors(x)
 epidist_stancode(x)
-
-# What are the default priors
-default_prior <- brms::default_prior(
-  object = formula,
-  data = prep_obs,
-  family = family
-)
-
-default_prior$source
-
-constructive::construct(default_prior)
-
-test_prior <- brms::set_prior(
-  "std_normal()",
-  class = "b"
-)
-
-str(test_prior)
-
-epidist_priors(priors = list(test_prior), data = prep_obs)
-
-default_priors <- brms::default_prior(
-  object = formula, data = prep_obs, family = family
-)
-
-default_priors_list <- split(default_priors, seq_len(nrow(default_priors)))
-default_priors_list <- unname(default_priors_list)
-
-priors <- c(priors_list, default_priors_list)
-
-return(priors)
