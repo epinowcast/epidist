@@ -1,7 +1,7 @@
-#' @method epidist_prepare epidist_ltcad
-#' @family ltcad
+#' @method epidist_prepare epidist_latent_individual
+#' @family latent_individual
 #' @export
-epidist_prepare.epidist_ltcad <- function(data, ...) {
+epidist_prepare.epidist_latent_individual <- function(data, ...) {
   id <- obs_t <- obs_at <- ptime_lwr <- pwindow_upr <- stime_lwr <- NULL
   stime_upr <- woverlap <- swindow_upr <- stime_upr <- delay_central <- NULL
   row_id <- ptime_upr <- NULL
@@ -25,24 +25,24 @@ epidist_prepare.epidist_ltcad <- function(data, ...) {
   return(data)
 }
 
-#' @method epidist_priors epidist_ltcad
-#' @family ltcad
+#' @method epidist_priors epidist_latent_individual
+#' @family latent_individual
 #' @export
-epidist_priors.epidist_ltcad <- function(data, ...) {
+epidist_priors.epidist_latent_individual <- function(data, ...) {
   return(NULL)
 }
 
-#' Define a formula for the ltcad model
+#' Define a formula for the latent_individual model
 #'
 #' @param data ...
 #' @param delay_central Formula for the delay mean. Defaults to intercept only.
 #' @param sigma Formula for the delay standard deviation. Defaults to intercept
 #' only.
 #' @param ... ...
-#' @method epidist_formula epidist_ltcad
-#' @family ltcad
+#' @method epidist_formula epidist_latent_individual
+#' @family latent_individual
 #' @export
-epidist_formula.epidist_ltcad <- function(data, delay_central = ~ 1,
+epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
                                           sigma = ~ 1, ...) {
   delay_equation <- paste0(
     "delay_central | vreal(obs_t, pwindow_upr, swindow_upr)",
@@ -54,10 +54,10 @@ epidist_formula.epidist_ltcad <- function(data, delay_central = ~ 1,
   return(form)
 }
 
-#' @method epidist_family epidist_ltcad
-#' @family ltcad
+#' @method epidist_family epidist_latent_individual
+#' @family latent_individual
 #' @export
-epidist_family.epidist_ltcad <- function(data, family = "lognormal", ...) {
+epidist_family.epidist_latent_individual <- function(data, family = "lognormal", ...) {
   brms::custom_family(
     paste0("latent_", family),
     dpars = c("mu", "sigma"),
@@ -70,15 +70,15 @@ epidist_family.epidist_ltcad <- function(data, family = "lognormal", ...) {
   )
 }
 
-#' @method epidist_stancode epidist_ltcad
-#' @family ltcad
+#' @method epidist_stancode epidist_latent_individual
+#' @family latent_individual
 #' @export
-epidist_stancode.epidist_ltcad <- function(data,
+epidist_stancode.epidist_latent_individual <- function(data,
                                            family = epidist_family(data), ...) {
   stanvars_version <- epidist_version_stanvar()
   
   stanvars_functions <- brms::stanvar(
-    block = "functions", scode = epidist_stan_chunk("ltcad/functions.stan")
+    block = "functions", scode = epidist_stan_chunk("latent_individual/functions.stan")
   )
   
   family_name <- gsub("latent_", "", family$name)
@@ -107,15 +107,15 @@ epidist_stancode.epidist_ltcad <- function(data,
     )
   
   stanvars_parameters <- brms::stanvar(
-    block = "parameters", scode = epidist_stan_chunk("ltcad/parameters.stan")
+    block = "parameters", scode = epidist_stan_chunk("latent_individual/parameters.stan")
   )
   
   stanvars_tparameters <- brms::stanvar(
-    block = "tparameters", scode = epidist_stan_chunk("ltcad/tparameters.stan")
+    block = "tparameters", scode = epidist_stan_chunk("latent_individual/tparameters.stan")
   )
   
   stanvars_priors <- brms::stanvar(
-    block = "model", scode = epidist_stan_chunk("ltcad/priors.stan")
+    block = "model", scode = epidist_stan_chunk("latent_individual/priors.stan")
   )
   
   stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
