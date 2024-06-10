@@ -6,6 +6,15 @@
 \usage{
 calculate_cohort_mean(data, type = c("cohort", "cumulative"), by = c(), obs_at)
 }
+\arguments{
+\item{data}{...}
+
+\item{type}{...}
+
+\item{by}{...}
+
+\item{obs_at}{...}
+}
 \description{
 Calculate the cohort-based or cumulative mean
 }
