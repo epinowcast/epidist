@@ -13,7 +13,7 @@ epidist_prepare(data, ...)
 \item{data}{A dataframe to be used for modelling.}
 
 \item{model}{Character string, model type to prepare to use.
-Supported options are "ltcad".}
+Supported options are "latent_individual".}
 
 \item{...}{Additional arguments passed to model specific \code{epidist_prepare}
 functions}
