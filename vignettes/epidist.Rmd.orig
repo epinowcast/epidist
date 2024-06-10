@@ -17,7 +17,21 @@ vignette: >
 bibliography: references.bib
 ---
 
+```{r setup, include=FALSE}
+# exclude compile warnings from cmdstanr
+knitr::opts_chunk$set(
+  fig.path = "figures/epidist-",
+  cache = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE
+)
 
+# Required for R-CMD-as-cran-check to pass
+cmdstanr::set_cmdstan_path()
+```
 
 Many quantities in epidemiology can be thought of as the time between two events or "delays".
 Important examples include:
@@ -41,8 +55,7 @@ If you would like more technical details, the `epidist` package implements model
 
 To run this vignette yourself, as well as the `epidist` package, you will need the `data.table`^[Note that to work with outputs from `epidist` you do not need to use `data.table`: any tool of your preference is suitable!], `purrr`, `ggplot2`, `gt`, and `dplyr` packages installed.
 
-
-```r
+```{r load-requirements}
 library(epidist)
 library(data.table)
 library(purrr)
@@ -64,15 +77,13 @@ Here we simulate data in this format, and in doing so explain the two main issue
 
 First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data (Figure \@ref(fig:outbreak)) from a stochastic compartmental model:
 
-
-```r
+```{r}
 outbreak <- simulate_gillespie(seed = 101)
 ```
 
 (ref:outbreak) Early on in the epidemic, there is a high rate of growth in new cases. As more people are infected, the rate of growth slows. (Only every 50th case is shown to avoid over-plotting.)
 
-
-```r
+```{r outbreak, fig.cap="(ref:outbreak)"}
 outbreak[case %% 50 == 0, ] |>
   ggplot(aes(x = ptime, y = case)) +
   geom_point(col = "#56B4E9") +
@@ -80,22 +91,18 @@ outbreak[case %% 50 == 0, ] |>
   theme_minimal()
 ```
 
-![(ref:outbreak)](figures/epidist-outbreak-1.png)
-
 `outbreak` is a [`data.table`](https://cran.r-project.org/web/packages/data.table/index.html) with the columns `case` and `ptime`.
 
 Now, to generate secondary events, we will use a lognormal distribution (Figure \@ref(fig:lognormal)) for the delay between primary and secondary events:
 
-
-```r
+```{r}
 secondary_dist <- data.table(meanlog = 1.8, sdlog = 0.5) |>
   add_natural_scale_mean_sd()
 ```
 
 (ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
 
-
-```r
+```{r lognormal, fig.cap="(ref:lognormal)"}
 ggplot(data.frame(x = c(0, 30)), aes(x = x)) +
   geom_function(
     fun = dlnorm,
@@ -111,10 +118,7 @@ ggplot(data.frame(x = c(0, 30)), aes(x = x)) +
   )
 ```
 
-![(ref:lognormal)](figures/epidist-lognormal-1.png)
-
-
-```r
+```{r}
 obs <- outbreak |>
   simulate_secondary(
     meanlog = secondary_dist[["meanlog"]],
@@ -124,8 +128,7 @@ obs <- outbreak |>
 
 (ref:delay) Secondary events (in green) occur with a delay drawn from the lognormal distribution (Figure \@ref(fig:lognormal)). As with Figure \@ref(fig:outbreak), to make this figure easier to read, only every 50th case is shown.
 
-
-```r
+```{r delay, fig.cap="(ref:delay)"}
 obs[case %% 50 == 0, ] |>
   ggplot(aes(y = case)) +
   geom_segment(
@@ -137,15 +140,11 @@ obs[case %% 50 == 0, ] |>
   theme_minimal()
 ```
 
-![(ref:delay)](figures/epidist-delay-1.png)
-
 `obs` is now a [`data.table`](https://cran.r-project.org/web/packages/data.table/index.html) object with further columns for `delay` and `stime`.
 The secondary event time is simply the primary event time plus the delay:
 
-
-```r
+```{r}
 all(obs$ptime + obs$delay == obs$stime)
-#> [1] TRUE
 ```
 
 If we were to receive the data `obs` as above then estimating the delay distribution would be easy, and the `epidist` package wouldn't need to exist.
@@ -155,16 +154,14 @@ First, the times of primary and secondary events will usually be censored.
 This means that rather than exact event times, we observe event times within an interval.
 Here we suppose that the interval is daily, meaning that only the date of the primary or secondary event, not the exact event time, is reported (Figure \@ref(fig:cens)):
 
-
-```r
+```{r}
 # observe_process() should be renamed and include a "daily" i.e. 1 argument
 obs_cens <- obs |> observe_process()
 ```
 
 (ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. A common example of this is when events are reported as daily aggregates. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
 
-
-```r
+```{r cens, fig.cap="(ref:cens)"}
 ggplot(obs_cens, aes(x = delay, y = delay_daily)) +
   geom_point(col = "#E69F00") +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", col = "grey") +
@@ -173,15 +170,12 @@ ggplot(obs_cens, aes(x = delay, y = delay_daily)) +
   labs(x = "Exact delay time (days)", y = "Censored delay time (days)")
 ```
 
-![(ref:cens)](figures/epidist-cens-1.png)
-
 Next, during an outbreak we will usually be estimating delays in real time.
 The result is that only those cases with a secondary event occurring before some time will be observed.
 This is called (right) truncation, and biases the observation process towards shorter delays:
 <!-- I think possible to do a better job with showing what right truncation is with a figure here! -->
 
-
-```r
+```{r}
 obs_time <- 25
 # filter_obs_by_obs_time() should be renamed to refer to stime
 obs_cens_trunc <- filter_obs_by_obs_time(obs_cens, obs_time = obs_time)
@@ -190,15 +184,13 @@ obs_cens_trunc <- filter_obs_by_obs_time(obs_cens, obs_time = obs_time)
 Finally, in reality, it's not possible to observe every case.
 We suppose that a sample of individuals of size `sample_size` are observed:
 
-
-```r
+```{r}
 sample_size <- 200
 ```
 
-This sample size corresponds to 8.7% of the data.
+This sample size corresponds to `r 100 * round(sample_size / nrow(obs_cens_trunc), 3)`% of the data.
 
-
-```r
+```{r}
 obs_cens_trunc_samp <-
   obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 ```
@@ -217,8 +209,7 @@ However, with only access to `obs_cens_trunc_samp`, the delay distribution we ob
 
 (ref:obs-est) The histogram of delays from the complete, retrospective data `obs_cens` match quite closely with the underlying distribution, whereas those from `obs_cens_trunc_samp` show more significant systematic bias. In this instance the extent of the bias caused by censoring is less than that caused by right truncation. Nonetheless, we always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present.
 
-
-```r
+```{r obs-est, fig.cap="(ref:obs-est)"}
 dplyr::bind_rows(
   obs_cens |>
     dplyr::mutate(type = "Complete, retrospective data") |>
@@ -253,19 +244,15 @@ dplyr::bind_rows(
   theme(legend.position = "bottom")
 ```
 
-![(ref:obs-est)](figures/epidist-obs-est-1.png)
-
 The main function you will use for modelling is called `epidist`^[Technically, `epidist` is an [S3 generic](http://adv-r.had.co.nz/S3.html) which allows it to work differently for inputs of different classes. This is why inputs must be prepared first via `epidist_prepare` so that they are of the appropriate class!].
 We will fit the model `"ltcad"`, which stands for latent truncation censoring adjusted delay (LTCAD)^[Catchy!].
 To do so, we first prepare the `data` using `epidist_prepare`:
 
 <!-- In a future vignette, we will explain in more detail the structure of the model. -->
 
-
-```r
+```{r}
 data <- epidist_prepare(obs_cens_trunc_samp, model = "ltcad")
 class(data)
-#> [1] "data.table"    "data.frame"    "epidist_ltcad"
 ```
 
 The `data` object now has the class `epidist_ltcad`.
@@ -273,19 +260,8 @@ Using this `data`, we now call `epidist::epidist` to fit the LTCAD model.
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
 
-
-```r
+```{r}
 fit <- epidist(data = data, cores = 4, refresh = 0)
-#> Running MCMC with 4 parallel chains...
-#> 
-#> Chain 1 finished in 2.3 seconds.
-#> Chain 2 finished in 2.3 seconds.
-#> Chain 3 finished in 2.4 seconds.
-#> Chain 4 finished in 2.4 seconds.
-#> 
-#> All 4 chains finished successfully.
-#> Mean chain execution time: 2.4 seconds.
-#> Total execution time: 2.6 seconds.
 ```
 
 The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters (Table \@ref(tab:pars)) in the model.
@@ -294,8 +270,7 @@ Any tool that supports `brms` fitted model objects will be compatible with `fit`
 
 (ref:pars) All of the parameters that are included in the model. Many of these parameters (e.g. `swindow` and `pwindow`) the so called latent variables in the model, and have lengths corresponding to the `sample_size`.
 
-
-```r
+```{r pars}
 pars <- fit$fit@par_dims |>
   map(.f = function(x) if (identical(x, integer(0))) return(1) else return(x))
 
@@ -304,491 +279,10 @@ data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
   gt::tab_caption("(ref:pars)")
 ```
 
-<!--html_preserve--><div id="dnujiogwtl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#dnujiogwtl table {
-  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-#dnujiogwtl thead, #dnujiogwtl tbody, #dnujiogwtl tfoot, #dnujiogwtl tr, #dnujiogwtl td, #dnujiogwtl th {
-  border-style: none;
-}
-
-#dnujiogwtl p {
-  margin: 0;
-  padding: 0;
-}
-
-#dnujiogwtl .gt_table {
-  display: table;
-  border-collapse: collapse;
-  line-height: normal;
-  margin-left: auto;
-  margin-right: auto;
-  color: #333333;
-  font-size: 16px;
-  font-weight: normal;
-  font-style: normal;
-  background-color: #FFFFFF;
-  width: auto;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #A8A8A8;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #A8A8A8;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-}
-
-#dnujiogwtl .gt_caption {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-#dnujiogwtl .gt_title {
-  color: #333333;
-  font-size: 125%;
-  font-weight: initial;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-color: #FFFFFF;
-  border-bottom-width: 0;
-}
-
-#dnujiogwtl .gt_subtitle {
-  color: #333333;
-  font-size: 85%;
-  font-weight: initial;
-  padding-top: 3px;
-  padding-bottom: 5px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-color: #FFFFFF;
-  border-top-width: 0;
-}
-
-#dnujiogwtl .gt_heading {
-  background-color: #FFFFFF;
-  text-align: center;
-  border-bottom-color: #FFFFFF;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
-
-#dnujiogwtl .gt_bottom_border {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#dnujiogwtl .gt_col_headings {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
-
-#dnujiogwtl .gt_col_heading {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 6px;
-  padding-left: 5px;
-  padding-right: 5px;
-  overflow-x: hidden;
-}
-
-#dnujiogwtl .gt_column_spanner_outer {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: 4px;
-  padding-right: 4px;
-}
-
-#dnujiogwtl .gt_column_spanner_outer:first-child {
-  padding-left: 0;
-}
-
-#dnujiogwtl .gt_column_spanner_outer:last-child {
-  padding-right: 0;
-}
-
-#dnujiogwtl .gt_column_spanner {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  overflow-x: hidden;
-  display: inline-block;
-  width: 100%;
-}
-
-#dnujiogwtl .gt_spanner_row {
-  border-bottom-style: hidden;
-}
-
-#dnujiogwtl .gt_group_heading {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  text-align: left;
-}
-
-#dnujiogwtl .gt_empty_group_heading {
-  padding: 0.5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: middle;
-}
-
-#dnujiogwtl .gt_from_md > :first-child {
-  margin-top: 0;
-}
-
-#dnujiogwtl .gt_from_md > :last-child {
-  margin-bottom: 0;
-}
-
-#dnujiogwtl .gt_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  margin: 10px;
-  border-top-style: solid;
-  border-top-width: 1px;
-  border-top-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  overflow-x: hidden;
-}
-
-#dnujiogwtl .gt_stub {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#dnujiogwtl .gt_stub_row_group {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-  vertical-align: top;
-}
-
-#dnujiogwtl .gt_row_group_first td {
-  border-top-width: 2px;
-}
-
-#dnujiogwtl .gt_row_group_first th {
-  border-top-width: 2px;
-}
-
-#dnujiogwtl .gt_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#dnujiogwtl .gt_first_summary_row {
-  border-top-style: solid;
-  border-top-color: #D3D3D3;
-}
-
-#dnujiogwtl .gt_first_summary_row.thick {
-  border-top-width: 2px;
-}
-
-#dnujiogwtl .gt_last_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#dnujiogwtl .gt_grand_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#dnujiogwtl .gt_first_grand_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-style: double;
-  border-top-width: 6px;
-  border-top-color: #D3D3D3;
-}
-
-#dnujiogwtl .gt_last_grand_summary_row_top {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-style: double;
-  border-bottom-width: 6px;
-  border-bottom-color: #D3D3D3;
-}
-
-#dnujiogwtl .gt_striped {
-  background-color: rgba(128, 128, 128, 0.05);
-}
-
-#dnujiogwtl .gt_table_body {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#dnujiogwtl .gt_footnotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#dnujiogwtl .gt_footnote {
-  margin: 0px;
-  font-size: 90%;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#dnujiogwtl .gt_sourcenotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#dnujiogwtl .gt_sourcenote {
-  font-size: 90%;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#dnujiogwtl .gt_left {
-  text-align: left;
-}
-
-#dnujiogwtl .gt_center {
-  text-align: center;
-}
-
-#dnujiogwtl .gt_right {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-#dnujiogwtl .gt_font_normal {
-  font-weight: normal;
-}
-
-#dnujiogwtl .gt_font_bold {
-  font-weight: bold;
-}
-
-#dnujiogwtl .gt_font_italic {
-  font-style: italic;
-}
-
-#dnujiogwtl .gt_super {
-  font-size: 65%;
-}
-
-#dnujiogwtl .gt_footnote_marks {
-  font-size: 75%;
-  vertical-align: 0.4em;
-  position: initial;
-}
-
-#dnujiogwtl .gt_asterisk {
-  font-size: 100%;
-  vertical-align: 0;
-}
-
-#dnujiogwtl .gt_indent_1 {
-  text-indent: 5px;
-}
-
-#dnujiogwtl .gt_indent_2 {
-  text-indent: 10px;
-}
-
-#dnujiogwtl .gt_indent_3 {
-  text-indent: 15px;
-}
-
-#dnujiogwtl .gt_indent_4 {
-  text-indent: 20px;
-}
-
-#dnujiogwtl .gt_indent_5 {
-  text-indent: 25px;
-}
-
-#dnujiogwtl .katex-display {
-  display: inline-flex !important;
-  margin-bottom: 0.75em !important;
-}
-</style>
-<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
-  <!--/html_preserve--><caption class='gt_caption'>(ref:pars)</caption><!--html_preserve-->
-  <thead>
-    <tr class="gt_col_headings">
-      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Parameter">Parameter</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Length">Length</th>
-    </tr>
-  </thead>
-  <tbody class="gt_table_body">
-    <tr><td headers="Parameter" class="gt_row gt_left">Intercept</td>
-<td headers="Length" class="gt_row gt_right">1</td></tr>
-    <tr><td headers="Parameter" class="gt_row gt_left">Intercept_sigma</td>
-<td headers="Length" class="gt_row gt_right">1</td></tr>
-    <tr><td headers="Parameter" class="gt_row gt_left">swindow_raw</td>
-<td headers="Length" class="gt_row gt_right">200</td></tr>
-    <tr><td headers="Parameter" class="gt_row gt_left">pwindow_raw</td>
-<td headers="Length" class="gt_row gt_right">200</td></tr>
-    <tr><td headers="Parameter" class="gt_row gt_left">lprior</td>
-<td headers="Length" class="gt_row gt_right">1</td></tr>
-    <tr><td headers="Parameter" class="gt_row gt_left">pwindow</td>
-<td headers="Length" class="gt_row gt_right">200</td></tr>
-    <tr><td headers="Parameter" class="gt_row gt_left">swindow</td>
-<td headers="Length" class="gt_row gt_right">200</td></tr>
-    <tr><td headers="Parameter" class="gt_row gt_left">b_Intercept</td>
-<td headers="Length" class="gt_row gt_right">1</td></tr>
-    <tr><td headers="Parameter" class="gt_row gt_left">b_sigma_Intercept</td>
-<td headers="Length" class="gt_row gt_right">1</td></tr>
-    <tr><td headers="Parameter" class="gt_row gt_left">lp__</td>
-<td headers="Length" class="gt_row gt_right">1</td></tr>
-  </tbody>
-  
-  
-</table>
-</div><!--/html_preserve-->
-
 The `epidist` package also provides functions to make common post-processing tasks easy.
 For example, samples of the fitted lognormal `meanlog` and `sdlog` parameter can be extracted using:
 
-
-```r
+```{r}
 draws <- extract_lognormal_draws(fit)
 ```
 
@@ -797,8 +291,7 @@ Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampl
 
 (ref:fitted-lognormal) A fitted delay distribution (in pink) as compared with the true delay distribution (in black).
 
-
-```r
+```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
 ggplot() +
   geom_function(
     data = data.frame(x = c(0, 30)),
@@ -824,7 +317,5 @@ ggplot() +
   ) +
   theme_minimal()
 ```
-
-![(ref:fitted-lognormal)](figures/epidist-fitted-lognormal-1.png)
 
 ## Bibliography {-}
