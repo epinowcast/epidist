@@ -32,10 +32,10 @@ reference:
   desc: Default methods for S3 generics
   contents:
   - has_concept("defaults")
-- title: Latent truncation censoring adjusted delay model
-  desc: Model-specific methods
+- title: Latent individual model
+  desc: Specific methods for the latent individual model
   contents:
-  - has_concept("ltcad")
+  - has_concept("latent_individual")
 - title: Postprocess
   desc: Functions for postprocessing model output
   contents:
