@@ -1,5 +1,6 @@
 #' Observation process for primary and secondary events
 #' 
+#' @param linelist ...
 #' @family observe
 #' @export
 observe_process <- function(linelist) {
@@ -26,6 +27,8 @@ observe_process <- function(linelist) {
 
 #' Filter observations based on a observation time of secondary events
 #' 
+#' @param linelist ...
+#' @param obs_time ...
 #' @family observe
 #' @export
 filter_obs_by_obs_time <- function(linelist, obs_time) {
@@ -41,6 +44,9 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
 
 #' Filter observations based on the observation time of primary events
 #' 
+#' @param linelist ...
+#' @param obs_time ...
+#' @param obs_at ...
 #' @family observe
 #' @export
 filter_obs_by_ptime <- function(linelist, obs_time,
@@ -74,6 +80,8 @@ filter_obs_by_ptime <- function(linelist, obs_time,
 
 #' Pad zero observations as unstable in a lognormal distribution
 #' 
+#' @param data ...
+#' @param pad ...
 #' @family observe
 #' @export
 pad_zero <- function(data, pad = 1e-3) {
@@ -88,6 +96,7 @@ pad_zero <- function(data, pad = 1e-3) {
 
 #' Drop zero observations as unstable in a lognormal distribution
 #' 
+#' @param data ...
 #' @family observe
 #' @export
 drop_zero <- function(data) {

@@ -13,6 +13,15 @@ calculate_truncated_means(
  }
 )
 }
+\arguments{
+\item{draws}{...}
+
+\item{obs_at}{...}
+
+\item{ptime}{...}
+
+\item{distribution}{...}
+}
 \description{
 Calculate the truncated mean by observation horizon
 }

@@ -6,6 +6,9 @@
 \usage{
 primary_censoring_bias_correction(draws)
 }
+\arguments{
+\item{draws}{...}
+}
 \description{
 Primary event bias correction
 }

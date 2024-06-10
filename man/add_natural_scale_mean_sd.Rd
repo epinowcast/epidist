@@ -6,6 +6,9 @@
 \usage{
 add_natural_scale_mean_sd(dt)
 }
+\arguments{
+\item{dt}{...}
+}
 \description{
 Add natural scale summary parameters for a lognormal distribution
 }
