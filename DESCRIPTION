@@ -52,3 +52,4 @@ URL: https://epidist.epinowcast.org/
 Depends: 
     R (>= 2.10)
 LazyData: true
+VignetteBuilder: knitr
