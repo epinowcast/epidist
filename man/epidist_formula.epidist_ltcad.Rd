@@ -4,13 +4,17 @@
 \alias{epidist_formula.epidist_ltcad}
 \title{Define a formula for the ltcad model}
 \usage{
-\method{epidist_formula}{epidist_ltcad}(data, delay_central = ~1, sigma = ~1)
+\method{epidist_formula}{epidist_ltcad}(data, delay_central = ~1, sigma = ~1, ...)
 }
 \arguments{
+\item{data}{...}
+
 \item{delay_central}{Formula for the delay mean. Defaults to intercept only.}
 
 \item{sigma}{Formula for the delay standard deviation. Defaults to intercept
 only.}
+
+\item{...}{...}
 }
 \description{
 Define a formula for the ltcad model

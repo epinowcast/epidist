@@ -167,8 +167,6 @@ simulate_secondary <- function(linelist, dist = rlnorm, ...) {
 #'
 #' @family simulate
 #' @export
-#' @examples
-#' simulate_double_censored_pmf(0.6, 0.5, 10, 1000)
 simulate_double_censored_pmf <- function(
   alpha, beta, max, n = 1000,
   rprimary = \(x) (runif(x, 0, 1)), rdelay = rlnorm,

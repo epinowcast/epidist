@@ -6,6 +6,9 @@
 \usage{
 plot_cases_by_obs_window(cases)
 }
+\arguments{
+\item{cases}{...}
+}
 \description{
 Plot cases by observation window
 }

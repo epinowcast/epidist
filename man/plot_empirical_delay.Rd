@@ -6,6 +6,13 @@
 \usage{
 plot_empirical_delay(cases, meanlog, sdlog)
 }
+\arguments{
+\item{cases}{...}
+
+\item{meanlog}{...}
+
+\item{sdlog}{...}
+}
 \description{
 Plot the empirical delay distribution
 }

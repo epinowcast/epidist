@@ -28,6 +28,9 @@ knitr::opts_chunk$set(
   warning = FALSE,
   error = FALSE
 )
+
+# Required for R-CMD-as-cran-check to pass
+cmdstanr::set_cmdstan_path()
 ```
 
 Many quantities in epidemiology can be thought of as the time between two events or "delays".

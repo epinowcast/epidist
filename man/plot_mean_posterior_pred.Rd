@@ -17,6 +17,10 @@ plot_mean_posterior_pred(
 \arguments{
 \item{summarised_mean}{Summarised mean as produced by \code{\link[=summarise_variable]{summarise_variable()}}}
 
+\item{obs_mean}{...}
+
+\item{alpha}{...}
+
 \item{mean}{Should the mean be plotted? Logical, defaults to \code{FALSE}.}
 
 \item{ribbon}{Should the quantile ribbon be plotted? Logical, defaults to
@@ -26,10 +30,6 @@ plot_mean_posterior_pred(
 \code{c(0.05, 0.95)} which corresponds to the 90\% credible interval.}
 
 \item{...}{Additional arguments passed to \code{\link[ggplot2:aes]{ggplot2::aes()}}.}
-
-\item{data}{data used for object fitting}
-
-\item{truncate}{account for truncation?}
 }
 \description{
 plot empirical cohort-based or cumulative mean vs posterior mean
