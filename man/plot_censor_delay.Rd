@@ -6,6 +6,9 @@
 \usage{
 plot_censor_delay(censor_delay)
 }
+\arguments{
+\item{censor_delay}{...}
+}
 \description{
 Plot the mean difference between continuous and discrete event time
 }

@@ -6,6 +6,9 @@
 \usage{
 draws_to_long(draws)
 }
+\arguments{
+\item{draws}{...}
+}
 \description{
 Convert posterior lognormal samples to long format
 }

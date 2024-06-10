@@ -6,6 +6,13 @@
 \usage{
 extract_lognormal_draws(data, id_vars, from_dt = FALSE)
 }
+\arguments{
+\item{data}{...}
+
+\item{id_vars}{...}
+
+\item{from_dt}{...}
+}
 \description{
 Extract posterior samples for a lognormal brms model
 }

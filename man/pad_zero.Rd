@@ -6,6 +6,11 @@
 \usage{
 pad_zero(data, pad = 0.001)
 }
+\arguments{
+\item{data}{...}
+
+\item{pad}{...}
+}
 \description{
 Pad zero observations as unstable in a lognormal distribution
 }

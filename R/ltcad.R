@@ -1,7 +1,7 @@
 #' @method epidist_prepare epidist_ltcad
 #' @family ltcad
 #' @export
-epidist_prepare.epidist_ltcad <- function(data) {
+epidist_prepare.epidist_ltcad <- function(data, ...) {
   id <- obs_t <- obs_at <- ptime_lwr <- pwindow_upr <- stime_lwr <- NULL
   stime_upr <- woverlap <- swindow_upr <- stime_upr <- delay_central <- NULL
   row_id <- ptime_upr <- NULL
@@ -28,20 +28,22 @@ epidist_prepare.epidist_ltcad <- function(data) {
 #' @method epidist_priors epidist_ltcad
 #' @family ltcad
 #' @export
-epidist_priors.epidist_ltcad <- function(data) {
+epidist_priors.epidist_ltcad <- function(data, ...) {
   return(NULL)
 }
 
 #' Define a formula for the ltcad model
 #'
+#' @param data ...
 #' @param delay_central Formula for the delay mean. Defaults to intercept only.
 #' @param sigma Formula for the delay standard deviation. Defaults to intercept
 #' only.
+#' @param ... ...
 #' @method epidist_formula epidist_ltcad
 #' @family ltcad
 #' @export
 epidist_formula.epidist_ltcad <- function(data, delay_central = ~ 1,
-                                          sigma = ~ 1) {
+                                          sigma = ~ 1, ...) {
   delay_equation <- paste0(
     "delay_central | vreal(obs_t, pwindow_upr, swindow_upr)",
     paste(delay_central, collapse = " ")
@@ -55,7 +57,7 @@ epidist_formula.epidist_ltcad <- function(data, delay_central = ~ 1,
 #' @method epidist_family epidist_ltcad
 #' @family ltcad
 #' @export
-epidist_family.epidist_ltcad <- function(data, family = "lognormal") {
+epidist_family.epidist_ltcad <- function(data, family = "lognormal", ...) {
   brms::custom_family(
     paste0("latent_", family),
     dpars = c("mu", "sigma"),
@@ -72,7 +74,7 @@ epidist_family.epidist_ltcad <- function(data, family = "lognormal") {
 #' @family ltcad
 #' @export
 epidist_stancode.epidist_ltcad <- function(data,
-                                           family = epidist_family(data)) {
+                                           family = epidist_family(data), ...) {
   stanvars_version <- epidist_version_stanvar()
   
   stanvars_functions <- brms::stanvar(

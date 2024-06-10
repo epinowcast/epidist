@@ -11,6 +11,15 @@ linelist_to_counts(
   pad_zeros = FALSE
 )
 }
+\arguments{
+\item{linelist}{...}
+
+\item{target_time}{...}
+
+\item{additional_by}{...}
+
+\item{pad_zeros}{...}
+}
 \description{
 For a target variable convert from individual data to counts
 }

@@ -6,6 +6,13 @@
 \usage{
 make_relative_to_truth(draws, secondary_dist, by = "parameter")
 }
+\arguments{
+\item{draws}{...}
+
+\item{secondary_dist}{...}
+
+\item{by}{...}
+}
 \description{
 Make posterior lognormal samples relative to true values
 }

@@ -6,6 +6,9 @@
 \usage{
 linelist_to_cases(linelist)
 }
+\arguments{
+\item{linelist}{...}
+}
 \description{
 Convert primary and secondary observations to counts in long format
 }
