@@ -1,7 +1,7 @@
 #' Default method used when preparing data
 #'
 #' @param model Character string, model type to prepare to use.
-#' Supported options are "ltcad".
+#' Supported options are "latent_individual".
 #' @param ... Additional arguments passed to model specific `epidist_prepare`
 #' functions
 #' @rdname epidist_prepare
@@ -9,7 +9,7 @@
 #' @family defaults
 #' @export
 epidist_prepare.default <- function(data, model, ...) {
-  model <- match.arg(model, choices = c("ltcad"))
+  model <- match.arg(model, choices = c("latent_individual"))
   class(data) <- c(class(data), paste0("epidist_", model))
   epidist_prepare(data, ...)
 }
