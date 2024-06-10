@@ -245,18 +245,16 @@ dplyr::bind_rows(
 ```
 
 The main function you will use for modelling is called `epidist`^[Technically, `epidist` is an [S3 generic](http://adv-r.had.co.nz/S3.html) which allows it to work differently for inputs of different classes. This is why inputs must be prepared first via `epidist_prepare` so that they are of the appropriate class!].
-We will fit the model `"ltcad"`, which stands for latent truncation censoring adjusted delay (LTCAD)^[Catchy!].
+We will fit the model `"latent_individual"` which uses latent variables for the time of primary and secondary event of each individual^[In a future vignette, we will explain in more detail the structure of the model!].
 To do so, we first prepare the `data` using `epidist_prepare`:
 
-<!-- In a future vignette, we will explain in more detail the structure of the model. -->
-
 ```{r}
-data <- epidist_prepare(obs_cens_trunc_samp, model = "ltcad")
+data <- epidist_prepare(obs_cens_trunc_samp, model = "latent_individual")
 class(data)
 ```
 
-The `data` object now has the class `epidist_ltcad`.
-Using this `data`, we now call `epidist::epidist` to fit the LTCAD model.
+The `data` object now has the class `epidist_latent_individual`.
+Using this `data`, we now call `epidist::epidist` to fit the model.
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
 
