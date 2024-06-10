@@ -1,9 +1,9 @@
 pandoc: 3.1.11
 pkgdown: 2.0.9.9000
-pkgdown_sha: 2c8d15d58331bc5ef4ef2e42097e37554d8780b5
+pkgdown_sha: fd8ed2468448e2a5790b2bc92260461fbaa1c2b3
 articles:
   epidist: epidist.html
-last_built: 2024-06-10T10:41Z
+last_built: 2024-06-10T18:08Z
 urls:
   reference: https://epidist.epinowcast.org/reference
   article: https://epidist.epinowcast.org/articles
