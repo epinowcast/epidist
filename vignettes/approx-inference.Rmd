@@ -79,7 +79,7 @@ obs_cens_trunc <- simulate_gillespie() |>
 
 obs_cens_trunc_samp <- obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 
-data <- epidist_prepare(obs_cens_trunc_samp, model = "ltcad")
+data <- epidist_prepare(obs_cens_trunc_samp, model = "latent_individual")
 
 fit_hmc <- epidist(data = data, algorithm = "sampling")
 fit_laplace <- epidist(data = data, algorithm = "laplace")
