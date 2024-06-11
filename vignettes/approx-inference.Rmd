@@ -32,27 +32,40 @@ knitr::opts_chunk$set(
 
 # Background
 
-* What is the default inference method used in `epidist` (HMC)
-  * How does it work
-  * Why is it the default
-  * What are its strengths
-  * What are its drawbacks
-* What are the alternatives
-  * Why might you consider them
+The `epidist` package uses Bayesian inference to estimate delay distributions.
+Doing Bayesian inference amounts to approximating the posterior distribution of each model parameter^[See a work-in-progress vignette about the model structure.].
+
+By default, `epidist` uses the No-U-Turn Sampler (NUTS) Hamiltonian Monte Carlo (HMC) algorithm to approximate the posterior distribution.
+NUTS works by simulating from a Markov chain which has the posterior distribution as its stationary distribution.
+As a result, when NUTS is run for sufficiently many iterations, the samples can be considered to be drawn from the posterior distribution, and used to compute relevant posterior quantities such as expectations.
+A drawback of NUTS, and other Markov chain Monte Carlo (MCMC) methods, is that they can be quite computational intensive, especially for complex models or large data.
+
+The `epidist` package is built using `brms`, itself built on the Stan probabilistic programming language.
+One benefit of this design, is that as other approximate Bayesian inference algorithms are implemented in Stan (and then `brms`), they automatically are available in `epidist`.
+As such, if you are using `epidist` and having difficulties using the default NUTS algorithm, you may want to consider an alternative.
+
+In this vignette, we will first briefly describe the alternative algorithms available in Section \@ref(other), as well as directing you to more detailed resources.
+Then in Section  \@ref(demo) we demonstrate their application to fitting simulated data, before extracting and comparing posterior distributions.
+By comparing the resulting inferences to those from NUTS, to hope to help you make informed decisions about which algorithm to use in your problem.
+
+# Alternative approximate inference algorithms {#other}
 
 ## Laplace 
 
-* Briefly, how does it work
+The Laplace method approximates a posterior distribution by a Gaussian distribution.
+In Stan, the Gaussian distribution is constructed on the unconstrained parameter space, and samples may then be transformed to the constrained parameter space.
+See the section [Laplace sampling](https://mc-stan.org/docs/cmdstan-guide/laplace_sample_config.html) of the `CmdStan` User's Guide for more information.
 
 ## Variational inference
 
 * Briefly, how does it work
+* It's the mean field version (only?)
 
 ## Pathfinder
 
 * Briefly, how does it work
 
-# Demonstration
+# Demonstration {#demo}
 
 ```{r load-requirements}
 library(epidist)
@@ -62,6 +75,8 @@ library(ggplot2)
 library(gt)
 library(dplyr)
 ```
+
+Simulate data:
 
 ```{r}
 meanlog <- 1.8
@@ -80,11 +95,27 @@ obs_cens_trunc <- simulate_gillespie() |>
 obs_cens_trunc_samp <- obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 
 data <- epidist_prepare(obs_cens_trunc_samp, model = "latent_individual")
+```
 
+Fit models:
+
+```{r}
 fit_hmc <- epidist(data = data, algorithm = "sampling")
 fit_laplace <- epidist(data = data, algorithm = "laplace")
 fit_variational <- epidist(data = data, algorithm = "meanfield")
 fit_pathfinder <- epidist(data = data, algorithm = "pathfinder")
+```
+
+Extract posterior distribution:
+
+```{r}
+# TODO
+```
+
+Compare with a figure or table or both:
+
+```{r}
+# TODO
 ```
 
 ## Bibliography {-}
