@@ -50,30 +50,28 @@ By comparing the resulting inferences to those from NUTS, to hope to help you ma
 
 # Alternative approximate inference algorithms {#other}
 
-## Laplace 
+## Laplace method
 
 The Laplace method approximates a posterior distribution by a Gaussian distribution.
 In Stan, the Gaussian distribution is constructed on the unconstrained parameter space, and samples may then be transformed to the constrained parameter space.
-See the section [Laplace sampling](https://mc-stan.org/docs/cmdstan-guide/laplace_sample_config.html) of the `CmdStan` User's Guide for more information.
+See the section [Laplace Sampling](https://mc-stan.org/docs/cmdstan-guide/laplace_sample_config.html) of the `CmdStan` User's Guide for more information.
 
-## Variational inference
+## Variational inference using ADVI
 
-* Briefly, how does it work
-* It's the mean field version (only?)
+Automatic differentiation variational inference [ADVI; @kucukelbir2017advi] is...
+See the section [Variational Inference using ADVI](https://mc-stan.org/docs/cmdstan-guide/variational_config.html) of the `CmdStan` User's Guide for more information.
 
 ## Pathfinder
 
-* Briefly, how does it work
+Pathfinder is a variational inference method more recently developed by @zhang2022pathfinder.
+See the section [Pathfinder Method for Approximate Bayesian Inference](https://mc-stan.org/docs/cmdstan-guide/pathfinder_config.html) of the `CmdStan` User's Guide for more information.
 
 # Demonstration {#demo}
 
+This demonstration requires the following packages:
+
 ```{r load-requirements}
 library(epidist)
-library(data.table)
-library(purrr)
-library(ggplot2)
-library(gt)
-library(dplyr)
 ```
 
 Simulate data:
@@ -92,30 +90,73 @@ obs_cens_trunc <- simulate_gillespie() |>
   observe_process() |>
   filter_obs_by_obs_time(obs_time = obs_time)
 
-obs_cens_trunc_samp <- obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
+obs_cens_trunc_samp <-
+  obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
+```
 
+Fit the latent individual model using each approximate inference method:
+
+```{r results='hide'}
 data <- epidist_prepare(obs_cens_trunc_samp, model = "latent_individual")
-```
 
-Fit models:
-
-```{r}
 fit_hmc <- epidist(data = data, algorithm = "sampling")
-fit_laplace <- epidist(data = data, algorithm = "laplace")
-fit_variational <- epidist(data = data, algorithm = "meanfield")
-fit_pathfinder <- epidist(data = data, algorithm = "pathfinder")
+fit_laplace <- epidist(data = data, algorithm = "laplace", draws = 4000)
+fit_advi <- epidist(data = data, algorithm = "meanfield", draws = 4000)
+fit_pathfinder <- epidist(data = data, algorithm = "pathfinder", draws = 4000)
 ```
 
-Extract posterior distribution:
+Extract posterior distribution for the delay parameters:
 
 ```{r}
-# TODO
+draws_hmc <- extract_lognormal_draws(fit_hmc)
+draws_laplace <- extract_lognormal_draws(fit_laplace)
+draws_advi<- extract_lognormal_draws(fit_advi)
+draws_pathfinder <- extract_lognormal_draws(fit_pathfinder)
 ```
 
 Compare with a figure or table or both:
 
 ```{r}
-# TODO
+draws_hmc <- draws_hmc |>
+  draws_to_long() |>
+  filter(parameter %in% c("mean", "sd")) |>
+  mutate(method = "hmc")
+
+draws_laplace <- draws_laplace |>
+  draws_to_long() |>
+  filter(parameter %in% c("mean", "sd")) |>
+  mutate(method = "laplace")
+
+draws_advi <- draws_advi |>
+  draws_to_long() |>
+  filter(parameter %in% c("mean", "sd")) |>
+  mutate(method = "advi")
+
+draws_pathfinder <- draws_pathfinder |>
+  draws_to_long() |>
+  filter(parameter %in% c("mean", "sd")) |>
+  mutate(method = "pathfinder")
+
+rbind(draws_hmc, draws_laplace, draws_advi) |>
+  filter(parameter == "mean") |>
+  ggplot(aes(x = value)) +
+  geom_histogram() +
+  facet_grid(method ~ parameter) +
+  theme_minimal()
+
+rbind(draws_hmc, draws_laplace, draws_advi) |>
+  filter(parameter == "sd") |>
+  ggplot(aes(x = value)) +
+  geom_histogram() +
+  facet_grid(method ~ parameter) +
+  theme_minimal()
+```
+
+Compare the time taken:
+
+```{r}
+rstan::get_elapsed_time(fit_hmc$fit)
+# Remainst to extract from the others
 ```
 
 ## Bibliography {-}
