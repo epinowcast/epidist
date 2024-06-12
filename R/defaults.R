@@ -80,7 +80,7 @@ epidist.default <- function(data, formula = epidist_formula(data),
                             ...) {
   
   fit <- fn(
-    formula = formula, family = family, priors = priors, stanvars = stancode,
+    formula = formula, family = family, stanvars = stancode,
     backend = "cmdstanr", data = data, ...
   )
   
