@@ -72,6 +72,8 @@ This demonstration requires the following packages:
 
 ```{r load-requirements}
 library(epidist)
+library(ggplot2)
+library(dplyr)
 ```
 
 Simulate data:
