@@ -110,7 +110,7 @@ Extract posterior distribution for the delay parameters:
 ```{r}
 draws_hmc <- extract_lognormal_draws(fit_hmc)
 draws_laplace <- extract_lognormal_draws(fit_laplace)
-draws_advi<- extract_lognormal_draws(fit_advi)
+draws_advi <- extract_lognormal_draws(fit_advi)
 draws_pathfinder <- extract_lognormal_draws(fit_pathfinder)
 ```
 
