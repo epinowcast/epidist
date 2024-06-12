@@ -65,8 +65,15 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 
 #' Define priors for the model
 #' 
-#' To alter the priors for this model, we recommend first fitting using the
-#' default priors, then extracting the default priors with `brms::get_prior()`.
+#' We provide suggested priors for the intercepts of the `meanlog` and `sdlog`
+#' parameters of the delay distribution. These priors are weakly informative in
+#' that they prevent excessive delays on the real scale. In particular:
+#' 
+#' * `meanlog ~ normal(2, 0.5)`
+#' * `sdlog ~ normal(0.5, 0.5)`
+#' 
+#' To alter the priors for this model, we recommend first fitting using these
+#' default priors, then extracting the priors with `brms::get_prior()`.
 #' Elements of this `data.frame` of priors may then be modified, and the
 #' resulting object passed to `epidist` to be used. An example of this workflow
 #' will be provided as a part of a vignette at a future date.
