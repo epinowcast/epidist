@@ -32,11 +32,11 @@ epidist_family <- function(data, ...) {
 #' 
 #' @inheritParams epidist_prepare
 #' @param ... Additional arguments for method.
-#' @rdname epidist_priors
+#' @rdname epidist_prior
 #' @family generics
 #' @export
-epidist_priors <- function(data, ...) {
-  UseMethod("epidist_priors")
+epidist_prior <- function(data, ...) {
+  UseMethod("epidist_prior")
 }
 
 #' Define model specific Stan code
