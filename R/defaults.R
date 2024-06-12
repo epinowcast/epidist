@@ -85,6 +85,6 @@ epidist.default <- function(data, formula = epidist_formula(data),
   )
 
   class(fit) <- c(class(fit), "epidist_fit")
-  
+
   return(fit)
 }

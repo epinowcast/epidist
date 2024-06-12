@@ -36,7 +36,7 @@ epidist_prepare.epidist_latent_individual <- function(data, ...) {
 #' @family latent_individual
 #' @export
 epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
-                                          sigma = ~ 1, ...) {
+                                                      sigma = ~ 1, ...) {
   delay_equation <- paste0(
     "delay_central | vreal(obs_t, pwindow_upr, swindow_upr)",
     paste(delay_central, collapse = " ")
@@ -50,7 +50,8 @@ epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
 #' @method epidist_family epidist_latent_individual
 #' @family latent_individual
 #' @export
-epidist_family.epidist_latent_individual <- function(data, family = "lognormal", ...) {
+epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
+                                                     ...) {
   brms::custom_family(
     paste0("latent_", family),
     dpars = c("mu", "sigma"),
@@ -68,10 +69,10 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' We provide suggested priors for the intercepts of the `meanlog` and `sdlog`
 #' parameters of the delay distribution. These priors are weakly informative in
 #' that they prevent excessive delays on the real scale. In particular:
-#' 
+#'
 #' * `meanlog ~ normal(2, 0.5)`
 #' * `sdlog ~ normal(0.5, 0.5)`
-#' 
+#'
 #' To alter the priors for this model, we recommend first fitting using these
 #' default priors, then extracting the priors with `brms::get_prior()`.
 #' Elements of this `data.frame` of priors may then be modified, and the
