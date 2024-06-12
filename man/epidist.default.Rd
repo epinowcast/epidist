@@ -21,6 +21,8 @@
 
 \item{family}{...}
 
+\item{prior}{...}
+
 \item{stancode}{...}
 
 \item{fn}{Likely \code{brms::brm}. Also possible to be \code{brms::make_stancode} or
