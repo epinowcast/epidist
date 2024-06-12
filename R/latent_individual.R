@@ -71,11 +71,13 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' resulting object passed to `epidist` to be used. An example of this workflow
 #' will be provided as a part of a vignette at a future date.
 #'
-#' @method epidist_priors epidist_latent_individual
+#' @method epidist_prior epidist_latent_individual
 #' @family latent_individual
 #' @export
-epidist_priors.epidist_latent_individual <- function(data, ...) {
-  return(NULL)
+epidist_prior.epidist_latent_individual <- function(data, ...) {
+  prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
+  prior2 <- brms::prior("normal(0.5, 0.5)", class = "Intercept", dpar = "sigma")
+  return(prior1 + prior2)
 }
 
 #' @method epidist_stancode epidist_latent_individual
