@@ -37,7 +37,7 @@ Doing Bayesian inference amounts to approximating the posterior distribution of 
 
 By default, `epidist` uses the No-U-Turn Sampler (NUTS) Hamiltonian Monte Carlo (HMC) algorithm to approximate the posterior distribution.
 NUTS works by simulating from a Markov chain which has the posterior distribution as its stationary distribution.
-As a result, when NUTS is run for sufficiently many iterations, the samples can be considered to be drawn from the posterior distribution, and used to compute relevant posterior quantities such as expectations.
+When NUTS is run for sufficiently many iterations, and has "reached convergence", the samples can be considered to be drawn from the posterior distribution, and used to compute relevant posterior quantities such as expectations.
 A drawback of NUTS, and other Markov chain Monte Carlo (MCMC) methods, is that they can be quite computational intensive, especially for complex models or large data.
 
 The `epidist` package is built using `brms`, itself built on the Stan probabilistic programming language.
@@ -49,6 +49,8 @@ Then in Section  \@ref(demo) we demonstrate their application to fitting simulat
 By comparing the resulting inferences to those from NUTS, to hope to help you make informed decisions about which algorithm to use in your problem.
 
 # Alternative approximate inference algorithms {#other}
+
+Here we describe three alternative approximate Bayesian inference algorithms that are available to use in `epidist`.
 
 ## Laplace method
 
@@ -96,16 +98,25 @@ obs_cens_trunc_samp <-
   obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 ```
 
-Fit the latent individual model using each approximate inference method:
+Fit the latent individual model using HMC:
 
 ```{r results='hide'}
 data <- epidist_prepare(obs_cens_trunc_samp, model = "latent_individual")
 
 fit_hmc <- epidist(data = data, algorithm = "sampling")
+```
+
+Fit the latent individual model using each method in Section \@ref(other) and draw 4000 samples to match the four Markov chains of 1000 in HMC:
+
+```{r}
 fit_laplace <- epidist(data = data, algorithm = "laplace", draws = 4000)
 fit_advi <- epidist(data = data, algorithm = "meanfield", draws = 4000)
 fit_pathfinder <- epidist(data = data, algorithm = "pathfinder", draws = 4000)
 ```
+
+Pathfinder runs into the error "Error evaluating model log probability: Non-finite gradient." here.
+Strange!
+Find a fix.
 
 Extract posterior distribution for the delay parameters:
 
@@ -139,19 +150,38 @@ draws_pathfinder <- draws_pathfinder |>
   filter(parameter %in% c("mean", "sd")) |>
   mutate(method = "pathfinder")
 
-rbind(draws_hmc, draws_laplace, draws_advi) |>
-  filter(parameter == "mean") |>
-  ggplot(aes(x = value)) +
-  geom_histogram() +
-  facet_grid(method ~ parameter) +
-  theme_minimal()
+fct_reorg <- function(fac, ...) {
+  forcats::fct_recode(forcats::fct_relevel(fac, ...), ...)
+}
 
-rbind(draws_hmc, draws_laplace, draws_advi) |>
-  filter(parameter == "sd") |>
+df <- rbind(draws_hmc, draws_laplace, draws_advi) |>
+  mutate(
+    method = forcats::fct_recode(method,
+      "HMC" = "hmc",
+      "Laplace" = "laplace",
+      "ADVI" = "advi",
+      "Pathfinder" = "pathfinder") |>
+        forcats::fct_relevel("HMC", "Laplace", "ADVI", "Pathfinder"),
+    parameter = forcats::fct_recode(parameter,
+      "Mean" = "mean",
+      "SD" = "sd"
+    )
+  )
+  
+filter(df, parameter == "Mean") |>
   ggplot(aes(x = value)) +
-  geom_histogram() +
+  geom_histogram(aes(y = ..density..)) +
   facet_grid(method ~ parameter) +
-  theme_minimal()
+  theme_minimal() +
+  labs(x = "", y = "")
+
+rbind(df, draws_hmc, draws_laplace, draws_advi) |>
+  filter(parameter == "SD") |>
+  ggplot(aes(x = value)) +
+  geom_histogram(aes(y= ..density..)) +
+  facet_grid(method ~ parameter) +
+  theme_minimal() +
+  labs(x = "", y = "")
 ```
 
 Compare the time taken:
