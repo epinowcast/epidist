@@ -78,6 +78,7 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' resulting object passed to `epidist` to be used. An example of this workflow
 #' will be provided as a part of a vignette at a future date.
 #'
+#' @inheritParams epidist_prior
 #' @method epidist_prior epidist_latent_individual
 #' @family latent_individual
 #' @export

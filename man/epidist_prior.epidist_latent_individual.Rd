@@ -6,6 +6,11 @@
 \usage{
 \method{epidist_prior}{epidist_latent_individual}(data, ...)
 }
+\arguments{
+\item{data}{A dataframe to be used for modelling.}
+
+\item{...}{Additional arguments for method.}
+}
 \description{
 We provide suggested priors for the intercepts of the \code{meanlog} and \code{sdlog}
 parameters of the delay distribution. These priors are weakly informative in
