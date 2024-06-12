@@ -25,21 +25,6 @@ epidist_prepare.epidist_latent_individual <- function(data, ...) {
   return(data)
 }
 
-#' Define priors for the model
-#' 
-#' To alter the priors for this model, we recommend first fitting using the
-#' default priors, then extracting the default priors with `brms::get_prior()`.
-#' Elements of this `data.frame` of priors may then be modified, and the
-#' resulting object passed to `epidist` to be used. An example of this workflow
-#' will be provided as a part of a vignette at a future date.
-#'
-#' @method epidist_priors epidist_latent_individual
-#' @family latent_individual
-#' @export
-epidist_priors.epidist_latent_individual <- function(data, ...) {
-  return(NULL)
-}
-
 #' Define a formula for the latent_individual model
 #'
 #' @param data ...
@@ -86,10 +71,10 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' resulting object passed to `epidist` to be used. An example of this workflow
 #' will be provided as a part of a vignette at a future date.
 #'
-#' @method epidist_priors epidist_ltcad
-#' @family ltcad
+#' @method epidist_priors epidist_latent_individual
+#' @family latent_individual
 #' @export
-epidist_priors.epidist_ltcad <- function(data, ...) {
+epidist_priors.epidist_latent_individual <- function(data, ...) {
   return(NULL)
 }
 
