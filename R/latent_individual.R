@@ -78,12 +78,6 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
   )
 }
 
-<<<<<<< HEAD:R/latent_individual.R
-#' @method epidist_stancode epidist_latent_individual
-#' @family latent_individual
-#' @export
-epidist_stancode.epidist_latent_individual <- function(data,
-=======
 #' Define priors for the model
 #' 
 #' To alter the priors for this model, we recommend first fitting using the
@@ -99,10 +93,10 @@ epidist_priors.epidist_ltcad <- function(data, ...) {
   return(NULL)
 }
 
-#' @method epidist_stancode epidist_ltcad
-#' @family ltcad
+#' @method epidist_stancode epidist_latent_individual
+#' @family latent_individual
 #' @export
-epidist_stancode.epidist_ltcad <- function(data,
+epidist_stancode.epidist_latent_individual <- function(data,
                                            family = epidist_family(data), ...) {
   stanvars_version <- epidist_version_stanvar()
   
