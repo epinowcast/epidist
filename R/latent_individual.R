@@ -89,7 +89,7 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' @export
 epidist_prior.epidist_latent_individual <- function(data, ...) {
   prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
-  prior2 <- brms::prior("normal(0.5, 0.5)", class = "Intercept", dpar = "sigma")
+  prior2 <- brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
   return(prior1 + prior2)
 }
 
