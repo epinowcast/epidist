@@ -9,7 +9,7 @@ epidist_prepare <- function(data, ...) {
 }
 
 #' Define a model specific formula
-#' 
+#'
 #' @inheritParams epidist_prepare
 #' @param ... Additional arguments for method.
 #' @family generics
@@ -19,7 +19,7 @@ epidist_formula <- function(data, ...) {
 }
 
 #' Define model specific family
-#' 
+#'
 #' @inheritParams epidist_prepare
 #' @param ... Additional arguments for method.
 #' @family generics
@@ -29,7 +29,7 @@ epidist_family <- function(data, ...) {
 }
 
 #' Define model specific priors
-#' 
+#'
 #' @inheritParams epidist_prepare
 #' @param ... Additional arguments for method.
 #' @rdname epidist_priors
@@ -40,7 +40,7 @@ epidist_priors <- function(data, ...) {
 }
 
 #' Define model specific Stan code
-#' 
+#'
 #' @inheritParams epidist_prepare
 #' @param ... Additional arguments for method.
 #' @rdname epidist_stancode
