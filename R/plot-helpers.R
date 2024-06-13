@@ -10,7 +10,8 @@ calculate_cohort_mean <- function(data, type = c("cohort", "cumulative"),
                                   by = c(), obs_at) {
   type <- match.arg(type)
   out <- copy(data)
-  out <- out[, .(mean = mean(delay_daily), n = .N), by = c("ptime_daily", by)]
+  out <- out[, list(mean = mean(delay_daily), n = .N),
+             by = c("ptime_daily", by)]
   out <- out[order(rank(ptime_daily))]
 
   if (type == "cumulative") {
@@ -65,7 +66,7 @@ calculate_truncated_means <- function(draws, obs_at, ptime,
   trunc_mean <- data.table::copy(draws)
   trunc_mean[, obs_horizon := list(seq(ptime[1] - obs_at, ptime[2] - obs_at))]
   trunc_mean <- trunc_mean[,
-                           .(obs_horizon = unlist(obs_horizon)),
+                           list(obs_horizon = unlist(obs_horizon)),
                            by = setdiff(colnames(draws), "obs_horizon")]
   trunc_mean[,
              trunc_mean := purrr::pmap_dbl(

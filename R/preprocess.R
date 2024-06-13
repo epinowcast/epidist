@@ -11,7 +11,7 @@ linelist_to_counts <- function(linelist, target_time = "ptime_daily",
                                additional_by = c(), pad_zeros = FALSE) {
   cases <- data.table::copy(linelist)
   cases[, time := get(target_time)]
-  cases <- cases[, .(cases = .N), by = c("time", additional_by)]
+  cases <- cases[, list(cases = .N), by = c("time", additional_by)]
   cases <- cases[order(time)]
 
   if (pad_zeros) {
@@ -142,7 +142,7 @@ combine_obs <- function(truncated_obs, obs) {
 calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
   truncated_obs_psumm <- data.table::copy(truncated_obs)
   truncated_obs_psumm[, ptime_delay := ptime - ptime_daily]
-  truncated_obs_psumm <- truncated_obs_psumm[, .(
+  truncated_obs_psumm <- truncated_obs_psumm[, list(
     mean = mean(ptime_delay),
     lwr = ifelse(length(ptime_delay) > 1, t.test(ptime_delay)[[4]][1], 0),
     upr = ifelse(length(ptime_delay) > 1, t.test(ptime_delay)[[4]][2], 1)
@@ -154,7 +154,7 @@ calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
 
   truncated_obs_ssumm <- data.table::copy(truncated_obs)
   truncated_obs_ssumm[, stime_delay := stime - stime_daily]
-  truncated_obs_ssumm <- truncated_obs_ssumm[, .(
+  truncated_obs_ssumm <- truncated_obs_ssumm[, list(
     mean = mean(stime_delay),
     lwr = ifelse(length(stime_delay) > 1, t.test(stime_delay)[[4]][1], 0),
     upr = ifelse(length(stime_delay) > 1, t.test(stime_delay)[[4]][2], 1)
@@ -180,7 +180,7 @@ calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
 #' @export
 event_to_incidence <- function(data, by = c()) {
   dd <- data.table::copy(data)
-  dd[, .(cases = .N), by = c("ptime_daily", by)]
+  dd[, list(cases = .N), by = c("ptime_daily", by)]
   dd <- dd[order(ptime_daily)]
   setnames(dd, old = c("ptime_daily"), new = c("time"))
   return(dd)

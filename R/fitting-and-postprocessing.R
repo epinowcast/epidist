@@ -170,7 +170,7 @@ extract_lognormal_draws <- function(data, id_vars, from_dt = FALSE) {
   )
 
   draws <- draws[, sdlog := exp(sdlog_log)]
-  draws <- draws[, .(meanlog, sdlog)]
+  draws <- draws[, list(meanlog, sdlog)]
   draws <- add_natural_scale_mean_sd(draws)
 
   if (!missing(id_vars)) {
@@ -210,7 +210,7 @@ extract_epinowcast_draws <- function(
     draws, c("refp_mean_int[1]", "refp_sd_int[1]"), c("meanlog", "sdlog"),
     skip_absent = TRUE
   )
-  draws <- draws[, .(meanlog, sdlog)]
+  draws <- draws[, list(meanlog, sdlog)]
   draws <- add_natural_scale_mean_sd(draws)
 
   if (!missing(id_vars)) {
@@ -287,7 +287,7 @@ summarise_draws <- function(draws, sf, not_by = "value", by) {
   }
 
   summarised_draws <- draws[,
-    .(
+    list(
       mean = mean(value, na.rm = TRUE),
       median = median(value, na.rm = TRUE),
       q2.5 = quantile(value, 0.025, na.rm = TRUE),
