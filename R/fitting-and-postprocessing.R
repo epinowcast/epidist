@@ -224,7 +224,7 @@ extract_epinowcast_draws <- function(
 #' @param draws ...
 #' @family postprocess
 #' @export
-primary_censoring_bias_correction <- function(draws) {
+correct_primary_censoring_bias <- function(draws) {
   draws <- data.table::copy(draws)
   draws[, mean := mean - runif(.N, min = 0, max = 1)]
   draws[, meanlog := log(mean^2 / sqrt(sd^2 + mean^2))]
