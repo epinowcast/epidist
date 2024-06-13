@@ -75,11 +75,15 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' @family latent_individual
 #' @autoglobal
 #' @export
-epidist_stancode.epidist_latent_individual <- function(data, family = epidist_family(data), ...) {
+epidist_stancode.epidist_latent_individual <- function(data,
+                                                       family =
+                                                         epidist_family(data),
+                                                       ...) {
   stanvars_version <- epidist_version_stanvar()
 
   stanvars_functions <- brms::stanvar(
-    block = "functions", scode = epidist_stan_chunk("latent_individual/functions.stan")
+    block = "functions",
+    scode = epidist_stan_chunk("latent_individual/functions.stan")
   )
 
   family_name <- gsub("latent_", "", family$name)
@@ -108,19 +112,22 @@ epidist_stancode.epidist_latent_individual <- function(data, family = epidist_fa
     )
 
   stanvars_parameters <- brms::stanvar(
-    block = "parameters", scode = epidist_stan_chunk("latent_individual/parameters.stan")
+    block = "parameters",
+    scode = epidist_stan_chunk("latent_individual/parameters.stan")
   )
 
   stanvars_tparameters <- brms::stanvar(
-    block = "tparameters", scode = epidist_stan_chunk("latent_individual/tparameters.stan")
+    block = "tparameters",
+    scode = epidist_stan_chunk("latent_individual/tparameters.stan")
   )
 
   stanvars_priors <- brms::stanvar(
-    block = "model", scode = epidist_stan_chunk("latent_individual/priors.stan")
+    block = "model",
+    scode = epidist_stan_chunk("latent_individual/priors.stan")
   )
 
   stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
     stanvars_parameters + stanvars_tparameters + stanvars_priors
-  
+
   return(stanvars_all)
 }

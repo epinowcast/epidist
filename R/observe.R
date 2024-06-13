@@ -14,7 +14,7 @@ observe_process <- function(linelist) {
   clinelist[, stime_lwr := stime_daily]
   clinelist[, stime_upr := stime_daily + 1]
   # How would we observe the delay distribution
-  # previously: delay_daily=floor(delay)
+  # previously delay_daily would be the floor(delay)
   clinelist[, delay_daily := stime_daily - ptime_daily]
   clinelist[, delay_lwr := purrr::map_dbl(delay_daily, ~ max(0, . - 1))]
   clinelist[, delay_upr := delay_daily + 1]
@@ -40,7 +40,7 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
   truncated_linelist[, censored_obs_time := obs_at - ptime_lwr]
   truncated_linelist[, censored := "interval"]
   truncated_linelist <- truncated_linelist[stime_upr <= obs_at]
-  
+
   return(truncated_linelist)
 }
 
@@ -65,7 +65,7 @@ filter_obs_by_ptime <- function(linelist, obs_time,
     # Update observation time to be the same as the maximum secondary time
     truncated_linelist[, obs_at := stime_upr]
   } else if (obs_at == "max_secondary") {
-    truncated_linelist[, obs_at := stime_upr |> max() |> ceiling()] 
+    truncated_linelist[, obs_at := stime_upr |> max() |> ceiling()]
   }
 
   # make observation time as specified
