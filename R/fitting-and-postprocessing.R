@@ -146,9 +146,7 @@ add_natural_scale_mean_sd <- function(dt) {
 #' @export
 #' @autoglobal
 #' @importFrom posterior as_draws_df
-extract_lognormal_draws <- function(
-  data, id_vars, from_dt = FALSE
-) {
+extract_lognormal_draws <- function(data, id_vars, from_dt = FALSE) {
   if (from_dt) {
     if (!any(colnames(data) %in% "fit")) {
       return(id_vars[])
@@ -160,16 +158,19 @@ extract_lognormal_draws <- function(
 
   draws <- posterior::as_draws_df(draws) |>
     data.table::as.data.table()
+
   data.table::setnames(
-    draws, c("Intercept", "Intercept_sigma"), c("meanlog", "sdlog"),
+    draws, c("Intercept", "Intercept_sigma"), c("meanlog", "sdlog_log"),
     skip_absent = TRUE
   )
+
   data.table::setnames(
-    draws, c("b_Intercept", "b_sigma_Intercept"), c("meanlog", "sdlog"),
+    draws, c("b_Intercept", "b_sigma_Intercept"), c("meanlog", "sdlog_log"),
     skip_absent = TRUE
   )
+
+  draws <- draws[, sdlog := exp(sdlog_log)]
   draws <- draws[, .(meanlog, sdlog)]
-  draws <- draws[, sdlog := exp(sdlog)]
   draws <- add_natural_scale_mean_sd(draws)
 
   if (!missing(id_vars)) {
@@ -177,6 +178,7 @@ extract_lognormal_draws <- function(
       draws[, id := id_vars$id], id_vars, by = "id"
     )
   }
+
   return(draws[])
 }
 
