@@ -1,15 +1,15 @@
 #' Sample from the posterior of a model with additional diagnositics
-#' 
+#'
 #' @param model ...
 #' @param data ...
 #' @param scenario ...
 #' @param diagnostics ...
 #' @param ... ...
 #' @family postprocess
+#' @autoglobal
 #' @export
 sample_model <- function(model, data, scenario = data.table::data.table(id = 1),
                          diagnostics = TRUE, ...) {
-
   out <- data.table::copy(scenario)
 
   # Setup failure tolerant model fitting
@@ -55,7 +55,7 @@ sample_model <- function(model, data, scenario = data.table::data.table(id = 1),
 }
 
 #' Sample from the posterior of an epinowcast model with additional diagnositics
-#' 
+#'
 #' @inheritParams sample_model
 #' @family postprocess
 #' @export
@@ -125,27 +125,26 @@ sample_epinowcast_model <- function(
 }
 
 #' Add natural scale summary parameters for a lognormal distribution
-#' 
+#'
 #' @param dt ...
 #' @family postprocess
+#' @autoglobal
 #' @export
 add_natural_scale_mean_sd <- function(dt) {
   nat_dt <- data.table::copy(dt)
-  
-  nat_dt <- nat_dt[,mean := exp(meanlog + sdlog ^ 2 / 2)]
-  
-  nat_dt <- nat_dt[,sd := exp(meanlog + (1 / 2) * sdlog ^ 2) * sqrt(exp(sdlog ^ 2) - 1)]
-  
+  nat_dt <- nat_dt[, mean := exp(meanlog + sdlog ^ 2 / 2)]
+  nat_dt <- nat_dt[, sd := mean * sqrt(exp(sdlog ^ 2) - 1)]
   return(nat_dt[])
 }
 
 #' Extract posterior samples for a lognormal brms model
-#' 
+#'
 #' @param data ...
 #' @param id_vars ...
 #' @param from_dt ...
 #' @family postprocess
 #' @export
+#' @autoglobal
 #' @importFrom posterior as_draws_df
 extract_lognormal_draws <- function(
   data, id_vars, from_dt = FALSE
@@ -182,9 +181,10 @@ extract_lognormal_draws <- function(
 }
 
 #' Extract posterior samples for a lognormal epinowcast model
-#' 
+#'
 #' @inheritParams extract_lognormal_draws
 #' @family postprocess
+#' @autoglobal
 #' @export
 extract_epinowcast_draws <- function(
   data, id_vars, from_dt = FALSE
@@ -220,7 +220,7 @@ extract_epinowcast_draws <- function(
 }
 
 #' Primary event bias correction
-#' 
+#'
 #' @param draws ...
 #' @family postprocess
 #' @export
@@ -229,12 +229,12 @@ primary_censoring_bias_correction <- function(draws) {
   draws[, mean := mean - runif(.N, min = 0, max = 1)]
   draws[, meanlog := log(mean^2 / sqrt(sd^2 + mean^2))]
   draws[, sdlog := sqrt(log(1 + (sd^2 / mean^2)))]
-  
+
   return(draws[])
 }
 
 #' Convert posterior lognormal samples to long format
-#' 
+#'
 #' @param draws ...
 #' @family postprocess
 #' @export
@@ -248,11 +248,12 @@ draws_to_long <- function(draws) {
 }
 
 #' Make posterior lognormal samples relative to true values
-#' 
+#'
 #' @param draws ...
 #' @param secondary_dist ...
 #' @param by ...
 #' @family postprocess
+#' @autoglobal
 #' @export
 make_relative_to_truth <- function(draws, secondary_dist, by = "parameter") {
   draws <- merge(
@@ -262,7 +263,7 @@ make_relative_to_truth <- function(draws, secondary_dist, by = "parameter") {
   )
 
   draws[, rel_value := value / true_value]
-  
+
   return(draws[])
 }
 
@@ -314,18 +315,16 @@ summarise_draws <- function(draws, sf, not_by = "value", by) {
 #'
 #' @param variable The variable to summarise
 #' @inheritParams summarise_draws
-#' 
+#'
 #' @family postprocess
+#' @autoglobal
 #' @export
 summarise_variable <- function(draws, variable, sf = 6, by = c()) {
   if (missing(variable)) {
     stop("variable must be specified")
   }
   summarised_draws <- data.table::copy(draws)
-  
   summarised_draws[, value := variable, env = list(variable = variable)]
-  
   summarised_draws <- summarise_draws(summarised_draws, sf = sf, by = by)
-  
   return(summarised_draws[])
 }

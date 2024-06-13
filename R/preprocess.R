@@ -1,18 +1,19 @@
 #' For a target variable convert from individual data to counts
-#' 
+#'
 #' @param linelist ...
 #' @param target_time ...
 #' @param additional_by ...
 #' @param pad_zeros ...
 #' @family preprocess
+#' @autoglobal
 #' @export
 linelist_to_counts <- function(linelist, target_time = "ptime_daily",
                                additional_by = c(), pad_zeros = FALSE) {
   cases <- data.table::copy(linelist)
-  cases[,time := get(target_time)]
-  cases <- cases[,.(cases = .N), by = c("time", additional_by)]
+  cases[, time := get(target_time)]
+  cases <- cases[, .(cases = .N), by = c("time", additional_by)]
   cases <- cases[order(time)]
-  
+
   if (pad_zeros) {
     cases <- merge(
       cases,
@@ -20,17 +21,18 @@ linelist_to_counts <- function(linelist, target_time = "ptime_daily",
       by = "time",
       all = TRUE
     )
-    
+
     cases[is.na(cases), cases := 0]
   }
-  
+
   return(cases[])
 }
 
 #' Convert primary and secondary observations to counts in long format
-#' 
+#'
 #' @param linelist ...
 #' @family preprocess
+#' @autoglobal
 #' @export
 linelist_to_cases <- function(linelist) {
   primary_cases <- linelist_to_counts(linelist)
@@ -51,29 +53,33 @@ linelist_to_cases <- function(linelist) {
 }
 
 #' For the observation observed at variable reverse the factor ordering
-#' 
+#'
 #' @param dt ...
 #' @family preprocess
+#' @autoglobal
 #' @export
 reverse_obs_at <- function(dt) {
   dt_rev <- data.table::copy(dt)
-  
+
   dt_rev[, obs_at := factor(obs_at)]
   dt_rev[, obs_at := factor(obs_at, levels = rev(levels(obs_at)))]
-  
+
   return(dt_rev)
 }
 
 #' Construct case counts by observation window based on secondary observations
-#' 
+#'
 #' @param linelist ...
 #' @param windows ...
 #' @param obs_type ...
 #' @param upper_window ...
 #' @family preprocess
+#' @autoglobal
 #' @export
 construct_cases_by_obs_window <- function(linelist, windows = c(25, 45),
-  obs_type = c("stime", "ptime"), upper_window = max(linelist$stime_daily)) {
+                                          obs_type = c("stime", "ptime"),
+                                          upper_window =
+                                            max(linelist$stime_daily)) {
   lower_window <- c(0, windows)
   upper_window <- c(windows, upper_window)
 
@@ -87,11 +93,11 @@ construct_cases_by_obs_window <- function(linelist, windows = c(25, 45),
       filter_obs_by_ptime(dt, obs_time = uw)[ptime > lw]
     }
   }
-  
+
   cases <- purrr::map2(
     lower_window, upper_window, ~ filter_fn(linelist, .x, .y)
   ) |>
-  data.table::rbindlist()
+    data.table::rbindlist()
 
   primary_cases <- cases |>
     linelist_to_counts(additional_by = "obs_at")
@@ -108,17 +114,17 @@ construct_cases_by_obs_window <- function(linelist, windows = c(25, 45),
 
   cases <- reverse_obs_at(cases)
   return(cases[])
-
 }
 
 #' Combine truncated and fully observed observations
-#' 
+#'
 #' @param truncated_obs ...
 #' @param obs ...
 #' @family preprocess
+#' @autoglobal
 #' @export
 combine_obs <- function(truncated_obs, obs) {
-  cobs <- rbind(
+  rbind(
     truncated_obs,
     obs[, obs_at := max(stime_daily)],
     fill = TRUE
@@ -127,10 +133,11 @@ combine_obs <- function(truncated_obs, obs) {
 }
 
 #' Calculate the mean difference between continuous and discrete event time
-#' 
+#'
 #' @param truncated_obs ...
 #' @param additional_by ...
 #' @family preprocess
+#' @autoglobal
 #' @export
 calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
   truncated_obs_psumm <- data.table::copy(truncated_obs)
@@ -163,18 +170,16 @@ calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
 }
 
 #' Convert from event based to incidence based data
-#' 
+#'
 #' @param data ...
 #' @param by ...
 #' @family preprocess
+#' @autoglobal
 #' @export
 event_to_incidence <- function(data, by = c()) {
   dd <- data.table::copy(data)
-  
   dd[, .(cases = .N), by = c("ptime_daily", by)]
   dd <- dd[order(ptime_daily)]
-  
   setnames(dd, old = c("ptime_daily"), new = c("time"))
-  
   return(dd)
 }
