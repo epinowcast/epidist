@@ -4,15 +4,11 @@ on:
   push:
     branches:
       - main
-      - master
-      - develop
   schedule:
     - cron: '5 4 * * 1'
   pull_request:
     branches:
       - main
-      - master
-      - develop
   merge_group:
   workflow_dispatch:
   
