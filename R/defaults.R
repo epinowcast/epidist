@@ -78,7 +78,7 @@ epidist.default <- function(data, formula = epidist_formula(data),
                             prior = epidist_prior(data),
                             stancode = epidist_stancode(data), fn = brms::brm,
                             ...) {
-  
+
   fit <- fn(
     formula = formula, family = family, prior = prior, stanvars = stancode,
     backend = "cmdstanr", data = data, ...

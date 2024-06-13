@@ -93,19 +93,21 @@ epidist_prior.epidist_latent_individual <- function(data, ...) {
 #' @family latent_individual
 #' @export
 epidist_stancode.epidist_latent_individual <- function(data,
-                                           family = epidist_family(data), ...) {
+                                                       family = epidist_family(
+                                                         data), ...) {
+  woverlap <- row_id <- NULL
   stanvars_version <- epidist_version_stanvar()
-  
+
   stanvars_functions <- brms::stanvar(
     block = "functions", scode = epidist_stan_chunk("latent_individual/functions.stan")
   )
-  
+
   family_name <- gsub("latent_", "", family$name)
-  
+
   stanvars_functions[[1]]$scode <- gsub(
     "family", family_name, stanvars_functions[[1]]$scode
   )
-  
+
   stanvars_data <- brms::stanvar(
     block = "data",
     scode = "int wN;",
@@ -124,19 +126,21 @@ epidist_stancode.epidist_latent_individual <- function(data,
       x = data[woverlap > 0][, row_id],
       name = "woverlap"
     )
-  
+
   stanvars_parameters <- brms::stanvar(
     block = "parameters", scode = epidist_stan_chunk("latent_individual/parameters.stan")
   )
-  
+
   stanvars_tparameters <- brms::stanvar(
     block = "tparameters", scode = epidist_stan_chunk("latent_individual/tparameters.stan")
   )
-  
+
   stanvars_priors <- brms::stanvar(
     block = "model", scode = epidist_stan_chunk("latent_individual/priors.stan")
   )
-  
+
   stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
     stanvars_parameters + stanvars_tparameters + stanvars_priors
+  
+  return(stanvars_all)
 }
