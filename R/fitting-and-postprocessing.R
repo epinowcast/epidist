@@ -303,8 +303,8 @@ summarise_draws <- function(draws, sf, not_by = "value", by) {
   if (!missing(sf)) {
     cols <- setdiff(colnames(summarised_draws), by_cols)
     summarised_draws <- summarised_draws[,
-     (cols) := lapply(.SD, signif, digits = sf),
-     .SDcols = cols
+      (cols) := lapply(.SD, signif, digits = sf),
+      .SDcols = cols
     ]
   }
 

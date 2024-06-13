@@ -85,11 +85,11 @@ construct_cases_by_obs_window <- function(linelist, windows = c(25, 45),
 
   obs_type <- match.arg(obs_type)
   if (obs_type == "stime") {
-    filter_fn <- function(dt, lw, uw) {
+    filter_fn <- function(dt, lw, uw) { # nolint
       filter_obs_by_obs_time(dt, obs_time = uw)[stime > lw]
     }
   }else {
-    filter_fn <- function(dt, lw, uw) {
+    filter_fn <- function(dt, lw, uw) { # nolint
       filter_obs_by_ptime(dt, obs_time = uw)[ptime > lw]
     }
   }
@@ -141,12 +141,13 @@ combine_obs <- function(truncated_obs, obs) {
 #' @export
 calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
   truncated_obs_psumm <- data.table::copy(truncated_obs)
-  truncated_obs_psumm[, ptime_delay := ptime - ptime_daily]  
+  truncated_obs_psumm[, ptime_delay := ptime - ptime_daily]
   truncated_obs_psumm <- truncated_obs_psumm[, .(
     mean = mean(ptime_delay),
     lwr = ifelse(length(ptime_delay) > 1, t.test(ptime_delay)[[4]][1], 0),
-    upr = ifelse(length(ptime_delay) > 1, t.test(ptime_delay)[[4]][2], 1)),
-    by = c("ptime_daily", additional_by)]
+    upr = ifelse(length(ptime_delay) > 1, t.test(ptime_delay)[[4]][2], 1)
+  ),
+  by = c("ptime_daily", additional_by)]
   truncated_obs_psumm[, lwr := ifelse(lwr < 0, 0, lwr)]
   truncated_obs_psumm[, upr := ifelse(upr > 1, 1, upr)]
   truncated_obs_psumm[, type := "ptime"]
@@ -156,8 +157,9 @@ calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
   truncated_obs_ssumm <- truncated_obs_ssumm[, .(
     mean = mean(stime_delay),
     lwr = ifelse(length(stime_delay) > 1, t.test(stime_delay)[[4]][1], 0),
-    upr = ifelse(length(stime_delay) > 1, t.test(stime_delay)[[4]][2], 1)),
-    by = c("stime_daily", additional_by)]
+    upr = ifelse(length(stime_delay) > 1, t.test(stime_delay)[[4]][2], 1)
+  ),
+  by = c("stime_daily", additional_by)]
   truncated_obs_ssumm[, lwr := ifelse(lwr < 0, 0, lwr)]
   truncated_obs_ssumm[, upr := ifelse(upr > 1, 1, upr)]
   truncated_obs_ssumm[, type := "stime"]
