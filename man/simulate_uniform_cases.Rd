@@ -13,12 +13,12 @@ simulate_uniform_cases(sample_size = 1000, t = 60)
 times.}
 }
 \value{
-A data table with two columns: case (case number) and ptime (primar
-event time).
+A \code{data.table} with two columns: \code{case} (case number) and \code{ptime}
+(primary event time).
 }
 \description{
 This function simulates cases from a uniform distribution, where the primary
-event times are uniformly distributed between 0 and t.
+event times are uniformly distributed between 0 and \code{t}.
 }
 \seealso{
 Other simulate: 

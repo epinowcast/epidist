@@ -28,22 +28,19 @@ knitr::opts_chunk$set(
   warning = FALSE,
   error = FALSE
 )
+
+# Required for R-CMD-as-cran-check to pass
+cmdstanr::set_cmdstan_path()
 ```
 
-```{r load-requirements}
-library(epidist)
-library(data.table)
-library(purrr)
-library(ggplot2)
-```
-
-Many quantities in epidemiology can be thought of as the time between two events, or "delays".
+Many quantities in epidemiology can be thought of as the time between two events or "delays".
 Important examples include:
 
 * the incubation period (time between infection and symptom onset),
 * serial interval (time between symptom onset of infectee and symptom onset of infected), and 
 * generation interval (time between infection of infectee and infection of infected).
 
+We encompass all of these delays as the time between a "primary event" and "secondary event".
 Unfortunately, estimating delays accurately from observational data is usually difficult.
 In our experience, the two main issues are:
 
@@ -51,14 +48,21 @@ In our experience, the two main issues are:
 2. right truncation.
 
 Don't worry if you've not come across these terms before.
-In Section \@ref(data), we will explain what they mean by simulating data like that we might observe during an ongoing infectious disease outbreak.
-Next, in Section \@ref(fit), we show how `epidist` can be used to estimate delays using a statistical model which properly accounts for these two issues.
-Finally, in Section \@ref(compare), we demonstrate that the fitted delay distribution accurately recovers the underlying truth.
+First, in Section \@ref(data), we explain interval censoring and right truncation by simulating data like that we might observe during an ongoing infectious disease outbreak.
+Then, in Section \@ref(fit), we show how `epidist` can be used to accurately estimate delay distributions by using a statistical model which properly accounts for these two issues.
 
 If you would like more technical details, the `epidist` package implements models following best practices as described in @park2024estimating and @charniga2024best.
 
-Finally, to run this vignette yourself, you will need the `data.table`, `purrr` and `ggplot2` packages installed.
-Note that to work with outputs from `epidist` you do not need to use `data.table`: any tool of your preference is suitable.
+To run this vignette yourself, as well as the `epidist` package, you will need the `data.table`^[Note that to work with outputs from `epidist` you do not need to use `data.table`: any tool of your preference is suitable!], `purrr`, `ggplot2`, `gt`, and `dplyr` packages installed.
+
+```{r load-requirements}
+library(epidist)
+library(data.table)
+library(purrr)
+library(ggplot2)
+library(gt)
+library(dplyr)
+```
 
 # Example data {#data}
 
@@ -128,8 +132,7 @@ obs <- outbreak |>
 obs[case %% 50 == 0, ] |>
   ggplot(aes(y = case)) +
   geom_segment(
-    aes(x = ptime, xend = stime, y = case, yend = case),
-    col = "grey"
+    aes(x = ptime, xend = stime, y = case, yend = case), col = "grey"
   ) +
   geom_point(aes(x = ptime), col = "#56B4E9") +
   geom_point(aes(x = stime), col = "#009E73") +
@@ -156,7 +159,7 @@ Here we suppose that the interval is daily, meaning that only the date of the pr
 obs_cens <- obs |> observe_process()
 ```
 
-(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
+(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. A common example of this is when events are reported as daily aggregates. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
 
 ```{r cens, fig.cap="(ref:cens)"}
 ggplot(obs_cens, aes(x = delay, y = delay_daily)) +
@@ -201,29 +204,31 @@ With our censored, truncated, and sampled data, we are now ready to try to recov
 
 # Fit the model and compare estimates {#fit}
 
-If we had access to the data `obs`, then it would be simple to estimate the delay distribution.
+If we had access to the complete and unaltered `obs`, it would be simple to estimate the delay distribution.
 However, with only access to `obs_cens_trunc_samp`, the delay distribution we observe is biased (Figure \@ref(fig:obs-est)) and we must use a statistical model.
 
-(ref:obs-est) The histogram of delays from `obs` matches closely the underlying distribution, whereas those from `obs_cens_trunc_samp` are systematically biased.
+(ref:obs-est) The histogram of delays from the complete, retrospective data `obs_cens` match quite closely with the underlying distribution, whereas those from `obs_cens_trunc_samp` show more significant systematic bias. In this instance the extent of the bias caused by censoring is less than that caused by right truncation. Nonetheless, we always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present.
 
 ```{r obs-est, fig.cap="(ref:obs-est)"}
 dplyr::bind_rows(
-  obs |>
-    dplyr::mutate(type = "Full data") |>
-    dplyr::select(delay, type),
-  obs_cens_trunc |>
+  obs_cens |>
+    dplyr::mutate(type = "Complete, retrospective data") |>
+    dplyr::select(delay = delay_daily, type),
+  obs_cens_trunc_samp |>
     dplyr::mutate(type = "Censored, truncated,\nsampled data") |>
-    dplyr::select(delay, type)
+    dplyr::select(delay = delay_daily, type)
 ) |>
+  dplyr::group_by(type, delay, .drop = FALSE) |>
+  dplyr::summarise(n = dplyr::n()) |>
+  dplyr::mutate(p = n / sum(n)) |>
   ggplot() +
-  geom_histogram(
-    aes(x = delay, y = ..density.., fill = type, group = type),
-    position = "dodge"
+  geom_col(
+    aes(x = delay, y = p, fill = type, group = type),
+    position = position_dodge2(preserve = "single")
   ) +
-  scale_fill_manual(values = c("#0072B2", "#D55E00")) +
+  scale_fill_manual(values = c("#CC79A7", "#0072B2")) +
   geom_function(
-    data = data.frame(x = c(0, 30)),
-    aes(x = x),
+    data = data.frame(x = c(0, 30)), aes(x = x),
     fun = dlnorm,
     args = list(
       meanlog = secondary_dist[["meanlog"]],
@@ -239,30 +244,37 @@ dplyr::bind_rows(
   theme(legend.position = "bottom")
 ```
 
-The main `epidist` model function is `latent_truncation_censoring_adjusted_delay`.
-<!-- In a future vignette, we will explain in more detail the structure of the model. -->
+The main function you will use for modelling is called `epidist`^[Technically, `epidist` is an [S3 generic](http://adv-r.had.co.nz/S3.html) which allows it to work differently for inputs of different classes. This is why inputs must be prepared first via `epidist_prepare` so that they are of the appropriate class!].
+We will fit the model `"latent_individual"` which uses latent variables for the time of primary and secondary event of each individual^[In a future vignette, we will explain in more detail the structure of the model!].
+To do so, we first prepare the `data` using `epidist_prepare`:
+
+```{r}
+data <- epidist_prepare(obs_cens_trunc_samp, model = "latent_individual")
+class(data)
+```
+
+The `data` object now has the class `epidist_latent_individual`.
+Using this `data`, we now call `epidist::epidist` to fit the model.
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
 
 ```{r}
-fit <- latent_truncation_censoring_adjusted_delay(
-  data = obs_cens_trunc_samp, cores = 4, refresh = 0
-)
+fit <- epidist(data = data, cores = 4, refresh = 0)
 ```
 
 The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters (Table \@ref(tab:pars)) in the model.
 Users familiar with Stan and `brms`, can work with `fit` directly.
 Any tool that supports `brms` fitted model objects will be compatible with `fit`.
 
+(ref:pars) All of the parameters that are included in the model. Many of these parameters (e.g. `swindow` and `pwindow`) the so called latent variables in the model, and have lengths corresponding to the `sample_size`.
+
 ```{r pars}
 pars <- fit$fit@par_dims |>
   map(.f = function(x) if (identical(x, integer(0))) return(1) else return(x))
 
 data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
-  gt::gt(caption =
-      "All of the parameters that are included in the model.
-      Many of these parameters are the so called latent variables in the model."
-  )
+  gt::gt() |>
+  gt::tab_caption("(ref:pars)")
 ```
 
 The `epidist` package also provides functions to make common post-processing tasks easy.
@@ -272,9 +284,10 @@ For example, samples of the fitted lognormal `meanlog` and `sdlog` parameter can
 draws <- extract_lognormal_draws(fit)
 ```
 
-Figure \@ref(fig:fitted-lognormal) shows...
+Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained using the average of the `meanlog` and `sdlog` draws.
+Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using `epidist` we have obtained a much closer match to the truth.
 
-(ref:fitted-lognormal) Figure caption.
+(ref:fitted-lognormal) A fitted delay distribution (in pink) as compared with the true delay distribution (in black).
 
 ```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
 ggplot() +
@@ -289,13 +302,12 @@ ggplot() +
   ) +
   geom_function(
     data = data.frame(x = c(0, 30)),
-    aes(x = x),
-    fun = dlnorm,
+    aes(x = x), fun = dlnorm,
     args = list(
       meanlog = mean(draws$meanlog),
       sdlog = mean(draws$sdlog)
     ),
-    col = "#D55E00"
+    col = "#CC79A7"
   ) +
   labs(
     x = "Delay between primary and secondary event (days)",

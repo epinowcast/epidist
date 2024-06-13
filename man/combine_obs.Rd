@@ -6,6 +6,11 @@
 \usage{
 combine_obs(truncated_obs, obs)
 }
+\arguments{
+\item{truncated_obs}{...}
+
+\item{obs}{...}
+}
 \description{
 Combine truncated and fully observed observations
 }

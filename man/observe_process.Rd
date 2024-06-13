@@ -6,6 +6,9 @@
 \usage{
 observe_process(linelist)
 }
+\arguments{
+\item{linelist}{...}
+}
 \description{
 Observation process for primary and secondary events
 }

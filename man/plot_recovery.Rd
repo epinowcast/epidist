@@ -6,6 +6,15 @@
 \usage{
 plot_recovery(data, alpha = 0.8, quantiles = c(0.05, 0.35, 0.65, 0.95), ...)
 }
+\arguments{
+\item{data}{...}
+
+\item{alpha}{...}
+
+\item{quantiles}{...}
+
+\item{...}{...}
+}
 \description{
 Plot the posterior estimates as densities
 }

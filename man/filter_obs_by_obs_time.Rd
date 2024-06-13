@@ -6,6 +6,11 @@
 \usage{
 filter_obs_by_obs_time(linelist, obs_time)
 }
+\arguments{
+\item{linelist}{...}
+
+\item{obs_time}{...}
+}
 \description{
 Filter observations based on a observation time of secondary events
 }

@@ -11,6 +11,15 @@ construct_cases_by_obs_window(
   upper_window = max(linelist$stime_daily)
 )
 }
+\arguments{
+\item{linelist}{...}
+
+\item{windows}{...}
+
+\item{obs_type}{...}
+
+\item{upper_window}{...}
+}
 \description{
 Construct case counts by observation window based on secondary observations
 }

@@ -1,9 +1,13 @@
 #' Plot the posterior estimates as densities
-#' 
+#'
+#' @param data ...
+#' @param alpha ...
+#' @param quantiles ...
+#' @param ... ...
 #' @family plot
 #' @export
 plot_recovery <- function(data, alpha = 0.8,
-                                   quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {
+                          quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {
   data |>
     ggplot() +
     aes(x = value, ...) +
@@ -15,8 +19,13 @@ plot_recovery <- function(data, alpha = 0.8,
 }
 
 #' Plot the relative difference between true values and posterior estimates
-#' 
+#'
+#' @param relative_data ...
+#' @param alpha ...
+#' @param quantiles ...
+#' @param ... ...
 #' @family plot
+#' @autoglobal
 #' @export
 plot_relative_recovery <- function(relative_data, alpha = 0.8,
                                    quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {
@@ -30,8 +39,10 @@ plot_relative_recovery <- function(relative_data, alpha = 0.8,
 }
 
 #' Plot cases by observation window
-#' 
+#'
+#' @param cases ...
 #' @family plot
+#' @autoglobal
 #' @export
 plot_cases_by_obs_window <- function(cases) {
   cases[case_type == "primary"] |>
@@ -50,23 +61,26 @@ plot_cases_by_obs_window <- function(cases) {
     scale_color_brewer(palette = "Reds", direction = 1) +
     theme_bw() +
     theme(legend.position = "bottom") +
-    labs(x = "Days", y = "Cases") + 
+    labs(x = "Days", y = "Cases") +
     guides(fill = guide_legend(title = "Observation day", reverse = TRUE),
            color = guide_legend(title = "Observation day", reverse = TRUE))
 }
 
 #' Plot the empirical delay distribution
-#' 
+#'
+#' @param cases ...
+#' @param meanlog ...
+#' @param sdlog ...
 #' @family plot
+#' @autoglobal
 #' @export
 plot_empirical_delay <- function(cases, meanlog, sdlog) {
   plot <- cases |>
     ggplot() +
     aes(x = delay_daily) +
     geom_histogram(
-      aes(
-        y = after_stat(density), fill = obs_at), binwidth = 1,
-        position = "dodge", col = "#696767b1"
+      aes(y = after_stat(density), fill = obs_at),
+      binwidth = 1, position = "dodge", col = "#696767b1"
     )
 
   if (!missing(meanlog) && !missing(sdlog)) {
@@ -88,14 +102,16 @@ plot_empirical_delay <- function(cases, meanlog, sdlog) {
 }
 
 #' Plot the mean difference between continuous and discrete event time
-#' 
+#'
+#' @param censor_delay ...
 #' @family plot
+#' @autoglobal
 #' @export
 plot_censor_delay <- function(censor_delay) {
   ggplot(censor_delay) +
     geom_point(aes(cohort, mean))  +
-    geom_errorbar(aes(cohort, ymin=lwr, ymax=upr), width=0) +
-    facet_wrap(~type)  +
+    geom_errorbar(aes(cohort, ymin = lwr, ymax = upr), width = 0) +
+    facet_wrap(~type) +
     theme_bw() +
     labs(
       x = "Cohort time (day)",
@@ -104,18 +120,19 @@ plot_censor_delay <- function(censor_delay) {
 }
 
 #' plot empirical cohort-based or cumulative mean vs posterior mean
-#' 
+#'
 #' @param summarised_mean Summarised mean as produced by [summarise_variable()]
-#' @param data data used for object fitting
-#' @param truncate account for truncation?
+#' @param obs_mean ...
+#' @param alpha ...
 #' @param mean Should the mean be plotted? Logical, defaults to `FALSE`.
 #' @param ribbon Should the quantile ribbon be plotted? Logical, defaults to
 #' `TRUE`.
-#' @param ribbon_bounds Bounds of the quantile ribbon. Defaults to 
+#' @param ribbon_bounds Bounds of the quantile ribbon. Defaults to
 #' `c(0.05, 0.95)` which corresponds to the 90% credible interval.
 #' @param ... Additional arguments passed to [ggplot2::aes()].
-#' 
+#'
 #' @family plot
+#' @autoglobal
 #' @export
 plot_mean_posterior_pred <- function(summarised_mean, obs_mean,
                                      alpha = 0.3, mean = FALSE, ribbon = TRUE,
@@ -162,7 +179,8 @@ make_ribbon_bound <- function(quantile) {
 }
 
 #' Plot empirical cohort-based or cumulative mean
-#' 
+#'
+#' @param data ...
 #' @family plot
 #' @export
 plot_cohort_mean <- function(data) {

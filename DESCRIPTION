@@ -20,7 +20,8 @@ Description: Understanding and accurately estimating epidemiological delay
     directly influence epidemic situational awareness, control strategies, and resource allocation. In this package, we provide methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. Despite their importance, these issues are frequently overlooked, often resulting in biased conclusions.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
+Roxygen: list(markdown = TRUE, roclets = c("collate", "namespace", "rd",
+    "roxyglobals::global_roclet"))
 RoxygenNote: 7.3.1
 Imports: 
     brms,
@@ -28,14 +29,19 @@ Imports:
     data.table,
     ggplot2,
     posterior,
-    purrr
+    purrr,
+    ggridges,
+    here
 Suggests:
     bookdown,
     epinowcast,
     testthat (>= 3.0.0),
     readxl,
     janitor,
-    gt
+    gt,
+    dplyr,
+    knitr,
+    roxyglobals
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
@@ -48,3 +54,6 @@ URL: https://epidist.epinowcast.org/
 Depends: 
     R (>= 2.10)
 LazyData: true
+VignetteBuilder: knitr
+Config/roxyglobals/filename: globals.R
+Config/roxyglobals/unique: FALSE

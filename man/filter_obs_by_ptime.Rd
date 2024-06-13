@@ -10,6 +10,13 @@ filter_obs_by_ptime(
   obs_at = c("obs_secondary", "max_secondary")
 )
 }
+\arguments{
+\item{linelist}{...}
+
+\item{obs_time}{...}
+
+\item{obs_at}{...}
+}
 \description{
 Filter observations based on the observation time of primary events
 }

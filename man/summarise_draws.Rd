@@ -11,8 +11,7 @@ summarise_draws(draws, sf, not_by = "value", by)
 
 \item{sf}{The number of significant figures to use}
 
-\item{not_by}{A vector of columns to exclude from the grouping
-This will be overridden if by is specified.}
+\item{not_by}{...}
 
 \item{by}{A vector of columns to group by}
 }
@@ -22,11 +21,11 @@ Summarise posterior draws
 \seealso{
 Other postprocess: 
 \code{\link{add_natural_scale_mean_sd}()},
+\code{\link{correct_primary_censoring_bias}()},
 \code{\link{draws_to_long}()},
 \code{\link{extract_epinowcast_draws}()},
 \code{\link{extract_lognormal_draws}()},
 \code{\link{make_relative_to_truth}()},
-\code{\link{primary_censoring_bias_correction}()},
 \code{\link{sample_epinowcast_model}()},
 \code{\link{sample_model}()},
 \code{\link{summarise_variable}()}

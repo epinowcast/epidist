@@ -6,6 +6,11 @@
 \usage{
 calculate_censor_delay(truncated_obs, additional_by = c())
 }
+\arguments{
+\item{truncated_obs}{...}
+
+\item{additional_by}{...}
+}
 \description{
 Calculate the mean difference between continuous and discrete event time
 }

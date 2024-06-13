@@ -11,6 +11,15 @@ plot_relative_recovery(
   ...
 )
 }
+\arguments{
+\item{relative_data}{...}
+
+\item{alpha}{...}
+
+\item{quantiles}{...}
+
+\item{...}{...}
+}
 \description{
 Plot the relative difference between true values and posterior estimates
 }

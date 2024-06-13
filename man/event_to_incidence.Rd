@@ -6,6 +6,11 @@
 \usage{
 event_to_incidence(data, by = c())
 }
+\arguments{
+\item{data}{...}
+
+\item{by}{...}
+}
 \description{
 Convert from event based to incidence based data
 }

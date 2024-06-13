@@ -12,17 +12,28 @@ sample_epinowcast_model(
   ...
 )
 }
+\arguments{
+\item{model}{...}
+
+\item{data}{...}
+
+\item{scenario}{...}
+
+\item{diagnostics}{...}
+
+\item{...}{...}
+}
 \description{
 Sample from the posterior of an epinowcast model with additional diagnositics
 }
 \seealso{
 Other postprocess: 
 \code{\link{add_natural_scale_mean_sd}()},
+\code{\link{correct_primary_censoring_bias}()},
 \code{\link{draws_to_long}()},
 \code{\link{extract_epinowcast_draws}()},
 \code{\link{extract_lognormal_draws}()},
 \code{\link{make_relative_to_truth}()},
-\code{\link{primary_censoring_bias_correction}()},
 \code{\link{sample_model}()},
 \code{\link{summarise_draws}()},
 \code{\link{summarise_variable}()}

@@ -6,6 +6,9 @@
 \usage{
 reverse_obs_at(dt)
 }
+\arguments{
+\item{dt}{...}
+}
 \description{
 For the observation observed at variable reverse the factor ordering
 }

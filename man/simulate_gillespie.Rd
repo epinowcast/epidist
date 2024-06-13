@@ -2,29 +2,30 @@
 % Please edit documentation in R/simulate.R
 \name{simulate_gillespie}
 \alias{simulate_gillespie}
-\title{Simulate cases from a Stochastic SIR model}
+\title{Simulate cases from a stochastic SIR model}
 \usage{
-simulate_gillespie(r = 0.2, gamma = 1/7, init_I = 50, n = 10000, seed)
+simulate_gillespie(r = 0.2, gamma = 1/7, I0 = 50, N = 10000, seed)
 }
 \arguments{
-\item{r}{The rate of infection. Defaults to 0.2.}
+\item{r}{The initial epidemic growth rate. Defaults to 0.2.}
 
 \item{gamma}{The rate of recovery. Defaults to 1/7.}
 
-\item{init_I}{The initial number of infected people. Defaults to 50.}
+\item{I0}{The initial number of infected people. Defaults to 50.}
 
-\item{n}{The total population size. Defaults to 10000.}
+\item{N}{The total population size. Defaults to 10000.}
 
 \item{seed}{The random seed to be used in the simulation process.}
 }
 \value{
-A data table with two columns: case (case number) and ptime (primary
-event time).
+A \code{data.table} with two columns: \code{case} (case number) and \code{ptime}
+(primary event time).
 }
 \description{
-This function simulates cases from an Stochastic SIR model. The user may
-specify the rate of infection r, the rate of recovery gamma, the initial
-number of infected cases I0, and the total population size N.
+This function simulates cases from an stochastic SIR model. The user may
+specify the initial epidemic growth rate \eqn{r}, the rate of recovery gamma
+\eqn{\gamma}, the initial number of infected cases \eqn{I_0}, and the total
+population size \eqn{N}.
 }
 \seealso{
 Other simulate: 

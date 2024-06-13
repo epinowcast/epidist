@@ -24,10 +24,18 @@ reference:
   desc: Functions for observing data
   contents:
   - has_concept("observe")
-- title: Model
-  desc: Functions for estimating epidemiological delays
+- title: S3 generics
+  desc: S3 generics for delay modelling
   contents:
-  - has_concept("model")
+  - has_concept("generics")
+- title: Method default
+  desc: Default methods for S3 generics
+  contents:
+  - has_concept("defaults")
+- title: Latent individual model
+  desc: Specific methods for the latent individual model
+  contents:
+  - has_concept("latent_individual")
 - title: Postprocess
   desc: Functions for postprocessing model output
   contents:
@@ -40,3 +48,6 @@ reference:
   desc: Data included with the package
   contents:
   - has_concept("data")
+- title: Utility functions
+  contents:
+  - has_concept("utils")

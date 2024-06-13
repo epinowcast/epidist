@@ -9,18 +9,18 @@ simulate_secondary(linelist, dist = rlnorm, ...)
 \arguments{
 \item{linelist}{A data frame with the primary event times.}
 
-\item{dist}{The delay distribution to be used. Defaults to rlnorm.}
+\item{dist}{The delay distribution to be used. Defaults to \code{\link[=rlnorm]{rlnorm()}}.}
 
 \item{...}{Arguments to be passed to the delay distribution function.}
 }
 \value{
-A data table that augments linelist with two new columns: delay
-(secondary event latency) and stime (the time of the secondary event).
+A \code{data.table} that augments \code{linelist} with two new columns: \code{delay}
+(secondary event latency) and \code{stime} (the time of the secondary event).
 }
 \description{
 This function simulates secondary events based on a given delay
 distribution. The input dataset should have the primary event times in a
-column named 'ptime'.
+column named \code{ptime}.
 }
 \seealso{
 Other simulate: 

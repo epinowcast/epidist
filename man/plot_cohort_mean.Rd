@@ -6,6 +6,9 @@
 \usage{
 plot_cohort_mean(data)
 }
+\arguments{
+\item{data}{...}
+}
 \description{
 Plot empirical cohort-based or cumulative mean
 }
