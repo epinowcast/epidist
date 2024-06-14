@@ -78,7 +78,7 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' `sdlog` is the exponential of `eta_sdlog`.
 #' 
 #' To alter the priors for this model, we recommend first fitting using these
-#' default priors, then extracting the priors with `brms::get_prior()`.
+#' default priors, then extracting the priors with `brms::prior_summary()`.
 #' Elements of this `data.frame` of priors may then be modified, and the
 #' resulting object passed to `epidist` to be used. An example of this workflow
 #' will be provided as a part of a vignette at a future date.
