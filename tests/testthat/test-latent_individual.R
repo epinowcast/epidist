@@ -2,9 +2,10 @@
 
 prep_obs <- epidist_prepare(sim_obs, model = "latent_individual")
 
-formula <- epidist_formula(prep_obs)
-# TODO: add tests for formula
-formula
+test_that("epidist_formula.epidist_latent_individual works with default parameters", {
+  formula <- epidist_formula(prep_obs)
+  expect_s3_class(formula, "brmsformula")
+})
 
 family <- epidist_family(prep_obs)
 # TODO: add tests for formula
