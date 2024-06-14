@@ -65,18 +65,18 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 }
 
 #' Define priors for the model
-#' 
+#'
 #' We provide suggested priors for the intercepts of the `meanlog` and `sdlog`
 #' linear predictors. These priors are weakly informative in that they prevent
 #' very large delays on the real scale. In particular:
 #'
 #' * `eta_meanlog ~ normal(2, 0.5)`
 #' * `eta_sdlog ~ normal(0, 0.5)`
-#' 
+#'
 #' Note that the link function used for `meanlog` is a constant, and the link
 #' function used for `sdlog` is a logarithm, such that the expectation of
 #' `sdlog` is the exponential of `eta_sdlog`.
-#' 
+#'
 #' To alter the priors for this model, we recommend first fitting using these
 #' default priors, then extracting the priors with `brms::prior_summary()`.
 #' Elements of this `data.frame` of priors may then be modified, and the
