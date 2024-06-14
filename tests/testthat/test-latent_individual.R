@@ -1,33 +1,21 @@
-meanlog <- 1.8
-sdlog <- 0.5
-obs_time <- 25
-sample_size <- 200
+# Assumes that tests/testthat/setup.R has been run
 
-obs_cens_trunc <- simulate_gillespie() |>
-  simulate_secondary(
-    meanlog = meanlog,
-    sdlog = sdlog
-  ) |>
-  observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time)
-
-obs_cens_trunc_samp <-
-  obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
-
-obs <- obs_cens_trunc_samp
-
-prep_obs <- epidist_prepare(obs, model = "ltcad")
+prep_obs <- epidist_prepare(sim_obs, model = "latent_individual")
 
 formula <- epidist_formula(prep_obs)
+# TODO: add tests for formula
 formula
 
 family <- epidist_family(prep_obs)
+# TODO: add tests for formula
 family
 
 priors <- epidist_priors(prep_obs)
+# TODO: add tests for formula
 priors
 
 stancode <- epidist_stancode(prep_obs)
+# TODO: add tests for stancode
 stancode
 
 fit <- epidist(
@@ -37,12 +25,14 @@ fit <- epidist(
   priors = priors,
   stancode = stancode
 )
+# TODO: add tests for epidist
+# Note this is the same thing as fit2 <- epidist(prep_obs)
 
-# This is the same thing as fit2 <- epidist(prep_obs)
-
+# Could also do tests on the stancode
 stancode <- epidist(prep_obs, fn = brms::make_stancode)
 stancode
 
+# Could also test other distribution functionality
 fit_gamma <- epidist(
   data = prep_obs,
   formula = formula,
@@ -54,8 +44,7 @@ fit_gamma <- epidist(
   )
 )
 
-# Test the defaults
-
+# Could also test how default methods work
 x <- list()
 epidist_prepare(x)
 epidist_family(x)
