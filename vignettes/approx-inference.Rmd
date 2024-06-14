@@ -32,45 +32,49 @@ knitr::opts_chunk$set(
 
 # Background
 
-The `epidist` package uses Bayesian inference to estimate delay distributions.
-Doing Bayesian inference amounts to approximating the posterior distribution of each model parameter^[See a work-in-progress vignette about the model structure.].
+The `epidist` package uses Bayesian inference to estimate delay distributions and other quantities.
+Doing Bayesian inference amounts to approximating the posterior distribution of each parameter in the statistical model^[See a work-in-progress vignette about the model structure.].
 
-By default, `epidist` uses the No-U-Turn Sampler (NUTS) Hamiltonian Monte Carlo (HMC) algorithm to approximate the posterior distribution.
-NUTS works by simulating from a Markov chain which has the posterior distribution as its stationary distribution.
-When NUTS is run for sufficiently many iterations, and has "reached convergence", the samples can be considered to be drawn from the posterior distribution, and used to compute relevant posterior quantities such as expectations.
-A drawback of NUTS, and other Markov chain Monte Carlo (MCMC) methods, is that they can be quite computational intensive, especially for complex models or large data.
+By default, `epidist` uses the No-U-Turn Sampler [NUTS; @hoffman2014no] Hamiltonian Monte Carlo (HMC) algorithm to approximate the posterior distribution.
+NUTS is an example of a broader class of Markov chain Monte Carlo (MCMC) methods which work by simulating from a Markov chain with the targetted posterior distribution as stationary distribution.
+When MCMC algorithms are run for sufficiently many iterations, and have "reached convergence", the samples can be treated as being being drawn from the posterior distribution and used to compute relevant posterior quantities such as expectations.
+A drawback of MCMC methods like NUTS, is that they can be quite computational intensive, especially for complex models or large data.
 
-The `epidist` package is built using `brms`, itself built on the Stan probabilistic programming language.
-One benefit of this design, is that as other approximate Bayesian inference algorithms are implemented in Stan (and then `brms`), they automatically are available in `epidist`.
-As such, if you are using `epidist` and having difficulties using the default NUTS algorithm, you may want to consider an alternative.
+The `epidist` package is built using `brms` [@brms], which stands for "Bayesian Regression Models using Stan", where Stan [@carpenter2017stan] is a probabilistic programming language.
+NUTS is not the only inference algorithm implemented in Stan.
+By relying on `brms` (and Stan) these additional inference algorithms are also available in `epidist`.
+As such, if you are using `epidist` and having difficulties (for example you may have a long runtime, or your chains are failing to converge) using the default NUTS algorithm, you may want to consider an alternative.
 
-In this vignette, we will first briefly describe the alternative algorithms available in Section \@ref(other), as well as directing you to more detailed resources.
-Then in Section  \@ref(demo) we demonstrate their application to fitting simulated data, before extracting and comparing posterior distributions.
-By comparing the resulting inferences to those from NUTS, to hope to help you make informed decisions about which algorithm to use in your problem.
+In this vignette, we first briefly describe the alternative algorithms available (Section \@ref(other)) as well as directing you to more detailed resources.
+Then (Section  \@ref(demo)) we demonstrate their application to fitting simulated data, before extracting and comparing posterior distributions.
+By comparing the resulting inferences to those from NUTS, to hope to help you make informed decisions about which algorithm to use in your applied problem.
 
 # Alternative approximate inference algorithms {#other}
 
-Here we describe three alternative approximate Bayesian inference algorithms that are available to use in `epidist`.
+Here we describe three alternative approximate Bayesian inference algorithms that are available to use in `brms` and therefore `epidist`.
+It's worth noting that further inference algorithms may have become available since this vignette was last updated. 
+Please check `brms` package updates if interested!
 
 ## Laplace method
 
 The Laplace method approximates a posterior distribution by a Gaussian distribution.
-In Stan, the Gaussian distribution is constructed on the unconstrained parameter space, and samples may then be transformed to the constrained parameter space.
+In Stan, the Gaussian approximation is constructed on the unconstrained parameter space as the domain of a Gaussian distribution is the real line.
+Samples from the Gaussian approximation may then be transformed to the constrained parameter space.
 See the section [Laplace Sampling](https://mc-stan.org/docs/cmdstan-guide/laplace_sample_config.html) of the `CmdStan` User's Guide for more information.
 
 ## Variational inference using ADVI
 
-Automatic differentiation variational inference [ADVI; @kucukelbir2017advi] is...
+Automatic differentiation variational inference [ADVI; @kucukelbir2017advi] is a variety of variational inference algorithm.
 See the section [Variational Inference using ADVI](https://mc-stan.org/docs/cmdstan-guide/variational_config.html) of the `CmdStan` User's Guide for more information.
 
 ## Pathfinder
 
-Pathfinder is a variational inference method more recently developed by @zhang2022pathfinder.
+Pathfinder is another variational inference method, more recently developed by @zhang2022pathfinder.
 See the section [Pathfinder Method for Approximate Bayesian Inference](https://mc-stan.org/docs/cmdstan-guide/pathfinder_config.html) of the `CmdStan` User's Guide for more information.
 
 # Demonstration {#demo}
 
-This demonstration requires the following packages:
+In this demonstration, we use the following packages:
 
 ```{r load-requirements}
 library(epidist)
@@ -78,7 +82,8 @@ library(ggplot2)
 library(dplyr)
 ```
 
-Simulate data:
+First, we begin by simulating data.
+The example data simulation process follows that used in the [Getting started with epidist](https://epidist.epinowcast.org/articles/epidist.html#data) vignette:
 
 ```{r}
 meanlog <- 1.8
@@ -86,7 +91,7 @@ sdlog <- 0.5
 obs_time <- 25
 sample_size <- 200
 
-obs_cens_trunc <- simulate_gillespie() |>
+obs_cens_trunc <- simulate_gillespie(seed = 101) |>
   simulate_secondary(
     meanlog = meanlog,
     sdlog = sdlog
@@ -98,7 +103,7 @@ obs_cens_trunc_samp <-
   obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 ```
 
-Fit the latent individual model using HMC:
+We now prepare the data for fitting with the latent individual model, and perform inference with HMC:
 
 ```{r results='hide'}
 data <- epidist_prepare(obs_cens_trunc_samp, model = "latent_individual")
@@ -106,7 +111,10 @@ data <- epidist_prepare(obs_cens_trunc_samp, model = "latent_individual")
 fit_hmc <- epidist(data = data, algorithm = "sampling")
 ```
 
-Fit the latent individual model using each method in Section \@ref(other) and draw 4000 samples to match the four Markov chains of 1000 in HMC:
+Note that for clarity above we specify `algorithm = "sampling"`, but if you were to call `epidist(data = data)` the result would be the same since `"sampling"` (i.e. HMC) is the default value for the `algorithm` argument.
+
+Now, we fit the same latent individual model using each method in Section \@ref(other).
+To match the four Markov chains of length 1000 in HMC above, we then draw 4000 samples from each approximate posterior:
 
 ```{r}
 fit_laplace <- epidist(data = data, algorithm = "laplace", draws = 4000)
@@ -114,11 +122,11 @@ fit_advi <- epidist(data = data, algorithm = "meanfield", draws = 4000)
 fit_pathfinder <- epidist(data = data, algorithm = "pathfinder", draws = 4000)
 ```
 
-Pathfinder runs into the error "Error evaluating model log probability: Non-finite gradient." here.
-Strange!
-Find a fix.
+Although both the Laplace and ADVI methods ran without problem, the Pathfinder algorithm produced errors of the form:
 
-Extract posterior distribution for the delay parameters:
+> "Error evaluating model log probability: Non-finite gradient."
+
+We now extract posterior distribution for the delay parameters from the fitted model for each inference method:
 
 ```{r}
 draws_hmc <- extract_lognormal_draws(fit_hmc)
@@ -130,53 +138,34 @@ draws_pathfinder <- extract_lognormal_draws(fit_pathfinder)
 Compare with a figure or table or both:
 
 ```{r}
-draws_hmc <- draws_hmc |>
-  draws_to_long() |>
-  filter(parameter %in% c("mean", "sd")) |>
-  mutate(method = "hmc")
-
-draws_laplace <- draws_laplace |>
-  draws_to_long() |>
-  filter(parameter %in% c("mean", "sd")) |>
-  mutate(method = "laplace")
-
-draws_advi <- draws_advi |>
-  draws_to_long() |>
-  filter(parameter %in% c("mean", "sd")) |>
-  mutate(method = "advi")
-
-draws_pathfinder <- draws_pathfinder |>
-  draws_to_long() |>
-  filter(parameter %in% c("mean", "sd")) |>
-  mutate(method = "pathfinder")
-
-fct_reorg <- function(fac, ...) {
-  forcats::fct_recode(forcats::fct_relevel(fac, ...), ...)
+process_draws <- function(draws, name) {
+  draws |>
+    draws_to_long() |>
+    filter(parameter %in% c("mean", "sd")) |>
+    mutate(
+      parameter = recode(parameter, "mean" = "Mean", "sd" = "SD"),
+      method = name
+    )
 }
 
-df <- rbind(draws_hmc, draws_laplace, draws_advi) |>
-  mutate(
-    method = forcats::fct_recode(method,
-      "HMC" = "hmc",
-      "Laplace" = "laplace",
-      "ADVI" = "advi",
-      "Pathfinder" = "pathfinder") |>
-        forcats::fct_relevel("HMC", "Laplace", "ADVI", "Pathfinder"),
-    parameter = forcats::fct_recode(parameter,
-      "Mean" = "mean",
-      "SD" = "sd"
-    )
-  )
-  
-filter(df, parameter == "Mean") |>
+draws_hmc <- process_draws(draws_hmc, "HMC")
+draws_laplace <- process_draws(draws_laplace, "Laplace")
+draws_advi  <- process_draws(draws_advi, "ADVI") 
+draws_pathfinder  <- process_draws(draws_pathfinder, "Pathfinder") 
+
+df <- rbind(draws_hmc, draws_laplace, draws_advi, draws_pathfinder) |>
+  mutate(method = forcats::as_factor(method))
+
+df |>
+  filter(parameter == "Mean", method != "Pathfinder") |>
   ggplot(aes(x = value)) +
   geom_histogram(aes(y = ..density..)) +
   facet_grid(method ~ parameter) +
   theme_minimal() +
   labs(x = "", y = "")
 
-rbind(df, draws_hmc, draws_laplace, draws_advi) |>
-  filter(parameter == "SD") |>
+df |>
+  filter(parameter == "SD", method != "Pathfinder") |>
   ggplot(aes(x = value)) +
   geom_histogram(aes(y= ..density..)) +
   facet_grid(method ~ parameter) +
@@ -184,11 +173,11 @@ rbind(df, draws_hmc, draws_laplace, draws_advi) |>
   labs(x = "", y = "")
 ```
 
-Compare the time taken:
+How long did each of the methods take?
 
 ```{r}
 rstan::get_elapsed_time(fit_hmc$fit)
-# Remainst to extract from the others
+# Remains to find way to do this with other methods
 ```
 
 ## Bibliography {-}
