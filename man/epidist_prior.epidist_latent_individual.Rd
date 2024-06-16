@@ -26,11 +26,17 @@ Note that the link function used for \code{meanlog} is a constant, and the link
 function used for \code{sdlog} is a logarithm, such that the expectation of
 \code{sdlog} is the exponential of \code{eta_sdlog}.
 
-To alter the priors for this model, we recommend first fitting using these
-default priors, then extracting the priors with \code{brms::prior_summary()}.
-Elements of this \code{data.frame} of priors may then be modified, and the
-resulting object passed to \code{epidist} to be used. An example of this workflow
-will be provided as a part of a vignette at a future date.
+To alter the priors for this model, we suggest two possible workflows:
+\enumerate{
+\item Use \code{brms::get_prior} to extract the default \code{brms} priors for your model.
+You may then alter these priors, and pass them to \code{epidist}. Note that the
+default \code{brms} priors are different to the priors we suggest.
+\item Alternatively, after fitting the model, the all priors used in the model
+may be extracted using \code{brms::prior_summary()}.
+}
+
+Examples of these two workflows will be provided as a part of a vignette at a
+future date.
 }
 \seealso{
 Other latent_individual: 
