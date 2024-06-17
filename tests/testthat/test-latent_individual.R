@@ -51,9 +51,9 @@ test_that("epidist.epidist_latent_individual fits for a gamma delay distribution
       family = epidist_family(prep_obs, family = "gamma")
     )
   )
-  expect_s3_class(fit, "brmsfit")
-  expect_s3_class(fit, "epidist_fit")
-  expect_convergence(fit)
+  expect_s3_class(fit_gamma, "brmsfit")
+  expect_s3_class(fit_gamma, "epidist_fit")
+  expect_convergence(fit_gamma)
 })
 
 # Could also test how default methods work
