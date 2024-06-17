@@ -19,7 +19,7 @@ Other generics:
 \code{\link{epidist}()},
 \code{\link{epidist_formula}()},
 \code{\link{epidist_prepare.default}()},
-\code{\link{epidist_priors}()},
+\code{\link{epidist_prior}()},
 \code{\link{epidist_stancode}()}
 }
 \concept{generics}

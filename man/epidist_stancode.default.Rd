@@ -20,6 +20,6 @@ Other defaults:
 \code{\link{epidist_family.default}()},
 \code{\link{epidist_formula.default}()},
 \code{\link{epidist_prepare.default}()},
-\code{\link{epidist_priors.default}()}
+\code{\link{epidist_prior.default}()}
 }
 \concept{defaults}

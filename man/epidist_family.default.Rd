@@ -19,7 +19,7 @@ Other defaults:
 \code{\link{epidist.default}()},
 \code{\link{epidist_formula.default}()},
 \code{\link{epidist_prepare.default}()},
-\code{\link{epidist_priors.default}()},
+\code{\link{epidist_prior.default}()},
 \code{\link{epidist_stancode.default}()}
 }
 \concept{defaults}

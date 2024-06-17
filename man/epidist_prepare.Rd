@@ -28,14 +28,14 @@ Other defaults:
 \code{\link{epidist.default}()},
 \code{\link{epidist_family.default}()},
 \code{\link{epidist_formula.default}()},
-\code{\link{epidist_priors.default}()},
+\code{\link{epidist_prior.default}()},
 \code{\link{epidist_stancode.default}()}
 
 Other generics: 
 \code{\link{epidist}()},
 \code{\link{epidist_family}()},
 \code{\link{epidist_formula}()},
-\code{\link{epidist_priors}()},
+\code{\link{epidist_prior}()},
 \code{\link{epidist_stancode}()}
 }
 \concept{defaults}
