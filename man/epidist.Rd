@@ -4,7 +4,7 @@
 \alias{epidist}
 \title{Interface using \code{brms}}
 \usage{
-epidist(data, formula, family, priors, stancode, fn, ...)
+epidist(data, formula, family, prior, stancode, fn, ...)
 }
 \arguments{
 \item{data}{A dataframe to be used for modelling.}
@@ -13,7 +13,7 @@ epidist(data, formula, family, priors, stancode, fn, ...)
 
 \item{family}{...}
 
-\item{priors}{...}
+\item{prior}{...}
 
 \item{stancode}{...}
 
@@ -30,7 +30,7 @@ Other generics:
 \code{\link{epidist_family}()},
 \code{\link{epidist_formula}()},
 \code{\link{epidist_prepare.default}()},
-\code{\link{epidist_priors}()},
+\code{\link{epidist_prior}()},
 \code{\link{epidist_stancode}()}
 }
 \concept{generics}

@@ -8,7 +8,7 @@
   data,
   formula = epidist_formula(data),
   family = epidist_family(data),
-  priors = epidist_priors(data),
+  prior = epidist_prior(data),
   stancode = epidist_stancode(data),
   fn = brms::brm,
   ...
@@ -21,7 +21,7 @@
 
 \item{family}{...}
 
-\item{priors}{...}
+\item{prior}{...}
 
 \item{stancode}{...}
 
@@ -38,7 +38,7 @@ Other defaults:
 \code{\link{epidist_family.default}()},
 \code{\link{epidist_formula.default}()},
 \code{\link{epidist_prepare.default}()},
-\code{\link{epidist_priors.default}()},
+\code{\link{epidist_prior.default}()},
 \code{\link{epidist_stancode.default}()}
 }
 \concept{defaults}

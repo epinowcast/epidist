@@ -42,14 +42,15 @@ epidist_family.default <- function(data, ...) {
 
 #' Default method for defining model specific priors
 #'
-#' @inheritParams epidist_priors
+
+#' @inheritParams epidist_prior
 #' @param ... Additional arguments for method.
 #' @family defaults
 #' @export
-epidist_priors.default <- function(data, ...) {
+epidist_prior.default <- function(data, ...) {
   stop(
-    "No epidist_priors method implemented for the class ", class(data), "\n",
-    "See methods(epidist_priors) for available methods"
+    "No epidist_prior method implemented for the class ", class(data), "\n",
+    "See methods(epidist_prior) for available methods"
   )
 }
 
@@ -75,11 +76,11 @@ epidist_stancode.default <- function(data, ...) {
 #' @export
 epidist.default <- function(data, formula = epidist_formula(data),
                             family = epidist_family(data),
-                            priors = epidist_priors(data),
+                            prior = epidist_prior(data),
                             stancode = epidist_stancode(data), fn = brms::brm,
                             ...) {
   fit <- fn(
-    formula = formula, family = family, stanvars = stancode,
+    formula = formula, family = family, prior = prior, stanvars = stancode,
     backend = "cmdstanr", data = data, ...
   )
 
