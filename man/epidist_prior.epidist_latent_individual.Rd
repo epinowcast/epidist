@@ -35,8 +35,8 @@ default \code{brms} priors are different to the priors we suggest.
 may be extracted using \code{brms::prior_summary()}.
 }
 
-Examples of these two workflows will be provided as a part of a vignette at a
-future date.
+Examples of these two workflows will be provided as a part of a vignette at
+a future date.
 }
 \seealso{
 Other latent_individual: 
