@@ -24,8 +24,9 @@
 <url><loc>https://epidist.epinowcast.org/reference/epidist_formula.epidist_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_formula.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_prepare.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/epidist_priors.default.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/epidist_priors.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_prior.default.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_prior.epidist_latent_individual.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stan_chunk.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stancode.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stancode.html</loc></url>
