@@ -25,13 +25,6 @@ epidist_prepare.epidist_latent_individual <- function(data, ...) {
   return(data)
 }
 
-#' @method epidist_priors epidist_latent_individual
-#' @family latent_individual
-#' @export
-epidist_priors.epidist_latent_individual <- function(data, ...) {
-  return(NULL)
-}
-
 #' Define a formula for the latent_individual model
 #'
 #' @param data ...
@@ -71,6 +64,41 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
   )
 }
 
+#' Define priors for the model
+#'
+#' We provide suggested priors for the intercepts of the `meanlog` and `sdlog`
+#' linear predictors. These priors are weakly informative in that they prevent
+#' very large delays on the real scale. In particular:
+#'
+#' * `eta_meanlog ~ normal(2, 0.5)`
+#' * `eta_sdlog ~ normal(0, 0.5)`
+#'
+#' Note that the link function used for `meanlog` is a constant, and the link
+#' function used for `sdlog` is a logarithm, such that the expectation of
+#' `sdlog` is the exponential of `eta_sdlog`.
+#'
+#' To alter the priors for this model, we suggest two possible workflows:
+#'
+#' 1. Use `brms::get_prior` to extract the default `brms` priors for your model.
+#' You may then alter these priors, and pass them to `epidist`. Note that the
+#' default `brms` priors are different to the priors we suggest.
+#'
+#' 2. Alternatively, after fitting the model, the all priors used in the model
+#' may be extracted using `brms::prior_summary()`.
+#'
+#' Examples of these two workflows will be provided as a part of a vignette at
+#' a future date.
+#'
+#' @inheritParams epidist_prior
+#' @method epidist_prior epidist_latent_individual
+#' @family latent_individual
+#' @export
+epidist_prior.epidist_latent_individual <- function(data, ...) {
+  prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
+  prior2 <- brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
+  return(prior1 + prior2)
+}
+
 #' @method epidist_stancode epidist_latent_individual
 #' @family latent_individual
 #' @autoglobal
@@ -79,6 +107,7 @@ epidist_stancode.epidist_latent_individual <- function(data,
                                                        family =
                                                          epidist_family(data),
                                                        ...) {
+
   stanvars_version <- epidist_version_stanvar()
 
   stanvars_functions <- brms::stanvar(

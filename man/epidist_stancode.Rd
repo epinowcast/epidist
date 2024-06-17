@@ -20,6 +20,6 @@ Other generics:
 \code{\link{epidist_family}()},
 \code{\link{epidist_formula}()},
 \code{\link{epidist_prepare.default}()},
-\code{\link{epidist_priors}()}
+\code{\link{epidist_prior}()}
 }
 \concept{generics}
