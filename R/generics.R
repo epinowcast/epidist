@@ -32,11 +32,11 @@ epidist_family <- function(data, ...) {
 #'
 #' @inheritParams epidist_prepare
 #' @param ... Additional arguments for method.
-#' @rdname epidist_priors
+#' @rdname epidist_prior
 #' @family generics
 #' @export
-epidist_priors <- function(data, ...) {
-  UseMethod("epidist_priors")
+epidist_prior <- function(data, ...) {
+  UseMethod("epidist_prior")
 }
 
 #' Define model specific Stan code
@@ -54,7 +54,7 @@ epidist_stancode <- function(data, ...) {
 #'
 #' @param formula A formula as defined using [epidist_formula()]
 #' @param family ...
-#' @param priors ...
+#' @param prior ...
 #' @param stancode ...
 #' @param fn Likely `brms::brm`. Also possible to be `brms::make_stancode` or
 #' `brms::make_standata`.
@@ -62,6 +62,6 @@ epidist_stancode <- function(data, ...) {
 #' @param ... Additional arguments for method.
 #' @family generics
 #' @export
-epidist <- function(data, formula, family, priors, stancode, fn, ...) {
+epidist <- function(data, formula, family, prior, stancode, fn, ...) {
   UseMethod("epidist")
 }
