@@ -193,7 +193,8 @@ Contributions of any kind are welcome!
 ### Issue Authors
 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>,
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>
 
 ### Issue Contributors
 
