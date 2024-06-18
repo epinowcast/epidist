@@ -6,6 +6,7 @@ as_string_formula <- function(formula) {
 
 # Generate observation data in correct format for the latent_individual model
 prep_obs <- epidist_prepare(sim_obs, model = "latent_individual")
+prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
 
 test_that("epidist_formula.epidist_latent_individual with default settings produces a brmsformula with the correct intercept only formula", { # nolint: line_length_linter.
   form <- epidist_formula(prep_obs)
@@ -20,8 +21,24 @@ test_that("epidist_formula.epidist_latent_individual with default settings produ
   )
 })
 
-# epidist_formula success when there is the appropriate column (custom formula)
-# epidist_formula failure when there is not the appropriate column (custom formula)
+test_that("epidist_formula.epidist_latent_individual with custom formulas produces a brmsformula with correct custom formulas", { # nolint: line_length_linter.
+  form_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex, 
+                              sigma = ~ 1 + sex)
+  expect_s3_class(form_sex, "brmsformula")
+  expect_equal(
+    as_string_formula(form_sex$formula),
+    "delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1 + sex"
+  )
+  expect_equal(
+    as_string_formula(form_sex$pforms$sigma),
+    "sigma ~ 1 + sex"
+  )
+})
+
+test_that("epidist_formula.epidist_latent_individual with custom formulas produces a brmsformula with correct custom formulas", { # nolint: line_length_linter.
+  form_age <- epidist_formula(prep_obs, delay_central = ~ 1 + age, 
+                              sigma = ~ 1 + age)
+})
 
 test_that("epidist_family.epidist_latent_individual with default settings produces an object of the right class", { # nolint: line_length_linter.
   family <- epidist_family(prep_obs)
