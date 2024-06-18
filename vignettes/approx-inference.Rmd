@@ -74,7 +74,7 @@ See the section [Pathfinder Method for Approximate Bayesian Inference](https://m
 
 # Demonstration {#demo}
 
-In this demonstration, we use the following packages:
+In this demonstration, we use `epidist` alongside the following packages:
 
 ```{r load-requirements}
 library(epidist)
