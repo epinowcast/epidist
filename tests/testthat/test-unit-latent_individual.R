@@ -6,7 +6,12 @@ as_string_formula <- function(formula) {
 
 # Generate observation data in correct format for the latent_individual model
 prep_obs <- epidist_prepare(sim_obs, model = "latent_individual")
-prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
+
+test_that("epidist_prepare.epidist_latent_individual with default settings an object with the correct classes", { # nolint: line_length_linter.
+  expect_s3_class(prep_obs, "data.table")
+  expect_s3_class(prep_obs, "data.frame")
+  expect_s3_class(prep_obs, "epidist_latent_individual")
+})
 
 test_that("epidist_formula.epidist_latent_individual with default settings produces a brmsformula with the correct intercept only formula", { # nolint: line_length_linter.
   form <- epidist_formula(prep_obs)
@@ -22,6 +27,7 @@ test_that("epidist_formula.epidist_latent_individual with default settings produ
 })
 
 test_that("epidist_formula.epidist_latent_individual with custom formulas produces a brmsformula with correct custom formulas", { # nolint: line_length_linter.
+  prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   form_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex, 
                               sigma = ~ 1 + sex)
   expect_s3_class(form_sex, "brmsformula")
