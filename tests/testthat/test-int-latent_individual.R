@@ -12,6 +12,8 @@ test_that("epidist.epidist_latent_individual fits in the default case", {
   expect_convergence(fit)
 })
 
+# epidist compiles for gamma delay distribution
+
 test_that("epidist.epidist_latent_individual fits for a gamma delay distribution", { # nolint: line_length_linter.
   fit_gamma <- epidist(
     data = prep_obs,
@@ -25,3 +27,6 @@ test_that("epidist.epidist_latent_individual fits for a gamma delay distribution
   expect_s3_class(fit_gamma, "epidist_fit")
   expect_convergence(fit_gamma)
 })
+
+# epidist compiles for an alternative formula e.g. with 1 + sex
+# epidist fits for an alternative formula e.g. with 1 + sex
