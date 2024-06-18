@@ -22,6 +22,9 @@ test_that("epidist_formula.epidist_latent_individual with default settings produ
   )
 })
 
+# epidist_formula success when there is the appropriate column (custom formula)
+# epidist_formula failure when there is not the appropriate column (custom formula)
+
 test_that("epidist_family.epidist_latent_individual with default settings produces an object of the right class", { # nolint: line_length_linter.
   family <- epidist_family(prep_obs)
   expect_s3_class(family, "customfamily")
