@@ -1,5 +1,3 @@
-# Assumes that tests/testthat/setup.R has been run
-
 as_string_formula <- function(formula) {
   form <- paste(deparse(formula), collapse = " ")
   form <- gsub("\\s+", " ", form, perl = FALSE)
@@ -32,19 +30,8 @@ test_that("epidist_family.epidist_latent_individual with default settings produc
   expect_s3_class(family, "family")
 })
 
-priors <- epidist_priors(prep_obs)
-# TODO: add tests for priors: waiting on prior PR being merged for this
-priors
-
-test_that("epidist_stancode.epidist_latent_individual", { # nolint: line_length_linter.
-  stancode <- epidist_stancode(prep_obs)
-  expect_equal(1, 1)
+test_that("epidist_prior.epidist_latent_individual with default settings produces an object of the right class", { # nolint: line_length_linter.
+  prior <- epidist_prior(prep_obs)
+  expect_s3_class(prior, "brmsprior")
+  expect_s3_class(prior, "data.frame")
 })
-
-# Could also test how default methods work
-x <- list()
-epidist_prepare(x)
-epidist_family(x)
-epidist_formula(x)
-epidist_priors(x)
-epidist_stancode(x)
