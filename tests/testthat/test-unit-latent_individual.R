@@ -1,5 +1,11 @@
 # Assumes that tests/testthat/setup.R has been run
 
+as_string_formula <- function(formula) {
+  form <- paste(deparse(formula), collapse = " ")
+  form <- gsub("\\s+", " ", form, perl = FALSE)
+  return(form)
+}
+
 # Generate observation data in correct format for the latent_individual model
 prep_obs <- epidist_prepare(sim_obs, model = "latent_individual")
 
@@ -7,11 +13,11 @@ test_that("epidist_formula.epidist_latent_individual with default settings produ
   form <- epidist_formula(prep_obs)
   expect_s3_class(form, "brmsformula")
   expect_equal(
-    deparse(form$formula),
+    as_string_formula(form$formula),
     "delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1"
   )
   expect_equal(
-    deparse(form$pforms$sigma),
+    as_string_formula(form$pforms$sigma),
     "sigma ~ 1"
   )
 })
