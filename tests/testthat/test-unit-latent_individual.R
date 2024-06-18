@@ -30,6 +30,15 @@ test_that("epidist_family.epidist_latent_individual with default settings produc
   expect_s3_class(family, "family")
 })
 
+test_that("the family argument in epidist_family.epidist_latent_individual passes as expected", { # nolint: line_length_linter.
+  family_gamma <- epidist_family(prep_obs, family = "gamma")
+  expect_equal(family_gamma$name, "latent_gamma")
+})
+
+test_that("the family argument in epidist_family.epidist_latent_individual gives suitable error for non-character input", { # nolint: line_length_linter.
+  family_fail <- epidist_family(prep_obs, family = 1)
+})
+
 test_that("epidist_prior.epidist_latent_individual with default settings produces an object of the right class", { # nolint: line_length_linter.
   prior <- epidist_prior(prep_obs)
   expect_s3_class(prior, "brmsprior")
