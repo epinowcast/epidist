@@ -28,7 +28,7 @@ test_that("epidist_formula.epidist_latent_individual with default settings produ
 
 test_that("epidist_formula.epidist_latent_individual with custom formulas produces a brmsformula with correct custom formulas", { # nolint: line_length_linter.
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
-  form_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex, 
+  form_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
                               sigma = ~ 1 + sex)
   expect_s3_class(form_sex, "brmsformula")
   expect_equal(
@@ -41,16 +41,6 @@ test_that("epidist_formula.epidist_latent_individual with custom formulas produc
   )
 })
 
-# This unit test requires a feature to be implemented in epidist_formula
-# Adding issue to implement this
-
-# test_that("epidist_formula.epidist_latent_individual with custom formulas errors for incorrect custom formulas", { # nolint: line_length_linter.
-#   expect_error(epidist_formula(prep_obs, delay_central = ~ 1 + age))
-#   expect_error(epidist_formula(prep_obs, sigma = ~ 1 + age))
-#   expect_error(epidist_formula(prep_obs, delay_central = 1))
-#   expect_error(epidist_formula(prep_obs, sigma = 1))
-# })
-
 test_that("epidist_family.epidist_latent_individual with default settings produces an object of the right class", { # nolint: line_length_linter.
   family <- epidist_family(prep_obs)
   expect_s3_class(family, "customfamily")
@@ -62,13 +52,6 @@ test_that("the family argument in epidist_family.epidist_latent_individual passe
   family_gamma <- epidist_family(prep_obs, family = "gamma")
   expect_equal(family_gamma$name, "latent_gamma")
 })
-
-# This unit test requires a feature to be implemented in epidist_family
-# Adding issue to implement this
-
-# test_that("the family argument in epidist_family.epidist_latent_individual gives suitable error for non-character input", { # nolint: line_length_linter.
-#   epidist_family(prep_obs, family = 1)
-# })
 
 test_that("epidist_prior.epidist_latent_individual with default settings produces an object of the right class", { # nolint: line_length_linter.
   prior <- epidist_prior(prep_obs)
