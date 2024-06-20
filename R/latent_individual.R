@@ -1,3 +1,23 @@
+as_latent_individual <- function(...) {
+  UseMethod("as_latent_individual")
+}
+ 
+as_latent_individual.default <- function(data) {
+  NULL
+  # Takes data as input
+  # Outputs an object of class latent_individual
+  # The default one would take in data
+  # Other ones could take in other model data formats
+  # Advanced R suggests a constructor and a helper but I think we might just
+  # want this single as function
+}
+
+validate_latent_individual <- function() {
+  # Checks that the object of class latent_individual has the correct properties
+  # Should be put in the top of any function that uses such objects
+  # Also put it at the end of as_latent_individual methods
+}
+
 #' @method epidist_prepare epidist_latent_individual
 #' @family latent_individual
 #' @autoglobal
