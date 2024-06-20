@@ -1,10 +1,8 @@
 #' @method epidist_prepare epidist_latent_individual
 #' @family latent_individual
+#' @autoglobal
 #' @export
 epidist_prepare.epidist_latent_individual <- function(data, ...) {
-  id <- obs_t <- obs_at <- ptime_lwr <- pwindow_upr <- stime_lwr <- NULL
-  stime_upr <- woverlap <- swindow_upr <- stime_upr <- delay_central <- NULL
-  row_id <- ptime_upr <- NULL
   data <- data.table::as.data.table(data)
   data[, id := seq_len(.N)]
   data[, obs_t := obs_at - ptime_lwr]
