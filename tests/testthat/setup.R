@@ -11,5 +11,6 @@ sim_obs <- simulate_gillespie() |>
     sdlog = sdlog
   ) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time) %>%
-  .[sample(seq_len(.N), sample_size, replace = FALSE)]
+  filter_obs_by_obs_time(obs_time = obs_time)
+
+sim_obs <- sim_obs[sample(seq_len(.N), sample_size, replace = FALSE)]
