@@ -9,7 +9,6 @@
   formula = epidist_formula(data),
   family = epidist_family(data),
   prior = epidist_prior(data),
-  stancode = epidist_stancode(data),
   fn = brms::brm,
   ...
 )
@@ -22,8 +21,6 @@
 \item{family}{...}
 
 \item{prior}{...}
-
-\item{stancode}{...}
 
 \item{fn}{Likely \code{brms::brm}. Also possible to be \code{brms::make_stancode} or
 \code{brms::make_standata}.}
