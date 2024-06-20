@@ -5,7 +5,7 @@ test_that("epidist.epidist_latent_individual Stan code compiles in the default c
   expect_no_error(rstan::stan_model(model_code = stancode))
 })
 
-test_that("epidist.epidist_latent_individual fits in the default case", {
+test_that("epidist.epidist_latent_individual fits and the MCMC converges in the default case", { # nolint: line_length_linter.
   fit <- epidist(data = prep_obs)
   expect_s3_class(fit, "brmsfit")
   expect_s3_class(fit, "epidist_fit")
@@ -28,7 +28,7 @@ test_that("epidist.epidist_latent_individual Stan code compiles in the gamma del
   expect_no_error(rstan::stan_model(model_code = stancode_gamma))
 })
 
-test_that("epidist.epidist_latent_individual fits for a gamma delay distribution", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual fits and the MCMC converges for a gamma delay distribution", { # nolint: line_length_linter.
   fit_gamma <- epidist(
     data = prep_obs,
     family = epidist_family(prep_obs, family = "gamma"),
@@ -51,7 +51,7 @@ test_that("epidist.epidist_latent_individual Stan code compiles for an alternati
   expect_no_error(rstan::stan_model(model_code = stancode_sex))
 })
 
-test_that("epidist.epidist_latent_individual fits for an alternative formula", {
+test_that("epidist.epidist_latent_individual fits and the MCMC converges for an alternative formula", { # nolint: line_length_linter.
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
                                  sigma = ~ 1 + sex)
