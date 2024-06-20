@@ -20,6 +20,18 @@ utils::globalVariables(c(
   "value", # <make_relative_to_truth>
   "rel_value", # <make_relative_to_truth>
   "value", # <summarise_variable>
+  "id", # <epidist_prepare.epidist_latent_individual>
+  "obs_t", # <epidist_prepare.epidist_latent_individual>
+  "obs_at", # <epidist_prepare.epidist_latent_individual>
+  "ptime_lwr", # <epidist_prepare.epidist_latent_individual>
+  "pwindow_upr", # <epidist_prepare.epidist_latent_individual>
+  "stime_lwr", # <epidist_prepare.epidist_latent_individual>
+  "ptime_upr", # <epidist_prepare.epidist_latent_individual>
+  "stime_upr", # <epidist_prepare.epidist_latent_individual>
+  "woverlap", # <epidist_prepare.epidist_latent_individual>
+  "swindow_upr", # <epidist_prepare.epidist_latent_individual>
+  "delay_central", # <epidist_prepare.epidist_latent_individual>
+  "row_id", # <epidist_prepare.epidist_latent_individual>
   "woverlap", # <epidist_stancode.epidist_latent_individual>
   "row_id", # <epidist_stancode.epidist_latent_individual>
   "ptime_daily", # <observe_process>
@@ -83,5 +95,9 @@ utils::globalVariables(c(
   "stime", # <calculate_censor_delay>
   "stime_daily", # <calculate_censor_delay>
   "ptime_daily", # <event_to_incidence>
+  "rlnorm", # <simulate_secondary>
+  "delay", # <simulate_secondary>
+  "stime", # <simulate_secondary>
+  "ptime", # <simulate_secondary>
   NULL
 ))
