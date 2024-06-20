@@ -132,9 +132,9 @@ simulate_gillespie <- function(r = 0.2,
 #' (secondary event latency) and `stime` (the time of the secondary event).
 #'
 #' @family simulate
+#' @autoglobal
 #' @export
 simulate_secondary <- function(linelist, dist = rlnorm, ...) {
-  delay <- ptime <- stime <- NULL
   obs <- data.table::copy(linelist)
 
   obs[, delay := dist(.N, ...)]
