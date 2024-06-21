@@ -15,7 +15,7 @@ extract_normal_parameters_brms <- function(prior) {
   return(list(mean = mean, sd = sd))
 }
 
-test_that("epidist.epidist_latent_individual samples from the prior according to marginal Kolmogorov-Smirnov tests", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case", { # nolint: line_length_linter.
   prior_samples <- epidist(data = prep_obs, fn = brms::brm,
                            sample_prior = "only")
   lognormal_draws <- extract_lognormal_draws(prior_samples)
@@ -37,6 +37,9 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   expect_s3_class(fit, "epidist_fit")
   expect_convergence(fit)
 })
+
+
+
 
 test_that("epidist.epidist_latent_individual Stan code compiles in the gamma delay case", { # nolint: line_length_linter.
   stancode_gamma <- epidist(
