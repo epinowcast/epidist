@@ -38,7 +38,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   expect_convergence(fit)
 })
 
-test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
   fit <- epidist(data = prep_obs)
   lognormal_draws <- extract_lognormal_draws(fit)
   # Unclear the extent to which we should expect parameter recovery here
@@ -56,6 +56,16 @@ test_that("epidist.epidist_latent_individual Stan code compiles in the gamma del
     stan_file = write_stan_file(stancode_gamma), compile = FALSE
   )
   expect_no_error(mod_gamma$compile())
+})
+
+test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the gamma delay case", { # nolint: line_length_linter.
+  fit_gamma <- epidist(
+    data = prep_obs_gamma,
+    family = epidist_family(prep_obs_gamma, family = "gamma"),
+  )
+  draws <- posterior::as_draws_df(fit_gamma$fit)
+  # draws$Intercept
+  # draws$Intercept_sigma
 })
 
 test_that("epidist.epidist_latent_individual fits and the MCMC converges for a gamma delay distribution", { # nolint: line_length_linter.
@@ -86,7 +96,7 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
                                  sigma = ~ 1 + sex)
   fit_sex <- epidist(data = prep_obs, formula = formula_sex)
   draws <- posterior::as_draws_df(fit_sex$fit)
-  expect_equal(mean(draws$b_sex), 0, tolerance = 0.1)
+  expect_equal( mean(draws$b_sex), 0, tolerance = 0.1)
 })
 
 test_that("epidist.epidist_latent_individual fits and the MCMC converges for an alternative formula", { # nolint: line_length_linter.
