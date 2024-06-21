@@ -7,6 +7,30 @@ test_that("epidist.epidist_latent_individual Stan code compiles in the default c
   expect_no_error(mod$compile())
 })
 
+extract_normal_parameters_brms <- function(prior) {
+  pattern <- "normal\\(([^,]+), ([^\\)]+)\\)"
+  match <- regmatches(prior, regexec(pattern, prior))
+  mean <- as.numeric(match[[1]][2])
+  sd <- as.numeric(match[[1]][3])
+  return(list(mean = mean, sd = sd))
+}
+
+test_that("epidist.epidist_latent_individual samples from the prior according to marginal Kolmogorov-Smirnov tests", { # nolint: line_length_linter.
+  prior_samples <- epidist(data = prep_obs, fn = brms::brm,
+                           sample_prior = "only")
+  lognormal_draws <- extract_lognormal_draws(prior_samples)
+  prior <- epidist_prior(data = prep_obs)
+  param1 <- extract_normal_parameters_brms(prior[1, ])
+  param2 <- extract_normal_parameters_brms(prior[2, ])
+  samples1 <- rnorm(1000, mean = param1$mean, sd = param1$sd)
+  samples2 <- exp(rnorm(1000, mean = param2$mean, sd = param2$sd))
+  # suppressWarnings here used to prevent warnings about ties
+  ks1 <- suppressWarnings(stats::ks.test(lognormal_draws$meanlog, samples1))
+  ks2 <- suppressWarnings(stats::ks.test(lognormal_draws$sdlog, samples2))
+  testthat::expect_gt(ks1$p.value, 0.01)
+  testthat::expect_gt(ks2$p.value, 0.01)
+})
+
 test_that("epidist.epidist_latent_individual fits and the MCMC converges in the default case", { # nolint: line_length_linter.
   fit <- epidist(data = prep_obs)
   expect_s3_class(fit, "brmsfit")
