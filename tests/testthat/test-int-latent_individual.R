@@ -1,4 +1,5 @@
 prep_obs <- epidist_prepare(sim_obs, model = "latent_individual")
+prep_obs_gamma <- epidist_prepare(sim_obs_gamma, model = "latent_individual")
 
 test_that("epidist.epidist_latent_individual Stan code compiles in the default case", { # nolint: line_length_linter.
   stancode <- epidist(data = prep_obs, fn = brms::make_stancode)
@@ -15,8 +16,8 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
 
 test_that("epidist.epidist_latent_individual Stan code compiles in the gamma delay case", { # nolint: line_length_linter.
   stancode_gamma <- epidist(
-    data = prep_obs,
-    family = epidist_family(prep_obs, family = "gamma"),
+    data = prep_obs_gamma,
+    family = epidist_family(prep_obs_gamma, family = "gamma"),
     fn = brms::make_stancode
   )
   mod_gamma <- cmdstan_model(
@@ -27,8 +28,8 @@ test_that("epidist.epidist_latent_individual Stan code compiles in the gamma del
 
 test_that("epidist.epidist_latent_individual fits and the MCMC converges for a gamma delay distribution", { # nolint: line_length_linter.
   fit_gamma <- epidist(
-    data = prep_obs,
-    family = epidist_family(prep_obs, family = "gamma"),
+    data = prep_obs_gamma,
+    family = epidist_family(prep_obs_gamma, family = "gamma"),
   )
   expect_s3_class(fit_gamma, "brmsfit")
   expect_s3_class(fit_gamma, "epidist_fit")
