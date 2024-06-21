@@ -38,8 +38,13 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   expect_convergence(fit)
 })
 
-
-
+test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution", { # nolint: line_length_linter.
+  fit <- epidist(data = prep_obs)
+  lognormal_draws <- extract_lognormal_draws(fit)
+  # Unclear the extent to which we should expect parameter recovery here
+  expect_equal(mean(lognormal_draws$meanlog), meanlog, tolerance = 0.1)
+  expect_equal(mean(lognormal_draws$sdlog), sdlog, tolerance = 0.1)
+})
 
 test_that("epidist.epidist_latent_individual Stan code compiles in the gamma delay case", { # nolint: line_length_linter.
   stancode_gamma <- epidist(
