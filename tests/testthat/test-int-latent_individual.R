@@ -80,6 +80,15 @@ test_that("epidist.epidist_latent_individual Stan code compiles for an alternati
   expect_no_error(mod_sex$compile())
 })
 
+test_that("epidist.epidist_latent_individual recovers no sex effect when none is simulated", { # nolint: line_length_linter.
+  prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
+  formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
+                                 sigma = ~ 1 + sex)
+  fit_sex <- epidist(data = prep_obs, formula = formula_sex)
+  draws <- posterior::as_draws_df(fit_sex$fit)
+  expect_equal(mean(draws$b_sex), 0, tolerance = 0.1)
+})
+
 test_that("epidist.epidist_latent_individual fits and the MCMC converges for an alternative formula", { # nolint: line_length_linter.
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
