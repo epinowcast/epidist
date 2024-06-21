@@ -13,17 +13,10 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   expect_convergence(fit)
 })
 
-# After merging another PR this code can be simplified
-# (perhaps rebase onto this if merged first)
-
 test_that("epidist.epidist_latent_individual Stan code compiles in the gamma delay case", { # nolint: line_length_linter.
   stancode_gamma <- epidist(
     data = prep_obs,
     family = epidist_family(prep_obs, family = "gamma"),
-    stancode = epidist_stancode(
-      prep_obs,
-      family = epidist_family(prep_obs, family = "gamma")
-    ),
     fn = brms::make_stancode
   )
   mod_gamma <- cmdstan_model(
@@ -36,10 +29,6 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges for a g
   fit_gamma <- epidist(
     data = prep_obs,
     family = epidist_family(prep_obs, family = "gamma"),
-    stancode = epidist_stancode(
-      prep_obs,
-      family = epidist_family(prep_obs, family = "gamma")
-    )
   )
   expect_s3_class(fit_gamma, "brmsfit")
   expect_s3_class(fit_gamma, "epidist_fit")
