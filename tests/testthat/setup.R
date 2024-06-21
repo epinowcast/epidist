@@ -3,7 +3,7 @@ set.seed(101)
 meanlog <- 1.8
 sdlog <- 0.5
 obs_time <- 25
-sample_size <- 200
+sample_size <- 500
 
 # The mean of the lognormal distribution is
 # exp(meanlog + 0.5 * sdlog^2)
