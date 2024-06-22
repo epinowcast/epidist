@@ -33,6 +33,7 @@ calculate_cohort_mean <- function(data, type = c("cohort", "cumulative"),
 #' @param ptime ...
 #' @param distribution ...
 #' @family plot
+#' @importFrom stats integrate
 #' @export
 calculate_truncated_means <- function(draws, obs_at, ptime,
                                       distribution = function(x, y, z) {
