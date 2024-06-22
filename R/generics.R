@@ -1,9 +1,16 @@
+#' Prepare data for modelling with the latent individual model
+#'
+#' @family generics
+#' @export
+as_latent_individual <- function(...) {
+  UseMethod("as_latent_individual")
+}
+
 #' Prepare data for modelling
 #'
 #' @param data A dataframe to be used for modelling.
 #' @rdname epidist_prepare
-#' @family generics
-#' @export
+#'
 epidist_prepare <- function(data, ...) {
   UseMethod("epidist_prepare")
 }
