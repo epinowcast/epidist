@@ -25,9 +25,9 @@ Interface using \code{brms}
 }
 \seealso{
 Other generics: 
+\code{\link{as_latent_individual}()},
 \code{\link{epidist_family}()},
 \code{\link{epidist_formula}()},
-\code{\link{epidist_prepare.default}()},
 \code{\link{epidist_prior}()},
 \code{\link{epidist_stancode}()}
 }
