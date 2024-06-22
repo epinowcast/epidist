@@ -1,19 +1,3 @@
-#' Default method used when preparing data
-#'
-#' @param model Character string, model type to prepare to use.
-#' Supported options are "latent_individual".
-#' @param ... Additional arguments passed to model specific `epidist_prepare`
-#' functions
-#' @rdname epidist_prepare
-#' @method epidist_prepare default
-#' @family defaults
-#' @export
-epidist_prepare.default <- function(data, model, ...) {
-  model <- match.arg(model, choices = c("latent_individual"))
-  class(data) <- c(class(data), paste0("epidist_", model))
-  epidist_prepare(data, ...)
-}
-
 #' Default method for defining a model specific formula
 #'
 #' @inheritParams epidist_formula
