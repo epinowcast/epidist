@@ -40,6 +40,7 @@ a future date.
 }
 \seealso{
 Other latent_individual: 
+\code{\link{as_latent_individual}()},
 \code{\link{epidist_formula.epidist_latent_individual}()}
 }
 \concept{latent_individual}
