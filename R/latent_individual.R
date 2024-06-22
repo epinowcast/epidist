@@ -29,10 +29,17 @@ as_latent_individual.data.frame <- function(data, ...) {
   return(data)
 }
 
-validate_latent_individual <- function() {
+#' @export
+validate_latent_individual <- function(...) {
+  return(NULL)
   # Checks that the object of class latent_individual has the correct properties
   # Should be put in the top of any function that uses such objects
   # Also put it at the end of as_latent_individual methods
+}
+
+#' @export
+is_latent_individual <- function(...) {
+  "epidist_latent_individual" %in% class(...)
 }
 
 #' Define a formula for the latent_individual model
