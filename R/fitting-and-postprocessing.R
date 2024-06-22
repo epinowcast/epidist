@@ -276,7 +276,7 @@ make_relative_to_truth <- function(draws, secondary_dist, by = "parameter") {
 #' @param not_by ...
 #' @param by A vector of columns to group by
 #' @family postprocess
-#' @importFrom stats median quantile 
+#' @importFrom stats median quantile
 #' @export
 summarise_draws <- function(draws, sf, not_by = "value", by) {
   if (missing(by)) {
