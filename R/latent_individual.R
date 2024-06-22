@@ -1,7 +1,3 @@
-as_latent_individual <- function(...) {
-  UseMethod("as_latent_individual")
-}
- 
 as_latent_individual.default <- function(data) {
   NULL
   # Takes data as input
