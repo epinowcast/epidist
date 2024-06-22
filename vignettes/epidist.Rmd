@@ -244,12 +244,12 @@ dplyr::bind_rows(
   theme(legend.position = "bottom")
 ```
 
-The main function you will use for modelling is called `epidist`^[Technically, `epidist` is an [S3 generic](http://adv-r.had.co.nz/S3.html) which allows it to work differently for inputs of different classes. This is why inputs must be prepared first via `epidist_prepare` so that they are of the appropriate class!].
+The main function you will use for modelling is called `epidist`^[Technically, `epidist` is an [S3 generic](http://adv-r.had.co.nz/S3.html) which allows it to work differently for inputs of different classes. This is in part why inputs must be prepared first via `as_latent_individual` so that they are of the appropriate class!].
 We will fit the model `"latent_individual"` which uses latent variables for the time of primary and secondary event of each individual^[In a future vignette, we will explain in more detail the structure of the model!].
-To do so, we first prepare the `data` using `epidist_prepare`:
+To do so, we first prepare the `data` using `as_latent_individual`:
 
 ```{r}
-data <- epidist_prepare(obs_cens_trunc_samp, model = "latent_individual")
+data <- as_latent_individual(obs_cens_trunc_samp)
 class(data)
 ```
 
