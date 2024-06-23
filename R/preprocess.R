@@ -138,6 +138,7 @@ combine_obs <- function(truncated_obs, obs) {
 #' @param additional_by ...
 #' @family preprocess
 #' @autoglobal
+#' @importFrom stats t.test
 #' @export
 calculate_censor_delay <- function(truncated_obs, additional_by = c()) {
   truncated_obs_psumm <- data.table::copy(truncated_obs)
