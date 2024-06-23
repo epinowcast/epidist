@@ -32,6 +32,7 @@ epidist_prepare.epidist_latent_individual <- function(data, ...) {
 #' @param ... ...
 #' @method epidist_formula epidist_latent_individual
 #' @family latent_individual
+#' @importFrom stats as.formula
 #' @export
 epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
                                                       sigma = ~ 1, ...) {
