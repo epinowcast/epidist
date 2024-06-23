@@ -31,7 +31,8 @@ Imports:
     posterior,
     purrr,
     ggridges,
-    here
+    here,
+    stats
 Suggests:
     bookdown,
     epinowcast,
