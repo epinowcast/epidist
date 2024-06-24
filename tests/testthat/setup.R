@@ -6,8 +6,7 @@ sample_size <- 500
 meanlog <- 1.8
 sdlog <- 0.5
 
-# The mean of the lognormal distribution is
-# exp(meanlog + 0.5 * sdlog^2)
+# The mean of the lognormal distribution is: exp(meanlog + 0.5 * sdlog^2)
 
 sim_obs <- simulate_gillespie() |>
   simulate_secondary(
@@ -25,8 +24,7 @@ set.seed(101)
 shape <- 2
 rate <- 3
 
-# The mean of the gamma distribution is
-# shape * rate
+# The mean of the gamma distribution is: shape * rate
 
 sim_obs_gamma <- simulate_gillespie() |>
   simulate_secondary(

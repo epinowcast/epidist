@@ -96,7 +96,7 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
                                  sigma = ~ 1 + sex)
   fit_sex <- epidist(data = prep_obs, formula = formula_sex)
   draws <- posterior::as_draws_df(fit_sex$fit)
-  expect_equal( mean(draws$b_sex), 0, tolerance = 0.1)
+  expect_equal(mean(draws$b_sex), 0, tolerance = 0.1)
 })
 
 test_that("epidist.epidist_latent_individual fits and the MCMC converges for an alternative formula", { # nolint: line_length_linter.
