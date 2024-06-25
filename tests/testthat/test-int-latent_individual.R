@@ -58,16 +58,6 @@ test_that("epidist.epidist_latent_individual Stan code compiles in the gamma del
   expect_no_error(mod_gamma$compile())
 })
 
-test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the gamma delay case", { # nolint: line_length_linter.
-  fit_gamma <- epidist(
-    data = prep_obs_gamma,
-    family = epidist_family(prep_obs_gamma, family = "gamma"),
-  )
-  draws <- posterior::as_draws_df(fit_gamma$fit)
-  # draws$Intercept
-  # draws$Intercept_sigma
-})
-
 test_that("epidist.epidist_latent_individual fits and the MCMC converges for a gamma delay distribution", { # nolint: line_length_linter.
   fit_gamma <- epidist(
     data = prep_obs_gamma,
