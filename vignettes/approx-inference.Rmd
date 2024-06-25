@@ -36,9 +36,10 @@ The `epidist` package uses Bayesian inference to estimate delay distributions an
 Doing Bayesian inference amounts to approximating the posterior distribution of each parameter in the statistical model^[See a work-in-progress vignette about the model structure.].
 
 By default, `epidist` uses the No-U-Turn Sampler [NUTS; @hoffman2014no] Hamiltonian Monte Carlo (HMC) algorithm to approximate the posterior distribution.
-NUTS is an example of a broader class of Markov chain Monte Carlo (MCMC) methods which work by simulating from a Markov chain with the targetted posterior distribution as stationary distribution.
+NUTS is an example of a broader class of Markov chain Monte Carlo (MCMC) methods.
+These methods work by simulating from a Markov chain with the intended posterior distribution as its stationary distribution.
 When MCMC algorithms are run for sufficiently many iterations, and have "reached convergence", the samples can be treated as being being drawn from the posterior distribution and used to compute relevant posterior quantities such as expectations.
-A drawback of MCMC methods like NUTS, is that they can be quite computational intensive, especially for complex models or large data.
+A drawback of MCMC methods like NUTS, is that these simulations can be quite computational intensive, especially for complex models or large data.
 
 The `epidist` package is built using `brms` [@brms], which stands for "Bayesian Regression Models using Stan", where Stan [@carpenter2017stan] is a probabilistic programming language.
 NUTS is not the only inference algorithm implemented in Stan.
@@ -51,7 +52,7 @@ By comparing the resulting inferences to those from NUTS, to hope to help you ma
 
 # Alternative approximate inference algorithms {#other}
 
-Here we describe three alternative approximate Bayesian inference algorithms that are available to use in `brms` and therefore `epidist`.
+Here we describe three alternative approximate Bayesian inference algorithms that are available to use in `brms`, and therefore also available in `epidist`.
 It's worth noting that further inference algorithms may have become available since this vignette was last updated. 
 Please check `brms` package updates if interested!
 
@@ -60,11 +61,15 @@ Please check `brms` package updates if interested!
 The Laplace method approximates a posterior distribution by a Gaussian distribution.
 In Stan, the Gaussian approximation is constructed on the unconstrained parameter space as the domain of a Gaussian distribution is the real line.
 Samples from the Gaussian approximation may then be transformed to the constrained parameter space.
+To access the Laplace method, specify `algorithm = "laplace"` within `brms::brm`.
 See the section [Laplace Sampling](https://mc-stan.org/docs/cmdstan-guide/laplace_sample_config.html) of the `CmdStan` User's Guide for more information.
 
 ## Variational inference using ADVI
 
-Automatic differentiation variational inference [ADVI; @kucukelbir2017advi] is a variety of variational inference algorithm.
+Automatic differentiation variational inference [ADVI; @kucukelbir2017advi] is a type of variational inference [VI; @blei2017variational] algorithm.
+VI works by restricting to a family of distributions, and then selecting the member of that family which is the most similar to the posterior distribution.
+Most commonly, and in Stan, (dis-)similarity is measured using the Kullback–Leibler divergence.
+There are two options for the family of distributions, either a fully factorised Gaussian with `algorithm = "meanfield"` or a Gaussian with a full-rank covariance matrix with `algorithm = "fullrank"`.
 See the section [Variational Inference using ADVI](https://mc-stan.org/docs/cmdstan-guide/variational_config.html) of the `CmdStan` User's Guide for more information.
 
 ## Pathfinder
