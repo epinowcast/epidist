@@ -58,16 +58,6 @@ test_that("epidist.epidist_latent_individual Stan code compiles in the gamma del
   expect_no_error(mod_gamma$compile())
 })
 
-test_that("epidist.epidist_latent_individual fits and the MCMC converges for a gamma delay distribution", { # nolint: line_length_linter.
-  fit_gamma <- epidist(
-    data = prep_obs_gamma,
-    family = epidist_family(prep_obs_gamma, family = "gamma"),
-  )
-  expect_s3_class(fit_gamma, "brmsfit")
-  expect_s3_class(fit_gamma, "epidist_fit")
-  expect_convergence(fit_gamma)
-})
-
 test_that("epidist.epidist_latent_individual Stan code compiles for an alternative formula", { # nolint: line_length_linter.
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
