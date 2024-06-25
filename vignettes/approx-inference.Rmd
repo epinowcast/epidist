@@ -79,7 +79,7 @@ See the section [Pathfinder Method for Approximate Bayesian Inference](https://m
 
 # Demonstration {#demo}
 
-In this demonstration, we use `epidist` alongside the following packages:
+In this demonstration, we use `epidist` alongside `ggplot2` and `dplyr`:
 
 ```{r load-requirements}
 library(epidist)
@@ -88,7 +88,7 @@ library(dplyr)
 ```
 
 First, we begin by simulating data.
-The example data simulation process follows that used in the [Getting started with epidist](https://epidist.epinowcast.org/articles/epidist.html#data) vignette:
+The example data simulation process follows that used in the [Getting started with epidist](https://epidist.epinowcast.org/articles/epidist.html#data) vignette, so we will not detail exactly what is happening here, but please consult that vignette if interested:
 
 ```{r}
 meanlog <- 1.8
@@ -118,10 +118,10 @@ fit_hmc <- epidist(data = data, algorithm = "sampling")
 
 Note that for clarity above we specify `algorithm = "sampling"`, but if you were to call `epidist(data = data)` the result would be the same since `"sampling"` (i.e. HMC) is the default value for the `algorithm` argument.
 
-Now, we fit the same latent individual model using each method in Section \@ref(other).
-To match the four Markov chains of length 1000 in HMC above, we then draw 4000 samples from each approximate posterior:
+Now, we fit^[Note that in this section, and above for the MCMC, the output of the call is hidden, but if you were to call these functions yourself they would display information about the fitting procedure as it occurs] the same latent individual model using each method in Section \@ref(other).
+To match the four Markov chains of length 1000 in HMC above, we then draw 4000 samples from each approximate posterior.
 
-```{r}
+```{r results='hide'}
 fit_laplace <- epidist(data = data, algorithm = "laplace", draws = 4000)
 fit_advi <- epidist(data = data, algorithm = "meanfield", draws = 4000)
 fit_pathfinder <- epidist(data = data, algorithm = "pathfinder", draws = 4000)
@@ -131,37 +131,32 @@ Although both the Laplace and ADVI methods ran without problem, the Pathfinder a
 
 > "Error evaluating model log probability: Non-finite gradient."
 
-We now extract posterior distribution for the delay parameters from the fitted model for each inference method:
+We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
+Thankfully, as each algorithm is implemented to sample 
 
 ```{r}
-draws_hmc <- extract_lognormal_draws(fit_hmc)
-draws_laplace <- extract_lognormal_draws(fit_laplace)
-draws_advi <- extract_lognormal_draws(fit_advi)
-draws_pathfinder <- extract_lognormal_draws(fit_pathfinder)
-```
+fits <- list(
+  "HMC" = fit_hmc,
+  "Laplace" = fit_laplace,
+  "ADVI" = fit_advi,
+  "Pathfinder" = fit_pathfinder
+)
 
-Compare with a figure or table or both:
-
-```{r}
-process_draws <- function(draws, name) {
-  draws |>
+draws <- purrr::map2(fits, names(fits), function(fit, name) {
+  extract_lognormal_draws(fit) |>
     draws_to_long() |>
     filter(parameter %in% c("mean", "sd")) |>
-    mutate(
-      parameter = recode(parameter, "mean" = "Mean", "sd" = "SD"),
-      method = name
-    )
-}
+    mutate(parameter = recode(parameter, "mean" = "Mean", "sd" = "SD"),
+           method = as.factor(name))
+})
 
-draws_hmc <- process_draws(draws_hmc, "HMC")
-draws_laplace <- process_draws(draws_laplace, "Laplace")
-draws_advi  <- process_draws(draws_advi, "ADVI") 
-draws_pathfinder  <- process_draws(draws_pathfinder, "Pathfinder") 
+draws <- bind_rows(draws)
+```
 
-df <- rbind(draws_hmc, draws_laplace, draws_advi, draws_pathfinder) |>
-  mutate(method = forcats::as_factor(method))
+## Comparison of parameter posterior distributions
 
-df |>
+```{r}
+draws |>
   filter(parameter == "Mean", method != "Pathfinder") |>
   ggplot(aes(x = value)) +
   geom_histogram(aes(y = ..density..)) +
@@ -169,7 +164,7 @@ df |>
   theme_minimal() +
   labs(x = "", y = "")
 
-df |>
+draws |>
   filter(parameter == "SD", method != "Pathfinder") |>
   ggplot(aes(x = value)) +
   geom_histogram(aes(y= ..density..)) +
@@ -178,11 +173,19 @@ df |>
   labs(x = "", y = "")
 ```
 
+## Comparison resulting delay distributions
+
+## Comparison of time taken
+
 How long did each of the methods take?
 
 ```{r}
 rstan::get_elapsed_time(fit_hmc$fit)
 # Remains to find way to do this with other methods
 ```
+
+# Concluion
+
+Remains to write!
 
 ## Bibliography {-}
