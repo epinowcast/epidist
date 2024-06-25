@@ -2,6 +2,7 @@ prep_obs <- epidist_prepare(sim_obs, model = "latent_individual")
 prep_obs_gamma <- epidist_prepare(sim_obs_gamma, model = "latent_individual")
 
 test_that("epidist.epidist_latent_individual Stan code compiles in the default case", { # nolint: line_length_linter.
+  skip_on_cran()
   stancode <- epidist(data = prep_obs, fn = brms::make_stancode)
   mod <- cmdstan_model(stan_file = write_stan_file(stancode), compile = FALSE)
   expect_no_error(mod$compile())
@@ -16,6 +17,7 @@ extract_normal_parameters_brms <- function(prior) {
 }
 
 test_that("epidist.epidist_latent_individual samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case", { # nolint: line_length_linter.
+  skip_on_cran()
   prior_samples <- epidist(data = prep_obs, fn = brms::brm,
                            sample_prior = "only")
   lognormal_draws <- extract_lognormal_draws(prior_samples)
@@ -32,6 +34,7 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
 })
 
 test_that("epidist.epidist_latent_individual fits and the MCMC converges in the default case", { # nolint: line_length_linter.
+  skip_on_cran()
   fit <- epidist(data = prep_obs)
   expect_s3_class(fit, "brmsfit")
   expect_s3_class(fit, "epidist_fit")
@@ -39,6 +42,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
 })
 
 test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
+  skip_on_cran()
   fit <- epidist(data = prep_obs)
   lognormal_draws <- extract_lognormal_draws(fit)
   # Unclear the extent to which we should expect parameter recovery here
@@ -47,6 +51,7 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
 })
 
 test_that("epidist.epidist_latent_individual Stan code compiles in the gamma delay case", { # nolint: line_length_linter.
+  skip_on_cran()
   stancode_gamma <- epidist(
     data = prep_obs_gamma,
     family = epidist_family(prep_obs_gamma, family = "gamma"),
@@ -59,6 +64,7 @@ test_that("epidist.epidist_latent_individual Stan code compiles in the gamma del
 })
 
 test_that("epidist.epidist_latent_individual Stan code compiles for an alternative formula", { # nolint: line_length_linter.
+  skip_on_cran()
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
                                  sigma = ~ 1 + sex)
@@ -71,6 +77,7 @@ test_that("epidist.epidist_latent_individual Stan code compiles for an alternati
 })
 
 test_that("epidist.epidist_latent_individual recovers no sex effect when none is simulated", { # nolint: line_length_linter.
+  skip_on_cran()
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
                                  sigma = ~ 1 + sex)
@@ -81,6 +88,7 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
 })
 
 test_that("epidist.epidist_latent_individual fits and the MCMC converges for an alternative formula", { # nolint: line_length_linter.
+  skip_on_cran()
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
                                  sigma = ~ 1 + sex)
