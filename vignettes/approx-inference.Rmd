@@ -113,7 +113,9 @@ We now prepare the data for fitting with the latent individual model, and perfor
 ```{r results='hide'}
 data <- epidist_prepare(obs_cens_trunc_samp, model = "latent_individual")
 
+t <- proc.time()
 fit_hmc <- epidist(data = data, algorithm = "sampling")
+time_hmc <- proc.time() - t
 ```
 
 Note that for clarity above we specify `algorithm = "sampling"`, but if you were to call `epidist(data = data)` the result would be the same since `"sampling"` (i.e. HMC) is the default value for the `algorithm` argument.
@@ -122,9 +124,18 @@ Now, we fit^[Note that in this section, and above for the MCMC, the output of th
 To match the four Markov chains of length 1000 in HMC above, we then draw 4000 samples from each approximate posterior.
 
 ```{r results='hide'}
+t <- proc.time()
 fit_laplace <- epidist(data = data, algorithm = "laplace", draws = 4000)
+time_laplace <- proc.time() - t
+
+
+t <- proc.time()
 fit_advi <- epidist(data = data, algorithm = "meanfield", draws = 4000)
+time_advi <- proc.time() - t
+
+t <- proc.time()
 fit_pathfinder <- epidist(data = data, algorithm = "pathfinder", draws = 4000)
+time_pathfinder <- proc.time() - t
 ```
 
 Although both the Laplace and ADVI methods ran without problem, the Pathfinder algorithm produced errors of the form:
@@ -197,8 +208,10 @@ purrr::pmap_df(
 How long did each of the methods take?
 
 ```{r}
-rstan::get_elapsed_time(fit_hmc$fit)
-# Remains to find way to do this with other methods
+time_hmc
+time_laplace
+time_advi
+time_pathfinder
 ```
 
 # Concluion
