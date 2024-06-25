@@ -145,9 +145,8 @@ fits <- list(
 draws <- purrr::map2(fits, names(fits), function(fit, name) {
   extract_lognormal_draws(fit) |>
     draws_to_long() |>
-    filter(parameter %in% c("mean", "sd")) |>
-    mutate(parameter = recode(parameter, "mean" = "Mean", "sd" = "SD"),
-           method = as.factor(name))
+    filter(parameter %in% c("meanlog", "sdlog")) |>
+    mutate(method = as.factor(name))
 })
 
 draws <- bind_rows(draws)
@@ -157,7 +156,7 @@ draws <- bind_rows(draws)
 
 ```{r}
 draws |>
-  filter(parameter == "Mean", method != "Pathfinder") |>
+  filter(parameter == "meanlog", method != "Pathfinder") |>
   ggplot(aes(x = value)) +
   geom_histogram(aes(y = ..density..)) +
   facet_grid(method ~ parameter) +
@@ -165,15 +164,33 @@ draws |>
   labs(x = "", y = "")
 
 draws |>
-  filter(parameter == "SD", method != "Pathfinder") |>
+  filter(parameter == "sdlog", method != "Pathfinder") |>
   ggplot(aes(x = value)) +
-  geom_histogram(aes(y= ..density..)) +
+  geom_histogram(aes(y = ..density..)) +
   facet_grid(method ~ parameter) +
   theme_minimal() +
   labs(x = "", y = "")
 ```
 
 ## Comparison resulting delay distributions
+
+```{r}
+pars <- draws |>
+  group_by(method, parameter) |>
+  summarise(value = mean(value)) |>
+  tidyr::pivot_wider(names_from = parameter, values_from = value) |>
+  filter(!method == "Pathfinder")
+
+purrr::pmap_df(
+  pars, ~ tibble(
+    x = seq(0, 25, by = 0.1),
+    method = ..1, density = dlnorm(x, ..2, ..3))
+  ) |>
+  ggplot(aes(x = x, y = density, col = method)) +
+  geom_line() +
+  theme_minimal() +
+  labs(x = "", y = "", col = "Method")
+```
 
 ## Comparison of time taken
 
