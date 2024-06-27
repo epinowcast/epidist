@@ -5,9 +5,9 @@ as_string_formula <- function(formula) {
 }
 
 # Generate observation data in correct format for the latent_individual model
-prep_obs <- epidist_prepare(sim_obs, model = "latent_individual")
+prep_obs <- as_latent_individual(sim_obs)
 
-test_that("epidist_prepare.epidist_latent_individual with default settings an object with the correct classes", { # nolint: line_length_linter.
+test_that("as_latent_individual.data.frame with default settings an object with the correct classes", { # nolint: line_length_linter.
   expect_s3_class(prep_obs, "data.table")
   expect_s3_class(prep_obs, "data.frame")
   expect_s3_class(prep_obs, "epidist_latent_individual")

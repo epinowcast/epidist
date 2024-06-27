@@ -18,7 +18,6 @@ Default method for defining a model specific formula
 Other defaults: 
 \code{\link{epidist.default}()},
 \code{\link{epidist_family.default}()},
-\code{\link{epidist_prepare.default}()},
 \code{\link{epidist_prior.default}()},
 \code{\link{epidist_stancode.default}()}
 }

@@ -1,8 +1,14 @@
-#' @method epidist_prepare epidist_latent_individual
+#' Prepare latent individual model
+#'
+#' @param data ...
+#' @param ... Additional arguments
+#' @rdname as_latent_individual
+#' @method as_latent_individual data.frame
 #' @family latent_individual
 #' @autoglobal
 #' @export
-epidist_prepare.epidist_latent_individual <- function(data, ...) {
+as_latent_individual.data.frame <- function(data, ...) {
+  class(data) <- c(class(data), paste0("epidist_latent_individual"))
   data <- data.table::as.data.table(data)
   data[, id := seq_len(.N)]
   data[, obs_t := obs_at - ptime_lwr]
@@ -15,12 +21,25 @@ epidist_prepare.epidist_latent_individual <- function(data, ...) {
   data[, swindow_upr := stime_upr - stime_lwr]
   data[, delay_central := stime_lwr - ptime_lwr]
   data[, row_id := seq_len(.N)]
-
+  
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
   }
-
+  
   return(data)
+}
+
+#' @export
+validate_latent_individual <- function(...) {
+  return(NULL)
+  # Checks that the object of class latent_individual has the correct properties
+  # Should be put in the top of any function that uses such objects
+  # Also put it at the end of as_latent_individual methods
+}
+
+#' @export
+is_latent_individual <- function(...) {
+  "epidist_latent_individual" %in% class(...)
 }
 
 #' Define a formula for the latent_individual model
