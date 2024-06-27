@@ -74,7 +74,8 @@ See the section [Variational Inference using ADVI](https://mc-stan.org/docs/cmds
 
 ## Pathfinder
 
-Pathfinder is another variational inference method, more recently developed by @zhang2022pathfinder.
+Pathfinder is method closely related to variational inference, more recently developed by @zhang2022pathfinder.
+It works by generating Gaussian approximations along each step of an iterative optimisation algorithm (such as L-BFGS).
 See the section [Pathfinder Method for Approximate Bayesian Inference](https://mc-stan.org/docs/cmdstan-guide/pathfinder_config.html) of the `CmdStan` User's Guide for more information.
 
 # Demonstration {#demo}
