@@ -42,7 +42,8 @@ Suggests:
     gt,
     dplyr,
     knitr,
-    roxyglobals
+    roxyglobals,
+    rstan
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
