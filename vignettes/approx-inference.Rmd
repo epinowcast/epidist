@@ -1,5 +1,5 @@
 ---
-title: "Approximate Bayesian inference in `epidist`"
+title: "Approximate Bayesian inference in epidist"
 description: "..."
 output: 
   bookdown::html_document2:
@@ -18,7 +18,9 @@ bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
-# exclude compile warnings from cmdstanr
+# With set.seed(1) then Pathfinder fails
+set.seed(2)
+
 knitr::opts_chunk$set(
   fig.path = "figures/epidist-",
   cache = TRUE,
@@ -135,16 +137,16 @@ fit_advi <- epidist(data = data, algorithm = "meanfield", draws = 4000)
 time_advi <- proc.time() - t
 
 t <- proc.time()
-fit_pathfinder <- epidist(data = data, algorithm = "pathfinder", draws = 4000)
+fit_pathfinder <- epidist(data = data, algorithm = "pathfinder", draws = 4000, num_paths = 1)
 time_pathfinder <- proc.time() - t
 ```
 
-Although both the Laplace and ADVI methods ran without problem, the Pathfinder algorithm produced errors of the form:
+Although both the Laplace and ADVI methods ran without problem, the Pathfinder algorithm is liable to produce errors of the form:
 
 > "Error evaluating model log probability: Non-finite gradient."
 
 We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
-Thankfully, as each algorithm is implemented to sample 
+Thankfully, as each algorithm is implemented to sample draws from the posterior then post-processing is simple
 
 ```{r}
 fits <- list(
@@ -162,26 +164,33 @@ draws <- purrr::map2(fits, names(fits), function(fit, name) {
 })
 
 draws <- bind_rows(draws)
+
+pars <- draws |>
+  group_by(method, parameter) |>
+  summarise(value = mean(value)) |>
+  tidyr::pivot_wider(names_from = parameter, values_from = value)
+
+pars
 ```
 
 ## Comparison of parameter posterior distributions
 
 ```{r}
 draws |>
-  filter(parameter == "meanlog", method != "Pathfinder") |>
+  filter(parameter == "meanlog") |>
   ggplot(aes(x = value, fill = method)) +
   geom_histogram(aes(y = ..density..)) +
-  scale_fill_manual(values = c("#56B4E9", "#009E73", "#E69F00")) +
+  scale_fill_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
   facet_grid(method ~ parameter) +
   theme_minimal() +
   guides(fill = "none") +
   labs(x = "", y = "")
 
 draws |>
-  filter(parameter == "sdlog", method != "Pathfinder") |>
+  filter(parameter == "sdlog") |>
   ggplot(aes(x = value, fill = method)) +
   geom_histogram(aes(y = ..density..)) +
-  scale_fill_manual(values = c("#56B4E9", "#009E73", "#E69F00")) +
+  scale_fill_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
   facet_grid(method ~ parameter) +
   theme_minimal() +
   guides(fill = "none") +
@@ -191,20 +200,14 @@ draws |>
 ## Comparison resulting delay distributions
 
 ```{r}
-pars <- draws |>
-  group_by(method, parameter) |>
-  summarise(value = mean(value)) |>
-  tidyr::pivot_wider(names_from = parameter, values_from = value) |>
-  filter(!method == "Pathfinder")
-
 purrr::pmap_df(
-  pars, ~ tibble(
+  filter(pars), ~ tibble(
     x = seq(0, 25, by = 0.1),
     method = ..1, density = dlnorm(x, ..2, ..3))
   ) |>
   ggplot(aes(x = x, y = density, col = method)) +
   geom_line() +
-  scale_color_manual(values = c("#56B4E9", "#009E73", "#E69F00")) +  
+  scale_color_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +  
   theme_minimal() +
   labs(x = "", y = "", col = "Method")
 ```
@@ -220,7 +223,7 @@ time_advi
 time_pathfinder
 ```
 
-# Concluion
+# Conclusion
 
 Remains to write!
 
