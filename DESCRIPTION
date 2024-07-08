@@ -32,7 +32,8 @@ Imports:
     purrr,
     ggridges,
     here,
-    stats
+    stats,
+    cli
 Suggests:
     bookdown,
     epinowcast,
