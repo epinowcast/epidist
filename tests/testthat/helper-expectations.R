@@ -1,9 +1,13 @@
+get_sampler_params <- function(fit) {
+  sp <- lapply(fit$fit@sim$samples, function(x) attr(x, "sampler_params"))
+  do.call(rbind, sp)
+}
+
 expect_convergence <- function(fit, per_dts = 0.05, treedepth = 10,
                                rhat = 1.05) {
-  np <- brms::nuts_params(fit)
-  indices <- np$Parameter == "divergent__"
-  per_divergent_transitions <- mean(np[indices, ]$Value)
-  max_treedepth <- brms::control_params(fit)$max_treedepth
+  np <- get_sampler_params(fit)
+  per_divergent_transitions <- mean(np$divergent__)
+  max_treedepth <- max(np$treedepth__)
   max_rhat <- max(brms::rhat(fit))
   testthat::expect_lt(per_divergent_transitions, per_dts)
   testthat::expect_lt(max_treedepth, treedepth)
