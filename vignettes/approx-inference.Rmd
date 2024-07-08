@@ -156,7 +156,7 @@ fits <- list(
   "Pathfinder" = fit_pathfinder
 )
 
-draws <- purrr::map2(fits, names(fits), function(fit, name) {
+draws <- purrr::imap(fits, function(fit, name) {
   extract_lognormal_draws(fit) |>
     draws_to_long() |>
     filter(parameter %in% c("meanlog", "sdlog")) |>
