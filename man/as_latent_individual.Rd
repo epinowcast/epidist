@@ -5,17 +5,18 @@
 \alias{as_latent_individual.data.frame}
 \title{Prepare data for modelling with the latent individual model}
 \usage{
-as_latent_individual(...)
+as_latent_individual(data, ...)
 
-\method{as_latent_individual}{data.frame}(data)
+\method{as_latent_individual}{data.frame}(data, ...)
 }
 \arguments{
-\item{data}{...}
+\item{data}{A \code{data.frame} or \code{data.table} containing line list data}
+
+\item{...}{...}
 }
 \description{
-Prepare data for modelling with the latent individual model
-
-Prepare latent individual model
+This function prepares data for use with the latent individual model. It does
+this by adding columns used the that model, including...
 }
 \seealso{
 Other generics: 

@@ -2,7 +2,7 @@
 #'
 #' @family generics
 #' @export
-as_latent_individual <- function(...) {
+as_latent_individual <- function(data, ...) {
   UseMethod("as_latent_individual")
 }
 

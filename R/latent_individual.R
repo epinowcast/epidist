@@ -1,6 +1,10 @@
 #' Prepare latent individual model
+#' 
+#' This function prepares data for use with the latent individual model. It does
+#' this by adding columns used the that model, including...
 #'
-#' @param data ...
+#' @param data A `data.frame` or `data.table` containing line list data
+#' @param ... ...
 #' @rdname as_latent_individual
 #' @method as_latent_individual data.frame
 #' @family latent_individual
@@ -8,7 +12,7 @@
 #' assert_numeric
 #' @autoglobal
 #' @export
-as_latent_individual.data.frame <- function(data) {
+as_latent_individual.data.frame <- function(data, ...) {
   checkmate::assert_data_frame(data)
   checkmate::assert_names(
     names(data),
@@ -41,6 +45,9 @@ as_latent_individual.data.frame <- function(data) {
   return(data)
 }
 
+#' Validate latent individual model data
+#'
+#' @param data A `data.frame` or `data.table` containing line list data
 #' @importFrom checkmate assert_data_frame assert_names assert_int
 #' assert_numeric
 #' @export
@@ -70,9 +77,12 @@ validate_latent_individual <- function(data) {
   checkmate::assert_integer(data$row_id, lower = 0)
 }
 
+#' Check if data is in the latent individual model format
+#'
+#' @param data A `data.frame` or `data.table` containing line list data
 #' @export
-is_latent_individual <- function(...) {
-  inherits(..., "epidist_latent_individual")
+is_latent_individual <- function(data) {
+  inherits(data, "epidist_latent_individual")
 }
 
 #' Define a formula for the latent_individual model
