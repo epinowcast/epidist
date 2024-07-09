@@ -39,7 +39,7 @@ validate_latent_individual <- function(...) {
 
 #' @export
 is_latent_individual <- function(...) {
-  "epidist_latent_individual" %in% class(...)
+  inherits(..., "epidist_latent_individual")
 }
 
 #' Define a formula for the latent_individual model
