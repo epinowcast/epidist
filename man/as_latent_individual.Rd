@@ -7,11 +7,9 @@
 \usage{
 as_latent_individual(...)
 
-\method{as_latent_individual}{data.frame}(data, ...)
+\method{as_latent_individual}{data.frame}(data)
 }
 \arguments{
-\item{...}{Additional arguments}
-
 \item{data}{...}
 }
 \description{

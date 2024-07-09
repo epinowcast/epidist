@@ -1,7 +1,6 @@
 #' Prepare latent individual model
 #'
 #' @param data ...
-#' @param ... Additional arguments
 #' @rdname as_latent_individual
 #' @method as_latent_individual data.frame
 #' @family latent_individual
@@ -35,13 +34,10 @@ as_latent_individual.data.frame <- function(data) {
   data[, swindow_upr := stime_upr - stime_lwr]
   data[, delay_central := stime_lwr - ptime_lwr]
   data[, row_id := seq_len(.N)]
-  
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
   }
-  
   validate_latent_individual(data)
-  
   return(data)
 }
 
@@ -63,11 +59,9 @@ validate_latent_individual <- function(data) {
   checkmate::assert_numeric(data$stime_lwr, lower = 0)
   checkmate::assert_numeric(data$stime_upr, lower = 0)
   checkmate::assert_numeric(data$obs_at, lower = 0)
-  
   if (nrow(data) > 1) {
     checkmate::assert_factor(data$id)
   }
-  
   checkmate::assert_numeric(data$obs_t, lower = 0)
   checkmate::assert_numeric(data$pwindow_upr, lower = 0)
   checkmate::assert_numeric(data$woverlap, lower = 0)
@@ -94,6 +88,7 @@ is_latent_individual <- function(...) {
 #' @export
 epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
                                                       sigma = ~ 1, ...) {
+<<<<<<< HEAD
   if (!inherits(delay_central, "formula")) {
     cli::cli_abort("A valid formula for delay_central must be provided")
   }
@@ -110,6 +105,10 @@ epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
       )
     )
   }
+=======
+  validate_latent_individual(data)
+
+>>>>>>> 40fbdbf2 (Lint, document, and add validation to functions with take latent_individual class data as input)
   delay_equation <- paste0(
     "delay_central | vreal(obs_t, pwindow_upr, swindow_upr)",
     paste(delay_central, collapse = " ")
@@ -124,6 +123,8 @@ epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
 #' @export
 epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
                                                      ...) {
+  validate_latent_individual(data)
+
   brms::custom_family(
     paste0("latent_", family),
     dpars = c("mu", "sigma"),
@@ -166,6 +167,8 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' @family latent_individual
 #' @export
 epidist_prior.epidist_latent_individual <- function(data, ...) {
+  validate_latent_individual(data)
+
   prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
   prior2 <- brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
   return(prior1 + prior2)
@@ -179,6 +182,8 @@ epidist_stancode.epidist_latent_individual <- function(data,
                                                        family =
                                                          epidist_family(data),
                                                        ...) {
+
+  validate_latent_individual(data)
 
   stanvars_version <- epidist_version_stanvar()
 
