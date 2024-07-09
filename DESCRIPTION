@@ -4,7 +4,7 @@ Version: 0.0.0.9000
 Authors@R:
   c(person(given = "Sang Woo",
            family = "Park",
-           role = c("aut", "cre"),
+           role = c("aut"),
            email = "swp2@princeton.edu",
            comment = c(ORCID = "0000-0003-2202-3361")),
     person(given = "Sam Abbott",
@@ -12,7 +12,7 @@ Authors@R:
            email = "contact@samabbott.co.uk",
            comment = c(ORCID = "0000-0001-8057-8037")),
     person(given = "Adam Howes",
-           role = c("aut"),
+           role = c("aut", "cre"),
            email = "adamthowes@gmail.com",
            comment = c(ORCID = "0000-0003-2386-4031")))
 Description: Understanding and accurately estimating epidemiological delay
@@ -22,7 +22,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE, roclets = c("collate", "namespace", "rd",
     "roxyglobals::global_roclet"))
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Imports: 
     brms,
     cmdstanr,
