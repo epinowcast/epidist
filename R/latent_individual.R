@@ -5,9 +5,23 @@
 #' @rdname as_latent_individual
 #' @method as_latent_individual data.frame
 #' @family latent_individual
+#' @importFrom checkmate assert_data_frame assert_names assert_int
+#' assert_numeric
 #' @autoglobal
 #' @export
-as_latent_individual.data.frame <- function(data, ...) {
+as_latent_individual.data.frame <- function(data) {
+  checkmate::assert_data_frame(data)
+  checkmate::assert_names(
+    names(data),
+    must.include = c("case", "ptime_lwr", "ptime_upr",
+                     "stime_lwr", "stime_upr", "obs_at")
+  )
+  checkmate::assert_int(data$case, lower = 0)
+  checkmate::assert_numeric(data$ptime_lwr, lower = 0)
+  checkmate::assert_numeric(data$ptime_upr, lower = 0)
+  checkmate::assert_numeric(data$stime_lwr, lower = 0)
+  checkmate::assert_numeric(data$stime_upr, lower = 0)
+  checkmate::assert_numeric(data$obs_at, lower = 0)
   class(data) <- c(class(data), paste0("epidist_latent_individual"))
   data <- data.table::as.data.table(data)
   data[, id := seq_len(.N)]
@@ -26,15 +40,27 @@ as_latent_individual.data.frame <- function(data, ...) {
     data <- data[, id := as.factor(id)]
   }
   
+  validate_latent_individual(data)
+  
   return(data)
 }
 
+#' @importFrom checkmate assert_data_frame assert_names assert_int
+#' assert_numeric
 #' @export
 validate_latent_individual <- function(...) {
-  return(NULL)
-  # Checks that the object of class latent_individual has the correct properties
-  # Should be put in the top of any function that uses such objects
-  # Also put it at the end of as_latent_individual methods
+  checkmate::assert_data_frame(data)
+  checkmate::assert_names(
+    names(data),
+    must.include = c("case", "ptime_lwr", "ptime_upr",
+                     "stime_lwr", "stime_upr", "obs_at")
+  )
+  checkmate::assert_int(data$case, lower = 0)
+  checkmate::assert_numeric(data$ptime_lwr, lower = 0)
+  checkmate::assert_numeric(data$ptime_upr, lower = 0)
+  checkmate::assert_numeric(data$stime_lwr, lower = 0)
+  checkmate::assert_numeric(data$stime_upr, lower = 0)
+  checkmate::assert_numeric(data$obs_at, lower = 0)
 }
 
 #' @export

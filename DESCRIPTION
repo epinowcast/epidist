@@ -33,7 +33,8 @@ Imports:
     ggridges,
     here,
     stats,
-    cli
+    cli,
+    checkmate
 Suggests:
     bookdown,
     epinowcast,
