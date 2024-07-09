@@ -13,6 +13,10 @@ test_that("as_latent_individual.data.frame with default settings an object with 
   expect_s3_class(prep_obs, "epidist_latent_individual")
 })
 
+test_that("as_latent_individual.data.frame gives errors when passed inappropriate inputs", { # nolint: line_length_linter.
+  expect_error(as_latent_individual(list()))
+})
+
 test_that("epidist_formula.epidist_latent_individual with default settings produces a brmsformula with the correct intercept only formula", { # nolint: line_length_linter.
   form <- epidist_formula(prep_obs)
   expect_s3_class(form, "brmsformula")
