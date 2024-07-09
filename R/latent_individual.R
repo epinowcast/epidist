@@ -36,11 +36,26 @@ epidist_prepare.epidist_latent_individual <- function(data, ...) {
 #' @export
 epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
                                                       sigma = ~ 1, ...) {
+  if (!inherits(delay_central, "formula")) {
+    cli::cli_abort("A valid formula for delay_central must be provided")
+  }
+  if (!inherits(sigma, "formula")) {
+    cli::cli_abort("A valid formula for sigma must be provided")
+  }
+  formula_vars <- c(all.vars(delay_central), all.vars(sigma))
+  missing_vars <- setdiff(formula_vars, names(data))
+  if (length(missing_vars) > 0) {
+    cli::cli_abort(
+      paste0(
+        "The following variables are missing from data: ",
+        paste(missing_vars, collapse = ", ")
+      )
+    )
+  }
   delay_equation <- paste0(
     "delay_central | vreal(obs_t, pwindow_upr, swindow_upr)",
     paste(delay_central, collapse = " ")
   )
-
   sigma_equation <- paste0("sigma", paste(sigma, collapse = " "))
   form <- brms::bf(as.formula(delay_equation), as.formula(sigma_equation))
   return(form)
