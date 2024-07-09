@@ -1,5 +1,5 @@
 #' Prepare latent individual model
-#' 
+#'
 #' This function prepares data for use with the latent individual model. It does
 #' this by adding columns used the that model, including...
 #'
@@ -98,7 +98,7 @@ is_latent_individual <- function(data) {
 #' @export
 epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
                                                       sigma = ~ 1, ...) {
-<<<<<<< HEAD
+  validate_latent_individual(data)
   if (!inherits(delay_central, "formula")) {
     cli::cli_abort("A valid formula for delay_central must be provided")
   }
@@ -115,10 +115,6 @@ epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
       )
     )
   }
-=======
-  validate_latent_individual(data)
-
->>>>>>> 40fbdbf2 (Lint, document, and add validation to functions with take latent_individual class data as input)
   delay_equation <- paste0(
     "delay_central | vreal(obs_t, pwindow_upr, swindow_upr)",
     paste(delay_central, collapse = " ")
