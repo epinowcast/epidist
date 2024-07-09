@@ -41,6 +41,13 @@ test_that("epidist_formula.epidist_latent_individual with custom formulas produc
   )
 })
 
+test_that("epidist_formula.epidist_latent_individual with custom formulas errors for incorrect custom formulas", { # nolint: line_length_linter.
+  expect_error(epidist_formula(prep_obs, delay_central = ~ 1 + age))
+  expect_error(epidist_formula(prep_obs, sigma = ~ 1 + age))
+  expect_error(epidist_formula(prep_obs, delay_central = 1))
+  expect_error(epidist_formula(prep_obs, sigma = 1))
+})
+
 test_that("epidist_family.epidist_latent_individual with default settings produces an object of the right class", { # nolint: line_length_linter.
   family <- epidist_family(prep_obs)
   expect_s3_class(family, "customfamily")
