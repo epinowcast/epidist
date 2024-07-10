@@ -12,3 +12,11 @@ validate_latent_individual(data)
 \description{
 Validate latent individual model data
 }
+\seealso{
+Other latent_individual: 
+\code{\link{as_latent_individual}()},
+\code{\link{epidist_formula.epidist_latent_individual}()},
+\code{\link{epidist_prior.epidist_latent_individual}()},
+\code{\link{is_latent_individual}()}
+}
+\concept{latent_individual}

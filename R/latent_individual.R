@@ -50,6 +50,7 @@ as_latent_individual.data.frame <- function(data, ...) {
 #' @param data A `data.frame` or `data.table` containing line list data
 #' @importFrom checkmate assert_data_frame assert_names assert_int
 #' assert_numeric
+#' @family latent_individual
 #' @export
 validate_latent_individual <- function(data) {
   checkmate::assert_data_frame(data)
@@ -80,6 +81,7 @@ validate_latent_individual <- function(data) {
 #' Check if data is in the latent individual model format
 #'
 #' @param data A `data.frame` or `data.table` containing line list data
+#' @family latent_individual
 #' @export
 is_latent_individual <- function(data) {
   inherits(data, "epidist_latent_individual")
