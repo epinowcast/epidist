@@ -60,7 +60,7 @@ as_latent_individual.data.frame <- function(data) {
 }
 
 #' Validate latent individual model data
-#' 
+#'
 #' This function checks whether the provided `data` object is suitable for
 #' running the latent individual model. As well as making sure that
 #' `is_latent_individual()` is true, it also checks that `data` is a
