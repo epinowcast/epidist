@@ -10,7 +10,10 @@ validate_latent_individual(data)
 \item{data}{A \code{data.frame} or \code{data.table} containing line list data}
 }
 \description{
-Validate latent individual model data
+This function checks whether the provided \code{data} object is suitable for
+running the latent individual model. As well as making sure that
+\code{is_latent_individual()} is true, it also checks that \code{data} is a
+\code{data.frame} with the correct columns.
 }
 \seealso{
 Other latent_individual: 

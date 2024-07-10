@@ -16,7 +16,6 @@ Define a model specific formula
 }
 \seealso{
 Other generics: 
-\code{\link{as_latent_individual}()},
 \code{\link{epidist}()},
 \code{\link{epidist_family}()},
 \code{\link{epidist_prior}()},

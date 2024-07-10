@@ -2,7 +2,7 @@
 % Please edit documentation in R/latent_individual.R
 \name{is_latent_individual}
 \alias{is_latent_individual}
-\title{Check if data is in the latent individual model format}
+\title{Check if data has the \code{epidist_latent_individual} class}
 \usage{
 is_latent_individual(data)
 }
@@ -10,7 +10,7 @@ is_latent_individual(data)
 \item{data}{A \code{data.frame} or \code{data.table} containing line list data}
 }
 \description{
-Check if data is in the latent individual model format
+Check if data has the \code{epidist_latent_individual} class
 }
 \seealso{
 Other latent_individual: 

@@ -1,12 +1,3 @@
-#' Prepare data for modelling with the latent individual model
-#'
-#' @param data A dataframe to be used for modelling.
-#' @family generics
-#' @export
-as_latent_individual <- function(data, ...) {
-  UseMethod("as_latent_individual")
-}
-
 #' Define a model specific formula
 #'
 #' @param data A dataframe to be used for modelling.

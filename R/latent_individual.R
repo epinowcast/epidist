@@ -1,10 +1,24 @@
 #' Prepare latent individual model
 #'
+#' @param data Input data to be used for modelling.
+#' @family latent_individual
+#' @export
+as_latent_individual <- function(data) {
+  UseMethod("as_latent_individual")
+}
+
+#' Prepare latent individual model
+#'
 #' This function prepares data for use with the latent individual model. It does
-#' this by adding columns used the that model, including...
+#' this by adding columns used in the model to the `data` object provided. To do
+#' this, the `data` must already have columns for the case number (integer),
+#' (positive, numeric) upper and lower bounds for the primary and secondary
+#' event times, as well as a (positive, numeric) time that observation takes
+#' place. The output of this function is a `epidist_latent_individual` class
+#' object, which may be passed to `epidist()` to perform inference for the
+#' model.
 #'
 #' @param data A `data.frame` or `data.table` containing line list data
-#' @param ... ...
 #' @rdname as_latent_individual
 #' @method as_latent_individual data.frame
 #' @family latent_individual
@@ -12,7 +26,7 @@
 #' assert_numeric
 #' @autoglobal
 #' @export
-as_latent_individual.data.frame <- function(data, ...) {
+as_latent_individual.data.frame <- function(data) {
   checkmate::assert_data_frame(data)
   checkmate::assert_names(
     names(data),
@@ -46,6 +60,11 @@ as_latent_individual.data.frame <- function(data, ...) {
 }
 
 #' Validate latent individual model data
+#' 
+#' This function checks whether the provided `data` object is suitable for
+#' running the latent individual model. As well as making sure that
+#' `is_latent_individual()` is true, it also checks that `data` is a
+#' `data.frame` with the correct columns.
 #'
 #' @param data A `data.frame` or `data.table` containing line list data
 #' @importFrom checkmate assert_data_frame assert_names assert_int
@@ -53,6 +72,7 @@ as_latent_individual.data.frame <- function(data, ...) {
 #' @family latent_individual
 #' @export
 validate_latent_individual <- function(data) {
+  checkmate::assert_true(is_latent_individual(data))
   checkmate::assert_data_frame(data)
   checkmate::assert_names(
     names(data),
@@ -78,7 +98,7 @@ validate_latent_individual <- function(data) {
   checkmate::assert_integer(data$row_id, lower = 0)
 }
 
-#' Check if data is in the latent individual model format
+#' Check if data has the `epidist_latent_individual` class
 #'
 #' @param data A `data.frame` or `data.table` containing line list data
 #' @family latent_individual

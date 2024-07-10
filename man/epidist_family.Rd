@@ -16,7 +16,6 @@ Define model specific family
 }
 \seealso{
 Other generics: 
-\code{\link{as_latent_individual}()},
 \code{\link{epidist}()},
 \code{\link{epidist_formula}()},
 \code{\link{epidist_prior}()},
