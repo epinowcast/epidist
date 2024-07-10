@@ -48,7 +48,8 @@ Suggests:
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
-    epinowcast/epinowcast
+    epinowcast/epinowcast,
+    paul-buerkner/brms
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
