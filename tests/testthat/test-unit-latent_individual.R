@@ -15,7 +15,7 @@ test_that("as_latent_individual.data.frame errors when passed incorrect inputs",
   expect_error(as_latent_individual(list()))
   expect_error(as_latent_individual(sim_obs[, 1]))
   expect_error({
-    sim_obs$case <- paste("case_", 1:nrow(sim_obs))
+    sim_obs$case <- paste("case_", seq_len(nrow(sim_obs)))
     as_latent_individual(sim_obs)
   })
 })
