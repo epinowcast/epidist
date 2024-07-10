@@ -23,6 +23,28 @@ test_that("as_latent_individual.data.frame errors when passed incorrect inputs",
 # Make this data available for other tests
 prep_obs <- as_latent_individual(sim_obs)
 
+test_that("is_latent_individual returns TRUE for correct input", { # nolint: line_length_linter.
+  expect_true(is_latent_individual(prep_obs))
+})
+
+test_that("is_latent_individual returns FALSE for incorrect input", { # nolint: line_length_linter.
+  expect_false(is_latent_individual(list()))
+})
+
+test_that("validate_latent_individual doesn't produce an error for correct input", { # nolint: line_length_linter.
+  expect_no_error(validate_latent_individual(prep_obs))
+})
+
+test_that("validate_latent_individual returns FALSE for incorrect input", { # nolint: line_length_linter.
+  expect_error(validate_latent_individual(list()))
+  expect_error(validate_latent_individual(prep_obs[, 1]))
+  expect_error({
+    x <- list()
+    class(x) <- "latent_individual"
+    validate_latent_individual(x)
+  })
+})
+
 test_that("epidist_formula.epidist_latent_individual with default settings produces a brmsformula with the correct intercept only formula", { # nolint: line_length_linter.
   form <- epidist_formula(prep_obs)
   expect_s3_class(form, "brmsformula")
