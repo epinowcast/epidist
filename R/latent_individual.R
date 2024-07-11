@@ -39,7 +39,7 @@ as_latent_individual.data.frame <- function(data) {
   checkmate::assert_numeric(data$stime_lwr, lower = 0)
   checkmate::assert_numeric(data$stime_upr, lower = 0)
   checkmate::assert_numeric(data$obs_at, lower = 0)
-  class(data) <- c(class(data), paste0("epidist_latent_individual"))
+  class(data) <- c(class(data), "epidist_latent_individual")
   data <- data.table::as.data.table(data)
   data[, id := seq_len(.N)]
   data[, obs_t := obs_at - ptime_lwr]
