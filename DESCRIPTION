@@ -44,7 +44,8 @@ Suggests:
     knitr,
     roxyglobals
 Remotes:
-    stan-dev/cmdstanr
+    stan-dev/cmdstanr,
+    Rdatatable/data.table
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
