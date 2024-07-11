@@ -33,7 +33,9 @@ Imports:
     ggridges,
     here,
     stats,
-    cli
+    cli,
+    checkmate,
+    rstan
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
