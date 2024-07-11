@@ -17,18 +17,18 @@ utils::globalVariables(c(
   "value", # <make_relative_to_truth>
   "rel_value", # <make_relative_to_truth>
   "value", # <summarise_variable>
-  "id", # <epidist_prepare.epidist_latent_individual>
-  "obs_t", # <epidist_prepare.epidist_latent_individual>
-  "obs_at", # <epidist_prepare.epidist_latent_individual>
-  "ptime_lwr", # <epidist_prepare.epidist_latent_individual>
-  "pwindow_upr", # <epidist_prepare.epidist_latent_individual>
-  "stime_lwr", # <epidist_prepare.epidist_latent_individual>
-  "ptime_upr", # <epidist_prepare.epidist_latent_individual>
-  "stime_upr", # <epidist_prepare.epidist_latent_individual>
-  "woverlap", # <epidist_prepare.epidist_latent_individual>
-  "swindow_upr", # <epidist_prepare.epidist_latent_individual>
-  "delay_central", # <epidist_prepare.epidist_latent_individual>
-  "row_id", # <epidist_prepare.epidist_latent_individual>
+  "id", # <as_latent_individual.data.frame>
+  "obs_t", # <as_latent_individual.data.frame>
+  "obs_at", # <as_latent_individual.data.frame>
+  "ptime_lwr", # <as_latent_individual.data.frame>
+  "pwindow_upr", # <as_latent_individual.data.frame>
+  "stime_lwr", # <as_latent_individual.data.frame>
+  "ptime_upr", # <as_latent_individual.data.frame>
+  "stime_upr", # <as_latent_individual.data.frame>
+  "woverlap", # <as_latent_individual.data.frame>
+  "swindow_upr", # <as_latent_individual.data.frame>
+  "delay_central", # <as_latent_individual.data.frame>
+  "row_id", # <as_latent_individual.data.frame>
   "woverlap", # <epidist_stancode.epidist_latent_individual>
   "row_id", # <epidist_stancode.epidist_latent_individual>
   "ptime_daily", # <observe_process>
