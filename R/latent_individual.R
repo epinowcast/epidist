@@ -61,6 +61,7 @@ epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
   return(form)
 }
 
+#' @importFrom rstan lookup
 #' @method epidist_family epidist_latent_individual
 #' @family latent_individual
 #' @export
