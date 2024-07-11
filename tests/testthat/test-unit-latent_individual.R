@@ -55,6 +55,11 @@ test_that("epidist_family.epidist_latent_individual with default settings produc
   expect_s3_class(family, "family")
 })
 
+test_that("epidist_family.epidist_latent_individual warns users or gives an error when passed inappropriate family input", { # nolint: line_length_linter.
+  expect_error(epidist_family(prep_obs, family = 1))
+  expect_warning(epidist_family(prep_obs, family = "not_a_real_lpdf"))
+})
+
 test_that("the family argument in epidist_family.epidist_latent_individual passes as expected", { # nolint: line_length_linter.
   family_gamma <- epidist_family(prep_obs, family = "gamma")
   expect_equal(family_gamma$name, "latent_gamma")
