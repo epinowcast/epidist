@@ -83,7 +83,7 @@ validate_latent_individual <- function(data) {
   )
   checkmate::assert_integer(data$case, lower = 0)
   checkmate::assert_numeric(data$ptime_lwr, lower = 0)
-  checkmate::assert_numeric(data$ptime_upr, lower = 0)
+  checkmate::assert_numeric(data$ptime_upr, lower = data$ptime_lwr)  
   checkmate::assert_numeric(data$stime_lwr, lower = 0)
   checkmate::assert_numeric(data$stime_upr, lower = 0)
   checkmate::assert_numeric(data$obs_at, lower = 0)
