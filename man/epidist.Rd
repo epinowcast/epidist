@@ -27,7 +27,6 @@ Interface using \code{brms}
 Other generics: 
 \code{\link{epidist_family}()},
 \code{\link{epidist_formula}()},
-\code{\link{epidist_prepare.default}()},
 \code{\link{epidist_prior}()},
 \code{\link{epidist_stancode}()}
 }

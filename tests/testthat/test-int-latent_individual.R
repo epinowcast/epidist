@@ -1,5 +1,5 @@
-prep_obs <- epidist_prepare(sim_obs, model = "latent_individual")
-prep_obs_gamma <- epidist_prepare(sim_obs_gamma, model = "latent_individual")
+prep_obs <- as_latent_individual(sim_obs)
+prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
 
 test_that("epidist.epidist_latent_individual Stan code compiles in the default case", { # nolint: line_length_linter.
   skip_on_cran()
