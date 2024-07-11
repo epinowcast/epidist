@@ -146,12 +146,24 @@ epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
   return(form)
 }
 
+#' @importFrom rstan lookup
 #' @method epidist_family epidist_latent_individual
 #' @family latent_individual
 #' @export
 epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
                                                      ...) {
   validate_latent_individual(data)
+  checkmate::assert_string(family)
+
+  pdf_lookup <- rstan::lookup("pdf")
+  valid_pdfs <- gsub("_lpdf", "", pdf_lookup$StanFunction)
+  if (!family %in% valid_pdfs) {
+    cli::cli_warn(
+      "The provided family {.code family} does not correspond to a valid LPDF
+      function available in rstan. (It is possible [but unlikely] that there is
+      such an LPDF in Stan available via cmdstanr, as rstan is behind Stan.)"
+    )
+  }
 
   brms::custom_family(
     paste0("latent_", family),

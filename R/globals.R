@@ -13,9 +13,6 @@ utils::globalVariables(c(
   "sdlog_log", # <extract_lognormal_draws>
   "meanlog", # <extract_lognormal_draws>
   "id", # <extract_lognormal_draws>
-  "meanlog", # <extract_epinowcast_draws>
-  "sdlog", # <extract_epinowcast_draws>
-  "id", # <extract_epinowcast_draws>
   "true_value", # <make_relative_to_truth>
   "value", # <make_relative_to_truth>
   "rel_value", # <make_relative_to_truth>
