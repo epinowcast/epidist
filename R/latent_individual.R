@@ -1,8 +1,51 @@
-#' @method epidist_prepare epidist_latent_individual
+#' Prepare latent individual model
+#'
+#' @param data Input data to be used for modelling.
 #' @family latent_individual
+#' @export
+as_latent_individual <- function(data) {
+  UseMethod("as_latent_individual")
+}
+
+assert_latent_individual_input <- function(data) {
+  checkmate::assert_data_frame(data)
+  checkmate::assert_names(
+    names(data),
+    must.include = c("case", "ptime_lwr", "ptime_upr",
+                     "stime_lwr", "stime_upr", "obs_at")
+  )
+  checkmate::assert_integer(data$case, lower = 0)
+  checkmate::assert_numeric(data$ptime_lwr, lower = 0)
+  checkmate::assert_numeric(data$ptime_upr, lower = 0)
+  checkmate::assert_true(all(data$ptime_upr - data$ptime_lwr > 0))
+  checkmate::assert_numeric(data$stime_lwr, lower = 0)
+  checkmate::assert_numeric(data$stime_upr, lower = 0)
+  checkmate::assert_true(all(data$stime_upr - data$stime_lwr > 0))
+  checkmate::assert_numeric(data$obs_at, lower = 0)
+}
+
+#' Prepare latent individual model
+#'
+#' This function prepares data for use with the latent individual model. It does
+#' this by adding columns used in the model to the `data` object provided. To do
+#' this, the `data` must already have columns for the case number (integer),
+#' (positive, numeric) upper and lower bounds for the primary and secondary
+#' event times, as well as a (positive, numeric) time that observation takes
+#' place. The output of this function is a `epidist_latent_individual` class
+#' object, which may be passed to `epidist()` to perform inference for the
+#' model.
+#'
+#' @param data A `data.frame` or `data.table` containing line list data
+#' @rdname as_latent_individual
+#' @method as_latent_individual data.frame
+#' @family latent_individual
+#' @importFrom checkmate assert_data_frame assert_names assert_int
+#' assert_numeric
 #' @autoglobal
 #' @export
-epidist_prepare.epidist_latent_individual <- function(data, ...) {
+as_latent_individual.data.frame <- function(data) {
+  assert_latent_individual_input(data)
+  class(data) <- c(class(data), "epidist_latent_individual")
   data <- data.table::as.data.table(data)
   data[, id := seq_len(.N)]
   data[, obs_t := obs_at - ptime_lwr]
@@ -15,12 +58,53 @@ epidist_prepare.epidist_latent_individual <- function(data, ...) {
   data[, swindow_upr := stime_upr - stime_lwr]
   data[, delay_central := stime_lwr - ptime_lwr]
   data[, row_id := seq_len(.N)]
-
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
   }
-
+  validate_latent_individual(data)
   return(data)
+}
+
+#' Validate latent individual model data
+#'
+#' This function checks whether the provided `data` object is suitable for
+#' running the latent individual model. As well as making sure that
+#' `is_latent_individual()` is true, it also checks that `data` is a
+#' `data.frame` with the correct columns.
+#'
+#' @param data A `data.frame` or `data.table` containing line list data
+#' @importFrom checkmate assert_data_frame assert_names assert_int
+#' assert_numeric
+#' @family latent_individual
+#' @export
+validate_latent_individual <- function(data) {
+  checkmate::assert_true(is_latent_individual(data))
+  assert_latent_individual_input(data)
+  checkmate::assert_names(
+    names(data),
+    must.include = c("case", "ptime_lwr", "ptime_upr",
+                     "stime_lwr", "stime_upr", "obs_at",
+                     "id", "obs_t", "pwindow_upr", "woverlap",
+                     "swindow_upr", "delay_central", "row_id")
+  )
+  if (nrow(data) > 1) {
+    checkmate::assert_factor(data$id)
+  }
+  checkmate::assert_numeric(data$obs_t, lower = 0)
+  checkmate::assert_numeric(data$pwindow_upr, lower = 0)
+  checkmate::assert_numeric(data$woverlap, lower = 0)
+  checkmate::assert_numeric(data$swindow_upr, lower = 0)
+  checkmate::assert_numeric(data$delay_central, lower = 0)
+  checkmate::assert_integer(data$row_id, lower = 0)
+}
+
+#' Check if data has the `epidist_latent_individual` class
+#'
+#' @param data A `data.frame` or `data.table` containing line list data
+#' @family latent_individual
+#' @export
+is_latent_individual <- function(data) {
+  inherits(data, "epidist_latent_individual")
 }
 
 #' Define a formula for the latent_individual model
@@ -36,6 +120,7 @@ epidist_prepare.epidist_latent_individual <- function(data, ...) {
 #' @export
 epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
                                                       sigma = ~ 1, ...) {
+  validate_latent_individual(data)
   if (!inherits(delay_central, "formula")) {
     cli::cli_abort("A valid formula for delay_central must be provided")
   }
@@ -67,6 +152,7 @@ epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
 #' @export
 epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
                                                      ...) {
+  validate_latent_individual(data)
   checkmate::assert_string(family)
 
   pdf_lookup <- rstan::lookup("pdf")
@@ -121,6 +207,8 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' @family latent_individual
 #' @export
 epidist_prior.epidist_latent_individual <- function(data, ...) {
+  validate_latent_individual(data)
+
   prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
   prior2 <- brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
   return(prior1 + prior2)
@@ -134,6 +222,8 @@ epidist_stancode.epidist_latent_individual <- function(data,
                                                        family =
                                                          epidist_family(data),
                                                        ...) {
+
+  validate_latent_individual(data)
 
   stanvars_version <- epidist_version_stanvar()
 
