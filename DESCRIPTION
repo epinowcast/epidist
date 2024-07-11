@@ -36,7 +36,6 @@ Imports:
     cli
 Suggests:
     bookdown,
-    epinowcast,
     testthat (>= 3.0.0),
     readxl,
     janitor,
@@ -46,8 +45,7 @@ Suggests:
     roxyglobals
 Remotes:
     stan-dev/cmdstanr,
-    Rdatatable/data.table,
-    epinowcast/epinowcast
+    Rdatatable/data.table
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
