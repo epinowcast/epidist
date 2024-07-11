@@ -78,7 +78,7 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
       such an LPDF in Stan available via cmdstanr, as rstan is behind Stan.)"
     )
   }
-  
+
   brms::custom_family(
     paste0("latent_", family),
     dpars = c("mu", "sigma"),
