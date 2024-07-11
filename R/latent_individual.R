@@ -7,6 +7,21 @@ as_latent_individual <- function(data) {
   UseMethod("as_latent_individual")
 }
 
+assert_latent_individual_input <- function(data) {
+  checkmate::assert_data_frame(data)
+  checkmate::assert_names(
+    names(data),
+    must.include = c("case", "ptime_lwr", "ptime_upr",
+                     "stime_lwr", "stime_upr", "obs_at")
+  )
+  checkmate::assert_integer(data$case, lower = 0)
+  checkmate::assert_numeric(data$ptime_lwr, lower = 0)
+  checkmate::assert_numeric(data$ptime_upr, lower = data$ptime_lwr)
+  checkmate::assert_numeric(data$stime_lwr, lower = 0)
+  checkmate::assert_numeric(data$stime_upr, lower = data$stime_lwr)
+  checkmate::assert_numeric(data$obs_at, lower = 0)
+}
+
 #' Prepare latent individual model
 #'
 #' This function prepares data for use with the latent individual model. It does
@@ -27,18 +42,7 @@ as_latent_individual <- function(data) {
 #' @autoglobal
 #' @export
 as_latent_individual.data.frame <- function(data) {
-  checkmate::assert_data_frame(data)
-  checkmate::assert_names(
-    names(data),
-    must.include = c("case", "ptime_lwr", "ptime_upr",
-                     "stime_lwr", "stime_upr", "obs_at")
-  )
-  checkmate::assert_integer(data$case, lower = 0)
-  checkmate::assert_numeric(data$ptime_lwr, lower = 0)
-  checkmate::assert_numeric(data$ptime_upr, lower = 0)
-  checkmate::assert_numeric(data$stime_lwr, lower = 0)
-  checkmate::assert_numeric(data$stime_upr, lower = 0)
-  checkmate::assert_numeric(data$obs_at, lower = 0)
+  assert_latent_individual_input(data)
   class(data) <- c(class(data), "epidist_latent_individual")
   data <- data.table::as.data.table(data)
   data[, id := seq_len(.N)]
@@ -73,7 +77,7 @@ as_latent_individual.data.frame <- function(data) {
 #' @export
 validate_latent_individual <- function(data) {
   checkmate::assert_true(is_latent_individual(data))
-  checkmate::assert_data_frame(data)
+  assert_latent_individual_input(data)
   checkmate::assert_names(
     names(data),
     must.include = c("case", "ptime_lwr", "ptime_upr",
@@ -81,12 +85,6 @@ validate_latent_individual <- function(data) {
                      "id", "obs_t", "pwindow_upr", "woverlap",
                      "swindow_upr", "delay_central", "row_id")
   )
-  checkmate::assert_integer(data$case, lower = 0)
-  checkmate::assert_numeric(data$ptime_lwr, lower = 0)
-  checkmate::assert_numeric(data$ptime_upr, lower = data$ptime_lwr)  
-  checkmate::assert_numeric(data$stime_lwr, lower = 0)
-  checkmate::assert_numeric(data$stime_upr, lower = 0)
-  checkmate::assert_numeric(data$obs_at, lower = 0)
   if (nrow(data) > 1) {
     checkmate::assert_factor(data$id)
   }
