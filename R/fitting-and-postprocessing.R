@@ -54,76 +54,6 @@ sample_model <- function(model, data, scenario = data.table::data.table(id = 1),
   return(out[])
 }
 
-#' Sample from the posterior of an epinowcast model with additional diagnositics
-#'
-#' @inheritParams sample_model
-#' @family postprocess
-#' @export
-sample_epinowcast_model <- function(
-  model, data, scenario = data.table::data.table(id = 1),
-  diagnostics = TRUE, ...
-) {
-
-  out <- data.table::copy(scenario)
-
-  # Setup failure tolerant model fitting
-  fit_model <- function(model, data, ...) {
-    fit <- epinowcast::enw_model(
-      target_dir = here::here("data", "models")
-    )$sample(data = data, ...)
-    print(fit)
-    return(fit)
-  }
-  safe_fit_model <- purrr::safely(fit_model)
-  fit <- safe_fit_model(model, data, ...)
-
-  if (!is.null(fit$error)) {
-    out[, error := list(fit$error[[1]])]
-    diagnostics <- FALSE
-  }else {
-    out[, fit := list(fit$result)]
-    fit <- fit$result
-  }
-
-  if (diagnostics) {
-    diag <- fit$sampler_diagnostics(format = "df")
-    diagnostics <- data.table(
-      samples = nrow(diag),
-      max_rhat = round(max(
-        fit$summary(
-          variables = NULL, posterior::rhat,
-          .args = list(na.rm = TRUE)
-        )$`posterior::rhat`,
-        na.rm = TRUE
-      ), 0),
-      min_ess_bulk = round(min(
-        fit$summary(
-          variables = NULL, posterior::ess_bulk,
-          .args = list(na.rm = TRUE)
-        )$`posterior::ess_bulk`,
-        na.rm = TRUE
-      ), 2),
-      min_ess_tail = round(min(
-        fit$summary(
-          variables = NULL, posterior::ess_tail,
-          .args = list(na.rm = TRUE)
-        )$`posterior::ess_tail`,
-        na.rm = TRUE
-      ), 0),
-      divergent_transitions = sum(diag$divergent__),
-      per_divergent_transitions = sum(diag$divergent__) / nrow(diag),
-      max_treedepth = max(diag$treedepth__)
-    )
-    diagnostics[, no_at_max_treedepth := sum(diag$treedepth__ == max_treedepth)]
-    diagnostics[, per_at_max_treedepth := no_at_max_treedepth / nrow(diag)]
-    out <- cbind(out, diagnostics)
-
-    timing <- round(max(fit$metadata()$time$total), 1)
-    out[, run_time := timing]
-  }
-  return(out[])
-}
-
 #' Add natural scale summary parameters for a lognormal distribution
 #'
 #' @param dt ...
@@ -179,45 +109,6 @@ extract_lognormal_draws <- function(data, id_vars, from_dt = FALSE) {
     )
   }
 
-  return(draws[])
-}
-
-#' Extract posterior samples for a lognormal epinowcast model
-#'
-#' @inheritParams extract_lognormal_draws
-#' @family postprocess
-#' @autoglobal
-#' @export
-extract_epinowcast_draws <- function(
-  data, id_vars, from_dt = FALSE
-) {
-  if (from_dt) {
-    if (!any(colnames(data) %in% "fit")) {
-      return(id_vars[])
-    }
-    draws <- data$fit[[1]]$draws(
-      variables = c("refp_mean_int[1]", "refp_sd_int[1]"), format = "draws_df"
-    )
-  }else {
-    draws <- data$fit[[1]]$draws(
-      variables = c("refp_mean_int[1]", "refp_sd_int[1]"), format = "draws_df"
-    )
-  }
-
-  draws <- data.table::setDT(draws)
-
-  data.table::setnames(
-    draws, c("refp_mean_int[1]", "refp_sd_int[1]"), c("meanlog", "sdlog"),
-    skip_absent = TRUE
-  )
-  draws <- draws[, list(meanlog, sdlog)]
-  draws <- add_natural_scale_mean_sd(draws)
-
-  if (!missing(id_vars)) {
-    draws <- merge(
-      draws[, id := id_vars$id], id_vars, by = "id"
-    )
-  }
   return(draws[])
 }
 
