@@ -18,7 +18,6 @@ Define a model specific formula
 Other generics: 
 \code{\link{epidist}()},
 \code{\link{epidist_family}()},
-\code{\link{epidist_prepare.default}()},
 \code{\link{epidist_prior}()},
 \code{\link{epidist_stancode}()}
 }

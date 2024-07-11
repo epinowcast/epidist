@@ -4,13 +4,55 @@ as_string_formula <- function(formula) {
   return(form)
 }
 
-# Generate observation data in correct format for the latent_individual model
-prep_obs <- epidist_prepare(sim_obs, model = "latent_individual")
-
-test_that("epidist_prepare.epidist_latent_individual with default settings an object with the correct classes", { # nolint: line_length_linter.
+test_that("as_latent_individual.data.frame with default settings an object with the correct classes", { # nolint: line_length_linter.
+  prep_obs <- as_latent_individual(sim_obs)
   expect_s3_class(prep_obs, "data.table")
   expect_s3_class(prep_obs, "data.frame")
   expect_s3_class(prep_obs, "epidist_latent_individual")
+})
+
+test_that("as_latent_individual.data.frame errors when passed incorrect inputs", { # nolint: line_length_linter.
+  expect_error(as_latent_individual(list()))
+  expect_error(as_latent_individual(sim_obs[, 1]))
+  expect_error({
+    sim_obs$case <- paste("case_", seq_len(nrow(sim_obs)))
+    as_latent_individual(sim_obs)
+  })
+})
+
+# Make this data available for other tests
+prep_obs <- as_latent_individual(sim_obs)
+
+test_that("is_latent_individual returns TRUE for correct input", { # nolint: line_length_linter.
+  expect_true(is_latent_individual(prep_obs))
+  expect_true({
+    x <- list()
+    class(x) <- "epidist_latent_individual"
+    is_latent_individual(x)
+  })
+})
+
+test_that("is_latent_individual returns FALSE for incorrect input", { # nolint: line_length_linter.
+  expect_false(is_latent_individual(list()))
+  expect_false({
+    x <- list()
+    class(x) <- "epidist_latent_individual_extension"
+    is_latent_individual(x)
+  })
+})
+
+test_that("validate_latent_individual doesn't produce an error for correct input", { # nolint: line_length_linter.
+  expect_no_error(validate_latent_individual(prep_obs))
+})
+
+test_that("validate_latent_individual returns FALSE for incorrect input", { # nolint: line_length_linter.
+  expect_error(validate_latent_individual(list()))
+  expect_error(validate_latent_individual(prep_obs[, 1]))
+  expect_error({
+    x <- list()
+    class(x) <- "epidist_latent_individual"
+    validate_latent_individual(x)
+  })
 })
 
 test_that("epidist_formula.epidist_latent_individual with default settings produces a brmsformula with the correct intercept only formula", { # nolint: line_length_linter.
