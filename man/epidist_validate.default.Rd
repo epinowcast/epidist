@@ -7,6 +7,8 @@
 \method{epidist_validate}{default}(data, ...)
 }
 \arguments{
+\item{data}{A dataframe to be used for modelling.}
+
 \item{...}{Additional arguments for method.}
 }
 \description{

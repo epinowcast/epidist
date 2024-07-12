@@ -6,6 +6,9 @@
 \usage{
 epidist_validate(data)
 }
+\arguments{
+\item{data}{A dataframe to be used for modelling.}
+}
 \description{
 Validate
 }
