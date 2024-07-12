@@ -120,7 +120,7 @@ obs_cens_trunc_samp <-
 We now prepare the data for fitting with the latent individual model, and perform inference with HMC:
 
 ```{r results='hide'}
-data <- epidist_prepare(obs_cens_trunc_samp, model = "latent_individual")
+data <- as_latent_individual(obs_cens_trunc_samp)
 
 t <- proc.time()
 fit_hmc <- epidist(data = data, algorithm = "sampling")
