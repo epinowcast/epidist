@@ -18,8 +18,9 @@ extract_normal_parameters_brms <- function(prior) {
 
 test_that("epidist.epidist_latent_individual samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case", { # nolint: line_length_linter.
   skip_on_cran()
+  set.seed(1)
   prior_samples <- epidist(data = prep_obs, fn = brms::brm,
-                           sample_prior = "only")
+                           sample_prior = "only", seed = 1)
   lognormal_draws <- extract_lognormal_draws(prior_samples)
   prior <- epidist_prior(data = prep_obs)
   param1 <- extract_normal_parameters_brms(prior[1, ])
@@ -35,7 +36,8 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
 
 test_that("epidist.epidist_latent_individual fits and the MCMC converges in the default case", { # nolint: line_length_linter.
   skip_on_cran()
-  fit <- epidist(data = prep_obs)
+  set.seed(1)
+  fit <- epidist(data = prep_obs, seed = 1)
   expect_s3_class(fit, "brmsfit")
   expect_s3_class(fit, "epidist_fit")
   expect_convergence(fit)
@@ -43,7 +45,8 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
 
 test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
   skip_on_cran()
-  fit <- epidist(data = prep_obs)
+  set.seed(1)
+  fit <- epidist(data = prep_obs, seed = 1)
   lognormal_draws <- extract_lognormal_draws(fit)
   # Unclear the extent to which we should expect parameter recovery here
   expect_equal(mean(lognormal_draws$meanlog), meanlog, tolerance = 0.1)
@@ -78,10 +81,11 @@ test_that("epidist.epidist_latent_individual Stan code compiles for an alternati
 
 test_that("epidist.epidist_latent_individual recovers no sex effect when none is simulated", { # nolint: line_length_linter.
   skip_on_cran()
+  set.seed(1)
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
                                  sigma = ~ 1 + sex)
-  fit_sex <- epidist(data = prep_obs, formula = formula_sex)
+  fit_sex <- epidist(data = prep_obs, formula = formula_sex, seed = 1)
   draws <- posterior::as_draws_df(fit_sex$fit)
   expect_equal(mean(draws$b_sex), 0, tolerance = 0.2)
   expect_equal(mean(draws$b_sigma_sex), 0, tolerance = 0.2)
@@ -89,10 +93,11 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
 
 test_that("epidist.epidist_latent_individual fits and the MCMC converges for an alternative formula", { # nolint: line_length_linter.
   skip_on_cran()
+  set.seed(1)
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
                                  sigma = ~ 1 + sex)
-  fit_sex <- epidist(data = prep_obs, formula = formula_sex)
+  fit_sex <- epidist(data = prep_obs, formula = formula_sex, seed = 1)
   expect_s3_class(fit_sex, "brmsfit")
   expect_s3_class(fit_sex, "epidist_fit")
   expect_convergence(fit_sex)
