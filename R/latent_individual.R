@@ -205,6 +205,7 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' @inheritParams epidist_prior
 #' @method epidist_prior epidist_latent_individual
 #' @family latent_individual
+#' @importFrom cli cli_inform
 #' @export
 epidist_prior.epidist_latent_individual <- function(data, ...) {
   validate_latent_individual(data)
