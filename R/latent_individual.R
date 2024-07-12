@@ -218,7 +218,7 @@ epidist_prior.epidist_latent_individual <- function(data, ...) {
     "*" = "normal(0, 0.5) on the intercept of the sdlog linear predictor",
     "To alter priors, or set priors on other parameters, see ?epidist_prior."
   ))
-  
+
   return(prior1 + prior2)
 }
 
