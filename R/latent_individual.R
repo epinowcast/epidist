@@ -211,6 +211,14 @@ epidist_prior.epidist_latent_individual <- function(data, ...) {
 
   prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
   prior2 <- brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
+
+  cli::cli_inform(c(
+    "i" = "The following priors have been set:",
+    "*" = "normal(2, 0.5) on the intercept of the meanlog linear predictor",
+    "*" = "normal(0, 0.5) on the intercept of the sdlog linear predictor",
+    "To alter priors, or set priors on other parameters, see ?epidist_prior."
+  ))
+  
   return(prior1 + prior2)
 }
 
