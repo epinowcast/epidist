@@ -78,7 +78,7 @@ See the section [Variational Inference using ADVI](https://mc-stan.org/docs/cmds
 
 ## Pathfinder
 
-Pathfinder is method closely related to variational inference, more recently developed by @zhang2022pathfinder.
+Pathfinder is a method closely related to variational inference, which has been more recently developed by @zhang2022pathfinder.
 It works by generating Gaussian approximations along each step of an iterative optimisation algorithm (such as L-BFGS).
 The KL divergence from each approximation to the posterior is measured, with the best approximation chosen.
 Pareto smoothed importance sampling [PSIS; @vehtari2015pareto] is optionally used to resample draws from the chosen Gaussian distribution.
@@ -216,7 +216,7 @@ draws |>
   labs(x = "", y = "")
 ```
 
-## Comparison resulting delay distributions
+## Comparison of resulting delay distributions
 
 How do these different distributions on the `meanlog` and `sdlog` parameters effect the estimated delay distribution?
 
