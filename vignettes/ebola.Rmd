@@ -72,7 +72,7 @@ head(sierra_leone_ebola_data)
 <!-- Question about whether to include shapefiles as data object in package. -->
 
 ```{r}
-sf <- sf::st_read("gadm41_SLE_shp")
+sf <- sf::st_read("../inst/gadm41_SLE_shp")
 
 sierra_leone_ebola_data |>
   dplyr::group_by(chiefdom) |>
@@ -231,21 +231,22 @@ obs_combined |>
 Fit the lognormal model(s).
 
 ```{r}
+obs_combined <- dplyr::rename(obs_combined, case = id)
+obs_combined$case <- as.integer(obs_combined$case)
+obs_combined <- as_latent_individual(obs_combined)
 obs_combined_list <- split(obs_combined, by = c("scenario", "obs_type"))
 
-fit_lognormal_models <- map(
-  obs_combined_list,
-  .f = function(x) latent_truncation_censoring_adjusted_delay(data = x)
-)
+fit_lognormal_models <- map(obs_combined_list, epidist::epidist)
 ```
 
 Fit the gamma model(s).
 
 ```{r eval=FALSE}
-fit_lognormal_models <- map(
-  obs_combined_list,
-  .f = function(x) latent_truncation_censoring_adjusted_delay(data = x, delay_prior = "gamma")
-)
+# fit_gamma_models <- map(
+#   obs_combined_list,
+#   epidist::epidist,
+#   family = epidist_family(...)
+# )
 ```
 
 Other things here?
