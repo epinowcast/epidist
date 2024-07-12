@@ -1,3 +1,11 @@
+#' Validate
+#'
+#' @family generics
+#' @export
+epidist_validate <- function(data) {
+  UseMethod("epidist_validate")
+}
+
 #' Define a model specific formula
 #'
 #' @param data A dataframe to be used for modelling.

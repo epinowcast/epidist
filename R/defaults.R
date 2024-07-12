@@ -1,3 +1,16 @@
+#' Default method for data validation
+#'
+#' @inheritParams epidist_validate
+#' @param ... Additional arguments for method.
+#' @family defaults
+#' @export
+epidist_validate.default <- function(data, ...) {
+  stop(
+    "No epidist_formula method implemented for the class ", class(data), "\n",
+    "See methods(epidist_validate) for available methods"
+  )
+}
+
 #' Default method for defining a model specific formula
 #'
 #' @inheritParams epidist_formula
@@ -61,6 +74,7 @@ epidist_stancode.default <- function(data, ...) {
 epidist.default <- function(data, formula = epidist_formula(data),
                             family = epidist_family(data),
                             prior = epidist_prior(data), fn = brms::brm, ...) {
+  epidist_validate(data)
   stancode <- epidist_stancode(data = data, family = family)
   fit <- fn(
     formula = formula, family = family, prior = prior, stanvars = stancode,
