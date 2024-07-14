@@ -249,8 +249,8 @@ times <- list(
 
 purrr::imap(times, function(time, name) {
   data.frame(
-    method = name,
-    time = time[["elapsed"]]
+    "method" = name,
+    "time (s)" = time[["elapsed"]]
   )
 }) |>
   bind_rows() |>
