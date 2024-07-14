@@ -52,7 +52,7 @@ These additional inference algorithms are also available in `epidist` due to its
 
 In this vignette, we first briefly describe the alternative algorithms available (Section \@ref(other)) as well as directing you to more detailed resources.
 Then (Section  \@ref(demo)) we demonstrate their application to fitting simulated data, before extracting and comparing posterior distributions.
-By comparing the resulting inferences to those from NUTS, to hope to help you make informed decisions about which algorithm to use in your applied problem.
+By comparing the resulting inferences to those from NUTS, we hope to help you make informed decisions about which algorithm to use in your applied problem.
 
 # Alternative approximate inference algorithms {#other}
 
