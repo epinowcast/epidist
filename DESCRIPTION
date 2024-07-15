@@ -46,7 +46,8 @@ Suggests:
     roxyglobals
 Remotes:
     stan-dev/cmdstanr,
-    Rdatatable/data.table
+    Rdatatable/data.table,
+    paul-buerkner/brms
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
