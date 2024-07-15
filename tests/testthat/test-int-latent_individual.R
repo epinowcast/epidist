@@ -1,10 +1,11 @@
 prep_obs <- as_latent_individual(sim_obs)
 prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
 
-test_that("epidist.epidist_latent_individual Stan code compiles in the default case", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles in the default case", { # nolint: line_length_linter.
   skip_on_cran()
   stancode <- epidist(data = prep_obs, fn = brms::make_stancode)
   mod <- cmdstan_model(stan_file = write_stan_file(stancode), compile = FALSE)
+  expect_true(mod$check_syntax())
   expect_no_error(mod$compile())
 })
 
@@ -53,7 +54,7 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   expect_equal(mean(lognormal_draws$sdlog), sdlog, tolerance = 0.1)
 })
 
-test_that("epidist.epidist_latent_individual Stan code compiles in the gamma delay case", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles in the gamma delay case", { # nolint: line_length_linter.
   skip_on_cran()
   stancode_gamma <- epidist(
     data = prep_obs_gamma,
@@ -63,10 +64,11 @@ test_that("epidist.epidist_latent_individual Stan code compiles in the gamma del
   mod_gamma <- cmdstan_model(
     stan_file = write_stan_file(stancode_gamma), compile = FALSE
   )
+  expect_true(mod_gamma$check_syntax())
   expect_no_error(mod_gamma$compile())
 })
 
-test_that("epidist.epidist_latent_individual Stan code compiles for an alternative formula", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles for an alternative formula", { # nolint: line_length_linter.
   skip_on_cran()
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
@@ -76,6 +78,7 @@ test_that("epidist.epidist_latent_individual Stan code compiles for an alternati
   mod_sex <- cmdstan_model(
     stan_file = write_stan_file(stancode_sex), compile = FALSE
   )
+  expect_true(mod_sex$check_syntax())
   expect_no_error(mod_sex$compile())
 })
 
