@@ -36,11 +36,11 @@ It was the largest outbreak in the disease's history, and resulted in over 28,60
 In this vignette, we use the `epidist` package to analyze line list data from the outbreak in Sierra Leone, as collated by @fang2016transmission.
 In doing so, we demonstrate some of the more advanced features of `epidist`, including:
 
-1. Fitting lognormal and gamma delay distributions, and selecting between fitted models.
+1. Using the `epidist_family` function to fit models with lognormal and gamma delay distributions. After fitting these models, we illustrate one approach to choosing between fitted models.
 2. Investigating delay estimation scenarios. A subset of the analysis in @park2024estimating.
-3. Fitting location-sex stratified delay distribution estimates.
+3. Using the `epidist_formula` function to fit location-sex stratified delay distribution estimates.
 
-For users new to `epidist`, we recommend beginning with the [getting started vignette](http://epidist.epinowcast.org/articles/epidist.html) before reading this article.
+For users new to `epidist`, before reading this article, we recommend beginning with the [getting started vignette](http://epidist.epinowcast.org/articles/epidist.html).
 
 The packages used in this article are:
 
@@ -54,36 +54,72 @@ library(sf)
 
 # Data preparation
 
-We begin by loading the Ebola line list data, as provided in the `epidist` package (see `sierra_leone_ebola_data`):
+We begin by loading the Ebola line list data, as included in the `epidist` package (see `sierra_leone_ebola_data`):
 
 ```{r}
 data("sierra_leone_ebola_data")
-
-sierra_leone_ebola_data <- dplyr::select(sierra_leone_ebola_data, -name)
 ```
 
 The data has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a unique case report `id`.
-The other columns of the data are the individuals age, sex, the dates of symptom onset and positive sample, and their district and chiefdom.
+The columns of the data are the individuals name (retracted, and hence can be safely removed), age, sex, the dates of symptom onset and positive sample, and their district and chiefdom.
 
 ```{r}
 head(sierra_leone_ebola_data)
+sierra_leone_ebola_data <- dplyr::select(sierra_leone_ebola_data, -name)
 ```
 
 <!-- Question about whether to include shapefiles as data object in package. -->
 
+
+
 ```{r}
 sf <- sf::st_read("../inst/gadm41_SLE_shp")
 
-sierra_leone_ebola_data |>
-  dplyr::group_by(chiefdom) |>
-  dplyr::summarise(cases = dplyr::n()) |>
+sort(setdiff(unique(sf$NAME_3), unique(sierra_leone_ebola_data$chiefdom)))
+sort(setdiff(unique(sierra_leone_ebola_data$chiefdom), unique(sf$NAME_3)))
+
+sierra_leone_ebola_data <- sierra_leone_ebola_data |>
+  dplyr::mutate(chiefdom = forcats::fct_recode(chiefdom,
+    "Kissi Tongi" = "Kissi Tonge",
+    "replace" = "Jawei",
+    "replace" = "Peje Bongre",
+    "replace" = "W/Urban",
+    "replace" = "Baoma",
+    "replace" = "Kandu Leppiama",
+    "replace" = "Dea",             
+    "replace" = "W/Rural",          
+    "replace" = "Tms",             
+    "replace" = "Gbanti-Kamaranka",
+    "replace" = "Timidale",        
+    "replace" = "Kholifa",  
+    "replace" = "Lokomasam",
+    "replace" = "Bkm",             
+    "Gbendembu Ngowahun" = "Ngowahun",
+    "Tambakha" = "Tambakka",
+    "replace" = "Kargboro",         
+    "replace" = "Gbinle-Dixing",    
+    "replace" = "Kpanga Kabonde",
+    "replace" = "Kafe Simiria",
+    "replace" = "Jaiama Bongor",
+    "replace" = "Bumpe Ngawo",
+    "replace" = "Kasonko"
+  ))
+
+sierra_leone_ebola_data_sf <- dplyr::select(sf, chiefdom = NAME_3, geometry) |>
   dplyr::left_join(
-    dplyr::select(sf, chiefdom = NAME_3, geometry)
-  ) |>
-  ggplot(aes(fill = cases, geometry = geometry)) +
-    geom_sf() +
-    theme_minimal() +
-    labs(fill = "Cases")
+    sierra_leone_ebola_data |>
+      dplyr::group_by(chiefdom) |>
+      dplyr::summarise(cases = dplyr::n())
+  )
+
+sum(sierra_leone_ebola_data_sf$cases, na.rm = TRUE)
+nrow(sierra_leone_ebola_data)
+
+ggplot(sierra_leone_ebola_data_sf, aes(fill = cases, geometry = geometry)) +
+  geom_sf() +
+  scale_fill_viridis_c(na.value = "lightgrey") +
+  theme_minimal() +
+  labs(fill = "Cases")
 ```
 
 (ref:ebola-outbreak) Figure caption.
@@ -236,7 +272,7 @@ obs_combined$case <- as.integer(obs_combined$case)
 obs_combined <- as_latent_individual(obs_combined)
 obs_combined_list <- split(obs_combined, by = c("scenario", "obs_type"))
 
-fit_lognormal_models <- map(obs_combined_list, epidist::epidist)
+# fit_lognormal_models <- map(obs_combined_list, epidist::epidist)
 ```
 
 Fit the gamma model(s).
