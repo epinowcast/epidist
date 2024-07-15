@@ -3,9 +3,10 @@
 #' @inheritParams epidist_validate
 #' @param ... Additional arguments for method.
 #' @family defaults
+#' @importFrom cli cli_abort
 #' @export
 epidist_validate.default <- function(data, ...) {
-  stop(
+  cli::cli_abort(
     "No epidist_validate method implemented for the class ", class(data), "\n",
     "See methods(epidist_validate) for available methods"
   )
@@ -16,9 +17,10 @@ epidist_validate.default <- function(data, ...) {
 #' @inheritParams epidist_formula
 #' @param ... Additional arguments for method.
 #' @family defaults
+#' @importFrom cli cli_abort
 #' @export
 epidist_formula.default <- function(data, ...) {
-  stop(
+  cli::cli_abort(
     "No epidist_formula method implemented for the class ", class(data), "\n",
     "See methods(epidist_formula) for available methods"
   )
@@ -29,9 +31,10 @@ epidist_formula.default <- function(data, ...) {
 #' @inheritParams epidist_family
 #' @param ... Additional arguments for method.
 #' @family defaults
+#' @importFrom cli cli_abort
 #' @export
 epidist_family.default <- function(data, ...) {
-  stop(
+  cli::cli_abort(
     "No epidist_family method implemented for the class ", class(data), "\n",
     "See methods(epidist_family) for available methods"
   )
@@ -43,9 +46,10 @@ epidist_family.default <- function(data, ...) {
 #' @inheritParams epidist_prior
 #' @param ... Additional arguments for method.
 #' @family defaults
+#' @importFrom cli cli_abort
 #' @export
 epidist_prior.default <- function(data, ...) {
-  stop(
+  cli::cli_abort(
     "No epidist_prior method implemented for the class ", class(data), "\n",
     "See methods(epidist_prior) for available methods"
   )
@@ -56,9 +60,10 @@ epidist_prior.default <- function(data, ...) {
 #' @inheritParams epidist_stancode
 #' @param ... Additional arguments for method.
 #' @family defaults
+#' @importFrom cli cli_abort
 #' @export
 epidist_stancode.default <- function(data, ...) {
-  stop(
+  cli::cli_abort(
     "No epidist_stancode method implemented for the class ", class(data), "\n",
     "See methods(epidist_stancode) for available methods"
   )
