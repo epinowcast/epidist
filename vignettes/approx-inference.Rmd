@@ -1,0 +1,267 @@
+---
+title: "Approximate Bayesian inference in epidist"
+description: |
+  "A demonstration of how to fit models in epidist using approximate Bayesian
+  inference methods such as the Laplace approximation, ADVI, and Pathfinder."
+output: 
+  bookdown::html_document2:
+    fig_caption: yes
+    code_folding: show
+    number_sections: true
+pkgdown:
+  as_is: true
+# csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Getting started with epidist}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+set.seed(2)
+
+knitr::opts_chunk$set(
+  fig.path = "figures/epidist-",
+  cache = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE
+)
+```
+
+# Background
+
+The `epidist` package uses Bayesian inference to estimate delay distributions and other quantities.
+Doing Bayesian inference amounts to approximating the posterior distribution of each parameter in the statistical model^[We are currently developing a vignette explaining the statistical model in more detail!].
+A range of methods exist to perform this approximation.
+
+By default, `epidist` uses the No-U-Turn Sampler [NUTS; @hoffman2014no] Hamiltonian Monte Carlo (HMC) algorithm.
+NUTS is an example of a broader class of Markov chain Monte Carlo (MCMC) methods.
+These methods work by simulating from a Markov chain with the target posterior distribution as its stationary distribution.
+When MCMC algorithms are run for sufficiently many iterations, and have reached convergence, the samples can be treated as being drawn from the posterior distribution.
+Relevant posterior quantities such as expectations may then be computed using these samples.
+A drawback of MCMC methods, like NUTS, is that simulations can be quite computational intensive, especially for complex models or large data.
+
+The `epidist` package is built using `brms` [@brms], which stands for "Bayesian Regression Models using Stan", where Stan [@carpenter2017stan] is a probabilistic programming language.
+Although NUTS the the primary inference algorithm used in Stan, additional options are available.
+These additional inference algorithms are also available in `epidist` due to its dependence on `brms`.
+
+In this vignette, we first briefly describe the alternative algorithms available (Section \@ref(other)) as well as directing you to more detailed resources.
+Then (Section  \@ref(demo)) we demonstrate their application to fitting simulated data, before extracting and comparing posterior distributions.
+By comparing the resulting inferences to those from NUTS, we hope to help you make informed decisions about which algorithm to use in your applied problem.
+
+# Alternative approximate inference algorithms {#other}
+
+Here we describe three alternative approximate Bayesian inference algorithms that are available to use in `brms`, and therefore also available in `epidist`.
+It's worth noting that further inference algorithms may have become available since this vignette was last updated. 
+Please check `brms` package updates if interested!
+
+## Laplace method
+
+The Laplace method approximates a posterior distribution by a Gaussian distribution centered (by default) at the posterior mode.
+In Stan, the Gaussian approximation is constructed on the unconstrained parameter space (as the domain of a Gaussian distribution is the real line).
+Samples from the Gaussian approximation may then be transformed to the constrained parameter space.
+To access the Laplace method, specify `algorithm = "laplace"` within `brms::brm`.
+See the section [Laplace Sampling](https://mc-stan.org/docs/cmdstan-guide/laplace_sample_config.html) of the `CmdStan` User's Guide for more information.
+
+## Variational inference using ADVI
+
+Automatic differentiation variational inference [ADVI; @kucukelbir2017advi] is a type of variational inference [VI; @blei2017variational] algorithm.
+VI works by restricting to a family of distributions, and then selecting the member of that family which is the most similar to the posterior distribution.
+Most commonly, and in Stan, (dis-)similarity is measured using the Kullback–Leibler (KL) divergence.
+There are two options for the family of distributions, either a fully factorised Gaussian with `algorithm = "meanfield"` or a Gaussian with a full-rank covariance matrix with `algorithm = "fullrank"`.
+See the section [Variational Inference using ADVI](https://mc-stan.org/docs/cmdstan-guide/variational_config.html) of the `CmdStan` User's Guide for more information.
+
+## Pathfinder
+
+Pathfinder is a method closely related to variational inference, which has been more recently developed by @zhang2022pathfinder.
+It works by generating Gaussian approximations along each step of an iterative optimisation algorithm (such as L-BFGS).
+The KL divergence from each approximation to the posterior is measured, with the best approximation chosen.
+Pareto smoothed importance sampling [PSIS; @vehtari2015pareto] is optionally used to resample draws from the chosen Gaussian distribution.
+When multiple paths are specified (using `num_paths`) then the Pathfinder algorithm is run multiple times, initialising the optimisation at different points.
+The resulting approximation is a mixture of Gaussian distributions, rather than a single Gaussian distribution.
+See the section [Pathfinder Method for Approximate Bayesian Inference](https://mc-stan.org/docs/cmdstan-guide/pathfinder_config.html) of the `CmdStan` User's Guide for more information.
+
+# Demonstration {#demo}
+
+In this demonstration, we use `epidist` alongside `ggplot2` and `dplyr`:
+
+```{r load-requirements}
+library(epidist)
+library(ggplot2)
+library(dplyr)
+```
+
+First, we begin by simulating data.
+The example data simulation process follows that used in the [Getting started with epidist](https://epidist.epinowcast.org/articles/epidist.html#data) vignette, so we will not detail exactly what is happening here, but please consult that vignette if interested:
+
+```{r}
+meanlog <- 1.8
+sdlog <- 0.5
+obs_time <- 25
+sample_size <- 200
+
+obs_cens_trunc <- simulate_gillespie(seed = 101) |>
+  simulate_secondary(
+    meanlog = meanlog,
+    sdlog = sdlog
+  ) |>
+  observe_process() |>
+  filter_obs_by_obs_time(obs_time = obs_time)
+
+obs_cens_trunc_samp <-
+  obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
+```
+
+We now prepare the data for fitting with the latent individual model, and perform inference with HMC:
+
+```{r results='hide'}
+data <- as_latent_individual(obs_cens_trunc_samp)
+
+t <- proc.time()
+fit_hmc <- epidist(data = data, algorithm = "sampling")
+time_hmc <- proc.time() - t
+```
+
+Note that for clarity above we specify `algorithm = "sampling"`, but if you were to call `epidist(data = data)` the result would be the same since `"sampling"` (i.e. HMC) is the default value for the `algorithm` argument.
+
+Now, we fit^[Note that in this section, and above for the MCMC, the output of the call is hidden, but if you were to call these functions yourself they would display information about the fitting procedure as it occurs] the same latent individual model using each method in Section \@ref(other).
+To match the four Markov chains of length 1000 in HMC above, we then draw 4000 samples from each approximate posterior.
+
+```{r results='hide'}
+t <- proc.time()
+fit_laplace <- epidist(data = data, algorithm = "laplace", draws = 4000)
+time_laplace <- proc.time() - t
+
+t <- proc.time()
+fit_advi <- epidist(data = data, algorithm = "meanfield", draws = 4000)
+time_advi <- proc.time() - t
+```
+
+For the Pathfinder algorithm we will set `num_paths = 1`.
+Although in testing both the Laplace and ADVI methods ran without problem in all cases, we found Pathfinder often produced "Error evaluating model log probability: Non-finite gradient.".
+Although a `save_single_paths` option is available, which may have allowed recovery of individual Pathfinder paths (and therefore removing faulty paths), it does not appear to be working currently^[See https://github.com/stan-dev/cmdstanr/issues/878].
+
+```{r}
+t <- proc.time()
+fit_pathfinder <- epidist(
+  data = data, algorithm = "pathfinder", draws = 4000, num_paths = 1
+)
+time_pathfinder <- proc.time() - t
+```
+
+We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
+Thankfully, each algorithm is implemented to sample draws from the posterior distribution, and so post-processing is simple.
+
+```{r}
+fits <- list(
+  "HMC" = fit_hmc,
+  "Laplace" = fit_laplace,
+  "ADVI" = fit_advi,
+  "Pathfinder" = fit_pathfinder
+)
+
+draws <- purrr::imap(fits, function(fit, name) {
+  extract_lognormal_draws(fit) |>
+    draws_to_long() |>
+    filter(parameter %in% c("meanlog", "sdlog")) |>
+    mutate(method = as.factor(name))
+})
+
+draws <- bind_rows(draws)
+```
+
+## Comparison of parameter posterior distributions
+
+The mean estimated value of each parameter, from each method is as follows.
+
+```{r}
+pars <- draws |>
+  group_by(method, parameter) |>
+  summarise(value = mean(value)) |>
+  tidyr::pivot_wider(names_from = parameter, values_from = value)
+
+pars |>
+  ungroup() |>
+  gt::gt()
+```
+
+More comprehensively, the estimated posterior distributions are as follows.
+
+```{r}
+draws |>
+  filter(parameter == "meanlog") |>
+  ggplot(aes(x = value, fill = method)) +
+  geom_histogram(aes(y = ..density..)) +
+  scale_fill_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
+  facet_grid(method ~ parameter) +
+  theme_minimal() +
+  guides(fill = "none") +
+  labs(x = "", y = "")
+```
+
+```{r}
+draws |>
+  filter(parameter == "sdlog") |>
+  ggplot(aes(x = value, fill = method)) +
+  geom_histogram(aes(y = ..density..)) +
+  scale_fill_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
+  facet_grid(method ~ parameter) +
+  theme_minimal() +
+  guides(fill = "none") +
+  labs(x = "", y = "")
+```
+
+## Comparison of resulting delay distributions
+
+How do these different distributions on the `meanlog` and `sdlog` parameters effect the estimated delay distribution?
+
+```{r}
+purrr::pmap_df(
+  filter(pars), ~ tibble(
+    x = seq(0, 25, by = 0.1),
+    method = ..1, density = dlnorm(x, ..2, ..3)
+  )
+) |>
+  ggplot(aes(x = x, y = density, col = method)) +
+  geom_line() +
+  scale_color_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
+  theme_minimal() +
+  labs(x = "", y = "", col = "Method")
+```
+
+## Comparison of time taken
+
+In this example, HMC took much longer than the other methods, with Pathfinder being the fastest method.
+That said, even for HMC the computation time in this case is unlikely to be prohibitive.
+
+```{r}
+times <- list(
+  "HMC" = time_hmc,
+  "Laplace" = time_laplace,
+  "ADVI" = time_advi,
+  "Pathfinder" = time_pathfinder
+)
+
+purrr::imap(times, function(time, name) {
+  data.frame(
+    "method" = name,
+    "time (s)" = time[["elapsed"]]
+  )
+}) |>
+  bind_rows() |>
+  gt::gt()
+```
+
+# Conclusion
+
+The range of alternative approximation algorithms available, and their ease of use, is an attractive feature of `brms`.
+We found that these algorithms do produce reasonable approximations in far less time than HMC.
+Of course, this vignette only includes one example, and a more thorough investigation would be required to make specific recommendations.
+That said, currently we do not recommend use of the Pathfinder algorithm due to its unstable performance in our testing, and early stage software implementation.
+
+## Bibliography {-}
