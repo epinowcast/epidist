@@ -14,7 +14,6 @@ Add natural scale summary parameters for a lognormal distribution
 }
 \seealso{
 Other postprocess: 
-\code{\link{correct_primary_censoring_bias}()},
 \code{\link{draws_to_long}()},
 \code{\link{extract_lognormal_draws}()},
 \code{\link{make_relative_to_truth}()},
