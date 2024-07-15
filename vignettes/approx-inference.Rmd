@@ -42,7 +42,7 @@ A range of methods exist to perform this approximation.
 By default, `epidist` uses the No-U-Turn Sampler [NUTS; @hoffman2014no] Hamiltonian Monte Carlo (HMC) algorithm.
 NUTS is an example of a broader class of Markov chain Monte Carlo (MCMC) methods.
 These methods work by simulating from a Markov chain with the target posterior distribution as its stationary distribution.
-When MCMC algorithms are run for sufficiently many iterations, and have reached convergence, the samples can be treated as being being drawn from the posterior distribution.
+When MCMC algorithms are run for sufficiently many iterations, and have reached convergence, the samples can be treated as being drawn from the posterior distribution.
 Relevant posterior quantities such as expectations may then be computed using these samples.
 A drawback of MCMC methods, like NUTS, is that simulations can be quite computational intensive, especially for complex models or large data.
 
