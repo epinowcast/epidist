@@ -6,7 +6,7 @@
 #' @export
 epidist_validate.default <- function(data, ...) {
   stop(
-    "No epidist_formula method implemented for the class ", class(data), "\n",
+    "No epidist_validate method implemented for the class ", class(data), "\n",
     "See methods(epidist_validate) for available methods"
   )
 }
