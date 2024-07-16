@@ -89,20 +89,17 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges  in the
     lb = c(0, 0),
     ub = c(NA, NA)
   )
-  
-  gamma_prior <- brms::prior("normal(0, 3)", class = "Intercept")
-  
-  gamma_formula <- epidist_formula(prep_obs_gamma)
-  gamma_formula <- brms::bf(gamma_formula, as.formula("shape ~ 1"))
-  gamma_formula$pforms$sigma <- NULL
 
+  gamma_formula <- epidist_formula(prep_obs_gamma)
+  gamma_formula$pforms$sigma <- NULL
+  gamma_formula <- brms::bf(gamma_formula, as.formula("shape ~ 0"))
+  
   fit_gamma <- epidist(
     data = prep_obs_gamma,
     family = gamma_family,
-    prior = gamma_prior,
+    prior = brms::prior("normal(0, 3)", class = "Intercept"),
     formula = gamma_formula,
-    seed = 1,
-    fn = brms::make_stancode
+    seed = 1
   )
   
   expect_s3_class(fit_gamma, "brmsfit")
@@ -113,14 +110,39 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges  in the
 test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the gamma delay case", { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
+  
+  gamma_family <- epidist_family(
+    prep_obs_gamma,
+    family = "gamma",
+    dpars = c("mu", "shape"),
+    links = c("log", "log"),
+    lb = c(0, 0),
+    ub = c(NA, NA)
+  )
+  
+  gamma_formula <- epidist_formula(prep_obs_gamma)
+  gamma_formula$pforms$sigma <- NULL
+  gamma_formula <- brms::bf(gamma_formula, as.formula("shape ~ 1"))
+  
+  # Fix the shape intercept to log(2) so that it corresponds to simulated value
+  gamma_prior <- brms::prior("normal(0, 3)", class = "Intercept") +
+    brms::prior("constant(0.6931472)", class = "Intercept", dpar = "shape")
+  
   fit_gamma <- epidist(
     data = prep_obs_gamma,
-    family = epidist_family(prep_obs_gamma, family = "gamma"),
+    family = gamma_family,
+    prior = gamma_prior,
+    formula = gamma_formula,
     seed = 1
   )
+  
+  # What the value is of the delay i.e. mu = 2/3
+  mean(prep_obs_gamma$delay)
+  
   draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
-  # draws_gamma$Intercept
-  # draws_gamma$Intercept_sigma
+  draws_gamma_mu <- exp(draws_gamma$Intercept)
+  
+  expect_equal(mean(draws_gamma_mu), mu, tolerance = 0.1)
 })
 
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles for an alternative formula", { # nolint: line_length_linter.
