@@ -152,6 +152,11 @@ epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
 #' @family latent_individual
 #' @export
 epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
+                                                     dpars = c("mu", "sigma"),
+                                                     links =
+                                                       c("identity", "log"),
+                                                     lb = c(NA, 0),
+                                                     ub = c(NA, NA),
                                                      ...) {
   epidist_validate(data)
   checkmate::assert_string(family)
@@ -168,10 +173,10 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 
   brms::custom_family(
     paste0("latent_", family),
-    dpars = c("mu", "sigma"),
-    links = c("identity", "log"),
-    lb = c(NA, 0),
-    ub = c(NA, NA),
+    dpars = dpars,
+    links = links,
+    lb = lb,
+    ub = ub,
     type = "real",
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE
