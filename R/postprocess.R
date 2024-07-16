@@ -23,16 +23,29 @@ add_natural_scale_mean_sd.default <- function(data, ...) {
   return(data)
 }
 
-#' Default method for add natural scale parameters
+#' Add natural scale parameters for a latent lognormal model
 #'
 #' @inheritParams add_natural_scale_mean_sd
 #' @param ... Additional arguments for method.
 #' @family postprocess
+#' @autoglobal
 #' @export
-add_natural_scale_mean_sd.lognormal <- function(data, ...) {
+add_natural_scale_mean_sd.latent_lognormal <- function(data, ...) {
   nat_dt <- data.table::copy(data)
   nat_dt <- nat_dt[, mean := exp(meanlog + sdlog ^ 2 / 2)]
   nat_dt <- nat_dt[, sd := mean * sqrt(exp(sdlog ^ 2) - 1)]
   return(nat_dt[])
 }
 
+#' Add natural scale parameters for a latent gamma model
+#'
+#' @inheritParams add_natural_scale_mean_sd
+#' @param ... Additional arguments for method.
+#' @family postprocess
+#' @autoglobal
+#' @export
+add_natural_scale_mean_sd.latent_gamma <- function(data, ...) {
+  nat_dt <- data.table::copy(data)
+  # Do something here!
+  return(nat_dt[])
+}

@@ -86,7 +86,7 @@ epidist.default <- function(data, formula = epidist_formula(data),
     backend = "cmdstanr", data = data, ...
   )
 
-  class(fit) <- c(class(fit), "epidist_fit")
+  class(fit) <- c(class(fit), "epidist_fit", family$name)
 
   return(fit)
 }
