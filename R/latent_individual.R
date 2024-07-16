@@ -251,10 +251,23 @@ epidist_stancode.epidist_latent_individual <- function(data,
     scode = epidist_stan_chunk("latent_individual/functions.stan")
   )
 
+  
   family_name <- gsub("latent_", "", family$name)
 
   stanvars_functions[[1]]$scode <- gsub(
     "family", family_name, stanvars_functions[[1]]$scode
+  )
+  
+  stanvars_functions[[1]]$scode <- gsub(
+    "dpars_A",
+    paste(paste0("vector ", family$dpars), collapse = ", "),
+    stanvars_functions[[1]]$scode
+  )
+  
+  stanvars_functions[[1]]$scode <- gsub(
+    "dpars_B",
+    paste(family$dpars, collapse = ", "),
+    stanvars_functions[[1]]$scode
   )
 
   stanvars_data <- brms::stanvar(

@@ -85,7 +85,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges  in the
     prep_obs_gamma,
     family = "gamma",
     dpars = c("mu", "shape"),
-    links = c("log", "identity"),
+    links = c("log", "log"),
     lb = c(0, 0),
     ub = c(NA, NA)
   )
@@ -101,7 +101,8 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges  in the
     family = gamma_family,
     prior = gamma_prior,
     formula = gamma_formula,
-    seed = 1
+    seed = 1,
+    fn = brms::make_stancode
   )
   
   expect_s3_class(fit_gamma, "brmsfit")
