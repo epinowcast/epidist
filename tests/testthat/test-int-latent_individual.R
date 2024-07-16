@@ -80,11 +80,30 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
 test_that("epidist.epidist_latent_individual fits and the MCMC converges  in the gamma delay case", { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
+  
+  gamma_family <- epidist_family(
+    prep_obs_gamma,
+    family = "gamma",
+    dpars = c("mu", "shape"),
+    links = c("log", "identity"),
+    lb = c(0, 0),
+    ub = c(NA, NA)
+  )
+  
+  gamma_prior <- brms::prior("normal(0, 3)", class = "Intercept")
+  
+  gamma_formula <- epidist_formula(prep_obs_gamma)
+  gamma_formula <- brms::bf(gamma_formula, as.formula("shape ~ 1"))
+  gamma_formula$pforms$sigma <- NULL
+
   fit_gamma <- epidist(
     data = prep_obs_gamma,
-    family = epidist_family(prep_obs_gamma, family = "gamma"),
+    family = gamma_family,
+    prior = gamma_prior,
+    formula = gamma_formula,
     seed = 1
   )
+  
   expect_s3_class(fit_gamma, "brmsfit")
   expect_s3_class(fit_gamma, "epidist_fit")
   expect_convergence(fit_gamma)
