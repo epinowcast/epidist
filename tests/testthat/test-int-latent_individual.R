@@ -77,6 +77,32 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
   expect_no_error(mod_gamma$compile())
 })
 
+test_that("epidist.epidist_latent_individual fits and the MCMC converges  in the gamma delay case", { # nolint: line_length_linter.
+  skip_on_cran()
+  set.seed(1)
+  fit_gamma <- epidist(
+    data = prep_obs_gamma,
+    family = epidist_family(prep_obs_gamma, family = "gamma"),
+    seed = 1
+  )
+  expect_s3_class(fit_gamma, "brmsfit")
+  expect_s3_class(fit_gamma, "epidist_fit")
+  expect_convergence(fit_gamma)
+})
+
+test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the gamma delay case", { # nolint: line_length_linter.
+  skip_on_cran()
+  set.seed(1)
+  fit_gamma <- epidist(
+    data = prep_obs_gamma,
+    family = epidist_family(prep_obs_gamma, family = "gamma"),
+    seed = 1
+  )
+  draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
+  # draws_gamma$Intercept
+  # draws_gamma$Intercept_sigma
+})
+
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles for an alternative formula", { # nolint: line_length_linter.
   skip_on_cran()
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
