@@ -213,14 +213,15 @@ epidist_prior.epidist_latent_individual <- function(data, ...) {
   prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
   prior2 <- brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
 
+  msg <- c(
+    "i" = "The following priors have been set:",
+    "*" = "normal(2, 0.5) on the intercept of distributional parameter mu",
+    "*" = "normal(0, 0.5) on the intercept of distributional parameter sigma",
+    "To alter priors, or set priors on other parameters, see ?epidist_prior."
+  )
+
   cli::cli_inform(
-    message = c(
-      "i" = "The following priors have been set:",
-      "*" = "normal(2, 0.5) on the intercept of distributional parameter mu",
-      "*" = "normal(0, 0.5) on the intercept of distributional parameter sigma",
-      "To alter priors, or set priors on other parameters, see ?epidist_prior."
-    ),
-    .frequency = "regularly"
+    message = msg, .frequency = "regularly", .frequency_id = "prior-message"
   )
 
   return(prior1 + prior2)
