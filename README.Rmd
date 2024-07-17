@@ -40,15 +40,17 @@ cat(gsub("\n[ ]+"," ",packageDescription("epidist")$Description))
   
 <details><summary>Installing the package</summary>
 
-You can install the latest released version using the normal `R` function, though you need to point to `r-universe` instead of CRAN:
+<!-- You can install the latest released version using the normal `R` function, though you need to point to `r-universe` instead of CRAN: -->
 
-```{r, eval = FALSE}
-install.packages(
-  "epidist", repos = "https://epinowcast.r-universe.dev"
-)
-```
+<!-- ```{r, eval = FALSE} -->
+<!-- install.packages( -->
+<!--   "epidist", repos = "https://epinowcast.r-universe.dev" -->
+<!-- ) -->
+<!-- ``` -->
 
-Alternatively, you can use the [`remotes` package](https://remotes.r-lib.org/) to install the development version from Github (warning! this version may contain breaking changes and/or bugs):
+<!-- Alternatively, y -->
+
+You can use the [`remotes` package](https://remotes.r-lib.org/) to install the development version from Github (warning! this version may contain breaking changes and/or bugs):
 
 ```{r, eval = FALSE}
 remotes::install_github(
@@ -80,15 +82,15 @@ install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOpt
 cmdstanr::install_cmdstan()
 ```
 
-*Note: You can speed up CmdStan installation using the `cores` argument. If you are installing a particular version of `epinowcast`, you may also need to install a past version of CmdStan, which you can do with the `version` argument.*
+*Note: You can speed up CmdStan installation using the `cores` argument. If you are installing a particular version of `epidist`, you may also need to install a past version of CmdStan, which you can do with the `version` argument.*
 
 </details>
 
-<details><summary>Alternative: Docker</summary>
+<!-- <details><summary>Alternative: Docker</summary> -->
 
-We also provide a [Docker](https://www.docker.com/get-started/) image with [`epinowcast` and all dependencies installed](https://github.com/orgs/epinowcast/packages/container/package/epidist). You can use this image to run `epidist` without installing dependencies.
+<!-- We also provide a [Docker](https://www.docker.com/get-started/) image with [all dependencies installed](https://github.com/orgs/epinowcast/packages/container/package/epidist). You can use this image to run `epidist` without installing dependencies. -->
 
-</details>
+<!-- </details> -->
 
 ## Resources
 
@@ -100,30 +102,32 @@ Our [organisation website](https://www.epinowcast.org/) includes links to other 
 
 <details><summary>Community Forum</summary>
 
-Our [community forum](https://community.epinowcast.org/) has areas for [question and answer](https://community.epinowcast.org/c/interface/15) and [considering new methods and tools](https://community.epinowcast.org/c/projects/11), among others. If you are generally interested in real-time analysis of infectious disease, you may find this useful even if do not use `epinowcast`.
+Our [community forum](https://community.epinowcast.org/) has areas for [question and answer](https://community.epinowcast.org/c/interface/15) and [considering new methods and tools](https://community.epinowcast.org/c/projects/11), among others. If you are generally interested in real-time analysis of infectious disease, you may find this useful even if do not use `epidist`.
 
 </details>
 
 ## Contributing
 
-We welcome contributions and new contributors! We particularly appreciate help on [identifying and identified issues](https://github.com/epinowcast/epidist/issues). Please check and add to the issues, and/or add a [pull request](https://github.com/epinowcast/epidist/pulls) and see our [contributing guide](CONTRIBUTING.md) for more information.
+We welcome contributions and new contributors! We particularly appreciate help on [identifying and identified issues](https://github.com/epinowcast/epidist/issues). Please check and add to the issues, and/or add a [pull request](https://github.com/epinowcast/epidist/pulls).
 
-### How to make a bug report or feature request
+<!-- and see our [contributing guide](CONTRIBUTING.md) for more information. -->
 
-Please briefly describe your problem and what output you expect in an [issue](https://github.com/epinowcast/epidist/issues). If you have a question, please don't open an issue. Instead, ask on our [Q and A page](https://github.com/epinowcast/dist/discussions/categories/q-a). See our [contributing guide](CONTRIBUTING.md) for more information.
+<!-- ### How to make a bug report or feature request -->
 
-### Code of Conduct
-  
-Please note that the `epidist` project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.
+<!-- Please briefly describe your problem and what output you expect in an [issue](https://github.com/epinowcast/epidist/issues). -->
+
+<!-- If you have a question, please don't open an issue. Instead, ask on our [Q and A page](https://github.com/epinowcast/dist/discussions/categories/q-a). -->
+<!-- See our [contributing guide](CONTRIBUTING.md) for more information. -->
+
+<!-- ### Code of Conduct -->
+
+<!-- Please note that the `epidist` project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms. -->
 
 ## Citation
 
 If making use of our methodology or the methodology on which ours is based, please cite the relevant papers from our [model outline](https://epidist.epinowcast.org/articles/model.html). If you use `epidist` in your work, please consider citing it with `citation("epidist")`.
 
 ## Contributors
-
-
-
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -133,33 +137,22 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 
 ### Code
 
-
 <a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>, 
 <a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>, 
 <a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>, 
 <a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>
 
-
-
 ### Issue Authors
-
 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>
 
-
-
 ### Issue Contributors
-
 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Asbfnk">sbfnk</a>
 
-
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
-
-
-
