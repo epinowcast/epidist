@@ -1,3 +1,9 @@
+# Note: some tests in this script are stochastic. As such, test failure may be
+# bad luck rather than indicate an issue with the code. However, as these tests
+# are reproducible, the distribution of test failures may be investigated by
+# varying the input seed. Test failure at an unusually high rate does suggest
+# a potential code issue.
+
 prep_obs <- as_latent_individual(sim_obs)
 prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
 
@@ -17,7 +23,8 @@ extract_normal_parameters_brms <- function(prior) {
   return(list(mean = mean, sd = sd))
 }
 
-test_that("epidist.epidist_latent_individual samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case.", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
   prior_samples <- epidist(data = prep_obs, fn = brms::brm,
@@ -36,6 +43,7 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
 })
 
 test_that("epidist.epidist_latent_individual fits and the MCMC converges in the default case", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
   fit <- epidist(data = prep_obs, seed = 1)
@@ -45,6 +53,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
 })
 
 test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
   fit <- epidist(data = prep_obs, seed = 1)
@@ -83,6 +92,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
 })
 
 test_that("epidist.epidist_latent_individual recovers no sex effect when none is simulated", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
@@ -95,6 +105,7 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
 })
 
 test_that("epidist.epidist_latent_individual fits and the MCMC converges for an alternative formula", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
