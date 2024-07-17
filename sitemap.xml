@@ -30,6 +30,9 @@
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stan_chunk.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stancode.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stancode.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_validate.default.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_validate.epidist_latent_individual.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_validate.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_version_stanvar.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/event_to_incidence.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/extract_lognormal_draws.html</loc></url>
@@ -59,6 +62,5 @@
 <url><loc>https://epidist.epinowcast.org/reference/simulate_uniform_cases.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/summarise_draws.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/summarise_variable.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/validate_latent_individual.html</loc></url>
 </urlset>
 
