@@ -38,20 +38,17 @@ biased conclusions.
 <summary>
 Installing the package
 </summary>
+<!-- You can install the latest released version using the normal `R` function, though you need to point to `r-universe` instead of CRAN: -->
+<!-- ```{r, eval = FALSE} -->
+<!-- install.packages( -->
+<!--   "epidist", repos = "https://epinowcast.r-universe.dev" -->
+<!-- ) -->
+<!-- ``` -->
+<!-- Alternatively, y -->
 
-You can install the latest released version using the normal `R`
-function, though you need to point to `r-universe` instead of CRAN:
-
-``` r
-install.packages(
-  "epidist", repos = "https://epinowcast.r-universe.dev"
-)
-```
-
-Alternatively, you can use the [`remotes`
-package](https://remotes.r-lib.org/) to install the development version
-from Github (warning! this version may contain breaking changes and/or
-bugs):
+You can use the [`remotes` package](https://remotes.r-lib.org/) to
+install the development version from Github (warning! this version may
+contain breaking changes and/or bugs):
 
 ``` r
 remotes::install_github(
@@ -96,22 +93,14 @@ cmdstanr::install_cmdstan()
 ```
 
 *Note: You can speed up CmdStan installation using the `cores` argument.
-If you are installing a particular version of `epinowcast`, you may also
+If you are installing a particular version of `epidist`, you may also
 need to install a past version of CmdStan, which you can do with the
 `version` argument.*
 
 </details>
-<details>
-<summary>
-Alternative: Docker
-</summary>
-
-We also provide a [Docker](https://www.docker.com/get-started/) image
-with [`epinowcast` and all dependencies
-installed](https://github.com/orgs/epinowcast/packages/container/package/epidist).
-You can use this image to run `epidist` without installing dependencies.
-
-</details>
+<!-- <details><summary>Alternative: Docker</summary> -->
+<!-- We also provide a [Docker](https://www.docker.com/get-started/) image with [all dependencies installed](https://github.com/orgs/epinowcast/packages/container/package/epidist). You can use this image to run `epidist` without installing dependencies. -->
+<!-- </details> -->
 
 ## Resources
 
@@ -136,7 +125,7 @@ Our [community forum](https://community.epinowcast.org/) has areas for
 and [considering new methods and
 tools](https://community.epinowcast.org/c/projects/11), among others. If
 you are generally interested in real-time analysis of infectious
-disease, you may find this useful even if do not use `epinowcast`.
+disease, you may find this useful even if do not use `epidist`.
 
 </details>
 
@@ -146,22 +135,15 @@ We welcome contributions and new contributors! We particularly
 appreciate help on [identifying and identified
 issues](https://github.com/epinowcast/epidist/issues). Please check and
 add to the issues, and/or add a [pull
-request](https://github.com/epinowcast/epidist/pulls) and see our
-[contributing guide](CONTRIBUTING.md) for more information.
+request](https://github.com/epinowcast/epidist/pulls).
 
-### How to make a bug report or feature request
-
-Please briefly describe your problem and what output you expect in an
-[issue](https://github.com/epinowcast/epidist/issues). If you have a
-question, please don’t open an issue. Instead, ask on our [Q and A
-page](https://github.com/epinowcast/dist/discussions/categories/q-a).
-See our [contributing guide](CONTRIBUTING.md) for more information.
-
-### Code of Conduct
-
-Please note that the `epidist` project is released with a [Contributor
-Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project,
-you agree to abide by its terms.
+<!-- and see our [contributing guide](CONTRIBUTING.md) for more information. -->
+<!-- ### How to make a bug report or feature request -->
+<!-- Please briefly describe your problem and what output you expect in an [issue](https://github.com/epinowcast/epidist/issues). -->
+<!-- If you have a question, please don't open an issue. Instead, ask on our [Q and A page](https://github.com/epinowcast/dist/discussions/categories/q-a). -->
+<!-- See our [contributing guide](CONTRIBUTING.md) for more information. -->
+<!-- ### Code of Conduct -->
+<!-- Please note that the `epidist` project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms. -->
 
 ## Citation
 
