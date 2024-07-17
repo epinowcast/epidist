@@ -41,17 +41,17 @@ test_that("is_latent_individual returns FALSE for incorrect input", { # nolint: 
   })
 })
 
-test_that("validate_latent_individual doesn't produce an error for correct input", { # nolint: line_length_linter.
-  expect_no_error(validate_latent_individual(prep_obs))
+test_that("epidist_validate.epidist_latent_individual doesn't produce an error for correct input", { # nolint: line_length_linter.
+  expect_no_error(epidist_validate(prep_obs))
 })
 
-test_that("validate_latent_individual returns FALSE for incorrect input", { # nolint: line_length_linter.
-  expect_error(validate_latent_individual(list()))
-  expect_error(validate_latent_individual(prep_obs[, 1]))
+test_that("epidist_validate.epidist_latent_individual returns FALSE for incorrect input", { # nolint: line_length_linter.
+  expect_error(epidist_validate(list()))
+  expect_error(epidist_validate(prep_obs[, 1]))
   expect_error({
     x <- list()
     class(x) <- "epidist_latent_individual"
-    validate_latent_individual(x)
+    epidist_validate(x)
   })
 })
 
