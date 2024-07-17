@@ -61,7 +61,7 @@ as_latent_individual.data.frame <- function(data) {
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
   }
-  validate_latent_individual(data)
+  epidist_validate(data)
   return(data)
 }
 
@@ -75,9 +75,10 @@ as_latent_individual.data.frame <- function(data) {
 #' @param data A `data.frame` or `data.table` containing line list data
 #' @importFrom checkmate assert_data_frame assert_names assert_int
 #' assert_numeric
+#' @method epidist_validate epidist_latent_individual
 #' @family latent_individual
 #' @export
-validate_latent_individual <- function(data) {
+epidist_validate.epidist_latent_individual <- function(data) {
   checkmate::assert_true(is_latent_individual(data))
   assert_latent_individual_input(data)
   checkmate::assert_names(
@@ -120,7 +121,7 @@ is_latent_individual <- function(data) {
 #' @export
 epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
                                                       sigma = ~ 1, ...) {
-  validate_latent_individual(data)
+  epidist_validate(data)
   if (!inherits(delay_central, "formula")) {
     cli::cli_abort("A valid formula for delay_central must be provided")
   }
@@ -152,7 +153,7 @@ epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
 #' @export
 epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
                                                      ...) {
-  validate_latent_individual(data)
+  epidist_validate(data)
   checkmate::assert_string(family)
 
   pdf_lookup <- rstan::lookup("pdf")
@@ -207,7 +208,7 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' @family latent_individual
 #' @export
 epidist_prior.epidist_latent_individual <- function(data, ...) {
-  validate_latent_individual(data)
+  epidist_validate(data)
 
   prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
   prior2 <- brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
@@ -223,7 +224,7 @@ epidist_stancode.epidist_latent_individual <- function(data,
                                                          epidist_family(data),
                                                        ...) {
 
-  validate_latent_individual(data)
+  epidist_validate(data)
 
   stanvars_version <- epidist_version_stanvar()
 
