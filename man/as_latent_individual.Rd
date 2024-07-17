@@ -26,13 +26,13 @@ model.
 Other latent_individual: 
 \code{\link{epidist_formula.epidist_latent_individual}()},
 \code{\link{epidist_prior.epidist_latent_individual}()},
-\code{\link{is_latent_individual}()},
-\code{\link{validate_latent_individual}()}
+\code{\link{epidist_validate.epidist_latent_individual}()},
+\code{\link{is_latent_individual}()}
 
 Other latent_individual: 
 \code{\link{epidist_formula.epidist_latent_individual}()},
 \code{\link{epidist_prior.epidist_latent_individual}()},
-\code{\link{is_latent_individual}()},
-\code{\link{validate_latent_individual}()}
+\code{\link{epidist_validate.epidist_latent_individual}()},
+\code{\link{is_latent_individual}()}
 }
 \concept{latent_individual}

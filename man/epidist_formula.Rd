@@ -19,6 +19,7 @@ Other generics:
 \code{\link{epidist}()},
 \code{\link{epidist_family}()},
 \code{\link{epidist_prior}()},
-\code{\link{epidist_stancode}()}
+\code{\link{epidist_stancode}()},
+\code{\link{epidist_validate}()}
 }
 \concept{generics}

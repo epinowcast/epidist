@@ -35,6 +35,7 @@ Other defaults:
 \code{\link{epidist_family.default}()},
 \code{\link{epidist_formula.default}()},
 \code{\link{epidist_prior.default}()},
-\code{\link{epidist_stancode.default}()}
+\code{\link{epidist_stancode.default}()},
+\code{\link{epidist_validate.default}()}
 }
 \concept{defaults}
