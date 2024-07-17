@@ -85,21 +85,25 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges  in the
     prep_obs_gamma,
     family = "gamma",
     dpars = c("mu", "shape"),
-    links = c("log", "log"),
+    links = c("log", "identity"),
     lb = c(0, 0),
     ub = c(NA, NA)
   )
 
   gamma_formula <- epidist_formula(prep_obs_gamma)
   gamma_formula$pforms$sigma <- NULL
-  gamma_formula <- brms::bf(gamma_formula, as.formula("shape ~ 0"))
+  gamma_formula <- brms::bf(gamma_formula, as.formula("shape ~ 1"))
   
+  gamma_prior <- brms::prior("normal(0, 3)", class = "Intercept") +
+    brms::prior("gamma(0.01, 0.01)", class = "Intercept", dpar = "shape", lb = 0)
+    
   fit_gamma <- epidist(
     data = prep_obs_gamma,
     family = gamma_family,
-    prior = brms::prior("normal(0, 3)", class = "Intercept"),
+    prior = gamma_prior,
     formula = gamma_formula,
-    seed = 1
+    seed = 1,
+    brms::brm
   )
   
   expect_s3_class(fit_gamma, "brmsfit")
