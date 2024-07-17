@@ -1,3 +1,9 @@
+stochastic_test_message <- paste0(
+  "Note: this test is stochastic. Test failure may be bad luck rather than ",
+  "indicate an issue. As this test is reproducible, you may investigate the ",
+  "distribution of test failures varying the input seed."
+)
+
 prep_obs <- as_latent_individual(sim_obs)
 prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
 
@@ -17,7 +23,7 @@ extract_normal_parameters_brms <- function(prior) {
   return(list(mean = mean, sd = sd))
 }
 
-test_that("epidist.epidist_latent_individual samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case", { # nolint: line_length_linter.
+test_that(paste0("epidist.epidist_latent_individual samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case. ", stochastic_test_message), { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
   prior_samples <- epidist(data = prep_obs, fn = brms::brm,
@@ -35,7 +41,7 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
   testthat::expect_gt(ks2$p.value, 0.01)
 })
 
-test_that("epidist.epidist_latent_individual fits and the MCMC converges in the default case", { # nolint: line_length_linter.
+test_that(paste0("epidist.epidist_latent_individual fits and the MCMC converges in the default case", stochastic_test_message), { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
   fit <- epidist(data = prep_obs, seed = 1)
@@ -44,7 +50,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   expect_convergence(fit)
 })
 
-test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
+test_that(paste0("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the default case", stochastic_test_message), { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
   fit <- epidist(data = prep_obs, seed = 1)
@@ -82,7 +88,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
   expect_no_error(mod_sex$compile())
 })
 
-test_that("epidist.epidist_latent_individual recovers no sex effect when none is simulated", { # nolint: line_length_linter.
+test_that(paste0("epidist.epidist_latent_individual recovers no sex effect when none is simulated", stochastic_test_message), { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
@@ -94,7 +100,7 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
   expect_equal(mean(draws$b_sigma_sex), 0, tolerance = 0.2)
 })
 
-test_that("epidist.epidist_latent_individual fits and the MCMC converges for an alternative formula", { # nolint: line_length_linter.
+test_that(paste0("epidist.epidist_latent_individual fits and the MCMC converges for an alternative formula", stochastic_test_message), { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
