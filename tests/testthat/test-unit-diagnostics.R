@@ -10,6 +10,16 @@ test_that("epidist_diagnostics", { # nolint: line_length_linter.
     "per_at_max_treedepth"
   )
   expect_equal(names(diag), expected_names)
+  expect_gt(diag$time, 0)
+  expect_numeric(diag$samples)
+  expect_gt(diag$max_rhat, 0.9)
+  expect_lt(diag$max_rhat, 1.1)
+  expect_numeric(diag$divergent_transitions)
+  expect_lt(diag$divergent_transitions, diag$samples)
+  expect_lt(diag$max_treedepth, 12)
+  expect_lt(diag$no_at_max_treedepth, diag$samples)
+  expect_lt(diag$per_at_max_treedepth, 1)
+  expect_gt(diag$per_at_max_treedepth, 0)
 })
 
 test_that("epidist_diagnostics gives an error when passed model fit using the Laplace algorithm", { # nolint: line_length_linter.
