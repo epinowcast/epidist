@@ -15,7 +15,6 @@ Validate
 \seealso{
 Other generics: 
 \code{\link{epidist}()},
-\code{\link{epidist_diagnostics}()},
 \code{\link{epidist_family}()},
 \code{\link{epidist_formula}()},
 \code{\link{epidist_prior}()},

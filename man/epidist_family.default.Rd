@@ -17,8 +17,6 @@ Default method for defining a model specific family
 \seealso{
 Other defaults: 
 \code{\link{epidist.default}()},
-\code{\link{epidist_diagnostics.default}()},
-\code{\link{epidist_diagnostics.epidist_fit}()},
 \code{\link{epidist_formula.default}()},
 \code{\link{epidist_prior.default}()},
 \code{\link{epidist_stancode.default}()},

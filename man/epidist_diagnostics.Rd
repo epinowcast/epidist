@@ -2,7 +2,7 @@
 % Please edit documentation in R/diagnostics.R
 \name{epidist_diagnostics}
 \alias{epidist_diagnostics}
-\title{Diagnostics for fitted epidist model}
+\title{Diagnostics}
 \usage{
 epidist_diagnostics(fit)
 }
@@ -10,15 +10,6 @@ epidist_diagnostics(fit)
 \item{fit}{...}
 }
 \description{
-Diagnostics for fitted epidist model
+Diagnostics
 }
-\seealso{
-Other generics: 
-\code{\link{epidist}()},
-\code{\link{epidist_family}()},
-\code{\link{epidist_formula}()},
-\code{\link{epidist_prior}()},
-\code{\link{epidist_stancode}()},
-\code{\link{epidist_validate}()}
-}
-\concept{generics}
+\concept{diagnostics}

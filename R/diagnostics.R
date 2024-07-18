@@ -1,8 +1,7 @@
 #' Diagnostics
 #'
 #' @param fit ...
-#' @family defaults
-#' @method epidist_diagnostics epidist_fit
+#' @family diagnostics
 #' @export
 epidist_diagnostics <- function(fit) {
   if (!inherits(fit, "epidist_fit")) {
@@ -24,12 +23,12 @@ epidist_diagnostics <- function(fit) {
     divergent_indices <- np$Parameter == "divergent__"
     treedepth_indices <- np$Parameter == "treedepth__"
     diagnostics <- data.table(
+      "time" = sum(rstan::get_elapsed_time(fit$fit)),
       "samples" = nrow(np) / length(unique(np$Parameter)),
       "max_rhat" = round(max(brms::rhat(fit)), 3),
       "divergent_transitions" = sum(np[divergent_indices, ]$Value),
       "per_divergent_transitions" = mean(np[divergent_indices, ]$Value),
-      "max_treedepth" = max(np[treedepth_indices, ]$Value),
-      "time" = rstan::get_elapsed_time(fit$fit)
+      "max_treedepth" = max(np[treedepth_indices, ]$Value)
     )
     diagnostics[, no_at_max_treedepth :=
                     sum(np[treedepth_indices, ]$Value == max_treedepth)]
