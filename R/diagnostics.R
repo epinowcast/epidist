@@ -2,6 +2,7 @@
 #'
 #' @param fit ...
 #' @family diagnostics
+#' @autoglobal
 #' @export
 epidist_diagnostics <- function(fit) {
   if (!inherits(fit, "epidist_fit")) {
@@ -9,7 +10,6 @@ epidist_diagnostics <- function(fit) {
       "!" = "Diagnostics only supported for objects of class epidist_fit"
     ))
   }
-  
   if (fit$algorithm %in% c("laplace", "meanfield", "fullrank", "pathfinder")) {
     cli::cli_abort(c(
       "!" = paste0(
@@ -17,7 +17,6 @@ epidist_diagnostics <- function(fit) {
       )
     ))
   }
-  
   if (fit$algorithm == "sampling") {
     np <- brms::nuts_params(fit)
     divergent_indices <- np$Parameter == "divergent__"
@@ -31,13 +30,12 @@ epidist_diagnostics <- function(fit) {
       "max_treedepth" = max(np[treedepth_indices, ]$Value)
     )
     diagnostics[, no_at_max_treedepth :=
-                    sum(np[treedepth_indices, ]$Value == max_treedepth)]
+                  sum(np[treedepth_indices, ]$Value == max_treedepth)]
     diagnostics[, per_at_max_treedepth := no_at_max_treedepth / samples]
   } else {
-    cli::cli_abort(c( 
+    cli::cli_abort(c(
       "!" = paste0("Unrecognised algorithm: ", fit$algorithm)
     ))
   }
-  
   return(diagnostics)
 }
