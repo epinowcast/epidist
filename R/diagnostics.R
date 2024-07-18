@@ -4,13 +4,14 @@
 #' @param fit ...
 #' @export
 epidist_diagnostics <- function(fit) {
-  UseMethod("epidist")
+  UseMethod("epidist_diagnostics")
 }
 
 #' Default method for returning diagnostics
 #'
 #' @param fit ...
 #' @family defaults
+#' @method epidist_diagnostics default
 #' @export
 epidist_diagnostics.default <- function(fit) {
   stop(
@@ -23,36 +24,38 @@ epidist_diagnostics.default <- function(fit) {
 #'
 #' @param fit ...
 #' @family defaults
+#' @method epidist_diagnostics epidist_fit
 #' @export
-epidist_diagnostics.default <- function(fit) {
-  stop(
-    "No epidist_diagnostics method implemented for the class ", class(data), "\n",
-    "See methods(epidist_diagnostics) for available methods"
-  )
-}
-
-#' Default method for returning diagnostics
-#'
-#' @param fit ...
-#' @family defaults
-#' @export
-epidist_diagnostics <- function(fit) {
-  # diag <- fit$sampler_diagnostics(format = "df")
-  # diagnostics <- data.table(
-  #   samples = nrow(diag),
-  #   max_rhat = round(max(
-  #     fit$summary(
-  #       variables = NULL, posterior::rhat,
-  #       .args = list(na.rm = TRUE)
-  #     )$`posterior::rhat`,
-  #     na.rm = TRUE
-  #   ), 2),
-  #   divergent_transitions = sum(diag$divergent__),
-  #   per_divergent_transitions = sum(diag$divergent__) / nrow(diag),
-  #   max_treedepth = max(diag$treedepth__)
-  # )
-  # diagnostics[, no_at_max_treedepth := sum(diag$treedepth__ == max_treedepth)]
-  # diagnostics[, per_at_max_treedepth := no_at_max_treedepth / nrow(diag)]
+epidist_diagnostics.epidist_fit <- function(fit) {
+  if (fit$algorithm %in% c("laplace", "meanfield", "fullrank", "pathfinder")) {
+    cli::cli_abort(c(
+      "!" = paste0(
+        "Diagnostics not yet supported for the algorithm: ", fit$algorithm
+      )
+    ))
+  } else if (!fit$algorithm == "sampling") {
+    cli::cli_abort(c( 
+      "!" = paste0(
+        "Unrecognised algorithm: ", fit$algorithm
+      )
+    ))
+  } else if (fit$algorithm == "sampling") {
+    np <- brms::nuts_params(fit)
+    divergent_indices <- np$Parameter == "divergent__"
+    treedepth_indices <- np$Parameter == "treedepth__"
+    diagnostics <- data.table(
+      "samples" = nrow(np) / length(unique(np$Parameter)),
+      "max_rhat" = round(max(brms::rhat(fit)), 3),
+      "divergent_transitions" = sum(np[divergent_indices, ]$Value),
+      "per_divergent_transitions" = mean(np[divergent_indices, ]$Value),
+      "max_treedepth" = max(np[treedepth_indices, ]$Value)
+    )
+    diagnostics[, no_at_max_treedepth :=
+                    sum(np[treedepth_indices, ]$Value == max_treedepth)]
+    diagnostics[, per_at_max_treedepth := no_at_max_treedepth / samples]
+  }
   
-  # timing <- round(fit$time()$total, 1)
+  # rstan::get_elapsed_time(fit$fit)
+  
+  return(diagnostics)
 }

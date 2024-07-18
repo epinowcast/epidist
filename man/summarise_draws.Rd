@@ -24,7 +24,6 @@ Other postprocess:
 \code{\link{draws_to_long}()},
 \code{\link{extract_lognormal_draws}()},
 \code{\link{make_relative_to_truth}()},
-\code{\link{sample_model}()},
 \code{\link{summarise_variable}()}
 }
 \concept{postprocess}

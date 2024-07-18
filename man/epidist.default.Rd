@@ -32,6 +32,8 @@ Default method used for interface using \code{brms}
 }
 \seealso{
 Other defaults: 
+\code{\link{epidist_diagnostics.default}()},
+\code{\link{epidist_diagnostics.epidist_fit}()},
 \code{\link{epidist_family.default}()},
 \code{\link{epidist_formula.default}()},
 \code{\link{epidist_prior.default}()},
