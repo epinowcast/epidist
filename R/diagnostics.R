@@ -1,6 +1,24 @@
-#' Diagnostics
-#'
-#' @param fit ...
+#' Diagnostics for `epidist_fit` models
+#' 
+#' This function computes diagnostics to assess the quality of a fitted model.
+#' When the fitting algorithm used is `"sampling"` (HMC) then the output of
+#' `epidist_diagnostics` is a `data.table` containing:
+#' 
+#' * `time`: the total time taken to fit all chains
+#' * `samples`: the total number of samples across all chains
+#' * `max_rhat`: the highest value of the Gelman-Rubin statistic
+#' * `divergent_transitions`: the total number of divergent transitions
+#' * `per_divergent_transitions`: the proportion of samples which had divergent
+#' transitions
+#' * `max_treedepth`: the highest value of the treedepth HMC parameter
+#' * `no_at_max_treedepth`: the number of samples which attained the
+#' `max_treedepth`
+#' * `per_at_max_treedepth`: the proportion of samples which attained the
+#' `max_treedepth`
+#' 
+#' When the fitting algorithm is not `"sampling"` (see `?brms::brm` for other
+#' possible algorithms) then diagnostics are yet to be implemented.
+#' @param fit A fitted model of class `epidist_fit`
 #' @family diagnostics
 #' @autoglobal
 #' @export

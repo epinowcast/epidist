@@ -2,14 +2,34 @@
 % Please edit documentation in R/diagnostics.R
 \name{epidist_diagnostics}
 \alias{epidist_diagnostics}
-\title{Diagnostics}
+\title{Diagnostics for \code{epidist_fit} models}
 \usage{
 epidist_diagnostics(fit)
 }
 \arguments{
-\item{fit}{...}
+\item{fit}{A fitted model of class \code{epidist_fit}}
 }
 \description{
-Diagnostics
+This function computes diagnostics to assess the quality of a fitted model.
+When the fitting algorithm used is \code{"sampling"} (HMC) then the output of
+\code{epidist_diagnostics} is a \code{data.table} containing:
+}
+\details{
+\itemize{
+\item \code{time}: the total time taken to fit all chains
+\item \code{samples}: the total number of samples across all chains
+\item \code{max_rhat}: the highest value of the Gelman-Rubin statistic
+\item \code{divergent_transitions}: the total number of divergent transitions
+\item \code{per_divergent_transitions}: the proportion of samples which had divergent
+transitions
+\item \code{max_treedepth}: the highest value of the treedepth HMC parameter
+\item \code{no_at_max_treedepth}: the number of samples which attained the
+\code{max_treedepth}
+\item \code{per_at_max_treedepth}: the proportion of samples which attained the
+\code{max_treedepth}
+}
+
+When the fitting algorithm is not \code{"sampling"} (see \code{?brms::brm} for other
+possible algorithms) then diagnostics are yet to be implemented.
 }
 \concept{diagnostics}
