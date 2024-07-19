@@ -19,6 +19,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/epidist-package.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_diagnostics.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_family.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_family.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_formula.default.html</loc></url>
@@ -53,7 +54,6 @@
 <url><loc>https://epidist.epinowcast.org/reference/plot_recovery.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/plot_relative_recovery.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/reverse_obs_at.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/sample_model.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/sierra_leone_ebola_data.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/simulate_double_censored_pmf.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/simulate_exponential_cases.html</loc></url>
