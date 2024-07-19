@@ -1,5 +1,5 @@
 ---
-title: "FAQ"
+title: "Frequently asked questions and tips"
 output: 
   bookdown::html_document2:
     toc: true
@@ -20,10 +20,12 @@ bibliography: references.bib
 Here we provide tips for working with the `epidist` package, and answers to "frequently" asked questions.
 If you have a question about using the package, please create an [issue](https://github.com/epinowcast/epidist/issues) and we will endeavour to get back to you soon!
 
-(The hidden code block below is provided to facilitate reproduction of this script, if required!)
+The code block below is provided to facilitate reproduction of this script, if required!
 
 ```{r message=FALSE, results='hide', class.source='fold-hide'}
 library(epidist)
+
+set.seed(1)
 
 meanlog <- 1.8
 sdlog <- 0.5
