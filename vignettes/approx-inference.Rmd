@@ -247,13 +247,9 @@ times <- list(
   "Pathfinder" = time_pathfinder
 )
 
-purrr::imap(times, function(time, name) {
-  data.frame(
-    "method" = name,
-    "time (s)" = time[["elapsed"]]
-  )
-}) |>
-  bind_rows() |>
+times |>
+  purrr::map_dbl("elapsed") |>
+  tibble::enframe(name = "method", value = "time (s)") |>
   gt::gt()
 ```
 
