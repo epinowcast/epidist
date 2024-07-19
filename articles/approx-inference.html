@@ -759,13 +759,9 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <span>  <span class="st">"Pathfinder"</span> <span class="op">=</span> <span class="va">time_pathfinder</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">imap</a></span><span class="op">(</span><span class="va">times</span>, <span class="kw">function</span><span class="op">(</span><span class="va">time</span>, <span class="va">name</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>    <span class="st">"method"</span> <span class="op">=</span> <span class="va">name</span>,</span>
-<span>    <span class="st">"time (s)"</span> <span class="op">=</span> <span class="va">time</span><span class="op">[[</span><span class="st">"elapsed"</span><span class="op">]</span><span class="op">]</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="va">times</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="st">"elapsed"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/enframe.html" class="external-link">enframe</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"method"</span>, value <span class="op">=</span> <span class="st">"time (s)"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">gt</span><span class="fu">::</span><span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div id="rabbmxjcxa" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>#rabbmxjcxa table {
@@ -1219,24 +1215,24 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
 <thead><tr class="gt_col_headings">
 <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="method">method</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="time..s.">time..s.</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="time (s)">time (s)</th>
     </tr></thead>
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time..s." class="gt_row gt_right">33.005</td>
+<td headers="time (s)" class="gt_row gt_right">31.138</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time..s." class="gt_row gt_right">2.563</td>
+<td headers="time (s)" class="gt_row gt_right">2.644</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time..s." class="gt_row gt_right">2.021</td>
+<td headers="time (s)" class="gt_row gt_right">2.057</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time..s." class="gt_row gt_right">0.945</td>
+<td headers="time (s)" class="gt_row gt_right">0.944</td>
 </tr>
 </tbody>
 </table>
