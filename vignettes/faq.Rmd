@@ -4,7 +4,7 @@ output:
   bookdown::html_document2:
     fig_caption: yes
     code_folding: show
-    number_sections: true
+    number_sections: false
 pkgdown:
   as_is: true
 # csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
@@ -16,8 +16,59 @@ vignette: >
 bibliography: references.bib
 ---
 
-## Tip 1
+```{r include=FALSE}
+library(epidist)
 
-## Tip 2
+meanlog <- 1.8
+sdlog <- 0.5
+obs_time <- 25
+sample_size <- 200
 
-## Tip 3
+obs_cens_trunc <- simulate_gillespie(seed = 101) |>
+  simulate_secondary(
+    meanlog = meanlog,
+    sdlog = sdlog
+  ) |>
+  observe_process() |>
+  filter_obs_by_obs_time(obs_time = obs_time)
+
+obs_cens_trunc_samp <-
+  obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
+
+data <- as_latent_individual(obs_cens_trunc_samp)
+fit <- epidist(data, seed = 1)
+```
+
+## I would like to work with the samples output
+
+The output of a call to `epidist` is compatible with typical Stan workflows.
+We recommend use of the `posterior` package for working with samples from MCMC or other sampling algorithms.
+
+```{r message = FALSE}
+library(posterior)
+draws <- posterior::as_draws_df(fit, variable = c("Intercept", "Intercept_sigma"))
+head(draws)
+```
+
+## How can I assess if sampling has converged?
+
+The output of a call to `epidist` is compatible with typical Stan workflows.
+We recommend use of the `bayesplot` package for sampling diagnostic plots.
+
+```{r message = FALSE}
+library(bayesplot)
+bayesplot::mcmc_trace(fit, pars = c("Intercept", "Intercept_sigma"))
+```
+
+## I'd like to run a simulation study
+
+We recommend use of the `purrr` package for running many `epidist` models, for example as a part of a simulation study.
+We particularly highlight two functions which might be useful:
+
+1. `purrr::map` (and other similar functions) for iterating over a list of inputs.
+2. `purrr::safely` which ensures that the function called "always succeeds". In other words, if there is an error it will be captured and output, rather than ending computation (and potentially disrupting a call to `purrr::map`).
+
+For an example use of these functions, have a look at the [`epidist-paper`](https://github.com/parksw3/epidist-paper) repository containing the code for @park2024estimating.
+(Note that in that codebase, we use `map` as a part of a [`targets`](https://books.ropensci.org/targets/) pipeline.)
+
+## Bibliography
