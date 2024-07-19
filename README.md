@@ -170,6 +170,7 @@ Contributions of any kind are welcome!
 <a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>
 
 ### Issue Authors
