@@ -46,7 +46,10 @@ We recommend use of the `posterior` package for working with samples from MCMC o
 
 ```{r message = FALSE}
 library(posterior)
-draws <- posterior::as_draws_df(fit, variable = c("Intercept", "Intercept_sigma"))
+draws <- posterior::as_draws_df(
+  fit,
+  variable = c("Intercept", "Intercept_sigma")
+)
 head(draws)
 ```
 
