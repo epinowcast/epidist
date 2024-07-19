@@ -2,6 +2,7 @@
 title: "FAQ"
 output: 
   bookdown::html_document2:
+    toc: true
     fig_caption: yes
     code_folding: show
     number_sections: false
@@ -16,7 +17,12 @@ vignette: >
 bibliography: references.bib
 ---
 
-```{r include=FALSE}
+Here we provide tips for working with the `epidist` package, and answers to "frequently" asked questions.
+If you have a question about using the package, please create an [issue](https://github.com/epinowcast/epidist/issues) and we will endeavour to get back to you soon!
+
+(The hidden code block below is provided to facilitate reproduction of this script, if required!)
+
+```{r message=FALSE, results='hide', class.source='fold-hide'}
 library(epidist)
 
 meanlog <- 1.8
