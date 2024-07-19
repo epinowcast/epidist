@@ -152,10 +152,14 @@ epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
 #' @family latent_individual
 #' @export
 epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
+                                                     dpars = c("mu", "sigma"),
+                                                     links =
+                                                       c("identity", "log"),
+                                                     lb = c(NA, 0),
+                                                     ub = c(NA, NA),
                                                      ...) {
   epidist_validate(data)
   checkmate::assert_string(family)
-
   pdf_lookup <- rstan::lookup("pdf")
   valid_pdfs <- gsub("_lpdf", "", pdf_lookup$StanFunction)
   if (!family %in% valid_pdfs) {
@@ -165,13 +169,12 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
       such an LPDF in Stan available via cmdstanr, as rstan is behind Stan.)"
     )
   }
-
   brms::custom_family(
     paste0("latent_", family),
-    dpars = c("mu", "sigma"),
-    links = c("identity", "log"),
-    lb = c(NA, 0),
-    ub = c(NA, NA),
+    dpars = dpars,
+    links = links,
+    lb = lb,
+    ub = ub,
     type = "real",
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE
@@ -210,17 +213,14 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
 #' @export
 epidist_prior.epidist_latent_individual <- function(data, ...) {
   epidist_validate(data)
-
   prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
   prior2 <- brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
-
   msg <- c(
     "i" = "The following priors have been set:",
     "*" = "normal(2, 0.5) on the intercept of distributional parameter mu",
     "*" = "normal(0, 0.5) on the intercept of distributional parameter sigma",
     "To alter priors, or set priors on other parameters, see ?epidist_prior."
   )
-
   cli::cli_inform(
     message = msg, .frequency = "regularly", .frequency_id = "prior-message"
   )
@@ -250,6 +250,18 @@ epidist_stancode.epidist_latent_individual <- function(data,
 
   stanvars_functions[[1]]$scode <- gsub(
     "family", family_name, stanvars_functions[[1]]$scode
+  )
+
+  stanvars_functions[[1]]$scode <- gsub(
+    "dpars_A",
+    paste(paste0("vector ", family$dpars), collapse = ", "),
+    stanvars_functions[[1]]$scode
+  )
+
+  stanvars_functions[[1]]$scode <- gsub(
+    "dpars_B",
+    paste(family$dpars, collapse = ", "),
+    stanvars_functions[[1]]$scode
   )
 
   stanvars_data <- brms::stanvar(
