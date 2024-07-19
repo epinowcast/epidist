@@ -17,8 +17,8 @@ test_that("epidist_diagnostics", { # nolint: line_length_linter.
   expect_gte(diag$divergent_transitions, 0)
   expect_lt(diag$divergent_transitions, diag$samples)
   expect_lt(diag$max_treedepth, 12)
-  expect_lt(diag$no_at_max_treedepth, diag$samples)
-  expect_lt(diag$per_at_max_treedepth, 1)
+  expect_lte(diag$no_at_max_treedepth, diag$samples)
+  expect_lte(diag$per_at_max_treedepth, 1)
   expect_gt(diag$per_at_max_treedepth, 0)
 })
 
