@@ -13,6 +13,7 @@ add_natural_scale_mean_sd <- function(data, ...) {
 #' @inheritParams add_natural_scale_mean_sd
 #' @param ... Additional arguments for method.
 #' @family postprocess
+#' @method add_natural_scale_mean_sd default
 #' @export
 add_natural_scale_mean_sd.default <- function(data, ...) {
   cli::cli_inform(
@@ -31,6 +32,7 @@ add_natural_scale_mean_sd.default <- function(data, ...) {
 #' @inheritParams add_natural_scale_mean_sd
 #' @param ... Additional arguments for method.
 #' @family postprocess
+#' @method add_natural_scale_mean_sd latent_lognormal
 #' @autoglobal
 #' @export
 add_natural_scale_mean_sd.latent_lognormal <- function(data, ...) {
@@ -47,6 +49,7 @@ add_natural_scale_mean_sd.latent_lognormal <- function(data, ...) {
 #' @inheritParams add_natural_scale_mean_sd
 #' @param ... Additional arguments for method.
 #' @family postprocess
+#' @method add_natural_scale_mean_sd latent_gamma
 #' @autoglobal
 #' @export
 add_natural_scale_mean_sd.latent_gamma <- function(data, ...) {

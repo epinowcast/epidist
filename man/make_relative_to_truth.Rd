@@ -19,6 +19,9 @@ Make posterior lognormal samples relative to true values
 \seealso{
 Other postprocess: 
 \code{\link{add_natural_scale_mean_sd}()},
+\code{\link{add_natural_scale_mean_sd.default}()},
+\code{\link{add_natural_scale_mean_sd.latent_gamma}()},
+\code{\link{add_natural_scale_mean_sd.latent_lognormal}()},
 \code{\link{draws_to_long}()},
 \code{\link{extract_lognormal_draws}()},
 \code{\link{summarise_draws}()},

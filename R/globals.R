@@ -5,9 +5,6 @@ utils::globalVariables(c(
   "max_treedepth", # <epidist_diagnostics>
   "per_at_max_treedepth", # <epidist_diagnostics>
   "samples", # <epidist_diagnostics>
-  "meanlog", # <add_natural_scale_mean_sd>
-  "sdlog", # <add_natural_scale_mean_sd>
-  "sd", # <add_natural_scale_mean_sd>
   "sdlog", # <extract_lognormal_draws>
   "sdlog_log", # <extract_lognormal_draws>
   "meanlog", # <extract_lognormal_draws>
@@ -72,6 +69,13 @@ utils::globalVariables(c(
   "ptime_daily", # <plot_mean_posterior_pred>
   "n", # <plot_mean_posterior_pred>
   "obs_horizon", # <plot_mean_posterior_pred>
+  "mu", # <add_natural_scale_mean_sd.latent_lognormal>
+  "sigma", # <add_natural_scale_mean_sd.latent_lognormal>
+  "sd", # <add_natural_scale_mean_sd.latent_lognormal>
+  "sigma", # <add_natural_scale_mean_sd.latent_gamma>
+  "sd", # <add_natural_scale_mean_sd.latent_gamma>
+  "mu", # <add_natural_scale_mean_sd.latent_gamma>
+  "shape", # <add_natural_scale_mean_sd.latent_gamma>
   "time", # <linelist_to_counts>
   "primary", # <linelist_to_cases>
   "secondary", # <linelist_to_cases>
