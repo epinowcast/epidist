@@ -1,6 +1,6 @@
 #' Add natural scale parameters
 #'
-#' @param data A dataframe to be used for modelling.
+#' @param data A dataframe of distributional parameters
 #' @param ... Additional arguments for method.
 #' @family postprocess
 #' @export
