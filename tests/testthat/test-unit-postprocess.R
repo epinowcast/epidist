@@ -13,6 +13,9 @@ fit$family$link_sigma
 brms::posterior_epred(fit)
 brms::posterior_predict(fit)
 
+linpred_mu <- brms::posterior_linpred(fit, transform = TRUE, dpar = "mu")
+linpred_sigma <- brms::posterior_linpred(fit, transform = TRUE, dpar = "sigma")
+
 fit$family$family <- "lognormal"
 fit$family$name <- "lognormal"
 
