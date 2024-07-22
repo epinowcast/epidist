@@ -16,6 +16,10 @@ brms::posterior_predict(fit)
 linpred_mu <- brms::posterior_linpred(fit, transform = TRUE, dpar = "mu")
 linpred_sigma <- brms::posterior_linpred(fit, transform = TRUE, dpar = "sigma")
 
+pp <- brms::prepare_predictions(fit)
+pp$dpars$mu$fe$b
+pp$dpars$sigma$fe$b
+
 fit$family$family <- "lognormal"
 fit$family$name <- "lognormal"
 
