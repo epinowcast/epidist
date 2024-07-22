@@ -4,7 +4,8 @@ pkgdown_sha: 2841c0f994fda7f7c7da94034bd24e3882fc7a37
 articles:
   approx-inference: approx-inference.html
   epidist: epidist.html
-last_built: 2024-07-22T10:24Z
+  faq: faq.html
+last_built: 2024-07-22T11:06Z
 urls:
   reference: https://epidist.epinowcast.org/reference
   article: https://epidist.epinowcast.org/articles
