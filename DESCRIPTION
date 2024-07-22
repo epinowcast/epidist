@@ -34,7 +34,8 @@ Imports:
     stats,
     cli,
     checkmate,
-    rstan
+    rstan,
+    bayesplot
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
