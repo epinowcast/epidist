@@ -1,16 +1,3 @@
-#' Add natural scale summary parameters for a lognormal distribution
-#'
-#' @param dt ...
-#' @family postprocess
-#' @autoglobal
-#' @export
-add_natural_scale_mean_sd <- function(dt) {
-  nat_dt <- data.table::copy(dt)
-  nat_dt <- nat_dt[, mean := exp(meanlog + sdlog ^ 2 / 2)]
-  nat_dt <- nat_dt[, sd := mean * sqrt(exp(sdlog ^ 2) - 1)]
-  return(nat_dt[])
-}
-
 #' Extract posterior samples for a lognormal brms model
 #'
 #' @param data ...
