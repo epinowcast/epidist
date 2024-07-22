@@ -20,8 +20,8 @@ Extract posterior samples for a lognormal brms model
 Other postprocess: 
 \code{\link{add_natural_scale_mean_sd}()},
 \code{\link{add_natural_scale_mean_sd.default}()},
-\code{\link{add_natural_scale_mean_sd.latent_gamma}()},
-\code{\link{add_natural_scale_mean_sd.latent_lognormal}()},
+\code{\link{add_natural_scale_mean_sd.gamma_samples}()},
+\code{\link{add_natural_scale_mean_sd.lognormal_samples}()},
 \code{\link{draws_to_long}()},
 \code{\link{make_relative_to_truth}()},
 \code{\link{summarise_draws}()},

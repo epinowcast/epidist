@@ -69,13 +69,12 @@ utils::globalVariables(c(
   "ptime_daily", # <plot_mean_posterior_pred>
   "n", # <plot_mean_posterior_pred>
   "obs_horizon", # <plot_mean_posterior_pred>
-  "mu", # <add_natural_scale_mean_sd.latent_lognormal>
-  "sigma", # <add_natural_scale_mean_sd.latent_lognormal>
-  "sd", # <add_natural_scale_mean_sd.latent_lognormal>
-  "sigma", # <add_natural_scale_mean_sd.latent_gamma>
-  "sd", # <add_natural_scale_mean_sd.latent_gamma>
-  "mu", # <add_natural_scale_mean_sd.latent_gamma>
-  "shape", # <add_natural_scale_mean_sd.latent_gamma>
+  "mu", # <add_natural_scale_mean_sd.lognormal_samples>
+  "sigma", # <add_natural_scale_mean_sd.lognormal_samples>
+  "sd", # <add_natural_scale_mean_sd.lognormal_samples>
+  "mu", # <add_natural_scale_mean_sd.gamma_samples>
+  "sd", # <add_natural_scale_mean_sd.gamma_samples>
+  "shape", # <add_natural_scale_mean_sd.gamma_samples>
   "time", # <linelist_to_counts>
   "primary", # <linelist_to_cases>
   "secondary", # <linelist_to_cases>

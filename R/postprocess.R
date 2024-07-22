@@ -32,10 +32,10 @@ add_natural_scale_mean_sd.default <- function(data, ...) {
 #' @inheritParams add_natural_scale_mean_sd
 #' @param ... Additional arguments for method.
 #' @family postprocess
-#' @method add_natural_scale_mean_sd latent_lognormal
+#' @method add_natural_scale_mean_sd lognormal_samples
 #' @autoglobal
 #' @export
-add_natural_scale_mean_sd.latent_lognormal <- function(data, ...) {
+add_natural_scale_mean_sd.lognormal_samples <- function(data, ...) {
   nat_dt <- data.table::copy(data)
   nat_dt <- nat_dt[, mean := exp(mu + sigma ^ 2 / 2)]
   nat_dt <- nat_dt[, sd := mu * sqrt(exp(sigma ^ 2) - 1)]
@@ -49,12 +49,12 @@ add_natural_scale_mean_sd.latent_lognormal <- function(data, ...) {
 #' @inheritParams add_natural_scale_mean_sd
 #' @param ... Additional arguments for method.
 #' @family postprocess
-#' @method add_natural_scale_mean_sd latent_gamma
+#' @method add_natural_scale_mean_sd gamma_samples
 #' @autoglobal
 #' @export
-add_natural_scale_mean_sd.latent_gamma <- function(data, ...) {
+add_natural_scale_mean_sd.gamma_samples <- function(data, ...) {
   nat_dt <- data.table::copy(data)
-  nat_dt <- nat_dt[, mean := sigma]
+  nat_dt <- nat_dt[, mean := mu]
   nat_dt <- nat_dt[, sd := mu / sqrt(shape)]
   return(nat_dt[])
 }
