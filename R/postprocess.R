@@ -25,6 +25,9 @@ add_natural_scale_mean_sd.default <- function(data, ...) {
 
 #' Add natural scale parameters for a latent lognormal model
 #'
+#' Note that the input parameters here are `mu` and `sigma`, corresponding to
+#' the distributional parameters used by `brms` for the `lognormal` family.
+#'
 #' @inheritParams add_natural_scale_mean_sd
 #' @param ... Additional arguments for method.
 #' @family postprocess
@@ -32,8 +35,8 @@ add_natural_scale_mean_sd.default <- function(data, ...) {
 #' @export
 add_natural_scale_mean_sd.latent_lognormal <- function(data, ...) {
   nat_dt <- data.table::copy(data)
-  nat_dt <- nat_dt[, mean := exp(meanlog + sdlog ^ 2 / 2)]
-  nat_dt <- nat_dt[, sd := mean * sqrt(exp(sdlog ^ 2) - 1)]
+  nat_dt <- nat_dt[, mean := exp(mu + sigma ^ 2 / 2)]
+  nat_dt <- nat_dt[, sd := mu * sqrt(exp(sigma ^ 2) - 1)]
   return(nat_dt[])
 }
 
