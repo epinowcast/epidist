@@ -1,4 +1,4 @@
-test_that("add_natural_scale_mean_sd.lognormal_samples", { # nolint: line_length_linter.
+test_that("add_natural_scale_mean_sd.lognormal_samples works with posterior samples from the latent lognormal model", { # nolint: line_length_linter.
   set.seed(1)
   prep_obs <- as_latent_individual(sim_obs)
   fit <- epidist(data = prep_obs, seed = 1)
@@ -11,11 +11,15 @@ test_that("add_natural_scale_mean_sd.lognormal_samples", { # nolint: line_length
   
   linpred_melt <- dplyr::left_join(linpred_mu_melt, linpred_sigma_melt)
   class(linpred_melt) <- c(class(linpred_melt), "lognormal_samples")
-  x <- add_natural_scale_mean_sd(data.table::as.data.table(linpred_melt))
-  # Test x here
+  dt <- data.table::as.data.table(linpred_melt)
+  x <- add_natural_scale_mean_sd(dt)
+  expect_s3_class(x, "data.table")
+  expect_named(x, c("draw", "index", "mu", "sigma", "mean", "sd"))
+  expect_true(all(x$mean > 0))
+  expect_true(all(x$sd > 0))
 })
 
-test_that("add_natural_scale_mean_sd.lognormal_samples", { # nolint: line_length_linter.
+test_that("add_natural_scale_mean_sd.gamma_samples works with simulated gamma distribution parameter data", { # nolint: line_length_linter.
   set.seed(1)
   dt <- data.table(
     shape = rnorm(n = 100, mean = 2, sd = 0.1),
@@ -24,28 +28,8 @@ test_that("add_natural_scale_mean_sd.lognormal_samples", { # nolint: line_length
   dt[, mu := shape / rate]
   class(dt) <- c(class(dt), "gamma_samples")
   x <- add_natural_scale_mean_sd(dt)
-  # Test x here
+  expect_s3_class(x, "data.table")
+  expect_named(x, c("shape", "rate", "mu", "mean", "sd"))
+  expect_true(all(x$mean > 0))
+  expect_true(all(x$sd > 0))
 })
-
-# Below contains implementation notes:
-
-# Need to modify this (i.e. "latent_lognormal")
-fit$family
-
-# (Which includes these names for the link functions needed)
-fit$family$link
-fit$family$link_sigma
-
-# To work with these existing brms prediction functions
-brms::posterior_epred(fit)
-brms::posterior_predict(fit)
-
-pp <- brms::prepare_predictions(fit)
-pp$dpars$mu$fe$b
-pp$dpars$sigma$fe$b
-
-fit$family$family <- "lognormal"
-fit$family$name <- "lognormal"
-
-str(fit$family)
-brms::posterior_predict(fit)
