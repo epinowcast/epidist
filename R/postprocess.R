@@ -42,6 +42,8 @@ add_natural_scale_mean_sd.latent_lognormal <- function(data, ...) {
 
 #' Add natural scale parameters for a latent gamma model
 #'
+#' Again, `mu` and `shape` here are the distributional parameters of `brms`.
+#'
 #' @inheritParams add_natural_scale_mean_sd
 #' @param ... Additional arguments for method.
 #' @family postprocess
@@ -49,6 +51,7 @@ add_natural_scale_mean_sd.latent_lognormal <- function(data, ...) {
 #' @export
 add_natural_scale_mean_sd.latent_gamma <- function(data, ...) {
   nat_dt <- data.table::copy(data)
-  # Do something here!
+  nat_dt <- nat_dt[, mean := sigma]
+  nat_dt <- nat_dt[, sd := mu / sqrt(shape)]
   return(nat_dt[])
 }
