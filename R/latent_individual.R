@@ -122,12 +122,12 @@ epidist_family.epidist_latent_individual <- function(data,
                                                      ...) {
   epidist_validate(data)
   checkmate::assert_string(family)
+  # brms also has lb and ub in brms::custom_family, but not in brms::brmsfamily
+  non_mu_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
   brms::custom_family(
     paste0("latent_", family$family),
     dpars = family$dpars,
-    links = c(family$link, family[[paste0("link_", setdiff(family$dpars, "mu"))]])
-    # lb = ?,
-    # ub = ?,
+    links =   c(family$link, non_mu_links),
     type = family$type,
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE
