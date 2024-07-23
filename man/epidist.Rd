@@ -9,12 +9,6 @@ epidist(data, formula, family, prior, fn, ...)
 \arguments{
 \item{data}{A dataframe to be used for modelling.}
 
-\item{formula}{A formula as defined using \code{\link[=epidist_formula]{epidist_formula()}}}
-
-\item{family}{...}
-
-\item{prior}{...}
-
 \item{fn}{Likely \code{brms::brm}. Also possible to be \code{brms::make_stancode} or
 \code{brms::make_standata}.}
 

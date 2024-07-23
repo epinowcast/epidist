@@ -138,19 +138,20 @@ epidist_family.epidist_latent_individual <- function(data,
 #'
 #' @param data ...
 #' @param family The output of `epidist_family()`
-#' @param form A list of formula
+#' @param formula A list of formula
 #' @param ... ...
 #' @method epidist_formula epidist_latent_individual
 #' @family latent_individual
 #' @importFrom stats as.formula
 #' @export
-epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
+epidist_formula.epidist_latent_individual <- function(data, family, formula,
+                                                      ...) {
   epidist_validate(data)
-  if (!all(sapply(form, inherits, "formula"))) {
-    cli::cli_abort("form must contain a list of formula")
+  if (!all(sapply(formula, inherits, "formula"))) {
+    cli::cli_abort("formula must contain a list of formula")
   }
   required_dpars <- family$dpars
-  dpars <- sapply(form, function(x) all.vars(x)[1])
+  dpars <- sapply(formula, function(x) all.vars(x)[1])
   if (!setequal(required_dpars, dpars)) {
     missing_input <- setdiff(required_dpars, dpars)
     extra_input <- setdiff(dpars, required_dpars)
@@ -174,7 +175,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
     }
   }
   dpars <- as.list(dpars)
-  form_vars <- lapply(form, function(x) attr(terms(x), "term.labels"))
+  form_vars <- lapply(formula, function(x) attr(terms(x), "term.labels"))
   form_vars <- Filter(function(x) !identical(x, character(0)), form_vars)
   missing_vars <- setdiff(unlist(form_vars), names(data))
   missing_vars <- setdiff(form_vars, names(data))
@@ -187,12 +188,12 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
     )
   }
   mu_index <- which(dpars == "mu")
-  form[[mu_index]] <- update(
-    form[[mu_index]],
+  formula[[mu_index]] <- update(
+    formula[[mu_index]],
     delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ .
   )
-  form <- do.call(brms::bf, form)
-  return(form)
+  formula <- do.call(brms::bf, formula)
+  return(formula)
 }
 
 #' Define priors for the model
@@ -204,21 +205,31 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
 #' @family latent_individual
 #' @importFrom cli cli_inform
 #' @export
-epidist_prior.epidist_latent_individual <- function(data, family) {
+epidist_prior.epidist_latent_individual <- function(data, family, formula) {
   epidist_validate(data)
-  prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
-  prior2 <- brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
-  msg <- c(
-    "i" = "The following priors have been set:",
-    "*" = "normal(2, 0.5) on the intercept of distributional parameter mu",
-    "*" = "normal(0, 0.5) on the intercept of distributional parameter sigma",
-    "To alter priors, or set priors on other parameters, see ?epidist_prior."
-  )
-  cli::cli_inform(
-    message = msg, .frequency = "regularly", .frequency_id = "prior-message"
-  )
-
-  return(prior1 + prior2)
+  if (identical(family$dpars, c("mu", "sigma"))) {
+    prior_mu <- brms::prior("normal(2, 0.5)", class = "Intercept")
+    prior_sigma <- brms::prior(
+      "normal(0, 0.5)", class = "Intercept", dpar = "sigma"
+    )
+    msg <- c(
+      "i" = "The following priors have been set:",
+      "*" = "normal(2, 0.5) on the intercept of distributional parameter mu",
+      "*" = "normal(0, 0.5) on the intercept of distributional parameter sigma",
+      "To alter priors, or set priors on other parameters, see ?epidist_prior."
+    )
+    cli::cli_inform(
+      message = msg, .frequency = "regularly", .frequency_id = "prior-message"
+    )
+    priors <- prior_mu + prior_sigma
+  } else {
+    cli::cli_warn(c(
+      "!" = "Priors not available for these distributional parameters.",
+      "Using the default priors from brms"
+    ))
+    priors <- brms::get_prior(formula)
+  }
+  return(priors)
 }
 
 #' @method epidist_stancode epidist_latent_individual

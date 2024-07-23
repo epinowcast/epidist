@@ -4,23 +4,10 @@
 \alias{epidist.default}
 \title{Default method used for interface using \code{brms}}
 \usage{
-\method{epidist}{default}(
-  data,
-  formula = epidist_formula(data),
-  family = epidist_family(data),
-  prior = epidist_prior(data),
-  fn = brms::brm,
-  ...
-)
+\method{epidist}{default}(data, formula, family, fn = brms::brm, ...)
 }
 \arguments{
 \item{data}{A dataframe to be used for modelling.}
-
-\item{formula}{A formula as defined using \code{\link[=epidist_formula]{epidist_formula()}}}
-
-\item{family}{...}
-
-\item{prior}{...}
 
 \item{fn}{Likely \code{brms::brm}. Also possible to be \code{brms::make_stancode} or
 \code{brms::make_standata}.}
