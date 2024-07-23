@@ -51,9 +51,6 @@ epidist_stancode <- function(data, ...) {
 
 #' Interface using `brms`
 #'
-#' @param formula A formula as defined using [epidist_formula()]
-#' @param family ...
-#' @param prior ...
 #' @param fn Likely `brms::brm`. Also possible to be `brms::make_stancode` or
 #' `brms::make_standata`.
 #' @inheritParams epidist_validate
