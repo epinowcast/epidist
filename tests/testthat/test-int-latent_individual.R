@@ -36,8 +36,8 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
   samples1 <- rnorm(1000, mean = param1$mean, sd = param1$sd)
   samples2 <- exp(rnorm(1000, mean = param2$mean, sd = param2$sd))
   # suppressWarnings here used to prevent warnings about ties
-  ks1 <- suppressWarnings(stats::ks.test(lognormal_draws$meanlog, samples1))
-  ks2 <- suppressWarnings(stats::ks.test(lognormal_draws$sdlog, samples2))
+  ks1 <- suppressWarnings(stats::ks.test(lognormal_draws$mu, samples1))
+  ks2 <- suppressWarnings(stats::ks.test(lognormal_draws$sigma, samples2))
   testthat::expect_gt(ks1$p.value, 0.01)
   testthat::expect_gt(ks2$p.value, 0.01)
 })
@@ -59,8 +59,8 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   fit <- epidist(data = prep_obs, seed = 1)
   lognormal_draws <- extract_lognormal_draws(fit)
   # Unclear the extent to which we should expect parameter recovery here
-  expect_equal(mean(lognormal_draws$meanlog), meanlog, tolerance = 0.1)
-  expect_equal(mean(lognormal_draws$sdlog), sdlog, tolerance = 0.1)
+  expect_equal(mean(lognormal_draws$mu), meanlog, tolerance = 0.1)
+  expect_equal(mean(lognormal_draws$sigma), sdlog, tolerance = 0.1)
 })
 
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles in the gamma delay case", { # nolint: line_length_linter.
