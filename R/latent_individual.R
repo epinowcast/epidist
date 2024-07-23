@@ -111,36 +111,24 @@ is_latent_individual <- function(data) {
 #' Check if data has the `epidist_latent_individual` class
 #'
 #' @param data A `data.frame` or `data.table` containing line list data
+#' @param family Output of a call to `brms::brmsfamily()`
 #'
 #' @importFrom rstan lookup
 #' @method epidist_family epidist_latent_individual
 #' @family latent_individual
 #' @export
-epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
-                                                     dpars = c("mu", "sigma"),
-                                                     links =
-                                                       c("identity", "log"),
-                                                     lb = c(NA, 0),
-                                                     ub = c(NA, NA),
+epidist_family.epidist_latent_individual <- function(data,
+                                                     family = brms::lognormal(),
                                                      ...) {
   epidist_validate(data)
   checkmate::assert_string(family)
-  pdf_lookup <- rstan::lookup("pdf")
-  valid_pdfs <- gsub("_lpdf", "", pdf_lookup$StanFunction)
-  if (!family %in% valid_pdfs) {
-    cli::cli_warn(
-      "The provided family {.code family} does not correspond to a valid LPDF
-      function available in rstan. (It is possible [but unlikely] that there is
-      such an LPDF in Stan available via cmdstanr, as rstan is behind Stan.)"
-    )
-  }
   brms::custom_family(
-    paste0("latent_", family),
-    dpars = dpars,
-    links = links,
-    lb = lb,
-    ub = ub,
-    type = "real",
+    paste0("latent_", family$family),
+    dpars = family$dpars,
+    # links = ?,
+    # lb = ?,
+    # ub = ?,
+    type = family$type,
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE
   )
