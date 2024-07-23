@@ -150,10 +150,10 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
     cli::cli_abort("form must contain a list of formula")
   }
   required_dpars <- family$dpars
-  input_dpars <- sapply(form, function(x) all.vars(x)[1])
-  if (!setequal(required_dpars, input_dpars)) {
-    missing_input <- setdiff(required_dpars, input_dpars)
-    extra_input <- setdiff(input_dpars, required_dpars)
+  dpars <- sapply(form, function(x) all.vars(x)[1])
+  if (!setequal(required_dpars, dpars)) {
+    missing_input <- setdiff(required_dpars, dpars)
+    extra_input <- setdiff(dpars, required_dpars)
     if (length(missing_input) > 0) {
       cli::cli_abort(
         paste0(
@@ -173,7 +173,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
       )
     }
   }
-  input_dpars <- as.list(input_dpars)
+  dpars <- as.list(dpars)
   form_vars <- lapply(form, function(x) attr(terms(x), "term.labels"))
   form_vars <- Filter(function(x) !identical(x, character(0)), form_vars)
   missing_vars <- setdiff(unlist(form_vars), names(data))
@@ -186,7 +186,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
       )
     )
   }
-  mu_index <- which(input_dpars == "mu")
+  mu_index <- which(dpars == "mu")
   form[[mu_index]] <- update(
     form[[mu_index]],
     delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ .
@@ -197,35 +197,14 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
 
 #' Define priors for the model
 #'
-#' We provide suggested priors for the intercepts of the `meanlog` and `sdlog`
-#' linear predictors. These priors are weakly informative in that they prevent
-#' very large delays on the real scale. In particular:
-#'
-#' * `eta_meanlog ~ normal(2, 0.5)`
-#' * `eta_sdlog ~ normal(0, 0.5)`
-#'
-#' Note that the link function used for `meanlog` is a constant, and the link
-#' function used for `sdlog` is a logarithm, such that the expectation of
-#' `sdlog` is the exponential of `eta_sdlog`.
-#'
-#' To alter the priors for this model, we suggest two possible workflows:
-#'
-#' 1. Use `brms::get_prior` to extract the default `brms` priors for your model.
-#' You may then alter these priors, and pass them to `epidist`. Note that the
-#' default `brms` priors are different to the priors we suggest.
-#'
-#' 2. Alternatively, after fitting the model, the all priors used in the model
-#' may be extracted using `brms::prior_summary()`.
-#'
-#' Examples of these two workflows will be provided as a part of a vignette at
-#' a future date.
+#' We provide suggested weakly informative priors.
 #'
 #' @inheritParams epidist_prior
 #' @method epidist_prior epidist_latent_individual
 #' @family latent_individual
 #' @importFrom cli cli_inform
 #' @export
-epidist_prior.epidist_latent_individual <- function(data, ...) {
+epidist_prior.epidist_latent_individual <- function(data, family) {
   epidist_validate(data)
   prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
   prior2 <- brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
