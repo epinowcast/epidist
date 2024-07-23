@@ -125,7 +125,7 @@ epidist_family.epidist_latent_individual <- function(data,
   brms::custom_family(
     paste0("latent_", family$family),
     dpars = family$dpars,
-    # links = ?,
+    links = c(family$link, family[[paste0("link_", setdiff(family$dpars, "mu"))]])
     # lb = ?,
     # ub = ?,
     type = family$type,
