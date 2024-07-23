@@ -108,45 +108,10 @@ is_latent_individual <- function(data) {
   inherits(data, "epidist_latent_individual")
 }
 
-#' Define a formula for the latent_individual model
+#' Check if data has the `epidist_latent_individual` class
 #'
-#' @param data ...
-#' @param delay_central Formula for the delay mean. Defaults to intercept only.
-#' @param sigma Formula for the delay standard deviation. Defaults to intercept
-#' only.
-#' @param ... ...
-#' @method epidist_formula epidist_latent_individual
-#' @family latent_individual
-#' @importFrom stats as.formula
-#' @export
-epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
-                                                      sigma = ~ 1, ...) {
-  epidist_validate(data)
-  if (!inherits(delay_central, "formula")) {
-    cli::cli_abort("A valid formula for delay_central must be provided")
-  }
-  if (!inherits(sigma, "formula")) {
-    cli::cli_abort("A valid formula for sigma must be provided")
-  }
-  formula_vars <- c(all.vars(delay_central), all.vars(sigma))
-  missing_vars <- setdiff(formula_vars, names(data))
-  if (length(missing_vars) > 0) {
-    cli::cli_abort(
-      paste0(
-        "The following variables are missing from data: ",
-        paste(missing_vars, collapse = ", ")
-      )
-    )
-  }
-  delay_equation <- paste0(
-    "delay_central | vreal(obs_t, pwindow_upr, swindow_upr)",
-    paste(delay_central, collapse = " ")
-  )
-  sigma_equation <- paste0("sigma", paste(sigma, collapse = " "))
-  form <- brms::bf(as.formula(delay_equation), as.formula(sigma_equation))
-  return(form)
-}
-
+#' @param data A `data.frame` or `data.table` containing line list data
+#'
 #' @importFrom rstan lookup
 #' @method epidist_family epidist_latent_individual
 #' @family latent_individual
@@ -179,6 +144,63 @@ epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE
   )
+}
+
+#' Define a formula for the latent_individual model
+#'
+#' @param data ...
+#' @param family The output of `epidist_family()`
+#' @param form A list of formula
+#' @param ... ...
+#' @method epidist_formula epidist_latent_individual
+#' @family latent_individual
+#' @importFrom stats as.formula
+#' @export
+epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
+  epidist_validate(data)
+  if (!all(sapply(form, inherits, "formula"))) {
+    cli::cli_abort("form must contain a list of formula")
+  }
+  required_dpars <- family$dpars
+  input_dpars <- sapply(form, function(x) all.vars(x)[1])
+  if (!setequal(required_dpars, input_dpars)) {
+    missing_input <- setdiff(required_dpars, input_dpars)
+    extra_input <- setdiff(input_dpars, required_dpars)
+    if (length(missing_input) > 0) {
+      cli::cli_abort(
+        paste0(
+          "Formula for these distributional parameters must be provided: ",
+          paste(missing_input, collapse = ", ")
+        )
+      )
+    }
+    if (length(extra_input) > 0) {
+      cli::cli_abort(
+        paste0(
+          "Formula provided for parameters not in specified family: ",
+          paste(extra_input, collapse = ", ")
+        )
+      )
+    }
+  }
+  input_dpars <- as.list(input_dpars)
+  form_vars <- lapply(form, function(x) all.vars(delete.response(terms(x))))
+  missing_vars <- setdiff(form_vars, names(data))
+  if (length(missing_vars) > 0) {
+    cli::cli_abort(
+      paste0(
+        "The following variables are missing from data: ",
+        paste(missing_vars, collapse = ", ")
+      )
+    )
+  }
+  mu_index <- which(input_dpars == "mu")
+  mu_rhs <- form_vars[mu_index]
+  lhs <- "delay_central | vreal(obs_t, pwindow_upr, swindow_upr)"
+  delay_form <- stats::reformulate(mu_rhs, response = lhs)
+  form[[mu_index]] <- delay_form
+  form <- do.call(brms::bf, form)
+  return(form)
 }
 
 #' Define priors for the model

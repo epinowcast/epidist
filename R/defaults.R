@@ -79,8 +79,8 @@ epidist_stancode.default <- function(data, ...) {
 epidist.default <- function(data, fn = brms::brm, ...) {
   epidist_validate(data)
   family <- epidist_family(data)
-  formula <- epidist_formula(data)
-  prior <- epidist_prior(data)
+  formula <- epidist_formula(data = data, family = family)
+  prior <- epidist_prior(data = data, family = family)
   stancode <- epidist_stancode(data = data, family = family)
   fit <- fn(
     formula = formula, family = family, prior = prior, stanvars = stancode,
