@@ -184,7 +184,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
     }
   }
   input_dpars <- as.list(input_dpars)
-  form_vars <- lapply(form, function(x) all.vars(delete.response(terms(x))))
+  form_vars <- lapply(form, function(x) attr(terms(x), "term.labels"))
   missing_vars <- setdiff(form_vars, names(data))
   if (length(missing_vars) > 0) {
     cli::cli_abort(
@@ -195,10 +195,10 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
     )
   }
   mu_index <- which(input_dpars == "mu")
-  mu_rhs <- form_vars[mu_index]
-  lhs <- "delay_central | vreal(obs_t, pwindow_upr, swindow_upr)"
-  delay_form <- stats::reformulate(mu_rhs, response = lhs)
-  form[[mu_index]] <- delay_form
+  form[[mu_index]] <- update(
+    form[[mu_index]],
+    delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ .
+  )
   form <- do.call(brms::bf, form)
   return(form)
 }
