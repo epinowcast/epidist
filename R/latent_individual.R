@@ -121,7 +121,7 @@ epidist_family.epidist_latent_individual <- function(data,
                                                      family = brms::lognormal(),
                                                      ...) {
   epidist_validate(data)
-  checkmate::assert_string(family)
+  checkmate::assert_class(family, "brmsfamily")
   # brms also has lb and ub in brms::custom_family, but not in brms::brmsfamily
   non_mu_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
   brms::custom_family(
