@@ -170,15 +170,17 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
       cli::cli_abort(
         paste0(
           "Formula for these distributional parameters must be provided: ",
-          paste(missing_input, collapse = ", ")
+          paste(missing_input, collapse = ", "),
+          " (These parameters are required for the family you have specified!)"
         )
       )
     }
     if (length(extra_input) > 0) {
       cli::cli_abort(
         paste0(
-          "Formula provided for parameters not in specified family: ",
+          "Formulas provided for parameters not in specified family: ",
           paste(extra_input, collapse = ", ")
+          " Please remove these formulas from your input!"
         )
       )
     }
