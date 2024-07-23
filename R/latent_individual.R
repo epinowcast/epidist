@@ -185,6 +185,8 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
   }
   input_dpars <- as.list(input_dpars)
   form_vars <- lapply(form, function(x) attr(terms(x), "term.labels"))
+  form_vars <- Filter(function(x) !identical(x, character(0)), form_vars)
+  missing_vars <- setdiff(unlist(form_vars), names(data))
   missing_vars <- setdiff(form_vars, names(data))
   if (length(missing_vars) > 0) {
     cli::cli_abort(
