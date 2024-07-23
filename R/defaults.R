@@ -71,15 +71,16 @@ epidist_stancode.default <- function(data, ...) {
 
 #' Default method used for interface using `brms`
 #'
+#' @inheritParams epidist_formula
 #' @inheritParams epidist
 #' @rdname epidist.default
 #' @method epidist default
 #' @family defaults
 #' @export
-epidist.default <- function(data, fn = brms::brm, ...) {
+epidist.default <- function(data, form, fn = brms::brm, ...) {
   epidist_validate(data)
   family <- epidist_family(data)
-  formula <- epidist_formula(data = data, family = family)
+  formula <- epidist_formula(data = data, family = family, form = form)
   prior <- epidist_prior(data = data, family = family)
   stancode <- epidist_stancode(data = data, family = family)
   fit <- fn(
