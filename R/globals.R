@@ -5,9 +5,10 @@ utils::globalVariables(c(
   "max_treedepth", # <epidist_diagnostics>
   "per_at_max_treedepth", # <epidist_diagnostics>
   "samples", # <epidist_diagnostics>
-  "sdlog", # <extract_lognormal_draws>
-  "sdlog_log", # <extract_lognormal_draws>
-  "meanlog", # <extract_lognormal_draws>
+  "mu", # <extract_lognormal_draws>
+  "Intercept", # <extract_lognormal_draws>
+  "sigma", # <extract_lognormal_draws>
+  "Intercept_sigma", # <extract_lognormal_draws>
   "id", # <extract_lognormal_draws>
   "true_value", # <make_relative_to_truth>
   "value", # <make_relative_to_truth>

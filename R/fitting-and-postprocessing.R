@@ -20,18 +20,10 @@ extract_lognormal_draws <- function(data, id_vars, from_dt = FALSE) {
   draws <- posterior::as_draws_df(draws) |>
     data.table::as.data.table()
 
-  data.table::setnames(
-    draws, c("Intercept", "Intercept_sigma"), c("meanlog", "sdlog_log"),
-    skip_absent = TRUE
-  )
-
-  data.table::setnames(
-    draws, c("b_Intercept", "b_sigma_Intercept"), c("meanlog", "sdlog_log"),
-    skip_absent = TRUE
-  )
-
-  draws <- draws[, sdlog := exp(sdlog_log)]
-  draws <- draws[, list(meanlog, sdlog)]
+  draws <- draws[, mu := Intercept]
+  draws <- draws[, sigma := exp(Intercept_sigma)]
+  draws <- draws[, list(mu, sigma)]
+  class(draws) <- c(class(draws), "lognormal_samples")
   draws <- add_natural_scale_mean_sd(draws)
 
   if (!missing(id_vars)) {
@@ -51,7 +43,7 @@ extract_lognormal_draws <- function(data, id_vars, from_dt = FALSE) {
 draws_to_long <- function(draws) {
   long_draws <- data.table::melt(
     draws,
-    measure.vars = c("meanlog", "sdlog", "mean", "sd"),
+    measure.vars = c("mu", "sigma", "mean", "sd"),
     variable.name = "parameter"
   )
   return(long_draws[])

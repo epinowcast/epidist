@@ -168,7 +168,7 @@ fits <- list(
 draws <- purrr::imap(fits, function(fit, name) {
   extract_lognormal_draws(fit) |>
     draws_to_long() |>
-    filter(parameter %in% c("meanlog", "sdlog")) |>
+    filter(parameter %in% c("mu", "sigma")) |>
     mutate(method = as.factor(name))
 })
 
@@ -194,7 +194,7 @@ More comprehensively, the estimated posterior distributions are as follows.
 
 ```{r}
 draws |>
-  filter(parameter == "meanlog") |>
+  filter(parameter == "mu") |>
   ggplot(aes(x = value, fill = method)) +
   geom_histogram(aes(y = ..density..)) +
   scale_fill_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
@@ -206,7 +206,7 @@ draws |>
 
 ```{r}
 draws |>
-  filter(parameter == "sdlog") |>
+  filter(parameter == "sigma") |>
   ggplot(aes(x = value, fill = method)) +
   geom_histogram(aes(y = ..density..)) +
   scale_fill_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
@@ -218,7 +218,7 @@ draws |>
 
 ## Comparison of resulting delay distributions
 
-How do these different distributions on the `meanlog` and `sdlog` parameters effect the estimated delay distribution?
+How do these different distributions on the `mu` and `sigma` parameters effect the estimated delay distribution?
 
 ```{r}
 purrr::pmap_df(
