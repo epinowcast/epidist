@@ -179,7 +179,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, form, ...) {
       cli::cli_abort(
         paste0(
           "Formulas provided for parameters not in specified family: ",
-          paste(extra_input, collapse = ", ")
+          paste(extra_input, collapse = ", "),
           " Please remove these formulas from your input!"
         )
       )
