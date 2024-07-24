@@ -77,7 +77,8 @@ epidist_stancode.default <- function(data, ...) {
 #' @method epidist default
 #' @family defaults
 #' @export
-epidist.default <- function(data, formula, family, fn = brms::brm, ...) {
+epidist.default <- function(data, formula = list(mu ~ 1, sigma ~ 1),
+                            family = brms::lognormal(), fn = brms::brm, ...) {
   epidist_validate(data)
   epidist_family <- epidist_family(data, family)
   epidist_formula <- epidist_formula(
