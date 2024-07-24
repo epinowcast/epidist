@@ -131,7 +131,7 @@ epidist_family.epidist_latent_individual <- function(data,
   brms::custom_family(
     paste0("latent_", family$family),
     dpars = family$dpars,
-    links =   c(family$link, non_mu_links),
+    links = c(family$link, non_mu_links),
     type = family$type,
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE
