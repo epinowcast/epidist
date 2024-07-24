@@ -4,10 +4,14 @@
 \alias{epidist}
 \title{Interface using \code{brms}}
 \usage{
-epidist(data, formula, family, prior, fn, ...)
+epidist(data, formula, family, fn, ...)
 }
 \arguments{
 \item{data}{A dataframe to be used for modelling.}
+
+\item{formula}{...}
+
+\item{family}{...}
 
 \item{fn}{Likely \code{brms::brm}. Also possible to be \code{brms::make_stancode} or
 \code{brms::make_standata}.}

@@ -8,6 +8,10 @@
 }
 \arguments{
 \item{data}{A dataframe to be used for modelling.}
+
+\item{family}{...}
+
+\item{formula}{...}
 }
 \description{
 We provide suggested weakly informative priors.

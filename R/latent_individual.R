@@ -112,6 +112,7 @@ is_latent_individual <- function(data) {
 #'
 #' @param data A `data.frame` or `data.table` containing line list data
 #' @param family Output of a call to `brms::brmsfamily()`
+#' @param ... ...
 #'
 #' @importFrom rstan lookup
 #' @method epidist_family epidist_latent_individual
@@ -149,7 +150,7 @@ epidist_family.epidist_latent_individual <- function(data,
 #' @param ... ...
 #' @method epidist_formula epidist_latent_individual
 #' @family latent_individual
-#' @importFrom stats as.formula
+#' @importFrom stats as.formula update terms
 #' @export
 epidist_formula.epidist_latent_individual <- function(data, family, formula,
                                                       ...) {
@@ -182,7 +183,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
     }
   }
   dpars <- as.list(dpars)
-  form_vars <- lapply(formula, function(x) attr(terms(x), "term.labels"))
+  form_vars <- lapply(formula, function(x) attr(stats::terms(x), "term.labels"))
   form_vars <- Filter(function(x) !identical(x, character(0)), form_vars)
   missing_vars <- setdiff(unlist(form_vars), names(data))
   missing_vars <- setdiff(form_vars, names(data))
@@ -195,7 +196,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
     )
   }
   mu_index <- which(dpars == "mu")
-  formula[[mu_index]] <- update(
+  formula[[mu_index]] <- stats::update(
     formula[[mu_index]],
     delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ .
   )

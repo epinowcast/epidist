@@ -10,6 +10,8 @@
 \item{data}{A \code{data.frame} or \code{data.table} containing line list data}
 
 \item{family}{Output of a call to \code{brms::brmsfamily()}}
+
+\item{...}{...}
 }
 \description{
 Check if data has the \code{epidist_latent_individual} class
