@@ -41,7 +41,7 @@ epidist_family.default <- function(data, ...) {
 }
 
 #' Default method for defining model specific priors
-#' 
+#'
 #' @inheritParams epidist_prior
 #' @family defaults
 #' @importFrom cli cli_abort

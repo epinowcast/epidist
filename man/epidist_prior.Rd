@@ -4,14 +4,14 @@
 \alias{epidist_prior}
 \title{Define model specific priors}
 \usage{
-epidist_prior(data, formula, family, ...)
+epidist_prior(data, family, formula, ...)
 }
 \arguments{
 \item{data}{A dataframe to be used for modelling.}
 
-\item{formula}{...}
-
 \item{family}{...}
+
+\item{formula}{...}
 
 \item{...}{Additional arguments for method.}
 }
