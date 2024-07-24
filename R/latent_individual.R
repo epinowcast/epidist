@@ -125,13 +125,16 @@ epidist_family.epidist_latent_individual <- function(data,
     cli::cli_abort("family must be a family object")
   }
   family <- brms:::validate_family(family) # allows use of stats:: family
-  # brms also has lb and ub in brms::custom_family, but not in brms::brmsfamily
   non_mu_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
-  # Use the function dpar_bounds() here
+  non_mu_bounds <- lapply(
+    family$dpars[-1], brms:::dpar_bounds, family = family$family
+  )
   brms::custom_family(
     paste0("latent_", family$family),
     dpars = family$dpars,
     links = c(family$link, non_mu_links),
+    lb = c(NA, as.numeric(lapply(non_mu_bounds, "[[", "lb"))),
+    ub = c(NA, as.numeric(lapply(non_mu_bounds, "[[", "ub"))),
     type = family$type,
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE
