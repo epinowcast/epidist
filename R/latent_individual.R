@@ -121,9 +121,13 @@ epidist_family.epidist_latent_individual <- function(data,
                                                      family = brms::lognormal(),
                                                      ...) {
   epidist_validate(data)
-  checkmate::assert_class(family, "brmsfamily")
+  if (!checkmate::test_class(family, "family")) {
+    cli::cli_abort("family must be a family object")
+  }
+  family <- brms:::validate_family(family) # allows use of stats:: family
   # brms also has lb and ub in brms::custom_family, but not in brms::brmsfamily
   non_mu_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
+  # Use the function dpar_bounds() here
   brms::custom_family(
     paste0("latent_", family$family),
     dpars = family$dpars,
@@ -225,7 +229,7 @@ epidist_prior.epidist_latent_individual <- function(data, family, formula) {
   } else {
     cli::cli_warn(c(
       "!" = "Priors not available for these distributional parameters.",
-      "Using the default priors from brms"
+      "Using the default priors from brms."
     ))
     priors <- brms::get_prior(formula)
   }
