@@ -234,7 +234,13 @@ epidist_prior.epidist_latent_individual <- function(data, family, formula) {
       "!" = "Priors not available for these distributional parameters.",
       "Using the default priors from brms."
     ))
-    priors <- brms::get_prior(formula)
+    # This is currently not working, but does it matter? Ok to just return NULL?
+    # Still has this, say for the Gamma():
+    # lprior += student_t_lpdf(Intercept | 3, 0, 2.5);
+    # lprior += student_t_lpdf(Intercept_shape | 3, 0, 2.5);
+    # formula <- do.call(brms::bf, formula)
+    # priors <- brms::default_prior(formula, data, family)
+    priors <- NULL
   }
   return(priors)
 }

@@ -78,8 +78,8 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
     formula = list(mu ~ 1, shape ~ 1),
     fn = brms::make_stancode
   )
-  mod_gamma <- cmdstan_model(
-    stan_file = write_stan_file(stancode_gamma), compile = FALSE
+  mod_gamma <- cmdstanr::cmdstan_model(
+    stan_file = cmdstanr::write_stan_file(stancode_gamma), compile = FALSE
   )
   expect_true(mod_gamma$check_syntax())
   expect_no_error(mod_gamma$compile())
