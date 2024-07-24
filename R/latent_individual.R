@@ -213,7 +213,8 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
 #' @family latent_individual
 #' @importFrom cli cli_inform
 #' @export
-epidist_prior.epidist_latent_individual <- function(data, family, formula) {
+epidist_prior.epidist_latent_individual <- function(data, family, formula,
+                                                    ...) {
   epidist_validate(data)
   if (identical(family$dpars, c("mu", "sigma"))) {
     prior_mu <- brms::prior("normal(2, 0.5)", class = "Intercept")

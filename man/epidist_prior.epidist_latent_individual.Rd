@@ -4,7 +4,7 @@
 \alias{epidist_prior.epidist_latent_individual}
 \title{Define priors for the model}
 \usage{
-\method{epidist_prior}{epidist_latent_individual}(data, family, formula)
+\method{epidist_prior}{epidist_latent_individual}(data, family, formula, ...)
 }
 \arguments{
 \item{data}{A dataframe to be used for modelling.}
@@ -12,6 +12,8 @@
 \item{family}{...}
 
 \item{formula}{...}
+
+\item{...}{Additional arguments for method.}
 }
 \description{
 We provide suggested weakly informative priors.
