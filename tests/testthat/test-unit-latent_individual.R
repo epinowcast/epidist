@@ -100,7 +100,7 @@ test_that("epidist_formula.epidist_latent_individual with custom formulas produc
   expect_s3_class(form_sex, "brmsformula")
   expect_equal(
     as_string_formula(form_sex$formula),
-    "delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1 + sex"
+    "delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ sex"
   )
   expect_equal(
     as_string_formula(form_sex$pforms$sigma),
