@@ -37,12 +37,76 @@ library(purrr)
 library(ggplot2)
 ```
 
-* Its generative form
-* An explanation of how it accounts for censoring and right truncation
+# Maths
+
+Let $p$ be time of primary event with rate (incidence) $\mathcal{P}(p)$.
+Let $s$ be time of secondary eveng with rate (incidence) $\mathcal{S}(s)$.
+Let $f_p(\tau)$ be probability of delay $\tau$ after observing primary event at time $p$ such that $p + \tau = s$.
+Let $b_s(\tau)$ be probability of delay $\tau$ after observing secondary event at time $s$.
+Let $\mathcal{T}(p, s)$ be density of individuals with primary event at time $p$ and secondary event at time $s$.
+Then forwards
+$$
+\mathcal{T}(p, s) = \mathcal{P}(p) f_p(s - p),
+$$
+and backwards
+$$
+\mathcal{T}(p, s) = \mathcal{S}(s) b_s(s - p).
+$$
+Therefore by equivalence of forwards and backwards
+$$
+\mathcal{P}(p) f_p(s - p) = \mathcal{S}(s) b_s(s - p).
+$$
+Rearranging gives
+$$
+b_s(\tau) = \frac{\mathcal{P}(s - \tau) f_{s - \tau}(\tau)}{\mathcal{S}(s)}.
+$$
+The denominator may be expressed as the integral over all possible delays
+$$
+\mathcal{S}(s) = \int_{-\infty}^\infty \mathcal{P}(s - \tau) f_{s - \tau}(\tau) \text{d} \tau.
+$$
+
+## Correct thing
+
+Let $\mathbf{Y}$ be the data vector and $\boldsymbol{\theta}$ be parameters.
+Then
+$$ 
+\mathcal{L}(\mathbf{Y} \, | \, \boldsymbol{\theta}) = \prod_i \mathbb{P}(S_{L, i} < S < S_{R, i} \, | \, P_{L, i} < P < P_{R, i}, S < T).
+$$
+
+<!-- Shouldn't this be a joint likelihood? -->
+
+Equivalent latent variable approach
+\begin{align}
+x_i &\sim g_P(x_i \, | \, p_{L, i}, p_{R, i}) \\
+y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
+\mathcal{L}(\mathbf{Y} \, | \, \boldsymbol{\theta}) &= \prod_i \left[ \frac{f_\text{forward}(y_i - x_i)}{\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_\text{forward}(T - z) \text{d}z} \right].
+\end{align}
+
+Modelling $g_P$ $\iff$ modelling incidence in primary events.
+This is a tough thing to do.
+
+## Approximate thing that we do
+
+**Assume primary event incidence constant** leads to
+\begin{align}
+x_i &\sim \text{Unif}(p_{L, i}, p_{R, i}) \\
+y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}).
+\end{align}
+Further, assume that censoring interval is narrow such that
+$$
+\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_\text{forward}(T - z) \text{d}z \approx F_\text{forward}(T - x_i),
+$$
+then
+$$
+\mathcal{L}(\mathbf{Y}_i \, | \, \boldsymbol{\theta}) = \frac{f_\text{forward}(y_i - x_i)}{F_\text{forward}(T - x_i)}.
+$$
+This is the approach of @ward2022transmission.
+
+# Implementation
+
 * How it is implemented in the package
 * What the extra arguments of the function do, if you'd like to change them
 * Which parts of the arguments we would imagine you might want to change and the potential use-cases
-* The limitations of the model (ways it's not ideal)
 
 ```{r}
 formula <- brms::bf(delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1, sigma ~ 1)
@@ -66,5 +130,7 @@ scode_tparameters <- "\n    vector<lower = 0>[N] pwindow;\n    vector<lower = 0>
 
 scode_priors <- "\n    swindow_raw ~ uniform(0, 1);\n    pwindow_raw ~ uniform(0, 1);\n  "
 ```
+
+* The limitations of the model (ways it's not ideal)
 
 ## Bibliography {-}
