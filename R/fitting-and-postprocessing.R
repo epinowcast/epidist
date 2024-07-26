@@ -24,7 +24,7 @@ extract_lognormal_draws <- function(data, id_vars, from_dt = FALSE) {
   draws <- draws[, sigma := exp(Intercept_sigma)]
   draws <- draws[, list(mu, sigma)]
   class(draws) <- c(class(draws), "lognormal_samples")
-  draws <- add_natural_scale_mean_sd(draws)
+  draws <- add_mean_sd(draws)
 
   if (!missing(id_vars)) {
     draws <- merge(

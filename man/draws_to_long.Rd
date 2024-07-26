@@ -14,10 +14,10 @@ Convert posterior lognormal samples to long format
 }
 \seealso{
 Other postprocess: 
-\code{\link{add_natural_scale_mean_sd}()},
-\code{\link{add_natural_scale_mean_sd.default}()},
-\code{\link{add_natural_scale_mean_sd.gamma_samples}()},
-\code{\link{add_natural_scale_mean_sd.lognormal_samples}()},
+\code{\link{add_mean_sd}()},
+\code{\link{add_mean_sd.default}()},
+\code{\link{add_mean_sd.gamma_samples}()},
+\code{\link{add_mean_sd.lognormal_samples}()},
 \code{\link{extract_lognormal_draws}()},
 \code{\link{make_relative_to_truth}()},
 \code{\link{summarise_draws}()},
