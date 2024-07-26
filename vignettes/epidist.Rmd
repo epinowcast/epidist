@@ -98,7 +98,7 @@ Now, to generate secondary events, we will use a lognormal distribution (Figure 
 ```{r}
 secondary_dist <- data.table(mu = 1.8, sigma = 0.5)
 class(secondary_dist) <- c(class(secondary_dist), "lognormal_samples")
-secondary_dist <- add_natural_scale_mean_sd(secondary_dist)
+secondary_dist <- add_mean_sd(secondary_dist)
 ```
 
 (ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
