@@ -6,12 +6,12 @@ test_that("add_mean_sd.lognormal_samples works with posterior samples from the l
   lp_mu <- brms::posterior_linpred(fit, transform = TRUE, dpar = "mu") |>
     as.table() |>
     as.data.table()
-  names(ld_mu) <- c("draw", "index", "mu")
+  names(lp_mu) <- c("draw", "index", "mu")
   lp_sigma <- brms::posterior_linpred(fit, transform = TRUE, dpar = "sigma") |>
     as.table() |>
     as.data.table(value.name = "sigma")
-  names(ld_sigma) <- c("draw", "index", "sigma")
-  lp <- dplyr::left_join(ld_mu, ld_sigma)
+  names(lp_sigma) <- c("draw", "index", "sigma")
+  lp <- dplyr::left_join(lp_mu, lp_sigma)
   class(lp) <- c(class(lp), "lognormal_samples")
   x <- add_mean_sd(lp)
   expect_s3_class(x, "data.table")
