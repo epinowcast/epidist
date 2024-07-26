@@ -3,11 +3,11 @@ test_that("add_mean_sd.lognormal_samples works with posterior samples from the l
   set.seed(1)
   prep_obs <- as_latent_individual(sim_obs)
   fit <- epidist(data = prep_obs, seed = 1)
-  ld_mu <- brms::posterior_linpred(fit, transform = TRUE, dpar = "mu") |>
+  lp_mu <- brms::posterior_linpred(fit, transform = TRUE, dpar = "mu") |>
     as.table() |>
     as.data.table()
   names(ld_mu) <- c("draw", "index", "mu")
-  ld_sigma <- brms::posterior_linpred(fit, transform = TRUE, dpar = "sigma") |>
+  lp_sigma <- brms::posterior_linpred(fit, transform = TRUE, dpar = "sigma") |>
     as.table() |>
     as.data.table(value.name = "sigma")
   names(ld_sigma) <- c("draw", "index", "sigma")
