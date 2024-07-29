@@ -3,5 +3,5 @@ real latent_family_lpdf(vector y, vector mu, vector sigma, vector pwindow,
   int n = num_elements(y);
   vector[n] d = y - pwindow + swindow;
   vector[n] obs_time = to_vector(obs_t) - pwindow;
-  return family_lpdf(d | mu, sigma) - family_lcdf(obs_time | mu, sigma);
+  return family_lpdf(d | mu, sigma) T[0.0, obs_time];
 }
