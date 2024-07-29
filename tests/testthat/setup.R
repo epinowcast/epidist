@@ -24,7 +24,7 @@ set.seed(101)
 shape <- 2
 rate <- 3
 
-# The mean of the gamma distribution is: shape * rate
+# The mean of the gamma distribution is: shape / rate
 
 sim_obs_gamma <- simulate_gillespie() |>
   simulate_secondary(
