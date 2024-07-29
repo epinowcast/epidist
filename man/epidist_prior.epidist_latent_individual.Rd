@@ -4,43 +4,24 @@
 \alias{epidist_prior.epidist_latent_individual}
 \title{Define priors for the model}
 \usage{
-\method{epidist_prior}{epidist_latent_individual}(data, ...)
+\method{epidist_prior}{epidist_latent_individual}(data, family, formula, ...)
 }
 \arguments{
 \item{data}{A dataframe to be used for modelling.}
 
+\item{family}{...}
+
+\item{formula}{...}
+
 \item{...}{Additional arguments for method.}
 }
 \description{
-We provide suggested priors for the intercepts of the \code{meanlog} and \code{sdlog}
-linear predictors. These priors are weakly informative in that they prevent
-very large delays on the real scale. In particular:
-}
-\details{
-\itemize{
-\item \code{eta_meanlog ~ normal(2, 0.5)}
-\item \code{eta_sdlog ~ normal(0, 0.5)}
-}
-
-Note that the link function used for \code{meanlog} is a constant, and the link
-function used for \code{sdlog} is a logarithm, such that the expectation of
-\code{sdlog} is the exponential of \code{eta_sdlog}.
-
-To alter the priors for this model, we suggest two possible workflows:
-\enumerate{
-\item Use \code{brms::get_prior} to extract the default \code{brms} priors for your model.
-You may then alter these priors, and pass them to \code{epidist}. Note that the
-default \code{brms} priors are different to the priors we suggest.
-\item Alternatively, after fitting the model, the all priors used in the model
-may be extracted using \code{brms::prior_summary()}.
-}
-
-Examples of these two workflows will be provided as a part of a vignette at
-a future date.
+We provide suggested weakly informative priors.
 }
 \seealso{
 Other latent_individual: 
 \code{\link{as_latent_individual}()},
+\code{\link{epidist_family.epidist_latent_individual}()},
 \code{\link{epidist_formula.epidist_latent_individual}()},
 \code{\link{epidist_validate.epidist_latent_individual}()},
 \code{\link{is_latent_individual}()}
