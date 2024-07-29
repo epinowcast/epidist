@@ -5,12 +5,10 @@ utils::globalVariables(c(
   "max_treedepth", # <epidist_diagnostics>
   "per_at_max_treedepth", # <epidist_diagnostics>
   "samples", # <epidist_diagnostics>
-  "meanlog", # <add_natural_scale_mean_sd>
-  "sdlog", # <add_natural_scale_mean_sd>
-  "sd", # <add_natural_scale_mean_sd>
-  "sdlog", # <extract_lognormal_draws>
-  "sdlog_log", # <extract_lognormal_draws>
-  "meanlog", # <extract_lognormal_draws>
+  "mu", # <extract_lognormal_draws>
+  "Intercept", # <extract_lognormal_draws>
+  "sigma", # <extract_lognormal_draws>
+  "Intercept_sigma", # <extract_lognormal_draws>
   "id", # <extract_lognormal_draws>
   "true_value", # <make_relative_to_truth>
   "value", # <make_relative_to_truth>
@@ -72,6 +70,12 @@ utils::globalVariables(c(
   "ptime_daily", # <plot_mean_posterior_pred>
   "n", # <plot_mean_posterior_pred>
   "obs_horizon", # <plot_mean_posterior_pred>
+  "mu", # <add_mean_sd.lognormal_samples>
+  "sigma", # <add_mean_sd.lognormal_samples>
+  "sd", # <add_mean_sd.lognormal_samples>
+  "mu", # <add_mean_sd.gamma_samples>
+  "sd", # <add_mean_sd.gamma_samples>
+  "shape", # <add_mean_sd.gamma_samples>
   "time", # <linelist_to_counts>
   "primary", # <linelist_to_cases>
   "secondary", # <linelist_to_cases>
