@@ -4,15 +4,14 @@
 \alias{epidist_formula.epidist_latent_individual}
 \title{Define a formula for the latent_individual model}
 \usage{
-\method{epidist_formula}{epidist_latent_individual}(data, delay_central = ~1, sigma = ~1, ...)
+\method{epidist_formula}{epidist_latent_individual}(data, family, formula, ...)
 }
 \arguments{
 \item{data}{...}
 
-\item{delay_central}{Formula for the delay mean. Defaults to intercept only.}
+\item{family}{The output of \code{epidist_family()}}
 
-\item{sigma}{Formula for the delay standard deviation. Defaults to intercept
-only.}
+\item{formula}{A list of formula}
 
 \item{...}{...}
 }
@@ -22,6 +21,7 @@ Define a formula for the latent_individual model
 \seealso{
 Other latent_individual: 
 \code{\link{as_latent_individual}()},
+\code{\link{epidist_family.epidist_latent_individual}()},
 \code{\link{epidist_prior.epidist_latent_individual}()},
 \code{\link{epidist_validate.epidist_latent_individual}()},
 \code{\link{is_latent_individual}()}

@@ -30,11 +30,13 @@ epidist_family <- function(data, ...) {
 #' Define model specific priors
 #'
 #' @inheritParams epidist_validate
+#' @param family ...
+#' @param formula ...
 #' @param ... Additional arguments for method.
 #' @rdname epidist_prior
 #' @family generics
 #' @export
-epidist_prior <- function(data, ...) {
+epidist_prior <- function(data, family, formula, ...) {
   UseMethod("epidist_prior")
 }
 
@@ -51,15 +53,14 @@ epidist_stancode <- function(data, ...) {
 
 #' Interface using `brms`
 #'
-#' @param formula A formula as defined using [epidist_formula()]
+#' @inheritParams epidist_validate
+#' @param formula ...
 #' @param family ...
-#' @param prior ...
 #' @param fn Likely `brms::brm`. Also possible to be `brms::make_stancode` or
 #' `brms::make_standata`.
-#' @inheritParams epidist_validate
 #' @param ... Additional arguments for method.
 #' @family generics
 #' @export
-epidist <- function(data, formula, family, prior, fn, ...) {
+epidist <- function(data, formula, family, fn, ...) {
   UseMethod("epidist")
 }
