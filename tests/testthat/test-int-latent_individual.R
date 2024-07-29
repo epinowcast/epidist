@@ -9,8 +9,13 @@ prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
 
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles in the default case", { # nolint: line_length_linter.
   skip_on_cran()
-  stancode <- epidist(data = prep_obs, fn = brms::make_stancode)
-  mod <- cmdstan_model(stan_file = write_stan_file(stancode), compile = FALSE)
+  stancode <- epidist(
+    data = prep_obs,
+    fn = brms::make_stancode
+  )
+  mod <- cmdstanr::cmdstan_model(
+    stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
+  )
   expect_true(mod$check_syntax())
   expect_no_error(mod$compile())
 })
@@ -27,10 +32,12 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
-  prior_samples <- epidist(data = prep_obs, fn = brms::brm,
-                           sample_prior = "only", seed = 1)
+  prior_samples <- epidist(
+    data = prep_obs, fn = brms::brm, sample_prior = "only", seed = 1
+  )
   lognormal_draws <- extract_lognormal_draws(prior_samples)
-  prior <- epidist_prior(data = prep_obs)
+  family <- epidist_family(data = prep_obs, family = brms::lognormal())
+  prior <- epidist_prior(data = prep_obs, family = family)
   param1 <- extract_normal_parameters_brms(prior[1, ])
   param2 <- extract_normal_parameters_brms(prior[2, ])
   samples1 <- rnorm(1000, mean = param1$mean, sd = param1$sd)
@@ -67,11 +74,12 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
   skip_on_cran()
   stancode_gamma <- epidist(
     data = prep_obs_gamma,
-    family = epidist_family(prep_obs_gamma, family = "gamma"),
+    family = stats::Gamma(link = "log"),
+    formula = list(mu ~ 1, shape ~ 1),
     fn = brms::make_stancode
   )
-  mod_gamma <- cmdstan_model(
-    stan_file = write_stan_file(stancode_gamma), compile = FALSE
+  mod_gamma <- cmdstanr::cmdstan_model(
+    stan_file = cmdstanr::write_stan_file(stancode_gamma), compile = FALSE
   )
   expect_true(mod_gamma$check_syntax())
   expect_no_error(mod_gamma$compile())
@@ -80,12 +88,13 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles for an alternative formula", { # nolint: line_length_linter.
   skip_on_cran()
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
-  formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
-                                 sigma = ~ 1 + sex)
-  stancode_sex <- epidist(data = prep_obs, formula = formula_sex,
-                          fn = brms::make_stancode)
-  mod_sex <- cmdstan_model(
-    stan_file = write_stan_file(stancode_sex), compile = FALSE
+  stancode_sex <- epidist(
+    data = prep_obs,
+    formula = list(mu ~ 1 + sex, sigma ~ 1 + sex),
+    fn = brms::make_stancode
+  )
+  mod_sex <- cmdstanr::cmdstan_model(
+    stan_file = cmdstanr::write_stan_file(stancode_sex), compile = FALSE
   )
   expect_true(mod_sex$check_syntax())
   expect_no_error(mod_sex$compile())
@@ -96,9 +105,10 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
   skip_on_cran()
   set.seed(1)
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
-  formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
-                                 sigma = ~ 1 + sex)
-  fit_sex <- epidist(data = prep_obs, formula = formula_sex, seed = 1)
+  fit_sex <- epidist(
+    data = prep_obs,
+    formula = list(mu ~ 1 + sex, sigma ~ 1 + sex)
+  )
   draws <- posterior::as_draws_df(fit_sex$fit)
   expect_equal(mean(draws$b_sex), 0, tolerance = 0.2)
   expect_equal(mean(draws$b_sigma_sex), 0, tolerance = 0.2)
@@ -109,9 +119,10 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges for an 
   skip_on_cran()
   set.seed(1)
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
-  formula_sex <- epidist_formula(prep_obs, delay_central = ~ 1 + sex,
-                                 sigma = ~ 1 + sex)
-  fit_sex <- epidist(data = prep_obs, formula = formula_sex, seed = 1)
+  fit_sex <- epidist(
+    data = prep_obs,
+    formula = list(mu ~ 1 + sex, sigma ~ 1 + sex)
+  )
   expect_s3_class(fit_sex, "brmsfit")
   expect_s3_class(fit_sex, "epidist_fit")
   expect_convergence(fit_sex)

@@ -44,7 +44,8 @@ Suggests:
     gt,
     dplyr,
     knitr,
-    roxyglobals
+    roxyglobals,
+    tibble
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
