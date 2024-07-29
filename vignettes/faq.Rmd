@@ -82,4 +82,15 @@ We particularly highlight two functions which might be useful:
 For an example use of these functions, have a look at the [`epidist-paper`](https://github.com/parksw3/epidist-paper) repository containing the code for @park2024estimating.
 (Note that in that codebase, we use `map` as a part of a [`targets`](https://books.ropensci.org/targets/) pipeline.)
 
+## How did you choose the default priors for `epidist`?
+
+`brms` provides default priors for all parameters.
+However, some of those priors do not make sense in the context of our application.
+Instead, we used [prior predictive checking](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html) to set `epidist`-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.
+
+```{r}
+fit_ppc <- epidist::epidist(data = prep_obs, sample_prior = "only")
+# Extract the mean and SD here and how that they are reasonable (once other PRs merged)
+```
+
 ## Bibliography
