@@ -8,10 +8,9 @@ font_add_google("Zilla Slab Highlight", "useme")
 # make standard plot
 outbreak <- simulate_gillespie(seed = 101)
 
-secondary_dist <- data.table(
-  meanlog = 1.8, sdlog = 0.5
-) |>
-  add_natural_scale_mean_sd()
+secondary_dist <- data.table(mu = 1.8, sigma = 0.5)
+class(secondary_dist) <- c(class(secondary_dist), "lognormal_samples")
+secondary_dist <- add_mean_sd(secondary_dist)
 
 obs <- outbreak |>
   simulate_secondary(

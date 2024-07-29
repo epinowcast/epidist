@@ -96,8 +96,9 @@ outbreak[case %% 50 == 0, ] |>
 Now, to generate secondary events, we will use a lognormal distribution (Figure \@ref(fig:lognormal)) for the delay between primary and secondary events:
 
 ```{r}
-secondary_dist <- data.table(meanlog = 1.8, sdlog = 0.5) |>
-  add_natural_scale_mean_sd()
+secondary_dist <- data.table(mu = 1.8, sigma = 0.5)
+class(secondary_dist) <- c(class(secondary_dist), "lognormal_samples")
+secondary_dist <- add_mean_sd(secondary_dist)
 ```
 
 (ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
@@ -107,8 +108,8 @@ ggplot(data.frame(x = c(0, 30)), aes(x = x)) +
   geom_function(
     fun = dlnorm,
     args = list(
-      meanlog = secondary_dist[["meanlog"]],
-      sdlog = secondary_dist[["sdlog"]]
+      meanlog = secondary_dist[["mu"]],
+      sdlog = secondary_dist[["sigma"]]
     )
   ) +
   theme_minimal() +
@@ -121,8 +122,8 @@ ggplot(data.frame(x = c(0, 30)), aes(x = x)) +
 ```{r}
 obs <- outbreak |>
   simulate_secondary(
-    meanlog = secondary_dist[["meanlog"]],
-    sdlog = secondary_dist[["sdlog"]]
+    meanlog = secondary_dist[["mu"]],
+    sdlog = secondary_dist[["sigma"]]
   )
 ```
 
@@ -231,8 +232,8 @@ dplyr::bind_rows(
     data = data.frame(x = c(0, 30)), aes(x = x),
     fun = dlnorm,
     args = list(
-      meanlog = secondary_dist[["meanlog"]],
-      sdlog = secondary_dist[["sdlog"]]
+      meanlog = secondary_dist[["mu"]],
+      sdlog = secondary_dist[["sigma"]]
     ),
   ) +
   labs(
@@ -278,13 +279,13 @@ data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
 ```
 
 The `epidist` package also provides functions to make common post-processing tasks easy.
-For example, samples of the fitted lognormal `meanlog` and `sdlog` parameter can be extracted using:
+For example, samples of the fitted lognormal `mu` and `sigma` parameter can be extracted using:
 
 ```{r}
 draws <- extract_lognormal_draws(fit)
 ```
 
-Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained using the average of the `meanlog` and `sdlog` draws.
+Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained using the average of the `mu` and `sigma` draws.
 Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using `epidist` we have obtained a much closer match to the truth.
 
 (ref:fitted-lognormal) A fitted delay distribution (in pink) as compared with the true delay distribution (in black).
@@ -296,16 +297,16 @@ ggplot() +
     aes(x = x),
     fun = dlnorm,
     args = list(
-      meanlog = secondary_dist[["meanlog"]],
-      sdlog = secondary_dist[["sdlog"]]
+      mu = secondary_dist[["mu"]],
+      sigma = secondary_dist[["sigma"]]
     ),
   ) +
   geom_function(
     data = data.frame(x = c(0, 30)),
     aes(x = x), fun = dlnorm,
     args = list(
-      meanlog = mean(draws$meanlog),
-      sdlog = mean(draws$sdlog)
+      meanlog = mean(draws$mu),
+      sdlog = mean(draws$sigma)
     ),
     col = "#CC79A7"
   ) +
