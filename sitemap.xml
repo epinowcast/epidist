@@ -8,7 +8,10 @@
 <url><loc>https://epidist.epinowcast.org/articles/index.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/authors.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/index.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/add_natural_scale_mean_sd.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.default.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.gamma_samples.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.lognormal_samples.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/as_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/calculate_censor_delay.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/calculate_cohort_mean.html</loc></url>
