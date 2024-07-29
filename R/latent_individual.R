@@ -108,28 +108,85 @@ is_latent_individual <- function(data) {
   inherits(data, "epidist_latent_individual")
 }
 
+#' Check if data has the `epidist_latent_individual` class
+#'
+#' @param data A `data.frame` or `data.table` containing line list data
+#' @param family Output of a call to `brms::brmsfamily()`
+#' @param ... ...
+#'
+#' @importFrom rstan lookup
+#' @method epidist_family epidist_latent_individual
+#' @family latent_individual
+#' @export
+epidist_family.epidist_latent_individual <- function(data,
+                                                     family = brms::lognormal(),
+                                                     ...) {
+  epidist_validate(data)
+  if (!checkmate::test_class(family, "family")) {
+    cli::cli_abort("family must be a family object")
+  }
+  family <- brms:::validate_family(family) # allows use of stats:: family
+  non_mu_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
+  non_mu_bounds <- lapply(
+    family$dpars[-1], brms:::dpar_bounds, family = family$family
+  )
+  brms::custom_family(
+    paste0("latent_", family$family),
+    dpars = family$dpars,
+    links = c(family$link, non_mu_links),
+    lb = c(NA, as.numeric(lapply(non_mu_bounds, "[[", "lb"))),
+    ub = c(NA, as.numeric(lapply(non_mu_bounds, "[[", "ub"))),
+    type = family$type,
+    vars = c("pwindow", "swindow", "vreal1"),
+    loop = FALSE
+  )
+}
+
 #' Define a formula for the latent_individual model
 #'
 #' @param data ...
-#' @param delay_central Formula for the delay mean. Defaults to intercept only.
-#' @param sigma Formula for the delay standard deviation. Defaults to intercept
-#' only.
+#' @param family The output of `epidist_family()`
+#' @param formula A list of formula
 #' @param ... ...
 #' @method epidist_formula epidist_latent_individual
 #' @family latent_individual
-#' @importFrom stats as.formula
+#' @importFrom stats as.formula update terms
 #' @export
-epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
-                                                      sigma = ~ 1, ...) {
+epidist_formula.epidist_latent_individual <- function(data, family, formula,
+                                                      ...) {
   epidist_validate(data)
-  if (!inherits(delay_central, "formula")) {
-    cli::cli_abort("A valid formula for delay_central must be provided")
+  if (!all(sapply(formula, inherits, "formula"))) {
+    cli::cli_abort("formula must contain a list of formula")
   }
-  if (!inherits(sigma, "formula")) {
-    cli::cli_abort("A valid formula for sigma must be provided")
+  required_dpars <- family$dpars
+  dpars <- sapply(formula, function(x) all.vars(x)[1])
+  if (!setequal(required_dpars, dpars)) {
+    missing_input <- setdiff(required_dpars, dpars)
+    extra_input <- setdiff(dpars, required_dpars)
+    if (length(missing_input) > 0) {
+      cli::cli_abort(
+        paste0(
+          "Formula for these distributional parameters must be provided: ",
+          paste(missing_input, collapse = ", "),
+          " (These parameters are required for the family you have specified!)"
+        )
+      )
+    }
+    if (length(extra_input) > 0) {
+      cli::cli_abort(
+        paste0(
+          "Formulas provided for parameters not in specified family: ",
+          paste(extra_input, collapse = ", "),
+          " Please remove these formulas from your input!"
+        )
+      )
+    }
   }
-  formula_vars <- c(all.vars(delay_central), all.vars(sigma))
-  missing_vars <- setdiff(formula_vars, names(data))
+  dpars <- as.list(dpars)
+  form_vars <- lapply(formula, function(x) attr(stats::terms(x), "term.labels"))
+  form_vars <- Filter(function(x) !identical(x, character(0)), form_vars)
+  missing_vars <- setdiff(unlist(form_vars), names(data))
+  missing_vars <- setdiff(form_vars, names(data))
   if (length(missing_vars) > 0) {
     cli::cli_abort(
       paste0(
@@ -138,94 +195,50 @@ epidist_formula.epidist_latent_individual <- function(data, delay_central = ~ 1,
       )
     )
   }
-  delay_equation <- paste0(
-    "delay_central | vreal(obs_t, pwindow_upr, swindow_upr)",
-    paste(delay_central, collapse = " ")
+  mu_index <- which(dpars == "mu")
+  formula[[mu_index]] <- stats::update(
+    formula[[mu_index]],
+    delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ .
   )
-  sigma_equation <- paste0("sigma", paste(sigma, collapse = " "))
-  form <- brms::bf(as.formula(delay_equation), as.formula(sigma_equation))
-  return(form)
-}
-
-#' @importFrom rstan lookup
-#' @method epidist_family epidist_latent_individual
-#' @family latent_individual
-#' @export
-epidist_family.epidist_latent_individual <- function(data, family = "lognormal",
-                                                     ...) {
-  epidist_validate(data)
-  checkmate::assert_string(family)
-
-  pdf_lookup <- rstan::lookup("pdf")
-  valid_pdfs <- gsub("_lpdf", "", pdf_lookup$StanFunction)
-  if (!family %in% valid_pdfs) {
-    cli::cli_warn(
-      "The provided family {.code family} does not correspond to a valid LPDF
-      function available in rstan. (It is possible [but unlikely] that there is
-      such an LPDF in Stan available via cmdstanr, as rstan is behind Stan.)"
-    )
-  }
-
-  brms::custom_family(
-    paste0("latent_", family),
-    dpars = c("mu", "sigma"),
-    links = c("identity", "log"),
-    lb = c(NA, 0),
-    ub = c(NA, NA),
-    type = "real",
-    vars = c("pwindow", "swindow", "vreal1"),
-    loop = FALSE
-  )
+  formula <- do.call(brms::bf, formula)
+  return(formula)
 }
 
 #' Define priors for the model
 #'
-#' We provide suggested priors for the intercepts of the `meanlog` and `sdlog`
-#' linear predictors. These priors are weakly informative in that they prevent
-#' very large delays on the real scale. In particular:
-#'
-#' * `eta_meanlog ~ normal(2, 0.5)`
-#' * `eta_sdlog ~ normal(0, 0.5)`
-#'
-#' Note that the link function used for `meanlog` is a constant, and the link
-#' function used for `sdlog` is a logarithm, such that the expectation of
-#' `sdlog` is the exponential of `eta_sdlog`.
-#'
-#' To alter the priors for this model, we suggest two possible workflows:
-#'
-#' 1. Use `brms::get_prior` to extract the default `brms` priors for your model.
-#' You may then alter these priors, and pass them to `epidist`. Note that the
-#' default `brms` priors are different to the priors we suggest.
-#'
-#' 2. Alternatively, after fitting the model, the all priors used in the model
-#' may be extracted using `brms::prior_summary()`.
-#'
-#' Examples of these two workflows will be provided as a part of a vignette at
-#' a future date.
+#' We provide suggested weakly informative priors.
 #'
 #' @inheritParams epidist_prior
 #' @method epidist_prior epidist_latent_individual
 #' @family latent_individual
 #' @importFrom cli cli_inform
 #' @export
-epidist_prior.epidist_latent_individual <- function(data, ...) {
+epidist_prior.epidist_latent_individual <- function(data, family, formula,
+                                                    ...) {
   epidist_validate(data)
-
-  prior1 <- brms::prior("normal(2, 0.5)", class = "Intercept")
-  prior2 <- brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
-
-  msg <- c(
-    "i" = "The following priors have been set:",
-    "*" = "normal(2, 0.5) on the intercept of distributional parameter mu",
-    "*" = "normal(0, 0.5) on the intercept of distributional parameter sigma",
-    "To alter priors, or set priors on other parameters, see ?epidist_prior."
-  )
-
-  cli::cli_inform(
-    message = msg, .frequency = "regularly", .frequency_id = "prior-message"
-  )
-
-  return(prior1 + prior2)
+  if (identical(family$dpars, c("mu", "sigma"))) {
+    prior_mu <- brms::prior("normal(2, 0.5)", class = "Intercept")
+    prior_sigma <- brms::prior(
+      "normal(0, 0.5)", class = "Intercept", dpar = "sigma"
+    )
+    msg <- c(
+      "i" = "The following priors have been set:",
+      "*" = "normal(2, 0.5) on the intercept of distributional parameter mu",
+      "*" = "normal(0, 0.5) on the intercept of distributional parameter sigma",
+      "To alter priors, or set priors on other parameters, see ?epidist_prior."
+    )
+    cli::cli_inform(
+      message = msg, .frequency = "regularly", .frequency_id = "prior-message"
+    )
+    priors <- prior_mu + prior_sigma
+  } else {
+    cli::cli_warn(c(
+      "!" = "Priors not available for these distributional parameters.",
+      "Using the default priors from brms."
+    ))
+    priors <- NULL
+  }
+  return(priors)
 }
 
 #' @method epidist_stancode epidist_latent_individual
@@ -250,6 +263,18 @@ epidist_stancode.epidist_latent_individual <- function(data,
 
   stanvars_functions[[1]]$scode <- gsub(
     "family", family_name, stanvars_functions[[1]]$scode
+  )
+
+  stanvars_functions[[1]]$scode <- gsub(
+    "dpars_A",
+    paste(paste0("vector ", family$dpars), collapse = ", "),
+    stanvars_functions[[1]]$scode
+  )
+
+  stanvars_functions[[1]]$scode <- gsub(
+    "dpars_B",
+    paste(family$dpars, collapse = ", "),
+    stanvars_functions[[1]]$scode
   )
 
   stanvars_data <- brms::stanvar(
