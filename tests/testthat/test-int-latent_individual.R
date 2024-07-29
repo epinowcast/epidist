@@ -89,32 +89,11 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
-  
-  gamma_family <- epidist_family(
-    prep_obs_gamma,
-    family = "gamma",
-    dpars = c("mu", "shape"),
-    links = c("log", "identity"),
-    lb = c(0, 0),
-    ub = c(NA, NA)
-  )
-  
-  gamma_formula <- epidist_formula(prep_obs_gamma)
-  gamma_formula$pforms$sigma <- NULL
-  gamma_formula <- brms::bf(gamma_formula, as.formula("shape ~ 1"))
-  
-  gamma_prior <- brms::prior("normal(0, 3)", class = "Intercept") +
-    brms::prior("gamma(0.01, 0.01)", class = "Intercept", dpar = "shape", lb = 0)
-  
   fit_gamma <- epidist(
     data = prep_obs_gamma,
-    family = gamma_family,
-    prior = gamma_prior,
-    formula = gamma_formula,
-    seed = 1,
-    brms::brm
+    family = stats::Gamma(link = "log"),
+    formula = list(mu ~ 1, shape ~ 1)
   )
-  
   expect_s3_class(fit_gamma, "brmsfit")
   expect_s3_class(fit_gamma, "epidist_fit")
   expect_convergence(fit_gamma)
@@ -124,35 +103,13 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
-  
-  gamma_family <- epidist_family(
-    prep_obs_gamma,
-    family = "gamma",
-    dpars = c("mu", "shape"),
-    links = c("log", "log"),
-    lb = c(0, 0),
-    ub = c(NA, NA)
-  )
-  
-  gamma_formula <- epidist_formula(prep_obs_gamma)
-  gamma_formula$pforms$sigma <- NULL
-  gamma_formula <- brms::bf(gamma_formula, as.formula("shape ~ 1"))
-  
-  # Fix the shape intercept to log(2) so that it corresponds to simulated value
-  gamma_prior <- brms::prior("normal(0, 3)", class = "Intercept") +
-    brms::prior("constant(0.6931472)", class = "Intercept", dpar = "shape")
-  
   fit_gamma <- epidist(
     data = prep_obs_gamma,
-    family = gamma_family,
-    prior = gamma_prior,
-    formula = gamma_formula,
-    seed = 1
+    family = stats::Gamma(link = "log"),
+    formula = list(mu ~ 1, shape ~ 1)
   )
-  
-  # What the value is of the delay i.e. mu = 2/3
-  mean(prep_obs_gamma$delay)
-  
+
+  # Could try to fix shape intercept to log(2) corresponding to simulated value
   draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
   draws_gamma_mu <- exp(draws_gamma$Intercept)
   

@@ -25,6 +25,7 @@ shape <- 2
 rate <- 3
 
 # The mean of the gamma distribution is: shape / rate
+mu <- shape / rate
 
 sim_obs_gamma <- simulate_gillespie() |>
   simulate_secondary(
