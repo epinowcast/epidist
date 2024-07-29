@@ -42,13 +42,11 @@ epidist_family.default <- function(data, ...) {
 
 #' Default method for defining model specific priors
 #'
-
 #' @inheritParams epidist_prior
-#' @param ... Additional arguments for method.
 #' @family defaults
 #' @importFrom cli cli_abort
 #' @export
-epidist_prior.default <- function(data, ...) {
+epidist_prior.default <- function(data, family, formula, ...) {
   cli::cli_abort(
     "No epidist_prior method implemented for the class ", class(data), "\n",
     "See methods(epidist_prior) for available methods"
@@ -71,19 +69,26 @@ epidist_stancode.default <- function(data, ...) {
 
 #' Default method used for interface using `brms`
 #'
+#' @inheritParams epidist_formula
 #' @inheritParams epidist
 #' @rdname epidist.default
 #' @method epidist default
 #' @family defaults
 #' @export
-epidist.default <- function(data, formula = epidist_formula(data),
-                            family = epidist_family(data),
-                            prior = epidist_prior(data), fn = brms::brm, ...) {
+epidist.default <- function(data, formula = list(mu ~ 1, sigma ~ 1),
+                            family = brms::lognormal(), fn = brms::brm, ...) {
   epidist_validate(data)
-  stancode <- epidist_stancode(data = data, family = family)
+  epidist_family <- epidist_family(data, family)
+  epidist_formula <- epidist_formula(
+    data = data, family = epidist_family, formula = formula
+  )
+  epidist_prior <- epidist_prior(
+    data = data, family = epidist_family, formula = formula
+  )
+  epidist_stancode <- epidist_stancode(data = data, family = epidist_family)
   fit <- fn(
-    formula = formula, family = family, prior = prior, stanvars = stancode,
-    backend = "cmdstanr", data = data, ...
+    formula = epidist_formula, family = epidist_family, prior = epidist_prior,
+    stanvars = epidist_stancode, backend = "cmdstanr", data = data, ...
   )
 
   class(fit) <- c(class(fit), "epidist_fit", family$name)

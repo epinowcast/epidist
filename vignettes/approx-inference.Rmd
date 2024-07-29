@@ -13,7 +13,7 @@ pkgdown:
 # csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
 link-citations: true
 vignette: >
-  %\VignetteIndexEntry{Getting started with epidist}
+  %\VignetteIndexEntry{Approximate Bayesian inference in epidist}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: references.bib
