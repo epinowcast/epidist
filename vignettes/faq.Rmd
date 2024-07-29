@@ -89,8 +89,10 @@ However, some of those priors do not make sense in the context of our applicatio
 Instead, we used [prior predictive checking](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html) to set `epidist`-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.
 
 ```{r}
-fit_ppc <- epidist::epidist(data = prep_obs, sample_prior = "only")
-# Extract the mean and SD here and how that they are reasonable (once other PRs merged)
+fit_ppc <- epidist::epidist(data = data, sample_prior = "only")
+draws <- extract_lognormal_draws(fit_ppc)
+summary(draws$mean)
+summary(draws$sd)
 ```
 
 ## Bibliography
