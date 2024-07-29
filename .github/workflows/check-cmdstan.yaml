@@ -59,13 +59,21 @@ jobs:
 
       - name: Compile model and check syntax
         run: |
-          model <- epinowcast::enw_model()
-          # If the model is not syntactically correct above will fail
-          # however it may be correct enougth to compile but still contain
-          # soft depreciated syntax and so we check the syntax again below 
-          # and test the output.
+          dummy_obs <- data.table::data.table(ptime = 1, stime = 2,
+            delay_daily = 1, delay_lwr = 1, delay_upr = 2, ptime_lwr = 1,
+            ptime_upr = 2, stime_lwr = 1, stime_upr = 2, obs_at = 100,
+            censored = "interval", censored_obs_time = 10, ptime_daily = 1,
+            stime_daily = 1
+          )
+          dummy_obs <- as_latent_individual(dummy_obs)
+          stancode <- epidist::epidist(
+            data = dummy_obs, fn = brms::make_stancode
+          )
+          mod <- cmdstan_model(
+            stan_file = write_stan_file(stancode), compile = FALSE
+          )
           message <- capture.output(
-            model$check_syntax(pedantic = FALSE),
+            mod(pedantic = FALSE),
             type = "message"
           )
           # We can't use TRUE here as pendatic check return lots of false
