@@ -91,7 +91,7 @@ epidist.default <- function(data, formula = list(mu ~ 1, sigma ~ 1),
     stanvars = epidist_stancode, backend = "cmdstanr", data = data, ...
   )
 
-  class(fit) <- c(class(fit), "epidist_fit", family$name)
+  class(fit) <- c(class(fit), "epidist_fit")
 
   return(fit)
 }
