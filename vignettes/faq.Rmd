@@ -88,11 +88,25 @@ For an example use of these functions, have a look at the [`epidist-paper`](http
 However, some of those priors do not make sense in the context of our application.
 Instead, we used [prior predictive checking](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html) to set `epidist`-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.
 
+For example, here are summary statistics for the distributions on the delay distribution mean and standard deviation, as implied by the following prior distributions on the `brms` lognormal `mu` and `sigma` parameters
+$$
+\mu \sim \mathcal{N}(2, 0.5^2), \\
+\sigma \sim \mathcal{N}(0, 0.5^2).
+$$
+
+```{r message=FALSE, results='hide'}
+set.seed(1)
+fit_ppc <- epidist::epidist(
+  data = data, family = brms::lognormal(), sample_prior = "only", seed = 1
+)
+```
+
 ```{r}
-fit_ppc <- epidist::epidist(data = data, sample_prior = "only")
 draws <- extract_lognormal_draws(fit_ppc)
 summary(draws$mean)
 summary(draws$sd)
 ```
+
+Note that even with these quite restricted prior distributions, there are still some very large samples of the delay mean and standard deviation (which arguably are not plausible a-priori)!
 
 ## Bibliography
