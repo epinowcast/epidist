@@ -79,7 +79,7 @@ test_that("the family argument in epidist_family.epidist_latent_individual passe
 
 test_that("epidist_formula.epidist_latent_individual with default settings produces a brmsformula with the correct intercept only formula", { # nolint: line_length_linter.
   form <- epidist_formula(
-    prep_obs, family = family_lognormal, formula = list(mu ~ 1, sigma ~ 1)
+    prep_obs, family = family_lognormal, formula = brms::bf(mu ~ 1, sigma ~ 1)
   )
   expect_s3_class(form, "brmsformula")
   expect_equal(
@@ -97,7 +97,7 @@ test_that("epidist_formula.epidist_latent_individual with custom formulas produc
   form_sex <- epidist_formula(
     prep_obs,
     family = family_lognormal,
-    formula = list(mu ~ 1 + sex, sigma ~ 1 + sex)
+    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex)
   )
   expect_s3_class(form_sex, "brmsformula")
   expect_equal(
@@ -114,32 +114,32 @@ test_that("epidist_formula.epidist_latent_individual with custom formulas errors
   expect_error(
     epidist_formula(
       prep_obs, family = family_lognormal,
-      formula = list(mu ~ 1 + age, sigma ~ 1)
+      formula = brms::bf(mu ~ 1 + age, sigma ~ 1)
     )
   )
   expect_error(
     epidist_formula(
       prep_obs, family = family_lognormal,
-      formula = list(mu ~ 1, sigma ~ 1 + age)
+      formula = brms::bf(mu ~ 1, sigma ~ 1 + age)
     )
   )
   expect_error(
     epidist_formula(
       prep_obs, family = family_lognormal,
-      formula = list(mu ~ 1, 1)
+      formula = brms::bf(mu ~ 1, 1)
     )
   )
   expect_error(
     epidist_formula(
       prep_obs, family = family_lognormal,
-      formula = list(1, sigma ~ 1)
+      formula = brms::bf(1, sigma ~ 1)
     )
   )
 })
 
 test_that("epidist_prior.epidist_latent_individual with default settings produces an object of the right class", { # nolint: line_length_linter.
   prior <- epidist_prior(
-    prep_obs, family = family_lognormal, formula = list(mu ~ 1, sigma ~ 1)
+    prep_obs, family = family_lognormal, formula = brms::bf(mu ~ 1, sigma ~ 1)
   )
   expect_s3_class(prior, "brmsprior")
   expect_s3_class(prior, "data.frame")
