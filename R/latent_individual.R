@@ -122,10 +122,8 @@ epidist_family.epidist_latent_individual <- function(data,
                                                      family = brms::lognormal(),
                                                      ...) {
   epidist_validate(data)
-  if (!checkmate::test_class(family, "family")) {
-    cli::cli_abort("family must be a family object")
-  }
-  family <- brms:::validate_family(family) # allows use of stats:: family
+  # allows use of stats::family and strings
+  family <- brms:::validate_family(family)
   non_mu_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
   non_mu_bounds <- lapply(
     family$dpars[-1], brms:::dpar_bounds, family = family$family
