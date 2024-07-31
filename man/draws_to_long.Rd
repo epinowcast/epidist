@@ -18,7 +18,7 @@ Other postprocess:
 \code{\link{add_mean_sd.default}()},
 \code{\link{add_mean_sd.gamma_samples}()},
 \code{\link{add_mean_sd.lognormal_samples}()},
-\code{\link{extract_lognormal_draws}()},
+\code{\link{delay_samples}()},
 \code{\link{make_relative_to_truth}()},
 \code{\link{summarise_draws}()},
 \code{\link{summarise_variable}()}

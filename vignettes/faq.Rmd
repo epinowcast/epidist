@@ -102,9 +102,9 @@ fit_ppc <- epidist::epidist(
 ```
 
 ```{r}
-draws <- extract_lognormal_draws(fit_ppc)
-summary(draws$mean)
-summary(draws$sd)
+delay_samples <- delay_samples(fit_ppc)
+summary(delay_samples$mean)
+summary(delay_samples$sd)
 ```
 
 Note that even with these quite restricted prior distributions, there are still some very large samples of the delay mean and standard deviation (which arguably are not plausible a-priori)!

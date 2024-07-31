@@ -35,7 +35,7 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
   prior_samples <- epidist(
     data = prep_obs, fn = brms::brm, sample_prior = "only", seed = 1
   )
-  lognormal_draws <- extract_lognormal_draws(prior_samples)
+  lognormal_draws <- delay_samples(prior_samples)
   family <- epidist_family(data = prep_obs, family = brms::lognormal())
   prior <- epidist_prior(data = prep_obs, family = family)
   param1 <- extract_normal_parameters_brms(prior[1, ])
@@ -64,7 +64,7 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   skip_on_cran()
   set.seed(1)
   fit <- epidist(data = prep_obs, seed = 1)
-  lognormal_draws <- extract_lognormal_draws(fit)
+  lognormal_draws <- delay_samples(fit)
   # Unclear the extent to which we should expect parameter recovery here
   expect_equal(mean(lognormal_draws$mu), meanlog, tolerance = 0.1)
   expect_equal(mean(lognormal_draws$sigma), sdlog, tolerance = 0.1)
