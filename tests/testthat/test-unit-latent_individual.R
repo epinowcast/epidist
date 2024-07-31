@@ -126,13 +126,13 @@ test_that("epidist_formula.epidist_latent_individual with custom formulas errors
   expect_error(
     epidist_formula(
       prep_obs, family = family_lognormal,
-      formula = brms::bf(mu ~ 1, 1)
+      formula = brms::bf(list(), sigma ~ 1)
     )
   )
   expect_error(
     epidist_formula(
       prep_obs, family = family_lognormal,
-      formula = brms::bf(1, sigma ~ 1)
+      formula = brms::bf(mu ~ 1, shape ~ 1)
     )
   )
 })
