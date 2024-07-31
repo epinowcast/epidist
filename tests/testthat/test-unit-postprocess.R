@@ -3,21 +3,11 @@ test_that("add_mean_sd.lognormal_samples works with posterior samples from the l
   set.seed(1)
   prep_obs <- as_latent_individual(sim_obs)
   fit <- epidist(data = prep_obs, seed = 1)
-  lp_mu <- brms::posterior_linpred(fit, transform = TRUE, dpar = "mu") |>
-    as.table() |>
-    as.data.table()
-  names(lp_mu) <- c("draw", "index", "mu")
-  lp_sigma <- brms::posterior_linpred(fit, transform = TRUE, dpar = "sigma") |>
-    as.table() |>
-    as.data.table(value.name = "sigma")
-  names(lp_sigma) <- c("draw", "index", "sigma")
-  lp <- dplyr::left_join(lp_mu, lp_sigma)
-  class(lp) <- c(class(lp), "lognormal_samples")
-  x <- add_mean_sd(lp)
-  expect_s3_class(x, "data.table")
-  expect_named(x, c("draw", "index", "mu", "sigma", "mean", "sd"))
-  expect_true(all(x$mean > 0))
-  expect_true(all(x$sd > 0))
+  delay_samples <- delay_samples(fit)
+  expect_s3_class(delay_samples, "data.table")
+  expect_named(delay_samples, c("index", "draw", "mu", "sigma", "mean", "sd"))
+  expect_true(all(delay_samples$mean > 0))
+  expect_true(all(delay_samples$sd > 0))
 })
 
 test_that("add_mean_sd.lognormal_samples works with simulated lognormal distribution parameter data", { # nolint: line_length_linter.

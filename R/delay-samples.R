@@ -1,17 +1,17 @@
+#' @export
 delay_samples <- function(fit) {
-  dpars <- fit$family$dpars
-  lp_mu <- brms::posterior_linpred(fit, transform = TRUE, dpar = dpars[1])
-  lp_sigma <- brms::posterior_linpred(fit, transform = TRUE, dpar = dpars[2])
-  
-  # lp_mu <- brms::posterior_linpred(fit, transform = TRUE, dpar = "mu") |>
-  #   as.table() |>
-  #   as.data.table()
-  # names(lp_mu) <- c("draw", "index", "mu")
-  # lp_sigma <- brms::posterior_linpred(fit, transform = TRUE, dpar = "sigma") |>
-  #   as.table() |>
-  #   as.data.table(value.name = "sigma")
-  # names(lp_sigma) <- c("draw", "index", "sigma")
-  # lp <- dplyr::left_join(lp_mu, lp_sigma)
-  # class(lp) <- c(class(lp), "lognormal_samples")
-  # x <- add_mean_sd(lp)
+  # Warning: only works at the moment with lognormal!
+  pp <- brms::prepare_predictions(fit)
+  lp_mu <- brms::get_dpar(pp, dpar = "mu", inv_link = TRUE)
+  lp_sigma <- brms::get_dpar(pp, dpar = "sigma", inv_link = TRUE)
+  # Assumes lp_mu and lp_sigma have same dimensions
+  df <- expand.grid("index" = 1:nrow(lp_mu), "draw" = 1:ncol(lp_mu))
+  df[["mu"]] <- as.vector(lp_mu)
+  df[["sigma"]] <- as.vector(lp_sigma)
+  class(df) <- c(class(df), "lognormal_samples")
+  dt <- as.data.table(df)
+  dt <- add_mean_sd(dt)
 }
+
+# data <- as_latent_individual(sim_obs)
+# fit <- epidist(data)
