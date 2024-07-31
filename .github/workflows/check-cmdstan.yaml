@@ -59,7 +59,7 @@ jobs:
 
       - name: Compile model and check syntax
         run: |
-          dummy_obs <- data.table::data.table(ptime = 1, stime = 2,
+          dummy_obs <- data.table::data.table(case = 1L, ptime = 1, stime = 2,
             delay_daily = 1, delay_lwr = 1, delay_upr = 2, ptime_lwr = 1,
             ptime_upr = 2, stime_lwr = 1, stime_upr = 2, obs_at = 100,
             censored = "interval", censored_obs_time = 10, ptime_daily = 1,
@@ -73,7 +73,7 @@ jobs:
             stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
           )
           message <- capture.output(
-            mod(pedantic = FALSE),
+            mod$check_syntax(pedantic = FALSE),
             type = "message"
           )
           # We can't use TRUE here as pendatic check return lots of false
