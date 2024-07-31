@@ -65,12 +65,12 @@ jobs:
             censored = "interval", censored_obs_time = 10, ptime_daily = 1,
             stime_daily = 1
           )
-          dummy_obs <- as_latent_individual(dummy_obs)
+          dummy_obs <- epidist::as_latent_individual(dummy_obs)
           stancode <- epidist::epidist(
             data = dummy_obs, fn = brms::make_stancode
           )
-          mod <- cmdstan_model(
-            stan_file = write_stan_file(stancode), compile = FALSE
+          mod <- cmdstanr::cmdstan_model(
+            stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
           )
           message <- capture.output(
             mod(pedantic = FALSE),
