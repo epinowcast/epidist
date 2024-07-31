@@ -65,14 +65,16 @@ test_that("epidist_family.epidist_latent_individual with default settings produc
 
 test_that("epidist_family.epidist_latent_individual gives an error when passed inappropriate family input", { # nolint: line_length_linter.
   expect_error(epidist_family(prep_obs, family = 1))
-  expect_error(epidist_family(prep_obs, family = "lognormal"))
+  expect_error(epidist_family(prep_obs, family = list()))
 })
 
-test_that("the family argument in epidist_family.epidist_latent_individual passes as expected for brms and stats family objects", { # nolint: line_length_linter.
+test_that("the family argument in epidist_family.epidist_latent_individual passes as expected for brms and stats family objects, as well as strings", { # nolint: line_length_linter.
   family_lognormal <- epidist_family(prep_obs, family = brms::lognormal())
   expect_equal(family_lognormal$name, "latent_lognormal")
   family_gamma <- epidist_family(prep_obs, family = Gamma(link = "log"))
   expect_equal(family_gamma$name, "latent_gamma")
+  string_lognormal <- epidist_family(prep_obs, family = "lognormal")
+  expect_equal(string_lognormal$name, "latent_lognormal")
 })
 
 test_that("epidist_formula.epidist_latent_individual with default settings produces a brmsformula with the correct intercept only formula", { # nolint: line_length_linter.
