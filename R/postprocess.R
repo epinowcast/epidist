@@ -1,13 +1,17 @@
 #' Extract samples of the delay distribution parameters
 #'
 #' @param fit A model fit with `epidist::epidist`
+#' @param ... Additional arguments passed to `brms::prepare_predictions`
 #' @family postprocess
 #' @export
-delay_samples <- function(fit) {
-  pp <- brms::prepare_predictions(fit)
+delay_samples <- function(fit, ...) {
+  pp <- brms::prepare_predictions(fit, ...)
   # Every brms model has the parameter mu
   lp_mu <- brms::get_dpar(pp, dpar = "mu", inv_link = TRUE)
-  df <- expand.grid("index" = 1:nrow(lp_mu), "draw" = 1:ncol(lp_mu))
+  df <- expand.grid(
+    "index" = seq_len(nrow(lp_mu)),
+    "draw" = seq_len(ncol(lp_mu))
+  )
   df[["mu"]] <- as.vector(lp_mu)
   for (dpar in setdiff(names(pp$dpars), "mu")) {
     lp_dpar <- brms::get_dpar(pp, dpar = dpar, inv_link = TRUE)
