@@ -3,8 +3,13 @@
 #' @param fit A model fit with `epidist::epidist`
 #' @param ... Additional arguments passed to `brms::prepare_predictions`
 #' @family postprocess
+#' @autoglobal
 #' @export
 delay_samples <- function(fit, ...) {
+  args <- list(...)
+  if ("newdata" %in% names(args)) {
+    newdata <- brms:::validate_newdata(newdata)
+  }
   pp <- brms::prepare_predictions(fit, ...)
   # Every brms model has the parameter mu
   lp_mu <- brms::get_dpar(pp, dpar = "mu", inv_link = TRUE)
