@@ -1,6 +1,11 @@
+#' Extract samples of the delay distribution parameters
+#'
+#' @param fit A model fit with `epidist::epidist`
+#' @family postprocess
 #' @export
 delay_samples <- function(fit) {
   # Warning: only works at the moment with lognormal!
+  stopifnot(fit$family$name == "latent_lognormal")
   pp <- brms::prepare_predictions(fit)
   lp_mu <- brms::get_dpar(pp, dpar = "mu", inv_link = TRUE)
   lp_sigma <- brms::get_dpar(pp, dpar = "sigma", inv_link = TRUE)
