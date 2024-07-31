@@ -4,10 +4,12 @@
 \alias{delay_samples}
 \title{Extract samples of the delay distribution parameters}
 \usage{
-delay_samples(fit)
+delay_samples(fit, ...)
 }
 \arguments{
 \item{fit}{A model fit with \code{epidist::epidist}}
+
+\item{...}{Additional arguments passed to \code{brms::prepare_predictions}}
 }
 \description{
 Extract samples of the delay distribution parameters
