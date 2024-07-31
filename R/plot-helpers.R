@@ -5,6 +5,7 @@
 #' @param by ...
 #' @param obs_at ...
 #' @family plot
+#' @autoglobal
 #' @export
 calculate_cohort_mean <- function(data, type = c("cohort", "cumulative"),
                                   by = c(), obs_at) {
@@ -34,6 +35,7 @@ calculate_cohort_mean <- function(data, type = c("cohort", "cumulative"),
 #' @param distribution ...
 #' @family plot
 #' @importFrom stats integrate
+#' @autoglobal
 #' @export
 calculate_truncated_means <- function(draws, obs_at, ptime,
                                       distribution = function(x, y, z) {
