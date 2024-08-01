@@ -144,61 +144,25 @@ epidist_family.epidist_latent_individual <- function(data,
 #'
 #' @param data ...
 #' @param family The output of `epidist_family()`
-#' @param formula A list of formula
+#' @param formula As produced by `brms::brmsformula`
 #' @param ... ...
 #' @method epidist_formula epidist_latent_individual
 #' @family latent_individual
-#' @importFrom stats as.formula update terms
+#' @importFrom brms brmsterms
 #' @export
 epidist_formula.epidist_latent_individual <- function(data, family, formula,
                                                       ...) {
   epidist_validate(data)
-  if (!all(sapply(formula, inherits, "formula"))) {
-    cli::cli_abort("formula must contain a list of formula")
-  }
-  required_dpars <- family$dpars
-  dpars <- sapply(formula, function(x) all.vars(x)[1])
-  if (!setequal(required_dpars, dpars)) {
-    missing_input <- setdiff(required_dpars, dpars)
-    extra_input <- setdiff(dpars, required_dpars)
-    if (length(missing_input) > 0) {
-      cli::cli_abort(
-        paste0(
-          "Formula for these distributional parameters must be provided: ",
-          paste(missing_input, collapse = ", "),
-          " (These parameters are required for the family you have specified!)"
-        )
-      )
-    }
-    if (length(extra_input) > 0) {
-      cli::cli_abort(
-        paste0(
-          "Formulas provided for parameters not in specified family: ",
-          paste(extra_input, collapse = ", "),
-          " Please remove these formulas from your input!"
-        )
-      )
-    }
-  }
-  dpars <- as.list(dpars)
-  form_vars <- lapply(formula, function(x) attr(stats::terms(x), "term.labels"))
-  form_vars <- Filter(function(x) !identical(x, character(0)), form_vars)
-  missing_vars <- setdiff(unlist(form_vars), names(data))
-  missing_vars <- setdiff(form_vars, names(data))
-  if (length(missing_vars) > 0) {
-    cli::cli_abort(
-      paste0(
-        "The following variables are missing from data: ",
-        paste(missing_vars, collapse = ", ")
-      )
-    )
-  }
-  mu_index <- which(dpars == "mu")
-  formula[[mu_index]] <- stats::update(
-    formula[[mu_index]],
-    delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ .
+  formula <- brms:::validate_formula(formula, data = data, family = family)
+
+  formula <- update(
+    formula, delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ .
   )
-  formula <- do.call(brms::bf, formula)
+
+  # Using this here for checking purposes
+  bterms <- brms::brmsterms(formula)
+  brms:::validate_data(data, bterms)
+
   return(formula)
 }
 
