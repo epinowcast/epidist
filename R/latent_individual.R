@@ -155,13 +155,14 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
   epidist_validate(data)
   formula <- brms:::validate_formula(formula, data = data, family = family)
   
-  # Using this here only for checking purposes: expect it catches some errors
-  bterms <- brms::brmsterms(formula)
-  brms:::validate_data(data, bterms)
-  
   formula <- update(
     formula, delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ .
   )
+  
+  # Using this here for checking purposes
+  bterms <- brms::brmsterms(formula)
+  brms:::validate_data(data, bterms)
+  
   return(formula)
 }
 
