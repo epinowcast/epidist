@@ -33,7 +33,8 @@ Imports:
     stats,
     cli,
     checkmate,
-    rstan
+    rstan,
+    posterior
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
@@ -45,7 +46,6 @@ Suggests:
     roxyglobals,
     tibble,
     bayesplot,
-    posterior,
     tidyr
 Remotes:
     stan-dev/cmdstanr,
