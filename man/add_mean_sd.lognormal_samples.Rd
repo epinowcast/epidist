@@ -21,9 +21,9 @@ Other postprocess:
 \code{\link{add_mean_sd}()},
 \code{\link{add_mean_sd.default}()},
 \code{\link{add_mean_sd.gamma_samples}()},
-\code{\link{delay_samples}()},
 \code{\link{draws_to_long}()},
 \code{\link{make_relative_to_truth}()},
+\code{\link{predict_delay_parameters}()},
 \code{\link{summarise_draws}()},
 \code{\link{summarise_variable}()}
 }

@@ -1,7 +1,7 @@
 #' Extract samples of the delay distribution parameters
 #'
 #' @param fit A model fit with `epidist::epidist`
-#' @inheritParams brms newdata
+#' @inheritParams brms::prepare_predictions
 #' @param ... Additional arguments passed to `brms::prepare_predictions`
 #' @family postprocess
 #' @autoglobal
