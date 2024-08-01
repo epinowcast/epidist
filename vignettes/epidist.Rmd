@@ -279,10 +279,10 @@ data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
 ```
 
 The `epidist` package also provides functions to make common post-processing tasks easy.
-For example, samples of the fitted lognormal `mu` and `sigma` parameter can be extracted using:
+For example, individual predictions of the lognormal delay parameters can be extracted using:
 
 ```{r}
-draws <- delay_samples(fit)
+pred <- predict_delay_parameters(fit)
 ```
 
 Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained using the average of the `mu` and `sigma` draws.
@@ -305,8 +305,8 @@ ggplot() +
     data = data.frame(x = c(0, 30)),
     aes(x = x), fun = dlnorm,
     args = list(
-      meanlog = mean(draws$mu),
-      sdlog = mean(draws$sigma)
+      meanlog = mean(pred$mu),
+      sdlog = mean(pred$sigma)
     ),
     col = "#CC79A7"
   ) +

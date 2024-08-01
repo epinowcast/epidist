@@ -3,11 +3,11 @@ test_that("add_mean_sd.lognormal_samples works with posterior samples from the l
   set.seed(1)
   prep_obs <- as_latent_individual(sim_obs)
   fit <- epidist(data = prep_obs, seed = 1)
-  delay_samples <- delay_samples(fit)
-  expect_s3_class(delay_samples, "data.table")
-  expect_named(delay_samples, c("index", "draw", "mu", "sigma", "mean", "sd"))
-  expect_true(all(delay_samples$mean > 0))
-  expect_true(all(delay_samples$sd > 0))
+  pred <- predict_delay_parameters(fit)
+  expect_s3_class(pred, "data.table")
+  expect_named(pred, c("index", "draw", "mu", "sigma", "mean", "sd"))
+  expect_true(all(pred$mean > 0))
+  expect_true(all(pred$sd > 0))
 })
 
 test_that("add_mean_sd.lognormal_samples works with simulated lognormal distribution parameter data", { # nolint: line_length_linter.

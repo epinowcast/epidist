@@ -1,11 +1,12 @@
 #' Extract samples of the delay distribution parameters
 #'
 #' @param fit A model fit with `epidist::epidist`
+#' @inheritParams brms newdata
 #' @param ... Additional arguments passed to `brms::prepare_predictions`
 #' @family postprocess
 #' @autoglobal
 #' @export
-delay_samples <- function(fit, ...) {
+predict_delay_parameters <- function(fit, newdata = NULL, ...) {
   args <- list(...)
   if ("newdata" %in% names(args)) {
     newdata <- brms:::validate_newdata(newdata)
@@ -29,6 +30,10 @@ delay_samples <- function(fit, ...) {
   dt <- add_mean_sd(dt)
   return(dt)
 }
+
+#' @rdname predict_delay_parameters
+#' @export
+predict_dpar <- predict_delay_parameters
 
 #' Convert posterior lognormal samples to long format
 #'

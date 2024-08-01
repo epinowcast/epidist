@@ -166,7 +166,7 @@ fits <- list(
 )
 
 draws <- purrr::imap(fits, function(fit, name) {
-  delay_samples(fit) |>
+  predict_delay_parameters(fit) |>
     draws_to_long() |>
     filter(parameter %in% c("mu", "sigma")) |>
     mutate(method = as.factor(name))
