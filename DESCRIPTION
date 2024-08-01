@@ -45,7 +45,8 @@ Suggests:
     roxyglobals,
     tibble,
     bayesplot,
-    posterior
+    posterior,
+    tidyr
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
