@@ -75,7 +75,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
   stancode_gamma <- epidist(
     data = prep_obs_gamma,
     family = stats::Gamma(link = "log"),
-    formula = list(mu ~ 1, shape ~ 1),
+    formula = brms::bf(mu ~ 1, shape ~ 1),
     fn = brms::make_stancode
   )
   mod_gamma <- cmdstanr::cmdstan_model(
@@ -90,7 +90,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   stancode_sex <- epidist(
     data = prep_obs,
-    formula = list(mu ~ 1 + sex, sigma ~ 1 + sex),
+    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     fn = brms::make_stancode
   )
   mod_sex <- cmdstanr::cmdstan_model(
@@ -107,7 +107,7 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   fit_sex <- epidist(
     data = prep_obs,
-    formula = list(mu ~ 1 + sex, sigma ~ 1 + sex)
+    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex)
   )
   draws <- posterior::as_draws_df(fit_sex$fit)
   expect_equal(mean(draws$b_sex), 0, tolerance = 0.2)
@@ -121,7 +121,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges for an 
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   fit_sex <- epidist(
     data = prep_obs,
-    formula = list(mu ~ 1 + sex, sigma ~ 1 + sex)
+    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex)
   )
   expect_s3_class(fit_sex, "brmsfit")
   expect_s3_class(fit_sex, "epidist_fit")

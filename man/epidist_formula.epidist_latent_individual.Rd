@@ -11,7 +11,7 @@
 
 \item{family}{The output of \code{epidist_family()}}
 
-\item{formula}{A list of formula}
+\item{formula}{As produced by \code{brms::brmsformula}}
 
 \item{...}{...}
 }
