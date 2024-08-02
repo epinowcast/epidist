@@ -26,8 +26,11 @@ log_lik_latent_lognormal <- function(i, prep) {
   vreal1 <- prep$data$vreal1[i]
   vreal2 <- prep$data$vreal2[i]
   vreal3 <- prep$data$vreal3[i]
+  
+  # Maybe the issue here is that I need to be integrating these out...
   # swindow_raw <- ...
   # pwindow_raw <- ...
+  
   # pwindow <- ...
   # swindow <- ... 
   # obs_t <- ...
@@ -37,6 +40,20 @@ log_lik_latent_lognormal <- function(i, prep) {
 posterior_predict_latent_lognormal <- function(i, prep, ...) {
   mu <- brms::get_dpar(prep, "mu", i = i)
   sigma <- brms::get_dpar(prep, "sigma", i = i)
+  vreal1 <- prep$data$vreal1[i]
+  vreal2 <- prep$data$vreal2[i]
+  vreal3 <- prep$data$vreal3[i]
+  wN <- prep$data$wN[i]
+  woverlap <- prep$data$woverlap[i]
+  noverlap <- prep$data$noverlap[i]
+  
+  swindow_raw <- runif(prep$ndraws, 0, 1)
+  pwindow_raw <- runif(prep$ndraws, 0, 1)
+  
+  swindow <- vreal3 * swindow_raw
+  # pwindow <- ...
+  # obs_t <- ...
+  
   y <- prep$data$Y[i]
 }
 
