@@ -7,16 +7,15 @@
 #' @autoglobal
 #' @export
 predict_delay_parameters <- function(fit, newdata = NULL, ...) {
-  args <- list(...)
-  if ("newdata" %in% names(args)) {
-    newdata <- brms:::validate_newdata(newdata)
+  if (!is.null(newdata)) {
+    newdata <- brms:::validate_newdata(newdata, fit)
   }
-  pp <- brms::prepare_predictions(fit, ...)
+  pp <- brms::prepare_predictions(fit, newdata = newdata, ...)
   # Every brms model has the parameter mu
   lp_mu <- brms::get_dpar(pp, dpar = "mu", inv_link = TRUE)
   df <- expand.grid(
-    "index" = seq_len(nrow(lp_mu)),
-    "draw" = seq_len(ncol(lp_mu))
+    "index" = seq_len(ncol(lp_mu)),
+    "draw" = seq_len(nrow(lp_mu))
   )
   df[["mu"]] <- as.vector(lp_mu)
   for (dpar in setdiff(names(pp$dpars), "mu")) {
