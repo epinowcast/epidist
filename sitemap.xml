@@ -41,7 +41,6 @@
 <url><loc>https://epidist.epinowcast.org/reference/epidist_validate.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_version_stanvar.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/event_to_incidence.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/extract_lognormal_draws.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/filter_obs_by_obs_time.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/filter_obs_by_ptime.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/index.html</loc></url>
@@ -58,6 +57,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/plot_mean_posterior_pred.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/plot_recovery.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/plot_relative_recovery.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/predict_delay_parameters.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/reverse_obs_at.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/sierra_leone_ebola_data.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/simulate_double_censored_pmf.html</loc></url>
