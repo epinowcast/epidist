@@ -1,23 +1,30 @@
-test_that("add_mean_sd.lognormal_samples works with posterior samples from the latent lognormal model", { # nolint: line_length_linter.
+test_that("predict_delay_parameters works with NULL newdata and the latent lognormal model", { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
   prep_obs <- as_latent_individual(sim_obs)
   fit <- epidist(data = prep_obs, seed = 1)
-  lp_mu <- brms::posterior_linpred(fit, transform = TRUE, dpar = "mu") |>
-    as.table() |>
-    as.data.table()
-  names(lp_mu) <- c("draw", "index", "mu")
-  lp_sigma <- brms::posterior_linpred(fit, transform = TRUE, dpar = "sigma") |>
-    as.table() |>
-    as.data.table(value.name = "sigma")
-  names(lp_sigma) <- c("draw", "index", "sigma")
-  lp <- dplyr::left_join(lp_mu, lp_sigma)
-  class(lp) <- c(class(lp), "lognormal_samples")
-  x <- add_mean_sd(lp)
-  expect_s3_class(x, "data.table")
-  expect_named(x, c("draw", "index", "mu", "sigma", "mean", "sd"))
-  expect_true(all(x$mean > 0))
-  expect_true(all(x$sd > 0))
+  pred <- predict_delay_parameters(fit)
+  expect_s3_class(pred, "data.table")
+  expect_named(pred, c("index", "draw", "mu", "sigma", "mean", "sd"))
+  expect_true(all(pred$mean > 0))
+  expect_true(all(pred$sd > 0))
+  expect_equal(length(unique(pred$index)), nrow(prep_obs))
+  expect_equal(length(unique(pred$draw)), summary(fit)$total_ndraws)
+})
+
+test_that("predict_delay_parameters accepts newdata arguments", { # nolint: line_length_linter.
+  skip_on_cran()
+  set.seed(1)
+  prep_obs <- as_latent_individual(sim_obs)
+  fit <- epidist(data = prep_obs, seed = 1)
+  n <- 5
+  pred <- predict_delay_parameters(fit, newdata = prep_obs[1:n, ])
+  expect_s3_class(pred, "data.table")
+  expect_named(pred, c("index", "draw", "mu", "sigma", "mean", "sd"))
+  expect_true(all(pred$mean > 0))
+  expect_true(all(pred$sd > 0))
+  expect_equal(length(unique(pred$index)), 5)
+  expect_equal(length(unique(pred$draw)), summary(fit)$total_ndraws)
 })
 
 test_that("add_mean_sd.lognormal_samples works with simulated lognormal distribution parameter data", { # nolint: line_length_linter.
