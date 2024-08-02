@@ -140,26 +140,36 @@ We particularly highlight two functions which might be useful:</p>
 <p><code>brms</code> provides default priors for all parameters.
 However, some of those priors do not make sense in the context of our application.
 Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html" class="external-link">prior predictive checking</a> to set <code>epidist</code>-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.</p>
-<p>For example, here are summary statistics for the distributions on the delay distribution mean and standard deviation, as implied by the following prior distributions on the <code>brms</code> lognormal <code>mu</code> and <code>sigma</code> parameters
-<span class="math display">\[
-\mu \sim \mathcal{N}(2, 0.5^2), \\
-\sigma \sim \mathcal{N}(0, 0.5^2).
-\]</span></p>
+<p>For example, for the lognormal latent individual model, we suggest the following prior distributions for the <code>brms</code> <code>mu</code> and <code>sigma</code> parameters:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">epidist_family</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_family.html">epidist_family</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, family <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="va"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">)</span></span>
+<span><span class="va">epidist_prior</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_prior.html">epidist_prior</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">data</span>,</span>
+<span>  family <span class="op">=</span> <span class="va">epidist_family</span>,</span>
+<span>  formula <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">epidist_prior</span></span></code></pre></div>
+<pre><code><span><span class="co">##           prior     class coef group resp  dpar nlpar   lb   ub source</span></span>
+<span><span class="co">##  normal(2, 0.5) Intercept                             &lt;NA&gt; &lt;NA&gt;   user</span></span>
+<span><span class="co">##  normal(0, 0.5) Intercept                 sigma       &lt;NA&gt; &lt;NA&gt;   user</span></span></code></pre>
+<p>(Note that the functions <code>epidist_family</code> and <code>epidist_prior</code> are mostly for internal use!)</p>
+<p>Here are summary statistics for the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">fit_ppc</span> <span class="op">&lt;-</span> <span class="fu">epidist</span><span class="fu">::</span><span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">data</span>, family <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>, sample_prior <span class="op">=</span> <span class="st">"only"</span>, seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_delay_parameters.html">predict_delay_parameters</a></span><span class="op">(</span><span class="va">fit_ppc</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">mean</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. </span></span>
 <span><span class="co">## 2.000e+00 9.000e+00 1.400e+01 5.599e+09 2.400e+01 2.240e+13</span></span></code></pre>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">sd</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. </span></span>
 <span><span class="co">## 0.000e+00 2.000e+00 3.000e+00 1.592e+09 5.000e+00 6.369e+12</span></span></code></pre>
-<p>Note that even with these quite restricted prior distributions, there are still some very large samples of the delay mean and standard deviation (which arguably are not plausible a-priori)!</p>
+<p>(Note that even with these quite restricted prior distributions, there are still some very large samples of the delay mean and standard deviation [which arguably are not plausible a-priori]!)</p>
 </div>
 <div class="section level2 unnumbered">
 <h2 id="bibliography">Bibliography<a class="anchor" aria-label="anchor" href="#bibliography"></a>
