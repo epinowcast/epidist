@@ -28,14 +28,13 @@ Imports:
     cmdstanr,
     data.table,
     ggplot2,
-    posterior,
     purrr,
     ggridges,
     stats,
     cli,
     checkmate,
     rstan,
-    bayesplot
+    posterior
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
@@ -45,7 +44,9 @@ Suggests:
     dplyr,
     knitr,
     roxyglobals,
-    tibble
+    tibble,
+    bayesplot,
+    tidyr
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
