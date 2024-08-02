@@ -714,7 +714,7 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></code></pre></div>
-<p><img src="figures/epidist-unnamed-chunk-7-1.png" width="672"></p>
+<p><img src="figures%2Fepidist-unnamed-chunk-7-1.png" width="672"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">draws</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">parameter</span> <span class="op">==</span> <span class="st">"sigma"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -725,7 +725,7 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></code></pre></div>
-<p><img src="figures/epidist-unnamed-chunk-8-1.png" width="672"></p>
+<p><img src="figures%2Fepidist-unnamed-chunk-8-1.png" width="672"></p>
 </div>
 <div class="section level3" number="3.2">
 <h3 id="comparison-of-resulting-delay-distributions">
@@ -744,7 +744,7 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#56B4E9"</span>, <span class="st">"#009E73"</span>, <span class="st">"#E69F00"</span>, <span class="st">"#CC79A7"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span>, col <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="figures/epidist-unnamed-chunk-9-1.png" width="672"></p>
+<p><img src="figures%2Fepidist-unnamed-chunk-9-1.png" width="672"></p>
 </div>
 <div class="section level3" number="3.3">
 <h3 id="comparison-of-time-taken">
@@ -1221,19 +1221,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">31.935</td>
+<td headers="time (s)" class="gt_row gt_right">37.330</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.617</td>
+<td headers="time (s)" class="gt_row gt_right">2.598</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.218</td>
+<td headers="time (s)" class="gt_row gt_right">2.214</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.962</td>
+<td headers="time (s)" class="gt_row gt_right">0.957</td>
 </tr>
 </tbody>
 </table>
