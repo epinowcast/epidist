@@ -203,7 +203,7 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">imap</a></span><span class="op">(</span><span class="va">fits</span>, <span class="kw">function</span><span class="op">(</span><span class="va">fit</span>, <span class="va">name</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/extract_lognormal_draws.html">extract_lognormal_draws</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/predict_delay_parameters.html">predict_delay_parameters</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="../reference/draws_to_long.html">draws_to_long</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">parameter</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mu"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">name</span><span class="op">)</span><span class="op">)</span></span>
@@ -1221,19 +1221,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">31.303</td>
+<td headers="time (s)" class="gt_row gt_right">31.935</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.635</td>
+<td headers="time (s)" class="gt_row gt_right">2.617</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.056</td>
+<td headers="time (s)" class="gt_row gt_right">2.218</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.961</td>
+<td headers="time (s)" class="gt_row gt_right">0.962</td>
 </tr>
 </tbody>
 </table>

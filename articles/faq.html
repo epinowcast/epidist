@@ -151,12 +151,12 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <span>  data <span class="op">=</span> <span class="va">data</span>, family <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>, sample_prior <span class="op">=</span> <span class="st">"only"</span>, seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_lognormal_draws.html">extract_lognormal_draws</a></span><span class="op">(</span><span class="va">fit_ppc</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">draws</span><span class="op">$</span><span class="va">mean</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_delay_parameters.html">predict_delay_parameters</a></span><span class="op">(</span><span class="va">fit_ppc</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">mean</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. </span></span>
 <span><span class="co">## 2.000e+00 9.000e+00 1.400e+01 5.599e+09 2.400e+01 2.240e+13</span></span></code></pre>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">draws</span><span class="op">$</span><span class="va">sd</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">sd</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. </span></span>
 <span><span class="co">## 0.000e+00 2.000e+00 3.000e+00 1.592e+09 5.000e+00 6.369e+12</span></span></code></pre>
 <p>Note that even with these quite restricted prior distributions, there are still some very large samples of the delay mean and standard deviation (which arguably are not plausible a-priori)!</p>
