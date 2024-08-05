@@ -85,6 +85,45 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
   expect_no_error(mod_gamma$compile())
 })
 
+test_that("epidist.epidist_latent_individual fits and the MCMC converges in the gamma delay case", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  skip_on_cran()
+  set.seed(1)
+  fit_gamma <- epidist(
+    data = prep_obs_gamma,
+    family = stats::Gamma(link = "log"),
+    formula = brms::bf(mu ~ 1, shape ~ 1),
+    seed = 1
+  )
+  expect_s3_class(fit_gamma, "brmsfit")
+  expect_s3_class(fit_gamma, "epidist_fit")
+  expect_convergence(fit_gamma)
+})
+
+test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the gamma delay case", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  skip_on_cran()
+  set.seed(1)
+  fit_gamma <- epidist(
+    data = prep_obs_gamma,
+    family = stats::Gamma(link = "log"),
+    formula = brms::bf(mu ~ 1, shape ~ 1),
+    seed = 1
+  )
+  # Using the Stan parameterisation of the gamma distribution
+  draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
+  draws_gamma_alpha <- exp(draws_gamma$Intercept)
+  draws_gamma_beta <- exp(draws_gamma$Intercept_shape)
+  draws_gamma_alpha_ecdf <- ecdf(draws_gamma_alpha)
+  draws_gamma_beta_ecdf <- ecdf(draws_gamma_beta)
+  quantile_shape <- draws_gamma_alpha_ecdf(shape)
+  quantile_rate <- draws_gamma_beta_ecdf(rate)
+  expect_gte(quantile_shape, 0.025)
+  expect_lte(quantile_shape, 0.975)
+  expect_gte(quantile_rate, 0.025)
+  expect_lte(quantile_rate, 0.975)
+})
+
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles for an alternative formula", { # nolint: line_length_linter.
   skip_on_cran()
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
@@ -107,7 +146,8 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   fit_sex <- epidist(
     data = prep_obs,
-    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex)
+    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
+    seed = 1
   )
   draws <- posterior::as_draws_df(fit_sex$fit)
   expect_equal(mean(draws$b_sex), 0, tolerance = 0.2)
@@ -121,7 +161,8 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges for an 
   prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   fit_sex <- epidist(
     data = prep_obs,
-    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex)
+    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
+    seed = 1
   )
   expect_s3_class(fit_sex, "brmsfit")
   expect_s3_class(fit_sex, "epidist_fit")
