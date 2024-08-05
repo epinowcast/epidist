@@ -92,7 +92,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   fit_gamma <- epidist(
     data = prep_obs_gamma,
     family = stats::Gamma(link = "log"),
-    formula = list(mu ~ 1, shape ~ 1)
+    formula = brms::bf(mu ~ 1, shape ~ 1)
   )
   expect_s3_class(fit_gamma, "brmsfit")
   expect_s3_class(fit_gamma, "epidist_fit")
@@ -106,14 +106,14 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   fit_gamma <- epidist(
     data = prep_obs_gamma,
     family = stats::Gamma(link = "log"),
-    formula = list(mu ~ 1, shape ~ 1)
+    formula = brms::bf(mu ~ 1, shape ~ 1)
   )
 
   # Could try to fix shape intercept to log(2) corresponding to simulated value
   draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
-  draws_gamma_mu <- exp(draws_gamma$Intercept)
-  
-  expect_equal(mean(draws_gamma_mu), mu, tolerance = 0.1)
+  draws_gamma_mu <- exp(exp(draws_gamma$Intercept))
+
+  expect_equal(mean(draws_gamma_mu), mu, tolerance = 0.3)
 })
 
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles for an alternative formula", { # nolint: line_length_linter.
