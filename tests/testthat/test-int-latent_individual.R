@@ -108,12 +108,18 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
     family = stats::Gamma(link = "log"),
     formula = brms::bf(mu ~ 1, shape ~ 1)
   )
-
-  # Could try to fix shape intercept to log(2) corresponding to simulated value
+  # Using the Stan parameterisation of the gamma distribution
   draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
-  draws_gamma_mu <- exp(exp(draws_gamma$Intercept))
-
-  expect_equal(mean(draws_gamma_mu), mu, tolerance = 0.3)
+  draws_gamma_alpha <- exp(draws_gamma$Intercept)
+  draws_gamma_beta <- exp(draws_gamma$Intercept_shape)
+  draws_gamma_alpha_ecdf <- ecdf(draws_gamma_alpha)
+  draws_gamma_beta_ecdf <- ecdf(draws_gamma_beta)
+  quantile_shape <- draws_gamma_alpha_ecdf(shape)
+  quantile_rate <- draws_gamma_beta_ecdf(rate)
+  expect_gte(quantile_shape, 0.025)
+  expect_lte(quantile_shape, 0.975)
+  expect_gte(quantile_rate, 0.025)
+  expect_lte(quantile_rate, 0.975)
 })
 
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles for an alternative formula", { # nolint: line_length_linter.
