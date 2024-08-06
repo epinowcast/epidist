@@ -228,6 +228,8 @@ epidist_stancode.epidist_latent_individual <- function(data,
     "family", family_name, stanvars_functions[[1]]$scode
   )
 
+  # Here is where we  an put in "vector" or "real" based on whether the dpars
+  # has a formula in the model (vector) or not (real)
   stanvars_functions[[1]]$scode <- gsub(
     "dpars_A",
     paste(paste0("vector ", family$dpars), collapse = ", "),
