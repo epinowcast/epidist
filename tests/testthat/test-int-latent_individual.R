@@ -33,7 +33,7 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
   skip_on_cran()
   set.seed(1)
   prior_samples <- epidist(
-    data = prep_obs, fn = brms::brm, sample_prior = "only", seed = 1
+    data = prep_obs, fn = brms::brm, sample_prior = "only", seed = 1, silent = 2
   )
   pred <- predict_delay_parameters(prior_samples)
   family <- epidist_family(data = prep_obs, family = brms::lognormal())
@@ -53,7 +53,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
-  fit <- epidist(data = prep_obs, seed = 1)
+  fit <- epidist(data = prep_obs, seed = 1, silent = 2)
   expect_s3_class(fit, "brmsfit")
   expect_s3_class(fit, "epidist_fit")
   expect_convergence(fit)
@@ -63,7 +63,7 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
-  fit <- epidist(data = prep_obs, seed = 1)
+  fit <- epidist(data = prep_obs, seed = 1, silent = 2)
   pred <- predict_delay_parameters(fit)
   # Unclear the extent to which we should expect parameter recovery here
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
@@ -93,7 +93,8 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
     data = prep_obs_gamma,
     family = stats::Gamma(link = "log"),
     formula = brms::bf(mu ~ 1, shape ~ 1),
-    seed = 1
+    seed = 1,
+    silent = 2
   )
   expect_s3_class(fit_gamma, "brmsfit")
   expect_s3_class(fit_gamma, "epidist_fit")
@@ -108,7 +109,8 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
     data = prep_obs_gamma,
     family = stats::Gamma(link = "log"),
     formula = brms::bf(mu ~ 1, shape ~ 1),
-    seed = 1
+    seed = 1,
+    silent = 2
   )
   # Using the Stan parameterisation of the gamma distribution
   draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
@@ -147,7 +149,8 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
   fit_sex <- epidist(
     data = prep_obs,
     formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-    seed = 1
+    seed = 1,
+    silent = 2
   )
   draws <- posterior::as_draws_df(fit_sex$fit)
   expect_equal(mean(draws$b_sex), 0, tolerance = 0.2)
@@ -162,7 +165,8 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges for an 
   fit_sex <- epidist(
     data = prep_obs,
     formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-    seed = 1
+    seed = 1,
+    silent = 2
   )
   expect_s3_class(fit_sex, "brmsfit")
   expect_s3_class(fit_sex, "epidist_fit")
