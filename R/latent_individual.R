@@ -179,29 +179,15 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
 epidist_prior.epidist_latent_individual <- function(data, family, formula,
                                                     ...) {
   epidist_validate(data)
-  if (identical(family$dpars, c("mu", "sigma"))) {
-    prior_mu <- brms::prior("normal(2, 0.5)", class = "Intercept")
-    prior_sigma <- brms::prior(
-      "normal(0, 0.5)", class = "Intercept", dpar = "sigma"
-    )
-    msg <- c(
-      "i" = "The following priors have been set:",
-      "*" = "normal(2, 0.5) on the intercept of distributional parameter mu",
-      "*" = "normal(0, 0.5) on the intercept of distributional parameter sigma",
-      "To alter priors, or set priors on other parameters, see ?epidist_prior."
-    )
-    cli::cli_inform(
-      message = msg, .frequency = "regularly", .frequency_id = "prior-message"
-    )
-    priors <- prior_mu + prior_sigma
-  } else {
-    cli::cli_warn(c(
-      "!" = "Priors not available for these distributional parameters.",
-      "Using the default priors from brms."
-    ))
-    priors <- NULL
+  prior <- brms::default_prior(formula, data = data)
+  if (identical(family$name, "latent_lognormal")) {
+    prior <- replace_brms_prior(prior,
+      brms::prior("normal(2, 0.5)", class = "Intercept"))
+
+    prior <- replace_brms_prior(prior,
+      brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma"))
   }
-  return(priors)
+  return(prior)
 }
 
 #' @method epidist_stancode epidist_latent_individual

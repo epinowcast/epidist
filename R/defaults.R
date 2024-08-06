@@ -83,7 +83,7 @@ epidist.default <- function(data, formula = brms::bf(mu ~ 1),
     data = data, family = epidist_family, formula = formula
   )
   epidist_prior <- epidist_prior(
-    data = data, family = epidist_family, formula = formula
+    data = data, family = epidist_family, formula = epidist_formula
   )
   epidist_stancode <- epidist_stancode(data = data, family = epidist_family)
   fit <- fn(
