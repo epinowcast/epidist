@@ -14,8 +14,8 @@ predict_delay_parameters <- function(fit, newdata = NULL, ...) {
   # Every brms model has the parameter mu
   lp_mu <- brms::get_dpar(pp, dpar = "mu", inv_link = TRUE)
   df <- expand.grid(
-    "index" = seq_len(ncol(lp_mu)),
-    "draw" = seq_len(nrow(lp_mu))
+    "draw" = seq_len(nrow(lp_mu)),
+    "index" = seq_len(ncol(lp_mu))
   )
   df[["mu"]] <- as.vector(lp_mu)
   for (dpar in setdiff(names(pp$dpars), "mu")) {

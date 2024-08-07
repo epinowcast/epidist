@@ -43,10 +43,10 @@ set.seed(101)
 obs_time <- 25
 sample_size <- 500
 
-meanlog_m <- 1.9
+meanlog_m <- 2.0
 sdlog_m <- 0.3
 
-meanlog_f <- 1.4
+meanlog_f <- 1.3
 sdlog_f <- 0.7
 
 sim_obs_sex <- simulate_gillespie()
@@ -77,3 +77,26 @@ sim_obs_sex <- sim_obs_sex[sample(seq_len(.N), sample_size, replace = FALSE)]
 
 ggplot(sim_obs_sex, aes(x = case, y = delay, col = as.factor(sex))) + 
   geom_point()
+
+data_sex <- as_latent_individual(sim_obs_sex)
+
+fit_sex <- epidist(data = data_sex, formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex))
+summary(fit_sex)
+
+pred_sex <- predict_delay_parameters(fit_sex)
+pred_sex
+
+pred_sex <- pred_sex |>
+  left_join(
+    data_sex |>
+      as.data.frame() |>
+      dplyr::select("index" = "row_id", sex),
+    by = "index"
+  )
+
+pred_sex |>
+  group_by(sex) |>
+  summarise(
+    mu_mean = mean(mu),
+    sigma_mean = mean(sigma)
+  )
