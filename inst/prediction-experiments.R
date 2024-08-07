@@ -100,3 +100,23 @@ pred_sex |>
     mu_mean = mean(mu),
     sigma_mean = mean(sigma)
   )
+
+newdata_all_strata <- function(fit) {
+  bterms <- brms::brmsterms(fit$formula)
+  vars <- lapply(bterms$dpars, function(x) all.vars(x$formula))
+  vars <- unique(unlist(vars))
+  var_values <- lapply(vars, function(var) unique(fit$data[, var]))
+  names(var_values) <- vars
+  newdata <- expand.grid(var_values)
+  newdata$delay_central <- 0
+  newdata$obs_t <- NA
+  newdata$pwindow_upr <- NA
+  newdata$swindow_upr <- NA
+  return(newdata)
+}
+
+strata <- newdata_all_strata(fit_sex)
+pred <- predict_delay_parameters(fit_sex, newdata = strata)
+
+ggplot(pred, aes(x = as.factor(index), y = mu)) +
+  geom_point()
