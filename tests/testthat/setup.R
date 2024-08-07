@@ -50,14 +50,14 @@ sdlog_f <- 0.7
 sim_obs_sex <- simulate_gillespie()
 sim_obs_sex$sex <- rbinom(n = nrow(sim_obs_sex), size = 1, prob = 0.5)
 
-sim_obs_sex_m <- filter(sim_obs_sex, sex == 0) |>
+sim_obs_sex_m <- dplyr::filter(sim_obs_sex, sex == 0) |>
   simulate_secondary(
     dist = rlnorm,
     meanlog = meanlog_m,
     sdlog = sdlog_m
   )
 
-sim_obs_sex_f <- filter(sim_obs_sex, sex == 1) |>
+sim_obs_sex_f <- dplyr::filter(sim_obs_sex, sex == 1) |>
   simulate_secondary(
     dist = rlnorm,
     meanlog = meanlog_f,
