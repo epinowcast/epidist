@@ -49,8 +49,8 @@ test_that("predict_delay_parameters accepts newdata arguments, all_strata_newdat
   expect_equal(length(unique(pred_sex$draw)), summary(fit_sex)$total_ndraws)
 
   pred_sex_summary <- pred_sex |>
-    group_by(index) |>
-    summarise(
+    dplyr::group_by(index) |>
+    dplyr::summarise(
       mu = mean(mu),
       sigma = mean(sigma)
     )
