@@ -22,6 +22,7 @@ Other postprocess:
 \code{\link{add_mean_sd.default}()},
 \code{\link{add_mean_sd.gamma_samples}()},
 \code{\link{add_mean_sd.lognormal_samples}()},
+\code{\link{all_strata_newdata}()},
 \code{\link{draws_to_long}()},
 \code{\link{predict_delay_parameters}()},
 \code{\link{summarise_draws}()},

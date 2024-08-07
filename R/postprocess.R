@@ -34,6 +34,26 @@ predict_delay_parameters <- function(fit, newdata = NULL, ...) {
 #' @export
 predict_dpar <- predict_delay_parameters
 
+#' Generate newdata to predict on all unique strata in the model
+#'
+#' @param fit A model fit with `epidist::epidist`
+#' @family postprocess
+#' @autoglobal
+#' @export
+all_strata_newdata <- function(fit) {
+  bterms <- brms::brmsterms(fit$formula)
+  vars <- lapply(bterms$dpars, function(x) all.vars(x$formula))
+  vars <- unique(unlist(vars))
+  var_values <- lapply(vars, function(var) unique(fit$data[, var]))
+  names(var_values) <- vars
+  newdata <- expand.grid(var_values)
+  newdata$delay_central <- 0
+  newdata$obs_t <- NA
+  newdata$pwindow_upr <- NA
+  newdata$swindow_upr <- NA
+  return(newdata)
+}
+
 #' Convert posterior lognormal samples to long format
 #'
 #' @param draws ...
