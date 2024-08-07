@@ -12,16 +12,6 @@ test_that("predict_delay_parameters works with NULL newdata and the latent logno
   expect_equal(length(unique(pred$draw)), summary(fit)$total_ndraws)
 })
 
-test_that("predict_delay_parameters accepts newdata arguments", { # nolint: line_length_linter.
-  skip_on_cran()
-  set.seed(1)
-  prep_obs <- as_latent_individual(sim_obs)
-  fit <- epidist(data = prep_obs, seed = 1, silent = 2)
-  n <- 5
-  pred <- predict_delay_parameters(fit, newdata = prep_obs[1:n, ])
-
-})
-
 test_that("predict_delay_parameters accepts newdata arguments, all_strata_newdata works as expected, and predictions by sex recover underlying parameters", { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
@@ -29,7 +19,8 @@ test_that("predict_delay_parameters accepts newdata arguments, all_strata_newdat
   fit_sex <- epidist(
     data = prep_obs_sex,
     formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-    seed = 1
+    seed = 1,
+    silent = 2
   )
 
   all_strata <- all_strata_newdata(fit_sex)
@@ -61,7 +52,7 @@ test_that("predict_delay_parameters accepts newdata arguments, all_strata_newdat
     c(meanlog_m, sdlog_m),
     tolerance = 0.05
   )
-
+  
   # Correction predictions of F
   expect_equal(
     as.numeric(pred_sex_summary[2, c("mu", "sigma")]),
