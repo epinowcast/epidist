@@ -1,5 +1,5 @@
 ---
-title: "Using `epidist` to estimate the delay between symptom onset and positive test for the 2014-2016 Ebola outbreak in Sierra Leone"
+title: "Using `epidist` to estimate stratified delays between symptom onset and positive test for the 2014-2016 Ebola outbreak in Sierra Leone"
 description: "A more detailed guide to using the `epidist` R package"
 output: 
   bookdown::html_document2:
@@ -37,8 +37,9 @@ In this vignette, we use the `epidist` package to analyze line list data from th
 In doing so, we demonstrate some of the features of `epidist`, including:
 
 1. Fitting district-sex stratified delay distribution estimates.
-2. Fitting models with lognormal and gamma delay distributions, and selecting between fitted models.
-3. Investigating delay estimation scenarios. (A subset of the analysis in @park2024estimating, extended to the location-sex setting.)
+2. Fitting models with lognormal and gamma delay distributions.
+3. Selecting between fitted models.
+4. Post-processing and plotting functionality.
 
 For users new to `epidist`, before reading this article, we recommend beginning with the "[Getting started vignette](http://epidist.epinowcast.org/articles/epidist.html)".
 
@@ -54,7 +55,8 @@ library(sf)
 
 # Data preparation
 
-We begin by loading the Ebola line list data, as included in the `epidist` package (see `sierra_leone_ebola_data`):
+We begin by loading the Ebola line list data, as included in the `epidist` package.
+For more details, see `?sierra_leone_ebola_data`.
 
 ```{r}
 data("sierra_leone_ebola_data")
@@ -64,24 +66,18 @@ The data has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a uni
 The columns of the data are the individuals name (retracted, and hence can be safely removed), age, sex, the dates of symptom onset and positive sample, and their district and chiefdom.
 
 ```{r}
-head(sierra_leone_ebola_data)
-
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
   dplyr::select(-name) |>
-  dplyr::rename(case = id) |>
-  dplyr::mutate(case = as.integer(case))
+  dplyr::mutate(case = as.integer(id), .keep = "unused")
+
+head(sierra_leone_ebola_data)
 ```
 
 <!-- Question about whether to include shapefiles as data object in package. -->
 
-```{r}
-sierra_leone_ebola_data |>
-  dplyr::group_by(district) |>
-  dplyr::summarize(n = dplyr::n()) |>
-  dplyr::arrange(desc(n))
-```
+We now join the Ebola data to shapefiles (obtained from [GADM](https://gadm.org/)) for the districts of Sierra Leone:
 
-```{r}
+```{r message = FALSE}
 sf <- sf::st_read("../inst/gadm41_SLE_shp/gadm41_SLE_2.shp")
 
 sierra_leone_ebola_data_sf <- dplyr::select(sf, district = NAME_2, geometry) |>
@@ -90,7 +86,11 @@ sierra_leone_ebola_data_sf <- dplyr::select(sf, district = NAME_2, geometry) |>
       dplyr::group_by(district) |>
       dplyr::summarise(cases = dplyr::n())
   )
+```
 
+(ref:ebola-cloropleth) Figure caption.
+
+```{r ebola-cloropleth, fig.cap="(ref:ebola-cloropleth)"}
 ggplot(sierra_leone_ebola_data_sf, aes(fill = cases, geometry = geometry)) +
   geom_sf() +
   scale_fill_viridis_c(na.value = "lightgrey") +
@@ -160,13 +160,17 @@ The columns added are:
 
 # Fitting district-sex stratified delay distributions
 
-* Fit most obvious lognormal with sex effect and district effect
-* Translate fitted distribution to probability mass function
-
+Fit most obvious lognormal with sex effect and district effect.
+Translate fitted distribution to probability mass function
 First fit model with no district-sex stratification.
-Use the Laplace algorithm for speed:
+Sub-sample the data for speed.
+Use ADVI for speed.
 
 ```{r}
+N <- nrow(obs_cens)
+obs_cens <- obs_cens[complete.cases(obs_cens)]
+N_complete <- nrow(obs_cens)
+obs_cens <- obs_cens[sample(seq_len(.N), N_complete / 10, replace = FALSE)]
 obs_prep <- as_latent_individual(obs_cens)
 
 fit <- epidist::epidist(
@@ -176,191 +180,37 @@ fit <- epidist::epidist(
   algorithm = "laplace"
 )
 
-fit_district_sex <- epidist::epidist(
+summary(fit)
+
+table(obs_prep$sex)
+
+fit_sex <- epidist::epidist(
   data = obs_prep,
-  formula = brms::bf(mu ~ 1 + district + sex, sigma ~ 1 + district + sex),
+  formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
   family = brms::lognormal(),
   algorithm = "laplace"
 )
+
+summary(fit_sex)
+
+fit_sex_district <- epidist::epidist(
+  data = obs_prep,
+  formula = brms::bf(mu ~ 1 + sex + district, sigma ~ 1 + sex + district),
+  family = brms::lognormal(),
+  algorithm = "laplace"
+)
+
+summary(fit_sex_district)
 ```
+
+Think about the plots and summaries that I want here.
 
 # Model selection
 
-* Is it worth including sex as a covariate? What about spatially structured?
-* Is it worth including district as a covariate?
+* Is it worth including sex as a covariate? 
+* Is it worth including district as a covariate? What about spatially structured?
+* Now fit with the gamma delay distribution
 * Should we use the lognormal or gamma delay distribution?
 * Extract posterior predictions (of something) from all models – posterior predictive checking?
 
-# Delay estimation scenarios
-
-When the epidemic is concluded, to obtain the best delay distribution estimates, we should use all of the available (censored) data.
-However, during a novel outbreak we can't wait until the epidemic is over to begin estimating delays.
-The `epidist` package faciliates assessing how the delay distribution estimates change depending on the time of estimation.
-
-Here, we consider estimation at 120 days, as well as after the epidemic is concluded at 483 days.
-@park2024estimating also consider estimation at X, Y and Z days.
-
-```{r}
-estimation_times <- data.table(
-  scenario = c("120 days", "483 days"),
-  time = c(120, 483)
-)
-
-obs_cens_trunc <- purrr::pmap(estimation_times, function(scenario, time) {
-  obs_cens |>
-    filter_obs_by_obs_time(obs_time = time) |>
-    dplyr::mutate(
-      scenario = scenario,
-      obs_type = "real_time"
-    ) |>
-    dplyr::filter(ptime_lwr >= time - 60)
-})
-
-map(obs_cens_trunc, nrow)
-```
-
-Create retrospective observations.
-The point is that these don't have any truncation.
-They contain all cases where the primary event happened before `time`, even if the secondary event occured after `time`.
-
-```{r}
-obs_cens_retro <- purrr::pmap(estimation_times, function(scenario, time) {
-  obs_cens |>
-    filter_obs_by_ptime(obs_time = time, obs_at = "max_secondary") |>
-    dplyr::mutate(
-      scenario = scenario,
-      obs_type = "retrospective"
-    ) |>
-    dplyr::filter(ptime_lwr >= time - 60)
-})
-
-map(obs_cens_retro, nrow)
-```
-
-One thing we can do here is go to aggregate incidence.
-Why would we want to do this?
-It's used as inputs in other places.
-
-```{r}
-# inc <- event_to_incidence(obs_cens_retro, by = "scenario")
-# head(inc)
-# dim(inc)
-```
-
-```{r}
-obs_combined <- dplyr::bind_rows(
-  obs_cens_trunc,
-  obs_cens_retro
-) |>
-  dplyr::group_by(scenario, obs_type) |>
-  dplyr::mutate(
-    sample_size = dplyr::n()
-  ) |>
-  as.data.table()
-
-nrow(obs_combined)
-```
-
-What are all the scenarios we have here?
-
-```{r}
-obs_combined |>
-  dplyr::select(scenario, obs_type, sample_size) |>
-  unique() |>
-  dplyr::mutate(id = 1:dplyr::n())
-```
-
-# Model fitting
-
-Fit the selected model.
-
-```{r}
-obs_combined <- dplyr::rename(obs_combined, case = id)
-obs_combined$case <- as.integer(obs_combined$case)
-obs_combined <- as_latent_individual(obs_combined)
-obs_combined_list <- split(obs_combined, by = c("scenario", "obs_type"))
-
-# fit_lognormal_models <- map(obs_combined_list, epidist::epidist)
-```
-
-
-# Appendix
-
-```{r eval = FALSE}
-# I think that aligning the Ebola data by chiefdom is too hard
-# Going to use district-level approach for now
-
-library(epidist)
-library(data.table)
-library(purrr)
-library(ggplot2)
-library(sf)
-
-data("sierra_leone_ebola_data")
-
-head(sierra_leone_ebola_data)
-sierra_leone_ebola_data <- dplyr::select(sierra_leone_ebola_data, -name)
-
-sierra_leone_ebola_data |>
-  dplyr::group_by(chiefdom) |>
-  dplyr::summarize(n = dplyr::n()) |>
-  dplyr::arrange(desc(n))
-
-sf <- sf::st_read("../inst/gadm41_SLE_shp")
-
-ggplot(data = sf) +
-  geom_sf() +
-  geom_sf_text(aes(label = NAME_3), size = 2) +
-  theme_minimal()
-
-sort(setdiff(unique(sf$NAME_3), unique(sierra_leone_ebola_data$chiefdom)))
-sort(setdiff(unique(sierra_leone_ebola_data$chiefdom), unique(sf$NAME_3)))
-
-sierra_leone_ebola_data <- sierra_leone_ebola_data |>
-  dplyr::mutate(chiefdom = forcats::fct_recode(chiefdom,
-    "Boama" = "Baoma",
-    "Dia" = "Dea",
-    "Jawie" = "Jawei",
-    "Kissi Tongi" = "Kissi Tonge",
-    "Kando Leppeama" = "Kandu Leppiama",
-    "Pehe Bongre" = "Peje Bongre",
-    "Gbendembu Ngowahun" = "Ngowahun",
-    "replace" = "Bkm",
-    "Bumpe" = "Bumpe Ngawo",
-    "Gbanti Kamaranka" = "Gbanti-Kamaranka",
-    "Gbinleh-Dixon" = "Gbinle-Dixing",
-    "Jiama-Bongor" = "Jaiama Bongor",
-    "Kafe Simira" = "Kafe Simiria",
-    "Kagboro" = "Kargboro",
-    "replace" = "Kasonko",
-    "replace" = "Kholifa",
-    "replace" = "Kpanga Kabonde",
-    "replace" = "Lokomasam",
-    "replace" = "Tms",
-    "Timdel" = "Timidale",
-    "replace" = "W/Rural",
-    "Freetown1" = "W/Urban",
-    "Freetown2" = "W/Urban",
-    "Freetown3" = "W/Urban",
-    "Freetown4" = "W/Urban",
-    "Freetown5" = "W/Urban",
-    "Tambakha" = "Tambakka"
-  ))
-
-sierra_leone_ebola_data_sf <- dplyr::select(sf, chiefdom = NAME_3, geometry) |>
-  dplyr::left_join(
-    sierra_leone_ebola_data |>
-      dplyr::group_by(chiefdom) |>
-      dplyr::summarise(cases = dplyr::n())
-  )
-
-sum(sierra_leone_ebola_data_sf$cases, na.rm = TRUE)
-nrow(sierra_leone_ebola_data)
-
-ggplot(sierra_leone_ebola_data_sf, aes(fill = cases, geometry = geometry)) +
-  geom_sf() +
-  scale_fill_viridis_c(na.value = "lightgrey") +
-  theme_minimal() +
-  labs(fill = "Cases")
-```
 ## Bibliography {-}
