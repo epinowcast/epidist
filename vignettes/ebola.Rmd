@@ -1,0 +1,216 @@
+---
+title: "Using `epidist` to estimate stratified delays between symptom onset and positive test for the 2014-2016 Ebola outbreak in Sierra Leone"
+description: "A more detailed guide to using the `epidist` R package"
+output: 
+  bookdown::html_document2:
+    fig_caption: yes
+    code_folding: show
+    number_sections: true
+pkgdown:
+  as_is: true
+# csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Getting in depth with epidist}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+# exclude compile warnings from cmdstanr
+knitr::opts_chunk$set(
+  fig.path = "figures/epidist-",
+  cache = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE
+)
+```
+
+The 2014-2016 outbreak of Ebola in West Africa began in Guinea, and quickly spread to neighbouring Liberia and Sierra Leone.
+It was the largest outbreak in the disease's history, and resulted in over 28,600 infections and 11,325 deaths [@who_ebola_2014_2016].
+
+In this vignette, we use the `epidist` package to analyze line list data from the outbreak in Sierra Leone, as collated by @fang2016transmission.
+In doing so, we demonstrate some of the features of `epidist`, including:
+
+1. Fitting district-sex stratified delay distribution estimates.
+2. Fitting models with lognormal and gamma delay distributions.
+3. Selecting between fitted models.
+4. Post-processing and plotting functionality.
+
+For users new to `epidist`, before reading this article, we recommend beginning with the "[Getting started vignette](http://epidist.epinowcast.org/articles/epidist.html)".
+
+The packages used in this article are:
+
+```{r load-requirements}
+library(epidist)
+library(data.table)
+library(purrr)
+library(ggplot2)
+library(sf)
+```
+
+# Data preparation
+
+We begin by loading the Ebola line list data, as included in the `epidist` package.
+For more details, see `?sierra_leone_ebola_data`.
+
+```{r}
+data("sierra_leone_ebola_data")
+```
+
+The data has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a unique case report `id`.
+The columns of the data are the individuals name (retracted, and hence can be safely removed), age, sex, the dates of symptom onset and positive sample, and their district and chiefdom.
+
+```{r}
+sierra_leone_ebola_data <- sierra_leone_ebola_data |>
+  dplyr::select(-name) |>
+  dplyr::mutate(case = as.integer(id), .keep = "unused")
+
+head(sierra_leone_ebola_data)
+```
+
+<!-- Question about whether to include shapefiles as data object in package. -->
+
+We now join the Ebola data to shapefiles (obtained from [GADM](https://gadm.org/)) for the districts of Sierra Leone:
+
+```{r message = FALSE}
+sf <- sf::st_read("../inst/gadm41_SLE_shp/gadm41_SLE_2.shp")
+
+sierra_leone_ebola_data_sf <- dplyr::select(sf, district = NAME_2, geometry) |>
+  dplyr::left_join(
+    sierra_leone_ebola_data |>
+      dplyr::group_by(district) |>
+      dplyr::summarise(cases = dplyr::n())
+  )
+```
+
+(ref:ebola-cloropleth) Figure caption.
+
+```{r ebola-cloropleth, fig.cap="(ref:ebola-cloropleth)"}
+ggplot(sierra_leone_ebola_data_sf, aes(fill = cases, geometry = geometry)) +
+  geom_sf() +
+  scale_fill_viridis_c(na.value = "lightgrey") +
+  theme_minimal() +
+  labs(fill = "Cases")
+```
+
+(ref:ebola-outbreak) Figure caption.
+
+```{r ebola-outbreak, fig.cap="(ref:ebola-outbreak)", fig.height=9}
+# Might want to move to using data.table code rather than dplyr here/everywhere
+sierra_leone_ebola_data |>
+  dplyr::filter(case %% 10 == 0) |>
+  ggplot() +
+    geom_segment(
+      aes(
+        x = date_of_symptom_onset, xend = date_of_sample_tested,
+        y = case, yend = case
+      ),
+      col = "grey"
+    ) +
+    geom_point(aes(x = date_of_symptom_onset, y = case), col = "#56B4E9") +
+    geom_point(aes(x = date_of_sample_tested, y = case), col = "#009E73") +
+    facet_grid(district ~ .) +
+    labs(x = "", y = "Case ID") +
+    theme_minimal()
+```
+
+To prepare the data for use in `epidist`, we first rename the date columns as `ptime` (time of primary event) and `stime` (time of secondary event), as well as transforming to a `data.table`:
+
+```{r}
+sierra_leone_ebola_data <- sierra_leone_ebola_data |>
+  dplyr::mutate(
+    date_of_symptom_onset = lubridate::ymd(date_of_symptom_onset),
+    date_of_sample_tested = lubridate::ymd(date_of_sample_tested),
+    ptime = as.numeric(date_of_symptom_onset - min(date_of_symptom_onset)),
+    stime = as.numeric(date_of_sample_tested - min(date_of_symptom_onset))
+  ) |>
+  dplyr::select(case, ptime, stime, age, sex, district) |>
+  data.table::as.data.table()
+```
+
+Next, we use `observe_process()` to do add interval censoring columns:
+
+```{r}
+obs_cens <- epidist::observe_process(sierra_leone_ebola_data)
+
+all(obs_cens$ptime == obs_cens$ptime_daily)
+all(obs_cens$stime == obs_cens$stime_daily)
+
+max(obs_cens$ptime)
+max(obs_cens$stime)
+```
+
+The columns added are:
+
+* `ptime_daily`: As the `ptime` was already daily then this is superfluous
+* `ptime_lwr`:
+* `ptime_upr`:
+* `stime_daily`: As the `ptime` was already daily then this is superfluous
+* `stime_lwr`:
+* `stime_upr`:
+* `delay_daily`:
+* `delay_lwr`:
+* `delay_upr`:
+* `obs_at`: The maximum value of `stime`
+
+# Fitting district-sex stratified delay distributions
+
+Fit most obvious lognormal with sex effect and district effect.
+Translate fitted distribution to probability mass function
+First fit model with no district-sex stratification.
+Sub-sample the data for speed.
+Use ADVI for speed.
+
+```{r}
+N <- nrow(obs_cens)
+obs_cens <- obs_cens[complete.cases(obs_cens)]
+N_complete <- nrow(obs_cens)
+obs_cens <- obs_cens[sample(seq_len(.N), N_complete / 10, replace = FALSE)]
+obs_prep <- as_latent_individual(obs_cens)
+
+fit <- epidist::epidist(
+  data = obs_prep,
+  formula = brms::bf(mu ~ 1, sigma ~ 1),
+  family = brms::lognormal(),
+  algorithm = "laplace"
+)
+
+summary(fit)
+
+table(obs_prep$sex)
+
+fit_sex <- epidist::epidist(
+  data = obs_prep,
+  formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
+  family = brms::lognormal(),
+  algorithm = "laplace"
+)
+
+summary(fit_sex)
+
+fit_sex_district <- epidist::epidist(
+  data = obs_prep,
+  formula = brms::bf(mu ~ 1 + sex + district, sigma ~ 1 + sex + district),
+  family = brms::lognormal(),
+  algorithm = "laplace"
+)
+
+summary(fit_sex_district)
+```
+
+Think about the plots and summaries that I want here.
+
+# Model selection
+
+* Is it worth including sex as a covariate? 
+* Is it worth including district as a covariate? What about spatially structured?
+* Now fit with the gamma delay distribution
+* Should we use the lognormal or gamma delay distribution?
+* Extract posterior predictions (of something) from all models – posterior predictive checking?
+
+## Bibliography {-}
