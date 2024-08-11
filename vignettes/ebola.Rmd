@@ -233,6 +233,31 @@ add_epred_draws(obs_prep, fit)
 # http://mjskay.github.io/tidybayes/articles/tidy-brms.html#extracting-distributional-regression-parameters
 # Use add_epred_draws(dpar = TRUE) to get the distributional parameters
 # You can also use dpar = list("mu", "sigma") etc. to get particular parameters
+epred_draws <- obs_prep |>
+  as.data.frame() |>
+  add_epred_draws(fit, dpar = TRUE)
+
+epred_draws_sex_district <- obs_prep |>
+  as.data.frame() |>
+  modelr::data_grid(sex, district) |>
+  dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
+  add_epred_draws(fit_sex_district, dpar = TRUE)
+
+epred_draws_sex <- obs_prep |>
+  as.data.frame() |>
+  modelr::data_grid(sex) |>
+  dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
+  tidybayes::add_epred_draws(fit_sex, dpar = TRUE)
+
+epred_draws_sex |>
+  ggplot(aes(x = .epred, y = sex)) +
+    stat_slab()
+
+# Some strata that don't have much data?
+# Some very bad priors?
+summary(epred_draws_sex_district$.epred)
+
+# Some functionality here to go to actual draws from the delay distribution easily?
 ```
 
 # Model selection
