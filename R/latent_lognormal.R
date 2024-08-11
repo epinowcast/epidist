@@ -60,5 +60,5 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) {
 posterior_epred_latent_lognormal <- function(prep) {
   mu <- brms::get_dpar(prep, "mu")
   sigma <- brms::get_dpar(prep, "sigma")
+  exp(mu + sigma^2 / 2)
 }
-
