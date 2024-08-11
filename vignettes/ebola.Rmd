@@ -205,6 +205,36 @@ summary(fit_sex_district)
 
 Think about the plots and summaries that I want here.
 
+```{r}
+library(tidybayes)
+library(modelr)
+
+# Get all the variable names
+get_variables(fit)
+
+# Wide format
+spread_draws(fit, b_Intercept)
+
+fit |>
+  spread_draws(b_Intercept) |>
+  median_qi()
+
+# Long format
+gather_draws(fit, b_Intercept)
+
+fit |>
+  gather_draws(b_Intercept) |>
+  median_qi()
+
+# This does indeed fail with the error
+# object 'posterior_epred_latent_lognormal' not found
+add_epred_draws(obs_prep, fit)
+
+# http://mjskay.github.io/tidybayes/articles/tidy-brms.html#extracting-distributional-regression-parameters
+# Use add_epred_draws(dpar = TRUE) to get the distributional parameters
+# You can also use dpar = list("mu", "sigma") etc. to get particular parameters
+```
+
 # Model selection
 
 * Is it worth including sex as a covariate? 
