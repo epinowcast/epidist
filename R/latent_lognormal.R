@@ -16,10 +16,7 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) {
   noverlap <- prep$data$noverlap[i]
   
   # This assumes a certain prior on swindow_raw and pwindow_raw
-  # It would be better to extract these from prep in some way?
-  # Is it also the case that other outputs are correlated to these somehow such
-  # that independent draws are wrong in some way?
-  # Should n be prep$ndraws or 1?
+  # It would be better to extract these from prep or the model in some way?
   swindow_raw <- runif(1, 0, 1)
   pwindow_raw <- runif(1, 0, 1)
   
@@ -34,10 +31,20 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) {
   
   vreal1 <- prep$data$vreal1[i]
   obs_t <- vreal1
-  
   obs_time <- obs_t - pwindow
   
-  EnvStats::rlnormTrunc(1, meanlog = mu, sdlog = sigma, min = 0, max = Inf)
+  d <- EnvStats::rlnormTrunc(
+    1,
+    meanlog = mu,
+    sdlog = sigma,
+    min = 0,
+    max = obs_time
+  )
+  
+  y <- d + pwindow - swindow
+  
+  # Shouldn't this be censored to e.g. integer?
+  return(y)
 }
 
 #' Draws from the expected value of the posterior predictive distribution
@@ -56,7 +63,8 @@ posterior_epred_latent_lognormal <- function(prep) {
 
 #' The latent lognormal LPDF function
 #' 
-#' To be tested against an exposed Stan version.
+#' To be tested against an exposed Stan version. I think that this would be
+#' used in the forthcoming `log_lik_latent_lognormal` function.
 #' 
 #' @export
 latent_lognormal_lpdf <- function(y, mu, sigma, pwindow, swindow, obs_t) {
@@ -64,6 +72,6 @@ latent_lognormal_lpdf <- function(y, mu, sigma, pwindow, swindow, obs_t) {
   d <- y - pwindow + swindow
   obs_time <- obs_t - pwindow
   lpdf <- dlnorm(d, meanlog = mu, sdlog = sigma, log = TRUE)
-  lcdf <- plnorm(obs_time, meanlog = mu, sdlog = sigma, log = TRUE)
+  lcdf <- plnorm(obs_time, meanlog = mu, sdlog = sigma, log.p = TRUE)
   return(lpdf - lcdf)
 }
