@@ -11,3 +11,4 @@ brms::expose_functions(x = fit, vectorize = TRUE)
 
 i <- 1
 
+posterior_predict_latent_lognormal(i = 1, prep = prep)
