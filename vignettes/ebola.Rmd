@@ -52,6 +52,8 @@ library(data.table)
 library(purrr)
 library(ggplot2)
 library(sf)
+library(tidybayes)
+library(modelr)
 ```
 
 # Data preparation
@@ -220,44 +222,15 @@ summary(fit_sex_district)
 
 ## Posterior expectations
 
+Posterior expectation of the delay distribution by covariate under no censoring or truncation:
+
 ```{r}
-library(tidybayes)
-library(modelr)
-
-# Get all the variable names
-get_variables(fit)
-
-# Wide format
-spread_draws(fit, b_Intercept)
-
-fit |>
-  spread_draws(b_Intercept) |>
-  median_qi()
-
-# Long format
-gather_draws(fit, b_Intercept)
-
-fit |>
-  gather_draws(b_Intercept) |>
-  median_qi()
-
-# This does indeed fail with the error
-# object 'posterior_epred_latent_lognormal' not found
-# add_epred_draws(obs_prep, fit)
-
-# http://mjskay.github.io/tidybayes/articles/tidy-brms.html#extracting-distributional-regression-parameters
-# Use add_epred_draws(dpar = TRUE) to get the distributional parameters
-# You can also use dpar = list("mu", "sigma") etc. to get particular parameters
 epred_draws <- obs_prep |>
   as.data.frame() |>
   add_epred_draws(fit, dpar = TRUE)
 
-epred_draws_sex_district <- obs_prep |>
-  as.data.frame() |>
-  modelr::data_grid(sex, district) |>
-  dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
-  add_epred_draws(fit_sex_district, dpar = TRUE)
-
+# We will probably want to add functionality for users to mutate these things
+# to the newdata themselves
 epred_draws_sex <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex) |>
@@ -265,19 +238,42 @@ epred_draws_sex <- obs_prep |>
   tidybayes::add_epred_draws(fit_sex, dpar = TRUE)
 
 epred_draws_sex |>
+  dplyr::mutate(
+    sex = dplyr::case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male"
+    )
+  ) |>
   ggplot(aes(x = .epred, y = sex)) +
-    stat_slab()
+    stat_slab() +
+    labs(x = "Posterior expectation of the delay", y = "") +
+    theme_minimal()
+
+epred_draws_sex_district <- obs_prep |>
+  as.data.frame() |>
+  modelr::data_grid(sex, district) |>
+  dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
+  add_epred_draws(fit_sex_district, dpar = TRUE)
 
 # Some strata that don't have much data?
 # Some very bad priors?
 summary(epred_draws_sex_district$.epred)
-
-# Some functionality here to go to actual draws from the delay distribution easily?
 ```
 
 ## Posterior predictions
 
+Posterior prediction of the delay distribution under censoring and truncation.
+Because we are copying the data.
+Then plot the data on top of the posterior predictive distribution.
+Does it look reasonable?
+
 ## Delay probability mass functions
+
+Do a posterior predictive distribution under no truncation but daily censoring.
+Then plot those as discrete PMF.
+Compare to data somehow?
+
+What about the "continuous" no truncation no censoring distribution?
 
 ## Model comparison
 
