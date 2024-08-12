@@ -29,8 +29,7 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
     pwindow[woverlap] <- swindow[woverlap] * pwindow_raw[woverlap]
   }
 
-  vreal1 <- prep$data$vreal1[i]
-  obs_t <- vreal1
+  obs_t <- prep$data$vreal1[i]
   obs_time <- obs_t - pwindow
 
   d <- EnvStats::rlnormTrunc(
