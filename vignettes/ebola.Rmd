@@ -33,8 +33,9 @@ knitr::opts_chunk$set(
 The 2014-2016 outbreak of Ebola in West Africa began in Guinea, and quickly spread to neighbouring Liberia and Sierra Leone.
 It was the largest outbreak in the disease's history, and resulted in over 28,600 infections and 11,325 deaths [@who_ebola_2014_2016].
 
-In this vignette, we use the `epidist` package to analyze line list data from the outbreak in Sierra Leone, as collated by @fang2016transmission.
-In doing so, we demonstrate some of the features of `epidist`, including:
+In this vignette, we use the `epidist` package to analyze line list data from the outbreak in Sierra Leone.
+This data was collated by @fang2016transmission, and is available in the `epidist` package.
+In analyzing this data, we demonstrate the following features of `epidist`:
 
 1. Fitting district-sex stratified delay distribution estimates.
 2. Fitting models with lognormal and gamma delay distributions.
@@ -55,7 +56,7 @@ library(sf)
 
 # Data preparation
 
-We begin by loading the Ebola line list data, as included in the `epidist` package.
+We begin by loading the Ebola line list data.
 For more details, see `?sierra_leone_ebola_data`.
 
 ```{r}
@@ -73,32 +74,9 @@ sierra_leone_ebola_data <- sierra_leone_ebola_data |>
 head(sierra_leone_ebola_data)
 ```
 
-<!-- Question about whether to include shapefiles as data object in package. -->
+Figure \@ref(fig:ebola-outbreak) shows the data.
 
-We now join the Ebola data to shapefiles (obtained from [GADM](https://gadm.org/)) for the districts of Sierra Leone:
-
-```{r message = FALSE}
-sf <- sf::st_read("../inst/gadm41_SLE_shp/gadm41_SLE_2.shp")
-
-sierra_leone_ebola_data_sf <- dplyr::select(sf, district = NAME_2, geometry) |>
-  dplyr::left_join(
-    sierra_leone_ebola_data |>
-      dplyr::group_by(district) |>
-      dplyr::summarise(cases = dplyr::n())
-  )
-```
-
-(ref:ebola-cloropleth) Figure caption.
-
-```{r ebola-cloropleth, fig.cap="(ref:ebola-cloropleth)"}
-ggplot(sierra_leone_ebola_data_sf, aes(fill = cases, geometry = geometry)) +
-  geom_sf() +
-  scale_fill_viridis_c(na.value = "lightgrey") +
-  theme_minimal() +
-  labs(fill = "Cases")
-```
-
-(ref:ebola-outbreak) Figure caption.
+(ref:ebola-outbreak) Primary and secondary event times for a fraction of the cases.
 
 ```{r ebola-outbreak, fig.cap="(ref:ebola-outbreak)", fig.height=9}
 # Might want to move to using data.table code rather than dplyr here/everywhere
@@ -114,10 +92,42 @@ sierra_leone_ebola_data |>
     ) +
     geom_point(aes(x = date_of_symptom_onset, y = case), col = "#56B4E9") +
     geom_point(aes(x = date_of_sample_tested, y = case), col = "#009E73") +
-    facet_grid(district ~ .) +
+    facet_wrap(district ~ ., ncol = 2) +
     labs(x = "", y = "Case ID") +
     theme_minimal()
 ```
+
+<!-- Question about whether to include shapefiles as data object in package. -->
+
+We can use a map to help visualise the outbreak across space.
+To create a map, we first join the Ebola data to shapefiles (obtained from [GADM](https://gadm.org/)) for the districts of Sierra Leone.
+
+```{r message = FALSE}
+sf <- sf::st_read("../inst/gadm41_SLE_shp/gadm41_SLE_2.shp")
+
+sierra_leone_ebola_data_sf <- dplyr::select(sf, district = NAME_2, geometry) |>
+  dplyr::left_join(
+    sierra_leone_ebola_data |>
+      dplyr::group_by(district) |>
+      dplyr::summarise(cases = dplyr::n())
+  )
+```
+
+Figure \@ref(fig:ebola-cloropleth) shows that the majority of cases we concentrated in the Western Urban district.
+
+(ref:ebola-cloropleth) Figure caption.
+
+```{r ebola-cloropleth, fig.cap="(ref:ebola-cloropleth)"}
+ggplot(sierra_leone_ebola_data_sf, aes(fill = cases, geometry = geometry)) +
+  geom_sf() +
+  scale_fill_viridis_c(na.value = "lightgrey") +
+  theme_minimal() +
+  labs(fill = "Cases")
+```
+
+# Fitting district-sex stratified delay distributions
+
+## Data preparation
 
 To prepare the data for use in `epidist`, we first rename the date columns as `ptime` (time of primary event) and `stime` (time of secondary event), as well as transforming to a `data.table`:
 
@@ -158,10 +168,9 @@ The columns added are:
 * `delay_upr`:
 * `obs_at`: The maximum value of `stime`
 
-# Fitting district-sex stratified delay distributions
+## Model fitting
 
-Fit most obvious lognormal with sex effect and district effect.
-Translate fitted distribution to probability mass function
+Now we fit lognormal delay distribution with sex effect and district effect.
 First fit model with no district-sex stratification.
 Sub-sample the data for speed.
 Use ADVI for speed.
@@ -181,9 +190,11 @@ fit <- epidist::epidist(
 )
 
 summary(fit)
+```
 
-table(obs_prep$sex)
+Fit a model including sex effect:
 
+```{r}
 fit_sex <- epidist::epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
@@ -192,7 +203,11 @@ fit_sex <- epidist::epidist(
 )
 
 summary(fit_sex)
+```
 
+Fit a model including sex effect and district effect:
+
+```{r}
 fit_sex_district <- epidist::epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1 + sex + district, sigma ~ 1 + sex + district),
@@ -203,7 +218,7 @@ fit_sex_district <- epidist::epidist(
 summary(fit_sex_district)
 ```
 
-Think about the plots and summaries that I want here.
+## Posterior expectations
 
 ```{r}
 library(tidybayes)
@@ -228,7 +243,7 @@ fit |>
 
 # This does indeed fail with the error
 # object 'posterior_epred_latent_lognormal' not found
-add_epred_draws(obs_prep, fit)
+# add_epred_draws(obs_prep, fit)
 
 # http://mjskay.github.io/tidybayes/articles/tidy-brms.html#extracting-distributional-regression-parameters
 # Use add_epred_draws(dpar = TRUE) to get the distributional parameters
@@ -260,12 +275,25 @@ summary(epred_draws_sex_district$.epred)
 # Some functionality here to go to actual draws from the delay distribution easily?
 ```
 
-# Model selection
+## Posterior predictions
+
+## Delay probability mass functions
+
+## Model comparison
 
 * Is it worth including sex as a covariate? 
 * Is it worth including district as a covariate? What about spatially structured?
-* Now fit with the gamma delay distribution
+
+# Using a gamma delay distribution
+
+## Fitting 
+
+* Just fit the best model from above here?
+
+# Model selection
+
 * Should we use the lognormal or gamma delay distribution?
-* Extract posterior predictions (of something) from all models – posterior predictive checking?
+
+# Conclusion
 
 ## Bibliography {-}
