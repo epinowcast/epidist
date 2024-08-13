@@ -24,18 +24,18 @@ epidist_version_stanvar <- function() {
 
 #' Replace a brms prior only if it exists
 #' 
-#' @param priors One or more prior distributions in the class `brmsprior`
+#' @param old_prior One or more prior distributions in the class `brmsprior`
 #' @param new_prior One prior distribution in the class `brmsprior`
 #' @family utils
 #' @export
-replace_brms_prior <- function(priors, new_prior) {
+replace_brms_prior <- function(old_prior, new_prior) {
   cols <- c("class", "coef", "group", "resp", "dpar", "nlpar", "lb", "ub")
-  row_matches <- apply(priors[cols], 1, function(r) {
+  row_matches <- apply(old_prior[cols], 1, function(r) {
     all(r == as.vector(new_prior)[cols])
   })
   print(row_matches)
   if (any(row_matches)) {
-    old <- capture.output(print(priors[row_matches, ]))
+    old <- capture.output(print(old_prior[row_matches, ]))
     old <- paste(old, collapse = "\n")
     new <- capture.output(print(new_prior))
     new <- paste(new, collapse = "\n")
@@ -47,7 +47,7 @@ replace_brms_prior <- function(priors, new_prior) {
       message = msg
     ) 
     # .frequency = "regularly", .frequency_id = "prior-message"
-    priors[row_matches, ] <- new_prior
+    old_prior[row_matches, ] <- new_prior
   }
-  return(priors)
+  return(old_prior)
 }
