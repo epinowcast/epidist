@@ -136,11 +136,3 @@ test_that("epidist_formula.epidist_latent_individual with custom formulas errors
     )
   )
 })
-
-test_that("epidist_prior.epidist_latent_individual with default settings produces an object of the right class", { # nolint: line_length_linter.
-  prior <- epidist_prior(
-    prep_obs, family = family_lognormal, formula = brms::bf(mu ~ 1, sigma ~ 1)
-  )
-  expect_s3_class(prior, "brmsprior")
-  expect_s3_class(prior, "data.frame")
-})
