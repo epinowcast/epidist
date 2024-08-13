@@ -91,11 +91,20 @@ Instead, we used [prior predictive checking](https://mc-stan.org/docs/stan-users
 For example, for the lognormal latent individual model, we suggest the following prior distributions for the `brms` `mu` and `sigma` parameters:
 
 ```{r}
-epidist_family <- epidist_family(data = data, family = brms::lognormal)
+family <- brms::lognormal()
+class(family) <- c(class(family), family$family)
+
+epidist_family <- epidist_family(data, family)
+epidist_formula <- epidist_formula(
+  data, family = epidist_family, formula = brms::bf(mu ~ 1, sigma ~ 1)
+)
+
+# NULL here means no replacing priors from the user!
 epidist_prior <- epidist_prior(
   data = data,
-  family = epidist_family,
-  formula = brms::bf(mu ~ 1, sigma ~ 1)
+  family = family,
+  formula = epidist_formula,
+  prior = NULL
 )
 
 epidist_prior
