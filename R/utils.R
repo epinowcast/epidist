@@ -28,27 +28,33 @@ epidist_version_stanvar <- function() {
 #' @param new_prior One prior distribution in the class `brmsprior`
 #' @family utils
 #' @importFrom cli cli_inform
+#' @autoglobal
 #' @export
 replace_brms_prior <- function(old_prior, new_prior) {
-  cols <- c("class", "coef", "group", "resp", "dpar", "nlpar", "lb", "ub")
-  row_matches <- apply(old_prior[cols], 1, function(r) {
-    all(r == as.vector(new_prior)[cols])
-  })
-  print(row_matches)
-  if (any(row_matches)) {
-    old <- capture.output(print(old_prior[row_matches, ]))
-    old <- paste(old, collapse = "\n")
-    new <- capture.output(print(new_prior))
-    new <- paste(new, collapse = "\n")
-    msg <- c(
-      "i" = "Overwriting the brms prior:", old,
-      "Using the prior:", new
-    )
-    cli::cli_inform(
-      message = msg
-    ) 
-    # .frequency = "regularly", .frequency_id = "prior-message"
-    old_prior[row_matches, ] <- new_prior
+  if (is.null(new_prior)) {
+    return(old_prior)
   }
-  return(old_prior)
+  cols <- c("class", "coef", "group", "resp", "dpar", "nlpar", "lb", "ub")
+  prior <- dplyr::full_join(
+    old_prior, new_prior, by = cols, suffix = c("_old", "_new")
+  )
+
+  if (any(is.na(prior$prior_old))) {
+    missing_prior <- capture.output(print(
+      prior |>
+        dplyr::filter(is.na(prior_old)) |>
+        dplyr::select(prior = prior_new, all_of(cols), source = source_new)
+    ))
+    msg <- c(
+      "i" = "No available prior to replace in old_prior found for:",
+      missing_prior
+    )
+    cli::cli_abort(message = msg)
+  }
+
+  prior <- prior |>
+    dplyr::filter(!is.na(prior_old), !is.na(prior_new)) |>
+    dplyr::select(prior = prior_new, all_of(cols), source = source_new)
+
+  return(prior)
 }
