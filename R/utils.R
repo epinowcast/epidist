@@ -27,6 +27,7 @@ epidist_version_stanvar <- function() {
 #' @param old_prior One or more prior distributions in the class `brmsprior`
 #' @param new_prior One prior distribution in the class `brmsprior`
 #' @family utils
+#' @importFrom cli cli_inform
 #' @export
 replace_brms_prior <- function(old_prior, new_prior) {
   cols <- c("class", "coef", "group", "resp", "dpar", "nlpar", "lb", "ub")
