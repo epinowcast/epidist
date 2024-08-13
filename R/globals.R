@@ -100,5 +100,8 @@ utils::globalVariables(c(
   "delay", # <simulate_secondary>
   "stime", # <simulate_secondary>
   "ptime", # <simulate_secondary>
+  "prior_old", # <replace_brms_prior>
+  "prior_new", # <replace_brms_prior>
+  "source_new", # <replace_brms_prior>
   NULL
 ))

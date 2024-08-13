@@ -15,6 +15,7 @@ Label a epidist Stan model with a version indicator
 }
 \seealso{
 Other utils: 
-\code{\link{epidist_stan_chunk}()}
+\code{\link{epidist_stan_chunk}()},
+\code{\link{replace_brms_prior}()}
 }
 \concept{utils}
