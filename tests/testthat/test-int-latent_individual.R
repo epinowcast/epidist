@@ -36,10 +36,20 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
     data = prep_obs, fn = brms::brm, sample_prior = "only", seed = 1, silent = 2
   )
   pred <- predict_delay_parameters(prior_samples)
-  family <- epidist_family(data = prep_obs, family = brms::lognormal())
-  prior <- epidist_prior(data = prep_obs, family = family)
-  param1 <- extract_normal_parameters_brms(prior[1, ])
-  param2 <- extract_normal_parameters_brms(prior[2, ])
+  family <- brms::lognormal()
+  class(family) <- c(class(family), "lognormal")
+  epidist_family <- epidist_family(data = prep_obs, family = family)
+  epidist_formula <- epidist_formula(
+    data, family = epidist_family, formula = brms::bf(mu ~ 1, sigma ~ 1)
+  )
+  epidist_prior <- epidist_prior(
+    data = prep_obs,
+    family = family,
+    formula = epidist_formula,
+    prior = NULL
+  )
+  param1 <- extract_normal_parameters_brms(epidist_prior[1, ])
+  param2 <- extract_normal_parameters_brms(epidist_prior[2, ])
   samples1 <- rnorm(1000, mean = param1$mean, sd = param1$sd)
   samples2 <- exp(rnorm(1000, mean = param2$mean, sd = param2$sd))
   # suppressWarnings here used to prevent warnings about ties
