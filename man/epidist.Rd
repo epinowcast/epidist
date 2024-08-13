@@ -4,7 +4,7 @@
 \alias{epidist}
 \title{Interface using \code{brms}}
 \usage{
-epidist(data, formula, family, fn, ...)
+epidist(data, formula, family, prior, fn, ...)
 }
 \arguments{
 \item{data}{A dataframe to be used for modelling.}
@@ -12,6 +12,8 @@ epidist(data, formula, family, fn, ...)
 \item{formula}{...}
 
 \item{family}{...}
+
+\item{prior}{...}
 
 \item{fn}{Likely \code{brms::brm}. Also possible to be \code{brms::make_stancode} or
 \code{brms::make_standata}.}
@@ -25,7 +27,6 @@ Interface using \code{brms}
 Other generics: 
 \code{\link{epidist_family}()},
 \code{\link{epidist_formula}()},
-\code{\link{epidist_prior}()},
 \code{\link{epidist_stancode}()},
 \code{\link{epidist_validate}()}
 }
