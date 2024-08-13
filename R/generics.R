@@ -56,11 +56,12 @@ epidist_stancode <- function(data, ...) {
 #' @inheritParams epidist_validate
 #' @param formula ...
 #' @param family ...
+#' @param prior ...
 #' @param fn Likely `brms::brm`. Also possible to be `brms::make_stancode` or
 #' `brms::make_standata`.
 #' @param ... Additional arguments for method.
 #' @family generics
 #' @export
-epidist <- function(data, formula, family, fn, ...) {
+epidist <- function(data, formula, family, prior, fn, ...) {
   UseMethod("epidist")
 }
