@@ -18,7 +18,7 @@ epidist_prior <- function(data, family, formula, prior) {
 
 #' Model specific prior
 #'
-#' @param data ...
+#' @inheritParams epidist_prior
 #' @param ... ...
 #' @rdname epidist_model_prior
 #' @family prior
@@ -29,6 +29,8 @@ epidist_model_prior <- function(data, ...) {
 
 #' Default empty model specific prior
 #'
+#' @inheritParams epidist_prior
+#' @param ... ...
 #' @family prior
 #' @export
 epidist_model_prior.default <- function(data, formula, ...) {
@@ -39,7 +41,7 @@ epidist_model_prior.default <- function(data, formula, ...) {
 
 #' Family specific prior
 #'
-#' @param family ...
+#' @inheritParams epidist_prior
 #' @param ... ...
 #' @rdname epidist_family_prior
 #' @family prior
@@ -50,8 +52,8 @@ epidist_family_prior <- function(family, ...) {
 
 #' Default empty family specific prior
 #'
-#' @inheritParams epidist_family_prior
-#' @param formula ...
+#' @inheritParams epidist_prior
+#' @param ... ...
 #' @family prior
 #' @export
 epidist_family_prior.default <- function(family, formula, ...) {
@@ -60,8 +62,8 @@ epidist_family_prior.default <- function(family, formula, ...) {
 
 #' Family specific prior for lognormal
 #'
-#' @inheritParams epidist_family_prior
-#' @param formula ...
+#' @inheritParams epidist_prior
+#' @param ... ...
 #' @method epidist_family_prior lognormal
 #' @family prior
 #' @export

@@ -6,6 +6,13 @@
 \usage{
 \method{epidist_model_prior}{default}(data, formula, ...)
 }
+\arguments{
+\item{data}{...}
+
+\item{formula}{...}
+
+\item{...}{...}
+}
 \description{
 Default empty model specific prior
 }
@@ -15,6 +22,7 @@ Other prior:
 \code{\link{epidist_family_prior.default}()},
 \code{\link{epidist_family_prior.lognormal}()},
 \code{\link{epidist_model_prior}()},
-\code{\link{epidist_prior}()}
+\code{\link{epidist_prior}()},
+\code{\link{replace_prior}()}
 }
 \concept{prior}
