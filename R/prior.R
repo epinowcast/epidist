@@ -8,10 +8,8 @@ epidist_prior <- function(data, family, formula, prior) {
   default <- brms::default_prior(formula, data = data)
   model <- epidist_model_prior(data, formula)
   family <  epidist_family_prior(family, formula)
-  out <- replace_brms_prior(default, model)
-  out <- replace_brms_prior(out, family)
-  out <- replace_brms_prior(out, prior)
-  return(out)
+  prior <- Reduce(replace_brms_prior, list(default, model, family, prior))
+  return(prior)
 }
 
 #' Model specific prior
