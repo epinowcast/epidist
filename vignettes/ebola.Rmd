@@ -337,6 +337,19 @@ What about the "continuous" no truncation no censoring distribution?
 ## Fitting 
 
 * Just fit the best model from above here?
+* Going to do the sex stratified one for now
+
+```{r}
+fit_sex_gamma <- epidist::epidist(
+  data = obs_prep,
+  formula = brms::bf(mu ~ 1 + sex, shape ~ 1 + sex),
+  family = stats::Gamma(),
+  algorithm = "laplace",
+  refresh = 0
+)
+
+summary(fit_sex_gamma)
+```
 
 # Model selection
 
