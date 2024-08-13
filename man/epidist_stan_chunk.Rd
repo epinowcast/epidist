@@ -19,6 +19,6 @@ Read in a epidist Stan code chunk
 \seealso{
 Other utils: 
 \code{\link{epidist_version_stanvar}()},
-\code{\link{replace_brms_prior}()}
+\code{\link{replace_prior}()}
 }
 \concept{utils}

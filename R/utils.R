@@ -30,7 +30,7 @@ epidist_version_stanvar <- function() {
 #' @importFrom cli cli_inform
 #' @autoglobal
 #' @export
-replace_brms_prior <- function(old_prior, new_prior) {
+replace_prior <- function(old_prior, new_prior) {
   if (is.null(new_prior)) {
     return(old_prior)
   }
