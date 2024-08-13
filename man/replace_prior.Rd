@@ -15,8 +15,12 @@ replace_prior(old_prior, new_prior)
 Replace a brms prior only if it exists
 }
 \seealso{
-Other utils: 
-\code{\link{epidist_stan_chunk}()},
-\code{\link{epidist_version_stanvar}()}
+Other prior: 
+\code{\link{epidist_family_prior}()},
+\code{\link{epidist_family_prior.default}()},
+\code{\link{epidist_family_prior.lognormal}()},
+\code{\link{epidist_model_prior}()},
+\code{\link{epidist_model_prior.default}()},
+\code{\link{epidist_prior}()}
 }
-\concept{utils}
+\concept{prior}
