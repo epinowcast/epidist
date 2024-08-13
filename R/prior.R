@@ -77,7 +77,7 @@ epidist_family_prior.lognormal <- function(family, formula, ...) {
 #'
 #' @param old_prior One or more prior distributions in the class `brmsprior`
 #' @param new_prior One prior distribution in the class `brmsprior`
-#' @family utils
+#' @family prior
 #' @importFrom cli cli_inform
 #' @importFrom utils capture.output
 #' @autoglobal
