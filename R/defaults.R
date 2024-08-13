@@ -40,19 +40,6 @@ epidist_family.default <- function(data, ...) {
   )
 }
 
-#' Default method for defining model specific priors
-#'
-#' @inheritParams epidist_prior
-#' @family defaults
-#' @importFrom cli cli_abort
-#' @export
-epidist_prior.default <- function(data, family, formula, ...) {
-  cli::cli_abort(
-    "No epidist_prior method implemented for the class ", class(data), "\n",
-    "See methods(epidist_prior) for available methods"
-  )
-}
-
 #' Default method for defining model specific Stan code
 #'
 #' @inheritParams epidist_stancode
