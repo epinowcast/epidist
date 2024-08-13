@@ -8,6 +8,7 @@
   data,
   formula = brms::bf(mu ~ 1, sigma ~ 1),
   family = brms::lognormal(),
+  prior = NULL,
   fn = brms::brm,
   ...
 )
@@ -18,6 +19,8 @@
 \item{formula}{...}
 
 \item{family}{...}
+
+\item{prior}{...}
 
 \item{fn}{Likely \code{brms::brm}. Also possible to be \code{brms::make_stancode} or
 \code{brms::make_standata}.}

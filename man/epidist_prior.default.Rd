@@ -4,16 +4,7 @@
 \alias{epidist_prior.default}
 \title{Default method for defining model specific priors}
 \usage{
-\method{epidist_prior}{default}(data, family, formula, ...)
-}
-\arguments{
-\item{data}{A dataframe to be used for modelling.}
-
-\item{family}{...}
-
-\item{formula}{...}
-
-\item{...}{Additional arguments for method.}
+epidist_prior.default(data, family, formula, ...)
 }
 \description{
 Default method for defining model specific priors
