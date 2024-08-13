@@ -21,3 +21,33 @@ epidist_version_stanvar <- function() {
   comment <- paste0("// code chunks used from epidist ", version, "\n")
   brms::stanvar(scode = comment, block = "functions")
 }
+
+#' Replace a brms prior only if it exists
+#' 
+#' @param priors One or more prior distributions in the class `brmsprior`
+#' @param new_prior One prior distribution in the class `brmsprior`
+#' @family utils
+#' @export
+replace_brms_prior <- function(priors, new_prior) {
+  cols <- c("class", "coef", "group", "resp", "dpar", "nlpar", "lb", "ub")
+  row_matches <- apply(priors[cols], 1, function(r) {
+    all(r == as.vector(new_prior)[cols])
+  })
+  print(row_matches)
+  if (any(row_matches)) {
+    old <- capture.output(print(priors[row_matches, ]))
+    old <- paste(old, collapse = "\n")
+    new <- capture.output(print(new_prior))
+    new <- paste(new, collapse = "\n")
+    msg <- c(
+      "i" = "Overwriting the brms prior:", old,
+      "Using the prior:", new
+    )
+    cli::cli_inform(
+      message = msg
+    ) 
+    # .frequency = "regularly", .frequency_id = "prior-message"
+    priors[row_matches, ] <- new_prior
+  }
+  return(priors)
+}
