@@ -6,12 +6,19 @@
 \usage{
 epidist_model_prior(data, ...)
 }
+\arguments{
+\item{data}{...}
+
+\item{...}{...}
+}
 \description{
 Model specific prior
 }
 \seealso{
 Other prior: 
 \code{\link{epidist_family_prior}()},
+\code{\link{epidist_family_prior.default}()},
+\code{\link{epidist_family_prior.lognormal}()},
 \code{\link{epidist_prior}()}
 }
 \concept{prior}

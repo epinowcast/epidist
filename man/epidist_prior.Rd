@@ -6,12 +6,23 @@
 \usage{
 epidist_prior(data, family, formula, prior)
 }
+\arguments{
+\item{data}{...}
+
+\item{family}{...}
+
+\item{formula}{...}
+
+\item{prior}{...}
+}
 \description{
 Define prior from defaults, model, family, user
 }
 \seealso{
 Other prior: 
 \code{\link{epidist_family_prior}()},
+\code{\link{epidist_family_prior.default}()},
+\code{\link{epidist_family_prior.lognormal}()},
 \code{\link{epidist_model_prior}()}
 }
 \concept{prior}
