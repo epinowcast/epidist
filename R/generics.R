@@ -27,19 +27,6 @@ epidist_family <- function(data, ...) {
   UseMethod("epidist_family")
 }
 
-#' Define model specific priors
-#'
-#' @inheritParams epidist_validate
-#' @param family ...
-#' @param formula ...
-#' @param ... Additional arguments for method.
-#' @rdname epidist_prior
-#' @family generics
-#' @export
-epidist_prior <- function(data, family, formula, ...) {
-  UseMethod("epidist_prior")
-}
-
 #' Define model specific Stan code
 #'
 #' @inheritParams epidist_validate
