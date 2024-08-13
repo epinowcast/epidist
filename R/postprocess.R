@@ -8,7 +8,7 @@
 #' @export
 predict_delay_parameters <- function(fit, newdata = NULL, ...) {
   if (!is.null(newdata)) {
-    newdata <- brms:::validate_newdata(newdata, fit)
+    newdata <- brms::validate_newdata(newdata, fit)
   }
   pp <- brms::prepare_predictions(fit, newdata = newdata, ...)
   # Every brms model has the parameter mu
