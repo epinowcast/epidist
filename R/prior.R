@@ -20,6 +20,8 @@ epidist_model_prior <- function(data, formula) {
 #' @family prior
 #' @export
 epidist_model_prior.default <- function(data, formula){
+  # Currently there are not model-specific priors
+  # In future there might be, but we need to be careful about Stan code
   return(NULL)
 }
 
