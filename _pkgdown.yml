@@ -46,6 +46,10 @@ reference:
   desc: Default methods for S3 generics
   contents:
   - has_concept("defaults")
+- title: Priors
+  desc: Functions for specifying prior distributions
+  contents:
+  - has_concept("prior")
 - title: Latent individual model
   desc: Specific methods for the latent individual model
   contents:
