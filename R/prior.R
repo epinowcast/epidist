@@ -27,7 +27,8 @@ epidist_model_prior <- function(data, ...) {
   UseMethod("epidist_model_prior")
 }
 
-#' 
+#' Default empty model specific prior
+#'
 #' @family prior
 #' @export
 epidist_model_prior.default <- function(data, formula, ...) {
@@ -89,7 +90,7 @@ replace_prior <- function(old_prior, new_prior) {
   prior <- dplyr::full_join(
     old_prior, new_prior, by = cols, suffix = c("_old", "_new")
   )
-  
+
   if (any(is.na(prior$prior_old))) {
     missing_prior <- utils::capture.output(print(
       prior |>
@@ -104,10 +105,10 @@ replace_prior <- function(old_prior, new_prior) {
     )
     cli::cli_abort(message = msg)
   }
-  
+
   prior <- prior |>
     dplyr::filter(!is.na(prior_old), !is.na(prior_new)) |>
     dplyr::select(prior = prior_new, dplyr::all_of(cols), source = source_new)
-  
+
   return(prior)
 }
