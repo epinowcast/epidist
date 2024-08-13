@@ -48,7 +48,7 @@ epidist_family_prior.default <- function(family, formula) {
 #' @family prior
 #' @export
 epidist_family_prior.lognormal <- function(family, formula) {
-  prior <- brms::prior("normal(2, 0.5)", class = "Intercept") + 
+  prior <- brms::prior("normal(2, 0.5)", class = "Intercept") +
     brms::prior("normal(0, 0.5)", class = "Intercept", dpar = "sigma")
   prior$source <- "family"
   prior[is.na(prior)] <- "" # This is because brms likes empty over NA

@@ -23,7 +23,7 @@ epidist_version_stanvar <- function() {
 }
 
 #' Replace a brms prior only if it exists
-#' 
+#'
 #' @param old_prior One or more prior distributions in the class `brmsprior`
 #' @param new_prior One prior distribution in the class `brmsprior`
 #' @family utils
@@ -43,7 +43,9 @@ replace_brms_prior <- function(old_prior, new_prior) {
     missing_prior <- capture.output(print(
       prior |>
         dplyr::filter(is.na(prior_old)) |>
-        dplyr::select(prior = prior_new, all_of(cols), source = source_new)
+        dplyr::select(
+          prior = prior_new, dplyr::all_of(cols), source = source_new
+        )
     ))
     msg <- c(
       "i" = "No available prior to replace in old_prior found for:",
@@ -54,7 +56,7 @@ replace_brms_prior <- function(old_prior, new_prior) {
 
   prior <- prior |>
     dplyr::filter(!is.na(prior_old), !is.na(prior_new)) |>
-    dplyr::select(prior = prior_new, all_of(cols), source = source_new)
+    dplyr::select(prior = prior_new, dplyr::all_of(cols), source = source_new)
 
   return(prior)
 }
