@@ -40,7 +40,9 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
   class(family) <- c(class(family), "lognormal")
   epidist_family <- epidist_family(data = prep_obs, family = family)
   epidist_formula <- epidist_formula(
-    data, family = epidist_family, formula = brms::bf(mu ~ 1, sigma ~ 1)
+    data = prep_obs,
+    family = epidist_family,
+    formula = brms::bf(mu ~ 1, sigma ~ 1)
   )
   epidist_prior <- epidist_prior(
     data = prep_obs,
