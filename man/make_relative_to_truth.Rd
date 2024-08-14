@@ -23,7 +23,6 @@ Other postprocess:
 \code{\link{add_mean_sd.gamma_samples}()},
 \code{\link{add_mean_sd.lognormal_samples}()},
 \code{\link{draws_to_long}()},
-\code{\link{latent_lognormal_lpdf}()},
 \code{\link{posterior_epred_latent_lognormal}()},
 \code{\link{posterior_predict_latent_lognormal}()},
 \code{\link{predict_delay_parameters}()},
