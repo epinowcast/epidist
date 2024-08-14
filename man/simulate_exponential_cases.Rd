@@ -27,7 +27,6 @@ uniform distribution.
 }
 \seealso{
 Other simulate: 
-\code{\link{simulate_double_censored_pmf}()},
 \code{\link{simulate_gillespie}()},
 \code{\link{simulate_secondary}()},
 \code{\link{simulate_uniform_cases}()}
