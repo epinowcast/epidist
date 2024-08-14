@@ -24,7 +24,6 @@ column named \code{ptime}.
 }
 \seealso{
 Other simulate: 
-\code{\link{simulate_double_censored_pmf}()},
 \code{\link{simulate_exponential_cases}()},
 \code{\link{simulate_gillespie}()},
 \code{\link{simulate_uniform_cases}()}
