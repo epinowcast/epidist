@@ -11,39 +11,23 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
   mu <- brms::get_dpar(prep, "mu", i = i)
   sigma <- brms::get_dpar(prep, "sigma", i = i)
 
-  wN <- prep$data$wN[i] # nolint: object_name_linter
-  woverlap <- prep$data$woverlap[i]
-  noverlap <- prep$data$noverlap[i]
+  obs_t <- prep$data$vreal1[i]
+  pwindow_width <- prep$data$vreal2[i]
+  swindow_width <- prep$data$vreal3[i]
 
-  # This assumes a certain prior on swindow_raw and pwindow_raw
-  # It would be better to extract these from prep or the model in some way?
-  swindow_raw <- runif(1, 0, 1)
-  pwindow_raw <- runif(1, 0, 1)
-
-  vreal3 <- prep$data$vreal3[i]
-  swindow <- vreal3 * swindow_raw
-
-  vreal2 <- prep$data$vreal2[i]
-  pwindow <- vreal2[noverlap] * pwindow_raw[noverlap]
-  if (wN) {
-    pwindow[woverlap] <- swindow[woverlap] * pwindow_raw[woverlap]
+  # while loop to impose the truncation
+  d_censored <- obs_t + 1
+  while (d_censored > obs_t) {
+    p_latent <- runif(1, 0, 1) * pwindow_width
+    d_latent <- rlnorm(1, meanlog = mu, sdlog = sigma)
+    s_latent <- p_latent + d_latent
+  
+    p_censored <- floor_mult(p_latent, pwindow_width)
+    s_censored <- floor_mult(s_latent, swindow_width)
+    d_censored <- s_censored - p_censored
   }
 
-  obs_t <- prep$data$vreal1[i]
-  obs_time <- obs_t - pwindow
-
-  d <- EnvStats::rlnormTrunc(
-    1,
-    meanlog = mu,
-    sdlog = sigma,
-    min = 0,
-    max = obs_time
-  )
-
-  y <- d + pwindow - swindow
-
-  # Shouldn't this be censored to e.g. integer?
-  return(y)
+  return(d_censored)
 }
 
 #' Draws from the expected value of the posterior predictive distribution
