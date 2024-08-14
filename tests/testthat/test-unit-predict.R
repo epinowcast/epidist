@@ -11,29 +11,29 @@ test_that("posterior_predict_latent_lognormal outputs a positive single integer"
   expect_gt(pred_i, 0)
 
   i_out_of_bounds <- length(prep$data$Y) + 1
-  expect_error( posterior_predict_latent_lognormal(prep, i = i_out_of_bounds))
+  expect_error(posterior_predict_latent_lognormal(prep, i = i_out_of_bounds))
 })
 
 test_that("posterior_predict_latent_lognormal errors for i out of bounds", { # nolint: line_length_linter.
   i_out_of_bounds <- length(prep$data$Y) + 1
-  expect_error( posterior_predict_latent_lognormal(prep, i = i_out_of_bounds))
+  expect_error(posterior_predict_latent_lognormal(prep, i = i_out_of_bounds))
 })
 
 test_that("posterior_predict_latent_lognormal predicts delays for which the data is in the 95% credible interval", { # nolint: line_length_linter.
   max_i <- length(prep$data$Y)
-  df <- tidyr::crossing( "i" = 1:max_i, "draw" = 1:100) |>
+  df <- tidyr::crossing("i" = 1:max_i, "draw" = 1:100) |>
     dplyr::mutate(
-      y = purrr::map_dbl(i, ~ posterior_predict_latent_lognormal(i = .x, prep = prep))
+      y = purrr::map_dbl(
+        i, ~ posterior_predict_latent_lognormal(i = .x, prep = prep)
+      )
     )
-  
   quantiles <- purrr::map_vec(1:max_i, function(i) {
     ecdf <- ecdf(dplyr::filter(df, i == i)$y)
     q <- ecdf(prep$data$Y[i])
     return(q)
   })
-  
   expect_lt(quantile(quantiles, 0.1), 0.3)
-  expect_gt(quantile(quantiles, 0.9), 0.7)  
+  expect_gt(quantile(quantiles, 0.9), 0.7)
   expect_lt(min(quantiles), 0.1)
   expect_gt(max(quantiles), 0.9)
 })
