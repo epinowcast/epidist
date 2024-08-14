@@ -43,25 +43,3 @@ posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_lin
   sigma <- brms::get_dpar(prep, "sigma")
   exp(mu + sigma^2 / 2)
 }
-
-#' The latent lognormal LPDF function
-#'
-#' To be tested against an exposed Stan version. I think that this would be
-#' used in the forthcoming `log_lik_latent_lognormal` function.
-#'
-#' @param y ...
-#' @param mu ...
-#' @param sigma ...
-#' @param pwindow ...
-#' @param swindow ...
-#' @param obs_t ...
-#' @family postprocess
-#' @autoglobal
-#' @export
-latent_lognormal_lpdf <- function(y, mu, sigma, pwindow, swindow, obs_t) {
-  d <- y - pwindow + swindow
-  obs_time <- obs_t - pwindow
-  lpdf <- dlnorm(d, meanlog = mu, sdlog = sigma, log = TRUE)
-  lcdf <- plnorm(obs_time, meanlog = mu, sdlog = sigma, log.p = TRUE)
-  return(sum(lpdf - lcdf))
-}
