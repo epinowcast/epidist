@@ -4,7 +4,7 @@
 \alias{posterior_predict_latent_lognormal}
 \title{Draws from the posterior predictive distribution}
 \usage{
-posterior_predict_latent_lognormal(i, prep, ...)
+posterior_predict_latent_lognormal(i, prep)
 }
 \arguments{
 \item{i}{The index of the observation to predict}
@@ -21,7 +21,6 @@ Other postprocess:
 \code{\link{add_mean_sd.gamma_samples}()},
 \code{\link{add_mean_sd.lognormal_samples}()},
 \code{\link{draws_to_long}()},
-\code{\link{latent_lognormal_lpdf}()},
 \code{\link{make_relative_to_truth}()},
 \code{\link{posterior_epred_latent_lognormal}()},
 \code{\link{predict_delay_parameters}()},

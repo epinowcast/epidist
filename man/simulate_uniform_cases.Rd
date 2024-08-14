@@ -22,7 +22,6 @@ event times are uniformly distributed between 0 and \code{t}.
 }
 \seealso{
 Other simulate: 
-\code{\link{simulate_double_censored_pmf}()},
 \code{\link{simulate_exponential_cases}()},
 \code{\link{simulate_gillespie}()},
 \code{\link{simulate_secondary}()}
