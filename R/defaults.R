@@ -70,7 +70,6 @@ epidist.default <- function(data, formula = brms::bf(mu ~ 1, sigma ~ 1),
   epidist_formula <- epidist_formula(
     data = data, family = epidist_family, formula = formula
   )
-  class(family) <- c(class(family), family$family)
   epidist_prior <- epidist_prior(
     data = data, family = family, formula = epidist_formula, prior
   )
