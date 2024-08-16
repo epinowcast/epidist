@@ -31,7 +31,6 @@ epidist_version_stanvar <- function() {
 #' @param x A number to be rounded down
 #' @param f A number specifying the multiple to be rounded down to
 #' @family utils
-#' @export
 floor_mult <- function(x, f = 1) {
   return(floor(x / f) * f)
 }
