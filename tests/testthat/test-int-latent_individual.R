@@ -37,7 +37,6 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
   )
   pred <- predict_delay_parameters(prior_samples)
   family <- brms::lognormal()
-  class(family) <- c(class(family), "lognormal")
   epidist_family <- epidist_family(data = prep_obs, family = family)
   epidist_formula <- epidist_formula(
     data = prep_obs,

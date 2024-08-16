@@ -26,7 +26,6 @@ test_that("epidist_prior with default settings produces an object of the right c
   epidist_formula <- epidist_formula(
     data = data, family = epidist_family(data, family), formula = formula
   )
-  class(family) <- c(class(family), family$family)
   prior <- epidist_prior(data, family, formula = epidist_formula, prior = NULL)
   expect_s3_class(prior, "brmsprior")
   expect_s3_class(prior, "data.frame")
