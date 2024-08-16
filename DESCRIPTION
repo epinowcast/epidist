@@ -33,14 +33,14 @@ Imports:
     stats,
     cli,
     checkmate,
-    rstan
+    rstan,
+    dplyr
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
     readxl,
     janitor,
     gt,
-    dplyr,
     knitr,
     roxyglobals,
     tibble,
