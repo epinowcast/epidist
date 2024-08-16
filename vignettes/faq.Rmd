@@ -92,7 +92,6 @@ For example, for the lognormal latent individual model, we suggest the following
 
 ```{r}
 family <- brms::lognormal()
-class(family) <- c(class(family), family$family)
 
 epidist_family <- epidist_family(data, family)
 epidist_formula <- epidist_formula(
