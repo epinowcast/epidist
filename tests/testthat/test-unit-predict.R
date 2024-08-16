@@ -1,8 +1,8 @@
-prep_obs <- as_latent_individual(sim_obs)
-fit <- epidist(prep_obs)
-prep <- brms::prepare_predictions(fit)
-
 test_that("posterior_predict_latent_lognormal outputs a positive single integer", { # nolint: line_length_linter.
+  fit <- readRDS(
+    system.file("extdata/fit.rds", package = "epidist")
+  )
+  prep <- brms::prepare_predictions(fit)
   i <- 1
   pred_i <- posterior_predict_latent_lognormal(i = i, prep)
   expect_equal(floor(pred_i), pred_i)
@@ -15,11 +15,19 @@ test_that("posterior_predict_latent_lognormal outputs a positive single integer"
 })
 
 test_that("posterior_predict_latent_lognormal errors for i out of bounds", { # nolint: line_length_linter.
+  fit <- readRDS(
+    system.file("extdata/fit.rds", package = "epidist")
+  )
+  prep <- brms::prepare_predictions(fit)
   i_out_of_bounds <- length(prep$data$Y) + 1
   expect_error(posterior_predict_latent_lognormal(prep, i = i_out_of_bounds))
 })
 
 test_that("posterior_predict_latent_lognormal predicts delays for which the data is in the 95% credible interval", { # nolint: line_length_linter.
+  fit <- readRDS(
+    system.file("extdata/fit.rds", package = "epidist")
+  )
+  prep <- brms::prepare_predictions(fit)
   max_i <- length(prep$data$Y)
   df <- tidyr::crossing("i" = 1:max_i, "draw" = 1:100) |>
     dplyr::mutate(
@@ -39,6 +47,10 @@ test_that("posterior_predict_latent_lognormal predicts delays for which the data
 })
 
 test_that("posterior_epred_latent_lognormal creates a array of non-negative numbers with the correct dimensions", { # nolint: line_length_linter.
+  fit <- readRDS(
+    system.file("extdata/fit.rds", package = "epidist")
+  )
+  prep <- brms::prepare_predictions(fit)
   epred <- posterior_epred_latent_lognormal(prep)
   expect_setequal(class(epred), c("matrix", "array"))
   expect_equal(nrow(epred), prep$ndraws)
