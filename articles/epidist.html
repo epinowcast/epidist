@@ -6,6 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Getting started with epidist • epidist</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
@@ -46,6 +52,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/epinowcast/epidist/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -59,7 +66,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Getting started with epidist</h1>
             
       
-
+      <small class="dont-index">Source: <a href="https://github.com/epinowcast/epidist/blob/main/vignettes/epidist.Rmd" class="external-link"><code>vignettes/epidist.Rmd</code></a></small>
       <div class="d-none name"><code>epidist.Rmd</code></div>
     </div>
 
@@ -283,14 +290,14 @@ In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo 
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, cores <span class="op">=</span> <span class="fl">4</span>, refresh <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 4 parallel chains...</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Chain 2 finished in 5.3 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 5.4 seconds.</span></span>
 <span><span class="co">#&gt; Chain 1 finished in 5.5 seconds.</span></span>
-<span><span class="co">#&gt; Chain 3 finished in 5.4 seconds.</span></span>
-<span><span class="co">#&gt; Chain 4 finished in 5.5 seconds.</span></span>
+<span><span class="co">#&gt; Chain 3 finished in 5.6 seconds.</span></span>
+<span><span class="co">#&gt; Chain 4 finished in 5.7 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; All 4 chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 5.4 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 5.7 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 5.6 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 5.8 seconds.</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <code>brmsfit</code> object containing MCMC samples from each of the parameters (Table <a href="#tab:pars">2.1</a>) in the model.
 Users familiar with Stan and <code>brms</code>, can work with <code>fit</code> directly.
 Any tool that supports <code>brms</code> fitted model objects will be compatible with <code>fit</code>.</p>

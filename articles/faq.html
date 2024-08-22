@@ -6,6 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Frequently asked questions and tips • epidist</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
@@ -43,6 +49,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/epinowcast/epidist/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -56,7 +63,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Frequently asked questions and tips</h1>
             
       
-
+      <small class="dont-index">Source: <a href="https://github.com/epinowcast/epidist/blob/main/vignettes/faq.Rmd" class="external-link"><code>vignettes/faq.Rmd</code></a></small>
       <div class="d-none name"><code>faq.Rmd</code></div>
     </div>
 
@@ -142,17 +149,25 @@ However, some of those priors do not make sense in the context of our applicatio
 Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html" class="external-link">prior predictive checking</a> to set <code>epidist</code>-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.</p>
 <p>For example, for the lognormal latent individual model, we suggest the following prior distributions for the <code>brms</code> <code>mu</code> and <code>sigma</code> parameters:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">epidist_family</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_family.html">epidist_family</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, family <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="va"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">family</span> <span class="op">&lt;-</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">epidist_family</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_family.html">epidist_family</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">family</span><span class="op">)</span></span>
+<span><span class="va">epidist_formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_formula.html">epidist_formula</a></span><span class="op">(</span></span>
+<span>  <span class="va">data</span>, family <span class="op">=</span> <span class="va">epidist_family</span>, formula <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># NULL here means no replacing priors from the user!</span></span>
 <span><span class="va">epidist_prior</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_prior.html">epidist_prior</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">data</span>,</span>
-<span>  family <span class="op">=</span> <span class="va">epidist_family</span>,</span>
-<span>  formula <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span></span>
+<span>  family <span class="op">=</span> <span class="va">family</span>,</span>
+<span>  formula <span class="op">=</span> <span class="va">epidist_formula</span>,</span>
+<span>  prior <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epidist_prior</span></span></code></pre></div>
-<pre><code><span><span class="co">##           prior     class coef group resp  dpar nlpar   lb   ub source</span></span>
-<span><span class="co">##  normal(2, 0.5) Intercept                             &lt;NA&gt; &lt;NA&gt;   user</span></span>
-<span><span class="co">##  normal(0, 0.5) Intercept                 sigma       &lt;NA&gt; &lt;NA&gt;   user</span></span></code></pre>
+<pre><code><span><span class="co">##           prior     class coef group resp  dpar nlpar lb ub source</span></span>
+<span><span class="co">##  normal(2, 0.5) Intercept                                   family</span></span>
+<span><span class="co">##  normal(0, 0.5) Intercept                 sigma             family</span></span></code></pre>
 <p>(Note that the functions <code>epidist_family</code> and <code>epidist_prior</code> are mostly for internal use!)</p>
 <p>Here are summary statistics for the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
