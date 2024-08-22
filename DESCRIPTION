@@ -19,10 +19,11 @@ Description: Understanding and accurately estimating epidemiological delay
     distributions is important for public health policy. These estimates
     directly influence epidemic situational awareness, control strategies, and resource allocation. In this package, we provide methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. Despite their importance, these issues are frequently overlooked, often resulting in biased conclusions.
 License: MIT + file LICENSE
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE, roclets = c("collate", "namespace", "rd",
-    "roxyglobals::global_roclet"))
-RoxygenNote: 7.3.2
+URL: https://epidist.epinowcast.org/,
+    https://github.com/epinowcast/epidist/
+BugReports: https://github.com/epinowcast/epidist/issues/
+Depends: 
+    R (>= 2.10)
 Imports: 
     brms,
     cmdstanr,
@@ -55,10 +56,11 @@ Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
 Config/testthat/edition: 3
-URL: https://epidist.epinowcast.org/
-Depends: 
-    R (>= 2.10)
-LazyData: true
-VignetteBuilder: knitr
 Config/roxyglobals/filename: globals.R
 Config/roxyglobals/unique: FALSE
+LazyData: true
+VignetteBuilder: knitr
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE, roclets = c("collate", "namespace", "rd",
+    "roxyglobals::global_roclet"))
+RoxygenNote: 7.3.2
