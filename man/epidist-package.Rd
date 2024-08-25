@@ -13,6 +13,8 @@ Understanding and accurately estimating epidemiological delay distributions is i
 Useful links:
 \itemize{
   \item \url{https://epidist.epinowcast.org/}
+  \item \url{https://github.com/epinowcast/epidist/}
+  \item Report bugs at \url{https://github.com/epinowcast/epidist/issues/}
 }
 
 }
