@@ -19,10 +19,6 @@ Other postprocess:
 \code{\link{add_mean_sd.gamma_samples}()},
 \code{\link{add_mean_sd.lognormal_samples}()},
 \code{\link{draws_to_long}()},
-<<<<<<< HEAD
-=======
-\code{\link{latent_lognormal_lpdf}()},
->>>>>>> 9ad760de (Merge conflict)
 \code{\link{make_relative_to_truth}()},
 \code{\link{posterior_predict_latent_lognormal}()},
 \code{\link{predict_delay_parameters}()},
