@@ -4,10 +4,11 @@
 #'
 #' @param i The index of the observation to predict
 #' @param prep The result of a call to [`brms::posterior_predict`]
+#' @param ... Additional arguments
 #' @family postprocess
 #' @autoglobal
 #' @export
-posterior_predict_latent_lognormal <- function(i, prep) { # nolint: object_length_linter
+posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu", i = i)
   sigma <- brms::get_dpar(prep, "sigma", i = i)
 
