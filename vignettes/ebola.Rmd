@@ -319,6 +319,15 @@ Because we are copying the data.
 Then plot the data on top of the posterior predictive distribution.
 Does it look reasonable?
 
+```{r}
+draws <- predicted_draws(fit, newdata = as.data.frame(obs_prep))
+draws$.draw |> summary()
+
+obs_prep |>
+  as.data.frame() |>
+  add_predicted_rvars(fit)
+```
+
 ## Delay probability mass functions
 
 Do a posterior predictive distribution under no truncation but daily censoring.
