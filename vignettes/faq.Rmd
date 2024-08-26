@@ -24,6 +24,8 @@ The code block below is provided to facilitate reproduction of this script, if r
 
 ```{r message=FALSE, results='hide', class.source='fold-hide'}
 library(epidist)
+library(dplyr)
+library(ggplot2)
 
 set.seed(1)
 
@@ -111,21 +113,33 @@ epidist_prior
 
 (Note that the functions `epidist_family` and `epidist_prior` are mostly for internal use!)
 
-Here are summary statistics for the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:
+Here are the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:
 
 ```{r message=FALSE, results='hide'}
 set.seed(1)
-fit_ppc <- epidist::epidist(
-  data = data, family = brms::lognormal(), sample_prior = "only", seed = 1
+
+prior_new <- brms::prior("normal(2, 0.25)", class = "Intercept") +
+    brms::prior("normal(0, 0.25)", class = "Intercept", dpar = "sigma")
+
+# This is annoying and deserves an issue
+prior_new[is.na(prior_new)] <- ""
+
+fit_ppc <- epidist(
+  data = data, family = brms::lognormal(), sample_prior = "only", seed = 1, prior = prior_new
 )
 ```
 
 ```{r}
 pred <- predict_delay_parameters(fit_ppc)
-summary(pred$mean)
-summary(pred$sd)
-```
 
-(Note that even with these quite restricted prior distributions, there are still some very large samples of the delay mean and standard deviation [which arguably are not plausible a-priori]!)
+pred |>
+  draws_to_long() |>
+  filter(parameter %in% c("mean", "sd")) |>
+  ggplot(aes(x = value, y = after_stat(density))) +
+    geom_histogram() +
+    facet_wrap(. ~ parameter, scales = "free") +
+    labs(x = "", y = "Density") +
+    theme_minimal()
+```
 
 ## Bibliography
