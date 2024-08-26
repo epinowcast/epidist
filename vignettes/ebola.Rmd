@@ -187,7 +187,7 @@ N_complete / N
 obs_cens <- obs_cens[sample(seq_len(.N), N_complete / 5, replace = FALSE)]
 obs_prep <- as_latent_individual(obs_cens)
 
-fit <- epidist::epidist(
+fit <- epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1, sigma ~ 1),
   family = brms::lognormal(),
@@ -201,7 +201,7 @@ summary(fit)
 Fit a model including sex effect:
 
 ```{r}
-fit_sex <- epidist::epidist(
+fit_sex <- epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
   family = brms::lognormal(),
@@ -215,7 +215,7 @@ summary(fit_sex)
 Fit a model including sex effect and district effect:
 
 ```{r}
-fit_sex_district <- epidist::epidist(
+fit_sex_district <- epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1 + sex + district, sigma ~ 1 + sex + district),
   family = brms::lognormal(),
@@ -349,7 +349,7 @@ What about the "continuous" no truncation no censoring distribution?
 * Going to do the sex stratified one for now
 
 ```{r}
-fit_sex_gamma <- epidist::epidist(
+fit_sex_gamma <- epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1 + sex, shape ~ 1 + sex),
   family = stats::Gamma(),
