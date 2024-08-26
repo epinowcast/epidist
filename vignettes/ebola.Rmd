@@ -66,7 +66,7 @@ data("sierra_leone_ebola_data")
 ```
 
 The data has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a unique case report `id`.
-The columns of the data are the individuals name (retracted, and hence can be safely removed), age, sex, the dates of symptom onset and positive sample, and their district and chiefdom.
+The columns of the data are the individuals name (retracted, and hence can be removed), age, sex, the dates of symptom onset and positive sample, and their district and chiefdom.
 
 ```{r}
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
@@ -76,14 +76,16 @@ sierra_leone_ebola_data <- sierra_leone_ebola_data |>
 head(sierra_leone_ebola_data)
 ```
 
-Figure \@ref(fig:ebola-outbreak) shows the data.
+Figure \@ref(fig:ebola-outbreak) shows every `r fraction`th case (to avoid over-plotting the data) by district.
+The epidemic begins at different times in different districts.
 
-(ref:ebola-outbreak) Primary and secondary event times for a fraction of the cases.
+(ref:ebola-outbreak) Primary and secondary event times for every `r fraction`th case.
 
 ```{r ebola-outbreak, fig.cap="(ref:ebola-outbreak)", fig.height=9}
-# Might want to move to using data.table code rather than dplyr here/everywhere
+fraction <- 10
+
 sierra_leone_ebola_data |>
-  dplyr::filter(case %% 10 == 0) |>
+  dplyr::filter(case %% fraction == 0) |>
   ggplot() +
     geom_segment(
       aes(
@@ -115,9 +117,9 @@ sierra_leone_ebola_data_sf <- dplyr::select(sf, district = NAME_2, geometry) |>
   )
 ```
 
-Figure \@ref(fig:ebola-cloropleth) shows that the majority of cases we concentrated in the Western Urban district.
+Figure \@ref(fig:ebola-cloropleth) shows that the majority of cases were concentrated in the Western Urban district.
 
-(ref:ebola-cloropleth) Figure caption.
+(ref:ebola-cloropleth) A cloropleth showing the total number of Ebola cases in each district of Sierra Leone.
 
 ```{r ebola-cloropleth, fig.cap="(ref:ebola-cloropleth)"}
 ggplot(sierra_leone_ebola_data_sf, aes(fill = cases, geometry = geometry)) +
@@ -131,7 +133,9 @@ ggplot(sierra_leone_ebola_data_sf, aes(fill = cases, geometry = geometry)) +
 
 ## Data preparation
 
-To prepare the data for use in `epidist`, we first rename the date columns as `ptime` (time of primary event) and `stime` (time of secondary event), as well as transforming to a `data.table`:
+To prepare the data for use in `epidist`, we transform the date columns to `ptime` (time of primary event) and `stime` (time of secondary event) columns.
+Both of these columns are given relative to the first date of symptom onset in the data.
+We also transform the `data.frame` to a `data.table`.
 
 ```{r}
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
@@ -143,9 +147,11 @@ sierra_leone_ebola_data <- sierra_leone_ebola_data |>
   ) |>
   dplyr::select(case, ptime, stime, age, sex, district) |>
   data.table::as.data.table()
+
+head(sierra_leone_ebola_data)
 ```
 
-Next, we use `observe_process()` to do add interval censoring columns:
+Next, we use `observe_process()` to do add the required interval censoring columns:
 
 ```{r}
 obs_cens <- epidist::observe_process(sierra_leone_ebola_data)
@@ -228,7 +234,10 @@ summary(fit_sex_district)
 
 ## Posterior expectations
 
-Posterior expectation of the delay distribution by covariate under no censoring or truncation:
+To obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid` function in combination with the `tidybayes::add_epred_draws` function.
+The `tidybayes::add_epred_draws` function uses the `posterior_epred_latent_lognormal` function implemented in `epidist` for the `latent_lognormal` custom `brms` family.
+
+First, for the model with no stratification (Figure \@ref(fig:epred-base)):
 
 ```{r}
 epred_draws <- obs_prep |>
@@ -236,21 +245,33 @@ epred_draws <- obs_prep |>
   modelr::data_grid(NA) |>
   dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
   add_epred_draws(fit, dpar = TRUE)
+```
 
+(ref:epred-base) The fitted posterior expectation of the delay distribution for a model with no stratification.
+
+```{r epred-base, fig.cap="(ref:epred-base)"}
 epred_draws |>
   ggplot(aes(x = .epred)) +
     tidybayes::stat_slab() +
     labs(x = "Posterior expectation of the delay", y = "") +
     theme_minimal()
+```
 
-# We will probably want to add functionality for users to mutate these things
-# to the newdata themselves
-epred_draws_sex <- obs_prep |>
+Next, for the sex stratified model, we find the men typically have a higher posterior delay expectation than women (Figure \@ref(fig:epred-sex)):
+
+```{r}
+# Probably want functionality for users not to have to do this themselves
+(newdata_sex <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex) |>
-  dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
-  tidybayes::add_epred_draws(fit_sex, dpar = TRUE)
+  dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA))
 
+epred_draws_sex <- tidybayes::add_epred_draws(newdata_sex, fit_sex, dpar = TRUE)
+```
+
+(ref:epred-sex) The fitted posterior expectation of the delay distribution for a model with sex stratification.
+
+```{r epred-sex, fig.cap="(ref:epred-sex)"}
 epred_draws_sex |>
   dplyr::mutate(
     sex = dplyr::case_when(
@@ -259,10 +280,14 @@ epred_draws_sex |>
     )
   ) |>
   ggplot(aes(x = .epred, y = sex)) +
-    tidybayes::stat_slab() +
+    tidybayes::stat_halfeye() +
     labs(x = "Posterior expectation of the delay", y = "") +
     theme_minimal()
+```
 
+Finally, for the sex-district stratified model:
+
+```{r}
 epred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex, district) |>
@@ -277,30 +302,13 @@ epred_draws_sex_district |>
     )
   ) |>
   ggplot(aes(x = .epred, y = district)) +
-    tidybayes::stat_slab() +
+    tidybayes::stat_pointinterval() +
     facet_grid(. ~ sex) +
     labs(x = "Posterior expectation of the delay", y = "") +
     theme_minimal()
 
 # Some strata that don't have much data? Some very bad priors?
 summary(epred_draws_sex_district$.epred)
-
-obs_prep$district |>
-  table()
-
-epred_draws_sex_district |>
-  dplyr::filter(district %in% c("Port Loko", "Western Urban")) |>
-  dplyr::mutate(
-    sex = dplyr::case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
-  ggplot(aes(x = .epred, y = district)) +
-    tidybayes::stat_slab() +
-    facet_grid(. ~ sex) +
-    labs(x = "Posterior expectation of the delay", y = "") +
-    theme_minimal()
 
 epred_draws_sex_district |>
   dplyr::group_by(district) |>
@@ -312,29 +320,102 @@ obs_prep$district |>
   table()
 ```
 
+## Linear predictor posteriors
+
+```{r}
+linpred_draws_sex_district <- obs_prep |>
+  as.data.frame() |>
+  modelr::data_grid(sex, district) |>
+  dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
+  add_linpred_draws(fit_sex_district, dpar = TRUE)
+```
+
+Linear predictors for the `mu` parameter by sex and district:
+
+```{r}
+linpred_draws_sex_district |>
+  dplyr::mutate(
+    sex = dplyr::case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male"
+    )
+  ) |>
+  ggplot(aes(x = mu, y = district)) +
+    tidybayes::stat_pointinterval() +
+    facet_grid(. ~ sex) +
+    labs(x = "Posterior of the mu linear predictor", y = "") +
+    theme_minimal()
+```
+
+Linear predictors for the `sigma` parameter by sex and district:
+
+```{r}
+linpred_draws_sex_district |>
+  dplyr::mutate(
+    sex = dplyr::case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male"
+    )
+  ) |>
+  ggplot(aes(x = sigma, y = district)) +
+    tidybayes::stat_pointinterval() +
+    facet_grid(. ~ sex) +
+    labs(x = "Posterior of the sigma linear predictor", y = "") +
+    theme_minimal()
+```
+
 ## Posterior predictions
 
-Posterior prediction of the delay distribution under censoring and truncation.
-Because we are copying the data.
-Then plot the data on top of the posterior predictive distribution.
-Does it look reasonable?
+Posterior prediction of the observed data.
+(One sample from it.)
 
 ```{r}
 draws <- predicted_draws(fit, newdata = as.data.frame(obs_prep))
+
+# This is just a single draw. To get many draws do you have to repeat rows?
 draws$.draw |> summary()
 
+ggplot(draws, aes(x = .prediction, y = district)) +
+  tidybayes::stat_pointinterval() +
+  facet_grid(. ~ sex) +
+  theme_minimal()
+```
+
+How does this `rvars` stuff work?
+
+```{r}
 obs_prep |>
   as.data.frame() |>
-  add_predicted_rvars(fit)
+  add_predicted_rvars(fit) |>
+  select(.prediction) |>
+  head()
 ```
 
 ## Delay probability mass functions
 
 Do a posterior predictive distribution under no truncation but daily censoring.
 Then plot those as discrete PMF.
-Compare to data somehow?
+
+```{r}
+newdata_pmf <- obs_prep |>
+  as.data.frame() |>
+  modelr::data_grid(NA) |>
+  dplyr::mutate(obs_t = 100, pwindow_upr = 1, swindow_upr = 1)
+
+# Anything here with the prediction being vectorised?
+draws_pmf <- predicted_draws(fit, newdata = newdata_pmf, ndraws = 1)
+```
 
 What about the "continuous" no truncation no censoring distribution?
+
+```{r}
+newdata_pdf <- obs_prep |>
+  as.data.frame() |>
+  modelr::data_grid(NA) |>
+  dplyr::mutate(obs_t = 100, pwindow_upr = 0, swindow_upr = 0)
+
+draws_pdf <- predicted_draws(fit, newdata = newdata_pdf, ndraws = 1)
+```
 
 ## Model comparison
 
