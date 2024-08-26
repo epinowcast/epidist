@@ -46,7 +46,7 @@ obs_cens_trunc_samp <-
   obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 
 data <- as_latent_individual(obs_cens_trunc_samp)
-fit <- epidist(data, seed = 1)
+fit <- epidist(data, formula = brms::bf(mu ~ 1, sigma ~ 1), seed = 1)
 ```
 
 ## I would like to work with the samples output
@@ -90,7 +90,7 @@ For an example use of these functions, have a look at the [`epidist-paper`](http
 However, some of those priors do not make sense in the context of our application.
 Instead, we used [prior predictive checking](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html) to set `epidist`-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.
 
-For example, for the lognormal latent individual model, we suggest the following prior distributions for the `brms` `mu` and `sigma` parameters:
+For example, for the lognormal latent individual model, we suggest the following prior distributions for the `brms` `mu` and `sigma` intercept parameters:
 
 ```{r}
 family <- brms::lognormal()
@@ -117,16 +117,12 @@ Here are the distributions on the delay distribution mean and standard deviation
 
 ```{r message=FALSE, results='hide'}
 set.seed(1)
-
-prior_new <- brms::prior("skew_normal(1.5, 0.5, 3)", class = "Intercept") +
-  brms::prior("normal(-1, 0.5)", class = "Intercept", dpar = "sigma")
-
-# This is annoying and deserves an issue
-prior_new[is.na(prior_new)] <- ""
-
 fit_ppc <- epidist(
-  data = data, family = brms::lognormal(), sample_prior = "only", seed = 1,
-  prior = prior_new
+  data = data,
+  formula = brms::bf(mu ~ 1, sigma ~ 1),
+  family = brms::lognormal(),
+  sample_prior = "only",
+  seed = 1
 )
 ```
 
@@ -143,8 +139,8 @@ pred |>
   theme_minimal() +
   scale_x_log10(labels = scales::comma)
 
-summary(pred$mean)
-summary(pred$sd)
+quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
+quantile(pred$sd, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 ```
 
 ## Bibliography
