@@ -119,13 +119,14 @@ Here are the distributions on the delay distribution mean and standard deviation
 set.seed(1)
 
 prior_new <- brms::prior("skew_normal(1.5, 0.5, 3)", class = "Intercept") +
-    brms::prior("normal(-1, 0.5)", class = "Intercept", dpar = "sigma")
+  brms::prior("normal(-1, 0.5)", class = "Intercept", dpar = "sigma")
 
 # This is annoying and deserves an issue
 prior_new[is.na(prior_new)] <- ""
 
 fit_ppc <- epidist(
-  data = data, family = brms::lognormal(), sample_prior = "only", seed = 1, prior = prior_new
+  data = data, family = brms::lognormal(), sample_prior = "only", seed = 1,
+  prior = prior_new
 )
 ```
 
@@ -136,11 +137,11 @@ pred |>
   draws_to_long() |>
   filter(parameter %in% c("mean", "sd")) |>
   ggplot(aes(x = value, y = after_stat(density))) +
-    geom_histogram() +
-    facet_wrap(. ~ parameter, scales = "free") +
-    labs(x = "", y = "Density") +
-    theme_minimal() +
-    scale_x_log10(labels = scales::comma)
+  geom_histogram() +
+  facet_wrap(. ~ parameter, scales = "free") +
+  labs(x = "", y = "Density") +
+  theme_minimal() +
+  scale_x_log10(labels = scales::comma)
 
 summary(pred$mean)
 summary(pred$sd)
