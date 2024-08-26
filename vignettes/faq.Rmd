@@ -118,8 +118,8 @@ Here are the distributions on the delay distribution mean and standard deviation
 ```{r message=FALSE, results='hide'}
 set.seed(1)
 
-prior_new <- brms::prior("normal(2, 0.25)", class = "Intercept") +
-    brms::prior("normal(0, 0.25)", class = "Intercept", dpar = "sigma")
+prior_new <- brms::prior("skew_normal(1.5, 0.5, 3)", class = "Intercept") +
+    brms::prior("normal(-1, 0.5)", class = "Intercept", dpar = "sigma")
 
 # This is annoying and deserves an issue
 prior_new[is.na(prior_new)] <- ""
@@ -139,7 +139,11 @@ pred |>
     geom_histogram() +
     facet_wrap(. ~ parameter, scales = "free") +
     labs(x = "", y = "Density") +
-    theme_minimal()
+    theme_minimal() +
+    scale_x_log10(labels = scales::comma)
+
+summary(pred$mean)
+summary(pred$sd)
 ```
 
 ## Bibliography
