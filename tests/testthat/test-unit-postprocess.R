@@ -2,7 +2,7 @@ test_that("predict_delay_parameters works with NULL newdata and the latent logno
   skip_on_cran()
   set.seed(1)
   prep_obs <- as_latent_individual(sim_obs)
-  fit <- epidist(data = prep_obs, seed = 2, silent = 2)
+  fit <- epidist(data = prep_obs, seed = 3, silent = 2)
   pred <- predict_delay_parameters(fit)
   expect_s3_class(pred, "data.table")
   expect_named(pred, c("index", "draw", "mu", "sigma", "mean", "sd"))
