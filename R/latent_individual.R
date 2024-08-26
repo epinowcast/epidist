@@ -170,7 +170,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
 #' @method epidist_stancode epidist_latent_individual
 #' @family latent_individual
 #' @autoglobal
-#' @importFrom purrr map_vec 
+#' @importFrom purrr map_vec
 #' @export
 epidist_stancode.epidist_latent_individual <- function(data,
                                                        family =
@@ -198,7 +198,7 @@ epidist_stancode.epidist_latent_individual <- function(data,
   vector_real <- purrr::map_vec(family$dpars, function(dpar) {
     ifelse(dpar %in% c("mu", names(formula$pforms)), "vector", "real")
   })
-  
+
   stanvars_functions[[1]]$scode <- gsub(
     "dpars_A",
     paste(paste0(vector_real, " ", family$dpars), collapse = ", "),
