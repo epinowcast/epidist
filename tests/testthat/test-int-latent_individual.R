@@ -176,7 +176,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges for an 
   fit_sex <- epidist(
     data = prep_obs,
     formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-    seed = 1,
+    seed = 2,
     silent = 2
   )
   expect_s3_class(fit_sex, "brmsfit")
