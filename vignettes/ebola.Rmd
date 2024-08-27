@@ -74,6 +74,8 @@ sierra_leone_ebola_data <- sierra_leone_ebola_data |>
   dplyr::mutate(case = as.integer(id), .keep = "unused")
 
 head(sierra_leone_ebola_data)
+
+fraction <- 10
 ```
 
 Figure \@ref(fig:ebola-outbreak) shows every `r fraction`th case (to avoid over-plotting the data) by district.
@@ -82,8 +84,6 @@ The epidemic begins at different times in different districts.
 (ref:ebola-outbreak) Primary and secondary event times for every `r fraction`th case.
 
 ```{r ebola-outbreak, fig.cap="(ref:ebola-outbreak)", fig.height=9}
-fraction <- 10
-
 sierra_leone_ebola_data |>
   dplyr::filter(case %% fraction == 0) |>
   ggplot() +
@@ -387,7 +387,7 @@ How does this `rvars` stuff work?
 obs_prep |>
   as.data.frame() |>
   add_predicted_rvars(fit) |>
-  select(.prediction) |>
+  dplyr::select(.prediction) |>
   head()
 ```
 
@@ -399,11 +399,17 @@ Then plot those as discrete PMF.
 ```{r}
 newdata_pmf <- obs_prep |>
   as.data.frame() |>
-  modelr::data_grid(NA) |>
-  dplyr::mutate(obs_t = 100, pwindow_upr = 1, swindow_upr = 1)
+  modelr::data_grid(rep = seq_along(1:5000)) |>
+  dplyr::mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
 
 # Anything here with the prediction being vectorised?
+# Would that solve my draws only being one issue?
 draws_pmf <- predicted_draws(fit, newdata = newdata_pmf, ndraws = 1)
+
+ggplot(draws_pmf, aes(x = .prediction)) +
+  geom_bar(aes(y = after_stat(count / sum(count)))) +
+  labs(x = "PMF with daily censoring and no truncation", y = "") +
+  theme_minimal()
 ```
 
 What about the "continuous" no truncation no censoring distribution?
@@ -411,10 +417,17 @@ What about the "continuous" no truncation no censoring distribution?
 ```{r}
 newdata_pdf <- obs_prep |>
   as.data.frame() |>
-  modelr::data_grid(NA) |>
-  dplyr::mutate(obs_t = 100, pwindow_upr = 0, swindow_upr = 0)
+  modelr::data_grid(rep = seq_along(1:5000)) |>
+  dplyr::mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
 
 draws_pdf <- predicted_draws(fit, newdata = newdata_pdf, ndraws = 1)
+
+# I don't like that this is also doing kernel smoothing (to some extent)
+# But plotting as a histogram is suggestive of there being discrete structure
+ggplot(draws_pdf, aes(x = .prediction)) +
+  geom_density() +
+  labs(x = "PDF with no censoring and no truncation", y = "") +
+  theme_minimal()
 ```
 
 ## Model comparison
