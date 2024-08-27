@@ -101,8 +101,6 @@ sierra_leone_ebola_data |>
   theme_minimal()
 ```
 
-<!-- Question about whether to include shapefiles as data object in package. -->
-
 We can use a map to help visualise the outbreak across space.
 To create a map, we first join the Ebola data to shapefiles (obtained from [GADM](https://gadm.org/)) for the districts of Sierra Leone.
 
