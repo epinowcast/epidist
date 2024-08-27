@@ -87,18 +87,18 @@ fraction <- 10
 sierra_leone_ebola_data |>
   dplyr::filter(case %% fraction == 0) |>
   ggplot() +
-    geom_segment(
-      aes(
-        x = date_of_symptom_onset, xend = date_of_sample_tested,
-        y = case, yend = case
-      ),
-      col = "grey"
-    ) +
-    geom_point(aes(x = date_of_symptom_onset, y = case), col = "#56B4E9") +
-    geom_point(aes(x = date_of_sample_tested, y = case), col = "#009E73") +
-    facet_wrap(district ~ ., ncol = 2) +
-    labs(x = "", y = "Case ID") +
-    theme_minimal()
+  geom_segment(
+    aes(
+      x = date_of_symptom_onset, xend = date_of_sample_tested,
+      y = case, yend = case
+    ),
+    col = "grey"
+  ) +
+  geom_point(aes(x = date_of_symptom_onset, y = case), col = "#56B4E9") +
+  geom_point(aes(x = date_of_sample_tested, y = case), col = "#009E73") +
+  facet_wrap(district ~ ., ncol = 2) +
+  labs(x = "", y = "Case ID") +
+  theme_minimal()
 ```
 
 <!-- Question about whether to include shapefiles as data object in package. -->
@@ -186,11 +186,11 @@ Use ADVI for speed.
 ```{r}
 set.seed(1)
 
-N <- nrow(obs_cens)
+n <- nrow(obs_cens)
 obs_cens <- obs_cens[complete.cases(obs_cens)]
-N_complete <- nrow(obs_cens)
-N_complete / N
-obs_cens <- obs_cens[sample(seq_len(.N), N_complete / 5, replace = FALSE)]
+n_complete <- nrow(obs_cens)
+n_complete / n
+obs_cens <- obs_cens[sample(seq_len(.N), n_complete / 5, replace = FALSE)]
 obs_prep <- as_latent_individual(obs_cens)
 
 fit <- epidist(
@@ -252,9 +252,9 @@ epred_draws <- obs_prep |>
 ```{r epred-base, fig.cap="(ref:epred-base)"}
 epred_draws |>
   ggplot(aes(x = .epred)) +
-    tidybayes::stat_slab() +
-    labs(x = "Posterior expectation of the delay", y = "") +
-    theme_minimal()
+  tidybayes::stat_slab() +
+  labs(x = "Posterior expectation of the delay", y = "") +
+  theme_minimal()
 ```
 
 Next, for the sex stratified model, we find the men typically have a higher posterior delay expectation than women (Figure \@ref(fig:epred-sex)):
@@ -262,9 +262,9 @@ Next, for the sex stratified model, we find the men typically have a higher post
 ```{r}
 # Probably want functionality for users not to have to do this themselves
 (newdata_sex <- obs_prep |>
-  as.data.frame() |>
-  modelr::data_grid(sex) |>
-  dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA))
+   as.data.frame() |>
+   modelr::data_grid(sex) |>
+   dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA))
 
 epred_draws_sex <- tidybayes::add_epred_draws(newdata_sex, fit_sex, dpar = TRUE)
 ```
@@ -280,9 +280,9 @@ epred_draws_sex |>
     )
   ) |>
   ggplot(aes(x = .epred, y = sex)) +
-    tidybayes::stat_halfeye() +
-    labs(x = "Posterior expectation of the delay", y = "") +
-    theme_minimal()
+  tidybayes::stat_halfeye() +
+  labs(x = "Posterior expectation of the delay", y = "") +
+  theme_minimal()
 ```
 
 Finally, for the sex-district stratified model:
@@ -302,10 +302,10 @@ epred_draws_sex_district |>
     )
   ) |>
   ggplot(aes(x = .epred, y = district)) +
-    tidybayes::stat_pointinterval() +
-    facet_grid(. ~ sex) +
-    labs(x = "Posterior expectation of the delay", y = "") +
-    theme_minimal()
+  tidybayes::stat_pointinterval() +
+  facet_grid(. ~ sex) +
+  labs(x = "Posterior expectation of the delay", y = "") +
+  theme_minimal()
 
 # Some strata that don't have much data? Some very bad priors?
 summary(epred_draws_sex_district$.epred)
@@ -341,10 +341,10 @@ linpred_draws_sex_district |>
     )
   ) |>
   ggplot(aes(x = mu, y = district)) +
-    tidybayes::stat_pointinterval() +
-    facet_grid(. ~ sex) +
-    labs(x = "Posterior of the mu linear predictor", y = "") +
-    theme_minimal()
+  tidybayes::stat_pointinterval() +
+  facet_grid(. ~ sex) +
+  labs(x = "Posterior of the mu linear predictor", y = "") +
+  theme_minimal()
 ```
 
 Linear predictors for the `sigma` parameter by sex and district:
@@ -358,10 +358,10 @@ linpred_draws_sex_district |>
     )
   ) |>
   ggplot(aes(x = sigma, y = district)) +
-    tidybayes::stat_pointinterval() +
-    facet_grid(. ~ sex) +
-    labs(x = "Posterior of the sigma linear predictor", y = "") +
-    theme_minimal()
+  tidybayes::stat_pointinterval() +
+  facet_grid(. ~ sex) +
+  labs(x = "Posterior of the sigma linear predictor", y = "") +
+  theme_minimal()
 ```
 
 ## Posterior predictions
