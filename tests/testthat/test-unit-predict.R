@@ -57,5 +57,8 @@ test_that("log_lik_latent_lognormal works... (be more explicit after writing)", 
   )
   prep <- brms::prepare_predictions(fit)
   i <- 1
-  log_lik <- log_lik_latent_lognormal(prep, i)
+  log_lik <- log_lik_latent_lognormal(i, prep)
+  expect_equal(length(log_lik), prep$ndraws)
+  
 })
+
