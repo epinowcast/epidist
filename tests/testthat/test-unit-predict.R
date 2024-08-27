@@ -50,3 +50,12 @@ test_that("posterior_epred_latent_lognormal creates a array of non-negative numb
   expect_equal(ncol(epred), length(prep$data$Y))
   expect_gte(min(epred), 0)
 })
+
+test_that("log_lik_latent_lognormal works... (be more explicit after writing)", { # nolint: line_length_linter.
+  fit <- readRDS(
+    system.file("extdata/fit.rds", package = "epidist")
+  )
+  prep <- brms::prepare_predictions(fit)
+  i <- 1
+  log_lik <- log_lik_latent_lognormal(prep, i)
+})
