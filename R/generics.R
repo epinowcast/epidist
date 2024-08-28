@@ -44,8 +44,8 @@ epidist_stancode <- function(data, ...) {
 #' @param formula ...
 #' @param family ...
 #' @param prior ...
-#' @param fn Likely `brms::brm`. Also possible to be `brms::make_stancode` or
-#' `brms::make_standata`.
+#' @param fn Likely [brms::brm()]. Also possible to be [brms::make_stancode()]
+#' or [brms::make_standata()].
 #' @param ... Additional arguments for method.
 #' @family generics
 #' @export

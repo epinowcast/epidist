@@ -22,8 +22,8 @@
 
 \item{prior}{...}
 
-\item{fn}{Likely \code{brms::brm}. Also possible to be \code{brms::make_stancode} or
-\code{brms::make_standata}.}
+\item{fn}{Likely \code{\link[brms:brm]{brms::brm()}}. Also possible to be \code{\link[brms:stancode]{brms::make_stancode()}}
+or \code{\link[brms:standata]{brms::make_standata()}}.}
 
 \item{...}{Additional arguments for method.}
 }

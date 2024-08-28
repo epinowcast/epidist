@@ -14,7 +14,7 @@ floor_mult(x, f = 1)
 \description{
 This function rounds an input \code{x} down to the nearest multiple of some number
 \code{f}. For example, if \code{f = 0.2} and \code{x = 1.5} then the output would be 1.4.
-Or, if \code{f = 1} then \code{floor_mult} behaves as \code{floor}.
+If \code{f = 1} then \code{floor_mult} behaves as \code{floor}.
 }
 \seealso{
 Other utils: 

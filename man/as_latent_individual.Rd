@@ -19,7 +19,7 @@ this, the \code{data} must already have columns for the case number (integer),
 (positive, numeric) upper and lower bounds for the primary and secondary
 event times, as well as a (positive, numeric) time that observation takes
 place. The output of this function is a \code{epidist_latent_individual} class
-object, which may be passed to \code{epidist()} to perform inference for the
+object, which may be passed to \code{\link[=epidist]{epidist()}} to perform inference for the
 model.
 }
 \seealso{
