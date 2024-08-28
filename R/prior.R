@@ -1,6 +1,6 @@
 #' Define prior distributions using `brms` defaults, model specific priors,
 #' family specific priors, and user provided priors
-#' 
+#'
 #' This function obtains the `brms` default prior distributions for a particular
 #' model, then uses [replace_prior()] to update the prior distributions using:
 #' 1. Model specific prior distributions from [epidist_model_prior()]
@@ -27,7 +27,7 @@ epidist_prior <- function(data, family, formula, prior) {
 }
 
 #' Model specific prior distributions
-#' 
+#'
 #' This function contains `brms` prior distributions which are specific to
 #' particular `epidist` models e.g. the `latent_lognormal` model.
 #'
@@ -41,7 +41,7 @@ epidist_model_prior <- function(data, ...) {
 }
 
 #' Default model specific prior distributions
-#' 
+#'
 #' By default, we do not return any model specific prior distributions.
 #'
 #' @inheritParams epidist_prior
@@ -53,7 +53,7 @@ epidist_model_prior.default <- function(data, formula, ...) {
 }
 
 #' Family specific prior distributions
-#' 
+#'
 #' This function contains `brms` prior distributions which are specific to
 #' particular likelihood families e.g. [brms::lognormal()].
 #'
@@ -67,9 +67,9 @@ epidist_family_prior <- function(family, ...) {
 }
 
 #' Default family specific prior distributions
-#' 
+#'
 #' By default, we do not return any family specific prior distributions.
-#' 
+#'
 #' @inheritParams epidist_prior
 #' @param ... ...
 #' @family prior
@@ -79,7 +79,7 @@ epidist_family_prior.default <- function(family, formula, ...) {
 }
 
 #' Family specific prior distributions for the lognormal family
-#' 
+#'
 #' We suggest priors to overwrite the `brms` defaults for the lognormal family.
 #'
 #' @inheritParams epidist_prior
@@ -96,7 +96,7 @@ epidist_family_prior.lognormal <- function(family, formula, ...) {
 }
 
 #' Replace `brms` prior distributions
-#' 
+#'
 #' This function takes `old_prior` and replaces any prior distributions
 #' contained in it by the corresponding prior distribution in `new_prior`.
 #' If there is a prior distribution in `new_prior` with no match in `old_prior`

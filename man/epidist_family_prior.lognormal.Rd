@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior.R
 \name{epidist_family_prior.lognormal}
 \alias{epidist_family_prior.lognormal}
-\title{Family specific prior for lognormal}
+\title{Family specific prior distributions for the lognormal family}
 \usage{
 \method{epidist_family_prior}{lognormal}(family, formula, ...)
 }
@@ -14,7 +14,7 @@
 \item{...}{...}
 }
 \description{
-Family specific prior for lognormal
+We suggest priors to overwrite the \code{brms} defaults for the lognormal family.
 }
 \seealso{
 Other prior: 

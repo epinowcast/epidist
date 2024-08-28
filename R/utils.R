@@ -14,7 +14,7 @@ epidist_stan_chunk <- function(path) {
 }
 
 #' Label a `epidist` Stan model with a version indicator
-#' 
+#'
 #' This function is used within [epidist_stancode()] to label the generated Stan
 #' code with the version of `epidist` used. To view the full Stan code for any
 #' particular `epidist` model, we recommend use of [brms::make_stancode()].
