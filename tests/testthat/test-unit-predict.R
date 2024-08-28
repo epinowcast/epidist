@@ -1,4 +1,4 @@
-test_that("posterior_predict_latent_lognormal outputs a positive single integer", { # nolint: line_length_linter.
+test_that("posterior_predict_latent_lognormal outputs positive integers with length equal to draws", { # nolint: line_length_linter.
   fit <- readRDS(
     system.file("extdata/fit.rds", package = "epidist")
   )
@@ -6,12 +6,8 @@ test_that("posterior_predict_latent_lognormal outputs a positive single integer"
   i <- 1
   pred_i <- posterior_predict_latent_lognormal(i = i, prep)
   expect_equal(floor(pred_i), pred_i)
-  expect_equal(class(pred_i), "numeric")
-  expect_equal(length(pred_i), 1)
-  expect_gt(pred_i, 0)
-
-  i_out_of_bounds <- length(prep$data$Y) + 1
-  expect_error(posterior_predict_latent_lognormal(prep, i = i_out_of_bounds))
+  expect_equal(length(pred_i), prep$ndraws)
+  expect_gte(min(pred_i), 0)
 })
 
 test_that("posterior_predict_latent_lognormal errors for i out of bounds", { # nolint: line_length_linter.
@@ -28,22 +24,19 @@ test_that("posterior_predict_latent_lognormal predicts delays for which the data
     system.file("extdata/fit.rds", package = "epidist")
   )
   prep <- brms::prepare_predictions(fit)
-  max_i <- length(prep$data$Y)
-  df <- tidyr::crossing("i" = 1:max_i, "draw" = 1:100) |>
-    dplyr::mutate(
-      y = purrr::map_dbl(
-        i, ~ posterior_predict_latent_lognormal(i = .x, prep = prep)
-      )
-    )
-  quantiles <- purrr::map_vec(1:max_i, function(i) {
-    ecdf <- ecdf(dplyr::filter(df, i == i)$y)
+  prep$ndraws <- 1000 # Down from the 4000 for time saving
+  q <- purrr::map_vec(seq_along(length(prep$data$Y)), function(i) {
+    y <- posterior_predict_latent_lognormal(i, prep)
+    ecdf <- ecdf(y)
     q <- ecdf(prep$data$Y[i])
     return(q)
   })
-  expect_lt(quantile(quantiles, 0.1), 0.3)
-  expect_gt(quantile(quantiles, 0.9), 0.7)
-  expect_lt(min(quantiles), 0.1)
-  expect_gt(max(quantiles), 0.9)
+  expect_lt(quantile(q, 0.1), 0.3)
+  expect_gt(quantile(q, 0.9), 0.7)
+  expect_lt(min(q), 0.1)
+  expect_gt(max(q), 0.9)
+  expect_lt(mean(q), 0.65)
+  expect_gt(mean(q), 0.35)
 })
 
 test_that("posterior_epred_latent_lognormal creates a array of non-negative numbers with the correct dimensions", { # nolint: line_length_linter.
