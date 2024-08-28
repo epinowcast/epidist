@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior.R
 \name{epidist_family_prior.default}
 \alias{epidist_family_prior.default}
-\title{Default empty family specific prior}
+\title{Default family specific prior distributions}
 \usage{
 \method{epidist_family_prior}{default}(family, formula, ...)
 }
@@ -14,7 +14,7 @@
 \item{...}{...}
 }
 \description{
-Default empty family specific prior
+By default, we do not return any family specific prior distributions.
 }
 \seealso{
 Other prior: 

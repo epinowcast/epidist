@@ -9,12 +9,12 @@ posterior_predict_latent_lognormal(i, prep, ...)
 \arguments{
 \item{i}{The index of the observation to predict}
 
-\item{prep}{The result of a call to \code{\link[brms:posterior_predict.brmsfit]{brms::posterior_predict}}}
+\item{prep}{The result of a call to \code{\link[brms:posterior_predict.brmsfit]{brms::posterior_predict()}}}
 
 \item{...}{Additional arguments}
 }
 \description{
-See \code{\link[brms:posterior_predict.brmsfit]{brms::posterior_predict}}.
+See \code{\link[brms:posterior_predict.brmsfit]{brms::posterior_predict()}}.
 }
 \seealso{
 Other postprocess: 

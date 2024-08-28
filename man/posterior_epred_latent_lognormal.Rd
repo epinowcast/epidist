@@ -10,7 +10,7 @@ posterior_epred_latent_lognormal(prep)
 \item{prep}{The result of a call to \code{\link[brms:prepare_predictions]{brms::prepare_predictions}}}
 }
 \description{
-See \code{\link[brms:posterior_epred.brmsfit]{brms::posterior_epred}}.
+See \code{\link[brms:posterior_epred.brmsfit]{brms::posterior_epred()}}.
 }
 \seealso{
 Other postprocess: 

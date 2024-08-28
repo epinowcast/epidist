@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior.R
 \name{epidist_model_prior}
 \alias{epidist_model_prior}
-\title{Model specific prior}
+\title{Model specific prior distributions}
 \usage{
 epidist_model_prior(data, ...)
 }
@@ -12,7 +12,8 @@ epidist_model_prior(data, ...)
 \item{...}{...}
 }
 \description{
-Model specific prior
+This function contains \code{brms} prior distributions which are specific to
+particular \code{epidist} models e.g. the \code{latent_lognormal} model.
 }
 \seealso{
 Other prior: 

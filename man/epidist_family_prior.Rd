@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior.R
 \name{epidist_family_prior}
 \alias{epidist_family_prior}
-\title{Family specific prior}
+\title{Family specific prior distributions}
 \usage{
 epidist_family_prior(family, ...)
 }
@@ -12,7 +12,8 @@ epidist_family_prior(family, ...)
 \item{...}{...}
 }
 \description{
-Family specific prior
+This function contains \code{brms} prior distributions which are specific to
+particular likelihood families e.g. \code{\link[brms:brmsfamily]{brms::lognormal()}}.
 }
 \seealso{
 Other prior: 

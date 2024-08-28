@@ -32,7 +32,7 @@ assert_latent_individual_input <- function(data) {
 #' (positive, numeric) upper and lower bounds for the primary and secondary
 #' event times, as well as a (positive, numeric) time that observation takes
 #' place. The output of this function is a `epidist_latent_individual` class
-#' object, which may be passed to `epidist()` to perform inference for the
+#' object, which may be passed to [epidist()] to perform inference for the
 #' model.
 #'
 #' @param data A `data.frame` or `data.table` containing line list data
@@ -143,8 +143,8 @@ epidist_family.epidist_latent_individual <- function(data,
 #' Define a formula for the latent_individual model
 #'
 #' @param data ...
-#' @param family The output of `epidist_family()`
-#' @param formula As produced by `brms::brmsformula`
+#' @param family The output of [epidist_family()]
+#' @param formula As produced by [brms::brmsformula()]
 #' @param ... ...
 #' @method epidist_formula epidist_latent_individual
 #' @family latent_individual
