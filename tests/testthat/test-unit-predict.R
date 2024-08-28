@@ -25,7 +25,7 @@ test_that("posterior_predict_latent_lognormal predicts delays for which the data
   )
   prep <- brms::prepare_predictions(fit)
   prep$ndraws <- 1000 # Down from the 4000 for time saving
-  q <- purrr::map_vec(seq_along(length(prep$data$Y)), function(i) {
+  q <- purrr::map_vec(seq_along(prep$data$Y), function(i) {
     y <- posterior_predict_latent_lognormal(i, prep)
     ecdf <- ecdf(y)
     q <- ecdf(prep$data$Y[i])
