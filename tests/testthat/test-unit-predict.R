@@ -59,6 +59,4 @@ test_that("log_lik_latent_lognormal works... (be more explicit after writing)", 
   i <- 1
   log_lik <- log_lik_latent_lognormal(i, prep)
   expect_equal(length(log_lik), prep$ndraws)
-  
 })
-

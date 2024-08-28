@@ -69,15 +69,15 @@ log_lik_latent_lognormal <- function(i, prep) {
   # Really these should be extracted from prep (no way to do that currently)
   swindow_raw <- runif(prep$ndraws)
   pwindow_raw <- runif(prep$ndraws)
-  
+
   pwindow <- pwindow_raw * pwindow_width
   swindow <- swindow_raw * swindow_width
-  
+
   # Still need to handle the "overlap" stuff in here, just leaving it for now
   # prep$data$noverlap
   # prep$data$wN
   # prep$data$woverlap
-  
+
   d <- y - pwindow + swindow
   obs_time <- obs_t - pwindow
   lpdf <- dlnorm(d, meanlog = mu, sdlog = sigma, log = TRUE)
