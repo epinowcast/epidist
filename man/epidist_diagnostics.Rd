@@ -13,8 +13,6 @@ epidist_diagnostics(fit)
 This function computes diagnostics to assess the quality of a fitted model.
 When the fitting algorithm used is \code{"sampling"} (HMC) then the output of
 \code{epidist_diagnostics} is a \code{data.table} containing:
-}
-\details{
 \itemize{
 \item \code{time}: the total time taken to fit all chains
 \item \code{samples}: the total number of samples across all chains
@@ -27,9 +25,8 @@ transitions
 \code{max_treedepth}
 \item \code{per_at_max_treedepth}: the proportion of samples which attained the
 \code{max_treedepth}
-}
-
-When the fitting algorithm is not \code{"sampling"} (see \code{?brms::brm} for other
+When the fitting algorithm is not \code{"sampling"} (see \code{\link[brms:brm]{brms::brm()}} for other
 possible algorithms) then diagnostics are yet to be implemented.
+}
 }
 \concept{diagnostics}

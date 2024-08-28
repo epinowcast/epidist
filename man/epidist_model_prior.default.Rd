@@ -2,7 +2,7 @@
 % Please edit documentation in R/prior.R
 \name{epidist_model_prior.default}
 \alias{epidist_model_prior.default}
-\title{Default empty model specific prior}
+\title{Default model specific prior distributions}
 \usage{
 \method{epidist_model_prior}{default}(data, formula, ...)
 }
@@ -14,7 +14,7 @@
 \item{...}{...}
 }
 \description{
-Default empty model specific prior
+By default, we do not return any model specific prior distributions.
 }
 \seealso{
 Other prior: 

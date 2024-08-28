@@ -9,9 +9,9 @@
 \arguments{
 \item{data}{...}
 
-\item{family}{The output of \code{epidist_family()}}
+\item{family}{The output of \code{\link[=epidist_family]{epidist_family()}}}
 
-\item{formula}{As produced by \code{brms::brmsformula}}
+\item{formula}{As produced by \code{\link[brms:brmsformula]{brms::brmsformula()}}}
 
 \item{...}{...}
 }

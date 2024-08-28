@@ -2,19 +2,20 @@
 % Please edit documentation in R/utils.R
 \name{epidist_stan_chunk}
 \alias{epidist_stan_chunk}
-\title{Read in a epidist Stan code chunk}
+\title{Read in an \code{epidist} Stan code chunk}
 \usage{
 epidist_stan_chunk(path)
 }
 \arguments{
-\item{path}{The path within the "stan" folder of the installed epidist
+\item{path}{The path within the \verb{stan/} folder of the installed \code{epidist}
 package to the Stan code chunk of interest.}
 }
 \value{
 A character string containing the Stan code chunk of interest.
 }
 \description{
-Read in a epidist Stan code chunk
+This function is used to obtain Stan code chunks from the \verb{stan/} folder of
+the \code{epidist} package. It is used within the \code{\link[=epidist_stancode]{epidist_stancode()}} function.
 }
 \seealso{
 Other utils: 

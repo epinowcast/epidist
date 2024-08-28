@@ -1,9 +1,9 @@
 #' Draws from the posterior predictive distribution
 #'
-#' See [`brms::posterior_predict`].
+#' See [brms::posterior_predict()].
 #'
 #' @param i The index of the observation to predict
-#' @param prep The result of a call to [`brms::posterior_predict`]
+#' @param prep The result of a call to [brms::posterior_predict()]
 #' @param ... Additional arguments
 #' @family postprocess
 #' @autoglobal
@@ -32,7 +32,7 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
 
 #' Draws from the expected value of the posterior predictive distribution
 #'
-#' See [`brms::posterior_epred`].
+#' See [brms::posterior_epred()].
 #'
 #' @param prep The result of a call to [`brms::prepare_predictions`]
 #' @family postprocess
