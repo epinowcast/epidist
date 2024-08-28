@@ -1,4 +1,13 @@
-#' Define prior from defaults, model, family, user
+#' Define prior distributions using `brms` defaults, model specific priors,
+#' family specific priors, and user provided priors
+#'
+#' This function obtains the `brms` default prior distributions for a particular
+#' model, then uses [replace_prior()] to update the prior distributions using:
+#' 1. Model specific prior distributions from [epidist_model_prior()]
+#' 2. Family specific prior distributions from [epidist_family_prior()]
+#' 3. User provided prior distributions
+#' Each element of this list overwrites previous elements, such that user
+#' provided prior distribution have the highest priority.
 #'
 #' @param data ...
 #' @param family ...
@@ -17,7 +26,10 @@ epidist_prior <- function(data, family, formula, prior) {
   return(prior)
 }
 
-#' Model specific prior
+#' Model specific prior distributions
+#'
+#' This function contains `brms` prior distributions which are specific to
+#' particular `epidist` models e.g. the `latent_lognormal` model.
 #'
 #' @inheritParams epidist_prior
 #' @param ... ...
@@ -28,19 +40,22 @@ epidist_model_prior <- function(data, ...) {
   UseMethod("epidist_model_prior")
 }
 
-#' Default empty model specific prior
+#' Default model specific prior distributions
+#'
+#' By default, we do not return any model specific prior distributions.
 #'
 #' @inheritParams epidist_prior
 #' @param ... ...
 #' @family prior
 #' @export
 epidist_model_prior.default <- function(data, formula, ...) {
-  # Currently there are not model-specific priors
-  # In future there might be, but we need to be careful about Stan code
   return(NULL)
 }
 
-#' Family specific prior
+#' Family specific prior distributions
+#'
+#' This function contains `brms` prior distributions which are specific to
+#' particular likelihood families e.g. [brms::lognormal()].
 #'
 #' @inheritParams epidist_prior
 #' @param ... ...
@@ -51,7 +66,9 @@ epidist_family_prior <- function(family, ...) {
   UseMethod("epidist_family_prior")
 }
 
-#' Default empty family specific prior
+#' Default family specific prior distributions
+#'
+#' By default, we do not return any family specific prior distributions.
 #'
 #' @inheritParams epidist_prior
 #' @param ... ...
@@ -61,7 +78,9 @@ epidist_family_prior.default <- function(family, formula, ...) {
   return(NULL)
 }
 
-#' Family specific prior for lognormal
+#' Family specific prior distributions for the lognormal family
+#'
+#' We suggest priors to overwrite the `brms` defaults for the lognormal family.
 #'
 #' @inheritParams epidist_prior
 #' @param ... ...
@@ -76,10 +95,16 @@ epidist_family_prior.lognormal <- function(family, formula, ...) {
   return(prior)
 }
 
-#' Replace a brms prior only if it exists
+#' Replace `brms` prior distributions
+#'
+#' This function takes `old_prior` and replaces any prior distributions
+#' contained in it by the corresponding prior distribution in `new_prior`.
+#' If there is a prior distribution in `new_prior` with no match in `old_prior`
+#' then the function will error and give the name of the new prior distribution
+#' with no match.
 #'
 #' @param old_prior One or more prior distributions in the class `brmsprior`
-#' @param new_prior One prior distribution in the class `brmsprior`
+#' @param new_prior One or more prior distributions in the class `brmsprior`
 #' @family prior
 #' @importFrom cli cli_inform
 #' @importFrom utils capture.output

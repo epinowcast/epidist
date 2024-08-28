@@ -2,16 +2,18 @@
 % Please edit documentation in R/utils.R
 \name{epidist_version_stanvar}
 \alias{epidist_version_stanvar}
-\title{Label a epidist Stan model with a version indicator}
+\title{Label a \code{epidist} Stan model with a version indicator}
 \usage{
 epidist_version_stanvar()
 }
 \value{
-A brms stanvar chunk containing the package version used to build
-the Stan code.
+A \code{brms} Stan chunk containing the \code{epidist} package version used to
+build the Stan code.
 }
 \description{
-Label a epidist Stan model with a version indicator
+This function is used within \code{\link[=epidist_stancode]{epidist_stancode()}} to label the generated Stan
+code with the version of \code{epidist} used. To view the full Stan code for any
+particular \code{epidist} model, we recommend use of \code{\link[brms:stancode]{brms::make_stancode()}}.
 }
 \seealso{
 Other utils: 

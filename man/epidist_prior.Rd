@@ -2,7 +2,8 @@
 % Please edit documentation in R/prior.R
 \name{epidist_prior}
 \alias{epidist_prior}
-\title{Define prior from defaults, model, family, user}
+\title{Define prior distributions using \code{brms} defaults, model specific priors,
+family specific priors, and user provided priors}
 \usage{
 epidist_prior(data, family, formula, prior)
 }
@@ -16,7 +17,15 @@ epidist_prior(data, family, formula, prior)
 \item{prior}{...}
 }
 \description{
-Define prior from defaults, model, family, user
+This function obtains the \code{brms} default prior distributions for a particular
+model, then uses \code{\link[=replace_prior]{replace_prior()}} to update the prior distributions using:
+\enumerate{
+\item Model specific prior distributions from \code{\link[=epidist_model_prior]{epidist_model_prior()}}
+\item Family specific prior distributions from \code{\link[=epidist_family_prior]{epidist_family_prior()}}
+\item User provided prior distributions
+Each element of this list overwrites previous elements, such that user
+provided prior distribution have the highest priority.
+}
 }
 \seealso{
 Other prior: 

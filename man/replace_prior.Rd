@@ -2,17 +2,21 @@
 % Please edit documentation in R/prior.R
 \name{replace_prior}
 \alias{replace_prior}
-\title{Replace a brms prior only if it exists}
+\title{Replace \code{brms} prior distributions}
 \usage{
 replace_prior(old_prior, new_prior)
 }
 \arguments{
 \item{old_prior}{One or more prior distributions in the class \code{brmsprior}}
 
-\item{new_prior}{One prior distribution in the class \code{brmsprior}}
+\item{new_prior}{One or more prior distributions in the class \code{brmsprior}}
 }
 \description{
-Replace a brms prior only if it exists
+This function takes \code{old_prior} and replaces any prior distributions
+contained in it by the corresponding prior distribution in \code{new_prior}.
+If there is a prior distribution in \code{new_prior} with no match in \code{old_prior}
+then the function will error and give the name of the new prior distribution
+with no match.
 }
 \seealso{
 Other prior: 
