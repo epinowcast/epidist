@@ -46,7 +46,11 @@ obs_cens_trunc_samp <-
   obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 
 data <- as_latent_individual(obs_cens_trunc_samp)
-fit <- epidist(data, formula = brms::bf(mu ~ 1, sigma ~ 1), seed = 1)
+fit <- epidist(
+  data,
+  formula = brms::bf(mu ~ 1, sigma ~ 1),
+  seed = 1
+)
 ```
 
 ## I would like to work with the samples output
