@@ -24,6 +24,8 @@ The code block below is provided to facilitate reproduction of this script, if r
 
 ```{r message=FALSE, results='hide', class.source='fold-hide'}
 library(epidist)
+library(dplyr)
+library(ggplot2)
 
 set.seed(1)
 
@@ -44,7 +46,7 @@ obs_cens_trunc_samp <-
   obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
 
 data <- as_latent_individual(obs_cens_trunc_samp)
-fit <- epidist(data, seed = 1)
+fit <- epidist(data, formula = brms::bf(mu ~ 1, sigma ~ 1), seed = 1)
 ```
 
 ## I would like to work with the samples output
@@ -88,7 +90,7 @@ For an example use of these functions, have a look at the [`epidist-paper`](http
 However, some of those priors do not make sense in the context of our application.
 Instead, we used [prior predictive checking](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html) to set `epidist`-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.
 
-For example, for the lognormal latent individual model, we suggest the following prior distributions for the `brms` `mu` and `sigma` parameters:
+For example, for the lognormal latent individual model, we suggest the following prior distributions for the `brms` `mu` and `sigma` intercept parameters:
 
 ```{r}
 family <- brms::lognormal()
@@ -111,22 +113,35 @@ epidist_prior
 
 (Note that the functions `epidist_family` and `epidist_prior` are mostly for internal use!)
 
-Here are summary statistics for the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:
+Here are the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:
 
 ```{r message=FALSE, results='hide'}
 set.seed(1)
-fit_ppc <- epidist::epidist(
-  data = data, family = brms::lognormal(), sample_prior = "only", seed = 1
+fit_ppc <- epidist(
+  data = data,
+  formula = brms::bf(mu ~ 1, sigma ~ 1),
+  family = brms::lognormal(),
+  sample_prior = "only",
+  seed = 1
 )
 ```
 
 ```{r}
 pred <- predict_delay_parameters(fit_ppc)
-summary(pred$mean)
-summary(pred$sd)
-```
 
-(Note that even with these quite restricted prior distributions, there are still some very large samples of the delay mean and standard deviation [which arguably are not plausible a-priori]!)
+pred |>
+  draws_to_long() |>
+  filter(parameter %in% c("mean", "sd")) |>
+  ggplot(aes(x = value, y = after_stat(density))) +
+  geom_histogram() +
+  facet_wrap(. ~ parameter, scales = "free") +
+  labs(x = "", y = "Density") +
+  theme_minimal() +
+  scale_x_log10(labels = scales::comma)
+
+quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
+quantile(pred$sd, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
+```
 
 # What do the parameters in my model output correspond to?
 
