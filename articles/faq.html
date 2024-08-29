@@ -97,9 +97,9 @@ If you have a question about using the package, please create an <a href="https:
 <span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">obs_cens_trunc_samp</span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span><span class="va">data</span>, formula <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<div class="section level2">
-<h2 id="i-would-like-to-work-with-the-samples-output">I would like to work with the samples output<a class="anchor" aria-label="anchor" href="#i-would-like-to-work-with-the-samples-output"></a>
-</h2>
+<div class="section level3">
+<h3 id="i-would-like-to-work-with-the-samples-output">I would like to work with the samples output<a class="anchor" aria-label="anchor" href="#i-would-like-to-work-with-the-samples-output"></a>
+</h3>
 <p>The output of a call to <code>epidist</code> is compatible with typical Stan workflows.
 We recommend use of the <code>posterior</code> package for working with samples from MCMC or other sampling algorithms.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -119,9 +119,9 @@ We recommend use of the <code>posterior</code> package for working with samples 
 <span><span class="co">## 6       1.8           -0.72</span></span>
 <span><span class="co">## # ... hidden reserved variables {'.chain', '.iteration', '.draw'}</span></span></code></pre>
 </div>
-<div class="section level2">
-<h2 id="how-can-i-assess-if-sampling-has-converged">How can I assess if sampling has converged?<a class="anchor" aria-label="anchor" href="#how-can-i-assess-if-sampling-has-converged"></a>
-</h2>
+<div class="section level3">
+<h3 id="how-can-i-assess-if-sampling-has-converged">How can I assess if sampling has converged?<a class="anchor" aria-label="anchor" href="#how-can-i-assess-if-sampling-has-converged"></a>
+</h3>
 <p>The output of a call to <code>epidist</code> is compatible with typical Stan workflows.
 We recommend use of the <code>bayesplot</code> package for sampling diagnostic plots.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -129,9 +129,9 @@ We recommend use of the <code>bayesplot</code> package for sampling diagnostic p
 <span><span class="fu">bayesplot</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/MCMC-traces.html" class="external-link">mcmc_trace</a></span><span class="op">(</span><span class="va">fit</span>, pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Intercept"</span>, <span class="st">"Intercept_sigma"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="faq_files/figure-html/unnamed-chunk-3-1.png" width="672"></p>
 </div>
-<div class="section level2">
-<h2 id="id-like-to-run-a-simulation-study">I’d like to run a simulation study<a class="anchor" aria-label="anchor" href="#id-like-to-run-a-simulation-study"></a>
-</h2>
+<div class="section level3">
+<h3 id="id-like-to-run-a-simulation-study">I’d like to run a simulation study<a class="anchor" aria-label="anchor" href="#id-like-to-run-a-simulation-study"></a>
+</h3>
 <p>We recommend use of the <code>purrr</code> package for running many <code>epidist</code> models, for example as a part of a simulation study.
 We particularly highlight two functions which might be useful:</p>
 <ol style="list-style-type: decimal">
@@ -143,9 +143,9 @@ We particularly highlight two functions which might be useful:</p>
 <p>For an example use of these functions, have a look at the <a href="https://github.com/parksw3/epidist-paper" class="external-link"><code>epidist-paper</code></a> repository containing the code for <span class="citation">Park et al. (<a href="#ref-park2024estimating">2024</a>)</span>.
 (Note that in that codebase, we use <code>map</code> as a part of a <a href="https://books.ropensci.org/targets/" class="external-link"><code>targets</code></a> pipeline.)</p>
 </div>
-<div class="section level2">
-<h2 id="how-did-you-choose-the-default-priors-for-epidist">How did you choose the default priors for <code>epidist</code>?<a class="anchor" aria-label="anchor" href="#how-did-you-choose-the-default-priors-for-epidist"></a>
-</h2>
+<div class="section level3">
+<h3 id="how-did-you-choose-the-default-priors-for-epidist">How did you choose the default priors for <code>epidist</code>?<a class="anchor" aria-label="anchor" href="#how-did-you-choose-the-default-priors-for-epidist"></a>
+</h3>
 <p><code>brms</code> provides default priors for all parameters.
 However, some of those priors do not make sense in the context of our application.
 Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html" class="external-link">prior predictive checking</a> to set <code>epidist</code>-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.</p>
@@ -204,12 +204,51 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <pre><code><span><span class="co">##         1%        10%        25%        50%        75%        90%        99% </span></span>
 <span><span class="co">##  0.1247249  0.4090396  0.8196141  1.7231608  3.7897856  7.7210735 31.1275098</span></span></code></pre>
 </div>
-<div class="section level2 unnumbered">
-<h2 id="bibliography">Bibliography<a class="anchor" aria-label="anchor" href="#bibliography"></a>
+<div class="section level2">
+<h2 id="what-do-the-parameters-in-my-model-output-correspond-to">What do the parameters in my model output correspond to?<a class="anchor" aria-label="anchor" href="#what-do-the-parameters-in-my-model-output-correspond-to"></a>
 </h2>
+<p>The <code>epidist</code> package uses <code>brms</code> to fit models.
+This means that the model output will include <code>brms</code>-style names for parameters.
+Here, we provide a table giving the correspondence between the distributional parameter names used in <code>brms</code> and those used in standard R functions for some common likelihood families.</p>
+<table class="table">
+<thead><tr class="header">
+<th>Family</th>
+<th>
+<code>brms</code> parameter</th>
+<th>R parameter</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>lognormal()</code></td>
+<td><code>mu</code></td>
+<td><code>meanlog</code></td>
+</tr>
+<tr class="even">
+<td><code>lognormal()</code></td>
+<td><code>sigma</code></td>
+<td><code>sdlog</code></td>
+</tr>
+<tr class="odd">
+<td><code><a href="https://rdrr.io/r/stats/family.html" class="external-link">Gamma()</a></code></td>
+<td><code>mu</code></td>
+<td><code>shape / scale</code></td>
+</tr>
+<tr class="even">
+<td><code><a href="https://rdrr.io/r/stats/family.html" class="external-link">Gamma()</a></code></td>
+<td><code>shape</code></td>
+<td><code>shape</code></td>
+</tr>
+</tbody>
+</table>
+<p>Note that all families in <code>brms</code> are parameterised with some measure of centrality <code>mu</code> as their first parameter.
+This parameter does not necessarily correspond to the mean: hence the provision of a function <code>add_mean_sd</code> within <code>epidist</code> to add columns containing the natural scale mean and standard deviation to a <code>data.frame</code> of draws.</p>
+<div class="section level3">
+<h3 id="bibliography">Bibliography<a class="anchor" aria-label="anchor" href="#bibliography"></a>
+</h3>
 <div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-park2024estimating" class="csl-entry">
 Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, Anne Cori, Nicholas G. Davies, Jonathan Dushoff, Sebastian Funk, et al. 2024. <span>“Estimating Epidemiological Delay Distributions for Infectious Diseases.”</span> <em>medRxiv</em>. <a href="https://doi.org/10.1101/2024.01.12.24301247" class="external-link">https://doi.org/10.1101/2024.01.12.24301247</a>.
+</div>
 </div>
 </div>
 </div>
