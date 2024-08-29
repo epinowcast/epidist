@@ -9,7 +9,7 @@
   formula = brms::bf(mu ~ 1, sigma ~ 1),
   family = brms::lognormal(),
   prior = NULL,
-  backend = "rstan",
+  backend = "cmdstanr",
   fn = brms::brm,
   ...
 )
