@@ -143,4 +143,20 @@ quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 quantile(pred$sd, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 ```
 
+# What do the parameters in my model output correspond to?
+
+The `epidist` package uses `brms` to fit models.
+This means that the model output will include `brms`-style names for parameters.
+Here, we provide a table giving the correspondence between the distributional parameter names used in `brms` and those used in standard R functions for some common likelihood families.
+
+| Family        | `brms` parameter | R parameter |
+|---------------|------------------|-------------|
+| `lognormal()` | `mu`             | `meanlog`   |
+| `lognormal()` | `sigma`          | `sdlog`     |
+| `Gamma()`     | `mu`             | `shape / scale` |
+| `Gamma()`     | `shape`          | `shape`     |
+
+Note that all families in `brms` are parameterised with some measure of centrality `mu` as their first parameter.
+This parameter does not necessarily correspond to the mean: hence the provision of a function `add_mean_sd` within `epidist` to add columns containing the natural scale mean and standard deviation to a `data.frame` of draws.
+
 ## Bibliography
