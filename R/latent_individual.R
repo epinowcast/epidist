@@ -170,10 +170,13 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
 #' @method epidist_stancode epidist_latent_individual
 #' @family latent_individual
 #' @autoglobal
+#' @importFrom purrr map_vec
 #' @export
 epidist_stancode.epidist_latent_individual <- function(data,
                                                        family =
                                                          epidist_family(data),
+                                                       formula =
+                                                         epidist_formula(data),
                                                        ...) {
 
   epidist_validate(data)
@@ -191,9 +194,14 @@ epidist_stancode.epidist_latent_individual <- function(data,
     "family", family_name, stanvars_functions[[1]]$scode
   )
 
+  # Inject vector or real depending if there is a model for each dpar
+  vector_real <- purrr::map_vec(family$dpars, function(dpar) {
+    ifelse(dpar %in% c("mu", names(formula$pforms)), "vector", "real")
+  })
+
   stanvars_functions[[1]]$scode <- gsub(
     "dpars_A",
-    paste(paste0("vector ", family$dpars), collapse = ", "),
+    paste(paste0(vector_real, " ", family$dpars), collapse = ", "),
     stanvars_functions[[1]]$scode
   )
 
