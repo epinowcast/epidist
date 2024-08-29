@@ -193,8 +193,8 @@ Although a <code>save_single_paths</code> option is available, which may have al
 <span><span class="co">#&gt; Path [1] :Initial log joint density = -1520.740908 </span></span>
 <span><span class="co">#&gt; Error evaluating model log probability: Non-finite gradient. </span></span>
 <span><span class="co">#&gt; Path [1] : Iter      log prob        ||dx||      ||grad||     alpha      alpha0      # evals       ELBO    Best ELBO        Notes  </span></span>
-<span><span class="co">#&gt;              66      -9.381e+02      4.100e-04   3.293e-03    1.995e-01  1.000e+00      1651 -4.023e+02 -4.023e+02                   </span></span>
-<span><span class="co">#&gt; Path [1] :Best Iter: [66] ELBO (-402.252349) evaluations: (1651) </span></span>
+<span><span class="co">#&gt;              66      -9.381e+02      4.145e-04   3.228e-03    1.925e-01  1.000e+00      1651 -4.023e+02 -4.023e+02                   </span></span>
+<span><span class="co">#&gt; Path [1] :Best Iter: [66] ELBO (-402.301946) evaluations: (1651) </span></span>
 <span><span class="co">#&gt; Finished in  0.4 seconds.</span></span>
 <span><span class="va">time_pathfinder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span></code></pre></div>
 <p>We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
@@ -687,13 +687,13 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_center">HMC</td>
-<td headers="mu" class="gt_row gt_right">1.747605</td>
-<td headers="sigma" class="gt_row gt_right">0.4616057</td>
+<td headers="mu" class="gt_row gt_right">1.747895</td>
+<td headers="sigma" class="gt_row gt_right">0.4622867</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">Laplace</td>
 <td headers="mu" class="gt_row gt_right">1.730603</td>
-<td headers="sigma" class="gt_row gt_right">0.4267116</td>
+<td headers="sigma" class="gt_row gt_right">0.4267119</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">ADVI</td>
@@ -703,7 +703,7 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <tr>
 <td headers="method" class="gt_row gt_center">Pathfinder</td>
 <td headers="mu" class="gt_row gt_right">1.729763</td>
-<td headers="sigma" class="gt_row gt_right">0.4282182</td>
+<td headers="sigma" class="gt_row gt_right">0.4282183</td>
 </tr>
 </tbody>
 </table>
@@ -1226,19 +1226,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">31.248</td>
+<td headers="time (s)" class="gt_row gt_right">29.704</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.606</td>
+<td headers="time (s)" class="gt_row gt_right">2.621</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.073</td>
+<td headers="time (s)" class="gt_row gt_right">2.040</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.978</td>
+<td headers="time (s)" class="gt_row gt_right">0.950</td>
 </tr>
 </tbody>
 </table>
