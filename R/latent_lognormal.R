@@ -50,10 +50,10 @@ posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_lin
 
 #' Calculate the pointwise log likelihood
 #'
-#' See [`brms::log_lik].
+#' See [brms::log_lik()].
 #'
 #' @param i The index of the observation to calculate the log likelihood of
-#' @param prep The result of a call to [`brms::prepare_predictions`]
+#' @param prep The result of a call to [brms::prepare_predictions()]
 #' @family postprocess
 #' @autoglobal
 #' @export
@@ -65,18 +65,21 @@ log_lik_latent_lognormal <- function(i, prep) {
   pwindow_width <- prep$data$vreal2[i]
   swindow_width <- prep$data$vreal3[i]
 
-  # Generate values of the swindow_raw and pwindow_raw
-  # Really these should be extracted from prep (no way to do that currently)
+  # Generates values of the swindow_raw and pwindow_raw, but really these should
+  # be extracted from prep or the fitted raws somehow. See:
+  # https://github.com/epinowcast/epidist/issues/267
   swindow_raw <- runif(prep$ndraws)
   pwindow_raw <- runif(prep$ndraws)
 
   pwindow <- pwindow_raw * pwindow_width
   swindow <- swindow_raw * swindow_width
 
-  # Still need to handle the "overlap" stuff in here, just leaving it for now
-  # prep$data$noverlap
-  # prep$data$wN
-  # prep$data$woverlap
+  noverlap <- prep$data$noverlap
+  woverlap <- prep$data$woverlap
+  pwindow[noverlap] <- pwindow_width[noverlap] * pwindow_raw[noverlap]
+  if (prep$data$wN) {
+    pwindow[woverlap] <- swindow[woverlap] * pwindow_raw[woverlap]
+  }
 
   d <- y - pwindow + swindow
   obs_time <- obs_t - pwindow
