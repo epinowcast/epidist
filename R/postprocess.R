@@ -172,7 +172,7 @@ add_mean_sd.default <- function(data, ...) {
 add_mean_sd.lognormal_samples <- function(data, ...) {
   nat_dt <- data.table::copy(data)
   nat_dt <- nat_dt[, mean := exp(mu + sigma ^ 2 / 2)]
-  nat_dt <- nat_dt[, sd := mu * sqrt(exp(sigma ^ 2) - 1)]
+  nat_dt <- nat_dt[, sd := mean * sqrt(exp(sigma ^ 2) - 1)]
   return(nat_dt[])
 }
 
