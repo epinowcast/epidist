@@ -209,7 +209,7 @@ epidist_stancode.epidist_latent_individual <- function(data,
   # For some families, we tranform brms dpars to match Stan parameterisation
   lpdf_dpars <- family$dpars
   
-  if(family$name = "gamma") {
+  if (family$name == "gamma") {
     # ... do the transformation in here
     # it might need to account for the possibility that the dpars are either
     # vectors or real i.e. use of either / or ./
