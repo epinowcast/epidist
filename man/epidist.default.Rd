@@ -6,7 +6,7 @@
 \usage{
 \method{epidist}{default}(
   data,
-  formula = brms::bf(mu ~ 1, sigma ~ 1),
+  formula = brms::bf(mu ~ 1),
   family = brms::lognormal(),
   prior = NULL,
   backend = "cmdstanr",
