@@ -190,13 +190,11 @@ Although a <code>save_single_paths</code> option is available, which may have al
 <span>  data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"pathfinder"</span>, draws <span class="op">=</span> <span class="fl">4000</span>, num_paths <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Number of PSIS draws is larger than the total number of draws returned by the single Pathfinders. This is likely unintentional and leads to re-sampling from the same draws. </span></span>
-<span><span class="co">#&gt; Path [1] :Initial log joint density = -1512.900839 </span></span>
-<span><span class="co">#&gt; Error evaluating model log probability: Non-finite gradient. </span></span>
-<span><span class="co">#&gt; Error evaluating model log probability: Non-finite gradient. </span></span>
+<span><span class="co">#&gt; Path [1] :Initial log joint density = -1520.740908 </span></span>
 <span><span class="co">#&gt; Error evaluating model log probability: Non-finite gradient. </span></span>
 <span><span class="co">#&gt; Path [1] : Iter      log prob        ||dx||      ||grad||     alpha      alpha0      # evals       ELBO    Best ELBO        Notes  </span></span>
-<span><span class="co">#&gt;              60      -9.389e+02      1.931e-03   6.284e-03    1.000e+00  1.000e+00      1501 -4.248e+02 -4.248e+02                   </span></span>
-<span><span class="co">#&gt; Path [1] :Best Iter: [41] ELBO (-415.391472) evaluations: (1501) </span></span>
+<span><span class="co">#&gt;              66      -9.381e+02      4.100e-04   3.293e-03    1.995e-01  1.000e+00      1651 -4.023e+02 -4.023e+02                   </span></span>
+<span><span class="co">#&gt; Path [1] :Best Iter: [66] ELBO (-402.252349) evaluations: (1651) </span></span>
 <span><span class="co">#&gt; Finished in  0.4 seconds.</span></span>
 <span><span class="va">time_pathfinder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span></code></pre></div>
 <p>We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
@@ -689,23 +687,23 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_center">HMC</td>
-<td headers="mu" class="gt_row gt_right">1.755811</td>
-<td headers="sigma" class="gt_row gt_right">0.4696571</td>
+<td headers="mu" class="gt_row gt_right">1.747605</td>
+<td headers="sigma" class="gt_row gt_right">0.4616057</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">Laplace</td>
-<td headers="mu" class="gt_row gt_right">1.736441</td>
-<td headers="sigma" class="gt_row gt_right">0.4324377</td>
+<td headers="mu" class="gt_row gt_right">1.730603</td>
+<td headers="sigma" class="gt_row gt_right">0.4267116</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">ADVI</td>
-<td headers="mu" class="gt_row gt_right">1.809533</td>
-<td headers="sigma" class="gt_row gt_right">0.4514764</td>
+<td headers="mu" class="gt_row gt_right">1.799455</td>
+<td headers="sigma" class="gt_row gt_right">0.4442930</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">Pathfinder</td>
-<td headers="mu" class="gt_row gt_right">1.735681</td>
-<td headers="sigma" class="gt_row gt_right">0.4344439</td>
+<td headers="mu" class="gt_row gt_right">1.729763</td>
+<td headers="sigma" class="gt_row gt_right">0.4282182</td>
 </tr>
 </tbody>
 </table>
@@ -1228,19 +1226,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">32.167</td>
+<td headers="time (s)" class="gt_row gt_right">32.694</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.613</td>
+<td headers="time (s)" class="gt_row gt_right">2.638</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.066</td>
+<td headers="time (s)" class="gt_row gt_right">2.101</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.986</td>
+<td headers="time (s)" class="gt_row gt_right">0.976</td>
 </tr>
 </tbody>
 </table>

@@ -49,6 +49,7 @@
 <span>  formula <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span>,</span>
 <span>  fn <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="va"><a href="https://paul-buerkner.github.io/brms/reference/brm.html" class="external-link">brm</a></span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -74,9 +75,13 @@
 <dd><p>...</p></dd>
 
 
+<dt id="arg-backend">backend<a class="anchor" aria-label="anchor" href="#arg-backend"></a></dt>
+<dd><p>...</p></dd>
+
+
 <dt id="arg-fn">fn<a class="anchor" aria-label="anchor" href="#arg-fn"></a></dt>
-<dd><p>Likely <code><a href="https://paul-buerkner.github.io/brms/reference/brm.html" class="external-link">brms::brm()</a></code>. Also possible to be <code><a href="https://paul-buerkner.github.io/brms/reference/stancode.html" class="external-link">brms::make_stancode()</a></code>
-or <code><a href="https://paul-buerkner.github.io/brms/reference/standata.html" class="external-link">brms::make_standata()</a></code>.</p></dd>
+<dd><p>Likely <code><a href="https://paul-buerkner.github.io/brms/reference/brm.html" class="external-link">brms::brm</a></code>. Also possible to be <code><a href="https://paul-buerkner.github.io/brms/reference/stancode.html" class="external-link">brms::make_stancode</a></code> or
+<code><a href="https://paul-buerkner.github.io/brms/reference/standata.html" class="external-link">brms::make_standata</a></code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
