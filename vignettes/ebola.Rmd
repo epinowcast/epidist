@@ -104,8 +104,8 @@ sierra_leone_ebola_data |>
 We can use a map to help visualise the outbreak across space.
 To create a map, we first join the Ebola data to shapefiles (obtained from [GADM](https://gadm.org/)) for the districts of Sierra Leone.
 
-```{r message = FALSE}
-sf <- sf::st_read("../inst/gadm41_SLE_shp/gadm41_SLE_2.shp")
+```{r message=FALSE, warning=FALSE}
+sf <- sf::st_read("../inst/gadm41_SLE_shp/gadm41_SLE_2.shp", quiet = TRUE)
 
 sierra_leone_ebola_data_sf <- dplyr::select(sf, district = NAME_2, geometry) |>
   dplyr::left_join(
@@ -196,7 +196,8 @@ fit <- epidist(
   formula = brms::bf(mu ~ 1, sigma ~ 1),
   family = brms::lognormal(),
   algorithm = "laplace",
-  refresh = 0
+  refresh = 0,
+  silent = 2
 )
 
 summary(fit)
@@ -210,7 +211,8 @@ fit_sex <- epidist(
   formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
   family = brms::lognormal(),
   algorithm = "laplace",
-  refresh = 0
+  refresh = 0,
+  silent = 2
 )
 
 summary(fit_sex)
@@ -219,12 +221,22 @@ summary(fit_sex)
 Fit a model including sex effect and district effect:
 
 ```{r}
+obs_prep_reduced <- obs_prep |>
+  group_by(district) |>
+  mutate(n = n()) |>
+  filter(n > 30) |>
+  select(-n) |>
+  ungroup()
+
+obs_prep_reduced <- as_latent_individual(obs_prep_reduced)
+
 fit_sex_district <- epidist(
-  data = obs_prep,
+  data = obs_prep_reduced,
   formula = brms::bf(mu ~ 1 + sex + district, sigma ~ 1 + sex + district),
   family = brms::lognormal(),
   algorithm = "laplace",
-  refresh = 0
+  refresh = 0,
+  silent = 2
 )
 
 summary(fit_sex_district)
@@ -286,7 +298,7 @@ epred_draws_sex |>
 Finally, for the sex-district stratified model:
 
 ```{r}
-epred_draws_sex_district <- obs_prep |>
+epred_draws_sex_district <- obs_prep_reduced |>
   as.data.frame() |>
   modelr::data_grid(sex, district) |>
   dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
@@ -304,21 +316,12 @@ epred_draws_sex_district |>
   facet_grid(. ~ sex) +
   labs(x = "Posterior expectation of the delay", y = "") +
   theme_minimal()
-
-# Some strata that don't have much data? Some very bad priors?
-summary(epred_draws_sex_district$.epred)
-
-epred_draws_sex_district |>
-  dplyr::group_by(district) |>
-  dplyr::summarise(q90 = quantile(.epred, 0.9)) |>
-  ggplot(aes(x = district, y = q90)) +
-    geom_point()
-
-obs_prep$district |>
-  table()
 ```
 
 ## Linear predictor posteriors
+
+One can also generate draws of the linear predictors for all distributional parameters using `add_linpred_draws`.
+For example, for the `mu` parameter then:
 
 ```{r}
 linpred_draws_sex_district <- obs_prep |>
@@ -326,11 +329,7 @@ linpred_draws_sex_district <- obs_prep |>
   modelr::data_grid(sex, district) |>
   dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
   add_linpred_draws(fit_sex_district, dpar = TRUE)
-```
 
-Linear predictors for the `mu` parameter by sex and district:
-
-```{r}
 linpred_draws_sex_district |>
   dplyr::mutate(
     sex = dplyr::case_when(
@@ -345,64 +344,20 @@ linpred_draws_sex_district |>
   theme_minimal()
 ```
 
-Linear predictors for the `sigma` parameter by sex and district:
-
-```{r}
-linpred_draws_sex_district |>
-  dplyr::mutate(
-    sex = dplyr::case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
-  ggplot(aes(x = sigma, y = district)) +
-  tidybayes::stat_pointinterval() +
-  facet_grid(. ~ sex) +
-  labs(x = "Posterior of the sigma linear predictor", y = "") +
-  theme_minimal()
-```
-
-## Posterior predictions
-
-Posterior prediction of the observed data.
-(One sample from it.)
-
-```{r}
-draws <- predicted_draws(fit, newdata = as.data.frame(obs_prep))
-
-# This is just a single draw. To get many draws do you have to repeat rows?
-draws$.draw |> summary()
-
-ggplot(draws, aes(x = .prediction, y = district)) +
-  tidybayes::stat_pointinterval() +
-  facet_grid(. ~ sex) +
-  theme_minimal()
-```
-
-How does this `rvars` stuff work?
-
-```{r}
-obs_prep |>
-  as.data.frame() |>
-  add_predicted_rvars(fit) |>
-  dplyr::select(.prediction) |>
-  head()
-```
-
 ## Delay probability mass functions
 
-Do a posterior predictive distribution under no truncation but daily censoring.
-Then plot those as discrete PMF.
+### No truncation with daily censoring
+
+The posterior predictive distribution under no truncation but daily censoring.
+
+No stratification:
 
 ```{r}
 newdata_pmf <- obs_prep |>
   as.data.frame() |>
-  modelr::data_grid(rep = seq_along(1:5000)) |>
   dplyr::mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
 
-# Anything here with the prediction being vectorised?
-# Would that solve my draws only being one issue?
-draws_pmf <- predicted_draws(fit, newdata = newdata_pmf, ndraws = 1)
+draws_pmf <- predicted_draws(fit, newdata = newdata_pmf, ndraws = 1000)
 
 ggplot(draws_pmf, aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
@@ -410,28 +365,145 @@ ggplot(draws_pmf, aes(x = .prediction)) +
   theme_minimal()
 ```
 
-What about the "continuous" no truncation no censoring distribution?
+Stratification by sex:
+
+```{r}
+newdata_sex_pmf <- obs_prep |>
+  as.data.frame() |>
+  modelr::data_grid(sex) |>
+  dplyr::mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
+
+draws_sex_pmf <- predicted_draws(
+  fit_sex,
+  newdata = newdata_sex_pmf,
+  ndraws = 1000
+)
+
+draws_sex_pmf |>
+  dplyr::mutate(
+    sex = dplyr::case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male"
+    )
+  ) |>
+  ggplot(aes(x = .prediction)) +
+  geom_bar(aes(y = after_stat(count / sum(count)))) +
+  labs(x = "PMF with daily censoring and no truncation", y = "") +
+  facet_grid(. ~ sex) +
+  theme_minimal()
+```
+
+Stratification by sex-district:
+
+```{r}
+newdata_sex_district_pmf <- obs_prep_reduced |>
+  as.data.frame() |>
+  modelr::data_grid(sex, district) |>
+  dplyr::mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
+
+draws_sex_district_pmf <- predicted_draws(
+  fit_sex_district,
+  newdata = newdata_sex_district_pmf,
+  ndraws = 1000
+)
+
+draws_sex_district_pmf |>
+  dplyr::mutate(
+    sex = dplyr::case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male"
+    )
+  ) |>
+  ggplot(aes(x = .prediction)) +
+  geom_bar(aes(y = after_stat(count / sum(count)))) +
+  labs(x = "PMF with daily censoring and no truncation", y = "") +
+  facet_grid(district ~ sex) +
+  theme_minimal()
+```
+
+### Continuous with no truncation or censoring
+
+The posterior predictive distribution under no truncation and no censoring.
+That is to produce continuous delay times.
+I don't like that `geom_density()` is doing kernel smoothing but plotting as a histogram is suggestive of there being discrete structure.
+
+No stratification:
 
 ```{r}
 newdata_pdf <- obs_prep |>
   as.data.frame() |>
-  modelr::data_grid(rep = seq_along(1:5000)) |>
   dplyr::mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
 
-draws_pdf <- predicted_draws(fit, newdata = newdata_pdf, ndraws = 1)
+draws_pdf <- predicted_draws(fit, newdata = newdata_pdf, ndraws = 1000)
 
-# I don't like that this is also doing kernel smoothing (to some extent)
-# But plotting as a histogram is suggestive of there being discrete structure
 ggplot(draws_pdf, aes(x = .prediction)) +
   geom_density() +
   labs(x = "PDF with no censoring and no truncation", y = "") +
   theme_minimal()
 ```
 
+Stratification by sex:
+
+```{r}
+newdata_sex_pdf <- obs_prep |>
+  as.data.frame() |>
+  modelr::data_grid(sex) |>
+  dplyr::mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
+
+draws_sex_pdf <- predicted_draws(
+  fit_sex,
+  newdata = newdata_sex_pdf,
+  ndraws = 1000
+)
+
+draws_sex_pmf |>
+  dplyr::mutate(
+    sex = dplyr::case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male"
+    )
+  ) |>
+  ggplot(aes(x = .prediction)) +
+  geom_density() +
+  labs(x = "PDF with no censoring and no truncation", y = "") +
+  facet_grid(. ~ sex) +
+  theme_minimal()
+```
+
+Stratification by sex:
+
+```{r}
+newdata_sex_district_pdf <- obs_prep_reduced |>
+  as.data.frame() |>
+  modelr::data_grid(sex, district) |>
+  dplyr::mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
+
+draws_sex_district_pdf <- predicted_draws(
+  fit_sex_district,
+  newdata = newdata_sex_district_pdf,
+  ndraws = 1000
+)
+
+draws_sex_district_pdf |>
+  dplyr::mutate(
+    sex = dplyr::case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male"
+    )
+  ) |>
+  ggplot(aes(x = .prediction)) +
+  geom_density() +
+  labs(x = "PDF with no censoring and no truncation", y = "") +
+  facet_grid(district ~ sex) +
+  theme_minimal()
+```
+
 ## Model comparison
 
-* Is it worth including sex as a covariate? 
-* Is it worth including district as a covariate? What about spatially structured?
+* Use `loo` and PSIS
+* Find out if it's worth including sex as a covariate. Presumably yes given how different the delay distributions are
+* Find out if it's worth including district as a random effects
+  * What about spatially structured? Probably future work: how to include more structured random effects
 
 # Using a gamma delay distribution
 
@@ -446,7 +518,8 @@ fit_sex_gamma <- epidist(
   formula = brms::bf(mu ~ 1 + sex, shape ~ 1 + sex),
   family = stats::Gamma(),
   algorithm = "laplace",
-  refresh = 0
+  refresh = 0,
+  silent = 2
 )
 
 summary(fit_sex_gamma)
@@ -457,5 +530,23 @@ summary(fit_sex_gamma)
 * Should we use the lognormal or gamma delay distribution?
 
 # Conclusion
+
+* The `epidist` package allows you to fit delay distribution models
+* These models can be stratified by covariates such as sex and district
+* You can use `tidybayes` for post-processing and prediction with fitted models
+* The likelihood family may also be specified in `epidist`
+* Model comparison may be performed via the `loo` package
+
+# Appendix
+
+How does this `rvars` stuff work?
+
+```{r}
+obs_prep |>
+  as.data.frame() |>
+  add_predicted_rvars(fit) |>
+  dplyr::select(.prediction) |>
+  head()
+```
 
 ## Bibliography {-}
