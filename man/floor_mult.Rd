@@ -9,12 +9,13 @@ floor_mult(x, f = 1)
 \arguments{
 \item{x}{A number to be rounded down}
 
-\item{f}{A number specifying the multiple to be rounded down to}
+\item{f}{A positive number specifying the multiple to be rounded down to}
 }
 \description{
 This function rounds an input \code{x} down to the nearest multiple of some number
 \code{f}. For example, if \code{f = 0.2} and \code{x = 1.5} then the output would be 1.4.
-If \code{f = 1} then \code{floor_mult} behaves as \code{floor}.
+If \code{f = 1} then \code{floor_mult} behaves as \code{floor}. If \code{f = 0} then \code{x} is
+returned.
 }
 \seealso{
 Other utils: 
