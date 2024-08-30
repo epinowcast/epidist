@@ -35,8 +35,7 @@ Imports:
     cli,
     checkmate,
     rstan,
-    dplyr,
-    tidybayes
+    dplyr
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
@@ -49,7 +48,8 @@ Suggests:
     bayesplot,
     tidyr,
     posterior,
-    fs
+    fs,
+    tidybayes
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
