@@ -35,7 +35,8 @@ Imports:
     cli,
     checkmate,
     rstan,
-    dplyr
+    dplyr,
+    tidybayes
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
