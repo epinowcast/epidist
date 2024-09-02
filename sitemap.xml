@@ -51,6 +51,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/is_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/linelist_to_cases.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/linelist_to_counts.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/log_lik_latent_lognormal.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/make_relative_to_truth.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/observe_process.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/pad_zero.html</loc></url>
