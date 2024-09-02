@@ -11,11 +11,11 @@
 posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu", i = i)
   shape <- brms::get_dpar(prep, "shape", i = i)
-  
+
   obs_t <- prep$data$vreal1[i]
   pwindow_width <- prep$data$vreal2[i]
   swindow_width <- prep$data$vreal3[i]
-  
+
   .predict <- function(s) {
     d_censored <- obs_t + 1
     # while loop to impose the truncation
@@ -29,7 +29,7 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
     }
     return(d_censored)
   }
-  
+
   # Within brms this is a helper function called rblapply
   do.call(rbind, lapply(seq_len(prep$ndraws), .predict))
 }
@@ -64,19 +64,19 @@ log_lik_latent_gamma <- function(i, prep) {
   obs_t <- prep$data$vreal1[i]
   pwindow_width <- prep$data$vreal2[i]
   swindow_width <- prep$data$vreal3[i]
-  
+
   swindow_raw <- runif(prep$ndraws)
   pwindow_raw <- runif(prep$ndraws)
-  
+
   swindow <- swindow_raw * swindow_width
-  
+
   # For no overlap calculate as usual, for overlap ensure pwindow < swindow
   if (i %in% prep$data$noverlap) {
     pwindow <- pwindow_raw * pwindow_width
   } else {
     pwindow <- pwindow_raw * swindow
   }
-  
+
   d <- y - pwindow + swindow
   obs_time <- obs_t - pwindow
   lpdf <- dgamma(d, shape = shape, scale = mu / shape, log = TRUE)
