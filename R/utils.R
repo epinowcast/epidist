@@ -33,11 +33,14 @@ epidist_version_stanvar <- function() {
 #'
 #' This function rounds an input `x` down to the nearest multiple of some number
 #' `f`. For example, if `f = 0.2` and `x = 1.5` then the output would be 1.4.
-#' If `f = 1` then `floor_mult` behaves as `floor`.
+#' If `f = 1` then `floor_mult` behaves as `floor`. If `f = 0` then `x` is
+#' returned.
 #'
 #' @param x A number to be rounded down
-#' @param f A number specifying the multiple to be rounded down to
+#' @param f A positive number specifying the multiple to be rounded down to
+#' @importFrom checkmate assert_numeric
 #' @family utils
 floor_mult <- function(x, f = 1) {
-  return(floor(x / f) * f)
+  checkmate::assert_numeric(f, lower = 0)
+  ifelse(f == 0, x, floor(x / f) * f)
 }
