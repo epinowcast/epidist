@@ -19,6 +19,18 @@ test_that("posterior_predict_latent_lognormal errors for i out of bounds", { # n
   expect_error(posterior_predict_latent_lognormal(prep, i = i_out_of_bounds))
 })
 
+test_that("posterior_predict_latent_lognormal can generate predictions with no censoring", { # nolint: line_length_linter.
+  fit <- readRDS(
+    system.file("extdata/fit.rds", package = "epidist")
+  )
+  draws <- data.frame(obs_t = 1000, pwindow_upr = 0, swindow_upr = 0) |>
+    tidybayes::add_predicted_draws(fit, ndraws = 100)
+  expect_equal(draws$.draw, 1:100)
+  pred <- draws$.prediction
+  expect_gte(min(pred), 0)
+  expect_true(all(abs(pred - round(pred)) > .Machine$double.eps^0.5))
+})
+
 test_that("posterior_predict_latent_lognormal predicts delays for which the data is in the 95% credible interval", { # nolint: line_length_linter.
   fit <- readRDS(
     system.file("extdata/fit.rds", package = "epidist")

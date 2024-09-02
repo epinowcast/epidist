@@ -48,7 +48,8 @@ Suggests:
     bayesplot,
     tidyr,
     posterior,
-    fs
+    fs,
+    tidybayes
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
