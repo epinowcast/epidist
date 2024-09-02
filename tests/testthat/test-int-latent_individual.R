@@ -149,10 +149,10 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   draws_gamma_shape_ecdf <- ecdf(draws_gamma_shape)
   quantile_mu <- draws_gamma_mu_ecdf(mu)
   quantile_shape <- draws_gamma_shape_ecdf(shape)
+  expect_gte(quantile_mu, 0.025)
+  expect_lte(quantile_mu, 0.975)
   expect_gte(quantile_shape, 0.025)
   expect_lte(quantile_shape, 0.975)
-  expect_gte(quantile_rate, 0.025)
-  expect_lte(quantile_rate, 0.975)
 })
 
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles for an alternative formula", { # nolint: line_length_linter.
