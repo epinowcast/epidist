@@ -72,13 +72,19 @@ log_lik_latent_lognormal <- function(i, prep) {
   pwindow_raw <- runif(prep$ndraws)
 
   pwindow <- pwindow_raw * pwindow_width
-  swindow <- swindow_raw * swindow_width
 
   noverlap <- prep$data$noverlap
   woverlap <- prep$data$woverlap
-  pwindow[noverlap] <- pwindow_width[noverlap] * pwindow_raw[noverlap]
+
+  # swindow is the [0, 1] number times the width
+  swindow <- swindow_raw * swindow_width
+
+  # For non-overlapping then pwindow is the same
+  pwindow[noverlap] <- pwindow_raw[noverlap] * pwindow_width[noverlap]
+
+  # If there is overlap then...
   if (prep$data$wN) {
-    pwindow[woverlap] <- swindow[woverlap] * pwindow_raw[woverlap]
+    pwindow[woverlap] <- pwindow_raw[woverlap] * swindow[woverlap]
   }
 
   d <- y - pwindow + swindow
