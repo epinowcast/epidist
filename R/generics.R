@@ -12,7 +12,7 @@ epidist_validate <- function(data) {
 }
 
 #' Define a model specific formula
-#' 
+#'
 #' This function is used within [epidist()] to create the formula object passed
 #' to `brms`. It is unlikely that as a user you will need this function, but we
 #' export it nonetheless to be transparent about what exactly is happening
@@ -27,7 +27,7 @@ epidist_formula <- function(data, ...) {
 }
 
 #' Define model specific family
-#' 
+#'
 #' This function is used within [epidist()] to create a model specific custom
 #' `brms` family object. This object is passed to `brms`. It is unlikely that
 #' as a user you will need this function, but we export it nonetheless to be
@@ -58,7 +58,7 @@ epidist_stancode <- function(data, ...) {
 }
 
 #' Fit epidemiological delay distributions using a `brms` interface
-#' 
+#'
 #' @inheritParams epidist_validate
 #' @param formula A formula object created using `brms::bf`. A formula must be
 #' provided for the distributional parameter `mu` common to all `brms` families.
