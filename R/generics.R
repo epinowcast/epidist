@@ -69,10 +69,18 @@ epidist_stancode <- function(data, ...) {
 #' users to specify the link function to be applied on the response variable.
 #' If not specified, default links are used. For details of supported families
 #' see [brmsfamily()].
-#' @param prior ...
-#' @param backend ...
-#' @param fn Likely `brms::brm`. Also possible to be `brms::make_stancode` or
-#' `brms::make_standata`.
+#' @param prior One or more `brmsprior` objects created by [brms::set_prior()]
+#' or related functions. These priors are passed to [epidist_prior()] in the
+#' `prior` argument. We recommend caution and the use of prior predictive checks
+#' for specifying prior distributions.
+#' @param backend Character string naming the package to use as the backend for
+#' fitting the Stan model. Options are `"rstan"` and `"cmdstanr"` (the default).
+#' This option is passed directly through to `fn`.
+#' @param fn The internal function to be called. By default this is `brms::brm`,
+#' which performs inference for the specified model. Other options
+#' `brms::make_stancode`, which returns the Stan code for the specified model,
+#' and `brms::make_standata` which returns the data passed to Stan. These
+#' options may be useful for model debugging and extensions.
 #' @param ... Additional arguments for method.
 #' @family generics
 #' @export
