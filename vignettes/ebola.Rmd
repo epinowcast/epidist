@@ -334,7 +334,7 @@ Note that these results are questionable, and suggest that further would should 
 Part of the issue is that some sex-district strata have quite limited data.
 
 ```{r}
-epred_draws_sex_district <- obs_prep_reduced |>
+epred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex, district) |>
   dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
@@ -364,7 +364,7 @@ The `tidybayes` package also allows users to generate draws of the linear predic
 For example, for the `mu` parameter in the sex-district stratified model:
 
 ```{r}
-linpred_draws_sex_district <- obs_prep_reduced |>
+linpred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex, district) |>
   dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
@@ -443,7 +443,7 @@ draws_sex_pmf |>
 Stratification by sex-district:
 
 ```{r}
-newdata_sex_district_pmf <- obs_prep_reduced |>
+newdata_sex_district_pmf <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex, district) |>
   dplyr::mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
@@ -520,7 +520,7 @@ draws_sex_pmf |>
 Stratification by sex:
 
 ```{r}
-newdata_sex_district_pdf <- obs_prep_reduced |>
+newdata_sex_district_pdf <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex, district) |>
   dplyr::mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
