@@ -47,6 +47,8 @@ For users new to `epidist`, before reading this article, we recommend beginning 
 The packages used in this article are:
 
 ```{r load-requirements}
+set.seed(1)
+
 library(epidist)
 library(data.table)
 library(purrr)
@@ -164,9 +166,6 @@ Next, we use `observe_process()` to add interval censoring columns giving the lo
 
 ```{r}
 obs_cens <- epidist::observe_process(sierra_leone_ebola_data)
-
-# all(obs_cens$ptime == obs_cens$ptime_daily)
-# all(obs_cens$stime == obs_cens$stime_daily)
 ```
 
 Specially, the columns added by `observe_process` are:
@@ -220,7 +219,8 @@ fit <- epidist(
   family = brms::lognormal(),
   algorithm = "laplace",
   refresh = 0,
-  silent = 2
+  silent = 2,
+  seed = 1
 )
 ```
 
@@ -240,7 +240,8 @@ fit_sex <- epidist(
   family = brms::lognormal(),
   algorithm = "laplace",
   refresh = 0,
-  silent = 2
+  silent = 2,
+  seed = 1
 )
 ```
 
@@ -256,11 +257,15 @@ To do this, we will use district level random effects, assumed to be drawn from 
 ```{r}
 fit_sex_district <- epidist(
   data = obs_prep,
-  formula = brms::bf(mu ~ 1 + sex + (1 | district), sigma ~ 1 + sex + (1 | district)),
+  formula = brms::bf(
+    mu ~ 1 + sex + (1 | district),
+    sigma ~ 1 + sex + (1 | district)
+  ),
   family = brms::lognormal(),
   algorithm = "laplace",
   refresh = 0,
-  silent = 2
+  silent = 2,
+  seed = 1
 )
 ```
 
@@ -561,7 +566,8 @@ fit_sex_gamma <- epidist(
   family = stats::Gamma(),
   algorithm = "laplace",
   refresh = 0,
-  silent = 2
+  silent = 2,
+  seed = 1
 )
 
 summary(fit_sex_gamma)
