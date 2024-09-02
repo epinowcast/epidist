@@ -50,3 +50,15 @@ test_that("posterior_epred_latent_lognormal creates a array of non-negative numb
   expect_equal(ncol(epred), length(prep$data$Y))
   expect_gte(min(epred), 0)
 })
+
+test_that("log_lik_latent_lognormal produces a vector with length ndraws of finite non-NA numbers", { # nolint: line_length_linter.
+  fit <- readRDS(
+    system.file("extdata/fit.rds", package = "epidist")
+  )
+  prep <- brms::prepare_predictions(fit)
+  i <- 1
+  log_lik <- log_lik_latent_lognormal(i, prep)
+  expect_equal(length(log_lik), prep$ndraws)
+  expect_true(all(!is.na(log_lik)))
+  expect_true(all(is.finite(log_lik)))
+})
