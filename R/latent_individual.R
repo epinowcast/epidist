@@ -208,11 +208,11 @@ epidist_stancode.epidist_latent_individual <- function(data,
   # dpars_B refers to the insertion into the lpdf call
   # For some families, we tranform brms dpars to match Stan parameterisation
   lpdf_dpars <- family$dpars
-  
+
   if (family_name == "gamma") {
     lpdf_dpars <- c("shape", "shape ./ mu")
   }
-  
+
   stanvars_functions[[1]]$scode <- gsub(
     "dpars_B",
     paste(lpdf_dpars, collapse = ", "),
