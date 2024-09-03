@@ -1,4 +1,5 @@
-#' Draws from the posterior predictive distribution
+#' Draws from the posterior predictive distribution of the `latent_lognormal`
+#' family
 #'
 #' See [brms::posterior_predict()].
 #'
@@ -34,7 +35,8 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
   do.call(rbind, lapply(seq_len(prep$ndraws), .predict))
 }
 
-#' Draws from the expected value of the posterior predictive distribution
+#' Draws from the expected value of the posterior predictive distribution of the
+#' `latent_gamma` family
 #'
 #' See [brms::posterior_epred()].
 #'
@@ -48,7 +50,7 @@ posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_lin
   exp(mu + sigma^2 / 2)
 }
 
-#' Calculate the pointwise log likelihood
+#' Calculate the pointwise log likelihood of the `latent_gamma` family
 #'
 #' See [brms::log_lik()].
 #'
