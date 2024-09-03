@@ -49,8 +49,9 @@ Suggests:
     tidyr,
     posterior,
     fs,
+    sf,
     tidybayes,
-    sf
+    modelr
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
