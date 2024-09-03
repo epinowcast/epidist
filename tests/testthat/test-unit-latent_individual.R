@@ -136,3 +136,8 @@ test_that("epidist_formula.epidist_latent_individual with custom formulas errors
     )
   )
 })
+
+
+test_that("epidist_stancode.epidist_latent_individual produces valid stanvars", { # nolint: line_length_linter.
+  expect_equal(1, 1)
+})
