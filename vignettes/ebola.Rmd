@@ -34,15 +34,15 @@ The 2014-2016 outbreak of Ebola in West Africa began in Guinea, and quickly spre
 It was the largest outbreak in the disease's history, and resulted in over 28,600 infections and 11,325 deaths [@who_ebola_2014_2016].
 
 In this vignette, we use the `epidist` package to analyze line list data from the outbreak in Sierra Leone.
-This data was collated by @fang2016transmission, and is available in the `epidist` package.
+This data was collated by @fang2016transmission.
+We provide the data in the `epidist` package via `?sierra_leone_ebola_data`.
+
 In analyzing this data, we demonstrate the following features of `epidist`:
 
 1. Fitting district-sex stratified delay distribution estimates.
 2. Fitting models with lognormal and gamma delay distributions.
-3. Selecting between fitted models.
-4. Post-processing and plotting functionality.
-
-For users new to `epidist`, before reading this article, we recommend beginning with the "[Getting started vignette](http://epidist.epinowcast.org/articles/epidist.html)".
+3. Post-processing and plotting functionality using the integration of `brms` functionality with the [`tidybayes`](http://mjskay.github.io/tidybayes/) package.
+4. Selecting between fitted models using the [`loo`](https://mc-stan.org/loo/) package.
 
 The packages used in this article are:
 
@@ -58,17 +58,18 @@ library(tidybayes)
 library(modelr)
 ```
 
+Note that, for users new to `epidist`, before reading this article we recommend beginning with the vignette "[Getting started with `epidist`](http://epidist.epinowcast.org/articles/epidist.html)".
+
 # Data preparation
 
-We begin by loading the Ebola line list data.
-For more details, see `?sierra_leone_ebola_data`.
+We begin by loading the Ebola line list data:
 
 ```{r}
 data("sierra_leone_ebola_data")
 ```
 
 The data has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a unique case report `id`.
-The columns of the data are the individuals name (retracted, and hence can be removed), age, sex, the dates of symptom onset and positive sample, and their district and chiefdom.
+The columns of the data are the individuals name (retracted, and hence can be removed), age, sex, the dates of Ebola symptom onset and positive sample, and their district and chiefdom.
 
 ```{r}
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
@@ -81,7 +82,8 @@ fraction <- 5
 ndistrict <- length(unique(sierra_leone_ebola_data$district))
 ```
 
-Figure \@ref(fig:ebola-outbreak) shows every `r fraction`th case (to avoid over-plotting the data) by district.
+Figure \@ref(fig:ebola-outbreak) shows the progression of the epidemic in each district.
+(In this figure, we filter down to every `r fraction`th case in order to avoid overplotting.)
 We can see that the start time and course of the epidemic varies between districts.
 
 (ref:ebola-outbreak) Primary and secondary event times for every `r fraction`th case, over the `r ndistrict` districts of Sierra Leone.
@@ -106,7 +108,7 @@ sierra_leone_ebola_data |>
 
 We can use a map to help visualise the outbreak across space.
 To create a map, we first join the Ebola data to shapefiles for the districts of Sierra Leone.
-These shapefiles were obtained from [GADM](https://gadm.org/).
+These shapefiles were obtained from the Database of Global Administrative Areas ([GADM](https://gadm.org/)).
 
 ```{r message=FALSE, warning=FALSE}
 sf <- sf::st_read("../inst/gadm41_SLE_shp/gadm41_SLE_2.shp", quiet = TRUE)
@@ -134,14 +136,15 @@ ggplot(sierra_leone_ebola_data_sf, aes(fill = cases, geometry = geometry)) +
 
 # Fitting sex-district stratified delay distributions
 
-To understand the delay between time of symptom onset and time of sample testing, we are going to fit a range of models using the `epidist` package.
-In fitting these models, we are going to vary the parameters of the delay distribution by sex and by district.
-For the lognormal delay distribution, which we begin by focusing on, these parameters are the mean and standard deviation of the underlying normal distribution i.e. $\mu$ and $\sigma$ such that when $x \sim \mathcal{N}(\mu, \sigma)$ that $\exp(x)$ has a lognormal distribution.
+To understand the delay between time of symptom onset and time of sample testing, we fit a range of statistical models using the `epidist` package.
+In some of these models, we vary the parameters of the delay distribution by sex or by district.
+For the lognormal delay distribution, which we begin by focusing on, these parameters are the mean and standard deviation of the underlying normal distribution.
+That is, $\mu$ and $\sigma$ such that when $x \sim \mathcal{N}(\mu, \sigma)$ that $\exp(x)$ has a lognormal distribution.
 
 ## Data preparation
 
-To prepare the data for use in `epidist`, we begin by transforming the date columns to `ptime` and `stime` columns, for the times of the respective primary and secondary events.
-Both of these columns are given relative to the first date of symptom onset in the data.
+To prepare the data, we begin by transforming the date columns to `ptime` and `stime` columns for the times of the primary and secondary events respectively.
+Both of these columns are relative to the first date of symptom onset in the data.
 We also transform the `data.frame` to a `data.table`.
 
 ```{r}
@@ -191,7 +194,7 @@ subsample <- 0.2
 ```
 
 For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values^[It should be a relatively simple extension to allow for missing data in the model.]).
-As well, to speed up computation, we take a random `r `100 * subsample`% subsample of the complete data.
+As well, to speed up computation, we take a random `r 100 * subsample`% subsample of the complete data.
 
 ```{r}
 set.seed(1)
@@ -199,7 +202,7 @@ n <- nrow(obs_cens)
 obs_cens <- obs_cens[complete.cases(obs_cens)]
 n_complete <- nrow(obs_cens)
 n_complete / n
-obs_cens <- obs_cens[sample(seq_len(.N), n_complete / 5, replace = FALSE)]
+obs_cens <- obs_cens[sample(seq_len(.N), n_complete * subsample, replace = FALSE)]
 ```
 
 To prepare the data for use with the latent individual model, we use the function `as_latent_individual`:
@@ -208,9 +211,13 @@ To prepare the data for use with the latent individual model, we use the functio
 obs_prep <- as_latent_individual(obs_cens)
 ```
 
-Now we are ready to call `epidsit` and fit the latent individual model.
-We set `formula` to `brms::bf(mu ~ 1, sigma ~ 1)` to place only an intercept on the `mu` and `sigma` parameters of the lognormal distribution, specified using `family = brms::lognormal()`.
-To make model fitting fast, we use the Laplace approximation via `algorithm = "laplace"` (see the approximate inference vignette).
+Now we are ready to fit the latent individual model.
+
+### Intercept only model
+
+We set `formula` to `brms::bf(mu ~ 1, sigma ~ 1)` to place an intercept only model on the `mu` and `sigma` parameters of the lognormal distribution.
+This distribution is specified using `family = brms::lognormal()`.
+We use the Laplace approximation via `algorithm = "laplace"` (see the approximate inference vignette) for fast model fitting.
 
 ```{r}
 fit <- epidist(
@@ -224,12 +231,15 @@ fit <- epidist(
 )
 ```
 
-The `fit` object is a [`brmsfit`](https://paulbuerkner.com/brms/reference/brmsfit-class.html) object, and has the associated range of methods (see `methods(class = "brmsfit")`).
-For example, we may use `summary` to view details about the model, including estimates for the fitted regression coefficients:
+The `fit` object is a [`brmsfit`](https://paulbuerkner.com/brms/reference/brmsfit-class.html) object, and has the associated range of methods.
+See `methods(class = "brmsfit")` for more details.
+For example, we may use `summary` to view information about the fitted model, including posterior estimates for the regression coefficients:
 
 ```{r}
 summary(fit)
 ```
+
+### Sex-stratified model
 
 To fit a model which varies `mu` and `sigma` by sex we alter the `formula` specification to include fixed effects for sex as follows:
 
@@ -251,6 +261,8 @@ A summary of the model shows that males tend to have longer delays (the posterio
 summary(fit_sex)
 ```
 
+### Sex-district stratified model
+
 Finally, we will fit a model which also varies by district.
 To do this, we will use district level random effects, assumed to be drawn from a shared normal distribution, within the model for both the `mu` and `sigma` parameters:
 
@@ -269,7 +281,7 @@ fit_sex_district <- epidist(
 )
 ```
 
-Along with looking at the `summary`, we may also use the `brms::ranef` function to look at the estiamtes of the random effects:
+Along with looking at the `summary`, we may also use the `brms::ranef` function to look at the estimates of the random effects:
 
 ```{r}
 summary(fit_sex_district)
