@@ -142,18 +142,17 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
     silent = 2,
     output_dir = fs::dir_create(tempfile())
   )
-  # Using the Stan parameterisation of the gamma distribution
   draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
-  draws_gamma_alpha <- exp(draws_gamma$Intercept)
-  draws_gamma_beta <- exp(draws_gamma$Intercept_shape)
-  draws_gamma_alpha_ecdf <- ecdf(draws_gamma_alpha)
-  draws_gamma_beta_ecdf <- ecdf(draws_gamma_beta)
-  quantile_shape <- draws_gamma_alpha_ecdf(shape)
-  quantile_rate <- draws_gamma_beta_ecdf(rate)
+  draws_gamma_mu <- exp(draws_gamma$Intercept)
+  draws_gamma_shape <- exp(draws_gamma$Intercept_shape)
+  draws_gamma_mu_ecdf <- ecdf(draws_gamma_mu)
+  draws_gamma_shape_ecdf <- ecdf(draws_gamma_shape)
+  quantile_mu <- draws_gamma_mu_ecdf(mu)
+  quantile_shape <- draws_gamma_shape_ecdf(shape)
+  expect_gte(quantile_mu, 0.025)
+  expect_lte(quantile_mu, 0.975)
   expect_gte(quantile_shape, 0.025)
   expect_lte(quantile_shape, 0.975)
-  expect_gte(quantile_rate, 0.025)
-  expect_lte(quantile_rate, 0.975)
 })
 
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles for an alternative formula", { # nolint: line_length_linter.
