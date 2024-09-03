@@ -16,7 +16,7 @@ test_that("posterior_predict_latent_gamma errors for i out of bounds", { # nolin
   )
   prep <- brms::prepare_predictions(fit_gamma)
   i_out_of_bounds <- length(prep$data$Y) + 1
-  expect_error(posterior_predict_latent_gamma(prep, i = i_out_of_bounds))
+  expect_error(posterior_predict_latent_gamma(i = i_out_of_bounds, prep))
 })
 
 test_that("posterior_predict_latent_gamma can generate predictions with no censoring", { # nolint: line_length_linter.
