@@ -21,7 +21,7 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
     # while loop to impose the truncation
     while (d_censored > obs_t) {
       p_latent <- runif(1, 0, 1) * pwindow_width
-      d_latent <- rgamma(1, shape = shape[s], scale = mu[i] / shape[i])
+      d_latent <- rgamma(1, shape = shape[s], rate = shape[s] / mu[s])
       s_latent <- p_latent + d_latent
       p_censored <- floor_mult(p_latent, pwindow_width)
       s_censored <- floor_mult(s_latent, swindow_width)
