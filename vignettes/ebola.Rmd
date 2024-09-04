@@ -420,7 +420,9 @@ newdata_pmf <- obs_prep |>
   mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
 
 draws_pmf <- predicted_draws(fit, newdata = newdata_pmf, ndraws = 1000)
+```
 
+```{r}
 ggplot(draws_pmf, aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
   labs(x = "PMF with daily censoring and no truncation", y = "") +
@@ -440,7 +442,9 @@ draws_sex_pmf <- predicted_draws(
   newdata = newdata_sex_pmf,
   ndraws = 1000
 )
+```
 
+```{r}
 draws_sex_pmf |>
   mutate(
     sex = case_when(
@@ -468,7 +472,9 @@ draws_sex_district_pmf <- predicted_draws(
   newdata = newdata_sex_district_pmf,
   ndraws = 1000
 )
+```
 
+```{r}
 draws_sex_district_pmf |>
   mutate(
     sex = case_when(
@@ -497,7 +503,9 @@ newdata_pdf <- obs_prep |>
   mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
 
 draws_pdf <- predicted_draws(fit, newdata = newdata_pdf, ndraws = 1000)
+```
 
+```{r}
 ggplot(draws_pdf, aes(x = .prediction)) +
   geom_density() +
   labs(x = "PDF with no censoring and no truncation", y = "") +
@@ -517,7 +525,9 @@ draws_sex_pdf <- predicted_draws(
   newdata = newdata_sex_pdf,
   ndraws = 1000
 )
+```
 
+```{r}
 draws_sex_pmf |>
   mutate(
     sex = case_when(
@@ -546,6 +556,7 @@ draws_sex_district_pdf <- predicted_draws(
   ndraws = 1000
 )
 
+```{r}
 draws_sex_district_pdf |>
   mutate(
     sex = case_when(
