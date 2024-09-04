@@ -412,7 +412,7 @@ In this section, we demonstrate how to produce either a discrete probability mas
 
 The posterior predictive distribution under no truncation but daily censoring.
 
-No stratification:
+No stratification.
 
 ```{r}
 newdata_pmf <- obs_prep |>
@@ -422,10 +422,13 @@ newdata_pmf <- obs_prep |>
 draws_pmf <- predicted_draws(fit, newdata = newdata_pmf, ndraws = 1000)
 ```
 
+There were `r round(mean(draws_pmf$.prediction > 30) * 100, 1)`% of delays greater than 30, which are omitted in the following figure.
+
 ```{r}
 ggplot(draws_pmf, aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
   labs(x = "PMF with daily censoring and no truncation", y = "") +
+  scale_x_continuous(limits = c(0, 30)) +
   theme_minimal()
 ```
 
