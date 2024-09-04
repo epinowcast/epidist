@@ -320,11 +320,10 @@ epred_draws |>
 Next, for the sex stratified model, we illustrate the higher mean of men as compared with women (Figure \@ref(fig:epred-sex)):
 
 ```{r}
-# Probably want functionality for users not to have to do this themselves
-(newdata_sex <- obs_prep |>
-   as.data.frame() |>
-   data_grid(sex) |>
-   mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA))
+newdata_sex <- obs_prep |>
+  as.data.frame() |>
+  data_grid(sex) |>
+  mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA)
 
 epred_draws_sex <- add_epred_draws(newdata_sex, fit_sex, dpar = TRUE)
 ```
