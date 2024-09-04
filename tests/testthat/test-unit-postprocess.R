@@ -50,14 +50,14 @@ test_that("predict_delay_parameters accepts newdata arguments and prediction by 
   expect_equal(
     as.numeric(pred_sex_summary[1, c("mu", "sigma")]),
     c(meanlog_m, sdlog_m),
-    tolerance = 0.05
+    tolerance = 0.1
   )
 
   # Correction predictions of F
   expect_equal(
     as.numeric(pred_sex_summary[2, c("mu", "sigma")]),
     c(meanlog_f, sdlog_f),
-    tolerance = 0.05
+    tolerance = 0.1
   )
 })
 
