@@ -10,31 +10,55 @@ test_that("predict_delay_parameters works with NULL newdata and the latent logno
   )
   pred <- predict_delay_parameters(fit)
   expect_s3_class(pred, "data.table")
-  expect_named(pred, c("index", "draw", "mu", "sigma", "mean", "sd"))
+  expect_named(pred, c("draw", "index", "mu", "sigma", "mean", "sd"))
   expect_true(all(pred$mean > 0))
   expect_true(all(pred$sd > 0))
   expect_equal(length(unique(pred$index)), nrow(prep_obs))
   expect_equal(length(unique(pred$draw)), summary(fit)$total_ndraws)
 })
 
-test_that("predict_delay_parameters accepts newdata arguments", { # nolint: line_length_linter.
+test_that("predict_delay_parameters accepts newdata arguments and prediction by sex recovers underlying parameters", { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
-  prep_obs <- as_latent_individual(sim_obs)
-  fit <- epidist(
-    data = prep_obs,
+  prep_obs_sex <- as_latent_individual(sim_obs_sex)
+  fit_sex <- epidist(
+    data = prep_obs_sex,
+    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2
   )
-  n <- 5
-  pred <- predict_delay_parameters(fit, newdata = prep_obs[1:n, ])
-  expect_s3_class(pred, "data.table")
-  expect_named(pred, c("index", "draw", "mu", "sigma", "mean", "sd"))
-  expect_true(all(pred$mean > 0))
-  expect_true(all(pred$sd > 0))
-  expect_equal(length(unique(pred$index)), 5)
-  expect_equal(length(unique(pred$draw)), summary(fit)$total_ndraws)
+  pred_sex <- predict_delay_parameters(fit_sex, prep_obs_sex)
+  expect_s3_class(pred_sex, "data.table")
+  expect_named(pred_sex, c("draw", "index", "mu", "sigma", "mean", "sd"))
+  expect_true(all(pred_sex$mean > 0))
+  expect_true(all(pred_sex$sd > 0))
+  expect_equal(length(unique(pred_sex$index)), nrow(prep_obs_sex))
+  expect_equal(length(unique(pred_sex$draw)), summary(fit_sex)$total_ndraws)
+
+  pred_sex_summary <- pred_sex |>
+    dplyr::left_join(
+      dplyr::select(data.frame(prep_obs_sex), index = row_id, sex),
+      by = "index"
+    ) |>
+    dplyr::group_by(sex) |>
+    dplyr::summarise(
+      mu = mean(mu),
+      sigma = mean(sigma)
+    )
+
+  # Correct predictions of M
+  expect_equal(
+    as.numeric(pred_sex_summary[1, c("mu", "sigma")]),
+    c(meanlog_m, sdlog_m),
+    tolerance = 0.1
+  )
+
+  # Correction predictions of F
+  expect_equal(
+    as.numeric(pred_sex_summary[2, c("mu", "sigma")]),
+    c(meanlog_f, sdlog_f),
+    tolerance = 0.1
+  )
 })
 
 test_that("add_mean_sd.lognormal_samples works with simulated lognormal distribution parameter data", { # nolint: line_length_linter.
