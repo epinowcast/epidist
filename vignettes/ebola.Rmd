@@ -496,7 +496,6 @@ draws_sex_district_pmf |>
 
 The posterior predictive distribution under no truncation and no censoring.
 That is to produce continuous delay times.
-I don't like that `geom_density()` is doing kernel smoothing but plotting as a histogram is suggestive of there being discrete structure.
 
 No stratification:
 
