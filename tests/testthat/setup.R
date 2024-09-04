@@ -38,3 +38,37 @@ sim_obs_gamma <- simulate_gillespie() |>
 
 sim_obs_gamma <-
   sim_obs_gamma[sample(seq_len(.N), sample_size, replace = FALSE)]
+
+# Data with a sex difference
+
+meanlog_m <- 2.0
+sdlog_m <- 0.3
+
+meanlog_f <- 1.3
+sdlog_f <- 0.7
+
+sim_obs_sex <- simulate_gillespie()
+sim_obs_sex$sex <- rbinom(n = nrow(sim_obs_sex), size = 1, prob = 0.5)
+
+sim_obs_sex_m <- dplyr::filter(sim_obs_sex, sex == 0) |>
+  simulate_secondary(
+    dist = rlnorm,
+    meanlog = meanlog_m,
+    sdlog = sdlog_m
+  )
+
+sim_obs_sex_f <- dplyr::filter(sim_obs_sex, sex == 1) |>
+  simulate_secondary(
+    dist = rlnorm,
+    meanlog = meanlog_f,
+    sdlog = sdlog_f
+  )
+
+sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
+  dplyr::arrange(case)
+
+sim_obs_sex <- sim_obs_sex |>
+  observe_process() |>
+  filter_obs_by_obs_time(obs_time = obs_time)
+
+sim_obs_sex <- sim_obs_sex[sample(seq_len(.N), sample_size, replace = FALSE)]
