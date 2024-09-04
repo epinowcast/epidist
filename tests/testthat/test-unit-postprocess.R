@@ -32,7 +32,7 @@ test_that("predict_delay_parameters accepts newdata arguments and prediction by 
   expect_named(pred_sex, c("draw", "index", "mu", "sigma", "mean", "sd"))
   expect_true(all(pred_sex$mean > 0))
   expect_true(all(pred_sex$sd > 0))
-  expect_equal(length(unique(pred_sex$index)), nrow(all_strata))
+  expect_equal(length(unique(pred_sex$index)), nrow(prep_obs_sex))
   expect_equal(length(unique(pred_sex$draw)), summary(fit_sex)$total_ndraws)
 
   pred_sex_summary <- pred_sex |>
