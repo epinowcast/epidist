@@ -259,7 +259,7 @@ fit_sex <- epidist(
 )
 ```
 
-A summary of the model shows that males tend to have longer delays (the posterior mean of `sexM` is `r signif(summary(fit_sex)$fixed[3, "Estimate"], 3)`) and greater delay variation (the posterior mean of `sigma_sexM` is `r signif(summary(fit_sex)$fixed[4, "Estimate"], 3)`):
+A summary of the model shows that males tend to have longer delays (the posterior mean of `sexM` is `r round(summary(fit_sex)$fixed[3, "Estimate"], 2)`) and greater delay variation (the posterior mean of `sigma_sexM` is `r round(summary(fit_sex)$fixed[4, "Estimate"], 2)`):
 
 ```{r}
 summary(fit_sex)
