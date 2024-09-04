@@ -1,5 +1,4 @@
-#' Draws from the posterior predictive distribution of the `latent_lognormal`
-#' family
+#' Draws from the posterior predictive distribution of the `latent_gamma` family
 #'
 #' See [brms::posterior_predict()].
 #'
@@ -9,9 +8,9 @@
 #' @family postprocess
 #' @autoglobal
 #' @export
-posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_length_linter
+posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu", i = i)
-  sigma <- brms::get_dpar(prep, "sigma", i = i)
+  shape <- brms::get_dpar(prep, "shape", i = i)
 
   obs_t <- prep$data$vreal1[i]
   pwindow_width <- prep$data$vreal2[i]
@@ -22,7 +21,7 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
     # while loop to impose the truncation
     while (d_censored > obs_t) {
       p_latent <- runif(1, 0, 1) * pwindow_width
-      d_latent <- rlnorm(1, meanlog = mu[s], sdlog = sigma[s])
+      d_latent <- rgamma(1, shape = shape[s], scale = mu[s] / shape[s])
       s_latent <- p_latent + d_latent
       p_censored <- floor_mult(p_latent, pwindow_width)
       s_censored <- floor_mult(s_latent, swindow_width)
@@ -44,10 +43,9 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
 #' @family postprocess
 #' @autoglobal
 #' @export
-posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_linter
+posterior_epred_latent_gamma <- function(prep) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu")
-  sigma <- brms::get_dpar(prep, "sigma")
-  exp(mu + sigma^2 / 2)
+  mu
 }
 
 #' Calculate the pointwise log likelihood of the `latent_gamma` family
@@ -59,17 +57,14 @@ posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_lin
 #' @family postprocess
 #' @autoglobal
 #' @export
-log_lik_latent_lognormal <- function(i, prep) {
+log_lik_latent_gamma <- function(i, prep) {
   mu <- brms::get_dpar(prep, "mu", i = i)
-  sigma <- brms::get_dpar(prep, "sigma", i = i)
+  shape <- brms::get_dpar(prep, "shape", i = i)
   y <- prep$data$Y[i]
   obs_t <- prep$data$vreal1[i]
   pwindow_width <- prep$data$vreal2[i]
   swindow_width <- prep$data$vreal3[i]
 
-  # Generates values of the swindow_raw and pwindow_raw, but really these should
-  # be extracted from prep or the fitted raws somehow. See:
-  # https://github.com/epinowcast/epidist/issues/267
   swindow_raw <- runif(prep$ndraws)
   pwindow_raw <- runif(prep$ndraws)
 
@@ -84,7 +79,7 @@ log_lik_latent_lognormal <- function(i, prep) {
 
   d <- y - pwindow + swindow
   obs_time <- obs_t - pwindow
-  lpdf <- dlnorm(d, meanlog = mu, sdlog = sigma, log = TRUE)
-  lcdf <- plnorm(obs_time, meanlog = mu, sdlog = sigma, log.p = TRUE)
+  lpdf <- dgamma(d, shape = shape, scale = mu / shape, log = TRUE)
+  lcdf <- pgamma(obs_time, shape = shape, scale = mu / shape, log.p = TRUE)
   return(lpdf - lcdf)
 }
