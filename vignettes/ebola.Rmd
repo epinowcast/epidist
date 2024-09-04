@@ -295,8 +295,8 @@ brms::ranef(fit_sex_district)
 ## Posterior expectations
 
 To go beyond simple summaries of the fitted model, we recommend using the `tidybayes` package.
-For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid` function in combination with the `tidybayes::add_epred_draws` function.
-The `tidybayes::add_epred_draws` function uses the `posterior_epred_latent_lognormal` function implemented in `epidist` for the `latent_lognormal` custom `brms` family.
+For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws*(` function.
+The `tidybayes::add_epred_draws()` function uses the `posterior_epred_latent_lognormal` function implemented in `epidist` for the `latent_lognormal` custom `brms` family.
 First, for the model with no stratification (Figure \@ref(fig:epred-base)):
 
 ```{r}
@@ -376,7 +376,7 @@ epred_draws_sex_district |>
 
 ## Linear predictor posteriors
 
-The `tidybayes` package also allows users to generate draws of the linear predictors for all distributional parameters using `tidybayes::add_linpred_draws`.
+The `tidybayes` package also allows users to generate draws of the linear predictors for all distributional parameters using `tidybayes::add_linpred_draws()`.
 For example, for the `mu` parameter in the sex-district stratified model:
 
 ```{r}
