@@ -16,7 +16,7 @@ test_that("posterior_predict_latent_lognormal errors for i out of bounds", { # n
   )
   prep <- brms::prepare_predictions(fit)
   i_out_of_bounds <- length(prep$data$Y) + 1
-  expect_error(posterior_predict_latent_lognormal(prep, i = i_out_of_bounds))
+  expect_error(posterior_predict_latent_lognormal(i = i_out_of_bounds, prep))
 })
 
 test_that("posterior_predict_latent_lognormal can generate predictions with no censoring", { # nolint: line_length_linter.
