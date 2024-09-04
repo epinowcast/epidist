@@ -51,6 +51,7 @@ set.seed(1)
 
 library(epidist)
 library(data.table)
+library(dplyr)
 library(purrr)
 library(ggplot2)
 library(sf)
@@ -73,8 +74,8 @@ The columns of the data are the individuals name (retracted, and hence can be re
 
 ```{r}
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
-  dplyr::select(-name) |>
-  dplyr::mutate(case = as.integer(id), .keep = "unused")
+  select(-name) |>
+  mutate(case = as.integer(id), .keep = "unused")
 
 head(sierra_leone_ebola_data)
 
@@ -90,7 +91,7 @@ We can see that the start time and course of the epidemic varies between distric
 
 ```{r ebola-outbreak, fig.cap="(ref:ebola-outbreak)", fig.height=9}
 sierra_leone_ebola_data |>
-  dplyr::filter(case %% fraction == 0) |>
+  filter(case %% fraction == 0) |>
   ggplot() +
   geom_segment(
     aes(
@@ -113,11 +114,11 @@ These shapefiles were obtained from the Database of Global Administrative Areas 
 ```{r message=FALSE, warning=FALSE}
 sf <- sf::st_read("../inst/gadm41_SLE_shp/gadm41_SLE_2.shp", quiet = TRUE)
 
-sierra_leone_ebola_data_sf <- dplyr::select(sf, district = NAME_2, geometry) |>
-  dplyr::left_join(
+sierra_leone_ebola_data_sf <- select(sf, district = NAME_2, geometry) |>
+  left_join(
     sierra_leone_ebola_data |>
-      dplyr::group_by(district) |>
-      dplyr::summarise(cases = dplyr::n())
+      group_by(district) |>
+      summarise(cases = n())
   )
 ```
 
@@ -149,13 +150,13 @@ We also transform the `data.frame` to a `data.table`.
 
 ```{r}
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
-  dplyr::mutate(
+  mutate(
     date_of_symptom_onset = lubridate::ymd(date_of_symptom_onset),
     date_of_sample_tested = lubridate::ymd(date_of_sample_tested),
     ptime = as.numeric(date_of_symptom_onset - min(date_of_symptom_onset)),
     stime = as.numeric(date_of_sample_tested - min(date_of_symptom_onset))
   ) |>
-  dplyr::select(case, ptime, stime, age, sex, district) |>
+  select(case, ptime, stime, age, sex, district) |>
   data.table::as.data.table()
 ```
 
@@ -299,7 +300,7 @@ First, for the model with no stratification (Figure \@ref(fig:epred-base)):
 epred_draws <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(NA) |>
-  dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
+  mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
   add_epred_draws(fit, dpar = TRUE)
 ```
 
@@ -320,7 +321,7 @@ Next, for the sex stratified model, we illustrate the higher mean of men as comp
 (newdata_sex <- obs_prep |>
    as.data.frame() |>
    modelr::data_grid(sex) |>
-   dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA))
+   mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA))
 
 epred_draws_sex <- tidybayes::add_epred_draws(newdata_sex, fit_sex, dpar = TRUE)
 ```
@@ -329,8 +330,8 @@ epred_draws_sex <- tidybayes::add_epred_draws(newdata_sex, fit_sex, dpar = TRUE)
 
 ```{r epred-sex, fig.cap="(ref:epred-sex)"}
 epred_draws_sex |>
-  dplyr::mutate(
-    sex = dplyr::case_when(
+  mutate(
+    sex = case_when(
       sex == "F" ~ "Female",
       sex == "M" ~ "Male"
     )
@@ -349,7 +350,7 @@ Part of the issue is that some sex-district strata have quite limited data.
 epred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex, district) |>
-  dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
+  mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
   add_epred_draws(fit_sex_district, dpar = TRUE)
 ```
 
@@ -357,8 +358,8 @@ epred_draws_sex_district <- obs_prep |>
 
 ```{r epred-sex-district, fig.cap="(ref:epred-sex-district)"}
 epred_draws_sex_district |>
-  dplyr::mutate(
-    sex = dplyr::case_when(
+  mutate(
+    sex = case_when(
       sex == "F" ~ "Female",
       sex == "M" ~ "Male"
     )
@@ -379,7 +380,7 @@ For example, for the `mu` parameter in the sex-district stratified model:
 linpred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex, district) |>
-  dplyr::mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
+  mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
   add_linpred_draws(fit_sex_district, dpar = TRUE)
 ```
 
@@ -387,8 +388,8 @@ linpred_draws_sex_district <- obs_prep |>
 
 ```{r linpred-sex-district, fig.cap="(ref:linpred-sex-district)"}
 linpred_draws_sex_district |>
-  dplyr::mutate(
-    sex = dplyr::case_when(
+  mutate(
+    sex = case_when(
       sex == "F" ~ "Female",
       sex == "M" ~ "Male"
     )
@@ -414,7 +415,7 @@ No stratification:
 ```{r}
 newdata_pmf <- obs_prep |>
   as.data.frame() |>
-  dplyr::mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
+  mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
 
 draws_pmf <- predicted_draws(fit, newdata = newdata_pmf, ndraws = 1000)
 
@@ -430,7 +431,7 @@ Stratification by sex:
 newdata_sex_pmf <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex) |>
-  dplyr::mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
+  mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
 
 draws_sex_pmf <- predicted_draws(
   fit_sex,
@@ -439,8 +440,8 @@ draws_sex_pmf <- predicted_draws(
 )
 
 draws_sex_pmf |>
-  dplyr::mutate(
-    sex = dplyr::case_when(
+  mutate(
+    sex = case_when(
       sex == "F" ~ "Female",
       sex == "M" ~ "Male"
     )
@@ -458,7 +459,7 @@ Stratification by sex-district:
 newdata_sex_district_pmf <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex, district) |>
-  dplyr::mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
+  mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
 
 draws_sex_district_pmf <- predicted_draws(
   fit_sex_district,
@@ -467,8 +468,8 @@ draws_sex_district_pmf <- predicted_draws(
 )
 
 draws_sex_district_pmf |>
-  dplyr::mutate(
-    sex = dplyr::case_when(
+  mutate(
+    sex = case_when(
       sex == "F" ~ "Female",
       sex == "M" ~ "Male"
     )
@@ -491,7 +492,7 @@ No stratification:
 ```{r}
 newdata_pdf <- obs_prep |>
   as.data.frame() |>
-  dplyr::mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
+  mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
 
 draws_pdf <- predicted_draws(fit, newdata = newdata_pdf, ndraws = 1000)
 
@@ -507,7 +508,7 @@ Stratification by sex:
 newdata_sex_pdf <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex) |>
-  dplyr::mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
+  mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
 
 draws_sex_pdf <- predicted_draws(
   fit_sex,
@@ -516,8 +517,8 @@ draws_sex_pdf <- predicted_draws(
 )
 
 draws_sex_pmf |>
-  dplyr::mutate(
-    sex = dplyr::case_when(
+  mutate(
+    sex = case_when(
       sex == "F" ~ "Female",
       sex == "M" ~ "Male"
     )
@@ -535,7 +536,7 @@ Stratification by sex:
 newdata_sex_district_pdf <- obs_prep |>
   as.data.frame() |>
   modelr::data_grid(sex, district) |>
-  dplyr::mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
+  mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
 
 draws_sex_district_pdf <- predicted_draws(
   fit_sex_district,
@@ -544,8 +545,8 @@ draws_sex_district_pdf <- predicted_draws(
 )
 
 draws_sex_district_pdf |>
-  dplyr::mutate(
-    sex = dplyr::case_when(
+  mutate(
+    sex = case_when(
       sex == "F" ~ "Female",
       sex == "M" ~ "Male"
     )
@@ -608,7 +609,7 @@ How does this `rvars` stuff work?
 obs_prep |>
   as.data.frame() |>
   add_predicted_rvars(fit) |>
-  dplyr::select(.prediction) |>
+  select(.prediction) |>
   head()
 ```
 
