@@ -2,7 +2,7 @@
 % Please edit documentation in R/latent_lognormal.R
 \name{log_lik_latent_lognormal}
 \alias{log_lik_latent_lognormal}
-\title{Calculate the pointwise log likelihood}
+\title{Calculate the pointwise log likelihood of the \code{latent_gamma} family}
 \usage{
 log_lik_latent_lognormal(i, prep)
 }
@@ -21,8 +21,11 @@ Other postprocess:
 \code{\link{add_mean_sd.gamma_samples}()},
 \code{\link{add_mean_sd.lognormal_samples}()},
 \code{\link{draws_to_long}()},
+\code{\link{log_lik_latent_gamma}()},
 \code{\link{make_relative_to_truth}()},
+\code{\link{posterior_epred_latent_gamma}()},
 \code{\link{posterior_epred_latent_lognormal}()},
+\code{\link{posterior_predict_latent_gamma}()},
 \code{\link{posterior_predict_latent_lognormal}()},
 \code{\link{predict_delay_parameters}()},
 \code{\link{summarise_draws}()},
