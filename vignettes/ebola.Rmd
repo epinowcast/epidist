@@ -112,7 +112,10 @@ To create a map, we first join the Ebola data to shapefiles for the districts of
 These shapefiles were obtained from the Database of Global Administrative Areas ([GADM](https://gadm.org/)).
 
 ```{r message=FALSE, warning=FALSE}
-sf <- sf::st_read("../inst/gadm41_SLE_shp/gadm41_SLE_2.shp", quiet = TRUE)
+sf <- sf::st_read(
+  system.file("gadm41_SLE_shp/gadm41_SLE_2.shp", package = "epidist"),
+  quiet = TRUE
+)
 
 sierra_leone_ebola_data_sf <- select(sf, district = NAME_2, geometry) |>
   left_join(
