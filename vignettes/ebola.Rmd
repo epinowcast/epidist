@@ -302,7 +302,7 @@ First, for the model with no stratification (Figure \@ref(fig:epred-base)):
 ```{r}
 epred_draws <- obs_prep |>
   as.data.frame() |>
-  modelr::data_grid(NA) |>
+  data_grid(NA) |>
   mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
   add_epred_draws(fit, dpar = TRUE)
 ```
@@ -312,7 +312,7 @@ epred_draws <- obs_prep |>
 ```{r epred-base, fig.cap="(ref:epred-base)"}
 epred_draws |>
   ggplot(aes(x = .epred)) +
-  tidybayes::stat_slab() +
+  stat_slab() +
   labs(x = "Posterior expectation of the delay", y = "") +
   theme_minimal()
 ```
@@ -323,10 +323,10 @@ Next, for the sex stratified model, we illustrate the higher mean of men as comp
 # Probably want functionality for users not to have to do this themselves
 (newdata_sex <- obs_prep |>
    as.data.frame() |>
-   modelr::data_grid(sex) |>
+   data_grid(sex) |>
    mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA))
 
-epred_draws_sex <- tidybayes::add_epred_draws(newdata_sex, fit_sex, dpar = TRUE)
+epred_draws_sex <- add_epred_draws(newdata_sex, fit_sex, dpar = TRUE)
 ```
 
 (ref:epred-sex) The fitted posterior expectation of the delay distribution for a model with sex stratification.
@@ -340,7 +340,7 @@ epred_draws_sex |>
     )
   ) |>
   ggplot(aes(x = .epred, y = sex)) +
-  tidybayes::stat_halfeye() +
+  stat_halfeye() +
   labs(x = "Posterior expectation of the delay", y = "") +
   theme_minimal()
 ```
@@ -352,7 +352,7 @@ Part of the issue is that some sex-district strata have quite limited data.
 ```{r}
 epred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
-  modelr::data_grid(sex, district) |>
+  data_grid(sex, district) |>
   mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
   add_epred_draws(fit_sex_district, dpar = TRUE)
 ```
@@ -368,7 +368,7 @@ epred_draws_sex_district |>
     )
   ) |>
   ggplot(aes(x = .epred, y = district)) +
-  tidybayes::stat_pointinterval() +
+  stat_pointinterval() +
   facet_grid(. ~ sex) +
   labs(x = "Posterior expectation of the delay", y = "") +
   theme_minimal()
@@ -376,13 +376,13 @@ epred_draws_sex_district |>
 
 ## Linear predictor posteriors
 
-The `tidybayes` package also allows users to generate draws of the linear predictors for all distributional parameters using `add_linpred_draws`.
+The `tidybayes` package also allows users to generate draws of the linear predictors for all distributional parameters using `tidybayes::add_linpred_draws`.
 For example, for the `mu` parameter in the sex-district stratified model:
 
 ```{r}
 linpred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
-  modelr::data_grid(sex, district) |>
+  data_grid(sex, district) |>
   mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
   add_linpred_draws(fit_sex_district, dpar = TRUE)
 ```
@@ -398,7 +398,7 @@ linpred_draws_sex_district |>
     )
   ) |>
   ggplot(aes(x = mu, y = district)) +
-  tidybayes::stat_pointinterval() +
+  stat_pointinterval() +
   facet_grid(. ~ sex) +
   labs(x = "Posterior of the mu linear predictor", y = "") +
   theme_minimal()
@@ -433,7 +433,7 @@ Stratification by sex:
 ```{r}
 newdata_sex_pmf <- obs_prep |>
   as.data.frame() |>
-  modelr::data_grid(sex) |>
+  data_grid(sex) |>
   mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
 
 draws_sex_pmf <- predicted_draws(
@@ -461,7 +461,7 @@ Stratification by sex-district:
 ```{r}
 newdata_sex_district_pmf <- obs_prep |>
   as.data.frame() |>
-  modelr::data_grid(sex, district) |>
+  data_grid(sex, district) |>
   mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1)
 
 draws_sex_district_pmf <- predicted_draws(
@@ -510,7 +510,7 @@ Stratification by sex:
 ```{r}
 newdata_sex_pdf <- obs_prep |>
   as.data.frame() |>
-  modelr::data_grid(sex) |>
+  data_grid(sex) |>
   mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
 
 draws_sex_pdf <- predicted_draws(
@@ -538,7 +538,7 @@ Stratification by sex:
 ```{r}
 newdata_sex_district_pdf <- obs_prep |>
   as.data.frame() |>
-  modelr::data_grid(sex, district) |>
+  data_grid(sex, district) |>
   mutate(obs_t = 1000, pwindow_upr = 0.001, swindow_upr = 0.001)
 
 draws_sex_district_pdf <- predicted_draws(
