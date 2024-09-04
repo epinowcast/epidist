@@ -614,16 +614,4 @@ summary(fit_sex_gamma)
   * Age: this would be a simple extension of the model
   * Time: it is less clear how appropriate it is to include time as a covariate in the model. That said, I think it is an important future direction because I expect the time point during the epidemic to be a clear confounder of delay duration. Given epidemic start time varies by district, the "district" effects in the model currently are complicated by this fact
 
-# Appendix
-
-How does this `rvars` stuff work?
-
-```{r}
-obs_prep |>
-  as.data.frame() |>
-  add_predicted_rvars(fit) |>
-  select(.prediction) |>
-  head()
-```
-
 ## Bibliography {-}
