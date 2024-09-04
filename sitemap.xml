@@ -51,6 +51,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/is_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/linelist_to_cases.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/linelist_to_counts.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/log_lik_latent_gamma.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/log_lik_latent_lognormal.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/make_relative_to_truth.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/observe_process.html</loc></url>
@@ -62,7 +63,9 @@
 <url><loc>https://epidist.epinowcast.org/reference/plot_mean_posterior_pred.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/plot_recovery.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/plot_relative_recovery.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/posterior_epred_latent_gamma.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/posterior_epred_latent_lognormal.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/posterior_predict_latent_gamma.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/posterior_predict_latent_lognormal.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/predict_delay_parameters.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/replace_prior.html</loc></url>
