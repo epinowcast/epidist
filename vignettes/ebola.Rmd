@@ -39,7 +39,7 @@ We provide the data in the `epidist` package via `?sierra_leone_ebola_data`.
 
 In analyzing this data, we demonstrate the following features of `epidist`:
 
-1. Fitting district-sex stratified delay distribution estimates.
+1. Fitting district-sex stratified partially pooled delay distribution estimates.
 2. Fitting models with lognormal and gamma delay distributions.
 3. Post-processing and plotting functionality using the integration of `brms` functionality with the [`tidybayes`](http://mjskay.github.io/tidybayes/) package.
 4. Selecting between fitted models using the [`loo`](https://mc-stan.org/loo/) package.
