@@ -81,7 +81,7 @@ fraction <- 5
 ndistrict <- length(unique(sierra_leone_ebola_data$district))
 ```
 
-Figure \@ref(fig:ebola-outbreak) shows the progression of the epidemic in each district.
+Figure \@ref(fig:ebola-outbreak) shows the dates of symptom onset and sample testing for cases across in each district.
 (In this figure, we filter down to every `r fraction`th case in order to avoid overplotting.)
 We can see that the start time and course of the epidemic varies between districts.
 
