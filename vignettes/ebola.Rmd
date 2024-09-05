@@ -217,7 +217,10 @@ Now we are ready to fit the latent individual model.
 
 ### Intercept only model
 
-We set `formula` to `brms::bf(mu ~ 1, sigma ~ 1)` to place an intercept only model on the `mu` and `sigma` parameters of the lognormal distribution.
+We start by fitting an intercept-only model, in which we fit a lognormal distribution to the overall data. 
+This model assumes that a single distribution describes all delays in the data, regardless of the case's location, sex, or any other covariates.
+
+To do this, we set `formula` to `brms::bf(mu ~ 1, sigma ~ 1)` to place an intercept only model on the `mu` and `sigma` parameters of the lognormal distribution.
 This distribution is specified using `family = "lognormal"`.
 We use the Laplace approximation via `algorithm = "laplace"` (see the approximate inference vignette) for fast model fitting.
 
