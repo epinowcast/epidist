@@ -39,10 +39,8 @@ We provide the data in the `epidist` package via `?sierra_leone_ebola_data`.
 
 In analyzing this data, we demonstrate the following features of `epidist`:
 
-1. Fitting district-sex stratified partially pooled delay distribution estimates.
-2. Fitting models with lognormal and gamma delay distributions.
-3. Post-processing and plotting functionality using the integration of `brms` functionality with the [`tidybayes`](http://mjskay.github.io/tidybayes/) package.
-4. Selecting between fitted models using the [`loo`](https://mc-stan.org/loo/) package.
+1. Fitting district-sex stratified partially pooled delay distribution estimates with a lognormal delay distribution.
+2. Post-processing and plotting functionality using the integration of `brms` functionality with the [`tidybayes`](http://mjskay.github.io/tidybayes/) package.
 
 The packages used in this article are:
 
@@ -586,47 +584,10 @@ draws_sex_district_pdf |>
   theme_minimal()
 ```
 
-## Model comparison
-
-* Use `loo` and PSIS
-* Find out if it's worth including sex as a covariate. Presumably yes given how different the delay distributions are
-* Find out if it's worth including district as a random effects
-  * What about spatially structured? Probably future work: how to include more structured random effects
-
-# Using a gamma delay distribution
-
-## Fitting 
-
-* Just fit the best model from above here?
-* Going to do the sex stratified one for now
-
-```{r}
-fit_sex_gamma <- epidist(
-  data = obs_prep,
-  formula = brms::bf(mu ~ 1 + sex, shape ~ 1 + sex),
-  family = stats::Gamma(),
-  algorithm = "laplace",
-  refresh = 0,
-  silent = 2,
-  seed = 1
-)
-
-summary(fit_sex_gamma)
-```
-
-# Model selection
-
-* Should we use the lognormal or gamma delay distribution?
-
 # Conclusion
 
 * The `epidist` package allows you to fit delay distribution models
 * These models can be stratified by covariates such as sex and district
 * You can use `tidybayes` for post-processing and prediction with fitted models
-* The likelihood family may also be specified in `epidist`
-* Model comparison may be performed via the `loo` package
-* Factors that we did not take into account in this vignette include
-  * Age: this would be a simple extension of the model
-  * Time: it is less clear how appropriate it is to include time as a covariate in the model. That said, I think it is an important future direction because I expect the time point during the epidemic to be a clear confounder of delay duration. Given epidemic start time varies by district, the "district" effects in the model currently are complicated by this fact
 
 ## Bibliography {-}
