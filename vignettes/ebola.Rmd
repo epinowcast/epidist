@@ -152,6 +152,7 @@ We also transform the `data.frame` to a `data.table`.
 ```{r}
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
   mutate(
+    # use lubridate::ymd() to drop any sub-date time info
     date_of_symptom_onset = lubridate::ymd(date_of_symptom_onset),
     date_of_sample_tested = lubridate::ymd(date_of_sample_tested),
     ptime = as.numeric(date_of_symptom_onset - min(date_of_symptom_onset)),
