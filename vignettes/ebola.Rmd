@@ -220,14 +220,14 @@ Now we are ready to fit the latent individual model.
 ### Intercept only model
 
 We set `formula` to `brms::bf(mu ~ 1, sigma ~ 1)` to place an intercept only model on the `mu` and `sigma` parameters of the lognormal distribution.
-This distribution is specified using `family = brms::lognormal()`.
+This distribution is specified using `family = "lognormal"`.
 We use the Laplace approximation via `algorithm = "laplace"` (see the approximate inference vignette) for fast model fitting.
 
 ```{r}
 fit <- epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1, sigma ~ 1),
-  family = brms::lognormal(),
+  family = "lognormal",
   algorithm = "laplace",
   refresh = 0,
   silent = 2,
@@ -251,7 +251,7 @@ To fit a model which varies `mu` and `sigma` by sex we alter the `formula` speci
 fit_sex <- epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-  family = brms::lognormal(),
+  family = "lognormal",
   algorithm = "laplace",
   refresh = 0,
   silent = 2,
@@ -277,7 +277,7 @@ fit_sex_district <- epidist(
     mu ~ 1 + sex + (1 | district),
     sigma ~ 1 + sex + (1 | district)
   ),
-  family = brms::lognormal(),
+  family = "lognormal",
   algorithm = "laplace",
   refresh = 0,
   silent = 2,
