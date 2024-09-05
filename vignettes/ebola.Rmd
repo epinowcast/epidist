@@ -199,6 +199,7 @@ subsample <- 0.2
 
 For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values^[It should be a relatively simple extension to allow for missing data in the model.]).
 As well, to speed up computation, we take a random `r 100 * subsample`% subsample of the complete data.
+(In a real analysis, we'd recommend using all the available data).
 
 ```{r}
 set.seed(1)
