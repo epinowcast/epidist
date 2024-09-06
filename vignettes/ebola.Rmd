@@ -153,7 +153,8 @@ sierra_leone_ebola_data <- sierra_leone_ebola_data |>
     # use lubridate::ymd() to drop any sub-date time info
     date_of_symptom_onset = lubridate::ymd(date_of_symptom_onset),
     date_of_sample_tested = lubridate::ymd(date_of_sample_tested),
-    # ptime and stime represent the number of days elapsed since the earliest date of symptom onset in the data
+    # ptime and stime represent the number of days elapsed since the earliest
+    # date of symptom onset in the data
     ptime = as.numeric(date_of_symptom_onset - min(date_of_symptom_onset)),
     stime = as.numeric(date_of_sample_tested - min(date_of_symptom_onset))
   ) |>
@@ -192,7 +193,8 @@ n <- nrow(obs_cens)
 obs_cens <- obs_cens[complete.cases(obs_cens)]
 n_complete <- nrow(obs_cens)
 n_complete / n
-obs_cens <- obs_cens[sample(seq_len(.N), n_complete * subsample, replace = FALSE)]
+obs_cens <-
+  obs_cens[sample(seq_len(.N), n_complete * subsample, replace = FALSE)]
 ```
 
 To prepare the data for use with the latent individual model, we use the function `as_latent_individual`:
