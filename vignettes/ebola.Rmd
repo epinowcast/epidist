@@ -462,92 +462,69 @@ pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
 ### Continuous probability density function
 
 The posterior predictive distribution under no truncation and no censoring.
-That is to produce continuous delay times.
-
-No stratification (Figure \@ref(fig:pdf)):
+That is to produce continuous delay times (Figure \@ref(fig:pdf)):
 
 ```{r}
-newdata_pdf <- obs_prep |>
+draws_pdf <- obs_prep |>
   as.data.frame() |>
-  mutate(obs_t = 1000, pwindow_upr = 0, swindow_upr = 0)
+  mutate(obs_t = 1000, pwindow_upr = 0, swindow_upr = 0) |>
+  add_predicted_draws(fit, ndraws = 1000)
 
-draws_pdf <- predicted_draws(fit, newdata = newdata_pdf, ndraws = 1000)
+pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
+  geom_density() +
+  labs(x = "", y = "", title = "Intercept-only", tag = "A") +
+  scale_x_continuous(limits = c(0, 30)) +
+  theme_minimal()
+
+draws_sex_pdf <- obs_prep |>
+  as.data.frame() |>
+  data_grid(sex) |>
+  mutate(obs_t = 1000, pwindow_upr = 0, swindow_upr = 0) |>
+  add_predicted_draws(fit_sex, ndraws = 1000)
+
+pdf_sex_figure <- draws_sex_pdf |>
+  mutate(
+    sex = case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male"
+    )
+  ) |>
+  ggplot(aes(x = .prediction)) +
+  geom_density() +
+  labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
+  facet_grid(. ~ sex) +
+  scale_x_continuous(limits = c(0, 30)) +
+  theme_minimal()
+
+draws_sex_district_pdf <- obs_prep |>
+  as.data.frame() |>
+  data_grid(sex, district) |>
+  mutate(obs_t = 1000, pwindow_upr = 0, swindow_upr = 0) |>
+  add_predicted_draws(fit_sex_district, ndraws = 1000)
+
+pdf_sex_district_figure <- draws_sex_district_pdf |>
+  mutate(
+    sex = case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male"
+    )
+  ) |>
+  ggplot(aes(x = .prediction)) +
+  geom_density() +
+  labs(
+    x = "PDF with no censoring and no truncation", y = "",
+    title = "Sex-district-stratified", tag = "C"
+  ) +
+  facet_grid(district ~ sex) +
+  scale_x_continuous(limits = c(0, 30)) +
+  theme_minimal()
 ```
 
 (ref:pdf) Figure caption.
 
-```{r pdf, fig.cap="(ref:pdf)"}
-ggplot(draws_pdf, aes(x = .prediction)) +
-  geom_density() +
-  labs(x = "PDF with no censoring and no truncation", y = "") +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
-```
-
-Stratification by sex (Figure \@ref(fig:pdf-sex)):
-
-```{r}
-newdata_sex_pdf <- obs_prep |>
-  as.data.frame() |>
-  data_grid(sex) |>
-  mutate(obs_t = 1000, pwindow_upr = 0, swindow_upr = 0)
-
-draws_sex_pdf <- predicted_draws(
-  fit_sex,
-  newdata = newdata_sex_pdf,
-  ndraws = 1000
-)
-```
-
-(ref:pdf-sex) Figure caption.
-
-```{r pdf-sex, fig.cap="(ref:pdf-sex)"}
-draws_sex_pmf |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
-  ggplot(aes(x = .prediction)) +
-  geom_density() +
-  labs(x = "PDF with no censoring and no truncation", y = "") +
-  facet_grid(. ~ sex) +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
-```
-
-Stratification by sex-district (Figure \@ref(fig:pdf-sex-district)):
-
-```{r}
-newdata_sex_district_pdf <- obs_prep |>
-  as.data.frame() |>
-  data_grid(sex, district) |>
-  mutate(obs_t = 1000, pwindow_upr = 0, swindow_upr = 0)
-
-draws_sex_district_pdf <- predicted_draws(
-  fit_sex_district,
-  newdata = newdata_sex_district_pdf,
-  ndraws = 1000
-)
-```
-
-(ref:pdf-sex-district) Figure caption.
-
-```{r pdf-sex-district, fig.cap="(ref:pdf-sex-district)", fig.height = 9}
-draws_sex_district_pdf |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
-  ggplot(aes(x = .prediction)) +
-  geom_density() +
-  labs(x = "PDF with no censoring and no truncation", y = "") +
-  facet_grid(district ~ sex) +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
+```{r pdf, fig.cap="(ref:pdf)", fig.height = 9}
+pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
+  plot_layout(heights = c(1, 1.5, 3))
 ```
 
 # Conclusion
