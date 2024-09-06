@@ -250,7 +250,9 @@ fit_sex <- epidist(
 )
 ```
 
-A summary of the model shows that males tend to have longer delays (the posterior mean of `sexM` is `r round(summary(fit_sex)$fixed[3, "Estimate"], 2)`) and greater delay variation (the posterior mean of `sigma_sexM` is `r round(summary(fit_sex)$fixed[4, "Estimate"], 2)`):
+A summary of the model shows that males tend to have longer delays (the posterior mean of `sexM` is `r round(summary(fit_sex)$fixed[3, "Estimate"], 2)`) and greater delay variation (the posterior mean of `sigma_sexM` is `r round(summary(fit_sex)$fixed[4, "Estimate"], 2)`).
+For the `sexM` effect, the 95% credible interval is greater than zero, whereas for the `sigma_sexM` effect the 95% credible interval includes zero.
+It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.
 
 ```{r}
 summary(fit_sex)
@@ -286,7 +288,7 @@ brms::ranef(fit_sex_district)
 ## Posterior expectations
 
 To go beyond simple summaries of the fitted model, we recommend using the `tidybayes` package.
-For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws*(` function.
+For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws()` function.
 The `tidybayes::add_epred_draws()` function uses the `posterior_epred_latent_lognormal` function implemented in `epidist` for the `latent_lognormal` custom `brms` family.
 First, for the model with no stratification (Figure \@ref(fig:epred-base)):
 
