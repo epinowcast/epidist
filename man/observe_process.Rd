@@ -10,7 +10,21 @@ observe_process(linelist)
 \item{linelist}{...}
 }
 \description{
-Observation process for primary and secondary events
+This function adds columns to linelist data representing an observation
+process with daily primary and secondary censoring, as well as right
+truncation. The columns added are:
+\itemize{
+\item \code{ptime_daily}: The floor of \code{ptime}
+\item \code{ptime_lwr}: The lower bound of \code{ptime}. Equal to \code{ptime_daily}
+\item \code{ptime_upr}: The upper bound of \code{ptime}. Equal to \code{ptime_lwr + 1}
+\item \code{stime_daily}: The floor of \code{stime}
+\item \code{stime_lwr}: The lower bound of \code{stime}. Equal to \code{stime_daily}
+\item \code{stime_upr}: The upper bound of \code{stime}. Equal to \code{stime_lwr + 1}
+\item \code{delay_daily}: Given by \code{stime_daily - ptime_daily}
+\item \code{delay_lwr}: Given by \code{delay_daily - 1} (or 0 if \code{delay_daily < 1})
+\item \code{delay_upr}: Given by \code{delay_daily + 1}
+\item \code{obs_at}: The maximum value of \code{stime}
+}
 }
 \seealso{
 Other observe: 
