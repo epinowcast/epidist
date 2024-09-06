@@ -175,19 +175,6 @@ Next, we use `observe_process()` to add interval censoring columns giving the lo
 obs_cens <- epidist::observe_process(sierra_leone_ebola_data)
 ```
 
-Specially, the columns added by `observe_process` are:
-
-* `ptime_daily`: As the `ptime` was already daily then this is superfluous
-* `ptime_lwr`: The lower bound on the primary observation time i.e. the floor of `ptime_daily`
-* `ptime_upr`: The upper bound on the primary observation time i.e. `ptime_lwr + 1`
-* `stime_daily`: As the `ptime` was already daily then this is superfluous
-* `stime_lwr`: The lower bound on the secondary observation time i.e. the floor of `stime_daily`
-* `stime_upr`: The upper bound on the secondary observation time i.e. `stime_lwr + 1`
-* `delay_daily`: Is given by `stime_daily - ptime_daily`
-* `delay_lwr`: Is given by `stime_lwr - ptime_upr` i.e. the minimum possible delay
-* `delay_upr`: Is given by `stime_upr - ptime_lwr` i.e. the maximum possible delay
-* `obs_at`: The maximum value of `stime`
-
 ## Model fitting
 
 Now we are ready to fit lognormal delay distributions to the data!
@@ -224,14 +211,14 @@ We start by fitting an intercept-only model, in which we fit a lognormal distrib
 This model assumes that a single distribution describes all delays in the data, regardless of the case's location, sex, or any other covariates.
 
 To do this, we set `formula` to `brms::bf(mu ~ 1, sigma ~ 1)` to place an intercept only model on the `mu` and `sigma` parameters of the lognormal distribution.
-This distribution is specified using `family = "lognormal"`.
+This distribution is specified using `family = brms::lognormal()`.
 We use the Laplace approximation via `algorithm = "laplace"` (see the approximate inference vignette) for fast model fitting.
 
 ```{r}
 fit <- epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1, sigma ~ 1),
-  family = "lognormal",
+  family = brms::lognormal(),
   algorithm = "laplace",
   refresh = 0,
   silent = 2,
@@ -255,7 +242,7 @@ To fit a model which varies `mu` and `sigma` by sex we alter the `formula` speci
 fit_sex <- epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-  family = "lognormal",
+  family = brms::lognormal(),
   algorithm = "laplace",
   refresh = 0,
   silent = 2,
@@ -281,7 +268,7 @@ fit_sex_district <- epidist(
     mu ~ 1 + sex + (1 | district),
     sigma ~ 1 + sex + (1 | district)
   ),
-  family = "lognormal",
+  family = brms::lognormal(),
   algorithm = "laplace",
   refresh = 0,
   silent = 2,
