@@ -236,7 +236,7 @@ summary(fit)
 
 ### Sex-stratified model
 
-To fit a model which varies `mu` and `sigma` by sex we alter the `formula` specification to include fixed effects for sex as follows:
+To fit a model which varies the parameters of the fitted lognormal distribution, `mu` and `sigma`, by sex we alter the `formula` specification to include fixed effects for sex as follows:
 
 ```{r}
 fit_sex <- epidist(
