@@ -351,7 +351,7 @@ epred_sex_district_figure <- epred_draws_sex_district |>
 
 (ref:epred) The fitted posterior expectations of the delay distribution for each model.
 
-```{r linpred-sex-district, fig.cap="(ref:epred)", fig.height = 8}
+```{r epred, fig.cap="(ref:epred)", fig.height = 8}
 epred_base_figure / epred_sex_figure / epred_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 2.5))
 ```
