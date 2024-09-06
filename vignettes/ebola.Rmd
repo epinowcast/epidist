@@ -30,9 +30,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-The 2014-2016 outbreak of Ebola in West Africa began in Guinea, and quickly spread to neighbouring Liberia and Sierra Leone.
-It was the largest outbreak in the disease's history, and resulted in over 28,600 infections and 11,325 deaths [@who_ebola_2014_2016].
-
+The 2014-2016 outbreak of Ebola in West Africa was the largest outbreak in the disease's history, and resulted in over 28,600 infections and 11,325 deaths [@who_ebola_2014_2016].
 In this vignette, we use the `epidist` package to analyze line list data from the outbreak in Sierra Leone.
 This data was collated by @fang2016transmission.
 We provide the data in the `epidist` package via `?sierra_leone_ebola_data`.
