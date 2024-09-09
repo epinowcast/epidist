@@ -369,7 +369,7 @@ linpred_draws_sex_district <- obs_prep |>
   add_linpred_draws(fit_sex_district, dpar = TRUE)
 ```
 
-(ref:linpred-sex-district) The posterior distribution of the linear predictor of `mu` parameter within the sex-district stratified model. The posterior expectations in Section \@ref(sec:posterior-expectation) are a function of both the `mu` linear predictor posterior distribution and `sigma` linear predictor posterior distribution.
+(ref:linpred-sex-district) The posterior distribution of the linear predictor of `mu` parameter within the sex-district stratified model. The posterior expectations in Section \@ref(posterior-expectation) are a function of both the `mu` linear predictor posterior distribution and `sigma` linear predictor posterior distribution.
 
 ```{r linpred-sex-district, fig.cap="(ref:linpred-sex-district)"}
 linpred_draws_sex_district |>
