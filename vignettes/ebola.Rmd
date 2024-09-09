@@ -30,11 +30,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-The 2014-2016 outbreak of Ebola in West Africa was the largest outbreak in the disease's history, and resulted in over 28,600 infections and 11,325 deaths [@who_ebola_2014_2016].
-In this vignette, we use the `epidist` package to analyze line list data from the outbreak in Sierra Leone.
-This data was collated by @fang2016transmission.
+In this vignette, we use the `epidist` package to analyze line list data from the 2014-2016 outbreak of Ebola in Sierra Leone [@who_ebola_2014_2016].
+These data were collated by @fang2016transmission.
 We provide the data in the `epidist` package via `?sierra_leone_ebola_data`.
-
 In analyzing this data, we demonstrate the following features of `epidist`:
 
 1. Fitting district-sex stratified partially pooled delay distribution estimates with a lognormal delay distribution.
@@ -43,7 +41,7 @@ In analyzing this data, we demonstrate the following features of `epidist`:
 The packages used in this article are:
 
 ```{r load-requirements}
-set.seed(1)
+set.seed(123)
 
 library(epidist)
 library(data.table)
@@ -56,7 +54,7 @@ library(modelr)
 library(patchwork)
 ```
 
-Note that, for users new to `epidist`, before reading this article we recommend beginning with the vignette "[Getting started with `epidist`](http://epidist.epinowcast.org/articles/epidist.html)".
+For users new to `epidist`, before reading this article we recommend beginning with the "[Getting started with `epidist`](http://epidist.epinowcast.org/articles/epidist.html)" vignette.
 
 # Data preparation
 
@@ -82,7 +80,7 @@ ndistrict <- length(unique(sierra_leone_ebola_data$district))
 
 Figure \@ref(fig:ebola-outbreak) shows the dates of symptom onset and sample testing for cases across in each district.
 (In this figure, we filter down to every `r fraction`th case in order to avoid overplotting.)
-We can see that the start time and course of the epidemic varies between districts.
+We can see that the start time and course of the epidemic varies across districts.
 
 (ref:ebola-outbreak) Primary and secondary event times for every `r fraction`th case, over the `r ndistrict` districts of Sierra Leone.
 
@@ -138,15 +136,15 @@ ggplot(sierra_leone_ebola_data_sf, aes(fill = cases, geometry = geometry)) +
 # Fitting sex-district stratified delay distributions
 
 To understand the delay between time of symptom onset and time of sample testing, we fit a range of statistical models using the `epidist` package.
-In some of these models, we vary the parameters of the delay distribution by sex or by district.
-For the lognormal delay distribution, which we begin by focusing on, these parameters are the mean and standard deviation of the underlying normal distribution.
-That is, $\mu$ and $\sigma$ such that when $x \sim \mathcal{N}(\mu, \sigma)$ that $\exp(x)$ has a lognormal distribution.
+In some models, we vary the parameters of the delay distribution by sex or by district.
+For the lognormal delay distribution these parameters are the mean and standard deviation of the underlying normal distribution.
+That is, $\mu$ and $\sigma$ such that when $x \sim \mathcal{N}(\mu, \sigma)$ then $\exp(x)$ has a lognormal distribution.
 
 ## Data preparation
 
 To prepare the data, we begin by transforming the date columns to `ptime` and `stime` columns for the times of the primary and secondary events respectively.
 Both of these columns are relative to the first date of symptom onset in the data.
-We also transform the `data.frame` to a `data.table`.
+We also transform the `data.frame` to a `data.table`:
 
 ```{r}
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
@@ -161,47 +159,48 @@ sierra_leone_ebola_data <- sierra_leone_ebola_data |>
   ) |>
   select(case, ptime, stime, age, sex, district) |>
   data.table::as.data.table()
-```
 
-The data now looks like:
-
-```{r}
 head(sierra_leone_ebola_data)
 ```
 
-Next, we use `observe_process()` to add interval censoring columns giving the lower and upper bounds on the primary and secondary event times.
+Next, we use `observe_process()` to add interval censoring columns giving the lower and upper bounds on the primary and secondary event times:
 
 ```{r}
 obs_cens <- epidist::observe_process(sierra_leone_ebola_data)
+
+head(obs_cens)
 ```
 
-## Model fitting
+For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values^[It should be a relatively simple extension to allow for missing data in the model.]).
 
-Now we are ready to fit lognormal delay distributions to the data!
-First, we start with a simple model that assumes the same delay distribution for all cases.
+```{r}
+n <- nrow(obs_cens)
+obs_cens <- obs_cens[complete.cases(obs_cens)]
+n_complete <- nrow(obs_cens)
+```
+
+Here, `r round(100 * n_complete / n)`% of the cases were complete.
 
 ```{r}
 subsample <- 0.2
 ```
 
-For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values^[It should be a relatively simple extension to allow for missing data in the model.]).
-As well, to speed up computation, we take a random `r 100 * subsample`% subsample of the complete data.
+Additionally, to speed up computation, we take a random `r 100 * subsample`% subsample of the complete data.
 (In a real analysis, we'd recommend using all the available data).
 
 ```{r}
-set.seed(1)
-n <- nrow(obs_cens)
-obs_cens <- obs_cens[complete.cases(obs_cens)]
-n_complete <- nrow(obs_cens)
-n_complete / n
 obs_cens <-
   obs_cens[sample(seq_len(.N), n_complete * subsample, replace = FALSE)]
 ```
+
+## Model fitting
 
 To prepare the data for use with the latent individual model, we use the function `as_latent_individual`:
 
 ```{r}
 obs_prep <- as_latent_individual(obs_cens)
+
+head(obs_prep)
 ```
 
 Now we are ready to fit the latent individual model.
@@ -210,17 +209,15 @@ Now we are ready to fit the latent individual model.
 
 We start by fitting a single lognormal distribution to the data. 
 This model assumes that a single distribution describes all delays in the data, regardless of the case's location, sex, or any other covariates.
-
-To do this, we set `formula` to `brms::bf(mu ~ 1, sigma ~ 1)` to place an intercept-only model on the `mu` and `sigma` parameters of the lognormal distribution.
+To do this, we set `formula = brms::bf(mu ~ 1, sigma ~ 1)` to place an model with only and intercept parameter (i.e. `~ 1` in R formula syntax) on the `mu` and `sigma` parameters of the lognormal distribution.
 This distribution is specified using `family = brms::lognormal()`.
-We use the Laplace approximation via `algorithm = "laplace"` (see the approximate inference vignette) for fast model fitting.
 
 ```{r}
 fit <- epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1, sigma ~ 1),
   family = brms::lognormal(),
-  algorithm = "laplace",
+  algorithm = "sampling",
   refresh = 0,
   silent = 2,
   seed = 1
@@ -237,14 +234,14 @@ summary(fit)
 
 ### Sex-stratified model
 
-To fit a model which varies the parameters of the fitted lognormal distribution, `mu` and `sigma`, by sex we alter the `formula` specification to include fixed effects for sex as follows:
+To fit a model which varies the parameters of the fitted lognormal distribution, `mu` and `sigma`, by sex we alter the `formula` specification to include fixed effects for sex `~ 1 + sex` as follows:
 
 ```{r}
 fit_sex <- epidist(
   data = obs_prep,
   formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
   family = brms::lognormal(),
-  algorithm = "laplace",
+  algorithm = "sampling",
   refresh = 0,
   silent = 2,
   seed = 1
@@ -262,7 +259,8 @@ summary(fit_sex)
 ### Sex-district stratified model
 
 Finally, we will fit a model which also varies by district.
-To do this, we will use district level random effects, assumed to be drawn from a shared normal distribution, within the model for both the `mu` and `sigma` parameters:
+To do this, we will use district level random effects, assumed to be drawn from a shared normal distribution, within the model for both the `mu` and `sigma` parameters.
+These random effects are specified by including `(1 | district)` in the formulas:
 
 ```{r}
 fit_sex_district <- epidist(
@@ -272,28 +270,28 @@ fit_sex_district <- epidist(
     sigma ~ 1 + sex + (1 | district)
   ),
   family = brms::lognormal(),
-  algorithm = "laplace",
+  algorithm = "sampling",
   refresh = 0,
   silent = 2,
   seed = 1
 )
 ```
 
-Along with looking at the `summary`, we may also use the `brms::ranef` function to look at the estimates of the random effects:
+For this model, along with looking at the `summary`, we may also use the `brms::ranef` function to look at the estimates of the random effects:
 
 ```{r}
 summary(fit_sex_district)
 brms::ranef(fit_sex_district)
 ```
 
-## Posterior expectations
+## Posterior expectations {#posterior-expectation}
 
-To go beyond simple summaries of the fitted model, we recommend using the `tidybayes` package.
+To go further than summaries of the fitted model, we recommend using the `tidybayes` package.
 For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws()` function.
 The `tidybayes::add_epred_draws()` function uses the `posterior_epred_latent_lognormal` function implemented in `epidist` for the `latent_lognormal` custom `brms` family.
 
-In Figure \@ref(epred) we show the posterior expectation of the delay distribution for each of the three fitted models.
-Figure \@ref(pred)B illustrates the higher mean of men as compared with women.
+In Figure \@ref(fig:epred) we show the posterior expectation of the delay distribution for each of the three fitted models.
+Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with women.
 
 ```{r}
 epred_draws <- obs_prep |>
@@ -346,6 +344,7 @@ epred_sex_district_figure <- epred_draws_sex_district |>
     x = "Posterior expectation of the delay", y = "",
     title = "Sex-district-stratified", tag = "C"
   ) +
+  scale_y_discrete(limits = rev) +
   theme_minimal()
 ```
 
@@ -369,7 +368,7 @@ linpred_draws_sex_district <- obs_prep |>
   add_linpred_draws(fit_sex_district, dpar = TRUE)
 ```
 
-(ref:linpred-sex-district) The posterior distribution of the linear predictor of `mu` parameter within the sex-district stratified model.
+(ref:linpred-sex-district) The posterior distribution of the linear predictor of `mu` parameter within the sex-district stratified model. The posterior expectations in Section \@ref(sec:posterior-expectation) are a function of both the `mu` linear predictor posterior distribution and `sigma` linear predictor posterior distribution.
 
 ```{r linpred-sex-district, fig.cap="(ref:linpred-sex-district)"}
 linpred_draws_sex_district |>
@@ -383,18 +382,20 @@ linpred_draws_sex_district |>
   stat_pointinterval() +
   facet_grid(. ~ sex) +
   labs(x = "Posterior of the mu linear predictor", y = "") +
+  scale_y_discrete(limits = rev) +
   theme_minimal()
 ```
 
-## Delay probability mass functions
+## Delay posterior distributions
 
 Posterior predictions of the delay distribution are an important output of an analysis with the `epidist` package.
 In this section, we demonstrate how to produce either a discrete probability mass function representation, or continuous probability density function representation of the delay distribution.
 
 ### Discrete probability mass function
 
-The posterior predictive distribution under no truncation but daily censoring.
-Omitting all delays greater than 30, then (Figure \@ref(fig:pmf)):
+To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
+To do this, we set each of `pwindow_upr` and `swindow_upr` to 1 for daily censoring, and `obs_t` to 1000 for no censoring.
+Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure.
 
 ```{r}
 draws_pmf <- obs_prep |>
@@ -452,7 +453,7 @@ pmf_sex_district_figure <- draws_sex_district_pmf |>
   theme_minimal()
 ```
 
-(ref:pmf) Figure caption.
+(ref:pmf) Posterior predictions of the discrete probability mass function for each of the fitted models.
 
 ```{r pmf, fig.cap="(ref:pmf)", fig.height = 9}
 pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
@@ -520,7 +521,7 @@ pdf_sex_district_figure <- draws_sex_district_pdf |>
   theme_minimal()
 ```
 
-(ref:pdf) Figure caption.
+(ref:pdf) Posterior predictions of the continuous probability density function for each of the fitted models.
 
 ```{r pdf, fig.cap="(ref:pdf)", fig.height = 9}
 pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
@@ -529,8 +530,9 @@ pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
 
 # Conclusion
 
-* The `epidist` package allows you to fit delay distribution models
-* These models can be stratified by covariates such as sex and district
-* You can use `tidybayes` for post-processing and prediction with fitted models
+In this vignette, we demonstrate how the `epidist` package can be used to fit delay distribution models.
+These models can be stratified by covariates such as sex and district using fixed and random effects.
+Post-processing and prediction with fitted models is possible using the `tidybayes` package.
+We illustrate generating posterior expectations, the posteriors of linear predictors, as well as discrete and continuous representations of the delay distribution.
 
 ## Bibliography {-}
