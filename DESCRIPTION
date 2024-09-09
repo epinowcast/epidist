@@ -30,7 +30,6 @@ Imports:
     data.table,
     ggplot2,
     purrr,
-    ggridges,
     stats,
     cli,
     checkmate,
