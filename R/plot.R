@@ -1,23 +1,3 @@
-#' Plot the posterior estimates as densities
-#'
-#' @param data ...
-#' @param alpha ...
-#' @param quantiles ...
-#' @param ... ...
-#' @family plot
-#' @export
-plot_recovery <- function(data, alpha = 0.8,
-                          quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {
-  data |>
-    ggplot() +
-    aes(x = value, ...) +
-    ggridges::geom_density_ridges(
-      scale = 1.5, alpha = alpha, quantile_lines = TRUE,
-      quantiles = quantiles
-    ) +
-    theme_bw()
-}
-
 #' Plot the relative difference between true values and posterior estimates
 #'
 #' @param relative_data ...
