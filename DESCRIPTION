@@ -49,7 +49,10 @@ Suggests:
     tidyr,
     posterior,
     fs,
-    tidybayes
+    sf,
+    tidybayes,
+    modelr,
+    patchwork
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
