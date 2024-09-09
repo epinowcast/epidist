@@ -199,6 +199,7 @@ To prepare the data for use with the latent individual model, we use the functio
 
 ```{r}
 obs_prep <- as_latent_individual(obs_cens)
+head(obs_prep)
 
 head(obs_prep)
 ```
