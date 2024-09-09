@@ -46,27 +46,6 @@ utils::globalVariables(c(
   "censored_obs_time", # <pad_zero>
   "delay_lwr", # <pad_zero>
   "delay_daily", # <pad_zero>
-  "delay_daily", # <calculate_cohort_mean>
-  "ptime_daily", # <calculate_cohort_mean>
-  "n", # <calculate_cohort_mean>
-  "obs_horizon", # <calculate_truncated_means>
-  "meanlog", # <calculate_truncated_means>
-  "sdlog", # <calculate_truncated_means>
-  "value", # <plot_relative_recovery>
-  "rel_value", # <plot_relative_recovery>
-  "case_type", # <plot_cases_by_obs_window>
-  "time", # <plot_cases_by_obs_window>
-  "obs_at", # <plot_cases_by_obs_window>
-  "delay_daily", # <plot_empirical_delay>
-  "density", # <plot_empirical_delay>
-  "obs_at", # <plot_empirical_delay>
-  "dlnorm", # <plot_empirical_delay>
-  "cohort", # <plot_censor_delay>
-  "lwr", # <plot_censor_delay>
-  "upr", # <plot_censor_delay>
-  "ptime_daily", # <plot_mean_posterior_pred>
-  "n", # <plot_mean_posterior_pred>
-  "obs_horizon", # <plot_mean_posterior_pred>
   "true_value", # <make_relative_to_truth>
   "value", # <make_relative_to_truth>
   "rel_value", # <make_relative_to_truth>
