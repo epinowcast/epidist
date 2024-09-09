@@ -51,7 +51,8 @@ Suggests:
     fs,
     sf,
     tidybayes,
-    modelr
+    modelr,
+    patchwork
 Remotes:
     stan-dev/cmdstanr,
     Rdatatable/data.table,
