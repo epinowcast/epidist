@@ -16,6 +16,8 @@ navbar:
     articles:
       text: Articles
       menu:
+      - text: Advanced features with Ebola data
+        href: articles/ebola.html
       - text: Approximate Bayesian inference
         href: articles/approx-inference.html
 
