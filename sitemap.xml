@@ -15,8 +15,6 @@
 <url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.lognormal_samples.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/as_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/calculate_censor_delay.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/calculate_cohort_mean.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/calculate_truncated_means.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/combine_obs.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/construct_cases_by_obs_window.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/draws_to_long.html</loc></url>
@@ -57,13 +55,6 @@
 <url><loc>https://epidist.epinowcast.org/reference/make_relative_to_truth.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/observe_process.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/pad_zero.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/plot_cases_by_obs_window.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/plot_censor_delay.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/plot_cohort_mean.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/plot_empirical_delay.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/plot_mean_posterior_pred.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/plot_recovery.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/plot_relative_recovery.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/posterior_epred_latent_gamma.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/posterior_epred_latent_lognormal.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/posterior_predict_latent_gamma.html</loc></url>
