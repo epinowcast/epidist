@@ -1,23 +1,3 @@
-#' Plot the relative difference between true values and posterior estimates
-#'
-#' @param relative_data ...
-#' @param alpha ...
-#' @param quantiles ...
-#' @param ... ...
-#' @family plot
-#' @autoglobal
-#' @export
-plot_relative_recovery <- function(relative_data, alpha = 0.8,
-                                   quantiles = c(0.05, 0.35, 0.65, 0.95), ...) {
-  relative_data |>
-    plot_recovery(
-      data = copy(relative_data)[, value := rel_value],
-      alpha = alpha, quantiles = quantiles, ...
-    ) +
-    geom_vline(xintercept = 1, linetype = 2, size = 1.05, alpha = 0.8) +
-    labs(x = "Relative value")
-}
-
 #' Plot cases by observation window
 #'
 #' @param cases ...
