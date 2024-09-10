@@ -6,9 +6,8 @@
 #' @param i The index of the observation to predict
 #' @param prep The result of a call to [brms::posterior_predict()]
 #' @param ... Additional arguments
-#' @family postprocess
 #' @autoglobal
-#' @export
+#' @noRd
 posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu", i = i)
   sigma <- brms::get_dpar(prep, "sigma", i = i)
@@ -41,9 +40,8 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
 #' See [brms::posterior_epred()].
 #'
 #' @param prep The result of a call to [`brms::prepare_predictions`]
-#' @family postprocess
 #' @autoglobal
-#' @export
+#' @noRd
 posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu")
   sigma <- brms::get_dpar(prep, "sigma")
@@ -56,9 +54,8 @@ posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_lin
 #'
 #' @param i The index of the observation to calculate the log likelihood of
 #' @param prep The result of a call to [brms::prepare_predictions()]
-#' @family postprocess
 #' @autoglobal
-#' @export
+#' @noRd
 log_lik_latent_lognormal <- function(i, prep) {
   mu <- brms::get_dpar(prep, "mu", i = i)
   sigma <- brms::get_dpar(prep, "sigma", i = i)
