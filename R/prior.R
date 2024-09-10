@@ -2,7 +2,7 @@
 #' family specific priors, and user provided priors
 #'
 #' This function obtains the `brms` default prior distributions for a particular
-#' model, then uses [replace_prior()] to update the prior distributions using:
+#' model, then replaces these prior distributions using:
 #' 1. Model specific prior distributions from [epidist_model_prior()]
 #' 2. Family specific prior distributions from [epidist_family_prior()]
 #' 3. User provided prior distributions
