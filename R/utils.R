@@ -6,8 +6,7 @@
 #' @param path The path within the `stan/` folder of the installed `epidist`
 #' package to the Stan code chunk of interest.
 #' @return A character string containing the Stan code chunk of interest.
-#' @family utils
-#' @export
+#' @noRd
 epidist_stan_chunk <- function(path) {
   local_path <- system.file(paste0("stan/", path), package = "epidist")
   paste(readLines(local_path), collapse = "\n")
@@ -21,8 +20,7 @@ epidist_stan_chunk <- function(path) {
 #'
 #' @return A `brms` Stan chunk containing the `epidist` package version used to
 #' build the Stan code.
-#' @family utils
-#' @export
+#' @noRd
 epidist_version_stanvar <- function() {
   version <- utils::packageVersion("epidist")
   comment <- paste0("// code chunks used from epidist ", version, "\n")
@@ -39,7 +37,7 @@ epidist_version_stanvar <- function() {
 #' @param x A number to be rounded down
 #' @param f A positive number specifying the multiple to be rounded down to
 #' @importFrom checkmate assert_numeric
-#' @family utils
+#' @noRd
 floor_mult <- function(x, f = 1) {
   checkmate::assert_numeric(f, lower = 0)
   ifelse(f == 0, x, floor(x / f) * f)
