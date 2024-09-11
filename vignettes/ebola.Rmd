@@ -168,7 +168,6 @@ Next, we use `observe_process()` to add interval censoring columns giving the lo
 
 ```{r}
 obs_cens <- observe_process(sierra_leone_ebola_data)
-
 head(obs_cens)
 ```
 
@@ -200,8 +199,6 @@ To prepare the data for use with the latent individual model, we use the functio
 
 ```{r}
 obs_prep <- as_latent_individual(obs_cens)
-head(obs_prep)
-
 head(obs_prep)
 ```
 
