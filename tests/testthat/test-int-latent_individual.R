@@ -97,17 +97,20 @@ test_that("epidist.epidist_latent_individual fit and the MCMC converges when set
   expect_convergence(fit_constant)
 })
   
-test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles with family as a string", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles with lognormal family as a string", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
-  mod_string <- epidist(
+  stancode_string <- epidist(
     data = prep_obs,
     family = "lognormal",
     seed = 1,
     silent = 2,
     output_dir = fs::dir_create(tempfile()),
     fn = brms::make_stancode
+  )
+  mod_string <- cmdstanr::cmdstan_model(
+    stan_file = cmdstanr::write_stan_file(stancode_string), compile = FALSE
   )
   expect_true(mod_string$check_syntax())
   expect_no_error(mod_string$compile())
