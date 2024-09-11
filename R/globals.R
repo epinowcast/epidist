@@ -12,12 +12,12 @@ utils::globalVariables(c(
   "obs_t", # <as_latent_individual.data.frame>
   "obs_at", # <as_latent_individual.data.frame>
   "ptime_lwr", # <as_latent_individual.data.frame>
-  "pwindow_upr", # <as_latent_individual.data.frame>
+  "pwindow", # <as_latent_individual.data.frame>
   "stime_lwr", # <as_latent_individual.data.frame>
   "ptime_upr", # <as_latent_individual.data.frame>
   "stime_upr", # <as_latent_individual.data.frame>
   "woverlap", # <as_latent_individual.data.frame>
-  "swindow_upr", # <as_latent_individual.data.frame>
+  "swindow", # <as_latent_individual.data.frame>
   "delay_central", # <as_latent_individual.data.frame>
   "row_id", # <as_latent_individual.data.frame>
   "woverlap", # <epidist_stancode.epidist_latent_individual>
