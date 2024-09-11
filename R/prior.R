@@ -23,7 +23,7 @@ epidist_prior <- function(data, family, formula, prior) {
   default <- brms::default_prior(formula, data = data)
   model <- epidist_model_prior(data, formula)
   family <-  epidist_family_prior(family, formula)
-  prior <- Reduce(replace_prior, list(default, model, family, prior))
+  prior <- Reduce(.replace_prior, list(default, model, family, prior))
   return(prior)
 }
 

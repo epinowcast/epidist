@@ -7,7 +7,7 @@
 #' package to the Stan code chunk of interest.
 #' @return A character string containing the Stan code chunk of interest.
 #' @keywords internal
-stan_chunk <- function(path) {
+.stan_chunk <- function(path) {
   local_path <- system.file(paste0("stan/", path), package = "epidist")
   paste(readLines(local_path), collapse = "\n")
 }
@@ -21,7 +21,7 @@ stan_chunk <- function(path) {
 #' @return A `brms` Stan chunk containing the `epidist` package version used to
 #' build the Stan code.
 #' @keywords internal
-version_stanvar <- function() {
+.version_stanvar <- function() {
   version <- utils::packageVersion("epidist")
   comment <- paste0("// code chunks used from epidist ", version, "\n")
   brms::stanvar(scode = comment, block = "functions")
@@ -38,7 +38,7 @@ version_stanvar <- function() {
 #' @param f A positive number specifying the multiple to be rounded down to
 #' @importFrom checkmate assert_numeric
 #' @keywords internal
-floor_mult <- function(x, f = 1) {
+.floor_mult <- function(x, f = 1) {
   checkmate::assert_numeric(f, lower = 0)
   ifelse(f == 0, x, floor(x / f) * f)
 }
@@ -58,7 +58,7 @@ floor_mult <- function(x, f = 1) {
 #' @importFrom dplyr full_join filter select all_of
 #' @autoglobal
 #' @keywords internal
-replace_prior <- function(old_prior, new_prior) {
+.replace_prior <- function(old_prior, new_prior) {
   if (is.null(new_prior)) {
     return(old_prior)
   }

@@ -24,8 +24,8 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
       p_latent <- runif(1, 0, 1) * pwindow_width
       d_latent <- rlnorm(1, meanlog = mu[s], sdlog = sigma[s])
       s_latent <- p_latent + d_latent
-      p_censored <- floor_mult(p_latent, pwindow_width)
-      s_censored <- floor_mult(s_latent, swindow_width)
+      p_censored <- .floor_mult(p_latent, pwindow_width)
+      s_censored <- .floor_mult(s_latent, swindow_width)
       d_censored <- s_censored - p_censored
     }
     return(d_censored)

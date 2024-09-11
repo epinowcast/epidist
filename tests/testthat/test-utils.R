@@ -1,6 +1,27 @@
-test_that("floor_mult works as expected, including with one and zero as f", { # nolint: line_length_linter.
-  expect_equal(floor_mult(1.5, 0.2), 1.4)
-  expect_equal(floor_mult(1.5, 1), floor(1.5))
-  expect_equal(floor_mult(1.5, 0), 1.5)
-  expect_error(floor_mult(1.5, -1))
+test_that(".floor_mult works as expected, including with one and zero as f", { # nolint: line_length_linter.
+  expect_equal(.floor_mult(1.5, 0.2), 1.4)
+  expect_equal(.floor_mult(1.5, 1), floor(1.5))
+  expect_equal(.floor_mult(1.5, 0), 1.5)
+  expect_error(.floor_mult(1.5, -1))
+})
+
+test_that(".replace_prior successfully replaces priors", { # nolint: line_length_linter.
+  old_prior <- brms::prior("normal(0, 10)", class = "Intercept") +
+    brms::prior("normal(0, 10)", class = "Intercept", dpar = "sigma")
+  new_prior <- brms::prior("normal(0, 5)", class = "Intercept") +
+    brms::prior("normal(0, 5)", class = "Intercept", dpar = "sigma")
+  prior <- .replace_prior(old_prior, new_prior)
+  expect_equal(prior$prior, c("normal(0, 5)", "normal(0, 5)"))
+  expect_equal(nrow(prior), 2)
+  expect_s3_class(prior, "brmsprior")
+  expect_s3_class(prior, "data.frame")
+})
+
+test_that(".replace_prior errors when passed a new prior without a match in old_prior", { # nolint: line_length_linter.
+  old_prior <- brms::prior("normal(0, 10)", class = "Intercept") +
+    brms::prior("normal(0, 10)", class = "Intercept", dpar = "sigma")
+  new_prior <- brms::prior("normal(0, 5)", class = "Intercept") +
+    brms::prior("normal(0, 5)", class = "Intercept", dpar = "sigma") +
+    brms::prior("normal(0, 5)", class = "Intercept", dpar = "shape")
+  expect_error(.replace_prior(old_prior, new_prior))
 })
