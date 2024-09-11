@@ -108,7 +108,7 @@ These shapefiles were obtained from the Database of Global Administrative Areas 
 
 ```{r message=FALSE, warning=FALSE}
 sf <- sf::st_read(
-  system.file("gadm41_SLE_shp/gadm41_SLE_2.shp", package = "epidist"),
+  system.file("extdata/gadm41_SLE_shp/gadm41_SLE_2.shp", package = "epidist"),
   quiet = TRUE
 )
 
