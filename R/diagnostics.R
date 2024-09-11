@@ -40,7 +40,7 @@ epidist_diagnostics <- function(fit) {
     diagnostics <- data.table(
       "time" = sum(rstan::get_elapsed_time(fit$fit)),
       "samples" = nrow(np) / length(unique(np$Parameter)),
-      "max_rhat" = round(max(brms::rhat(fit)), 3),
+      "max_rhat" = round(max(brms::rhat(fit), na.rm = TRUE), 3),
       "divergent_transitions" = sum(np[divergent_indices, ]$Value),
       "per_divergent_transitions" = mean(np[divergent_indices, ]$Value),
       "max_treedepth" = max(np[treedepth_indices, ]$Value)
