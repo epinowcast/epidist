@@ -24,6 +24,7 @@ The code block below is provided to facilitate reproduction of this script, if r
 
 ```{r message=FALSE, results='hide', class.source='fold-hide'}
 library(epidist)
+library(brms)
 library(dplyr)
 library(ggplot2)
 library(scales)
