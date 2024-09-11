@@ -96,7 +96,7 @@ test_that("epidist.epidist_latent_individual fit and the MCMC converges when set
   expect_s3_class(fit_constant, "epidist_fit")
   expect_convergence(fit_constant)
 })
-  
+
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles with lognormal family as a string", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
