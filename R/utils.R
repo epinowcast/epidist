@@ -53,8 +53,9 @@ floor_mult <- function(x, f = 1) {
 #'
 #' @param old_prior One or more prior distributions in the class `brmsprior`
 #' @param new_prior One or more prior distributions in the class `brmsprior`
-#' @importFrom cli cli_inform
+#' @importFrom cli cli_abort
 #' @importFrom utils capture.output
+#' @importFrom dplyr full_join filter select all_of
 #' @autoglobal
 #' @keywords internal
 replace_prior <- function(old_prior, new_prior) {
