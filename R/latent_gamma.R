@@ -7,7 +7,7 @@
 #' @param ... Additional arguments
 #' @autoglobal
 #' @importFrom stats rgamma
-#' @noRd
+#' @keywords internal
 posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu", i = i)
   shape <- brms::get_dpar(prep, "shape", i = i)
@@ -41,7 +41,7 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
 #'
 #' @param prep The result of a call to [`brms::prepare_predictions`]
 #' @autoglobal
-#' @noRd
+#' @keywords internal
 posterior_epred_latent_gamma <- function(prep) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu")
   mu
@@ -55,7 +55,7 @@ posterior_epred_latent_gamma <- function(prep) { # nolint: object_length_linter
 #' @param prep The result of a call to [brms::prepare_predictions()]
 #' @autoglobal
 #' @importFrom stats dgamma pgamma
-#' @noRd
+#' @keywords internal
 log_lik_latent_gamma <- function(i, prep) {
   mu <- brms::get_dpar(prep, "mu", i = i)
   shape <- brms::get_dpar(prep, "shape", i = i)
