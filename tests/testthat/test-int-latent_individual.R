@@ -96,6 +96,22 @@ test_that("epidist.epidist_latent_individual fit and the MCMC converges when set
   expect_s3_class(fit_constant, "epidist_fit")
   expect_convergence(fit_constant)
 })
+  
+test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles with family as a string", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  skip_on_cran()
+  set.seed(1)
+  mod_string <- epidist(
+    data = prep_obs,
+    family = "lognormal",
+    seed = 1,
+    silent = 2,
+    output_dir = fs::dir_create(tempfile()),
+    fn = brms::make_stancode
+  )
+  expect_true(mod_string$check_syntax())
+  expect_no_error(mod_string$compile())
+})
 
 test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
