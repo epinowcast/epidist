@@ -81,6 +81,22 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   expect_convergence(fit)
 })
 
+test_that("epidist.epidist_latent_individual fit and the MCMC converges when setting sigma = 1 (a constant)", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  skip_on_cran()
+  set.seed(1)
+  fit_constant <- epidist(
+    data = prep_obs,
+    formula = brms::bf(mu ~ 1, sigma = 1),
+    seed = 1,
+    silent = 2,
+    output_dir = fs::dir_create(tempfile())
+  )
+  expect_s3_class(fit_constant, "brmsfit")
+  expect_s3_class(fit_constant, "epidist_fit")
+  expect_convergence(fit_constant)
+})
+
 test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()

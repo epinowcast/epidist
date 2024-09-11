@@ -90,12 +90,20 @@ epidist_family_prior.default <- function(family, formula, ...) {
 epidist_family_prior.lognormal <- function(family, formula, ...) {
   prior <- brms::prior("normal(1, 1)", class = "Intercept")
   if ("sigma" %in% names(formula$pforms)) {
-    prior <- prior +
-      brms::prior("normal(-0.7, 0.4)", class = "Intercept", dpar = "sigma")
+    # Case with a model on sigma
+    sigma_prior <- brms::prior(
+      "normal(-0.7, 0.4)", class = "Intercept", dpar = "sigma"
+    )
+  } else if ("sigma" %in% names(formula$pfix)) {
+    # Case with sigma fixed to a constant
+    sigma_prior <- NULL
   } else {
-    prior <- prior +
-      brms::prior("lognormal(-0.7, 0.4)", class = "sigma", lb = 0, ub = "NA")
+    # Case with no model on sigma
+    sigma_prior <- brms::prior(
+      "lognormal(-0.7, 0.4)", class = "sigma", lb = 0, ub = "NA"
+    )
   }
+  prior <- prior + sigma_prior
   prior$source <- "family"
   prior[is.na(prior)] <- "" # This is because brms likes empty over NA
   prior[prior == "NA"] <- NA # To keep particular NA
