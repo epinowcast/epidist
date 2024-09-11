@@ -88,12 +88,16 @@ See the section [Pathfinder Method for Approximate Bayesian Inference](https://m
 
 # Demonstration {#demo}
 
-In this demonstration, we use `epidist` alongside `ggplot2` and `dplyr`:
+In this demonstration, we use the following packages:
 
 ```{r load-requirements}
 library(epidist)
 library(ggplot2)
 library(dplyr)
+library(gt)
+library(purrr)
+library(tidyr)
+library(tibble)
 ```
 
 First, we begin by simulating data.
@@ -165,7 +169,7 @@ fits <- list(
   "Pathfinder" = fit_pathfinder
 )
 
-draws <- purrr::imap(fits, function(fit, name) {
+draws <- imap(fits, function(fit, name) {
   predict_delay_parameters(fit) |>
     draws_to_long() |>
     filter(parameter %in% c("mu", "sigma")) |>
@@ -183,11 +187,11 @@ The mean estimated value of each parameter, from each method is as follows.
 pars <- draws |>
   group_by(method, parameter) |>
   summarise(value = mean(value)) |>
-  tidyr::pivot_wider(names_from = parameter, values_from = value)
+  pivot_wider(names_from = parameter, values_from = value)
 
 pars |>
   ungroup() |>
-  gt::gt()
+  gt()
 ```
 
 More comprehensively, the estimated posterior distributions are as follows.
@@ -221,7 +225,7 @@ draws |>
 How do these different distributions on the `mu` and `sigma` parameters effect the estimated delay distribution?
 
 ```{r}
-purrr::pmap_df(
+pmap_df(
   filter(pars), ~ tibble(
     x = seq(0, 25, by = 0.1),
     method = ..1, density = dlnorm(x, ..2, ..3)
@@ -248,9 +252,9 @@ times <- list(
 )
 
 times |>
-  purrr::map_dbl("elapsed") |>
-  tibble::enframe(name = "method", value = "time (s)") |>
-  gt::gt()
+  map_dbl("elapsed") |>
+  enframe(name = "method", value = "time (s)") |>
+  gt()
 ```
 
 # Conclusion
