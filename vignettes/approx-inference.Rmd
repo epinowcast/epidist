@@ -65,7 +65,7 @@ Please check `brms` package updates if interested!
 The Laplace method approximates a posterior distribution by a Gaussian distribution centered (by default) at the posterior mode.
 In Stan, the Gaussian approximation is constructed on the unconstrained parameter space (as the domain of a Gaussian distribution is the real line).
 Samples from the Gaussian approximation may then be transformed to the constrained parameter space.
-To access the Laplace method, specify `algorithm = "laplace"` within `brms::brm`.
+To access the Laplace method, specify `algorithm = "laplace"` within `brms::brm()`.
 See the section [Laplace Sampling](https://mc-stan.org/docs/cmdstan-guide/laplace_sample_config.html) of the `CmdStan` User's Guide for more information.
 
 ## Variational inference using ADVI
