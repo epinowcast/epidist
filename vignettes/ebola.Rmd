@@ -52,6 +52,7 @@ library(sf)
 library(tidybayes)
 library(modelr)
 library(patchwork)
+library(lubridate)
 ```
 
 For users new to `epidist`, before reading this article we recommend beginning with the "[Getting started with `epidist`](http://epidist.epinowcast.org/articles/epidist.html)" vignette.
@@ -107,7 +108,7 @@ To create a map, we first join the Ebola data to shapefiles for the districts of
 These shapefiles were obtained from the Database of Global Administrative Areas ([GADM](https://gadm.org/)).
 
 ```{r message=FALSE, warning=FALSE}
-sf <- sf::st_read(
+sf <- st_read(
   system.file("gadm41_SLE_shp/gadm41_SLE_2.shp", package = "epidist"),
   quiet = TRUE
 )
@@ -150,15 +151,15 @@ We also transform the `data.frame` to a `data.table`:
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
   mutate(
     # use lubridate::ymd() to drop any sub-date time info
-    date_of_symptom_onset = lubridate::ymd(date_of_symptom_onset),
-    date_of_sample_tested = lubridate::ymd(date_of_sample_tested),
+    date_of_symptom_onset = ymd(date_of_symptom_onset),
+    date_of_sample_tested = ymd(date_of_sample_tested),
     # ptime and stime represent the number of days elapsed since the earliest
     # date of symptom onset in the data
     ptime = as.numeric(date_of_symptom_onset - min(date_of_symptom_onset)),
     stime = as.numeric(date_of_sample_tested - min(date_of_symptom_onset))
   ) |>
   select(case, ptime, stime, age, sex, district) |>
-  data.table::as.data.table()
+  as.data.table()
 
 head(sierra_leone_ebola_data)
 ```
@@ -166,7 +167,7 @@ head(sierra_leone_ebola_data)
 Next, we use `observe_process()` to add interval censoring columns giving the lower and upper bounds on the primary and secondary event times:
 
 ```{r}
-obs_cens <- epidist::observe_process(sierra_leone_ebola_data)
+obs_cens <- observe_process(sierra_leone_ebola_data)
 
 head(obs_cens)
 ```
@@ -210,14 +211,14 @@ Now we are ready to fit the latent individual model.
 
 We start by fitting a single lognormal distribution to the data. 
 This model assumes that a single distribution describes all delays in the data, regardless of the case's location, sex, or any other covariates.
-To do this, we set `formula = brms::bf(mu ~ 1, sigma ~ 1)` to place an model with only and intercept parameter (i.e. `~ 1` in R formula syntax) on the `mu` and `sigma` parameters of the lognormal distribution.
-This distribution is specified using `family = brms::lognormal()`.
+To do this, we set `formula = bf(mu ~ 1, sigma ~ 1)` to place an model with only and intercept parameter (i.e. `~ 1` in R formula syntax) on the `mu` and `sigma` parameters of the lognormal distribution.
+This distribution is specified using `family = lognormal()`.
 
 ```{r}
 fit <- epidist(
   data = obs_prep,
-  formula = brms::bf(mu ~ 1, sigma ~ 1),
-  family = brms::lognormal(),
+  formula = bf(mu ~ 1, sigma ~ 1),
+  family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
   silent = 2,
@@ -240,8 +241,8 @@ To fit a model which varies the parameters of the fitted lognormal distribution,
 ```{r}
 fit_sex <- epidist(
   data = obs_prep,
-  formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-  family = brms::lognormal(),
+  formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
+  family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
   silent = 2,
@@ -266,11 +267,11 @@ These random effects are specified by including `(1 | district)` in the formulas
 ```{r}
 fit_sex_district <- epidist(
   data = obs_prep,
-  formula = brms::bf(
+  formula = bf(
     mu ~ 1 + sex + (1 | district),
     sigma ~ 1 + sex + (1 | district)
   ),
-  family = brms::lognormal(),
+  family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
   silent = 2,
@@ -278,11 +279,11 @@ fit_sex_district <- epidist(
 )
 ```
 
-For this model, along with looking at the `summary`, we may also use the `brms::ranef` function to look at the estimates of the random effects:
+For this model, along with looking at the `summary`, we may also use the `brms::ranef()` function to look at the estimates of the random effects:
 
 ```{r}
 summary(fit_sex_district)
-brms::ranef(fit_sex_district)
+ranef(fit_sex_district)
 ```
 
 ## Posterior expectations {#posterior-expectation}
