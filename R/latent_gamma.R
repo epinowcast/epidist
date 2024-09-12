@@ -5,9 +5,9 @@
 #' @param i The index of the observation to predict
 #' @param prep The result of a call to [brms::posterior_predict()]
 #' @param ... Additional arguments
-#' @family postprocess
 #' @autoglobal
-#' @export
+#' @importFrom stats rgamma
+#' @keywords internal
 posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu", i = i)
   shape <- brms::get_dpar(prep, "shape", i = i)
@@ -23,8 +23,8 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
       p_latent <- runif(1, 0, 1) * pwindow
       d_latent <- rgamma(1, shape = shape[s], scale = mu[s] / shape[s])
       s_latent <- p_latent + d_latent
-      p_censored <- floor_mult(p_latent, pwindow)
-      s_censored <- floor_mult(s_latent, swindow)
+      p_censored <- .floor_mult(p_latent, pwindow)
+      s_censored <- .floor_mult(s_latent, swindow)
       d_censored <- s_censored - p_censored
     }
     return(d_censored)
@@ -40,9 +40,8 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
 #' See [brms::posterior_epred()].
 #'
 #' @param prep The result of a call to [`brms::prepare_predictions`]
-#' @family postprocess
 #' @autoglobal
-#' @export
+#' @keywords internal
 posterior_epred_latent_gamma <- function(prep) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu")
   mu
@@ -54,9 +53,9 @@ posterior_epred_latent_gamma <- function(prep) { # nolint: object_length_linter
 #'
 #' @param i The index of the observation to calculate the log likelihood of
 #' @param prep The result of a call to [brms::prepare_predictions()]
-#' @family postprocess
 #' @autoglobal
-#' @export
+#' @importFrom stats dgamma pgamma
+#' @keywords internal
 log_lik_latent_gamma <- function(i, prep) {
   mu <- brms::get_dpar(prep, "mu", i = i)
   shape <- brms::get_dpar(prep, "shape", i = i)
