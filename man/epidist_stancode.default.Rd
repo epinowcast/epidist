@@ -7,9 +7,9 @@
 \method{epidist_stancode}{default}(data, ...)
 }
 \arguments{
-\item{data}{A dataframe to be used for modelling.}
+\item{data}{A \code{data.frame} to be used for modelling.}
 
-\item{...}{Additional arguments for method.}
+\item{...}{Additional arguments passed to method.}
 }
 \description{
 Default method for defining model specific Stan code

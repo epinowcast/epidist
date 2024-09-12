@@ -2,28 +2,43 @@
 % Please edit documentation in R/generics.R
 \name{epidist}
 \alias{epidist}
-\title{Interface using \code{brms}}
+\title{Fit epidemiological delay distributions using a \code{brms} interface}
 \usage{
 epidist(data, formula, family, prior, backend, fn, ...)
 }
 \arguments{
-\item{data}{A dataframe to be used for modelling.}
+\item{data}{A \code{data.frame} to be used for modelling.}
 
-\item{formula}{...}
+\item{formula}{A formula object created using \code{brms::bf}. A formula must be
+provided for the distributional parameter \code{mu} common to all \code{brms} families.
+Optionally, formulas may also be provided for additional distributional
+parameters.}
 
-\item{family}{...}
+\item{family}{A description of the response distribution and link function to
+be used in the model. Every family function has a link argument allowing
+users to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details of supported families
+see \code{\link[=brmsfamily]{brmsfamily()}}.}
 
-\item{prior}{...}
+\item{prior}{One or more \code{brmsprior} objects created by \code{\link[brms:set_prior]{brms::set_prior()}}
+or related functions. These priors are passed to \code{\link[=epidist_prior]{epidist_prior()}} in the
+\code{prior} argument. We recommend caution and the use of prior predictive checks
+for specifying prior distributions.}
 
-\item{backend}{...}
+\item{backend}{Character string naming the package to use as the backend for
+fitting the Stan model. Options are \code{"rstan"} and \code{"cmdstanr"} (the default).
+This option is passed directly through to \code{fn}.}
 
-\item{fn}{Likely \code{brms::brm}. Also possible to be \code{brms::make_stancode} or
-\code{brms::make_standata}.}
+\item{fn}{The internal function to be called. By default this is \code{brms::brm},
+which performs inference for the specified model. Other options
+\code{brms::make_stancode}, which returns the Stan code for the specified model,
+and \code{brms::make_standata} which returns the data passed to Stan. These
+options may be useful for model debugging and extensions.}
 
 \item{...}{Additional arguments for method.}
 }
 \description{
-Interface using \code{brms}
+Fit epidemiological delay distributions using a \code{brms} interface
 }
 \seealso{
 Other generics: 
