@@ -14,18 +14,18 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
   sigma <- brms::get_dpar(prep, "sigma", i = i)
 
   obs_t <- prep$data$vreal1[i]
-  pwindow_width <- prep$data$vreal2[i]
-  swindow_width <- prep$data$vreal3[i]
+  pwindow <- prep$data$vreal2[i]
+  swindow <- prep$data$vreal3[i]
 
   .predict <- function(s) {
     d_censored <- obs_t + 1
     # while loop to impose the truncation
     while (d_censored > obs_t) {
-      p_latent <- runif(1, 0, 1) * pwindow_width
+      p_latent <- runif(1, 0, 1) * pwindow
       d_latent <- rlnorm(1, meanlog = mu[s], sdlog = sigma[s])
       s_latent <- p_latent + d_latent
-      p_censored <- .floor_mult(p_latent, pwindow_width)
-      s_censored <- .floor_mult(s_latent, swindow_width)
+      p_censored <- .floor_mult(p_latent, pwindow)
+      s_censored <- .floor_mult(s_latent, swindow)
       d_censored <- s_censored - p_censored
     }
     return(d_censored)
@@ -63,8 +63,8 @@ log_lik_latent_lognormal <- function(i, prep) {
   sigma <- brms::get_dpar(prep, "sigma", i = i)
   y <- prep$data$Y[i]
   obs_t <- prep$data$vreal1[i]
-  pwindow_width <- prep$data$vreal2[i]
-  swindow_width <- prep$data$vreal3[i]
+  pwindow <- prep$data$vreal2[i]
+  swindow <- prep$data$vreal3[i]
 
   # Generates values of the swindow_raw and pwindow_raw, but really these should
   # be extracted from prep or the fitted raws somehow. See:
@@ -72,11 +72,11 @@ log_lik_latent_lognormal <- function(i, prep) {
   swindow_raw <- runif(prep$ndraws)
   pwindow_raw <- runif(prep$ndraws)
 
-  swindow <- swindow_raw * swindow_width
+  swindow <- swindow_raw * swindow
 
   # For no overlap calculate as usual, for overlap ensure pwindow < swindow
   if (i %in% prep$data$noverlap) {
-    pwindow <- pwindow_raw * pwindow_width
+    pwindow <- pwindow_raw * pwindow
   } else {
     pwindow <- pwindow_raw * swindow
   }
