@@ -43,8 +43,7 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
 #' @autoglobal
 #' @keywords internal
 posterior_epred_latent_gamma <- function(prep) { # nolint: object_length_linter
-  mu <- brms::get_dpar(prep, "mu")
-  mu
+  brms::get_dpar(prep, "mu")
 }
 
 #' Calculate the pointwise log likelihood of the `latent_gamma` family
