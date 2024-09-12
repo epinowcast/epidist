@@ -23,7 +23,7 @@ test_that("posterior_predict_latent_gamma can generate predictions with no censo
   fit_gamma <- readRDS(
     system.file("extdata/fit_gamma.rds", package = "epidist")
   )
-  draws <- data.frame(obs_t = 1000, pwindow_upr = 0, swindow_upr = 0) |>
+  draws <- data.frame(obs_t = 1000, pwindow = 0, swindow = 0) |>
     tidybayes::add_predicted_draws(fit_gamma, ndraws = 100)
   expect_equal(draws$.draw, 1:100)
   pred <- draws$.prediction

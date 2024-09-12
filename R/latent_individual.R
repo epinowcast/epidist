@@ -49,13 +49,13 @@ as_latent_individual.data.frame <- function(data) {
   data <- data.table::as.data.table(data)
   data[, id := seq_len(.N)]
   data[, obs_t := obs_at - ptime_lwr]
-  data[, pwindow_upr := ifelse(
+  data[, pwindow := ifelse(
     stime_lwr < ptime_upr, ## if overlap
     stime_upr - ptime_lwr,
     ptime_upr - ptime_lwr
   )]
   data[, woverlap := as.numeric(stime_lwr < ptime_upr)]
-  data[, swindow_upr := stime_upr - stime_lwr]
+  data[, swindow := stime_upr - stime_lwr]
   data[, delay_central := stime_lwr - ptime_lwr]
   data[, row_id := seq_len(.N)]
   if (nrow(data) > 1) {
@@ -85,16 +85,16 @@ epidist_validate.epidist_latent_individual <- function(data) {
     names(data),
     must.include = c("case", "ptime_lwr", "ptime_upr",
                      "stime_lwr", "stime_upr", "obs_at",
-                     "id", "obs_t", "pwindow_upr", "woverlap",
-                     "swindow_upr", "delay_central", "row_id")
+                     "id", "obs_t", "pwindow", "woverlap",
+                     "swindow", "delay_central", "row_id")
   )
   if (nrow(data) > 1) {
     checkmate::assert_factor(data$id)
   }
   checkmate::assert_numeric(data$obs_t, lower = 0)
-  checkmate::assert_numeric(data$pwindow_upr, lower = 0)
+  checkmate::assert_numeric(data$pwindow, lower = 0)
   checkmate::assert_numeric(data$woverlap, lower = 0)
-  checkmate::assert_numeric(data$swindow_upr, lower = 0)
+  checkmate::assert_numeric(data$swindow, lower = 0)
   checkmate::assert_numeric(data$delay_central, lower = 0)
   checkmate::assert_integer(data$row_id, lower = 0)
 }
@@ -157,7 +157,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
   formula <- brms:::validate_formula(formula, data = data, family = family)
 
   formula <- stats::update(
-    formula, delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ .
+    formula, delay_central | vreal(obs_t, pwindow, swindow) ~ .
   )
 
   # Using this here for checking purposes
