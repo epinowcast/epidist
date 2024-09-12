@@ -18,7 +18,7 @@ epidist_prior(data, family, formula, prior)
 }
 \description{
 This function obtains the \code{brms} default prior distributions for a particular
-model, then uses \code{\link[=replace_prior]{replace_prior()}} to update the prior distributions using:
+model, then replaces these prior distributions using:
 \enumerate{
 \item Model specific prior distributions from \code{\link[=epidist_model_prior]{epidist_model_prior()}}
 \item Family specific prior distributions from \code{\link[=epidist_family_prior]{epidist_family_prior()}}

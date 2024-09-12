@@ -81,12 +81,18 @@ utils::globalVariables(c(
   "stime", # <calculate_censor_delay>
   "stime_daily", # <calculate_censor_delay>
   "ptime_daily", # <event_to_incidence>
+<<<<<<< HEAD
 >>>>>>> 6cfdf1dc (Run document())
   "rlnorm", # <simulate_secondary>
   ":=", # <simulate_secondary>
+=======
+>>>>>>> fa998bc1 (Resolve R check notes)
   "delay", # <simulate_secondary>
   ".N", # <simulate_secondary>
   "stime", # <simulate_secondary>
   "ptime", # <simulate_secondary>
+  "prior_old", # <replace_prior>
+  "prior_new", # <replace_prior>
+  "source_new", # <replace_prior>
   NULL
 ))

@@ -55,6 +55,7 @@ floor_mult <- function(x, f = 1) {
 #' @param new_prior One or more prior distributions in the class `brmsprior`
 #' @importFrom cli cli_inform
 #' @importFrom utils capture.output
+#' @autoglobal
 #' @noRd
 replace_prior <- function(old_prior, new_prior) {
   if (is.null(new_prior)) {
