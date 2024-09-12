@@ -72,7 +72,13 @@ The columns of the data are the individuals name (retracted, and hence can be re
 ```{r}
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
   select(-name) |>
-  mutate(case = as.integer(id), .keep = "unused")
+  mutate(
+    case = as.integer(id), .keep = "unused",
+    sex = case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male"
+    )
+  )
 
 head(sierra_leone_ebola_data)
 
@@ -248,8 +254,8 @@ fit_sex <- epidist(
 )
 ```
 
-A summary of the model shows that males tend to have longer delays (the posterior mean of `sexM` is `r round(summary(fit_sex)$fixed[3, "Estimate"], 2)`) and greater delay variation (the posterior mean of `sigma_sexM` is `r round(summary(fit_sex)$fixed[4, "Estimate"], 2)`).
-For the `sexM` effect, the 95% credible interval is greater than zero, whereas for the `sigma_sexM` effect the 95% credible interval includes zero.
+A summary of the model shows that males tend to have longer delays (the posterior mean of `sexMale` is `r round(summary(fit_sex)$fixed[3, "Estimate"], 2)`) and greater delay variation (the posterior mean of `sigma_sexMale` is `r round(summary(fit_sex)$fixed[4, "Estimate"], 2)`).
+For the `sexMale` effect, the 95% credible interval is greater than zero, whereas for the `sigma_sexMale` effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.
 
 ```{r}
@@ -313,12 +319,6 @@ epred_draws_sex <- obs_prep |>
   add_epred_draws(fit_sex, dpar = TRUE)
 
 epred_sex_figure <- epred_draws_sex |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .epred, y = sex)) +
   stat_halfeye() +
   labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
@@ -331,12 +331,6 @@ epred_draws_sex_district <- obs_prep |>
   add_epred_draws(fit_sex_district, dpar = TRUE)
 
 epred_sex_district_figure <- epred_draws_sex_district |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .epred, y = district)) +
   stat_pointinterval() +
   facet_grid(. ~ sex) +
@@ -372,12 +366,6 @@ linpred_draws_sex_district <- obs_prep |>
 
 ```{r linpred-sex-district, fig.cap="(ref:linpred-sex-district)"}
 linpred_draws_sex_district |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = mu, y = district)) +
   stat_pointinterval() +
   facet_grid(. ~ sex) +
@@ -416,12 +404,6 @@ draws_sex_pmf <- obs_prep |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pmf_sex_figure <- draws_sex_pmf |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
   labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
@@ -436,12 +418,6 @@ draws_sex_district_pmf <- obs_prep |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pmf_sex_district_figure <- draws_sex_district_pmf |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
   labs(
@@ -484,12 +460,6 @@ draws_sex_pdf <- obs_prep |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pdf_sex_figure <- draws_sex_pdf |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .prediction)) +
   geom_density() +
   labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
@@ -504,12 +474,6 @@ draws_sex_district_pdf <- obs_prep |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pdf_sex_district_figure <- draws_sex_district_pdf |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .prediction)) +
   geom_density() +
   labs(
