@@ -284,14 +284,14 @@ We also transform the <code>data.frame</code> to a <code>data.table</code>:</p>
 <span><span class="co">#&gt; 4:         142       142       143           4         3         5    483</span></span>
 <span><span class="co">#&gt; 5:         221       221       222           4         3         5    483</span></span>
 <span><span class="co">#&gt; 6:         163       163       164           6         5         7    483</span></span>
-<span><span class="co">#&gt;        id obs_t pwindow_upr woverlap swindow_upr delay_central row_id</span></span>
-<span><span class="co">#&gt;    &lt;fctr&gt; &lt;num&gt;       &lt;num&gt;    &lt;num&gt;       &lt;num&gt;         &lt;num&gt;  &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1:      1   375           1        0           1             3      1</span></span>
-<span><span class="co">#&gt; 2:      2   294           1        0           1             8      2</span></span>
-<span><span class="co">#&gt; 3:      3   372           1        0           1             6      3</span></span>
-<span><span class="co">#&gt; 4:      4   345           1        0           1             4      4</span></span>
-<span><span class="co">#&gt; 5:      5   266           1        0           1             4      5</span></span>
-<span><span class="co">#&gt; 6:      6   326           1        0           1             6      6</span></span></code></pre></div>
+<span><span class="co">#&gt;        id obs_t pwindow woverlap swindow delay_central row_id</span></span>
+<span><span class="co">#&gt;    &lt;fctr&gt; &lt;num&gt;   &lt;num&gt;    &lt;num&gt;   &lt;num&gt;         &lt;num&gt;  &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1:      1   375       1        0       1             3      1</span></span>
+<span><span class="co">#&gt; 2:      2   294       1        0       1             8      2</span></span>
+<span><span class="co">#&gt; 3:      3   372       1        0       1             6      3</span></span>
+<span><span class="co">#&gt; 4:      4   345       1        0       1             4      4</span></span>
+<span><span class="co">#&gt; 5:      5   266       1        0       1             4      5</span></span>
+<span><span class="co">#&gt; 6:      6   326       1        0       1             6      6</span></span></code></pre></div>
 <p>Now we are ready to fit the latent individual model.</p>
 <div class="section level4" number="2.2.1">
 <h4 id="intercept-only-model">
@@ -318,7 +318,7 @@ For example, we may use <code>summary</code> to view information about the fitte
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: latent_lognormal </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
-<span><span class="co">#&gt; Formula: delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ 1 </span></span>
+<span><span class="co">#&gt; Formula: delay_central | vreal(obs_t, pwindow, swindow) ~ 1 </span></span>
 <span><span class="co">#&gt;          sigma ~ 1</span></span>
 <span><span class="co">#&gt;    Data: data (Number of observations: 1390) </span></span>
 <span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
@@ -355,7 +355,7 @@ It is important to note that the estimates represent an average of the observed 
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_sex</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: latent_lognormal </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
-<span><span class="co">#&gt; Formula: delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ sex </span></span>
+<span><span class="co">#&gt; Formula: delay_central | vreal(obs_t, pwindow, swindow) ~ sex </span></span>
 <span><span class="co">#&gt;          sigma ~ 1 + sex</span></span>
 <span><span class="co">#&gt;    Data: data (Number of observations: 1390) </span></span>
 <span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
@@ -397,7 +397,7 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_sex_district</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: latent_lognormal </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
-<span><span class="co">#&gt; Formula: delay_central | vreal(obs_t, pwindow_upr, swindow_upr) ~ sex + (1 | district) </span></span>
+<span><span class="co">#&gt; Formula: delay_central | vreal(obs_t, pwindow, swindow) ~ sex + (1 | district) </span></span>
 <span><span class="co">#&gt;          sigma ~ 1 + sex + (1 | district)</span></span>
 <span><span class="co">#&gt;    Data: data (Number of observations: 1390) </span></span>
 <span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
@@ -471,7 +471,7 @@ Figure <a href="#fig:epred">2.1</a>B illustrates the higher mean of men as compa
 <code class="sourceCode R"><span><span class="va">epred_draws</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="cn">NA</span>, pwindow_upr <span class="op">=</span> <span class="cn">NA</span>, swindow_upr <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">fit</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred_base_figure</span> <span class="op">&lt;-</span> <span class="va">epred_draws</span> <span class="op">|&gt;</span></span>
@@ -483,7 +483,7 @@ Figure <a href="#fig:epred">2.1</a>B illustrates the higher mean of men as compa
 <span><span class="va">epred_draws_sex</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="cn">NA</span>, pwindow_upr <span class="op">=</span> <span class="cn">NA</span>, swindow_upr <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">fit_sex</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred_sex_figure</span> <span class="op">&lt;-</span> <span class="va">epred_draws_sex</span> <span class="op">|&gt;</span></span>
@@ -495,7 +495,7 @@ Figure <a href="#fig:epred">2.1</a>B illustrates the higher mean of men as compa
 <span><span class="va">epred_draws_sex_district</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="cn">NA</span>, pwindow_upr <span class="op">=</span> <span class="cn">NA</span>, swindow_upr <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred_sex_district_figure</span> <span class="op">&lt;-</span> <span class="va">epred_draws_sex_district</span> <span class="op">|&gt;</span></span>
@@ -529,7 +529,7 @@ For example, for the <code>mu</code> parameter in the sex-district stratified mo
 <code class="sourceCode R"><span><span class="va">linpred_draws_sex_district</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="cn">NA</span>, pwindow_upr <span class="op">=</span> <span class="cn">NA</span>, swindow_upr <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_linpred_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
@@ -558,12 +558,12 @@ In this section, we demonstrate how to produce either a discrete probability mas
 <span class="header-section-number">2.5.1</span> Discrete probability mass function<a class="anchor" aria-label="anchor" href="#discrete-probability-mass-function"></a>
 </h4>
 <p>To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
-To do this, we set each of <code>pwindow_upr</code> and <code>swindow_upr</code> to 1 for daily censoring, and <code>obs_t</code> to 1000 for no censoring.
+To do this, we set each of <code>pwindow</code> and <code>swindow</code> to 1 for daily censoring, and <code>obs_t</code> to 1000 for no censoring.
 Figure <a href="#fig:pmf">2.3</a> shows the result, where the few delays greater than 30 are omitted from the figure.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">draws_pmf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow_upr <span class="op">=</span> <span class="fl">1</span>, swindow_upr <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pmf_base_figure</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">draws_pmf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.prediction</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -575,7 +575,7 @@ Figure <a href="#fig:pmf">2.3</a> shows the result, where the few delays greater
 <span><span class="va">draws_sex_pmf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow_upr <span class="op">=</span> <span class="fl">1</span>, swindow_upr <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pmf_sex_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_pmf</span> <span class="op">|&gt;</span></span>
@@ -589,7 +589,7 @@ Figure <a href="#fig:pmf">2.3</a> shows the result, where the few delays greater
 <span><span class="va">draws_sex_district_pmf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow_upr <span class="op">=</span> <span class="fl">1</span>, swindow_upr <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pmf_sex_district_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_district_pmf</span> <span class="op">|&gt;</span></span>
@@ -622,7 +622,7 @@ That is to produce continuous delay times (Figure <a href="#fig:pdf">2.4</a>):</
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">draws_pdf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow_upr <span class="op">=</span> <span class="fl">0</span>, swindow_upr <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">0</span>, swindow <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pdf_base_figure</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">draws_pdf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.prediction</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -634,7 +634,7 @@ That is to produce continuous delay times (Figure <a href="#fig:pdf">2.4</a>):</
 <span><span class="va">draws_sex_pdf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow_upr <span class="op">=</span> <span class="fl">0</span>, swindow_upr <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">0</span>, swindow <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pdf_sex_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_pdf</span> <span class="op">|&gt;</span></span>
@@ -648,7 +648,7 @@ That is to produce continuous delay times (Figure <a href="#fig:pdf">2.4</a>):</
 <span><span class="va">draws_sex_district_pdf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow_upr <span class="op">=</span> <span class="fl">0</span>, swindow_upr <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_t <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">0</span>, swindow <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pdf_sex_district_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_district_pdf</span> <span class="op">|&gt;</span></span>
