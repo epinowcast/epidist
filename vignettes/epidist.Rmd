@@ -211,17 +211,17 @@ However, with only access to `obs_cens_trunc_samp`, the delay distribution we ob
 (ref:obs-est) The histogram of delays from the complete, retrospective data `obs_cens` match quite closely with the underlying distribution, whereas those from `obs_cens_trunc_samp` show more significant systematic bias. In this instance the extent of the bias caused by censoring is less than that caused by right truncation. Nonetheless, we always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present.
 
 ```{r obs-est, fig.cap="(ref:obs-est)"}
-dplyr::bind_rows(
+bind_rows(
   obs_cens |>
-    dplyr::mutate(type = "Complete, retrospective data") |>
-    dplyr::select(delay = delay_daily, type),
+    mutate(type = "Complete, retrospective data") |>
+    select(delay = delay_daily, type),
   obs_cens_trunc_samp |>
-    dplyr::mutate(type = "Censored, truncated,\nsampled data") |>
-    dplyr::select(delay = delay_daily, type)
+    mutate(type = "Censored, truncated,\nsampled data") |>
+    select(delay = delay_daily, type)
 ) |>
-  dplyr::group_by(type, delay, .drop = FALSE) |>
-  dplyr::summarise(n = dplyr::n()) |>
-  dplyr::mutate(p = n / sum(n)) |>
+  group_by(type, delay, .drop = FALSE) |>
+  summarise(n = n()) |>
+  mutate(p = n / sum(n)) |>
   ggplot() +
   geom_col(
     aes(x = delay, y = p, fill = type, group = type),
@@ -255,7 +255,7 @@ class(data)
 ```
 
 The `data` object now has the class `epidist_latent_individual`.
-Using this `data`, we now call `epidist::epidist` to fit the model.
+Using this `data`, we now call `epidist::epidist()` to fit the model.
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
 
@@ -274,8 +274,8 @@ pars <- fit$fit@par_dims |>
   map(.f = function(x) if (identical(x, integer(0))) return(1) else return(x))
 
 data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
-  gt::gt() |>
-  gt::tab_caption("(ref:pars)")
+  gt() |>
+  tab_caption("(ref:pars)")
 ```
 
 The `epidist` package also provides functions to make common post-processing tasks easy.

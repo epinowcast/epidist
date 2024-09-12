@@ -24,8 +24,10 @@ The code block below is provided to facilitate reproduction of this script, if r
 
 ```{r message=FALSE, results='hide', class.source='fold-hide'}
 library(epidist)
+library(brms)
 library(dplyr)
 library(ggplot2)
+library(scales)
 
 set.seed(1)
 
@@ -48,7 +50,7 @@ obs_cens_trunc_samp <-
 data <- as_latent_individual(obs_cens_trunc_samp)
 fit <- epidist(
   data,
-  formula = brms::bf(mu ~ 1, sigma ~ 1),
+  formula = bf(mu ~ 1, sigma ~ 1),
   seed = 1
 )
 ```
@@ -57,13 +59,11 @@ fit <- epidist(
 
 The output of a call to `epidist` is compatible with typical Stan workflows.
 We recommend use of the `posterior` package for working with samples from MCMC or other sampling algorithms.
+For example, the function `posterior::as_draws_df()` may be used to obtain a dataframe of MCMC draws for specified parameters.
 
 ```{r message = FALSE}
 library(posterior)
-draws <- posterior::as_draws_df(
-  fit,
-  variable = c("Intercept", "Intercept_sigma")
-)
+draws <- as_draws_df(fit, variable = c("Intercept", "Intercept_sigma"))
 head(draws)
 ```
 
@@ -71,10 +71,11 @@ head(draws)
 
 The output of a call to `epidist` is compatible with typical Stan workflows.
 We recommend use of the `bayesplot` package for sampling diagnostic plots.
+For example, the function `bayesplot::mcmc_trace()` can be used to produce traceplots for specified parameters.
 
 ```{r message = FALSE}
 library(bayesplot)
-bayesplot::mcmc_trace(fit, pars = c("Intercept", "Intercept_sigma"))
+mcmc_trace(fit, pars = c("Intercept", "Intercept_sigma"))
 ```
 
 ## I'd like to run a simulation study
@@ -82,8 +83,8 @@ bayesplot::mcmc_trace(fit, pars = c("Intercept", "Intercept_sigma"))
 We recommend use of the `purrr` package for running many `epidist` models, for example as a part of a simulation study.
 We particularly highlight two functions which might be useful:
 
-1. `purrr::map` (and other similar functions) for iterating over a list of inputs.
-2. `purrr::safely` which ensures that the function called "always succeeds". In other words, if there is an error it will be captured and output, rather than ending computation (and potentially disrupting a call to `purrr::map`).
+1. `purrr::map()` (and other similar functions) for iterating over a list of inputs.
+2. `purrr::safely()` which ensures that the function called "always succeeds". In other words, if there is an error it will be captured and output, rather than ending computation (and potentially disrupting a call to `purrr::map()`).
 
 For an example use of these functions, have a look at the [`epidist-paper`](https://github.com/parksw3/epidist-paper) repository containing the code for @park2024estimating.
 (Note that in that codebase, we use `map` as a part of a [`targets`](https://books.ropensci.org/targets/) pipeline.)
@@ -94,14 +95,14 @@ For an example use of these functions, have a look at the [`epidist-paper`](http
 However, some of those priors do not make sense in the context of our application.
 Instead, we used [prior predictive checking](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html) to set `epidist`-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.
 
-For example, for the lognormal latent individual model, we suggest the following prior distributions for the `brms` `mu` and `sigma` intercept parameters:
+For example, for the `brms::lognormal()` latent individual model, we suggest the following prior distributions for the `brms` `mu` and `sigma` intercept parameters:
 
 ```{r}
-family <- brms::lognormal()
+family <- lognormal()
 
 epidist_family <- epidist_family(data, family)
 epidist_formula <- epidist_formula(
-  data, family = epidist_family, formula = brms::bf(mu ~ 1, sigma ~ 1)
+  data, family = epidist_family, formula = bf(mu ~ 1, sigma ~ 1)
 )
 
 # NULL here means no replacing priors from the user!
@@ -123,8 +124,8 @@ Here are the distributions on the delay distribution mean and standard deviation
 set.seed(1)
 fit_ppc <- epidist(
   data = data,
-  formula = brms::bf(mu ~ 1, sigma ~ 1),
-  family = brms::lognormal(),
+  formula = bf(mu ~ 1, sigma ~ 1),
+  family = lognormal(),
   sample_prior = "only",
   seed = 1
 )
@@ -141,7 +142,7 @@ pred |>
   facet_wrap(. ~ parameter, scales = "free") +
   labs(x = "", y = "Density") +
   theme_minimal() +
-  scale_x_log10(labels = scales::comma)
+  scale_x_log10(labels = comma)
 
 quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 quantile(pred$sd, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
