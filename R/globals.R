@@ -57,36 +57,8 @@ utils::globalVariables(c(
   "mu", # <add_mean_sd.gamma_samples>
   "sd", # <add_mean_sd.gamma_samples>
   "shape", # <add_mean_sd.gamma_samples>
-<<<<<<< HEAD
-  "prior_old", # <replace_prior>
-  "prior_new", # <replace_prior>
-  "source_new", # <replace_prior>
-=======
-  "time", # <linelist_to_counts>
-  "primary", # <linelist_to_cases>
-  "secondary", # <linelist_to_cases>
-  "obs_at", # <reverse_obs_at>
-  "stime", # <construct_cases_by_obs_window>
-  "ptime", # <construct_cases_by_obs_window>
-  "case_type", # <construct_cases_by_obs_window>
-  "obs_at", # <combine_obs>
-  "stime_daily", # <combine_obs>
-  "ptime_delay", # <calculate_censor_delay>
-  "ptime", # <calculate_censor_delay>
-  "ptime_daily", # <calculate_censor_delay>
-  "lwr", # <calculate_censor_delay>
-  "upr", # <calculate_censor_delay>
-  "type", # <calculate_censor_delay>
-  "stime_delay", # <calculate_censor_delay>
-  "stime", # <calculate_censor_delay>
-  "stime_daily", # <calculate_censor_delay>
-  "ptime_daily", # <event_to_incidence>
-<<<<<<< HEAD
->>>>>>> 6cfdf1dc (Run document())
   "rlnorm", # <simulate_secondary>
   ":=", # <simulate_secondary>
-=======
->>>>>>> fa998bc1 (Resolve R check notes)
   "delay", # <simulate_secondary>
   ".N", # <simulate_secondary>
   "stime", # <simulate_secondary>

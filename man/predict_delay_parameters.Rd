@@ -29,18 +29,6 @@ Other postprocess:
 \code{\link{add_mean_sd.default}()},
 \code{\link{add_mean_sd.gamma_samples}()},
 \code{\link{add_mean_sd.lognormal_samples}()},
-\code{\link{draws_to_long}()},
-<<<<<<< HEAD
-\code{\link{log_lik_latent_gamma}()},
-\code{\link{log_lik_latent_lognormal}()},
-\code{\link{posterior_epred_latent_gamma}()},
-\code{\link{posterior_epred_latent_lognormal}()},
-\code{\link{posterior_predict_latent_gamma}()},
-\code{\link{posterior_predict_latent_lognormal}()}
-=======
-\code{\link{make_relative_to_truth}()},
-\code{\link{summarise_draws}()},
-\code{\link{summarise_variable}()}
->>>>>>> 6cfdf1dc (Run document())
+\code{\link{draws_to_long}()}
 }
 \concept{postprocess}
