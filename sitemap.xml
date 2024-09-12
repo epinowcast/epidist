@@ -14,6 +14,10 @@
 <url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.lognormal_samples.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/as_latent_individual.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-floor_mult.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-replace_prior.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-stan_chunk.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-version_stanvar.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/draws_to_long.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist-package.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist.default.html</loc></url>
@@ -31,16 +35,13 @@
 <url><loc>https://epidist.epinowcast.org/reference/epidist_model_prior.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_model_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_prior.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/epidist_stan_chunk.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stancode.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stancode.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_validate.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_validate.epidist_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_validate.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/epidist_version_stanvar.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/filter_obs_by_obs_time.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/filter_obs_by_ptime.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/floor_mult.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/index.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/is_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/log_lik_latent_gamma.html</loc></url>
@@ -51,7 +52,6 @@
 <url><loc>https://epidist.epinowcast.org/reference/posterior_predict_latent_gamma.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/posterior_predict_latent_lognormal.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/predict_delay_parameters.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/replace_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/sierra_leone_ebola_data.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/simulate_exponential_cases.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/simulate_gillespie.html</loc></url>
