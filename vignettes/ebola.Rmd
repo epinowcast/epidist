@@ -303,7 +303,7 @@ Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with wom
 epred_draws <- obs_prep |>
   as.data.frame() |>
   data_grid(NA) |>
-  mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
+  mutate(obs_t = NA, pwindow = NA, swindow = NA) |>
   add_epred_draws(fit, dpar = TRUE)
 
 epred_base_figure <- epred_draws |>
@@ -315,7 +315,7 @@ epred_base_figure <- epred_draws |>
 epred_draws_sex <- obs_prep |>
   as.data.frame() |>
   data_grid(sex) |>
-  mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
+  mutate(obs_t = NA, pwindow = NA, swindow = NA) |>
   add_epred_draws(fit_sex, dpar = TRUE)
 
 epred_sex_figure <- epred_draws_sex |>
@@ -327,7 +327,7 @@ epred_sex_figure <- epred_draws_sex |>
 epred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
   data_grid(sex, district) |>
-  mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
+  mutate(obs_t = NA, pwindow = NA, swindow = NA) |>
   add_epred_draws(fit_sex_district, dpar = TRUE)
 
 epred_sex_district_figure <- epred_draws_sex_district |>
@@ -358,7 +358,7 @@ For example, for the `mu` parameter in the sex-district stratified model (Figure
 linpred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
   data_grid(sex, district) |>
-  mutate(obs_t = NA, pwindow_upr = NA, swindow_upr = NA) |>
+  mutate(obs_t = NA, pwindow = NA, swindow = NA) |>
   add_linpred_draws(fit_sex_district, dpar = TRUE)
 ```
 
@@ -382,13 +382,13 @@ In this section, we demonstrate how to produce either a discrete probability mas
 ### Discrete probability mass function
 
 To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
-To do this, we set each of `pwindow_upr` and `swindow_upr` to 1 for daily censoring, and `obs_t` to 1000 for no censoring.
+To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and `obs_t` to 1000 for no censoring.
 Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure.
 
 ```{r}
 draws_pmf <- obs_prep |>
   as.data.frame() |>
-  mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1) |>
+  mutate(obs_t = 1000, pwindow = 1, swindow = 1) |>
   add_predicted_draws(fit, ndraws = 1000)
 
 pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
@@ -400,7 +400,7 @@ pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
 draws_sex_pmf <- obs_prep |>
   as.data.frame() |>
   data_grid(sex) |>
-  mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1) |>
+  mutate(obs_t = 1000, pwindow = 1, swindow = 1) |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pmf_sex_figure <- draws_sex_pmf |>
@@ -414,7 +414,7 @@ pmf_sex_figure <- draws_sex_pmf |>
 draws_sex_district_pmf <- obs_prep |>
   as.data.frame() |>
   data_grid(sex, district) |>
-  mutate(obs_t = 1000, pwindow_upr = 1, swindow_upr = 1) |>
+  mutate(obs_t = 1000, pwindow = 1, swindow = 1) |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pmf_sex_district_figure <- draws_sex_district_pmf |>
@@ -444,7 +444,7 @@ That is to produce continuous delay times (Figure \@ref(fig:pdf)):
 ```{r}
 draws_pdf <- obs_prep |>
   as.data.frame() |>
-  mutate(obs_t = 1000, pwindow_upr = 0, swindow_upr = 0) |>
+  mutate(obs_t = 1000, pwindow = 0, swindow = 0) |>
   add_predicted_draws(fit, ndraws = 1000)
 
 pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
@@ -456,7 +456,7 @@ pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
 draws_sex_pdf <- obs_prep |>
   as.data.frame() |>
   data_grid(sex) |>
-  mutate(obs_t = 1000, pwindow_upr = 0, swindow_upr = 0) |>
+  mutate(obs_t = 1000, pwindow = 0, swindow = 0) |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pdf_sex_figure <- draws_sex_pdf |>
@@ -470,7 +470,7 @@ pdf_sex_figure <- draws_sex_pdf |>
 draws_sex_district_pdf <- obs_prep |>
   as.data.frame() |>
   data_grid(sex, district) |>
-  mutate(obs_t = 1000, pwindow_upr = 0, swindow_upr = 0) |>
+  mutate(obs_t = 1000, pwindow = 0, swindow = 0) |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pdf_sex_district_figure <- draws_sex_district_pdf |>
