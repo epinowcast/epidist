@@ -18,6 +18,7 @@
 #' @export
 epidist_prior <- function(data, family, formula, prior) {
   epidist_validate(data)
+  family <- brms:::validate_family(family)
   class(family) <- c(class(family), family$family)
   default <- brms::default_prior(formula, data = data)
   model <- epidist_model_prior(data, formula)
