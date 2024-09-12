@@ -93,30 +93,3 @@ filter_obs_by_ptime <- function(linelist, obs_time,
   }
   return(truncated_linelist)
 }
-
-#' Pad zero observations as unstable in a lognormal distribution
-#'
-#' @param data ...
-#' @param pad ...
-#' @family observe
-#' @autoglobal
-#' @export
-pad_zero <- function(data, pad = 1e-3) {
-  data <- data.table::copy(data)
-  # Need upper bound to be greater than lower bound
-  data[censored_obs_time == 0, censored_obs_time := 2 * pad]
-  data[delay_lwr == 0, delay_lwr := pad]
-  data[delay_daily == 0, delay_daily := pad]
-  return(data)
-}
-
-#' Drop zero observations as unstable in a lognormal distribution
-#'
-#' @param data ...
-#' @family observe
-#' @export
-drop_zero <- function(data) {
-  data <- data.table::copy(data)
-  data <- data[delay_daily != 0]
-  return(data)
-}

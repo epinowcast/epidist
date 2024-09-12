@@ -2,15 +2,17 @@
 % Please edit documentation in R/generics.R
 \name{epidist_validate}
 \alias{epidist_validate}
-\title{Validate}
+\title{Validate a data object for use with \code{\link[=epidist]{epidist()}}}
 \usage{
 epidist_validate(data)
 }
 \arguments{
-\item{data}{A dataframe to be used for modelling.}
+\item{data}{A \code{data.frame} to be used for modelling.}
 }
 \description{
-Validate
+This function validates that the provided \code{data} is suitable to run a
+particular \code{epidist} model. This may include checking the class of \code{data},
+and that it contains suitable columns.
 }
 \seealso{
 Other generics: 

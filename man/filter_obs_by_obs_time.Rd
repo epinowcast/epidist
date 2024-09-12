@@ -16,9 +16,7 @@ Filter observations based on a observation time of secondary events
 }
 \seealso{
 Other observe: 
-\code{\link{drop_zero}()},
 \code{\link{filter_obs_by_ptime}()},
-\code{\link{observe_process}()},
-\code{\link{pad_zero}()}
+\code{\link{observe_process}()}
 }
 \concept{observe}

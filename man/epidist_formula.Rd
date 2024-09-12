@@ -7,12 +7,15 @@
 epidist_formula(data, ...)
 }
 \arguments{
-\item{data}{A dataframe to be used for modelling.}
+\item{data}{A \code{data.frame} to be used for modelling.}
 
-\item{...}{Additional arguments for method.}
+\item{...}{Additional arguments passed to method.}
 }
 \description{
-Define a model specific formula
+This function is used within \code{\link[=epidist]{epidist()}} to create the formula object passed
+to \code{brms}. It is unlikely that as a user you will need this function, but we
+export it nonetheless to be transparent about what exactly is happening
+inside of a call to \code{\link[=epidist]{epidist()}}.
 }
 \seealso{
 Other generics: 

@@ -44,6 +44,7 @@ The packages used in this article are:
 set.seed(123)
 
 library(epidist)
+library(brms)
 library(data.table)
 library(dplyr)
 library(purrr)
@@ -52,6 +53,7 @@ library(sf)
 library(tidybayes)
 library(modelr)
 library(patchwork)
+library(lubridate)
 ```
 
 For users new to `epidist`, before reading this article we recommend beginning with the "[Getting started with `epidist`](http://epidist.epinowcast.org/articles/epidist.html)" vignette.
@@ -70,7 +72,13 @@ The columns of the data are the individuals name (retracted, and hence can be re
 ```{r}
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
   select(-name) |>
-  mutate(case = as.integer(id), .keep = "unused")
+  mutate(
+    case = as.integer(id), .keep = "unused",
+    sex = case_when(
+      sex == "F" ~ "Female",
+      sex == "M" ~ "Male"
+    )
+  )
 
 head(sierra_leone_ebola_data)
 
@@ -107,7 +115,7 @@ To create a map, we first join the Ebola data to shapefiles for the districts of
 These shapefiles were obtained from the Database of Global Administrative Areas ([GADM](https://gadm.org/)).
 
 ```{r message=FALSE, warning=FALSE}
-sf <- sf::st_read(
+sf <- st_read(
   system.file("extdata/gadm41_SLE_shp/gadm41_SLE_2.shp", package = "epidist"),
   quiet = TRUE
 )
@@ -150,15 +158,15 @@ We also transform the `data.frame` to a `data.table`:
 sierra_leone_ebola_data <- sierra_leone_ebola_data |>
   mutate(
     # use lubridate::ymd() to drop any sub-date time info
-    date_of_symptom_onset = lubridate::ymd(date_of_symptom_onset),
-    date_of_sample_tested = lubridate::ymd(date_of_sample_tested),
+    date_of_symptom_onset = ymd(date_of_symptom_onset),
+    date_of_sample_tested = ymd(date_of_sample_tested),
     # ptime and stime represent the number of days elapsed since the earliest
     # date of symptom onset in the data
     ptime = as.numeric(date_of_symptom_onset - min(date_of_symptom_onset)),
     stime = as.numeric(date_of_sample_tested - min(date_of_symptom_onset))
   ) |>
   select(case, ptime, stime, age, sex, district) |>
-  data.table::as.data.table()
+  as.data.table()
 
 head(sierra_leone_ebola_data)
 ```
@@ -166,8 +174,7 @@ head(sierra_leone_ebola_data)
 Next, we use `observe_process()` to add interval censoring columns giving the lower and upper bounds on the primary and secondary event times:
 
 ```{r}
-obs_cens <- epidist::observe_process(sierra_leone_ebola_data)
-
+obs_cens <- observe_process(sierra_leone_ebola_data)
 head(obs_cens)
 ```
 
@@ -200,8 +207,6 @@ To prepare the data for use with the latent individual model, we use the functio
 ```{r}
 obs_prep <- as_latent_individual(obs_cens)
 head(obs_prep)
-
-head(obs_prep)
 ```
 
 Now we are ready to fit the latent individual model.
@@ -210,14 +215,14 @@ Now we are ready to fit the latent individual model.
 
 We start by fitting a single lognormal distribution to the data. 
 This model assumes that a single distribution describes all delays in the data, regardless of the case's location, sex, or any other covariates.
-To do this, we set `formula = brms::bf(mu ~ 1, sigma ~ 1)` to place an model with only and intercept parameter (i.e. `~ 1` in R formula syntax) on the `mu` and `sigma` parameters of the lognormal distribution.
-This distribution is specified using `family = brms::lognormal()`.
+To do this, we set `formula = bf(mu ~ 1, sigma ~ 1)` to place an model with only and intercept parameter (i.e. `~ 1` in R formula syntax) on the `mu` and `sigma` parameters of the lognormal distribution.
+This distribution is specified using `family = lognormal()`.
 
 ```{r}
 fit <- epidist(
   data = obs_prep,
-  formula = brms::bf(mu ~ 1, sigma ~ 1),
-  family = brms::lognormal(),
+  formula = bf(mu ~ 1, sigma ~ 1),
+  family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
   silent = 2,
@@ -240,8 +245,8 @@ To fit a model which varies the parameters of the fitted lognormal distribution,
 ```{r}
 fit_sex <- epidist(
   data = obs_prep,
-  formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-  family = brms::lognormal(),
+  formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
+  family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
   silent = 2,
@@ -249,8 +254,8 @@ fit_sex <- epidist(
 )
 ```
 
-A summary of the model shows that males tend to have longer delays (the posterior mean of `sexM` is `r round(summary(fit_sex)$fixed[3, "Estimate"], 2)`) and greater delay variation (the posterior mean of `sigma_sexM` is `r round(summary(fit_sex)$fixed[4, "Estimate"], 2)`).
-For the `sexM` effect, the 95% credible interval is greater than zero, whereas for the `sigma_sexM` effect the 95% credible interval includes zero.
+A summary of the model shows that males tend to have longer delays (the posterior mean of `sexMale` is `r round(summary(fit_sex)$fixed[3, "Estimate"], 2)`) and greater delay variation (the posterior mean of `sigma_sexMale` is `r round(summary(fit_sex)$fixed[4, "Estimate"], 2)`).
+For the `sexMale` effect, the 95% credible interval is greater than zero, whereas for the `sigma_sexMale` effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.
 
 ```{r}
@@ -266,11 +271,11 @@ These random effects are specified by including `(1 | district)` in the formulas
 ```{r}
 fit_sex_district <- epidist(
   data = obs_prep,
-  formula = brms::bf(
+  formula = bf(
     mu ~ 1 + sex + (1 | district),
     sigma ~ 1 + sex + (1 | district)
   ),
-  family = brms::lognormal(),
+  family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
   silent = 2,
@@ -278,11 +283,11 @@ fit_sex_district <- epidist(
 )
 ```
 
-For this model, along with looking at the `summary`, we may also use the `brms::ranef` function to look at the estimates of the random effects:
+For this model, along with looking at the `summary`, we may also use the `brms::ranef()` function to look at the estimates of the random effects:
 
 ```{r}
 summary(fit_sex_district)
-brms::ranef(fit_sex_district)
+ranef(fit_sex_district)
 ```
 
 ## Posterior expectations {#posterior-expectation}
@@ -314,12 +319,6 @@ epred_draws_sex <- obs_prep |>
   add_epred_draws(fit_sex, dpar = TRUE)
 
 epred_sex_figure <- epred_draws_sex |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .epred, y = sex)) +
   stat_halfeye() +
   labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
@@ -332,12 +331,6 @@ epred_draws_sex_district <- obs_prep |>
   add_epred_draws(fit_sex_district, dpar = TRUE)
 
 epred_sex_district_figure <- epred_draws_sex_district |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .epred, y = district)) +
   stat_pointinterval() +
   facet_grid(. ~ sex) +
@@ -373,12 +366,6 @@ linpred_draws_sex_district <- obs_prep |>
 
 ```{r linpred-sex-district, fig.cap="(ref:linpred-sex-district)"}
 linpred_draws_sex_district |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = mu, y = district)) +
   stat_pointinterval() +
   facet_grid(. ~ sex) +
@@ -417,12 +404,6 @@ draws_sex_pmf <- obs_prep |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pmf_sex_figure <- draws_sex_pmf |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
   labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
@@ -437,12 +418,6 @@ draws_sex_district_pmf <- obs_prep |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pmf_sex_district_figure <- draws_sex_district_pmf |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
   labs(
@@ -485,12 +460,6 @@ draws_sex_pdf <- obs_prep |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pdf_sex_figure <- draws_sex_pdf |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .prediction)) +
   geom_density() +
   labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
@@ -505,12 +474,6 @@ draws_sex_district_pdf <- obs_prep |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pdf_sex_district_figure <- draws_sex_district_pdf |>
-  mutate(
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  ) |>
   ggplot(aes(x = .prediction)) +
   geom_density() +
   labs(
