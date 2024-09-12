@@ -14,18 +14,4 @@ log_lik_latent_lognormal(i, prep)
 \description{
 See \code{\link[brms:log_lik.brmsfit]{brms::log_lik()}}.
 }
-\seealso{
-Other postprocess: 
-\code{\link{add_mean_sd}()},
-\code{\link{add_mean_sd.default}()},
-\code{\link{add_mean_sd.gamma_samples}()},
-\code{\link{add_mean_sd.lognormal_samples}()},
-\code{\link{draws_to_long}()},
-\code{\link{log_lik_latent_gamma}()},
-\code{\link{posterior_epred_latent_gamma}()},
-\code{\link{posterior_epred_latent_lognormal}()},
-\code{\link{posterior_predict_latent_gamma}()},
-\code{\link{posterior_predict_latent_lognormal}()},
-\code{\link{predict_delay_parameters}()}
-}
-\concept{postprocess}
+\keyword{internal}
