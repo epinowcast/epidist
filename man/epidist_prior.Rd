@@ -33,7 +33,6 @@ Other prior:
 \code{\link{epidist_family_prior.default}()},
 \code{\link{epidist_family_prior.lognormal}()},
 \code{\link{epidist_model_prior}()},
-\code{\link{epidist_model_prior.default}()},
-\code{\link{replace_prior}()}
+\code{\link{epidist_model_prior.default}()}
 }
 \concept{prior}
