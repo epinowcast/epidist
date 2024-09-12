@@ -1,7 +1,7 @@
 #' Default method for data validation
 #'
 #' @inheritParams epidist_validate
-#' @param ... Additional arguments for method.
+#' @param ... Additional arguments passed to method.
 #' @family defaults
 #' @importFrom cli cli_abort
 #' @export
@@ -15,7 +15,7 @@ epidist_validate.default <- function(data, ...) {
 #' Default method for defining a model specific formula
 #'
 #' @inheritParams epidist_formula
-#' @param ... Additional arguments for method.
+#' @param ... Additional arguments passed to method.
 #' @family defaults
 #' @importFrom cli cli_abort
 #' @export
@@ -29,7 +29,7 @@ epidist_formula.default <- function(data, ...) {
 #' Default method for defining a model specific family
 #'
 #' @inheritParams epidist_family
-#' @param ... Additional arguments for method.
+#' @param ... Additional arguments passed to method.
 #' @family defaults
 #' @importFrom cli cli_abort
 #' @export
@@ -43,7 +43,7 @@ epidist_family.default <- function(data, ...) {
 #' Default method for defining model specific Stan code
 #'
 #' @inheritParams epidist_stancode
-#' @param ... Additional arguments for method.
+#' @param ... Additional arguments passed to method.
 #' @family defaults
 #' @importFrom cli cli_abort
 #' @export
@@ -56,8 +56,8 @@ epidist_stancode.default <- function(data, ...) {
 
 #' Default method used for interface using `brms`
 #'
-#' @inheritParams epidist_formula
 #' @inheritParams epidist
+#' @inheritParams epidist_formula
 #' @rdname epidist.default
 #' @method epidist default
 #' @family defaults
