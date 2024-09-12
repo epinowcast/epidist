@@ -6,9 +6,8 @@
 #' @param path The path within the `stan/` folder of the installed `epidist`
 #' package to the Stan code chunk of interest.
 #' @return A character string containing the Stan code chunk of interest.
-#' @family utils
-#' @export
-epidist_stan_chunk <- function(path) {
+#' @keywords internal
+.stan_chunk <- function(path) {
   local_path <- system.file(paste0("stan/", path), package = "epidist")
   paste(readLines(local_path), collapse = "\n")
 }
@@ -21,9 +20,8 @@ epidist_stan_chunk <- function(path) {
 #'
 #' @return A `brms` Stan chunk containing the `epidist` package version used to
 #' build the Stan code.
-#' @family utils
-#' @export
-epidist_version_stanvar <- function() {
+#' @keywords internal
+.version_stanvar <- function() {
   version <- utils::packageVersion("epidist")
   comment <- paste0("// code chunks used from epidist ", version, "\n")
   brms::stanvar(scode = comment, block = "functions")
@@ -39,8 +37,54 @@ epidist_version_stanvar <- function() {
 #' @param x A number to be rounded down
 #' @param f A positive number specifying the multiple to be rounded down to
 #' @importFrom checkmate assert_numeric
-#' @family utils
-floor_mult <- function(x, f = 1) {
+#' @keywords internal
+.floor_mult <- function(x, f = 1) {
   checkmate::assert_numeric(f, lower = 0)
   ifelse(f == 0, x, floor(x / f) * f)
+}
+
+#' Replace `brms` prior distributions
+#'
+#' This function takes `old_prior` and replaces any prior distributions
+#' contained in it by the corresponding prior distribution in `new_prior`.
+#' If there is a prior distribution in `new_prior` with no match in `old_prior`
+#' then the function will error and give the name of the new prior distribution
+#' with no match.
+#'
+#' @param old_prior One or more prior distributions in the class `brmsprior`
+#' @param new_prior One or more prior distributions in the class `brmsprior`
+#' @importFrom cli cli_abort
+#' @importFrom utils capture.output
+#' @importFrom dplyr full_join filter select all_of
+#' @autoglobal
+#' @keywords internal
+.replace_prior <- function(old_prior, new_prior) {
+  if (is.null(new_prior)) {
+    return(old_prior)
+  }
+  cols <- c("class", "coef", "group", "resp", "dpar", "nlpar", "lb", "ub")
+  prior <- dplyr::full_join(
+    old_prior, new_prior, by = cols, suffix = c("_old", "_new")
+  )
+
+  if (any(is.na(prior$prior_old))) {
+    missing_prior <- utils::capture.output(print(
+      prior |>
+        dplyr::filter(is.na(prior_old)) |>
+        dplyr::select(
+          prior = prior_new, dplyr::all_of(cols), source = source_new
+        )
+    ))
+    msg <- c(
+      "i" = "No available prior to replace in old_prior found for:",
+      missing_prior
+    )
+    cli::cli_abort(message = msg)
+  }
+
+  prior <- prior |>
+    dplyr::filter(!is.na(prior_old), !is.na(prior_new)) |>
+    dplyr::select(prior = prior_new, dplyr::all_of(cols), source = source_new)
+
+  return(prior)
 }
