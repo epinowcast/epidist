@@ -18,12 +18,6 @@ Other postprocess:
 \code{\link{add_mean_sd.default}()},
 \code{\link{add_mean_sd.gamma_samples}()},
 \code{\link{add_mean_sd.lognormal_samples}()},
-\code{\link{log_lik_latent_gamma}()},
-\code{\link{log_lik_latent_lognormal}()},
-\code{\link{posterior_epred_latent_gamma}()},
-\code{\link{posterior_epred_latent_lognormal}()},
-\code{\link{posterior_predict_latent_gamma}()},
-\code{\link{posterior_predict_latent_lognormal}()},
 \code{\link{predict_delay_parameters}()}
 }
 \concept{postprocess}

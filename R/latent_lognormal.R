@@ -6,9 +6,9 @@
 #' @param i The index of the observation to predict
 #' @param prep The result of a call to [brms::posterior_predict()]
 #' @param ... Additional arguments
-#' @family postprocess
 #' @autoglobal
-#' @export
+#' @importFrom stats rlnorm
+#' @keywords internal
 posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu", i = i)
   sigma <- brms::get_dpar(prep, "sigma", i = i)
@@ -24,8 +24,8 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
       p_latent <- runif(1, 0, 1) * pwindow_width
       d_latent <- rlnorm(1, meanlog = mu[s], sdlog = sigma[s])
       s_latent <- p_latent + d_latent
-      p_censored <- floor_mult(p_latent, pwindow_width)
-      s_censored <- floor_mult(s_latent, swindow_width)
+      p_censored <- .floor_mult(p_latent, pwindow_width)
+      s_censored <- .floor_mult(s_latent, swindow_width)
       d_censored <- s_censored - p_censored
     }
     return(d_censored)
@@ -41,9 +41,8 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
 #' See [brms::posterior_epred()].
 #'
 #' @param prep The result of a call to [`brms::prepare_predictions`]
-#' @family postprocess
 #' @autoglobal
-#' @export
+#' @keywords internal
 posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu")
   sigma <- brms::get_dpar(prep, "sigma")
@@ -56,9 +55,9 @@ posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_lin
 #'
 #' @param i The index of the observation to calculate the log likelihood of
 #' @param prep The result of a call to [brms::prepare_predictions()]
-#' @family postprocess
 #' @autoglobal
-#' @export
+#' @importFrom stats dlnorm plnorm
+#' @keywords internal
 log_lik_latent_lognormal <- function(i, prep) {
   mu <- brms::get_dpar(prep, "mu", i = i)
   sigma <- brms::get_dpar(prep, "sigma", i = i)
