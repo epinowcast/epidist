@@ -61,28 +61,43 @@
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A dataframe to be used for modelling.</p></dd>
+<dd><p>A <code>data.frame</code> to be used for modelling.</p></dd>
 
 
 <dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>
-<dd><p>...</p></dd>
+<dd><p>A formula object created using <code><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">brms::bf</a></code>. A formula must be
+provided for the distributional parameter <code>mu</code> common to all <code>brms</code> families.
+Optionally, formulas may also be provided for additional distributional
+parameters.</p></dd>
 
 
 <dt id="arg-family">family<a class="anchor" aria-label="anchor" href="#arg-family"></a></dt>
-<dd><p>...</p></dd>
+<dd><p>A description of the response distribution and link function to
+be used in the model. Every family function has a link argument allowing
+users to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details of supported families
+see <code>brmsfamily()</code>.</p></dd>
 
 
 <dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
-<dd><p>...</p></dd>
+<dd><p>One or more <code>brmsprior</code> objects created by <code><a href="https://paul-buerkner.github.io/brms/reference/set_prior.html" class="external-link">brms::set_prior()</a></code>
+or related functions. These priors are passed to <code><a href="epidist_prior.html">epidist_prior()</a></code> in the
+<code>prior</code> argument. We recommend caution and the use of prior predictive checks
+for specifying prior distributions.</p></dd>
 
 
 <dt id="arg-backend">backend<a class="anchor" aria-label="anchor" href="#arg-backend"></a></dt>
-<dd><p>...</p></dd>
+<dd><p>Character string naming the package to use as the backend for
+fitting the Stan model. Options are <code>"rstan"</code> and <code>"cmdstanr"</code> (the default).
+This option is passed directly through to <code>fn</code>.</p></dd>
 
 
 <dt id="arg-fn">fn<a class="anchor" aria-label="anchor" href="#arg-fn"></a></dt>
-<dd><p>Likely <code><a href="https://paul-buerkner.github.io/brms/reference/brm.html" class="external-link">brms::brm</a></code>. Also possible to be <code><a href="https://paul-buerkner.github.io/brms/reference/stancode.html" class="external-link">brms::make_stancode</a></code> or
-<code><a href="https://paul-buerkner.github.io/brms/reference/standata.html" class="external-link">brms::make_standata</a></code>.</p></dd>
+<dd><p>The internal function to be called. By default this is <code><a href="https://paul-buerkner.github.io/brms/reference/brm.html" class="external-link">brms::brm</a></code>,
+which performs inference for the specified model. Other options
+<code><a href="https://paul-buerkner.github.io/brms/reference/stancode.html" class="external-link">brms::make_stancode</a></code>, which returns the Stan code for the specified model,
+and <code><a href="https://paul-buerkner.github.io/brms/reference/standata.html" class="external-link">brms::make_standata</a></code> which returns the data passed to Stan. These
+options may be useful for model debugging and extensions.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

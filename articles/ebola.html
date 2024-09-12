@@ -86,6 +86,7 @@ In analyzing this data, we demonstrate the following features of <code>epidist</
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epidist.epinowcast.org/">epidist</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms" class="external-link">brms</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
@@ -93,7 +94,8 @@ In analyzing this data, we demonstrate the following features of <code>epidist</
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mjskay.github.io/tidybayes/" class="external-link">tidybayes</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modelr.tidyverse.org" class="external-link">modelr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lubridate.tidyverse.org" class="external-link">lubridate</a></span><span class="op">)</span></span></code></pre></div>
 <p>For users new to <code>epidist</code>, before reading this article we recommend beginning with the “<a href="http://epidist.epinowcast.org/articles/epidist.html" class="external-link">Getting started with <code>epidist</code></a>” vignette.</p>
 <div class="section level2" number="1">
 <h2 id="data-preparation">
@@ -107,18 +109,24 @@ The columns of the data are the individuals name (retracted, and hence can be re
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sierra_leone_ebola_data</span> <span class="op">&lt;-</span> <span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">name</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>case <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span>, .keep <span class="op">=</span> <span class="st">"unused"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    case <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span>, .keep <span class="op">=</span> <span class="st">"unused"</span>,</span>
+<span>    sex <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
+<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"F"</span> <span class="op">~</span> <span class="st">"Female"</span>,</span>
+<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"M"</span> <span class="op">~</span> <span class="st">"Male"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sierra_leone_ebola_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">#&gt;     age sex   date_of_symptom_onset date_of_sample_tested district chiefdom   </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>    20 F     2014-05-18 <span style="color: #949494;">00:00:00</span>   2014-05-23 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Teng </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>    42 F     2014-05-20 <span style="color: #949494;">00:00:00</span>   2014-05-25 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Teng </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>    45 F     2014-05-20 <span style="color: #949494;">00:00:00</span>   2014-05-25 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Tonge</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>    15 F     2014-05-21 <span style="color: #949494;">00:00:00</span>   2014-05-26 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Teng </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>    19 F     2014-05-21 <span style="color: #949494;">00:00:00</span>   2014-05-26 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Teng </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>    55 F     2014-05-21 <span style="color: #949494;">00:00:00</span>   2014-05-26 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Teng </span></span>
+<span><span class="co">#&gt;     age sex    date_of_symptom_onset date_of_sample_tested district chiefdom   </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>    20 Female 2014-05-18 <span style="color: #949494;">00:00:00</span>   2014-05-23 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Teng </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>    42 Female 2014-05-20 <span style="color: #949494;">00:00:00</span>   2014-05-25 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Teng </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>    45 Female 2014-05-20 <span style="color: #949494;">00:00:00</span>   2014-05-25 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Tonge</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>    15 Female 2014-05-21 <span style="color: #949494;">00:00:00</span>   2014-05-26 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Teng </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>    19 Female 2014-05-21 <span style="color: #949494;">00:00:00</span>   2014-05-26 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Teng </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>    55 Female 2014-05-21 <span style="color: #949494;">00:00:00</span>   2014-05-26 <span style="color: #949494;">00:00:00</span>   Kailahun Kissi Teng </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: case &lt;int&gt;</span></span></span>
 <span></span>
 <span><span class="va">fraction</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
@@ -153,7 +161,7 @@ Figure 1.1: Primary and secondary event times for every 5th case, over the 14 di
 To create a map, we first join the Ebola data to shapefiles for the districts of Sierra Leone.
 These shapefiles were obtained from the Database of Global Administrative Areas (<a href="https://gadm.org/" class="external-link">GADM</a>).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sf</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">sf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"gadm41_SLE_shp/gadm41_SLE_2.shp"</span>, package <span class="op">=</span> <span class="st">"epidist"</span><span class="op">)</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
@@ -199,38 +207,37 @@ We also transform the <code>data.frame</code> to a <code>data.table</code>:</p>
 <code class="sourceCode R"><span><span class="va">sierra_leone_ebola_data</span> <span class="op">&lt;-</span> <span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    <span class="co"># use lubridate::ymd() to drop any sub-date time info</span></span>
-<span>    date_of_symptom_onset <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/ymd.html" class="external-link">ymd</a></span><span class="op">(</span><span class="va">date_of_symptom_onset</span><span class="op">)</span>,</span>
-<span>    date_of_sample_tested <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/ymd.html" class="external-link">ymd</a></span><span class="op">(</span><span class="va">date_of_sample_tested</span><span class="op">)</span>,</span>
+<span>    date_of_symptom_onset <span class="op">=</span> <span class="fu"><a href="https://lubridate.tidyverse.org/reference/ymd.html" class="external-link">ymd</a></span><span class="op">(</span><span class="va">date_of_symptom_onset</span><span class="op">)</span>,</span>
+<span>    date_of_sample_tested <span class="op">=</span> <span class="fu"><a href="https://lubridate.tidyverse.org/reference/ymd.html" class="external-link">ymd</a></span><span class="op">(</span><span class="va">date_of_sample_tested</span><span class="op">)</span>,</span>
 <span>    <span class="co"># ptime and stime represent the number of days elapsed since the earliest</span></span>
 <span>    <span class="co"># date of symptom onset in the data</span></span>
 <span>    ptime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">date_of_symptom_onset</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">date_of_symptom_onset</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    stime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">date_of_sample_tested</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">date_of_symptom_onset</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">case</span>, <span class="va">ptime</span>, <span class="va">stime</span>, <span class="va">age</span>, <span class="va">sex</span>, <span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/as.data.table.html" class="external-link">as.data.table</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sierra_leone_ebola_data</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     case ptime stime   age    sex district</span></span>
 <span><span class="co">#&gt;    &lt;int&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;char&gt;   &lt;char&gt;</span></span>
-<span><span class="co">#&gt; 1:     1     0     5    20      F Kailahun</span></span>
-<span><span class="co">#&gt; 2:     2     2     7    42      F Kailahun</span></span>
-<span><span class="co">#&gt; 3:     3     2     7    45      F Kailahun</span></span>
-<span><span class="co">#&gt; 4:     4     3     8    15      F Kailahun</span></span>
-<span><span class="co">#&gt; 5:     5     3     8    19      F Kailahun</span></span>
-<span><span class="co">#&gt; 6:     6     3     8    55      F Kailahun</span></span></code></pre></div>
+<span><span class="co">#&gt; 1:     1     0     5    20 Female Kailahun</span></span>
+<span><span class="co">#&gt; 2:     2     2     7    42 Female Kailahun</span></span>
+<span><span class="co">#&gt; 3:     3     2     7    45 Female Kailahun</span></span>
+<span><span class="co">#&gt; 4:     4     3     8    15 Female Kailahun</span></span>
+<span><span class="co">#&gt; 5:     5     3     8    19 Female Kailahun</span></span>
+<span><span class="co">#&gt; 6:     6     3     8    55 Female Kailahun</span></span></code></pre></div>
 <p>Next, we use <code><a href="../reference/observe_process.html">observe_process()</a></code> to add interval censoring columns giving the lower and upper bounds on the primary and secondary event times:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="fu">epidist</span><span class="fu">::</span><span class="fu"><a href="../reference/observe_process.html">observe_process</a></span><span class="op">(</span><span class="va">sierra_leone_ebola_data</span><span class="op">)</span></span>
-<span></span>
+<code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/observe_process.html">observe_process</a></span><span class="op">(</span><span class="va">sierra_leone_ebola_data</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     case ptime stime   age    sex district ptime_daily ptime_lwr ptime_upr</span></span>
 <span><span class="co">#&gt;    &lt;int&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;char&gt;   &lt;char&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:     1     0     5    20      F Kailahun           0         0         1</span></span>
-<span><span class="co">#&gt; 2:     2     2     7    42      F Kailahun           2         2         3</span></span>
-<span><span class="co">#&gt; 3:     3     2     7    45      F Kailahun           2         2         3</span></span>
-<span><span class="co">#&gt; 4:     4     3     8    15      F Kailahun           3         3         4</span></span>
-<span><span class="co">#&gt; 5:     5     3     8    19      F Kailahun           3         3         4</span></span>
-<span><span class="co">#&gt; 6:     6     3     8    55      F Kailahun           3         3         4</span></span>
+<span><span class="co">#&gt; 1:     1     0     5    20 Female Kailahun           0         0         1</span></span>
+<span><span class="co">#&gt; 2:     2     2     7    42 Female Kailahun           2         2         3</span></span>
+<span><span class="co">#&gt; 3:     3     2     7    45 Female Kailahun           2         2         3</span></span>
+<span><span class="co">#&gt; 4:     4     3     8    15 Female Kailahun           3         3         4</span></span>
+<span><span class="co">#&gt; 5:     5     3     8    19 Female Kailahun           3         3         4</span></span>
+<span><span class="co">#&gt; 6:     6     3     8    55 Female Kailahun           3         3         4</span></span>
 <span><span class="co">#&gt;    stime_daily stime_lwr stime_upr delay_daily delay_lwr delay_upr obs_at</span></span>
 <span><span class="co">#&gt;          &lt;num&gt;     &lt;num&gt;     &lt;num&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;  &lt;num&gt;</span></span>
 <span><span class="co">#&gt; 1:           5         5         6           5         4         6    483</span></span>
@@ -263,38 +270,12 @@ We also transform the <code>data.frame</code> to a <code>data.table</code>:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">obs_prep</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     case ptime stime   age    sex      district ptime_daily ptime_lwr ptime_upr</span></span>
 <span><span class="co">#&gt;    &lt;int&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;char&gt;        &lt;char&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:  1101   108   111    40      F       Bombali         108       108       109</span></span>
-<span><span class="co">#&gt; 2:  5584   189   197    23      M       Bombali         189       189       190</span></span>
-<span><span class="co">#&gt; 3:  1187   111   117    35      M     Port Loko         111       111       112</span></span>
-<span><span class="co">#&gt; 4:  2483   138   142    15      F            Bo         138       138       139</span></span>
-<span><span class="co">#&gt; 5:  6796   217   221    16      M Western Urban         217       217       218</span></span>
-<span><span class="co">#&gt; 6:  3576   157   163    28      F       Bombali         157       157       158</span></span>
-<span><span class="co">#&gt;    stime_daily stime_lwr stime_upr delay_daily delay_lwr delay_upr obs_at</span></span>
-<span><span class="co">#&gt;          &lt;num&gt;     &lt;num&gt;     &lt;num&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;  &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:         111       111       112           3         2         4    483</span></span>
-<span><span class="co">#&gt; 2:         197       197       198           8         7         9    483</span></span>
-<span><span class="co">#&gt; 3:         117       117       118           6         5         7    483</span></span>
-<span><span class="co">#&gt; 4:         142       142       143           4         3         5    483</span></span>
-<span><span class="co">#&gt; 5:         221       221       222           4         3         5    483</span></span>
-<span><span class="co">#&gt; 6:         163       163       164           6         5         7    483</span></span>
-<span><span class="co">#&gt;        id obs_t pwindow_upr woverlap swindow_upr delay_central row_id</span></span>
-<span><span class="co">#&gt;    &lt;fctr&gt; &lt;num&gt;       &lt;num&gt;    &lt;num&gt;       &lt;num&gt;         &lt;num&gt;  &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1:      1   375           1        0           1             3      1</span></span>
-<span><span class="co">#&gt; 2:      2   294           1        0           1             8      2</span></span>
-<span><span class="co">#&gt; 3:      3   372           1        0           1             6      3</span></span>
-<span><span class="co">#&gt; 4:      4   345           1        0           1             4      4</span></span>
-<span><span class="co">#&gt; 5:      5   266           1        0           1             4      5</span></span>
-<span><span class="co">#&gt; 6:      6   326           1        0           1             6      6</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">obs_prep</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     case ptime stime   age    sex      district ptime_daily ptime_lwr ptime_upr</span></span>
-<span><span class="co">#&gt;    &lt;int&gt; &lt;num&gt; &lt;num&gt; &lt;num&gt; &lt;char&gt;        &lt;char&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;</span></span>
-<span><span class="co">#&gt; 1:  1101   108   111    40      F       Bombali         108       108       109</span></span>
-<span><span class="co">#&gt; 2:  5584   189   197    23      M       Bombali         189       189       190</span></span>
-<span><span class="co">#&gt; 3:  1187   111   117    35      M     Port Loko         111       111       112</span></span>
-<span><span class="co">#&gt; 4:  2483   138   142    15      F            Bo         138       138       139</span></span>
-<span><span class="co">#&gt; 5:  6796   217   221    16      M Western Urban         217       217       218</span></span>
-<span><span class="co">#&gt; 6:  3576   157   163    28      F       Bombali         157       157       158</span></span>
+<span><span class="co">#&gt; 1:  1101   108   111    40 Female       Bombali         108       108       109</span></span>
+<span><span class="co">#&gt; 2:  5584   189   197    23   Male       Bombali         189       189       190</span></span>
+<span><span class="co">#&gt; 3:  1187   111   117    35   Male     Port Loko         111       111       112</span></span>
+<span><span class="co">#&gt; 4:  2483   138   142    15 Female            Bo         138       138       139</span></span>
+<span><span class="co">#&gt; 5:  6796   217   221    16   Male Western Urban         217       217       218</span></span>
+<span><span class="co">#&gt; 6:  3576   157   163    28 Female       Bombali         157       157       158</span></span>
 <span><span class="co">#&gt;    stime_daily stime_lwr stime_upr delay_daily delay_lwr delay_upr obs_at</span></span>
 <span><span class="co">#&gt;          &lt;num&gt;     &lt;num&gt;     &lt;num&gt;       &lt;num&gt;     &lt;num&gt;     &lt;num&gt;  &lt;num&gt;</span></span>
 <span><span class="co">#&gt; 1:         111       111       112           3         2         4    483</span></span>
@@ -318,13 +299,13 @@ We also transform the <code>data.frame</code> to a <code>data.table</code>:</p>
 </h4>
 <p>We start by fitting a single lognormal distribution to the data.
 This model assumes that a single distribution describes all delays in the data, regardless of the case’s location, sex, or any other covariates.
-To do this, we set <code>formula = brms::bf(mu ~ 1, sigma ~ 1)</code> to place an model with only and intercept parameter (i.e. <code>~ 1</code> in R formula syntax) on the <code>mu</code> and <code>sigma</code> parameters of the lognormal distribution.
-This distribution is specified using <code>family = brms::lognormal()</code>.</p>
+To do this, we set <code>formula = bf(mu ~ 1, sigma ~ 1)</code> to place an model with only and intercept parameter (i.e. <code>~ 1</code> in R formula syntax) on the <code>mu</code> and <code>sigma</code> parameters of the lognormal distribution.
+This distribution is specified using <code>family = lognormal()</code>.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">obs_prep</span>,</span>
-<span>  formula <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  family <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  formula <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
 <span>  refresh <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  silent <span class="op">=</span> <span class="fl">2</span>,</span>
@@ -360,15 +341,15 @@ For example, we may use <code>summary</code> to view information about the fitte
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_sex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">obs_prep</span>,</span>
-<span>  formula <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span><span class="op">)</span>,</span>
-<span>  family <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  formula <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
 <span>  refresh <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  silent <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexM</code> is 0.03) and greater delay variation (the posterior mean of <code>sigma_sexM</code> is 0.05).
-For the <code>sexM</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexM</code> effect the 95% credible interval includes zero.
+<p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.03) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is 0.05).
+For the <code>sexMale</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexMale</code> effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_sex</span><span class="op">)</span></span>
@@ -384,8 +365,8 @@ It is important to note that the estimates represent an average of the observed 
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
 <span><span class="co">#&gt; Intercept           1.60      0.02     1.56     1.65 1.00     9840     3072</span></span>
 <span><span class="co">#&gt; sigma_Intercept    -0.57      0.03    -0.62    -0.51 1.00     9121     2955</span></span>
-<span><span class="co">#&gt; sexM                0.03      0.03    -0.03     0.09 1.00     9384     2952</span></span>
-<span><span class="co">#&gt; sigma_sexM          0.05      0.04    -0.03     0.14 1.00     8838     2776</span></span>
+<span><span class="co">#&gt; sexMale             0.03      0.03    -0.03     0.09 1.00     9384     2952</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.05      0.04    -0.03     0.14 1.00     8838     2776</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -401,17 +382,17 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_sex_district</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">obs_prep</span>,</span>
-<span>  formula <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span></span>
+<span>  formula <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span></span>
 <span>    <span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">district</span><span class="op">)</span>,</span>
 <span>    <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">district</span><span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  family <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
 <span>  refresh <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  silent <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>For this model, along with looking at the <code>summary</code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef</a></code> function to look at the estimates of the random effects:</p>
+<p>For this model, along with looking at the <code>summary</code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_sex_district</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: latent_lognormal </span></span>
@@ -432,13 +413,13 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
 <span><span class="co">#&gt; Intercept           1.63      0.04     1.54     1.72 1.00     2473     2812</span></span>
 <span><span class="co">#&gt; sigma_Intercept    -0.64      0.08    -0.80    -0.49 1.00     1974     1983</span></span>
-<span><span class="co">#&gt; sexM                0.04      0.03    -0.02     0.10 1.00    10711     2685</span></span>
-<span><span class="co">#&gt; sigma_sexM          0.04      0.04    -0.04     0.12 1.00     8473     3145</span></span>
+<span><span class="co">#&gt; sexMale             0.04      0.03    -0.02     0.10 1.00    10711     2685</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.04      0.04    -0.04     0.12 1.00     8473     3145</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
 <span><span class="co">#&gt; scale reduction factor on split chains (at convergence, Rhat = 1).</span></span>
-<span><span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">ranef</a></span><span class="op">(</span><span class="va">fit_sex_district</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">ranef</a></span><span class="op">(</span><span class="va">fit_sex_district</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $district</span></span>
 <span><span class="co">#&gt; , , Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -506,12 +487,6 @@ Figure <a href="#fig:epred">2.1</a>B illustrates the higher mean of men as compa
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">fit_sex</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred_sex_figure</span> <span class="op">&lt;-</span> <span class="va">epred_draws_sex</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    sex <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"F"</span> <span class="op">~</span> <span class="st">"Female"</span>,</span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"M"</span> <span class="op">~</span> <span class="st">"Male"</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.epred</span>, y <span class="op">=</span> <span class="va">sex</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/ggdist/reference/stat_halfeye.html" class="external-link">stat_halfeye</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span>, title <span class="op">=</span> <span class="st">"Sex-stratified"</span>, tag <span class="op">=</span> <span class="st">"B"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -524,12 +499,6 @@ Figure <a href="#fig:epred">2.1</a>B illustrates the higher mean of men as compa
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred_sex_district_figure</span> <span class="op">&lt;-</span> <span class="va">epred_draws_sex_district</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    sex <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"F"</span> <span class="op">~</span> <span class="st">"Female"</span>,</span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"M"</span> <span class="op">~</span> <span class="st">"Male"</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.epred</span>, y <span class="op">=</span> <span class="va">district</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/ggdist/reference/stat_pointinterval.html" class="external-link">stat_pointinterval</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="va">.</span> <span class="op">~</span> <span class="va">sex</span><span class="op">)</span> <span class="op">+</span></span>
@@ -565,12 +534,6 @@ For example, for the <code>mu</code> parameter in the sex-district stratified mo
 
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">linpred_draws_sex_district</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    sex <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"F"</span> <span class="op">~</span> <span class="st">"Female"</span>,</span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"M"</span> <span class="op">~</span> <span class="st">"Male"</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">mu</span>, y <span class="op">=</span> <span class="va">district</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/ggdist/reference/stat_pointinterval.html" class="external-link">stat_pointinterval</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="va">.</span> <span class="op">~</span> <span class="va">sex</span><span class="op">)</span> <span class="op">+</span></span>
@@ -616,12 +579,6 @@ Figure <a href="#fig:pmf">2.3</a> shows the result, where the few delays greater
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pmf_sex_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_pmf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    sex <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"F"</span> <span class="op">~</span> <span class="st">"Female"</span>,</span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"M"</span> <span class="op">~</span> <span class="st">"Male"</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.prediction</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">count</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span>, title <span class="op">=</span> <span class="st">"Sex-stratified"</span>, tag <span class="op">=</span> <span class="st">"B"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -636,12 +593,6 @@ Figure <a href="#fig:pmf">2.3</a> shows the result, where the few delays greater
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pmf_sex_district_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_district_pmf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    sex <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"F"</span> <span class="op">~</span> <span class="st">"Female"</span>,</span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"M"</span> <span class="op">~</span> <span class="st">"Male"</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.prediction</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">count</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
@@ -687,12 +638,6 @@ That is to produce continuous delay times (Figure <a href="#fig:pdf">2.4</a>):</
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pdf_sex_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_pdf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    sex <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"F"</span> <span class="op">~</span> <span class="st">"Female"</span>,</span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"M"</span> <span class="op">~</span> <span class="st">"Male"</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.prediction</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density.html" class="external-link">geom_density</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span>, title <span class="op">=</span> <span class="st">"Sex-stratified"</span>, tag <span class="op">=</span> <span class="st">"B"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -707,12 +652,6 @@ That is to produce continuous delay times (Figure <a href="#fig:pdf">2.4</a>):</
 <span>  <span class="fu"><a href="http://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pdf_sex_district_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_district_pdf</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    sex <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"F"</span> <span class="op">~</span> <span class="st">"Female"</span>,</span>
-<span>      <span class="va">sex</span> <span class="op">==</span> <span class="st">"M"</span> <span class="op">~</span> <span class="st">"Male"</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.prediction</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density.html" class="external-link">geom_density</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
