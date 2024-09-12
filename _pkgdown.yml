@@ -32,10 +32,6 @@ reference:
   desc: Tools for simulating datasets
   contents:
   - has_concept("simulate")
-- title: Preprocess
-  desc: Functions for preprocessing observations
-  contents:
-  - has_concept("preprocess")
 - title: Observe
   desc: Functions for observing data
   contents:
@@ -60,10 +56,6 @@ reference:
   desc: Functions for postprocessing model output
   contents:
   - has_concept("postprocess")
-- title: Plot
-  desc: Functions and helper functions for plotting
-  contents:
-  - has_concept("plot")
 - title: Data
   desc: Data included with the package
   contents:

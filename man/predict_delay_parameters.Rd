@@ -32,12 +32,9 @@ Other postprocess:
 \code{\link{draws_to_long}()},
 \code{\link{log_lik_latent_gamma}()},
 \code{\link{log_lik_latent_lognormal}()},
-\code{\link{make_relative_to_truth}()},
 \code{\link{posterior_epred_latent_gamma}()},
 \code{\link{posterior_epred_latent_lognormal}()},
 \code{\link{posterior_predict_latent_gamma}()},
-\code{\link{posterior_predict_latent_lognormal}()},
-\code{\link{summarise_draws}()},
-\code{\link{summarise_variable}()}
+\code{\link{posterior_predict_latent_lognormal}()}
 }
 \concept{postprocess}
