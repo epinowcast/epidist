@@ -57,14 +57,14 @@ utils::globalVariables(c(
   "mu", # <add_mean_sd.gamma_samples>
   "sd", # <add_mean_sd.gamma_samples>
   "shape", # <add_mean_sd.gamma_samples>
-  "prior_old", # <replace_prior>
-  "prior_new", # <replace_prior>
-  "source_new", # <replace_prior>
   "rlnorm", # <simulate_secondary>
   ":=", # <simulate_secondary>
   "delay", # <simulate_secondary>
   ".N", # <simulate_secondary>
   "stime", # <simulate_secondary>
   "ptime", # <simulate_secondary>
+  "prior_old", # <.replace_prior>
+  "prior_new", # <.replace_prior>
+  "source_new", # <.replace_prior>
   NULL
 ))
