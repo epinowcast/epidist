@@ -291,14 +291,14 @@ In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo 
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, cores <span class="op">=</span> <span class="fl">4</span>, refresh <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 4 parallel chains...</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Chain 1 finished in 4.9 seconds.</span></span>
-<span><span class="co">#&gt; Chain 3 finished in 4.8 seconds.</span></span>
-<span><span class="co">#&gt; Chain 4 finished in 4.9 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 4.7 seconds.</span></span>
+<span><span class="co">#&gt; Chain 3 finished in 4.7 seconds.</span></span>
 <span><span class="co">#&gt; Chain 2 finished in 4.9 seconds.</span></span>
+<span><span class="co">#&gt; Chain 4 finished in 4.8 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; All 4 chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 4.9 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 5.1 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 4.8 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 5.0 seconds.</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <code>brmsfit</code> object containing MCMC samples from each of the parameters (Table <a href="#tab:pars">2.1</a>) in the model.
 Users familiar with Stan and <code>brms</code>, can work with <code>fit</code> directly.
 Any tool that supports <code>brms</code> fitted model objects will be compatible with <code>fit</code>.</p>
