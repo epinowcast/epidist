@@ -30,6 +30,10 @@ predict_delay_parameters <- function(fit, newdata = NULL, ...) {
   return(dt)
 }
 
+#' @rdname predict_delay_parameters
+#' @export
+predict_dpar <- predict_delay_parameters
+
 #' Add natural scale mean and standard deviation parameters
 #'
 #' @param data A dataframe of distributional parameters
