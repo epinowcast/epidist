@@ -35,7 +35,7 @@ assert_latent_individual_input <- function(data) {
 #' object, which may be passed to [epidist()] to perform inference for the
 #' model.
 #'
-#' @param data A `data.frame` or `data.table` containing line list data
+#' @param data A `data.frame` containing line list data
 #' @rdname as_latent_individual
 #' @method as_latent_individual data.frame
 #' @family latent_individual
@@ -72,7 +72,7 @@ as_latent_individual.data.frame <- function(data) {
 #' `is_latent_individual()` is true, it also checks that `data` is a
 #' `data.frame` with the correct columns.
 #'
-#' @param data A `data.frame` or `data.table` containing line list data
+#' @param data A `data.frame` containing line list data
 #' @importFrom checkmate assert_data_frame assert_names assert_int
 #' assert_numeric
 #' @method epidist_validate epidist_latent_individual
@@ -101,7 +101,7 @@ epidist_validate.epidist_latent_individual <- function(data) {
 
 #' Check if data has the `epidist_latent_individual` class
 #'
-#' @param data A `data.frame` or `data.table` containing line list data
+#' @param data A `data.frame` containing line list data
 #' @family latent_individual
 #' @export
 is_latent_individual <- function(data) {
@@ -110,7 +110,7 @@ is_latent_individual <- function(data) {
 
 #' Check if data has the `epidist_latent_individual` class
 #'
-#' @param data A `data.frame` or `data.table` containing line list data
+#' @param data A `data.frame` containing line list data
 #' @param family Output of a call to `brms::brmsfamily()`
 #' @param ... ...
 #'
