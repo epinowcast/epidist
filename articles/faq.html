@@ -116,12 +116,12 @@ For example, the function <code><a href="https://mc-stan.org/posterior/reference
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## # A draws_df: 6 iterations, 1 chains, and 2 variables</span></span>
 <span><span class="co">##   Intercept Intercept_sigma</span></span>
-<span><span class="co">## 1       1.8           -0.54</span></span>
-<span><span class="co">## 2       1.8           -0.75</span></span>
-<span><span class="co">## 3       1.7           -0.85</span></span>
-<span><span class="co">## 4       1.8           -0.76</span></span>
-<span><span class="co">## 5       1.8           -0.74</span></span>
-<span><span class="co">## 6       1.8           -0.72</span></span>
+<span><span class="co">## 1       1.7            0.46</span></span>
+<span><span class="co">## 2       1.8            0.43</span></span>
+<span><span class="co">## 3       1.8            0.48</span></span>
+<span><span class="co">## 4       1.7            0.44</span></span>
+<span><span class="co">## 5       1.7            0.47</span></span>
+<span><span class="co">## 6       1.7            0.46</span></span>
 <span><span class="co">## # ... hidden reserved variables {'.chain', '.iteration', '.draw'}</span></span></code></pre>
 </div>
 <div class="section level3">
@@ -157,7 +157,7 @@ However, some of those priors do not make sense in the context of our applicatio
 Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html" class="external-link">prior predictive checking</a> to set <code>epidist</code>-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.</p>
 <p>For example, for the <code><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">brms::lognormal()</a></code> latent individual model, we suggest the following prior distributions for the <code>brms</code> <code>mu</code> and <code>sigma</code> intercept parameters:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">family</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">family</span> <span class="op">&lt;-</span> <span class="st">"lognormal"</span></span>
 <span></span>
 <span><span class="va">epidist_family</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_family.html">epidist_family</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">family</span><span class="op">)</span></span>
 <span><span class="va">epidist_formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_formula.html">epidist_formula</a></span><span class="op">(</span></span>
@@ -183,7 +183,7 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <span><span class="va">fit_ppc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">data</span>,</span>
 <span>  formula <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  family <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="st">"lognormal"</span>,</span>
 <span>  sample_prior <span class="op">=</span> <span class="st">"only"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -204,11 +204,13 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">mean</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.99</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         1%        10%        25%        50%        75%        90%        99% </span></span>
-<span><span class="co">##  0.3165975  0.9126781  1.7219663  3.2820122  6.4091990 11.6835343 32.5133287</span></span></code></pre>
+<span><span class="co">##  0.3558084  1.0303217  1.9577108  3.7682459  7.5819517 14.5496488 46.0359735</span></span></code></pre>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">sd</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.99</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##         1%        10%        25%        50%        75%        90%        99% </span></span>
-<span><span class="co">##  0.1247249  0.4090396  0.8196141  1.7231608  3.7897856  7.7210735 31.1275098</span></span></code></pre>
+<pre><code><span><span class="co">##          1%         10%         25%         50%         75%         90% </span></span>
+<span><span class="co">##  0.03582676  0.37495328  1.01121384  2.72009640  7.13444186 18.28852812 </span></span>
+<span><span class="co">##         99% </span></span>
+<span><span class="co">## 94.99318781</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="what-do-the-parameters-in-my-model-output-correspond-to">What do the parameters in my model output correspond to?<a class="anchor" aria-label="anchor" href="#what-do-the-parameters-in-my-model-output-correspond-to"></a>
