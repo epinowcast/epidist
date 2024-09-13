@@ -15,7 +15,7 @@ utils::globalVariables(c(
   "stime_upr", # <as_latent_individual.data.frame>
   "woverlap", # <as_latent_individual.data.frame>
   "swindow", # <as_latent_individual.data.frame>
-  "delay_central", # <as_latent_individual.data.frame>
+  "delay", # <as_latent_individual.data.frame>
   "row_id", # <as_latent_individual.data.frame>
   "woverlap", # <epidist_stancode.epidist_latent_individual>
   "row_id", # <epidist_stancode.epidist_latent_individual>
