@@ -4,7 +4,7 @@
 \alias{epidist_family.epidist_latent_individual}
 \title{Check if data has the \code{epidist_latent_individual} class}
 \usage{
-\method{epidist_family}{epidist_latent_individual}(data, family = brms::lognormal(), ...)
+\method{epidist_family}{epidist_latent_individual}(data, family = "lognormal", ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} or \code{data.table} containing line list data}
