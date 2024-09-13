@@ -1,6 +1,6 @@
 ---
 title: "Using epidist to estimate delay between symptom onset and positive test for an Ebola outbreak in Sierra Leone"
-description: "A more detailed guide to using the `epidist` R package"
+description: "A more detailed guide to using the epidist R package"
 output: 
   bookdown::html_document2:
     fig_caption: yes
