@@ -19,25 +19,19 @@
 #' @autoglobal
 #' @export
 observe_process <- function(linelist) {
-  clinelist <- data.table::copy(linelist)
-  clinelist[, ptime_daily := floor(ptime)]
-  clinelist[, ptime_lwr := ptime_daily]
-  clinelist[, ptime_upr := ptime_daily + 1]
-  # How the second event would be recorded in the data
-  clinelist[, stime_daily := floor(stime)]
-  clinelist[, stime_lwr := stime_daily]
-  clinelist[, stime_upr := stime_daily + 1]
-  # How would we observe the delay distribution
-  # previously delay_daily would be the floor(delay)
-  clinelist[, delay_daily := stime_daily - ptime_daily]
-  clinelist[, delay_lwr := purrr::map_dbl(delay_daily, ~ max(0, . - 1))]
-  clinelist[, delay_upr := delay_daily + 1]
-  # We assume observation time is the ceiling of the maximum delay
-  clinelist[, obs_at := stime |>
-              max() |>
-              ceiling()]
-
-  return(clinelist)
+  linelist |>
+    dplyr::mutate(
+      ptime_daily = floor(ptime),
+      ptime_lwr = ptime_daily,
+      ptime_upr = ptime_daily + 1,
+      stime_daily = floor(stime),
+      stime_lwr = stime_daily,
+      stime_upr = stime_daily + 1,
+      delay_daily = stime_daily - ptime_daily,
+      delay_lwr = purrr::map_dbl(delay_daily, ~ max(0, . - 1)),
+      delay_upr = delay_daily + 1,
+      obs_at = ceiling(max(stime))
+    )
 }
 
 #' Filter observations based on a observation time of secondary events
@@ -48,14 +42,14 @@ observe_process <- function(linelist) {
 #' @autoglobal
 #' @export
 filter_obs_by_obs_time <- function(linelist, obs_time) {
-  truncated_linelist <- data.table::copy(linelist)
-  truncated_linelist[, obs_at := obs_time]
-  truncated_linelist[, obs_time := obs_time - ptime]
-  truncated_linelist[, censored_obs_time := obs_at - ptime_lwr]
-  truncated_linelist[, censored := "interval"]
-  truncated_linelist <- truncated_linelist[stime_upr <= obs_at]
-
-  return(truncated_linelist)
+  linelist |>
+    dplyr::mutate(
+      obs_at = obs_time,
+      obs_time = obs_time - ptime,
+      censored_obs_time = obs_at - ptime_lwr,
+      censored = "interval"
+    ) |>
+    dplyr::filter(stime_upr <= obs_at)
 }
 
 #' Filter observations based on the observation time of primary events
