@@ -7,14 +7,14 @@
 #' @param t Upper bound of the uniform distribution to generate primary event
 #' times.
 #'
-#' @return A `data.table` with two columns: `case` (case number) and `ptime`
+#' @return A `data.frame` with two columns: `case` (case number) and `ptime`
 #' (primary event time).
 #'
 #' @family simulate
 #' @importFrom stats runif
 #' @export
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
-  data.table::data.table(
+  data.frame(
     case = 1:sample_size, ptime = runif(sample_size, 0, t)
   )
 }
@@ -31,7 +31,7 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 #' @param seed The random seed to be used in the simulation process.
 #' @param t Upper bound of the survival time. Defaults to 30.
 #'
-#' @return A `data.table` with two columns: `case` (case number) and `ptime`
+#' @return A `data.frame` with two columns: `case` (case number) and `ptime`
 #' (primary event time).
 #'
 #' @family simulate
@@ -52,10 +52,7 @@ simulate_exponential_cases <- function(r = 0.2,
     ptime <- log(1 + quant * (exp(r * t) - 1)) / r
   }
 
-  cases <- data.table::data.table(
-    case = seq_along(ptime),
-    ptime = ptime
-  )
+  cases <- data.frame(case = seq_along(ptime), ptime = ptime)
   return(cases)
 }
 
@@ -72,7 +69,7 @@ simulate_exponential_cases <- function(r = 0.2,
 #' @param N The total population size. Defaults to 10000.
 #' @param seed The random seed to be used in the simulation process.
 #'
-#' @return A `data.table` with two columns: `case` (case number) and `ptime`
+#' @return A `data.frame` with two columns: `case` (case number) and `ptime`
 #' (primary event time).
 #'
 #' @family simulate
@@ -113,11 +110,7 @@ simulate_gillespie <- function(r = 0.2,
     }
   }
 
-  cases <- data.table::data.table(
-    case = seq_along(ptime),
-    ptime = ptime
-  )
-
+  cases <- data.frame(case = seq_along(ptime), ptime = ptime)
   return(cases)
 }
 
@@ -131,17 +124,16 @@ simulate_gillespie <- function(r = 0.2,
 #' @param dist The delay distribution to be used. Defaults to [rlnorm()].
 #' @param ... Arguments to be passed to the delay distribution function.
 #'
-#' @return A `data.table` that augments `linelist` with two new columns: `delay`
+#' @return A `data.frame` that augments `linelist` with two new columns: `delay`
 #' (secondary event latency) and `stime` (the time of the secondary event).
 #'
 #' @family simulate
 #' @autoglobal
 #' @export
 simulate_secondary <- function(linelist, dist = rlnorm, ...) {
-  obs <- data.table::copy(linelist)
-
-  obs[, delay := dist(.N, ...)]
-  obs[, stime := ptime + delay]
-
-  return(obs)
+  linelist |>
+    dplyr::mutate(
+      delay = dist(dplyr::n(), ...),
+      stime = ptime + delay
+    )
 }
