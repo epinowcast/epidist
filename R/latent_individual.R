@@ -56,7 +56,7 @@ as_latent_individual.data.frame <- function(data) {
   )]
   data[, woverlap := as.numeric(stime_lwr < ptime_upr)]
   data[, swindow := stime_upr - stime_lwr]
-  data[, delay_central := stime_lwr - ptime_lwr]
+  data[, delay := stime_lwr - ptime_lwr]
   data[, row_id := seq_len(.N)]
   if (nrow(data) > 1) {
     data <- data[, id := as.factor(id)]
@@ -86,7 +86,7 @@ epidist_validate.epidist_latent_individual <- function(data) {
     must.include = c("case", "ptime_lwr", "ptime_upr",
                      "stime_lwr", "stime_upr", "obs_at",
                      "id", "obs_t", "pwindow", "woverlap",
-                     "swindow", "delay_central", "row_id")
+                     "swindow", "delay", "row_id")
   )
   if (nrow(data) > 1) {
     checkmate::assert_factor(data$id)
@@ -95,7 +95,7 @@ epidist_validate.epidist_latent_individual <- function(data) {
   checkmate::assert_numeric(data$pwindow, lower = 0)
   checkmate::assert_numeric(data$woverlap, lower = 0)
   checkmate::assert_numeric(data$swindow, lower = 0)
-  checkmate::assert_numeric(data$delay_central, lower = 0)
+  checkmate::assert_numeric(data$delay, lower = 0)
   checkmate::assert_integer(data$row_id, lower = 0)
 }
 
@@ -157,7 +157,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
   formula <- brms:::validate_formula(formula, data = data, family = family)
 
   formula <- stats::update(
-    formula, delay_central | vreal(obs_t, pwindow, swindow) ~ .
+    formula, delay | vreal(obs_t, pwindow, swindow) ~ .
   )
 
   # Using this here for checking purposes
