@@ -98,6 +98,7 @@ library(gt)
 library(purrr)
 library(tidyr)
 library(tibble)
+library(tidybayes)
 ```
 
 First, we begin by simulating data.
@@ -171,7 +172,12 @@ fits <- list(
 
 draws <- imap(fits, function(fit, name) {
   predict_delay_parameters(fit) |>
-    draws_to_long() |>
+    as.data.frame() |>
+    pivot_longer(
+      cols = c("mu", "sigma", "mean", "sd"),
+      names_to = "parameter",
+      values_to = "value"
+    ) |>
     filter(parameter %in% c("mu", "sigma")) |>
     mutate(method = as.factor(name))
 })
@@ -194,37 +200,29 @@ pars |>
   gt()
 ```
 
-More comprehensively, the estimated posterior distributions are as follows.
+More comprehensively, the estimated posterior distributions are shown in Figure \@ref(fig:posterior).
 
-```{r}
+(ref:posterior) Estimated posterior distributions for the `mu` and `sigma` parameters using each inference method, shown using `tidybayes::stat_slabinterval()`.
+
+```{r posterior, fig.cap="(ref:posterior)"}
 draws |>
-  filter(parameter == "mu") |>
-  ggplot(aes(x = value, fill = method)) +
-  geom_histogram(aes(y = ..density..)) +
-  scale_fill_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
-  facet_grid(method ~ parameter) +
+  ggplot(aes(x = value, col = method)) +
+  stat_slabinterval(density = "histogram", breaks = 30, alpha = 0.8) +
+  scale_colour_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
+  facet_grid(method ~ parameter, scales = "free_x") +
   theme_minimal() +
   guides(fill = "none") +
-  labs(x = "", y = "")
-```
-
-```{r}
-draws |>
-  filter(parameter == "sigma") |>
-  ggplot(aes(x = value, fill = method)) +
-  geom_histogram(aes(y = ..density..)) +
-  scale_fill_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
-  facet_grid(method ~ parameter) +
-  theme_minimal() +
-  guides(fill = "none") +
-  labs(x = "", y = "")
+  labs(x = "", y = "", col = "Method") +
+  theme(legend.position = "bottom")
 ```
 
 ## Comparison of resulting delay distributions
 
-How do these different distributions on the `mu` and `sigma` parameters effect the estimated delay distribution?
+Figure \@ref(fig:delay-pdf) shows how the different `mu` and `sigma` posterior mean estimates from each inference method alter an estimated delay distribution.
 
-```{r}
+(ref:delay-pdf) Delay probability density functions obtained based on the posterior mean estimated `mu` and `sigma` parameters.
+
+```{r delay-pdf, fig.cap="(ref:delay-pdf)"}
 pmap_df(
   filter(pars), ~ tibble(
     x = seq(0, 25, by = 0.1),
