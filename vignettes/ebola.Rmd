@@ -405,7 +405,7 @@ draws_sex_pmf <- obs_prep |>
 
 pmf_sex_figure <- draws_sex_pmf |>
   ggplot(aes(x = .prediction)) +
-  geom_bar(aes(y = after_stat(count / sum(count)))) +
+  geom_bar(aes(y = after_stat(count / ave(count, PANEL, FUN = sum)))) +
   labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
   facet_grid(. ~ sex) +
   scale_x_continuous(limits = c(0, 30)) +
@@ -418,8 +418,16 @@ draws_sex_district_pmf <- obs_prep |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pmf_sex_district_figure <- draws_sex_district_pmf |>
+  mutate(
+    district = case_when(
+      district == "Port Loko" ~ "Port\nLoko",
+      district == "Western Rural" ~ "Western\nRural",
+      district == "Western Urban" ~ "Western\nUrban",
+      .default = district
+    )
+  ) |>
   ggplot(aes(x = .prediction)) +
-  geom_bar(aes(y = after_stat(count / sum(count)))) +
+  geom_bar(aes(y = after_stat(count / ave(count, PANEL, FUN = sum)))) +
   labs(
     x = "PMF with daily censoring and no truncation", y = "",
     title = "Sex-district-stratified", tag = "C"
@@ -431,9 +439,9 @@ pmf_sex_district_figure <- draws_sex_district_pmf |>
 
 (ref:pmf) Posterior predictions of the discrete probability mass function for each of the fitted models.
 
-```{r pmf, fig.cap="(ref:pmf)", fig.height = 12}
+```{r pmf, fig.cap="(ref:pmf)", fig.height = 16}
 pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
-  plot_layout(heights = c(1, 1.5, 3.5))
+  plot_layout(heights = c(1, 1.5, 5.5))
 ```
 
 ### Continuous probability density function
@@ -474,6 +482,14 @@ draws_sex_district_pdf <- obs_prep |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pdf_sex_district_figure <- draws_sex_district_pdf |>
+  mutate(
+    district = case_when(
+      district == "Port Loko" ~ "Port\nLoko",
+      district == "Western Rural" ~ "Western\nRural",
+      district == "Western Urban" ~ "Western\nUrban",
+      .default = district
+    )
+  ) |>
   ggplot(aes(x = .prediction)) +
   geom_density() +
   labs(
@@ -487,9 +503,9 @@ pdf_sex_district_figure <- draws_sex_district_pdf |>
 
 (ref:pdf) Posterior predictions of the continuous probability density function for each of the fitted models.
 
-```{r pdf, fig.cap="(ref:pdf)", fig.height = 12}
+```{r pdf, fig.cap="(ref:pdf)", fig.height = 16}
 pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
-  plot_layout(heights = c(1, 1.5, 3.5))
+  plot_layout(heights = c(1, 1.5, 5.5))
 ```
 
 # Conclusion
