@@ -197,7 +197,7 @@ Additionally, to speed up computation, we take a random `r 100 * subsample`% sub
 
 ```{r}
 obs_cens <- obs_cens |>
-  slice_sample(n = n_complete * subsample, replace = FALSE)
+  slice_sample(n = round(n_complete * subsample), replace = FALSE)
 ```
 
 ## Model fitting
