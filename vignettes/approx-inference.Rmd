@@ -110,16 +110,14 @@ sdlog <- 0.5
 obs_time <- 25
 sample_size <- 200
 
-obs_cens_trunc <- simulate_gillespie(seed = 101) |>
+obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
   simulate_secondary(
     meanlog = meanlog,
     sdlog = sdlog
   ) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time)
-
-obs_cens_trunc_samp <-
-  obs_cens_trunc[sample(seq_len(.N), sample_size, replace = FALSE)]
+  filter_obs_by_obs_time(obs_time = obs_time) |>
+  slice_sample(n = sample_size, replace = FALSE)
 ```
 
 We now prepare the data for fitting with the latent individual model, and perform inference with HMC:
