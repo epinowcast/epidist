@@ -17,6 +17,7 @@
 #' @param linelist ...
 #' @family observe
 #' @autoglobal
+#' @importFrom dplyr mutate
 #' @export
 observe_process <- function(linelist) {
   linelist |>
@@ -40,6 +41,7 @@ observe_process <- function(linelist) {
 #' @param obs_time ...
 #' @family observe
 #' @autoglobal
+#' @importFrom dplyr mutate filter
 #' @export
 filter_obs_by_obs_time <- function(linelist, obs_time) {
   linelist |>
@@ -59,31 +61,31 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
 #' @param obs_at ...
 #' @family observe
 #' @autoglobal
+#' @importFrom dplyr mutate
 #' @export
 filter_obs_by_ptime <- function(linelist, obs_time,
                                 obs_at = c("obs_secondary", "max_secondary")) {
   obs_at <- match.arg(obs_at)
-
   pfilt_t <- obs_time
-  truncated_linelist <- data.table::copy(linelist)
-  truncated_linelist[, censored := "interval"]
-  truncated_linelist <- truncated_linelist[ptime_upr <= pfilt_t]
-
+  truncated_linelist <- linelist |>
+    mutate(censored = "interval") |>
+    filter(ptime_upr <= pfilt_t)
   if (obs_at == "obs_secondary") {
     # Update observation time to be the same as the maximum secondary time
-    truncated_linelist[, obs_at := stime_upr]
+    truncated_linelist <- mutate(truncated_linelist, obs_at = stime_upr)
   } else if (obs_at == "max_secondary") {
-    truncated_linelist[, obs_at := stime_upr |> max() |> ceiling()]
+    truncated_linelist <- truncated_linelist |>
+      mutate(obs_at := stime_upr |> max() |> ceiling())
   }
-
-  # make observation time as specified
-  truncated_linelist[, obs_time := obs_at - ptime]
-  # Assuming truncation at the beginning of the censoring window
-  truncated_linelist[, censored_obs_time := obs_at - ptime_lwr]
-
-  # set observation time to artifial observation time
+  # Make observation time as specified
+  truncated_linelist <- truncated_linelist |>
+    mutate(
+      obs_time = obs_at - ptime,
+      censored_obs_time = obs_at - ptime_lwr
+    )
+  # Set observation time to artificial observation time if needed
   if (obs_at == "obs_secondary") {
-    truncated_linelist[, obs_at := pfilt_t]
+    truncated_linelist <- mutate(truncated_linelist, obs_at = pfilt_t)
   }
   return(truncated_linelist)
 }
