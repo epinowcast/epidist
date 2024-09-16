@@ -41,25 +41,27 @@ assert_latent_individual_input <- function(data) {
 #' @family latent_individual
 #' @importFrom checkmate assert_data_frame assert_names assert_int
 #' assert_numeric
+#' @importFrom dplyr mutate row_number
 #' @autoglobal
 #' @export
 as_latent_individual.data.frame <- function(data) {
   assert_latent_individual_input(data)
   class(data) <- c(class(data), "epidist_latent_individual")
-  data <- data.table::as.data.table(data)
-  data[, id := seq_len(.N)]
-  data[, obs_t := obs_at - ptime_lwr]
-  data[, pwindow := ifelse(
-    stime_lwr < ptime_upr, ## if overlap
-    stime_upr - ptime_lwr,
-    ptime_upr - ptime_lwr
-  )]
-  data[, woverlap := as.numeric(stime_lwr < ptime_upr)]
-  data[, swindow := stime_upr - stime_lwr]
-  data[, delay := stime_lwr - ptime_lwr]
-  data[, row_id := seq_len(.N)]
+  data <- data |>
+    mutate(
+      obs_t = obs_at - ptime_lwr,
+      pwindow = ifelse(
+        stime_lwr < ptime_upr,
+        stime_upr - ptime_lwr,
+        ptime_upr - ptime_lwr
+      ),
+      woverlap = as.numeric(stime_lwr < ptime_upr),
+      swindow = stime_upr - stime_lwr,
+      delay = stime_lwr - ptime_lwr,
+      row_id = row_number()
+    )
   if (nrow(data) > 1) {
-    data <- data[, id := as.factor(id)]
+    data$id <- as.factor(data$id)
   }
   epidist_validate(data)
   return(data)
@@ -85,7 +87,7 @@ epidist_validate.epidist_latent_individual <- function(data) {
     names(data),
     must.include = c("case", "ptime_lwr", "ptime_upr",
                      "stime_lwr", "stime_upr", "obs_at",
-                     "id", "obs_t", "pwindow", "woverlap",
+                     "obs_t", "pwindow", "woverlap",
                      "swindow", "delay", "row_id")
   )
   if (nrow(data) > 1) {
