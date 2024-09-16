@@ -290,223 +290,223 @@ summary(fit_sex_district)
 ranef(fit_sex_district)
 ```
 
-## Posterior expectations {#posterior-expectation}
+<!-- ## Posterior expectations {#posterior-expectation} -->
 
-To go further than summaries of the fitted model, we recommend using the `tidybayes` package.
-For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws()` function.
-The `tidybayes::add_epred_draws()` function uses the `posterior_epred_latent_lognormal` function implemented in `epidist` for the `latent_lognormal` custom `brms` family.
+<!-- To go further than summaries of the fitted model, we recommend using the `tidybayes` package. -->
+<!-- For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws()` function. -->
+<!-- The `tidybayes::add_epred_draws()` function uses the `posterior_epred_latent_lognormal` function implemented in `epidist` for the `latent_lognormal` custom `brms` family. -->
 
-In Figure \@ref(fig:epred) we show the posterior expectation of the delay distribution for each of the three fitted models.
-Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with women.
+<!-- In Figure \@ref(fig:epred) we show the posterior expectation of the delay distribution for each of the three fitted models. -->
+<!-- Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with women. -->
 
-```{r}
-epred_draws <- obs_prep |>
-  as.data.frame() |>
-  data_grid(NA) |>
-  mutate(obs_t = NA, pwindow = NA, swindow = NA) |>
-  add_epred_draws(fit, dpar = TRUE)
+<!-- ```{r} -->
+<!-- epred_draws <- obs_prep |> -->
+<!--   as.data.frame() |> -->
+<!--   data_grid(NA) |> -->
+<!--   mutate(obs_t = NA, pwindow = NA, swindow = NA) |> -->
+<!--   add_epred_draws(fit, dpar = TRUE) -->
 
-epred_base_figure <- epred_draws |>
-  ggplot(aes(x = .epred)) +
-  stat_halfeye() +
-  labs(x = "", y = "", title = "Intercept-only", tag = "A") +
-  theme_minimal()
+<!-- epred_base_figure <- epred_draws |> -->
+<!--   ggplot(aes(x = .epred)) + -->
+<!--   stat_halfeye() + -->
+<!--   labs(x = "", y = "", title = "Intercept-only", tag = "A") + -->
+<!--   theme_minimal() -->
 
-epred_draws_sex <- obs_prep |>
-  as.data.frame() |>
-  data_grid(sex) |>
-  mutate(obs_t = NA, pwindow = NA, swindow = NA) |>
-  add_epred_draws(fit_sex, dpar = TRUE)
+<!-- epred_draws_sex <- obs_prep |> -->
+<!--   as.data.frame() |> -->
+<!--   data_grid(sex) |> -->
+<!--   mutate(obs_t = NA, pwindow = NA, swindow = NA) |> -->
+<!--   add_epred_draws(fit_sex, dpar = TRUE) -->
 
-epred_sex_figure <- epred_draws_sex |>
-  ggplot(aes(x = .epred, y = sex)) +
-  stat_halfeye() +
-  labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
-  theme_minimal()
+<!-- epred_sex_figure <- epred_draws_sex |> -->
+<!--   ggplot(aes(x = .epred, y = sex)) + -->
+<!--   stat_halfeye() + -->
+<!--   labs(x = "", y = "", title = "Sex-stratified", tag = "B") + -->
+<!--   theme_minimal() -->
 
-epred_draws_sex_district <- obs_prep |>
-  as.data.frame() |>
-  data_grid(sex, district) |>
-  mutate(obs_t = NA, pwindow = NA, swindow = NA) |>
-  add_epred_draws(fit_sex_district, dpar = TRUE)
+<!-- epred_draws_sex_district <- obs_prep |> -->
+<!--   as.data.frame() |> -->
+<!--   data_grid(sex, district) |> -->
+<!--   mutate(obs_t = NA, pwindow = NA, swindow = NA) |> -->
+<!--   add_epred_draws(fit_sex_district, dpar = TRUE) -->
 
-epred_sex_district_figure <- epred_draws_sex_district |>
-  ggplot(aes(x = .epred, y = district)) +
-  stat_pointinterval() +
-  facet_grid(. ~ sex) +
-  labs(
-    x = "Posterior expectation of the delay", y = "",
-    title = "Sex-district-stratified", tag = "C"
-  ) +
-  scale_y_discrete(limits = rev) +
-  theme_minimal()
-```
+<!-- epred_sex_district_figure <- epred_draws_sex_district |> -->
+<!--   ggplot(aes(x = .epred, y = district)) + -->
+<!--   stat_pointinterval() + -->
+<!--   facet_grid(. ~ sex) + -->
+<!--   labs( -->
+<!--     x = "Posterior expectation of the delay", y = "", -->
+<!--     title = "Sex-district-stratified", tag = "C" -->
+<!--   ) + -->
+<!--   scale_y_discrete(limits = rev) + -->
+<!--   theme_minimal() -->
+<!-- ``` -->
 
-(ref:epred) The fitted posterior expectations of the delay distribution for each model.
+<!-- (ref:epred) The fitted posterior expectations of the delay distribution for each model. -->
 
-```{r epred, fig.cap="(ref:epred)", fig.height = 8}
-epred_base_figure / epred_sex_figure / epred_sex_district_figure +
-  plot_layout(heights = c(1, 1.5, 2.5))
-```
+<!-- ```{r epred, fig.cap="(ref:epred)", fig.height = 8} -->
+<!-- epred_base_figure / epred_sex_figure / epred_sex_district_figure + -->
+<!--   plot_layout(heights = c(1, 1.5, 2.5)) -->
+<!-- ``` -->
 
-## Linear predictor posteriors
+<!-- ## Linear predictor posteriors -->
 
-The `tidybayes` package also allows users to generate draws of the linear predictors for all distributional parameters using `tidybayes::add_linpred_draws()`.
-For example, for the `mu` parameter in the sex-district stratified model (Figure \@ref(fig:linpred-sex-district)):
+<!-- The `tidybayes` package also allows users to generate draws of the linear predictors for all distributional parameters using `tidybayes::add_linpred_draws()`. -->
+<!-- For example, for the `mu` parameter in the sex-district stratified model (Figure \@ref(fig:linpred-sex-district)): -->
 
-```{r}
-linpred_draws_sex_district <- obs_prep |>
-  as.data.frame() |>
-  data_grid(sex, district) |>
-  mutate(obs_t = NA, pwindow = NA, swindow = NA) |>
-  add_linpred_draws(fit_sex_district, dpar = TRUE)
-```
+<!-- ```{r} -->
+<!-- linpred_draws_sex_district <- obs_prep |> -->
+<!--   as.data.frame() |> -->
+<!--   data_grid(sex, district) |> -->
+<!--   mutate(obs_t = NA, pwindow = NA, swindow = NA) |> -->
+<!--   add_linpred_draws(fit_sex_district, dpar = TRUE) -->
+<!-- ``` -->
 
-(ref:linpred-sex-district) The posterior distribution of the linear predictor of `mu` parameter within the sex-district stratified model. The posterior expectations in Section \@ref(posterior-expectation) are a function of both the `mu` linear predictor posterior distribution and `sigma` linear predictor posterior distribution.
+<!-- (ref:linpred-sex-district) The posterior distribution of the linear predictor of `mu` parameter within the sex-district stratified model. The posterior expectations in Section \@ref(posterior-expectation) are a function of both the `mu` linear predictor posterior distribution and `sigma` linear predictor posterior distribution. -->
 
-```{r linpred-sex-district, fig.cap="(ref:linpred-sex-district)"}
-linpred_draws_sex_district |>
-  ggplot(aes(x = mu, y = district)) +
-  stat_pointinterval() +
-  facet_grid(. ~ sex) +
-  labs(x = "Posterior of the mu linear predictor", y = "") +
-  scale_y_discrete(limits = rev) +
-  theme_minimal()
-```
+<!-- ```{r linpred-sex-district, fig.cap="(ref:linpred-sex-district)"} -->
+<!-- linpred_draws_sex_district |> -->
+<!--   ggplot(aes(x = mu, y = district)) + -->
+<!--   stat_pointinterval() + -->
+<!--   facet_grid(. ~ sex) + -->
+<!--   labs(x = "Posterior of the mu linear predictor", y = "") + -->
+<!--   scale_y_discrete(limits = rev) + -->
+<!--   theme_minimal() -->
+<!-- ``` -->
 
-## Delay posterior distributions
+<!-- ## Delay posterior distributions -->
 
-Posterior predictions of the delay distribution are an important output of an analysis with the `epidist` package.
-In this section, we demonstrate how to produce either a discrete probability mass function representation, or continuous probability density function representation of the delay distribution.
+<!-- Posterior predictions of the delay distribution are an important output of an analysis with the `epidist` package. -->
+<!-- In this section, we demonstrate how to produce either a discrete probability mass function representation, or continuous probability density function representation of the delay distribution. -->
 
-### Discrete probability mass function
+<!-- ### Discrete probability mass function -->
 
-To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
-To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and `obs_t` to 1000 for no censoring.
-Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure.
+<!-- To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation. -->
+<!-- To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and `obs_t` to 1000 for no censoring. -->
+<!-- Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure. -->
 
-```{r}
-draws_pmf <- obs_prep |>
-  as.data.frame() |>
-  mutate(obs_t = 1000, pwindow = 1, swindow = 1) |>
-  add_predicted_draws(fit, ndraws = 1000)
+<!-- ```{r} -->
+<!-- draws_pmf <- obs_prep |> -->
+<!--   as.data.frame() |> -->
+<!--   mutate(obs_t = 1000, pwindow = 1, swindow = 1) |> -->
+<!--   add_predicted_draws(fit, ndraws = 1000) -->
 
-pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
-  geom_bar(aes(y = after_stat(count / sum(count)))) +
-  labs(x = "", y = "", title = "Intercept-only", tag = "A") +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
+<!-- pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) + -->
+<!--   geom_bar(aes(y = after_stat(count / sum(count)))) + -->
+<!--   labs(x = "", y = "", title = "Intercept-only", tag = "A") + -->
+<!--   scale_x_continuous(limits = c(0, 30)) + -->
+<!--   theme_minimal() -->
 
-draws_sex_pmf <- obs_prep |>
-  as.data.frame() |>
-  data_grid(sex) |>
-  mutate(obs_t = 1000, pwindow = 1, swindow = 1) |>
-  add_predicted_draws(fit_sex, ndraws = 1000)
+<!-- draws_sex_pmf <- obs_prep |> -->
+<!--   as.data.frame() |> -->
+<!--   data_grid(sex) |> -->
+<!--   mutate(obs_t = 1000, pwindow = 1, swindow = 1) |> -->
+<!--   add_predicted_draws(fit_sex, ndraws = 1000) -->
 
-pmf_sex_figure <- draws_sex_pmf |>
-  ggplot(aes(x = .prediction)) +
-  geom_bar(aes(y = after_stat(count / ave(count, PANEL, FUN = sum)))) +
-  labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
-  facet_grid(. ~ sex) +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
+<!-- pmf_sex_figure <- draws_sex_pmf |> -->
+<!--   ggplot(aes(x = .prediction)) + -->
+<!--   geom_bar(aes(y = after_stat(count / ave(count, PANEL, FUN = sum)))) + -->
+<!--   labs(x = "", y = "", title = "Sex-stratified", tag = "B") + -->
+<!--   facet_grid(. ~ sex) + -->
+<!--   scale_x_continuous(limits = c(0, 30)) + -->
+<!--   theme_minimal() -->
 
-draws_sex_district_pmf <- obs_prep |>
-  as.data.frame() |>
-  data_grid(sex, district) |>
-  mutate(obs_t = 1000, pwindow = 1, swindow = 1) |>
-  add_predicted_draws(fit_sex_district, ndraws = 1000)
+<!-- draws_sex_district_pmf <- obs_prep |> -->
+<!--   as.data.frame() |> -->
+<!--   data_grid(sex, district) |> -->
+<!--   mutate(obs_t = 1000, pwindow = 1, swindow = 1) |> -->
+<!--   add_predicted_draws(fit_sex_district, ndraws = 1000) -->
 
-pmf_sex_district_figure <- draws_sex_district_pmf |>
-  mutate(
-    district = case_when(
-      district == "Port Loko" ~ "Port\nLoko",
-      district == "Western Rural" ~ "Western\nRural",
-      district == "Western Urban" ~ "Western\nUrban",
-      .default = district
-    )
-  ) |>
-  ggplot(aes(x = .prediction)) +
-  geom_bar(aes(y = after_stat(count / ave(count, PANEL, FUN = sum)))) +
-  labs(
-    x = "PMF with daily censoring and no truncation", y = "",
-    title = "Sex-district-stratified", tag = "C"
-  ) +
-  facet_grid(district ~ sex) +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
-```
+<!-- pmf_sex_district_figure <- draws_sex_district_pmf |> -->
+<!--   mutate( -->
+<!--     district = case_when( -->
+<!--       district == "Port Loko" ~ "Port\nLoko", -->
+<!--       district == "Western Rural" ~ "Western\nRural", -->
+<!--       district == "Western Urban" ~ "Western\nUrban", -->
+<!--       .default = district -->
+<!--     ) -->
+<!--   ) |> -->
+<!--   ggplot(aes(x = .prediction)) + -->
+<!--   geom_bar(aes(y = after_stat(count / ave(count, PANEL, FUN = sum)))) + -->
+<!--   labs( -->
+<!--     x = "PMF with daily censoring and no truncation", y = "", -->
+<!--     title = "Sex-district-stratified", tag = "C" -->
+<!--   ) + -->
+<!--   facet_grid(district ~ sex) + -->
+<!--   scale_x_continuous(limits = c(0, 30)) + -->
+<!--   theme_minimal() -->
+<!-- ``` -->
 
-(ref:pmf) Posterior predictions of the discrete probability mass function for each of the fitted models.
+<!-- (ref:pmf) Posterior predictions of the discrete probability mass function for each of the fitted models. -->
 
-```{r pmf, fig.cap="(ref:pmf)", fig.height = 16}
-pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
-  plot_layout(heights = c(1, 1.5, 5.5))
-```
+<!-- ```{r pmf, fig.cap="(ref:pmf)", fig.height = 16} -->
+<!-- pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure + -->
+<!--   plot_layout(heights = c(1, 1.5, 5.5)) -->
+<!-- ``` -->
 
-### Continuous probability density function
+<!-- ### Continuous probability density function -->
 
-The posterior predictive distribution under no truncation and no censoring.
-That is to produce continuous delay times (Figure \@ref(fig:pdf)):
+<!-- The posterior predictive distribution under no truncation and no censoring. -->
+<!-- That is to produce continuous delay times (Figure \@ref(fig:pdf)): -->
 
-```{r}
-draws_pdf <- obs_prep |>
-  as.data.frame() |>
-  mutate(obs_t = 1000, pwindow = 0, swindow = 0) |>
-  add_predicted_draws(fit, ndraws = 1000)
+<!-- ```{r} -->
+<!-- draws_pdf <- obs_prep |> -->
+<!--   as.data.frame() |> -->
+<!--   mutate(obs_t = 1000, pwindow = 0, swindow = 0) |> -->
+<!--   add_predicted_draws(fit, ndraws = 1000) -->
 
-pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
-  geom_density() +
-  labs(x = "", y = "", title = "Intercept-only", tag = "A") +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
+<!-- pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) + -->
+<!--   geom_density() + -->
+<!--   labs(x = "", y = "", title = "Intercept-only", tag = "A") + -->
+<!--   scale_x_continuous(limits = c(0, 30)) + -->
+<!--   theme_minimal() -->
 
-draws_sex_pdf <- obs_prep |>
-  as.data.frame() |>
-  data_grid(sex) |>
-  mutate(obs_t = 1000, pwindow = 0, swindow = 0) |>
-  add_predicted_draws(fit_sex, ndraws = 1000)
+<!-- draws_sex_pdf <- obs_prep |> -->
+<!--   as.data.frame() |> -->
+<!--   data_grid(sex) |> -->
+<!--   mutate(obs_t = 1000, pwindow = 0, swindow = 0) |> -->
+<!--   add_predicted_draws(fit_sex, ndraws = 1000) -->
 
-pdf_sex_figure <- draws_sex_pdf |>
-  ggplot(aes(x = .prediction)) +
-  geom_density() +
-  labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
-  facet_grid(. ~ sex) +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
+<!-- pdf_sex_figure <- draws_sex_pdf |> -->
+<!--   ggplot(aes(x = .prediction)) + -->
+<!--   geom_density() + -->
+<!--   labs(x = "", y = "", title = "Sex-stratified", tag = "B") + -->
+<!--   facet_grid(. ~ sex) + -->
+<!--   scale_x_continuous(limits = c(0, 30)) + -->
+<!--   theme_minimal() -->
 
-draws_sex_district_pdf <- obs_prep |>
-  as.data.frame() |>
-  data_grid(sex, district) |>
-  mutate(obs_t = 1000, pwindow = 0, swindow = 0) |>
-  add_predicted_draws(fit_sex_district, ndraws = 1000)
+<!-- draws_sex_district_pdf <- obs_prep |> -->
+<!--   as.data.frame() |> -->
+<!--   data_grid(sex, district) |> -->
+<!--   mutate(obs_t = 1000, pwindow = 0, swindow = 0) |> -->
+<!--   add_predicted_draws(fit_sex_district, ndraws = 1000) -->
 
-pdf_sex_district_figure <- draws_sex_district_pdf |>
-  mutate(
-    district = case_when(
-      district == "Port Loko" ~ "Port\nLoko",
-      district == "Western Rural" ~ "Western\nRural",
-      district == "Western Urban" ~ "Western\nUrban",
-      .default = district
-    )
-  ) |>
-  ggplot(aes(x = .prediction)) +
-  geom_density() +
-  labs(
-    x = "PDF with no censoring and no truncation", y = "",
-    title = "Sex-district-stratified", tag = "C"
-  ) +
-  facet_grid(district ~ sex) +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
-```
+<!-- pdf_sex_district_figure <- draws_sex_district_pdf |> -->
+<!--   mutate( -->
+<!--     district = case_when( -->
+<!--       district == "Port Loko" ~ "Port\nLoko", -->
+<!--       district == "Western Rural" ~ "Western\nRural", -->
+<!--       district == "Western Urban" ~ "Western\nUrban", -->
+<!--       .default = district -->
+<!--     ) -->
+<!--   ) |> -->
+<!--   ggplot(aes(x = .prediction)) + -->
+<!--   geom_density() + -->
+<!--   labs( -->
+<!--     x = "PDF with no censoring and no truncation", y = "", -->
+<!--     title = "Sex-district-stratified", tag = "C" -->
+<!--   ) + -->
+<!--   facet_grid(district ~ sex) + -->
+<!--   scale_x_continuous(limits = c(0, 30)) + -->
+<!--   theme_minimal() -->
+<!-- ``` -->
 
-(ref:pdf) Posterior predictions of the continuous probability density function for each of the fitted models.
+<!-- (ref:pdf) Posterior predictions of the continuous probability density function for each of the fitted models. -->
 
-```{r pdf, fig.cap="(ref:pdf)", fig.height = 16}
-pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
-  plot_layout(heights = c(1, 1.5, 5.5))
-```
+<!-- ```{r pdf, fig.cap="(ref:pdf)", fig.height = 16} -->
+<!-- pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure + -->
+<!--   plot_layout(heights = c(1, 1.5, 5.5)) -->
+<!-- ``` -->
 
 # Conclusion
 
