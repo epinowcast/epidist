@@ -27,7 +27,6 @@ Depends:
 Imports: 
     brms,
     cmdstanr,
-    data.table,
     ggplot2,
     purrr,
     stats,
