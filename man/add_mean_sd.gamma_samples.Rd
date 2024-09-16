@@ -20,7 +20,6 @@ Other postprocess:
 \code{\link{add_mean_sd}()},
 \code{\link{add_mean_sd.default}()},
 \code{\link{add_mean_sd.lognormal_samples}()},
-\code{\link{draws_to_long}()},
 \code{\link{predict_delay_parameters}()}
 }
 \concept{postprocess}
