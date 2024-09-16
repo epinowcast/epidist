@@ -1,12 +1,12 @@
 pandoc: 3.1.11
 pkgdown: 2.1.0.9000
-pkgdown_sha: 800340f4b1b6d5c8c0c3510ef34776436b14b298
+pkgdown_sha: bbf246ea0e115fa39486bee5be80f91903c0081b
 articles:
   approx-inference: approx-inference.html
   ebola: ebola.html
   epidist: epidist.html
   faq: faq.html
-last_built: 2024-09-13T15:12Z
+last_built: 2024-09-16T16:51Z
 urls:
   reference: https://epidist.epinowcast.org/reference
   article: https://epidist.epinowcast.org/articles
