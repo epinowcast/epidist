@@ -46,7 +46,7 @@ assert_latent_individual_input <- function(data) {
 #' @export
 as_latent_individual.data.frame <- function(data) {
   assert_latent_individual_input(data)
-  class(data) <- c(class(data), "epidist_latent_individual")
+  class(data) <- c("epidist_latent_individual", class(data))
   data <- data |>
     mutate(
       obs_t = obs_at - ptime_lwr,
@@ -60,8 +60,8 @@ as_latent_individual.data.frame <- function(data) {
       delay = stime_lwr - ptime_lwr,
       row_id = row_number()
     )
-  if (nrow(data) > 1) {
-    data$id <- as.factor(data$id)
+  if(nrow(data) > 1) {
+    data <- mutate(data, row_id = factor(row_id))
   }
   epidist_validate(data)
   return(data)
@@ -91,14 +91,13 @@ epidist_validate.epidist_latent_individual <- function(data) {
                      "swindow", "delay", "row_id")
   )
   if (nrow(data) > 1) {
-    checkmate::assert_factor(data$id)
+    checkmate::assert_factor(data$row_id)
   }
   checkmate::assert_numeric(data$obs_t, lower = 0)
   checkmate::assert_numeric(data$pwindow, lower = 0)
   checkmate::assert_numeric(data$woverlap, lower = 0)
   checkmate::assert_numeric(data$swindow, lower = 0)
   checkmate::assert_numeric(data$delay, lower = 0)
-  checkmate::assert_integer(data$row_id, lower = 0)
 }
 
 #' Check if data has the `epidist_latent_individual` class
