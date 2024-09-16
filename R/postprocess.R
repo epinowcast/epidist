@@ -23,7 +23,7 @@ predict_delay_parameters <- function(fit, newdata = NULL, ...) {
     df[[dpar]] <- as.vector(lp_dpar)
   }
   class(df) <- c(
-    class(df), paste0(sub(".*_", "", fit$family$name), "_samples")
+    paste0(sub(".*_", "", fit$family$name), "_samples"), class(df)
   )
   df <- add_mean_sd(df)
   return(df)

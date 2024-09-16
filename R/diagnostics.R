@@ -37,7 +37,7 @@ epidist_diagnostics <- function(fit) {
     np <- brms::nuts_params(fit)
     divergent_ind <- np$Parameter == "divergent__"
     treedepth_ind <- np$Parameter == "treedepth__"
-    diagnostics <- tibble(
+    diagnostics <- dplyr::tibble(
       time = sum(rstan::get_elapsed_time(fit$fit)),
       samples = nrow(np) / length(unique(np$Parameter)),
       max_rhat = round(max(brms::rhat(fit), na.rm = TRUE), 3),

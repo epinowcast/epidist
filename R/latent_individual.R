@@ -60,7 +60,7 @@ as_latent_individual.data.frame <- function(data) {
       delay = stime_lwr - ptime_lwr,
       row_id = row_number()
     )
-  if(nrow(data) > 1) {
+  if (nrow(data) > 1) {
     data <- mutate(data, row_id = factor(row_id))
   }
   epidist_validate(data)
@@ -223,19 +223,19 @@ epidist_stancode.epidist_latent_individual <- function(data,
   stanvars_data <- brms::stanvar(
     block = "data",
     scode = "int wN;",
-    x = nrow(data[woverlap > 0]),
+    x = nrow(filter(data, woverlap > 0)),
     name = "wN"
   ) +
     brms::stanvar(
       block = "data",
       scode = "array[N - wN] int noverlap;",
-      x = data[woverlap == 0][, row_id],
+      x = filter(data, woverlap == 0)$row_id,
       name = "noverlap"
     ) +
     brms::stanvar(
       block = "data",
       scode = "array[wN] int woverlap;",
-      x = data[woverlap > 0][, row_id],
+      x = filter(data, woverlap > 0)$row_id,
       name = "woverlap"
     )
 

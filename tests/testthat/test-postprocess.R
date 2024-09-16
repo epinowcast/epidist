@@ -9,7 +9,8 @@ test_that("predict_delay_parameters works with NULL newdata and the latent logno
     output_dir = fs::dir_create(tempfile())
   )
   pred <- predict_delay_parameters(fit)
-  expect_s3_class(pred, "data.table")
+  expect_s3_class(pred, "lognormal_samples")
+  expect_s3_class(pred, "data.frame")
   expect_named(pred, c("draw", "index", "mu", "sigma", "mean", "sd"))
   expect_true(all(pred$mean > 0))
   expect_true(all(pred$sd > 0))
@@ -28,7 +29,8 @@ test_that("predict_delay_parameters accepts newdata arguments and prediction by 
     silent = 2
   )
   pred_sex <- predict_delay_parameters(fit_sex, prep_obs_sex)
-  expect_s3_class(pred_sex, "data.table")
+  expect_s3_class(pred_sex, "lognormal_samples")
+  expect_s3_class(pred_sex, "data.frame")
   expect_named(pred_sex, c("draw", "index", "mu", "sigma", "mean", "sd"))
   expect_true(all(pred_sex$mean > 0))
   expect_true(all(pred_sex$sd > 0))
@@ -63,13 +65,12 @@ test_that("predict_delay_parameters accepts newdata arguments and prediction by 
 
 test_that("add_mean_sd.lognormal_samples works with simulated lognormal distribution parameter data", { # nolint: line_length_linter.
   set.seed(1)
-  dt <- data.table(
+  df <- dplyr::tibble(
     mu = rnorm(n = 100, mean = 1.8, sd = 0.1),
     sigma = rnorm(n = 100, mean = 0.5, sd = 0.05)
   )
-  class(dt) <- c(class(dt), "lognormal_samples")
-  x <- add_mean_sd(dt)
-  expect_s3_class(x, "data.table")
+  class(df) <- c("lognormal_samples", class(df))
+  x <- add_mean_sd(df)
   expect_named(x, c("mu", "sigma", "mean", "sd"))
   expect_true(all(x$mean > 0))
   expect_true(all(x$sd > 0))
@@ -77,14 +78,13 @@ test_that("add_mean_sd.lognormal_samples works with simulated lognormal distribu
 
 test_that("add_mean_sd.gamma_samples works with simulated gamma distribution parameter data", { # nolint: line_length_linter.
   set.seed(1)
-  dt <- data.table(
+  df <- dplyr::tibble(
     shape = rnorm(n = 100, mean = 2, sd = 0.1),
     rate = rnorm(n = 100, mean = 3, sd = 0.2)
-  )
-  dt[, mu := shape / rate]
-  class(dt) <- c(class(dt), "gamma_samples")
-  x <- add_mean_sd(dt)
-  expect_s3_class(x, "data.table")
+  ) |>
+    dplyr::mutate(mu = shape / rate)
+  class(df) <- c("gamma_samples", class(df))
+  x <- add_mean_sd(df)
   expect_named(x, c("shape", "rate", "mu", "mean", "sd"))
   expect_true(all(x$mean > 0))
   expect_true(all(x$sd > 0))
