@@ -97,7 +97,7 @@ Now, to generate secondary events, we will use a lognormal distribution (Figure 
 
 ```{r}
 secondary_dist <- data.frame(mu = 1.8, sigma = 0.5)
-class(secondary_dist) <- c(class(secondary_dist), "lognormal_samples")
+class(secondary_dist) <- c("lognormal_samples", class(secondary_dist))
 secondary_dist <- add_mean_sd(secondary_dist)
 ```
 
@@ -298,9 +298,9 @@ ggplot() +
     aes(x = x),
     fun = dlnorm,
     args = list(
-      mu = secondary_dist[["mu"]],
-      sigma = secondary_dist[["sigma"]]
-    ),
+      meanlog = secondary_dist[["mu"]],
+      sdlog = secondary_dist[["sigma"]]
+    )
   ) +
   geom_function(
     data = data.frame(x = c(0, 30)),
