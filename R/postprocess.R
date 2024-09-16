@@ -34,20 +34,6 @@ predict_delay_parameters <- function(fit, newdata = NULL, ...) {
 #' @export
 predict_dpar <- predict_delay_parameters
 
-#' Convert posterior lognormal samples to long format
-#'
-#' @param draws ...
-#' @family postprocess
-#' @export
-draws_to_long <- function(draws) {
-  long_draws <- data.table::melt(
-    draws,
-    measure.vars = c("mu", "sigma", "mean", "sd"),
-    variable.name = "parameter"
-  )
-  return(long_draws[])
-}
-
 #' Add natural scale mean and standard deviation parameters
 #'
 #' @param data A dataframe of distributional parameters
