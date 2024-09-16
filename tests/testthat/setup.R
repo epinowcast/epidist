@@ -62,9 +62,6 @@ sim_obs_sex_f <- dplyr::filter(sim_obs_sex, sex == 1) |>
   )
 
 sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
-  dplyr::arrange(case)
-
-sim_obs_sex <- sim_obs_sex |>
   observe_process() |>
   filter_obs_by_obs_time(obs_time = obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
