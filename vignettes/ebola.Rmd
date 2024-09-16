@@ -416,7 +416,9 @@ draws_sex_district_pmf <- obs_prep |>
   data_grid(sex, district) |>
   mutate(obs_t = 1000, pwindow = 1, swindow = 1) |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
+```
 
+```{r}
 pmf_sex_district_figure <- draws_sex_district_pmf |>
   mutate(
     district = case_when(
