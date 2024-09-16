@@ -28,6 +28,7 @@ library(brms)
 library(dplyr)
 library(ggplot2)
 library(scales)
+library(tidyr)
 
 set.seed(1)
 
@@ -135,7 +136,12 @@ fit_ppc <- epidist(
 pred <- predict_delay_parameters(fit_ppc)
 
 pred |>
-  draws_to_long() |>
+  as.data.frame() |>
+  pivot_longer(
+    cols = c("mu", "sigma", "mean", "sd"),
+    names_to = "parameter",
+    values_to = "value"
+  ) |>
   filter(parameter %in% c("mean", "sd")) |>
   ggplot(aes(x = value, y = after_stat(density))) +
   geom_histogram() +
