@@ -65,7 +65,7 @@ library(dplyr)
 
 # Example data {#data}
 
-Data should be formatted as a [`data.table`](https://cran.r-project.org/web/packages/data.table/index.html) with the following columns for use within `epidist`:
+Data should be formatted as a `data.frame` with the following columns for use within `epidist`:
 
 * `case`: The unique case ID.
 * `ptime`: The time of the primary event.

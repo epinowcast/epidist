@@ -81,6 +81,7 @@ utils::globalVariables(c(
 >>>>>>> f75bd8f2 (Regenerate globals)
   "ptime_upr", # <filter_obs_by_ptime>
   "stime_upr", # <filter_obs_by_ptime>
+  ":=", # <filter_obs_by_ptime>
   "ptime", # <filter_obs_by_ptime>
   "ptime_lwr", # <filter_obs_by_ptime>
   "mu", # <add_mean_sd.lognormal_samples>

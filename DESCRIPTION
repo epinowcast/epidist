@@ -53,7 +53,6 @@ Suggests:
     patchwork
 Remotes:
     stan-dev/cmdstanr,
-    Rdatatable/data.table,
     paul-buerkner/brms
 Config/Needs/website:
     r-lib/pkgdown,
