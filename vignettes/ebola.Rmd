@@ -179,7 +179,7 @@ For the time being, we filter the data to only complete cases (i.e. rows of the 
 
 ```{r}
 n <- nrow(obs_cens)
-obs_cens <- obs_cens[complete.cases(obs_cens)]
+obs_cens <- obs_cens[complete.cases(obs_cens), ]
 n_complete <- nrow(obs_cens)
 ```
 
