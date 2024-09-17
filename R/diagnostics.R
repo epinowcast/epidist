@@ -21,7 +21,7 @@
 #' @autoglobal
 #' @importFrom brms nuts_params rhat
 #' @importFrom rstan get_elapsed_time
-#' @importFrom dplyr tibble mutate 
+#' @importFrom dplyr tibble mutate
 #' @importFrom cli cli_abort
 #' @export
 epidist_diagnostics <- function(fit) {
