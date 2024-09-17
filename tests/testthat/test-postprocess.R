@@ -39,7 +39,7 @@ test_that("predict_delay_parameters accepts newdata arguments and prediction by 
   expect_equal(length(unique(pred_sex$draw)), summary(fit_sex)$total_ndraws)
 
   pred_sex_summary <- pred_sex |>
-    dyplr::mutate(index = as.factor(index)) |>
+    dplyr::mutate(index = as.factor(index)) |>
     dplyr::left_join(
       dplyr::select(prep_obs_sex, index = row_id, sex),
       by = "index"
