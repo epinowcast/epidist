@@ -128,7 +128,7 @@ epidist_family.epidist_latent_individual <- function(data,
   non_mu_bounds <- lapply(
     family$dpars[-1], brms:::dpar_bounds, family = family$family
   )
-  brms::custom_family(
+  custom_family <- brms::custom_family(
     paste0("latent_", family$family),
     dpars = family$dpars,
     links = c(family$link, non_mu_links),
@@ -138,6 +138,12 @@ epidist_family.epidist_latent_individual <- function(data,
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE
   )
+  reparam <- family$dpars
+  if (family$family == "gamma") {
+    reparam <- c("shape", "shape ./ mu")
+  }
+  custom_family$reparam <- reparam
+  return(custom_family)
 }
 
 #' Define a formula for the latent_individual model
@@ -207,15 +213,9 @@ epidist_stancode.epidist_latent_individual <- function(data,
 
   # dpars_B refers to the insertion into the lpdf call
   # For some families, we tranform brms dpars to match Stan parameterisation
-  lpdf_dpars <- family$dpars
-
-  if (family_name == "gamma") {
-    lpdf_dpars <- c("shape", "shape ./ mu")
-  }
-
   stanvars_functions[[1]]$scode <- gsub(
     "dpars_B",
-    paste(lpdf_dpars, collapse = ", "),
+    paste(family$reparam, collapse = ", "),
     stanvars_functions[[1]]$scode
   )
 
