@@ -142,7 +142,7 @@ obs |>
   theme_minimal()
 ```
 
-`obs` is now a [`data.table`](https://cran.r-project.org/web/packages/data.table/index.html) object with further columns for `delay` and `stime`.
+`obs` is now a `data.frame` with further columns for `delay` and `stime`.
 The secondary event time is simply the primary event time plus the delay:
 
 ```{r}
