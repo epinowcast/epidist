@@ -45,7 +45,6 @@ set.seed(123)
 
 library(epidist)
 library(brms)
-library(data.table)
 library(dplyr)
 library(purrr)
 library(ggplot2)
