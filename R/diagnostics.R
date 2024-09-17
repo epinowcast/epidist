@@ -2,7 +2,7 @@
 #'
 #' This function computes diagnostics to assess the quality of a fitted model.
 #' When the fitting algorithm used is `"sampling"` (HMC) then the output of
-#' `epidist_diagnostics` is a `data.table` containing:
+#' `epidist_diagnostics` is a `data.frame` containing:
 #' * `time`: the total time taken to fit all chains
 #' * `samples`: the total number of samples across all chains
 #' * `max_rhat`: the highest value of the Gelman-Rubin statistic
