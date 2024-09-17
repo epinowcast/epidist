@@ -7,7 +7,7 @@
 #' @param ... Additional arguments
 #' @autoglobal
 #' @importFrom brms get_dpar
-#' @importFrom stats rgamma
+#' @importFrom stats rgamma runif
 #' @keywords internal
 posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu", i = i)
@@ -21,7 +21,7 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
     d_censored <- obs_t + 1
     # while loop to impose the truncation
     while (d_censored > obs_t) {
-      p_latent <- runif(1, 0, 1) * pwindow
+      p_latent <- stats::runif(1, 0, 1) * pwindow
       d_latent <- stats::rgamma(1, shape = shape[s], scale = mu[s] / shape[s])
       s_latent <- p_latent + d_latent
       p_censored <- .floor_mult(p_latent, pwindow)

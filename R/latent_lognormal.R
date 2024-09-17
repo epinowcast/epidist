@@ -8,7 +8,7 @@
 #' @param ... Additional arguments
 #' @autoglobal
 #' @importFrom brms get_dpar
-#' @importFrom stats rlnorm
+#' @importFrom stats rlnorm runif
 #' @keywords internal
 posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu", i = i)
@@ -22,7 +22,7 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
     d_censored <- obs_t + 1
     # while loop to impose the truncation
     while (d_censored > obs_t) {
-      p_latent <- runif(1, 0, 1) * pwindow
+      p_latent <- stats::runif(1, 0, 1) * pwindow
       d_latent <- stats::rlnorm(1, meanlog = mu[s], sdlog = sigma[s])
       s_latent <- p_latent + d_latent
       p_censored <- .floor_mult(p_latent, pwindow)
