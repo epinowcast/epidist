@@ -13,7 +13,7 @@ simulate_uniform_cases(sample_size = 1000, t = 60)
 times.}
 }
 \value{
-A \code{data.table} with two columns: \code{case} (case number) and \code{ptime}
+A \code{data.frame} with two columns: \code{case} (case number) and \code{ptime}
 (primary event time).
 }
 \description{

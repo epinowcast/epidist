@@ -23,11 +23,10 @@ predict_delay_parameters <- function(fit, newdata = NULL, ...) {
     df[[dpar]] <- as.vector(lp_dpar)
   }
   class(df) <- c(
-    class(df), paste0(sub(".*_", "", fit$family$name), "_samples")
+    paste0(sub(".*_", "", fit$family$name), "_samples"), class(df)
   )
-  dt <- as.data.table(df)
-  dt <- add_mean_sd(dt)
-  return(dt)
+  df <- add_mean_sd(df)
+  return(df)
 }
 
 #' @rdname predict_delay_parameters
@@ -73,10 +72,10 @@ add_mean_sd.default <- function(data, ...) {
 #' @autoglobal
 #' @export
 add_mean_sd.lognormal_samples <- function(data, ...) {
-  nat_dt <- data.table::copy(data)
-  nat_dt <- nat_dt[, mean := exp(mu + sigma ^ 2 / 2)]
-  nat_dt <- nat_dt[, sd := mean * sqrt(exp(sigma ^ 2) - 1)]
-  return(nat_dt[])
+  mutate(data,
+    mean = exp(mu + sigma ^ 2 / 2),
+    sd = mean * sqrt(exp(sigma ^ 2) - 1)
+  )
 }
 
 #' Add natural scale mean and standard deviation parameters for a latent gamma
@@ -91,8 +90,8 @@ add_mean_sd.lognormal_samples <- function(data, ...) {
 #' @autoglobal
 #' @export
 add_mean_sd.gamma_samples <- function(data, ...) {
-  nat_dt <- data.table::copy(data)
-  nat_dt <- nat_dt[, mean := mu]
-  nat_dt <- nat_dt[, sd := mu / sqrt(shape)]
-  return(nat_dt[])
+  mutate(data,
+    mean = mu,
+    sd = mu / sqrt(shape)
+  )
 }

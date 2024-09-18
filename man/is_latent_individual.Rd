@@ -7,7 +7,7 @@
 is_latent_individual(data)
 }
 \arguments{
-\item{data}{A \code{data.frame} or \code{data.table} containing line list data}
+\item{data}{A \code{data.frame} containing line list data}
 }
 \description{
 Check if data has the \code{epidist_latent_individual} class

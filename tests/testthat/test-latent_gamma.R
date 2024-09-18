@@ -1,4 +1,5 @@
 test_that("posterior_predict_latent_gamma outputs positive integers with length equal to draws", { # nolint: line_length_linter.
+  skip_on_cran()
   fit_gamma <- readRDS(
     system.file("extdata/fit_gamma.rds", package = "epidist")
   )
@@ -11,6 +12,7 @@ test_that("posterior_predict_latent_gamma outputs positive integers with length 
 })
 
 test_that("posterior_predict_latent_gamma errors for i out of bounds", { # nolint: line_length_linter.
+  skip_on_cran()
   fit_gamma <- readRDS(
     system.file("extdata/fit_gamma.rds", package = "epidist")
   )
@@ -20,6 +22,7 @@ test_that("posterior_predict_latent_gamma errors for i out of bounds", { # nolin
 })
 
 test_that("posterior_predict_latent_gamma can generate predictions with no censoring", { # nolint: line_length_linter.
+  skip_on_cran()
   fit_gamma <- readRDS(
     system.file("extdata/fit_gamma.rds", package = "epidist")
   )
@@ -32,6 +35,7 @@ test_that("posterior_predict_latent_gamma can generate predictions with no censo
 })
 
 test_that("posterior_predict_latent_gamma predicts delays for which the data is in the 95% credible interval", { # nolint: line_length_linter.
+  skip_on_cran()
   fit_gamma <- readRDS(
     system.file("extdata/fit_gamma.rds", package = "epidist")
   )
@@ -52,6 +56,7 @@ test_that("posterior_predict_latent_gamma predicts delays for which the data is 
 })
 
 test_that("posterior_epred_latent_gamma creates a array of non-negative numbers with the correct dimensions", { # nolint: line_length_linter.
+  skip_on_cran()
   fit_gamma <- readRDS(
     system.file("extdata/fit_gamma.rds", package = "epidist")
   )
@@ -64,6 +69,7 @@ test_that("posterior_epred_latent_gamma creates a array of non-negative numbers 
 })
 
 test_that("log_lik_latent_gamma produces a vector with length ndraws of finite non-NA numbers", { # nolint: line_length_linter.
+  skip_on_cran()
   fit_gamma <- readRDS(
     system.file("extdata/fit_gamma.rds", package = "epidist")
   )
