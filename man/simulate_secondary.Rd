@@ -14,7 +14,7 @@ simulate_secondary(linelist, dist = rlnorm, ...)
 \item{...}{Arguments to be passed to the delay distribution function.}
 }
 \value{
-A \code{data.table} that augments \code{linelist} with two new columns: \code{delay}
+A \code{data.frame} that augments \code{linelist} with two new columns: \code{delay}
 (secondary event latency) and \code{stime} (the time of the secondary event).
 }
 \description{

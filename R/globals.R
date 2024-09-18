@@ -5,37 +5,45 @@ utils::globalVariables(c(
   "max_treedepth", # <epidist_diagnostics>
   "per_at_max_treedepth", # <epidist_diagnostics>
   "samples", # <epidist_diagnostics>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+  ":=", # <as_latent_individual.data.frame>
+>>>>>>> b861968f (Rebase)
   "id", # <as_latent_individual.data.frame>
   "obs_t", # <as_latent_individual.data.frame>
+=======
+>>>>>>> 8102ae75 (Run document)
   "obs_at", # <as_latent_individual.data.frame>
   "ptime_lwr", # <as_latent_individual.data.frame>
-  "pwindow", # <as_latent_individual.data.frame>
   "stime_lwr", # <as_latent_individual.data.frame>
   "ptime_upr", # <as_latent_individual.data.frame>
   "stime_upr", # <as_latent_individual.data.frame>
-  "woverlap", # <as_latent_individual.data.frame>
-  "swindow", # <as_latent_individual.data.frame>
-  "delay", # <as_latent_individual.data.frame>
-  "row_id", # <as_latent_individual.data.frame>
   "woverlap", # <epidist_stancode.epidist_latent_individual>
   "row_id", # <epidist_stancode.epidist_latent_individual>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+  ":=", # <observe_process>
+>>>>>>> b861968f (Rebase)
   "ptime_daily", # <observe_process>
+=======
+>>>>>>> 8102ae75 (Run document)
   "ptime", # <observe_process>
-  "ptime_lwr", # <observe_process>
-  "ptime_upr", # <observe_process>
-  "stime_daily", # <observe_process>
+  "ptime_daily", # <observe_process>
   "stime", # <observe_process>
-  "stime_lwr", # <observe_process>
-  "stime_upr", # <observe_process>
+  "stime_daily", # <observe_process>
   "delay_daily", # <observe_process>
+<<<<<<< HEAD
   "delay_lwr", # <observe_process>
   "delay_upr", # <observe_process>
   "obs_at", # <observe_process>
   "obs_at", # <filter_obs_by_obs_time>
+=======
+>>>>>>> 8102ae75 (Run document)
   "ptime", # <filter_obs_by_obs_time>
-  "censored_obs_time", # <filter_obs_by_obs_time>
+  "obs_at", # <filter_obs_by_obs_time>
   "ptime_lwr", # <filter_obs_by_obs_time>
-  "censored", # <filter_obs_by_obs_time>
   "stime_upr", # <filter_obs_by_obs_time>
   "censored", # <filter_obs_by_ptime>
   "ptime_upr", # <filter_obs_by_ptime>
@@ -45,13 +53,28 @@ utils::globalVariables(c(
   "ptime_lwr", # <filter_obs_by_ptime>
   "mu", # <add_mean_sd.lognormal_samples>
   "sigma", # <add_mean_sd.lognormal_samples>
+<<<<<<< HEAD
   "sd", # <add_mean_sd.lognormal_samples>
+<<<<<<< HEAD
+=======
+  ":=", # <add_mean_sd.gamma_samples>
+=======
+>>>>>>> 8102ae75 (Run document)
+>>>>>>> b861968f (Rebase)
   "mu", # <add_mean_sd.gamma_samples>
-  "sd", # <add_mean_sd.gamma_samples>
   "shape", # <add_mean_sd.gamma_samples>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+  "rlnorm", # <simulate_secondary>
+  ":=", # <simulate_secondary>
+>>>>>>> b861968f (Rebase)
   "delay", # <simulate_secondary>
   "stime", # <simulate_secondary>
+=======
+>>>>>>> 8102ae75 (Run document)
   "ptime", # <simulate_secondary>
+  "delay", # <simulate_secondary>
   "prior_old", # <.replace_prior>
   "prior_new", # <.replace_prior>
   "source_new", # <.replace_prior>
