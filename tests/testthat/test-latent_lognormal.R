@@ -1,4 +1,5 @@
 test_that("posterior_predict_latent_lognormal outputs positive integers with length equal to draws", { # nolint: line_length_linter.
+  skip_on_cran()
   fit <- readRDS(
     system.file("extdata/fit.rds", package = "epidist")
   )
@@ -11,6 +12,7 @@ test_that("posterior_predict_latent_lognormal outputs positive integers with len
 })
 
 test_that("posterior_predict_latent_lognormal errors for i out of bounds", { # nolint: line_length_linter.
+  skip_on_cran()
   fit <- readRDS(
     system.file("extdata/fit.rds", package = "epidist")
   )
@@ -20,6 +22,7 @@ test_that("posterior_predict_latent_lognormal errors for i out of bounds", { # n
 })
 
 test_that("posterior_predict_latent_lognormal can generate predictions with no censoring", { # nolint: line_length_linter.
+  skip_on_cran()
   fit <- readRDS(
     system.file("extdata/fit.rds", package = "epidist")
   )
@@ -32,6 +35,7 @@ test_that("posterior_predict_latent_lognormal can generate predictions with no c
 })
 
 test_that("posterior_predict_latent_lognormal predicts delays for which the data is in the 95% credible interval", { # nolint: line_length_linter.
+  skip_on_cran()
   fit <- readRDS(
     system.file("extdata/fit.rds", package = "epidist")
   )
@@ -52,6 +56,7 @@ test_that("posterior_predict_latent_lognormal predicts delays for which the data
 })
 
 test_that("posterior_epred_latent_lognormal creates a array of non-negative numbers with the correct dimensions", { # nolint: line_length_linter.
+  skip_on_cran()
   fit <- readRDS(
     system.file("extdata/fit.rds", package = "epidist")
   )
@@ -64,6 +69,7 @@ test_that("posterior_epred_latent_lognormal creates a array of non-negative numb
 })
 
 test_that("log_lik_latent_lognormal produces a vector with length ndraws of finite non-NA numbers", { # nolint: line_length_linter.
+  skip_on_cran()
   fit <- readRDS(
     system.file("extdata/fit.rds", package = "epidist")
   )

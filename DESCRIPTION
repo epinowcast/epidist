@@ -23,11 +23,10 @@ URL: https://epidist.epinowcast.org/,
     https://github.com/epinowcast/epidist/
 BugReports: https://github.com/epinowcast/epidist/issues/
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5.0)
 Imports: 
     brms,
     cmdstanr,
-    data.table,
     ggplot2,
     purrr,
     stats,
@@ -54,7 +53,6 @@ Suggests:
     patchwork
 Remotes:
     stan-dev/cmdstanr,
-    Rdatatable/data.table,
     paul-buerkner/brms
 Config/Needs/website:
     r-lib/pkgdown,

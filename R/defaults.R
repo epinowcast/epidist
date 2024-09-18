@@ -3,7 +3,6 @@
 #' @inheritParams epidist_validate
 #' @param ... Additional arguments passed to method.
 #' @family defaults
-#' @importFrom cli cli_abort
 #' @export
 epidist_validate.default <- function(data, ...) {
   cli::cli_abort(
@@ -17,7 +16,6 @@ epidist_validate.default <- function(data, ...) {
 #' @inheritParams epidist_formula
 #' @param ... Additional arguments passed to method.
 #' @family defaults
-#' @importFrom cli cli_abort
 #' @export
 epidist_formula.default <- function(data, ...) {
   cli::cli_abort(
@@ -31,7 +29,6 @@ epidist_formula.default <- function(data, ...) {
 #' @inheritParams epidist_family
 #' @param ... Additional arguments passed to method.
 #' @family defaults
-#' @importFrom cli cli_abort
 #' @export
 epidist_family.default <- function(data, ...) {
   cli::cli_abort(
@@ -45,7 +42,6 @@ epidist_family.default <- function(data, ...) {
 #' @inheritParams epidist_stancode
 #' @param ... Additional arguments passed to method.
 #' @family defaults
-#' @importFrom cli cli_abort
 #' @export
 epidist_stancode.default <- function(data, ...) {
   cli::cli_abort(

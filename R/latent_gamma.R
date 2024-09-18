@@ -6,7 +6,6 @@
 #' @param prep The result of a call to [brms::posterior_predict()]
 #' @param ... Additional arguments
 #' @autoglobal
-#' @importFrom stats rgamma
 #' @keywords internal
 posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu", i = i)
@@ -20,8 +19,8 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
     d_censored <- obs_t + 1
     # while loop to impose the truncation
     while (d_censored > obs_t) {
-      p_latent <- runif(1, 0, 1) * pwindow
-      d_latent <- rgamma(1, shape = shape[s], scale = mu[s] / shape[s])
+      p_latent <- stats::runif(1, 0, 1) * pwindow
+      d_latent <- stats::rgamma(1, shape = shape[s], scale = mu[s] / shape[s])
       s_latent <- p_latent + d_latent
       p_censored <- .floor_mult(p_latent, pwindow)
       s_censored <- .floor_mult(s_latent, swindow)
@@ -53,7 +52,6 @@ posterior_epred_latent_gamma <- function(prep) { # nolint: object_length_linter
 #' @param i The index of the observation to calculate the log likelihood of
 #' @param prep The result of a call to [brms::prepare_predictions()]
 #' @autoglobal
-#' @importFrom stats dgamma pgamma
 #' @keywords internal
 log_lik_latent_gamma <- function(i, prep) {
   mu <- brms::get_dpar(prep, "mu", i = i)
@@ -63,8 +61,8 @@ log_lik_latent_gamma <- function(i, prep) {
   pwindow <- prep$data$vreal2[i]
   swindow <- prep$data$vreal3[i]
 
-  swindow_raw <- runif(prep$ndraws)
-  pwindow_raw <- runif(prep$ndraws)
+  swindow_raw <- stats::runif(prep$ndraws)
+  pwindow_raw <- stats::runif(prep$ndraws)
 
   swindow <- swindow_raw * swindow
 
@@ -77,7 +75,9 @@ log_lik_latent_gamma <- function(i, prep) {
 
   d <- y - pwindow + swindow
   obs_time <- obs_t - pwindow
-  lpdf <- dgamma(d, shape = shape, scale = mu / shape, log = TRUE)
-  lcdf <- pgamma(obs_time, shape = shape, scale = mu / shape, log.p = TRUE)
+  lpdf <- stats::dgamma(d, shape = shape, scale = mu / shape, log = TRUE)
+  lcdf <- stats::pgamma(
+    obs_time, shape = shape, scale = mu / shape, log.p = TRUE
+  )
   return(lpdf - lcdf)
 }

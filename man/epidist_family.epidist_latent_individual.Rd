@@ -7,7 +7,7 @@
 \method{epidist_family}{epidist_latent_individual}(data, family = "lognormal", ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} or \code{data.table} containing line list data}
+\item{data}{A \code{data.frame} containing line list data}
 
 \item{family}{Output of a call to \code{brms::brmsfamily()}}
 

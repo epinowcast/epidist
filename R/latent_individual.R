@@ -35,31 +35,30 @@ assert_latent_individual_input <- function(data) {
 #' object, which may be passed to [epidist()] to perform inference for the
 #' model.
 #'
-#' @param data A `data.frame` or `data.table` containing line list data
+#' @param data A `data.frame` containing line list data
 #' @rdname as_latent_individual
 #' @method as_latent_individual data.frame
 #' @family latent_individual
-#' @importFrom checkmate assert_data_frame assert_names assert_int
-#' assert_numeric
 #' @autoglobal
 #' @export
 as_latent_individual.data.frame <- function(data) {
   assert_latent_individual_input(data)
-  class(data) <- c(class(data), "epidist_latent_individual")
-  data <- data.table::as.data.table(data)
-  data[, id := seq_len(.N)]
-  data[, obs_t := obs_at - ptime_lwr]
-  data[, pwindow := ifelse(
-    stime_lwr < ptime_upr, ## if overlap
-    stime_upr - ptime_lwr,
-    ptime_upr - ptime_lwr
-  )]
-  data[, woverlap := as.numeric(stime_lwr < ptime_upr)]
-  data[, swindow := stime_upr - stime_lwr]
-  data[, delay := stime_lwr - ptime_lwr]
-  data[, row_id := seq_len(.N)]
+  class(data) <- c("epidist_latent_individual", class(data))
+  data <- data |>
+    mutate(
+      obs_t = obs_at - ptime_lwr,
+      pwindow = ifelse(
+        stime_lwr < ptime_upr,
+        stime_upr - ptime_lwr,
+        ptime_upr - ptime_lwr
+      ),
+      woverlap = as.numeric(stime_lwr < ptime_upr),
+      swindow = stime_upr - stime_lwr,
+      delay = stime_lwr - ptime_lwr,
+      row_id = dplyr::row_number()
+    )
   if (nrow(data) > 1) {
-    data <- data[, id := as.factor(id)]
+    data <- mutate(data, row_id = factor(row_id))
   }
   epidist_validate(data)
   return(data)
@@ -72,9 +71,7 @@ as_latent_individual.data.frame <- function(data) {
 #' `is_latent_individual()` is true, it also checks that `data` is a
 #' `data.frame` with the correct columns.
 #'
-#' @param data A `data.frame` or `data.table` containing line list data
-#' @importFrom checkmate assert_data_frame assert_names assert_int
-#' assert_numeric
+#' @param data A `data.frame` containing line list data
 #' @method epidist_validate epidist_latent_individual
 #' @family latent_individual
 #' @export
@@ -85,23 +82,22 @@ epidist_validate.epidist_latent_individual <- function(data) {
     names(data),
     must.include = c("case", "ptime_lwr", "ptime_upr",
                      "stime_lwr", "stime_upr", "obs_at",
-                     "id", "obs_t", "pwindow", "woverlap",
+                     "obs_t", "pwindow", "woverlap",
                      "swindow", "delay", "row_id")
   )
   if (nrow(data) > 1) {
-    checkmate::assert_factor(data$id)
+    checkmate::assert_factor(data$row_id)
   }
   checkmate::assert_numeric(data$obs_t, lower = 0)
   checkmate::assert_numeric(data$pwindow, lower = 0)
   checkmate::assert_numeric(data$woverlap, lower = 0)
   checkmate::assert_numeric(data$swindow, lower = 0)
   checkmate::assert_numeric(data$delay, lower = 0)
-  checkmate::assert_integer(data$row_id, lower = 0)
 }
 
 #' Check if data has the `epidist_latent_individual` class
 #'
-#' @param data A `data.frame` or `data.table` containing line list data
+#' @param data A `data.frame` containing line list data
 #' @family latent_individual
 #' @export
 is_latent_individual <- function(data) {
@@ -110,11 +106,10 @@ is_latent_individual <- function(data) {
 
 #' Check if data has the `epidist_latent_individual` class
 #'
-#' @param data A `data.frame` or `data.table` containing line list data
+#' @param data A `data.frame` containing line list data
 #' @param family Output of a call to `brms::brmsfamily()`
 #' @param ... ...
 #'
-#' @importFrom rstan lookup
 #' @method epidist_family epidist_latent_individual
 #' @family latent_individual
 #' @export
@@ -154,8 +149,6 @@ epidist_family.epidist_latent_individual <- function(data,
 #' @param ... ...
 #' @method epidist_formula epidist_latent_individual
 #' @family latent_individual
-#' @importFrom brms brmsterms
-#' @importFrom stats update
 #' @export
 epidist_formula.epidist_latent_individual <- function(data, family, formula,
                                                       ...) {
@@ -176,7 +169,6 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
 #' @method epidist_stancode epidist_latent_individual
 #' @family latent_individual
 #' @autoglobal
-#' @importFrom purrr map_vec
 #' @export
 epidist_stancode.epidist_latent_individual <- function(data,
                                                        family =
@@ -222,19 +214,19 @@ epidist_stancode.epidist_latent_individual <- function(data,
   stanvars_data <- brms::stanvar(
     block = "data",
     scode = "int wN;",
-    x = nrow(data[woverlap > 0]),
+    x = nrow(filter(data, woverlap > 0)),
     name = "wN"
   ) +
     brms::stanvar(
       block = "data",
       scode = "array[N - wN] int noverlap;",
-      x = data[woverlap == 0][, row_id],
+      x = filter(data, woverlap == 0)$row_id,
       name = "noverlap"
     ) +
     brms::stanvar(
       block = "data",
       scode = "array[wN] int woverlap;",
-      x = data[woverlap > 0][, row_id],
+      x = filter(data, woverlap > 0)$row_id,
       name = "woverlap"
     )
 
