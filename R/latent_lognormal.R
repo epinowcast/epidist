@@ -67,8 +67,8 @@ log_lik_latent_lognormal <- function(i, prep) {
   # Generates values of the swindow_raw and pwindow_raw, but really these should
   # be extracted from prep or the fitted raws somehow. See:
   # https://github.com/epinowcast/epidist/issues/267
-  swindow_raw <- runif(prep$ndraws)
-  pwindow_raw <- runif(prep$ndraws)
+  swindow_raw <- stats::runif(prep$ndraws)
+  pwindow_raw <- stats::runif(prep$ndraws)
 
   swindow <- swindow_raw * swindow
 

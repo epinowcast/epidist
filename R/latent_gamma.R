@@ -61,8 +61,8 @@ log_lik_latent_gamma <- function(i, prep) {
   pwindow <- prep$data$vreal2[i]
   swindow <- prep$data$vreal3[i]
 
-  swindow_raw <- runif(prep$ndraws)
-  pwindow_raw <- runif(prep$ndraws)
+  swindow_raw <- stats::runif(prep$ndraws)
+  pwindow_raw <- stats::runif(prep$ndraws)
 
   swindow <- swindow_raw * swindow
 
