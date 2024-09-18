@@ -23,7 +23,7 @@ URL: https://epidist.epinowcast.org/,
     https://github.com/epinowcast/epidist/
 BugReports: https://github.com/epinowcast/epidist/issues/
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5.0)
 Imports: 
     brms,
     cmdstanr,
