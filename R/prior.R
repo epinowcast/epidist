@@ -87,6 +87,7 @@ epidist_family_prior.default <- function(family, formula, ...) {
 #' @param ... ...
 #' @method epidist_family_prior lognormal
 #' @family prior
+#' @importFrom brms prior
 #' @export
 epidist_family_prior.lognormal <- function(family, formula, ...) {
   prior <- brms::prior("normal(1, 1)", class = "Intercept")

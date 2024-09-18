@@ -6,6 +6,7 @@
 #' @param prep The result of a call to [brms::posterior_predict()]
 #' @param ... Additional arguments
 #' @autoglobal
+#' @importFrom brms get_dpar
 #' @importFrom stats rgamma
 #' @keywords internal
 posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_length_linter
@@ -21,7 +22,7 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
     # while loop to impose the truncation
     while (d_censored > obs_t) {
       p_latent <- runif(1, 0, 1) * pwindow
-      d_latent <- rgamma(1, shape = shape[s], scale = mu[s] / shape[s])
+      d_latent <- stats::rgamma(1, shape = shape[s], scale = mu[s] / shape[s])
       s_latent <- p_latent + d_latent
       p_censored <- .floor_mult(p_latent, pwindow)
       s_censored <- .floor_mult(s_latent, swindow)
@@ -41,6 +42,7 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
 #'
 #' @param prep The result of a call to [`brms::prepare_predictions`]
 #' @autoglobal
+#' @importFrom brms get_dpar
 #' @keywords internal
 posterior_epred_latent_gamma <- function(prep) { # nolint: object_length_linter
   brms::get_dpar(prep, "mu")
@@ -53,6 +55,7 @@ posterior_epred_latent_gamma <- function(prep) { # nolint: object_length_linter
 #' @param i The index of the observation to calculate the log likelihood of
 #' @param prep The result of a call to [brms::prepare_predictions()]
 #' @autoglobal
+#' @importFrom brms get_dpar
 #' @importFrom stats dgamma pgamma
 #' @keywords internal
 log_lik_latent_gamma <- function(i, prep) {
@@ -77,7 +80,9 @@ log_lik_latent_gamma <- function(i, prep) {
 
   d <- y - pwindow + swindow
   obs_time <- obs_t - pwindow
-  lpdf <- dgamma(d, shape = shape, scale = mu / shape, log = TRUE)
-  lcdf <- pgamma(obs_time, shape = shape, scale = mu / shape, log.p = TRUE)
+  lpdf <- stats::dgamma(d, shape = shape, scale = mu / shape, log = TRUE)
+  lcdf <- stats::pgamma(
+    obs_time, shape = shape, scale = mu / shape, log.p = TRUE
+  )
   return(lpdf - lcdf)
 }

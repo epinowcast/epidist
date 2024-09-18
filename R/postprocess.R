@@ -5,6 +5,7 @@
 #' @param ... Additional arguments passed to [brms::prepare_predictions()]
 #' @family postprocess
 #' @autoglobal
+#' @importFrom brms prepare_predictions get_dpar
 #' @export
 predict_delay_parameters <- function(fit, newdata = NULL, ...) {
   if (!is.null(newdata)) {
@@ -49,6 +50,7 @@ add_mean_sd <- function(data, ...) {
 #' @param ... Additional arguments for method.
 #' @family postprocess
 #' @method add_mean_sd default
+#' @importFrom cli cli_inform
 #' @export
 add_mean_sd.default <- function(data, ...) {
   cli::cli_inform(c(
@@ -70,9 +72,10 @@ add_mean_sd.default <- function(data, ...) {
 #' @family postprocess
 #' @method add_mean_sd lognormal_samples
 #' @autoglobal
+#' @importFrom dplyr mutate
 #' @export
 add_mean_sd.lognormal_samples <- function(data, ...) {
-  dplyr::mutate(data,
+  mutate(data,
     mean = exp(mu + sigma ^ 2 / 2),
     sd = mean * sqrt(exp(sigma ^ 2) - 1)
   )
@@ -88,9 +91,10 @@ add_mean_sd.lognormal_samples <- function(data, ...) {
 #' @family postprocess
 #' @method add_mean_sd gamma_samples
 #' @autoglobal
+#' @importFrom dplyr mutate
 #' @export
 add_mean_sd.gamma_samples <- function(data, ...) {
-  dplyr::mutate(data,
+  mutate(data,
     mean = mu,
     sd = mu / sqrt(shape)
   )

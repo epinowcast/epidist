@@ -20,6 +20,7 @@
 #'
 #' @return A `brms` Stan chunk containing the `epidist` package version used to
 #' build the Stan code.
+#' @importFrom brms stanvar
 #' @keywords internal
 .version_stanvar <- function() {
   version <- utils::packageVersion("epidist")
@@ -70,8 +71,8 @@
   if (any(is.na(prior$prior_old))) {
     missing_prior <- utils::capture.output(print(
       prior |>
-        dplyr::filter(is.na(prior_old)) |>
-        dplyr::select(
+        filter(is.na(prior_old)) |>
+        select(
           prior = prior_new, dplyr::all_of(cols), source = source_new
         )
     ))
@@ -83,8 +84,8 @@
   }
 
   prior <- prior |>
-    dplyr::filter(!is.na(prior_old), !is.na(prior_new)) |>
-    dplyr::select(prior = prior_new, dplyr::all_of(cols), source = source_new)
+    filter(!is.na(prior_old), !is.na(prior_new)) |>
+    select(prior = prior_new, dplyr::all_of(cols), source = source_new)
 
   return(prior)
 }

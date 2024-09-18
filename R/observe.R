@@ -18,10 +18,11 @@
 #' @family observe
 #' @autoglobal
 #' @importFrom dplyr mutate
+#' @importFrom purrr map_dbl
 #' @export
 observe_process <- function(linelist) {
   linelist |>
-    dplyr::mutate(
+    mutate(
       ptime_daily = floor(ptime),
       ptime_lwr = ptime_daily,
       ptime_upr = ptime_daily + 1,
@@ -45,13 +46,13 @@ observe_process <- function(linelist) {
 #' @export
 filter_obs_by_obs_time <- function(linelist, obs_time) {
   linelist |>
-    dplyr::mutate(
+    mutate(
       obs_at = obs_time,
       obs_time = obs_time - ptime,
       censored_obs_time = obs_at - ptime_lwr,
       censored = "interval"
     ) |>
-    dplyr::filter(stime_upr <= obs_at)
+    filter(stime_upr <= obs_at)
 }
 
 #' Filter observations based on the observation time of primary events

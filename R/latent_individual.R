@@ -58,7 +58,7 @@ as_latent_individual.data.frame <- function(data) {
       woverlap = as.numeric(stime_lwr < ptime_upr),
       swindow = stime_upr - stime_lwr,
       delay = stime_lwr - ptime_lwr,
-      row_id = row_number()
+      row_id = dplyr::row_number()
     )
   if (nrow(data) > 1) {
     data <- mutate(data, row_id = factor(row_id))

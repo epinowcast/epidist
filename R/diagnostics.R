@@ -19,6 +19,10 @@
 #' @param fit A fitted model of class `epidist_fit`
 #' @family diagnostics
 #' @autoglobal
+#' @importFrom brms nuts_params rhat
+#' @importFrom rstan get_elapsed_time
+#' @importFrom dplyr tibble mutate 
+#' @importFrom cli cli_abort
 #' @export
 epidist_diagnostics <- function(fit) {
   if (!inherits(fit, "epidist_fit")) {

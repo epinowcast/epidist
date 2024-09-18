@@ -15,7 +15,7 @@
 #' @export
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
   data.frame(
-    case = 1:sample_size, ptime = runif(sample_size, 0, t)
+    case = 1:sample_size, ptime = stats::runif(sample_size, 0, t)
   )
 }
 
@@ -44,7 +44,7 @@ simulate_exponential_cases <- function(r = 0.2,
   if (!missing(seed)) {
     set.seed(seed)
   }
-  quant <- runif(sample_size, 0, 1)
+  quant <- stats::runif(sample_size, 0, 1)
 
   if (r == 0) {
     ptime <- quant * t
@@ -94,7 +94,7 @@ simulate_gillespie <- function(r = 0.2,
     srates <- sum(rates)
 
     if (srates > 0) {
-      deltat <- rexp(1, rate = srates)
+      deltat <- stats::rexp(1, rate = srates)
       t <- t + deltat
       wevent <- sample(seq_along(rates), size = 1, prob = rates)
 
@@ -129,10 +129,11 @@ simulate_gillespie <- function(r = 0.2,
 #'
 #' @family simulate
 #' @autoglobal
+#' @importFrom dplyr mutate n
 #' @export
 simulate_secondary <- function(linelist, dist = rlnorm, ...) {
   linelist |>
-    dplyr::mutate(
+    mutate(
       delay = dist(dplyr::n(), ...),
       stime = ptime + delay
     )

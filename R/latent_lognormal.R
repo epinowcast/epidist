@@ -7,6 +7,7 @@
 #' @param prep The result of a call to [brms::posterior_predict()]
 #' @param ... Additional arguments
 #' @autoglobal
+#' @importFrom brms get_dpar
 #' @importFrom stats rlnorm
 #' @keywords internal
 posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_length_linter
@@ -22,7 +23,7 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
     # while loop to impose the truncation
     while (d_censored > obs_t) {
       p_latent <- runif(1, 0, 1) * pwindow
-      d_latent <- rlnorm(1, meanlog = mu[s], sdlog = sigma[s])
+      d_latent <- stats::rlnorm(1, meanlog = mu[s], sdlog = sigma[s])
       s_latent <- p_latent + d_latent
       p_censored <- .floor_mult(p_latent, pwindow)
       s_censored <- .floor_mult(s_latent, swindow)
@@ -42,6 +43,7 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
 #'
 #' @param prep The result of a call to [`brms::prepare_predictions`]
 #' @autoglobal
+#' @importFrom brms get_dpar
 #' @keywords internal
 posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu")
@@ -56,6 +58,7 @@ posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_lin
 #' @param i The index of the observation to calculate the log likelihood of
 #' @param prep The result of a call to [brms::prepare_predictions()]
 #' @autoglobal
+#' @importFrom brms get_dpar
 #' @importFrom stats dlnorm plnorm
 #' @keywords internal
 log_lik_latent_lognormal <- function(i, prep) {
@@ -83,7 +86,7 @@ log_lik_latent_lognormal <- function(i, prep) {
 
   d <- y - pwindow + swindow
   obs_time <- obs_t - pwindow
-  lpdf <- dlnorm(d, meanlog = mu, sdlog = sigma, log = TRUE)
-  lcdf <- plnorm(obs_time, meanlog = mu, sdlog = sigma, log.p = TRUE)
+  lpdf <- stats::dlnorm(d, meanlog = mu, sdlog = sigma, log = TRUE)
+  lcdf <- stats::plnorm(obs_time, meanlog = mu, sdlog = sigma, log.p = TRUE)
   return(lpdf - lcdf)
 }
