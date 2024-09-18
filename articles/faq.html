@@ -88,16 +88,14 @@ If you have a question about using the package, please create an <a href="https:
 <span><span class="va">obs_time</span> <span class="op">&lt;-</span> <span class="fl">25</span></span>
 <span><span class="va">sample_size</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
 <span></span>
-<span><span class="va">obs_cens_trunc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_gillespie.html">simulate_gillespie</a></span><span class="op">(</span>seed <span class="op">=</span> <span class="fl">101</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="va">obs_cens_trunc_samp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_gillespie.html">simulate_gillespie</a></span><span class="op">(</span>seed <span class="op">=</span> <span class="fl">101</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/simulate_secondary.html">simulate_secondary</a></span><span class="op">(</span></span>
 <span>    meanlog <span class="op">=</span> <span class="va">meanlog</span>,</span>
 <span>    sdlog <span class="op">=</span> <span class="va">sdlog</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/observe_process.html">observe_process</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/filter_obs_by_obs_time.html">filter_obs_by_obs_time</a></span><span class="op">(</span>obs_time <span class="op">=</span> <span class="va">obs_time</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">obs_cens_trunc_samp</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">obs_cens_trunc</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">.N</span><span class="op">)</span>, <span class="va">sample_size</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="fu"><a href="../reference/filter_obs_by_obs_time.html">filter_obs_by_obs_time</a></span><span class="op">(</span>obs_time <span class="op">=</span> <span class="va">obs_time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">sample_size</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">obs_cens_trunc_samp</span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
@@ -277,7 +275,7 @@ Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, Anne Cori, Nicholas G. D
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.9000.</p>
 </div>
 
     </footer>

@@ -159,16 +159,14 @@ The example data simulation process follows that used in the <a href="https://ep
 <span><span class="va">obs_time</span> <span class="op">&lt;-</span> <span class="fl">25</span></span>
 <span><span class="va">sample_size</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
 <span></span>
-<span><span class="va">obs_cens_trunc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_gillespie.html">simulate_gillespie</a></span><span class="op">(</span>seed <span class="op">=</span> <span class="fl">101</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="va">obs_cens_trunc_samp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_gillespie.html">simulate_gillespie</a></span><span class="op">(</span>seed <span class="op">=</span> <span class="fl">101</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/simulate_secondary.html">simulate_secondary</a></span><span class="op">(</span></span>
 <span>    meanlog <span class="op">=</span> <span class="va">meanlog</span>,</span>
 <span>    sdlog <span class="op">=</span> <span class="va">sdlog</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/observe_process.html">observe_process</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/filter_obs_by_obs_time.html">filter_obs_by_obs_time</a></span><span class="op">(</span>obs_time <span class="op">=</span> <span class="va">obs_time</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">obs_cens_trunc_samp</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">obs_cens_trunc</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">.N</span><span class="op">)</span>, <span class="va">sample_size</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/filter_obs_by_obs_time.html">filter_obs_by_obs_time</a></span><span class="op">(</span>obs_time <span class="op">=</span> <span class="va">obs_time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">sample_size</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>We now prepare the data for fitting with the latent individual model, and perform inference with HMC:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">obs_cens_trunc_samp</span><span class="op">)</span></span>
@@ -1238,19 +1236,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">28.644</td>
+<td headers="time (s)" class="gt_row gt_right">29.586</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.196</td>
+<td headers="time (s)" class="gt_row gt_right">2.480</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">1.773</td>
+<td headers="time (s)" class="gt_row gt_right">2.040</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">1.166</td>
+<td headers="time (s)" class="gt_row gt_right">0.941</td>
 </tr>
 </tbody>
 </table>
@@ -1305,7 +1303,7 @@ Zhang, Lu, Bob Carpenter, Andrew Gelman, and Aki Vehtari. 2022. <span>“Pathfin
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.9000.</p>
 </div>
 
     </footer>
