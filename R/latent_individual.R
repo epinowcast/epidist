@@ -39,9 +39,6 @@ assert_latent_individual_input <- function(data) {
 #' @rdname as_latent_individual
 #' @method as_latent_individual data.frame
 #' @family latent_individual
-#' @importFrom checkmate assert_data_frame assert_names assert_int
-#' assert_numeric
-#' @importFrom dplyr mutate row_number
 #' @autoglobal
 #' @export
 as_latent_individual.data.frame <- function(data) {
@@ -75,8 +72,6 @@ as_latent_individual.data.frame <- function(data) {
 #' `data.frame` with the correct columns.
 #'
 #' @param data A `data.frame` containing line list data
-#' @importFrom checkmate assert_data_frame assert_names assert_int
-#' assert_numeric
 #' @method epidist_validate epidist_latent_individual
 #' @family latent_individual
 #' @export
@@ -115,7 +110,6 @@ is_latent_individual <- function(data) {
 #' @param family Output of a call to `brms::brmsfamily()`
 #' @param ... ...
 #'
-#' @importFrom rstan lookup
 #' @method epidist_family epidist_latent_individual
 #' @family latent_individual
 #' @export
@@ -155,8 +149,6 @@ epidist_family.epidist_latent_individual <- function(data,
 #' @param ... ...
 #' @method epidist_formula epidist_latent_individual
 #' @family latent_individual
-#' @importFrom brms brmsterms
-#' @importFrom stats update
 #' @export
 epidist_formula.epidist_latent_individual <- function(data, family, formula,
                                                       ...) {
@@ -177,7 +169,6 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
 #' @method epidist_stancode epidist_latent_individual
 #' @family latent_individual
 #' @autoglobal
-#' @importFrom purrr map_vec
 #' @export
 epidist_stancode.epidist_latent_individual <- function(data,
                                                        family =

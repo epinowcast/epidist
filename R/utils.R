@@ -20,7 +20,6 @@
 #'
 #' @return A `brms` Stan chunk containing the `epidist` package version used to
 #' build the Stan code.
-#' @importFrom brms stanvar
 #' @keywords internal
 .version_stanvar <- function() {
   version <- utils::packageVersion("epidist")
@@ -37,7 +36,6 @@
 #'
 #' @param x A number to be rounded down
 #' @param f A positive number specifying the multiple to be rounded down to
-#' @importFrom checkmate assert_numeric
 #' @keywords internal
 .floor_mult <- function(x, f = 1) {
   checkmate::assert_numeric(f, lower = 0)
@@ -54,9 +52,6 @@
 #'
 #' @param old_prior One or more prior distributions in the class `brmsprior`
 #' @param new_prior One or more prior distributions in the class `brmsprior`
-#' @importFrom cli cli_abort
-#' @importFrom utils capture.output
-#' @importFrom dplyr full_join filter select all_of
 #' @autoglobal
 #' @keywords internal
 .replace_prior <- function(old_prior, new_prior) {

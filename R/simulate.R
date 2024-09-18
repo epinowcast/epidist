@@ -11,7 +11,6 @@
 #' (primary event time).
 #'
 #' @family simulate
-#' @importFrom stats runif
 #' @export
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
   data.frame(
@@ -35,7 +34,6 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 #' (primary event time).
 #'
 #' @family simulate
-#' @importFrom stats runif
 #' @export
 simulate_exponential_cases <- function(r = 0.2,
                                        sample_size = 10000,
@@ -73,7 +71,6 @@ simulate_exponential_cases <- function(r = 0.2,
 #' (primary event time).
 #'
 #' @family simulate
-#' @importFrom stats rexp
 #' @export
 simulate_gillespie <- function(r = 0.2,
                                gamma = 1 / 7,
@@ -129,7 +126,7 @@ simulate_gillespie <- function(r = 0.2,
 #'
 #' @family simulate
 #' @autoglobal
-#' @importFrom dplyr mutate n
+#' @importFrom dplyr mutate
 #' @export
 simulate_secondary <- function(linelist, dist = rlnorm, ...) {
   linelist |>

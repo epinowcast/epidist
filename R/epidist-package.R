@@ -3,5 +3,9 @@
 
 #' @import ggplot2
 #' @import cmdstanr
-#' @import brms
+
+## usethis namespace: start
+#' @importFrom dplyr filter select
+#' @importFrom brms bf prior
+## usethis namespace: end
 NULL

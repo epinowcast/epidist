@@ -29,6 +29,7 @@ utils::globalVariables(c(
   "sigma", # <add_mean_sd.lognormal_samples>
   "mu", # <add_mean_sd.gamma_samples>
   "shape", # <add_mean_sd.gamma_samples>
+  "rlnorm", # <simulate_secondary>
   "ptime", # <simulate_secondary>
   "delay", # <simulate_secondary>
   "prior_old", # <.replace_prior>

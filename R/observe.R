@@ -17,8 +17,6 @@
 #' @param linelist ...
 #' @family observe
 #' @autoglobal
-#' @importFrom dplyr mutate
-#' @importFrom purrr map_dbl
 #' @export
 observe_process <- function(linelist) {
   linelist |>
@@ -42,7 +40,6 @@ observe_process <- function(linelist) {
 #' @param obs_time ...
 #' @family observe
 #' @autoglobal
-#' @importFrom dplyr mutate filter
 #' @export
 filter_obs_by_obs_time <- function(linelist, obs_time) {
   linelist |>
@@ -62,7 +59,6 @@ filter_obs_by_obs_time <- function(linelist, obs_time) {
 #' @param obs_at ...
 #' @family observe
 #' @autoglobal
-#' @importFrom dplyr mutate
 #' @export
 filter_obs_by_ptime <- function(linelist, obs_time,
                                 obs_at = c("obs_secondary", "max_secondary")) {
