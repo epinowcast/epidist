@@ -36,7 +36,6 @@
 #'
 #' @param x A number to be rounded down
 #' @param f A positive number specifying the multiple to be rounded down to
-#' @importFrom checkmate assert_numeric
 #' @keywords internal
 .floor_mult <- function(x, f = 1) {
   checkmate::assert_numeric(f, lower = 0)
@@ -53,9 +52,6 @@
 #'
 #' @param old_prior One or more prior distributions in the class `brmsprior`
 #' @param new_prior One or more prior distributions in the class `brmsprior`
-#' @importFrom cli cli_abort
-#' @importFrom utils capture.output
-#' @importFrom dplyr full_join filter select all_of
 #' @autoglobal
 #' @keywords internal
 .replace_prior <- function(old_prior, new_prior) {
@@ -70,8 +66,8 @@
   if (any(is.na(prior$prior_old))) {
     missing_prior <- utils::capture.output(print(
       prior |>
-        dplyr::filter(is.na(prior_old)) |>
-        dplyr::select(
+        filter(is.na(prior_old)) |>
+        select(
           prior = prior_new, dplyr::all_of(cols), source = source_new
         )
     ))
@@ -83,8 +79,8 @@
   }
 
   prior <- prior |>
-    dplyr::filter(!is.na(prior_old), !is.na(prior_new)) |>
-    dplyr::select(prior = prior_new, dplyr::all_of(cols), source = source_new)
+    filter(!is.na(prior_old), !is.na(prior_new)) |>
+    select(prior = prior_new, dplyr::all_of(cols), source = source_new)
 
   return(prior)
 }

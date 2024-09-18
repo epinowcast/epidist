@@ -10,7 +10,7 @@ as_latent_individual(data)
 \method{as_latent_individual}{data.frame}(data)
 }
 \arguments{
-\item{data}{A \code{data.frame} or \code{data.table} containing line list data}
+\item{data}{A \code{data.frame} containing line list data}
 }
 \description{
 This function prepares data for use with the latent individual model. It does

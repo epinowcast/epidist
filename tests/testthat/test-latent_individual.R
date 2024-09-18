@@ -6,7 +6,6 @@ as_string_formula <- function(formula) {
 
 test_that("as_latent_individual.data.frame with default settings an object with the correct classes", { # nolint: line_length_linter.
   prep_obs <- as_latent_individual(sim_obs)
-  expect_s3_class(prep_obs, "data.table")
   expect_s3_class(prep_obs, "data.frame")
   expect_s3_class(prep_obs, "epidist_latent_individual")
 })

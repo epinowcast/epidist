@@ -15,9 +15,8 @@ sim_obs <- simulate_gillespie() |>
     sdlog = sdlog
   ) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time)
-
-sim_obs <- sim_obs[sample(seq_len(.N), sample_size, replace = FALSE)]
+  filter_obs_by_obs_time(obs_time = obs_time) |>
+  dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 set.seed(101)
 
@@ -34,10 +33,8 @@ sim_obs_gamma <- simulate_gillespie() |>
     rate = rate
   ) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time)
-
-sim_obs_gamma <-
-  sim_obs_gamma[sample(seq_len(.N), sample_size, replace = FALSE)]
+  filter_obs_by_obs_time(obs_time = obs_time) |>
+  dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Data with a sex difference
 
@@ -65,10 +62,6 @@ sim_obs_sex_f <- dplyr::filter(sim_obs_sex, sex == 1) |>
   )
 
 sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
-  dplyr::arrange(case)
-
-sim_obs_sex <- sim_obs_sex |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time)
-
-sim_obs_sex <- sim_obs_sex[sample(seq_len(.N), sample_size, replace = FALSE)]
+  filter_obs_by_obs_time(obs_time = obs_time) |>
+  dplyr::slice_sample(n = sample_size, replace = FALSE)
