@@ -2,6 +2,7 @@
 
 utils::globalVariables(c(
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
   ":=", # <epidist_diagnostics>
@@ -21,6 +22,11 @@ utils::globalVariables(c(
   "obs_t", # <as_latent_individual.data.frame>
 =======
 >>>>>>> 8102ae75 (Run document)
+=======
+  "max_treedepth", # <epidist_diagnostics>
+  "no_at_max_treedepth", # <epidist_diagnostics>
+  "samples", # <epidist_diagnostics>
+>>>>>>> f75bd8f2 (Regenerate globals)
   "obs_at", # <as_latent_individual.data.frame>
   "ptime_lwr", # <as_latent_individual.data.frame>
   "stime_lwr", # <as_latent_individual.data.frame>
@@ -28,6 +34,7 @@ utils::globalVariables(c(
   "stime_upr", # <as_latent_individual.data.frame>
   "row_id", # <as_latent_individual.data.frame>
   "woverlap", # <epidist_stancode.epidist_latent_individual>
+<<<<<<< HEAD
 <<<<<<< HEAD
   "row_id", # <epidist_stancode.epidist_latent_individual>
 <<<<<<< HEAD
@@ -40,11 +47,14 @@ utils::globalVariables(c(
 >>>>>>> 8102ae75 (Run document)
 =======
 >>>>>>> 9386d2c2 (Add lots of importFrom)
+=======
+>>>>>>> f75bd8f2 (Regenerate globals)
   "ptime", # <observe_process>
   "ptime_daily", # <observe_process>
   "stime", # <observe_process>
   "stime_daily", # <observe_process>
   "delay_daily", # <observe_process>
+<<<<<<< HEAD
 <<<<<<< HEAD
   "delay_lwr", # <observe_process>
   "delay_upr", # <observe_process>
@@ -52,10 +62,13 @@ utils::globalVariables(c(
   "obs_at", # <filter_obs_by_obs_time>
 =======
 >>>>>>> 8102ae75 (Run document)
+=======
+>>>>>>> f75bd8f2 (Regenerate globals)
   "ptime", # <filter_obs_by_obs_time>
   "obs_at", # <filter_obs_by_obs_time>
   "ptime_lwr", # <filter_obs_by_obs_time>
   "stime_upr", # <filter_obs_by_obs_time>
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
@@ -64,12 +77,15 @@ utils::globalVariables(c(
   "censored", # <filter_obs_by_ptime>
 =======
 >>>>>>> 9386d2c2 (Add lots of importFrom)
+=======
+>>>>>>> f75bd8f2 (Regenerate globals)
   "ptime_upr", # <filter_obs_by_ptime>
   "stime_upr", # <filter_obs_by_ptime>
   "ptime", # <filter_obs_by_ptime>
   "ptime_lwr", # <filter_obs_by_ptime>
   "mu", # <add_mean_sd.lognormal_samples>
   "sigma", # <add_mean_sd.lognormal_samples>
+<<<<<<< HEAD
 <<<<<<< HEAD
   "sd", # <add_mean_sd.lognormal_samples>
 <<<<<<< HEAD
@@ -90,6 +106,10 @@ utils::globalVariables(c(
   "stime", # <simulate_secondary>
 =======
 >>>>>>> 8102ae75 (Run document)
+=======
+  "mu", # <add_mean_sd.gamma_samples>
+  "shape", # <add_mean_sd.gamma_samples>
+>>>>>>> f75bd8f2 (Regenerate globals)
   "ptime", # <simulate_secondary>
   "delay", # <simulate_secondary>
   "prior_old", # <.replace_prior>
