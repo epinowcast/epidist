@@ -12,7 +12,7 @@ epidist_diagnostics(fit)
 \description{
 This function computes diagnostics to assess the quality of a fitted model.
 When the fitting algorithm used is \code{"sampling"} (HMC) then the output of
-\code{epidist_diagnostics} is a \code{data.table} containing:
+\code{epidist_diagnostics} is a \code{data.frame} containing:
 \itemize{
 \item \code{time}: the total time taken to fit all chains
 \item \code{samples}: the total number of samples across all chains

@@ -2,7 +2,7 @@
 #'
 #' This function computes diagnostics to assess the quality of a fitted model.
 #' When the fitting algorithm used is `"sampling"` (HMC) then the output of
-#' `epidist_diagnostics` is a `data.table` containing:
+#' `epidist_diagnostics` is a `data.frame` containing:
 #' * `time`: the total time taken to fit all chains
 #' * `samples`: the total number of samples across all chains
 #' * `max_rhat`: the highest value of the Gelman-Rubin statistic
@@ -35,19 +35,20 @@ epidist_diagnostics <- function(fit) {
   }
   if (fit$algorithm == "sampling") {
     np <- brms::nuts_params(fit)
-    divergent_indices <- np$Parameter == "divergent__"
-    treedepth_indices <- np$Parameter == "treedepth__"
-    diagnostics <- data.table(
-      "time" = sum(rstan::get_elapsed_time(fit$fit)),
-      "samples" = nrow(np) / length(unique(np$Parameter)),
-      "max_rhat" = round(max(brms::rhat(fit), na.rm = TRUE), 3),
-      "divergent_transitions" = sum(np[divergent_indices, ]$Value),
-      "per_divergent_transitions" = mean(np[divergent_indices, ]$Value),
-      "max_treedepth" = max(np[treedepth_indices, ]$Value)
-    )
-    diagnostics[, no_at_max_treedepth :=
-                  sum(np[treedepth_indices, ]$Value == max_treedepth)]
-    diagnostics[, per_at_max_treedepth := no_at_max_treedepth / samples]
+    divergent_ind <- np$Parameter == "divergent__"
+    treedepth_ind <- np$Parameter == "treedepth__"
+    diagnostics <- dplyr::tibble(
+      time = sum(rstan::get_elapsed_time(fit$fit)),
+      samples = nrow(np) / length(unique(np$Parameter)),
+      max_rhat = round(max(brms::rhat(fit), na.rm = TRUE), 3),
+      divergent_transitions = sum(np[divergent_ind, ]$Value),
+      per_divergent_transitions = mean(np[divergent_ind, ]$Value),
+      max_treedepth = max(np[treedepth_ind, ]$Value)
+    ) |>
+      mutate(
+        no_at_max_treedepth = sum(np[treedepth_ind, ]$Value == max_treedepth),
+        per_at_max_treedepth = no_at_max_treedepth / samples
+      )
   } else {
     cli::cli_abort(c(
       "!" = paste0("Unrecognised algorithm: ", fit$algorithm)

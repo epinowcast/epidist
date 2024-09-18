@@ -16,7 +16,7 @@ simulate_exponential_cases(r = 0.2, sample_size = 10000, seed, t = 30)
 \item{t}{Upper bound of the survival time. Defaults to 30.}
 }
 \value{
-A \code{data.table} with two columns: \code{case} (case number) and \code{ptime}
+A \code{data.frame} with two columns: \code{case} (case number) and \code{ptime}
 (primary event time).
 }
 \description{

@@ -18,7 +18,7 @@ simulate_gillespie(r = 0.2, gamma = 1/7, I0 = 50, N = 10000, seed)
 \item{seed}{The random seed to be used in the simulation process.}
 }
 \value{
-A \code{data.table} with two columns: \code{case} (case number) and \code{ptime}
+A \code{data.frame} with two columns: \code{case} (case number) and \code{ptime}
 (primary event time).
 }
 \description{
