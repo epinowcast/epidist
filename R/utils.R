@@ -38,7 +38,7 @@
 #' @param f A positive number specifying the multiple to be rounded down to
 #' @keywords internal
 .floor_mult <- function(x, f = 1) {
-  checkmate::assert_numeric(f, lower = 0)
+  assert_numeric(f, lower = 0)
   ifelse(f == 0, x, floor(x / f) * f)
 }
 
