@@ -75,7 +75,7 @@
       "i" = "No available prior to replace in old_prior found for:",
       missing_prior
     )
-    cli::cli_abort(message = msg)
+    cli_abort(message = msg)
   }
 
   prior <- prior |>

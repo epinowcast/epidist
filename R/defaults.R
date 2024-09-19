@@ -5,7 +5,7 @@
 #' @family defaults
 #' @export
 epidist_validate.default <- function(data, ...) {
-  cli::cli_abort(
+  cli_abort(
     "No epidist_validate method implemented for the class ", class(data), "\n",
     "See methods(epidist_validate) for available methods"
   )
@@ -18,7 +18,7 @@ epidist_validate.default <- function(data, ...) {
 #' @family defaults
 #' @export
 epidist_formula.default <- function(data, ...) {
-  cli::cli_abort(
+  cli_abort(
     "No epidist_formula method implemented for the class ", class(data), "\n",
     "See methods(epidist_formula) for available methods"
   )
@@ -31,7 +31,7 @@ epidist_formula.default <- function(data, ...) {
 #' @family defaults
 #' @export
 epidist_family.default <- function(data, ...) {
-  cli::cli_abort(
+  cli_abort(
     "No epidist_family method implemented for the class ", class(data), "\n",
     "See methods(epidist_family) for available methods"
   )
@@ -44,7 +44,7 @@ epidist_family.default <- function(data, ...) {
 #' @family defaults
 #' @export
 epidist_stancode.default <- function(data, ...) {
-  cli::cli_abort(
+  cli_abort(
     "No epidist_stancode method implemented for the class ", class(data), "\n",
     "See methods(epidist_stancode) for available methods"
   )
