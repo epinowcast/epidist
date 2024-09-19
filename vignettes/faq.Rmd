@@ -115,7 +115,7 @@ epidist_prior <- epidist_prior(
 epidist_prior
 ```
 
-(Note that the functions `epidist_family` and `epidist_prior` are mostly for internal use!)
+(Note that the functions `epidist_family()` and `epidist_prior()` are mostly for internal use!)
 
 Here are the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:
 
@@ -166,6 +166,6 @@ Here, we provide a table giving the correspondence between the distributional pa
 | `Gamma()`     | `shape`          | `shape`     |
 
 Note that all families in `brms` are parameterised with some measure of centrality `mu` as their first parameter.
-This parameter does not necessarily correspond to the mean: hence the provision of a function `add_mean_sd` within `epidist` to add columns containing the natural scale mean and standard deviation to a `data.frame` of draws.
+This parameter does not necessarily correspond to the mean: hence the provision of a function `add_mean_sd()` within `epidist` to add columns containing the natural scale mean and standard deviation to a `data.frame` of draws.
 
 ## Bibliography
