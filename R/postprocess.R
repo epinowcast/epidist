@@ -51,7 +51,7 @@ add_mean_sd <- function(data, ...) {
 #' @method add_mean_sd default
 #' @export
 add_mean_sd.default <- function(data, ...) {
-  cli::cli_inform(c(
+  cli_inform(c(
     "!" = "Natural scale mean and standard deviation parameter columns not
     added: no method available for this family",
     "Consider submitting an issue to https:/github.com/epinowcast/epidist"
