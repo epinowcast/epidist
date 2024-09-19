@@ -246,9 +246,9 @@ bind_rows(
   theme(legend.position = "bottom")
 ```
 
-The main function you will use for modelling is called `epidist`^[Technically, `epidist` is an [S3 generic](http://adv-r.had.co.nz/S3.html) which allows it to work differently for inputs of different classes. This is in part why inputs must be prepared first via `as_latent_individual` so that they are of the appropriate class!].
+The main function you will use for modelling is called `epidist()`^[Technically, `epidist()` is an [S3 generic](http://adv-r.had.co.nz/S3.html) which allows it to work differently for inputs of different classes. This is in part why inputs must be prepared first via `as_latent_individual()` so that they are of the appropriate class!].
 We will fit the model `"latent_individual"` which uses latent variables for the time of primary and secondary event of each individual^[In a future vignette, we will explain in more detail the structure of the model!].
-To do so, we first prepare the `data` using `as_latent_individual`:
+To do so, we first prepare the `data` using `as_latent_individual()`:
 
 ```{r}
 data <- as_latent_individual(obs_cens_trunc_samp)
@@ -256,7 +256,7 @@ class(data)
 ```
 
 The `data` object now has the class `epidist_latent_individual`.
-Using this `data`, we now call `epidist::epidist()` to fit the model.
+Using this `data`, we now call `epidist()` to fit the model.
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
 
@@ -287,7 +287,7 @@ pred <- predict_delay_parameters(fit)
 ```
 
 Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained using the average of the `mu` and `sigma` draws.
-Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using `epidist` we have obtained a much closer match to the truth.
+Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using `epidist()` we have obtained a much closer match to the truth.
 
 (ref:fitted-lognormal) A fitted delay distribution (in pink) as compared with the true delay distribution (in black).
 
