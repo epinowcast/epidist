@@ -38,7 +38,7 @@
 #' @param f A positive number specifying the multiple to be rounded down to
 #' @keywords internal
 .floor_mult <- function(x, f = 1) {
-  checkmate::assert_numeric(f, lower = 0)
+  assert_numeric(f, lower = 0)
   ifelse(f == 0, x, floor(x / f) * f)
 }
 
@@ -75,7 +75,7 @@
       "i" = "No available prior to replace in old_prior found for:",
       missing_prior
     )
-    cli::cli_abort(message = msg)
+    cli_abort(message = msg)
   }
 
   prior <- prior |>
