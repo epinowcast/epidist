@@ -8,20 +8,20 @@ as_latent_individual <- function(data) {
 }
 
 assert_latent_individual_input <- function(data) {
-  checkmate::assert_data_frame(data)
-  checkmate::assert_names(
+  assert_data_frame(data)
+  assert_names(
     names(data),
     must.include = c("case", "ptime_lwr", "ptime_upr",
                      "stime_lwr", "stime_upr", "obs_at")
   )
-  checkmate::assert_integer(data$case, lower = 0)
-  checkmate::assert_numeric(data$ptime_lwr, lower = 0)
-  checkmate::assert_numeric(data$ptime_upr, lower = 0)
-  checkmate::assert_true(all(data$ptime_upr - data$ptime_lwr > 0))
-  checkmate::assert_numeric(data$stime_lwr, lower = 0)
-  checkmate::assert_numeric(data$stime_upr, lower = 0)
-  checkmate::assert_true(all(data$stime_upr - data$stime_lwr > 0))
-  checkmate::assert_numeric(data$obs_at, lower = 0)
+  assert_integer(data$case, lower = 0)
+  assert_numeric(data$ptime_lwr, lower = 0)
+  assert_numeric(data$ptime_upr, lower = 0)
+  assert_true(all(data$ptime_upr - data$ptime_lwr > 0))
+  assert_numeric(data$stime_lwr, lower = 0)
+  assert_numeric(data$stime_upr, lower = 0)
+  assert_true(all(data$stime_upr - data$stime_lwr > 0))
+  assert_numeric(data$obs_at, lower = 0)
 }
 
 #' Prepare latent individual model
@@ -76,9 +76,9 @@ as_latent_individual.data.frame <- function(data) {
 #' @family latent_individual
 #' @export
 epidist_validate.epidist_latent_individual <- function(data) {
-  checkmate::assert_true(is_latent_individual(data))
+  assert_true(is_latent_individual(data))
   assert_latent_individual_input(data)
-  checkmate::assert_names(
+  assert_names(
     names(data),
     must.include = c("case", "ptime_lwr", "ptime_upr",
                      "stime_lwr", "stime_upr", "obs_at",
@@ -86,13 +86,13 @@ epidist_validate.epidist_latent_individual <- function(data) {
                      "swindow", "delay", "row_id")
   )
   if (nrow(data) > 1) {
-    checkmate::assert_factor(data$row_id)
+    assert_factor(data$row_id)
   }
-  checkmate::assert_numeric(data$obs_t, lower = 0)
-  checkmate::assert_numeric(data$pwindow, lower = 0)
-  checkmate::assert_numeric(data$woverlap, lower = 0)
-  checkmate::assert_numeric(data$swindow, lower = 0)
-  checkmate::assert_numeric(data$delay, lower = 0)
+  assert_numeric(data$obs_t, lower = 0)
+  assert_numeric(data$pwindow, lower = 0)
+  assert_numeric(data$woverlap, lower = 0)
+  assert_numeric(data$swindow, lower = 0)
+  assert_numeric(data$delay, lower = 0)
 }
 
 #' Check if data has the `epidist_latent_individual` class

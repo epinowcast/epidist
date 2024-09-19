@@ -22,12 +22,12 @@
 #' @export
 epidist_diagnostics <- function(fit) {
   if (!inherits(fit, "epidist_fit")) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "!" = "Diagnostics only supported for objects of class epidist_fit"
     ))
   }
   if (fit$algorithm %in% c("laplace", "meanfield", "fullrank", "pathfinder")) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "!" = paste0(
         "Diagnostics not yet supported for the algorithm: ", fit$algorithm
       )
@@ -50,7 +50,7 @@ epidist_diagnostics <- function(fit) {
         per_at_max_treedepth = no_at_max_treedepth / samples
       )
   } else {
-    cli::cli_abort(c(
+    cli_abort(c(
       "!" = paste0("Unrecognised algorithm: ", fit$algorithm)
     ))
   }
