@@ -257,7 +257,7 @@ Both of these columns are relative to the first date of symptom onset in the dat
 <h3 id="model-fitting">
 <span class="header-section-number">2.2</span> Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a>
 </h3>
-<p>To prepare the data for use with the latent individual model, we use the function <code>as_latent_individual</code>:</p>
+<p>To prepare the data for use with the latent individual model, we use the function <code><a href="../reference/as_latent_individual.html">as_latent_individual()</a></code>:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_prep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">obs_prep</span><span class="op">)</span></span>
@@ -295,7 +295,7 @@ This distribution is specified using <code>family = lognormal()</code>.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <a href="https://paulbuerkner.com/brms/reference/brmsfit-class.html" class="external-link"><code>brmsfit</code></a> object, and has the associated range of methods.
 See <code>methods(class = "brmsfit")</code> for more details.
-For example, we may use <code>summary</code> to view information about the fitted model, including posterior estimates for the regression coefficients:</p>
+For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> to view information about the fitted model, including posterior estimates for the regression coefficients:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: latent_lognormal </span></span>
@@ -374,7 +374,7 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span>  silent <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>For this model, along with looking at the <code>summary</code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
+<p>For this model, along with looking at the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_sex_district</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: latent_lognormal </span></span>
@@ -446,7 +446,7 @@ These random effects are specified by including <code>(1 | district)</code> in t
 </h3>
 <p>To go further than summaries of the fitted model, we recommend using the <code>tidybayes</code> package.
 For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the <code><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">modelr::data_grid()</a></code> function in combination with the <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_epred_draws()</a></code> function.
-The <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_epred_draws()</a></code> function uses the <code>posterior_epred_latent_lognormal</code> function implemented in <code>epidist</code> for the <code>latent_lognormal</code> custom <code>brms</code> family.</p>
+The <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_epred_draws()</a></code> function uses the (internal) <code><a href="../reference/posterior_epred_latent_lognormal.html">posterior_epred_latent_lognormal()</a></code> function implemented in <code>epidist</code> for the <code>latent_lognormal</code> custom <code>brms</code> family.</p>
 <p>In Figure <a href="#fig:epred">2.1</a> we show the posterior expectation of the delay distribution for each of the three fitted models.
 Figure <a href="#fig:epred">2.1</a>B illustrates the higher mean of men as compared with women.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">

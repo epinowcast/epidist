@@ -175,7 +175,7 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <pre><code><span><span class="co">##              prior     class coef group resp  dpar nlpar lb ub source</span></span>
 <span><span class="co">##       normal(1, 1) Intercept                                   family</span></span>
 <span><span class="co">##  normal(-0.7, 0.4) Intercept                 sigma             family</span></span></code></pre>
-<p>(Note that the functions <code>epidist_family</code> and <code>epidist_prior</code> are mostly for internal use!)</p>
+<p>(Note that the functions <code><a href="../reference/epidist_family.html">epidist_family()</a></code> and <code><a href="../reference/epidist_prior.html">epidist_prior()</a></code> are mostly for internal use!)</p>
 <p>Here are the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
@@ -253,7 +253,7 @@ Here, we provide a table giving the correspondence between the distributional pa
 </tbody>
 </table>
 <p>Note that all families in <code>brms</code> are parameterised with some measure of centrality <code>mu</code> as their first parameter.
-This parameter does not necessarily correspond to the mean: hence the provision of a function <code>add_mean_sd</code> within <code>epidist</code> to add columns containing the natural scale mean and standard deviation to a <code>data.frame</code> of draws.</p>
+This parameter does not necessarily correspond to the mean: hence the provision of a function <code><a href="../reference/add_mean_sd.html">add_mean_sd()</a></code> within <code>epidist</code> to add columns containing the natural scale mean and standard deviation to a <code>data.frame</code> of draws.</p>
 <div class="section level3">
 <h3 id="bibliography">Bibliography<a class="anchor" aria-label="anchor" href="#bibliography"></a>
 </h3>
