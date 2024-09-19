@@ -66,7 +66,7 @@ filter_obs_by_ptime <- function(linelist, obs_time,
   pfilt_t <- obs_time
   truncated_linelist <- linelist |>
     mutate(censored = "interval") |>
-    filter(.data$ptime_upr <= .data$pfilt_t)
+    filter(.data$ptime_upr <= pfilt_t)
   if (obs_at == "obs_secondary") {
     # Update observation time to be the same as the maximum secondary time
     truncated_linelist <- mutate(truncated_linelist, obs_at = .data$stime_upr)
@@ -82,7 +82,7 @@ filter_obs_by_ptime <- function(linelist, obs_time,
     )
   # Set observation time to artificial observation time if needed
   if (obs_at == "obs_secondary") {
-    truncated_linelist <- mutate(truncated_linelist, obs_at = .data$pfilt_t)
+    truncated_linelist <- mutate(truncated_linelist, obs_at = pfilt_t)
   }
   return(truncated_linelist)
 }
