@@ -21,16 +21,16 @@
 observe_process <- function(linelist) {
   linelist |>
     mutate(
-      ptime_daily = floor(ptime),
-      ptime_lwr = ptime_daily,
-      ptime_upr = ptime_daily + 1,
-      stime_daily = floor(stime),
-      stime_lwr = stime_daily,
-      stime_upr = stime_daily + 1,
-      delay_daily = stime_daily - ptime_daily,
-      delay_lwr = purrr::map_dbl(delay_daily, ~ max(0, . - 1)),
-      delay_upr = delay_daily + 1,
-      obs_at = ceiling(max(stime))
+      ptime_daily = floor(.data$ptime),
+      ptime_lwr = .data$ptime_daily,
+      ptime_upr = .data$ptime_daily + 1,
+      stime_daily = floor(.data$stime),
+      stime_lwr = .data$stime_daily,
+      stime_upr = .data$stime_daily + 1,
+      delay_daily = .data$stime_daily - .data$ptime_daily,
+      delay_lwr = purrr::map_dbl(.data$delay_daily, ~ max(0, . - 1)),
+      delay_upr = .data$delay_daily + 1,
+      obs_at = ceiling(max(.data$stime))
     )
 }
 
@@ -44,12 +44,12 @@ observe_process <- function(linelist) {
 filter_obs_by_obs_time <- function(linelist, obs_time) {
   linelist |>
     mutate(
-      obs_at = obs_time,
-      obs_time = obs_time - ptime,
-      censored_obs_time = obs_at - ptime_lwr,
+      obs_at = .data$obs_time,
+      obs_time = .data$obs_time - .data$ptime,
+      censored_obs_time = .data$obs_at - .data$ptime_lwr,
       censored = "interval"
     ) |>
-    filter(stime_upr <= obs_at)
+    filter(.data$stime_upr <= .data$obs_at)
 }
 
 #' Filter observations based on the observation time of primary events
@@ -69,20 +69,20 @@ filter_obs_by_ptime <- function(linelist, obs_time,
     filter(ptime_upr <= pfilt_t)
   if (obs_at == "obs_secondary") {
     # Update observation time to be the same as the maximum secondary time
-    truncated_linelist <- mutate(truncated_linelist, obs_at = stime_upr)
+    truncated_linelist <- mutate(truncated_linelist, obs_at = .data$stime_upr)
   } else if (obs_at == "max_secondary") {
     truncated_linelist <- truncated_linelist |>
-      mutate(obs_at := stime_upr |> max() |> ceiling())
+      mutate(obs_at := .data$stime_upr |> max() |> ceiling())
   }
   # Make observation time as specified
   truncated_linelist <- truncated_linelist |>
     mutate(
-      obs_time = obs_at - ptime,
-      censored_obs_time = obs_at - ptime_lwr
+      obs_time = .data$obs_at - .data$ptime,
+      censored_obs_time = .data$obs_at - .data$ptime_lwr
     )
   # Set observation time to artificial observation time if needed
   if (obs_at == "obs_secondary") {
-    truncated_linelist <- mutate(truncated_linelist, obs_at = pfilt_t)
+    truncated_linelist <- mutate(truncated_linelist, obs_at = .data$pfilt_t)
   }
   return(truncated_linelist)
 }
