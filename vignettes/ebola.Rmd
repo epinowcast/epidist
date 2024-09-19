@@ -199,7 +199,7 @@ obs_cens <- obs_cens |>
 
 ## Model fitting
 
-To prepare the data for use with the latent individual model, we use the function `as_latent_individual`:
+To prepare the data for use with the latent individual model, we use the function `as_latent_individual()`:
 
 ```{r}
 obs_prep <- as_latent_individual(obs_cens)
@@ -229,7 +229,7 @@ fit <- epidist(
 
 The `fit` object is a [`brmsfit`](https://paulbuerkner.com/brms/reference/brmsfit-class.html) object, and has the associated range of methods.
 See `methods(class = "brmsfit")` for more details.
-For example, we may use `summary` to view information about the fitted model, including posterior estimates for the regression coefficients:
+For example, we may use `summary()` to view information about the fitted model, including posterior estimates for the regression coefficients:
 
 ```{r}
 summary(fit)
@@ -280,7 +280,7 @@ fit_sex_district <- epidist(
 )
 ```
 
-For this model, along with looking at the `summary`, we may also use the `brms::ranef()` function to look at the estimates of the random effects:
+For this model, along with looking at the `summary()`, we may also use the `brms::ranef()` function to look at the estimates of the random effects:
 
 ```{r}
 summary(fit_sex_district)
@@ -291,7 +291,7 @@ ranef(fit_sex_district)
 
 To go further than summaries of the fitted model, we recommend using the `tidybayes` package.
 For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws()` function.
-The `tidybayes::add_epred_draws()` function uses the `posterior_epred_latent_lognormal` function implemented in `epidist` for the `latent_lognormal` custom `brms` family.
+The `tidybayes::add_epred_draws()` function uses the (internal) `posterior_epred_latent_lognormal()` function implemented in `epidist` for the `latent_lognormal` custom `brms` family.
 
 In Figure \@ref(fig:epred) we show the posterior expectation of the delay distribution for each of the three fitted models.
 Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with women.
