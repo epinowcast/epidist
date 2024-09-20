@@ -73,8 +73,8 @@ add_mean_sd.default <- function(data, ...) {
 #' @export
 add_mean_sd.lognormal_samples <- function(data, ...) {
   mutate(data,
-    mean = exp(mu + sigma ^ 2 / 2),
-    sd = mean * sqrt(exp(sigma ^ 2) - 1)
+    mean = exp(.data$mu + .data$sigma ^ 2 / 2),
+    sd = .data$mean * sqrt(exp(.data$sigma ^ 2) - 1)
   )
 }
 
@@ -91,7 +91,7 @@ add_mean_sd.lognormal_samples <- function(data, ...) {
 #' @export
 add_mean_sd.gamma_samples <- function(data, ...) {
   mutate(data,
-    mean = mu,
-    sd = mu / sqrt(shape)
+    mean = .data$mu,
+    sd = .data$mu / sqrt(.data$shape)
   )
 }
