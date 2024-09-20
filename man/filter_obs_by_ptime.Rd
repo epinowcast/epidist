@@ -14,6 +14,8 @@ filter_obs_by_ptime(
 \item{linelist}{...}
 
 \item{obs_time}{...}
+
+\item{obs_time_type}{...}
 }
 \description{
 Filter observations based on the observation time of primary events
