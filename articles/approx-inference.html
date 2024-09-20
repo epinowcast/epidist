@@ -111,7 +111,7 @@ Please check <code>brms</code> package updates if interested!</p>
 <p>The Laplace method approximates a posterior distribution by a Gaussian distribution centered (by default) at the posterior mode.
 In Stan, the Gaussian approximation is constructed on the unconstrained parameter space (as the domain of a Gaussian distribution is the real line).
 Samples from the Gaussian approximation may then be transformed to the constrained parameter space.
-To access the Laplace method, specify <code>algorithm = "laplace"</code> within <code><a href="https://paul-buerkner.github.io/brms/reference/brm.html" class="external-link">brms::brm()</a></code>.
+To access the Laplace method, specify <code>algorithm = "laplace"</code> within <code><a href="https://paulbuerkner.com/brms/reference/brm.html" class="external-link">brms::brm()</a></code>.
 See the section <a href="https://mc-stan.org/docs/cmdstan-guide/laplace_sample_config.html" class="external-link">Laplace Sampling</a> of the <code>CmdStan</code> User’s Guide for more information.</p>
 </div>
 <div class="section level3" number="2.2">
@@ -1236,19 +1236,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">28.486</td>
+<td headers="time (s)" class="gt_row gt_right">29.454</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.442</td>
+<td headers="time (s)" class="gt_row gt_right">2.559</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.002</td>
+<td headers="time (s)" class="gt_row gt_right">2.023</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.914</td>
+<td headers="time (s)" class="gt_row gt_right">0.928</td>
 </tr>
 </tbody>
 </table>

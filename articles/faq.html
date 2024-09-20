@@ -100,7 +100,7 @@ If you have a question about using the package, please create an <a href="https:
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">obs_cens_trunc_samp</span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  formula <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  formula <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
@@ -154,13 +154,13 @@ We particularly highlight two functions which might be useful:</p>
 <p><code>brms</code> provides default priors for all parameters.
 However, some of those priors do not make sense in the context of our application.
 Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html" class="external-link">prior predictive checking</a> to set <code>epidist</code>-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.</p>
-<p>For example, for the <code><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">brms::lognormal()</a></code> latent individual model, we suggest the following prior distributions for the <code>brms</code> <code>mu</code> and <code>sigma</code> intercept parameters:</p>
+<p>For example, for the <code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">brms::lognormal()</a></code> latent individual model, we suggest the following prior distributions for the <code>brms</code> <code>mu</code> and <code>sigma</code> intercept parameters:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">family</span> <span class="op">&lt;-</span> <span class="st">"lognormal"</span></span>
 <span></span>
 <span><span class="va">epidist_family</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_family.html">epidist_family</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">family</span><span class="op">)</span></span>
 <span><span class="va">epidist_formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_formula.html">epidist_formula</a></span><span class="op">(</span></span>
-<span>  <span class="va">data</span>, family <span class="op">=</span> <span class="va">epidist_family</span>, formula <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="va">data</span>, family <span class="op">=</span> <span class="va">epidist_family</span>, formula <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># NULL here means no replacing priors from the user!</span></span>
@@ -181,7 +181,7 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">fit_ppc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">data</span>,</span>
-<span>  formula <span class="op">=</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  formula <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  family <span class="op">=</span> <span class="st">"lognormal"</span>,</span>
 <span>  sample_prior <span class="op">=</span> <span class="st">"only"</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span></span>
@@ -231,12 +231,12 @@ Here, we provide a table giving the correspondence between the distributional pa
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal()</a></code></td>
+<td><code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal()</a></code></td>
 <td><code>mu</code></td>
 <td><code>meanlog</code></td>
 </tr>
 <tr class="even">
-<td><code><a href="https://paul-buerkner.github.io/brms/reference/brmsfamily.html" class="external-link">lognormal()</a></code></td>
+<td><code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal()</a></code></td>
 <td><code>sigma</code></td>
 <td><code>sdlog</code></td>
 </tr>
