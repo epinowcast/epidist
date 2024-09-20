@@ -46,8 +46,9 @@ epidist_diagnostics <- function(fit) {
       max_treedepth = max(np[treedepth_ind, ]$Value)
     ) |>
       mutate(
-        no_at_max_treedepth = sum(np[treedepth_ind, ]$Value == max_treedepth),
-        per_at_max_treedepth = no_at_max_treedepth / samples
+        no_at_max_treedepth =
+          sum(np[treedepth_ind, ]$Value == .data$max_treedepth),
+        per_at_max_treedepth = .data$no_at_max_treedepth / samples
       )
   } else {
     cli_abort(c(

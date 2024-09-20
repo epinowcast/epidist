@@ -46,19 +46,19 @@ as_latent_individual.data.frame <- function(data) {
   class(data) <- c("epidist_latent_individual", class(data))
   data <- data |>
     mutate(
-      obs_t = obs_at - ptime_lwr,
+      obs_t = .data$obs_at - .data$ptime_lwr,
       pwindow = ifelse(
-        stime_lwr < ptime_upr,
-        stime_upr - ptime_lwr,
-        ptime_upr - ptime_lwr
+        stime_lwr < .data$ptime_upr,
+        stime_upr - .data$ptime_lwr,
+        ptime_upr - .data$ptime_lwr
       ),
-      woverlap = as.numeric(stime_lwr < ptime_upr),
-      swindow = stime_upr - stime_lwr,
-      delay = stime_lwr - ptime_lwr,
+      woverlap = as.numeric(.data$stime_lwr < .data$ptime_upr),
+      swindow = .data$stime_upr - .data$stime_lwr,
+      delay = .data$stime_lwr - .data$ptime_lwr,
       row_id = dplyr::row_number()
     )
   if (nrow(data) > 1) {
-    data <- mutate(data, row_id = factor(row_id))
+    data <- mutate(data, row_id = factor(.data$row_id))
   }
   epidist_validate(data)
   return(data)
