@@ -66,7 +66,7 @@
   if (any(is.na(prior$prior_old))) {
     missing_prior <- utils::capture.output(print(
       prior |>
-        filter(is.na(prior_old)) |>
+        filter(is.na(.data$prior_old)) |>
         select(
           prior = prior_new, dplyr::all_of(cols), source = source_new
         )
@@ -79,7 +79,7 @@
   }
 
   prior <- prior |>
-    filter(!is.na(prior_old), !is.na(prior_new)) |>
+    filter(!is.na(.data$prior_old), !is.na(.data$prior_new)) |>
     select(prior = prior_new, dplyr::all_of(cols), source = source_new)
 
   return(prior)

@@ -132,6 +132,6 @@ simulate_secondary <- function(linelist, dist = rlnorm, ...) {
   linelist |>
     mutate(
       delay = dist(dplyr::n(), ...),
-      stime = ptime + delay
+      stime = .data$ptime + .data$delay
     )
 }
