@@ -28,7 +28,7 @@ observe_process <- function(linelist) {
       stime_lwr = .data$stime_daily,
       stime_upr = .data$stime_daily + 1,
       delay_daily = .data$stime_daily - .data$ptime_daily,
-      delay_lwr = purrr::map_dbl(.data$delay_daily, ~ max(0, . - 1)),
+      delay_lwr = pmax(0, .data$delay_daily - 1),
       delay_upr = .data$delay_daily + 1,
       obs_time = ceiling(max(.data$stime))
     )
