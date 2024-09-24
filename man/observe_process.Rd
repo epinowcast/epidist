@@ -23,7 +23,7 @@ truncation. The columns added are:
 \item \code{delay_daily}: Given by \code{stime_daily - ptime_daily}
 \item \code{delay_lwr}: Given by \code{delay_daily - 1} (or 0 if \code{delay_daily < 1})
 \item \code{delay_upr}: Given by \code{delay_daily + 1}
-\item \code{obs_at}: The maximum value of \code{stime}
+\item \code{obs_time}: The maximum value of \code{stime}
 }
 }
 \seealso{
