@@ -26,7 +26,7 @@ test_that("posterior_predict_latent_lognormal can generate predictions with no c
   fit <- readRDS(
     system.file("extdata/fit.rds", package = "epidist")
   )
-  draws <- data.frame(obs_t = 1000, pwindow = 0, swindow = 0) |>
+  draws <- data.frame(relative_obs_time = 1000, pwindow = 0, swindow = 0) |>
     tidybayes::add_predicted_draws(fit, ndraws = 100)
   expect_equal(draws$.draw, 1:100)
   pred <- draws$.prediction

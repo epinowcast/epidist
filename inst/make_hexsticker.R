@@ -26,16 +26,16 @@ truncated_obs <- obs |>
 
 combined_obs <- bind_rows(
   truncated_obs,
-  mutate(obs, obs_at = max(stime_daily))
+  mutate(obs, obs_time = max(stime_daily))
 ) |>
-  mutate(obs_at = factor(obs_at))
+  mutate(obs_time = factor(obs_time))
 
 meanlog <- secondary_dist$mu[[1]]
 sdlog <- secondary_dist$sigma[[1]]
 
 hex_plot <- combined_obs |>
   ggplot() +
-  aes(x = delay_daily, fill = obs_at) +
+  aes(x = delay_daily, fill = obs_time) +
   geom_histogram(
     aes(y = after_stat(density)),
     binwidth = 1, position = "dodge"
