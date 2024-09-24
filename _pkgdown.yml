@@ -61,9 +61,6 @@ reference:
   desc: Data included with the package
   contents:
   - has_concept("data")
-- title: Utility functions
-  contents:
-  - has_concept("utils")
 - title: Diagnostic functions
   contents:
   - has_concept("diagnostics")
