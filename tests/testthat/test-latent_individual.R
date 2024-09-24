@@ -83,7 +83,7 @@ test_that("epidist_formula.epidist_latent_individual with default settings produ
   expect_s3_class(form, "brmsformula")
   expect_equal(
     as_string_formula(form$formula),
-    "delay | vreal(obs_t, pwindow, swindow) ~ 1"
+    "delay | vreal(relative_obs_time, pwindow, swindow) ~ 1"
   )
   expect_equal(
     as_string_formula(form$pforms$sigma),
@@ -101,7 +101,7 @@ test_that("epidist_formula.epidist_latent_individual with custom formulas produc
   expect_s3_class(form_sex, "brmsformula")
   expect_equal(
     as_string_formula(form_sex$formula),
-    "delay | vreal(obs_t, pwindow, swindow) ~ sex"
+    "delay | vreal(relative_obs_time, pwindow, swindow) ~ sex"
   )
   expect_equal(
     as_string_formula(form_sex$pforms$sigma),

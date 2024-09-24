@@ -12,7 +12,7 @@ assert_latent_individual_input <- function(data) {
   assert_names(
     names(data),
     must.include = c("case", "ptime_lwr", "ptime_upr",
-                     "stime_lwr", "stime_upr", "obs_at")
+                     "stime_lwr", "stime_upr", "obs_time")
   )
   assert_integer(data$case, lower = 0)
   assert_numeric(data$ptime_lwr, lower = 0)
@@ -21,7 +21,7 @@ assert_latent_individual_input <- function(data) {
   assert_numeric(data$stime_lwr, lower = 0)
   assert_numeric(data$stime_upr, lower = 0)
   assert_true(all(data$stime_upr - data$stime_lwr > 0))
-  assert_numeric(data$obs_at, lower = 0)
+  assert_numeric(data$obs_time, lower = 0)
 }
 
 #' Prepare latent individual model
@@ -46,7 +46,7 @@ as_latent_individual.data.frame <- function(data) {
   class(data) <- c("epidist_latent_individual", class(data))
   data <- data |>
     mutate(
-      obs_t = .data$obs_at - .data$ptime_lwr,
+      relative_obs_time = .data$obs_time - .data$ptime_lwr,
       pwindow = ifelse(
         stime_lwr < .data$ptime_upr,
         stime_upr - .data$ptime_lwr,
@@ -81,14 +81,14 @@ epidist_validate.epidist_latent_individual <- function(data) {
   assert_names(
     names(data),
     must.include = c("case", "ptime_lwr", "ptime_upr",
-                     "stime_lwr", "stime_upr", "obs_at",
-                     "obs_t", "pwindow", "woverlap",
+                     "stime_lwr", "stime_upr", "obs_time",
+                     "relative_obs_time", "pwindow", "woverlap",
                      "swindow", "delay", "row_id")
   )
   if (nrow(data) > 1) {
     assert_factor(data$row_id)
   }
-  assert_numeric(data$obs_t, lower = 0)
+  assert_numeric(data$relative_obs_time, lower = 0)
   assert_numeric(data$pwindow, lower = 0)
   assert_numeric(data$woverlap, lower = 0)
   assert_numeric(data$swindow, lower = 0)
@@ -156,7 +156,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
   formula <- brms:::validate_formula(formula, data = data, family = family)
 
   formula <- stats::update(
-    formula, delay | vreal(obs_t, pwindow, swindow) ~ .
+    formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
   )
 
   # Using this here for checking purposes

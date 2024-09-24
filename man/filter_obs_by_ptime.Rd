@@ -7,7 +7,7 @@
 filter_obs_by_ptime(
   linelist,
   obs_time,
-  obs_at = c("obs_secondary", "max_secondary")
+  obs_time_type = c("obs_secondary", "max_secondary")
 )
 }
 \arguments{
@@ -15,7 +15,7 @@ filter_obs_by_ptime(
 
 \item{obs_time}{...}
 
-\item{obs_at}{...}
+\item{obs_time_type}{...}
 }
 \description{
 Filter observations based on the observation time of primary events

@@ -11,14 +11,14 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
   mu <- brms::get_dpar(prep, "mu", i = i)
   shape <- brms::get_dpar(prep, "shape", i = i)
 
-  obs_t <- prep$data$vreal1[i]
+  relative_obs_time <- prep$data$vreal1[i]
   pwindow <- prep$data$vreal2[i]
   swindow <- prep$data$vreal3[i]
 
   .predict <- function(s) {
-    d_censored <- obs_t + 1
+    d_censored <- relative_obs_time + 1
     # while loop to impose the truncation
-    while (d_censored > obs_t) {
+    while (d_censored > relative_obs_time) {
       p_latent <- stats::runif(1, 0, 1) * pwindow
       d_latent <- stats::rgamma(1, shape = shape[s], scale = mu[s] / shape[s])
       s_latent <- p_latent + d_latent
@@ -57,7 +57,7 @@ log_lik_latent_gamma <- function(i, prep) {
   mu <- brms::get_dpar(prep, "mu", i = i)
   shape <- brms::get_dpar(prep, "shape", i = i)
   y <- prep$data$Y[i]
-  obs_t <- prep$data$vreal1[i]
+  relative_obs_time <- prep$data$vreal1[i]
   pwindow <- prep$data$vreal2[i]
   swindow <- prep$data$vreal3[i]
 
@@ -74,7 +74,7 @@ log_lik_latent_gamma <- function(i, prep) {
   }
 
   d <- y - pwindow + swindow
-  obs_time <- obs_t - pwindow
+  obs_time <- relative_obs_time - pwindow
   lpdf <- stats::dgamma(d, shape = shape, scale = mu / shape, log = TRUE)
   lcdf <- stats::pgamma(
     obs_time, shape = shape, scale = mu / shape, log.p = TRUE
