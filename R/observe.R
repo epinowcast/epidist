@@ -44,7 +44,7 @@ observe_process <- function(linelist) {
 filter_obs_by_obs_time <- function(linelist, obs_time) {
   linelist |>
     mutate(
-      obs_time = obs_time - .data$ptime,
+      relative_obs_time = obs_time - .data$ptime,
       censored_obs_time = .data$obs_time - .data$ptime_lwr,
       censored = "interval"
     ) |>
