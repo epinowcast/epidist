@@ -1,36 +1,23 @@
-#' Observation process for primary and secondary events
-#'
-#' This function adds columns to linelist data representing an observation
-#' process with daily primary and secondary censoring, as well as right
-#' truncation. The columns added are:
-#' * `ptime_daily`: The floor of `ptime`
-#' * `ptime_lwr`: The lower bound of `ptime`. Equal to `ptime_daily`
-#' * `ptime_upr`: The upper bound of `ptime`. Equal to `ptime_lwr + 1`
-#' * `stime_daily`: The floor of `stime`
-#' * `stime_lwr`: The lower bound of `stime`. Equal to `stime_daily`
-#' * `stime_upr`: The upper bound of `stime`. Equal to `stime_lwr + 1`
-#' * `delay_daily`: Given by `stime_daily - ptime_daily`
-#' * `delay_lwr`: Given by `delay_daily - 1` (or 0 if `delay_daily < 1`)
-#' * `delay_upr`: Given by `delay_daily + 1`
-#' * `obs_time`: The maximum value of `stime`
+#' Add columns for interval censoring of primary and secondary events
 #'
 #' @param linelist ...
+#' @param pwindow The primary censoring window.
+#' @param swindow The secondary censoring window.
 #' @family observe
 #' @autoglobal
 #' @export
-observe_process <- function(linelist) {
+observe_process <- function(linelist, pwindow = 1, swindow = 1) {
+  assert_numeric(pwindow, lower = 0)
+  assert_numeric(swindow, lower = 0)
+  
   linelist |>
     mutate(
-      ptime_daily = floor(.data$ptime),
-      ptime_lwr = .data$ptime_daily,
-      ptime_upr = .data$ptime_daily + 1,
-      stime_daily = floor(.data$stime),
-      stime_lwr = .data$stime_daily,
-      stime_upr = .data$stime_daily + 1,
-      delay_daily = .data$stime_daily - .data$ptime_daily,
-      delay_lwr = pmax(0, .data$delay_daily - 1),
-      delay_upr = .data$delay_daily + 1,
-      obs_time = ceiling(max(.data$stime))
+      ptime_lwr = .floor_mult(.data$ptime, f = pwindow),
+      ptime_upr = .data$ptime_lwr + pwindow,
+      stime_lwr = .floor_mult(.data$stime, f = pwindow),
+      stime_upr = .data$stime_lwr + swindow,
+      delay_lwr = pmax(0, .data$stime_lwr - .data$ptime_lwr - 1),
+      delay_upr = .data$delay_lwr + pwindow + swindow
     )
 }
 
