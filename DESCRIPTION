@@ -52,8 +52,7 @@ Suggests:
     modelr,
     patchwork
 Remotes:
-    stan-dev/cmdstanr,
-    paul-buerkner/brms
+    stan-dev/cmdstanr
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
