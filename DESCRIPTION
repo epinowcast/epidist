@@ -54,7 +54,7 @@ Suggests:
 Remotes:
     paul-buerkner/brms
 Additional_repositories:
-    stan-dev/cmdstanr
+    https://github.com/stan-dev/cmdstanr/releases
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
