@@ -270,14 +270,14 @@ Both of these columns are relative to the first date of symptom onset in the dat
 <code class="sourceCode R"><span><span class="va">obs_prep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">obs_prep</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 22</span></span></span>
-<span><span class="co">#&gt;    case ptime stime   age sex    district      ptime_daily ptime_lwr ptime_upr</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  <span style="text-decoration: underline;">1</span>101   108   111    40 Female Bombali               108       108       109</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>  <span style="text-decoration: underline;">5</span>584   189   197    23 Male   Bombali               189       189       190</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>  <span style="text-decoration: underline;">1</span>187   111   117    35 Male   Port Loko             111       111       112</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>  <span style="text-decoration: underline;">2</span>483   138   142    15 Female Bo                    138       138       139</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>  <span style="text-decoration: underline;">6</span>796   217   221    16 Male   Western Urban         217       217       218</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>  <span style="text-decoration: underline;">3</span>576   157   163    28 Female Bombali               157       157       158</span></span>
+<span><span class="co">#&gt;    case ptime stime   age sex   district      ptime_daily ptime_lwr ptime_upr</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  <span style="text-decoration: underline;">3</span>073   148   155    38 Male  Bombali               148       148       149</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>  <span style="text-decoration: underline;">3</span>125   149   155    22 Male  Western Urban         149       149       150</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>  <span style="text-decoration: underline;">2</span>774   143   157    28 Male  Kenema                143       143       144</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>   547    71    75     7 Male  Kenema                 71        71        72</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>  <span style="text-decoration: underline;">5</span>394   186   191    11 Male  Bombali               186       186       187</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>  <span style="text-decoration: underline;">3</span>692   159   168    29 Male  Bombali               159       159       160</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: stime_daily &lt;dbl&gt;, stime_lwr &lt;dbl&gt;, stime_upr &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   delay_daily &lt;dbl&gt;, delay_lwr &lt;dbl&gt;, delay_upr &lt;dbl&gt;, obs_time &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   relative_obs_time &lt;dbl&gt;, pwindow &lt;dbl&gt;, woverlap &lt;dbl&gt;, swindow &lt;dbl&gt;,</span></span></span>
@@ -316,8 +316,8 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.62      0.02     1.59     1.65 1.00     9135     2707</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.54      0.02    -0.58    -0.50 1.00     8932     3351</span></span>
+<span><span class="co">#&gt; Intercept           1.61      0.02     1.58     1.64 1.00     8684     2357</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.53      0.02    -0.57    -0.49 1.00     8236     2538</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -338,7 +338,7 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span>  silent <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.03) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is 0.05).
+<p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.06) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is -0.01).
 For the <code>sexMale</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexMale</code> effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
@@ -353,10 +353,10 @@ It is important to note that the estimates represent an average of the observed 
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.60      0.02     1.56     1.65 1.00     9840     3072</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.57      0.03    -0.62    -0.51 1.00     9121     2955</span></span>
-<span><span class="co">#&gt; sexMale             0.03      0.03    -0.03     0.09 1.00     9384     2952</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.05      0.04    -0.03     0.14 1.00     8838     2776</span></span>
+<span><span class="co">#&gt; Intercept           1.58      0.02     1.53     1.63 1.00    11131     2905</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.52      0.03    -0.58    -0.47 1.00     7580     3070</span></span>
+<span><span class="co">#&gt; sexMale             0.06      0.03    -0.00     0.13 1.00     9137     2883</span></span>
+<span><span class="co">#&gt; sigma_sexMale      -0.01      0.04    -0.09     0.07 1.00     7746     3049</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -396,15 +396,15 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
 <span><span class="co">#&gt; ~district (Number of levels: 14) </span></span>
 <span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)           0.13      0.04     0.07     0.22 1.00     2241     2762</span></span>
-<span><span class="co">#&gt; sd(sigma_Intercept)     0.24      0.07     0.14     0.41 1.00     1630     2277</span></span>
+<span><span class="co">#&gt; sd(Intercept)           0.13      0.04     0.07     0.22 1.00     1981     2500</span></span>
+<span><span class="co">#&gt; sd(sigma_Intercept)     0.23      0.07     0.13     0.40 1.00     1800     2234</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.63      0.04     1.54     1.72 1.00     2473     2812</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.64      0.08    -0.80    -0.49 1.00     1974     1983</span></span>
-<span><span class="co">#&gt; sexMale             0.04      0.03    -0.02     0.10 1.00    10711     2685</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.04      0.04    -0.04     0.12 1.00     8473     3145</span></span>
+<span><span class="co">#&gt; Intercept           1.61      0.05     1.52     1.71 1.00     2423     2615</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.61      0.07    -0.76    -0.46 1.00     1991     2516</span></span>
+<span><span class="co">#&gt; sexMale             0.05      0.03    -0.00     0.11 1.00     9025     2829</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.01      0.04    -0.07     0.09 1.00     7318     2851</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -413,39 +413,39 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; $district</span></span>
 <span><span class="co">#&gt; , , Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                    Estimate  Est.Error        Q2.5         Q97.5</span></span>
-<span><span class="co">#&gt; Bo             6.371621e-02 0.07359867 -0.07516483  0.2172727750</span></span>
-<span><span class="co">#&gt; Bombali        1.640778e-01 0.04941813  0.06541626  0.2611606250</span></span>
-<span><span class="co">#&gt; Bonthe         6.939424e-03 0.12645921 -0.25349780  0.2492450750</span></span>
-<span><span class="co">#&gt; Kailahun      -4.011221e-02 0.05667364 -0.15431732  0.0711047200</span></span>
-<span><span class="co">#&gt; Kambia         4.223585e-02 0.08850373 -0.12717575  0.2207266750</span></span>
-<span><span class="co">#&gt; Kenema        -1.391701e-01 0.07323260 -0.29128433  0.0002774699</span></span>
-<span><span class="co">#&gt; Koinadugu      1.133106e-01 0.09724935 -0.06785274  0.3257543500</span></span>
-<span><span class="co">#&gt; Kono          -3.061089e-02 0.07825150 -0.18479047  0.1197622750</span></span>
-<span><span class="co">#&gt; Moyamba       -6.773945e-05 0.08349288 -0.16163852  0.1587817000</span></span>
-<span><span class="co">#&gt; Port Loko      1.435738e-02 0.05249369 -0.09109206  0.1192909250</span></span>
-<span><span class="co">#&gt; Pujehun       -4.120320e-02 0.11048968 -0.26577855  0.1650174750</span></span>
-<span><span class="co">#&gt; Tonkolili      3.631068e-02 0.05692232 -0.07445011  0.1508875250</span></span>
-<span><span class="co">#&gt; Western Rural  8.802803e-03 0.05416008 -0.09850370  0.1171788750</span></span>
-<span><span class="co">#&gt; Western Urban -1.841781e-01 0.05383542 -0.29487793 -0.0825507900</span></span>
+<span><span class="co">#&gt;                   Estimate  Est.Error        Q2.5        Q97.5</span></span>
+<span><span class="co">#&gt; Bo             0.049659543 0.07648929 -0.09711603  0.198415850</span></span>
+<span><span class="co">#&gt; Bombali        0.174525747 0.05101936  0.07642013  0.280136825</span></span>
+<span><span class="co">#&gt; Bonthe         0.008627425 0.12711363 -0.25858180  0.272735075</span></span>
+<span><span class="co">#&gt; Kailahun      -0.033957270 0.05989824 -0.15194590  0.081417483</span></span>
+<span><span class="co">#&gt; Kambia         0.014035709 0.08728953 -0.15802057  0.184208650</span></span>
+<span><span class="co">#&gt; Kenema        -0.125336198 0.07186232 -0.27571403  0.008911684</span></span>
+<span><span class="co">#&gt; Koinadugu      0.131315706 0.10223466 -0.05158371  0.352779725</span></span>
+<span><span class="co">#&gt; Kono          -0.048832098 0.07882006 -0.20807180  0.101906450</span></span>
+<span><span class="co">#&gt; Moyamba        0.022377977 0.08328607 -0.14132422  0.187826300</span></span>
+<span><span class="co">#&gt; Port Loko     -0.001518065 0.05623126 -0.11547050  0.108663925</span></span>
+<span><span class="co">#&gt; Pujehun       -0.036766564 0.11669134 -0.27599690  0.186260275</span></span>
+<span><span class="co">#&gt; Tonkolili      0.047941057 0.06016027 -0.07005451  0.168607925</span></span>
+<span><span class="co">#&gt; Western Rural -0.017555863 0.05578999 -0.13222013  0.088493313</span></span>
+<span><span class="co">#&gt; Western Urban -0.172633700 0.05531442 -0.28503890 -0.065921998</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; , , sigma_Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5        Q97.5</span></span>
-<span><span class="co">#&gt; Bo            -0.04319236 0.11996727 -0.27383410  0.199299325</span></span>
-<span><span class="co">#&gt; Bombali       -0.29174162 0.08868419 -0.45921660 -0.116847950</span></span>
-<span><span class="co">#&gt; Bonthe        -0.05523976 0.25069080 -0.59706777  0.422855400</span></span>
-<span><span class="co">#&gt; Kailahun      -0.20451584 0.10145527 -0.40233780 -0.002879607</span></span>
-<span><span class="co">#&gt; Kambia         0.29141334 0.11936303  0.06776910  0.536575650</span></span>
-<span><span class="co">#&gt; Kenema         0.20998415 0.10333036  0.01559385  0.424579575</span></span>
-<span><span class="co">#&gt; Koinadugu      0.01337396 0.15237593 -0.28072285  0.320624525</span></span>
-<span><span class="co">#&gt; Kono           0.10498724 0.11619073 -0.11573440  0.336127500</span></span>
-<span><span class="co">#&gt; Moyamba        0.08364841 0.12449586 -0.14856748  0.339839775</span></span>
-<span><span class="co">#&gt; Port Loko      0.01463715 0.08721044 -0.15581690  0.198435475</span></span>
-<span><span class="co">#&gt; Pujehun       -0.14516908 0.24205619 -0.65634702  0.296625300</span></span>
-<span><span class="co">#&gt; Tonkolili     -0.23929303 0.10497508 -0.44888910 -0.035586045</span></span>
-<span><span class="co">#&gt; Western Rural  0.02832273 0.08749760 -0.13610960  0.201803750</span></span>
-<span><span class="co">#&gt; Western Urban  0.24464192 0.08314110  0.08656548  0.412287575</span></span></code></pre></div>
+<span><span class="co">#&gt;                   Estimate  Est.Error        Q2.5       Q97.5</span></span>
+<span><span class="co">#&gt; Bo            -0.075404985 0.12119463 -0.31379113  0.16745023</span></span>
+<span><span class="co">#&gt; Bombali       -0.275437891 0.08655618 -0.44781052 -0.10861032</span></span>
+<span><span class="co">#&gt; Bonthe        -0.051516361 0.23732468 -0.53411608  0.40638035</span></span>
+<span><span class="co">#&gt; Kailahun      -0.209597067 0.09857676 -0.40725572 -0.01650580</span></span>
+<span><span class="co">#&gt; Kambia         0.259667263 0.12118200  0.03643989  0.50790048</span></span>
+<span><span class="co">#&gt; Kenema         0.195191620 0.09983437  0.01150421  0.39580870</span></span>
+<span><span class="co">#&gt; Koinadugu      0.006092283 0.15098508 -0.28488527  0.31472935</span></span>
+<span><span class="co">#&gt; Kono           0.101216931 0.11122112 -0.10887437  0.32718263</span></span>
+<span><span class="co">#&gt; Moyamba        0.142895624 0.11660600 -0.07898224  0.37835145</span></span>
+<span><span class="co">#&gt; Port Loko      0.085841299 0.08613680 -0.08135099  0.25841027</span></span>
+<span><span class="co">#&gt; Pujehun       -0.139828100 0.22803379 -0.61120480  0.27803248</span></span>
+<span><span class="co">#&gt; Tonkolili     -0.235290473 0.10141871 -0.43479545 -0.03705476</span></span>
+<span><span class="co">#&gt; Western Rural  0.028077793 0.08536926 -0.13896268  0.19957480</span></span>
+<span><span class="co">#&gt; Western Urban  0.192813792 0.08029768  0.03438413  0.35998105</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3" number="2.3">
