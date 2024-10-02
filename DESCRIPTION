@@ -26,7 +26,6 @@ Depends:
     R (>= 3.5.0)
 Imports: 
     brms,
-    cmdstanr,
     ggplot2,
     purrr,
     stats,
@@ -50,9 +49,10 @@ Suggests:
     sf,
     tidybayes,
     modelr,
-    patchwork
-Remotes:
-    stan-dev/cmdstanr
+    patchwork,
+    cmdstanr
+Additional_repositories:
+    https://stan-dev.r-universe.dev
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
