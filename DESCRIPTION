@@ -51,8 +51,6 @@ Suggests:
     modelr,
     patchwork,
     cmdstanr
-Remotes:
-    paul-buerkner/brms
 Additional_repositories:
     https://stan-dev.r-universe.dev
 Config/Needs/website:
