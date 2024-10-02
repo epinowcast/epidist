@@ -7,7 +7,7 @@
 \method{epidist_family}{default}(data, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} to be used for modelling.}
+\item{data}{A \code{data.frame} containing line list data}
 
 \item{...}{Additional arguments passed to method.}
 }

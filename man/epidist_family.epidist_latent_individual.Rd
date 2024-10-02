@@ -2,7 +2,7 @@
 % Please edit documentation in R/latent_individual.R
 \name{epidist_family.epidist_latent_individual}
 \alias{epidist_family.epidist_latent_individual}
-\title{Check if data has the \code{epidist_latent_individual} class}
+\title{Create an \code{epidist} custom family for the latent_individual model}
 \usage{
 \method{epidist_family}{epidist_latent_individual}(data, family = "lognormal", ...)
 }
@@ -14,7 +14,7 @@
 \item{...}{...}
 }
 \description{
-Check if data has the \code{epidist_latent_individual} class
+Create an \code{epidist} custom family for the latent_individual model
 }
 \seealso{
 Other latent_individual: 

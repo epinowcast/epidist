@@ -104,7 +104,7 @@ is_latent_individual <- function(data) {
   inherits(data, "epidist_latent_individual")
 }
 
-#' Check if data has the `epidist_latent_individual` class
+#' Create an `epidist` custom family for the latent_individual model
 #'
 #' @param data A `data.frame` containing line list data
 #' @param family Output of a call to `brms::brmsfamily()`
