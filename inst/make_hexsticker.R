@@ -61,7 +61,7 @@ sticker(
   package = "epidist",
   p_color = "#646770",
   p_size = 42,
-  p_x = 1.3,
+  p_x = 1.35,
   p_y = 1.1,
   h_fill = "#ffffff",
   h_color = "#646770",
@@ -69,3 +69,6 @@ sticker(
   dpi = 600,
   white_around_sticker = TRUE
 )
+
+usethis::use_logo(file.path("man", "figures", "logo.png"))
+pkgdown::build_favicons(pkg = ".", overwrite = TRUE)
