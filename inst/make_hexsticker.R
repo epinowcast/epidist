@@ -1,10 +1,6 @@
 library(hexSticker)
-library(sysfonts)
 library(ggplot2)
 library(dplyr)
-
-# font setup
-font_add_google("Zilla Slab Highlight", "useme")
 
 # make standard plot
 outbreak <- simulate_gillespie(seed = 101)
@@ -45,7 +41,7 @@ hex_plot <- combined_obs |>
     fun = dlnorm, args = c(meanlog, sdlog), n = 100,
     col = "#696767b1"
   ) +
-  scale_fill_brewer(palette = "Set2", direction = 1) +
+  scale_fill_brewer(palette = "Blues", direction = 1) +
   scale_y_continuous(breaks = NULL) +
   labs(x = "", y = "") +
   theme_void() +
@@ -58,16 +54,21 @@ hex_plot <- combined_obs |>
 # Make and save hexsticker
 sticker(
   hex_plot,
+  s_x = 1,
+  s_y = 0.85,
+  s_width = 2.4,
+  s_height = 1.9,
   package = "epidist",
-  p_size = 23,
   p_color = "#646770",
-  p_x = 1.3,
-  p_y = 1.15,
-  s_x = 0.85,
-  s_y = 1,
-  s_width = 1.2,
-  s_height = 1.2,
+  p_size = 42,
+  p_x = 1.35,
+  p_y = 1.1,
   h_fill = "#ffffff",
   h_color = "#646770",
-  filename = file.path("man", "figures", "logo.png")
+  filename = file.path("man", "figures", "logo.png"),
+  dpi = 600,
+  white_around_sticker = TRUE
 )
+
+usethis::use_logo(file.path("man", "figures", "logo.png"))
+pkgdown::build_favicons(pkg = ".", overwrite = TRUE)
