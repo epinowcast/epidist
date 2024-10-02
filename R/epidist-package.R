@@ -2,7 +2,6 @@
 "_PACKAGE"
 
 #' @import ggplot2
-#' @import cmdstanr
 
 ## usethis namespace: start
 #' @importFrom dplyr filter select
