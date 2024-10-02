@@ -1,6 +1,7 @@
 library(hexSticker)
 library(ggplot2)
 library(dplyr)
+library(magick)
 
 # make standard plot
 outbreak <- simulate_gillespie(seed = 101)
@@ -39,7 +40,7 @@ hex_plot <- combined_obs |>
   lims(x = c(0, 18)) +
   stat_function(
     fun = dlnorm, args = c(meanlog, sdlog), n = 100,
-    col = "#696767b1"
+    col = "#646770"
   ) +
   scale_fill_brewer(palette = "Blues", direction = 1) +
   scale_y_continuous(breaks = NULL) +
@@ -60,15 +61,47 @@ sticker(
   s_height = 1.9,
   package = "epidist",
   p_color = "#646770",
-  p_size = 42,
+  p_size = 76,
   p_x = 1.35,
   p_y = 1.1,
   h_fill = "#ffffff",
   h_color = "#646770",
   filename = file.path("man", "figures", "logo.png"),
-  dpi = 600,
+  dpi = 1200,
   white_around_sticker = TRUE
 )
+
+# Make outside of hex sticker transparent
+p <- image_read(file.path("man", "figures", "logo.png"))
+fuzz <- 50
+
+pp <- p |>
+  image_fill(
+    color = "transparent",
+    refcolor = "white",
+    fuzz = fuzz,
+    point = "+1+1"
+  ) |>
+  image_fill(
+    color = "transparent",
+    refcolor = "white",
+    fuzz = fuzz,
+    point = paste0("+", image_info(p)$width - 1, "+1")
+  ) |>
+  image_fill(
+    color = "transparent",
+    refcolor = "white",
+    fuzz = fuzz,
+    point = paste0("+1", "+", image_info(p)$height - 1)
+  ) |>
+  image_fill(
+    color = "transparent",
+    refcolor = "white",
+    fuzz = fuzz,
+    point = paste0("+", image_info(p)$width - 1, "+", image_info(p)$height - 1)
+  )
+
+image_write(image = pp, path = file.path("man", "figures", "logo.png"))
 
 usethis::use_logo(file.path("man", "figures", "logo.png"))
 pkgdown::build_favicons(pkg = ".", overwrite = TRUE)
