@@ -14,7 +14,7 @@ observe_process <- function(linelist, pwindow = 1, swindow = 1) {
     mutate(
       ptime_lwr = .floor_mult(.data$ptime, f = pwindow),
       ptime_upr = .data$ptime_lwr + pwindow,
-      stime_lwr = .floor_mult(.data$stime, f = pwindow),
+      stime_lwr = .floor_mult(.data$stime, f = swindow),
       stime_upr = .data$stime_lwr + swindow,
       delay_lwr = pmax(0, .data$stime_lwr - .data$ptime_lwr - 1),
       delay_upr = .data$delay_lwr + pwindow + swindow
