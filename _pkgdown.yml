@@ -23,10 +23,10 @@ navbar:
         href: articles/approx-inference.html
 
 authors:
-  Sam Abbott:
-    href: "https://www.samabbott.co.uk/"
   Adam Howes:
     href: "https://athowes.github.io/"
+  Sam Abbott:
+    href: "https://www.samabbott.co.uk/"
 
 reference:
 - title: Simulation
