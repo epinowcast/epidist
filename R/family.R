@@ -12,8 +12,8 @@
 #' @family family
 #' @export
 epidist_family <- function(data, family = "lognormal", ...) {
+  family <- epidist_family_family(family)
   custom_family <- epidist_family_model(data, family, ...)
-  # Call to epidist_family_family()
   return(custom_family)
 }
 
@@ -37,4 +37,16 @@ epidist_family_model <- function(data, ...) {
 #' @export
 epidist_family_family <- function(family, ...) {
   UseMethod("epidist_family_family")
+}
+
+#' Default method for the family-specific parts of an `epidist_family()` call
+#'
+#' @inheritParams epidist_family_family
+#' @param ... Additional arguments passed to method.
+#' @family defaults
+#' @export
+epidist_family_family.default <- function(family, ...) {
+  # allows use of stats::family and strings
+  family <- brms:::validate_family(family)
+  return(family)
 }

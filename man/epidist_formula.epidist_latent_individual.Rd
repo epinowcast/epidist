@@ -7,7 +7,7 @@
 \method{epidist_formula}{epidist_latent_individual}(data, family, formula, ...)
 }
 \arguments{
-\item{data}{...}
+\item{data}{A \code{data.frame} containing line list data}
 
 \item{family}{The output of \code{\link[=epidist_family]{epidist_family()}}}
 
