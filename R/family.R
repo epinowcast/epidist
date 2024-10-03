@@ -13,7 +13,7 @@
 #' @export
 epidist_family <- function(data, family = "lognormal", ...) {
   custom_family <- epidist_family_model(data, family, ...)
-  # epidist_family_family()
+  # Call to epidist_family_family()
   return(custom_family)
 }
 

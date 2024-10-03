@@ -113,9 +113,9 @@ is_latent_individual <- function(data) {
 #' @method epidist_family_model epidist_latent_individual
 #' @family latent_individual
 #' @export
-epidist_family_model.epidist_latent_individual <- function(data,
-                                                     family = "lognormal",
-                                                     ...) {
+epidist_family_model.epidist_latent_individual <- function(
+  data, family = "lognormal", ...
+) {
   epidist_validate(data)
   # allows use of stats::family and strings
   family <- brms:::validate_family(family)
