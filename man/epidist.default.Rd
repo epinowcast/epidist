@@ -50,7 +50,7 @@ Default method used for interface using \code{brms}
 }
 \seealso{
 Other defaults: 
-\code{\link{epidist_family.default}()},
+\code{\link{epidist_family_model.default}()},
 \code{\link{epidist_formula.default}()},
 \code{\link{epidist_stancode.default}()},
 \code{\link{epidist_validate.default}()}

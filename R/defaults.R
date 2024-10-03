@@ -26,14 +26,14 @@ epidist_formula.default <- function(data, ...) {
 
 #' Default method for defining a model specific family
 #'
-#' @inheritParams epidist_family
+#' @inheritParams epidist_family_model
 #' @param ... Additional arguments passed to method.
 #' @family defaults
 #' @export
-epidist_family.default <- function(data, ...) {
+epidist_family_model.default <- function(data, ...) {
   cli_abort(
-    "No epidist_family method implemented for the class ", class(data), "\n",
-    "See methods(epidist_family) for available methods"
+    "No epidist_family_model method implemented for the class ", class(data),
+    "\n", "See methods(epidist_family_model) for available methods"
   )
 }
 

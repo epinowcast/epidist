@@ -104,16 +104,16 @@ is_latent_individual <- function(data) {
   inherits(data, "epidist_latent_individual")
 }
 
-#' Create an `epidist` custom family for the latent_individual model
+#' Create the model-specific component of an `epidist` custom family
 #'
 #' @param data A `data.frame` containing line list data
 #' @param family Output of a call to `brms::brmsfamily()`
 #' @param ... ...
 #'
-#' @method epidist_family epidist_latent_individual
+#' @method epidist_family_model epidist_latent_individual
 #' @family latent_individual
 #' @export
-epidist_family.epidist_latent_individual <- function(data,
+epidist_family_model.epidist_latent_individual <- function(data,
                                                      family = "lognormal",
                                                      ...) {
   epidist_validate(data)

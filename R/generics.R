@@ -26,21 +26,6 @@ epidist_formula <- function(data, ...) {
   UseMethod("epidist_formula")
 }
 
-#' Define model specific family
-#'
-#' This function is used within [epidist()] to create a model specific custom
-#' `brms` family object. This object is passed to `brms`. It is unlikely that
-#' as a user you will need this function, but we export it nonetheless to be
-#' transparent about what exactly is happening inside of a call to [epidist()].
-#'
-#' @inheritParams epidist_validate
-#' @param ... Additional arguments passed to method.
-#' @family generics
-#' @export
-epidist_family <- function(data, ...) {
-  UseMethod("epidist_family")
-}
-
 #' Define model specific Stan code
 #'
 #' This function is used within [epidist()] to create any custom Stan code which

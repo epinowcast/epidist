@@ -21,7 +21,7 @@ Define a formula for the latent_individual model
 \seealso{
 Other latent_individual: 
 \code{\link{as_latent_individual}()},
-\code{\link{epidist_family.epidist_latent_individual}()},
+\code{\link{epidist_family_model.epidist_latent_individual}()},
 \code{\link{epidist_validate.epidist_latent_individual}()},
 \code{\link{is_latent_individual}()}
 }

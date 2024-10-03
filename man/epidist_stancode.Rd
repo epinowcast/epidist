@@ -20,7 +20,6 @@ transparent about what exactly is happening inside of a call to \code{\link[=epi
 \seealso{
 Other generics: 
 \code{\link{epidist}()},
-\code{\link{epidist_family}()},
 \code{\link{epidist_formula}()},
 \code{\link{epidist_validate}()}
 }
