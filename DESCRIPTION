@@ -2,7 +2,11 @@ Package: epidist
 Title: Estimate epidemiological delay distributions for infectious diseases 
 Version: 0.0.0.9000
 Authors@R:
-  c(person(given = "Sang Woo",
+  c(person(given = "Adam Howes",
+           role = c("aut", "cre"),
+           email = "adamthowes@gmail.com",
+           comment = c(ORCID = "0000-0003-2386-4031")),
+    person(given = "Sang Woo",
            family = "Park",
            role = c("aut"),
            email = "swp2@princeton.edu",
@@ -10,11 +14,7 @@ Authors@R:
     person(given = "Sam Abbott",
            role = c("aut"),
            email = "contact@samabbott.co.uk",
-           comment = c(ORCID = "0000-0001-8057-8037")),
-    person(given = "Adam Howes",
-           role = c("aut", "cre"),
-           email = "adamthowes@gmail.com",
-           comment = c(ORCID = "0000-0003-2386-4031")))
+           comment = c(ORCID = "0000-0001-8057-8037")))
 Description: Understanding and accurately estimating epidemiological delay
     distributions is important for public health policy. These estimates
     directly influence epidemic situational awareness, control strategies, and resource allocation. In this package, we provide methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. Despite their importance, these issues are frequently overlooked, often resulting in biased conclusions.
