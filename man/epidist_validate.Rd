@@ -7,7 +7,7 @@
 epidist_validate(data)
 }
 \arguments{
-\item{data}{A \code{data.frame} to be used for modelling.}
+\item{data}{A \code{data.frame} containing line list data.}
 }
 \description{
 This function validates that the provided \code{data} is suitable to run a

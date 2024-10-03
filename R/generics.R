@@ -4,7 +4,7 @@
 #' particular `epidist` model. This may include checking the class of `data`,
 #' and that it contains suitable columns.
 #'
-#' @param data A `data.frame` to be used for modelling.
+#' @param data A `data.frame` containing line list data.
 #' @family generics
 #' @export
 epidist_validate <- function(data) {

@@ -7,7 +7,7 @@
 epidist(data, formula, family, prior, backend, fn, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} to be used for modelling.}
+\item{data}{A \code{data.frame} containing line list data.}
 
 \item{formula}{A formula object created using \code{brms::bf}. A formula must be
 provided for the distributional parameter \code{mu} common to all \code{brms} families.

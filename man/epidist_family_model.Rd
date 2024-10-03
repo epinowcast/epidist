@@ -6,6 +6,11 @@
 \usage{
 epidist_family_model(data, ...)
 }
+\arguments{
+\item{data}{A \code{data.frame} containing line list data}
+
+\item{...}{Additional arguments passed to method.}
+}
 \description{
 The model-specific parts of an \code{epidist_family()} call
 }

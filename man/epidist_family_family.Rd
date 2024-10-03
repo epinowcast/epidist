@@ -6,6 +6,11 @@
 \usage{
 epidist_family_family(family, ...)
 }
+\arguments{
+\item{family}{Output of a call to \code{brms::brmsfamily()}}
+
+\item{...}{Additional arguments passed to method.}
+}
 \description{
 The family-specific parts of an \code{epidist_family()} call
 }

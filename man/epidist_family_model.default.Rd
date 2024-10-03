@@ -7,6 +7,8 @@
 \method{epidist_family_model}{default}(data, ...)
 }
 \arguments{
+\item{data}{A \code{data.frame} containing line list data}
+
 \item{...}{Additional arguments passed to method.}
 }
 \description{
