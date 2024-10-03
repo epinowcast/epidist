@@ -1,6 +1,6 @@
 #' Prepare latent individual model
 #'
-#' @param data Input data to be used for modelling.
+#' @param data A `data.frame` containing line list data
 #' @family latent_individual
 #' @export
 as_latent_individual <- function(data) {
@@ -143,7 +143,7 @@ epidist_family_model.epidist_latent_individual <- function(data,
 
 #' Define a formula for the latent_individual model
 #'
-#' @param data ...
+#' @param data A `data.frame` containing line list data
 #' @param family The output of [epidist_family()]
 #' @param formula As produced by [brms::brmsformula()]
 #' @param ... ...
