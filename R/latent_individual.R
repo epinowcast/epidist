@@ -143,6 +143,11 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
   epidist_validate(data)
   formula <- brms:::validate_formula(formula, data = data, family = family)
 
+  # Here could detect which dpar do not have a formula and change it so that
+  # they do. Obviously this isn't a model-specific task so perhaps it's
+  # suggesteing that we want to be generalising epidist_formula in some way
+  # Or it could be a helper function and we put it in all of the epidist_formula
+  
   formula <- stats::update(
     formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
   )
