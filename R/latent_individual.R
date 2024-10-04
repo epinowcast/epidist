@@ -118,6 +118,7 @@ epidist_family_model.epidist_latent_individual <- function(
 ) {
   epidist_validate(data)
   family <- .add_dpar_info(family)
+  # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
     dpars = family$dpars,
