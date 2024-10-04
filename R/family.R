@@ -15,6 +15,7 @@ epidist_family <- function(data, family = "lognormal", ...) {
   family <- brms:::validate_family(family)
   class(family) <- c(family$family, class(family))
   custom_family <- epidist_family_model(data, family, ...)
+  class(custom_family) <- c(family$family, class(custom_family))
   custom_family <- epidist_family_reparam(custom_family)
   return(custom_family)
 }
