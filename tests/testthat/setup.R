@@ -52,14 +52,16 @@ sim_obs_sex_m <- dplyr::filter(sim_obs_sex, sex == 0) |>
     dist = rlnorm,
     meanlog = meanlog_m,
     sdlog = sdlog_m
-  )
+  ) |>
+  dplyr::select(case, ptime, delay, stime, sex)
 
 sim_obs_sex_f <- dplyr::filter(sim_obs_sex, sex == 1) |>
   simulate_secondary(
     dist = rlnorm,
     meanlog = meanlog_f,
     sdlog = sdlog_f
-  )
+  ) |>
+  dplyr::select(case, ptime, delay, stime, sex)
 
 sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
   observe_process() |>
