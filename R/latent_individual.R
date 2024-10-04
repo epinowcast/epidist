@@ -107,7 +107,7 @@ is_latent_individual <- function(data) {
 #' Create the model-specific component of an `epidist` custom family
 #'
 #' @param data A `data.frame` containing line list data
-#' @param family Output of a call to `epidist_family_family()`
+#' @param family Output of a call to `brms::brmsfamily()`
 #' @param ... ...
 #'
 #' @method epidist_family_model epidist_latent_individual
@@ -117,12 +117,13 @@ epidist_family_model.epidist_latent_individual <- function(
   data, family, ...
 ) {
   epidist_validate(data)
+  family <- .add_dpar_info(family)
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
     dpars = family$dpars,
-    links = c(family$link, family$non_mu_links),
-    lb = c(NA, as.numeric(lapply(family$non_mu_bounds, "[[", "lb"))),
-    ub = c(NA, as.numeric(lapply(family$non_mu_bounds, "[[", "ub"))),
+    links = c(family$link, family$other_links),
+    lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
+    ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
     type = family$type,
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE

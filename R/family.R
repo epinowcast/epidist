@@ -12,9 +12,13 @@
 #' @family family
 #' @export
 epidist_family <- function(data, family = "lognormal", ...) {
-  # allows use of stats::family and strings
   family <- brms:::validate_family(family)
+  custom_family <- epidist_family_model(data, family, ...)
+  custom_family <- epidist_family_reparam(custom_family)
+  return(custom_family)
+}
 
+.add_dpar_info <- function(family) {
   # other is all dpar but mu
   other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
   other_bounds <- lapply(
@@ -22,11 +26,7 @@ epidist_family <- function(data, family = "lognormal", ...) {
   )
   family$other_links <- other_links
   family$other_bounds <- other_bounds
-
-  custom_family <- epidist_family_model(data, family, ...)
-  custom_family <- epidist_family_reparam(custom_family)
-
-  return(custom_family)
+  return(family)
 }
 
 #' The model-specific parts of an `epidist_family()` call
@@ -44,11 +44,11 @@ epidist_family_model <- function(data, ...) {
 #'
 #' @inheritParams epidist_family
 #' @param ... Additional arguments passed to method.
-#' @rdname epidist_family_family
+#' @rdname epidist_family_reparam
 #' @family family
 #' @export
 epidist_family_reparam <- function(family, ...) {
-  UseMethod("epidist_family_family")
+  UseMethod("epidist_family_reparam")
 }
 
 #' Default method for families which do not require a reparameterisation

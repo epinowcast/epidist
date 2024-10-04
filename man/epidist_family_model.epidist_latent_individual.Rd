@@ -9,7 +9,7 @@
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
 
-\item{family}{Output of a call to \code{epidist_family_family()}}
+\item{family}{Output of a call to \code{brms::brmsfamily()}}
 
 \item{...}{...}
 }
