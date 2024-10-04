@@ -13,6 +13,7 @@
 #' @export
 epidist_family <- function(data, family = "lognormal", ...) {
   family <- brms:::validate_family(family)
+  class(family) <- c(family$family, class(family))
   custom_family <- epidist_family_model(data, family, ...)
   custom_family <- epidist_family_reparam(custom_family)
   return(custom_family)
@@ -40,6 +41,19 @@ epidist_family_model <- function(data, ...) {
   UseMethod("epidist_family_model")
 }
 
+#' Default method for defining a model specific family
+#'
+#' @inheritParams epidist_family_model
+#' @param ... Additional arguments passed to method.
+#' @family family
+#' @export
+epidist_family_model.default <- function(data, ...) {
+  cli_abort(
+    "No epidist_family_model method implemented for the class ", class(data),
+    "\n", "See methods(epidist_family_model) for available methods"
+  )
+}
+
 #' Reparameterise an `epidist` family to align `brms` and Stan
 #'
 #' @inheritParams epidist_family
@@ -55,13 +69,20 @@ epidist_family_reparam <- function(family, ...) {
 #'
 #' @inheritParams epidist_family_reparam
 #' @param ... Additional arguments passed to method.
-#' @family defaults
+#' @family family
 #' @export
 epidist_family_reparam.default <- function(family, ...) {
-  if (family$family == "gamma") {
-    family$reparam <- c("shape", "shape ./ mu")
-  } else {
-    family$reparam <- family$dpars
-  }
+  family$reparam <- family$dpars
+  return(family)
+}
+
+#' Default method for families which do not require a reparameterisation
+#'
+#' @inheritParams epidist_family_reparam
+#' @param ... Additional arguments passed to method.
+#' @family family
+#' @export
+epidist_family_reparam.gamma <- function(family) {
+  family$reparam <- c("shape", "shape ./ mu")
   return(family)
 }
