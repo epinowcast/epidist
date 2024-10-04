@@ -17,6 +17,6 @@ The model-specific parts of an \code{epidist_family()} call
 \seealso{
 Other family: 
 \code{\link{epidist_family}()},
-\code{\link{epidist_family_family}()}
+\code{\link{epidist_family_reparam}()}
 }
 \concept{family}

@@ -21,7 +21,7 @@ transparent about what exactly is happening inside of a call to \code{\link[=epi
 }
 \seealso{
 Other family: 
-\code{\link{epidist_family_family}()},
-\code{\link{epidist_family_model}()}
+\code{\link{epidist_family_model}()},
+\code{\link{epidist_family_reparam}()}
 }
 \concept{family}

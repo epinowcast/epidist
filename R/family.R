@@ -12,8 +12,20 @@
 #' @family family
 #' @export
 epidist_family <- function(data, family = "lognormal", ...) {
-  family <- epidist_family_family(family)
+  # allows use of stats::family and strings
+  family <- brms:::validate_family(family)
+
+  # other is all dpar but mu
+  other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
+  other_bounds <- lapply(
+    family$dpars[-1], brms:::dpar_bounds, family = family$family
+  )
+  family$other_links <- other_links
+  family$other_bounds <- other_bounds
+
   custom_family <- epidist_family_model(data, family, ...)
+  custom_family <- epidist_family_reparam(custom_family)
+
   return(custom_family)
 }
 
@@ -28,25 +40,28 @@ epidist_family_model <- function(data, ...) {
   UseMethod("epidist_family_model")
 }
 
-#' The family-specific parts of an `epidist_family()` call
+#' Reparameterise an `epidist` family to align `brms` and Stan
 #'
 #' @inheritParams epidist_family
 #' @param ... Additional arguments passed to method.
 #' @rdname epidist_family_family
 #' @family family
 #' @export
-epidist_family_family <- function(family, ...) {
+epidist_family_reparam <- function(family, ...) {
   UseMethod("epidist_family_family")
 }
 
-#' Default method for the family-specific parts of an `epidist_family()` call
+#' Default method for families which do not require a reparameterisation
 #'
-#' @inheritParams epidist_family_family
+#' @inheritParams epidist_family_reparam
 #' @param ... Additional arguments passed to method.
 #' @family defaults
 #' @export
-epidist_family_family.default <- function(family, ...) {
-  # allows use of stats::family and strings
-  family <- brms:::validate_family(family)
+epidist_family_reparam.default <- function(family, ...) {
+  if (family$family == "gamma") {
+    family$reparam <- c("shape", "shape ./ mu")
+  } else {
+    family$reparam <- family$dpars
+  }
   return(family)
 }

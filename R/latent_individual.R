@@ -107,35 +107,27 @@ is_latent_individual <- function(data) {
 #' Create the model-specific component of an `epidist` custom family
 #'
 #' @param data A `data.frame` containing line list data
-#' @param family Output of a call to `brms::brmsfamily()`
+#' @param family Output of a call to `epidist_family_family()`
 #' @param ... ...
 #'
 #' @method epidist_family_model epidist_latent_individual
 #' @family latent_individual
 #' @export
 epidist_family_model.epidist_latent_individual <- function(
-  data, family = "lognormal", ...
+  data, family, ...
 ) {
   epidist_validate(data)
-  non_mu_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
-  non_mu_bounds <- lapply(
-    family$dpars[-1], brms:::dpar_bounds, family = family$family
-  )
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
     dpars = family$dpars,
-    links = c(family$link, non_mu_links),
-    lb = c(NA, as.numeric(lapply(non_mu_bounds, "[[", "lb"))),
-    ub = c(NA, as.numeric(lapply(non_mu_bounds, "[[", "ub"))),
+    links = c(family$link, family$non_mu_links),
+    lb = c(NA, as.numeric(lapply(family$non_mu_bounds, "[[", "lb"))),
+    ub = c(NA, as.numeric(lapply(family$non_mu_bounds, "[[", "ub"))),
     type = family$type,
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE
   )
-  reparam <- family$dpars
-  if (family$family == "gamma") {
-    reparam <- c("shape", "shape ./ mu")
-  }
-  custom_family$reparam <- reparam
+  custom_family$reparm <- family$reparm
   return(custom_family)
 }
 

@@ -4,12 +4,12 @@
 \alias{epidist_family_model.epidist_latent_individual}
 \title{Create the model-specific component of an \code{epidist} custom family}
 \usage{
-\method{epidist_family_model}{epidist_latent_individual}(data, family = "lognormal", ...)
+\method{epidist_family_model}{epidist_latent_individual}(data, family, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
 
-\item{family}{Output of a call to \code{brms::brmsfamily()}}
+\item{family}{Output of a call to \code{epidist_family_family()}}
 
 \item{...}{...}
 }
