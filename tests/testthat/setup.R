@@ -54,7 +54,7 @@ sim_obs_sex_m <- dplyr::filter(sim_obs_sex, sex == 0) |>
     sdlog = sdlog_m
   ) |>
   dplyr::select(case, ptime, delay, stime, sex)
-  
+
 sim_obs_sex_f <- dplyr::filter(sim_obs_sex, sex == 1) |>
   simulate_secondary(
     dist = rlnorm,
