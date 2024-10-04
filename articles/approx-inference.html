@@ -202,12 +202,12 @@ Although a <code>save_single_paths</code> option is available, which may have al
 <span>  data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"pathfinder"</span>, draws <span class="op">=</span> <span class="fl">4000</span>, num_paths <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Number of PSIS draws is larger than the total number of draws returned by the single Pathfinders. This is likely unintentional and leads to re-sampling from the same draws. </span></span>
-<span><span class="co">#&gt; Path [1] :Initial log joint density = -1587.101782 </span></span>
+<span><span class="co">#&gt; Path [1] :Initial log joint density = -1591.056353 </span></span>
 <span><span class="co">#&gt; Error evaluating model log probability: Non-finite gradient. </span></span>
 <span><span class="co">#&gt; Error evaluating model log probability: Non-finite gradient. </span></span>
 <span><span class="co">#&gt; Path [1] : Iter      log prob        ||dx||      ||grad||     alpha      alpha0      # evals       ELBO    Best ELBO        Notes  </span></span>
-<span><span class="co">#&gt;              64      -1.054e+03      1.269e-02   1.500e-02    1.000e+00  1.000e+00      1601 -5.351e+02 -5.351e+02                   </span></span>
-<span><span class="co">#&gt; Path [1] :Best Iter: [45] ELBO (-533.593855) evaluations: (1601) </span></span>
+<span><span class="co">#&gt;              69      -1.053e+03      3.778e-03   3.281e-02    1.000e+00  1.000e+00      1726 -5.396e+02 -5.396e+02                   </span></span>
+<span><span class="co">#&gt; Path [1] :Best Iter: [65] ELBO (-533.408576) evaluations: (1726) </span></span>
 <span><span class="co">#&gt; Finished in  0.4 seconds.</span></span>
 <span><span class="va">time_pathfinder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span></code></pre></div>
 <p>We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
@@ -705,23 +705,23 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_center">HMC</td>
-<td headers="mu" class="gt_row gt_right">1.788691</td>
-<td headers="sigma" class="gt_row gt_right">0.4997865</td>
+<td headers="mu" class="gt_row gt_right">1.781345</td>
+<td headers="sigma" class="gt_row gt_right">0.4952294</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">Laplace</td>
-<td headers="mu" class="gt_row gt_right">1.794048</td>
-<td headers="sigma" class="gt_row gt_right">0.4821865</td>
+<td headers="mu" class="gt_row gt_right">1.786346</td>
+<td headers="sigma" class="gt_row gt_right">0.4778074</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">ADVI</td>
-<td headers="mu" class="gt_row gt_right">1.805796</td>
-<td headers="sigma" class="gt_row gt_right">0.4694563</td>
+<td headers="mu" class="gt_row gt_right">1.795057</td>
+<td headers="sigma" class="gt_row gt_right">0.4695766</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">Pathfinder</td>
-<td headers="mu" class="gt_row gt_right">1.795803</td>
-<td headers="sigma" class="gt_row gt_right">0.4846586</td>
+<td headers="mu" class="gt_row gt_right">1.785063</td>
+<td headers="sigma" class="gt_row gt_right">0.4780281</td>
 </tr>
 </tbody>
 </table>
@@ -1245,19 +1245,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">28.564</td>
+<td headers="time (s)" class="gt_row gt_right">29.515</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.566</td>
+<td headers="time (s)" class="gt_row gt_right">2.434</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.010</td>
+<td headers="time (s)" class="gt_row gt_right">2.014</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.920</td>
+<td headers="time (s)" class="gt_row gt_right">0.913</td>
 </tr>
 </tbody>
 </table>
