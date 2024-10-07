@@ -84,3 +84,21 @@
 
   return(prior)
 }
+
+#' Additional distributional parameter information for `brms` families
+#'
+#' Includes additional information (link functions and parameter bound) about
+#' the distributional parameters of a `brms` family which are not the
+#' conditional mean `mu`.
+#'
+#' @inheritParams epidist_family
+#' @keywords internal
+.add_dpar_info <- function(family) {
+  other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
+  other_bounds <- lapply(
+    family$dpars[-1], brms:::dpar_bounds, family = family$family
+  )
+  family$other_links <- other_links
+  family$other_bounds <- other_bounds
+  return(family)
+}

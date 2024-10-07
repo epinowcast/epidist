@@ -15,7 +15,7 @@
 )
 }
 \arguments{
-\item{data}{A \code{data.frame} to be used for modelling.}
+\item{data}{A \code{data.frame} containing line list data.}
 
 \item{formula}{A formula object created using \code{brms::bf}. A formula must be
 provided for the distributional parameter \code{mu} common to all \code{brms} families.
@@ -50,7 +50,6 @@ Default method used for interface using \code{brms}
 }
 \seealso{
 Other defaults: 
-\code{\link{epidist_family.default}()},
 \code{\link{epidist_formula.default}()},
 \code{\link{epidist_stancode.default}()},
 \code{\link{epidist_validate.default}()}

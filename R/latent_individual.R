@@ -1,6 +1,6 @@
 #' Prepare latent individual model
 #'
-#' @param data Input data to be used for modelling.
+#' @param data A `data.frame` containing line list data
 #' @family latent_individual
 #' @export
 as_latent_individual <- function(data) {
@@ -104,46 +104,34 @@ is_latent_individual <- function(data) {
   inherits(data, "epidist_latent_individual")
 }
 
-#' Check if data has the `epidist_latent_individual` class
+#' Create the model-specific component of an `epidist` custom family
 #'
-#' @param data A `data.frame` containing line list data
-#' @param family Output of a call to `brms::brmsfamily()`
-#' @param ... ...
-#'
-#' @method epidist_family epidist_latent_individual
+#' @inheritParams epidist_family_model
+#' @param ... Additional arguments passed to method.
+#' @method epidist_family_model epidist_latent_individual
 #' @family latent_individual
 #' @export
-epidist_family.epidist_latent_individual <- function(data,
-                                                     family = "lognormal",
-                                                     ...) {
-  epidist_validate(data)
-  # allows use of stats::family and strings
-  family <- brms:::validate_family(family)
-  non_mu_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
-  non_mu_bounds <- lapply(
-    family$dpars[-1], brms:::dpar_bounds, family = family$family
-  )
+epidist_family_model.epidist_latent_individual <- function(
+  data, family, ...
+) {
+  # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
     dpars = family$dpars,
-    links = c(family$link, non_mu_links),
-    lb = c(NA, as.numeric(lapply(non_mu_bounds, "[[", "lb"))),
-    ub = c(NA, as.numeric(lapply(non_mu_bounds, "[[", "ub"))),
+    links = c(family$link, family$other_links),
+    lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
+    ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
     type = family$type,
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE
   )
-  reparam <- family$dpars
-  if (family$family == "gamma") {
-    reparam <- c("shape", "shape ./ mu")
-  }
-  custom_family$reparam <- reparam
+  custom_family$reparm <- family$reparm
   return(custom_family)
 }
 
 #' Define a formula for the latent_individual model
 #'
-#' @param data ...
+#' @param data A `data.frame` containing line list data
 #' @param family The output of [epidist_family()]
 #' @param formula As produced by [brms::brmsformula()]
 #' @param ... ...

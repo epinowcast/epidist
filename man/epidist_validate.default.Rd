@@ -7,7 +7,7 @@
 \method{epidist_validate}{default}(data, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} to be used for modelling.}
+\item{data}{A \code{data.frame} containing line list data.}
 
 \item{...}{Additional arguments passed to method.}
 }
@@ -17,7 +17,6 @@ Default method for data validation
 \seealso{
 Other defaults: 
 \code{\link{epidist.default}()},
-\code{\link{epidist_family.default}()},
 \code{\link{epidist_formula.default}()},
 \code{\link{epidist_stancode.default}()}
 }
