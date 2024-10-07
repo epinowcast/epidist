@@ -69,7 +69,7 @@ epidist_family_reparam.default <- function(family, ...) {
   return(family)
 }
 
-#' Default method for families which do not require a reparameterisation
+#' Reparameterisation for the gamma family
 #'
 #' @inheritParams epidist_family_reparam
 #' @param ... Additional arguments passed to method.
