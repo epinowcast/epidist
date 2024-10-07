@@ -114,7 +114,6 @@ is_latent_individual <- function(data) {
 epidist_family_model.epidist_latent_individual <- function(
   data, family, ...
 ) {
-  epidist_validate(data)
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),

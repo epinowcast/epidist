@@ -26,13 +26,11 @@ test_that(".replace_prior errors when passed a new prior without a match in old_
   expect_error(.replace_prior(old_prior, new_prior))
 })
 
-test_that(".add_dpar_info works as expected for the lognormal and gamma families", {
+test_that(".add_dpar_info works as expected for the lognormal and gamma families", { # nolint: line_length_linter.
   lognormal_extra <- .add_dpar_info(brms::lognormal())
   expect_equal(lognormal_extra$other_links, "log")
   expect_equal(lognormal_extra$other_bounds, list(list("lb" = "0", ub = "")))
-  
   gamma_extra <- .add_dpar_info(brms:::validate_family(stats::Gamma()))
   expect_equal(gamma_extra$other_links, NULL)
   expect_equal(gamma_extra$other_bounds, list(list("lb" = "0", ub = "")))
 })
-  
