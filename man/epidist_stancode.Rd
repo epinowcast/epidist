@@ -7,7 +7,7 @@
 epidist_stancode(data, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} to be used for modelling.}
+\item{data}{A \code{data.frame} containing line list data.}
 
 \item{...}{Additional arguments passed to method.}
 }
@@ -20,7 +20,6 @@ transparent about what exactly is happening inside of a call to \code{\link[=epi
 \seealso{
 Other generics: 
 \code{\link{epidist}()},
-\code{\link{epidist_family}()},
 \code{\link{epidist_formula}()},
 \code{\link{epidist_validate}()}
 }
