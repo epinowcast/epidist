@@ -7,7 +7,7 @@
 \method{epidist_formula}{epidist_latent_individual}(data, family, formula, ...)
 }
 \arguments{
-\item{data}{...}
+\item{data}{A \code{data.frame} containing line list data}
 
 \item{family}{The output of \code{\link[=epidist_family]{epidist_family()}}}
 
@@ -21,7 +21,7 @@ Define a formula for the latent_individual model
 \seealso{
 Other latent_individual: 
 \code{\link{as_latent_individual}()},
-\code{\link{epidist_family.epidist_latent_individual}()},
+\code{\link{epidist_family_model.epidist_latent_individual}()},
 \code{\link{epidist_validate.epidist_latent_individual}()},
 \code{\link{is_latent_individual}()}
 }
