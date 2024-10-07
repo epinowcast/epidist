@@ -14,6 +14,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.lognormal_samples.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/as_latent_individual.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-add_dpar_info.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-floor_mult.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-replace_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-stan_chunk.html</loc></url>
@@ -22,12 +23,16 @@
 <url><loc>https://epidist.epinowcast.org/reference/epidist.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_diagnostics.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/epidist_family.default.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/epidist_family.epidist_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_family.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_family_model.default.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_family_model.epidist_latent_individual.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_family_model.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_family_prior.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_family_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_family_prior.lognormal.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_family_reparam.default.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_family_reparam.gamma.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_family_reparam.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_formula.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_formula.epidist_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_formula.html</loc></url>

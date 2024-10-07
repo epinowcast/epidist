@@ -125,12 +125,6 @@
         <dd>Fit epidemiological delay distributions using a <code>brms</code> interface</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_family.html">epidist_family()</a></code>
-
-        </dt>
-        <dd>Define model specific family</dd>
-      </dl><dl><dt>
-
           <code><a href="epidist_formula.html">epidist_formula()</a></code>
 
         </dt>
@@ -166,12 +160,6 @@
         <dd>Default method used for interface using <code>brms</code></dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_family.default.html">epidist_family(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method for defining a model specific family</dd>
-      </dl><dl><dt>
-
           <code><a href="epidist_formula.default.html">epidist_formula(<i>&lt;default&gt;</i>)</a></code>
 
         </dt>
@@ -188,6 +176,53 @@
 
         </dt>
         <dd>Default method for data validation</dd>
+      </dl></div><div class="section level2">
+      <h2 id="family">Family<a class="anchor" aria-label="anchor" href="#family"></a></h2>
+
+      <div class="section-desc"><p>Functions related to specifying custom <code>brms</code> families</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist_family.html">epidist_family()</a></code>
+
+        </dt>
+        <dd>Define <code>epidist</code> family</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_family_model.html">epidist_family_model()</a></code>
+
+        </dt>
+        <dd>The model-specific parts of an <code><a href="../reference/epidist_family.html">epidist_family()</a></code> call</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_family_model.default.html">epidist_family_model(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method for defining a model specific family</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_family_reparam.html">epidist_family_reparam()</a></code>
+
+        </dt>
+        <dd>Reparameterise an <code>epidist</code> family to align <code>brms</code> and Stan</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_family_reparam.default.html">epidist_family_reparam(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method for families which do not require a reparameterisation</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_family_reparam.gamma.html">epidist_family_reparam(<i>&lt;gamma&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Reparameterisation for the gamma family</dd>
       </dl></div><div class="section level2">
       <h2 id="priors">Priors<a class="anchor" aria-label="anchor" href="#priors"></a></h2>
 
@@ -254,10 +289,10 @@
         <dd>Prepare latent individual model</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_family.epidist_latent_individual.html">epidist_family(<i>&lt;epidist_latent_individual&gt;</i>)</a></code>
+          <code><a href="epidist_family_model.epidist_latent_individual.html">epidist_family_model(<i>&lt;epidist_latent_individual&gt;</i>)</a></code>
 
         </dt>
-        <dd>Check if data has the <code>epidist_latent_individual</code> class</dd>
+        <dd>Create the model-specific component of an <code>epidist</code> custom family</dd>
       </dl><dl><dt>
 
           <code><a href="epidist_formula.epidist_latent_individual.html">epidist_formula(<i>&lt;epidist_latent_individual&gt;</i>)</a></code>
