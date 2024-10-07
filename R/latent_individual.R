@@ -106,11 +106,8 @@ is_latent_individual <- function(data) {
 
 #' Create the model-specific component of an `epidist` custom family
 #'
-#' @param data A `data.frame` containing line list data
-#' @param family Output of a call to `brms::brmsfamily()` with additional
-#' information as provided by `.add_dpar_info()`
-#' @param ... ...
-#'
+#' @inheritParams epidist_family_model
+#' @param ... Additional arguments passed to method.
 #' @method epidist_family_model epidist_latent_individual
 #' @family latent_individual
 #' @export

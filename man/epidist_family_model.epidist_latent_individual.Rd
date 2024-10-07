@@ -12,7 +12,7 @@
 \item{family}{Output of a call to \code{brms::brmsfamily()} with additional
 information as provided by \code{.add_dpar_info()}}
 
-\item{...}{...}
+\item{...}{Additional arguments passed to method.}
 }
 \description{
 Create the model-specific component of an \code{epidist} custom family

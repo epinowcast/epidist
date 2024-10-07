@@ -1,9 +1,9 @@
 #' Define `epidist` family
 #'
 #' This function is used within [epidist()] to create a model specific custom
-#' `brms` family object. This object is passed to `brms`. It is unlikely that
-#' as a user you will need this function, but we export it nonetheless to be
-#' transparent about what exactly is happening inside of a call to [epidist()].
+#' `brms` family object. This custom family is passed to `brms`. It is unlikely
+#' that as a user you will need this function, but we export it nonetheless to
+#' be transparent about what happens inside of a call to [epidist()].
 #'
 #' @param data A `data.frame` containing line list data
 #' @param family Output of a call to `brms::brmsfamily()`
@@ -19,17 +19,6 @@ epidist_family <- function(data, family = "lognormal", ...) {
   class(custom_family) <- c(family$family, class(custom_family))
   custom_family <- epidist_family_reparam(custom_family)
   return(custom_family)
-}
-
-.add_dpar_info <- function(family) {
-  # other is all dpar but mu
-  other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
-  other_bounds <- lapply(
-    family$dpars[-1], brms:::dpar_bounds, family = family$family
-  )
-  family$other_links <- other_links
-  family$other_bounds <- other_bounds
-  return(family)
 }
 
 #' The model-specific parts of an `epidist_family()` call
@@ -86,7 +75,7 @@ epidist_family_reparam.default <- function(family, ...) {
 #' @param ... Additional arguments passed to method.
 #' @family family
 #' @export
-epidist_family_reparam.gamma <- function(family) {
+epidist_family_reparam.gamma <- function(family, ...) {
   family$reparam <- c("shape", "shape ./ mu")
   return(family)
 }

@@ -15,9 +15,9 @@ epidist_family(data, family = "lognormal", ...)
 }
 \description{
 This function is used within \code{\link[=epidist]{epidist()}} to create a model specific custom
-\code{brms} family object. This object is passed to \code{brms}. It is unlikely that
-as a user you will need this function, but we export it nonetheless to be
-transparent about what exactly is happening inside of a call to \code{\link[=epidist]{epidist()}}.
+\code{brms} family object. This custom family is passed to \code{brms}. It is unlikely
+that as a user you will need this function, but we export it nonetheless to
+be transparent about what happens inside of a call to \code{\link[=epidist]{epidist()}}.
 }
 \seealso{
 Other family: 
