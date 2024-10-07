@@ -22,6 +22,9 @@ transparent about what exactly is happening inside of a call to \code{\link[=epi
 \seealso{
 Other family: 
 \code{\link{epidist_family_model}()},
-\code{\link{epidist_family_reparam}()}
+\code{\link{epidist_family_model.default}()},
+\code{\link{epidist_family_reparam}()},
+\code{\link{epidist_family_reparam.default}()},
+\code{\link{epidist_family_reparam.gamma}()}
 }
 \concept{family}

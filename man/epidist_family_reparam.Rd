@@ -17,6 +17,9 @@ Reparameterise an \code{epidist} family to align \code{brms} and Stan
 \seealso{
 Other family: 
 \code{\link{epidist_family}()},
-\code{\link{epidist_family_model}()}
+\code{\link{epidist_family_model}()},
+\code{\link{epidist_family_model.default}()},
+\code{\link{epidist_family_reparam.default}()},
+\code{\link{epidist_family_reparam.gamma}()}
 }
 \concept{family}

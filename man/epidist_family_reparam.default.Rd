@@ -15,11 +15,11 @@
 Default method for families which do not require a reparameterisation
 }
 \seealso{
-Other defaults: 
-\code{\link{epidist.default}()},
+Other family: 
+\code{\link{epidist_family}()},
+\code{\link{epidist_family_model}()},
 \code{\link{epidist_family_model.default}()},
-\code{\link{epidist_formula.default}()},
-\code{\link{epidist_stancode.default}()},
-\code{\link{epidist_validate.default}()}
+\code{\link{epidist_family_reparam}()},
+\code{\link{epidist_family_reparam.gamma}()}
 }
-\concept{defaults}
+\concept{family}

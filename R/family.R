@@ -14,6 +14,7 @@
 epidist_family <- function(data, family = "lognormal", ...) {
   family <- brms:::validate_family(family)
   class(family) <- c(family$family, class(family))
+  family <- .add_dpar_info(family)
   custom_family <- epidist_family_model(data, family, ...)
   class(custom_family) <- c(family$family, class(custom_family))
   custom_family <- epidist_family_reparam(custom_family)
@@ -34,11 +35,13 @@ epidist_family <- function(data, family = "lognormal", ...) {
 #' The model-specific parts of an `epidist_family()` call
 #'
 #' @inheritParams epidist_family
+#' @param family Output of a call to `brms::brmsfamily()` with additional
+#' information as provided by `.add_dpar_info()`
 #' @param ... Additional arguments passed to method.
 #' @rdname epidist_family_model
 #' @family family
 #' @export
-epidist_family_model <- function(data, ...) {
+epidist_family_model <- function(data, family, ...) {
   UseMethod("epidist_family_model")
 }
 

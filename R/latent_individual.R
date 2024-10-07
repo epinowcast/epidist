@@ -107,7 +107,8 @@ is_latent_individual <- function(data) {
 #' Create the model-specific component of an `epidist` custom family
 #'
 #' @param data A `data.frame` containing line list data
-#' @param family Output of a call to `brms::brmsfamily()`
+#' @param family Output of a call to `brms::brmsfamily()` with additional
+#' information as provided by `.add_dpar_info()`
 #' @param ... ...
 #'
 #' @method epidist_family_model epidist_latent_individual
@@ -117,7 +118,6 @@ epidist_family_model.epidist_latent_individual <- function(
   data, family, ...
 ) {
   epidist_validate(data)
-  family <- .add_dpar_info(family)
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),

@@ -9,7 +9,8 @@
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
 
-\item{family}{Output of a call to \code{brms::brmsfamily()}}
+\item{family}{Output of a call to \code{brms::brmsfamily()} with additional
+information as provided by \code{.add_dpar_info()}}
 
 \item{...}{...}
 }
