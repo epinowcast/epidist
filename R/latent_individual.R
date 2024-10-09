@@ -154,17 +154,6 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
   return(formula)
 }
 
-#' Include implicit intercepts in `brms` formula as explicit
-#'
-#' This function detects the distributional parameters in a `brms` formula
-#' object, and alters to formula to include explicit intercept parameters for
-#' them i.e. `~ 1`.
-#'
-#' @param formula ...
-.make_intercepts_explicit <- function(formula) {
-  return(formula)
-}
-
 #' @method epidist_stancode epidist_latent_individual
 #' @family latent_individual
 #' @autoglobal
