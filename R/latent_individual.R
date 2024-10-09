@@ -142,12 +142,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
                                                       ...) {
   epidist_validate(data)
   formula <- brms:::validate_formula(formula, data = data, family = family)
-
-  # Here could detect which dpar do not have a formula and change it so that
-  # they do. Obviously this isn't a model-specific task so perhaps it's
-  # suggesteing that we want to be generalising epidist_formula in some way
-  # Or it could be a helper function and we put it in all of the epidist_formula
-  
+  formula <- .make_intercepts_explicit(formula)
   formula <- stats::update(
     formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
   )
@@ -157,6 +152,17 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
   brms:::validate_data(data, bterms)
 
   return(formula)
+}
+
+#' Include implicit intercepts in `brms` formula as explicit
+#'
+#' This function detects the distributional parameters in a `brms` formula
+#' object, and alters to formula to include explicit intercept parameters for
+#' them i.e. `~ 1`.
+#'
+#' @param formula ...
+.make_intercepts_explicit <- function(formula) {
+  # TODO
 }
 
 #' @method epidist_stancode epidist_latent_individual
