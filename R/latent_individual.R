@@ -162,7 +162,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
 #'
 #' @param formula ...
 .make_intercepts_explicit <- function(formula) {
-  # TODO
+  return(formula)
 }
 
 #' @method epidist_stancode epidist_latent_individual

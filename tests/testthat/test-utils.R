@@ -44,5 +44,4 @@ test_that(".make_intercepts_explicit works", { # nolint: line_length_linter.
     family = epidist_family
   )
   formula <- .make_intercepts_explicit(formula)
-  # expect_things()
 })
