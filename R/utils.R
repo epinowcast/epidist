@@ -115,7 +115,8 @@
   other_dpars <- setdiff(formula$family$dpars, "mu")
   no_formula <- setdiff(other_dpars, names(formula$pforms))
   for (dpar in no_formula) {
-    formula$pforms[[dpar]] <- as.formula(paste0(dpar, " ~ 1"))
+    new_formula <- as.formula(paste0(dpar, " ~ 1"))
+    formula$pforms[[dpar]] <- new_formula
   }
   return(formula)
 }

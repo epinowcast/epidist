@@ -35,13 +35,19 @@ test_that(".add_dpar_info works as expected for the lognormal and gamma families
   expect_equal(gamma_extra$other_bounds, list(list("lb" = "0", ub = "")))
 })
 
-test_that(".make_intercepts_explicit works", { # nolint: line_length_linter.
+test_that(".make_intercepts_explicit creates a formula which is the same as if it had been explicitly created", { # nolint: line_length_linter.
   prep_obs <- as_latent_individual(sim_obs)
   epidist_family <- epidist_family(prep_obs, family = "lognormal")
   formula <- brms:::validate_formula(
     formula = brms::bf(mu ~ 1),
     data = prep_obs,
     family = epidist_family
-  )
+  
   formula <- .make_intercepts_explicit(formula)
+  formula_explicit <- brms:::validate_formula(
+    formula = brms::bf(mu ~ 1, sigma ~ 1),
+    data = prep_obs,
+    family = epidist_family
+  )
+  expect_equal(formula, formula_explicit)
 })
