@@ -37,6 +37,10 @@ reference:
   desc: Functions for observing data
   contents:
   - has_concept("observe")
+- title: Preprocess
+  desc: Functions for preprocessing data
+  contents:
+  - has_concept("preprocess")
 - title: S3 generics
   desc: S3 generics for delay modelling
   contents:
