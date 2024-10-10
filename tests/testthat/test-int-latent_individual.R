@@ -58,7 +58,7 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
   param1 <- extract_normal_parameters_brms(epidist_prior[1, ])
   param2 <- extract_normal_parameters_brms(epidist_prior[2, ])
   samples1 <- rnorm(1000, mean = param1$mean, sd = param1$sd)
-  samples2 <- exp(rnorm(1000, mean = param2$mean, sd = param2$sd))
+  samples2 <- rnorm(1000, mean = param2$mean, sd = param2$sd)
   # suppressWarnings here used to prevent warnings about ties
   ks1 <- suppressWarnings(stats::ks.test(pred$mu, samples1))
   ks2 <- suppressWarnings(stats::ks.test(pred$sigma, samples2))
