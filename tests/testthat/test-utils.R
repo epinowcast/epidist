@@ -49,6 +49,8 @@ test_that(".make_intercepts_explicit creates a formula which is the same as if i
     data = prep_obs,
     family = epidist_family
   )
+  attr(formula$pforms$sigma, ".Environment") <- NULL
+  attr(formula_explicit$pforms$sigma, ".Environment") <- NULL
   expect_equal(formula, formula_explicit)
 })
 
@@ -61,5 +63,7 @@ test_that(".make_intercepts_explicit does not add an intercept if the distributi
     family = epidist_family
   )
   formula_updated <- .make_intercepts_explicit(formula)
+  attr(formula$pforms$sigma, ".Environment") <- NULL
+  attr(formula_updated$pforms$sigma, ".Environment") <- NULL
   expect_equal(formula, formula_updated)
 })
