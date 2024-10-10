@@ -142,7 +142,7 @@ epidist_formula.epidist_latent_individual <- function(data, family, formula,
                                                       ...) {
   epidist_validate(data)
   formula <- brms:::validate_formula(formula, data = data, family = family)
-
+  formula <- .make_intercepts_explicit(formula)
   formula <- stats::update(
     formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
   )
