@@ -16,6 +16,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/as_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-add_dpar_info.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-floor_mult.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-make_intercepts_explicit.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-replace_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-stan_chunk.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-version_stanvar.html</loc></url>
