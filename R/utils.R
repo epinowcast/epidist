@@ -113,8 +113,10 @@
 #' @keywords internal
 .make_intercepts_explicit <- function(formula) {
   other_dpars <- setdiff(formula$family$dpars, "mu")
-  no_formula <- setdiff(other_dpars, names(formula$pforms))
-  for (dpar in no_formula) {
+  fixed_dpars <- names(formula$pfix)
+  formula_dpars <- names(formula$pforms)
+  replace_dpars <- setdiff(other_dpars, c(fixed_dpars, formula_dpars))
+  for (dpar in replace_dpars) {
     new_formula <- as.formula(paste0(dpar, " ~ 1"))
     formula$pforms[[dpar]] <- new_formula
   }
