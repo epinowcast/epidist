@@ -90,18 +90,13 @@ epidist_family_prior.default <- function(family, formula, ...) {
 #' @export
 epidist_family_prior.lognormal <- function(family, formula, ...) {
   prior <- prior("normal(1, 1)", class = "Intercept")
-  if ("sigma" %in% names(formula$pforms)) {
-    # Case with a model on sigma
-    sigma_prior <- prior(
-      "normal(-0.7, 0.4)", class = "Intercept", dpar = "sigma"
-    )
-  } else if ("sigma" %in% names(formula$pfix)) {
+  if ("sigma" %in% names(formula$pfix)) {
     # Case with sigma fixed to a constant
     sigma_prior <- NULL
   } else {
-    # Case with no model on sigma
+    # Case with a model on sigma
     sigma_prior <- prior(
-      "lognormal(-0.7, 0.4)", class = "sigma", lb = 0, ub = "NA"
+      "normal(-0.7, 0.4)", class = "Intercept", dpar = "sigma"
     )
   }
   prior <- prior + sigma_prior
