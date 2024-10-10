@@ -102,3 +102,23 @@
   family$other_bounds <- other_bounds
   return(family)
 }
+
+#' Include implicit intercepts in `brms` formula as explicit
+#'
+#' This function detects the distributional parameters in a `brms` formula
+#' object, and alters to formula to include explicit intercept parameters for
+#' them i.e. `~ 1`.
+#'
+#' @param formula ...
+#' @keywords internal
+.make_intercepts_explicit <- function(formula) {
+  other_dpars <- setdiff(formula$family$dpars, "mu")
+  fixed_dpars <- names(formula$pfix)
+  formula_dpars <- names(formula$pforms)
+  replace_dpars <- setdiff(other_dpars, c(fixed_dpars, formula_dpars))
+  for (dpar in replace_dpars) {
+    new_formula <- as.formula(paste0(dpar, " ~ 1"))
+    formula$pforms[[dpar]] <- new_formula
+  }
+  return(formula)
+}
