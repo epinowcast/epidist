@@ -42,7 +42,7 @@ test_that(".make_intercepts_explicit creates a formula which is the same as if i
     formula = brms::bf(mu ~ 1),
     data = prep_obs,
     family = epidist_family
-  
+  )
   formula <- .make_intercepts_explicit(formula)
   formula_explicit <- brms:::validate_formula(
     formula = brms::bf(mu ~ 1, sigma ~ 1),
