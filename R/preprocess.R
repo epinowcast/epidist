@@ -14,37 +14,20 @@ add_event_vars <- function(
   linelist, ptime_lwr = NULL, ptime_upr = NULL, pwindow = NULL,
   stime_lwr = NULL, stime_upr = NULL, swindow = NULL
 ) {
-  if (!is.null(ptime_lwr)) {
-    linelist <- dplyr::rename(linelist, ptime_lwr = !!ptime_lwr)
-  }
-
-  if (!is.null(ptime_upr)) {
-    linelist <- dplyr::rename(linelist, ptime_upr = !!ptime_upr)
-  }
-
-  if (!is.null(pwindow) && is.character(pwindow)) {
-    linelist <- dplyr::rename(linelist, pwindow = !!pwindow)
-  }
-
-  if (!is.null(stime_lwr)) {
-    linelist <- dplyr::rename(linelist, stime_lwr = !!stime_lwr)
-  }
-
-  if (!is.null(stime_upr)) {
-    linelist <- dplyr::rename(linelist, stime_upr = !!stime_upr)
-  }
-
-  if (!is.null(swindow) && is.character(swindow)) {
-    linelist <- dplyr::rename(linelist, swindow = !!swindow)
-  }
+  linelist <- .rename_column(linelist, "ptime_lwr", ptime_lwr)
+  linelist <- .rename_column(linelist, "ptime_upr", ptime_upr)
+  linelist <- .rename_column(linelist, "stime_lwr", stime_lwr)
+  linelist <- .rename_column(linelist, "stime_upr", stime_upr)
+  linelist <- .rename_column(linelist, "pwindow", pwindow)
+  linelist <- .rename_column(linelist, "swindow", swindow)
 
   if (is.numeric(pwindow)) {
-    # Warn that numeric pwindow overwrites pwindow in data
+    cli::cli_warn("Overwriting using numeric value(s) of pwindow provided!")
     linelist$pwindow <- pwindow
   }
 
   if (is.numeric(swindow)) {
-    # Warn that numeric swindow overwrites swindow in data
+    cli::cli_warn("Overwriting using numeric value(s) of swindow provided!")
     linelist$swindow <- swindow
   }
 
