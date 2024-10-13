@@ -78,7 +78,7 @@
       "i" = "No available prior to replace in old_prior found for:",
       missing_prior
     )
-    if (strict) {
+    if (abort) {
       cli_abort(message = msg)
     } else {
       cli_warn(message = msg)
