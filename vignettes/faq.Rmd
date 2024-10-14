@@ -77,6 +77,12 @@ library(bayesplot)
 mcmc_trace(fit, pars = c("Intercept", "Intercept_sigma"))
 ```
 
+We also provide a function `epidist_diagnostics()` which can be used to obtain common diagnostics used to assess the quality of a fitted model.
+
+```{r message = FALSE}
+epidist_diagnostics(fit)
+```
+
 ## I'd like to run a simulation study
 
 We recommend use of the `purrr` package for running many `epidist` models, for example as a part of a simulation study.
