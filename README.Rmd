@@ -37,7 +37,7 @@ license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/
 cat(gsub("\n[ ]+"," ",packageDescription("epidist")$Description))
 ```
 
-To learn more about `epidist` we recommend looking at the following vignettes:
+To learn more about `epidist` we recommend reading the vignettes in this order:
 
 * [Getting started with `epidist`](https://epidist.epinowcast.org/articles/epidist.html)
 * [Using `epidist` to estimate delay between symptom onset and positive test for an Ebola outbreak in Sierra Leone](https://epidist.epinowcast.org/articles/ebola.html)
