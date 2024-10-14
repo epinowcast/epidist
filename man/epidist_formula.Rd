@@ -4,12 +4,16 @@
 \alias{epidist_formula}
 \title{Define a model specific formula}
 \usage{
-epidist_formula(data, ...)
+epidist_formula(data, family, formula, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data.}
+\item{data}{A \code{data.frame} containing line list data}
 
-\item{...}{Additional arguments passed to method.}
+\item{family}{Output of a call to \code{brms::brmsfamily()}}
+
+\item{formula}{As produced by \code{\link[brms:brmsformula]{brms::brmsformula()}}}
+
+\item{...}{...}
 }
 \description{
 This function is used within \code{\link[=epidist]{epidist()}} to create the formula object passed
@@ -19,6 +23,7 @@ inside of a call to \code{\link[=epidist]{epidist()}}.
 }
 \seealso{
 Other formula: 
-\code{\link{epidist_formula.default}()}
+\code{\link{epidist_family_model}()},
+\code{\link{epidist_formula_model.default}()}
 }
 \concept{formula}
