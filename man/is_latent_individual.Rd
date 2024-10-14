@@ -16,7 +16,7 @@ Check if data has the \code{epidist_latent_individual} class
 Other latent_individual: 
 \code{\link{as_latent_individual}()},
 \code{\link{epidist_family_model.epidist_latent_individual}()},
-\code{\link{epidist_formula.epidist_latent_individual}()},
+\code{\link{epidist_formula_model.epidist_latent_individual}()},
 \code{\link{epidist_validate.epidist_latent_individual}()}
 }
 \concept{latent_individual}

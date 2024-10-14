@@ -129,28 +129,21 @@ epidist_family_model.epidist_latent_individual <- function(
   return(custom_family)
 }
 
-#' Define a formula for the latent_individual model
+#' Define the model-specific component of an `epidist` custom formula
 #'
 #' @param data A `data.frame` containing line list data
-#' @param family The output of [epidist_family()]
 #' @param formula As produced by [brms::brmsformula()]
 #' @param ... ...
-#' @method epidist_formula epidist_latent_individual
+#' @method epidist_formula_model epidist_latent_individual
 #' @family latent_individual
 #' @export
-epidist_formula.epidist_latent_individual <- function(data, family, formula,
-                                                      ...) {
-  epidist_validate(data)
-  formula <- brms:::validate_formula(formula, data = data, family = family)
-  formula <- .make_intercepts_explicit(formula)
+epidist_formula_model.epidist_latent_individual <- function(
+  data, formula, ...
+) {
+  # data is only used to dispatch on
   formula <- stats::update(
     formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
   )
-
-  # Using this here for checking purposes
-  bterms <- brms::brmsterms(formula)
-  brms:::validate_data(data, bterms)
-
   return(formula)
 }
 
