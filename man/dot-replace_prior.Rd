@@ -4,12 +4,16 @@
 \alias{.replace_prior}
 \title{Replace \code{brms} prior distributions}
 \usage{
-.replace_prior(old_prior, new_prior)
+.replace_prior(old_prior, new_prior, abort = FALSE)
 }
 \arguments{
 \item{old_prior}{One or more prior distributions in the class \code{brmsprior}}
 
 \item{new_prior}{One or more prior distributions in the class \code{brmsprior}}
+
+\item{abort}{If \code{TRUE} then if a \code{new_prior} is provided for which there is
+no matching \code{old_prior} then the call will be aborted. If \code{FALSE} (the
+default) then a warning will be provided instead}
 }
 \description{
 This function takes \code{old_prior} and replaces any prior distributions

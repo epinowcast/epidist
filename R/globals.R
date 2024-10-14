@@ -10,5 +10,6 @@ utils::globalVariables(c(
   "rlnorm", # <simulate_secondary>
   "prior_new", # <.replace_prior>
   "source_new", # <.replace_prior>
+  "strict", # <.replace_prior>
   NULL
 ))

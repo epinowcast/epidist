@@ -52,9 +52,12 @@
 #'
 #' @param old_prior One or more prior distributions in the class `brmsprior`
 #' @param new_prior One or more prior distributions in the class `brmsprior`
+#' @param abort If `TRUE` then if a `new_prior` is provided for which there is
+#' no matching `old_prior` then the call will be aborted. If `FALSE` (the
+#' default) then a warning will be provided instead
 #' @autoglobal
 #' @keywords internal
-.replace_prior <- function(old_prior, new_prior) {
+.replace_prior <- function(old_prior, new_prior, abort = FALSE) {
   if (is.null(new_prior)) {
     return(old_prior)
   }
@@ -75,7 +78,11 @@
       "i" = "No available prior to replace in old_prior found for:",
       missing_prior
     )
-    cli_abort(message = msg)
+    if (strict) {
+      cli_abort(message = msg)
+    } else {
+      cli_warn(message = msg)
+    }
   }
 
   prior <- prior |>
