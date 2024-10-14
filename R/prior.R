@@ -7,7 +7,10 @@
 #' 2. Family specific prior distributions from [epidist_family_prior()]
 #' 3. User provided prior distributions
 #' Each element of this list overwrites previous elements, such that user
-#' provided prior distribution have the highest priority.
+#' provided prior distribution have the highest priority. At the third stage,
+#' if a prior distribution is provided which is not included in the model, then
+#' a warning will be shown. To prevent this warning, do not pass prior
+#' distributions for parameters which are not in the model.
 #'
 #' @param data A `data.frame` containing line list data
 #' @param family Output of a call to `brms::brmsfamily()`

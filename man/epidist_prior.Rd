@@ -24,7 +24,10 @@ model, then replaces these prior distributions using:
 \item Family specific prior distributions from \code{\link[=epidist_family_prior]{epidist_family_prior()}}
 \item User provided prior distributions
 Each element of this list overwrites previous elements, such that user
-provided prior distribution have the highest priority.
+provided prior distribution have the highest priority. At the third stage,
+if a prior distribution is provided which is not included in the model, then
+a warning will be shown. To prevent this warning, do not pass prior
+distributions for parameters which are not in the model.
 }
 }
 \seealso{
