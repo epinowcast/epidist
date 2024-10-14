@@ -153,8 +153,13 @@ request](https://github.com/epinowcast/epidist/pulls).
 
 ## Citation
 
-If you use `epidist` in your work, please consider citing it with
-`citation("epidist")`:
+If you use `epidist` in your work, please consider citing it using
+`citation("epidist")`.
+
+<details>
+<summary>
+Package citation information
+</summary>
 
 ``` r
 citation("epidist")
@@ -173,6 +178,8 @@ A BibTeX entry for LaTeX users is
     doi = {10.5281/zenodo.5637165},
   }
 ```
+
+</details>
 
 If using our methodology, or the methodology on which ours is based,
 please cite the relevant papers. This may include:
