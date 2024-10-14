@@ -41,11 +41,8 @@ epidist_family_model <- function(data, family, ...) {
 #' @param ... Additional arguments passed to method.
 #' @family family
 #' @export
-epidist_family_model.default <- function(data, ...) {
-  cli_abort(
-    "No epidist_family_model method implemented for the class ", class(data),
-    "\n", "See methods(epidist_family_model) for available methods"
-  )
+epidist_family_model.default <- function(data, family, ...) {
+  return(family)
 }
 
 #' Reparameterise an `epidist` family to align `brms` and Stan

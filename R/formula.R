@@ -30,7 +30,7 @@ epidist_formula <- function(data, family, formula, ...) {
 #' @rdname epidist_family_model
 #' @family formula
 #' @export
-epidist_formula_model <- function(data, ...) {
+epidist_formula_model <- function(data, formula, ...) {
   UseMethod("epidist_formula_model")
 }
 
@@ -40,9 +40,6 @@ epidist_formula_model <- function(data, ...) {
 #' @param ... Additional arguments passed to method.
 #' @family formula
 #' @export
-epidist_formula_model.default <- function(data, ...) {
-  cli_abort(
-    "No epidist_formula_model method implemented for the class ", class(data),
-    "\n", "See methods(epidist_formula_model) for available methods"
-  )
+epidist_formula_model.default <- function(data, formula, ...) {
+  return(formula)
 }
