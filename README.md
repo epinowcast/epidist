@@ -8,13 +8,11 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 [![R-CMD-check](https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/epinowcast/epidist/branch/main/graph/badge.svg)](https://app.codecov.io/gh/epinowcast/epidist)
-</br>
 [![Universe](https://epinowcast.r-universe.dev/badges/epidist)](https://epinowcast.r-universe.dev/epidist)
 [![MIT
 license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/epinowcast/epidist/blob/master/LICENSE.md/)
 [![GitHub
 contributors](https://img.shields.io/github/contributors/epinowcast/epidist)](https://github.com/epinowcast/epidist/graphs/contributors)
-</br>
 [![DOI](https://zenodo.org/badge/422611952.svg)](https://zenodo.org/badge/latestdoi/422611952)
 <!-- badges: end -->
 
