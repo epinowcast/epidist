@@ -17,7 +17,6 @@ and that it contains suitable columns.
 \seealso{
 Other generics: 
 \code{\link{epidist}()},
-\code{\link{epidist_formula}()},
 \code{\link{epidist_stancode}()}
 }
 \concept{generics}
