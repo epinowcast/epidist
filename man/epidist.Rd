@@ -9,7 +9,7 @@ epidist(data, formula, family, prior, backend, fn, ...)
 \arguments{
 \item{data}{A \code{data.frame} containing line list data.}
 
-\item{formula}{A formula object created using \code{brms::bf}. A formula must be
+\item{formula}{A formula object created using \code{\link[brms:brmsformula]{brms::bf()}}. A formula must be
 provided for the distributional parameter \code{mu} common to all \code{brms} families.
 Optionally, formulas may also be provided for additional distributional
 parameters.}
@@ -29,10 +29,10 @@ for specifying prior distributions.}
 fitting the Stan model. Options are \code{"rstan"} and \code{"cmdstanr"} (the default).
 This option is passed directly through to \code{fn}.}
 
-\item{fn}{The internal function to be called. By default this is \code{brms::brm},
-which performs inference for the specified model. Other options
-\code{brms::make_stancode}, which returns the Stan code for the specified model,
-and \code{brms::make_standata} which returns the data passed to Stan. These
+\item{fn}{The internal function to be called. By default this is
+\code{\link[brms:brm]{brms::brm()}} which performs inference for the specified model. Other options
+\code{\link[brms:stancode]{brms::make_stancode()}}, which returns the Stan code for the specified model,
+and \code{\link[brms:standata]{brms::make_standata()}} which returns the data passed to Stan. These
 options may be useful for model debugging and extensions.}
 
 \item{...}{Additional arguments for method.}
