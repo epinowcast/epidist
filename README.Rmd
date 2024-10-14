@@ -58,13 +58,13 @@ remotes::install_github(
 )
 ```
 
-Similarly, you can install historical versions by specifying the release tag (e.g. this installs [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)):
+<!-- Similarly, you can install historical versions by specifying the release tag (e.g. this installs [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)): -->
 
-```{r, eval = FALSE}
-remotes::install_github(
-  "epinowcast/epidist", dependencies = TRUE, ref = "v0.2.0"
-)
-```
+<!-- ```{r, eval = FALSE} -->
+<!-- remotes::install_github( -->
+<!--   "epinowcast/epidist", dependencies = TRUE, ref = "v0.2.0" -->
+<!-- ) -->
+<!-- ``` -->
 
 *Note: You can also use that last approach to install a specific commit if needed, e.g. if you want to try out a specific unreleased feature, but not the absolute latest developmental version.*
 
