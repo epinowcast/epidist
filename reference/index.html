@@ -125,12 +125,6 @@
         <dd>Fit epidemiological delay distributions using a <code>brms</code> interface</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_formula.html">epidist_formula()</a></code>
-
-        </dt>
-        <dd>Define a model specific formula</dd>
-      </dl><dl><dt>
-
           <code><a href="epidist_stancode.html">epidist_stancode()</a></code>
 
         </dt>
@@ -158,12 +152,6 @@
 
         </dt>
         <dd>Default method used for interface using <code>brms</code></dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_formula.default.html">epidist_formula(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method for defining a model specific formula</dd>
       </dl><dl><dt>
 
           <code><a href="epidist_stancode.default.html">epidist_stancode(<i>&lt;default&gt;</i>)</a></code>
@@ -195,7 +183,7 @@
         <dd>Define <code>epidist</code> family</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_family_model.html">epidist_family_model()</a></code>
+          <code><a href="epidist_family_model.html">epidist_family_model()</a></code> <code><a href="epidist_family_model.html">epidist_formula_model()</a></code>
 
         </dt>
         <dd>The model-specific parts of an <code><a href="../reference/epidist_family.html">epidist_family()</a></code> call</dd>
@@ -223,6 +211,35 @@
 
         </dt>
         <dd>Reparameterisation for the gamma family</dd>
+      </dl></div><div class="section level2">
+      <h2 id="formula">Formula<a class="anchor" aria-label="anchor" href="#formula"></a></h2>
+
+      <div class="section-desc"><p>Functions related to specifying custom <code>brms</code> formula</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist_family_model.html">epidist_family_model()</a></code> <code><a href="epidist_family_model.html">epidist_formula_model()</a></code>
+
+        </dt>
+        <dd>The model-specific parts of an <code><a href="../reference/epidist_family.html">epidist_family()</a></code> call</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_formula.html">epidist_formula()</a></code>
+
+        </dt>
+        <dd>Define a model specific formula</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_formula_model.default.html">epidist_formula_model(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method for defining a model specific formula</dd>
       </dl></div><div class="section level2">
       <h2 id="priors">Priors<a class="anchor" aria-label="anchor" href="#priors"></a></h2>
 
@@ -295,10 +312,10 @@
         <dd>Create the model-specific component of an <code>epidist</code> custom family</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_formula.epidist_latent_individual.html">epidist_formula(<i>&lt;epidist_latent_individual&gt;</i>)</a></code>
+          <code><a href="epidist_formula_model.epidist_latent_individual.html">epidist_formula_model(<i>&lt;epidist_latent_individual&gt;</i>)</a></code>
 
         </dt>
-        <dd>Define a formula for the latent_individual model</dd>
+        <dd>Define the model-specific component of an <code>epidist</code> custom formula</dd>
       </dl><dl><dt>
 
           <code><a href="epidist_validate.epidist_latent_individual.html">epidist_validate(<i>&lt;epidist_latent_individual&gt;</i>)</a></code>
