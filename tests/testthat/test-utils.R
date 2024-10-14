@@ -23,7 +23,7 @@ test_that(".replace_prior errors when passed a new prior without a match in old_
   new_prior <- brms::prior("normal(0, 5)", class = "Intercept") +
     brms::prior("normal(0, 5)", class = "Intercept", dpar = "sigma") +
     brms::prior("normal(0, 5)", class = "Intercept", dpar = "shape")
-  expect_error(.replace_prior(old_prior, new_prior, abort = TRUE))
+  expect_error(.replace_prior(old_prior, new_prior, warn = TRUE))
 })
 
 test_that(".add_dpar_info works as expected for the lognormal and gamma families", { # nolint: line_length_linter.

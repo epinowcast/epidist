@@ -73,8 +73,9 @@
     ))
     if (warn) {
       msg <- c(
-        "i" = "No available prior to replace in old_prior found for:",
-        missing_prior
+        "!" = "No available prior to replace in old_prior found for:",
+        missing_prior,
+        "i" = "To remove this warning consider changing prior specification."
       )
       cli_warn(message = msg)
     }

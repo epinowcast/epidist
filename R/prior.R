@@ -27,7 +27,7 @@ epidist_prior <- function(data, family, formula, prior) {
   model <- epidist_model_prior(data, formula)
   family <-  epidist_family_prior(family, formula)
   internal_prior <- Reduce(.replace_prior, list(default, model, family))
-  prior <- .replace_prior(internal_prior, prior, abort = TRUE)
+  prior <- .replace_prior(internal_prior, prior, warn = TRUE)
   return(prior)
 }
 
