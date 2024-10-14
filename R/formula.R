@@ -7,7 +7,7 @@
 #'
 #' @inheritParams epidist_validate
 #' @param ... Additional arguments passed to method.
-#' @family generics
+#' @family formula
 #' @export
 epidist_formula <- function(data, ...) {
   UseMethod("epidist_formula")
@@ -17,7 +17,7 @@ epidist_formula <- function(data, ...) {
 #'
 #' @inheritParams epidist_formula
 #' @param ... Additional arguments passed to method.
-#' @family defaults
+#' @family formula
 #' @export
 epidist_formula.default <- function(data, ...) {
   cli_abort(
