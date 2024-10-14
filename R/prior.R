@@ -9,10 +9,10 @@
 #' Each element of this list overwrites previous elements, such that user
 #' provided prior distribution have the highest priority.
 #'
-#' @param data ...
-#' @param family ...
-#' @param formula ...
-#' @param prior ...
+#' @param data A `data.frame` containing line list data
+#' @param family Output of a call to `brms::brmsfamily()`
+#' @param formula A formula object created using `brms::bf()`
+#' @param prior User provided prior distribution created using `brms::prior()`
 #' @rdname epidist_prior
 #' @family prior
 #' @export
