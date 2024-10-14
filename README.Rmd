@@ -28,13 +28,20 @@ license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/
 [![DOI](https://zenodo.org/badge/422611952.svg)](https://zenodo.org/badge/latestdoi/422611952)
 <!-- badges: end -->
 
-*Warning: This package is a prototype and is under active development. Breaking changes are likely.*
+> [!CAUTION]
+> This package is a prototype and is under active development. Breaking changes are likely.
 
 ## Summary
 
 ```{r, results = "asis", echo=FALSE}
 cat(gsub("\n[ ]+"," ",packageDescription("epidist")$Description))
 ```
+
+To learn more about `epidist` we recommend looking at the following vignettes:
+
+* [Getting started with `epidist`](https://epidist.epinowcast.org/articles/epidist.html)
+* [Using `epidist` to estimate delay between symptom onset and positive test for an Ebola outbreak in Sierra Leone](https://epidist.epinowcast.org/articles/ebola.html)
+* [Approximate Bayesian inference in `epidist`](https://epidist.epinowcast.org/articles/approx-inference.html)
 
 ## Installation
   
