@@ -28,14 +28,15 @@ license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/
 [![DOI](https://zenodo.org/badge/422611952.svg)](https://zenodo.org/badge/latestdoi/422611952)
 <!-- badges: end -->
 
-> [!CAUTION]
-> This package is a prototype and is under active development. Breaking changes are likely.
+*Warning! This package is a prototype and is under active development. Breaking changes are likely.*
 
 ## Summary
 
 ```{r, results = "asis", echo=FALSE}
 cat(gsub("\n[ ]+"," ",packageDescription("epidist")$Description))
 ```
+
+## Quickstart
 
 To learn more about `epidist` we recommend reading the vignettes in this order:
 

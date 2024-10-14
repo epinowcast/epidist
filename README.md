@@ -18,8 +18,8 @@ contributors](https://img.shields.io/github/contributors/epinowcast/epidist)](ht
 [![DOI](https://zenodo.org/badge/422611952.svg)](https://zenodo.org/badge/latestdoi/422611952)
 <!-- badges: end -->
 
-> \[!CAUTION\] This package is a prototype and is under active
-> development. Breaking changes are likely.
+*Warning! This package is a prototype and is under active development.
+Breaking changes are likely.*
 
 ## Summary
 
@@ -31,6 +31,8 @@ the key challenges in estimating these distributions, including
 truncation, interval censoring, and dynamical biases. Despite their
 importance, these issues are frequently overlooked, often resulting in
 biased conclusions.
+
+## Quickstart
 
 To learn more about `epidist` we recommend reading the vignettes in this
 order:
