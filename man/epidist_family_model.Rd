@@ -7,7 +7,7 @@
 \usage{
 epidist_family_model(data, family, ...)
 
-epidist_formula_model(data, ...)
+epidist_formula_model(data, formula, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
@@ -16,6 +16,8 @@ epidist_formula_model(data, ...)
 information as provided by \code{.add_dpar_info()}}
 
 \item{...}{Additional arguments passed to method.}
+
+\item{formula}{As produced by \code{\link[brms:brmsformula]{brms::brmsformula()}}}
 }
 \description{
 The model-specific parts of an \code{epidist_family()} call

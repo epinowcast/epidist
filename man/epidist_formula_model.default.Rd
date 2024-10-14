@@ -4,10 +4,12 @@
 \alias{epidist_formula_model.default}
 \title{Default method for defining a model specific formula}
 \usage{
-\method{epidist_formula_model}{default}(data, ...)
+\method{epidist_formula_model}{default}(data, formula, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
+
+\item{formula}{As produced by \code{\link[brms:brmsformula]{brms::brmsformula()}}}
 
 \item{...}{Additional arguments passed to method.}
 }
