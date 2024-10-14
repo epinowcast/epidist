@@ -25,8 +25,10 @@ transitions
 \code{max_treedepth}
 \item \code{per_at_max_treedepth}: the proportion of samples which attained the
 \code{max_treedepth}
+}
+}
+\details{
 When the fitting algorithm is not \code{"sampling"} (see \code{\link[brms:brm]{brms::brm()}} for other
 possible algorithms) then diagnostics are yet to be implemented.
-}
 }
 \concept{diagnostics}

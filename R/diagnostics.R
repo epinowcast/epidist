@@ -14,6 +14,7 @@
 #' `max_treedepth`
 #' * `per_at_max_treedepth`: the proportion of samples which attained the
 #' `max_treedepth`
+#'
 #' When the fitting algorithm is not `"sampling"` (see [brms::brm()] for other
 #' possible algorithms) then diagnostics are yet to be implemented.
 #' @param fit A fitted model of class `epidist_fit`
