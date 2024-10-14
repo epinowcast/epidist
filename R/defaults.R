@@ -11,19 +11,6 @@ epidist_validate.default <- function(data, ...) {
   )
 }
 
-#' Default method for defining a model specific formula
-#'
-#' @inheritParams epidist_formula
-#' @param ... Additional arguments passed to method.
-#' @family defaults
-#' @export
-epidist_formula.default <- function(data, ...) {
-  cli_abort(
-    "No epidist_formula method implemented for the class ", class(data), "\n",
-    "See methods(epidist_formula) for available methods"
-  )
-}
-
 #' Default method for defining model specific Stan code
 #'
 #' @inheritParams epidist_stancode
