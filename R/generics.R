@@ -11,21 +11,6 @@ epidist_validate <- function(data) {
   UseMethod("epidist_validate")
 }
 
-#' Define a model specific formula
-#'
-#' This function is used within [epidist()] to create the formula object passed
-#' to `brms`. It is unlikely that as a user you will need this function, but we
-#' export it nonetheless to be transparent about what exactly is happening
-#' inside of a call to [epidist()].
-#'
-#' @inheritParams epidist_validate
-#' @param ... Additional arguments passed to method.
-#' @family generics
-#' @export
-epidist_formula <- function(data, ...) {
-  UseMethod("epidist_formula")
-}
-
 #' Define model specific Stan code
 #'
 #' This function is used within [epidist()] to create any custom Stan code which
