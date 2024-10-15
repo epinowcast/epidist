@@ -61,8 +61,12 @@ reference:
   desc: Functions for specifying prior distributions
   contents:
   - has_concept("prior")
+- title: Stan code
+  desc: Functions for specifying custom Stan code to put into `brms`
+  contents:
+  - has_concept("stan") 
 - title: Model fitting
-  desc: Functions for fitting delay distribution models
+  desc: Functions for fitting delay distribution models using `brms`
   contents:
   - has_concept("fit")
 - title: Latent individual model

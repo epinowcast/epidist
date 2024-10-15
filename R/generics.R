@@ -10,6 +10,7 @@
 epidist_validate <- function(data) {
   UseMethod("epidist_validate")
 }
+<<<<<<< HEAD
 
 #' Define model specific Stan code
 #'
@@ -60,3 +61,5 @@ epidist <- function(data, formula, family, prior, backend, fn, ...) {
 }
 =======
 >>>>>>> 4cb6f81e (Move fitting functions into fit.R)
+=======
+>>>>>>> 8cb24d62 (Create stancode.R)
