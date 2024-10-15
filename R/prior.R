@@ -7,12 +7,15 @@
 #' 2. Family specific prior distributions from [epidist_family_prior()]
 #' 3. User provided prior distributions
 #' Each element of this list overwrites previous elements, such that user
-#' provided prior distribution have the highest priority.
+#' provided prior distribution have the highest priority. At the third stage,
+#' if a prior distribution is provided which is not included in the model, then
+#' a warning will be shown. To prevent this warning, do not pass prior
+#' distributions for parameters which are not in the model.
 #'
-#' @param data ...
-#' @param family ...
-#' @param formula ...
-#' @param prior ...
+#' @param data A `data.frame` containing line list data
+#' @param family Output of a call to `brms::brmsfamily()`
+#' @param formula A formula object created using `brms::bf()`
+#' @param prior User provided prior distribution created using `brms::prior()`
 #' @rdname epidist_prior
 #' @family prior
 #' @export
@@ -23,7 +26,8 @@ epidist_prior <- function(data, family, formula, prior) {
   default <- brms::default_prior(formula, data = data)
   model <- epidist_model_prior(data, formula)
   family <-  epidist_family_prior(family, formula)
-  prior <- Reduce(.replace_prior, list(default, model, family, prior))
+  internal_prior <- Reduce(.replace_prior, list(default, model, family))
+  prior <- .replace_prior(internal_prior, prior, warn = TRUE)
   return(prior)
 }
 
@@ -90,15 +94,7 @@ epidist_family_prior.default <- function(family, formula, ...) {
 #' @export
 epidist_family_prior.lognormal <- function(family, formula, ...) {
   prior <- prior("normal(1, 1)", class = "Intercept")
-  if ("sigma" %in% names(formula$pfix)) {
-    # Case with sigma fixed to a constant
-    sigma_prior <- NULL
-  } else {
-    # Case with a model on sigma
-    sigma_prior <- prior(
-      "normal(-0.7, 0.4)", class = "Intercept", dpar = "sigma"
-    )
-  }
+  sigma_prior <- prior("normal(-0.7, 0.4)", class = "Intercept", dpar = "sigma")
   prior <- prior + sigma_prior
   prior$source <- "family"
   prior[is.na(prior)] <- "" # This is because brms likes empty over NA
