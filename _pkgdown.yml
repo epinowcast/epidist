@@ -45,14 +45,6 @@ reference:
   desc: Functions used to check validity of package objects
   contents:
   - has_concept("validate")
-- title: S3 generics
-  desc: S3 generics for delay modelling
-  contents:
-  - has_concept("generics")
-- title: Method default
-  desc: Default methods for S3 generics
-  contents:
-  - has_concept("defaults")
 - title: Family
   desc: Functions related to specifying custom `brms` families
   contents:
