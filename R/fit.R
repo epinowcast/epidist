@@ -54,8 +54,6 @@ epidist.default <- function(data, formula = brms::bf(mu ~ 1),
     formula = epidist_formula, family = epidist_family, prior = epidist_prior,
     stanvars = epidist_stancode, backend = backend, data = data, ...
   )
-  
   class(fit) <- c(class(fit), "epidist_fit")
-  
   return(fit)
 }
