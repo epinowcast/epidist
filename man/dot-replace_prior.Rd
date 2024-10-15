@@ -4,12 +4,12 @@
 \alias{.replace_prior}
 \title{Replace \code{brms} prior distributions}
 \usage{
-.replace_prior(prior, old_prior, warn = FALSE)
+.replace_prior(old_prior, prior, warn = FALSE)
 }
 \arguments{
-\item{prior}{One or more prior distributions in the class \code{brmsprior}}
-
 \item{old_prior}{One or more prior distributions in the class \code{brmsprior}}
+
+\item{prior}{One or more prior distributions in the class \code{brmsprior}}
 
 \item{warn}{If \code{TRUE} then a warning will be displayed if a \code{new_prior} is
 provided for which there is no matching \code{old_prior}. Defaults to \code{FALSE}}

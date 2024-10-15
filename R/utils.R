@@ -49,13 +49,13 @@
 #' is a prior distribution in `prior` with no match in `old_prior` then this
 #' function can optionally give a warning.
 #'
-#' @param prior One or more prior distributions in the class `brmsprior`
 #' @param old_prior One or more prior distributions in the class `brmsprior`
+#' @param prior One or more prior distributions in the class `brmsprior`
 #' @param warn If `TRUE` then a warning will be displayed if a `new_prior` is
 #' provided for which there is no matching `old_prior`. Defaults to `FALSE`
 #' @autoglobal
 #' @keywords internal
-.replace_prior <- function(prior, old_prior, warn = FALSE) {
+.replace_prior <- function(old_prior, prior, warn = FALSE) {
   if (is.null(prior)) {
     return(old_prior)
   }
