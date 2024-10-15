@@ -41,6 +41,10 @@ reference:
   desc: Functions for preprocessing data
   contents:
   - has_concept("preprocess")
+- title: Validation
+  desc: Functions used to check validity of package objects
+  contents:
+  - has_concept("validate")
 - title: S3 generics
   desc: S3 generics for delay modelling
   contents:

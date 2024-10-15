@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #' Validate a data object for use with [epidist()]
 #'
 #' This function validates that the provided `data` is suitable to run a
@@ -63,3 +64,6 @@ epidist <- function(data, formula, family, prior, backend, fn, ...) {
 >>>>>>> 4cb6f81e (Move fitting functions into fit.R)
 =======
 >>>>>>> 8cb24d62 (Create stancode.R)
+=======
+
+>>>>>>> 006aeb64 (Create validate.R)
