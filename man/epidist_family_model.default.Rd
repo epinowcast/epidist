@@ -4,10 +4,13 @@
 \alias{epidist_family_model.default}
 \title{Default method for defining a model specific family}
 \usage{
-\method{epidist_family_model}{default}(data, ...)
+\method{epidist_family_model}{default}(data, family, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
+
+\item{family}{Output of a call to \code{brms::brmsfamily()} with additional
+information as provided by \code{.add_dpar_info()}}
 
 \item{...}{Additional arguments passed to method.}
 }
