@@ -5,7 +5,10 @@ Model specific prior distributions from epidist_model_prior()
 Family specific prior distributions from epidist_family_prior()
 User provided prior distributions
 Each element of this list overwrites previous elements, such that user
-provided prior distribution have the highest priority.
+provided prior distribution have the highest priority. At the third stage,
+if a prior distribution is provided which is not included in the model, then
+a warning will be shown. To prevent this warning, do not pass prior
+distributions for parameters which are not in the model.
 
 "><meta property="og:description" content="This function obtains the brms default prior distributions for a particular
 model, then replaces these prior distributions using:
@@ -13,7 +16,10 @@ Model specific prior distributions from epidist_model_prior()
 Family specific prior distributions from epidist_family_prior()
 User provided prior distributions
 Each element of this list overwrites previous elements, such that user
-provided prior distribution have the highest priority.
+provided prior distribution have the highest priority. At the third stage,
+if a prior distribution is provided which is not included in the model, then
+a warning will be shown. To prevent this warning, do not pass prior
+distributions for parameters which are not in the model.
 
 "><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -66,7 +72,10 @@ model, then replaces these prior distributions using:</p><ol><li><p>Model specif
 <li><p>Family specific prior distributions from <code><a href="epidist_family_prior.html">epidist_family_prior()</a></code></p></li>
 <li><p>User provided prior distributions
 Each element of this list overwrites previous elements, such that user
-provided prior distribution have the highest priority.</p></li>
+provided prior distribution have the highest priority. At the third stage,
+if a prior distribution is provided which is not included in the model, then
+a warning will be shown. To prevent this warning, do not pass prior
+distributions for parameters which are not in the model.</p></li>
 </ol></div>
 
     <div class="section level2">
@@ -79,19 +88,19 @@ provided prior distribution have the highest priority.</p></li>
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>...</p></dd>
+<dd><p>A <code>data.frame</code> containing line list data</p></dd>
 
 
 <dt id="arg-family">family<a class="anchor" aria-label="anchor" href="#arg-family"></a></dt>
-<dd><p>...</p></dd>
+<dd><p>Output of a call to <code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">brms::brmsfamily()</a></code></p></dd>
 
 
 <dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>
-<dd><p>...</p></dd>
+<dd><p>A formula object created using <code><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">brms::bf()</a></code></p></dd>
 
 
 <dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
-<dd><p>...</p></dd>
+<dd><p>User provided prior distribution created using <code><a href="https://paulbuerkner.com/brms/reference/set_prior.html" class="external-link">brms::prior()</a></code></p></dd>
 
 </dl></div>
     <div class="section level2">
