@@ -77,11 +77,21 @@
 </div>
 <!-- badges: start -->
 
-<p><em>Warning: This package is a prototype and is under active development. Breaking changes are likely.</em></p>
+<p><em>Warning! This package is a prototype and is under active development. Breaking changes are likely.</em></p>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
 <p>Understanding and accurately estimating epidemiological delay distributions is important for public health policy. These estimates directly influence epidemic situational awareness, control strategies, and resource allocation. In this package, we provide methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. Despite their importance, these issues are frequently overlooked, often resulting in biased conclusions.</p>
+</div>
+<div class="section level2">
+<h2 id="quickstart">Quickstart<a class="anchor" aria-label="anchor" href="#quickstart"></a>
+</h2>
+<p>To learn more about <code>epidist</code> we recommend reading the vignettes in this order:</p>
+<ul>
+<li><a href="https://epidist.epinowcast.org/articles/epidist.html">Getting started with <code>epidist</code></a></li>
+<li><a href="https://epidist.epinowcast.org/articles/ebola.html">Using <code>epidist</code> to estimate delay between symptom onset and positive test for an Ebola outbreak in Sierra Leone</a></li>
+<li><a href="https://epidist.epinowcast.org/articles/approx-inference.html">Approximate Bayesian inference in <code>epidist</code></a></li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -93,17 +103,18 @@ Installing the package
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span></span>
 <span>  <span class="st">"epinowcast/epidist"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Similarly, you can install historical versions by specifying the release tag (e.g. this installs <a href="https://github.com/epinowcast/epidist/releases/tag/v0.1.0" class="external-link"><code>0.1.0</code></a>):</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span></span>
-<span>  <span class="st">"epinowcast/epidist"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span>, ref <span class="op">=</span> <span class="st">"v0.2.0"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><em>Note: You can also use that last approach to install a specific commit if needed, e.g. if you want to try out a specific unreleased feature, but not the absolute latest developmental version.</em></p>
+<!-- Similarly, you can install historical versions by specifying the release tag (e.g. this installs [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)): -->
+<!-- ```{r, eval = FALSE} -->
+<!-- remotes::install_github( -->
+<!--   "epinowcast/epidist", dependencies = TRUE, ref = "v0.2.0" -->
+<!-- ) -->
+<!-- ``` -->
+<!-- *Note: You can also use that last approach to install a specific commit if needed, e.g. if you want to try out a specific unreleased feature, but not the absolute latest developmental version.* -->
 </details><details><summary>
 Installing CmdStan
-</summary><p>If you wish to do model fitting and nowcasting, you will need to install <a href="https://mc-stan.org/users/interfaces/cmdstan" class="external-link">CmdStan</a>, which also entails having a suitable C++ toolchain setup. We recommend using the <a href="https://mc-stan.org/cmdstanr/" class="external-link"><code>cmdstanr</code> package</a>. The Stan team provides instructions in the <a href="https://mc-stan.org/cmdstanr/articles/cmdstanr.html" class="external-link"><em>Getting started with <code>cmdstanr</code></em></a> vignette, with other details and support at the <a href="https://mc-stan.org/cmdstanr/" class="external-link">package site</a>, but the brief version is:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># if you not yet installed `epinowcast`, or you installed it without `Suggests` dependencies</span></span>
+</summary><p>If you wish to do model fitting, you will need to install <a href="https://mc-stan.org/users/interfaces/cmdstan" class="external-link">CmdStan</a>, which also entails having a suitable C++ toolchain setup. We recommend using the <a href="https://mc-stan.org/cmdstanr/" class="external-link"><code>cmdstanr</code> package</a>. The Stan team provides instructions in the <a href="https://mc-stan.org/cmdstanr/articles/cmdstanr.html" class="external-link"><em>Getting started with <code>cmdstanr</code></em></a> vignette, with other details and support at the <a href="https://mc-stan.org/cmdstanr/" class="external-link">package site</a>, but the brief version is:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># if you not yet installed `epidist`, or you installed it without `Suggests` dependencies</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cmdstanr"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://mc-stan.org/r-packages/"</span>, <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"repos"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># once `cmdstanr` is installed:</span></span>
 <span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/install_cmdstan.html" class="external-link">install_cmdstan</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -136,7 +147,31 @@ Community Forum
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>If making use of our methodology or the methodology on which ours is based, please cite the relevant papers from our <a href="https://epidist.epinowcast.org/articles/model.html">model outline</a>. If you use <code>epidist</code> in your work, please consider citing it with <code>citation("epidist")</code>.</p>
+<p>If you use <code>epidist</code> in your work, please consider citing it using <code>citation("epidist")</code>.</p>
+<details><summary>
+Package citation information
+</summary><div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">citation</span>(<span class="st">"epidist"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>To cite package <span class="st">'epidist'</span> <span class="cf">in</span> publications use<span class="sc">:</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  Adam Howes, Park S, Sam <span class="fu">Abbott</span> (<span class="cn">NULL</span>). _epidist<span class="sc">:</span> Estimate</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  epidemiological delay distributions <span class="cf">for</span> infectious diseases_.</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  doi<span class="sc">:</span><span class="fl">10.5281</span><span class="sc">/</span>zenodo<span class="fl">.5637165</span> <span class="sc">&lt;</span>https<span class="sc">:</span><span class="er">//</span>doi.org<span class="sc">/</span><span class="fl">10.5281</span><span class="sc">/</span>zenodo<span class="fl">.5637165</span><span class="sc">&gt;</span>.</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>A BibTeX entry <span class="cf">for</span> LaTeX users is</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="sc">@</span>Manual{,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    title <span class="ot">=</span> {epidist<span class="sc">:</span> Estimate epidemiological delay distributions <span class="cf">for</span> infectious diseases},</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    author <span class="ot">=</span> {{Adam Howes} and Sang Woo Park and {Sam Abbott}},</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    year <span class="ot">=</span> {<span class="cn">NULL</span>},</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    doi <span class="ot">=</span> {<span class="fl">10.5281</span><span class="sc">/</span>zenodo<span class="fl">.5637165</span>},</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>  }</span></code></pre></div>
+</details><p>If using our methodology, or the methodology on which ours is based, please cite the relevant papers. This may include:</p>
+<ul>
+<li>
+<a href="https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1" class="external-link">Estimating epidemiological delay distributions for infectious diseases</a> by Park <em>et al.</em> (2024)</li>
+<li>
+<a href="https://arxiv.org/abs/2405.08841" class="external-link">Best practices for estimating and reporting epidemiological delay distributions of infectious diseases using public health surveillance and healthcare data</a> by Charniga <em>et al.</em> (2024)</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="contributors">Contributors<a class="anchor" aria-label="anchor" href="#contributors"></a>
