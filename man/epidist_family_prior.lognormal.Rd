@@ -7,9 +7,9 @@
 \method{epidist_family_prior}{lognormal}(family, formula, ...)
 }
 \arguments{
-\item{family}{...}
+\item{family}{Output of a call to \code{brms::brmsfamily()}}
 
-\item{formula}{...}
+\item{formula}{A formula object created using \code{brms::bf()}}
 
 \item{...}{...}
 }
