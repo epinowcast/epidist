@@ -32,7 +32,6 @@ epidist <- function(data, formula, family, prior, backend, fn, ...) {
 #' Default method used for interface using `brms`
 #'
 #' @inheritParams epidist
-#' @inheritParams epidist_formula
 #' @rdname epidist.default
 #' @method epidist default
 #' @family fit
