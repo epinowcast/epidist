@@ -45,24 +45,23 @@
 #' Replace `brms` prior distributions
 #'
 #' This function takes `old_prior` and replaces any prior distributions
-#' contained in it by the corresponding prior distribution in `new_prior`.
-#' If there is a prior distribution in `new_prior` with no match in `old_prior`
-#' then the function will error and give the name of the new prior distribution
-#' with no match.
+#' contained in it by the corresponding prior distribution in `prior`. If there
+#' is a prior distribution in `prior` with no match in `old_prior` then this
+#' function can optionally give a warning.
 #'
+#' @param prior One or more prior distributions in the class `brmsprior`
 #' @param old_prior One or more prior distributions in the class `brmsprior`
-#' @param new_prior One or more prior distributions in the class `brmsprior`
 #' @param warn If `TRUE` then a warning will be displayed if a `new_prior` is
 #' provided for which there is no matching `old_prior`. Defaults to `FALSE`
 #' @autoglobal
 #' @keywords internal
-.replace_prior <- function(old_prior, new_prior, warn = FALSE) {
-  if (is.null(new_prior)) {
+.replace_prior <- function(prior, old_prior, warn = FALSE) {
+  if (is.null(prior)) {
     return(old_prior)
   }
   cols <- c("class", "coef", "group", "resp", "dpar", "nlpar", "lb", "ub")
   prior <- dplyr::full_join(
-    old_prior, new_prior, by = cols, suffix = c("_old", "_new")
+    old_prior, prior, by = cols, suffix = c("_old", "_new")
   )
 
   if (any(is.na(prior$prior_old))) {
@@ -73,7 +72,7 @@
     ))
     if (warn) {
       msg <- c(
-        "!" = "No available prior to replace in old_prior found for:",
+        "!" = "One or more priors have no match in existing parameters:",
         missing_prior,
         "i" = "To remove this warning consider changing prior specification."
       )
