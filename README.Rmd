@@ -19,22 +19,28 @@ knitr::opts_chunk$set(
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![R-CMD-check](https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml) [![Codecov test coverage](https://codecov.io/gh/epinowcast/epidist/branch/main/graph/badge.svg)](https://app.codecov.io/gh/epinowcast/epidist)
-</br>
 [![Universe](https://epinowcast.r-universe.dev/badges/epidist)](https://epinowcast.r-universe.dev/epidist)
 [![MIT
 license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/epinowcast/epidist/blob/master/LICENSE.md/)
 [![GitHub contributors](https://img.shields.io/github/contributors/epinowcast/epidist)](https://github.com/epinowcast/epidist/graphs/contributors)
-</br>
 [![DOI](https://zenodo.org/badge/422611952.svg)](https://zenodo.org/badge/latestdoi/422611952)
 <!-- badges: end -->
 
-*Warning: This package is a prototype and is under active development. Breaking changes are likely.*
+*Warning! This package is a prototype and is under active development. Breaking changes are likely.*
 
 ## Summary
 
 ```{r, results = "asis", echo=FALSE}
 cat(gsub("\n[ ]+"," ",packageDescription("epidist")$Description))
 ```
+
+## Quickstart
+
+To learn more about `epidist` we recommend reading the vignettes in this order:
+
+* [Getting started with `epidist`](https://epidist.epinowcast.org/articles/epidist.html)
+* [Using `epidist` to estimate delay between symptom onset and positive test for an Ebola outbreak in Sierra Leone](https://epidist.epinowcast.org/articles/ebola.html)
+* [Approximate Bayesian inference in `epidist`](https://epidist.epinowcast.org/articles/approx-inference.html)
 
 ## Installation
   
@@ -58,25 +64,25 @@ remotes::install_github(
 )
 ```
 
-Similarly, you can install historical versions by specifying the release tag (e.g. this installs [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)):
+<!-- Similarly, you can install historical versions by specifying the release tag (e.g. this installs [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)): -->
 
-```{r, eval = FALSE}
-remotes::install_github(
-  "epinowcast/epidist", dependencies = TRUE, ref = "v0.2.0"
-)
-```
+<!-- ```{r, eval = FALSE} -->
+<!-- remotes::install_github( -->
+<!--   "epinowcast/epidist", dependencies = TRUE, ref = "v0.2.0" -->
+<!-- ) -->
+<!-- ``` -->
 
-*Note: You can also use that last approach to install a specific commit if needed, e.g. if you want to try out a specific unreleased feature, but not the absolute latest developmental version.*
+<!-- *Note: You can also use that last approach to install a specific commit if needed, e.g. if you want to try out a specific unreleased feature, but not the absolute latest developmental version.* -->
 
 </details>
 
 <details><summary>Installing CmdStan</summary>
 
-If you wish to do model fitting and nowcasting, you will need to install [CmdStan](https://mc-stan.org/users/interfaces/cmdstan), which also entails having a suitable C++ toolchain setup. We recommend using the [`cmdstanr` package](https://mc-stan.org/cmdstanr/). The Stan team provides instructions in the [_Getting started with
+If you wish to do model fitting, you will need to install [CmdStan](https://mc-stan.org/users/interfaces/cmdstan), which also entails having a suitable C++ toolchain setup. We recommend using the [`cmdstanr` package](https://mc-stan.org/cmdstanr/). The Stan team provides instructions in the [_Getting started with
 `cmdstanr`_](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) vignette, with other details and support at the [package site](https://mc-stan.org/cmdstanr/), but the brief version is:
 
 ```{r, eval = FALSE}
-# if you not yet installed `epinowcast`, or you installed it without `Suggests` dependencies
+# if you not yet installed `epidist`, or you installed it without `Suggests` dependencies
 install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
 # once `cmdstanr` is installed:
 cmdstanr::install_cmdstan()
@@ -125,12 +131,23 @@ We welcome contributions and new contributors! We particularly appreciate help o
 
 ## Citation
 
-If making use of our methodology or the methodology on which ours is based, please cite the relevant papers from our [model outline](https://epidist.epinowcast.org/articles/model.html). If you use `epidist` in your work, please consider citing it with `citation("epidist")`.
+If you use `epidist` in your work, please consider citing it using `citation("epidist")`.
+
+<details><summary>Package citation information</summary>
+
+```{r}
+citation("epidist")
+```
+
+</details>
+
+If using our methodology, or the methodology on which ours is based, please cite the relevant papers.
+This may include:
+
+* [Estimating epidemiological delay distributions for infectious diseases](https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1) by Park *et al.* (2024)
+* [Best practices for estimating and reporting epidemiological delay distributions of infectious diseases using public health surveillance and healthcare data](https://arxiv.org/abs/2405.08841) by Charniga *et al.* (2024)
 
 ## Contributors
-
-
-
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -140,36 +157,25 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 
 ### Code
 
-
 <a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>, 
 <a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>, 
 <a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>, 
 <a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>, 
 <a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>
 
-
-
 ### Issue Authors
-
 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>
 
-
-
 ### Issue Contributors
-
 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Asbfnk">sbfnk</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1">SamuelBrand1</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein">zsusswein</a>
 
-
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
-
-
-
