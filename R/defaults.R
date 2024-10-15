@@ -23,35 +23,3 @@ epidist_stancode.default <- function(data, ...) {
     "See methods(epidist_stancode) for available methods"
   )
 }
-
-#' Default method used for interface using `brms`
-#'
-#' @inheritParams epidist
-#' @inheritParams epidist_formula
-#' @rdname epidist.default
-#' @method epidist default
-#' @family defaults
-#' @export
-epidist.default <- function(data, formula = brms::bf(mu ~ 1),
-                            family = "lognormal", prior = NULL,
-                            backend = "cmdstanr", fn = brms::brm, ...) {
-  epidist_validate(data)
-  epidist_family <- epidist_family(data, family)
-  epidist_formula <- epidist_formula(
-    data = data, family = epidist_family, formula = formula
-  )
-  epidist_prior <- epidist_prior(
-    data = data, family = family, formula = epidist_formula, prior
-  )
-  epidist_stancode <- epidist_stancode(
-    data = data, family = epidist_family, formula = epidist_formula
-  )
-  fit <- fn(
-    formula = epidist_formula, family = epidist_family, prior = epidist_prior,
-    stanvars = epidist_stancode, backend = backend, data = data, ...
-  )
-
-  class(fit) <- c(class(fit), "epidist_fit")
-
-  return(fit)
-}

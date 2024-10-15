@@ -26,6 +26,7 @@ epidist_validate <- function(data) {
 epidist_stancode <- function(data, ...) {
   UseMethod("epidist_stancode")
 }
+<<<<<<< HEAD
 
 #' Fit epidemiological delay distributions using a `brms` interface
 #'
@@ -57,3 +58,5 @@ epidist_stancode <- function(data, ...) {
 epidist <- function(data, formula, family, prior, backend, fn, ...) {
   UseMethod("epidist")
 }
+=======
+>>>>>>> 4cb6f81e (Move fitting functions into fit.R)

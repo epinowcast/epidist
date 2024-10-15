@@ -57,10 +57,14 @@ reference:
   desc: Functions related to specifying custom `brms` formula
   contents:
   - has_concept("formula")
-- title: Priors
+- title: Prior distributions
   desc: Functions for specifying prior distributions
   contents:
   - has_concept("prior")
+- title: Model fitting
+  desc: Functions for fitting delay distribution models
+  contents:
+  - has_concept("fit")
 - title: Latent individual model
   desc: Specific methods for the latent individual model
   contents:
