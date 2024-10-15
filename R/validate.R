@@ -5,9 +5,10 @@
 #' and that it contains suitable columns.
 #'
 #' @param data A `data.frame` containing line list data.
+#' @param ... Additional arguments passed to method.
 #' @family validate
 #' @export
-epidist_validate <- function(data) {
+epidist_validate <- function(data, ...) {
   UseMethod("epidist_validate")
 }
 

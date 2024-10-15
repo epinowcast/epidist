@@ -4,10 +4,12 @@
 \alias{epidist_validate}
 \title{Validate a data object for use with \code{\link[=epidist]{epidist()}}}
 \usage{
-epidist_validate(data)
+epidist_validate(data, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data.}
+
+\item{...}{Additional arguments passed to method.}
 }
 \description{
 This function validates that the provided \code{data} is suitable to run a
