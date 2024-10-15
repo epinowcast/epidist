@@ -8,17 +8,15 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 [![R-CMD-check](https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/epinowcast/epidist/branch/main/graph/badge.svg)](https://app.codecov.io/gh/epinowcast/epidist)
-</br>
 [![Universe](https://epinowcast.r-universe.dev/badges/epidist)](https://epinowcast.r-universe.dev/epidist)
 [![MIT
 license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/epinowcast/epidist/blob/master/LICENSE.md/)
 [![GitHub
 contributors](https://img.shields.io/github/contributors/epinowcast/epidist)](https://github.com/epinowcast/epidist/graphs/contributors)
-</br>
 [![DOI](https://zenodo.org/badge/422611952.svg)](https://zenodo.org/badge/latestdoi/422611952)
 <!-- badges: end -->
 
-*Warning: This package is a prototype and is under active development.
+*Warning! This package is a prototype and is under active development.
 Breaking changes are likely.*
 
 ## Summary
@@ -31,6 +29,19 @@ the key challenges in estimating these distributions, including
 truncation, interval censoring, and dynamical biases. Despite their
 importance, these issues are frequently overlooked, often resulting in
 biased conclusions.
+
+## Quickstart
+
+To learn more about `epidist` we recommend reading the vignettes in this
+order:
+
+- [Getting started with
+  `epidist`](https://epidist.epinowcast.org/articles/epidist.html)
+- [Using `epidist` to estimate delay between symptom onset and positive
+  test for an Ebola outbreak in Sierra
+  Leone](https://epidist.epinowcast.org/articles/ebola.html)
+- [Approximate Bayesian inference in
+  `epidist`](https://epidist.epinowcast.org/articles/approx-inference.html)
 
 ## Installation
 
@@ -56,27 +67,20 @@ remotes::install_github(
 )
 ```
 
-Similarly, you can install historical versions by specifying the release
-tag (e.g. this installs
-[`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)):
-
-``` r
-remotes::install_github(
-  "epinowcast/epidist", dependencies = TRUE, ref = "v0.2.0"
-)
-```
-
-*Note: You can also use that last approach to install a specific commit
-if needed, e.g. if you want to try out a specific unreleased feature,
-but not the absolute latest developmental version.*
-
+<!-- Similarly, you can install historical versions by specifying the release tag (e.g. this installs [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)): -->
+<!-- ```{r, eval = FALSE} -->
+<!-- remotes::install_github( -->
+<!--   "epinowcast/epidist", dependencies = TRUE, ref = "v0.2.0" -->
+<!-- ) -->
+<!-- ``` -->
+<!-- *Note: You can also use that last approach to install a specific commit if needed, e.g. if you want to try out a specific unreleased feature, but not the absolute latest developmental version.* -->
 </details>
 <details>
 <summary>
 Installing CmdStan
 </summary>
 
-If you wish to do model fitting and nowcasting, you will need to install
+If you wish to do model fitting, you will need to install
 [CmdStan](https://mc-stan.org/users/interfaces/cmdstan), which also
 entails having a suitable C++ toolchain setup. We recommend using the
 [`cmdstanr` package](https://mc-stan.org/cmdstanr/). The Stan team
@@ -86,7 +90,7 @@ vignette, with other details and support at the [package
 site](https://mc-stan.org/cmdstanr/), but the brief version is:
 
 ``` r
-# if you not yet installed `epinowcast`, or you installed it without `Suggests` dependencies
+# if you not yet installed `epidist`, or you installed it without `Suggests` dependencies
 install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
 # once `cmdstanr` is installed:
 cmdstanr::install_cmdstan()
@@ -147,11 +151,44 @@ request](https://github.com/epinowcast/epidist/pulls).
 
 ## Citation
 
-If making use of our methodology or the methodology on which ours is
-based, please cite the relevant papers from our [model
-outline](https://epidist.epinowcast.org/articles/model.html). If you use
-`epidist` in your work, please consider citing it with
+If you use `epidist` in your work, please consider citing it using
 `citation("epidist")`.
+
+<details>
+<summary>
+Package citation information
+</summary>
+
+``` r
+citation("epidist")
+To cite package 'epidist' in publications use:
+
+  Adam Howes, Park S, Sam Abbott (NULL). _epidist: Estimate
+  epidemiological delay distributions for infectious diseases_.
+  doi:10.5281/zenodo.5637165 <https://doi.org/10.5281/zenodo.5637165>.
+
+A BibTeX entry for LaTeX users is
+
+  @Manual{,
+    title = {epidist: Estimate epidemiological delay distributions for infectious diseases},
+    author = {{Adam Howes} and Sang Woo Park and {Sam Abbott}},
+    year = {NULL},
+    doi = {10.5281/zenodo.5637165},
+  }
+```
+
+</details>
+
+If using our methodology, or the methodology on which ours is based,
+please cite the relevant papers. This may include:
+
+- [Estimating epidemiological delay distributions for infectious
+  diseases](https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1)
+  by Park *et al.* (2024)
+- [Best practices for estimating and reporting epidemiological delay
+  distributions of infectious diseases using public health surveillance
+  and healthcare data](https://arxiv.org/abs/2405.08841) by Charniga *et
+  al.* (2024)
 
 ## Contributors
 
