@@ -50,5 +50,12 @@ test_that("epidist_validate.epidist_latent_individual returns FALSE for incorrec
 })
 
 test_that("epidist_stancode.epidist_latent_individual produces valid stanvars", { # nolint: line_length_linter.
-  expect_equal(1, 1)
+  epidist_family <- epidist_family(prep_obs)
+  epidist_formula <- epidist_formula(
+    prep_obs, epidist_family, formula = brms::bf(mu ~ 1)
+  )
+  stancode <- epidist_stancode(
+    prep_obs, family = epidist_family, formula = epidist_formula
+  )
+  expect_s3_class(stancode, "stanvars")
 })
