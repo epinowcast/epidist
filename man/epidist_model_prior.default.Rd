@@ -7,9 +7,9 @@
 \method{epidist_model_prior}{default}(data, formula, ...)
 }
 \arguments{
-\item{data}{...}
+\item{data}{A \code{data.frame} containing line list data}
 
-\item{formula}{...}
+\item{formula}{A formula object created using \code{brms::bf()}}
 
 \item{...}{...}
 }

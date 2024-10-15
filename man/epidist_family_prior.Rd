@@ -7,7 +7,7 @@
 epidist_family_prior(family, ...)
 }
 \arguments{
-\item{family}{...}
+\item{family}{Output of a call to \code{brms::brmsfamily()}}
 
 \item{...}{...}
 }

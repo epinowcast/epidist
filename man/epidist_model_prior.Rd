@@ -7,7 +7,7 @@
 epidist_model_prior(data, ...)
 }
 \arguments{
-\item{data}{...}
+\item{data}{A \code{data.frame} containing line list data}
 
 \item{...}{...}
 }
