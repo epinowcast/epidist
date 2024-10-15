@@ -30,7 +30,7 @@ epidist_stancode <- function(data, ...) {
 #' Fit epidemiological delay distributions using a `brms` interface
 #'
 #' @inheritParams epidist_validate
-#' @param formula A formula object created using `brms::bf`. A formula must be
+#' @param formula A formula object created using [brms::bf()]. A formula must be
 #' provided for the distributional parameter `mu` common to all `brms` families.
 #' Optionally, formulas may also be provided for additional distributional
 #' parameters.
@@ -46,10 +46,10 @@ epidist_stancode <- function(data, ...) {
 #' @param backend Character string naming the package to use as the backend for
 #' fitting the Stan model. Options are `"rstan"` and `"cmdstanr"` (the default).
 #' This option is passed directly through to `fn`.
-#' @param fn The internal function to be called. By default this is `brms::brm`,
-#' which performs inference for the specified model. Other options
-#' `brms::make_stancode`, which returns the Stan code for the specified model,
-#' and `brms::make_standata` which returns the data passed to Stan. These
+#' @param fn The internal function to be called. By default this is
+#' [brms::brm()] which performs inference for the specified model. Other options
+#' [brms::make_stancode()], which returns the Stan code for the specified model,
+#' and [brms::make_standata()] which returns the data passed to Stan. These
 #' options may be useful for model debugging and extensions.
 #' @param ... Additional arguments for method.
 #' @family generics

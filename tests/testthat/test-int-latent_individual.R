@@ -81,7 +81,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   expect_convergence(fit)
 })
 
-test_that("epidist.epidist_latent_individual fit and the MCMC converges when setting sigma = 1 (a constant)", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual fits, the MCMC converges, and the draws of sigma are indeed a constant, when setting sigma = 1 (a constant)", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
@@ -95,6 +95,8 @@ test_that("epidist.epidist_latent_individual fit and the MCMC converges when set
   expect_s3_class(fit_constant, "brmsfit")
   expect_s3_class(fit_constant, "epidist_fit")
   expect_convergence(fit_constant)
+  sigma <- rstan::extract(fit_constant$fit, pars = "sigma")$sigma
+  expect_true(all(sigma == 1))
 })
 
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles with lognormal family as a string", { # nolint: line_length_linter.
