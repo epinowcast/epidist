@@ -17,7 +17,6 @@ Default method for data validation
 \seealso{
 Other defaults: 
 \code{\link{epidist.default}()},
-\code{\link{epidist_formula.default}()},
 \code{\link{epidist_stancode.default}()}
 }
 \concept{defaults}

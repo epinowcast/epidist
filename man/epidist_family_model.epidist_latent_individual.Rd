@@ -20,7 +20,7 @@ Create the model-specific component of an \code{epidist} custom family
 \seealso{
 Other latent_individual: 
 \code{\link{as_latent_individual}()},
-\code{\link{epidist_formula.epidist_latent_individual}()},
+\code{\link{epidist_formula_model.epidist_latent_individual}()},
 \code{\link{epidist_validate.epidist_latent_individual}()},
 \code{\link{is_latent_individual}()}
 }

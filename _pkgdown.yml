@@ -53,6 +53,10 @@ reference:
   desc: Functions related to specifying custom `brms` families
   contents:
   - has_concept("family")
+- title: Formula
+  desc: Functions related to specifying custom `brms` formula
+  contents:
+  - has_concept("formula")
 - title: Priors
   desc: Functions for specifying prior distributions
   contents:

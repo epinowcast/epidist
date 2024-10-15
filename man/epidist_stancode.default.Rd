@@ -17,7 +17,6 @@ Default method for defining model specific Stan code
 \seealso{
 Other defaults: 
 \code{\link{epidist.default}()},
-\code{\link{epidist_formula.default}()},
 \code{\link{epidist_validate.default}()}
 }
 \concept{defaults}

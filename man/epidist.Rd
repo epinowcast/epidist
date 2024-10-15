@@ -42,7 +42,6 @@ Fit epidemiological delay distributions using a \code{brms} interface
 }
 \seealso{
 Other generics: 
-\code{\link{epidist_formula}()},
 \code{\link{epidist_stancode}()},
 \code{\link{epidist_validate}()}
 }
