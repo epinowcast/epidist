@@ -41,14 +41,10 @@ reference:
   desc: Functions for preprocessing data
   contents:
   - has_concept("preprocess")
-- title: S3 generics
-  desc: S3 generics for delay modelling
+- title: Validation
+  desc: Functions used to check validity of package objects
   contents:
-  - has_concept("generics")
-- title: Method default
-  desc: Default methods for S3 generics
-  contents:
-  - has_concept("defaults")
+  - has_concept("validate")
 - title: Family
   desc: Functions related to specifying custom `brms` families
   contents:
@@ -57,10 +53,18 @@ reference:
   desc: Functions related to specifying custom `brms` formula
   contents:
   - has_concept("formula")
-- title: Priors
+- title: Prior distributions
   desc: Functions for specifying prior distributions
   contents:
   - has_concept("prior")
+- title: Stan code
+  desc: Functions for specifying custom Stan code to put into `brms`
+  contents:
+  - has_concept("stan") 
+- title: Model fitting
+  desc: Functions for fitting delay distribution models using `brms`
+  contents:
+  - has_concept("fit")
 - title: Latent individual model
   desc: Specific methods for the latent individual model
   contents:
