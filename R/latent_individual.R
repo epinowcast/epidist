@@ -72,10 +72,11 @@ as_latent_individual.data.frame <- function(data) {
 #' `data.frame` with the correct columns.
 #'
 #' @param data A `data.frame` containing line list data
+#' @param ... ...
 #' @method epidist_validate epidist_latent_individual
 #' @family latent_individual
 #' @export
-epidist_validate.epidist_latent_individual <- function(data) {
+epidist_validate.epidist_latent_individual <- function(data, ...) {
   assert_true(is_latent_individual(data))
   assert_latent_individual_input(data)
   assert_names(
