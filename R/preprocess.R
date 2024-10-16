@@ -1,69 +1,36 @@
-#' Add columns for interval censoring of primary and secondary events
-#'
-#' @param linelist ...
-#' @param ptime_lwr ...
-#' @param ptime_upr ...
-#' @param pwindow ...
-#' @param stime_lwr ...
-#' @param stime_upr ...
-#' @param swindow ...
-#' @family preprocess
-#' @autoglobal
-#' @export
 add_event_vars <- function(
-  linelist, ptime_lwr = NULL, ptime_upr = NULL, pwindow = NULL,
-  stime_lwr = NULL, stime_upr = NULL, swindow = NULL
+  data, ptime_lwr = NULL, pwindow = NULL, stime_lwr = NULL, swindow = NULL
 ) {
-  linelist <- .rename_column(linelist, "ptime_lwr", ptime_lwr)
-  linelist <- .rename_column(linelist, "ptime_upr", ptime_upr)
-  linelist <- .rename_column(linelist, "stime_lwr", stime_lwr)
-  linelist <- .rename_column(linelist, "stime_upr", stime_upr)
-  linelist <- .rename_column(linelist, "pwindow", pwindow)
-  linelist <- .rename_column(linelist, "swindow", swindow)
+  data |>
+    mutate(
+      ptime_upr = !!ptime_lwr + !!pwindow,
+      stime_upr = !!stime_lwr + !!swindow
+    )
+}
 
-  if (is.numeric(pwindow)) {
-    cli::cli_warn("Overwriting using numeric value(s) of pwindow provided!")
-    linelist$pwindow <- pwindow
-  }
+as_epidist_linelist <- function(
+  data, ptime_lwr = NULL, pwindow = NULL, ptime_upr = NULL, stime_lwr = NULL,
+  swindow = NULL, stime_upr = NULL
+) {
+  class(data) <- c("epidist_linelist", class(data))
+  # this is inefficient and needs a refactor but it's a technical challenge
+  data <- .rename_column(data, "ptime_lwr", ptime_lwr)
+  data <- .rename_column(data, "ptime_upr", ptime_upr)
+  data <- .rename_column(data, "stime_lwr", stime_lwr)
+  data <- .rename_column(data, "stime_upr", stime_upr)
+  data <- .rename_column(data, "pwindow", pwindow)
+  data <- .rename_column(data, "swindow", swindow)
+  return(data)
+}
 
-  if (is.numeric(swindow)) {
-    cli::cli_warn("Overwriting using numeric value(s) of swindow provided!")
-    linelist$swindow <- swindow
-  }
-
-  if (is.null(stime_upr)) {
-    linelist <- mutate(linelist, stime_upr = stime_lwr + swindow)
-  }
-
-  if (is.null(ptime_upr)) {
-    linelist <- mutate(linelist, ptime_upr = ptime_lwr + pwindow)
-  }
-
-  if (is.null(swindow)) {
-    linelist <- mutate(linelist, pwindow = stime_upr - stime_lwr)
-  }
-
-  if (is.null(pwindow)) {
-    linelist <- mutate(linelist, swindow = ptime_upr - ptime_lwr)
-  }
-
-  assert_numeric(linelist$ptime_lwr)
-  assert_numeric(linelist$ptime_upr)
-  assert_numeric(linelist$pwindow, lower = 0)
-  assert_true(
-    all(linelist$ptime_lwr + linelist$pwindow - linelist$ptime_upr < 1e-6)
-  )
-
-  assert_numeric(linelist$stime_lwr)
-  assert_numeric(linelist$stime_upr)
-  assert_numeric(linelist$swindow, lower = 0)
-  assert_true(
-    all(linelist$stime_lwr + linelist$swindow - linelist$stime_upr < 1e-6)
-  )
-
-  linelist <- dplyr::relocate(
-    linelist, ptime_lwr, ptime_upr, pwindow, stime_lwr, stime_upr, swindow
-  )
-
-  return(linelist)
+add_obs_vars <- function(
+ data, obs_time, ptime_lwr = NULL
+) {
+  # obs_time could be numeric (same for all cases) or vector (different)
+  # do we need to give the name for ptime_lwr here? no guaruntee of what it is
+  data |>
+    mutate(
+      obs_time = obs_time,
+      relative_obs_time = obs_time - ptime_lwr
+    )
 }
