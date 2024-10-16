@@ -44,7 +44,7 @@ and that it contains suitable columns."><meta property="og:image" content="https
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Validate a data object for use with <code><a href="epidist.html">epidist()</a></code></h1>
-      <small class="dont-index">Source: <a href="https://github.com/epinowcast/epidist/blob/main/R/generics.R" class="external-link"><code>R/generics.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/epinowcast/epidist/blob/main/R/validate.R" class="external-link"><code>R/validate.R</code></a></small>
       <div class="d-none name"><code>epidist_validate.Rd</code></div>
     </div>
 
@@ -56,7 +56,7 @@ and that it contains suitable columns.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">epidist_validate</span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">epidist_validate</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -66,12 +66,15 @@ and that it contains suitable columns.</p>
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>A <code>data.frame</code> containing line list data.</p></dd>
 
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments passed to method.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Other generics:
-<code><a href="epidist.html">epidist</a>()</code>,
-<code><a href="epidist_stancode.html">epidist_stancode</a>()</code></p></div>
+    <div class="dont-index"><p>Other validate:
+<code><a href="epidist_validate.default.html">epidist_validate.default</a>()</code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

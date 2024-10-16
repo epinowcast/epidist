@@ -124,9 +124,9 @@
         </dt>
         <dd>Add columns for interval censoring of primary and secondary events</dd>
       </dl></div><div class="section level2">
-      <h2 id="s-generics">S3 generics<a class="anchor" aria-label="anchor" href="#s-generics"></a></h2>
+      <h2 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a></h2>
 
-      <div class="section-desc"><p>S3 generics for delay modelling</p></div>
+      <div class="section-desc"><p>Functions used to check validity of package objects</p></div>
 
 
     </div><div class="section level2">
@@ -135,46 +135,11 @@
 
 
       <dl><dt>
-
-          <code><a href="epidist.html">epidist()</a></code>
-
-        </dt>
-        <dd>Fit epidemiological delay distributions using a <code>brms</code> interface</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_stancode.html">epidist_stancode()</a></code>
-
-        </dt>
-        <dd>Define model specific Stan code</dd>
-      </dl><dl><dt>
 
           <code><a href="epidist_validate.html">epidist_validate()</a></code>
 
         </dt>
         <dd>Validate a data object for use with <code><a href="../reference/epidist.html">epidist()</a></code></dd>
-      </dl></div><div class="section level2">
-      <h2 id="method-default">Method default<a class="anchor" aria-label="anchor" href="#method-default"></a></h2>
-
-      <div class="section-desc"><p>Default methods for S3 generics</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="epidist.default.html">epidist(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method used for interface using <code>brms</code></dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_stancode.default.html">epidist_stancode(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method for defining model specific Stan code</dd>
       </dl><dl><dt>
 
           <code><a href="epidist_validate.default.html">epidist_validate(<i>&lt;default&gt;</i>)</a></code>
@@ -258,7 +223,7 @@
         </dt>
         <dd>Default method for defining a model specific formula</dd>
       </dl></div><div class="section level2">
-      <h2 id="priors">Priors<a class="anchor" aria-label="anchor" href="#priors"></a></h2>
+      <h2 id="prior-distributions">Prior distributions<a class="anchor" aria-label="anchor" href="#prior-distributions"></a></h2>
 
       <div class="section-desc"><p>Functions for specifying prior distributions</p></div>
 
@@ -304,6 +269,52 @@
 
         </dt>
         <dd>Define prior distributions using <code>brms</code> defaults, model specific priors, family specific priors, and user provided priors</dd>
+      </dl></div><div class="section level2">
+      <h2 id="stan-code">Stan code<a class="anchor" aria-label="anchor" href="#stan-code"></a></h2>
+
+      <div class="section-desc"><p>Functions for specifying custom Stan code to put into <code>brms</code></p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist_stancode.html">epidist_stancode()</a></code>
+
+        </dt>
+        <dd>Define model specific Stan code</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_stancode.default.html">epidist_stancode(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method for defining model specific Stan code</dd>
+      </dl></div><div class="section level2">
+      <h2 id="model-fitting">Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a></h2>
+
+      <div class="section-desc"><p>Functions for fitting delay distribution models using <code>brms</code></p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist.html">epidist()</a></code>
+
+        </dt>
+        <dd>Fit epidemiological delay distributions using a <code>brms</code> interface</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist.default.html">epidist(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method used for interface using <code>brms</code></dd>
       </dl></div><div class="section level2">
       <h2 id="latent-individual-model">Latent individual model<a class="anchor" aria-label="anchor" href="#latent-individual-model"></a></h2>
 
