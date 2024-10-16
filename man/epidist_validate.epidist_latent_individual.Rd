@@ -4,10 +4,12 @@
 \alias{epidist_validate.epidist_latent_individual}
 \title{Validate latent individual model data}
 \usage{
-\method{epidist_validate}{epidist_latent_individual}(data)
+\method{epidist_validate}{epidist_latent_individual}(data, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
+
+\item{...}{...}
 }
 \description{
 This function checks whether the provided \code{data} object is suitable for
