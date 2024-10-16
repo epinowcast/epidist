@@ -50,7 +50,8 @@ Suggests:
     tidybayes,
     modelr,
     patchwork,
-    cmdstanr
+    cmdstanr,
+    priorsense
 Additional_repositories:
     https://stan-dev.r-universe.dev
 Config/Needs/website:
