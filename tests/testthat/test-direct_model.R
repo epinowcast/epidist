@@ -1,9 +1,16 @@
 test_that("as_direct_model.data.frame with default settings an object with the correct classes", { # nolint: line_length_linter.
-  # ...
+  prep_obs <- as_direct_model(sim_obs)
+  expect_s3_class(prep_obs, "data.frame")
+  expect_s3_class(prep_obs, "epidist_direct_model")
 })
 
 test_that("as_direct_model.data.frame errors when passed incorrect inputs", { # nolint: line_length_linter.
-  # ...
+  expect_error(as_direct_model(list()))
+  expect_error(as_direct_model(sim_obs[, 1]))
+  expect_error({
+    sim_obs$case <- paste("case_", seq_len(nrow(sim_obs)))
+    as_direct_model(sim_obs)
+  })
 })
 
 # Make this data available for other tests
@@ -40,8 +47,4 @@ test_that("epidist_validate.epidist_direct_model returns FALSE for incorrect inp
     class(x) <- "epidist_direct_model"
     epidist_validate(x)
   })
-})
-
-test_that("epidist_stancode.epidist_direct_model produces valid stanvars", { # nolint: line_length_linter.
-  # ...
 })
