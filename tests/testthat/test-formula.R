@@ -42,6 +42,21 @@ test_that("epidist_formula with custom formulas produces a brmsformula with corr
   )
 })
 
+test_that("epidist_formula with input as a formula (not using brms::bf) produces a brmsformula", { # nolint: line_length_linter.
+  form <- epidist_formula(
+    prep_obs, family = family_lognormal, formula = mu ~ 1
+  )
+  expect_s3_class(form, "brmsformula")
+  expect_equal(
+    as_string_formula(form$formula),
+    "delay | vreal(relative_obs_time, pwindow, swindow) ~ 1"
+  )
+  expect_equal(
+    as_string_formula(form$pforms$sigma),
+    "sigma ~ 1"
+  )
+})
+
 test_that("epidist_formula with custom formulas errors for incorrect custom formulas", { # nolint: line_length_linter.
   expect_error(
     epidist_formula(
