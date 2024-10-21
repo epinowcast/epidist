@@ -8,13 +8,17 @@ family specific priors, and user provided priors}
 epidist_prior(data, family, formula, prior)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data}
+\item{data}{A \code{data.frame} containing line list data.}
 
-\item{family}{Output of a call to \code{brms::brmsfamily()}}
+\item{family}{A description of the response distribution and link function to
+be used in the model created using \code{\link[=epidist_family]{epidist_family()}}.}
 
-\item{formula}{A formula object created using \code{brms::bf()}}
+\item{formula}{A symbolic description of the model to be fitted created using
+\code{\link[=epidist_formula]{epidist_formula()}}.}
 
-\item{prior}{User provided prior distribution created using \code{brms::prior()}}
+\item{prior}{One or more \code{brmsprior} objects created by \code{\link[brms:set_prior]{brms::set_prior()}}
+or related functions. These priors are passed to \code{\link[=epidist_prior]{epidist_prior()}} in the
+\code{prior} argument.}
 }
 \description{
 This function obtains the \code{brms} default prior distributions for a particular
