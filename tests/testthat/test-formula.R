@@ -11,7 +11,7 @@ as_string_formula <- function(formula) {
 
 test_that("epidist_formula with default settings produces a brmsformula with the correct intercept only formula", { # nolint: line_length_linter.
   form <- epidist_formula(
-    prep_obs, family = family_lognormal, formula = brms::bf(mu ~ 1, sigma ~ 1)
+    prep_obs, family = family_lognormal, formula = mu ~ 1
   )
   expect_s3_class(form, "brmsformula")
   expect_equal(
@@ -39,21 +39,6 @@ test_that("epidist_formula with custom formulas produces a brmsformula with corr
   expect_equal(
     as_string_formula(form_sex$pforms$sigma),
     "sigma ~ 1 + sex"
-  )
-})
-
-test_that("epidist_formula with input as a formula (not using brms::bf) produces a brmsformula", { # nolint: line_length_linter.
-  form <- epidist_formula(
-    prep_obs, family = family_lognormal, formula = mu ~ 1
-  )
-  expect_s3_class(form, "brmsformula")
-  expect_equal(
-    as_string_formula(form$formula),
-    "delay | vreal(relative_obs_time, pwindow, swindow) ~ 1"
-  )
-  expect_equal(
-    as_string_formula(form$pforms$sigma),
-    "sigma ~ 1"
   )
 })
 

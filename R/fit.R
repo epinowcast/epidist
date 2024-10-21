@@ -36,7 +36,7 @@ epidist <- function(data, formula, family, prior, backend, fn, ...) {
 #' @method epidist default
 #' @family fit
 #' @export
-epidist.default <- function(data, formula = brms::bf(mu ~ 1),
+epidist.default <- function(data, formula = mu ~ 1,
                             family = "lognormal", prior = NULL,
                             backend = "cmdstanr", fn = brms::brm, ...) {
   epidist_validate(data)
