@@ -190,9 +190,9 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epidist_prior</span></span></code></pre></div>
-<pre><code><span><span class="co">##              prior     class coef group resp  dpar nlpar lb ub source</span></span>
-<span><span class="co">##       normal(1, 1) Intercept                                   family</span></span>
-<span><span class="co">##  normal(-0.7, 0.4) Intercept                 sigma             family</span></span></code></pre>
+<pre><code><span><span class="co">##               prior     class coef group resp  dpar nlpar lb ub  source</span></span>
+<span><span class="co">##  student_t(3, 6, 3) Intercept                                   default</span></span>
+<span><span class="co">##  student_t(3, 0, 3) Intercept                 sigma             default</span></span></code></pre>
 <p>(Note that the functions <code><a href="../reference/epidist_family.html">epidist_family()</a></code> and <code><a href="../reference/epidist_prior.html">epidist_prior()</a></code> are mostly for internal use!)</p>
 <p>Here are the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">

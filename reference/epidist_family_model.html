@@ -63,7 +63,7 @@ The model-specific parts of an epidist_formula() call"><meta property="og:image"
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A <code>data.frame</code> containing line list data</p></dd>
+<dd><p>A <code>data.frame</code> containing line list data.</p></dd>
 
 
 <dt id="arg-family">family<a class="anchor" aria-label="anchor" href="#arg-family"></a></dt>
@@ -76,7 +76,11 @@ information as provided by <code><a href="dot-add_dpar_info.html">.add_dpar_info
 
 
 <dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>
-<dd><p>As produced by <code><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">brms::brmsformula()</a></code></p></dd>
+<dd><p>An object of class <a href="https://rdrr.io/r/stats/formula.html" class="external-link">stats::formula</a> or <a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">brms::brmsformula</a>
+(or one that can be coerced to those classes). A symbolic description of the
+model to be fitted. A formula must be provided for the distributional
+parameter <code>mu</code>, and may optionally be provided for other distributional
+parameters.</p></dd>
 
 </dl></div>
     <div class="section level2">

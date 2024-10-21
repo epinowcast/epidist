@@ -88,19 +88,23 @@ distributions for parameters which are not in the model.</p></li>
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A <code>data.frame</code> containing line list data</p></dd>
+<dd><p>A <code>data.frame</code> containing line list data.</p></dd>
 
 
 <dt id="arg-family">family<a class="anchor" aria-label="anchor" href="#arg-family"></a></dt>
-<dd><p>Output of a call to <code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">brms::brmsfamily()</a></code></p></dd>
+<dd><p>A description of the response distribution and link function to
+be used in the model created using <code><a href="epidist_family.html">epidist_family()</a></code>.</p></dd>
 
 
 <dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>
-<dd><p>A formula object created using <code><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">brms::bf()</a></code></p></dd>
+<dd><p>A symbolic description of the model to be fitted created using
+<code><a href="epidist_formula.html">epidist_formula()</a></code>.</p></dd>
 
 
 <dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
-<dd><p>User provided prior distribution created using <code><a href="https://paulbuerkner.com/brms/reference/set_prior.html" class="external-link">brms::prior()</a></code></p></dd>
+<dd><p>One or more <code>brmsprior</code> objects created by <code><a href="https://paulbuerkner.com/brms/reference/set_prior.html" class="external-link">brms::set_prior()</a></code>
+or related functions. These priors are passed to <code>epidist_prior()</code> in the
+<code>prior</code> argument.</p></dd>
 
 </dl></div>
     <div class="section level2">

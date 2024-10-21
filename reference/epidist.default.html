@@ -71,9 +71,10 @@
 
 
 <dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>
-<dd><p>A formula object created using <code><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">brms::bf()</a></code>. A formula must be
-provided for the distributional parameter <code>mu</code> common to all <code>brms</code> families.
-Optionally, formulas may also be provided for additional distributional
+<dd><p>An object of class <a href="https://rdrr.io/r/stats/formula.html" class="external-link">stats::formula</a> or <a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">brms::brmsformula</a>
+(or one that can be coerced to those classes). A symbolic description of the
+model to be fitted. A formula must be provided for the distributional
+parameter <code>mu</code>, and may optionally be provided for other distributional
 parameters.</p></dd>
 
 
@@ -88,8 +89,7 @@ see <code>brmsfamily()</code>.</p></dd>
 <dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
 <dd><p>One or more <code>brmsprior</code> objects created by <code><a href="https://paulbuerkner.com/brms/reference/set_prior.html" class="external-link">brms::set_prior()</a></code>
 or related functions. These priors are passed to <code><a href="epidist_prior.html">epidist_prior()</a></code> in the
-<code>prior</code> argument. We recommend caution and the use of prior predictive checks
-for specifying prior distributions.</p></dd>
+<code>prior</code> argument.</p></dd>
 
 
 <dt id="arg-backend">backend<a class="anchor" aria-label="anchor" href="#arg-backend"></a></dt>
@@ -101,13 +101,13 @@ This option is passed directly through to <code>fn</code>.</p></dd>
 <dt id="arg-fn">fn<a class="anchor" aria-label="anchor" href="#arg-fn"></a></dt>
 <dd><p>The internal function to be called. By default this is
 <code><a href="https://paulbuerkner.com/brms/reference/brm.html" class="external-link">brms::brm()</a></code> which performs inference for the specified model. Other options
-<code><a href="https://paulbuerkner.com/brms/reference/stancode.html" class="external-link">brms::make_stancode()</a></code>, which returns the Stan code for the specified model,
-and <code><a href="https://paulbuerkner.com/brms/reference/standata.html" class="external-link">brms::make_standata()</a></code> which returns the data passed to Stan. These
-options may be useful for model debugging and extensions.</p></dd>
+are <code><a href="https://paulbuerkner.com/brms/reference/stancode.html" class="external-link">brms::make_stancode()</a></code> which returns the Stan code for the specified
+model, or <code><a href="https://paulbuerkner.com/brms/reference/standata.html" class="external-link">brms::make_standata()</a></code> which returns the data passed to Stan.
+These two later options may be useful for model debugging and extensions.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments for method.</p></dd>
+<dd><p>Additional arguments passed to method.</p></dd>
 
 </dl></div>
     <div class="section level2">
