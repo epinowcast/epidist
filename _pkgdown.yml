@@ -69,6 +69,10 @@ reference:
   desc: Specific methods for the latent individual model
   contents:
   - has_concept("latent_individual")
+- title: Direct model
+  desc: Specific methods for the direct model
+  contents:
+  - has_concept("direct_model")
 - title: Postprocess
   desc: Functions for postprocessing model output
   contents:
