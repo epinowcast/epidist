@@ -14,6 +14,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.gamma_samples.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.lognormal_samples.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/as_direct_model.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/as_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-add_dpar_info.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-floor_mult.html</loc></url>
@@ -44,11 +45,13 @@
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stancode.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stancode.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_validate.default.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_validate.epidist_direct_model.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_validate.epidist_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_validate.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/filter_obs_by_obs_time.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/filter_obs_by_ptime.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/index.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/is_direct_model.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/is_latent_individual.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/log_lik_latent_gamma.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/log_lik_latent_lognormal.html</loc></url>
