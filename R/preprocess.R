@@ -8,9 +8,25 @@ add_event_vars <- function(
     )
 }
 
+add_obs_vars <- function(
+ data, obs_time, ptime_lwr = NULL
+) {
+  # obs_time could be numeric (same for all cases) or vector (different)
+  # do we need to give the name for ptime_lwr here? no guaruntee of what it is
+  data |>
+    mutate(
+      obs_time = obs_time,
+      relative_obs_time = obs_time - ptime_lwr
+    )
+}
+
+add_delay_vars <- function() {
+  return(NULL)
+}
+
 as_epidist_linelist <- function(
-  data, ptime_lwr = NULL, pwindow = NULL, ptime_upr = NULL, stime_lwr = NULL,
-  swindow = NULL, stime_upr = NULL
+    data, ptime_lwr = NULL, pwindow = NULL, ptime_upr = NULL, stime_lwr = NULL,
+    swindow = NULL, stime_upr = NULL
 ) {
   class(data) <- c("epidist_linelist", class(data))
   # this is inefficient and needs a refactor but it's a technical challenge
@@ -23,14 +39,7 @@ as_epidist_linelist <- function(
   return(data)
 }
 
-add_obs_vars <- function(
- data, obs_time, ptime_lwr = NULL
-) {
-  # obs_time could be numeric (same for all cases) or vector (different)
-  # do we need to give the name for ptime_lwr here? no guaruntee of what it is
-  data |>
-    mutate(
-      obs_time = obs_time,
-      relative_obs_time = obs_time - ptime_lwr
-    )
+# This method will be in the latent_individual.R file
+as_latent_indvidual.epidist_linelist <- function() {
+  return(NULL)
 }
