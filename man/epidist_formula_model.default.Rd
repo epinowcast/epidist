@@ -7,9 +7,13 @@
 \method{epidist_formula_model}{default}(data, formula, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data}
+\item{data}{A \code{data.frame} containing line list data.}
 
-\item{formula}{As produced by \code{\link[brms:brmsformula]{brms::brmsformula()}}}
+\item{formula}{An object of class \link[stats:formula]{stats::formula} or \link[brms:brmsformula]{brms::brmsformula}
+(or one that can be coerced to those classes). A symbolic description of the
+model to be fitted. A formula must be provided for the distributional
+parameter \code{mu}, and may optionally be provided for other distributional
+parameters.}
 
 \item{...}{Additional arguments passed to method.}
 }

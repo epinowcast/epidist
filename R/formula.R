@@ -5,11 +5,9 @@
 #' export it nonetheless to be transparent about what exactly is happening
 #' inside of a call to [epidist()].
 #'
-#' @param data A `data.frame` containing line list data
-#' @param family Output of a call to `brms::brmsfamily()`
-#' @param formula As produced by [brms::brmsformula()]
-#' @param ... ...
-#'
+#' @inheritParams epidist
+#' @param family A description of the response distribution and link function to
+#' be used in the model created using [epidist_family()].
 #' @family formula
 #' @export
 epidist_formula <- function(data, family, formula, ...) {
@@ -25,8 +23,7 @@ epidist_formula <- function(data, family, formula, ...) {
 
 #' The model-specific parts of an `epidist_formula()` call
 #'
-#' @inheritParams epidist_formula
-#' @param ... Additional arguments passed to method.
+#' @inheritParams epidist
 #' @rdname epidist_family_model
 #' @family formula
 #' @export
@@ -36,8 +33,7 @@ epidist_formula_model <- function(data, formula, ...) {
 
 #' Default method for defining a model specific formula
 #'
-#' @inheritParams epidist_formula
-#' @param ... Additional arguments passed to method.
+#' @inheritParams epidist
 #' @family formula
 #' @export
 epidist_formula_model.default <- function(data, formula, ...) {

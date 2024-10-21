@@ -7,9 +7,13 @@
 epidist_family_prior(family, ...)
 }
 \arguments{
-\item{family}{Output of a call to \code{brms::brmsfamily()}}
+\item{family}{A description of the response distribution and link function to
+be used in the model. Every family function has a link argument allowing
+users to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details of supported families
+see \code{\link[=brmsfamily]{brmsfamily()}}.}
 
-\item{...}{...}
+\item{...}{Additional arguments passed to method.}
 }
 \description{
 This function contains \code{brms} prior distributions which are specific to

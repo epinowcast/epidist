@@ -4,8 +4,7 @@
 #' particular `epidist` model. This may include checking the class of `data`,
 #' and that it contains suitable columns.
 #'
-#' @param data A `data.frame` containing line list data.
-#' @param ... Additional arguments passed to method.
+#' @inheritParams epidist
 #' @family validate
 #' @export
 epidist_validate <- function(data, ...) {
@@ -14,8 +13,7 @@ epidist_validate <- function(data, ...) {
 
 #' Default method for data validation
 #'
-#' @inheritParams epidist_validate
-#' @param ... Additional arguments passed to method.
+#' @inheritParams epidist
 #' @family validate
 #' @export
 epidist_validate.default <- function(data, ...) {
