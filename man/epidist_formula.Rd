@@ -7,13 +7,18 @@
 epidist_formula(data, family, formula, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data}
+\item{data}{A \code{data.frame} containing line list data.}
 
-\item{family}{Output of a call to \code{brms::brmsfamily()}}
+\item{family}{A description of the response distribution and link function to
+be used in the model created using \code{\link[=epidist_family]{epidist_family()}}.}
 
-\item{formula}{As produced by \code{\link[brms:brmsformula]{brms::brmsformula()}}}
+\item{formula}{An object of class \link[stats:formula]{stats::formula} or \link[brms:brmsformula]{brms::brmsformula}
+(or one that can be coerced to those classes). A symbolic description of the
+model to be fitted. A formula must be provided for the distributional
+parameter \code{mu}, and may optionally be provided for other distributional
+parameters.}
 
-\item{...}{...}
+\item{...}{Additional arguments passed to method.}
 }
 \description{
 This function is used within \code{\link[=epidist]{epidist()}} to create the formula object passed

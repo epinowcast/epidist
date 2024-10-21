@@ -7,11 +7,19 @@
 \method{epidist_family_prior}{lognormal}(family, formula, ...)
 }
 \arguments{
-\item{family}{Output of a call to \code{brms::brmsfamily()}}
+\item{family}{A description of the response distribution and link function to
+be used in the model. Every family function has a link argument allowing
+users to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details of supported families
+see \code{\link[=brmsfamily]{brmsfamily()}}.}
 
-\item{formula}{A formula object created using \code{brms::bf()}}
+\item{formula}{An object of class \link[stats:formula]{stats::formula} or \link[brms:brmsformula]{brms::brmsformula}
+(or one that can be coerced to those classes). A symbolic description of the
+model to be fitted. A formula must be provided for the distributional
+parameter \code{mu}, and may optionally be provided for other distributional
+parameters.}
 
-\item{...}{...}
+\item{...}{Additional arguments passed to method.}
 }
 \description{
 We suggest priors to overwrite the \code{brms} defaults for the lognormal family.
