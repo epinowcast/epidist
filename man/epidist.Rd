@@ -9,9 +9,10 @@ epidist(data, formula, family, prior, backend, fn, ...)
 \arguments{
 \item{data}{A \code{data.frame} containing line list data.}
 
-\item{formula}{A formula object created using \code{\link[brms:brmsformula]{brms::bf()}}. A formula must be
-provided for the distributional parameter \code{mu} common to all \code{brms} families.
-Optionally, formulas may also be provided for additional distributional
+\item{formula}{An object of class \link[stats:formula]{stats::formula} or \link[brms:brmsformula]{brms::brmsformula}
+(or one that can be coerced to those classes). A symbolic description of the
+model to be fitted. A formula must be provided for the distributional
+parameter \code{mu}, and may optionally be provided for other distributional
 parameters.}
 
 \item{family}{A description of the response distribution and link function to
@@ -22,8 +23,7 @@ see \code{\link[=brmsfamily]{brmsfamily()}}.}
 
 \item{prior}{One or more \code{brmsprior} objects created by \code{\link[brms:set_prior]{brms::set_prior()}}
 or related functions. These priors are passed to \code{\link[=epidist_prior]{epidist_prior()}} in the
-\code{prior} argument. We recommend caution and the use of prior predictive checks
-for specifying prior distributions.}
+\code{prior} argument.}
 
 \item{backend}{Character string naming the package to use as the backend for
 fitting the Stan model. Options are \code{"rstan"} and \code{"cmdstanr"} (the default).
@@ -31,11 +31,11 @@ This option is passed directly through to \code{fn}.}
 
 \item{fn}{The internal function to be called. By default this is
 \code{\link[brms:brm]{brms::brm()}} which performs inference for the specified model. Other options
-\code{\link[brms:stancode]{brms::make_stancode()}}, which returns the Stan code for the specified model,
-and \code{\link[brms:standata]{brms::make_standata()}} which returns the data passed to Stan. These
-options may be useful for model debugging and extensions.}
+are \code{\link[brms:stancode]{brms::make_stancode()}} which returns the Stan code for the specified
+model, or \code{\link[brms:standata]{brms::make_standata()}} which returns the data passed to Stan.
+These two later options may be useful for model debugging and extensions.}
 
-\item{...}{Additional arguments for method.}
+\item{...}{Additional arguments passed to method.}
 }
 \description{
 Fit epidemiological delay distributions using a \code{brms} interface

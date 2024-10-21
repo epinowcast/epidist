@@ -5,8 +5,7 @@
 #' as a user you will need this function, but we export it nonetheless to be
 #' transparent about what exactly is happening inside of a call to [epidist()].
 #'
-#' @inheritParams epidist_validate
-#' @param ... Additional arguments passed to method.
+#' @inheritParams epidist
 #' @rdname epidist_stancode
 #' @family stan
 #' @export
@@ -16,8 +15,7 @@ epidist_stancode <- function(data, ...) {
 
 #' Default method for defining model specific Stan code
 #'
-#' @inheritParams epidist_stancode
-#' @param ... Additional arguments passed to method.
+#' @inheritParams epidist
 #' @family stan
 #' @export
 epidist_stancode.default <- function(data, ...) {

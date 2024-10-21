@@ -7,9 +7,9 @@
 epidist_model_prior(data, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data}
+\item{data}{A \code{data.frame} containing line list data.}
 
-\item{...}{...}
+\item{...}{Additional arguments passed to method.}
 }
 \description{
 This function contains \code{brms} prior distributions which are specific to
