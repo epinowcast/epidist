@@ -25,9 +25,11 @@ epidist_prior <- function(data, family, formula, prior) {
   default <- brms::default_prior(formula, data = data)
   model <- epidist_model_prior(data, formula)
   family <-  epidist_family_prior(family, formula)
-  family$source <- "family"
-  family[is.na(family)] <- "" # brms likes empty over NA
-  family[family == "NA"] <- NA # To keep particular NA
+  if (!is.null(family)) {
+    family$source <- "family"
+    family[is.na(family)] <- "" # brms likes empty over NA
+    family[family == "NA"] <- NA # To keep particular NA
+  }
   internal_prior <- Reduce(.replace_prior, list(default, model, family))
   prior <- .replace_prior(internal_prior, prior, warn = TRUE)
   return(prior)
