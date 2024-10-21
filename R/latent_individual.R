@@ -9,11 +9,10 @@ as_latent_individual <- function(data) {
 
 assert_latent_individual_input <- function(data) {
   assert_data_frame(data)
-  assert_names(
-    names(data),
-    must.include = c("case", "ptime_lwr", "ptime_upr",
-                     "stime_lwr", "stime_upr", "obs_time")
+  col_names <- c(
+    "case", "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time"
   )
+  assert_names(names(data), must.include = col_names)
   assert_integer(data$case, lower = 0)
   assert_numeric(data$ptime_lwr, lower = 0)
   assert_numeric(data$ptime_upr, lower = 0)
