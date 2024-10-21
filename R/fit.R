@@ -45,7 +45,7 @@ epidist.default <- function(data, formula = brms::bf(mu ~ 1),
     data = data, family = epidist_family, formula = formula
   )
   epidist_prior <- epidist_prior(
-    data = data, family = family, formula = epidist_formula, prior
+    data = data, family = epidist_family, formula = epidist_formula, prior
   )
   epidist_stancode <- epidist_stancode(
     data = data, family = epidist_family, formula = epidist_formula
