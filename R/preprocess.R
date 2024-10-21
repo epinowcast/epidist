@@ -1,45 +1,35 @@
-add_event_vars <- function(
-  data, ptime_lwr = NULL, pwindow = NULL, stime_lwr = NULL, swindow = NULL
-) {
-  data |>
-    mutate(
-      ptime_upr = !!ptime_lwr + !!pwindow,
-      stime_upr = !!stime_lwr + !!swindow
-    )
-}
-
-add_obs_vars <- function(
- data, obs_time, ptime_lwr = NULL
-) {
-  # obs_time could be numeric (same for all cases) or vector (different)
-  # do we need to give the name for ptime_lwr here? no guaruntee of what it is
-  data |>
-    mutate(
-      obs_time = obs_time,
-      relative_obs_time = obs_time - ptime_lwr
-    )
-}
-
-add_delay_vars <- function() {
-  return(NULL)
-}
-
 as_epidist_linelist <- function(
-    data, ptime_lwr = NULL, pwindow = NULL, ptime_upr = NULL, stime_lwr = NULL,
-    swindow = NULL, stime_upr = NULL
+  data, pdate_lwr = NULL, pdate_upr = NULL, sdate_lwr = NULL, sdate_upr = NULL,
+  obs_date = NULL
 ) {
   class(data) <- c("epidist_linelist", class(data))
-  # this is inefficient and needs a refactor but it's a technical challenge
-  data <- .rename_column(data, "ptime_lwr", ptime_lwr)
-  data <- .rename_column(data, "ptime_upr", ptime_upr)
-  data <- .rename_column(data, "stime_lwr", stime_lwr)
-  data <- .rename_column(data, "stime_upr", stime_upr)
-  data <- .rename_column(data, "pwindow", pwindow)
-  data <- .rename_column(data, "swindow", swindow)
+  
+  # Rename columns to our internal names: inefficient and needs a refactor
+  data <- .rename_column(data, "pdate_lwr", pdate_lwr)
+  data <- .rename_column(data, "pdate_upr", pdate_upr)
+  data <- .rename_column(data, "sdate_lwr", sdate_lwr)
+  data <- .rename_column(data, "sdate_upr", sdate_upr)
+  data <- .rename_column(data, "obs_date", obs_date)
+  
+  # Check for being a datetime
+  checkmate::check_class(data$pdate_lwr, c("POSIXct", "POSIXlt"))
+  checkmate::check_class(data$pdate_upr, c("POSIXct", "POSIXlt"))
+  checkmate::check_class(data$sdate_lwr, c("POSIXct", "POSIXlt"))
+  checkmate::check_class(data$sdate_upr, c("POSIXct", "POSIXlt"))
+  checkmate::check_class(data$obs_date, c("POSIXct", "POSIXlt"))
+  
+  # Could check that all lwr < upr
+  
+  # Convert datetime to time
+  min_date <- min(data$pdate_lwr)
+  
+  data <- mutate(data,
+    ptime_lwr = as.numeric(pdate_lwr - min_date),
+    ptime_upr = as.numeric(pdate_upr - min_date),
+    stime_lwr = as.numeric(sdate_lwr - min_date),
+    stime_upr = as.numeric(sdate_upr - min_date),
+    obs_time = as.numeric(obs_date - min_date)
+  )
+  
   return(data)
-}
-
-# This method will be in the latent_individual.R file
-as_latent_indvidual.epidist_linelist <- function() {
-  return(NULL)
 }
