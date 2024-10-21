@@ -51,7 +51,7 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
   )
   epidist_prior <- epidist_prior(
     data = prep_obs,
-    family = family,
+    family = epidist_family,
     formula = epidist_formula,
     prior = NULL
   )
