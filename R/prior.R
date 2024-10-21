@@ -13,7 +13,7 @@
 #' distributions for parameters which are not in the model.
 #'
 #' @param data A `data.frame` containing line list data
-#' @param family Output of a call to `brms::brmsfamily()`
+#' @param family Output of a call to `epidist_family()`
 #' @param formula A formula object created using `brms::bf()`
 #' @param prior User provided prior distribution created using `brms::prior()`
 #' @rdname epidist_prior
@@ -21,8 +21,6 @@
 #' @export
 epidist_prior <- function(data, family, formula, prior) {
   epidist_validate(data)
-  family <- brms:::validate_family(family)
-  class(family) <- c(class(family), family$family)
   default <- brms::default_prior(formula, data = data)
   model <- epidist_model_prior(data, formula)
   family <-  epidist_family_prior(family, formula)
