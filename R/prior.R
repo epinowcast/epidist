@@ -12,10 +12,11 @@
 #' a warning will be shown. To prevent this warning, do not pass prior
 #' distributions for parameters which are not in the model.
 #'
-#' @param data A `data.frame` containing line list data
-#' @param family Output of a call to `epidist_family()`
-#' @param formula A formula object created using `brms::bf()`
-#' @param prior User provided prior distribution created using `brms::prior()`
+#' @inheritParams epidist
+#' @param family A description of the response distribution and link function to
+#' be used in the model created using [epidist_family()].
+#' @param formula A symbolic description of the model to be fitted created using
+#' [epidist_formula()].
 #' @rdname epidist_prior
 #' @family prior
 #' @export
@@ -37,8 +38,7 @@ epidist_prior <- function(data, family, formula, prior) {
 #' This function contains `brms` prior distributions which are specific to
 #' particular `epidist` models e.g. the `latent_lognormal` model.
 #'
-#' @inheritParams epidist_prior
-#' @param ... ...
+#' @inheritParams epidist
 #' @rdname epidist_model_prior
 #' @family prior
 #' @export
@@ -50,8 +50,7 @@ epidist_model_prior <- function(data, ...) {
 #'
 #' By default, we do not return any model specific prior distributions.
 #'
-#' @inheritParams epidist_prior
-#' @param ... ...
+#' @inheritParams epidist
 #' @family prior
 #' @export
 epidist_model_prior.default <- function(data, formula, ...) {
@@ -63,8 +62,7 @@ epidist_model_prior.default <- function(data, formula, ...) {
 #' This function contains `brms` prior distributions which are specific to
 #' particular likelihood families e.g. [brms::lognormal()].
 #'
-#' @inheritParams epidist_prior
-#' @param ... ...
+#' @inheritParams epidist
 #' @rdname epidist_family_prior
 #' @family prior
 #' @export
@@ -76,8 +74,7 @@ epidist_family_prior <- function(family, ...) {
 #'
 #' By default, we do not return any family specific prior distributions.
 #'
-#' @inheritParams epidist_prior
-#' @param ... ...
+#' @inheritParams epidist
 #' @family prior
 #' @export
 epidist_family_prior.default <- function(family, formula, ...) {
@@ -88,8 +85,7 @@ epidist_family_prior.default <- function(family, formula, ...) {
 #'
 #' We suggest priors to overwrite the `brms` defaults for the lognormal family.
 #'
-#' @inheritParams epidist_prior
-#' @param ... ...
+#' @inheritParams epidist
 #' @method epidist_family_prior lognormal
 #' @family prior
 #' @export

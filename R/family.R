@@ -5,10 +5,7 @@
 #' that as a user you will need this function, but we export it nonetheless to
 #' be transparent about what happens inside of a call to [epidist()].
 #'
-#' @param data A `data.frame` containing line list data
-#' @param family Output of a call to `brms::brmsfamily()`
-#' @param ... ...
-#'
+#' @inheritParams epidist
 #' @family family
 #' @export
 epidist_family <- function(data, family = "lognormal", ...) {
@@ -24,10 +21,9 @@ epidist_family <- function(data, family = "lognormal", ...) {
 
 #' The model-specific parts of an `epidist_family()` call
 #'
-#' @inheritParams epidist_family
+#' @inheritParams epidist
 #' @param family Output of a call to `brms::brmsfamily()` with additional
 #' information as provided by `.add_dpar_info()`
-#' @param ... Additional arguments passed to method.
 #' @rdname epidist_family_model
 #' @family family
 #' @export
@@ -38,7 +34,6 @@ epidist_family_model <- function(data, family, ...) {
 #' Default method for defining a model specific family
 #'
 #' @inheritParams epidist_family_model
-#' @param ... Additional arguments passed to method.
 #' @family family
 #' @export
 epidist_family_model.default <- function(data, family, ...) {
@@ -48,7 +43,6 @@ epidist_family_model.default <- function(data, family, ...) {
 #' Reparameterise an `epidist` family to align `brms` and Stan
 #'
 #' @inheritParams epidist_family
-#' @param ... Additional arguments passed to method.
 #' @rdname epidist_family_reparam
 #' @family family
 #' @export
@@ -58,8 +52,7 @@ epidist_family_reparam <- function(family, ...) {
 
 #' Default method for families which do not require a reparameterisation
 #'
-#' @inheritParams epidist_family_reparam
-#' @param ... Additional arguments passed to method.
+#' @inheritParams epidist_family
 #' @family family
 #' @export
 epidist_family_reparam.default <- function(family, ...) {
@@ -69,8 +62,7 @@ epidist_family_reparam.default <- function(family, ...) {
 
 #' Reparameterisation for the gamma family
 #'
-#' @inheritParams epidist_family_reparam
-#' @param ... Additional arguments passed to method.
+#' @inheritParams epidist_family
 #' @family family
 #' @export
 epidist_family_reparam.gamma <- function(family, ...) {
