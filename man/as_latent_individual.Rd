@@ -2,30 +2,21 @@
 % Please edit documentation in R/latent_individual.R
 \name{as_latent_individual}
 \alias{as_latent_individual}
-\alias{as_latent_individual.data.frame}
 \title{Prepare latent individual model}
 \usage{
 as_latent_individual(data)
-
-\method{as_latent_individual}{data.frame}(data)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
 }
 \description{
-This function prepares data for use with the latent individual model. It does
-this by adding columns used in the model to the \code{data} object provided. To do
-this, the \code{data} must already have columns for the case number (integer),
-(positive, numeric) upper and lower bounds for the primary and secondary
-event times, as well as a (positive, numeric) time that observation takes
-place. The output of this function is a \code{epidist_latent_individual} class
-object, which may be passed to \code{\link[=epidist]{epidist()}} to perform inference for the
-model.
+Prepare latent individual model
 }
 \seealso{
 Other latent_individual: 
 \code{\link{epidist_family_model.epidist_latent_individual}()},
 \code{\link{epidist_formula_model.epidist_latent_individual}()},
+<<<<<<< HEAD
 \code{\link{epidist_validate.epidist_latent_individual}()},
 \code{\link{is_direct_model}()},
 \code{\link{is_latent_individual}()}
@@ -35,6 +26,9 @@ Other latent_individual:
 \code{\link{epidist_formula_model.epidist_latent_individual}()},
 \code{\link{epidist_validate.epidist_latent_individual}()},
 \code{\link{is_direct_model}()},
+=======
+\code{\link{is_epidist_linelist}()},
+>>>>>>> 044a9bdb (Refactor validation functionality)
 \code{\link{is_latent_individual}()}
 }
 \concept{latent_individual}

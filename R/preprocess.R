@@ -18,18 +18,42 @@ as_epidist_linelist <- function(
   checkmate::check_class(data$sdate_upr, c("POSIXct", "POSIXlt"))
   checkmate::check_class(data$obs_date, c("POSIXct", "POSIXlt"))
   
-  # Could check that all lwr < upr
-  
   # Convert datetime to time
   min_date <- min(data$pdate_lwr)
   
   data <- mutate(data,
-    ptime_lwr = as.numeric(pdate_lwr - min_date),
-    ptime_upr = as.numeric(pdate_upr - min_date),
-    stime_lwr = as.numeric(sdate_lwr - min_date),
-    stime_upr = as.numeric(sdate_upr - min_date),
-    obs_time = as.numeric(obs_date - min_date)
+    ptime_lwr = as.numeric(.data$pdate_lwr - min_date),
+    ptime_upr = as.numeric(.data$pdate_upr - min_date),
+    stime_lwr = as.numeric(.data$sdate_lwr - min_date),
+    stime_upr = as.numeric(.data$sdate_upr - min_date),
+    obs_time = as.numeric(.data$obs_date - min_date)
   )
+
+  epidist_validate_data(data)
   
   return(data)
+}
+
+epidist_validate_data.epidist_linelist <- function(data) {
+  assert_true(is_epidist_linelist(data))
+  assert_data_frame(data)
+  col_names <- c(
+    "case", "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time"
+  )
+  assert_names(names(data), must.include = col_names)
+  assert_numeric(data$ptime_lwr, lower = 0)
+  assert_numeric(data$ptime_upr, lower = 0)
+  assert_true(all(data$ptime_upr - data$ptime_lwr > 0))
+  assert_numeric(data$stime_lwr, lower = 0)
+  assert_numeric(data$stime_upr, lower = 0)
+  assert_true(all(data$stime_upr - data$stime_lwr > 0))
+  assert_numeric(data$obs_time, lower = 0)
+}
+
+#' Check if data has the `epidist_linelist` class
+#'
+#' @family latent_individual
+#' @export
+is_epidist_linelist <- function(data) {
+  inherits(data, "epidist_linelist")
 }
