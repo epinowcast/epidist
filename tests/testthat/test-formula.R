@@ -22,6 +22,12 @@ test_that("epidist_formula with default settings produces a brmsformula with the
     as_string_formula(form$pforms$sigma),
     "sigma ~ 1"
   )
+  form_explicit <- epidist_formula(
+    prep_obs, family = family_lognormal, formula = brms::bf(mu ~ 1, sigma ~ 1)
+  )
+  attr(form$pforms$sigma, ".Environment") <- NULL
+  attr(form_explicit$pforms$sigma, ".Environment") <- NULL
+  expect_identical(form, form_explicit)
 })
 
 test_that("epidist_formula with custom formulas produces a brmsformula with correct custom formulas", { # nolint: line_length_linter.
