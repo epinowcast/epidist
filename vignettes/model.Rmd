@@ -82,19 +82,41 @@ Assume the data are right truncated and we don't observe secondary events past t
 Let $P$ and $S$ be random variables.
 Let $F_p$ be the forward cumulative distribution.
 Then
-\begin{align}
+$$
+\begin{aligned}
 \mathbb{P}(S = P + \tau \, | \, P = p, S < T) &= \frac{\mathbb{P}(S = P + \tau, P = p, S < T)}{\mathbb{P}(P = p, S < T)} \\
 &= \frac{\mathbb{P}(S = P + \tau < T \, | \, P = p)\mathbb{P}(P = p)}{\mathbb{P}(S < T \, | \, P = p)\mathbb{P}(P = p)} \\
 &= \frac{\mathbb{P}(S = P + \tau < T \, | \, P = p)}{\mathbb{P}(S < T \, | \, P = p)} \\
 &= \frac{f_p(\tau)}{\int_0^{T - p} f_p(x) \text{d}x} = \frac{f_p(\tau)}{F_p(T - p)}, \quad p + \tau < T. (\#eq:right-truncation)
-\end{align}
+\end{aligned}
+$$
 
 Examining Equation \@ref(eq:right-truncation) illustrates that (right) truncation renormalises the density by the values which are possible.
 For example, if the distribution $x \sim \text{Unif}(0, 1)$ were right truncated by $T = 0.5$ then $x \sim \text{Unif}(0, 0.5)$.
 
 ## Interval censoring
 
-To-do: add section about interval censoring.
+Assume the secondary event $S$ is censored and so we don't know when the event exactly happened.
+Instead, we only know that the secondary event happened between $S_L$ and $S_R$.
+Then,
+$$
+\begin{aligned}
+\mathbb{P}(S_L < S < S_R \, | \, P = p) &= \int_{S_L}^{S_R} f_p(y-p) dy\\
+&= F_p(S_R-p) - F_p(S_L-p)
+\end{aligned}
+$$
+
+Now, assume that both primary $P$ and secondary $S$ events are truncated.
+We only know that the primary event happened between $P_L$ and $P_R$ and the secondary event happened between $S_L$ and $S_R$.
+We now write $g_P$ to denote the distribution of primary events.
+Then,
+$$
+\begin{aligned}
+\mathbb{P}(S_L < S < S_R \, | \, P_L < P < P_R) &= \mathbb{P}(P_L < P < P_R, S_L < S < S_R \, | \, P_L < P < P_R)\\
+&= \frac{\mathbb{P}(P_L < P < P_R, S_L < S < S_R)}{\mathbb{P}(P_L < P < P_R)}\\
+&= \frac{\mathbb{P}(P_L < P < P_R, S_L < S < S_R)}{\int_{P_L}^{P_R}  }\\
+\end{aligned}
+$$
 
 # The latent individual model
 
@@ -107,11 +129,13 @@ $$
 <!-- Shouldn't this be a joint likelihood? So it includes the prior? I think I took this from the paper, and the paper might have an issue -->
 
 Using latent variables, together with Equation \@ref(eq:right-truncation), then
-\begin{align}
+$$
+\begin{aligned}
 x_i &\sim g_P(x_i \, | \, p_{L, i}, p_{R, i}) \\
 y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
 \mathcal{L}(\mathbf{Y} \, | \, \boldsymbol{\theta}) &= \prod_i \left[ \frac{f_x(y_i - x_i)}{\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_x(T - z) \text{d}z} \right].
-\end{align}
+\end{aligned}
+$$
 
 Modelling $g_P$ $\iff$ modelling incidence in primary events.
 This is a tough thing to do.
