@@ -47,7 +47,7 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
   epidist_formula <- epidist_formula(
     data = prep_obs,
     family = epidist_family,
-    formula = brms::bf(mu ~ 1, sigma ~ 1)
+    formula = mu ~ 1
   )
   epidist_prior <- epidist_prior(
     data = prep_obs,
@@ -139,7 +139,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
   stancode_gamma <- epidist(
     data = prep_obs_gamma,
     family = stats::Gamma(link = "log"),
-    formula = brms::bf(mu ~ 1, shape ~ 1),
+    formula = mu ~ 1,
     output_dir = fs::dir_create(tempfile()),
     fn = brms::make_stancode
   )
@@ -157,7 +157,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   fit_gamma <- epidist(
     data = prep_obs_gamma,
     family = stats::Gamma(link = "log"),
-    formula = brms::bf(mu ~ 1, shape ~ 1),
+    formula = mu ~ 1,
     seed = 1,
     silent = 2,
     output_dir = fs::dir_create(tempfile())
@@ -174,7 +174,7 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   fit_gamma <- epidist(
     data = prep_obs_gamma,
     family = stats::Gamma(link = "log"),
-    formula = brms::bf(mu ~ 1, shape ~ 1),
+    formula = mu ~ 1,
     seed = 1,
     silent = 2,
     output_dir = fs::dir_create(tempfile())
