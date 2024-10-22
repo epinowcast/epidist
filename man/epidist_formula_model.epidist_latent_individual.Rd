@@ -20,8 +20,12 @@ Define the model-specific component of an \code{epidist} custom formula
 Other latent_individual: 
 \code{\link{as_latent_individual}()},
 \code{\link{epidist_family_model.epidist_latent_individual}()},
+<<<<<<< HEAD
 \code{\link{epidist_validate.epidist_latent_individual}()},
 \code{\link{is_direct_model}()},
+=======
+\code{\link{is_epidist_linelist}()},
+>>>>>>> 044a9bdb (Refactor validation functionality)
 \code{\link{is_latent_individual}()}
 }
 \concept{latent_individual}

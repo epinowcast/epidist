@@ -2,9 +2,6 @@
 
 utils::globalVariables(c(
   "samples", # <epidist_diagnostics>
-  "stime_lwr", # <as_latent_individual.data.frame>
-  "stime_upr", # <as_latent_individual.data.frame>
-  "ptime_upr", # <as_latent_individual.data.frame>
   "woverlap", # <epidist_stancode.epidist_latent_individual>
   ":=", # <filter_obs_by_ptime>
   "rlnorm", # <simulate_secondary>
