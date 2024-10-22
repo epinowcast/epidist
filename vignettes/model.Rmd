@@ -108,49 +108,66 @@ $$
 
 Now, assume that both primary $P$ and secondary $S$ events are truncated.
 We only know that the primary event happened between $P_L$ and $P_R$ and the secondary event happened between $S_L$ and $S_R$.
-We now write $g_P$ to denote the distribution of primary events.
+We now write $g_P$ to denote the unconditional distribution of primary events.
 Then,
 $$
 \begin{aligned}
 \mathbb{P}(S_L < S < S_R \, | \, P_L < P < P_R) &= \mathbb{P}(P_L < P < P_R, S_L < S < S_R \, | \, P_L < P < P_R)\\
 &= \frac{\mathbb{P}(P_L < P < P_R, S_L < S < S_R)}{\mathbb{P}(P_L < P < P_R)}\\
-&= \frac{\mathbb{P}(P_L < P < P_R, S_L < S < S_R)}{\int_{P_L}^{P_R}  }\\
+&= \frac{\int_{P_L}^{P_R} \int_{S_L}^{S_R} g_P(x) f_x(y-x) \,dy\, dx}{\int_{P_L}^{P_R} g_P(z)\, dz  }\\
+&= \int_{P_L}^{P_R} \int_{S_L}^{S_R} g_P(x\,|\,P_L,P_R) f_x(y-x) \,dy\, dx
 \end{aligned}
 $$
+where $ g_P(x\,|\,P_L,P_R)$ represents the conditional distribution of primary event given lower $P_L$ and upper $P_R$ bounds.
 
 # The latent individual model
 
-Let $\mathbf{Y}$ be the data vector and $\boldsymbol{\theta}$ be parameters.
-Then
-$$ 
-\mathcal{L}(\mathbf{Y} \, | \, \boldsymbol{\theta}) = \prod_i \mathbb{P}(S_{L, i} < S < S_{R, i} \, | \, P_{L, i} < P < P_{R, i}, S < T).
+Now, we incorporate both truncation and double censoring:
 $$
-
-<!-- Shouldn't this be a joint likelihood? So it includes the prior? I think I took this from the paper, and the paper might have an issue -->
-
-Using latent variables, together with Equation \@ref(eq:right-truncation), then
+\begin{aligned}
+\mathbb{P}(S_L < S < S_R \, | \, P_L < P < P_R, S<T) &= \mathbb{P}(P_L < P < P_R, S_L < S < S_R, S<T \, | \, P_L < P < P_R, S<T)\\
+&= \frac{\mathbb{P}(P_L < P < P_R, S_L < S < S_R, S<T)}{\mathbb{P}(P_L < P < P_R, S<T)}\\
+&= \frac{\int_{P_L}^{P_R} \int_{S_L}^{S_R} g_P(x) f_x(y-x) \,dy\, dx}{\int_{P_L}^{P_R} \int_{z}^T g_P(z) f_z(w-z) \, dz \,dw  }\\
+&= \frac{\int_{P_L}^{P_R} \int_{S_L}^{S_R} g_P(x) f_x(y-x) \,dy\, dx}{\int_{P_L}^{P_R} g_P(z) F_z(T-z) \,dw  }\\
+&= \frac{\int_{P_L}^{P_R} \int_{S_L}^{S_R} g_P(x|P_L, P_R) f_x(y-x) \,dy\, dx}{\int_{P_L}^{P_R} g_P(z|P_L, P_R) F_z(T-z) \,dw  }\\
+\end{aligned}
+$$
+Using latent, variables, we can now rewrite down the observation likelihood as:
 $$
 \begin{aligned}
 x_i &\sim g_P(x_i \, | \, p_{L, i}, p_{R, i}) \\
 y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
-\mathcal{L}(\mathbf{Y} \, | \, \boldsymbol{\theta}) &= \prod_i \left[ \frac{f_x(y_i - x_i)}{\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_x(T - z) \text{d}z} \right].
+\mathcal{L}(\mathbf{Y} \, | \, \boldsymbol{\theta}) &= \prod_i \left[ \frac{f_{x_i}(y_i - x_i)}{\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_z(T - z) \text{d}z} \right].
 \end{aligned}
 $$
-
 Modelling $g_P$ $\iff$ modelling incidence in primary events.
 This is a tough thing to do.
 
-This is the approach of the `latent_individual` model [@ward2022transmission] is to:
+<!--Let $\mathbf{Y}$ be the data vector and $\boldsymbol{\theta}$ be parameters.
+Then
+$$ 
+\mathcal{L}(\mathbf{Y} \, | \, \boldsymbol{\theta}) = \prod_i \mathbb{P}(S_{L, i} < S < S_{R, i} \, | \, P_{L, i} < P < P_{R, i}, S < T).
+$$
+>
 
-1. Assume primary event incidence constant
-\begin{align}
+<!-- Shouldn't this be a joint likelihood? So it includes the prior? I think I took this from the paper, and the paper might have an issue -->
+
+<!-- This is just writing the model likelihood so I think it's ok to not have prior? -->
+
+
+Instead, the approach of the `latent_individual` model [@ward2022transmission] is to:
+
+1. Assume a uniformly distributed primary event times
+$$
+\begin{aligned}
 x_i &\sim \text{Unif}(p_{L, i}, p_{R, i}) \\
 y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}).
-\end{align}
+\end{aligned}
+$$
 
 2. Assume that censoring interval is narrow such that
 $$
-\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_x(T - z) \text{d}z \approx F_x(T - x_i).
+\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_{x_i}(T - z) \text{d}z \approx F_{x_i}(T - x_i).
 $$
 
 Then
