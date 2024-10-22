@@ -212,13 +212,14 @@ Now we are ready to fit the latent individual model.
 
 We start by fitting a single lognormal distribution to the data. 
 This model assumes that a single distribution describes all delays in the data, regardless of the case's location, sex, or any other covariates.
-To do this, we set `formula = bf(mu ~ 1, sigma ~ 1)` to place an model with only and intercept parameter (i.e. `~ 1` in R formula syntax) on the `mu` and `sigma` parameters of the lognormal distribution.
-This distribution is specified using `family = lognormal()`.
+To do this, we set `formula = mu ~ 1` to place an model with only an intercept parameter (i.e. `~ 1` in R formula syntax) on the `mu` parameter of the lognormal distribution specified using `family = lognormal()`.
+(Note that the lognormal distribution has two distributional parameters `mu` and `sigma`.
+As a model is not explicitly placed on `sigma`, a constant model `sigma ~ 1` is assumed.) 
 
 ```{r}
 fit <- epidist(
   data = obs_prep,
-  formula = bf(mu ~ 1, sigma ~ 1),
+  formula = mu ~ 1,
   family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
