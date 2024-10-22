@@ -50,7 +50,7 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
 data <- as_latent_individual(obs_cens_trunc_samp)
 fit <- epidist(
   data,
-  formula = bf(mu ~ 1, sigma ~ 1),
+  formula = mu ~ 1,
   seed = 1
 )
 ```
@@ -108,7 +108,7 @@ family <- "lognormal"
 
 epidist_family <- epidist_family(data, family)
 epidist_formula <- epidist_formula(
-  data, family = epidist_family, formula = bf(mu ~ 1, sigma ~ 1)
+  data, family = epidist_family, formula = mu ~ 1
 )
 
 # NULL here means no replacing priors from the user!
@@ -130,7 +130,7 @@ Here are the distributions on the delay distribution mean and standard deviation
 set.seed(1)
 fit_ppc <- epidist(
   data = data,
-  formula = bf(mu ~ 1, sigma ~ 1),
+  formula = mu ~ 1,
   family = "lognormal",
   sample_prior = "only",
   seed = 1
