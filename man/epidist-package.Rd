@@ -3,7 +3,7 @@
 \docType{package}
 \name{epidist-package}
 \alias{epidist-package}
-\title{epidist: Estimate epidemiological delay distributions for infectious diseases}
+\title{epidist: Estimate epidemiological delay distributions with brms}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
