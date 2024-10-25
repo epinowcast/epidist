@@ -203,10 +203,10 @@ Although a <code>save_single_paths</code> option is available, which may have al
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Number of PSIS draws is larger than the total number of draws returned by the single Pathfinders. This is likely unintentional and leads to re-sampling from the same draws. </span></span>
 <span><span class="co">#&gt; Path [1] :Initial log joint density = -1468.604912 </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/RtmpbEkxaI/model-1ed06467f512.stan', line 16, column 2 to column 78) (in '/tmp/RtmpbEkxaI/model-1ed06467f512.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/RtmpbEkxaI/model-1ed06467f512.stan', line 16, column 2 to column 78) (in '/tmp/RtmpbEkxaI/model-1ed06467f512.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/RtmpbEkxaI/model-1ed06467f512.stan', line 16, column 2 to column 78) (in '/tmp/RtmpbEkxaI/model-1ed06467f512.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/RtmpbEkxaI/model-1ed06467f512.stan', line 16, column 2 to column 78) (in '/tmp/RtmpbEkxaI/model-1ed06467f512.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/RtmpBdrBAf/model-2000b29f6d0.stan', line 16, column 2 to column 78) (in '/tmp/RtmpBdrBAf/model-2000b29f6d0.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/RtmpBdrBAf/model-2000b29f6d0.stan', line 16, column 2 to column 78) (in '/tmp/RtmpBdrBAf/model-2000b29f6d0.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/RtmpBdrBAf/model-2000b29f6d0.stan', line 16, column 2 to column 78) (in '/tmp/RtmpBdrBAf/model-2000b29f6d0.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/RtmpBdrBAf/model-2000b29f6d0.stan', line 16, column 2 to column 78) (in '/tmp/RtmpBdrBAf/model-2000b29f6d0.stan', line 64, column 4 to column 77) </span></span>
 <span><span class="co">#&gt; Path [1] : Iter      log prob        ||dx||      ||grad||     alpha      alpha0      # evals       ELBO    Best ELBO        Notes  </span></span>
 <span><span class="co">#&gt;              91      -1.057e+03      2.060e-03   2.208e-02    1.000e+00  1.000e+00      2276 -5.417e+02 -5.417e+02                   </span></span>
 <span><span class="co">#&gt; Path [1] :Best Iter: [89] ELBO (-533.322633) evaluations: (2276) </span></span>
@@ -1247,19 +1247,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">33.821</td>
+<td headers="time (s)" class="gt_row gt_right">36.341</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.580</td>
+<td headers="time (s)" class="gt_row gt_right">2.677</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.169</td>
+<td headers="time (s)" class="gt_row gt_right">2.335</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.970</td>
+<td headers="time (s)" class="gt_row gt_right">1.004</td>
 </tr>
 </tbody>
 </table>
