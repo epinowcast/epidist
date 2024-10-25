@@ -1,5 +1,5 @@
 
-# Estimate epidemiological delay distributions for infectious diseases<a href='https://epidist.epinowcast.org'><img src='man/figures/logo.png' align="right" height="139" /></a>
+# Estimate epidemiological delay distributions with `brms`<a href='https://epidist.epinowcast.org'><img src='man/figures/logo.png' align="right" height="139" /></a>
 
 <!-- badges: start -->
 
