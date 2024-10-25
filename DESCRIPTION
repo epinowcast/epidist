@@ -1,5 +1,5 @@
 Package: epidist
-Title: Estimate epidemiological delay distributions for infectious diseases 
+Title: Estimate Epidemiological Delay Distributions With brms 
 Version: 0.0.0.9000
 Authors@R:
   c(person(given = "Adam Howes",
