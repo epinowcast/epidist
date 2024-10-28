@@ -30,10 +30,10 @@ as_latent_individual.epidist_linelist <- function(data) {
   return(data)
 }
 
-#' @method epidist_validate epidist_latent_individual
+#' @method epidist_validate_model epidist_latent_individual
 #' @family latent_individual
 #' @export
-epidist_validate.epidist_latent_individual <- function(data, ...) {
+epidist_validate_model.epidist_latent_individual <- function(data, ...) {
   assert_true(is_latent_individual(data))
   col_names <- c(
     "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time",
@@ -111,7 +111,7 @@ epidist_stancode.epidist_latent_individual <- function(data,
                                                          epidist_formula(data),
                                                        ...) {
 
-  epidist_validate(data)
+  epidist_validate_model(data)
 
   stanvars_version <- .version_stanvar()
 

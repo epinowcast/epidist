@@ -19,7 +19,7 @@ epidist_validate_data.default <- function(data, ...) {
 #' @family validate
 #' @export
 epidist_validate_model <- function(data, ...) {
-  UseMethod("epidist_validate_data")
+  UseMethod("epidist_validate_model")
 }
 
 #' @inheritParams epidist

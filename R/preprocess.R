@@ -3,24 +3,24 @@ as_epidist_linelist <- function(
   obs_date = NULL
 ) {
   class(data) <- c("epidist_linelist", class(data))
-  
+
   # Rename columns to our internal names: inefficient and needs a refactor
   data <- .rename_column(data, "pdate_lwr", pdate_lwr)
   data <- .rename_column(data, "pdate_upr", pdate_upr)
   data <- .rename_column(data, "sdate_lwr", sdate_lwr)
   data <- .rename_column(data, "sdate_upr", sdate_upr)
   data <- .rename_column(data, "obs_date", obs_date)
-  
+
   # Check for being a datetime
   checkmate::check_class(data$pdate_lwr, c("POSIXct", "POSIXlt"))
   checkmate::check_class(data$pdate_upr, c("POSIXct", "POSIXlt"))
   checkmate::check_class(data$sdate_lwr, c("POSIXct", "POSIXlt"))
   checkmate::check_class(data$sdate_upr, c("POSIXct", "POSIXlt"))
   checkmate::check_class(data$obs_date, c("POSIXct", "POSIXlt"))
-  
+
   # Convert datetime to time
   min_date <- min(data$pdate_lwr)
-  
+
   data <- mutate(data,
     ptime_lwr = as.numeric(.data$pdate_lwr - min_date),
     ptime_upr = as.numeric(.data$pdate_upr - min_date),
@@ -30,10 +30,11 @@ as_epidist_linelist <- function(
   )
 
   epidist_validate_data(data)
-  
+
   return(data)
 }
 
+#' @export
 epidist_validate_data.epidist_linelist <- function(data) {
   assert_true(is_epidist_linelist(data))
   assert_data_frame(data)

@@ -35,7 +35,7 @@ as_direct_model.data.frame <- function(data) {
   class(data) <- c("epidist_direct_model", class(data))
   data <- data |>
     mutate(delay = .data$stime - .data$ptime)
-  epidist_validate(data)
+  epidist_validate_model(data)
   return(data)
 }
 
@@ -48,10 +48,10 @@ as_direct_model.data.frame <- function(data) {
 #'
 #' @param data A `data.frame` containing line list data
 #' @param ... ...
-#' @method epidist_validate epidist_direct_model
+#' @method epidist_validate_model epidist_direct_model
 #' @family direct_model
 #' @export
-epidist_validate.epidist_direct_model <- function(data, ...) {
+epidist_validate_model.epidist_direct_model <- function(data, ...) {
   assert_true(is_direct_model(data))
   assert_direct_model_input(data)
   assert_names(names(data), must.include = c("case", "ptime", "stime", "delay"))

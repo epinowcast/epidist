@@ -22,9 +22,9 @@ be passed to \code{\link[=epidist]{epidist()}} to perform inference for the mode
 }
 \seealso{
 Other direct_model: 
-\code{\link{epidist_validate.epidist_direct_model}()}
+\code{\link{epidist_validate_model.epidist_direct_model}()}
 
 Other direct_model: 
-\code{\link{epidist_validate.epidist_direct_model}()}
+\code{\link{epidist_validate_model.epidist_direct_model}()}
 }
 \concept{direct_model}
