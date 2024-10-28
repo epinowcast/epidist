@@ -22,11 +22,11 @@ as_epidist_linelist <- function(
   data <- .rename_column(data, "obs_date", obs_date)
 
   # Check for being a datetime
-  checkmate::check_class(data$pdate_lwr, c("POSIXct", "POSIXlt"))
-  checkmate::check_class(data$pdate_upr, c("POSIXct", "POSIXlt"))
-  checkmate::check_class(data$sdate_lwr, c("POSIXct", "POSIXlt"))
-  checkmate::check_class(data$sdate_upr, c("POSIXct", "POSIXlt"))
-  checkmate::check_class(data$obs_date, c("POSIXct", "POSIXlt"))
+  assert_class(data$pdate_lwr, c("POSIXct", "POSIXlt"))
+  assert_class(data$pdate_upr, c("POSIXct", "POSIXlt"))
+  assert_class(data$sdate_lwr, c("POSIXct", "POSIXlt"))
+  assert_class(data$sdate_upr, c("POSIXct", "POSIXlt"))
+  assert_class(data$obs_date, c("POSIXct", "POSIXlt"))
 
   # Convert datetime to time
   min_date <- min(data$pdate_lwr)
