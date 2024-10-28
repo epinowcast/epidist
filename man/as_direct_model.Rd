@@ -2,29 +2,18 @@
 % Please edit documentation in R/direct_model.R
 \name{as_direct_model}
 \alias{as_direct_model}
-\alias{as_direct_model.data.frame}
 \title{Prepare direct model to pass through to \code{brms}}
 \usage{
 as_direct_model(data)
-
-\method{as_direct_model}{data.frame}(data)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
 }
 \description{
-This function prepares data for use with the direct model. It does this by
-adding columns used in the model to the \code{data} object provided. To do this,
-the \code{data} must already have columns for the case number (integer),
-(positive, numeric) times for the primary and secondary event times. The
-output of this function is a \code{epidist_direct_model} class object, which may
-be passed to \code{\link[=epidist]{epidist()}} to perform inference for the model.
+Prepare direct model to pass through to \code{brms}
 }
 \seealso{
 Other direct_model: 
-\code{\link{epidist_validate_model.epidist_direct_model}()}
-
-Other direct_model: 
-\code{\link{epidist_validate_model.epidist_direct_model}()}
+\code{\link{as_epidist_linelist}()}
 }
 \concept{direct_model}
