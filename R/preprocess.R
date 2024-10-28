@@ -44,6 +44,9 @@ as_epidist_linelist <- function(
   return(data)
 }
 
+#' Validation for the `epidist_linelist` class
+#'
+#' @param data A `data.frame` containing line list data
 #' @export
 epidist_validate_data.epidist_linelist <- function(data) {
   assert_true(is_epidist_linelist(data))
