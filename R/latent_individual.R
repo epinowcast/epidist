@@ -24,7 +24,8 @@ as_latent_individual.epidist_linelist <- function(data) {
       ),
       woverlap = as.numeric(.data$stime_lwr < .data$ptime_upr),
       swindow = .data$stime_upr - .data$stime_lwr,
-      delay = .data$stime_lwr - .data$ptime_lwr
+      delay = .data$stime_lwr - .data$ptime_lwr,
+      row_id = dplyr::row_number()
     )
   epidist_validate_model(data)
   return(data)
@@ -37,7 +38,7 @@ epidist_validate_model.epidist_latent_individual <- function(data, ...) {
   assert_true(is_latent_individual(data))
   col_names <- c(
     "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time",
-    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay"
+    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", "row_id"
   )
   assert_names(names(data), must.include = col_names)
   assert_numeric(data$relative_obs_time, lower = 0)
