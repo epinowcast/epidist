@@ -1,10 +1,20 @@
+#' Prepare data in the `epidist_linelist` format
+#'
+#' @param data A `data.frame` containing line list data
+#' @param pdate_lwr,pdate_upr,sdate_lwr,sdate_upr Strings giving the column of
+#' `data` containing the primary and secondary event upper and lower bounds.
+#' These columns of `data` must be as datetime.
+#' @param obs_date A string giving the column of `data` containing the
+#' observation time as a datetime.
+#' @family direct_model
+#' @export
 as_epidist_linelist <- function(
   data, pdate_lwr = NULL, pdate_upr = NULL, sdate_lwr = NULL, sdate_upr = NULL,
   obs_date = NULL
 ) {
   class(data) <- c("epidist_linelist", class(data))
 
-  # Rename columns to our internal names: inefficient and needs a refactor
+  # Rename columns to our internal names: inefficient and needs refactor
   data <- .rename_column(data, "pdate_lwr", pdate_lwr)
   data <- .rename_column(data, "pdate_upr", pdate_upr)
   data <- .rename_column(data, "sdate_lwr", sdate_lwr)
