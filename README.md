@@ -164,13 +164,13 @@ citation("epidist")
 To cite package 'epidist' in publications use:
 
   Adam Howes, Park S, Sam Abbott (NULL). _epidist: Estimate
-  Epidemiological Delay Distributions With brms_.
+  epidemiological delay distributions for infectious diseases_.
   doi:10.5281/zenodo.5637165 <https://doi.org/10.5281/zenodo.5637165>.
 
 A BibTeX entry for LaTeX users is
 
   @Manual{,
-    title = {epidist: Estimate Epidemiological Delay Distributions With brms},
+    title = {epidist: Estimate epidemiological delay distributions for infectious diseases},
     author = {{Adam Howes} and Sang Woo Park and {Sam Abbott}},
     year = {NULL},
     doi = {10.5281/zenodo.5637165},
@@ -187,8 +187,9 @@ please cite the relevant papers. This may include:
   by Park *et al.* (2024)
 - [Best practices for estimating and reporting epidemiological delay
   distributions of infectious diseases using public health surveillance
-  and healthcare data](https://arxiv.org/abs/2405.08841) by Charniga *et
-  al.* (2024)
+  and healthcare
+  data](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012520)
+  by Charniga *et al.* (2024)
 
 ## Contributors
 
