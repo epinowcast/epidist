@@ -18,6 +18,13 @@ sim_obs <- simulate_gillespie() |>
   filter_obs_by_obs_time(obs_time = obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
+
+# Convert everything to datetime
+# But this isn't correct because we need the columns to be called pdate and sdate
+start_date <- as.POSIXct("2024-01-01", tz = "UTC")
+sim_obs <- sim_obs |>
+  dplyr::mutate(dplyr::across(-case, ~ start_date + lubridate::duration(.x, "days")))
+
 set.seed(101)
 
 shape <- 2
