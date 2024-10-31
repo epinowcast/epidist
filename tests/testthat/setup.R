@@ -18,12 +18,8 @@ sim_obs <- simulate_gillespie() |>
   filter_obs_by_obs_time(obs_time = obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
-
-# Convert everything to datetime
-# But this isn't correct because we need the columns to be called pdate and sdate
-start_date <- as.POSIXct("2024-01-01", tz = "UTC")
-sim_obs <- sim_obs |>
-  dplyr::mutate(dplyr::across(-case, ~ start_date + lubridate::duration(.x, "days")))
+# Temporary solution for classing time data
+sim_obs <- as_epidist_linelist_time(sim_obs)
 
 set.seed(101)
 
@@ -42,6 +38,9 @@ sim_obs_gamma <- simulate_gillespie() |>
   observe_process() |>
   filter_obs_by_obs_time(obs_time = obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
+
+# Temporary solution for classing time data
+sim_obs_gamma <- as_epidist_linelist_time(sim_obs_gamma)
 
 # Data with a sex difference
 
@@ -74,3 +73,6 @@ sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
   observe_process() |>
   filter_obs_by_obs_time(obs_time = obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
+
+# Temporary solution for classing time data
+sim_obs_sex <- as_epidist_linelist_time(sim_obs_sex)

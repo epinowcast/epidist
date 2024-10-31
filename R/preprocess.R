@@ -23,9 +23,9 @@ as_epidist_linelist <- function(
 
   # Check for being a datetime
   assert_true(any(inherits(data$pdate_lwr, c("POSIXct", "POSIXlt"))))
-  assert_true(any(inherits(data$pdate_upr, c("POSIXct", "POSIXlt"))))              
+  assert_true(any(inherits(data$pdate_upr, c("POSIXct", "POSIXlt"))))
   assert_true(any(inherits(data$sdate_lwr, c("POSIXct", "POSIXlt"))))
-  assert_true(any(inherits(data$sdate_upr, c("POSIXct", "POSIXlt"))))              
+  assert_true(any(inherits(data$sdate_upr, c("POSIXct", "POSIXlt"))))
   assert_true(any(inherits(data$obs_date, c("POSIXct", "POSIXlt"))))
 
   # Convert datetime to time
@@ -41,6 +41,13 @@ as_epidist_linelist <- function(
 
   epidist_validate_data(data)
 
+  return(data)
+}
+
+#' @export
+as_epidist_linelist_time <- function(data) {
+  class(data) <- c("epidist_linelist", class(data))
+  epidist_validate_data(data)
   return(data)
 }
 

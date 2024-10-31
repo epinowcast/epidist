@@ -28,5 +28,3 @@ test_that("as_epidist_linelist correctly renames columns", {
   col_names <- c("pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date")
   expect_true(all(col_names %in% names(linelist)))
 })
-
-  
