@@ -10,11 +10,8 @@ is_epidist_linelist(data)
 Check if data has the \code{epidist_linelist} class
 }
 \seealso{
-Other latent_individual: 
-\code{\link{as_latent_individual}()},
-\code{\link{epidist_family_model.epidist_latent_individual}()},
-\code{\link{epidist_formula_model.epidist_latent_individual}()},
-\code{\link{is_direct_model}()},
-\code{\link{is_latent_individual}()}
+Other preprocess: 
+\code{\link{as_epidist_linelist}()},
+\code{\link{epidist_validate_data.epidist_linelist}()}
 }
-\concept{latent_individual}
+\concept{preprocess}

@@ -6,7 +6,7 @@
 #' These columns of `data` must be as datetime.
 #' @param obs_date A string giving the column of `data` containing the
 #' observation time as a datetime.
-#' @family direct_model
+#' @family preprocess
 #' @export
 as_epidist_linelist <- function(
   data, pdate_lwr = NULL, pdate_upr = NULL, sdate_lwr = NULL, sdate_upr = NULL,
@@ -44,6 +44,7 @@ as_epidist_linelist <- function(
   return(data)
 }
 
+#' @family preprocess
 #' @export
 as_epidist_linelist_time <- function(data) {
   class(data) <- c("epidist_linelist", class(data))
@@ -54,6 +55,7 @@ as_epidist_linelist_time <- function(data) {
 #' Validation for the `epidist_linelist` class
 #'
 #' @param data A `data.frame` containing line list data
+#' @family preprocess
 #' @export
 epidist_validate_data.epidist_linelist <- function(data) {
   assert_true(is_epidist_linelist(data))
@@ -73,7 +75,7 @@ epidist_validate_data.epidist_linelist <- function(data) {
 
 #' Check if data has the `epidist_linelist` class
 #'
-#' @family latent_individual
+#' @family preprocess
 #' @export
 is_epidist_linelist <- function(data) {
   inherits(data, "epidist_linelist")

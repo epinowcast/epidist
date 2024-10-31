@@ -27,7 +27,8 @@ observation time as a datetime.}
 Prepare data in the \code{epidist_linelist} format
 }
 \seealso{
-Other direct_model: 
-\code{\link{as_direct_model}()}
+Other preprocess: 
+\code{\link{epidist_validate_data.epidist_linelist}()},
+\code{\link{is_epidist_linelist}()}
 }
-\concept{direct_model}
+\concept{preprocess}
