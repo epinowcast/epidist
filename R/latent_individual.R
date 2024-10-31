@@ -25,7 +25,7 @@ as_latent_individual.epidist_linelist <- function(data) {
       woverlap = as.numeric(.data$stime_lwr < .data$ptime_upr),
       swindow = .data$stime_upr - .data$stime_lwr,
       delay = .data$stime_lwr - .data$ptime_lwr,
-      row_id = dplyr::row_number()
+      .row_id = dplyr::row_number()
     )
   epidist_validate_model(data)
   return(data)
@@ -38,7 +38,7 @@ epidist_validate_model.epidist_latent_individual <- function(data, ...) {
   assert_true(is_latent_individual(data))
   col_names <- c(
     "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time",
-    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", "row_id"
+    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", ".row_id"
   )
   assert_names(names(data), must.include = col_names)
   assert_numeric(data$relative_obs_time, lower = 0)
@@ -155,13 +155,13 @@ epidist_stancode.epidist_latent_individual <- function(data,
     brms::stanvar(
       block = "data",
       scode = "array[N - wN] int noverlap;",
-      x = filter(data, woverlap == 0)$row_id,
+      x = filter(data, woverlap == 0)$.row_id,
       name = "noverlap"
     ) +
     brms::stanvar(
       block = "data",
       scode = "array[wN] int woverlap;",
-      x = filter(data, woverlap > 0)$row_id,
+      x = filter(data, woverlap > 0)$.row_id,
       name = "woverlap"
     )
 
