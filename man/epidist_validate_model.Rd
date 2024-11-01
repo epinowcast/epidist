@@ -9,7 +9,7 @@ epidist_validate_model(data, ...)
 \arguments{
 \item{data}{A \code{data.frame} containing line list data.}
 
-\item{...}{Additional arguments passed to method.}
+\item{...}{Additional arguments}
 }
 \description{
 Validate model class

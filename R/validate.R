@@ -1,6 +1,7 @@
 #' Validate data class
 #'
 #' @inheritParams epidist
+#' @param ... Additional arguments
 #' @family validate
 #' @export
 epidist_validate_data <- function(data, ...) {
@@ -10,6 +11,7 @@ epidist_validate_data <- function(data, ...) {
 #' Default method for validate data class
 #'
 #' @inheritParams epidist
+#' @param ... Additional arguments
 #' @family validate
 #' @export
 epidist_validate_data.default <- function(data, ...) {
@@ -22,6 +24,7 @@ epidist_validate_data.default <- function(data, ...) {
 #' Validate model class
 #'
 #' @inheritParams epidist
+#' @param ... Additional arguments
 #' @family validate
 #' @export
 epidist_validate_model <- function(data, ...) {
@@ -31,6 +34,7 @@ epidist_validate_model <- function(data, ...) {
 #' Default method for validate model class
 #'
 #' @inheritParams epidist
+#' @param ... Additional arguments
 #' @family validate
 #' @export
 epidist_validate_model.default <- function(data, ...) {
