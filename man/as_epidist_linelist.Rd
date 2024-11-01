@@ -2,7 +2,7 @@
 % Please edit documentation in R/preprocess.R
 \name{as_epidist_linelist}
 \alias{as_epidist_linelist}
-\title{Prepare data in the \code{epidist_linelist} format}
+\title{Prepare date data in the \code{epidist_linelist} format}
 \usage{
 as_epidist_linelist(
   data,
@@ -24,10 +24,11 @@ These columns of \code{data} must be as datetime.}
 observation time as a datetime.}
 }
 \description{
-Prepare data in the \code{epidist_linelist} format
+Prepare date data in the \code{epidist_linelist} format
 }
 \seealso{
 Other preprocess: 
+\code{\link{as_epidist_linelist_time}()},
 \code{\link{epidist_validate_data.epidist_linelist}()},
 \code{\link{is_epidist_linelist}()}
 }

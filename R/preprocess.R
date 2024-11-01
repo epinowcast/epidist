@@ -1,4 +1,4 @@
-#' Prepare data in the `epidist_linelist` format
+#' Prepare date data in the `epidist_linelist` format
 #'
 #' @param data A `data.frame` containing line list data
 #' @param pdate_lwr,pdate_upr,sdate_lwr,sdate_upr Strings giving the column of
@@ -44,6 +44,9 @@ as_epidist_linelist <- function(
   return(data)
 }
 
+#' Prepare temporal data in the `epidist_linelist` format
+#'
+#' @inheritParams as_epidist_linelist
 #' @family preprocess
 #' @export
 as_epidist_linelist_time <- function(data) {
@@ -54,7 +57,7 @@ as_epidist_linelist_time <- function(data) {
 
 #' Validation for the `epidist_linelist` class
 #'
-#' @param data A `data.frame` containing line list data
+#' @inheritParams as_epidist_linelist
 #' @family preprocess
 #' @export
 epidist_validate_data.epidist_linelist <- function(data) {
@@ -75,6 +78,7 @@ epidist_validate_data.epidist_linelist <- function(data) {
 
 #' Check if data has the `epidist_linelist` class
 #'
+#' @inheritParams as_epidist_linelist
 #' @family preprocess
 #' @export
 is_epidist_linelist <- function(data) {
