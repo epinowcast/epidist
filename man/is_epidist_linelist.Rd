@@ -4,7 +4,7 @@
 \alias{is_epidist_linelist}
 \title{Check if data has the \code{epidist_linelist} class}
 \usage{
-is_epidist_linelist(data)
+is_epidist_linelist(data, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}

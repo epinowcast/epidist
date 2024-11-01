@@ -81,6 +81,6 @@ epidist_validate_data.epidist_linelist <- function(data) {
 #' @inheritParams as_epidist_linelist
 #' @family preprocess
 #' @export
-is_epidist_linelist <- function(data) {
+is_epidist_linelist <- function(data, ...) {
   inherits(data, "epidist_linelist")
 }
