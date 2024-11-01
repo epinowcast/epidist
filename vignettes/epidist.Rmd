@@ -251,7 +251,8 @@ We will fit the model `"latent_individual"` which uses latent variables for the 
 To do so, we first prepare the `data` using `as_latent_individual()`:
 
 ```{r}
-data <- as_latent_individual(obs_cens_trunc_samp)
+linelist <- as_epidist_linelist_time(obs_cens_trunc_samp)
+data <- as_latent_individual(linelist)
 class(data)
 ```
 
