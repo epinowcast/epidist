@@ -202,7 +202,8 @@ obs_cens <- obs_cens |>
 To prepare the data for use with the latent individual model, we use the function `as_latent_individual()`:
 
 ```{r}
-obs_prep <- as_latent_individual(obs_cens)
+linelist <- as_epidist_linelist_time(obs_cens)
+obs_prep <- as_latent_individual(linelist)
 head(obs_prep)
 ```
 
