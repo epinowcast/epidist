@@ -4,10 +4,12 @@
 \alias{epidist_validate_data.epidist_linelist}
 \title{Validation for the \code{epidist_linelist} class}
 \usage{
-\method{epidist_validate_data}{epidist_linelist}(data)
+\method{epidist_validate_data}{epidist_linelist}(data, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
+
+\item{...}{Additional arguments}
 }
 \description{
 Validation for the \code{epidist_linelist} class

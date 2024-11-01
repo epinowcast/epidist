@@ -8,6 +8,8 @@ is_epidist_linelist(data, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
+
+\item{...}{Additional arguments}
 }
 \description{
 Check if data has the \code{epidist_linelist} class

@@ -58,9 +58,10 @@ as_epidist_linelist_time <- function(data) {
 #' Validation for the `epidist_linelist` class
 #'
 #' @inheritParams as_epidist_linelist
+#' @param ... Additional arguments
 #' @family preprocess
 #' @export
-epidist_validate_data.epidist_linelist <- function(data) {
+epidist_validate_data.epidist_linelist <- function(data, ...) {
   assert_true(is_epidist_linelist(data))
   assert_data_frame(data)
   col_names <- c(
@@ -79,6 +80,7 @@ epidist_validate_data.epidist_linelist <- function(data) {
 #' Check if data has the `epidist_linelist` class
 #'
 #' @inheritParams as_epidist_linelist
+#' @param ... Additional arguments
 #' @family preprocess
 #' @export
 is_epidist_linelist <- function(data, ...) {
