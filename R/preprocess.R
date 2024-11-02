@@ -14,7 +14,6 @@ as_epidist_linelist <- function(
 ) {
   class(data) <- c("epidist_linelist", class(data))
 
-  # Rename columns to our internal names: inefficient and needs refactor
   data <- .rename_column(data, "pdate_lwr", pdate_lwr)
   data <- .rename_column(data, "pdate_upr", pdate_upr)
   data <- .rename_column(data, "sdate_lwr", sdate_lwr)
