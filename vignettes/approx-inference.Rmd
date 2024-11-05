@@ -123,6 +123,7 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
 We now prepare the data for fitting with the latent individual model, and perform inference with HMC:
 
 ```{r results='hide'}
+# Note: this functionality will be integrated into the package shortly
 as_epidist_linelist_time <- function(data) {
   class(data) <- c("epidist_linelist", class(data))
   epidist_validate_data(data)

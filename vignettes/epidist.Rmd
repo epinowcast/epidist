@@ -251,6 +251,7 @@ We will fit the model `"latent_individual"` which uses latent variables for the 
 To do so, we first prepare the `data` using `as_latent_individual()`:
 
 ```{r}
+# Note: this functionality will be integrated into the package shortly
 as_epidist_linelist_time <- function(data) {
   class(data) <- c("epidist_linelist", class(data))
   epidist_validate_data(data)
