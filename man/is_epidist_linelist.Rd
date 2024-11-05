@@ -17,7 +17,6 @@ Check if data has the \code{epidist_linelist} class
 \seealso{
 Other preprocess: 
 \code{\link{as_epidist_linelist}()},
-\code{\link{as_epidist_linelist_time}()},
 \code{\link{epidist_validate_data.epidist_linelist}()}
 }
 \concept{preprocess}

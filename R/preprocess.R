@@ -43,17 +43,6 @@ as_epidist_linelist <- function(
   return(data)
 }
 
-#' Prepare temporal data in the `epidist_linelist` format
-#'
-#' @inheritParams as_epidist_linelist
-#' @family preprocess
-#' @export
-as_epidist_linelist_time <- function(data) {
-  class(data) <- c("epidist_linelist", class(data))
-  epidist_validate_data(data)
-  return(data)
-}
-
 #' Validation for the `epidist_linelist` class
 #'
 #' @inheritParams as_epidist_linelist

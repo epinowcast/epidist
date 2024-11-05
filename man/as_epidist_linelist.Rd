@@ -28,7 +28,6 @@ Prepare date data in the \code{epidist_linelist} format
 }
 \seealso{
 Other preprocess: 
-\code{\link{as_epidist_linelist_time}()},
 \code{\link{epidist_validate_data.epidist_linelist}()},
 \code{\link{is_epidist_linelist}()}
 }

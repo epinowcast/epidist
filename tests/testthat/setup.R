@@ -1,5 +1,11 @@
 set.seed(101)
 
+as_epidist_linelist_time <- function(data) {
+  class(data) <- c("epidist_linelist", class(data))
+  epidist_validate_data(data)
+  return(data)
+}
+
 obs_time <- 25
 sample_size <- 500
 

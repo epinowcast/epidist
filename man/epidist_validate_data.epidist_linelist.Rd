@@ -17,7 +17,6 @@ Validation for the \code{epidist_linelist} class
 \seealso{
 Other preprocess: 
 \code{\link{as_epidist_linelist}()},
-\code{\link{as_epidist_linelist_time}()},
 \code{\link{is_epidist_linelist}()}
 }
 \concept{preprocess}
