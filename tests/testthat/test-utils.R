@@ -17,13 +17,16 @@ test_that(".replace_prior successfully replaces priors", { # nolint: line_length
   expect_s3_class(prior, "data.frame")
 })
 
-test_that(".replace_prior errors when passed a new prior without a match in old_prior", { # nolint: line_length_linter.
+cli::test_that_cli(".replace_prior errors when passed a new prior without a match in old_prior", {
   old_prior <- brms::prior("normal(0, 10)", class = "Intercept") +
     brms::prior("normal(0, 10)", class = "Intercept", dpar = "sigma")
   new_prior <- brms::prior("normal(0, 5)", class = "Intercept") +
     brms::prior("normal(0, 5)", class = "Intercept", dpar = "sigma") +
     brms::prior("normal(0, 5)", class = "Intercept", dpar = "shape")
-  expect_warning(.replace_prior(old_prior, new_prior, warn = TRUE))
+  
+  expect_snapshot({
+    .replace_prior(old_prior, new_prior, warn = TRUE)
+  })
 })
 
 test_that(".add_dpar_info works as expected for the lognormal and gamma families", { # nolint: line_length_linter.
