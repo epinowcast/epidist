@@ -6,6 +6,7 @@ linters: all_linters(
     function_argument_linter = NULL,
     indentation_linter = NULL,
     object_name_linter = NULL,
+    namespace_linter = NULL,
     cyclocomp_linter(25L)
   )
 exclusions: list(
