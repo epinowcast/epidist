@@ -14,11 +14,12 @@ as_epidist_linelist <- function(
 ) {
   class(data) <- c("epidist_linelist", class(data))
 
-  data <- .rename_column(data, "pdate_lwr", pdate_lwr)
-  data <- .rename_column(data, "pdate_upr", pdate_upr)
-  data <- .rename_column(data, "sdate_lwr", sdate_lwr)
-  data <- .rename_column(data, "sdate_upr", sdate_upr)
-  data <- .rename_column(data, "obs_date", obs_date)
+  data <- .rename_columns(data,
+    new_names = c(
+      "pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"
+    ),
+    old_names = c(pdate_lwr, pdate_upr, sdate_lwr, sdate_upr, obs_date)
+  )
 
   # Check for being a datetime
   assert_true(any(inherits(data$pdate_lwr, c("POSIXct", "POSIXlt"))))
