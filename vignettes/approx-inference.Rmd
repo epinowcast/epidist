@@ -134,7 +134,7 @@ linelist <- as_epidist_linelist_time(obs_cens_trunc_samp)
 data <- as_latent_individual(linelist)
 
 t <- proc.time()
-fit_hmc <- epidist(data = data, algorithm = "sampling")
+fit_hmc <- epidist(data = data, algorithm = "sampling", backend = "cmdstanr")
 time_hmc <- proc.time() - t
 ```
 
@@ -145,11 +145,15 @@ To match the four Markov chains of length 1000 in HMC above, we then draw 4000 s
 
 ```{r results='hide'}
 t <- proc.time()
-fit_laplace <- epidist(data = data, algorithm = "laplace", draws = 4000)
+fit_laplace <- epidist(
+  data = data, algorithm = "laplace", draws = 4000, backend = "cmdstanr"
+)
 time_laplace <- proc.time() - t
 
 t <- proc.time()
-fit_advi <- epidist(data = data, algorithm = "meanfield", draws = 4000)
+fit_advi <- epidist(
+  data = data, algorithm = "meanfield", draws = 4000, backend = "cmdstanr"
+)
 time_advi <- proc.time() - t
 ```
 
@@ -160,7 +164,8 @@ Although a `save_single_paths` option is available, which may have allowed recov
 ```{r}
 t <- proc.time()
 fit_pathfinder <- epidist(
-  data = data, algorithm = "pathfinder", draws = 4000, num_paths = 1
+  data = data, algorithm = "pathfinder", draws = 4000, num_paths = 1,
+  backend = "cmdstanr"
 )
 time_pathfinder <- proc.time() - t
 ```
