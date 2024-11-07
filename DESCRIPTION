@@ -33,6 +33,7 @@ Imports:
     checkmate,
     rstan,
     BH,
+    RcppEigen,
     dplyr
 Suggests:
     bookdown,
