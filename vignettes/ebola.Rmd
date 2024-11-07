@@ -28,6 +28,8 @@ knitr::opts_chunk$set(
   warning = FALSE,
   error = FALSE
 )
+
+options(stringsAsFactors = FALSE)
 ```
 
 In this vignette, we use the `epidist` package to analyze line list data from the 2014-2016 outbreak of Ebola in Sierra Leone [@who_ebola_2014_2016].
