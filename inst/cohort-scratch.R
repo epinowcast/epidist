@@ -2,6 +2,7 @@ library(dplyr)
 library(ggplot2)
 library(brms)
 library(primarycensored)
+library(bayesplot)
 
 set.seed(101)
 
@@ -29,3 +30,19 @@ cohort_obs <- sim_obs |>
 
 ggplot(cohort_obs, aes(x = delay, y = n)) +
   geom_col()
+
+fit_direct <- brms::brm(
+  formula = delay_daily ~ 1,
+  family = "lognormal",
+  data = sim_obs
+)
+
+summary(fit_direct)
+
+fit_direct_weighted <- brms::brm(
+  formula = delay | weights(n) ~ 1,
+  family = "lognormal",
+  cohort_obs,
+)
+
+summary(fit_direct_weighted)
