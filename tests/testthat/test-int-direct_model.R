@@ -27,8 +27,7 @@ test_that("epidist.epidist_direct_model fits and the MCMC converges in the defau
   fit <- epidist(
     data = prep_obs,
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2
   )
   expect_s3_class(fit, "brmsfit")
   expect_s3_class(fit, "epidist_fit")
