@@ -26,6 +26,8 @@ test_that("epidist_diagnostics gives an error when passed model fit using the La
   skip_on_cran()
   set.seed(1)
   prep_obs <- as_latent_individual(sim_obs)
-  fit_laplace <- epidist(data = prep_obs, seed = 1, algorithm = "laplace")
+  fit_laplace <- epidist(
+    data = prep_obs, seed = 1, algorithm = "laplace", backend = "cmdstanr"
+  )
   expect_error(epidist_diagnostics(fit_laplace))
 })
