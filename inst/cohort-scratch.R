@@ -46,3 +46,24 @@ fit_direct_weighted <- brms::brm(
 )
 
 summary(fit_direct_weighted)
+
+lognormal <- brms::lognormal()
+
+primarycensored_lognormal_uniform_lcdf <- brms::custom_family(
+  "primarycensored_lognormal_uniform_lcdf",
+  dpars = lognormal$dpar,
+  links = c(lognormal$link, lognormal$link_sigma),
+  type = lognormal$type,
+  loop = FALSE
+)
+
+primarycensored_lognormal_uniform_lcdf_file <- file.path(
+  tempdir(), "primarycensored_lognormal_uniform_lcdf.stan"
+)
+
+pcd_load_stan_functions(
+  "primarycensored_lognormal_uniform_lcdf",
+  write_to_file = TRUE,
+  output_file = primarycensored_lognormal_uniform_lcdf_file,
+  wrap_in_block = TRUE
+)
