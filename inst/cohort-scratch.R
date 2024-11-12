@@ -65,3 +65,12 @@ stanvars_functions <- brms::stanvar(
   block = "functions",
   scode = pcd_load_stan_functions("primarycensored_lognormal_uniform_lcdf")
 )
+
+stanvars_tparameters <- brms::stanvar(
+  block = "tparameters",
+  scode = .stan_chunk("cohort_model/tparameters.stan")
+)
+
+stanvars_all <- stanvars_functions + stanvars_tparameters
+
+stanvars_all
