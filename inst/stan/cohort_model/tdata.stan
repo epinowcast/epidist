@@ -1,1 +1,1 @@
-real q = fmax(Y - pwindow, 0);
+vector[N] q = fmax(Y - pwindow, 0);
