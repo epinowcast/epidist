@@ -61,9 +61,7 @@ primarycensored_lognormal_uniform_lcdf_file <- file.path(
   tempdir(), "primarycensored_lognormal_uniform_lcdf.stan"
 )
 
-pcd_load_stan_functions(
-  "primarycensored_lognormal_uniform_lcdf",
-  write_to_file = TRUE,
-  output_file = primarycensored_lognormal_uniform_lcdf_file,
-  wrap_in_block = TRUE
+stanvars_functions <- brms::stanvar(
+  block = "functions",
+  scode = pcd_load_stan_functions("primarycensored_lognormal_uniform_lcdf")
 )
