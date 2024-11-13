@@ -9,7 +9,7 @@
   formula = mu ~ 1,
   family = "lognormal",
   prior = NULL,
-  backend = "rstan",
+  backend = c("rstan", "cmdstanr"),
   fn = brms::brm,
   ...
 )
@@ -34,7 +34,7 @@ or related functions. These priors are passed to \code{\link[=epidist_prior]{epi
 \code{prior} argument.}
 
 \item{backend}{Character string naming the package to use as the backend for
-fitting the Stan model. Options are \code{"rstan"} and \code{"cmdstanr"}.
+fitting the Stan model.
 This option is passed directly through to \code{fn}.}
 
 \item{fn}{The internal function to be called. By default this is
