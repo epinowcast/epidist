@@ -35,16 +35,16 @@ test_that("is_direct_model returns FALSE for incorrect input", { # nolint: line_
   })
 })
 
-test_that("epidist_validate.epidist_direct_model doesn't produce an error for correct input", { # nolint: line_length_linter.
-  expect_no_error(epidist_validate(prep_obs))
+test_that("epidist_validate_model.epidist_direct_model doesn't produce an error for correct input", { # nolint: line_length_linter.
+  expect_no_error(epidist_validate_model(prep_obs))
 })
 
-test_that("epidist_validate.epidist_direct_model returns FALSE for incorrect input", { # nolint: line_length_linter.
-  expect_error(epidist_validate(list()))
-  expect_error(epidist_validate(prep_obs[, 1]))
+test_that("epidist_validate_model.epidist_direct_model returns FALSE for incorrect input", { # nolint: line_length_linter.
+  expect_error(epidist_validate_model(list()))
+  expect_error(epidist_validate_model(prep_obs[, 1]))
   expect_error({
     x <- list()
     class(x) <- "epidist_direct_model"
-    epidist_validate(x)
+    epidist_validate_model(x)
   })
 })

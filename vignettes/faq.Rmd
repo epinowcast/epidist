@@ -47,7 +47,16 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
   filter_obs_by_obs_time(obs_time = obs_time) |>
   slice_sample(n = sample_size, replace = FALSE)
 
-data <- as_latent_individual(obs_cens_trunc_samp)
+# Note: this functionality will be integrated into the package shortly
+as_epidist_linelist_time <- function(data) {
+  class(data) <- c("epidist_linelist", class(data))
+  epidist_validate_data(data)
+  return(data)
+}
+
+linelist <- as_epidist_linelist_time(obs_cens_trunc_samp)
+data <- as_latent_individual(linelist)
+
 fit <- epidist(
   data,
   formula = mu ~ 1,

@@ -1,16 +1,12 @@
-test_that("as_latent_individual.data.frame with default settings an object with the correct classes", { # nolint: line_length_linter.
+test_that("as_latent_individual.epidist_linelist with default settings an object with the correct classes", { # nolint: line_length_linter.
   prep_obs <- as_latent_individual(sim_obs)
   expect_s3_class(prep_obs, "data.frame")
   expect_s3_class(prep_obs, "epidist_latent_individual")
 })
 
-test_that("as_latent_individual.data.frame errors when passed incorrect inputs", { # nolint: line_length_linter.
+test_that("as_latent_individual.epidist_linelist errors when passed incorrect inputs", { # nolint: line_length_linter.
   expect_error(as_latent_individual(list()))
   expect_error(as_latent_individual(sim_obs[, 1]))
-  expect_error({
-    sim_obs$case <- paste("case_", seq_len(nrow(sim_obs)))
-    as_latent_individual(sim_obs)
-  })
 })
 
 # Make this data available for other tests
@@ -35,8 +31,8 @@ test_that("is_latent_individual returns FALSE for incorrect input", { # nolint: 
   })
 })
 
-test_that("epidist_validate.epidist_latent_individual doesn't produce an error for correct input", { # nolint: line_length_linter.
-  expect_no_error(epidist_validate(prep_obs))
+test_that("epidist_validate_model.epidist_latent_individual doesn't produce an error for correct input", { # nolint: line_length_linter.
+  expect_no_error(epidist_validate_model(prep_obs))
 })
 
 test_that("epidist_validate.epidist_latent_individual returns FALSE for incorrect input", { # nolint: line_length_linter.

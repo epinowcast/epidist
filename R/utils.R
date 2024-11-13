@@ -125,10 +125,19 @@
   return(formula)
 }
 
-.rename_column <- function(df, new, old) {
-  are_char <- is.character(new) & is.character(old)
-  if (are_char) {
-    df <- dplyr::rename(df, !!new := !!old)
+#' Rename the columns of a `data.frame`
+#'
+#' @param df ...
+#' @param new_names ...
+#' @param old_names ...
+#' @keywords internal
+.rename_columns <- function(df, new_names, old_names) {
+  are_char <- is.character(new_names) & is.character(old_names)
+  valid_new_names <- new_names[are_char]
+  valid_old_names <- old_names[are_char]
+  if (length(are_char) > 0) {
+    rename_map <- setNames(valid_old_names, valid_new_names)
+    df <- dplyr::rename(df, !!!rename_map)
   }
   return(df)
 }

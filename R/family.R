@@ -9,7 +9,7 @@
 #' @family family
 #' @export
 epidist_family <- function(data, family = "lognormal", ...) {
-  epidist_validate(data)
+  epidist_validate_model(data)
   family <- brms:::validate_family(family)
   class(family) <- c(family$family, class(family))
   family <- .add_dpar_info(family)

@@ -1,36 +1,46 @@
-test_that("add_event_vars produces equivalent linelists in different ways", { # nolint: line_length_linter.
-  linelist <- tibble::tibble(
-    "a" = runif(100),
-    "b" = 1,
-    "c" = a + b,
-    "d" = runif(100, 2, 3),
-    "e" = 1,
-    "f" = d + e
+test_that("as_epidist_linelist assigns epidist_linelist class to data", {
+  data <- data.frame(
+    case = 1,
+    pdate_lwr = as.POSIXct("2023-01-01 00:00:00"),
+    pdate_upr = as.POSIXct("2023-01-02 00:00:00"),
+    sdate_lwr = as.POSIXct("2023-01-03 00:00:00"),
+    sdate_upr = as.POSIXct("2023-01-04 00:00:00"),
+    obs_date = as.POSIXct("2023-01-05 00:00:00")
   )
+  linelist <- as_epidist_linelist(
+    data, "pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"
+  )
+  expect_s3_class(linelist, "epidist_linelist")
+})
 
-  ll <- linelist |>
-    add_event_vars(
-      ptime_lwr = "a", pwindow = "b", ptime_upr = "c",
-      stime_lwr = "d", swindow = "e", stime_upr = "f"
+test_that("as_epidist_linelist correctly renames columns", {
+  data <- data.frame(
+    case = 1,
+    p_lower = as.POSIXct("2023-01-01"),
+    p_upper = as.POSIXct("2023-01-02"),
+    s_lower = as.POSIXct("2023-01-03"),
+    s_upper = as.POSIXct("2023-01-04"),
+    observation = as.POSIXct("2023-01-05")
+  )
+  linelist <- as_epidist_linelist(
+    data, "p_lower", "p_upper", "s_lower", "s_upper", "observation"
+  )
+  col_names <- c("pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date")
+  expect_true(all(col_names %in% names(linelist)))
+})
+
+test_that("as_epidist_linelist gives error if columns are not datetime", {
+  data <- data.frame(
+    case = 1,
+    pdate_lwr = as.Date("2023-01-01"),
+    pdate_upr = as.Date("2023-01-02"),
+    sdate_lwr = as.Date("2023-01-03"),
+    sdate_upr = as.Date("2023-01-04"),
+    obs_date = as.Date("2023-01-05")
+  )
+  expect_error(
+    as_epidist_linelist(
+      data, "pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"
     )
-
-  ll2 <- select(linelist, a, c, d, f) |>
-    add_event_vars(
-      ptime_lwr = "a", pwindow = 1, ptime_upr = "c",
-      stime_lwr = "d", swindow = 1, stime_upr = "f"
-    )
-
-  ll3 <- select(linelist, a, b, d, e) |>
-    add_event_vars(
-      ptime_lwr = "a", pwindow = "b", stime_lwr = "d", swindow = "e",
-    )
-
-  ll4 <- select(linelist, a, c, d, f) |>
-    add_event_vars(
-      ptime_lwr = "a", ptime_upr = "c", stime_lwr = "d", stime_upr = "f",
-    )
-
-  expect_equal(ll, ll2)
-  expect_equal(ll, ll3)
-  expect_equal(ll, ll4)
+  )
 })
