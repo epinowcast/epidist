@@ -5,8 +5,8 @@ test_that("predict_delay_parameters works with NULL newdata and the latent logno
   fit <- epidist(
     data = prep_obs,
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2, refresh = 0,
+    cores = 2
   )
   pred <- predict_delay_parameters(fit)
   expect_s3_class(pred, "lognormal_samples")
@@ -26,8 +26,8 @@ test_that("predict_delay_parameters accepts newdata arguments and prediction by 
     data = prep_obs_sex,
     formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2, refresh = 0,
+    cores = 2
   )
   pred_sex <- predict_delay_parameters(fit_sex, prep_obs_sex)
   expect_s3_class(pred_sex, "lognormal_samples")

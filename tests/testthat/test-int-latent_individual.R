@@ -12,7 +12,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
   stancode <- epidist(
     data = prep_obs,
     fn = brms::make_stancode,
-    output_dir = fs::dir_create(tempfile())
+    cores = 2
   )
   mod <- cmdstanr::cmdstan_model(
     stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
@@ -38,8 +38,8 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
     fn = brms::brm,
     sample_prior = "only",
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2, refresh = 0,
+    cores = 2
   )
   pred <- predict_delay_parameters(prior_samples)
   family <- brms::lognormal()
@@ -73,8 +73,8 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   fit <- epidist(
     data = prep_obs,
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2, refresh = 0,
+    cores = 2
   )
   expect_s3_class(fit, "brmsfit")
   expect_s3_class(fit, "epidist_fit")
@@ -90,7 +90,7 @@ test_that("epidist.epidist_latent_individual fits, the MCMC converges, and the d
     formula = brms::bf(mu ~ 1, sigma = 1),
     seed = 1,
     silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    cores = 2
   )
   expect_s3_class(fit_constant, "brmsfit")
   expect_s3_class(fit_constant, "epidist_fit")
@@ -107,8 +107,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
     data = prep_obs,
     family = "lognormal",
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile()),
+    silent = 2, refresh = 0,
     fn = brms::make_stancode
   )
   mod_string <- cmdstanr::cmdstan_model(
@@ -125,8 +124,8 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   fit <- epidist(
     data = prep_obs,
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2, refresh = 0,
+    cores = 2
   )
   pred <- predict_delay_parameters(fit)
   # Unclear the extent to which we should expect parameter recovery here
@@ -140,7 +139,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
     data = prep_obs_gamma,
     family = stats::Gamma(link = "log"),
     formula = mu ~ 1,
-    output_dir = fs::dir_create(tempfile()),
+    cores = 2,
     fn = brms::make_stancode
   )
   mod_gamma <- cmdstanr::cmdstan_model(
@@ -159,8 +158,8 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
     family = stats::Gamma(link = "log"),
     formula = mu ~ 1,
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2, refresh = 0,
+    cores = 2
   )
   expect_s3_class(fit_gamma, "brmsfit")
   expect_s3_class(fit_gamma, "epidist_fit")
@@ -176,8 +175,8 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
     family = stats::Gamma(link = "log"),
     formula = mu ~ 1,
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2, refresh = 0,
+    cores = 2
   )
   draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
   draws_gamma_mu <- exp(draws_gamma$Intercept)
@@ -199,7 +198,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
     data = prep_obs,
     formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     fn = brms::make_stancode,
-    output_dir = fs::dir_create(tempfile())
+    cores = 2
   )
   mod_sex <- cmdstanr::cmdstan_model(
     stan_file = cmdstanr::write_stan_file(stancode_sex), compile = FALSE
@@ -217,8 +216,8 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
     data = prep_obs,
     formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2, refresh = 0,
+    cores = 2
   )
   draws <- posterior::as_draws_df(fit_sex$fit)
   expect_equal(mean(draws$b_sex), 0, tolerance = 0.2)
@@ -234,8 +233,8 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges for an 
     data = prep_obs,
     formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2, refresh = 0,
+    cores = 2
   )
   expect_s3_class(fit_sex, "brmsfit")
   expect_s3_class(fit_sex, "epidist_fit")

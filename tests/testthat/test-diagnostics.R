@@ -1,8 +1,6 @@
 test_that("epidist_diagnostics", { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
-  prep_obs <- as_latent_individual(sim_obs)
-  fit <- epidist(data = prep_obs, seed = 1)
   diag <- epidist_diagnostics(fit)
   expected_names <- c(
     "time", "samples", "max_rhat", "divergent_transitions",
@@ -20,6 +18,14 @@ test_that("epidist_diagnostics", { # nolint: line_length_linter.
   expect_lte(diag$no_at_max_treedepth, diag$samples)
   expect_lte(diag$per_at_max_treedepth, 1)
   expect_gt(diag$per_at_max_treedepth, 0)
+})
+
+test_that("epidist_diagnostics gives the same results for cmdstanr and rstan", {
+  skip_on_cran()
+  set.seed(1)
+  diag_cmdstanr <- epidist_diagnostics(fit)
+  diag_rstan <- epidist_diagnostics(fit_rstan)
+  expect_equal(colnames(diag_cmdstanr), colnames(diag_rstan))
 })
 
 test_that("epidist_diagnostics gives an error when passed model fit using the Laplace algorithm", { # nolint: line_length_linter.
