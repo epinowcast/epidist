@@ -15,7 +15,7 @@
 #' or related functions. These priors are passed to [epidist_prior()] in the
 #' `prior` argument.
 #' @param backend Character string naming the package to use as the backend for
-#' fitting the Stan model. Options are `"rstan"` and `"cmdstanr"` (the default).
+#' fitting the Stan model. Options are `"rstan"` and `"cmdstanr"`.
 #' This option is passed directly through to `fn`.
 #' @param fn The internal function to be called. By default this is
 #' [brms::brm()] which performs inference for the specified model. Other options
@@ -38,7 +38,7 @@ epidist <- function(data, formula, family, prior, backend, fn, ...) {
 #' @export
 epidist.default <- function(data, formula = mu ~ 1,
                             family = "lognormal", prior = NULL,
-                            backend = "cmdstanr", fn = brms::brm, ...) {
+                            backend = "rstan", fn = brms::brm, ...) {
   epidist_validate_model(data)
   epidist_family <- epidist_family(data, family)
   epidist_formula <- epidist_formula(
