@@ -119,10 +119,22 @@
 
       <dl><dt>
 
-          <code><a href="add_event_vars.html">add_event_vars()</a></code>
+          <code><a href="as_epidist_linelist.html">as_epidist_linelist()</a></code>
 
         </dt>
-        <dd>Add columns for interval censoring of primary and secondary events</dd>
+        <dd>Prepare date data in the <code>epidist_linelist</code> format</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_validate_data.epidist_linelist.html">epidist_validate_data(<i>&lt;epidist_linelist&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Validation for the <code>epidist_linelist</code> class</dd>
+      </dl><dl><dt>
+
+          <code><a href="is_epidist_linelist.html">is_epidist_linelist()</a></code>
+
+        </dt>
+        <dd>Check if data has the <code>epidist_linelist</code> class</dd>
       </dl></div><div class="section level2">
       <h2 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a></h2>
 
@@ -136,16 +148,28 @@
 
       <dl><dt>
 
-          <code><a href="epidist_validate.html">epidist_validate()</a></code>
+          <code><a href="epidist_validate_data.html">epidist_validate_data()</a></code>
 
         </dt>
-        <dd>Validate a data object for use with <code><a href="../reference/epidist.html">epidist()</a></code></dd>
+        <dd>Validate data class</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_validate.default.html">epidist_validate(<i>&lt;default&gt;</i>)</a></code>
+          <code><a href="epidist_validate_data.default.html">epidist_validate_data(<i>&lt;default&gt;</i>)</a></code>
 
         </dt>
-        <dd>Default method for data validation</dd>
+        <dd>Default method for validate data class</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_validate_model.html">epidist_validate_model()</a></code>
+
+        </dt>
+        <dd>Validate model class</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_validate_model.default.html">epidist_validate_model(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method for validate model class</dd>
       </dl></div><div class="section level2">
       <h2 id="family">Family<a class="anchor" aria-label="anchor" href="#family"></a></h2>
 
@@ -346,12 +370,6 @@
         <dd>Define the model-specific component of an <code>epidist</code> custom formula</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_validate.epidist_latent_individual.html">epidist_validate(<i>&lt;epidist_latent_individual&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Validate latent individual model data</dd>
-      </dl><dl><dt>
-
           <code><a href="is_direct_model.html">is_direct_model()</a></code>
 
         </dt>
@@ -379,12 +397,6 @@
 
         </dt>
         <dd>Prepare direct model to pass through to <code>brms</code></dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_validate.epidist_direct_model.html">epidist_validate(<i>&lt;epidist_direct_model&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Validate direct model data</dd>
       </dl></div><div class="section level2">
       <h2 id="postprocess">Postprocess<a class="anchor" aria-label="anchor" href="#postprocess"></a></h2>
 

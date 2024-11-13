@@ -288,9 +288,18 @@ Figure 2.1: The histogram of delays from the complete, retrospective data <code>
 We will fit the model <code>"latent_individual"</code> which uses latent variables for the time of primary and secondary event of each individual<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;In a future vignette, we will explain in more detail the structure of the model!&lt;/p&gt;"><sup>2</sup></a>.
 To do so, we first prepare the <code>data</code> using <code><a href="../reference/as_latent_individual.html">as_latent_individual()</a></code>:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">obs_cens_trunc_samp</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Note: this functionality will be integrated into the package shortly</span></span>
+<span><span class="va">as_epidist_linelist_time</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"epidist_linelist"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/epidist_validate_data.html">epidist_validate_data</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">linelist</span> <span class="op">&lt;-</span> <span class="fu">as_epidist_linelist_time</span><span class="op">(</span><span class="va">obs_cens_trunc_samp</span><span class="op">)</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">linelist</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "epidist_latent_individual" "data.frame"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "epidist_latent_individual" "epidist_linelist"         </span></span>
+<span><span class="co">#&gt; [3] "data.frame"</span></span></code></pre></div>
 <p>The <code>data</code> object now has the class <code>epidist_latent_individual</code>.
 Using this <code>data</code>, we now call <code><a href="../reference/epidist.html">epidist()</a></code> to fit the model.
 The parameters of the model are inferred using Bayesian inference.
@@ -299,12 +308,12 @@ In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo 
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, cores <span class="op">=</span> <span class="fl">4</span>, refresh <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 4 parallel chains...</span></span>
 <span><span class="co">#&gt; Chain 3 finished in 6.4 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 6.6 seconds.</span></span>
 <span><span class="co">#&gt; Chain 2 finished in 6.6 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 6.6 seconds.</span></span>
 <span><span class="co">#&gt; Chain 4 finished in 6.6 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; All 4 chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 6.6 seconds.</span></span>
+<span><span class="co">#&gt; Mean chain execution time: 6.5 seconds.</span></span>
 <span><span class="co">#&gt; Total execution time: 6.8 seconds.</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <code>brmsfit</code> object containing MCMC samples from each of the parameters (Table <a href="#tab:pars"><strong>??</strong></a>) in the model.
 Users familiar with Stan and <code>brms</code>, can work with <code>fit</code> directly.
