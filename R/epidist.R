@@ -22,7 +22,7 @@
 #' @param ... Additional arguments passed to `fn` method.
 #' @family fit
 #' @export
-epidist <- function(data, formula, family, prior, backend, fn, ...) {
+epidist <- function(data, formula, family, prior, fn, ...) {
   UseMethod("epidist")
 }
 
@@ -36,7 +36,6 @@ epidist <- function(data, formula, family, prior, backend, fn, ...) {
 epidist.default <- function(data, formula = mu ~ 1,
                             family = "lognormal", prior = NULL,
                             fn = brms::brm, ...) {
-  backend <- match.arg(backend)
   epidist_validate_model(data)
   epidist_family <- epidist_family(data, family)
   epidist_formula <- epidist_formula(
