@@ -4,15 +4,11 @@
 # varying the input seed. Test failure at an unusually high rate does suggest
 # a potential code issue.
 
-prep_obs <- as_latent_individual(sim_obs)
-prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
-
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles in the default case", { # nolint: line_length_linter.
   skip_on_cran()
   stancode <- epidist(
     data = prep_obs,
-    fn = brms::make_stancode,
-    cores = 2
+    fn = brms::make_stancode
   )
   mod <- cmdstanr::cmdstan_model(
     stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
@@ -69,13 +65,6 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
 test_that("epidist.epidist_latent_individual fits and the MCMC converges in the default case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  set.seed(1)
-  fit <- epidist(
-    data = prep_obs,
-    seed = 1,
-    silent = 2, refresh = 0,
-    cores = 2
-  )
   expect_s3_class(fit, "brmsfit")
   expect_s3_class(fit, "epidist_fit")
   expect_convergence(fit)
@@ -89,8 +78,9 @@ test_that("epidist.epidist_latent_individual fits, the MCMC converges, and the d
     data = prep_obs,
     formula = brms::bf(mu ~ 1, sigma = 1),
     seed = 1,
-    silent = 2,
-    cores = 2
+    silent = 2, refresh = 0,
+    cores = 2,
+    chains = 2
   )
   expect_s3_class(fit_constant, "brmsfit")
   expect_s3_class(fit_constant, "epidist_fit")
@@ -121,12 +111,6 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
-  fit <- epidist(
-    data = prep_obs,
-    seed = 1,
-    silent = 2, refresh = 0,
-    cores = 2
-  )
   pred <- predict_delay_parameters(fit)
   # Unclear the extent to which we should expect parameter recovery here
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
@@ -153,14 +137,6 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
-  fit_gamma <- epidist(
-    data = prep_obs_gamma,
-    family = stats::Gamma(link = "log"),
-    formula = mu ~ 1,
-    seed = 1,
-    silent = 2, refresh = 0,
-    cores = 2
-  )
   expect_s3_class(fit_gamma, "brmsfit")
   expect_s3_class(fit_gamma, "epidist_fit")
   expect_convergence(fit_gamma)
@@ -170,14 +146,6 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
-  fit_gamma <- epidist(
-    data = prep_obs_gamma,
-    family = stats::Gamma(link = "log"),
-    formula = mu ~ 1,
-    seed = 1,
-    silent = 2, refresh = 0,
-    cores = 2
-  )
   draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
   draws_gamma_mu <- exp(draws_gamma$Intercept)
   draws_gamma_shape <- exp(draws_gamma$Intercept_shape)
@@ -193,7 +161,6 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
 
 test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles for an alternative formula", { # nolint: line_length_linter.
   skip_on_cran()
-  prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
   stancode_sex <- epidist(
     data = prep_obs,
     formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
@@ -211,31 +178,9 @@ test_that("epidist.epidist_latent_individual recovers no sex effect when none is
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
-  prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
-  fit_sex <- epidist(
-    data = prep_obs,
-    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-    seed = 1,
-    silent = 2, refresh = 0,
-    cores = 2
-  )
   draws <- posterior::as_draws_df(fit_sex$fit)
   expect_equal(mean(draws$b_sex), 0, tolerance = 0.2)
   expect_equal(mean(draws$b_sigma_sex), 0, tolerance = 0.2)
-})
-
-test_that("epidist.epidist_latent_individual fits and the MCMC converges for an alternative formula", { # nolint: line_length_linter.
-  # Note: this test is stochastic. See note at the top of this script
-  skip_on_cran()
-  set.seed(1)
-  prep_obs$sex <- rbinom(n = nrow(prep_obs), size = 1, prob = 0.5)
-  fit_sex <- epidist(
-    data = prep_obs,
-    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-    seed = 1,
-    silent = 2, refresh = 0,
-    cores = 2
-  )
   expect_s3_class(fit_sex, "brmsfit")
   expect_s3_class(fit_sex, "epidist_fit")
   expect_convergence(fit_sex)

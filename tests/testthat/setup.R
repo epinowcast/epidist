@@ -86,21 +86,27 @@ sim_obs_sex <- as_epidist_linelist_time(sim_obs_sex)
 prep_obs <- as_latent_individual(sim_obs)
 prep_direct_obs <- as_direct_model(sim_obs)
 prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
+prep_obs_sex <- as_latent_individual(sim_obs_sex)
 
-if (
-  !on_ci() || (on_ci() && Sys.info()["sysname"] == "Linux" && not_on_cran())
-) {
+if (not_on_cran()) {
   fit <- epidist(
-    data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2,
+    data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
     backend = "cmdstanr"
   )
   fit_rstan <- epidist(
-    data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2
+    data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0
   )
 
   fit_gamma <- epidist(
     data = prep_obs_gamma, family = stats::Gamma(link = "log"),
-    seed = 1, chains = 2, cores = 2, silent = 2,
+    seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
     backend = "cmdstanr"
+  )
+
+  fit_sex <- epidist(
+    data = prep_obs_sex,
+    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
+    seed = 1, silent = 2, refresh = 0,
+    cores = 2, chains = 2, backend = "cmdstanr"
   )
 }

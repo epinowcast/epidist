@@ -8,8 +8,7 @@ test_that("epidist.epidist_direct_model Stan code has no syntax errors and compi
   skip_on_cran()
   stancode <- epidist(
     data = prep_direct_obs,
-    fn = brms::make_stancode,
-    cores = 2
+    fn = brms::make_stancode
   )
   mod <- cmdstanr::cmdstan_model(
     stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
@@ -25,8 +24,9 @@ test_that("epidist.epidist_direct_model fits and the MCMC converges in the defau
   fit <- epidist(
     data = prep_direct_obs,
     seed = 1,
-    silent = 2,
-    cores = 2
+    silent = 2, refresh = 0,
+    cores = 2,
+    chains = 2
   )
   expect_s3_class(fit, "brmsfit")
   expect_s3_class(fit, "epidist_fit")

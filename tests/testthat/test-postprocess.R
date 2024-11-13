@@ -1,13 +1,6 @@
 test_that("predict_delay_parameters works with NULL newdata and the latent lognormal model", { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
-  prep_obs <- as_latent_individual(sim_obs)
-  fit <- epidist(
-    data = prep_obs,
-    seed = 1,
-    silent = 2, refresh = 0,
-    cores = 2
-  )
   pred <- predict_delay_parameters(fit)
   expect_s3_class(pred, "lognormal_samples")
   expect_s3_class(pred, "data.frame")
@@ -21,14 +14,6 @@ test_that("predict_delay_parameters works with NULL newdata and the latent logno
 test_that("predict_delay_parameters accepts newdata arguments and prediction by sex recovers underlying parameters", { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
-  prep_obs_sex <- as_latent_individual(sim_obs_sex)
-  fit_sex <- epidist(
-    data = prep_obs_sex,
-    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-    seed = 1,
-    silent = 2, refresh = 0,
-    cores = 2
-  )
   pred_sex <- predict_delay_parameters(fit_sex, prep_obs_sex)
   expect_s3_class(pred_sex, "lognormal_samples")
   expect_s3_class(pred_sex, "data.frame")
