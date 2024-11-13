@@ -203,10 +203,10 @@ Although a <code>save_single_paths</code> option is available, which may have al
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Number of PSIS draws is larger than the total number of draws returned by the single Pathfinders. This is likely unintentional and leads to re-sampling from the same draws. </span></span>
 <span><span class="co">#&gt; Path [1] :Initial log joint density = -1468.604912 </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/RtmpPX05Qm/model-1f7f14901fd8.stan', line 16, column 2 to column 78) (in '/tmp/RtmpPX05Qm/model-1f7f14901fd8.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/RtmpPX05Qm/model-1f7f14901fd8.stan', line 16, column 2 to column 78) (in '/tmp/RtmpPX05Qm/model-1f7f14901fd8.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/RtmpPX05Qm/model-1f7f14901fd8.stan', line 16, column 2 to column 78) (in '/tmp/RtmpPX05Qm/model-1f7f14901fd8.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/RtmpPX05Qm/model-1f7f14901fd8.stan', line 16, column 2 to column 78) (in '/tmp/RtmpPX05Qm/model-1f7f14901fd8.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/RtmpjtMYbA/model-20b871d91a20.stan', line 16, column 2 to column 78) (in '/tmp/RtmpjtMYbA/model-20b871d91a20.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/RtmpjtMYbA/model-20b871d91a20.stan', line 16, column 2 to column 78) (in '/tmp/RtmpjtMYbA/model-20b871d91a20.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/RtmpjtMYbA/model-20b871d91a20.stan', line 16, column 2 to column 78) (in '/tmp/RtmpjtMYbA/model-20b871d91a20.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/RtmpjtMYbA/model-20b871d91a20.stan', line 16, column 2 to column 78) (in '/tmp/RtmpjtMYbA/model-20b871d91a20.stan', line 64, column 4 to column 77) </span></span>
 <span><span class="co">#&gt; Path [1] : Iter      log prob        ||dx||      ||grad||     alpha      alpha0      # evals       ELBO    Best ELBO        Notes  </span></span>
 <span><span class="co">#&gt;              91      -1.057e+03      2.060e-03   2.208e-02    1.000e+00  1.000e+00      2276 -5.417e+02 -5.417e+02                   </span></span>
 <span><span class="co">#&gt; Path [1] :Best Iter: [89] ELBO (-533.322633) evaluations: (2276) </span></span>
@@ -742,7 +742,7 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:posterior"></span>
-<img src="figures%2Fepidist-posterior-1.png" alt="Estimated posterior distributions for the mu and sigma parameters using each inference method, shown using tidybayes::stat_slabinterval()." width="672"><p class="caption">
+<img src="figures/epidist-posterior-1.png" alt="Estimated posterior distributions for the mu and sigma parameters using each inference method, shown using tidybayes::stat_slabinterval()." width="672"><p class="caption">
 Figure 3.1: Estimated posterior distributions for the <code>mu</code> and <code>sigma</code> parameters using each inference method, shown using <code><a href="http://mjskay.github.io/ggdist/reference/stat_slabinterval.html" class="external-link">tidybayes::stat_slabinterval()</a></code>.
 </p>
 </div>
@@ -767,7 +767,7 @@ Figure 3.1: Estimated posterior distributions for the <code>mu</code> and <code>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span>, col <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:delay-pdf"></span>
-<img src="figures%2Fepidist-delay-pdf-1.png" alt="Delay probability density functions obtained based on the posterior mean estimated mu and sigma parameters." width="672"><p class="caption">
+<img src="figures/epidist-delay-pdf-1.png" alt="Delay probability density functions obtained based on the posterior mean estimated mu and sigma parameters." width="672"><p class="caption">
 Figure 3.2: Delay probability density functions obtained based on the posterior mean estimated <code>mu</code> and <code>sigma</code> parameters.
 </p>
 </div>
@@ -1247,15 +1247,15 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">33.384</td>
+<td headers="time (s)" class="gt_row gt_right">33.251</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.575</td>
+<td headers="time (s)" class="gt_row gt_right">2.587</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.164</td>
+<td headers="time (s)" class="gt_row gt_right">2.168</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
