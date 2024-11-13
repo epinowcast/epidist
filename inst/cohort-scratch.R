@@ -55,7 +55,7 @@ primarycensored_lognormal_uniform_lcdf <- brms::custom_family(
   links = c(lognormal$link, lognormal$link_sigma),
   type = lognormal$type,
   loop = TRUE,
-  vars = "pwindow"
+  vars = c("pwindow", "vreal1[n]")
 )
 
 primarycensored_lognormal_uniform_lcdf_file <- file.path(
@@ -64,8 +64,11 @@ primarycensored_lognormal_uniform_lcdf_file <- file.path(
 
 data <- cohort_obs |>
   select(d = delay, n = n) |>
-  mutate(pwindow = 1)
-
+  mutate(
+    pwindow = 1,
+    q = pmax(d - pwindow, 0)
+  )
+  
 pcd_function <- pcd_load_stan_functions("primarycensored_lognormal_uniform_lcdf")
 pcd_function <- sub(pattern = "array\\[\\] real params", "real mu, real sigma", pcd_function)
 pcd_function <- gsub("\\s*real mu = params\\[1\\];\\n\\s*real sigma = params\\[2\\];\\n", "", pcd_function)
@@ -80,10 +83,10 @@ stanvars_functions <- brms::stanvar(
 #   scode = .stan_chunk("cohort_model/tparameters.stan")
 # )
 
-stanvars_tdata <- brms::stanvar(
-  block = "tdata",
-  scode = .stan_chunk("cohort_model/tdata.stan")
-)
+# stanvars_tdata <- brms::stanvar(
+#   block = "tdata",
+#   scode = .stan_chunk("cohort_model/tdata.stan")
+# )
 
 pwindow <- data$pwindow
 
@@ -93,20 +96,18 @@ stanvars_data <- brms::stanvar(
   scode = .stan_chunk("cohort_model/data.stan")
 )
 
-stanvars_all <- stanvars_functions + stanvars_tdata + stanvars_data
+stanvars_all <- stanvars_functions + stanvars_data
 
 brms::make_stancode(
-  formula = d | weights(n) ~ 1,
+  formula = d | weights(n) + vreal(q) ~ 1,
   family = primarycensored_lognormal_uniform_lcdf,
   data = data,
   stanvars = stanvars_all,
 )
 
 fit_pcd <- brms::brm(
-  formula = d | weights(n) ~ 1,
+  formula = d | weights(n), vreal(q) ~ 1,
   family = primarycensored_lognormal_uniform_lcdf,
   data = data,
   stanvars = stanvars_all,
 )
-
-
