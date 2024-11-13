@@ -3,7 +3,7 @@ on_ci <- function() {
 }
 
 not_on_cran <- function() {
-  identical(Sys.getenv("NOT_CRAN"), "true") . || 
+  identical(Sys.getenv("NOT_CRAN"), "true")
 }
 
 skip_on_local <- function() {
