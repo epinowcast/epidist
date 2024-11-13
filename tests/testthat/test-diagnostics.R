@@ -44,7 +44,7 @@ test_that("epidist_diagnostics gives an error when passed model fit using the La
   prep_obs <- as_latent_individual(sim_obs)
   fit_laplace <- epidist(
     data = prep_obs, seed = 1, algorithm = "laplace", backend = "cmdstanr",
-    refresh = 0
+    refresh = 0, silent = 2, show_messages = FALSE
   )
   expect_error(epidist_diagnostics(fit_laplace))
 })
