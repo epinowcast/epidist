@@ -66,15 +66,19 @@ data <- cohort_obs |>
   select(d = delay, n = n) |>
   mutate(pwindow = 1)
 
+pcd_function <- pcd_load_stan_functions("primarycensored_lognormal_uniform_lcdf")
+pcd_function <- sub(pattern = "array\\[\\] real params", "real mu, real sigma", pcd_function)
+pcd_function <- gsub("\\s*real mu = params\\[1\\];\\n\\s*real sigma = params\\[2\\];\\n", "", pcd_function)
+
 stanvars_functions <- brms::stanvar(
   block = "functions",
-  scode = pcd_load_stan_functions("primarycensored_lognormal_uniform_lcdf")
+  scode = pcd_function
 )
 
-stanvars_tparameters <- brms::stanvar(
-  block = "tparameters",
-  scode = .stan_chunk("cohort_model/tparameters.stan")
-)
+# stanvars_tparameters <- brms::stanvar(
+#   block = "tparameters",
+#   scode = .stan_chunk("cohort_model/tparameters.stan")
+# )
 
 stanvars_tdata <- brms::stanvar(
   block = "tdata",
@@ -89,8 +93,7 @@ stanvars_data <- brms::stanvar(
   scode = .stan_chunk("cohort_model/data.stan")
 )
 
-stanvars_all <- stanvars_functions + stanvars_tparameters + stanvars_tdata +
-  stanvars_data
+stanvars_all <- stanvars_functions + stanvars_tdata + stanvars_data
 
 brms::make_stancode(
   formula = d | weights(n) ~ 1,
@@ -105,3 +108,5 @@ fit_pcd <- brms::brm(
   data = data,
   stanvars = stanvars_all,
 )
+
+
