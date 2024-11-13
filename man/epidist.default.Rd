@@ -9,7 +9,6 @@
   formula = mu ~ 1,
   family = "lognormal",
   prior = NULL,
-  backend = c("rstan", "cmdstanr"),
   fn = brms::brm,
   ...
 )
@@ -33,17 +32,13 @@ see \code{\link[=brmsfamily]{brmsfamily()}}.}
 or related functions. These priors are passed to \code{\link[=epidist_prior]{epidist_prior()}} in the
 \code{prior} argument.}
 
-\item{backend}{Character string naming the package to use as the backend for
-fitting the Stan model.
-This option is passed directly through to \code{fn}.}
-
 \item{fn}{The internal function to be called. By default this is
 \code{\link[brms:brm]{brms::brm()}} which performs inference for the specified model. Other options
 are \code{\link[brms:stancode]{brms::make_stancode()}} which returns the Stan code for the specified
 model, or \code{\link[brms:standata]{brms::make_standata()}} which returns the data passed to Stan.
 These two later options may be useful for model debugging and extensions.}
 
-\item{...}{Additional arguments passed to method.}
+\item{...}{Additional arguments passed to \code{fn} method.}
 }
 \description{
 Default method used for interface using \code{brms}
