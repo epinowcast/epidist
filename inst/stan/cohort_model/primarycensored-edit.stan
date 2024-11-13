@@ -2,10 +2,12 @@
 // Edited to work with temporary brms function
 
 real primarycensored_lognormal_uniform_lpmf(data int d, real mu, real sigma, real q, data real pwindow) {
+  int dist_id = 1; // lognormal
   array[2] real params = {mu, sigma};
-  array[0] real primary_params;
   int d_upper = d + 1;
-  return primarycensored_lpmf(d | 1, params, pwindow, d_upper, positive_infinity(), 1, primary_params);
+  int primary_id = 1; // Uniform
+  array[0] real primary_params;
+  return primarycensored_lpmf(d | dist_id, params, pwindow, d_upper, positive_infinity(), primary_id, primary_params);
 }
 
 /**

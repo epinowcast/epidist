@@ -49,7 +49,7 @@ summary(fit_direct_weighted)
 
 lognormal <- brms::lognormal()
 
-primarycensored_lognormal_uniform_lpmf <- brms::custom_family(
+primarycensored_lognormal_uniform <- brms::custom_family(
   "primarycensored_lognormal_uniform",
   dpars = lognormal$dpar,
   links = c(lognormal$link, lognormal$link_sigma),
@@ -92,7 +92,7 @@ stanvars_all <- stanvars_functions + stanvars_data
 
 stancode <- brms::make_stancode(
   formula = d | weights(n) + vreal(q) ~ 1,
-  family = primarycensored_lognormal_uniform_lpmf,
+  family = primarycensored_lognormal_uniform,
   data = data,
   stanvars = stanvars_all,
 )
@@ -101,7 +101,7 @@ model <- rstan::stan_model(model_code = stancode)
 
 fit_pcd <- brms::brm(
   formula = d | weights(n) + vreal(q) ~ 1,
-  family = primarycensored_lognormal_uniform_lpmf,
+  family = primarycensored_lognormal_uniform,
   data = data,
   stanvars = stanvars_all,
   backend = "cmdstanr"
