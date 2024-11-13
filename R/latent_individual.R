@@ -7,89 +7,42 @@ as_latent_individual <- function(data) {
   UseMethod("as_latent_individual")
 }
 
-assert_latent_individual_input <- function(data) {
-  assert_data_frame(data)
-  assert_names(
-    names(data),
-    must.include = c("case", "ptime_lwr", "ptime_upr",
-                     "stime_lwr", "stime_upr", "obs_time")
-  )
-  assert_integer(data$case, lower = 0)
-  assert_numeric(data$ptime_lwr, lower = 0)
-  assert_numeric(data$ptime_upr, lower = 0)
-  assert_true(all(data$ptime_upr - data$ptime_lwr > 0))
-  assert_numeric(data$stime_lwr, lower = 0)
-  assert_numeric(data$stime_upr, lower = 0)
-  assert_true(all(data$stime_upr - data$stime_lwr > 0))
-  assert_numeric(data$obs_time, lower = 0)
-}
-
-#' Prepare latent individual model
-#'
-#' This function prepares data for use with the latent individual model. It does
-#' this by adding columns used in the model to the `data` object provided. To do
-#' this, the `data` must already have columns for the case number (integer),
-#' (positive, numeric) upper and lower bounds for the primary and secondary
-#' event times, as well as a (positive, numeric) time that observation takes
-#' place. The output of this function is a `epidist_latent_individual` class
-#' object, which may be passed to [epidist()] to perform inference for the
-#' model.
-#'
-#' @param data A `data.frame` containing line list data
-#' @rdname as_latent_individual
-#' @method as_latent_individual data.frame
+#' @method as_latent_individual epidist_linelist
 #' @family latent_individual
 #' @autoglobal
 #' @export
-as_latent_individual.data.frame <- function(data) {
-  assert_latent_individual_input(data)
+as_latent_individual.epidist_linelist <- function(data) {
+  epidist_validate_data(data)
   class(data) <- c("epidist_latent_individual", class(data))
   data <- data |>
     mutate(
       relative_obs_time = .data$obs_time - .data$ptime_lwr,
       pwindow = ifelse(
-        stime_lwr < .data$ptime_upr,
-        stime_upr - .data$ptime_lwr,
-        ptime_upr - .data$ptime_lwr
+        .data$stime_lwr < .data$ptime_upr,
+        .data$stime_upr - .data$ptime_lwr,
+        .data$ptime_upr - .data$ptime_lwr
       ),
       woverlap = as.numeric(.data$stime_lwr < .data$ptime_upr),
       swindow = .data$stime_upr - .data$stime_lwr,
       delay = .data$stime_lwr - .data$ptime_lwr,
-      row_id = dplyr::row_number()
+      .row_id = dplyr::row_number()
     )
-  if (nrow(data) > 1) {
-    data <- mutate(data, row_id = factor(.data$row_id))
-  }
-  epidist_validate(data)
+  epidist_validate_model(data)
   return(data)
 }
 
-#' Validate latent individual model data
-#'
-#' This function checks whether the provided `data` object is suitable for
-#' running the latent individual model. As well as making sure that
-#' `is_latent_individual()` is true, it also checks that `data` is a
-#' `data.frame` with the correct columns.
-#'
-#' @param data A `data.frame` containing line list data
-#' @param ... ...
-#' @method epidist_validate epidist_latent_individual
+#' @method epidist_validate_model epidist_latent_individual
 #' @family latent_individual
 #' @export
-epidist_validate.epidist_latent_individual <- function(data, ...) {
+epidist_validate_model.epidist_latent_individual <- function(data, ...) {
   assert_true(is_latent_individual(data))
-  assert_latent_individual_input(data)
-  assert_names(
-    names(data),
-    must.include = c("case", "ptime_lwr", "ptime_upr",
-                     "stime_lwr", "stime_upr", "obs_time",
-                     "relative_obs_time", "pwindow", "woverlap",
-                     "swindow", "delay", "row_id")
+  col_names <- c(
+    "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time",
+    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", ".row_id"
   )
-  if (nrow(data) > 1) {
-    assert_factor(data$row_id)
-  }
+  assert_names(names(data), must.include = col_names)
   assert_numeric(data$relative_obs_time, lower = 0)
+  # pwindow as f(p) and swindow as f(s) checks here?
   assert_numeric(data$pwindow, lower = 0)
   assert_numeric(data$woverlap, lower = 0)
   assert_numeric(data$swindow, lower = 0)
@@ -159,7 +112,7 @@ epidist_stancode.epidist_latent_individual <- function(data,
                                                          epidist_formula(data),
                                                        ...) {
 
-  epidist_validate(data)
+  epidist_validate_model(data)
 
   stanvars_version <- .version_stanvar()
 
@@ -202,13 +155,13 @@ epidist_stancode.epidist_latent_individual <- function(data,
     brms::stanvar(
       block = "data",
       scode = "array[N - wN] int noverlap;",
-      x = filter(data, woverlap == 0)$row_id,
+      x = filter(data, woverlap == 0)$.row_id,
       name = "noverlap"
     ) +
     brms::stanvar(
       block = "data",
       scode = "array[wN] int woverlap;",
-      x = filter(data, woverlap > 0)$row_id,
+      x = filter(data, woverlap > 0)$.row_id,
       name = "woverlap"
     )
 
