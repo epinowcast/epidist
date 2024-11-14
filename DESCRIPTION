@@ -32,8 +32,6 @@ Imports:
     cli,
     checkmate,
     rstan,
-    BH,
-    RcppEigen,
     dplyr
 Suggests:
     bookdown,
