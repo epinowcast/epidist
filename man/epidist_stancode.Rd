@@ -9,7 +9,7 @@ epidist_stancode(data, ...)
 \arguments{
 \item{data}{A \code{data.frame} containing line list data.}
 
-\item{...}{Additional arguments passed to method.}
+\item{...}{Additional arguments passed to \code{fn} method.}
 }
 \description{
 This function is used within \code{\link[=epidist]{epidist()}} to create any custom Stan code which

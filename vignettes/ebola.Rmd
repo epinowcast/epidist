@@ -53,9 +53,20 @@ library(tidybayes)
 library(modelr)
 library(patchwork)
 library(lubridate)
+library(cmdstanr)
 ```
 
 For users new to `epidist`, before reading this article we recommend beginning with the "[Getting started with `epidist`](http://epidist.epinowcast.org/articles/epidist.html)" vignette.
+
+# Using the cmdstanr backend
+
+As the models explored in this vignette are relatively complex, we recommend using the `cmdstanr` backend for fitting models as it is typically more performant than the default `rstan` backend.
+To use the `cmdstanr` backend, we first need to install CmdStan (see the README for more details).
+We can check we have everything we need as follows:
+
+```{r}
+cmdstanr::cmdstan_version()
+```
 
 # Data preparation
 
@@ -115,7 +126,9 @@ These shapefiles were obtained from the Database of Global Administrative Areas 
 
 ```{r message=FALSE, warning=FALSE}
 sf <- st_read(
-  system.file("extdata/gadm41_SLE_shp/gadm41_SLE_2.shp", package = "epidist"),
+  system.file(
+    "extdata", "gadm41_SLE_shp", "gadm41_SLE_2.shp", package = "epidist"
+  ),
   quiet = TRUE
 )
 
@@ -231,8 +244,9 @@ fit <- epidist(
   family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
-  silent = 2,
-  seed = 1
+  silent = 2, refresh = 0,
+  seed = 1,
+  backend = "cmdstanr"
 )
 ```
 
@@ -255,8 +269,9 @@ fit_sex <- epidist(
   family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
-  silent = 2,
-  seed = 1
+  silent = 2, refresh = 0,
+  seed = 1,
+  backend = "cmdstanr"
 )
 ```
 
@@ -284,8 +299,9 @@ fit_sex_district <- epidist(
   family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
-  silent = 2,
-  seed = 1
+  silent = 2, refresh = 0,
+  seed = 1,
+  backend = "cmdstanr"
 )
 ```
 

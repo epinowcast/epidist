@@ -15,7 +15,7 @@ model to be fitted. A formula must be provided for the distributional
 parameter \code{mu}, and may optionally be provided for other distributional
 parameters.}
 
-\item{...}{Additional arguments passed to method.}
+\item{...}{Additional arguments passed to \code{fn} method.}
 }
 \description{
 Default method for defining a model specific formula
