@@ -264,7 +264,7 @@ The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
 
 ```{r}
-fit <- epidist(data = data, cores = 4, refresh = 0)
+fit <- epidist(data = data, chains = 2, cores = 2, refresh = 0)
 ```
 
 The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters (Table \@ref(tab:pars)) in the model.
