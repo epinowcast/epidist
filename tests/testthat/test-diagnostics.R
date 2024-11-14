@@ -41,7 +41,7 @@ test_that("epidist_diagnostics gives the same results for cmdstanr and rstan", {
 test_that("epidist_diagnostics gives an error when passed model fit using the Laplace algorithm", { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)
-  prep_obs <- as_latent_individual(sim_obs)
+  prep_obs <- as_latent_model(sim_obs)
   fit_laplace <- epidist(
     data = prep_obs, seed = 1, algorithm = "laplace", backend = "cmdstanr",
     refresh = 0, silent = 2, show_messages = FALSE

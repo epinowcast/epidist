@@ -65,10 +65,10 @@ reference:
   desc: Functions for fitting delay distribution models using `brms`
   contents:
   - has_concept("fit")
-- title: Latent individual model
-  desc: Specific methods for the latent individual model
+- title: Latent model
+  desc: Specific methods for the latent model
   contents:
-  - has_concept("latent_individual")
+  - has_concept("latent_model")
 - title: Direct model
   desc: Specific methods for the naive model
   contents:

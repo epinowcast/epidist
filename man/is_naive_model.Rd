@@ -13,10 +13,7 @@ is_naive_model(data)
 Check if data has the \code{epidist_naive_model} class
 }
 \seealso{
-Other latent_individual: 
-\code{\link{as_latent_individual}()},
-\code{\link{epidist_family_model.epidist_latent_individual}()},
-\code{\link{epidist_formula_model.epidist_latent_individual}()},
-\code{\link{is_latent_individual}()}
+Other naive_model: 
+\code{\link{as_naive_model}()}
 }
-\concept{latent_individual}
+\concept{naive_model}

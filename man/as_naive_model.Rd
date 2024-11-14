@@ -12,4 +12,8 @@ as_naive_model(data)
 \description{
 Prepare naive model to pass through to \code{brms}
 }
+\seealso{
+Other naive_model: 
+\code{\link{is_naive_model}()}
+}
 \concept{naive_model}

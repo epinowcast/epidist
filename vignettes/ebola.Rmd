@@ -213,7 +213,7 @@ obs_cens <- obs_cens |>
 
 ## Model fitting
 
-To prepare the data for use with the latent individual model, we set `obs_cens` to be an `epidist_linelist` object, then use the function `as_latent_individual()`:
+To prepare the data for use with the latent model, we set `obs_cens` to be an `epidist_linelist` object, then use the function `as_latent_model()`:
 
 ```{r}
 # Note: this functionality will be integrated into the package shortly
@@ -224,11 +224,11 @@ as_epidist_linelist_time <- function(data) {
 }
 
 linelist <- as_epidist_linelist_time(obs_cens)
-obs_prep <- as_latent_individual(linelist)
+obs_prep <- as_latent_model(linelist)
 head(obs_prep)
 ```
 
-Now we are ready to fit the latent individual model.
+Now we are ready to fit the latent model.
 
 ### Intercept-only model
 

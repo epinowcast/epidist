@@ -55,7 +55,7 @@ as_epidist_linelist_time <- function(data) {
 }
 
 linelist <- as_epidist_linelist_time(obs_cens_trunc_samp)
-data <- as_latent_individual(linelist)
+data <- as_latent_model(linelist)
 
 fit <- epidist(
   data,
@@ -110,7 +110,7 @@ For an example use of these functions, have a look at the [`epidist-paper`](http
 However, some of those priors do not make sense in the context of our application.
 Instead, we used [prior predictive checking](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html) to set `epidist`-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.
 
-For example, for the `brms::lognormal()` latent individual model, we suggest the following prior distributions for the `brms` `mu` and `sigma` intercept parameters:
+For example, for the `brms::lognormal()` latent model, we suggest the following prior distributions for the `brms` `mu` and `sigma` intercept parameters:
 
 ```{r}
 family <- "lognormal"
@@ -220,7 +220,7 @@ ggplot(draws_pmf, aes(x = .prediction)) +
 ```
 
 Importantly, this functionality is only available for `epidist` models using custom `brms` families that have `posterior_predict` and `posterior_epred` methods implemented.
-For example, for the `latent_individual` model, currently methods are implemented for the [lognormal](https://github.com/epinowcast/epidist/blob/main/R/latent_lognormal.R) and [gamma](https://github.com/epinowcast/epidist/blob/main/R/latent_gamma.R) families.
+For example, for the `latent_model` model, currently methods are implemented for the [lognormal](https://github.com/epinowcast/epidist/blob/main/R/latent_lognormal.R) and [gamma](https://github.com/epinowcast/epidist/blob/main/R/latent_gamma.R) families.
 If you are using another family, consider [submitting a pull request](https://github.com/epinowcast/epidist/pulls) to implement these methods!
 In doing so, you may find it useful to use the [`primarycensored`](https://primarycensored.epinowcast.org/) package.
 

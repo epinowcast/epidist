@@ -41,7 +41,7 @@ epidist_validate_model.epidist_naive_model <- function(data, ...) {
 #' Check if data has the `epidist_naive_model` class
 #'
 #' @param data A `data.frame` containing line list data
-#' @family latent_individual
+#' @family naive_model
 #' @export
 is_naive_model <- function(data) {
   inherits(data, "epidist_naive_model")
