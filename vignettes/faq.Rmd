@@ -223,4 +223,13 @@ For example, for the `latent_individual` model, currently methods are implemente
 If you are using another family, consider [submitting a pull request](https://github.com/epinowcast/epidist/pulls) to implement these methods!
 In doing so, you may find it useful to use the [`primarycensored`](https://primarycensored.epinowcast.org/) package.
 
+# How can I use the `cmdstanr` backend?
+
+The `cmdstanr` backend is typically more performant than the default `rstan` backend.
+To use the `cmdstanr` backend, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:
+
+```{r}
+cmdstanr::cmdstan_version()
+```
+
 ## Bibliography

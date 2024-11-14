@@ -13,7 +13,7 @@ users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of supported families
 see \code{\link[=brmsfamily]{brmsfamily()}}.}
 
-\item{...}{Additional arguments passed to method.}
+\item{...}{Additional arguments passed to \code{fn} method.}
 }
 \description{
 Reparameterise an \code{epidist} family to align \code{brms} and Stan

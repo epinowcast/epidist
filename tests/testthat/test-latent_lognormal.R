@@ -1,8 +1,5 @@
 test_that("posterior_predict_latent_lognormal outputs positive integers with length equal to draws", { # nolint: line_length_linter.
   skip_on_cran()
-  fit <- readRDS(
-    system.file("extdata/fit.rds", package = "epidist")
-  )
   prep <- brms::prepare_predictions(fit)
   i <- 1
   pred_i <- posterior_predict_latent_lognormal(i = i, prep)
@@ -13,9 +10,6 @@ test_that("posterior_predict_latent_lognormal outputs positive integers with len
 
 test_that("posterior_predict_latent_lognormal errors for i out of bounds", { # nolint: line_length_linter.
   skip_on_cran()
-  fit <- readRDS(
-    system.file("extdata/fit.rds", package = "epidist")
-  )
   prep <- brms::prepare_predictions(fit)
   i_out_of_bounds <- length(prep$data$Y) + 1
   expect_error(posterior_predict_latent_lognormal(i = i_out_of_bounds, prep))
@@ -23,9 +17,6 @@ test_that("posterior_predict_latent_lognormal errors for i out of bounds", { # n
 
 test_that("posterior_predict_latent_lognormal can generate predictions with no censoring", { # nolint: line_length_linter.
   skip_on_cran()
-  fit <- readRDS(
-    system.file("extdata/fit.rds", package = "epidist")
-  )
   draws <- data.frame(relative_obs_time = 1000, pwindow = 0, swindow = 0) |>
     tidybayes::add_predicted_draws(fit, ndraws = 100)
   expect_equal(draws$.draw, 1:100)
@@ -36,9 +27,6 @@ test_that("posterior_predict_latent_lognormal can generate predictions with no c
 
 test_that("posterior_predict_latent_lognormal predicts delays for which the data is in the 95% credible interval", { # nolint: line_length_linter.
   skip_on_cran()
-  fit <- readRDS(
-    system.file("extdata/fit.rds", package = "epidist")
-  )
   prep <- brms::prepare_predictions(fit)
   prep$ndraws <- 1000 # Down from the 4000 for time saving
   q <- purrr::map_vec(seq_along(prep$data$Y), function(i) {
@@ -57,9 +45,6 @@ test_that("posterior_predict_latent_lognormal predicts delays for which the data
 
 test_that("posterior_epred_latent_lognormal creates a array of non-negative numbers with the correct dimensions", { # nolint: line_length_linter.
   skip_on_cran()
-  fit <- readRDS(
-    system.file("extdata/fit.rds", package = "epidist")
-  )
   prep <- brms::prepare_predictions(fit)
   epred <- posterior_epred_latent_lognormal(prep)
   expect_setequal(class(epred), c("matrix", "array"))
@@ -70,9 +55,6 @@ test_that("posterior_epred_latent_lognormal creates a array of non-negative numb
 
 test_that("log_lik_latent_lognormal produces a vector with length ndraws of finite non-NA numbers", { # nolint: line_length_linter.
   skip_on_cran()
-  fit <- readRDS(
-    system.file("extdata/fit.rds", package = "epidist")
-  )
   prep <- brms::prepare_predictions(fit)
   i <- 1
   log_lik <- log_lik_latent_lognormal(i, prep)

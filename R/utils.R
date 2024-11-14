@@ -131,6 +131,7 @@
 #' @param new_names ...
 #' @param old_names ...
 #' @keywords internal
+#' @importFrom stats setNames
 .rename_columns <- function(df, new_names, old_names) {
   are_char <- is.character(new_names) & is.character(old_names)
   valid_new_names <- new_names[are_char]
