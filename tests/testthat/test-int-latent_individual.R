@@ -4,7 +4,7 @@
 # varying the input seed. Test failure at an unusually high rate does suggest
 # a potential code issue.
 
-test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles in the default case", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
   stancode <- epidist(
     data = prep_obs,
