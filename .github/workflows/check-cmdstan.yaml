@@ -62,15 +62,17 @@ jobs:
 
       - name: Compile model and check syntax
         run: |
-          dummy_obs <- dplyr::tibble(case = 1L, ptime = 1, stime = 2,
-            delay_daily = 1, delay_lwr = 1, delay_upr = 2, ptime_lwr = 1,
-            ptime_upr = 2, stime_lwr = 1, stime_upr = 2, obs_time = 100,
-            censored = "interval", censored_obs_time = 10, ptime_daily = 1,
-            stime_daily = 1
+          dummy_data <- data.frame(
+            pdate_lwr = as.POSIXct("2024-01-01 00:00:00"),
+            pdate_upr = as.POSIXct("2024-01-02 00:00:00"),
+            sdate_lwr = as.POSIXct("2024-01-03 00:00:00"),
+            sdate_upr = as.POSIXct("2024-01-04 00:00:00"),
+            obs_date  = as.POSIXct("2024-01-05 00:00:00")
           )
-          dummy_obs <- epidist::as_latent_model(dummy_obs)
+          linelist <- epidist::as_epidist_linelist(dummy_data)
+          latent_model <- epidist::as_latent_model(linelist)
           stancode <- epidist::epidist(
-            data = dummy_obs, fn = brms::make_stancode
+            data = latent_model, fn = brms::make_stancode
           )
           mod <- cmdstanr::cmdstan_model(
             stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
