@@ -1,5 +1,11 @@
 set.seed(101)
 
+as_epidist_linelist_time <- function(data) {
+  class(data) <- c("epidist_linelist", class(data))
+  epidist_validate_data(data)
+  return(data)
+}
+
 obs_time <- 25
 sample_size <- 500
 
@@ -18,6 +24,9 @@ sim_obs <- simulate_gillespie() |>
   filter_obs_by_obs_time(obs_time = obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
+# Temporary solution for classing time data
+sim_obs <- as_epidist_linelist_time(sim_obs)
+
 set.seed(101)
 
 shape <- 2
@@ -35,6 +44,9 @@ sim_obs_gamma <- simulate_gillespie() |>
   observe_process() |>
   filter_obs_by_obs_time(obs_time = obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
+
+# Temporary solution for classing time data
+sim_obs_gamma <- as_epidist_linelist_time(sim_obs_gamma)
 
 # Data with a sex difference
 
@@ -67,3 +79,6 @@ sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
   observe_process() |>
   filter_obs_by_obs_time(obs_time = obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
+
+# Temporary solution for classing time data
+sim_obs_sex <- as_epidist_linelist_time(sim_obs_sex)
