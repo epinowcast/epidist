@@ -28,9 +28,6 @@ knitr::opts_chunk$set(
   warning = FALSE,
   error = FALSE
 )
-
-# Required for R-CMD-as-cran-check to pass
-cmdstanr::set_cmdstan_path()
 ```
 
 Many quantities in epidemiology can be thought of as the time between two events or "delays".
@@ -57,7 +54,7 @@ To run this vignette yourself, along with the `epidist` package, you will need t
 
 ```{r load-requirements}
 library(epidist)
-library(purrr)
+library(brms)
 library(ggplot2)
 library(gt)
 library(dplyr)
@@ -157,7 +154,6 @@ This means that rather than exact event times, we observe event times within an 
 Here we suppose that the interval is daily, meaning that only the date of the primary or secondary event, not the exact event time, is reported (Figure \@ref(fig:cens)):
 
 ```{r}
-# observe_process() should be renamed and include a "daily" i.e. 1 argument
 obs_cens <- obs |> observe_process()
 ```
 
@@ -179,7 +175,6 @@ This is called (right) truncation, and biases the observation process towards sh
 
 ```{r}
 obs_time <- 25
-# filter_obs_by_obs_time() should be renamed to refer to stime
 obs_cens_trunc <- filter_obs_by_obs_time(obs_cens, obs_time = obs_time)
 ```
 
@@ -276,13 +271,18 @@ The `fit` object is a `brmsfit` object containing MCMC samples from each of the 
 Users familiar with Stan and `brms`, can work with `fit` directly.
 Any tool that supports `brms` fitted model objects will be compatible with `fit`.
 
+**Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features. This can be set using `backend = "cmdstanr"` after following the installing `cmdstan` instructions in the README.**
+
 (ref:pars) All of the parameters that are included in the model. Many of these parameters (e.g. `swindow` and `pwindow`) the so called latent variables in the model, and have lengths corresponding to the `sample_size`.
 
 ```{r pars}
-pars <- fit$fit@par_dims |>
-  map(.f = function(x) if (identical(x, integer(0))) return(1) else return(x))
+pars <- fit |>
+  brms::variables(reserved = FALSE) |>
+  gsub(pattern = "\\[\\d+\\]", replacement = "")
 
-data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
+data.frame(
+  "Parameter" = unique(pars), "Length" = table(pars)
+) |>
   gt() |>
   tab_caption("(ref:pars)")
 ```
