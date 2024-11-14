@@ -33,39 +33,3 @@ observe_process <- function(linelist) {
       obs_time = ceiling(max(.data$stime))
     )
 }
-
-#' Filter observations based on the observation time of primary events
-#'
-#' @param linelist ...
-#' @param obs_time ...
-#' @param obs_time_type ...
-#' @family observe
-#' @autoglobal
-#' @export
-filter_obs_by_ptime <- function(linelist, obs_time,
-                                obs_time_type =
-                                  c("obs_secondary", "max_secondary")) {
-  obs_time <- match.arg(obs_time)
-  pfilt_t <- obs_time
-  truncated_linelist <- linelist |>
-    mutate(censored = "interval") |>
-    filter(.data$ptime_upr <= pfilt_t)
-  if (obs_time_type == "obs_secondary") {
-    # Update observation time to be the same as the maximum secondary time
-    truncated_linelist <- mutate(truncated_linelist, obs_time = .data$stime_upr)
-  } else if (obs_time_type == "max_secondary") {
-    truncated_linelist <- truncated_linelist |>
-      mutate(obs_time := .data$stime_upr |> max() |> ceiling())
-  }
-  # Make observation time as specified
-  truncated_linelist <- truncated_linelist |>
-    mutate(
-      obs_time = .data$obs_time - .data$ptime,
-      censored_obs_time = .data$obs_time - .data$ptime_lwr
-    )
-  # Set observation time to artificial observation time if needed
-  if (obs_time_type == "obs_secondary") {
-    truncated_linelist <- mutate(truncated_linelist, obs_time = pfilt_t)
-  }
-  return(truncated_linelist)
-}
