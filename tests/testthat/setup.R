@@ -21,7 +21,7 @@ sim_obs <- simulate_gillespie() |>
     sdlog = sdlog
   ) |>
   observe_process() |>
-  filter(.data$stime_upr <= obs_time) |>
+  dplyr::filter(.data$stime_upr <= obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
@@ -42,7 +42,7 @@ sim_obs_gamma <- simulate_gillespie() |>
     rate = rate
   ) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time) |>
+  dplyr::filter(.data$stime_upr <= obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
@@ -77,7 +77,7 @@ sim_obs_sex_f <- dplyr::filter(sim_obs_sex, sex == 1) |>
 
 sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time) |>
+  dplyr::filter(.data$stime_upr <= obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
