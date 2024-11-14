@@ -179,7 +179,16 @@ This is called (right) truncation, and biases the observation process towards sh
 
 ```{r}
 obs_time <- 25
-# filter_obs_by_obs_time() should be renamed to refer to stime
+
+filter_obs_by_obs_time <- function(linelist, obs_time) {
+  linelist |>
+    mutate(
+      obs_time = obs_time,
+      relative_obs_time = .data$obs_time - .data$ptime,
+    ) |>
+    filter(.data$stime_upr <= .data$obs_time)
+}
+
 obs_cens_trunc <- filter_obs_by_obs_time(obs_cens, obs_time = obs_time)
 ```
 
