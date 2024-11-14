@@ -2,7 +2,7 @@
 % Please edit documentation in R/latent_individual.R
 \name{as_latent_individual}
 \alias{as_latent_individual}
-\title{Prepare latent individual model}
+\title{Convert an object to an \code{epidist_latent_individual} object}
 \usage{
 as_latent_individual(data)
 }
@@ -10,7 +10,7 @@ as_latent_individual(data)
 \item{data}{A \code{data.frame} containing line list data}
 }
 \description{
-Prepare latent individual model
+Convert an object to an \code{epidist_latent_individual} object
 }
 \seealso{
 Other latent_individual: 

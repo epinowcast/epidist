@@ -12,4 +12,8 @@ as_direct_model(data)
 \description{
 Prepare direct model to pass through to \code{brms}
 }
+\seealso{
+Other direct_model: 
+\code{\link{as_direct_model.epidist_linelist}()}
+}
 \concept{direct_model}

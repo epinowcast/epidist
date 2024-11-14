@@ -15,11 +15,13 @@ as_epidist_linelist <- function(data, ...) {
 #' @param stime_lwr,stime_upr Numeric vectors giving lower and upper bounds for
 #' secondary times
 #' @param obs_time Numeric vector giving observation times
+#' @param ... Additional columns to add to the epidist_linelist object
 #' @export
 as_epidist_linelist.default <- function(
   data, ptime_upr = NULL, stime_lwr = NULL, stime_upr = NULL,
   obs_time = NULL, ...
 ) {
+  # Create base data frame with required columns
   df <- data.frame(
     ptime_lwr = data,
     ptime_upr = ptime_upr,
@@ -27,6 +29,12 @@ as_epidist_linelist.default <- function(
     stime_upr = stime_upr,
     obs_time = obs_time
   )
+
+  # Add any additional columns passed via ...
+  extra_cols <- list(...)
+  if (length(extra_cols) > 0) {
+    df <- cbind(df, extra_cols)
+  }
 
   df <- new_epidist_linelist(df)
   assert_epidist(df)
@@ -55,6 +63,11 @@ as_epidist_linelist.data.frame <- function(
     ),
     old_names = c(pdate_lwr, pdate_upr, sdate_lwr, sdate_upr, obs_date)
   )
+
+  col_names <- c(
+    "pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"
+  )
+  assert_names(names(df), must.include = col_names)
 
   # Check for being a datetime
   assert_true(any(inherits(df$pdate_lwr, c("POSIXct", "POSIXlt"))))

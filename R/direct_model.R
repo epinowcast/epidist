@@ -7,35 +7,45 @@ as_direct_model <- function(data) {
   UseMethod("as_direct_model")
 }
 
-assert_direct_model_input <- function(data) {
-  assert_data_frame(data)
-  assert_names(names(data), must.include = c("case", "ptime", "stime"))
-  assert_integer(data$case, lower = 0)
-  assert_numeric(data$ptime, lower = 0)
-  assert_numeric(data$stime, lower = 0)
-}
-
-#' @method as_direct_model data.frame
+#' The direct model method for `epidist_linelist` objects
+#'
+#' @param data An `epidist_linelist` object
+#' @method as_direct_model epidist_linelist
 #' @family direct_model
 #' @autoglobal
 #' @export
-as_direct_model.data.frame <- function(data) {
-  assert_direct_model_input(data)
-  class(data) <- c("epidist_direct_model", class(data))
+as_direct_model.epidist_linelist <- function(data) {
+  assert_epidist(data)
+
   data <- data |>
     mutate(delay = .data$stime - .data$ptime)
-  epidist_validate_model(data)
+
+  data <- new_epidist_direct_model(data)
+  assert_epidist(data)
   return(data)
 }
 
-#' @method epidist_validate_model epidist_direct_model
+#' Class constructor for `epidist_direct_model` objects
+#'
+#' @param data A data.frame to convert
+#' @returns An object of class `epidist_direct_model`
+#' @keywords internal
+#' @export
+new_epidist_direct_model <- function(data) {
+  class(data) <- c("epidist_direct_model", class(data))
+  return(data)
+}
+
+#' @method assert_epidist epidist_direct_model
 #' @family direct_model
 #' @export
-epidist_validate_model.epidist_direct_model <- function(data, ...) {
-  assert_true(is_direct_model(data))
-  assert_direct_model_input(data)
+assert_epidist.epidist_direct_model <- function(data, ...) {
+  assert_data_frame(data)
   assert_names(names(data), must.include = c("case", "ptime", "stime", "delay"))
   assert_numeric(data$delay, lower = 0)
+  assert_integer(data$case, lower = 0)
+  assert_numeric(data$ptime, lower = 0)
+  assert_numeric(data$stime, lower = 0)
 }
 
 #' Check if data has the `epidist_direct_model` class

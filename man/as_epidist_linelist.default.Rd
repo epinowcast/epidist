@@ -22,6 +22,8 @@
 secondary times}
 
 \item{obs_time}{Numeric vector giving observation times}
+
+\item{...}{Additional columns to add to the epidist_linelist object}
 }
 \description{
 Create an epidist_linelist object from vectors of event times

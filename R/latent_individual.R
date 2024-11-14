@@ -1,4 +1,4 @@
-#' Prepare latent individual model
+#' Convert an object to an `epidist_latent_individual` object
 #'
 #' @param data A `data.frame` containing line list data
 #' @family latent_individual
@@ -12,8 +12,7 @@ as_latent_individual <- function(data) {
 #' @autoglobal
 #' @export
 as_latent_individual.epidist_linelist <- function(data) {
-  epidist_validate_data(data)
-  class(data) <- c("epidist_latent_individual", class(data))
+  assert_epidist(data)
   data <- data |>
     mutate(
       relative_obs_time = .data$obs_time - .data$ptime_lwr,
@@ -27,26 +26,20 @@ as_latent_individual.epidist_linelist <- function(data) {
       delay = .data$stime_lwr - .data$ptime_lwr,
       .row_id = dplyr::row_number()
     )
-  epidist_validate_model(data)
+  data <- new_epidist_latent_individual(data)
+  assert_epidist(data)
   return(data)
 }
 
-#' @method epidist_validate_model epidist_latent_individual
-#' @family latent_individual
+#' Class constructor for `epidist_latent_individual` objects
+#'
+#' @param data A data.frame to convert
+#' @returns An object of class `epidist_latent_individual`
+#' @keywords internal
 #' @export
-epidist_validate_model.epidist_latent_individual <- function(data, ...) {
-  assert_true(is_latent_individual(data))
-  col_names <- c(
-    "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time",
-    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", ".row_id"
-  )
-  assert_names(names(data), must.include = col_names)
-  assert_numeric(data$relative_obs_time, lower = 0)
-  # pwindow as f(p) and swindow as f(s) checks here?
-  assert_numeric(data$pwindow, lower = 0)
-  assert_numeric(data$woverlap, lower = 0)
-  assert_numeric(data$swindow, lower = 0)
-  assert_numeric(data$delay, lower = 0)
+new_epidist_latent_individual <- function(data) {
+  class(data) <- c("epidist_latent_individual", class(data))
+  return(data)
 }
 
 #' Check if data has the `epidist_latent_individual` class
@@ -56,6 +49,22 @@ epidist_validate_model.epidist_latent_individual <- function(data, ...) {
 #' @export
 is_latent_individual <- function(data) {
   inherits(data, "epidist_latent_individual")
+}
+
+#' @method assert_epidist epidist_latent_individual
+#' @family latent_individual
+#' @export
+assert_epidist.epidist_latent_individual <- function(data, ...) {
+  col_names <- c(
+    "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time",
+    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", ".row_id"
+  )
+  assert_names(names(data), must.include = col_names)
+  assert_numeric(data$relative_obs_time, lower = 0)
+  assert_numeric(data$pwindow, lower = 0)
+  assert_numeric(data$woverlap, lower = 0)
+  assert_numeric(data$swindow, lower = 0)
+  assert_numeric(data$delay, lower = 0)
 }
 
 #' Create the model-specific component of an `epidist` custom family
@@ -109,7 +118,7 @@ epidist_stancode.epidist_latent_individual <- function(data,
                                                        formula =
                                                          epidist_formula(data),
                                                        ...) {
-  epidist_validate_model(data)
+  assert_epidist(data)
 
   stanvars_version <- .version_stanvar()
 
