@@ -106,11 +106,11 @@ epidist_formula_model.epidist_latent_model <- function(
 #' @autoglobal
 #' @export
 epidist_stancode.epidist_latent_model <- function(data,
-                                                       family =
-                                                         epidist_family(data),
-                                                       formula =
-                                                         epidist_formula(data),
-                                                       ...) {
+                                                  family =
+                                                    epidist_family(data),
+                                                  formula =
+                                                    epidist_formula(data),
+                                                  ...) {
   epidist_validate_model(data)
 
   stanvars_version <- .version_stanvar()
