@@ -38,22 +38,13 @@ sdlog <- 0.5
 obs_time <- 25
 sample_size <- 200
 
-filter_obs_by_obs_time <- function(linelist, obs_time) {
-  linelist |>
-    mutate(
-      obs_time = obs_time,
-      relative_obs_time = .data$obs_time - .data$ptime,
-    ) |>
-    filter(.data$stime_upr <= .data$obs_time)
-}
-
 obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
   simulate_secondary(
     meanlog = meanlog,
     sdlog = sdlog
   ) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time) |>
+  filter(.data$stime_upr <= obs_time) |>
   slice_sample(n = sample_size, replace = FALSE)
 
 # Note: this functionality will be integrated into the package shortly
