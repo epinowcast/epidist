@@ -101,7 +101,6 @@ simulate_gillespie <- function(r = 0.2,
       } else {
         state <- c(state[1], state[2] - 1, state[3] + 1)
       }
-
     } else {
       go <- FALSE
     }

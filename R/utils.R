@@ -61,7 +61,8 @@
   }
   cols <- c("class", "coef", "group", "resp", "dpar", "nlpar", "lb", "ub")
   prior <- dplyr::full_join(
-    old_prior, prior, by = cols, suffix = c("_old", "_new")
+    old_prior, prior,
+    by = cols, suffix = c("_old", "_new")
   )
 
   if (any(is.na(prior$prior_old))) {
@@ -98,7 +99,8 @@
 .add_dpar_info <- function(family) {
   other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
   other_bounds <- lapply(
-    family$dpars[-1], brms:::dpar_bounds, family = family$family
+    family$dpars[-1], brms:::dpar_bounds,
+    family = family$family
   )
   family$other_links <- other_links
   family$other_bounds <- other_bounds

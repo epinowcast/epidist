@@ -77,7 +77,8 @@ log_lik_latent_gamma <- function(i, prep) {
   obs_time <- relative_obs_time - pwindow
   lpdf <- stats::dgamma(d, shape = shape, scale = mu / shape, log = TRUE)
   lcdf <- stats::pgamma(
-    obs_time, shape = shape, scale = mu / shape, log.p = TRUE
+    obs_time,
+    shape = shape, scale = mu / shape, log.p = TRUE
   )
   return(lpdf - lcdf)
 }
