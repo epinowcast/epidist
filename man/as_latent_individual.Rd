@@ -16,7 +16,7 @@ Prepare latent individual model
 Other latent_individual: 
 \code{\link{epidist_family_model.epidist_latent_individual}()},
 \code{\link{epidist_formula_model.epidist_latent_individual}()},
-\code{\link{is_direct_model}()},
-\code{\link{is_latent_individual}()}
+\code{\link{is_latent_individual}()},
+\code{\link{is_naive_model}()}
 }
 \concept{latent_individual}

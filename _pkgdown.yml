@@ -70,9 +70,9 @@ reference:
   contents:
   - has_concept("latent_individual")
 - title: Direct model
-  desc: Specific methods for the direct model
+  desc: Specific methods for the naive model
   contents:
-  - has_concept("direct_model")
+  - has_concept("naive_model")
 - title: Postprocess
   desc: Functions for postprocessing model output
   contents:
