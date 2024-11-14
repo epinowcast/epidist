@@ -3,7 +3,7 @@ library(ggplot2)
 library(dplyr)
 library(magick)
 
-# make standard plot
+# Make standard plot
 outbreak <- simulate_gillespie(seed = 101)
 
 secondary_dist <- data.frame(mu = 1.8, sigma = 0.5)
@@ -17,8 +17,9 @@ obs <- outbreak |>
   ) |>
   observe_process()
 
+obs_time <- 25
 truncated_obs <- obs |>
-  filter_obs_by_obs_time(obs_time = 25) |>
+  filter(.data$stime_upr <= obs_time) |>
   slice_sample(n = 200, replace = FALSE)
 
 combined_obs <- bind_rows(
@@ -35,11 +36,14 @@ hex_plot <- combined_obs |>
   aes(x = delay_daily, fill = obs_time) +
   geom_histogram(
     aes(y = after_stat(density)),
-    binwidth = 1, position = "dodge"
+    binwidth = 1,
+    position = "dodge"
   ) +
   lims(x = c(0, 18)) +
   stat_function(
-    fun = dlnorm, args = c(meanlog, sdlog), n = 100,
+    fun = dlnorm,
+    args = c(meanlog, sdlog),
+    n = 100,
     col = "#646770"
   ) +
   scale_fill_brewer(palette = "Blues", direction = 1) +

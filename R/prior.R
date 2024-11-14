@@ -24,7 +24,7 @@ epidist_prior <- function(data, family, formula, prior) {
   epidist_validate_model(data)
   default <- brms::default_prior(formula, data = data)
   model <- epidist_model_prior(data, formula)
-  family <-  epidist_family_prior(family, formula)
+  family <- epidist_family_prior(family, formula)
   if (!is.null(family)) {
     family$source <- "family"
     family[is.na(family)] <- "" # brms likes empty over NA

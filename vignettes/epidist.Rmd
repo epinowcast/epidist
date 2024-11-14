@@ -131,7 +131,8 @@ obs |>
   filter(case %% 50 == 0) |>
   ggplot(aes(y = case)) +
   geom_segment(
-    aes(x = ptime, xend = stime, y = case, yend = case), col = "grey"
+    aes(x = ptime, xend = stime, y = case, yend = case),
+    col = "grey"
   ) +
   geom_point(aes(x = ptime), col = "#56B4E9") +
   geom_point(aes(x = stime), col = "#009E73") +
@@ -175,7 +176,7 @@ This is called (right) truncation, and biases the observation process towards sh
 
 ```{r}
 obs_time <- 25
-obs_cens_trunc <- filter_obs_by_obs_time(obs_cens, obs_time = obs_time)
+obs_cens_trunc <- filter(obs_cens, .data$stime_upr <= obs_time)
 ```
 
 Finally, in reality, it's not possible to observe every case.
