@@ -44,7 +44,7 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
     sdlog = sdlog
   ) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time) |>
+  filter(.data$stime_upr <= obs_time) |>
   slice_sample(n = sample_size, replace = FALSE)
 
 # Note: this functionality will be integrated into the package shortly
@@ -117,7 +117,8 @@ family <- "lognormal"
 
 epidist_family <- epidist_family(data, family)
 epidist_formula <- epidist_formula(
-  data, family = epidist_family, formula = mu ~ 1
+  data,
+  family = epidist_family, formula = mu ~ 1
 )
 
 # NULL here means no replacing priors from the user!
