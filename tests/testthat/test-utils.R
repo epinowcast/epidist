@@ -32,10 +32,10 @@ cli::test_that_cli(".replace_prior errors when passed a new prior without a matc
 test_that(".add_dpar_info works as expected for the lognormal and gamma families", { # nolint: line_length_linter.
   lognormal_extra <- .add_dpar_info(brms::lognormal())
   expect_equal(lognormal_extra$other_links, "log")
-  expect_equal(lognormal_extra$other_bounds, list(list("lb" = "0", ub = "")))
+  expect_equal(lognormal_extra$other_bounds, list(list(lb = "0", ub = "")))
   gamma_extra <- .add_dpar_info(brms:::validate_family(stats::Gamma()))
   expect_equal(gamma_extra$other_links, NULL)
-  expect_equal(gamma_extra$other_bounds, list(list("lb" = "0", ub = "")))
+  expect_equal(gamma_extra$other_bounds, list(list(lb = "0", ub = "")))
 })
 
 test_that(".make_intercepts_explicit creates a formula which is the same as if it had been explicitly created", { # nolint: line_length_linter.
