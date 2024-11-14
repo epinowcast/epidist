@@ -1,6 +1,3 @@
-prep_obs <- as_latent_individual(sim_obs)
-prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
-
 test_that("epidist_family with default settings produces an object of the right class", { # nolint: line_length_linter.
   family <- epidist_family(prep_obs)
   expect_s3_class(family, "customfamily")

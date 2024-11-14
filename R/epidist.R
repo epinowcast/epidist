@@ -14,18 +14,15 @@
 #' @param prior One or more `brmsprior` objects created by [brms::set_prior()]
 #' or related functions. These priors are passed to [epidist_prior()] in the
 #' `prior` argument.
-#' @param backend Character string naming the package to use as the backend for
-#' fitting the Stan model. Options are `"rstan"` and `"cmdstanr"` (the default).
-#' This option is passed directly through to `fn`.
 #' @param fn The internal function to be called. By default this is
 #' [brms::brm()] which performs inference for the specified model. Other options
 #' are [brms::make_stancode()] which returns the Stan code for the specified
 #' model, or [brms::make_standata()] which returns the data passed to Stan.
 #' These two later options may be useful for model debugging and extensions.
-#' @param ... Additional arguments passed to method.
+#' @param ... Additional arguments passed to `fn` method.
 #' @family fit
 #' @export
-epidist <- function(data, formula, family, prior, backend, fn, ...) {
+epidist <- function(data, formula, family, prior, fn, ...) {
   UseMethod("epidist")
 }
 
@@ -38,7 +35,7 @@ epidist <- function(data, formula, family, prior, backend, fn, ...) {
 #' @export
 epidist.default <- function(data, formula = mu ~ 1,
                             family = "lognormal", prior = NULL,
-                            backend = "cmdstanr", fn = brms::brm, ...) {
+                            fn = brms::brm, ...) {
   epidist_validate_model(data)
   epidist_family <- epidist_family(data, family)
   epidist_formula <- epidist_formula(
@@ -52,7 +49,7 @@ epidist.default <- function(data, formula = mu ~ 1,
   )
   fit <- fn(
     formula = epidist_formula, family = epidist_family, prior = epidist_prior,
-    stanvars = epidist_stancode, backend = backend, data = data, ...
+    stanvars = epidist_stancode, data = data, ...
   )
   class(fit) <- c(class(fit), "epidist_fit")
   return(fit)
