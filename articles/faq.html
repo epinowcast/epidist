@@ -133,12 +133,12 @@ For example, the function <code><a href="https://mc-stan.org/posterior/reference
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## # A draws_df: 6 iterations, 1 chains, and 2 variables</span></span>
 <span><span class="co">##   Intercept Intercept_sigma</span></span>
-<span><span class="co">## 1       1.8            0.53</span></span>
-<span><span class="co">## 2       1.8            0.56</span></span>
-<span><span class="co">## 3       1.8            0.46</span></span>
-<span><span class="co">## 4       1.7            0.54</span></span>
-<span><span class="co">## 5       1.8            0.44</span></span>
-<span><span class="co">## 6       1.8            0.53</span></span>
+<span><span class="co">## 1       1.8            0.49</span></span>
+<span><span class="co">## 2       1.7            0.46</span></span>
+<span><span class="co">## 3       1.8            0.48</span></span>
+<span><span class="co">## 4       1.8            0.48</span></span>
+<span><span class="co">## 5       1.8            0.48</span></span>
+<span><span class="co">## 6       1.8            0.51</span></span>
 <span><span class="co">## # ... hidden reserved variables {'.chain', '.iteration', '.draw'}</span></span></code></pre>
 </div>
 <div class="section level3">
@@ -157,7 +157,7 @@ For example, the function <code><a href="https://mc-stan.org/bayesplot/reference
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
 <span><span class="co">##    time samples max_rhat divergent_transitions per_divergent_transitions</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>  15.3    <span style="text-decoration: underline;">4</span>000     1.01                     0                         0</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>  21.9    <span style="text-decoration: underline;">4</span>000     1.01                     0                         0</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 3 more variables: max_treedepth &lt;dbl&gt;, no_at_max_treedepth &lt;int&gt;,</span></span></span>
 <span><span class="co">## <span style="color: #949494;">#   per_at_max_treedepth &lt;dbl&gt;</span></span></span></code></pre>
 </div>
@@ -235,13 +235,13 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">mean</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.99</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         1%        10%        25%        50%        75%        90%        99% </span></span>
-<span><span class="co">##  0.3558084  1.0303217  1.9577108  3.7682459  7.5819517 14.5496488 46.0359735</span></span></code></pre>
+<span><span class="co">##  0.3733353  1.0534143  1.8934522  3.8569836  7.8507837 14.4995829 41.9427660</span></span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">sd</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.99</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##          1%         10%         25%         50%         75%         90% </span></span>
-<span><span class="co">##  0.03582676  0.37495328  1.01121384  2.72009640  7.13444186 18.28852812 </span></span>
+<span><span class="co">##  0.03505143  0.37601469  1.00338739  2.83358510  7.56734287 18.27764105 </span></span>
 <span><span class="co">##         99% </span></span>
-<span><span class="co">## 94.99318781</span></span></code></pre>
+<span><span class="co">## 89.12986521</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="how-can-i-assess-how-sensitive-the-fitted-posterior-distribution-is-to-the-prior-distribution-used">How can I assess how sensitive the fitted posterior distribution is to the prior distribution used?<a class="anchor" aria-label="anchor" href="#how-can-i-assess-how-sensitive-the-fitted-posterior-distribution-is-to-the-prior-distribution-used"></a>
@@ -326,6 +326,15 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 For example, for the <code>latent_individual</code> model, currently methods are implemented for the <a href="https://github.com/epinowcast/epidist/blob/main/R/latent_lognormal.R" class="external-link">lognormal</a> and <a href="https://github.com/epinowcast/epidist/blob/main/R/latent_gamma.R" class="external-link">gamma</a> families.
 If you are using another family, consider <a href="https://github.com/epinowcast/epidist/pulls" class="external-link">submitting a pull request</a> to implement these methods!
 In doing so, you may find it useful to use the <a href="https://primarycensored.epinowcast.org/" class="external-link"><code>primarycensored</code></a> package.</p>
+</div>
+<div class="section level2">
+<h2 id="how-can-i-use-the-cmdstanr-backend">How can I use the <code>cmdstanr</code> backend?<a class="anchor" aria-label="anchor" href="#how-can-i-use-the-cmdstanr-backend"></a>
+</h2>
+<p>The <code>cmdstanr</code> backend is typically more performant than the default <code>rstan</code> backend.
+To use the <code>cmdstanr</code> backend, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "2.35.0"</span></span></code></pre>
 <div class="section level3">
 <h3 id="bibliography">Bibliography<a class="anchor" aria-label="anchor" href="#bibliography"></a>
 </h3>

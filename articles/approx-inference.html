@@ -158,10 +158,15 @@ See the section <a href="https://mc-stan.org/docs/cmdstan-guide/pathfinder_confi
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mjskay.github.io/tidybayes/" class="external-link">tidybayes</a></span><span class="op">)</span></span></code></pre></div>
-<p>First, we begin by simulating data.
-The example data simulation process follows that used in the <a href="https://epidist.epinowcast.org/articles/epidist.html#data">Getting started with epidist</a> vignette, so we will not detail exactly what is happening here, but please consult that vignette if interested:</p>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mjskay.github.io/tidybayes/" class="external-link">tidybayes</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mc-stan.org/cmdstanr/" class="external-link">cmdstanr</a></span><span class="op">)</span></span></code></pre></div>
+<p>To access the approximate inference methods used in this vignette we will need to use the <code>cmdstanr</code> backend for <code>brms</code> (we generally recommend using this backend for fitting models). To do this, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "2.35.0"</span></span></code></pre></div>
+<p>We can simulate data to use for fitting models.
+The example data simulation process follows that used in the <a href="https://epidist.epinowcast.org/articles/epidist.html#data">Getting started with epidist</a> vignette, so we will not detail exactly what is happening here, but please consult that vignette if interested:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">meanlog</span> <span class="op">&lt;-</span> <span class="fl">1.8</span></span>
 <span><span class="va">sdlog</span> <span class="op">&lt;-</span> <span class="fl">0.5</span></span>
 <span><span class="va">obs_time</span> <span class="op">&lt;-</span> <span class="fl">25</span></span>
@@ -176,7 +181,7 @@ The example data simulation process follows that used in the <a href="https://ep
 <span>  <span class="fu"><a href="../reference/filter_obs_by_obs_time.html">filter_obs_by_obs_time</a></span><span class="op">(</span>obs_time <span class="op">=</span> <span class="va">obs_time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">sample_size</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>We now prepare the data for fitting with the latent individual model, and perform inference with HMC:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Note: this functionality will be integrated into the package shortly</span></span>
 <span><span class="va">as_epidist_linelist_time</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"epidist_linelist"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span>
@@ -188,33 +193,38 @@ The example data simulation process follows that used in the <a href="https://ep
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">linelist</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">fit_hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"sampling"</span><span class="op">)</span></span>
+<span><span class="va">fit_hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"sampling"</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span>
 <span><span class="va">time_hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span></code></pre></div>
 <p>Note that for clarity above we specify <code>algorithm = "sampling"</code>, but if you were to call <code>epidist(data = data)</code> the result would be the same since <code>"sampling"</code> (i.e. HMC) is the default value for the <code>algorithm</code> argument.</p>
 <p>Now, we fit<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Note that in this section, and above for the MCMC, the output of the call is hidden, but if you were to call these functions yourself they would display information about the fitting procedure as it occurs&lt;/p&gt;"><sup>2</sup></a> the same latent individual model using each method in Section <a href="#other">2</a>.
 To match the four Markov chains of length 1000 in HMC above, we then draw 4000 samples from each approximate posterior.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">fit_laplace</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"laplace"</span>, draws <span class="op">=</span> <span class="fl">4000</span><span class="op">)</span></span>
+<span><span class="va">fit_laplace</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"laplace"</span>, draws <span class="op">=</span> <span class="fl">4000</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
+<span><span class="op">)</span></span>
 <span><span class="va">time_laplace</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span>
 <span></span>
 <span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">fit_advi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"meanfield"</span>, draws <span class="op">=</span> <span class="fl">4000</span><span class="op">)</span></span>
+<span><span class="va">fit_advi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"meanfield"</span>, draws <span class="op">=</span> <span class="fl">4000</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
+<span><span class="op">)</span></span>
 <span><span class="va">time_advi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span></code></pre></div>
 <p>For the Pathfinder algorithm we will set <code>num_paths = 1</code>.
 Although in testing both the Laplace and ADVI methods ran without problem in all cases, we found Pathfinder often produced “Error evaluating model log probability: Non-finite gradient.”.
 Although a <code>save_single_paths</code> option is available, which may have allowed recovery of individual Pathfinder paths (and therefore removing faulty paths), it does not appear to be working currently<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;See &lt;a href="https://github.com/stan-dev/cmdstanr/issues/878" class="external-link uri"&gt;https://github.com/stan-dev/cmdstanr/issues/878&lt;/a&gt;&lt;/p&gt;'><sup>3</sup></a>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">fit_pathfinder</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"pathfinder"</span>, draws <span class="op">=</span> <span class="fl">4000</span>, num_paths <span class="op">=</span> <span class="fl">1</span></span>
+<span>  data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"pathfinder"</span>, draws <span class="op">=</span> <span class="fl">4000</span>, num_paths <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Number of PSIS draws is larger than the total number of draws returned by the single Pathfinders. This is likely unintentional and leads to re-sampling from the same draws. </span></span>
 <span><span class="co">#&gt; Path [1] :Initial log joint density = -1468.604912 </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/Rtmp74sJs9/model-1f806db14690.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp74sJs9/model-1f806db14690.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/Rtmp74sJs9/model-1f806db14690.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp74sJs9/model-1f806db14690.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/Rtmp74sJs9/model-1f806db14690.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp74sJs9/model-1f806db14690.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/Rtmp74sJs9/model-1f806db14690.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp74sJs9/model-1f806db14690.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 16, column 2 to column 78) (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 16, column 2 to column 78) (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 16, column 2 to column 78) (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 16, column 2 to column 78) (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 64, column 4 to column 77) </span></span>
 <span><span class="co">#&gt; Path [1] : Iter      log prob        ||dx||      ||grad||     alpha      alpha0      # evals       ELBO    Best ELBO        Notes  </span></span>
 <span><span class="co">#&gt;              91      -1.057e+03      2.060e-03   2.208e-02    1.000e+00  1.000e+00      2276 -5.417e+02 -5.417e+02                   </span></span>
 <span><span class="co">#&gt; Path [1] :Best Iter: [89] ELBO (-533.322633) evaluations: (2276) </span></span>
@@ -222,7 +232,7 @@ Although a <code>save_single_paths</code> option is available, which may have al
 <span><span class="va">time_pathfinder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span></code></pre></div>
 <p>We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
 Thankfully, each algorithm is implemented to sample draws from the posterior distribution, and so post-processing is simple.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="st">"HMC"</span> <span class="op">=</span> <span class="va">fit_hmc</span>,</span>
 <span>  <span class="st">"Laplace"</span> <span class="op">=</span> <span class="va">fit_laplace</span>,</span>
@@ -248,7 +258,7 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <span class="header-section-number">3.1</span> Comparison of parameter posterior distributions<a class="anchor" aria-label="anchor" href="#comparison-of-parameter-posterior-distributions"></a>
 </h3>
 <p>The mean estimated value of each parameter, from each method is as follows.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pars</span> <span class="op">&lt;-</span> <span class="va">draws</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">method</span>, <span class="va">parameter</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -715,8 +725,8 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_center">HMC</td>
-<td headers="mu" class="gt_row gt_right">1.781758</td>
-<td headers="sigma" class="gt_row gt_right">0.4913874</td>
+<td headers="mu" class="gt_row gt_right">1.780786</td>
+<td headers="sigma" class="gt_row gt_right">0.4925516</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">Laplace</td>
@@ -738,7 +748,7 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 </div>
 <p>More comprehensively, the estimated posterior distributions are shown in Figure <a href="#fig:posterior">3.1</a>.</p>
 
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">draws</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">value</span>, col <span class="op">=</span> <span class="va">method</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/ggdist/reference/stat_slabinterval.html" class="external-link">stat_slabinterval</a></span><span class="op">(</span>density <span class="op">=</span> <span class="st">"histogram"</span>, breaks <span class="op">=</span> <span class="fl">30</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
@@ -761,7 +771,7 @@ Figure 3.1: Estimated posterior distributions for the <code>mu</code> and <code>
 </h3>
 <p>Figure <a href="#fig:delay-pdf">3.2</a> shows how the different <code>mu</code> and <code>sigma</code> posterior mean estimates from each inference method alter an estimated delay distribution.</p>
 
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">pmap_df</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">pars</span><span class="op">)</span>, <span class="op">~</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">25</span>, by <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span>
@@ -786,7 +796,7 @@ Figure 3.2: Delay probability density functions obtained based on the posterior 
 </h3>
 <p>In this example, HMC took much longer than the other methods, with Pathfinder being the fastest method.
 That said, even for HMC the computation time in this case is unlikely to be prohibitive.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="st">"HMC"</span> <span class="op">=</span> <span class="va">time_hmc</span>,</span>
 <span>  <span class="st">"Laplace"</span> <span class="op">=</span> <span class="va">time_laplace</span>,</span>
@@ -1255,19 +1265,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">35.576</td>
+<td headers="time (s)" class="gt_row gt_right">35.647</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.625</td>
+<td headers="time (s)" class="gt_row gt_right">2.640</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.210</td>
+<td headers="time (s)" class="gt_row gt_right">2.233</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.986</td>
+<td headers="time (s)" class="gt_row gt_right">0.984</td>
 </tr>
 </tbody>
 </table>

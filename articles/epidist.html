@@ -102,7 +102,7 @@ Then, in Section <a href="#fit">2</a>, we show how <code>epidist</code> can be u
 <p>To run this vignette yourself, along with the <code>epidist</code> package, you will need the following packages:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epidist.epinowcast.org/">epidist</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms" class="external-link">brms</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://gt.rstudio.com" class="external-link">gt</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
@@ -200,8 +200,7 @@ However, in reality, during an outbreak we almost never receive the data as abov
 This means that rather than exact event times, we observe event times within an interval.
 Here we suppose that the interval is daily, meaning that only the date of the primary or secondary event, not the exact event time, is reported (Figure <a href="#fig:cens">1.4</a>):</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># observe_process() should be renamed and include a "daily" i.e. 1 argument</span></span>
-<span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="va">obs</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/observe_process.html">observe_process</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="va">obs</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/observe_process.html">observe_process</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">obs_cens</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">delay</span>, y <span class="op">=</span> <span class="va">delay_daily</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -222,7 +221,6 @@ This is called (right) truncation, and biases the observation process towards sh
 <!-- I think possible to do a better job with showing what right truncation is with a figure here! --></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_time</span> <span class="op">&lt;-</span> <span class="fl">25</span></span>
-<span><span class="co"># filter_obs_by_obs_time() should be renamed to refer to stime</span></span>
 <span><span class="va">obs_cens_trunc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filter_obs_by_obs_time.html">filter_obs_by_obs_time</a></span><span class="op">(</span><span class="va">obs_cens</span>, obs_time <span class="op">=</span> <span class="va">obs_time</span><span class="op">)</span></span></code></pre></div>
 <p>Finally, in reality, it’s not possible to observe every case.
 We suppose that a sample of individuals of size <code>sample_size</code> are observed:</p>
@@ -305,44 +303,39 @@ Using this <code>data</code>, we now call <code><a href="../reference/epidist.ht
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the <a href="https://paul-buerkner.github.io/brms/" class="external-link"><code>brms</code></a> R package <span class="citation">(<a href="#ref-brms">Bürkner 2017</a>)</span>.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, cores <span class="op">=</span> <span class="fl">4</span>, refresh <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Running MCMC with 4 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 6.7 seconds.</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 6.6 seconds.</span></span>
-<span><span class="co">#&gt; Chain 3 finished in 6.6 seconds.</span></span>
-<span><span class="co">#&gt; Chain 4 finished in 6.6 seconds.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; All 4 chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 6.6 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 6.7 seconds.</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, chains <span class="op">=</span> <span class="fl">2</span>, cores <span class="op">=</span> <span class="fl">2</span>, refresh <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <code>brmsfit</code> object containing MCMC samples from each of the parameters (Table <a href="#tab:pars"><strong>??</strong></a>) in the model.
 Users familiar with Stan and <code>brms</code>, can work with <code>fit</code> directly.
 Any tool that supports <code>brms</code> fitted model objects will be compatible with <code>fit</code>.</p>
+<p><strong>Note that here we use the default <code>rstan</code> backend but we generally recommend using the <code>cmdstanr</code> backend for faster sampling and additional features. This can be set using <code>backend = "cmdstanr"</code> after following the installing <code>cmdstan</code> instructions in the README.</strong></p>
 
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pars</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="va">fit</span><span class="op">@</span><span class="va">par_dims</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span>.f <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="kw">else</span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">pars</span> <span class="op">&lt;-</span> <span class="va">fit</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://mc-stan.org/posterior/reference/variables.html" class="external-link">variables</a></span><span class="op">(</span>reserved <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span>pattern <span class="op">=</span> <span class="st">"\\[\\d+\\]"</span>, replacement <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="st">"Parameter"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pars</span><span class="op">)</span>, <span class="st">"Length"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">pars</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Parameter"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">pars</span><span class="op">)</span>, <span class="st">"Length"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">pars</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_caption.html" class="external-link">tab_caption</a></span><span class="op">(</span><span class="st">"All of the parameters that are included in the model. Many of these parameters (e.g. swindow and pwindow) the so called latent variables in the model, and have lengths corresponding to the sample_size."</span><span class="op">)</span></span></code></pre></div>
-<div id="dnujiogwtl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#dnujiogwtl table {
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_caption.html" class="external-link">tab_caption</a></span><span class="op">(</span><span class="st">"All of the parameters that are included in the model. Many of these parameters (e.g. swindow and pwindow) are the so called latent variables in the model, and have lengths corresponding to the sample_size. We extracted the model parameters using brms::variables() and removed the indices."</span><span class="op">)</span></span></code></pre></div>
+<div id="zaxpjhqbtp" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#zaxpjhqbtp table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#dnujiogwtl thead, #dnujiogwtl tbody, #dnujiogwtl tfoot, #dnujiogwtl tr, #dnujiogwtl td, #dnujiogwtl th {
+#zaxpjhqbtp thead, #zaxpjhqbtp tbody, #zaxpjhqbtp tfoot, #zaxpjhqbtp tr, #zaxpjhqbtp td, #zaxpjhqbtp th {
   border-style: none;
 }
 
-#dnujiogwtl p {
+#zaxpjhqbtp p {
   margin: 0;
   padding: 0;
 }
 
-#dnujiogwtl .gt_table {
+#zaxpjhqbtp .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -368,12 +361,12 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   border-left-color: #D3D3D3;
 }
 
-#dnujiogwtl .gt_caption {
+#zaxpjhqbtp .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#dnujiogwtl .gt_title {
+#zaxpjhqbtp .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -385,7 +378,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   border-bottom-width: 0;
 }
 
-#dnujiogwtl .gt_subtitle {
+#zaxpjhqbtp .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -397,7 +390,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   border-top-width: 0;
 }
 
-#dnujiogwtl .gt_heading {
+#zaxpjhqbtp .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -409,13 +402,13 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   border-right-color: #D3D3D3;
 }
 
-#dnujiogwtl .gt_bottom_border {
+#zaxpjhqbtp .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#dnujiogwtl .gt_col_headings {
+#zaxpjhqbtp .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -430,7 +423,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   border-right-color: #D3D3D3;
 }
 
-#dnujiogwtl .gt_col_heading {
+#zaxpjhqbtp .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -450,7 +443,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   overflow-x: hidden;
 }
 
-#dnujiogwtl .gt_column_spanner_outer {
+#zaxpjhqbtp .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -462,15 +455,15 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   padding-right: 4px;
 }
 
-#dnujiogwtl .gt_column_spanner_outer:first-child {
+#zaxpjhqbtp .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#dnujiogwtl .gt_column_spanner_outer:last-child {
+#zaxpjhqbtp .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#dnujiogwtl .gt_column_spanner {
+#zaxpjhqbtp .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -482,11 +475,11 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   width: 100%;
 }
 
-#dnujiogwtl .gt_spanner_row {
+#zaxpjhqbtp .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#dnujiogwtl .gt_group_heading {
+#zaxpjhqbtp .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -512,7 +505,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   text-align: left;
 }
 
-#dnujiogwtl .gt_empty_group_heading {
+#zaxpjhqbtp .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -527,15 +520,15 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   vertical-align: middle;
 }
 
-#dnujiogwtl .gt_from_md > :first-child {
+#zaxpjhqbtp .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#dnujiogwtl .gt_from_md > :last-child {
+#zaxpjhqbtp .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#dnujiogwtl .gt_row {
+#zaxpjhqbtp .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -554,7 +547,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   overflow-x: hidden;
 }
 
-#dnujiogwtl .gt_stub {
+#zaxpjhqbtp .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -567,7 +560,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   padding-right: 5px;
 }
 
-#dnujiogwtl .gt_stub_row_group {
+#zaxpjhqbtp .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -581,15 +574,15 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   vertical-align: top;
 }
 
-#dnujiogwtl .gt_row_group_first td {
+#zaxpjhqbtp .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#dnujiogwtl .gt_row_group_first th {
+#zaxpjhqbtp .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#dnujiogwtl .gt_summary_row {
+#zaxpjhqbtp .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -599,16 +592,16 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   padding-right: 5px;
 }
 
-#dnujiogwtl .gt_first_summary_row {
+#zaxpjhqbtp .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#dnujiogwtl .gt_first_summary_row.thick {
+#zaxpjhqbtp .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#dnujiogwtl .gt_last_summary_row {
+#zaxpjhqbtp .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -618,7 +611,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   border-bottom-color: #D3D3D3;
 }
 
-#dnujiogwtl .gt_grand_summary_row {
+#zaxpjhqbtp .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -628,7 +621,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   padding-right: 5px;
 }
 
-#dnujiogwtl .gt_first_grand_summary_row {
+#zaxpjhqbtp .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -638,7 +631,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   border-top-color: #D3D3D3;
 }
 
-#dnujiogwtl .gt_last_grand_summary_row_top {
+#zaxpjhqbtp .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -648,11 +641,11 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   border-bottom-color: #D3D3D3;
 }
 
-#dnujiogwtl .gt_striped {
+#zaxpjhqbtp .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#dnujiogwtl .gt_table_body {
+#zaxpjhqbtp .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -661,7 +654,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   border-bottom-color: #D3D3D3;
 }
 
-#dnujiogwtl .gt_footnotes {
+#zaxpjhqbtp .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -675,7 +668,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   border-right-color: #D3D3D3;
 }
 
-#dnujiogwtl .gt_footnote {
+#zaxpjhqbtp .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -684,7 +677,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   padding-right: 5px;
 }
 
-#dnujiogwtl .gt_sourcenotes {
+#zaxpjhqbtp .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -698,7 +691,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   border-right-color: #D3D3D3;
 }
 
-#dnujiogwtl .gt_sourcenote {
+#zaxpjhqbtp .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -706,121 +699,132 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
   padding-right: 5px;
 }
 
-#dnujiogwtl .gt_left {
+#zaxpjhqbtp .gt_left {
   text-align: left;
 }
 
-#dnujiogwtl .gt_center {
+#zaxpjhqbtp .gt_center {
   text-align: center;
 }
 
-#dnujiogwtl .gt_right {
+#zaxpjhqbtp .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#dnujiogwtl .gt_font_normal {
+#zaxpjhqbtp .gt_font_normal {
   font-weight: normal;
 }
 
-#dnujiogwtl .gt_font_bold {
+#zaxpjhqbtp .gt_font_bold {
   font-weight: bold;
 }
 
-#dnujiogwtl .gt_font_italic {
+#zaxpjhqbtp .gt_font_italic {
   font-style: italic;
 }
 
-#dnujiogwtl .gt_super {
+#zaxpjhqbtp .gt_super {
   font-size: 65%;
 }
 
-#dnujiogwtl .gt_footnote_marks {
+#zaxpjhqbtp .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#dnujiogwtl .gt_asterisk {
+#zaxpjhqbtp .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#dnujiogwtl .gt_indent_1 {
+#zaxpjhqbtp .gt_indent_1 {
   text-indent: 5px;
 }
 
-#dnujiogwtl .gt_indent_2 {
+#zaxpjhqbtp .gt_indent_2 {
   text-indent: 10px;
 }
 
-#dnujiogwtl .gt_indent_3 {
+#zaxpjhqbtp .gt_indent_3 {
   text-indent: 15px;
 }
 
-#dnujiogwtl .gt_indent_4 {
+#zaxpjhqbtp .gt_indent_4 {
   text-indent: 20px;
 }
 
-#dnujiogwtl .gt_indent_5 {
+#zaxpjhqbtp .gt_indent_5 {
   text-indent: 25px;
 }
 
-#dnujiogwtl .katex-display {
+#zaxpjhqbtp .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#dnujiogwtl div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#zaxpjhqbtp div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
 <table class="table gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
-<caption>(\#tab:pars)All of the parameters that are included in the model. Many of these parameters (e.g. <code>swindow</code> and <code>pwindow</code>) the so called latent variables in the model, and have lengths corresponding to the <code>sample_size</code>.</caption>
+<caption>(\#tab:pars)All of the parameters that are included in the model. Many of these parameters (e.g. <code>swindow</code> and <code>pwindow</code>) are the so called latent variables in the model, and have lengths corresponding to the <code>sample_size</code>. We extracted the model parameters using <code><a href="https://mc-stan.org/posterior/reference/variables.html" class="external-link">brms::variables()</a></code> and removed the indices.</caption>
   <thead><tr class="gt_col_headings">
 <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="Parameter">Parameter</th>
-      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Length">Length</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="Length.pars">Length.pars</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="Length.Freq">Length.Freq</th>
     </tr></thead>
 <tbody class="gt_table_body">
 <tr>
-<td headers="Parameter" class="gt_row gt_left">Intercept</td>
-<td headers="Length" class="gt_row gt_right">1</td>
-</tr>
-<tr>
-<td headers="Parameter" class="gt_row gt_left">Intercept_sigma</td>
-<td headers="Length" class="gt_row gt_right">1</td>
-</tr>
-<tr>
-<td headers="Parameter" class="gt_row gt_left">swindow_raw</td>
-<td headers="Length" class="gt_row gt_right">200</td>
-</tr>
-<tr>
-<td headers="Parameter" class="gt_row gt_left">pwindow_raw</td>
-<td headers="Length" class="gt_row gt_right">200</td>
-</tr>
-<tr>
-<td headers="Parameter" class="gt_row gt_left">lprior</td>
-<td headers="Length" class="gt_row gt_right">1</td>
-</tr>
-<tr>
-<td headers="Parameter" class="gt_row gt_left">pwindow</td>
-<td headers="Length" class="gt_row gt_right">200</td>
-</tr>
-<tr>
-<td headers="Parameter" class="gt_row gt_left">swindow</td>
-<td headers="Length" class="gt_row gt_right">200</td>
-</tr>
-<tr>
 <td headers="Parameter" class="gt_row gt_left">b_Intercept</td>
-<td headers="Length" class="gt_row gt_right">1</td>
+<td headers="Length.pars" class="gt_row gt_center">b_Intercept</td>
+<td headers="Length.Freq" class="gt_row gt_right">1</td>
 </tr>
 <tr>
 <td headers="Parameter" class="gt_row gt_left">b_sigma_Intercept</td>
-<td headers="Length" class="gt_row gt_right">1</td>
+<td headers="Length.pars" class="gt_row gt_center">b_sigma_Intercept</td>
+<td headers="Length.Freq" class="gt_row gt_right">1</td>
+</tr>
+<tr>
+<td headers="Parameter" class="gt_row gt_left">Intercept</td>
+<td headers="Length.pars" class="gt_row gt_center">Intercept</td>
+<td headers="Length.Freq" class="gt_row gt_right">1</td>
+</tr>
+<tr>
+<td headers="Parameter" class="gt_row gt_left">Intercept_sigma</td>
+<td headers="Length.pars" class="gt_row gt_center">Intercept_sigma</td>
+<td headers="Length.Freq" class="gt_row gt_right">1</td>
+</tr>
+<tr>
+<td headers="Parameter" class="gt_row gt_left">lprior</td>
+<td headers="Length.pars" class="gt_row gt_center">lp__</td>
+<td headers="Length.Freq" class="gt_row gt_right">1</td>
 </tr>
 <tr>
 <td headers="Parameter" class="gt_row gt_left">lp__</td>
-<td headers="Length" class="gt_row gt_right">1</td>
+<td headers="Length.pars" class="gt_row gt_center">lprior</td>
+<td headers="Length.Freq" class="gt_row gt_right">1</td>
+</tr>
+<tr>
+<td headers="Parameter" class="gt_row gt_left">swindow_raw</td>
+<td headers="Length.pars" class="gt_row gt_center">pwindow</td>
+<td headers="Length.Freq" class="gt_row gt_right">200</td>
+</tr>
+<tr>
+<td headers="Parameter" class="gt_row gt_left">pwindow_raw</td>
+<td headers="Length.pars" class="gt_row gt_center">pwindow_raw</td>
+<td headers="Length.Freq" class="gt_row gt_right">200</td>
+</tr>
+<tr>
+<td headers="Parameter" class="gt_row gt_left">pwindow</td>
+<td headers="Length.pars" class="gt_row gt_center">swindow</td>
+<td headers="Length.Freq" class="gt_row gt_right">200</td>
+</tr>
+<tr>
+<td headers="Parameter" class="gt_row gt_left">swindow</td>
+<td headers="Length.pars" class="gt_row gt_center">swindow_raw</td>
+<td headers="Length.Freq" class="gt_row gt_right">200</td>
 </tr>
 </tbody>
 </table>

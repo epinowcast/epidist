@@ -102,18 +102,30 @@ In analyzing this data, we demonstrate the following features of <code>epidist</
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mjskay.github.io/tidybayes/" class="external-link">tidybayes</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://modelr.tidyverse.org" class="external-link">modelr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lubridate.tidyverse.org" class="external-link">lubridate</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://lubridate.tidyverse.org" class="external-link">lubridate</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mc-stan.org/cmdstanr/" class="external-link">cmdstanr</a></span><span class="op">)</span></span></code></pre></div>
 <p>For users new to <code>epidist</code>, before reading this article we recommend beginning with the “<a href="http://epidist.epinowcast.org/articles/epidist.html" class="external-link">Getting started with <code>epidist</code></a>” vignette.</p>
 <div class="section level2" number="1">
+<h2 id="using-the-cmdstanr-backend">
+<span class="header-section-number">1</span> Using the cmdstanr backend<a class="anchor" aria-label="anchor" href="#using-the-cmdstanr-backend"></a>
+</h2>
+<p>As the models explored in this vignette are relatively complex, we recommend using the <code>cmdstanr</code> backend for fitting models as it is typically more performant than the default <code>rstan</code> backend.
+To use the <code>cmdstanr</code> backend, we first need to install CmdStan (see the README for more details).
+We can check we have everything we need as follows:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "2.35.0"</span></span></code></pre></div>
+</div>
+<div class="section level2" number="2">
 <h2 id="data-preparation">
-<span class="header-section-number">1</span> Data preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a>
+<span class="header-section-number">2</span> Data preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a>
 </h2>
 <p>We begin by loading the Ebola line list data:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"sierra_leone_ebola_data"</span><span class="op">)</span></span></code></pre></div>
 <p>The data has 8358 rows, each corresponding to a unique case report <code>id</code>.
 The columns of the data are the individuals name (retracted, and hence can be removed), age, sex, the dates of Ebola symptom onset and positive sample, and their district and chiefdom.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sierra_leone_ebola_data</span> <span class="op">&lt;-</span> <span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">name</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -138,11 +150,11 @@ The columns of the data are the individuals name (retracted, and hence can be re
 <span></span>
 <span><span class="va">fraction</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
 <span><span class="va">ndistrict</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">sierra_leone_ebola_data</span><span class="op">$</span><span class="va">district</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Figure <a href="#fig:ebola-outbreak">1.1</a> shows the dates of symptom onset and sample testing for cases across in each district.
+<p>Figure <a href="#fig:ebola-outbreak">2.1</a> shows the dates of symptom onset and sample testing for cases across in each district.
 (In this figure, we filter down to every 5th case in order to avoid overplotting.)
 We can see that the start time and course of the epidemic varies across districts.</p>
 
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">case</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="va">fraction</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -161,15 +173,17 @@ We can see that the start time and course of the epidemic varies across district
 <div class="figure">
 <span style="display:block;" id="fig:ebola-outbreak"></span>
 <img src="figures/epidist-ebola-outbreak-1.png" alt="Primary and secondary event times for every 5th case, over the 14 districts of Sierra Leone." width="672"><p class="caption">
-Figure 1.1: Primary and secondary event times for every 5th case, over the 14 districts of Sierra Leone.
+Figure 2.1: Primary and secondary event times for every 5th case, over the 14 districts of Sierra Leone.
 </p>
 </div>
 <p>We can use a map to help visualise the outbreak across space.
 To create a map, we first join the Ebola data to shapefiles for the districts of Sierra Leone.
 These shapefiles were obtained from the Database of Global Administrative Areas (<a href="https://gadm.org/" class="external-link">GADM</a>).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/gadm41_SLE_shp/gadm41_SLE_2.shp"</span>, package <span class="op">=</span> <span class="st">"epidist"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
+<span>    <span class="st">"extdata"</span>, <span class="st">"gadm41_SLE_shp"</span>, <span class="st">"gadm41_SLE_2.shp"</span>, package <span class="op">=</span> <span class="st">"epidist"</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -179,10 +193,10 @@ These shapefiles were obtained from the Database of Global Administrative Areas 
 <span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>cases <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p>Figure <a href="#fig:ebola-cloropleth">1.2</a> shows that the majority of cases were concentrated in the Western Urban district.
+<p>Figure <a href="#fig:ebola-cloropleth">2.2</a> shows that the majority of cases were concentrated in the Western Urban district.
 This district contains the capital of the country, and has the highest population (as such, one may also be interested in the prevalence of Ebola, that is the number of cases divided by the population size).</p>
 
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">sierra_leone_ebola_data_sf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">cases</span>, geometry <span class="op">=</span> <span class="va">geometry</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_c</a></span><span class="op">(</span>na.value <span class="op">=</span> <span class="st">"lightgrey"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -191,25 +205,25 @@ This district contains the capital of the country, and has the highest populatio
 <div class="figure">
 <span style="display:block;" id="fig:ebola-cloropleth"></span>
 <img src="figures/epidist-ebola-cloropleth-1.png" alt="A cloropleth showing the total number of Ebola cases in each district of Sierra Leone." width="672"><p class="caption">
-Figure 1.2: A cloropleth showing the total number of Ebola cases in each district of Sierra Leone.
+Figure 2.2: A cloropleth showing the total number of Ebola cases in each district of Sierra Leone.
 </p>
 </div>
 </div>
-<div class="section level2" number="2">
+<div class="section level2" number="3">
 <h2 id="fitting-sex-district-stratified-delay-distributions">
-<span class="header-section-number">2</span> Fitting sex-district stratified delay distributions<a class="anchor" aria-label="anchor" href="#fitting-sex-district-stratified-delay-distributions"></a>
+<span class="header-section-number">3</span> Fitting sex-district stratified delay distributions<a class="anchor" aria-label="anchor" href="#fitting-sex-district-stratified-delay-distributions"></a>
 </h2>
 <p>To understand the delay between time of symptom onset and time of sample testing, we fit a range of statistical models using the <code>epidist</code> package.
 In some models, we vary the parameters of the delay distribution by sex or by district.
 For the lognormal delay distribution these parameters are the mean and standard deviation of the underlying normal distribution.
 That is, <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> such that when <span class="math inline">\(x \sim \mathcal{N}(\mu, \sigma)\)</span> then <span class="math inline">\(\exp(x)\)</span> has a lognormal distribution.</p>
-<div class="section level3" number="2.1">
+<div class="section level3" number="3.1">
 <h3 id="data-preparation-1">
-<span class="header-section-number">2.1</span> Data preparation<a class="anchor" aria-label="anchor" href="#data-preparation-1"></a>
+<span class="header-section-number">3.1</span> Data preparation<a class="anchor" aria-label="anchor" href="#data-preparation-1"></a>
 </h3>
 <p>To prepare the data, we begin by transforming the date columns to <code>ptime</code> and <code>stime</code> columns for the times of the primary and secondary events respectively.
 Both of these columns are relative to the first date of symptom onset in the data:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sierra_leone_ebola_data</span> <span class="op">&lt;-</span> <span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    <span class="co"># use lubridate::ymd() to drop any sub-date time info</span></span>
@@ -233,7 +247,7 @@ Both of these columns are relative to the first date of symptom onset in the dat
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5     3     8    19 Female Kailahun</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6     3     8    55 Female Kailahun</span></span></code></pre></div>
 <p>Next, we use <code><a href="../reference/observe_process.html">observe_process()</a></code> to add interval censoring columns giving the lower and upper bounds on the primary and secondary event times:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/observe_process.html">observe_process</a></span><span class="op">(</span><span class="va">sierra_leone_ebola_data</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 16</span></span></span>
@@ -248,25 +262,25 @@ Both of these columns are relative to the first date of symptom onset in the dat
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: stime_daily &lt;dbl&gt;, stime_lwr &lt;dbl&gt;, stime_upr &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   delay_daily &lt;dbl&gt;, delay_lwr &lt;dbl&gt;, delay_upr &lt;dbl&gt;, obs_time &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;It should be a relatively simple extension to allow for missing data in the model.&lt;/p&gt;"><sup>1</sup></a>).</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span></span>
 <span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="va">obs_cens</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/stats/complete.cases.html" class="external-link">complete.cases</a></span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span>, <span class="op">]</span></span>
 <span><span class="va">n_complete</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span></span></code></pre></div>
 <p>Here, 83% of the cases were complete.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subsample</span> <span class="op">&lt;-</span> <span class="fl">0.2</span></span></code></pre></div>
 <p>Additionally, to speed up computation, we take a random 20% subsample of the complete data.
 (In a real analysis, we’d recommend using all the available data).</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="va">obs_cens</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n_complete</span> <span class="op">*</span> <span class="va">subsample</span><span class="op">)</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level3" number="2.2">
+<div class="section level3" number="3.2">
 <h3 id="model-fitting">
-<span class="header-section-number">2.2</span> Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a>
+<span class="header-section-number">3.2</span> Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a>
 </h3>
 <p>To prepare the data for use with the latent individual model, we set <code>obs_cens</code> to be an <code>epidist_linelist</code> object, then use the function <code><a href="../reference/as_latent_individual.html">as_latent_individual()</a></code>:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Note: this functionality will be integrated into the package shortly</span></span>
 <span><span class="va">as_epidist_linelist_time</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"epidist_linelist"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span>
@@ -278,42 +292,43 @@ Both of these columns are relative to the first date of symptom onset in the dat
 <span><span class="va">obs_prep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">linelist</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">obs_prep</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 22</span></span></span>
-<span><span class="co">#&gt;    case ptime stime   age sex   district      ptime_daily ptime_lwr ptime_upr</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  <span style="text-decoration: underline;">3</span>073   148   155    38 Male  Bombali               148       148       149</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>  <span style="text-decoration: underline;">3</span>125   149   155    22 Male  Western Urban         149       149       150</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>  <span style="text-decoration: underline;">2</span>774   143   157    28 Male  Kenema                143       143       144</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>   547    71    75     7 Male  Kenema                 71        71        72</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>  <span style="text-decoration: underline;">5</span>394   186   191    11 Male  Bombali               186       186       187</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>  <span style="text-decoration: underline;">3</span>692   159   168    29 Male  Bombali               159       159       160</span></span>
+<span><span class="co">#&gt;    case ptime stime   age sex    district      ptime_daily ptime_lwr ptime_upr</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  <span style="text-decoration: underline;">1</span>101   108   111    40 Female Bombali               108       108       109</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>  <span style="text-decoration: underline;">5</span>584   189   197    23 Male   Bombali               189       189       190</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>  <span style="text-decoration: underline;">1</span>187   111   117    35 Male   Port Loko             111       111       112</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>  <span style="text-decoration: underline;">2</span>483   138   142    15 Female Bo                    138       138       139</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>  <span style="text-decoration: underline;">6</span>796   217   221    16 Male   Western Urban         217       217       218</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>  <span style="text-decoration: underline;">3</span>576   157   163    28 Female Bombali               157       157       158</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: stime_daily &lt;dbl&gt;, stime_lwr &lt;dbl&gt;, stime_upr &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   delay_daily &lt;dbl&gt;, delay_lwr &lt;dbl&gt;, delay_upr &lt;dbl&gt;, obs_time &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   relative_obs_time &lt;dbl&gt;, pwindow &lt;dbl&gt;, woverlap &lt;dbl&gt;, swindow &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   delay &lt;dbl&gt;, .row_id &lt;int&gt;</span></span></span></code></pre></div>
 <p>Now we are ready to fit the latent individual model.</p>
-<div class="section level4" number="2.2.1">
+<div class="section level4" number="3.2.1">
 <h4 id="intercept-only-model">
-<span class="header-section-number">2.2.1</span> Intercept-only model<a class="anchor" aria-label="anchor" href="#intercept-only-model"></a>
+<span class="header-section-number">3.2.1</span> Intercept-only model<a class="anchor" aria-label="anchor" href="#intercept-only-model"></a>
 </h4>
 <p>We start by fitting a single lognormal distribution to the data.
 This model assumes that a single distribution describes all delays in the data, regardless of the case’s location, sex, or any other covariates.
 To do this, we set <code>formula = mu ~ 1</code> to place an model with only an intercept parameter (i.e. <code>~ 1</code> in R formula syntax) on the <code>mu</code> parameter of the lognormal distribution specified using <code>family = lognormal()</code>.
 (Note that the lognormal distribution has two distributional parameters <code>mu</code> and <code>sigma</code>.
 As a model is not explicitly placed on <code>sigma</code>, a constant model <code>sigma ~ 1</code> is assumed.)</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">obs_prep</span>,</span>
 <span>  formula <span class="op">=</span> <span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
 <span>  refresh <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  silent <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">1</span></span>
+<span>  silent <span class="op">=</span> <span class="fl">2</span>, refresh <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <a href="https://paulbuerkner.com/brms/reference/brmsfit-class.html" class="external-link"><code>brmsfit</code></a> object, and has the associated range of methods.
 See <code>methods(class = "brmsfit")</code> for more details.
 For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> to view information about the fitted model, including posterior estimates for the regression coefficients:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: latent_lognormal </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
@@ -325,32 +340,33 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.61      0.02     1.58     1.64 1.00     8684     2357</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.53      0.02    -0.57    -0.49 1.00     8236     2538</span></span>
+<span><span class="co">#&gt; Intercept           1.62      0.02     1.59     1.65 1.00     9135     2707</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.54      0.02    -0.58    -0.50 1.00     8932     3351</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
 <span><span class="co">#&gt; scale reduction factor on split chains (at convergence, Rhat = 1).</span></span></code></pre></div>
 </div>
-<div class="section level4" number="2.2.2">
+<div class="section level4" number="3.2.2">
 <h4 id="sex-stratified-model">
-<span class="header-section-number">2.2.2</span> Sex-stratified model<a class="anchor" aria-label="anchor" href="#sex-stratified-model"></a>
+<span class="header-section-number">3.2.2</span> Sex-stratified model<a class="anchor" aria-label="anchor" href="#sex-stratified-model"></a>
 </h4>
 <p>To fit a model which varies the parameters of the fitted lognormal distribution, <code>mu</code> and <code>sigma</code>, by sex we alter the <code>formula</code> specification to include fixed effects for sex <code>~ 1 + sex</code> as follows:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_sex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">obs_prep</span>,</span>
 <span>  formula <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span><span class="op">)</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
 <span>  refresh <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  silent <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">1</span></span>
+<span>  silent <span class="op">=</span> <span class="fl">2</span>, refresh <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.06) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is -0.01).
+<p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.03) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is 0.05).
 For the <code>sexMale</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexMale</code> effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_sex</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: latent_lognormal </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
@@ -362,23 +378,23 @@ It is important to note that the estimates represent an average of the observed 
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.58      0.02     1.53     1.63 1.00    11131     2905</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.52      0.03    -0.58    -0.47 1.00     7580     3070</span></span>
-<span><span class="co">#&gt; sexMale             0.06      0.03    -0.00     0.13 1.00     9137     2883</span></span>
-<span><span class="co">#&gt; sigma_sexMale      -0.01      0.04    -0.09     0.07 1.00     7746     3049</span></span>
+<span><span class="co">#&gt; Intercept           1.60      0.02     1.56     1.65 1.00     9840     3072</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.57      0.03    -0.62    -0.51 1.00     9121     2955</span></span>
+<span><span class="co">#&gt; sexMale             0.03      0.03    -0.03     0.09 1.00     9384     2952</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.05      0.04    -0.03     0.14 1.00     8838     2776</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
 <span><span class="co">#&gt; scale reduction factor on split chains (at convergence, Rhat = 1).</span></span></code></pre></div>
 </div>
-<div class="section level4" number="2.2.3">
+<div class="section level4" number="3.2.3">
 <h4 id="sex-district-stratified-model">
-<span class="header-section-number">2.2.3</span> Sex-district stratified model<a class="anchor" aria-label="anchor" href="#sex-district-stratified-model"></a>
+<span class="header-section-number">3.2.3</span> Sex-district stratified model<a class="anchor" aria-label="anchor" href="#sex-district-stratified-model"></a>
 </h4>
 <p>Finally, we will fit a model which also varies by district.
 To do this, we will use district level random effects, assumed to be drawn from a shared normal distribution, within the model for both the <code>mu</code> and <code>sigma</code> parameters.
 These random effects are specified by including <code>(1 | district)</code> in the formulas:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_sex_district</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">obs_prep</span>,</span>
 <span>  formula <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span></span>
@@ -388,11 +404,12 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
 <span>  refresh <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  silent <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">1</span></span>
+<span>  silent <span class="op">=</span> <span class="fl">2</span>, refresh <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>For this model, along with looking at the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_sex_district</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: latent_lognormal </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
@@ -405,15 +422,15 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
 <span><span class="co">#&gt; ~district (Number of levels: 14) </span></span>
 <span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)           0.13      0.04     0.07     0.22 1.00     1981     2500</span></span>
-<span><span class="co">#&gt; sd(sigma_Intercept)     0.23      0.07     0.13     0.40 1.00     1800     2234</span></span>
+<span><span class="co">#&gt; sd(Intercept)           0.13      0.04     0.07     0.22 1.00     2241     2762</span></span>
+<span><span class="co">#&gt; sd(sigma_Intercept)     0.24      0.07     0.14     0.41 1.00     1630     2277</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.61      0.05     1.52     1.71 1.00     2423     2615</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.61      0.07    -0.76    -0.46 1.00     1991     2516</span></span>
-<span><span class="co">#&gt; sexMale             0.05      0.03    -0.00     0.11 1.00     9025     2829</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.01      0.04    -0.07     0.09 1.00     7318     2851</span></span>
+<span><span class="co">#&gt; Intercept           1.63      0.04     1.54     1.72 1.00     2473     2812</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.64      0.08    -0.80    -0.49 1.00     1974     1983</span></span>
+<span><span class="co">#&gt; sexMale             0.04      0.03    -0.02     0.10 1.00    10711     2685</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.04      0.04    -0.04     0.12 1.00     8473     3145</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -422,51 +439,51 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; $district</span></span>
 <span><span class="co">#&gt; , , Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                   Estimate  Est.Error        Q2.5        Q97.5</span></span>
-<span><span class="co">#&gt; Bo             0.049659543 0.07648929 -0.09711603  0.198415850</span></span>
-<span><span class="co">#&gt; Bombali        0.174525747 0.05101936  0.07642013  0.280136825</span></span>
-<span><span class="co">#&gt; Bonthe         0.008627425 0.12711363 -0.25858180  0.272735075</span></span>
-<span><span class="co">#&gt; Kailahun      -0.033957270 0.05989824 -0.15194590  0.081417483</span></span>
-<span><span class="co">#&gt; Kambia         0.014035709 0.08728953 -0.15802057  0.184208650</span></span>
-<span><span class="co">#&gt; Kenema        -0.125336198 0.07186232 -0.27571403  0.008911684</span></span>
-<span><span class="co">#&gt; Koinadugu      0.131315706 0.10223466 -0.05158371  0.352779725</span></span>
-<span><span class="co">#&gt; Kono          -0.048832098 0.07882006 -0.20807180  0.101906450</span></span>
-<span><span class="co">#&gt; Moyamba        0.022377977 0.08328607 -0.14132422  0.187826300</span></span>
-<span><span class="co">#&gt; Port Loko     -0.001518065 0.05623126 -0.11547050  0.108663925</span></span>
-<span><span class="co">#&gt; Pujehun       -0.036766564 0.11669134 -0.27599690  0.186260275</span></span>
-<span><span class="co">#&gt; Tonkolili      0.047941057 0.06016027 -0.07005451  0.168607925</span></span>
-<span><span class="co">#&gt; Western Rural -0.017555863 0.05578999 -0.13222013  0.088493313</span></span>
-<span><span class="co">#&gt; Western Urban -0.172633700 0.05531442 -0.28503890 -0.065921998</span></span>
+<span><span class="co">#&gt;                    Estimate  Est.Error        Q2.5         Q97.5</span></span>
+<span><span class="co">#&gt; Bo             6.371621e-02 0.07359867 -0.07516483  0.2172727750</span></span>
+<span><span class="co">#&gt; Bombali        1.640778e-01 0.04941813  0.06541626  0.2611606250</span></span>
+<span><span class="co">#&gt; Bonthe         6.939424e-03 0.12645921 -0.25349780  0.2492450750</span></span>
+<span><span class="co">#&gt; Kailahun      -4.011221e-02 0.05667364 -0.15431732  0.0711047200</span></span>
+<span><span class="co">#&gt; Kambia         4.223585e-02 0.08850373 -0.12717575  0.2207266750</span></span>
+<span><span class="co">#&gt; Kenema        -1.391701e-01 0.07323260 -0.29128433  0.0002774699</span></span>
+<span><span class="co">#&gt; Koinadugu      1.133106e-01 0.09724935 -0.06785274  0.3257543500</span></span>
+<span><span class="co">#&gt; Kono          -3.061089e-02 0.07825150 -0.18479047  0.1197622750</span></span>
+<span><span class="co">#&gt; Moyamba       -6.773945e-05 0.08349288 -0.16163852  0.1587817000</span></span>
+<span><span class="co">#&gt; Port Loko      1.435738e-02 0.05249369 -0.09109206  0.1192909250</span></span>
+<span><span class="co">#&gt; Pujehun       -4.120320e-02 0.11048968 -0.26577855  0.1650174750</span></span>
+<span><span class="co">#&gt; Tonkolili      3.631068e-02 0.05692232 -0.07445011  0.1508875250</span></span>
+<span><span class="co">#&gt; Western Rural  8.802803e-03 0.05416008 -0.09850370  0.1171788750</span></span>
+<span><span class="co">#&gt; Western Urban -1.841781e-01 0.05383542 -0.29487793 -0.0825507900</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; , , sigma_Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                   Estimate  Est.Error        Q2.5       Q97.5</span></span>
-<span><span class="co">#&gt; Bo            -0.075404985 0.12119463 -0.31379113  0.16745023</span></span>
-<span><span class="co">#&gt; Bombali       -0.275437891 0.08655618 -0.44781052 -0.10861032</span></span>
-<span><span class="co">#&gt; Bonthe        -0.051516361 0.23732468 -0.53411608  0.40638035</span></span>
-<span><span class="co">#&gt; Kailahun      -0.209597067 0.09857676 -0.40725572 -0.01650580</span></span>
-<span><span class="co">#&gt; Kambia         0.259667263 0.12118200  0.03643989  0.50790048</span></span>
-<span><span class="co">#&gt; Kenema         0.195191620 0.09983437  0.01150421  0.39580870</span></span>
-<span><span class="co">#&gt; Koinadugu      0.006092283 0.15098508 -0.28488527  0.31472935</span></span>
-<span><span class="co">#&gt; Kono           0.101216931 0.11122112 -0.10887437  0.32718263</span></span>
-<span><span class="co">#&gt; Moyamba        0.142895624 0.11660600 -0.07898224  0.37835145</span></span>
-<span><span class="co">#&gt; Port Loko      0.085841299 0.08613680 -0.08135099  0.25841027</span></span>
-<span><span class="co">#&gt; Pujehun       -0.139828100 0.22803379 -0.61120480  0.27803248</span></span>
-<span><span class="co">#&gt; Tonkolili     -0.235290473 0.10141871 -0.43479545 -0.03705476</span></span>
-<span><span class="co">#&gt; Western Rural  0.028077793 0.08536926 -0.13896268  0.19957480</span></span>
-<span><span class="co">#&gt; Western Urban  0.192813792 0.08029768  0.03438413  0.35998105</span></span></code></pre></div>
+<span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5        Q97.5</span></span>
+<span><span class="co">#&gt; Bo            -0.04319236 0.11996727 -0.27383410  0.199299325</span></span>
+<span><span class="co">#&gt; Bombali       -0.29174162 0.08868419 -0.45921660 -0.116847950</span></span>
+<span><span class="co">#&gt; Bonthe        -0.05523976 0.25069080 -0.59706777  0.422855400</span></span>
+<span><span class="co">#&gt; Kailahun      -0.20451584 0.10145527 -0.40233780 -0.002879607</span></span>
+<span><span class="co">#&gt; Kambia         0.29141334 0.11936303  0.06776910  0.536575650</span></span>
+<span><span class="co">#&gt; Kenema         0.20998415 0.10333036  0.01559385  0.424579575</span></span>
+<span><span class="co">#&gt; Koinadugu      0.01337396 0.15237593 -0.28072285  0.320624525</span></span>
+<span><span class="co">#&gt; Kono           0.10498724 0.11619073 -0.11573440  0.336127500</span></span>
+<span><span class="co">#&gt; Moyamba        0.08364841 0.12449586 -0.14856748  0.339839775</span></span>
+<span><span class="co">#&gt; Port Loko      0.01463715 0.08721044 -0.15581690  0.198435475</span></span>
+<span><span class="co">#&gt; Pujehun       -0.14516908 0.24205619 -0.65634702  0.296625300</span></span>
+<span><span class="co">#&gt; Tonkolili     -0.23929303 0.10497508 -0.44888910 -0.035586045</span></span>
+<span><span class="co">#&gt; Western Rural  0.02832273 0.08749760 -0.13610960  0.201803750</span></span>
+<span><span class="co">#&gt; Western Urban  0.24464192 0.08314110  0.08656548  0.412287575</span></span></code></pre></div>
 </div>
 </div>
-<div class="section level3" number="2.3">
+<div class="section level3" number="3.3">
 <h3 id="posterior-expectation">
-<span class="header-section-number">2.3</span> Posterior expectations<a class="anchor" aria-label="anchor" href="#posterior-expectation"></a>
+<span class="header-section-number">3.3</span> Posterior expectations<a class="anchor" aria-label="anchor" href="#posterior-expectation"></a>
 </h3>
 <p>To go further than summaries of the fitted model, we recommend using the <code>tidybayes</code> package.
 For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the <code><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">modelr::data_grid()</a></code> function in combination with the <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_epred_draws()</a></code> function.
 The <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_epred_draws()</a></code> function uses the (internal) <code><a href="../reference/posterior_epred_latent_lognormal.html">posterior_epred_latent_lognormal()</a></code> function implemented in <code>epidist</code> for the <code>latent_lognormal</code> custom <code>brms</code> family.</p>
-<p>In Figure <a href="#fig:epred">2.1</a> we show the posterior expectation of the delay distribution for each of the three fitted models.
-Figure <a href="#fig:epred">2.1</a>B illustrates the higher mean of men as compared with women.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<p>In Figure <a href="#fig:epred">3.1</a> we show the posterior expectation of the delay distribution for each of the three fitted models.
+Figure <a href="#fig:epred">3.1</a>B illustrates the higher mean of men as compared with women.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">epred_draws</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -508,30 +525,30 @@ Figure <a href="#fig:epred">2.1</a>B illustrates the higher mean of men as compa
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_discrete.html" class="external-link">scale_y_discrete</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="va">rev</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">epred_base_figure</span> <span class="op">/</span> <span class="va">epred_sex_figure</span> <span class="op">/</span> <span class="va">epred_sex_district_figure</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.5</span>, <span class="fl">2.5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:epred"></span>
 <img src="figures/epidist-epred-1.png" alt="The fitted posterior expectations of the delay distribution for each model." width="672"><p class="caption">
-Figure 2.1: The fitted posterior expectations of the delay distribution for each model.
+Figure 3.1: The fitted posterior expectations of the delay distribution for each model.
 </p>
 </div>
 </div>
-<div class="section level3" number="2.4">
+<div class="section level3" number="3.4">
 <h3 id="linear-predictor-posteriors">
-<span class="header-section-number">2.4</span> Linear predictor posteriors<a class="anchor" aria-label="anchor" href="#linear-predictor-posteriors"></a>
+<span class="header-section-number">3.4</span> Linear predictor posteriors<a class="anchor" aria-label="anchor" href="#linear-predictor-posteriors"></a>
 </h3>
 <p>The <code>tidybayes</code> package also allows users to generate draws of the linear predictors for all distributional parameters using <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_linpred_draws()</a></code>.
-For example, for the <code>mu</code> parameter in the sex-district stratified model (Figure <a href="#fig:linpred-sex-district">2.2</a>):</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+For example, for the <code>mu</code> parameter in the sex-district stratified model (Figure <a href="#fig:linpred-sex-district">3.2</a>):</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">linpred_draws_sex_district</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_linpred_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">linpred_draws_sex_district</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">mu</span>, y <span class="op">=</span> <span class="va">district</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="http://mjskay.github.io/ggdist/reference/stat_pointinterval.html" class="external-link">stat_pointinterval</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
@@ -541,25 +558,25 @@ For example, for the <code>mu</code> parameter in the sex-district stratified mo
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:linpred-sex-district"></span>
-<img src="figures/epidist-linpred-sex-district-1.png" alt="The posterior distribution of the linear predictor of mu parameter within the sex-district stratified model. The posterior expectations in Section 2.3 are a function of both the mu linear predictor posterior distribution and sigma linear predictor posterior distribution." width="672"><p class="caption">
-Figure 2.2: The posterior distribution of the linear predictor of <code>mu</code> parameter within the sex-district stratified model. The posterior expectations in Section <a href="#posterior-expectation">2.3</a> are a function of both the <code>mu</code> linear predictor posterior distribution and <code>sigma</code> linear predictor posterior distribution.
+<img src="figures/epidist-linpred-sex-district-1.png" alt="The posterior distribution of the linear predictor of mu parameter within the sex-district stratified model. The posterior expectations in Section 3.3 are a function of both the mu linear predictor posterior distribution and sigma linear predictor posterior distribution." width="672"><p class="caption">
+Figure 3.2: The posterior distribution of the linear predictor of <code>mu</code> parameter within the sex-district stratified model. The posterior expectations in Section <a href="#posterior-expectation">3.3</a> are a function of both the <code>mu</code> linear predictor posterior distribution and <code>sigma</code> linear predictor posterior distribution.
 </p>
 </div>
 </div>
-<div class="section level3" number="2.5">
+<div class="section level3" number="3.5">
 <h3 id="delay-posterior-distributions">
-<span class="header-section-number">2.5</span> Delay posterior distributions<a class="anchor" aria-label="anchor" href="#delay-posterior-distributions"></a>
+<span class="header-section-number">3.5</span> Delay posterior distributions<a class="anchor" aria-label="anchor" href="#delay-posterior-distributions"></a>
 </h3>
 <p>Posterior predictions of the delay distribution are an important output of an analysis with the <code>epidist</code> package.
 In this section, we demonstrate how to produce either a discrete probability mass function representation, or continuous probability density function representation of the delay distribution.</p>
-<div class="section level4" number="2.5.1">
+<div class="section level4" number="3.5.1">
 <h4 id="discrete-probability-mass-function">
-<span class="header-section-number">2.5.1</span> Discrete probability mass function<a class="anchor" aria-label="anchor" href="#discrete-probability-mass-function"></a>
+<span class="header-section-number">3.5.1</span> Discrete probability mass function<a class="anchor" aria-label="anchor" href="#discrete-probability-mass-function"></a>
 </h4>
 <p>To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
 To do this, we set each of <code>pwindow</code> and <code>swindow</code> to 1 for daily censoring, and <code>relative_obs_time</code> to 1000 for no censoring.
-Figure <a href="#fig:pmf">2.3</a> shows the result, where the few delays greater than 30 are omitted from the figure.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+Figure <a href="#fig:pmf">3.3</a> shows the result, where the few delays greater than 30 are omitted from the figure.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">draws_pmf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -610,23 +627,23 @@ Figure <a href="#fig:pmf">2.3</a> shows the result, where the few delays greater
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pmf_base_figure</span> <span class="op">/</span> <span class="va">pmf_sex_figure</span> <span class="op">/</span> <span class="va">pmf_sex_district_figure</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.5</span>, <span class="fl">5.5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:pmf"></span>
 <img src="figures/epidist-pmf-1.png" alt="Posterior predictions of the discrete probability mass function for each of the fitted models." width="672"><p class="caption">
-Figure 2.3: Posterior predictions of the discrete probability mass function for each of the fitted models.
+Figure 3.3: Posterior predictions of the discrete probability mass function for each of the fitted models.
 </p>
 </div>
 </div>
-<div class="section level4" number="2.5.2">
+<div class="section level4" number="3.5.2">
 <h4 id="continuous-probability-density-function">
-<span class="header-section-number">2.5.2</span> Continuous probability density function<a class="anchor" aria-label="anchor" href="#continuous-probability-density-function"></a>
+<span class="header-section-number">3.5.2</span> Continuous probability density function<a class="anchor" aria-label="anchor" href="#continuous-probability-density-function"></a>
 </h4>
 <p>The posterior predictive distribution under no truncation and no censoring.
-That is to produce continuous delay times (Figure <a href="#fig:pdf">2.4</a>):</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+That is to produce continuous delay times (Figure <a href="#fig:pdf">3.4</a>):</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">draws_pdf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">0</span>, swindow <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -677,21 +694,21 @@ That is to produce continuous delay times (Figure <a href="#fig:pdf">2.4</a>):</
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pdf_base_figure</span> <span class="op">/</span> <span class="va">pdf_sex_figure</span> <span class="op">/</span> <span class="va">pdf_sex_district_figure</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>heights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.5</span>, <span class="fl">5.5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:pdf"></span>
 <img src="figures/epidist-pdf-1.png" alt="Posterior predictions of the continuous probability density function for each of the fitted models." width="672"><p class="caption">
-Figure 2.4: Posterior predictions of the continuous probability density function for each of the fitted models.
+Figure 3.4: Posterior predictions of the continuous probability density function for each of the fitted models.
 </p>
 </div>
 </div>
 </div>
 </div>
-<div class="section level2" number="3">
+<div class="section level2" number="4">
 <h2 id="conclusion">
-<span class="header-section-number">3</span> Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+<span class="header-section-number">4</span> Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
 <p>In this vignette, we demonstrate how the <code>epidist</code> package can be used to fit delay distribution models.
 These models can be stratified by covariates such as sex and district using fixed and random effects.
