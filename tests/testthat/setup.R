@@ -6,6 +6,15 @@ as_epidist_linelist_time <- function(data) {
   return(data)
 }
 
+filter_obs_by_obs_time <- function(linelist, obs_time) {
+  linelist |>
+    mutate(
+      obs_time = obs_time,
+      relative_obs_time = .data$obs_time - .data$ptime,
+    ) |>
+    filter(.data$stime_upr <= .data$obs_time)
+}
+
 obs_time <- 25
 sample_size <- 500
 

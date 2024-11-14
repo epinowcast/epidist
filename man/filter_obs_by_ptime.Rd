@@ -22,7 +22,6 @@ Filter observations based on the observation time of primary events
 }
 \seealso{
 Other observe: 
-\code{\link{filter_obs_by_obs_time}()},
 \code{\link{observe_process}()}
 }
 \concept{observe}

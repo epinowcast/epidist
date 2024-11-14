@@ -34,22 +34,6 @@ observe_process <- function(linelist) {
     )
 }
 
-#' Filter observations based on a observation time of secondary events
-#'
-#' @param linelist ...
-#' @param obs_time ...
-#' @family observe
-#' @autoglobal
-#' @export
-filter_obs_by_obs_time <- function(linelist, obs_time) {
-  linelist |>
-    mutate(
-      obs_time = obs_time,
-      relative_obs_time = .data$obs_time - .data$ptime,
-    ) |>
-    filter(.data$stime_upr <= .data$obs_time)
-}
-
 #' Filter observations based on the observation time of primary events
 #'
 #' @param linelist ...
