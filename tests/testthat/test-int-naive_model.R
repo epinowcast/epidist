@@ -7,7 +7,7 @@
 test_that("epidist.epidist_naive_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
   stancode <- epidist(
-    data = prep_direct_obs,
+    data = prep_naive_obs,
     fn = brms::make_stancode
   )
   mod <- cmdstanr::cmdstan_model(
@@ -21,7 +21,7 @@ test_that("epidist.epidist_naive_model fits and the MCMC converges in the defaul
   skip_on_cran()
   set.seed(1)
   fit <- epidist(
-    data = prep_direct_obs,
+    data = prep_naive_obs,
     seed = 1,
     silent = 2, refresh = 0,
     cores = 2,

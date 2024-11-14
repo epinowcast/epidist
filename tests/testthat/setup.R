@@ -83,10 +83,10 @@ sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
 # Temporary solution for classing time data
 sim_obs_sex <- as_epidist_linelist_time(sim_obs_sex)
 
-prep_obs <- as_latent_individual(sim_obs)
-prep_direct_obs <- as_direct_model(sim_obs)
-prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
-prep_obs_sex <- as_latent_individual(sim_obs_sex)
+prep_obs <- as_latent_model(sim_obs)
+prep_naive_obs <- as_naive_model(sim_obs)
+prep_obs_gamma <- as_latent_model(sim_obs_gamma)
+prep_obs_sex <- as_latent_model(sim_obs_sex)
 
 if (not_on_cran()) {
   set.seed(1)
