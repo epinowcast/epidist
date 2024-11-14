@@ -1,5 +1,6 @@
 # All available hooks: https://pre-commit.com/hooks.html
 # R specific hooks: https://github.com/lorenzwalthert/precommit
+exclude: '\.Rd$'  # Excludes all .Rd files from pre-commit hooks
 repos:
 -   repo: https://github.com/lorenzwalthert/precommit
     rev: v0.4.3
@@ -20,7 +21,6 @@ repos:
     -   id: check-added-large-files
         args: ['--maxkb=200']
     -   id: end-of-file-fixer
-        exclude: '\.Rd'
 -   repo: local
     hooks:
     -   id: forbid-to-commit
