@@ -82,3 +82,32 @@ sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
 
 # Temporary solution for classing time data
 sim_obs_sex <- as_epidist_linelist_time(sim_obs_sex)
+
+prep_obs <- as_latent_individual(sim_obs)
+prep_direct_obs <- as_direct_model(sim_obs)
+prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
+prep_obs_sex <- as_latent_individual(sim_obs_sex)
+
+if (not_on_cran()) {
+  set.seed(1)
+  fit <- epidist(
+    data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
+    backend = "cmdstanr"
+  )
+  fit_rstan <- epidist(
+    data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0
+  )
+
+  fit_gamma <- epidist(
+    data = prep_obs_gamma, family = stats::Gamma(link = "log"),
+    seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
+    backend = "cmdstanr"
+  )
+
+  fit_sex <- epidist(
+    data = prep_obs_sex,
+    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
+    seed = 1, silent = 2, refresh = 0,
+    cores = 2, chains = 2, backend = "cmdstanr"
+  )
+}

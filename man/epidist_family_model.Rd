@@ -15,7 +15,7 @@ epidist_formula_model(data, formula, ...)
 \item{family}{Output of a call to \code{brms::brmsfamily()} with additional
 information as provided by \code{.add_dpar_info()}}
 
-\item{...}{Additional arguments passed to method.}
+\item{...}{Additional arguments passed to \code{fn} method.}
 
 \item{formula}{An object of class \link[stats:formula]{stats::formula} or \link[brms:brmsformula]{brms::brmsformula}
 (or one that can be coerced to those classes). A symbolic description of the

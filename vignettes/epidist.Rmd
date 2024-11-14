@@ -28,9 +28,6 @@ knitr::opts_chunk$set(
   warning = FALSE,
   error = FALSE
 )
-
-# Required for R-CMD-as-cran-check to pass
-cmdstanr::set_cmdstan_path()
 ```
 
 Many quantities in epidemiology can be thought of as the time between two events or "delays".
@@ -57,7 +54,7 @@ To run this vignette yourself, along with the `epidist` package, you will need t
 
 ```{r load-requirements}
 library(epidist)
-library(purrr)
+library(brms)
 library(ggplot2)
 library(gt)
 library(dplyr)
@@ -157,7 +154,6 @@ This means that rather than exact event times, we observe event times within an 
 Here we suppose that the interval is daily, meaning that only the date of the primary or secondary event, not the exact event time, is reported (Figure \@ref(fig:cens)):
 
 ```{r}
-# observe_process() should be renamed and include a "daily" i.e. 1 argument
 obs_cens <- obs |> observe_process()
 ```
 
@@ -268,20 +264,25 @@ The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
 
 ```{r}
-fit <- epidist(data = data, cores = 4, refresh = 0)
+fit <- epidist(data = data, chains = 2, cores = 2, refresh = 0)
 ```
 
 The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters (Table \@ref(tab:pars)) in the model.
 Users familiar with Stan and `brms`, can work with `fit` directly.
 Any tool that supports `brms` fitted model objects will be compatible with `fit`.
 
-(ref:pars) All of the parameters that are included in the model. Many of these parameters (e.g. `swindow` and `pwindow`) the so called latent variables in the model, and have lengths corresponding to the `sample_size`.
+**Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features. This can be set using `backend = "cmdstanr"` after following the installing `cmdstan` instructions in the README.**
+
+(ref:pars) All of the parameters that are included in the model. Many of these parameters (e.g. `swindow` and `pwindow`) are the so called latent variables in the model, and have lengths corresponding to the `sample_size`. We extracted the model parameters using `brms::variables()` and removed the indices.
 
 ```{r pars}
-pars <- fit$fit@par_dims |>
-  map(.f = function(x) if (identical(x, integer(0))) return(1) else return(x))
+pars <- fit |>
+  variables(reserved = FALSE) |>
+  gsub(pattern = "\\[\\d+\\]", replacement = "")
 
-data.frame("Parameter" = names(pars), "Length" = unlist(pars)) |>
+data.frame(
+  "Parameter" = unique(pars), "Length" = table(pars)
+) |>
   gt() |>
   tab_caption("(ref:pars)")
 ```
