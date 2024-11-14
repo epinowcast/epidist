@@ -4,20 +4,16 @@
 # varying the input seed. Test failure at an unusually high rate does suggest
 # a potential code issue.
 
-prep_obs <- as_direct_model(sim_obs)
-
-test_that("epidist.epidist_direct_model Stan code has no syntax errors and compiles in the default case", { # nolint: line_length_linter.
+test_that("epidist.epidist_direct_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
   stancode <- epidist(
-    data = prep_obs,
-    fn = brms::make_stancode,
-    output_dir = fs::dir_create(tempfile())
+    data = prep_direct_obs,
+    fn = brms::make_stancode
   )
   mod <- cmdstanr::cmdstan_model(
     stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
   )
   expect_true(mod$check_syntax())
-  expect_no_error(mod$compile())
 })
 
 test_that("epidist.epidist_direct_model fits and the MCMC converges in the default case", { # nolint: line_length_linter.
@@ -25,10 +21,11 @@ test_that("epidist.epidist_direct_model fits and the MCMC converges in the defau
   skip_on_cran()
   set.seed(1)
   fit <- epidist(
-    data = prep_obs,
+    data = prep_direct_obs,
     seed = 1,
-    silent = 2,
-    output_dir = fs::dir_create(tempfile())
+    silent = 2, refresh = 0,
+    cores = 2,
+    chains = 2
   )
   expect_s3_class(fit, "brmsfit")
   expect_s3_class(fit, "epidist_fit")

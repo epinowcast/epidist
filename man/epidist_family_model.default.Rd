@@ -12,7 +12,7 @@
 \item{family}{Output of a call to \code{brms::brmsfamily()} with additional
 information as provided by \code{.add_dpar_info()}}
 
-\item{...}{Additional arguments passed to method.}
+\item{...}{Additional arguments passed to \code{fn} method.}
 }
 \description{
 Default method for defining a model specific family
