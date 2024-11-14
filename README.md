@@ -77,21 +77,24 @@ remotes::install_github(
 </details>
 <details>
 <summary>
-Installing CmdStan
+Installing CmdStan (optional)
 </summary>
 
-If you wish to do model fitting, you will need to install
+By default `epidist` uses the `rstan` package for fitting models. If you
+wish to use the `cmdstanr` package instead, you will need to install
 [CmdStan](https://mc-stan.org/users/interfaces/cmdstan), which also
 entails having a suitable C++ toolchain setup. We recommend using the
-[`cmdstanr` package](https://mc-stan.org/cmdstanr/). The Stan team
-provides instructions in the [*Getting started with
+[`cmdstanr` package](https://mc-stan.org/cmdstanr/) to manage CmdStan.
+The Stan team provides instructions in the [*Getting started with
 `cmdstanr`*](https://mc-stan.org/cmdstanr/articles/cmdstanr.html)
 vignette, with other details and support at the [package
 site](https://mc-stan.org/cmdstanr/), but the brief version is:
 
 ``` r
 # if you not yet installed `epidist`, or you installed it without `Suggests` dependencies
-install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
+install.packages(
+  "cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos"))
+)
 # once `cmdstanr` is installed:
 cmdstanr::install_cmdstan()
 ```
@@ -102,9 +105,6 @@ need to install a past version of CmdStan, which you can do with the
 `version` argument.*
 
 </details>
-<!-- <details><summary>Alternative: Docker</summary> -->
-<!-- We also provide a [Docker](https://www.docker.com/get-started/) image with [all dependencies installed](https://github.com/orgs/epinowcast/packages/container/package/epidist). You can use this image to run `epidist` without installing dependencies. -->
-<!-- </details> -->
 
 ## Resources
 
