@@ -4,17 +4,17 @@
 \alias{simulate_secondary}
 \title{Simulate secondary events based on a delay distribution}
 \usage{
-simulate_secondary(linelist, dist = rlnorm, ...)
+simulate_secondary(data, dist = rlnorm, ...)
 }
 \arguments{
-\item{linelist}{A data frame with the primary event times.}
+\item{data}{A data frame with the primary event times.}
 
 \item{dist}{The delay distribution to be used. Defaults to \code{\link[=rlnorm]{rlnorm()}}.}
 
 \item{...}{Arguments to be passed to the delay distribution function.}
 }
 \value{
-A \code{data.frame} that augments \code{linelist} with two new columns: \code{delay}
+A \code{data.frame} that augments \code{data} with two new columns: \code{delay}
 (secondary event latency) and \code{stime} (the time of the secondary event).
 }
 \description{
