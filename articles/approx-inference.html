@@ -178,7 +178,7 @@ The example data simulation process follows that used in the <a href="https://ep
 <span>    sdlog <span class="op">=</span> <span class="va">sdlog</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/observe_process.html">observe_process</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/filter_obs_by_obs_time.html">filter_obs_by_obs_time</a></span><span class="op">(</span>obs_time <span class="op">=</span> <span class="va">obs_time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">stime_upr</span> <span class="op">&lt;=</span> <span class="va">obs_time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">sample_size</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>We now prepare the data for fitting with the latent individual model, and perform inference with HMC:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -221,10 +221,10 @@ Although a <code>save_single_paths</code> option is available, which may have al
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Number of PSIS draws is larger than the total number of draws returned by the single Pathfinders. This is likely unintentional and leads to re-sampling from the same draws. </span></span>
 <span><span class="co">#&gt; Path [1] :Initial log joint density = -1468.604912 </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 16, column 2 to column 78) (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 16, column 2 to column 78) (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 16, column 2 to column 78) (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 16, column 2 to column 78) (in '/tmp/RtmpxXVBHa/model-20227332cabe.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/Rtmpd5Tp85/model-1f612a915f08.stan', line 16, column 2 to column 78) (in '/tmp/Rtmpd5Tp85/model-1f612a915f08.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/Rtmpd5Tp85/model-1f612a915f08.stan', line 16, column 2 to column 78) (in '/tmp/Rtmpd5Tp85/model-1f612a915f08.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/Rtmpd5Tp85/model-1f612a915f08.stan', line 16, column 2 to column 78) (in '/tmp/Rtmpd5Tp85/model-1f612a915f08.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/Rtmpd5Tp85/model-1f612a915f08.stan', line 16, column 2 to column 78) (in '/tmp/Rtmpd5Tp85/model-1f612a915f08.stan', line 64, column 4 to column 77) </span></span>
 <span><span class="co">#&gt; Path [1] : Iter      log prob        ||dx||      ||grad||     alpha      alpha0      # evals       ELBO    Best ELBO        Notes  </span></span>
 <span><span class="co">#&gt;              91      -1.057e+03      2.060e-03   2.208e-02    1.000e+00  1.000e+00      2276 -5.417e+02 -5.417e+02                   </span></span>
 <span><span class="co">#&gt; Path [1] :Best Iter: [89] ELBO (-533.322633) evaluations: (2276) </span></span>
@@ -1265,19 +1265,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">35.647</td>
+<td headers="time (s)" class="gt_row gt_right">37.222</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.640</td>
+<td headers="time (s)" class="gt_row gt_right">2.604</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.233</td>
+<td headers="time (s)" class="gt_row gt_right">2.204</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.984</td>
+<td headers="time (s)" class="gt_row gt_right">0.979</td>
 </tr>
 </tbody>
 </table>

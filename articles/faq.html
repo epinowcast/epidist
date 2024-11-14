@@ -103,7 +103,7 @@ If you have a question about using the package, please create an <a href="https:
 <span>    sdlog <span class="op">=</span> <span class="va">sdlog</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/observe_process.html">observe_process</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/filter_obs_by_obs_time.html">filter_obs_by_obs_time</a></span><span class="op">(</span>obs_time <span class="op">=</span> <span class="va">obs_time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">stime_upr</span> <span class="op">&lt;=</span> <span class="va">obs_time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">sample_size</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Note: this functionality will be integrated into the package shortly</span></span>
@@ -157,7 +157,7 @@ For example, the function <code><a href="https://mc-stan.org/bayesplot/reference
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
 <span><span class="co">##    time samples max_rhat divergent_transitions per_divergent_transitions</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>  21.9    <span style="text-decoration: underline;">4</span>000     1.01                     0                         0</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>  21.8    <span style="text-decoration: underline;">4</span>000     1.01                     0                         0</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 3 more variables: max_treedepth &lt;dbl&gt;, no_at_max_treedepth &lt;int&gt;,</span></span></span>
 <span><span class="co">## <span style="color: #949494;">#   per_at_max_treedepth &lt;dbl&gt;</span></span></span></code></pre>
 </div>
@@ -187,7 +187,8 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <span></span>
 <span><span class="va">epidist_family</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_family.html">epidist_family</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">family</span><span class="op">)</span></span>
 <span><span class="va">epidist_formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_formula.html">epidist_formula</a></span><span class="op">(</span></span>
-<span>  <span class="va">data</span>, family <span class="op">=</span> <span class="va">epidist_family</span>, formula <span class="op">=</span> <span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  family <span class="op">=</span> <span class="va">epidist_family</span>, formula <span class="op">=</span> <span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># NULL here means no replacing priors from the user!</span></span>
