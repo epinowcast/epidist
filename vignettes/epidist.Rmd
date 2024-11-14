@@ -273,11 +273,11 @@ Any tool that supports `brms` fitted model objects will be compatible with `fit`
 
 **Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features. This can be set using `backend = "cmdstanr"` after following the installing `cmdstan` instructions in the README.**
 
-(ref:pars) All of the parameters that are included in the model. Many of these parameters (e.g. `swindow` and `pwindow`) the so called latent variables in the model, and have lengths corresponding to the `sample_size`.
+(ref:pars) All of the parameters that are included in the model. Many of these parameters (e.g. `swindow` and `pwindow`) the so called latent variables in the model, and have lengths corresponding to the `sample_size`. We extracted the model parameters using `brms::variables()` and removed the indices.
 
 ```{r pars}
 pars <- fit |>
-  brms::variables(reserved = FALSE) |>
+  variables(reserved = FALSE) |>
   gsub(pattern = "\\[\\d+\\]", replacement = "")
 
 data.frame(

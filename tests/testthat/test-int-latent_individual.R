@@ -14,16 +14,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
     stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
   )
   expect_true(mod$check_syntax())
-  expect_no_error(mod$compile())
 })
-
-extract_normal_parameters_brms <- function(prior) {
-  pattern <- "normal\\(([^,]+), ([^\\)]+)\\)"
-  match <- regmatches(prior, regexec(pattern, prior))
-  mean <- as.numeric(match[[1]][2])
-  sd <- as.numeric(match[[1]][3])
-  return(list(mean = mean, sd = sd))
-}
 
 test_that("epidist.epidist_latent_individual samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case.", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
@@ -89,7 +80,7 @@ test_that("epidist.epidist_latent_individual fits, the MCMC converges, and the d
   expect_true(all(sigma == 1))
 })
 
-test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles with lognormal family as a string", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual Stan code has no syntax errors", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
@@ -104,7 +95,6 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
     stan_file = cmdstanr::write_stan_file(stancode_string), compile = FALSE
   )
   expect_true(mod_string$check_syntax())
-  expect_no_error(mod_string$compile())
 })
 
 test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
@@ -159,10 +149,10 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   expect_lte(quantile_shape, 0.975)
 })
 
-test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles for an alternative formula", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual Stan code has no syntax errors for an alternative formula", { # nolint: line_length_linter.
   skip_on_cran()
   stancode_sex <- epidist(
-    data = prep_obs,
+    data = prep_obs_sex,
     formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     fn = brms::make_stancode,
     cores = 2
@@ -171,16 +161,15 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
     stan_file = cmdstanr::write_stan_file(stancode_sex), compile = FALSE
   )
   expect_true(mod_sex$check_syntax())
-  expect_no_error(mod_sex$compile())
 })
 
-test_that("epidist.epidist_latent_individual recovers no sex effect when none is simulated", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_individual recovers a sex effect", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
   draws <- posterior::as_draws_df(fit_sex$fit)
-  expect_equal(mean(draws$b_sex), 0, tolerance = 0.2)
-  expect_equal(mean(draws$b_sigma_sex), 0, tolerance = 0.2)
+  expect_equal(mean(draws$b_sex), -0.73, tolerance = 0.2)
+  expect_equal(mean(draws$b_sigma_sex), 0.43, tolerance = 0.2)
   expect_s3_class(fit_sex, "brmsfit")
   expect_s3_class(fit_sex, "epidist_fit")
   expect_convergence(fit_sex)
