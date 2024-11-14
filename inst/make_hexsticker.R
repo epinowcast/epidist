@@ -3,15 +3,6 @@ library(ggplot2)
 library(dplyr)
 library(magick)
 
-filter_obs_by_obs_time <- function(linelist, obs_time) {
-  linelist |>
-    mutate(
-      obs_time = obs_time,
-      relative_obs_time = .data$obs_time - .data$ptime,
-    ) |>
-    filter(.data$stime_upr <= .data$obs_time)
-}
-
 # make standard plot
 outbreak <- simulate_gillespie(seed = 101)
 
@@ -27,7 +18,7 @@ obs <- outbreak |>
   observe_process()
 
 truncated_obs <- obs |>
-  filter_obs_by_obs_time(obs_time = 25) |>
+  filter(.data$stime_upr <= .obs_time = 25) |>
   slice_sample(n = 200, replace = FALSE)
 
 combined_obs <- bind_rows(
