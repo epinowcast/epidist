@@ -73,13 +73,16 @@ test_that(".make_intercepts_explicit does not add an intercept if the distributi
 
 test_that(".rename_columns works correctly", { # nolint: line_length_linter.
   df <- data.frame(a = 1, b = 2)
-  new_df <- .rename_columns(df, new_names = c("x", "y"), old_names = c("a", "b"))
+  new_df <- .rename_columns(
+    df, new_names = c("x", "y"), old_names = c("a", "b")
+  )
   expect_named(new_df, c("x", "y"))
 })
 
 test_that(".rename_columns does nothing if old_names is only NULL", { # nolint: line_length_linter.
   df <- data.frame(a = 1, b = 2)
-  new_df <- .rename_columns(df, new_names = c("a", "b"), old_names = c(NULL, NULL))
+  new_df <- .rename_columns(
+    df, new_names = c("a", "b"), old_names = c(NULL, NULL)
+  )
   expect_named(new_df, c("a", "b"))
 })
-

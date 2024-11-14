@@ -135,7 +135,7 @@
 #' @keywords internal
 #' @importFrom stats setNames
 .rename_columns <- function(df, new_names, old_names) {
-  if (is.null(new_names) | is.null(old_names)) {
+  if (is.null(new_names) || is.null(old_names)) {
     return(df)
   }
   new_char <- sapply(new_names, is.character)
