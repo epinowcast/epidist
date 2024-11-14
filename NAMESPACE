@@ -39,12 +39,6 @@ export(epidist_prior)
 export(epidist_stancode)
 export(epidist_validate_data)
 export(epidist_validate_model)
-<<<<<<< HEAD
-export(is_direct_model)
-=======
-export(filter_obs_by_obs_time)
-export(filter_obs_by_ptime)
->>>>>>> 989328c5 (All other direct to naive replacements)
 export(is_epidist_linelist)
 export(is_latent_model)
 export(is_naive_model)
