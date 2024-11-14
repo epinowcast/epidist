@@ -1,11 +1,5 @@
 set.seed(101)
 
-as_epidist_linelist_time <- function(data) {
-  class(data) <- c("epidist_linelist", class(data))
-  epidist_validate_data(data)
-  return(data)
-}
-
 obs_time <- 25
 sample_size <- 500
 
@@ -25,7 +19,13 @@ sim_obs <- simulate_gillespie() |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
-sim_obs <- as_epidist_linelist_time(sim_obs)
+sim_obs <- as_epidist_linelist(
+  sim_obs$ptime_lwr,
+  sim_obs$ptime_upr,
+  sim_obs$stime_lwr,
+  sim_obs$stime_upr,
+  sim_obs$obs_time
+)
 
 set.seed(101)
 
@@ -46,7 +46,13 @@ sim_obs_gamma <- simulate_gillespie() |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
-sim_obs_gamma <- as_epidist_linelist_time(sim_obs_gamma)
+sim_obs_gamma <- as_epidist_linelist(
+  sim_obs_gamma$ptime_lwr,
+  sim_obs_gamma$ptime_upr,
+  sim_obs_gamma$stime_lwr,
+  sim_obs_gamma$stime_upr,
+  sim_obs_gamma$obs_time
+)
 
 # Data with a sex difference
 
@@ -81,7 +87,14 @@ sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
-sim_obs_sex <- as_epidist_linelist_time(sim_obs_sex)
+sim_obs_sex <- as_epidist_linelist(
+  sim_obs_sex$ptime_lwr,
+  sim_obs_sex$ptime_upr,
+  sim_obs_sex$stime_lwr,
+  sim_obs_sex$stime_upr,
+  sim_obs_sex$obs_time,
+  sex = sim_obs_sex$sex
+)
 
 prep_obs <- as_latent_individual(sim_obs)
 prep_direct_obs <- as_direct_model(sim_obs)

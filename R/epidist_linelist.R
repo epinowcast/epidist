@@ -117,7 +117,7 @@ is_epidist_linelist <- function(data, ...) {
 assert_epidist.epidist_linelist <- function(data, ...) {
   assert_data_frame(data)
   col_names <- c(
-    "case", "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time"
+    "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time"
   )
   assert_names(names(data), must.include = col_names)
   assert_numeric(data$ptime_lwr, lower = 0)

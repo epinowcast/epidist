@@ -18,7 +18,7 @@ as_direct_model.epidist_linelist <- function(data) {
   assert_epidist(data)
 
   data <- data |>
-    mutate(delay = .data$stime - .data$ptime)
+    mutate(delay = .data$stime_lwr - .data$ptime_lwr)
 
   data <- new_epidist_direct_model(data)
   assert_epidist(data)
@@ -41,11 +41,8 @@ new_epidist_direct_model <- function(data) {
 #' @export
 assert_epidist.epidist_direct_model <- function(data, ...) {
   assert_data_frame(data)
-  assert_names(names(data), must.include = c("case", "ptime", "stime", "delay"))
+  assert_names(names(data), must.include = c("delay"))
   assert_numeric(data$delay, lower = 0)
-  assert_integer(data$case, lower = 0)
-  assert_numeric(data$ptime, lower = 0)
-  assert_numeric(data$stime, lower = 0)
 }
 
 #' Check if data has the `epidist_direct_model` class
