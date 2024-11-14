@@ -66,8 +66,7 @@ is_latent_individual <- function(data) {
 #' @family latent_individual
 #' @export
 epidist_family_model.epidist_latent_individual <- function(
-  data, family, ...
-) {
+    data, family, ...) {
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
@@ -92,8 +91,7 @@ epidist_family_model.epidist_latent_individual <- function(
 #' @family latent_individual
 #' @export
 epidist_formula_model.epidist_latent_individual <- function(
-  data, formula, ...
-) {
+    data, formula, ...) {
   # data is only used to dispatch on
   formula <- stats::update(
     formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
@@ -111,7 +109,6 @@ epidist_stancode.epidist_latent_individual <- function(data,
                                                        formula =
                                                          epidist_formula(data),
                                                        ...) {
-
   epidist_validate_model(data)
 
   stanvars_version <- .version_stanvar()

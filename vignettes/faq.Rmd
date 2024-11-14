@@ -117,7 +117,8 @@ family <- "lognormal"
 
 epidist_family <- epidist_family(data, family)
 epidist_formula <- epidist_formula(
-  data, family = epidist_family, formula = mu ~ 1
+  data,
+  family = epidist_family, formula = mu ~ 1
 )
 
 # NULL here means no replacing priors from the user!
