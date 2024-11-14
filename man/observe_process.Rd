@@ -26,9 +26,4 @@ truncation. The columns added are:
 \item \code{obs_time}: The maximum value of \code{stime}
 }
 }
-\seealso{
-Other observe: 
-\code{\link{filter_obs_by_obs_time}()},
-\code{\link{filter_obs_by_ptime}()}
-}
 \concept{observe}

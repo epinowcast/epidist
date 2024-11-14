@@ -9,9 +9,8 @@
 #' @family preprocess
 #' @export
 as_epidist_linelist <- function(
-  data, pdate_lwr = NULL, pdate_upr = NULL, sdate_lwr = NULL, sdate_upr = NULL,
-  obs_date = NULL
-) {
+    data, pdate_lwr = NULL, pdate_upr = NULL, sdate_lwr = NULL,
+    sdate_upr = NULL, obs_date = NULL) {
   class(data) <- c("epidist_linelist", class(data))
 
   data <- .rename_columns(data,
