@@ -77,6 +77,7 @@ as_epidist_linelist_data.default <- function(
 #' @importFrom lubridate days is.timepoint
 #' @importFrom cli cli_abort cli_alert_info
 #' @importFrom checkmate assert_true assert_names assert_numeric assert_date
+#' @importFrom utils hasName
 #' @export
 as_epidist_linelist_data.data.frame <- function(
   data, pdate_lwr = NULL,  sdate_lwr = NULL, pdate_upr = NULL, sdate_upr = NULL,

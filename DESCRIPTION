@@ -34,7 +34,10 @@ Imports:
     rstan (>= 2.26.0),
     dplyr,
     tibble,
-    lubridate
+    lubridate,
+    BH (>= 1.66.0),
+    Rcpp (>= 0.12.0),
+    RcppEigen (>= 0.3.3.3.0)
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
@@ -43,7 +46,6 @@ Suggests:
     gt,
     knitr,
     roxyglobals,
-    tibble,
     bayesplot,
     tidyr,
     posterior,
@@ -54,10 +56,6 @@ Suggests:
     patchwork,
     cmdstanr,
     priorsense
-LinkingTo: 
-    BH (>= 1.66.0),
-    Rcpp (>= 0.12.0),
-    RcppEigen (>= 0.3.3.3.0)
 Additional_repositories:
     https://stan-dev.r-universe.dev
 Config/Needs/website:
