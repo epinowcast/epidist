@@ -183,7 +183,9 @@ This is called (right) truncation, and biases the observation process towards sh
 
 ```{r}
 obs_time <- 25
-obs_cens_trunc <- filter(obs_cens, .data$stime_upr <= obs_time)
+obs_cens_trunc <- obs_cens |>
+  mutate(obs_time = obs_time) |>
+  filter(.data$stime_upr <= .data$obs_time)
 ```
 
 Finally, in reality, it's not possible to observe every case.

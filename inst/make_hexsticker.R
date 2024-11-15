@@ -24,8 +24,10 @@ obs <- outbreak |>
   )
 
 obs_time <- 25
+
 truncated_obs <- obs |>
-  filter(.data$stime_upr <= obs_time) |>
+  mutate(obs_time = obs_time) |>
+  filter(.data$stime_upr <= .data$obs_time) |>
   slice_sample(n = 200, replace = FALSE)
 
 combined_obs <- bind_rows(

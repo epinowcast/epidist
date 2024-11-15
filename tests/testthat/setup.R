@@ -15,17 +15,13 @@ sim_obs <- simulate_gillespie() |>
     sdlog = sdlog
   ) |>
   dplyr::mutate(
-    ptime_daily = floor(.data$ptime),
-    ptime_lwr = .data$ptime_daily,
-    ptime_upr = .data$ptime_daily + 1,
-    stime_daily = floor(.data$stime),
-    stime_lwr = .data$stime_daily,
-    stime_upr = .data$stime_daily + 1,
-    delay_daily = .data$stime_daily - .data$ptime_daily,
-    delay_lwr = purrr::map_dbl(.data$delay_daily, ~ max(0, . - 1)),
-    delay_upr = .data$delay_daily + 1
+    ptime_lwr = floor(.data$ptime),
+    ptime_upr = .data$ptime_lwr + 1,
+    stime_lwr = floor(.data$stime),
+    stime_upr = .data$stime_lwr + 1,
+    obs_time = obs_time
   ) |>
-  dplyr::filter(.data$stime_upr <= obs_time) |>
+  dplyr::filter(.data$stime_upr <= .data$obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
@@ -52,17 +48,13 @@ sim_obs_gamma <- simulate_gillespie() |>
     rate = rate
   ) |>
   dplyr::mutate(
-    ptime_daily = floor(.data$ptime),
-    ptime_lwr = .data$ptime_daily,
-    ptime_upr = .data$ptime_daily + 1,
-    stime_daily = floor(.data$stime),
-    stime_lwr = .data$stime_daily,
-    stime_upr = .data$stime_daily + 1,
-    delay_daily = .data$stime_daily - .data$ptime_daily,
-    delay_lwr = purrr::map_dbl(.data$delay_daily, ~ max(0, . - 1)),
-    delay_upr = .data$delay_daily + 1
+    ptime_lwr = floor(.data$ptime),
+    ptime_upr = .data$ptime_lwr + 1,
+    stime_lwr = floor(.data$stime),
+    stime_upr = .data$stime_lwr + 1,
+    obs_time = obs_time
   ) |>
-  dplyr::filter(.data$stime_upr <= obs_time) |>
+  dplyr::filter(.data$stime_upr <= .data$obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
@@ -106,9 +98,10 @@ sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
     ptime_lwr = floor(.data$ptime),
     ptime_upr = .data$ptime_lwr + 1,
     stime_lwr = floor(.data$stime),
-    stime_upr = .data$stime_lwr + 1
+    stime_upr = .data$stime_lwr + 1,
+    obs_time = obs_time
   ) |>
-  dplyr::filter(.data$stime_upr <= obs_time) |>
+  dplyr::filter(.data$stime_upr <= .data$obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data

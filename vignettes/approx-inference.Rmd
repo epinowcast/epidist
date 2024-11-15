@@ -126,9 +126,10 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
     ptime_lwr = floor(.data$ptime),
     ptime_upr = .data$ptime_lwr + 1,
     stime_lwr = floor(.data$stime),
-    stime_upr = .data$stime_lwr + 1
+    stime_upr = .data$stime_lwr + 1,
+    obs_time = obs_time
   ) |>
-  filter(.data$stime_upr <= obs_time) |>
+  filter(.data$stime_upr <= .data$obs_time) |>
   slice_sample(n = sample_size, replace = FALSE)
 ```
 
