@@ -4,7 +4,7 @@
 # varying the input seed. Test failure at an unusually high rate does suggest
 # a potential code issue.
 
-test_that("epidist.epidist_latent_individual Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
   stancode <- epidist(
     data = prep_obs,
@@ -16,7 +16,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors in t
   expect_true(mod$check_syntax())
 })
 
-test_that("epidist.epidist_latent_individual samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case.", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_model samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case.", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
@@ -53,7 +53,7 @@ test_that("epidist.epidist_latent_individual samples from the prior according to
   testthat::expect_gt(ks2$p.value, 0.01)
 })
 
-test_that("epidist.epidist_latent_individual fits and the MCMC converges in the default case", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_model fits and the MCMC converges in the default case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   expect_s3_class(fit, "brmsfit")
@@ -61,7 +61,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   expect_convergence(fit)
 })
 
-test_that("epidist.epidist_latent_individual fits, the MCMC converges, and the draws of sigma are indeed a constant, when setting sigma = 1 (a constant)", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_model fits, the MCMC converges, and the draws of sigma are indeed a constant, when setting sigma = 1 (a constant)", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
@@ -80,7 +80,7 @@ test_that("epidist.epidist_latent_individual fits, the MCMC converges, and the d
   expect_true(all(sigma == 1))
 })
 
-test_that("epidist.epidist_latent_individual Stan code has no syntax errors", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_model Stan code has no syntax errors", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
@@ -97,7 +97,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors", { 
   expect_true(mod_string$check_syntax())
 })
 
-test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_model recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
@@ -107,7 +107,7 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   expect_equal(mean(pred$sigma), sdlog, tolerance = 0.1)
 })
 
-test_that("epidist.epidist_latent_individual Stan code has no syntax errors and compiles in the gamma delay case", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_model Stan code has no syntax errors and compiles in the gamma delay case", { # nolint: line_length_linter.
   skip_on_cran()
   stancode_gamma <- epidist(
     data = prep_obs_gamma,
@@ -123,7 +123,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors and 
   expect_no_error(mod_gamma$compile())
 })
 
-test_that("epidist.epidist_latent_individual fits and the MCMC converges in the gamma delay case", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_model fits and the MCMC converges in the gamma delay case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
@@ -132,7 +132,7 @@ test_that("epidist.epidist_latent_individual fits and the MCMC converges in the 
   expect_convergence(fit_gamma)
 })
 
-test_that("epidist.epidist_latent_individual recovers the simulation settings for the delay distribution in the gamma delay case", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_model recovers the simulation settings for the delay distribution in the gamma delay case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
@@ -149,7 +149,7 @@ test_that("epidist.epidist_latent_individual recovers the simulation settings fo
   expect_lte(quantile_shape, 0.975)
 })
 
-test_that("epidist.epidist_latent_individual Stan code has no syntax errors for an alternative formula", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_model Stan code has no syntax errors for an alternative formula", { # nolint: line_length_linter.
   skip_on_cran()
   stancode_sex <- epidist(
     data = prep_obs_sex,
@@ -163,7 +163,7 @@ test_that("epidist.epidist_latent_individual Stan code has no syntax errors for 
   expect_true(mod_sex$check_syntax())
 })
 
-test_that("epidist.epidist_latent_individual recovers a sex effect", { # nolint: line_length_linter.
+test_that("epidist.epidist_latent_model recovers a sex effect", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)

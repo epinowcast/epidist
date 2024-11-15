@@ -36,7 +36,7 @@ epidist <- function(data, formula, family, prior, fn, ...) {
 epidist.default <- function(data, formula = mu ~ 1,
                             family = "lognormal", prior = NULL,
                             fn = brms::brm, ...) {
-  epidist_validate_model(data)
+  assert_epidist(data)
   epidist_family <- epidist_family(data, family)
   epidist_formula <- epidist_formula(
     data = data, family = epidist_family, formula = formula

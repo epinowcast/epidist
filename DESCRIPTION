@@ -32,7 +32,9 @@ Imports:
     cli,
     checkmate,
     rstan (>= 2.26.0),
-    dplyr
+    dplyr,
+    tibble,
+    lubridate
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
@@ -41,7 +43,6 @@ Suggests:
     gt,
     knitr,
     roxyglobals,
-    tibble,
     bayesplot,
     tidyr,
     posterior,
@@ -51,8 +52,7 @@ Suggests:
     modelr,
     patchwork,
     cmdstanr,
-    priorsense
-LinkingTo: 
+    priorsense,
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
     RcppEigen (>= 0.3.3.3.0)
