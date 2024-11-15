@@ -74,7 +74,7 @@ as_epidist_linelist_data.default <- function(
 #' @param ... Additional arguments passed to methods
 #' @family linelist_data
 #' @importFrom dplyr bind_cols
-#' @importFrom lubridate days
+#' @importFrom lubridate days is.timepoint
 #' @importFrom cli cli_abort cli_alert_info
 #' @importFrom checkmate assert_true assert_names assert_numeric assert_date
 #' @export
@@ -135,11 +135,11 @@ as_epidist_linelist_data.data.frame <- function(
   assert_names(names(df), must.include = col_names)
 
   # Check for being a datetime
-  assert_date(df$pdate_lwr)
-  assert_date(df$pdate_upr)
-  assert_date(df$sdate_lwr)
-  assert_date(df$sdate_upr)
-  assert_date(df$obs_date)
+  assert_true(is.timepoint(df$pdate_lwr))
+  assert_true(is.timepoint(df$pdate_upr))
+  assert_true(is.timepoint(df$sdate_lwr))
+  assert_true(is.timepoint(df$sdate_upr))
+  assert_true(is.timepoint(df$obs_date))
 
   # Convert datetime to time
   min_date <- min(df$pdate_lwr)
