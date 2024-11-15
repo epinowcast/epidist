@@ -7,7 +7,7 @@ test_that("epidist_diagnostics", { # nolint: line_length_linter.
     "per_divergent_transitions", "max_treedepth", "no_at_max_treedepth",
     "per_at_max_treedepth"
   )
-  expect_equal(names(diag), expected_names)
+  expect_named(diag, expected_names)
   expect_gt(diag$time, 0)
   expect_gt(diag$samples, 0)
   expect_gt(diag$max_rhat, 0.9)

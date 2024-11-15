@@ -8,11 +8,11 @@ test_that("epidist_formula with default settings produces a brmsformula with the
     family = family_lognormal, formula = mu ~ 1
   )
   expect_s3_class(form, "brmsformula")
-  expect_equal(
+  expect_identical(
     as_string_formula(form$formula),
     "delay | vreal(relative_obs_time, pwindow, swindow) ~ 1"
   )
-  expect_equal(
+  expect_identical(
     as_string_formula(form$pforms$sigma),
     "sigma ~ 1"
   )
@@ -33,11 +33,11 @@ test_that("epidist_formula with custom formulas produces a brmsformula with corr
     formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex)
   )
   expect_s3_class(form_sex, "brmsformula")
-  expect_equal(
+  expect_identical(
     as_string_formula(form_sex$formula),
     "delay | vreal(relative_obs_time, pwindow, swindow) ~ sex"
   )
-  expect_equal(
+  expect_identical(
     as_string_formula(form_sex$pforms$sigma),
     "sigma ~ 1 + sex"
   )
