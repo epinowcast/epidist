@@ -104,9 +104,9 @@ sim_obs_sex_f <- dplyr::filter(sim_obs_sex, sex == 1) |>
 sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
   dplyr::mutate(
     ptime_lwr = floor(.data$ptime),
-    ptime_upr = .data$ptime_daily + 1,
+    ptime_upr = .data$ptime_lwr + 1,
     stime_lwr = floor(.data$stime),
-    stime_upr = .data$stime_daily + 1
+    stime_upr = .data$stime_lwr + 1
   ) |>
   dplyr::filter(.data$stime_upr <= obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)

@@ -17,9 +17,9 @@ obs <- outbreak |>
   ) |>
   mutate(
     ptime_lwr = floor(.data$ptime),
-    ptime_upr = .data$ptime_daily + 1,
+    ptime_upr = .data$ptime_lwr + 1,
     stime_lwr = floor(.data$stime),
-    stime_upr = .data$stime_daily + 1,
+    stime_upr = .data$stime_lwr + 1
     delay_daily = .data$stime_lwr - .data$ptime_lwr
   )
 
