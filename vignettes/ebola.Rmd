@@ -171,7 +171,7 @@ obs_cens <- sierra_leone_ebola_data |>
   mutate(
     # use lubridate::ymd() to drop any sub-date time info
     date_of_symptom_onset = ymd(date_of_symptom_onset),
-    date_of_sample_tested = ymd(date_of_sample_tested),
+    date_of_sample_tested = ymd(date_of_sample_tested)
   ) |>
   select(case, date_of_symptom_onset, date_of_sample_tested, age, sex, district)
 

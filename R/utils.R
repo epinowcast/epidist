@@ -98,7 +98,7 @@
 #' @inheritParams epidist_family
 #' @keywords internal
 .add_dpar_info <- function(family) {
-  other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
+  other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]] # nolint
   other_bounds <- lapply(
     family$dpars[-1], brms:::dpar_bounds, # nolint
     family = family$family
@@ -146,7 +146,7 @@
   if (length(missing_cols) > 0) {
     cli::cli_abort(paste0(
       "The following columns are not present in the data: ",
-      paste(missing_cols, collapse = ", ")
+      toString(missing_cols)
     ))
   }
 
