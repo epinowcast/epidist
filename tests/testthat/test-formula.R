@@ -1,4 +1,4 @@
-prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
+prep_obs_gamma <- as_epidist_latent_model(sim_obs_gamma)
 
 family_lognormal <- epidist_family(prep_obs, family = brms::lognormal())
 

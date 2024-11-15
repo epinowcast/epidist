@@ -8,7 +8,7 @@
 #' @return A character string containing the Stan code chunk of interest.
 #' @keywords internal
 .stan_chunk <- function(path) {
-  local_path <- system.file(paste0("stan/", path), package = "epidist")
+  local_path <- system.file(file.path("stan", path), package = "epidist")
   paste(readLines(local_path), collapse = "\n")
 }
 
@@ -54,6 +54,7 @@
 #' @param warn If `TRUE` then a warning will be displayed if a `new_prior` is
 #' provided for which there is no matching `old_prior`. Defaults to `FALSE`
 #' @autoglobal
+#' @importFrom dplyr full_join filter select
 #' @keywords internal
 .replace_prior <- function(old_prior, prior, warn = FALSE) {
   if (is.null(prior)) {
@@ -135,12 +136,24 @@
 #' @keywords internal
 #' @importFrom stats setNames
 .rename_columns <- function(df, new_names, old_names) {
-  are_char <- is.character(new_names) & is.character(old_names)
-  valid_new_names <- new_names[are_char]
-  valid_old_names <- old_names[are_char]
-  if (length(are_char) > 0) {
+  are_valid <- is.character(new_names) & is.character(old_names)
+
+  valid_new_names <- new_names[are_valid]
+  valid_old_names <- old_names[are_valid]
+
+  # Check if old names exist in dataframe
+  missing_cols <- setdiff(valid_old_names, names(df))
+  if (length(missing_cols) > 0) {
+    cli::cli_abort(paste0(
+      "The following columns are not present in the data: ",
+      paste(missing_cols, collapse = ", ")
+    ))
+  }
+
+  if (length(valid_new_names) > 0) {
     rename_map <- setNames(valid_old_names, valid_new_names)
     df <- dplyr::rename(df, !!!rename_map)
   }
+
   return(df)
 }
