@@ -10,7 +10,7 @@
 #' @export
 epidist_family <- function(data, family = "lognormal", ...) {
   assert_epidist(data)
-  family <- brms:::validate_family(family)
+  family <- brms:::validate_family(family) # nolint
   class(family) <- c(family$family, class(family))
   family <- .add_dpar_info(family)
   custom_family <- epidist_family_model(data, family, ...)
@@ -66,6 +66,6 @@ epidist_family_reparam.default <- function(family, ...) {
 #' @family family
 #' @export
 epidist_family_reparam.gamma <- function(family, ...) {
-  family$reparam <- c("shape", "shape ./ mu")
+  family$reparam <- c("shape", "shape ./ mu") # nolint
   return(family)
 }

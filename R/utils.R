@@ -8,7 +8,7 @@
 #' @return A character string containing the Stan code chunk of interest.
 #' @keywords internal
 .stan_chunk <- function(path) {
-  local_path <- system.file(file.path("stan", path), package = "epidist")
+  local_path <- system.file("stan", path, package = "epidist")
   paste(readLines(local_path), collapse = "\n")
 }
 
@@ -66,7 +66,7 @@
     by = cols, suffix = c("_old", "_new")
   )
 
-  if (any(is.na(prior$prior_old))) {
+  if (anyNA(prior$prior_old)) {
     missing_prior <- utils::capture.output(print(
       prior |>
         filter(is.na(.data$prior_old)) |>
@@ -76,7 +76,7 @@
       msg <- c(
         "!" = "One or more priors have no match in existing parameters:",
         missing_prior,
-        "i" = "To remove this warning consider changing prior specification."
+        "i" = "To remove this warning consider changing prior specification." # nolint
       )
       cli_warn(message = msg)
     }
@@ -98,9 +98,9 @@
 #' @inheritParams epidist_family
 #' @keywords internal
 .add_dpar_info <- function(family) {
-  other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]]
+  other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]] # nolint
   other_bounds <- lapply(
-    family$dpars[-1], brms:::dpar_bounds,
+    family$dpars[-1], brms:::dpar_bounds, # nolint
     family = family$family
   )
   family$other_links <- other_links
@@ -146,7 +146,7 @@
   if (length(missing_cols) > 0) {
     cli::cli_abort(paste0(
       "The following columns are not present in the data: ",
-      paste(missing_cols, collapse = ", ")
+      toString(missing_cols)
     ))
   }
 

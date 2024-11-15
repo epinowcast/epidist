@@ -1,6 +1,6 @@
 ---
 title: "Frequently asked questions and tips"
-output: 
+output:
   bookdown::html_document2:
     toc: true
     fig_caption: yes
