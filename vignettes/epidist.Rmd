@@ -1,7 +1,7 @@
 ---
 title: "Getting started with epidist"
 description: "A quick start guide to using the epidist R package"
-output: 
+output:
   bookdown::html_document2:
     fig_caption: yes
     code_folding: show
@@ -20,7 +20,7 @@ bibliography: references.bib
 ```{r setup, include=FALSE}
 # exclude compile warnings from cmdstanr
 knitr::opts_chunk$set(
-  fig.path = "figures/epidist-",
+  fig.path = file.path("figures", "epidist-"),
   cache = TRUE,
   collapse = TRUE,
   comment = "#>",
@@ -34,7 +34,7 @@ Many quantities in epidemiology can be thought of as the time between two events
 Important examples include:
 
 * the incubation period (time between infection and symptom onset),
-* serial interval (time between symptom onset of infectee and symptom onset of infected), and 
+* serial interval (time between symptom onset of infectee and symptom onset of infected), and
 * generation interval (time between infection of infectee and infection of infected).
 
 We encompass all of these delays as the time between a "primary event" and "secondary event".
@@ -231,7 +231,7 @@ bind_rows(
     args = list(
       meanlog = secondary_dist[["mu"]],
       sdlog = secondary_dist[["sigma"]]
-    ),
+    )
   ) +
   labs(
     x = "Delay between primary and secondary event (days)",
