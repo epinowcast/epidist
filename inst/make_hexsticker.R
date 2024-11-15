@@ -15,7 +15,17 @@ obs <- outbreak |>
     meanlog = secondary_dist$mu[[1]],
     sdlog = secondary_dist$sigma[[1]]
   ) |>
-  observe_process()
+  mutate(
+    ptime_daily = floor(.data$ptime),
+    ptime_lwr = .data$ptime_daily,
+    ptime_upr = .data$ptime_daily + 1,
+    stime_daily = floor(.data$stime),
+    stime_lwr = .data$stime_daily,
+    stime_upr = .data$stime_daily + 1,
+    delay_daily = .data$stime_daily - .data$ptime_daily,
+    delay_lwr = purrr::map_dbl(.data$delay_daily, ~ max(0, . - 1)),
+    delay_upr = .data$delay_daily + 1
+  )
 
 obs_time <- 25
 truncated_obs <- obs |>

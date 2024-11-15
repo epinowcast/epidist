@@ -155,7 +155,18 @@ This means that rather than exact event times, we observe event times within an 
 Here we suppose that the interval is daily, meaning that only the date of the primary or secondary event, not the exact event time, is reported (Figure \@ref(fig:cens)):
 
 ```{r}
-obs_cens <- obs |> observe_process()
+obs_cens <- obs |>
+  mutate(
+    ptime_daily = floor(.data$ptime),
+    ptime_lwr = .data$ptime_daily,
+    ptime_upr = .data$ptime_daily + 1,
+    stime_daily = floor(.data$stime),
+    stime_lwr = .data$stime_daily,
+    stime_upr = .data$stime_daily + 1,
+    delay_daily = .data$stime_daily - .data$ptime_daily,
+    delay_lwr = purrr::map_dbl(.data$delay_daily, ~ max(0, . - 1)),
+    delay_upr = .data$delay_daily + 1
+  )
 ```
 
 (ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. A common example of this is when events are reported as daily aggregates. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.

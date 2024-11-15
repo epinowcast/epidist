@@ -14,7 +14,17 @@ sim_obs <- simulate_gillespie() |>
     meanlog = meanlog,
     sdlog = sdlog
   ) |>
-  observe_process() |>
+  dplyr::mutate(
+    ptime_daily = floor(.data$ptime),
+    ptime_lwr = .data$ptime_daily,
+    ptime_upr = .data$ptime_daily + 1,
+    stime_daily = floor(.data$stime),
+    stime_lwr = .data$stime_daily,
+    stime_upr = .data$stime_daily + 1,
+    delay_daily = .data$stime_daily - .data$ptime_daily,
+    delay_lwr = purrr::map_dbl(.data$delay_daily, ~ max(0, . - 1)),
+    delay_upr = .data$delay_daily + 1
+  ) |>
   dplyr::filter(.data$stime_upr <= obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
@@ -41,7 +51,17 @@ sim_obs_gamma <- simulate_gillespie() |>
     shape = shape,
     rate = rate
   ) |>
-  observe_process() |>
+  dplyr::mutate(
+    ptime_daily = floor(.data$ptime),
+    ptime_lwr = .data$ptime_daily,
+    ptime_upr = .data$ptime_daily + 1,
+    stime_daily = floor(.data$stime),
+    stime_lwr = .data$stime_daily,
+    stime_upr = .data$stime_daily + 1,
+    delay_daily = .data$stime_daily - .data$ptime_daily,
+    delay_lwr = purrr::map_dbl(.data$delay_daily, ~ max(0, . - 1)),
+    delay_upr = .data$delay_daily + 1
+  ) |>
   dplyr::filter(.data$stime_upr <= obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
@@ -82,7 +102,17 @@ sim_obs_sex_f <- dplyr::filter(sim_obs_sex, sex == 1) |>
   dplyr::select(case, ptime, delay, stime, sex)
 
 sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
-  observe_process() |>
+  dplyr::mutate(
+    ptime_daily = floor(.data$ptime),
+    ptime_lwr = .data$ptime_daily,
+    ptime_upr = .data$ptime_daily + 1,
+    stime_daily = floor(.data$stime),
+    stime_lwr = .data$stime_daily,
+    stime_upr = .data$stime_daily + 1,
+    delay_daily = .data$stime_daily - .data$ptime_daily,
+    delay_lwr = purrr::map_dbl(.data$delay_daily, ~ max(0, . - 1)),
+    delay_upr = .data$delay_daily + 1
+  ) |>
   dplyr::filter(.data$stime_upr <= obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 

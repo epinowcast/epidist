@@ -175,6 +175,25 @@ obs_cens <- sierra_leone_ebola_data |>
   ) |>
   select(case, date_of_symptom_onset, date_of_sample_tested, age, sex, district)
 
+head(sierra_leone_ebola_data)
+```
+
+Next, we use add interval censoring columns giving the lower and upper bounds on the (daily) primary and secondary event times:
+
+```{r}
+obs_cens <- sierra_leone_ebola_data |>
+  mutate(
+    ptime_daily = floor(.data$ptime),
+    ptime_lwr = .data$ptime_daily,
+    ptime_upr = .data$ptime_daily + 1,
+    stime_daily = floor(.data$stime),
+    stime_lwr = .data$stime_daily,
+    stime_upr = .data$stime_daily + 1,
+    delay_daily = .data$stime_daily - .data$ptime_daily,
+    delay_lwr = purrr::map_dbl(.data$delay_daily, ~ max(0, . - 1)),
+    delay_upr = .data$delay_daily + 1
+  )
+
 head(obs_cens)
 ```
 
