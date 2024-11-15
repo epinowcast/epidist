@@ -47,15 +47,14 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
   filter(.data$stime_upr <= obs_time) |>
   slice_sample(n = sample_size, replace = FALSE)
 
-# Note: this functionality will be integrated into the package shortly
-as_epidist_linelist_time <- function(data) {
-  class(data) <- c("epidist_linelist", class(data))
-  epidist_validate_data(data)
-  return(data)
-}
-
-linelist <- as_epidist_linelist_time(obs_cens_trunc_samp)
-data <- as_latent_individual(linelist)
+linelist_data <- as_epidist_linelist_data(
+  obs_cens_trunc_samp$ptime_lwr,
+  obs_cens_trunc_samp$ptime_upr,
+  obs_cens_trunc_samp$stime_lwr,
+  obs_cens_trunc_samp$stime_upr,
+  obs_time = obs_cens_trunc_samp$obs_time
+)
+data <- as_epidist_latent_model(linelist_data)
 
 fit <- epidist(
   data,
@@ -220,7 +219,7 @@ ggplot(draws_pmf, aes(x = .prediction)) +
 ```
 
 Importantly, this functionality is only available for `epidist` models using custom `brms` families that have `posterior_predict` and `posterior_epred` methods implemented.
-For example, for the `latent_individual` model, currently methods are implemented for the [lognormal](https://github.com/epinowcast/epidist/blob/main/R/latent_lognormal.R) and [gamma](https://github.com/epinowcast/epidist/blob/main/R/latent_gamma.R) families.
+For example, for the `epidist_latent_model` model, currently methods are implemented for the [lognormal](https://github.com/epinowcast/epidist/blob/main/R/latent_lognormal.R) and [gamma](https://github.com/epinowcast/epidist/blob/main/R/latent_gamma.R) families.
 If you are using another family, consider [submitting a pull request](https://github.com/epinowcast/epidist/pulls) to implement these methods!
 In doing so, you may find it useful to use the [`primarycensored`](https://primarycensored.epinowcast.org/) package.
 
