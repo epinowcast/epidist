@@ -250,8 +250,8 @@ To do so, we first prepare the `data` using `as_latent_individual()`:
 linelist <- as_epidist_linelist(
   obs_cens_trunc_samp$ptime_lwr,
   obs_cens_trunc_samp$ptime_upr,
-  obs_cens_trunc_samp$sdate_lwr,
-  obs_cens_trunc_samp$sdate_upr,
+  obs_cens_trunc_samp$stime_lwr,
+  obs_cens_trunc_samp$stime_upr,
   obs_time = obs_cens_trunc_samp$obs_time
 )
 

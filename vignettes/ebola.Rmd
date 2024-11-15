@@ -219,10 +219,11 @@ To prepare the data for use with the latent individual model, we set `obs_cens` 
 linelist <- as_epidist_linelist(
   obs_cens$ptime_lwr,
   obs_cens$ptime_upr,
-  obs_cens$sdate_lwr,
-  obs_cens$sdate_upr,
+  obs_cens$stime_lwr,
+  obs_cens$stime_upr,
   obs_time = obs_cens$obs_time
 )
+
 obs_prep <- as_latent_individual(linelist)
 head(obs_prep)
 ```
