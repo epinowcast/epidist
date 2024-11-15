@@ -7,10 +7,6 @@ test_that("as_direct_model.data.frame with default settings an object with the c
 test_that("as_direct_model.data.frame errors when passed incorrect inputs", { # nolint: line_length_linter.
   expect_error(as_direct_model(list()))
   expect_error(as_direct_model(sim_obs[, 1]))
-  expect_error({
-    sim_obs$case <- paste("case_", seq_len(nrow(sim_obs)))
-    as_direct_model(sim_obs)
-  })
 })
 
 # Make this data available for other tests

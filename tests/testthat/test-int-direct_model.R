@@ -25,7 +25,8 @@ test_that("epidist.epidist_direct_model fits and the MCMC converges in the defau
     seed = 1,
     silent = 2, refresh = 0,
     cores = 2,
-    chains = 2
+    chains = 2,
+    backend = "cmdstanr"
   )
   expect_s3_class(fit, "brmsfit")
   expect_s3_class(fit, "epidist_fit")
