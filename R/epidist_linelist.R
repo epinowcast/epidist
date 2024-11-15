@@ -16,13 +16,15 @@ as_epidist_linelist <- function(data, ...) {
 #' secondary times
 #' @param obs_time Numeric vector giving observation times
 #' @param ... Additional columns to add to the epidist_linelist object
+#' @importFrom tibble tibble
+#' @importFrom dplyr bind_cols
 #' @export
 as_epidist_linelist.default <- function(
   data, ptime_upr = NULL, stime_lwr = NULL, stime_upr = NULL,
   obs_time = NULL, ...
 ) {
   # Create base data frame with required columns
-  df <- data.frame(
+  df <- tibble(
     ptime_lwr = data,
     ptime_upr = ptime_upr,
     stime_lwr = stime_lwr,
@@ -33,7 +35,7 @@ as_epidist_linelist.default <- function(
   # Add any additional columns passed via ...
   extra_cols <- list(...)
   if (length(extra_cols) > 0) {
-    df <- cbind(df, extra_cols)
+    df <- bind_cols(df, extra_cols)
   }
 
   df <- new_epidist_linelist(df)
@@ -52,6 +54,7 @@ as_epidist_linelist.default <- function(
 #' observation time as a datetime.
 #' @param ... Additional arguments passed to methods
 #' @family preprocess
+#' @importFrom dplyr bind_cols
 #' @export
 as_epidist_linelist.data.frame <- function(
   data, pdate_lwr = NULL, pdate_upr = NULL, sdate_lwr = NULL, sdate_upr = NULL,
@@ -80,6 +83,7 @@ as_epidist_linelist.data.frame <- function(
   min_date <- min(df$pdate_lwr)
 
   # Convert to numeric times and use default method
+
   result <- as_epidist_linelist.default(
     data = as.numeric(df$pdate_lwr - min_date),
     ptime_upr = as.numeric(df$pdate_upr - min_date),
@@ -87,6 +91,8 @@ as_epidist_linelist.data.frame <- function(
     stime_upr = as.numeric(df$sdate_upr - min_date),
     obs_time = as.numeric(df$obs_date - min_date)
   )
+
+  result <- bind_cols(result, df)
 
   return(result)
 }

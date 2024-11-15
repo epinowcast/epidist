@@ -10,7 +10,6 @@ test_that("as_latent_individual.epidist_linelist errors when passed incorrect in
 })
 
 # Make this data available for other tests
-prep_obs <- as_latent_individual(sim_obs)
 family_lognormal <- epidist_family(prep_obs, family = brms::lognormal())
 
 test_that("is_latent_individual returns TRUE for correct input", { # nolint: line_length_linter.
@@ -31,17 +30,17 @@ test_that("is_latent_individual returns FALSE for incorrect input", { # nolint: 
   })
 })
 
-test_that("epidist_validate_model.epidist_latent_individual doesn't produce an error for correct input", { # nolint: line_length_linter.
-  expect_no_error(epidist_validate_model(prep_obs))
+test_that("assert_epidist.epidist_latent_individual doesn't produce an error for correct input", { # nolint: line_length_linter.
+  expect_no_error(assert_epidist(prep_obs))
 })
 
-test_that("epidist_validate.epidist_latent_individual returns FALSE for incorrect input", { # nolint: line_length_linter.
-  expect_error(epidist_validate(list()))
-  expect_error(epidist_validate(prep_obs[, 1]))
+test_that("assert_epidist.epidist_latent_individual returns FALSE for incorrect input", { # nolint: line_length_linter.
+  expect_error(assert_epidist(list()))
+  expect_error(assert_epidist(prep_obs[, 1]))
   expect_error({
     x <- list()
     class(x) <- "epidist_latent_individual"
-    epidist_validate(x)
+    assert_epidist(x)
   })
 })
 

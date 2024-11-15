@@ -14,11 +14,10 @@ test_that("as_direct_model.data.frame errors when passed incorrect inputs", { # 
 })
 
 # Make this data available for other tests
-prep_obs <- as_direct_model(sim_obs)
-family_lognormal <- epidist_family(prep_obs, family = brms::lognormal())
+family_lognormal <- epidist_family(sim_obs, family = brms::lognormal())
 
 test_that("is_direct_model returns TRUE for correct input", { # nolint: line_length_linter.
-  expect_true(is_direct_model(prep_obs))
+  expect_true(is_direct_model(prep_direct_obs))
   expect_true({
     x <- list()
     class(x) <- "epidist_direct_model"
@@ -35,16 +34,16 @@ test_that("is_direct_model returns FALSE for incorrect input", { # nolint: line_
   })
 })
 
-test_that("epidist_validate_model.epidist_direct_model doesn't produce an error for correct input", { # nolint: line_length_linter.
-  expect_no_error(epidist_validate_model(prep_obs))
+test_that("assert_epidist.epidist_direct_model doesn't produce an error for correct input", { # nolint: line_length_linter.
+  expect_no_error(assert_epidist(prep_direct_obs))
 })
 
-test_that("epidist_validate_model.epidist_direct_model returns FALSE for incorrect input", { # nolint: line_length_linter.
-  expect_error(epidist_validate_model(list()))
-  expect_error(epidist_validate_model(prep_obs[, 1]))
+test_that("assert_epidist.epidist_direct_model returns FALSE for incorrect input", { # nolint: line_length_linter.
+  expect_error(assert_epidist(list()))
+  expect_error(assert_epidist(prep_direct_obs[, 1]))
   expect_error({
     x <- list()
     class(x) <- "epidist_direct_model"
-    epidist_validate_model(x)
+    assert_epidist(x)
   })
 })

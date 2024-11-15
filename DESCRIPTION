@@ -32,7 +32,8 @@ Imports:
     cli,
     checkmate,
     rstan (>= 2.26.0),
-    dplyr
+    dplyr,
+    tibble
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
