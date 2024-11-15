@@ -15,5 +15,8 @@ exclusions: list(
     "inst",
     "tests/testthat.R" = list(
       unused_import_linter = Inf
+    ),
+    "vignettes/faq.Rmd" = list(
+      library_call_linter = Inf
     )
   )
