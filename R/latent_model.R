@@ -109,20 +109,20 @@ epidist_formula_model.epidist_latent_model <- function(
 }
 
 #' @method epidist_stancode epidist_latent_model
+#' @importFrom brms stanvar
 #' @family epidist_latent_model
 #' @autoglobal
 #' @export
-epidist_stancode.epidist_latent_model <- function(data,
-                                                       family =
-                                                         epidist_family(data),
-                                                       formula =
-                                                         epidist_formula(data),
-                                                       ...) {
+epidist_stancode.epidist_latent_model <- function(
+  data,
+  family = epidist_family(data),
+  formula = epidist_formula(data), ...
+) {
   assert_epidist(data)
 
   stanvars_version <- .version_stanvar()
 
-  stanvars_functions <- brms::stanvar(
+  stanvars_functions <- stanvar(
     block = "functions",
     scode = .stan_chunk(file.path("latent_model", "functions.stan"))
   )
@@ -152,36 +152,36 @@ epidist_stancode.epidist_latent_model <- function(data,
     stanvars_functions[[1]]$scode
   )
 
-  stanvars_data <- brms::stanvar(
+  stanvars_data <- stanvar(
     block = "data",
     scode = "int wN;",
     x = nrow(filter(data, woverlap > 0)),
     name = "wN"
   ) +
-    brms::stanvar(
+    stanvar(
       block = "data",
       scode = "array[N - wN] int noverlap;",
       x = filter(data, woverlap == 0)$.row_id,
       name = "noverlap"
     ) +
-    brms::stanvar(
+    stanvar(
       block = "data",
       scode = "array[wN] int woverlap;",
       x = filter(data, woverlap > 0)$.row_id,
       name = "woverlap"
     )
 
-  stanvars_parameters <- brms::stanvar(
+  stanvars_parameters <- stanvar(
     block = "parameters",
     scode = .stan_chunk(file.path("latent_model", "parameters.stan"))
   )
 
-  stanvars_tparameters <- brms::stanvar(
+  stanvars_tparameters <- stanvar(
     block = "tparameters",
     scode = .stan_chunk(file.path("latent_model", "tparameters.stan"))
   )
 
-  stanvars_priors <- brms::stanvar(
+  stanvars_priors <- stanvar(
     block = "model",
     scode = .stan_chunk(file.path("latent_model", "priors.stan"))
   )
