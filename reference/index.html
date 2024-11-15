@@ -95,9 +95,9 @@
         </dt>
         <dd>Observation process for primary and secondary events</dd>
       </dl></div><div class="section level2">
-      <h2 id="preprocess">Preprocess<a class="anchor" aria-label="anchor" href="#preprocess"></a></h2>
+      <h2 id="linelist-data">Linelist data<a class="anchor" aria-label="anchor" href="#linelist-data"></a></h2>
 
-      <div class="section-desc"><p>Functions for preprocessing data</p></div>
+      <div class="section-desc"><p>Functions for preparing linelist data</p></div>
 
 
     </div><div class="section level2">
@@ -107,26 +107,44 @@
 
       <dl><dt>
 
-          <code><a href="as_epidist_linelist.html">as_epidist_linelist()</a></code>
+          <code><a href="as_epidist_linelist_data.html">as_epidist_linelist_data()</a></code>
 
         </dt>
-        <dd>Prepare date data in the <code>epidist_linelist</code> format</dd>
+        <dd>Create an epidist_linelist_data object</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_validate_data.epidist_linelist.html">epidist_validate_data(<i>&lt;epidist_linelist&gt;</i>)</a></code>
+          <code><a href="as_epidist_linelist_data.data.frame.html">as_epidist_linelist_data(<i>&lt;data.frame&gt;</i>)</a></code>
 
         </dt>
-        <dd>Validation for the <code>epidist_linelist</code> class</dd>
+        <dd>Create an epidist_linelist_data object from a data frame with event dates</dd>
       </dl><dl><dt>
 
-          <code><a href="is_epidist_linelist.html">is_epidist_linelist()</a></code>
+          <code><a href="as_epidist_linelist_data.default.html">as_epidist_linelist_data(<i>&lt;default&gt;</i>)</a></code>
 
         </dt>
-        <dd>Check if data has the <code>epidist_linelist</code> class</dd>
+        <dd>Create an epidist_linelist_data object from vectors of event times</dd>
+      </dl><dl><dt>
+
+          <code><a href="assert_epidist.epidist_linelist_data.html">assert_epidist(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Assert validity of <code>epidist_linelist_data</code> objects</dd>
+      </dl><dl><dt>
+
+          <code><a href="is_epidist_linelist_data.html">is_epidist_linelist_data()</a></code>
+
+        </dt>
+        <dd>Check if data has the <code>epidist_linelist_data</code> class</dd>
+      </dl><dl><dt>
+
+          <code><a href="new_epidist_linelist_data.html">new_epidist_linelist_data()</a></code>
+
+        </dt>
+        <dd>Class constructor for <code>epidist_linelist_data</code> objects</dd>
       </dl></div><div class="section level2">
-      <h2 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a></h2>
+      <h2 id="assert-validity-of-objects">Assert validity of objects<a class="anchor" aria-label="anchor" href="#assert-validity-of-objects"></a></h2>
 
-      <div class="section-desc"><p>Functions used to check validity of package objects</p></div>
+      <div class="section-desc"><p>Functions used to assert the validity of package objects</p></div>
 
 
     </div><div class="section level2">
@@ -136,28 +154,10 @@
 
       <dl><dt>
 
-          <code><a href="epidist_validate_data.html">epidist_validate_data()</a></code>
+          <code><a href="assert_epidist.html">assert_epidist()</a></code>
 
         </dt>
-        <dd>Validate data class</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_validate_data.default.html">epidist_validate_data(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method for validate data class</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_validate_model.html">epidist_validate_model()</a></code>
-
-        </dt>
-        <dd>Validate model class</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_validate_model.default.html">epidist_validate_model(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method for validate model class</dd>
+        <dd>Validation for epidist objects</dd>
       </dl></div><div class="section level2">
       <h2 id="family">Family<a class="anchor" aria-label="anchor" href="#family"></a></h2>
 
@@ -328,9 +328,9 @@
         </dt>
         <dd>Default method used for interface using <code>brms</code></dd>
       </dl></div><div class="section level2">
-      <h2 id="latent-individual-model">Latent individual model<a class="anchor" aria-label="anchor" href="#latent-individual-model"></a></h2>
+      <h2 id="latent-model">Latent model<a class="anchor" aria-label="anchor" href="#latent-model"></a></h2>
 
-      <div class="section-desc"><p>Specific methods for the latent individual model</p></div>
+      <div class="section-desc"><p>Specific methods for the latent model</p></div>
 
 
     </div><div class="section level2">
@@ -340,34 +340,34 @@
 
       <dl><dt>
 
-          <code><a href="as_latent_individual.html">as_latent_individual()</a></code>
+          <code><a href="as_epidist_latent_model.html">as_epidist_latent_model()</a></code>
 
         </dt>
-        <dd>Prepare latent individual model</dd>
+        <dd>Convert an object to an <code>epidist_latent_model</code> object</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_family_model.epidist_latent_individual.html">epidist_family_model(<i>&lt;epidist_latent_individual&gt;</i>)</a></code>
+          <code><a href="epidist_family_model.epidist_latent_model.html">epidist_family_model(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
 
         </dt>
         <dd>Create the model-specific component of an <code>epidist</code> custom family</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_formula_model.epidist_latent_individual.html">epidist_formula_model(<i>&lt;epidist_latent_individual&gt;</i>)</a></code>
+          <code><a href="epidist_formula_model.epidist_latent_model.html">epidist_formula_model(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
 
         </dt>
         <dd>Define the model-specific component of an <code>epidist</code> custom formula</dd>
       </dl><dl><dt>
 
-          <code><a href="is_direct_model.html">is_direct_model()</a></code>
+          <code><a href="is_epidist_latent_model.html">is_epidist_latent_model()</a></code>
 
         </dt>
-        <dd>Check if data has the <code>epidist_direct_model</code> class</dd>
+        <dd>Check if data has the <code>epidist_latent_model</code> class</dd>
       </dl><dl><dt>
 
-          <code><a href="is_latent_individual.html">is_latent_individual()</a></code>
+          <code><a href="new_epidist_latent_model.html">new_epidist_latent_model()</a></code>
 
         </dt>
-        <dd>Check if data has the <code>epidist_latent_individual</code> class</dd>
+        <dd>Class constructor for <code>epidist_latent_model</code> objects</dd>
       </dl></div><div class="section level2">
       <h2 id="direct-model">Direct model<a class="anchor" aria-label="anchor" href="#direct-model"></a></h2>
 
@@ -381,10 +381,28 @@
 
       <dl><dt>
 
-          <code><a href="as_direct_model.html">as_direct_model()</a></code>
+          <code><a href="as_epidist_naive_model.html">as_epidist_naive_model()</a></code>
 
         </dt>
         <dd>Prepare direct model to pass through to <code>brms</code></dd>
+      </dl><dl><dt>
+
+          <code><a href="as_epidist_naive_model.epidist_linelist_data.html">as_epidist_naive_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The direct model method for <code>epidist_linelist_data</code> objects</dd>
+      </dl><dl><dt>
+
+          <code><a href="is_epidist_naive_model.html">is_epidist_naive_model()</a></code>
+
+        </dt>
+        <dd>Check if data has the <code>epidist_naive_model</code> class</dd>
+      </dl><dl><dt>
+
+          <code><a href="new_epidist_naive_model.html">new_epidist_naive_model()</a></code>
+
+        </dt>
+        <dd>Class constructor for <code>epidist_naive_model</code> objects</dd>
       </dl></div><div class="section level2">
       <h2 id="postprocess">Postprocess<a class="anchor" aria-label="anchor" href="#postprocess"></a></h2>
 

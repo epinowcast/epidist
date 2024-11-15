@@ -283,23 +283,23 @@ However, with only access to <code>obs_cens_trunc_samp</code>, the delay distrib
 Figure 2.1: The histogram of delays from the complete, retrospective data <code>obs_cens</code> match quite closely with the underlying distribution, whereas those from <code>obs_cens_trunc_samp</code> show more significant systematic bias. In this instance the extent of the bias caused by censoring is less than that caused by right truncation. Nonetheless, we always recommend [<span class="citation">Charniga et al. (<a href="#ref-charniga2024best">2024</a>)</span>; Table 2] adjusting for censoring when it is present.
 </p>
 </div>
-<p>The main function you will use for modelling is called <code><a href="../reference/epidist.html">epidist()</a></code><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Technically, &lt;code&gt;&lt;a href="../reference/epidist.html"&gt;epidist()&lt;/a&gt;&lt;/code&gt; is an &lt;a href="http://adv-r.had.co.nz/S3.html" class="external-link"&gt;S3 generic&lt;/a&gt; which allows it to work differently for inputs of different classes. This is in part why inputs must be prepared first via &lt;code&gt;&lt;a href="../reference/as_latent_individual.html"&gt;as_latent_individual()&lt;/a&gt;&lt;/code&gt; so that they are of the appropriate class!&lt;/p&gt;'><sup>1</sup></a>.
-We will fit the model <code>"latent_individual"</code> which uses latent variables for the time of primary and secondary event of each individual<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;In a future vignette, we will explain in more detail the structure of the model!&lt;/p&gt;"><sup>2</sup></a>.
-To do so, we first prepare the <code>data</code> using <code><a href="../reference/as_latent_individual.html">as_latent_individual()</a></code>:</p>
+<p>The main function you will use for modelling is called <code><a href="../reference/epidist.html">epidist()</a></code><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Technically, &lt;code&gt;&lt;a href="../reference/epidist.html"&gt;epidist()&lt;/a&gt;&lt;/code&gt; is an &lt;a href="http://adv-r.had.co.nz/S3.html" class="external-link"&gt;S3 generic&lt;/a&gt; which allows it to work differently for inputs of different classes. This is in part why inputs must be prepared first via &lt;code&gt;&lt;a href="../reference/as_epidist_latent_model.html"&gt;as_epidist_latent_model()&lt;/a&gt;&lt;/code&gt; so that they are of the appropriate class!&lt;/p&gt;'><sup>1</sup></a>.
+We will fit the model <code>"epidist_latent_model"</code> which uses latent variables for the time of primary and secondary event of each individual<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;In a future vignette, we will explain in more detail the structure of the model!&lt;/p&gt;"><sup>2</sup></a>.
+To do so, we first prepare the <code>data</code> using <code><a href="../reference/as_epidist_latent_model.html">as_epidist_latent_model()</a></code>:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Note: this functionality will be integrated into the package shortly</span></span>
-<span><span class="va">as_epidist_linelist_time</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"epidist_linelist"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="../reference/epidist_validate_data.html">epidist_validate_data</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
+<code class="sourceCode R"><span><span class="va">linelist_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_linelist_data.html">as_epidist_linelist_data</a></span><span class="op">(</span></span>
+<span>  <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">ptime_lwr</span>,</span>
+<span>  <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">ptime_upr</span>,</span>
+<span>  <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">stime_lwr</span>,</span>
+<span>  <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">stime_upr</span>,</span>
+<span>  obs_time <span class="op">=</span> <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">obs_time</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">linelist</span> <span class="op">&lt;-</span> <span class="fu">as_epidist_linelist_time</span><span class="op">(</span><span class="va">obs_cens_trunc_samp</span><span class="op">)</span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">linelist</span><span class="op">)</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_latent_model.html">as_epidist_latent_model</a></span><span class="op">(</span><span class="va">linelist_data</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "epidist_latent_individual" "epidist_linelist"         </span></span>
-<span><span class="co">#&gt; [3] "data.frame"</span></span></code></pre></div>
-<p>The <code>data</code> object now has the class <code>epidist_latent_individual</code>.
+<span><span class="co">#&gt; [1] "epidist_latent_model"  "epidist_linelist_data" "tbl_df"               </span></span>
+<span><span class="co">#&gt; [4] "tbl"                   "data.frame"</span></span></code></pre></div>
+<p>The <code>data</code> object now has the class <code>epidist_latent_model</code>.
 Using this <code>data</code>, we now call <code><a href="../reference/epidist.html">epidist()</a></code> to fit the model.
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the <a href="https://paul-buerkner.github.io/brms/" class="external-link"><code>brms</code></a> R package <span class="citation">(<a href="#ref-brms">Bürkner 2017</a>)</span>.</p>

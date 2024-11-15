@@ -106,15 +106,14 @@ If you have a question about using the package, please create an <a href="https:
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">stime_upr</span> <span class="op">&lt;=</span> <span class="va">obs_time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">sample_size</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Note: this functionality will be integrated into the package shortly</span></span>
-<span><span class="va">as_epidist_linelist_time</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"epidist_linelist"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="../reference/epidist_validate_data.html">epidist_validate_data</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">linelist</span> <span class="op">&lt;-</span> <span class="fu">as_epidist_linelist_time</span><span class="op">(</span><span class="va">obs_cens_trunc_samp</span><span class="op">)</span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">linelist</span><span class="op">)</span></span>
+<span><span class="va">linelist_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_linelist_data.html">as_epidist_linelist_data</a></span><span class="op">(</span></span>
+<span>  <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">ptime_lwr</span>,</span>
+<span>  <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">ptime_upr</span>,</span>
+<span>  <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">stime_lwr</span>,</span>
+<span>  <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">stime_upr</span>,</span>
+<span>  obs_time <span class="op">=</span> <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">obs_time</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_latent_model.html">as_epidist_latent_model</a></span><span class="op">(</span><span class="va">linelist_data</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
@@ -157,7 +156,7 @@ For example, the function <code><a href="https://mc-stan.org/bayesplot/reference
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
 <span><span class="co">##    time samples max_rhat divergent_transitions per_divergent_transitions</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>  21.6    <span style="text-decoration: underline;">4</span>000     1.01                     0                         0</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>  21.8    <span style="text-decoration: underline;">4</span>000     1.01                     0                         0</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 3 more variables: max_treedepth &lt;dbl&gt;, no_at_max_treedepth &lt;int&gt;,</span></span></span>
 <span><span class="co">## <span style="color: #949494;">#   per_at_max_treedepth &lt;dbl&gt;</span></span></span></code></pre>
 </div>
@@ -324,7 +323,7 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 <span><span class="co">## (`geom_bar()`).</span></span></code></pre>
 <p><img src="faq_files/figure-html/unnamed-chunk-9-1.png" width="672"></p>
 <p>Importantly, this functionality is only available for <code>epidist</code> models using custom <code>brms</code> families that have <code>posterior_predict</code> and <code>posterior_epred</code> methods implemented.
-For example, for the <code>latent_individual</code> model, currently methods are implemented for the <a href="https://github.com/epinowcast/epidist/blob/main/R/latent_lognormal.R" class="external-link">lognormal</a> and <a href="https://github.com/epinowcast/epidist/blob/main/R/latent_gamma.R" class="external-link">gamma</a> families.
+For example, for the <code>epidist_latent_model</code> model, currently methods are implemented for the <a href="https://github.com/epinowcast/epidist/blob/main/R/latent_lognormal.R" class="external-link">lognormal</a> and <a href="https://github.com/epinowcast/epidist/blob/main/R/latent_gamma.R" class="external-link">gamma</a> families.
 If you are using another family, consider <a href="https://github.com/epinowcast/epidist/pulls" class="external-link">submitting a pull request</a> to implement these methods!
 In doing so, you may find it useful to use the <a href="https://primarycensored.epinowcast.org/" class="external-link"><code>primarycensored</code></a> package.</p>
 </div>

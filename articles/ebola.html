@@ -95,6 +95,7 @@ In analyzing this data, we demonstrate the following features of <code>epidist</
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epidist.epinowcast.org/">epidist</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms" class="external-link">brms</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
@@ -222,89 +223,69 @@ That is, <span class="math inline">\(\mu\)</span> and <span class="math inline">
 <h3 id="data-preparation-1">
 <span class="header-section-number">3.1</span> Data preparation<a class="anchor" aria-label="anchor" href="#data-preparation-1"></a>
 </h3>
-<p>To prepare the data, we begin by transforming the date columns to <code>ptime</code> and <code>stime</code> columns for the times of the primary and secondary events respectively.
-Both of these columns are relative to the first date of symptom onset in the data:</p>
+<p>To prepare the data, we begin by filtering for the relevant columns and converting the date columns to <code>Date</code> objects:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sierra_leone_ebola_data</span> <span class="op">&lt;-</span> <span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
 <span>    <span class="co"># use lubridate::ymd() to drop any sub-date time info</span></span>
 <span>    date_of_symptom_onset <span class="op">=</span> <span class="fu"><a href="https://lubridate.tidyverse.org/reference/ymd.html" class="external-link">ymd</a></span><span class="op">(</span><span class="va">date_of_symptom_onset</span><span class="op">)</span>,</span>
 <span>    date_of_sample_tested <span class="op">=</span> <span class="fu"><a href="https://lubridate.tidyverse.org/reference/ymd.html" class="external-link">ymd</a></span><span class="op">(</span><span class="va">date_of_sample_tested</span><span class="op">)</span>,</span>
-<span>    <span class="co"># ptime and stime represent the number of days elapsed since the earliest</span></span>
-<span>    <span class="co"># date of symptom onset in the data</span></span>
-<span>    ptime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">date_of_symptom_onset</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">date_of_symptom_onset</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    stime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">date_of_sample_tested</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">date_of_symptom_onset</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">case</span>, <span class="va">ptime</span>, <span class="va">stime</span>, <span class="va">age</span>, <span class="va">sex</span>, <span class="va">district</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">case</span>, <span class="va">date_of_symptom_onset</span>, <span class="va">date_of_sample_tested</span>, <span class="va">age</span>, <span class="va">sex</span>, <span class="va">district</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sierra_leone_ebola_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
-<span><span class="co">#&gt;    case ptime stime   age sex    district</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1     0     5    20 Female Kailahun</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2     2     7    42 Female Kailahun</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3     2     7    45 Female Kailahun</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4     3     8    15 Female Kailahun</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5     3     8    19 Female Kailahun</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6     3     8    55 Female Kailahun</span></span></code></pre></div>
-<p>Next, we use <code><a href="../reference/observe_process.html">observe_process()</a></code> to add interval censoring columns giving the lower and upper bounds on the primary and secondary event times:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/observe_process.html">observe_process</a></span><span class="op">(</span><span class="va">sierra_leone_ebola_data</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 16</span></span></span>
-<span><span class="co">#&gt;    case ptime stime   age sex    district ptime_daily ptime_lwr ptime_upr</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1     0     5    20 Female Kailahun           0         0         1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2     2     7    42 Female Kailahun           2         2         3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3     2     7    45 Female Kailahun           2         2         3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4     3     8    15 Female Kailahun           3         3         4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5     3     8    19 Female Kailahun           3         3         4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6     3     8    55 Female Kailahun           3         3         4</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: stime_daily &lt;dbl&gt;, stime_lwr &lt;dbl&gt;, stime_upr &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   delay_daily &lt;dbl&gt;, delay_lwr &lt;dbl&gt;, delay_upr &lt;dbl&gt;, obs_time &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
+<span><span class="co">#&gt;    case date_of_symptom_onset date_of_sample_tested   age sex    district</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 2014-05-18            2014-05-23               20 Female Kailahun</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 2014-05-20            2014-05-25               42 Female Kailahun</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 2014-05-20            2014-05-25               45 Female Kailahun</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4 2014-05-21            2014-05-26               15 Female Kailahun</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5 2014-05-21            2014-05-26               19 Female Kailahun</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     6 2014-05-21            2014-05-26               55 Female Kailahun</span></span></code></pre></div>
 <p>For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;It should be a relatively simple extension to allow for missing data in the model.&lt;/p&gt;"><sup>1</sup></a>).</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span></span>
 <span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="va">obs_cens</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/stats/complete.cases.html" class="external-link">complete.cases</a></span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span>, <span class="op">]</span></span>
 <span><span class="va">n_complete</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span></span></code></pre></div>
 <p>Here, 83% of the cases were complete.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subsample</span> <span class="op">&lt;-</span> <span class="fl">0.2</span></span></code></pre></div>
 <p>Additionally, to speed up computation, we take a random 20% subsample of the complete data.
 (In a real analysis, we’d recommend using all the available data).</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="va">obs_cens</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n_complete</span> <span class="op">*</span> <span class="va">subsample</span><span class="op">)</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<p>Finally, we prepare the data for use with the <code>epidist</code> package by converting the data to an <code>epidist_linelist_data</code> object:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">linelist_data</span> <span class="op">&lt;-</span> <span class="va">obs_cens</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/as_epidist_linelist_data.html">as_epidist_linelist_data</a></span><span class="op">(</span></span>
+<span>    pdate_lwr <span class="op">=</span> <span class="st">"date_of_symptom_onset"</span>,</span>
+<span>    sdate_lwr <span class="op">=</span> <span class="st">"date_of_sample_tested"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<p>Note that this has made some assumptions about the data in that it has assumed that as we did not supply upper bounds for the primary and secondary events, that the upper bounds are one day after the lower bounds. It has also assumed that the observation time is the maximum of the secondary event upper bound as we also did not supply an observation time column.</p>
 </div>
 <div class="section level3" number="3.2">
 <h3 id="model-fitting">
 <span class="header-section-number">3.2</span> Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a>
 </h3>
-<p>To prepare the data for use with the latent individual model, we set <code>obs_cens</code> to be an <code>epidist_linelist</code> object, then use the function <code><a href="../reference/as_latent_individual.html">as_latent_individual()</a></code>:</p>
+<p>To prepare the data for use with the latent individual model, we define the data as being a <code>epidist_latent_model</code> model object:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Note: this functionality will be integrated into the package shortly</span></span>
-<span><span class="va">as_epidist_linelist_time</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"epidist_linelist"</span>, <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="../reference/epidist_validate_data.html">epidist_validate_data</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">linelist</span> <span class="op">&lt;-</span> <span class="fu">as_epidist_linelist_time</span><span class="op">(</span><span class="va">obs_cens</span><span class="op">)</span></span>
-<span><span class="va">obs_prep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_latent_individual.html">as_latent_individual</a></span><span class="op">(</span><span class="va">linelist</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">obs_prep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_latent_model.html">as_epidist_latent_model</a></span><span class="op">(</span><span class="va">linelist_data</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">obs_prep</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 22</span></span></span>
-<span><span class="co">#&gt;    case ptime stime   age sex    district      ptime_daily ptime_lwr ptime_upr</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>  <span style="text-decoration: underline;">1</span>101   108   111    40 Female Bombali               108       108       109</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>  <span style="text-decoration: underline;">5</span>584   189   197    23 Male   Bombali               189       189       190</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>  <span style="text-decoration: underline;">1</span>187   111   117    35 Male   Port Loko             111       111       112</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>  <span style="text-decoration: underline;">2</span>483   138   142    15 Female Bo                    138       138       139</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>  <span style="text-decoration: underline;">6</span>796   217   221    16 Male   Western Urban         217       217       218</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>  <span style="text-decoration: underline;">3</span>576   157   163    28 Female Bombali               157       157       158</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: stime_daily &lt;dbl&gt;, stime_lwr &lt;dbl&gt;, stime_upr &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   delay_daily &lt;dbl&gt;, delay_lwr &lt;dbl&gt;, delay_upr &lt;dbl&gt;, obs_time &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   relative_obs_time &lt;dbl&gt;, pwindow &lt;dbl&gt;, woverlap &lt;dbl&gt;, swindow &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   delay &lt;dbl&gt;, .row_id &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 20</span></span></span>
+<span><span class="co">#&gt;   ptime_lwr ptime_upr stime_lwr stime_upr obs_time  case pdate_lwr  sdate_lwr </span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       108       109       111       112      480  <span style="text-decoration: underline;">1</span>101 2014-09-03 2014-09-06</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       189       190       197       198      480  <span style="text-decoration: underline;">5</span>584 2014-11-23 2014-12-01</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       111       112       117       118      480  <span style="text-decoration: underline;">1</span>187 2014-09-06 2014-09-12</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       138       139       142       143      480  <span style="text-decoration: underline;">2</span>483 2014-10-03 2014-10-07</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>       217       218       221       222      480  <span style="text-decoration: underline;">6</span>796 2014-12-21 2014-12-25</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>       157       158       163       164      480  <span style="text-decoration: underline;">3</span>576 2014-10-22 2014-10-28</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: age &lt;dbl&gt;, sex &lt;chr&gt;, district &lt;chr&gt;, pdate_upr &lt;date&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   sdate_upr &lt;date&gt;, obs_date &lt;date&gt;, relative_obs_time &lt;dbl&gt;, pwindow &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   woverlap &lt;dbl&gt;, swindow &lt;dbl&gt;, delay &lt;dbl&gt;, .row_id &lt;int&gt;</span></span></span></code></pre></div>
 <p>Now we are ready to fit the latent individual model.</p>
 <div class="section level4" number="3.2.1">
 <h4 id="intercept-only-model">
@@ -341,8 +322,8 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.62      0.02     1.59     1.65 1.00     9135     2707</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.54      0.02    -0.58    -0.50 1.00     8932     3351</span></span>
+<span><span class="co">#&gt; Intercept           1.62      0.02     1.59     1.65 1.00     9716     2688</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.54      0.02    -0.58    -0.50 1.00     9059     2914</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -379,10 +360,10 @@ It is important to note that the estimates represent an average of the observed 
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.60      0.02     1.56     1.65 1.00     9840     3072</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.57      0.03    -0.62    -0.51 1.00     9121     2955</span></span>
-<span><span class="co">#&gt; sexMale             0.03      0.03    -0.03     0.09 1.00     9384     2952</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.05      0.04    -0.03     0.14 1.00     8838     2776</span></span>
+<span><span class="co">#&gt; Intercept           1.60      0.02     1.56     1.65 1.00     7640     2860</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.57      0.03    -0.63    -0.51 1.00     7639     3413</span></span>
+<span><span class="co">#&gt; sexMale             0.03      0.03    -0.03     0.09 1.00     8259     3161</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.05      0.04    -0.03     0.13 1.00     7225     3271</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -423,15 +404,15 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
 <span><span class="co">#&gt; ~district (Number of levels: 14) </span></span>
 <span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)           0.13      0.04     0.07     0.22 1.00     2241     2762</span></span>
-<span><span class="co">#&gt; sd(sigma_Intercept)     0.24      0.07     0.14     0.41 1.00     1630     2277</span></span>
+<span><span class="co">#&gt; sd(Intercept)           0.13      0.04     0.07     0.22 1.00     2031     2785</span></span>
+<span><span class="co">#&gt; sd(sigma_Intercept)     0.23      0.07     0.14     0.39 1.00     1660     2425</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.63      0.04     1.54     1.72 1.00     2473     2812</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.64      0.08    -0.80    -0.49 1.00     1974     1983</span></span>
-<span><span class="co">#&gt; sexMale             0.04      0.03    -0.02     0.10 1.00    10711     2685</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.04      0.04    -0.04     0.12 1.00     8473     3145</span></span>
+<span><span class="co">#&gt; Intercept           1.63      0.05     1.54     1.72 1.00     1995     2422</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.64      0.08    -0.80    -0.49 1.00     1486     1925</span></span>
+<span><span class="co">#&gt; sexMale             0.04      0.03    -0.02     0.10 1.00     9583     2802</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.04      0.04    -0.04     0.12 1.00     8840     3261</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -440,39 +421,39 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; $district</span></span>
 <span><span class="co">#&gt; , , Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                    Estimate  Est.Error        Q2.5         Q97.5</span></span>
-<span><span class="co">#&gt; Bo             6.371621e-02 0.07359867 -0.07516483  0.2172727750</span></span>
-<span><span class="co">#&gt; Bombali        1.640778e-01 0.04941813  0.06541626  0.2611606250</span></span>
-<span><span class="co">#&gt; Bonthe         6.939424e-03 0.12645921 -0.25349780  0.2492450750</span></span>
-<span><span class="co">#&gt; Kailahun      -4.011221e-02 0.05667364 -0.15431732  0.0711047200</span></span>
-<span><span class="co">#&gt; Kambia         4.223585e-02 0.08850373 -0.12717575  0.2207266750</span></span>
-<span><span class="co">#&gt; Kenema        -1.391701e-01 0.07323260 -0.29128433  0.0002774699</span></span>
-<span><span class="co">#&gt; Koinadugu      1.133106e-01 0.09724935 -0.06785274  0.3257543500</span></span>
-<span><span class="co">#&gt; Kono          -3.061089e-02 0.07825150 -0.18479047  0.1197622750</span></span>
-<span><span class="co">#&gt; Moyamba       -6.773945e-05 0.08349288 -0.16163852  0.1587817000</span></span>
-<span><span class="co">#&gt; Port Loko      1.435738e-02 0.05249369 -0.09109206  0.1192909250</span></span>
-<span><span class="co">#&gt; Pujehun       -4.120320e-02 0.11048968 -0.26577855  0.1650174750</span></span>
-<span><span class="co">#&gt; Tonkolili      3.631068e-02 0.05692232 -0.07445011  0.1508875250</span></span>
-<span><span class="co">#&gt; Western Rural  8.802803e-03 0.05416008 -0.09850370  0.1171788750</span></span>
-<span><span class="co">#&gt; Western Urban -1.841781e-01 0.05383542 -0.29487793 -0.0825507900</span></span>
+<span><span class="co">#&gt;                   Estimate  Est.Error        Q2.5        Q97.5</span></span>
+<span><span class="co">#&gt; Bo             0.062354374 0.07793594 -0.09351771  0.218292475</span></span>
+<span><span class="co">#&gt; Bombali        0.161996426 0.04955703  0.06940822  0.264468425</span></span>
+<span><span class="co">#&gt; Bonthe         0.006244718 0.12679564 -0.24637620  0.255287025</span></span>
+<span><span class="co">#&gt; Kailahun      -0.042366892 0.05661785 -0.15803442  0.067869875</span></span>
+<span><span class="co">#&gt; Kambia         0.047736853 0.08842820 -0.12744093  0.225382750</span></span>
+<span><span class="co">#&gt; Kenema        -0.140868411 0.07190588 -0.29151928 -0.006228557</span></span>
+<span><span class="co">#&gt; Koinadugu      0.115249953 0.10252796 -0.06984558  0.323375225</span></span>
+<span><span class="co">#&gt; Kono          -0.033648450 0.07635799 -0.19061337  0.114239075</span></span>
+<span><span class="co">#&gt; Moyamba       -0.003141594 0.08211161 -0.16419105  0.154032925</span></span>
+<span><span class="co">#&gt; Port Loko      0.012306233 0.05371323 -0.09176502  0.117358425</span></span>
+<span><span class="co">#&gt; Pujehun       -0.040339979 0.11931596 -0.28476797  0.185322950</span></span>
+<span><span class="co">#&gt; Tonkolili      0.034717044 0.05846418 -0.07734945  0.152016750</span></span>
+<span><span class="co">#&gt; Western Rural  0.007570996 0.05532290 -0.10125318  0.120088900</span></span>
+<span><span class="co">#&gt; Western Urban -0.185939069 0.05412118 -0.29620172 -0.080082992</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; , , sigma_Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5        Q97.5</span></span>
-<span><span class="co">#&gt; Bo            -0.04319236 0.11996727 -0.27383410  0.199299325</span></span>
-<span><span class="co">#&gt; Bombali       -0.29174162 0.08868419 -0.45921660 -0.116847950</span></span>
-<span><span class="co">#&gt; Bonthe        -0.05523976 0.25069080 -0.59706777  0.422855400</span></span>
-<span><span class="co">#&gt; Kailahun      -0.20451584 0.10145527 -0.40233780 -0.002879607</span></span>
-<span><span class="co">#&gt; Kambia         0.29141334 0.11936303  0.06776910  0.536575650</span></span>
-<span><span class="co">#&gt; Kenema         0.20998415 0.10333036  0.01559385  0.424579575</span></span>
-<span><span class="co">#&gt; Koinadugu      0.01337396 0.15237593 -0.28072285  0.320624525</span></span>
-<span><span class="co">#&gt; Kono           0.10498724 0.11619073 -0.11573440  0.336127500</span></span>
-<span><span class="co">#&gt; Moyamba        0.08364841 0.12449586 -0.14856748  0.339839775</span></span>
-<span><span class="co">#&gt; Port Loko      0.01463715 0.08721044 -0.15581690  0.198435475</span></span>
-<span><span class="co">#&gt; Pujehun       -0.14516908 0.24205619 -0.65634702  0.296625300</span></span>
-<span><span class="co">#&gt; Tonkolili     -0.23929303 0.10497508 -0.44888910 -0.035586045</span></span>
-<span><span class="co">#&gt; Western Rural  0.02832273 0.08749760 -0.13610960  0.201803750</span></span>
-<span><span class="co">#&gt; Western Urban  0.24464192 0.08314110  0.08656548  0.412287575</span></span></code></pre></div>
+<span><span class="co">#&gt; Bo            -0.03846943 0.12209254 -0.27656220  0.204633075</span></span>
+<span><span class="co">#&gt; Bombali       -0.28608014 0.08967155 -0.46117640 -0.110950700</span></span>
+<span><span class="co">#&gt; Bonthe        -0.05263939 0.25533418 -0.56840995  0.434322475</span></span>
+<span><span class="co">#&gt; Kailahun      -0.20092384 0.10222637 -0.40472870 -0.002501823</span></span>
+<span><span class="co">#&gt; Kambia         0.28990098 0.12193886  0.06364249  0.546610475</span></span>
+<span><span class="co">#&gt; Kenema         0.21306142 0.10361685  0.02341296  0.425560350</span></span>
+<span><span class="co">#&gt; Koinadugu      0.01608345 0.14743538 -0.26236690  0.314916075</span></span>
+<span><span class="co">#&gt; Kono           0.10647670 0.11489021 -0.10604492  0.349526025</span></span>
+<span><span class="co">#&gt; Moyamba        0.08658646 0.12012121 -0.13572768  0.338896975</span></span>
+<span><span class="co">#&gt; Port Loko      0.01543792 0.08684709 -0.15448425  0.192607250</span></span>
+<span><span class="co">#&gt; Pujehun       -0.13537132 0.23270857 -0.62131650  0.276139650</span></span>
+<span><span class="co">#&gt; Tonkolili     -0.23273016 0.10370956 -0.43821827 -0.029459557</span></span>
+<span><span class="co">#&gt; Western Rural  0.03107030 0.08897905 -0.13993570  0.210752500</span></span>
+<span><span class="co">#&gt; Western Urban  0.24903149 0.08285642  0.09742020  0.422192375</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3" number="3.3">
