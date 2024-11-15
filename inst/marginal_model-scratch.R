@@ -19,7 +19,7 @@ sim_obs <- simulate_gillespie() |>
     sdlog = sdlog
   ) |>
   observe_process() |>
-  filter_obs_by_obs_time(obs_time = obs_time) |>
+  filter(.data$stime_upr <= obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Create cohort version of data
@@ -49,8 +49,8 @@ summary(fit_direct_weighted)
 
 lognormal <- brms::lognormal()
 
-primarycensored_lognormal_uniform <- brms::custom_family(
-  "primarycensored_lognormal_uniform",
+primarycensored_family <- brms::custom_family(
+  "primarycensored_wrapper",
   dpars = lognormal$dpar,
   links = c(lognormal$link, lognormal$link_sigma),
   type = "int",
@@ -65,20 +65,15 @@ data <- cohort_obs |>
     q = pmax(d - pwindow, 0)
   )
 
-stanvars_functions <- brms::stanvar(
+pcd_stanvars_functions <- brms::stanvar(
   block = "functions",
-  scode = .stan_chunk("cohort_model/primarycensored-edit.stan")
+  scode = pcd_load_stan_functions()
 )
 
-# stanvars_tparameters <- brms::stanvar(
-#   block = "tparameters",
-#   scode = .stan_chunk("cohort_model/tparameters.stan")
-# )
-
-# stanvars_tdata <- brms::stanvar(
-#   block = "tdata",
-#   scode = .stan_chunk("cohort_model/tdata.stan")
-# )
+stanvars_functions <- brms::stanvar(
+  block = "functions",
+  scode = .stan_chunk("cohort_model/functions.stan")
+)
 
 pwindow <- data$pwindow
 
@@ -88,11 +83,11 @@ stanvars_data <- brms::stanvar(
   scode = .stan_chunk("cohort_model/data.stan")
 )
 
-stanvars_all <- stanvars_functions + stanvars_data
+stanvars_all <- pcd_stanvars_functions + stanvars_functions + stanvars_data
 
 stancode <- brms::make_stancode(
   formula = d | weights(n) + vreal(q) ~ 1,
-  family = primarycensored_lognormal_uniform,
+  family = primarycensored_family,
   data = data,
   stanvars = stanvars_all,
 )
@@ -101,7 +96,7 @@ model <- rstan::stan_model(model_code = stancode)
 
 fit_pcd <- brms::brm(
   formula = d | weights(n) + vreal(q) ~ 1,
-  family = primarycensored_lognormal_uniform,
+  family = primarycensored_family,
   data = data,
   stanvars = stanvars_all,
   backend = "cmdstanr"
