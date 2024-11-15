@@ -268,7 +268,7 @@ However, with only access to <code>obs_cens_trunc_samp</code>, the delay distrib
 <span>    args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>      meanlog <span class="op">=</span> <span class="va">secondary_dist</span><span class="op">[[</span><span class="st">"mu"</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>      sdlog <span class="op">=</span> <span class="va">secondary_dist</span><span class="op">[[</span><span class="st">"sigma"</span><span class="op">]</span><span class="op">]</span></span>
-<span>    <span class="op">)</span>,</span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="st">"Delay between primary and secondary event (days)"</span>,</span>
@@ -316,7 +316,7 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span>pattern <span class="op">=</span> <span class="st">"\\[\\d+\\]"</span>, replacement <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  <span class="st">"Parameter"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">pars</span><span class="op">)</span>, <span class="st">"Length"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">pars</span><span class="op">)</span></span>
+<span>  Parameter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">pars</span><span class="op">)</span>, Length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">pars</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://gt.rstudio.com/reference/tab_caption.html" class="external-link">tab_caption</a></span><span class="op">(</span><span class="st">"All of the parameters that are included in the model. Many of these parameters (e.g. swindow and pwindow) are the so called latent variables in the model, and have lengths corresponding to the sample_size. We extracted the model parameters using brms::variables() and removed the indices."</span><span class="op">)</span></span></code></pre></div>

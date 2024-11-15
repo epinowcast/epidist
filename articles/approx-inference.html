@@ -221,10 +221,10 @@ Although a <code>save_single_paths</code> option is available, which may have al
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Number of PSIS draws is larger than the total number of draws returned by the single Pathfinders. This is likely unintentional and leads to re-sampling from the same draws. </span></span>
 <span><span class="co">#&gt; Path [1] :Initial log joint density = -1468.604912 </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/RtmpS1akZI/model-1f8a3033620a.stan', line 16, column 2 to column 78) (in '/tmp/RtmpS1akZI/model-1f8a3033620a.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/RtmpS1akZI/model-1f8a3033620a.stan', line 16, column 2 to column 78) (in '/tmp/RtmpS1akZI/model-1f8a3033620a.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/RtmpS1akZI/model-1f8a3033620a.stan', line 16, column 2 to column 78) (in '/tmp/RtmpS1akZI/model-1f8a3033620a.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/RtmpS1akZI/model-1f8a3033620a.stan', line 16, column 2 to column 78) (in '/tmp/RtmpS1akZI/model-1f8a3033620a.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/RtmpXZJWzn/model-209a2f2ffaf3.stan', line 16, column 2 to column 78) (in '/tmp/RtmpXZJWzn/model-209a2f2ffaf3.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/RtmpXZJWzn/model-209a2f2ffaf3.stan', line 16, column 2 to column 78) (in '/tmp/RtmpXZJWzn/model-209a2f2ffaf3.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/RtmpXZJWzn/model-209a2f2ffaf3.stan', line 16, column 2 to column 78) (in '/tmp/RtmpXZJWzn/model-209a2f2ffaf3.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/RtmpXZJWzn/model-209a2f2ffaf3.stan', line 16, column 2 to column 78) (in '/tmp/RtmpXZJWzn/model-209a2f2ffaf3.stan', line 64, column 4 to column 77) </span></span>
 <span><span class="co">#&gt; Path [1] : Iter      log prob        ||dx||      ||grad||     alpha      alpha0      # evals       ELBO    Best ELBO        Notes  </span></span>
 <span><span class="co">#&gt;              91      -1.057e+03      2.060e-03   2.208e-02    1.000e+00  1.000e+00      2276 -5.417e+02 -5.417e+02                   </span></span>
 <span><span class="co">#&gt; Path [1] :Best Iter: [89] ELBO (-533.322633) evaluations: (2276) </span></span>
@@ -234,10 +234,10 @@ Although a <code>save_single_paths</code> option is available, which may have al
 Thankfully, each algorithm is implemented to sample draws from the posterior distribution, and so post-processing is simple.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  <span class="st">"HMC"</span> <span class="op">=</span> <span class="va">fit_hmc</span>,</span>
-<span>  <span class="st">"Laplace"</span> <span class="op">=</span> <span class="va">fit_laplace</span>,</span>
-<span>  <span class="st">"ADVI"</span> <span class="op">=</span> <span class="va">fit_advi</span>,</span>
-<span>  <span class="st">"Pathfinder"</span> <span class="op">=</span> <span class="va">fit_pathfinder</span></span>
+<span>  HMC <span class="op">=</span> <span class="va">fit_hmc</span>,</span>
+<span>  Laplace <span class="op">=</span> <span class="va">fit_laplace</span>,</span>
+<span>  ADVI <span class="op">=</span> <span class="va">fit_advi</span>,</span>
+<span>  Pathfinder <span class="op">=</span> <span class="va">fit_pathfinder</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">imap</a></span><span class="op">(</span><span class="va">fits</span>, <span class="kw">function</span><span class="op">(</span><span class="va">fit</span>, <span class="va">name</span><span class="op">)</span> <span class="op">{</span></span>
@@ -798,10 +798,10 @@ Figure 3.2: Delay probability density functions obtained based on the posterior 
 That said, even for HMC the computation time in this case is unlikely to be prohibitive.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  <span class="st">"HMC"</span> <span class="op">=</span> <span class="va">time_hmc</span>,</span>
-<span>  <span class="st">"Laplace"</span> <span class="op">=</span> <span class="va">time_laplace</span>,</span>
-<span>  <span class="st">"ADVI"</span> <span class="op">=</span> <span class="va">time_advi</span>,</span>
-<span>  <span class="st">"Pathfinder"</span> <span class="op">=</span> <span class="va">time_pathfinder</span></span>
+<span>  HMC <span class="op">=</span> <span class="va">time_hmc</span>,</span>
+<span>  Laplace <span class="op">=</span> <span class="va">time_laplace</span>,</span>
+<span>  ADVI <span class="op">=</span> <span class="va">time_advi</span>,</span>
+<span>  Pathfinder <span class="op">=</span> <span class="va">time_pathfinder</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">times</span> <span class="op">|&gt;</span></span>
@@ -1265,19 +1265,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">33.191</td>
+<td headers="time (s)" class="gt_row gt_right">34.210</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.618</td>
+<td headers="time (s)" class="gt_row gt_right">2.623</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.153</td>
+<td headers="time (s)" class="gt_row gt_right">2.190</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">1.227</td>
+<td headers="time (s)" class="gt_row gt_right">1.259</td>
 </tr>
 </tbody>
 </table>
