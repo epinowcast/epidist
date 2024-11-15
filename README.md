@@ -63,7 +63,8 @@ contain breaking changes and/or bugs):
 
 ``` r
 remotes::install_github(
-  "epinowcast/epidist", dependencies = TRUE
+  "epinowcast/epidist",
+  dependencies = TRUE
 )
 ```
 
@@ -93,7 +94,8 @@ site](https://mc-stan.org/cmdstanr/), but the brief version is:
 ``` r
 # if you not yet installed `epidist`, or you installed it without `Suggests` dependencies
 install.packages(
-  "cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos"))
+  "cmdstanr",
+  repos = c("https://mc-stan.org/r-packages/", getOption("repos"))
 )
 # once `cmdstanr` is installed:
 cmdstanr::install_cmdstan()
