@@ -282,7 +282,7 @@ pars <- fit |>
   gsub(pattern = "\\[\\d+\\]", replacement = "")
 
 data.frame(
-  "Parameter" = unique(pars), "Length" = table(pars)
+  Parameter = unique(pars), Length = table(pars)
 ) |>
   gt() |>
   tab_caption("(ref:pars)")

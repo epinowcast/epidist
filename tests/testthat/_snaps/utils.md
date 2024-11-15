@@ -53,4 +53,3 @@
               prior     class coef group resp  dpar nlpar   lb   ub source
        normal(0, 5) Intercept                             <NA> <NA>   user
        normal(0, 5) Intercept                 sigma       <NA> <NA>   user
-

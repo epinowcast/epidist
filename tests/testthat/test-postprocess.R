@@ -7,8 +7,8 @@ test_that("predict_delay_parameters works with NULL newdata and the latent logno
   expect_named(pred, c("draw", "index", "mu", "sigma", "mean", "sd"))
   expect_true(all(pred$mean > 0))
   expect_true(all(pred$sd > 0))
-  expect_equal(length(unique(pred$index)), nrow(prep_obs))
-  expect_equal(length(unique(pred$draw)), summary(fit)$total_ndraws)
+  expect_length(unique(pred$index), nrow(prep_obs))
+  expect_length(unique(pred$draw), summary(fit)$total_ndraws)
 })
 
 test_that("predict_delay_parameters accepts newdata arguments and prediction by sex recovers underlying parameters", { # nolint: line_length_linter.
@@ -20,8 +20,8 @@ test_that("predict_delay_parameters accepts newdata arguments and prediction by 
   expect_named(pred_sex, c("draw", "index", "mu", "sigma", "mean", "sd"))
   expect_true(all(pred_sex$mean > 0))
   expect_true(all(pred_sex$sd > 0))
-  expect_equal(length(unique(pred_sex$index)), nrow(prep_obs_sex))
-  expect_equal(length(unique(pred_sex$draw)), summary(fit_sex)$total_ndraws)
+  expect_length(unique(pred_sex$index), nrow(prep_obs_sex))
+  expect_length(unique(pred_sex$draw), summary(fit_sex)$total_ndraws)
 
   pred_sex_summary <- pred_sex |>
     dplyr::left_join(
