@@ -99,7 +99,7 @@ library(purrr)
 library(tidyr)
 library(tibble)
 library(tidybayes)
-library(cmdstanr)
+loadNamespace(cmdstanr)
 ```
 
 To access the approximate inference methods used in this vignette we will need to use the `cmdstanr` backend for `brms` (we generally recommend using this backend for fitting models). To do this, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:
