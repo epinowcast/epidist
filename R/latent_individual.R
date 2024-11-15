@@ -7,11 +7,11 @@ as_latent_individual <- function(data) {
   UseMethod("as_latent_individual")
 }
 
-#' @method as_latent_individual epidist_linelist
+#' @method as_latent_individual epidist_linelist_data
 #' @family latent_individual
 #' @autoglobal
 #' @export
-as_latent_individual.epidist_linelist <- function(data) {
+as_latent_individual.epidist_linelist_data <- function(data) {
   assert_epidist(data)
   data <- data |>
     mutate(

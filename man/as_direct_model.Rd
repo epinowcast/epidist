@@ -14,7 +14,7 @@ Prepare direct model to pass through to \code{brms}
 }
 \seealso{
 Other direct_model: 
-\code{\link{as_direct_model.epidist_linelist}()},
+\code{\link{as_direct_model.epidist_linelist_data}()},
 \code{\link{is_direct_model}()},
 \code{\link{new_epidist_direct_model}()}
 }

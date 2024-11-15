@@ -247,7 +247,7 @@ We will fit the model `"latent_individual"` which uses latent variables for the 
 To do so, we first prepare the `data` using `as_latent_individual()`:
 
 ```{r}
-linelist <- as_epidist_linelist(
+linelist_data <- as_epidist_linelist_data(
   obs_cens_trunc_samp$ptime_lwr,
   obs_cens_trunc_samp$ptime_upr,
   obs_cens_trunc_samp$stime_lwr,
@@ -255,7 +255,7 @@ linelist <- as_epidist_linelist(
   obs_time = obs_cens_trunc_samp$obs_time
 )
 
-data <- as_latent_individual(linelist)
+data <- as_latent_individual(linelist_data)
 class(data)
 ```
 

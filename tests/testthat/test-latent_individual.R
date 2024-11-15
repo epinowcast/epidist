@@ -1,10 +1,10 @@
-test_that("as_latent_individual.epidist_linelist with default settings an object with the correct classes", { # nolint: line_length_linter.
+test_that("as_latent_individual.epidist_linelist_data with default settings an object with the correct classes", { # nolint: line_length_linter.
   prep_obs <- as_latent_individual(sim_obs)
   expect_s3_class(prep_obs, "data.frame")
   expect_s3_class(prep_obs, "epidist_latent_individual")
 })
 
-test_that("as_latent_individual.epidist_linelist errors when passed incorrect inputs", { # nolint: line_length_linter.
+test_that("as_latent_individual.epidist_linelist_data errors when passed incorrect inputs", { # nolint: line_length_linter.
   expect_error(as_latent_individual(list()))
   expect_error(as_latent_individual(sim_obs[, 1]))
 })

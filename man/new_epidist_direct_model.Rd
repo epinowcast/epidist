@@ -18,7 +18,7 @@ Class constructor for \code{epidist_direct_model} objects
 \seealso{
 Other direct_model: 
 \code{\link{as_direct_model}()},
-\code{\link{as_direct_model.epidist_linelist}()},
+\code{\link{as_direct_model.epidist_linelist_data}()},
 \code{\link{is_direct_model}()}
 }
 \concept{direct_model}

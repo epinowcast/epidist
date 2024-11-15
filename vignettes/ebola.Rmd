@@ -45,6 +45,7 @@ set.seed(123)
 
 library(epidist)
 library(brms)
+library(tibble)
 library(dplyr)
 library(purrr)
 library(ggplot2)
@@ -163,29 +164,18 @@ That is, $\mu$ and $\sigma$ such that when $x \sim \mathcal{N}(\mu, \sigma)$ the
 
 ## Data preparation
 
-To prepare the data, we begin by transforming the date columns to `ptime` and `stime` columns for the times of the primary and secondary events respectively.
-Both of these columns are relative to the first date of symptom onset in the data:
+To prepare the data, we begin by filtering for the relevant columns and converting the date columns to `Date` objects:
 
 ```{r}
-sierra_leone_ebola_data <- sierra_leone_ebola_data |>
+obs_cens <- sierra_leone_ebola_data |>
+  tibble() |>
   mutate(
     # use lubridate::ymd() to drop any sub-date time info
     date_of_symptom_onset = ymd(date_of_symptom_onset),
     date_of_sample_tested = ymd(date_of_sample_tested),
-    # ptime and stime represent the number of days elapsed since the earliest
-    # date of symptom onset in the data
-    ptime = as.numeric(date_of_symptom_onset - min(date_of_symptom_onset)),
-    stime = as.numeric(date_of_sample_tested - min(date_of_symptom_onset))
   ) |>
-  select(case, ptime, stime, age, sex, district)
+  select(case, date_of_symptom_onset, date_of_sample_tested, age, sex, district)
 
-head(sierra_leone_ebola_data)
-```
-
-Next, we use `observe_process()` to add interval censoring columns giving the lower and upper bounds on the primary and secondary event times:
-
-```{r}
-obs_cens <- observe_process(sierra_leone_ebola_data)
 head(obs_cens)
 ```
 
@@ -211,20 +201,24 @@ obs_cens <- obs_cens |>
   slice_sample(n = round(n_complete * subsample), replace = FALSE)
 ```
 
-## Model fitting
-
-To prepare the data for use with the latent individual model, we set `obs_cens` to be an `epidist_linelist` object, then use the function `as_latent_individual()`:
+Finally, we prepare the data for use with the `epidist` package by converting the data to an `epidist_linelist_data` object:
 
 ```{r}
-linelist <- as_epidist_linelist(
-  obs_cens$ptime_lwr,
-  obs_cens$ptime_upr,
-  obs_cens$stime_lwr,
-  obs_cens$stime_upr,
-  obs_time = obs_cens$obs_time
-)
+linelist_data <- obs_cens |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  )
+```
 
-obs_prep <- as_latent_individual(linelist)
+Note that this has made some assumptions about the data in that it has assumed that as we did not supply upper bounds for the primary and secondary events, that the upper bounds are one day after the lower bounds. It has also assumed that the observation time is the maximum of the secondary event upper bound as we also did not supply an observation time column.
+
+## Model fitting
+
+To prepare the data for use with the latent individual model, we define the data as being a `latent_individual` model object:
+
+```{r
+obs_prep <- as_latent_individual(linelist_data)
 head(obs_prep)
 ```
 

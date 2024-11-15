@@ -135,12 +135,24 @@
 #' @keywords internal
 #' @importFrom stats setNames
 .rename_columns <- function(df, new_names, old_names) {
-  are_char <- is.character(new_names) & is.character(old_names)
-  valid_new_names <- new_names[are_char]
-  valid_old_names <- old_names[are_char]
-  if (length(are_char) > 0) {
+  are_valid <- is.character(new_names) & is.character(old_names)
+
+  valid_new_names <- new_names[are_valid]
+  valid_old_names <- old_names[are_valid]
+
+  # Check if old names exist in dataframe
+  missing_cols <- setdiff(valid_old_names, names(df))
+  if (length(missing_cols) > 0) {
+    cli::cli_abort(paste0(
+      "The following columns are not present in the data: ",
+      paste(missing_cols, collapse = ", ")
+    ))
+  }
+
+  if (length(valid_new_names) > 0) {
     rename_map <- setNames(valid_old_names, valid_new_names)
     df <- dplyr::rename(df, !!!rename_map)
   }
+
   return(df)
 }

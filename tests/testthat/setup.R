@@ -19,7 +19,7 @@ sim_obs <- simulate_gillespie() |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
-sim_obs <- as_epidist_linelist(
+sim_obs <- as_epidist_linelist_data(
   sim_obs$ptime_lwr,
   sim_obs$ptime_upr,
   sim_obs$stime_lwr,
@@ -46,7 +46,7 @@ sim_obs_gamma <- simulate_gillespie() |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
-sim_obs_gamma <- as_epidist_linelist(
+sim_obs_gamma <- as_epidist_linelist_data(
   sim_obs_gamma$ptime_lwr,
   sim_obs_gamma$ptime_upr,
   sim_obs_gamma$stime_lwr,
@@ -87,7 +87,7 @@ sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
-sim_obs_sex <- as_epidist_linelist(
+sim_obs_sex <- as_epidist_linelist_data(
   sim_obs_sex$ptime_lwr,
   sim_obs_sex$ptime_upr,
   sim_obs_sex$stime_lwr,

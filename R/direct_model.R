@@ -7,14 +7,14 @@ as_direct_model <- function(data) {
   UseMethod("as_direct_model")
 }
 
-#' The direct model method for `epidist_linelist` objects
+#' The direct model method for `epidist_linelist_data` objects
 #'
-#' @param data An `epidist_linelist` object
-#' @method as_direct_model epidist_linelist
+#' @param data An `epidist_linelist_data` object
+#' @method as_direct_model epidist_linelist_data
 #' @family direct_model
 #' @autoglobal
 #' @export
-as_direct_model.epidist_linelist <- function(data) {
+as_direct_model.epidist_linelist_data <- function(data) {
   assert_epidist(data)
 
   data <- data |>
