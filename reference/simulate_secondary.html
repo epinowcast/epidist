@@ -56,14 +56,14 @@ column named <code>ptime</code>.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simulate_secondary</span><span class="op">(</span><span class="va">linelist</span>, dist <span class="op">=</span> <span class="va">rlnorm</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simulate_secondary</span><span class="op">(</span><span class="va">data</span>, dist <span class="op">=</span> <span class="va">rlnorm</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-linelist">linelist<a class="anchor" aria-label="anchor" href="#arg-linelist"></a></dt>
+<dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>A data frame with the primary event times.</p></dd>
 
 
@@ -77,7 +77,7 @@ column named <code>ptime</code>.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>data.frame</code> that augments <code>linelist</code> with two new columns: <code>delay</code>
+    <p>A <code>data.frame</code> that augments <code>data</code> with two new columns: <code>delay</code>
 (secondary event latency) and <code>stime</code> (the time of the secondary event).</p>
     </div>
     <div class="section level2">
