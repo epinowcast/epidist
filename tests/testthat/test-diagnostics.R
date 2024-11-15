@@ -25,7 +25,7 @@ test_that("epidist_diagnostics gives the same results for cmdstanr and rstan", {
   set.seed(1)
   diag_cmdstanr <- epidist_diagnostics(fit)
   diag_rstan <- epidist_diagnostics(fit_rstan)
-  expect_equal(colnames(diag_cmdstanr), colnames(diag_rstan))
+  expect_identical(colnames(diag_cmdstanr), colnames(diag_rstan))
   expect_gt(diag_rstan$time, 0)
   expect_gt(diag_rstan$samples, 0)
   expect_gt(diag_rstan$max_rhat, 0.9)
