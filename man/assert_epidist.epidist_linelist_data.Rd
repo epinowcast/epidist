@@ -6,6 +6,11 @@
 \usage{
 \method{assert_epidist}{epidist_linelist_data}(data, ...)
 }
+\arguments{
+\item{data}{An object to check}
+
+\item{...}{Additional arguments}
+}
 \description{
 Assert validity of \code{epidist_linelist_data} objects
 }

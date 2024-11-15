@@ -183,6 +183,8 @@ is_epidist_linelist_data <- function(data, ...) {
 
 #' Assert validity of `epidist_linelist_data` objects
 #'
+#' @param data An object to check
+#' @param ... Additional arguments
 #' @method assert_epidist epidist_linelist_data
 #' @family linelist_data
 #' @export
