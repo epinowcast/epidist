@@ -29,7 +29,7 @@ test_that("as_epidist_linelist_data correctly renames columns", {
   expect_true(all(col_names %in% names(linelist_data)))
 })
 
-test_that("as_epidist_linelist_data gives error if columns are not datetime", {
+test_that("as_epidist_linelist_data works with dates", {
   data <- data.frame(
     case = 1,
     pdate_lwr = as.Date("2023-01-01"),
@@ -38,7 +38,7 @@ test_that("as_epidist_linelist_data gives error if columns are not datetime", {
     sdate_upr = as.Date("2023-01-04"),
     obs_date = as.Date("2023-01-05")
   )
-  expect_error(
+  expect_no_error(
     as_epidist_linelist_data(
       data, "pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"
     )
