@@ -2,7 +2,7 @@
 % Please edit documentation in R/naive_model.R
 \name{as_epidist_naive_model.epidist_linelist_data}
 \alias{as_epidist_naive_model.epidist_linelist_data}
-\title{The direct model method for \code{epidist_linelist_data} objects}
+\title{The naive model method for \code{epidist_linelist_data} objects}
 \usage{
 \method{as_epidist_naive_model}{epidist_linelist_data}(data)
 }
@@ -10,7 +10,7 @@
 \item{data}{An \code{epidist_linelist_data} object}
 }
 \description{
-The direct model method for \code{epidist_linelist_data} objects
+The naive model method for \code{epidist_linelist_data} objects
 }
 \seealso{
 Other naive_model: 

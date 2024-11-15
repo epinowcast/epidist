@@ -69,8 +69,8 @@ reference:
   desc: Specific methods for the latent model
   contents:
   - has_concept("latent_model")
-- title: Direct model
-  desc: Specific methods for the direct model
+- title: Naive model
+  desc: Specific methods for the naive model
   contents:
   - has_concept("naive_model")
 - title: Postprocess
