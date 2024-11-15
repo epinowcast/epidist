@@ -124,7 +124,7 @@ epidist_stancode.epidist_latent_model <- function(data,
 
   stanvars_functions <- brms::stanvar(
     block = "functions",
-    scode = .stan_chunk(file.path("epidist_latent_model", "functions.stan"))
+    scode = .stan_chunk(file.path("latent_model", "functions.stan"))
   )
 
   family_name <- gsub("latent_", "", family$name)
@@ -173,17 +173,17 @@ epidist_stancode.epidist_latent_model <- function(data,
 
   stanvars_parameters <- brms::stanvar(
     block = "parameters",
-    scode = .stan_chunk(file.path("epidist_latent_model", "parameters.stan"))
+    scode = .stan_chunk(file.path("latent_model", "parameters.stan"))
   )
 
   stanvars_tparameters <- brms::stanvar(
     block = "tparameters",
-    scode = .stan_chunk(file.path("epidist_latent_model", "tparameters.stan"))
+    scode = .stan_chunk(file.path("latent_model", "tparameters.stan"))
   )
 
   stanvars_priors <- brms::stanvar(
     block = "model",
-    scode = .stan_chunk(file.path("epidist_latent_model", "priors.stan"))
+    scode = .stan_chunk(file.path("latent_model", "priors.stan"))
   )
 
   stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +

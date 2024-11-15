@@ -8,7 +8,7 @@
 #' @return A character string containing the Stan code chunk of interest.
 #' @keywords internal
 .stan_chunk <- function(path) {
-  local_path <- system.file("stan", path, package = "epidist")
+  local_path <- system.file(file.path("stan", path), package = "epidist")
   paste(readLines(local_path), collapse = "\n")
 }
 
@@ -54,6 +54,7 @@
 #' @param warn If `TRUE` then a warning will be displayed if a `new_prior` is
 #' provided for which there is no matching `old_prior`. Defaults to `FALSE`
 #' @autoglobal
+#' @importFrom dplyr full_join filter select
 #' @keywords internal
 .replace_prior <- function(old_prior, prior, warn = FALSE) {
   if (is.null(prior)) {
