@@ -23,5 +23,5 @@ test_that("epidist_family contains the correct reparameterisations for lognormal
   family_lognormal <- epidist_family(prep_obs, family = "lognormal")
   expect_identical(family_lognormal$reparam, c("mu", "sigma"))
   family_gamma <- epidist_family(prep_obs, family = Gamma(link = "log"))
-  expect_identical(family_gamma$reparam, c("shape", "shape ./ mu"))
+  expect_identical(family_gamma$reparam, c("shape", "shape ./ mu")) # nolint
 })
