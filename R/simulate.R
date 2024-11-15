@@ -116,19 +116,19 @@ simulate_gillespie <- function(r = 0.2,
 #' distribution. The input dataset should have the primary event times in a
 #' column named `ptime`.
 #'
-#' @param linelist A data frame with the primary event times.
+#' @param data A data frame with the primary event times.
 #' @param dist The delay distribution to be used. Defaults to [rlnorm()].
 #' @param ... Arguments to be passed to the delay distribution function.
 #'
-#' @return A `data.frame` that augments `linelist` with two new columns: `delay`
+#' @return A `data.frame` that augments `data` with two new columns: `delay`
 #' (secondary event latency) and `stime` (the time of the secondary event).
 #'
 #' @family simulate
 #' @autoglobal
 #' @importFrom dplyr mutate
 #' @export
-simulate_secondary <- function(linelist, dist = rlnorm, ...) {
-  linelist |>
+simulate_secondary <- function(data, dist = rlnorm, ...) {
+  data |>
     mutate(
       delay = dist(dplyr::n(), ...),
       stime = .data$ptime + .data$delay
