@@ -242,24 +242,24 @@ bind_rows(
   theme(legend.position = "bottom")
 ```
 
-The main function you will use for modelling is called `epidist()`^[Technically, `epidist()` is an [S3 generic](http://adv-r.had.co.nz/S3.html) which allows it to work differently for inputs of different classes. This is in part why inputs must be prepared first via `as_latent_individual()` so that they are of the appropriate class!].
-We will fit the model `"latent_individual"` which uses latent variables for the time of primary and secondary event of each individual^[In a future vignette, we will explain in more detail the structure of the model!].
-To do so, we first prepare the `data` using `as_latent_individual()`:
+The main function you will use for modelling is called `epidist()`^[Technically, `epidist()` is an [S3 generic](http://adv-r.had.co.nz/S3.html) which allows it to work differently for inputs of different classes. This is in part why inputs must be prepared first via `as_epidist_latent_model()` so that they are of the appropriate class!].
+We will fit the model `"epidist_latent_model"` which uses latent variables for the time of primary and secondary event of each individual^[In a future vignette, we will explain in more detail the structure of the model!].
+To do so, we first prepare the `data` using `as_epidist_latent_model()`:
 
 ```{r}
-# Note: this functionality will be integrated into the package shortly
-as_epidist_linelist_time <- function(data) {
-  class(data) <- c("epidist_linelist", class(data))
-  epidist_validate_data(data)
-  return(data)
-}
+linelist_data <- as_epidist_linelist_data(
+  obs_cens_trunc_samp$ptime_lwr,
+  obs_cens_trunc_samp$ptime_upr,
+  obs_cens_trunc_samp$stime_lwr,
+  obs_cens_trunc_samp$stime_upr,
+  obs_time = obs_cens_trunc_samp$obs_time
+)
 
-linelist <- as_epidist_linelist_time(obs_cens_trunc_samp)
-data <- as_latent_individual(linelist)
+data <- as_epidist_latent_model(linelist_data)
 class(data)
 ```
 
-The `data` object now has the class `epidist_latent_individual`.
+The `data` object now has the class `epidist_latent_model`.
 Using this `data`, we now call `epidist()` to fit the model.
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].

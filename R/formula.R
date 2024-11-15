@@ -11,7 +11,7 @@
 #' @family formula
 #' @export
 epidist_formula <- function(data, family, formula, ...) {
-  epidist_validate_model(data)
+  assert_epidist(data)
   formula <- brms:::validate_formula(formula, data = data, family = family)
   formula <- .make_intercepts_explicit(formula)
   formula <- epidist_formula_model(data, formula)
