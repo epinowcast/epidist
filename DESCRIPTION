@@ -33,7 +33,8 @@ Imports:
     checkmate,
     rstan (>= 2.26.0),
     dplyr,
-    tibble
+    tibble,
+    lubridate
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
