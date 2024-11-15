@@ -96,10 +96,10 @@ sim_obs_sex <- as_epidist_linelist_data(
   sex = sim_obs_sex$sex
 )
 
-prep_obs <- as_latent_individual(sim_obs)
-prep_direct_obs <- as_direct_model(sim_obs)
-prep_obs_gamma <- as_latent_individual(sim_obs_gamma)
-prep_obs_sex <- as_latent_individual(sim_obs_sex)
+prep_obs <- as_epidist_latent_model(sim_obs)
+prep_direct_obs <- as_epidist_naive_model(sim_obs)
+prep_obs_gamma <- as_epidist_latent_model(sim_obs_gamma)
+prep_obs_sex <- as_epidist_latent_model(sim_obs_sex)
 
 if (not_on_cran()) {
   set.seed(1)

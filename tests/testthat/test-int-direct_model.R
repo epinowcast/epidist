@@ -4,7 +4,7 @@
 # varying the input seed. Test failure at an unusually high rate does suggest
 # a potential code issue.
 
-test_that("epidist.epidist_direct_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
+test_that("epidist.epidist_naive_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
   stancode <- epidist(
     data = prep_direct_obs,
@@ -16,7 +16,7 @@ test_that("epidist.epidist_direct_model Stan code has no syntax errors in the de
   expect_true(mod$check_syntax())
 })
 
-test_that("epidist.epidist_direct_model fits and the MCMC converges in the default case", { # nolint: line_length_linter.
+test_that("epidist.epidist_naive_model fits and the MCMC converges in the default case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)

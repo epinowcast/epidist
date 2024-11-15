@@ -72,7 +72,7 @@ reference:
 - title: Direct model
   desc: Specific methods for the direct model
   contents:
-  - has_concept("direct_model")
+  - has_concept("epidist_naive_model")
 - title: Postprocess
   desc: Functions for postprocessing model output
   contents:

@@ -215,10 +215,10 @@ Note that this has made some assumptions about the data in that it has assumed t
 
 ## Model fitting
 
-To prepare the data for use with the latent individual model, we define the data as being a `latent_individual` model object:
+To prepare the data for use with the latent individual model, we define the data as being a `epidist_latent_model` model object:
 
 ```{r}
-obs_prep <- as_latent_individual(linelist_data)
+obs_prep <- as_epidist_latent_model(linelist_data)
 head(obs_prep)
 ```
 

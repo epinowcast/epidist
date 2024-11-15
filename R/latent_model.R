@@ -1,17 +1,17 @@
-#' Convert an object to an `epidist_latent_individual` object
+#' Convert an object to an `epidist_latent_model` object
 #'
 #' @param data A `data.frame` containing line list data
-#' @family latent_individual
+#' @family epidist_latent_model
 #' @export
-as_latent_individual <- function(data) {
-  UseMethod("as_latent_individual")
+as_epidist_latent_model <- function(data) {
+  UseMethod("as_epidist_latent_model")
 }
 
-#' @method as_latent_individual epidist_linelist_data
-#' @family latent_individual
+#' @method as_epidist_latent_model epidist_linelist_data
+#' @family epidist_latent_model
 #' @autoglobal
 #' @export
-as_latent_individual.epidist_linelist_data <- function(data) {
+as_epidist_latent_model.epidist_linelist_data <- function(data) {
   assert_epidist(data)
   data <- data |>
     mutate(
@@ -26,35 +26,35 @@ as_latent_individual.epidist_linelist_data <- function(data) {
       delay = .data$stime_lwr - .data$ptime_lwr,
       .row_id = dplyr::row_number()
     )
-  data <- new_epidist_latent_individual(data)
+  data <- new_epidist_latent_model(data)
   assert_epidist(data)
   return(data)
 }
 
-#' Class constructor for `epidist_latent_individual` objects
+#' Class constructor for `epidist_latent_model` objects
 #'
 #' @param data A data.frame to convert
-#' @returns An object of class `epidist_latent_individual`
-#' @family latent_individual
+#' @returns An object of class `epidist_latent_model`
+#' @family epidist_latent_model
 #' @export
-new_epidist_latent_individual <- function(data) {
-  class(data) <- c("epidist_latent_individual", class(data))
+new_epidist_latent_model <- function(data) {
+  class(data) <- c("epidist_latent_model", class(data))
   return(data)
 }
 
-#' Check if data has the `epidist_latent_individual` class
+#' Check if data has the `epidist_latent_model` class
 #'
 #' @param data A `data.frame` containing line list data
-#' @family latent_individual
+#' @family epidist_latent_model
 #' @export
-is_latent_individual <- function(data) {
-  inherits(data, "epidist_latent_individual")
+is_epidist_latent_model <- function(data) {
+  inherits(data, "epidist_latent_model")
 }
 
-#' @method assert_epidist epidist_latent_individual
-#' @family latent_individual
+#' @method assert_epidist epidist_latent_model
+#' @family epidist_latent_model
 #' @export
-assert_epidist.epidist_latent_individual <- function(data, ...) {
+assert_epidist.epidist_latent_model <- function(data, ...) {
   col_names <- c(
     "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time",
     "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", ".row_id"
@@ -71,10 +71,10 @@ assert_epidist.epidist_latent_individual <- function(data, ...) {
 #'
 #' @inheritParams epidist_family_model
 #' @param ... Additional arguments passed to method.
-#' @method epidist_family_model epidist_latent_individual
-#' @family latent_individual
+#' @method epidist_family_model epidist_latent_model
+#' @family epidist_latent_model
 #' @export
-epidist_family_model.epidist_latent_individual <- function(
+epidist_family_model.epidist_latent_model <- function(
     data, family, ...) {
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
@@ -96,10 +96,10 @@ epidist_family_model.epidist_latent_individual <- function(
 #' @param data A `data.frame` containing line list data
 #' @param formula As produced by [brms::brmsformula()]
 #' @param ... ...
-#' @method epidist_formula_model epidist_latent_individual
-#' @family latent_individual
+#' @method epidist_formula_model epidist_latent_model
+#' @family epidist_latent_model
 #' @export
-epidist_formula_model.epidist_latent_individual <- function(
+epidist_formula_model.epidist_latent_model <- function(
     data, formula, ...) {
   # data is only used to dispatch on
   formula <- stats::update(
@@ -108,11 +108,11 @@ epidist_formula_model.epidist_latent_individual <- function(
   return(formula)
 }
 
-#' @method epidist_stancode epidist_latent_individual
-#' @family latent_individual
+#' @method epidist_stancode epidist_latent_model
+#' @family epidist_latent_model
 #' @autoglobal
 #' @export
-epidist_stancode.epidist_latent_individual <- function(data,
+epidist_stancode.epidist_latent_model <- function(data,
                                                        family =
                                                          epidist_family(data),
                                                        formula =
@@ -124,7 +124,7 @@ epidist_stancode.epidist_latent_individual <- function(data,
 
   stanvars_functions <- brms::stanvar(
     block = "functions",
-    scode = .stan_chunk(file.path("latent_individual", "functions.stan"))
+    scode = .stan_chunk(file.path("epidist_latent_model", "functions.stan"))
   )
 
   family_name <- gsub("latent_", "", family$name)
@@ -173,17 +173,17 @@ epidist_stancode.epidist_latent_individual <- function(data,
 
   stanvars_parameters <- brms::stanvar(
     block = "parameters",
-    scode = .stan_chunk(file.path("latent_individual", "parameters.stan"))
+    scode = .stan_chunk(file.path("epidist_latent_model", "parameters.stan"))
   )
 
   stanvars_tparameters <- brms::stanvar(
     block = "tparameters",
-    scode = .stan_chunk(file.path("latent_individual", "tparameters.stan"))
+    scode = .stan_chunk(file.path("epidist_latent_model", "tparameters.stan"))
   )
 
   stanvars_priors <- brms::stanvar(
     block = "model",
-    scode = .stan_chunk(file.path("latent_individual", "priors.stan"))
+    scode = .stan_chunk(file.path("epidist_latent_model", "priors.stan"))
   )
 
   stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +

@@ -138,7 +138,7 @@ linelist_data <- as_epidist_linelist_data(
   obs_time = obs_cens_trunc_samp$obs_time
 )
 
-data <- as_latent_individual(linelist_data)
+data <- as_epidist_latent_model(linelist_data)
 
 t <- proc.time()
 fit_hmc <- epidist(data = data, algorithm = "sampling", backend = "cmdstanr")
