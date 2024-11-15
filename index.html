@@ -101,7 +101,8 @@ Installing the package
 </summary><!-- You can install the latest released version using the normal `R` function, though you need to point to `r-universe` instead of CRAN: --><!-- ```{r, eval = FALSE} --><!-- install.packages( --><!--   "epidist", repos = "https://epinowcast.r-universe.dev" --><!-- ) --><!-- ``` --><!-- Alternatively, y --><p>You can use the <a href="https://remotes.r-lib.org/" class="external-link"><code>remotes</code> package</a> to install the development version from Github (warning! this version may contain breaking changes and/or bugs):</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span></span>
-<span>  <span class="st">"epinowcast/epidist"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="st">"epinowcast/epidist"</span>,</span>
+<span>  dependencies <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <!-- Similarly, you can install historical versions by specifying the release tag (e.g. this installs [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)): -->
 <!-- ```{r, eval = FALSE} -->
@@ -116,7 +117,8 @@ Installing CmdStan (optional)
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># if you not yet installed `epidist`, or you installed it without `Suggests` dependencies</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
-<span>  <span class="st">"cmdstanr"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://mc-stan.org/r-packages/"</span>, <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"repos"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="st">"cmdstanr"</span>,</span>
+<span>  repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://mc-stan.org/r-packages/"</span>, <span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">getOption</a></span><span class="op">(</span><span class="st">"repos"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co"># once `cmdstanr` is installed:</span></span>
 <span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/install_cmdstan.html" class="external-link">install_cmdstan</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
