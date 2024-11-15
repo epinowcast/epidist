@@ -217,7 +217,7 @@ Note that this has made some assumptions about the data in that it has assumed t
 
 To prepare the data for use with the latent individual model, we define the data as being a `latent_individual` model object:
 
-```{r
+```{r}
 obs_prep <- as_latent_individual(linelist_data)
 head(obs_prep)
 ```
