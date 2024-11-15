@@ -62,12 +62,11 @@ jobs:
 
       - name: Compile model and check syntax
         run: |
-          dummy_obs <- dplyr::tibble(case = 1L, ptime = 1, stime = 2,
-            delay_daily = 1, delay_lwr = 1, delay_upr = 2, ptime_lwr = 1,
-            ptime_upr = 2, stime_lwr = 1, stime_upr = 2, obs_time = 100,
-            censored = "interval", censored_obs_time = 10, ptime_daily = 1,
-            stime_daily = 1
+          dummy_obs <- dplyr::tibble(
+            pdate_lwr = as.Date("2020-01-01"),
+            sdate_lwr = as.Date("2020-02-01")
           )
+          dummy_obs <- epidist::as_epidist_linelist_data(dummy_obs)
           dummy_obs <- epidist::as_epidist_latent_model(dummy_obs)
           stancode <- epidist::epidist(
             data = dummy_obs, fn = brms::make_stancode
