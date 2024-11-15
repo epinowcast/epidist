@@ -20,7 +20,7 @@ jobs:
         with:
           use-public-rspm: true
           extra-repositories: 'https://stan-dev.r-universe.dev'
-          
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::codemetar
@@ -29,7 +29,7 @@ jobs:
       - name: Render codemeta
         run: codemetar::write_codemeta()
         shell: Rscript {0}
-    
+
       - name: Commit results
         run: |
           git commit codemeta.json -m 'Re-build codemeta.json [ci-skip]' || echo "No changes to commit"

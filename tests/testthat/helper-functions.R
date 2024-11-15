@@ -20,7 +20,7 @@ as_string_formula <- function(formula) {
 }
 
 extract_normal_parameters_brms <- function(prior) {
-  pattern <- "normal\\(([^,]+), ([^\\)]+)\\)"
+  pattern <- "normal\\(([^,]+), ([^\\)]+)\\)" # nolint
   match <- regmatches(prior, regexec(pattern, prior))
   mean <- as.numeric(match[[1]][2])
   sd <- as.numeric(match[[1]][3])

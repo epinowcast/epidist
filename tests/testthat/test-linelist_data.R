@@ -1,18 +1,20 @@
 test_that(
-  "as_epidist_linelist_data assigns epidist_linelist_data class to data", {
+  "as_epidist_linelist_data assigns epidist_linelist_data class to data",
+  {
     data <- data.frame(
       case = 1,
-    pdate_lwr = as.POSIXct("2023-01-01 00:00:00"),
-    pdate_upr = as.POSIXct("2023-01-02 00:00:00"),
-    sdate_lwr = as.POSIXct("2023-01-03 00:00:00"),
-    sdate_upr = as.POSIXct("2023-01-04 00:00:00"),
-    obs_date = as.POSIXct("2023-01-05 00:00:00")
-  )
-  linelist_data <- suppressMessages(as_epidist_linelist_data(
-    data, "pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"
-  ))
-  expect_s3_class(linelist_data, "epidist_linelist_data")
-})
+      pdate_lwr = as.POSIXct("2023-01-01 00:00:00"),
+      pdate_upr = as.POSIXct("2023-01-02 00:00:00"),
+      sdate_lwr = as.POSIXct("2023-01-03 00:00:00"),
+      sdate_upr = as.POSIXct("2023-01-04 00:00:00"),
+      obs_date = as.POSIXct("2023-01-05 00:00:00")
+    )
+    linelist_data <- suppressMessages(as_epidist_linelist_data(
+      data, "pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"
+    ))
+    expect_s3_class(linelist_data, "epidist_linelist_data")
+  }
+)
 
 test_that("as_epidist_linelist_data correctly renames columns", {
   data <- data.frame(
@@ -107,7 +109,8 @@ test_that("as_epidist_linelist_data preserves additional columns", {
     case = 1,
     pdate_lwr = as.Date("2023-01-01"),
     sdate_lwr = as.Date("2023-01-03"),
-    extra_col = "test"
+    extra_col = "test",
+    stringsAsFactors = FALSE
   )
   linelist_data <- suppressMessages(as_epidist_linelist_data(data))
   expect_true("extra_col" %in% names(linelist_data))

@@ -12,12 +12,12 @@
 #' @export
 epidist_formula <- function(data, family, formula, ...) {
   assert_epidist(data)
-  formula <- brms:::validate_formula(formula, data = data, family = family)
+  formula <- brms:::validate_formula(formula, data = data, family = family) # nolint
   formula <- .make_intercepts_explicit(formula)
   formula <- epidist_formula_model(data, formula)
   # Using this here for checking purposes
   bterms <- brms::brmsterms(formula)
-  brms:::validate_data(data, bterms)
+  brms:::validate_data(data, bterms) # nolint
   return(formula)
 }
 

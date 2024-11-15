@@ -60,7 +60,7 @@ reference:
 - title: Stan code
   desc: Functions for specifying custom Stan code to put into `brms`
   contents:
-  - has_concept("stan") 
+  - has_concept("stan")
 - title: Model fitting
   desc: Functions for fitting delay distribution models using `brms`
   contents:
