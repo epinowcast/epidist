@@ -3,7 +3,7 @@ title: "Approximate Bayesian inference in epidist"
 description: |
   "A demonstration of how to fit models in epidist using approximate Bayesian
   inference methods such as the Laplace approximation, ADVI, and Pathfinder."
-output: 
+output:
   bookdown::html_document2:
     fig_caption: yes
     code_folding: show
@@ -23,7 +23,7 @@ bibliography: references.bib
 set.seed(2)
 
 knitr::opts_chunk$set(
-  fig.path = "figures/epidist-",
+  fig.path = file.path("figures", "epidist-"),
   cache = TRUE,
   collapse = TRUE,
   comment = "#>",
@@ -57,7 +57,7 @@ By comparing the resulting inferences to those from NUTS, we hope to help you ma
 # Alternative approximate inference algorithms {#other}
 
 Here we describe three alternative approximate Bayesian inference algorithms that are available to use in `brms`, and therefore also available in `epidist`.
-It's worth noting that further inference algorithms may have become available since this vignette was last updated. 
+It's worth noting that further inference algorithms may have become available since this vignette was last updated.
 Please check `brms` package updates if interested!
 
 ## Laplace method
@@ -182,10 +182,10 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 
 ```{r}
 fits <- list(
-  "HMC" = fit_hmc,
-  "Laplace" = fit_laplace,
-  "ADVI" = fit_advi,
-  "Pathfinder" = fit_pathfinder
+  HMC = fit_hmc,
+  Laplace = fit_laplace,
+  ADVI = fit_advi,
+  Pathfinder = fit_pathfinder
 )
 
 draws <- imap(fits, function(fit, name) {
@@ -261,10 +261,10 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 
 ```{r}
 times <- list(
-  "HMC" = time_hmc,
-  "Laplace" = time_laplace,
-  "ADVI" = time_advi,
-  "Pathfinder" = time_pathfinder
+  HMC = time_hmc,
+  Laplace = time_laplace,
+  ADVI = time_advi,
+  Pathfinder = time_pathfinder
 )
 
 times |>

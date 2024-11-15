@@ -41,7 +41,7 @@ new_epidist_naive_model <- function(data) {
 #' @export
 assert_epidist.epidist_naive_model <- function(data, ...) {
   assert_data_frame(data)
-  assert_names(names(data), must.include = c("delay"))
+  assert_names(names(data), must.include = "delay")
   assert_numeric(data$delay, lower = 0)
 }
 

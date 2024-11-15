@@ -21,9 +21,8 @@ as_epidist_linelist_data <- function(data, ...) {
 #' @family linelist_data
 #' @export
 as_epidist_linelist_data.default <- function(
-  data, ptime_upr = NULL, stime_lwr = NULL, stime_upr = NULL,
-  obs_time = NULL, ...
-) {
+    data, ptime_upr = NULL, stime_lwr = NULL, stime_upr = NULL,
+    obs_time = NULL, ...) {
   # Create base data frame with required columns
   df <- tibble(
     ptime_lwr = data,
@@ -80,9 +79,8 @@ as_epidist_linelist_data.default <- function(
 #' @importFrom utils hasName
 #' @export
 as_epidist_linelist_data.data.frame <- function(
-  data, pdate_lwr = NULL,  sdate_lwr = NULL, pdate_upr = NULL, sdate_upr = NULL,
-  obs_date = NULL, ...
-) {
+    data, pdate_lwr = NULL, sdate_lwr = NULL, pdate_upr = NULL,
+    sdate_upr = NULL, obs_date = NULL, ...) {
   if (is.null(pdate_lwr) && !hasName(data, "pdate_lwr")) {
     cli::cli_abort("{.var pdate_lwr} is NULL but must be provided.")
   }

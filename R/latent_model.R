@@ -114,10 +114,9 @@ epidist_formula_model.epidist_latent_model <- function(
 #' @autoglobal
 #' @export
 epidist_stancode.epidist_latent_model <- function(
-  data,
-  family = epidist_family(data),
-  formula = epidist_formula(data), ...
-) {
+    data,
+    family = epidist_family(data),
+    formula = epidist_formula(data), ...) {
   assert_epidist(data)
 
   stanvars_version <- .version_stanvar()
@@ -127,10 +126,11 @@ epidist_stancode.epidist_latent_model <- function(
     scode = .stan_chunk(file.path("latent_model", "functions.stan"))
   )
 
-  family_name <- gsub("latent_", "", family$name)
+  family_name <- gsub("latent_", "", family$name, fixed = TRUE)
 
   stanvars_functions[[1]]$scode <- gsub(
-    "family", family_name, stanvars_functions[[1]]$scode
+    "family", family_name, stanvars_functions[[1]]$scode,
+    fixed = TRUE
   )
 
   # Inject vector or real depending if there is a model for each dpar
@@ -140,16 +140,18 @@ epidist_stancode.epidist_latent_model <- function(
 
   stanvars_functions[[1]]$scode <- gsub(
     "dpars_A",
-    paste(paste0(vector_real, " ", family$dpars), collapse = ", "),
-    stanvars_functions[[1]]$scode
+    toString(paste0(vector_real, " ", family$dpars)),
+    stanvars_functions[[1]]$scode,
+    fixed = TRUE
   )
 
   # dpars_B refers to the insertion into the lpdf call
   # For some families, we tranform brms dpars to match Stan parameterisation
   stanvars_functions[[1]]$scode <- gsub(
     "dpars_B",
-    paste(family$reparam, collapse = ", "),
-    stanvars_functions[[1]]$scode
+    toString(family$reparam),
+    stanvars_functions[[1]]$scode,
+    fixed = TRUE
   )
 
   stanvars_data <- stanvar(

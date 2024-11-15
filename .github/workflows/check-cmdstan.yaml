@@ -29,7 +29,7 @@ jobs:
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      
+
     steps:
       - name: cmdstan env vars
         run: |
@@ -37,7 +37,7 @@ jobs:
         shell: bash
 
       - uses: actions/checkout@v4
-        
+
       - name: Install cmdstan Linux system dependencies
         run: |
           sudo apt-get update
@@ -51,7 +51,7 @@ jobs:
           extra-repositories: 'https://stan-dev.r-universe.dev'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
-        with: 
+        with:
           extra-packages: local::.
 
       - name: Install cmdstan

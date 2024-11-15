@@ -7,7 +7,7 @@ test_that("epidist_diagnostics", { # nolint: line_length_linter.
     "per_divergent_transitions", "max_treedepth", "no_at_max_treedepth",
     "per_at_max_treedepth"
   )
-  expect_equal(names(diag), expected_names)
+  expect_named(diag, expected_names)
   expect_gt(diag$time, 0)
   expect_gt(diag$samples, 0)
   expect_gt(diag$max_rhat, 0.9)
@@ -25,7 +25,7 @@ test_that("epidist_diagnostics gives the same results for cmdstanr and rstan", {
   set.seed(1)
   diag_cmdstanr <- epidist_diagnostics(fit)
   diag_rstan <- epidist_diagnostics(fit_rstan)
-  expect_equal(colnames(diag_cmdstanr), colnames(diag_rstan))
+  expect_identical(colnames(diag_cmdstanr), colnames(diag_rstan))
   expect_gt(diag_rstan$time, 0)
   expect_gt(diag_rstan$samples, 0)
   expect_gt(diag_rstan$max_rhat, 0.9)

@@ -24,7 +24,7 @@ jobs:
         with:
           use-public-rspm: true
           extra-repositories: 'https://stan-dev.r-universe.dev'
-          
+
       - name: Setup pandoc
         uses: r-lib/actions/setup-pandoc@v2
 
@@ -37,7 +37,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: allcontributors::add_contributors(format = "text")
         shell: Rscript {0}
-        
+
       - name: Compile the readme
         run: |
           rmarkdown::render("README.Rmd")

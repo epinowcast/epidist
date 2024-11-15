@@ -3,7 +3,7 @@ author <- meta$`Authors@R`
 if (length(author)) {
     aar <- .read_authors_at_R_field(author)
     author <- Filter(function(e) {
-        !(is.null(e$given) && is.null(e$family)) && !is.na(match("aut", 
+        !(is.null(e$given) && is.null(e$family)) && !is.na(match("aut",
             e$role))
     }, aar)
 }
