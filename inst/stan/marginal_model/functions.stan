@@ -1,4 +1,4 @@
-real primarycensored_wrapper_lpmf(data int d, real mu, real sigma, real q, data real pwindow) {
+real primarycensored_wrapper_lpmf(data int d, real mu, real sigma, data real pwindow) {
   int dist_id = 1; // lognormal
   array[2] real params = {mu, sigma};
   int d_upper = d + 1;

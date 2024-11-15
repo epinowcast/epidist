@@ -55,15 +55,12 @@ primarycensored_family <- brms::custom_family(
   links = c(lognormal$link, lognormal$link_sigma),
   type = "int",
   loop = TRUE,
-  vars = c("vreal1[n]", "pwindow[n]")
+  vars = c("vreal1[n]")
 )
 
 data <- cohort_obs |>
   select(d = delay, n = n) |>
-  mutate(
-    pwindow = 1,
-    q = pmax(d - pwindow, 0)
-  )
+  mutate(pwindow = 1)
 
 pcd_stanvars_functions <- brms::stanvar(
   block = "functions",
@@ -72,30 +69,28 @@ pcd_stanvars_functions <- brms::stanvar(
 
 stanvars_functions <- brms::stanvar(
   block = "functions",
-  scode = .stan_chunk("cohort_model/functions.stan")
+  scode = .stan_chunk(file.path("marginal_model", "functions.stan"))
 )
 
-pwindow <- data$pwindow
+# pwindow <- data$pwindow
+#
+# stanvars_data <- brms::stanvar(
+#   x = pwindow,
+#   block = "data",
+#   scode = .stan_chunk("marginal_model/data.stan")
+# )
 
-stanvars_data <- brms::stanvar(
-  x = pwindow,
-  block = "data",
-  scode = .stan_chunk("cohort_model/data.stan")
-)
-
-stanvars_all <- pcd_stanvars_functions + stanvars_functions + stanvars_data
+stanvars_all <- pcd_stanvars_functions + stanvars_functions
 
 stancode <- brms::make_stancode(
-  formula = d | weights(n) + vreal(q) ~ 1,
+  formula = d | weights(n) + vreal(pwindow) ~ 1,
   family = primarycensored_family,
   data = data,
   stanvars = stanvars_all,
 )
 
-model <- rstan::stan_model(model_code = stancode)
-
 fit_pcd <- brms::brm(
-  formula = d | weights(n) + vreal(q) ~ 1,
+  formula = d | weights(n) + vreal(pwindow) ~ 1,
   family = primarycensored_family,
   data = data,
   stanvars = stanvars_all,
