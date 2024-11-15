@@ -35,6 +35,7 @@ reference:
   - has_concept("simulate")
 - title: Linelist data
   desc: Functions for preparing linelist data
+  contents:
   - has_concept("linelist_data")
 - title: Assert validity of objects
   desc: Functions used to assert the validity of package objects
