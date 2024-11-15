@@ -3,8 +3,8 @@ test_that("posterior_predict_latent_gamma outputs positive integers with length 
   prep <- brms::prepare_predictions(fit_gamma)
   i <- 1
   pred_i <- posterior_predict_latent_gamma(i = i, prep)
-  expect_equal(floor(pred_i), pred_i)
-  expect_equal(length(pred_i), prep$ndraws)
+  expect_identical(floor(pred_i), pred_i)
+  expect_length(pred_i, prep$ndraws)
   expect_gte(min(pred_i), 0)
 })
 
@@ -19,7 +19,7 @@ test_that("posterior_predict_latent_gamma can generate predictions with no censo
   skip_on_cran()
   draws <- data.frame(relative_obs_time = 1000, pwindow = 0, swindow = 0) |>
     tidybayes::add_predicted_draws(fit_gamma, ndraws = 100)
-  expect_equal(draws$.draw, 1:100)
+  expect_identical(draws$.draw, 1:100)
   pred <- draws$.prediction
   expect_gte(min(pred), 0)
   expect_true(all(abs(pred - round(pred)) > .Machine$double.eps^0.5))
@@ -48,8 +48,8 @@ test_that("posterior_epred_latent_gamma creates a array of non-negative numbers 
   prep <- brms::prepare_predictions(fit_gamma)
   epred <- posterior_epred_latent_gamma(prep)
   expect_setequal(class(epred), c("matrix", "array"))
-  expect_equal(nrow(epred), prep$ndraws)
-  expect_equal(ncol(epred), length(prep$data$Y))
+  expect_identical(nrow(epred), prep$ndraws)
+  expect_identical(ncol(epred), length(prep$data$Y))
   expect_gte(min(epred), 0)
 })
 
@@ -58,7 +58,7 @@ test_that("log_lik_latent_gamma produces a vector with length ndraws of finite n
   prep <- brms::prepare_predictions(fit_gamma)
   i <- 1
   log_lik <- log_lik_latent_gamma(i, prep)
-  expect_equal(length(log_lik), prep$ndraws)
-  expect_true(all(!is.na(log_lik)))
+  expect_length(log_lik, prep$ndraws)
+  expect_false(anyNA(log_lik))
   expect_true(all(is.finite(log_lik)))
 })

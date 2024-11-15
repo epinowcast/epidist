@@ -43,7 +43,7 @@ To learn more about `epidist` we recommend reading the vignettes in this order:
 * [Approximate Bayesian inference in `epidist`](https://epidist.epinowcast.org/articles/approx-inference.html)
 
 ## Installation
-  
+
 <details><summary>Installing the package</summary>
 
 <!-- You can install the latest released version using the normal `R` function, though you need to point to `r-universe` instead of CRAN: -->
@@ -60,7 +60,7 @@ You can use the [`remotes` package](https://remotes.r-lib.org/) to install the d
 
 ```{r, eval = FALSE}
 remotes::install_github(
-  "epinowcast/epidist",
+  file.path("epinowcast", "epidist"),
   dependencies = TRUE
 )
 ```
@@ -83,12 +83,14 @@ By default `epidist` uses the `rstan` package for fitting models. If you wish to
 `cmdstanr`_](https://mc-stan.org/cmdstanr/articles/cmdstanr.html) vignette, with other details and support at the [package site](https://mc-stan.org/cmdstanr/), but the brief version is:
 
 ```{r, eval = FALSE}
-# if you not yet installed `epidist`, or you installed it without `Suggests` dependencies
+# if you have not yet installed `epidist`, or you installed it without
+# `Suggests` dependencies
 install.packages(
   "cmdstanr",
   repos = c("https://mc-stan.org/r-packages/", getOption("repos"))
 )
-# once `cmdstanr` is installed:
+
+# once `cmdstanr` is installed
 cmdstanr::install_cmdstan()
 ```
 
@@ -155,23 +157,23 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 
 ### Code
 
-<a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>, 
-<a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>, 
-<a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>, 
-<a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>, 
+<a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>
 
 ### Issue Authors
 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>, 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>, 
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>
 
 ### Issue Contributors
 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>, 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Asbfnk">sbfnk</a>, 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1">SamuelBrand1</a>, 
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Asbfnk">sbfnk</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1">SamuelBrand1</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein">zsusswein</a>
 
 <!-- markdownlint-enable -->
