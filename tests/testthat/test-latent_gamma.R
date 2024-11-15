@@ -4,7 +4,7 @@ test_that("posterior_predict_latent_gamma outputs positive integers with length 
   i <- 1
   pred_i <- posterior_predict_latent_gamma(i = i, prep)
   expect_identical(floor(pred_i), pred_i)
-  expect_identical(length(pred_i), prep$ndraws)
+  expect_length(pred_i, prep$ndraws)
   expect_gte(min(pred_i), 0)
 })
 
@@ -58,7 +58,7 @@ test_that("log_lik_latent_gamma produces a vector with length ndraws of finite n
   prep <- brms::prepare_predictions(fit_gamma)
   i <- 1
   log_lik <- log_lik_latent_gamma(i, prep)
-  expect_identical(length(log_lik), prep$ndraws)
-  expect_true(all(!is.na(log_lik)))
+  expect_length(log_lik, prep$ndraws)
+  expect_false(anyNA(log_lik))
   expect_true(all(is.finite(log_lik)))
 })
