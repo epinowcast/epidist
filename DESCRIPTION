@@ -1,5 +1,5 @@
 Package: epidist
-Title: Estimate Epidemiological Delay Distributions With brms 
+Title: Estimate Epidemiological Delay Distributions With brms
 Version: 0.0.0.9000
 Authors@R:
   c(person(given = "Adam Howes",
@@ -22,9 +22,9 @@ License: MIT + file LICENSE
 URL: https://epidist.epinowcast.org/,
     https://github.com/epinowcast/epidist/
 BugReports: https://github.com/epinowcast/epidist/issues/
-Depends: 
+Depends:
     R (>= 3.5.0)
-Imports: 
+Imports:
     brms,
     ggplot2,
     purrr,
