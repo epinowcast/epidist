@@ -44,3 +44,71 @@ test_that("as_epidist_linelist_data works with dates", {
     )
   )
 })
+
+test_that("as_epidist_linelist_data works with default column names", {
+  data <- data.frame(
+    case = 1,
+    pdate_lwr = as.Date("2023-01-01"),
+    sdate_lwr = as.Date("2023-01-03")
+  )
+  linelist_data <- as_epidist_linelist_data(data)
+  expect_s3_class(linelist_data, "epidist_linelist_data")
+  expect_true(
+    all(
+      c(
+        "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time"
+      ) %in% names(linelist_data)
+    )
+  )
+})
+
+test_that("as_epidist_linelist_data adds default upper bounds", {
+  data <- data.frame(
+    pdate_lwr = as.Date("2023-01-01"),
+    sdate_lwr = as.Date("2023-01-03")
+  )
+  linelist_data <- as_epidist_linelist_data(data)
+  expect_identical(
+    as.Date(linelist_data$pdate_upr),
+    as.Date("2023-01-02")
+  )
+  expect_identical(
+    as.Date(linelist_data$sdate_upr),
+    as.Date("2023-01-04")
+  )
+})
+
+test_that("as_epidist_linelist_data uses max secondary date as obs_date", {
+  data <- data.frame(
+    pdate_lwr = as.Date("2023-01-01"),
+    sdate_lwr = as.Date("2023-01-03")
+  )
+  linelist_data <- as_epidist_linelist_data(data)
+  expect_identical(
+    as.Date(linelist_data$obs_date),
+    as.Date("2023-01-04")
+  )
+})
+
+test_that("as_epidist_linelist_data errors without required columns", {
+  data <- data.frame(
+    case = 1,
+    some_date = as.Date("2023-01-01")
+  )
+  expect_error(
+    as_epidist_linelist_data(data),
+    "pdate_lwr is NULL but must be provided"
+  )
+})
+
+test_that("as_epidist_linelist_data preserves additional columns", {
+  data <- data.frame(
+    case = 1,
+    pdate_lwr = as.Date("2023-01-01"),
+    sdate_lwr = as.Date("2023-01-03"),
+    extra_col = "test"
+  )
+  linelist_data <- as_epidist_linelist_data(data)
+  expect_true("extra_col" %in% names(linelist_data))
+  expect_identical(linelist_data$extra_col, "test")
+})

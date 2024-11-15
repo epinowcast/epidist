@@ -17,10 +17,10 @@
 Define the model-specific component of an \code{epidist} custom formula
 }
 \seealso{
-Other epidist_latent_model: 
+Other latent_model: 
 \code{\link{as_epidist_latent_model}()},
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{is_epidist_latent_model}()},
 \code{\link{new_epidist_latent_model}()}
 }
-\concept{epidist_latent_model}
+\concept{latent_model}

@@ -13,10 +13,10 @@ as_epidist_latent_model(data)
 Convert an object to an \code{epidist_latent_model} object
 }
 \seealso{
-Other epidist_latent_model: 
+Other latent_model: 
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{epidist_formula_model.epidist_latent_model}()},
 \code{\link{is_epidist_latent_model}()},
 \code{\link{new_epidist_latent_model}()}
 }
-\concept{epidist_latent_model}
+\concept{latent_model}

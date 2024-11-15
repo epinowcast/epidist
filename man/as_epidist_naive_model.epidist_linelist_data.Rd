@@ -13,9 +13,9 @@
 The direct model method for \code{epidist_linelist_data} objects
 }
 \seealso{
-Other epidist_naive_model: 
+Other naive_model: 
 \code{\link{as_epidist_naive_model}()},
 \code{\link{is_epidist_naive_model}()},
 \code{\link{new_epidist_naive_model}()}
 }
-\concept{epidist_naive_model}
+\concept{naive_model}

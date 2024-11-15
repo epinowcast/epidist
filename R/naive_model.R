@@ -1,7 +1,7 @@
 #' Prepare direct model to pass through to `brms`
 #'
 #' @param data A `data.frame` containing line list data
-#' @family epidist_naive_model
+#' @family naive_model
 #' @export
 as_epidist_naive_model <- function(data) {
   UseMethod("as_epidist_naive_model")
@@ -11,7 +11,7 @@ as_epidist_naive_model <- function(data) {
 #'
 #' @param data An `epidist_linelist_data` object
 #' @method as_epidist_naive_model epidist_linelist_data
-#' @family epidist_naive_model
+#' @family naive_model
 #' @autoglobal
 #' @export
 as_epidist_naive_model.epidist_linelist_data <- function(data) {
@@ -29,7 +29,7 @@ as_epidist_naive_model.epidist_linelist_data <- function(data) {
 #'
 #' @param data A data.frame to convert
 #' @returns An object of class `epidist_naive_model`
-#' @family epidist_naive_model
+#' @family naive_model
 #' @export
 new_epidist_naive_model <- function(data) {
   class(data) <- c("epidist_naive_model", class(data))
@@ -37,7 +37,7 @@ new_epidist_naive_model <- function(data) {
 }
 
 #' @method assert_epidist epidist_naive_model
-#' @family epidist_naive_model
+#' @family naive_model
 #' @export
 assert_epidist.epidist_naive_model <- function(data, ...) {
   assert_data_frame(data)
@@ -48,7 +48,7 @@ assert_epidist.epidist_naive_model <- function(data, ...) {
 #' Check if data has the `epidist_naive_model` class
 #'
 #' @param data A `data.frame` containing line list data
-#' @family epidist_naive_model
+#' @family naive_model
 #' @export
 is_epidist_naive_model <- function(data) {
   inherits(data, "epidist_naive_model")

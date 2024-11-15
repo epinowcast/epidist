@@ -16,9 +16,9 @@ An object of class \code{epidist_naive_model}
 Class constructor for \code{epidist_naive_model} objects
 }
 \seealso{
-Other epidist_naive_model: 
+Other naive_model: 
 \code{\link{as_epidist_naive_model}()},
 \code{\link{as_epidist_naive_model.epidist_linelist_data}()},
 \code{\link{is_epidist_naive_model}()}
 }
-\concept{epidist_naive_model}
+\concept{naive_model}

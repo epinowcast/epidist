@@ -13,10 +13,10 @@ is_epidist_latent_model(data)
 Check if data has the \code{epidist_latent_model} class
 }
 \seealso{
-Other epidist_latent_model: 
+Other latent_model: 
 \code{\link{as_epidist_latent_model}()},
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{epidist_formula_model.epidist_latent_model}()},
 \code{\link{new_epidist_latent_model}()}
 }
-\concept{epidist_latent_model}
+\concept{latent_model}

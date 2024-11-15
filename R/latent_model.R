@@ -1,14 +1,14 @@
 #' Convert an object to an `epidist_latent_model` object
 #'
 #' @param data A `data.frame` containing line list data
-#' @family epidist_latent_model
+#' @family latent_model
 #' @export
 as_epidist_latent_model <- function(data) {
   UseMethod("as_epidist_latent_model")
 }
 
 #' @method as_epidist_latent_model epidist_linelist_data
-#' @family epidist_latent_model
+#' @family latent_model
 #' @autoglobal
 #' @export
 as_epidist_latent_model.epidist_linelist_data <- function(data) {
@@ -35,7 +35,7 @@ as_epidist_latent_model.epidist_linelist_data <- function(data) {
 #'
 #' @param data A data.frame to convert
 #' @returns An object of class `epidist_latent_model`
-#' @family epidist_latent_model
+#' @family latent_model
 #' @export
 new_epidist_latent_model <- function(data) {
   class(data) <- c("epidist_latent_model", class(data))
@@ -45,14 +45,14 @@ new_epidist_latent_model <- function(data) {
 #' Check if data has the `epidist_latent_model` class
 #'
 #' @param data A `data.frame` containing line list data
-#' @family epidist_latent_model
+#' @family latent_model
 #' @export
 is_epidist_latent_model <- function(data) {
   inherits(data, "epidist_latent_model")
 }
 
 #' @method assert_epidist epidist_latent_model
-#' @family epidist_latent_model
+#' @family latent_model
 #' @export
 assert_epidist.epidist_latent_model <- function(data, ...) {
   col_names <- c(
@@ -72,7 +72,7 @@ assert_epidist.epidist_latent_model <- function(data, ...) {
 #' @inheritParams epidist_family_model
 #' @param ... Additional arguments passed to method.
 #' @method epidist_family_model epidist_latent_model
-#' @family epidist_latent_model
+#' @family latent_model
 #' @export
 epidist_family_model.epidist_latent_model <- function(
     data, family, ...) {
@@ -97,7 +97,7 @@ epidist_family_model.epidist_latent_model <- function(
 #' @param formula As produced by [brms::brmsformula()]
 #' @param ... ...
 #' @method epidist_formula_model epidist_latent_model
-#' @family epidist_latent_model
+#' @family latent_model
 #' @export
 epidist_formula_model.epidist_latent_model <- function(
     data, formula, ...) {
@@ -110,7 +110,7 @@ epidist_formula_model.epidist_latent_model <- function(
 
 #' @method epidist_stancode epidist_latent_model
 #' @importFrom brms stanvar
-#' @family epidist_latent_model
+#' @family latent_model
 #' @autoglobal
 #' @export
 epidist_stancode.epidist_latent_model <- function(

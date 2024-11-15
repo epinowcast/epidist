@@ -18,10 +18,10 @@ information as provided by \code{.add_dpar_info()}}
 Create the model-specific component of an \code{epidist} custom family
 }
 \seealso{
-Other epidist_latent_model: 
+Other latent_model: 
 \code{\link{as_epidist_latent_model}()},
 \code{\link{epidist_formula_model.epidist_latent_model}()},
 \code{\link{is_epidist_latent_model}()},
 \code{\link{new_epidist_latent_model}()}
 }
-\concept{epidist_latent_model}
+\concept{latent_model}

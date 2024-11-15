@@ -16,10 +16,10 @@ An object of class \code{epidist_latent_model}
 Class constructor for \code{epidist_latent_model} objects
 }
 \seealso{
-Other epidist_latent_model: 
+Other latent_model: 
 \code{\link{as_epidist_latent_model}()},
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{epidist_formula_model.epidist_latent_model}()},
 \code{\link{is_epidist_latent_model}()}
 }
-\concept{epidist_latent_model}
+\concept{latent_model}
