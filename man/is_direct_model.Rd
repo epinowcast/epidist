@@ -13,10 +13,9 @@ is_direct_model(data)
 Check if data has the \code{epidist_direct_model} class
 }
 \seealso{
-Other latent_individual: 
-\code{\link{as_latent_individual}()},
-\code{\link{epidist_family_model.epidist_latent_individual}()},
-\code{\link{epidist_formula_model.epidist_latent_individual}()},
-\code{\link{is_latent_individual}()}
+Other direct_model: 
+\code{\link{as_direct_model}()},
+\code{\link{as_direct_model.epidist_linelist}()},
+\code{\link{new_epidist_direct_model}()}
 }
-\concept{latent_individual}
+\concept{direct_model}

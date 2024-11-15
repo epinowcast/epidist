@@ -29,7 +29,7 @@ as_direct_model.epidist_linelist <- function(data) {
 #'
 #' @param data A data.frame to convert
 #' @returns An object of class `epidist_direct_model`
-#' @keywords internal
+#' @family direct_model
 #' @export
 new_epidist_direct_model <- function(data) {
   class(data) <- c("epidist_direct_model", class(data))
@@ -48,7 +48,7 @@ assert_epidist.epidist_direct_model <- function(data, ...) {
 #' Check if data has the `epidist_direct_model` class
 #'
 #' @param data A `data.frame` containing line list data
-#' @family latent_individual
+#' @family direct_model
 #' @export
 is_direct_model <- function(data) {
   inherits(data, "epidist_direct_model")

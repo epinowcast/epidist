@@ -15,4 +15,11 @@ An object of class \code{epidist_latent_individual}
 \description{
 Class constructor for \code{epidist_latent_individual} objects
 }
-\keyword{internal}
+\seealso{
+Other latent_individual: 
+\code{\link{as_latent_individual}()},
+\code{\link{epidist_family_model.epidist_latent_individual}()},
+\code{\link{epidist_formula_model.epidist_latent_individual}()},
+\code{\link{is_latent_individual}()}
+}
+\concept{latent_individual}

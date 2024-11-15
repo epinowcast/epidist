@@ -2,7 +2,7 @@
 #'
 #' @param data The data to convert
 #' @param ... Additional arguments passed to methods
-#' @family preprocess
+#' @family linelist
 #' @export
 as_epidist_linelist <- function(data, ...) {
   UseMethod("as_epidist_linelist")
@@ -18,6 +18,7 @@ as_epidist_linelist <- function(data, ...) {
 #' @param ... Additional columns to add to the epidist_linelist object
 #' @importFrom tibble tibble
 #' @importFrom dplyr bind_cols
+#' @family linelist
 #' @export
 as_epidist_linelist.default <- function(
   data, ptime_upr = NULL, stime_lwr = NULL, stime_upr = NULL,
@@ -53,7 +54,7 @@ as_epidist_linelist.default <- function(
 #' @param obs_date A string giving the column of `data` containing the
 #' observation time as a datetime.
 #' @param ... Additional arguments passed to methods
-#' @family preprocess
+#' @family linelist
 #' @importFrom dplyr bind_cols
 #' @export
 as_epidist_linelist.data.frame <- function(
@@ -101,7 +102,7 @@ as_epidist_linelist.data.frame <- function(
 #'
 #' @param data A data.frame to convert
 #' @returns An object of class `epidist_linelist`
-#' @keywords internal
+#' @family linelist
 #' @export
 new_epidist_linelist <- function(data) {
   class(data) <- c("epidist_linelist", class(data))
@@ -112,13 +113,16 @@ new_epidist_linelist <- function(data) {
 #'
 #' @inheritParams as_epidist_linelist
 #' @param ... Additional arguments
-#' @family preprocess
+#' @family linelist
 #' @export
 is_epidist_linelist <- function(data, ...) {
   inherits(data, "epidist_linelist")
 }
 
-#' @rdname assert_epidist
+#' Assert validity of `epidist_linelist` objects
+#'
+#' @method assert_epidist epidist_linelist
+#' @family linelist
 #' @export
 assert_epidist.epidist_linelist <- function(data, ...) {
   assert_data_frame(data)

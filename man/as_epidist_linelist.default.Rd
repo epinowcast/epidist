@@ -28,3 +28,12 @@ secondary times}
 \description{
 Create an epidist_linelist object from vectors of event times
 }
+\seealso{
+Other linelist: 
+\code{\link{as_epidist_linelist}()},
+\code{\link{as_epidist_linelist.data.frame}()},
+\code{\link{assert_epidist.epidist_linelist}()},
+\code{\link{is_epidist_linelist}()},
+\code{\link{new_epidist_linelist}()}
+}
+\concept{linelist}

@@ -14,6 +14,8 @@ The direct model method for \code{epidist_linelist} objects
 }
 \seealso{
 Other direct_model: 
-\code{\link{as_direct_model}()}
+\code{\link{as_direct_model}()},
+\code{\link{is_direct_model}()},
+\code{\link{new_epidist_direct_model}()}
 }
 \concept{direct_model}

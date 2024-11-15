@@ -16,7 +16,7 @@ Convert an object to an \code{epidist_latent_individual} object
 Other latent_individual: 
 \code{\link{epidist_family_model.epidist_latent_individual}()},
 \code{\link{epidist_formula_model.epidist_latent_individual}()},
-\code{\link{is_direct_model}()},
-\code{\link{is_latent_individual}()}
+\code{\link{is_latent_individual}()},
+\code{\link{new_epidist_latent_individual}()}
 }
 \concept{latent_individual}

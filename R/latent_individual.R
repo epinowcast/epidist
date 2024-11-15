@@ -35,7 +35,7 @@ as_latent_individual.epidist_linelist <- function(data) {
 #'
 #' @param data A data.frame to convert
 #' @returns An object of class `epidist_latent_individual`
-#' @keywords internal
+#' @family latent_individual
 #' @export
 new_epidist_latent_individual <- function(data) {
   class(data) <- c("epidist_latent_individual", class(data))

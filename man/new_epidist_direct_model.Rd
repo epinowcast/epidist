@@ -15,4 +15,10 @@ An object of class \code{epidist_direct_model}
 \description{
 Class constructor for \code{epidist_direct_model} objects
 }
-\keyword{internal}
+\seealso{
+Other direct_model: 
+\code{\link{as_direct_model}()},
+\code{\link{as_direct_model.epidist_linelist}()},
+\code{\link{is_direct_model}()}
+}
+\concept{direct_model}

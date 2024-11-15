@@ -15,8 +15,11 @@ is_epidist_linelist(data, ...)
 Check if data has the \code{epidist_linelist} class
 }
 \seealso{
-Other preprocess: 
+Other linelist: 
 \code{\link{as_epidist_linelist}()},
-\code{\link{as_epidist_linelist.data.frame}()}
+\code{\link{as_epidist_linelist.data.frame}()},
+\code{\link{as_epidist_linelist.default}()},
+\code{\link{assert_epidist.epidist_linelist}()},
+\code{\link{new_epidist_linelist}()}
 }
-\concept{preprocess}
+\concept{linelist}

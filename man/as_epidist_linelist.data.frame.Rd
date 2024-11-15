@@ -30,8 +30,11 @@ observation time as a datetime.}
 Create an epidist_linelist object from a data frame with event dates
 }
 \seealso{
-Other preprocess: 
+Other linelist: 
 \code{\link{as_epidist_linelist}()},
-\code{\link{is_epidist_linelist}()}
+\code{\link{as_epidist_linelist.default}()},
+\code{\link{assert_epidist.epidist_linelist}()},
+\code{\link{is_epidist_linelist}()},
+\code{\link{new_epidist_linelist}()}
 }
-\concept{preprocess}
+\concept{linelist}

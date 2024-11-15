@@ -15,4 +15,12 @@ An object of class \code{epidist_linelist}
 \description{
 Class constructor for \code{epidist_linelist} objects
 }
-\keyword{internal}
+\seealso{
+Other linelist: 
+\code{\link{as_epidist_linelist}()},
+\code{\link{as_epidist_linelist.data.frame}()},
+\code{\link{as_epidist_linelist.default}()},
+\code{\link{assert_epidist.epidist_linelist}()},
+\code{\link{is_epidist_linelist}()}
+}
+\concept{linelist}

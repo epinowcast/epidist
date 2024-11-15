@@ -37,14 +37,14 @@ reference:
   desc: Functions for observing data
   contents:
   - has_concept("observe")
-- title: Preprocess
-  desc: Functions for preprocessing data
+- title: Linelist data
+  desc: Functions for preparing linelist data
   contents:
-  - has_concept("preprocess")
-- title: Validation
-  desc: Functions used to check validity of package objects
+  - has_concept("linelist")
+- title: Assert validity of objects
+  desc: Functions used to assert the validity of package objects
   contents:
-  - has_concept("validate")
+  - has_concept("assert")
 - title: Family
   desc: Functions related to specifying custom `brms` families
   contents:

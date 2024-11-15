@@ -4,11 +4,13 @@
 #' @param ... Additional arguments
 #' @return NULL invisibly
 #' @export
+#' @family assert
 assert_epidist <- function(data, ...) {
   UseMethod("assert_epidist")
 }
 
 #' @export
+#' @family assert
 assert_epidist.default <- function(data, ...) {
   cli_abort(
     c(

@@ -8,7 +8,7 @@
 #' @return A character string containing the Stan code chunk of interest.
 #' @keywords internal
 .stan_chunk <- function(path) {
-  local_path <- system.file(paste0("stan/", path), package = "epidist")
+  local_path <- system.file("stan", path, package = "epidist")
   paste(readLines(local_path), collapse = "\n")
 }
 
