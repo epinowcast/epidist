@@ -238,7 +238,7 @@ fit <- epidist(
   family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
-  silent = 2, refresh = 0,
+  silent = 2,
   seed = 1,
   backend = "cmdstanr"
 )
@@ -263,7 +263,7 @@ fit_sex <- epidist(
   family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
-  silent = 2, refresh = 0,
+  silent = 2,
   seed = 1,
   backend = "cmdstanr"
 )
@@ -293,7 +293,7 @@ fit_sex_district <- epidist(
   family = lognormal(),
   algorithm = "sampling",
   refresh = 0,
-  silent = 2, refresh = 0,
+  silent = 2,
   seed = 1,
   backend = "cmdstanr"
 )
