@@ -1,6 +1,6 @@
 prep_obs_gamma <- as_epidist_latent_model(sim_obs_gamma)
 
-family_lognormal <- epidist_family(prep_obs, family = brms::lognormal())
+family_lognormal <- epidist_family(prep_obs, family = lognormal())
 
 test_that("epidist_formula with default settings produces a brmsformula with the correct intercept only formula", { # nolint: line_length_linter.
   form <- epidist_formula(
