@@ -42,13 +42,13 @@ test_that(".make_intercepts_explicit creates a formula which is the same as if i
   prep_obs <- as_epidist_latent_model(sim_obs)
   epidist_family <- epidist_family(prep_obs, family = lognormal())
   formula <- brms:::validate_formula( # nolint
-    formula = brms::bf(mu ~ 1),
+    formula = bf(mu ~ 1),
     data = prep_obs,
     family = epidist_family
   )
   formula <- .make_intercepts_explicit(formula)
   formula_explicit <- brms:::validate_formula( # nolint
-    formula = brms::bf(mu ~ 1, sigma ~ 1),
+    formula = bf(mu ~ 1, sigma ~ 1),
     data = prep_obs,
     family = epidist_family
   )
@@ -61,7 +61,7 @@ test_that(".make_intercepts_explicit does not add an intercept if the distributi
   prep_obs <- as_epidist_latent_model(sim_obs)
   epidist_family <- epidist_family(prep_obs, family = lognormal())
   formula <- brms:::validate_formula( # nolint
-    formula = brms::bf(mu ~ 1, sigma = 1),
+    formula = bf(mu ~ 1, sigma = 1),
     data = prep_obs,
     family = epidist_family
   )

@@ -67,7 +67,7 @@ test_that("epidist.epidist_latent_model fits, the MCMC converges, and the draws 
   set.seed(1)
   fit_constant <- epidist(
     data = prep_obs,
-    formula = brms::bf(mu ~ 1, sigma = 1),
+    formula = bf(mu ~ 1, sigma = 1),
     seed = 1,
     silent = 2, refresh = 0,
     cores = 2,
@@ -153,7 +153,7 @@ test_that("epidist.epidist_latent_model Stan code has no syntax errors for an al
   skip_on_cran()
   stancode_sex <- epidist(
     data = prep_obs_sex,
-    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
+    formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     fn = brms::make_stancode,
     cores = 2
   )

@@ -48,7 +48,7 @@ test_that("epidist_stancode.epidist_latent_model produces valid stanvars", { # n
   epidist_family <- epidist_family(prep_obs)
   epidist_formula <- epidist_formula(
     prep_obs, epidist_family,
-    formula = brms::bf(mu ~ 1)
+    formula = bf(mu ~ 1)
   )
   stancode <- epidist_stancode(
     prep_obs,
