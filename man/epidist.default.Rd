@@ -7,7 +7,7 @@
 \method{epidist}{default}(
   data,
   formula = mu ~ 1,
-  family = "lognormal",
+  family = lognormal(),
   prior = NULL,
   fn = brms::brm,
   ...
@@ -25,8 +25,9 @@ parameters.}
 \item{family}{A description of the response distribution and link function to
 be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
-If not specified, default links are used. For details of supported families
-see \code{\link[=brmsfamily]{brmsfamily()}}.}
+If not specified, default links are used. For details of all supported
+families see \code{\link[=brmsfamily]{brmsfamily()}}. Commonly used, such as \code{\link[=lognormal]{lognormal()}}, are also
+reexported as part of \code{epidist}.}
 
 \item{prior}{One or more \code{brmsprior} objects created by \code{\link[brms:set_prior]{brms::set_prior()}}
 or related functions. These priors are passed to \code{\link[=epidist_prior]{epidist_prior()}} in the

@@ -10,8 +10,9 @@ epidist_family_prior(family, ...)
 \item{family}{A description of the response distribution and link function to
 be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
-If not specified, default links are used. For details of supported families
-see \code{\link[=brmsfamily]{brmsfamily()}}.}
+If not specified, default links are used. For details of all supported
+families see \code{\link[=brmsfamily]{brmsfamily()}}. Commonly used, such as \code{\link[=lognormal]{lognormal()}}, are also
+reexported as part of \code{epidist}.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
