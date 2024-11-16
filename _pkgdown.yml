@@ -27,6 +27,9 @@ authors:
     href: "https://athowes.github.io/"
   Sam Abbott:
     href: "https://www.samabbott.co.uk/"
+  CDC:
+    href: "https://www.cdc.gov/"
+    html: "<img src='man/figures/cdc-logo.png' height='24' alt='CDC logo'/>"
 
 reference:
 - title: Simulation
