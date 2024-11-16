@@ -33,7 +33,7 @@ test_that(".add_dpar_info works as expected for the lognormal and gamma families
   lognormal_extra <- .add_dpar_info(lognormal())
   expect_identical(lognormal_extra$other_links, "log")
   expect_identical(lognormal_extra$other_bounds, list(list(lb = "0", ub = "")))
-  gamma_extra <- .add_dpar_info(brms:::validate_family(stats::Gamma())) # nolint
+  gamma_extra <- .add_dpar_info(brms:::validate_family(Gamma())) # nolint
   expect_null(gamma_extra$other_links)
   expect_identical(gamma_extra$other_bounds, list(list(lb = "0", ub = "")))
 })

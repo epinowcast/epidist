@@ -112,7 +112,7 @@ if (not_on_cran()) {
   )
 
   fit_gamma <- epidist(
-    data = prep_obs_gamma, family = stats::Gamma(link = "log"),
+    data = prep_obs_gamma, family = Gamma(link = "log"),
     seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
     backend = "cmdstanr"
   )

@@ -29,7 +29,7 @@ test_that("epidist.epidist_latent_model samples from the prior according to marg
     cores = 2
   )
   pred <- predict_delay_parameters(prior_samples)
-  family <- brms::lognormal()
+  family <- lognormal()
   epidist_family <- epidist_family(data = prep_obs, family = family)
   epidist_formula <- epidist_formula(
     data = prep_obs,
@@ -111,7 +111,7 @@ test_that("epidist.epidist_latent_model Stan code has no syntax errors and compi
   skip_on_cran()
   stancode_gamma <- epidist(
     data = prep_obs_gamma,
-    family = stats::Gamma(link = "log"),
+    family = Gamma(link = "log"),
     formula = mu ~ 1,
     cores = 2,
     fn = brms::make_stancode
