@@ -10,7 +10,9 @@ epidist_family_model(data, family, ...)
 epidist_formula_model(data, formula, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data.}
+\item{data}{An object with class corresponding to an implemented model.
+The currently available models classes are \code{epidist_latent_model} and
+\code{epidist_naive_model}.}
 
 \item{family}{Output of a call to \code{brms::brmsfamily()} with additional
 information as provided by \code{.add_dpar_info()}}

@@ -7,13 +7,14 @@
 as_epidist_latent_model(data)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data}
+\item{data}{An object to be converted to the class \code{epidist_latent_model}}
 }
 \description{
 Convert an object to an \code{epidist_latent_model} object
 }
 \seealso{
 Other latent_model: 
+\code{\link{as_epidist_latent_model.epidist_linelist_data}()},
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{epidist_formula_model.epidist_latent_model}()},
 \code{\link{is_epidist_latent_model}()},

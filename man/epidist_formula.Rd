@@ -7,7 +7,9 @@
 epidist_formula(data, family, formula, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data.}
+\item{data}{An object with class corresponding to an implemented model.
+The currently available models classes are \code{epidist_latent_model} and
+\code{epidist_naive_model}.}
 
 \item{family}{A description of the response distribution and link function to
 be used in the model created using \code{\link[=epidist_family]{epidist_family()}}.}
