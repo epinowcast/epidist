@@ -86,7 +86,7 @@ test_that("epidist.epidist_latent_model Stan code has no syntax errors", { # nol
   set.seed(1)
   stancode_string <- epidist(
     data = prep_obs,
-    family = "lognormal",
+    family = lognormal(),
     seed = 1,
     silent = 2, refresh = 0,
     fn = brms::make_stancode

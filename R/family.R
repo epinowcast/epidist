@@ -8,7 +8,7 @@
 #' @inheritParams epidist
 #' @family family
 #' @export
-epidist_family <- function(data, family = "lognormal", ...) {
+epidist_family <- function(data, family = lognormal(), ...) {
   assert_epidist(data)
   family <- brms:::validate_family(family) # nolint
   class(family) <- c(family$family, class(family))
