@@ -30,7 +30,7 @@ cli::test_that_cli(".replace_prior errors when passed a new prior without a matc
 })
 
 test_that(".add_dpar_info works as expected for the lognormal and gamma families", { # nolint: line_length_linter.
-  lognormal_extra <- .add_dpar_info(brms::lognormal())
+  lognormal_extra <- .add_dpar_info(lognormal())
   expect_identical(lognormal_extra$other_links, "log")
   expect_identical(lognormal_extra$other_bounds, list(list(lb = "0", ub = "")))
   gamma_extra <- .add_dpar_info(brms:::validate_family(stats::Gamma())) # nolint

@@ -1,6 +1,6 @@
 test_that("epidist_prior with default settings produces an object of the right class", { # nolint: line_length_linter.
   data <- as_epidist_latent_model(sim_obs)
-  family <- brms::lognormal()
+  family <- lognormal()
   formula <- bf(mu ~ 1, sigma ~ 1)
   epidist_family <- epidist_family(data, family)
   epidist_formula <- epidist_formula(
