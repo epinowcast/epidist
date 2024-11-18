@@ -167,21 +167,18 @@ test_that("epidist.epidist_latent_model recovers a sex effect", { # nolint: line
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   set.seed(1)
-  sex_effect <- predict_delay_parameters(fit_sex) |>
-    left_join(
-      mutate(sim_obs_sex, index = row_number()) |>
-        select(index, sex),
-      by = "index"
-    ) |>
-    group_by(sex) |>
-    summarise(
-      mu = mean(mu),
-      sigma = mean(sigma)
-    )
-  expect_equal(sex_effect$mu[1], meanlog_m, tolerance = 0.1)
-  expect_equal(sex_effect$sigma[1], sdlog_m, tolerance = 0.1)
-  expect_equal(sex_effect$mu[2], meanlog_f, tolerance = 0.1)
-  expect_equal(sex_effect$sigma[2], sdlog_f, tolerance = 0.1)
+  draws <- posterior::as_draws_df(fit_sex$fit)
+  expect_equal(mean(draws$b_Intercept), meanlog_m, tolerance = 0.1)
+  expect_equal(
+    mean(draws$b_Intercept + draws$b_sex), meanlog_f,
+    tolerance = 0.1
+  )
+  expect_equal(mean(exp(draws$b_sigma_Intercept)), sdlog_m, tolerance = 0.1)
+  expect_equal(
+    mean(exp(draws$b_sigma_Intercept + draws$b_sigma_sex)),
+    sdlog_f,
+    tolerance = 0.1
+  )
   expect_s3_class(fit_sex, "brmsfit")
   expect_s3_class(fit_sex, "epidist_fit")
   expect_convergence(fit_sex)
