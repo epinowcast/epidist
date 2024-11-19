@@ -8,7 +8,7 @@
 #' @param ... Additional arguments
 #' @autoglobal
 #' @keywords internal
-posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_length_linter
+posterior_predict_latent <- function(i, prep, ...) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu", i = i)
   sigma <- brms::get_dpar(prep, "sigma", i = i)
 
@@ -42,7 +42,7 @@ posterior_predict_latent_lognormal <- function(i, prep, ...) { # nolint: object_
 #' @param prep The result of a call to [`brms::prepare_predictions`]
 #' @autoglobal
 #' @keywords internal
-posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_linter
+posterior_epred_latent <- function(prep) { # nolint: object_length_linter
   mu <- brms::get_dpar(prep, "mu")
   sigma <- brms::get_dpar(prep, "sigma")
   exp(mu + sigma^2 / 2)
@@ -56,7 +56,7 @@ posterior_epred_latent_lognormal <- function(prep) { # nolint: object_length_lin
 #' @param prep The result of a call to [brms::prepare_predictions()]
 #' @autoglobal
 #' @keywords internal
-log_lik_latent_lognormal <- function(i, prep) {
+log_lik_latent <- function(i, prep) {
   mu <- brms::get_dpar(prep, "mu", i = i)
   sigma <- brms::get_dpar(prep, "sigma", i = i)
   y <- prep$data$Y[i]

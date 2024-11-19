@@ -89,7 +89,10 @@ epidist_family_model.epidist_latent_model <- function(
     ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
     type = family$type,
     vars = c("pwindow", "swindow", "vreal1"),
-    loop = FALSE
+    loop = FALSE,
+    log_lik = log_lik_latent,
+    posterior_predict = posterior_predict_latent,
+    posterior_epred = posterior_epred_latent
   )
   custom_family$reparm <- family$reparm
   return(custom_family)
