@@ -7,7 +7,7 @@
 new_epidist_latent_model(data)
 }
 \arguments{
-\item{data}{A data.frame to convert}
+\item{data}{An object to be set with the class \code{epidist_latent_model}}
 }
 \value{
 An object of class \code{epidist_latent_model}
@@ -18,6 +18,7 @@ Class constructor for \code{epidist_latent_model} objects
 \seealso{
 Other latent_model: 
 \code{\link{as_epidist_latent_model}()},
+\code{\link{as_epidist_latent_model.epidist_linelist_data}()},
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{epidist_formula_model.epidist_latent_model}()},
 \code{\link{is_epidist_latent_model}()}
