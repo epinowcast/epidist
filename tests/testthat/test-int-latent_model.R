@@ -29,7 +29,7 @@ test_that("epidist.epidist_latent_model samples from the prior according to marg
     cores = 2
   )
   pred <- predict_delay_parameters(prior_samples)
-  family <- brms::lognormal()
+  family <- lognormal()
   epidist_family <- epidist_family(data = prep_obs, family = family)
   epidist_formula <- epidist_formula(
     data = prep_obs,
@@ -45,7 +45,7 @@ test_that("epidist.epidist_latent_model samples from the prior according to marg
   param1 <- extract_normal_parameters_brms(epidist_prior[1, ])
   param2 <- extract_normal_parameters_brms(epidist_prior[2, ])
   samples1 <- rnorm(1000, mean = param1$mean, sd = param1$sd)
-  samples2 <- rnorm(1000, mean = param2$mean, sd = param2$sd)
+  samples2 <- exp(rnorm(1000, mean = param2$mean, sd = param2$sd))
   # suppressWarnings here used to prevent warnings about ties
   ks1 <- suppressWarnings(stats::ks.test(pred$mu, samples1))
   ks2 <- suppressWarnings(stats::ks.test(pred$sigma, samples2))
@@ -67,7 +67,7 @@ test_that("epidist.epidist_latent_model fits, the MCMC converges, and the draws 
   set.seed(1)
   fit_constant <- epidist(
     data = prep_obs,
-    formula = brms::bf(mu ~ 1, sigma = 1),
+    formula = bf(mu ~ 1, sigma = 1),
     seed = 1,
     silent = 2, refresh = 0,
     cores = 2,
@@ -86,7 +86,7 @@ test_that("epidist.epidist_latent_model Stan code has no syntax errors", { # nol
   set.seed(1)
   stancode_string <- epidist(
     data = prep_obs,
-    family = "lognormal",
+    family = lognormal(),
     seed = 1,
     silent = 2, refresh = 0,
     fn = brms::make_stancode
@@ -111,7 +111,7 @@ test_that("epidist.epidist_latent_model Stan code has no syntax errors and compi
   skip_on_cran()
   stancode_gamma <- epidist(
     data = prep_obs_gamma,
-    family = stats::Gamma(link = "log"),
+    family = Gamma(link = "log"),
     formula = mu ~ 1,
     cores = 2,
     fn = brms::make_stancode
@@ -153,7 +153,7 @@ test_that("epidist.epidist_latent_model Stan code has no syntax errors for an al
   skip_on_cran()
   stancode_sex <- epidist(
     data = prep_obs_sex,
-    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
+    formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     fn = brms::make_stancode,
     cores = 2
   )
@@ -168,8 +168,17 @@ test_that("epidist.epidist_latent_model recovers a sex effect", { # nolint: line
   skip_on_cran()
   set.seed(1)
   draws <- posterior::as_draws_df(fit_sex$fit)
-  expect_equal(mean(draws$b_sex), -0.73, tolerance = 0.2)
-  expect_equal(mean(draws$b_sigma_sex), 0.43, tolerance = 0.2)
+  expect_equal(mean(draws$b_Intercept), meanlog_m, tolerance = 0.1)
+  expect_equal(
+    mean(draws$b_Intercept + draws$b_sex), meanlog_f,
+    tolerance = 0.1
+  )
+  expect_equal(mean(exp(draws$b_sigma_Intercept)), sdlog_m, tolerance = 0.1)
+  expect_equal(
+    mean(exp(draws$b_sigma_Intercept + draws$b_sigma_sex)),
+    sdlog_f,
+    tolerance = 0.1
+  )
   expect_s3_class(fit_sex, "brmsfit")
   expect_s3_class(fit_sex, "epidist_fit")
   expect_convergence(fit_sex)

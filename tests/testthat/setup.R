@@ -112,14 +112,14 @@ if (not_on_cran()) {
   )
 
   fit_gamma <- epidist(
-    data = prep_obs_gamma, family = stats::Gamma(link = "log"),
+    data = prep_obs_gamma, family = Gamma(link = "log"),
     seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
     backend = "cmdstanr"
   )
 
   fit_sex <- epidist(
     data = prep_obs_sex,
-    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex),
+    formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     seed = 1, silent = 2, refresh = 0,
     cores = 2, chains = 2, backend = "cmdstanr"
   )

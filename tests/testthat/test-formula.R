@@ -1,6 +1,6 @@
 prep_obs_gamma <- as_epidist_latent_model(sim_obs_gamma)
 
-family_lognormal <- epidist_family(prep_obs, family = brms::lognormal())
+family_lognormal <- epidist_family(prep_obs, family = lognormal())
 
 test_that("epidist_formula with default settings produces a brmsformula with the correct intercept only formula", { # nolint: line_length_linter.
   form <- epidist_formula(
@@ -18,7 +18,7 @@ test_that("epidist_formula with default settings produces a brmsformula with the
   )
   form_explicit <- epidist_formula(
     prep_obs,
-    family = family_lognormal, formula = brms::bf(mu ~ 1, sigma ~ 1)
+    family = family_lognormal, formula = bf(mu ~ 1, sigma ~ 1)
   )
   attr(form$pforms$sigma, ".Environment") <- NULL
   attr(form_explicit$pforms$sigma, ".Environment") <- NULL
@@ -30,7 +30,7 @@ test_that("epidist_formula with custom formulas produces a brmsformula with corr
   form_sex <- epidist_formula(
     prep_obs,
     family = family_lognormal,
-    formula = brms::bf(mu ~ 1 + sex, sigma ~ 1 + sex)
+    formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex)
   )
   expect_s3_class(form_sex, "brmsformula")
   expect_identical(
@@ -48,28 +48,28 @@ test_that("epidist_formula with custom formulas errors for incorrect custom form
     epidist_formula(
       prep_obs,
       family = family_lognormal,
-      formula = brms::bf(mu ~ 1 + age, sigma ~ 1)
+      formula = bf(mu ~ 1 + age, sigma ~ 1)
     )
   )
   expect_error(
     epidist_formula(
       prep_obs,
       family = family_lognormal,
-      formula = brms::bf(mu ~ 1, sigma ~ 1 + age)
+      formula = bf(mu ~ 1, sigma ~ 1 + age)
     )
   )
   expect_error(
     epidist_formula(
       prep_obs,
       family = family_lognormal,
-      formula = brms::bf(list(), sigma ~ 1)
+      formula = bf(list(), sigma ~ 1)
     )
   )
   expect_error(
     epidist_formula(
       prep_obs,
       family = family_lognormal,
-      formula = brms::bf(mu ~ 1, shape ~ 1)
+      formula = bf(mu ~ 1, shape ~ 1)
     )
   )
 })
