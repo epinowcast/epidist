@@ -5,7 +5,7 @@
 ^\.github$
 ^\.pre-commit-config\.yaml$
 ^\.devcontainer$
-^\.Rprofile
+^\.Rprofile$
 ^_pkgdown\.yml$
 ^docs$
 ^data-raw$
@@ -13,8 +13,8 @@
 ^pkgdown$
 ^doc$
 ^Meta$
-README.Rmd
+^README.Rmd$
 ^pkgdown$
 ^vignettes/approx-inference\.Rmd$
 ^vignettes/ebola\.Rmd$
-^\.lintr
+^\.lintr$
