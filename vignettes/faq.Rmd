@@ -43,8 +43,14 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
     meanlog = meanlog,
     sdlog = sdlog
   ) |>
-  observe_process() |>
-  filter(.data$stime_upr <= obs_time) |>
+  mutate(
+    ptime_lwr = floor(.data$ptime),
+    ptime_upr = .data$ptime_lwr + 1,
+    stime_lwr = floor(.data$stime),
+    stime_upr = .data$stime_lwr + 1,
+    obs_time = obs_time
+  ) |>
+  filter(.data$stime_upr <= .data$obs_time) |>
   slice_sample(n = sample_size, replace = FALSE)
 
 linelist_data <- as_epidist_linelist_data(

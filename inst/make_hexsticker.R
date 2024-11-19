@@ -15,16 +15,24 @@ obs <- outbreak |>
     meanlog = secondary_dist$mu[[1]],
     sdlog = secondary_dist$sigma[[1]]
   ) |>
-  observe_process()
+  mutate(
+    ptime_lwr = floor(.data$ptime),
+    ptime_upr = .data$ptime_lwr + 1,
+    stime_lwr = floor(.data$stime),
+    stime_upr = .data$stime_lwr + 1,
+    delay_daily = .data$stime_lwr - .data$ptime_lwr
+  )
 
 obs_time <- 25
+
 truncated_obs <- obs |>
-  filter(.data$stime_upr <= obs_time) |>
+  mutate(obs_time = obs_time) |>
+  filter(.data$stime_upr <= .data$obs_time) |>
   slice_sample(n = 200, replace = FALSE)
 
 combined_obs <- bind_rows(
   truncated_obs,
-  mutate(obs, obs_time = max(stime_daily))
+  mutate(obs, obs_time = max(stime_lwr))
 ) |>
   mutate(obs_time = factor(obs_time))
 

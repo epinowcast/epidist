@@ -99,7 +99,7 @@ library(purrr)
 library(tidyr)
 library(tibble)
 library(tidybayes)
-library(cmdstanr)
+library(cmdstanr) # nolint
 ```
 
 To access the approximate inference methods used in this vignette we will need to use the `cmdstanr` backend for `brms` (we generally recommend using this backend for fitting models). To do this, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:
@@ -122,8 +122,14 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
     meanlog = meanlog,
     sdlog = sdlog
   ) |>
-  observe_process() |>
-  filter(.data$stime_upr <= obs_time) |>
+  mutate(
+    ptime_lwr = floor(.data$ptime),
+    ptime_upr = .data$ptime_lwr + 1,
+    stime_lwr = floor(.data$stime),
+    stime_upr = .data$stime_lwr + 1,
+    obs_time = obs_time
+  ) |>
+  filter(.data$stime_upr <= .data$obs_time) |>
   slice_sample(n = sample_size, replace = FALSE)
 ```
 

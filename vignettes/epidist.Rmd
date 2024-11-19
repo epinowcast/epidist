@@ -155,7 +155,14 @@ This means that rather than exact event times, we observe event times within an 
 Here we suppose that the interval is daily, meaning that only the date of the primary or secondary event, not the exact event time, is reported (Figure \@ref(fig:cens)):
 
 ```{r}
-obs_cens <- obs |> observe_process()
+obs_cens <- obs |>
+  mutate(
+    ptime_lwr = floor(.data$ptime),
+    ptime_upr = .data$ptime_lwr + 1,
+    stime_lwr = floor(.data$stime),
+    stime_upr = .data$stime_lwr + 1,
+    delay_daily = stime_lwr - ptime_lwr
+  )
 ```
 
 (ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. A common example of this is when events are reported as daily aggregates. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
@@ -176,7 +183,9 @@ This is called (right) truncation, and biases the observation process towards sh
 
 ```{r}
 obs_time <- 25
-obs_cens_trunc <- filter(obs_cens, .data$stime_upr <= obs_time)
+obs_cens_trunc <- obs_cens |>
+  mutate(obs_time = obs_time) |>
+  filter(.data$stime_upr <= .data$obs_time)
 ```
 
 Finally, in reality, it's not possible to observe every case.
