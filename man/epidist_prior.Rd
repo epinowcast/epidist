@@ -8,9 +8,7 @@ family specific priors, and user provided priors}
 epidist_prior(data, family, formula, prior)
 }
 \arguments{
-\item{data}{An object with class corresponding to an implemented model.
-The currently available models classes are \code{epidist_latent_model} and
-\code{epidist_naive_model}.}
+\item{data}{An object with class corresponding to an implemented model.}
 
 \item{family}{A description of the response distribution and link function to
 be used in the model created using \code{\link[=epidist_family]{epidist_family()}}.}

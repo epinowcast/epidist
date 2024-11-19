@@ -7,9 +7,7 @@
 epidist(data, formula, family, prior, fn, ...)
 }
 \arguments{
-\item{data}{An object with class corresponding to an implemented model.
-The currently available models classes are \code{epidist_latent_model} and
-\code{epidist_naive_model}.}
+\item{data}{An object with class corresponding to an implemented model.}
 
 \item{formula}{An object of class \link[stats:formula]{stats::formula} or \link[brms:brmsformula]{brms::brmsformula}
 (or one that can be coerced to those classes). A symbolic description of the
