@@ -10,7 +10,7 @@ test_that("as_epidist_latent_model.epidist_linelist_data errors when passed inco
 })
 
 # Make this data available for other tests
-family_lognormal <- epidist_family(prep_obs, family = brms::lognormal())
+family_lognormal <- epidist_family(prep_obs, family = lognormal())
 
 test_that("is_epidist_latent_model returns TRUE for correct input", { # nolint: line_length_linter.
   expect_true(is_epidist_latent_model(prep_obs))
@@ -48,7 +48,7 @@ test_that("epidist_stancode.epidist_latent_model produces valid stanvars", { # n
   epidist_family <- epidist_family(prep_obs)
   epidist_formula <- epidist_formula(
     prep_obs, epidist_family,
-    formula = brms::bf(mu ~ 1)
+    formula = bf(mu ~ 1)
   )
   stancode <- epidist_stancode(
     prep_obs,
