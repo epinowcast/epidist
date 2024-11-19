@@ -201,7 +201,14 @@ However, in reality, during an outbreak we almost never receive the data as abov
 This means that rather than exact event times, we observe event times within an interval.
 Here we suppose that the interval is daily, meaning that only the date of the primary or secondary event, not the exact event time, is reported (Figure <a href="#fig:cens">1.4</a>):</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="va">obs</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/observe_process.html">observe_process</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="va">obs</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>    ptime_lwr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">ptime</span><span class="op">)</span>,</span>
+<span>    ptime_upr <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">ptime_lwr</span> <span class="op">+</span> <span class="fl">1</span>,</span>
+<span>    stime_lwr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">stime</span><span class="op">)</span>,</span>
+<span>    stime_upr <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">stime_lwr</span> <span class="op">+</span> <span class="fl">1</span>,</span>
+<span>    delay_daily <span class="op">=</span> <span class="va">stime_lwr</span> <span class="op">-</span> <span class="va">ptime_lwr</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">obs_cens</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">delay</span>, y <span class="op">=</span> <span class="va">delay_daily</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -222,12 +229,14 @@ This is called (right) truncation, and biases the observation process towards sh
 <!-- I think possible to do a better job with showing what right truncation is with a figure here! --></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_time</span> <span class="op">&lt;-</span> <span class="fl">25</span></span>
-<span><span class="va">obs_cens_trunc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">obs_cens</span>, <span class="va">.data</span><span class="op">$</span><span class="va">stime_upr</span> <span class="op">&lt;=</span> <span class="va">obs_time</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">obs_cens_trunc</span> <span class="op">&lt;-</span> <span class="va">obs_cens</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>obs_time <span class="op">=</span> <span class="va">obs_time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">stime_upr</span> <span class="op">&lt;=</span> <span class="va">.data</span><span class="op">$</span><span class="va">obs_time</span><span class="op">)</span></span></code></pre></div>
 <p>Finally, in reality, it’s not possible to observe every case.
 We suppose that a sample of individuals of size <code>sample_size</code> are observed:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sample_size</span> <span class="op">&lt;-</span> <span class="fl">200</span></span></code></pre></div>
-<p>This sample size corresponds to 2.3% of the data.</p>
+<p>This sample size corresponds to 8.7% of the data.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_cens_trunc_samp</span> <span class="op">&lt;-</span> <span class="va">obs_cens_trunc</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">sample_size</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
