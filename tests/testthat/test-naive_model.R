@@ -10,7 +10,7 @@ test_that("as_epidist_naive_model.data.frame errors when passed incorrect inputs
 })
 
 # Make this data available for other tests
-family_lognormal <- epidist_family(sim_obs, family = brms::lognormal())
+family_lognormal <- epidist_family(sim_obs, family = lognormal())
 
 test_that("is_epidist_naive_model returns TRUE for correct input", { # nolint: line_length_linter.
   expect_true(is_epidist_naive_model(prep_naive_obs))
