@@ -33,10 +33,6 @@ reference:
   desc: Tools for simulating datasets
   contents:
   - has_concept("simulate")
-- title: Observe
-  desc: Functions for observing data
-  contents:
-  - has_concept("observe")
 - title: Linelist data
   desc: Functions for preparing linelist data
   contents:
