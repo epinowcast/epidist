@@ -32,7 +32,7 @@ truncated_obs <- obs |>
 
 combined_obs <- bind_rows(
   truncated_obs,
-  mutate(obs, obs_time = max(stime_daily))
+  mutate(obs, obs_time = max(stime_lwr))
 ) |>
   mutate(obs_time = factor(obs_time))
 
