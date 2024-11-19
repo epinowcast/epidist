@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="../deps/MathJax-3.2.2/tex-chtml.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Approximate Bayesian inference in epidist">
 <meta name="description" content='"A demonstration of how to fit models in epidist using approximate Bayesian
 inference methods such as the Laplace approximation, ADVI, and Pathfinder."
@@ -221,10 +221,10 @@ Although a <code>save_single_paths</code> option is available, which may have al
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Number of PSIS draws is larger than the total number of draws returned by the single Pathfinders. This is likely unintentional and leads to re-sampling from the same draws. </span></span>
 <span><span class="co">#&gt; Path [1] :Initial log joint density = -1468.604912 </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/Rtmp2A0mBI/model-1fa95ea12b72.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp2A0mBI/model-1fa95ea12b72.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/Rtmp2A0mBI/model-1fa95ea12b72.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp2A0mBI/model-1fa95ea12b72.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/Rtmp2A0mBI/model-1fa95ea12b72.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp2A0mBI/model-1fa95ea12b72.stan', line 64, column 4 to column 77) </span></span>
-<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/Rtmp2A0mBI/model-1fa95ea12b72.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp2A0mBI/model-1fa95ea12b72.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.39161, but must be positive finite! (in '/tmp/Rtmp5q5GKu/model-20b51a0f5c4a.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp5q5GKu/model-20b51a0f5c4a.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.322619, but must be positive finite! (in '/tmp/Rtmp5q5GKu/model-20b51a0f5c4a.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp5q5GKu/model-20b51a0f5c4a.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -2.32855, but must be positive finite! (in '/tmp/Rtmp5q5GKu/model-20b51a0f5c4a.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp5q5GKu/model-20b51a0f5c4a.stan', line 64, column 4 to column 77) </span></span>
+<span><span class="co">#&gt; Exception: Exception: lognormal_lcdf: Scale parameter[1] is -0.749105, but must be positive finite! (in '/tmp/Rtmp5q5GKu/model-20b51a0f5c4a.stan', line 16, column 2 to column 78) (in '/tmp/Rtmp5q5GKu/model-20b51a0f5c4a.stan', line 64, column 4 to column 77) </span></span>
 <span><span class="co">#&gt; Path [1] : Iter      log prob        ||dx||      ||grad||     alpha      alpha0      # evals       ELBO    Best ELBO        Notes  </span></span>
 <span><span class="co">#&gt;              91      -1.057e+03      2.060e-03   2.208e-02    1.000e+00  1.000e+00      2276 -5.417e+02 -5.417e+02                   </span></span>
 <span><span class="co">#&gt; Path [1] :Best Iter: [89] ELBO (-533.322633) evaluations: (2276) </span></span>
@@ -1265,19 +1265,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">33.605</td>
+<td headers="time (s)" class="gt_row gt_right">36.354</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.600</td>
+<td headers="time (s)" class="gt_row gt_right">2.661</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.176</td>
+<td headers="time (s)" class="gt_row gt_right">2.202</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">1.231</td>
+<td headers="time (s)" class="gt_row gt_right">1.268</td>
 </tr>
 </tbody>
 </table>
