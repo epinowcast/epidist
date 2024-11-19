@@ -9,8 +9,9 @@
 #' @param family A description of the response distribution and link function to
 #' be used in the model. Every family function has a link argument allowing
 #' users to specify the link function to be applied on the response variable.
-#' If not specified, default links are used. For details of supported families
-#' see [brmsfamily()].
+#' If not specified, default links are used. For details of all supported
+#' families see [brmsfamily()]. Commonly used, such as [lognormal()], are also
+#' reexported as part of `epidist`.
 #' @param prior One or more `brmsprior` objects created by [brms::set_prior()]
 #' or related functions. These priors are passed to [epidist_prior()] in the
 #' `prior` argument.
@@ -34,7 +35,7 @@ epidist <- function(data, formula, family, prior, fn, ...) {
 #' @family fit
 #' @export
 epidist.default <- function(data, formula = mu ~ 1,
-                            family = "lognormal", prior = NULL,
+                            family = lognormal(), prior = NULL,
                             fn = brms::brm, ...) {
   assert_epidist(data)
   epidist_family <- epidist_family(data, family)

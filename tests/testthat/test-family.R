@@ -11,7 +11,7 @@ test_that("epidist_family gives an error when passed inappropriate family input"
 })
 
 test_that("the family argument in epidist_family passes as expected for brms and stats family objects, as well as strings", { # nolint: line_length_linter.
-  family_lognormal <- epidist_family(prep_obs, family = brms::lognormal())
+  family_lognormal <- epidist_family(prep_obs, family = lognormal())
   expect_identical(family_lognormal$name, "latent_lognormal")
   family_gamma <- epidist_family(prep_obs, family = Gamma(link = "log"))
   expect_identical(family_gamma$name, "latent_gamma")
