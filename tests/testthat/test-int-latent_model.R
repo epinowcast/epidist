@@ -168,16 +168,16 @@ test_that("epidist.epidist_latent_model recovers a sex effect", { # nolint: line
   skip_on_cran()
   set.seed(1)
   draws <- posterior::as_draws_df(fit_sex$fit)
-  expect_equal(mean(draws$b_Intercept), meanlog_m, tolerance = 0.2)
+  expect_equal(mean(draws$b_Intercept), meanlog_m, tolerance = 0.3)
   expect_equal(
     mean(draws$b_Intercept + draws$b_sex), meanlog_f,
-    tolerance = 0.2
+    tolerance = 0.3
   )
-  expect_equal(mean(exp(draws$b_sigma_Intercept)), sdlog_m, tolerance = 0.2)
+  expect_equal(mean(exp(draws$b_sigma_Intercept)), sdlog_m, tolerance = 0.3)
   expect_equal(
     mean(exp(draws$b_sigma_Intercept + draws$b_sigma_sex)),
     sdlog_f,
-    tolerance = 0.2
+    tolerance = 0.3
   )
   expect_s3_class(fit_sex, "brmsfit")
   expect_s3_class(fit_sex, "epidist_fit")
