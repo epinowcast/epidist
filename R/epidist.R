@@ -1,6 +1,6 @@
 #' Fit epidemiological delay distributions using a `brms` interface
 #'
-#' @param data A `data.frame` containing line list data.
+#' @param data An object with class corresponding to an implemented model.
 #' @param formula An object of class [stats::formula] or [brms::brmsformula]
 #' (or one that can be coerced to those classes). A symbolic description of the
 #' model to be fitted. A formula must be provided for the distributional

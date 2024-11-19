@@ -1,12 +1,16 @@
 #' Convert an object to an `epidist_latent_model` object
 #'
-#' @param data A `data.frame` containing line list data
+#' @param data An object to be converted to the class `epidist_latent_model`
 #' @family latent_model
 #' @export
 as_epidist_latent_model <- function(data) {
   UseMethod("as_epidist_latent_model")
 }
 
+
+#' The latent model method for `epidist_linelist_data` objects
+#'
+#' @param data An `epidist_linelist_data` object
 #' @method as_epidist_latent_model epidist_linelist_data
 #' @family latent_model
 #' @autoglobal
@@ -33,7 +37,7 @@ as_epidist_latent_model.epidist_linelist_data <- function(data) {
 
 #' Class constructor for `epidist_latent_model` objects
 #'
-#' @param data A data.frame to convert
+#' @param data An object to be set with the class `epidist_latent_model`
 #' @returns An object of class `epidist_latent_model`
 #' @family latent_model
 #' @export
@@ -44,7 +48,7 @@ new_epidist_latent_model <- function(data) {
 
 #' Check if data has the `epidist_latent_model` class
 #'
-#' @param data A `data.frame` containing line list data
+#' @param data An object
 #' @family latent_model
 #' @export
 is_epidist_latent_model <- function(data) {
@@ -93,9 +97,8 @@ epidist_family_model.epidist_latent_model <- function(
 
 #' Define the model-specific component of an `epidist` custom formula
 #'
-#' @param data A `data.frame` containing line list data
-#' @param formula As produced by [brms::brmsformula()]
-#' @param ... ...
+#' @inheritParams epidist_formula_model
+#' @param ... Additional arguments passed to method.
 #' @method epidist_formula_model epidist_latent_model
 #' @family latent_model
 #' @export

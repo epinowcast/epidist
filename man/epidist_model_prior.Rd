@@ -7,7 +7,7 @@
 epidist_model_prior(data, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data.}
+\item{data}{An object with class corresponding to an implemented model.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }

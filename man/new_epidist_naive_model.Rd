@@ -7,7 +7,7 @@
 new_epidist_naive_model(data)
 }
 \arguments{
-\item{data}{A data.frame to convert}
+\item{data}{An object to be set with the class \code{epidist_naive_model}}
 }
 \value{
 An object of class \code{epidist_naive_model}
