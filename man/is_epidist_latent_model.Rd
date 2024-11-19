@@ -7,7 +7,7 @@
 is_epidist_latent_model(data)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data}
+\item{data}{An object}
 }
 \description{
 Check if data has the \code{epidist_latent_model} class
@@ -15,6 +15,7 @@ Check if data has the \code{epidist_latent_model} class
 \seealso{
 Other latent_model: 
 \code{\link{as_epidist_latent_model}()},
+\code{\link{as_epidist_latent_model.epidist_linelist_data}()},
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{epidist_formula_model.epidist_latent_model}()},
 \code{\link{new_epidist_latent_model}()}
