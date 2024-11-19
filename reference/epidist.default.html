@@ -54,7 +54,7 @@
 <span><span class="fu"><a href="epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  formula <span class="op">=</span> <span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>,</span>
-<span>  family <span class="op">=</span> <span class="st">"lognormal"</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  prior <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fn <span class="op">=</span> <span class="fu">brms</span><span class="fu">::</span><span class="va"><a href="https://paulbuerkner.com/brms/reference/brm.html" class="external-link">brm</a></span>,</span>
 <span>  <span class="va">...</span></span>
@@ -81,8 +81,9 @@ parameters.</p></dd>
 <dd><p>A description of the response distribution and link function to
 be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
-If not specified, default links are used. For details of supported families
-see <code>brmsfamily()</code>.</p></dd>
+If not specified, default links are used. For details of all supported
+families see <code>brmsfamily()</code>. Commonly used, such as <code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal()</a></code>, are also
+reexported as part of <code>epidist</code>.</p></dd>
 
 
 <dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
