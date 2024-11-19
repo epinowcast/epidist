@@ -125,6 +125,7 @@ if (not_on_cran()) {
     data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
     backend = "cmdstanr"
   )
+
   fit_rstan <- epidist(
     data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0
   )
