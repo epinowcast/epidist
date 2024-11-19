@@ -17,3 +17,4 @@ README.Rmd
 ^pkgdown$
 ^vignettes/approx-inference\.Rmd$
 ^vignettes/ebola\.Rmd$
+^\.lintr
