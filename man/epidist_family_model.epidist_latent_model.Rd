@@ -7,7 +7,7 @@
 \method{epidist_family_model}{epidist_latent_model}(data, family, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data.}
+\item{data}{An object with class corresponding to an implemented model.}
 
 \item{family}{Output of a call to \code{brms::brmsfamily()} with additional
 information as provided by \code{.add_dpar_info()}}
@@ -20,6 +20,7 @@ Create the model-specific component of an \code{epidist} custom family
 \seealso{
 Other latent_model: 
 \code{\link{as_epidist_latent_model}()},
+\code{\link{as_epidist_latent_model.epidist_linelist_data}()},
 \code{\link{epidist_formula_model.epidist_latent_model}()},
 \code{\link{is_epidist_latent_model}()},
 \code{\link{new_epidist_latent_model}()}

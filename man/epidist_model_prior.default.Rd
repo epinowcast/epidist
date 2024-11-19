@@ -7,7 +7,7 @@
 \method{epidist_model_prior}{default}(data, formula, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data.}
+\item{data}{An object with class corresponding to an implemented model.}
 
 \item{formula}{An object of class \link[stats:formula]{stats::formula} or \link[brms:brmsformula]{brms::brmsformula}
 (or one that can be coerced to those classes). A symbolic description of the
