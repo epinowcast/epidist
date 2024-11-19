@@ -2,7 +2,7 @@
 % Please edit documentation in R/naive_model.R
 \name{as_epidist_naive_model}
 \alias{as_epidist_naive_model}
-\title{Prepare direct model to pass through to \code{brms}}
+\title{Prepare naive model to pass through to \code{brms}}
 \usage{
 as_epidist_naive_model(data)
 }
@@ -10,7 +10,7 @@ as_epidist_naive_model(data)
 \item{data}{A \code{data.frame} containing line list data}
 }
 \description{
-Prepare direct model to pass through to \code{brms}
+Prepare naive model to pass through to \code{brms}
 }
 \seealso{
 Other naive_model: 

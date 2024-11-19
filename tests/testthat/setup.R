@@ -97,7 +97,7 @@ sim_obs_sex <- as_epidist_linelist_data(
 )
 
 prep_obs <- as_epidist_latent_model(sim_obs)
-prep_direct_obs <- as_epidist_naive_model(sim_obs)
+prep_naive_obs <- as_epidist_naive_model(sim_obs)
 prep_obs_gamma <- as_epidist_latent_model(sim_obs_gamma)
 prep_obs_sex <- as_epidist_latent_model(sim_obs_sex)
 
