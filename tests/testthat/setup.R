@@ -14,8 +14,14 @@ sim_obs <- simulate_gillespie() |>
     meanlog = meanlog,
     sdlog = sdlog
   ) |>
-  observe_process() |>
-  dplyr::filter(.data$stime_upr <= obs_time) |>
+  dplyr::mutate(
+    ptime_lwr = floor(.data$ptime),
+    ptime_upr = .data$ptime_lwr + 1,
+    stime_lwr = floor(.data$stime),
+    stime_upr = .data$stime_lwr + 1,
+    obs_time = obs_time
+  ) |>
+  dplyr::filter(.data$stime_upr <= .data$obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
@@ -41,8 +47,14 @@ sim_obs_gamma <- simulate_gillespie() |>
     shape = shape,
     rate = rate
   ) |>
-  observe_process() |>
-  dplyr::filter(.data$stime_upr <= obs_time) |>
+  dplyr::mutate(
+    ptime_lwr = floor(.data$ptime),
+    ptime_upr = .data$ptime_lwr + 1,
+    stime_lwr = floor(.data$stime),
+    stime_upr = .data$stime_lwr + 1,
+    obs_time = obs_time
+  ) |>
+  dplyr::filter(.data$stime_upr <= .data$obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
@@ -82,8 +94,14 @@ sim_obs_sex_f <- dplyr::filter(sim_obs_sex, sex == 1) |>
   dplyr::select(case, ptime, delay, stime, sex)
 
 sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
-  observe_process() |>
-  dplyr::filter(.data$stime_upr <= obs_time) |>
+  dplyr::mutate(
+    ptime_lwr = floor(.data$ptime),
+    ptime_upr = .data$ptime_lwr + 1,
+    stime_lwr = floor(.data$stime),
+    stime_upr = .data$stime_lwr + 1,
+    obs_time = obs_time
+  ) |>
+  dplyr::filter(.data$stime_upr <= .data$obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Temporary solution for classing time data
@@ -107,6 +125,7 @@ if (not_on_cran()) {
     data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
     backend = "cmdstanr"
   )
+
   fit_rstan <- epidist(
     data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0
   )
