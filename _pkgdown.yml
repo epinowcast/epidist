@@ -84,3 +84,6 @@ reference:
 - title: Diagnostic functions
   contents:
   - has_concept("diagnostics")
+- title: Reexported functions
+  contents:
+  - reexports
