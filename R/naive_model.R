@@ -1,4 +1,4 @@
-#' Prepare direct model to pass through to `brms`
+#' Prepare naive model to pass through to `brms`
 #'
 #' @param data A `data.frame` containing line list data
 #' @family naive_model
@@ -7,7 +7,7 @@ as_epidist_naive_model <- function(data) {
   UseMethod("as_epidist_naive_model")
 }
 
-#' The direct model method for `epidist_linelist_data` objects
+#' The naive model method for `epidist_linelist_data` objects
 #'
 #' @param data An `epidist_linelist_data` object
 #' @method as_epidist_naive_model epidist_linelist_data

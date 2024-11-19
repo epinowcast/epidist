@@ -13,7 +13,7 @@ test_that("as_epidist_naive_model.data.frame errors when passed incorrect inputs
 family_lognormal <- epidist_family(sim_obs, family = brms::lognormal())
 
 test_that("is_epidist_naive_model returns TRUE for correct input", { # nolint: line_length_linter.
-  expect_true(is_epidist_naive_model(prep_direct_obs))
+  expect_true(is_epidist_naive_model(prep_naive_obs))
   expect_true({
     x <- list()
     class(x) <- "epidist_naive_model"
@@ -31,12 +31,12 @@ test_that("is_epidist_naive_model returns FALSE for incorrect input", { # nolint
 })
 
 test_that("assert_epidist.epidist_naive_model doesn't produce an error for correct input", { # nolint: line_length_linter.
-  expect_no_error(assert_epidist(prep_direct_obs))
+  expect_no_error(assert_epidist(prep_naive_obs))
 })
 
 test_that("assert_epidist.epidist_naive_model returns FALSE for incorrect input", { # nolint: line_length_linter.
   expect_error(assert_epidist(list()))
-  expect_error(assert_epidist(prep_direct_obs[, 1]))
+  expect_error(assert_epidist(prep_naive_obs[, 1]))
   expect_error({
     x <- list()
     class(x) <- "epidist_naive_model"
