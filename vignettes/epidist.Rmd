@@ -325,31 +325,42 @@ For example, individual predictions of the lognormal delay parameters can be ext
 pred <- predict_delay_parameters(fit)
 ```
 
-Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained using the average of the `mu` and `sigma` draws.
+Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained for 100 draws from the posterior distribution of the `mu` and `sigma` parameters.
 Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using `epidist()` we have obtained a much closer match to the truth.
 
 (ref:fitted-lognormal) A fitted delay distribution (in pink) as compared with the true delay distribution (in black).
 
 ```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
+# Sample 100 random draws from the posterior
+set.seed(123)
+sample_draws <- sample(nrow(pred), 100)
+
 ggplot() +
+  # Plot the true distribution
   geom_function(
     data = data.frame(x = c(0, 30)),
     aes(x = x),
     fun = dlnorm,
+    linewidth = 2,
     args = list(
       meanlog = secondary_dist[["mu"]],
       sdlog = secondary_dist[["sigma"]]
     )
   ) +
-  geom_function(
-    data = data.frame(x = c(0, 30)),
-    aes(x = x), fun = dlnorm,
-    args = list(
-      meanlog = mean(pred$mu),
-      sdlog = mean(pred$sigma)
-    ),
-    col = "#CC79A7"
-  ) +
+  # Plot 100 sampled posterior distributions
+  lapply(sample_draws, \(i) {
+    geom_function(
+      data = data.frame(x = c(0, 30)),
+      aes(x = x),
+      fun = dlnorm,
+      args = list(
+        meanlog = pred$mu[i],
+        sdlog = pred$sigma[i]
+      ),
+      alpha = 0.1,
+      color = "#CC79A7"
+    )
+  }) +
   labs(
     x = "Delay between primary and secondary event (days)",
     y = "Probability density"
