@@ -328,7 +328,7 @@ pred <- predict_delay_parameters(fit)
 Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained for 100 draws from the posterior distribution of the `mu` and `sigma` parameters.
 Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using `epidist()` we have obtained a much closer match to the truth.
 
-(ref:fitted-lognormal) A fitted delay distribution (in pink) as compared with the true delay distribution (in black).
+(ref:fitted-lognormal) The fitted delay distribution (pink lines, 100 draws from the posterior) compared to the true underlying delay distribution (black line). Each pink line represents one possible delay distribution based on the fitted model parameters.
 
 ```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
 # Sample 100 random draws from the posterior
