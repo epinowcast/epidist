@@ -310,6 +310,14 @@ Any tool that supports `brms` fitted model objects will be compatible with `fit`
 **Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features.**
 **This can be set using `backend = "cmdstanr"` after following the installing CmdStan instructions in the README.**
 
+For example, we can use the built in `summary()` function
+
+```{r}
+summary(fit)
+```
+
+to see that the model has converged and recovered the delay distribution distribution paramters reasonably well.
+
 The `epidist` package also provides functions to make common post-processing tasks easy.
 For example, individual predictions of the lognormal delay parameters can be extracted using:
 
