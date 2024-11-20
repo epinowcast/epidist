@@ -3,8 +3,7 @@ test_that("epidist_gen_posterior_predict returns a function that outputs positiv
   # Test lognormal
   prep <- brms::prepare_predictions(fit)
   i <- 1
-  family <- epidist_family(data = prep_obs, family = lognormal())
-  predict_fn <- epidist_gen_posterior_predict(family)
+  predict_fn <- epidist_gen_posterior_predict(lognormal())
   pred_i <- predict_fn(i = i, prep)
   expect_identical(floor(pred_i), pred_i)
   expect_length(pred_i, prep$ndraws)
@@ -12,8 +11,7 @@ test_that("epidist_gen_posterior_predict returns a function that outputs positiv
 
   # Test gamma
   prep_gamma <- brms::prepare_predictions(fit_gamma)
-  family_gamma <- epidist_family(data = prep_obs, family = Gamma())
-  predict_fn_gamma <- epidist_gen_posterior_predict(family_gamma)
+  predict_fn_gamma <- epidist_gen_posterior_predict(Gamma())
   pred_i_gamma <- predict_fn_gamma(i = i, prep_gamma)
   expect_identical(floor(pred_i_gamma), pred_i_gamma)
   expect_length(pred_i_gamma, prep_gamma$ndraws)
@@ -25,23 +23,26 @@ test_that("epidist_gen_posterior_predict returns a function that errors for i ou
   # Test lognormal
   prep <- brms::prepare_predictions(fit)
   i_out_of_bounds <- length(prep$data$Y) + 1
-  family <- epidist_family(data = prep_obs, family = lognormal())
-  predict_fn <- epidist_gen_posterior_predict(family)
-  expect_error(predict_fn(i = i_out_of_bounds, prep))
+  predict_fn <- epidist_gen_posterior_predict(lognormal())
+  expect_warning(
+    expect_error(
+      predict_fn(i = i_out_of_bounds, prep)
+    )
+  )
 
   # Test gamma
   prep_gamma <- brms::prepare_predictions(fit_gamma)
   i_out_of_bounds_gamma <- length(prep_gamma$data$Y) + 1
-  family_gamma <- epidist_family(data = prep_obs, family = Gamma())
-  predict_fn_gamma <- epidist_gen_posterior_predict(family_gamma)
-  expect_error(predict_fn_gamma(i = i_out_of_bounds_gamma, prep_gamma))
+  predict_fn_gamma <- epidist_gen_posterior_predict(Gamma())
+  expect_warning(
+    expect_error(predict_fn_gamma(i = i_out_of_bounds_gamma, prep_gamma))
+  )
 })
 
 test_that("epidist_gen_posterior_predict returns a function that can generate predictions with no censoring", { # nolint: line_length_linter.
   skip_on_cran()
   # Test lognormal
-  family <- epidist_family(data = prep_obs, family = lognormal())
-  predict_fn <- epidist_gen_posterior_predict(family)
+  predict_fn <- epidist_gen_posterior_predict(lognormal())
   draws <- data.frame(relative_obs_time = 1000, pwindow = 0, swindow = 0) |>
     tidybayes::add_predicted_draws(fit, ndraws = 100)
   expect_identical(draws$.draw, 1:100)
@@ -50,8 +51,7 @@ test_that("epidist_gen_posterior_predict returns a function that can generate pr
   expect_true(all(abs(pred - round(pred)) > .Machine$double.eps^0.5))
 
   # Test gamma
-  family_gamma <- epidist_family(data = prep_obs, family = Gamma())
-  predict_fn_gamma <- epidist_gen_posterior_predict(family_gamma)
+  predict_fn_gamma <- epidist_gen_posterior_predict(Gamma())
   draws_gamma <- data.frame(
     relative_obs_time = 1000, pwindow = 0, swindow = 0
   ) |>
@@ -69,8 +69,7 @@ test_that("epidist_gen_posterior_predict returns a function that predicts delays
   # Test lognormal
   prep <- brms::prepare_predictions(fit)
   prep$ndraws <- 1000 # Down from the 4000 for time saving
-  family <- epidist_family(data = prep_obs, family = lognormal())
-  predict_fn <- epidist_gen_posterior_predict(family)
+  predict_fn <- epidist_gen_posterior_predict(lognormal())
   q <- purrr::map_vec(seq_along(prep$data$Y), function(i) {
     y <- predict_fn(i, prep)
     ecdf <- ecdf(y)
@@ -87,8 +86,7 @@ test_that("epidist_gen_posterior_predict returns a function that predicts delays
   # Test gamma
   prep_gamma <- brms::prepare_predictions(fit_gamma)
   prep_gamma$ndraws <- 1000
-  family_gamma <- epidist_family(data = prep_obs, family = Gamma())
-  predict_fn_gamma <- epidist_gen_posterior_predict(family_gamma)
+  predict_fn_gamma <- epidist_gen_posterior_predict(Gamma())
   q_gamma <- purrr::map_vec(seq_along(prep_gamma$data$Y), function(i) {
     y <- predict_fn_gamma(i, prep_gamma)
     ecdf <- ecdf(y)
@@ -107,8 +105,7 @@ test_that("epidist_gen_posterior_epred returns a function that creates arrays wi
   skip_on_cran()
   # Test lognormal
   prep <- brms::prepare_predictions(fit)
-  family <- epidist_family(data = prep_obs, family = lognormal())
-  epred_fn <- epidist_gen_posterior_epred(family)
+  epred_fn <- epidist_gen_posterior_epred(lognormal())
   epred <- epred_fn(prep)
   expect_setequal(class(epred), c("matrix", "array"))
   expect_identical(nrow(epred), prep$ndraws)
@@ -117,8 +114,7 @@ test_that("epidist_gen_posterior_epred returns a function that creates arrays wi
 
   # Test gamma
   prep_gamma <- brms::prepare_predictions(fit_gamma)
-  family_gamma <- epidist_family(data = prep_obs, family = Gamma())
-  epred_fn_gamma <- epidist_gen_posterior_epred(family_gamma)
+  epred_fn_gamma <- epidist_gen_posterior_epred(Gamma())
   epred_gamma <- epred_fn_gamma(prep_gamma)
   expect_setequal(class(epred_gamma), c("matrix", "array"))
   expect_identical(nrow(epred_gamma), prep_gamma$ndraws)

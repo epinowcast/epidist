@@ -22,10 +22,7 @@
 #' @family gen
 #' @export
 epidist_gen_posterior_predict <- function(family) {
-  dist_fn <- get(
-    paste0("posterior_predict_", family$family),
-    asNamespace("brms")
-  )
+  dist_fn <- .get_brms_fn("posterior_predict", family)
 
   rdist <- function(n, i, prep, ...) {
     prep$ndraws <- n
@@ -72,8 +69,5 @@ epidist_gen_posterior_predict <- function(family) {
 #' @family gen
 #' @export
 epidist_gen_posterior_epred <- function(family) {
-  get(
-    paste0("posterior_epred_", family$family),
-    asNamespace("brms")
-  )
+  .get_brms_fn("posterior_epred", family)
 }

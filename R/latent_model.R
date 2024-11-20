@@ -121,10 +121,7 @@ epidist_family_model.epidist_latent_model <- function(
 #' @autoglobal
 epidist_gen_log_lik_latent <- function(family) {
   # Get internal brms log_lik function
-  log_lik_brms <- get(
-    paste0("log_lik_", family$family),
-    asNamespace("brms")
-  )
+  log_lik_brms <- .get_brms_fn("log_lik", family)
 
   .log_lik <- function(i, prep) {
     y <- prep$data$Y[i]
