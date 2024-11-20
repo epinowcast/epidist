@@ -322,7 +322,6 @@ Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with wom
 
 ```{r}
 epred_draws <- obs_prep |>
-  as.data.frame() |>
   data_grid(NA) |>
   mutate(relative_obs_time = NA, pwindow = NA, swindow = NA) |>
   add_epred_draws(fit, dpar = TRUE)
@@ -334,7 +333,6 @@ epred_base_figure <- epred_draws |>
   theme_minimal()
 
 epred_draws_sex <- obs_prep |>
-  as.data.frame() |>
   data_grid(sex) |>
   mutate(relative_obs_time = NA, pwindow = NA, swindow = NA) |>
   add_epred_draws(fit_sex, dpar = TRUE)
@@ -346,7 +344,6 @@ epred_sex_figure <- epred_draws_sex |>
   theme_minimal()
 
 epred_draws_sex_district <- obs_prep |>
-  as.data.frame() |>
   data_grid(sex, district) |>
   mutate(relative_obs_time = NA, pwindow = NA, swindow = NA) |>
   add_epred_draws(fit_sex_district, dpar = TRUE)

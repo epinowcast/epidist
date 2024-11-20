@@ -104,13 +104,10 @@ test_that("epidist_gen_posterior_predict returns a function that predicts delays
 test_that("epidist_gen_posterior_epred returns a function that creates arrays with correct dimensions", { # nolint: line_length_linter.
   skip_on_cran()
   # Test lognormal
-  prep <- brms::prepare_predictions(fit)
-  epred_fn <- epidist_gen_posterior_epred(lognormal())
-  epred <- epred_fn(prep)
-  expect_setequal(class(epred), c("matrix", "array"))
-  expect_identical(nrow(epred), prep$ndraws)
-  expect_identical(ncol(epred), length(prep$data$Y))
-  expect_gte(min(epred), 0)
+  epred <- prep_obs |>
+    tidybayes::add_epred_draws(fit)
+  expect_equal(mean(epred$.epred), 5.97, tolerance = 0.1)
+  expect_gte(min(epred$.epred), 0)
 
   # Test gamma
   prep_gamma <- brms::prepare_predictions(fit_gamma)

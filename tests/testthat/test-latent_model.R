@@ -62,8 +62,7 @@ test_that("epidist_gen_log_lik_latent returns a function that produces valid log
   # Test lognormal
   prep <- brms::prepare_predictions(fit)
   i <- 1
-  family <- epidist_family(data = prep_obs, family = lognormal())
-  log_lik_fn <- epidist_gen_log_lik_latent(family)
+  log_lik_fn <- epidist_gen_log_lik_latent(lognormal())
   log_lik <- log_lik_fn(i = i, prep)
   expect_length(log_lik, prep$ndraws)
   expect_false(anyNA(log_lik))
@@ -71,8 +70,7 @@ test_that("epidist_gen_log_lik_latent returns a function that produces valid log
 
   # Test gamma
   prep_gamma <- brms::prepare_predictions(fit_gamma)
-  family_gamma <- epidist_family(data = prep_obs, family = Gamma())
-  log_lik_fn_gamma <- epidist_gen_log_lik_latent(family_gamma)
+  log_lik_fn_gamma <- epidist_gen_log_lik_latent(Gamma())
   log_lik_gamma <- log_lik_fn_gamma(i = i, prep_gamma)
   expect_length(log_lik_gamma, prep_gamma$ndraws)
   expect_false(anyNA(log_lik_gamma))
