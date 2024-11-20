@@ -27,6 +27,10 @@ posterior_predict_latent_gamma <- function(i, prep, ...) { # nolint: object_leng
       d_censored <- s_censored - p_censored
     }
     return(d_censored)
+
+    .predict <- function(s) {
+      primarycensored::rpcens()
+    }
   }
 
   # Within brms this is a helper function called rblapply

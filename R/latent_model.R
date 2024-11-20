@@ -82,7 +82,7 @@ epidist_family_model.epidist_latent_model <- function(
     data, family, ...) {
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
-    paste0("latent_", family$family),
+    "epidist_latent",
     dpars = family$dpars,
     links = c(family$link, family$other_links),
     lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
@@ -90,12 +90,125 @@ epidist_family_model.epidist_latent_model <- function(
     type = family$type,
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE,
-    log_lik = log_lik_latent,
-    posterior_predict = posterior_predict_latent,
-    posterior_epred = posterior_epred_latent
+    log_lik = log_lik_epidist_latent(family),
+    posterior_predict = posterior_predict_epidist_latent(family),
+    posterior_epred = posterior_epred_epidist_latent(family)
   )
   custom_family$reparm <- family$reparm
   return(custom_family)
+}
+
+#' Calculate the pointwise log likelihood of the `latent_gamma` family
+#'
+#' See [brms::log_lik()].
+#'
+#' @param i The index of the observation to calculate the log likelihood of
+#' @param prep The result of a call to [brms::prepare_predictions()]
+#' @autoglobal
+#' @keywords internal
+log_lik_epidist_latent <- function(i, prep) {
+  mu <- brms::get_dpar(prep, "mu", i = i)
+  sigma <- brms::get_dpar(prep, "sigma", i = i)
+  y <- prep$data$Y[i]
+  relative_obs_time <- prep$data$vreal1[i]
+  pwindow <- prep$data$vreal2[i]
+  swindow <- prep$data$vreal3[i]
+
+  # Generates values of the swindow_raw and pwindow_raw, but really these should
+  # be extracted from prep or the fitted raws somehow. See:
+  # https://github.com/epinowcast/epidist/issues/267
+  swindow_raw <- stats::runif(prep$ndraws)
+  pwindow_raw <- stats::runif(prep$ndraws)
+
+  swindow <- swindow_raw * swindow
+
+  # For no overlap calculate as usual, for overlap ensure pwindow < swindow
+  if (i %in% prep$data$noverlap) {
+    pwindow <- pwindow_raw * pwindow
+  } else {
+    pwindow <- pwindow_raw * swindow
+  }
+
+  d <- y - pwindow + swindow
+  obs_time <- relative_obs_time - pwindow
+  lpdf <- stats::dlnorm(d, meanlog = mu, sdlog = sigma, log = TRUE)
+  lcdf <- stats::plnorm(obs_time, meanlog = mu, sdlog = sigma, log.p = TRUE)
+  return(lpdf - lcdf)
+}
+
+#' Create a function to draw from the posterior predictive distribution for a
+#' latent model
+#'
+#' This function creates a function that draws from the posterior predictive
+#' distribution for a latent model using [primarycensored::rpcens()] to handle
+#' censoring and truncation. The returned function takes a prep argument from
+#' `brms` and returns posterior predictions. This is used internally by
+#' [brms::posterior_predict()] to generate predictions for latent models.
+#'
+#' @inheritParams epidist_family_model
+#'
+#' @return A function that takes a prep argument from brms and returns a matrix
+#' of posterior predictions, with one row per posterior draw and one column
+#' per observation.
+#'
+#' @seealso [brms::posterior_predict()] for details on how this is used within
+#' `brms`, [primarycensored::rpcens()] for details on the censoring approach
+#' @autoglobal
+#' @family latent_model
+#' @export
+posterior_predict_epidist_latent <- function(i, prep, ...) {
+  fn_string <- paste0("posterior_predict_", family$name)
+  dist_fn <- eval(parse(text = fn_string))
+
+  rdist <- function(n, i, prep, ...) {
+    purrr::map_dbl(
+      seq_len(n),
+      ~ do.call(dist_fn, list(i = i, prep = prep))
+    )
+  }
+
+  .predict <- function(i, prep) {
+    relative_obs_time <- prep$data$vreal1[i]
+    pwindow <- prep$data$vreal2[i]
+    swindow <- prep$data$vreal3[i]
+
+    primarycensored::rpcens(
+      n = prep$ndraws,
+      rdist = rdist,
+      rprimary = stats::runif,
+      pwindow = prep$data$vreal2[i],
+      swindow = prep$data$vreal3[i],
+      D = prep$data$vreal1[i],
+      i = i,
+      prep = prep
+    )
+  }
+  return(.predict)
+}
+
+#' Create a function to draw from the expected value of the posterior predictive
+#' distribution for a latent model
+#'
+#' This function creates a function that calculates the expected value of the
+#' posterior predictive distribution for a latent model. The returned function
+#' takes a prep argument (from brms) and returns posterior expected values.
+#' This is used internally by [brms::posterior_epred()] to calculate expected
+#' values for latent models.
+#'
+#' @inheritParams epidist_family_model
+#'
+#' @return A function that takes a prep argument from brms and returns a matrix
+#' of posterior expected values, with one row per posterior draw and one column
+#' per observation.
+#'
+#' @seealso [brms::posterior_epred()] for details on how this is used within
+#' `brms`.
+#' @autoglobal
+#' @family latent_model
+#' @export
+posterior_epred_epidist_latent <- function(family) {
+  fn_string <- paste0("posterior_epred_", family$name)
+  eval(parse(text = fn_string))
 }
 
 #' Define the model-specific component of an `epidist` custom formula
