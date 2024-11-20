@@ -27,7 +27,7 @@ Other latent_model:
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{is_epidist_latent_model}()},
 \code{\link{new_epidist_latent_model}()},
-\code{\link{posterior_epred_epidist_latent}()},
-\code{\link{posterior_predict_epidist_latent}()}
+\code{\link{posterior_epred_latent}()},
+\code{\link{posterior_predict_latent}()}
 }
 \concept{latent_model}

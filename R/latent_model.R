@@ -82,7 +82,7 @@ epidist_family_model.epidist_latent_model <- function(
     data, family, ...) {
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
-    "epidist_latent",
+    paste0("latent_", family$family),
     dpars = family$dpars,
     links = c(family$link, family$other_links),
     lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
@@ -90,9 +90,9 @@ epidist_family_model.epidist_latent_model <- function(
     type = family$type,
     vars = c("pwindow", "swindow", "vreal1"),
     loop = FALSE,
-    log_lik = log_lik_epidist_latent(family),
-    posterior_predict = posterior_predict_epidist_latent(family),
-    posterior_epred = posterior_epred_epidist_latent(family)
+    log_lik = log_lik_latent,
+    posterior_predict = posterior_predict_latent(family),
+    posterior_epred = posterior_epred_latent(family)
   )
   custom_family$reparm <- family$reparm
   return(custom_family)
@@ -106,7 +106,7 @@ epidist_family_model.epidist_latent_model <- function(
 #' @param prep The result of a call to [brms::prepare_predictions()]
 #' @autoglobal
 #' @keywords internal
-log_lik_epidist_latent <- function(i, prep) {
+log_lik_latent <- function(i, prep) {
   mu <- brms::get_dpar(prep, "mu", i = i)
   sigma <- brms::get_dpar(prep, "sigma", i = i)
   y <- prep$data$Y[i]
@@ -156,8 +156,8 @@ log_lik_epidist_latent <- function(i, prep) {
 #' @autoglobal
 #' @family latent_model
 #' @export
-posterior_predict_epidist_latent <- function(i, prep, ...) {
-  fn_string <- paste0("posterior_predict_", family$name)
+posterior_predict_latent <- function(family) {
+  fn_string <- paste0("brms:::posterior_predict_", family$family)
   dist_fn <- eval(parse(text = fn_string))
 
   rdist <- function(n, i, prep, ...) {
@@ -167,7 +167,7 @@ posterior_predict_epidist_latent <- function(i, prep, ...) {
     )
   }
 
-  .predict <- function(i, prep) {
+  .predict <- function(i, prep, ...) {
     relative_obs_time <- prep$data$vreal1[i]
     pwindow <- prep$data$vreal2[i]
     swindow <- prep$data$vreal3[i]
@@ -206,8 +206,8 @@ posterior_predict_epidist_latent <- function(i, prep, ...) {
 #' @autoglobal
 #' @family latent_model
 #' @export
-posterior_epred_epidist_latent <- function(family) {
-  fn_string <- paste0("posterior_epred_", family$name)
+posterior_epred_latent <- function(family) {
+  fn_string <- paste0("brms:::posterior_epred_", family$family)
   eval(parse(text = fn_string))
 }
 
