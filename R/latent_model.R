@@ -149,7 +149,7 @@ epidist_gen_log_lik_latent <- function(family) {
     # Create brms truncation upper bound
     prep$data$ub <- rep(obs_time, length(prep$data$Y))
     # Update augmented data
-    prep$data$Y <- rep(y, length(prep$data$Y))
+    prep$data$Y <- rep(d, length(prep$data$Y))
 
     # Call internal brms log_lik function with augmented data
     lpdf <- log_lik_brms(i, prep)
