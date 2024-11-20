@@ -161,10 +161,8 @@ posterior_predict_latent <- function(family) {
   dist_fn <- eval(parse(text = fn_string))
 
   rdist <- function(n, i, prep, ...) {
-    purrr::map_dbl(
-      seq_len(n),
-      ~ do.call(dist_fn, list(i = i, prep = prep))
-    )
+    prep$ndraws <- n
+    do.call(dist_fn, list(i = i, prep = prep))
   }
 
   .predict <- function(i, prep, ...) {
@@ -172,7 +170,7 @@ posterior_predict_latent <- function(family) {
     pwindow <- prep$data$vreal2[i]
     swindow <- prep$data$vreal3[i]
 
-    primarycensored::rpcens(
+    as.matrix(primarycensored::rpcens(
       n = prep$ndraws,
       rdist = rdist,
       rprimary = stats::runif,
@@ -181,7 +179,7 @@ posterior_predict_latent <- function(family) {
       D = prep$data$vreal1[i],
       i = i,
       prep = prep
-    )
+    ))
   }
   return(.predict)
 }
