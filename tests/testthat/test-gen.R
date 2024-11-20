@@ -110,11 +110,8 @@ test_that("epidist_gen_posterior_epred returns a function that creates arrays wi
   expect_gte(min(epred$.epred), 0)
 
   # Test gamma
-  prep_gamma <- brms::prepare_predictions(fit_gamma)
-  epred_fn_gamma <- epidist_gen_posterior_epred(Gamma())
-  epred_gamma <- epred_fn_gamma(prep_gamma)
-  expect_setequal(class(epred_gamma), c("matrix", "array"))
-  expect_identical(nrow(epred_gamma), prep_gamma$ndraws)
-  expect_identical(ncol(epred_gamma), length(prep_gamma$data$Y))
-  expect_gte(min(epred_gamma), 0)
+  epred_gamma <- prep_obs |>
+    tidybayes::add_epred_draws(fit_gamma)
+  expect_equal(mean(epred_gamma$.epred), 6.56, tolerance = 0.1)
+  expect_gte(min(epred_gamma$.epred), 0)
 })
