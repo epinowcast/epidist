@@ -49,8 +49,9 @@ First, in Section \@ref(data), we explain interval censoring and right truncatio
 Then, in Section \@ref(fit), we show how `epidist` can be used to accurately estimate delay distributions by using a statistical model which properly accounts for these two issues.
 
 If you would like more technical details, the `epidist` package implements models following best practices as described in @park2024estimating and @charniga2024best.
+We also recommend the introduction provided by the [nowcasting and forecasting infectious disease dynamics](https://nfidd.github.io/nfidd/) course.
 
-To run this vignette yourself, along with the `epidist` package, you will need the following packages:
+To run this vignette yourself, as well as the `epidist` package, you will need the following packages:
 
 ```{r load-requirements}
 library(epidist)
@@ -62,16 +63,7 @@ library(dplyr)
 
 # Example data {#data}
 
-Data should be formatted as a `data.frame` with the following columns for use within `epidist`:
-
-* `case`: The unique case ID.
-* `ptime`: The time of the primary event.
-* `stime`: The time of the secondary event.
-
-Here we simulate data in this format, and in doing so explain the two main issues with observational delay data.
-<!-- Please see as of yet unwritten vignette for information about how to transform your data of other formats to the right format. -->
-
-First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data (Figure \@ref(fig:outbreak)) from a stochastic compartmental model:
+First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data (Figure \@ref(fig:outbreak)) from a stochastic compartmental model.
 
 ```{r}
 outbreak <- simulate_gillespie(seed = 101)
@@ -88,14 +80,26 @@ outbreak |>
   theme_minimal()
 ```
 
-`outbreak` is a `data.frame` with the columns `case` and `ptime`.
+`outbreak` is a `data.frame` with the two columns: `case` and `ptime`.
+Here `ptime` is a numeric column giving the time of infection.
+In reality, it is more common to recive primary event times as a date rather than a numeric.
 
-Now, to generate secondary events, we will use a lognormal distribution (Figure \@ref(fig:lognormal)) for the delay between primary and secondary events:
+```{r}
+head(outbreak)
+```
+
+To generate secondary events, we will use a lognormal distribution (Figure \@ref(fig:lognormal)) for the delay between primary and secondary events:
 
 ```{r}
 secondary_dist <- data.frame(mu = 1.8, sigma = 0.5)
 class(secondary_dist) <- c("lognormal_samples", class(secondary_dist))
 secondary_dist <- add_mean_sd(secondary_dist)
+
+obs <- outbreak |>
+  simulate_secondary(
+    meanlog = secondary_dist[["mu"]],
+    sdlog = secondary_dist[["sigma"]]
+  )
 ```
 
 (ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
@@ -113,14 +117,6 @@ ggplot(data.frame(x = c(0, 30)), aes(x = x)) +
   labs(
     x = "Delay between primary and secondary event (days)",
     y = "Probability density"
-  )
-```
-
-```{r}
-obs <- outbreak |>
-  simulate_secondary(
-    meanlog = secondary_dist[["mu"]],
-    sdlog = secondary_dist[["sigma"]]
   )
 ```
 
@@ -147,7 +143,7 @@ The secondary event time is simply the primary event time plus the delay:
 all(obs$ptime + obs$delay == obs$stime)
 ```
 
-If we were to receive the data `obs` as above then estimating the delay distribution would be easy, and the `epidist` package wouldn't need to exist.
+If we were to receive the complete data `obs` as above then it would be simple to accurately estimate the delay distribution.
 However, in reality, during an outbreak we almost never receive the data as above.
 
 First, the times of primary and secondary events will usually be censored.
@@ -168,15 +164,28 @@ obs_cens <- obs |>
 (ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. A common example of this is when events are reported as daily aggregates. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
 
 ```{r cens, fig.cap="(ref:cens)"}
-ggplot(obs_cens, aes(x = delay, y = delay_daily)) +
-  geom_point(col = "#E69F00") +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", col = "grey") +
-  theme_minimal() +
-  coord_fixed() +
-  labs(x = "Exact delay time (days)", y = "Censored delay time (days)")
+obs_cens |>
+  filter(case %% 50 == 0, case <= 250) |>
+  ggplot(aes(y = case)) +
+  geom_segment(
+    aes(x = ptime, xend = stime, y = case, yend = case),
+    col = "grey"
+  ) +
+  geom_errorbarh(
+    aes(xmin = ptime_lwr, xmax = ptime_upr, y = case, yend = case),
+    col = "#56B4E9", height = 5
+  ) +
+  geom_errorbarh(
+    aes(xmin = stime_lwr, xmax = stime_upr, y = case, yend = case),
+    col = "#009E73", height = 5
+  ) +
+  geom_point(aes(x = ptime), fill = "white", col = "#56B4E9", shape = 21) +
+  geom_point(aes(x = stime), fill = "white", col = "#009E73", shape = 21) +
+  labs(x = "Event time (day)", y = "Case number") +
+  theme_minimal()
 ```
 
-Next, during an outbreak we will usually be estimating delays in real time.
+During an outbreak we will usually be estimating delays in real time.
 The result is that only those cases with a secondary event occurring before some time will be observed.
 This is called (right) truncation, and biases the observation process towards shorter delays:
 <!-- I think possible to do a better job with showing what right truncation is with a figure here! -->
