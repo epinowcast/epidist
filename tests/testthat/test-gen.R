@@ -12,7 +12,7 @@ test_that("epidist_gen_posterior_predict returns a function that outputs positiv
 
   # Test gamma
   prep_gamma <- brms::prepare_predictions(fit_gamma)
-  family_gamma <- epidist_family(data = prep_obs, family = gamma())
+  family_gamma <- epidist_family(data = prep_obs, family = Gamma())
   predict_fn_gamma <- epidist_gen_posterior_predict(family_gamma)
   pred_i_gamma <- predict_fn_gamma(i = i, prep_gamma)
   expect_identical(floor(pred_i_gamma), pred_i_gamma)
@@ -32,7 +32,7 @@ test_that("epidist_gen_posterior_predict returns a function that errors for i ou
   # Test gamma
   prep_gamma <- brms::prepare_predictions(fit_gamma)
   i_out_of_bounds_gamma <- length(prep_gamma$data$Y) + 1
-  family_gamma <- epidist_family(data = prep_obs, family = gamma())
+  family_gamma <- epidist_family(data = prep_obs, family = Gamma())
   predict_fn_gamma <- epidist_gen_posterior_predict(family_gamma)
   expect_error(predict_fn_gamma(i = i_out_of_bounds_gamma, prep_gamma))
 })
@@ -50,7 +50,7 @@ test_that("epidist_gen_posterior_predict returns a function that can generate pr
   expect_true(all(abs(pred - round(pred)) > .Machine$double.eps^0.5))
 
   # Test gamma
-  family_gamma <- epidist_family(data = prep_obs, family = gamma())
+  family_gamma <- epidist_family(data = prep_obs, family = Gamma())
   predict_fn_gamma <- epidist_gen_posterior_predict(family_gamma)
   draws_gamma <- data.frame(
     relative_obs_time = 1000, pwindow = 0, swindow = 0
@@ -87,7 +87,7 @@ test_that("epidist_gen_posterior_predict returns a function that predicts delays
   # Test gamma
   prep_gamma <- brms::prepare_predictions(fit_gamma)
   prep_gamma$ndraws <- 1000
-  family_gamma <- epidist_family(data = prep_obs, family = gamma())
+  family_gamma <- epidist_family(data = prep_obs, family = Gamma())
   predict_fn_gamma <- epidist_gen_posterior_predict(family_gamma)
   q_gamma <- purrr::map_vec(seq_along(prep_gamma$data$Y), function(i) {
     y <- predict_fn_gamma(i, prep_gamma)
@@ -117,7 +117,7 @@ test_that("epidist_gen_posterior_epred returns a function that creates arrays wi
 
   # Test gamma
   prep_gamma <- brms::prepare_predictions(fit_gamma)
-  family_gamma <- epidist_family(data = prep_obs, family = gamma())
+  family_gamma <- epidist_family(data = prep_obs, family = Gamma())
   epred_fn_gamma <- epidist_gen_posterior_epred(family_gamma)
   epred_gamma <- epred_fn_gamma(prep_gamma)
   expect_setequal(class(epred_gamma), c("matrix", "array"))
