@@ -239,8 +239,9 @@ fit <- epidist(
   formula = mu ~ 1,
   family = lognormal(),
   algorithm = "sampling",
-  refresh = 0,
-  silent = 2,
+  chains = 2,
+  cores = 2,
+  refresh = as.integer(interactive()),
   seed = 1,
   backend = "cmdstanr"
 )
@@ -264,8 +265,9 @@ fit_sex <- epidist(
   formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
   family = lognormal(),
   algorithm = "sampling",
-  refresh = 0,
-  silent = 2,
+  chains = 2,
+  cores = 2,
+  refresh = as.integer(interactive()),
   seed = 1,
   backend = "cmdstanr"
 )
@@ -294,8 +296,9 @@ fit_sex_district <- epidist(
   ),
   family = lognormal(),
   algorithm = "sampling",
-  refresh = 0,
-  silent = 2,
+  chains = 2,
+  cores = 2,
+  refresh = as.integer(interactive()),
   seed = 1,
   backend = "cmdstanr"
 )
@@ -312,14 +315,13 @@ ranef(fit_sex_district)
 
 To go further than summaries of the fitted model, we recommend using the `tidybayes` package.
 For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws()` function.
-The `tidybayes::add_epred_draws()` function uses the (internal) `posterior_epred_latent_lognormal()` function implemented in `epidist` for the `latent_lognormal` custom `brms` family.
+The `tidybayes::add_epred_draws()` function uses the `epidist_gen_posterior_predict()` function to generate a posterior prediction function for the `lognormal()` distribution.
 
 In Figure \@ref(fig:epred) we show the posterior expectation of the delay distribution for each of the three fitted models.
 Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with women.
 
 ```{r}
 epred_draws <- obs_prep |>
-  as.data.frame() |>
   data_grid(NA) |>
   mutate(relative_obs_time = NA, pwindow = NA, swindow = NA) |>
   add_epred_draws(fit, dpar = TRUE)
@@ -331,7 +333,6 @@ epred_base_figure <- epred_draws |>
   theme_minimal()
 
 epred_draws_sex <- obs_prep |>
-  as.data.frame() |>
   data_grid(sex) |>
   mutate(relative_obs_time = NA, pwindow = NA, swindow = NA) |>
   add_epred_draws(fit_sex, dpar = TRUE)
@@ -343,7 +344,6 @@ epred_sex_figure <- epred_draws_sex |>
   theme_minimal()
 
 epred_draws_sex_district <- obs_prep |>
-  as.data.frame() |>
   data_grid(sex, district) |>
   mutate(relative_obs_time = NA, pwindow = NA, swindow = NA) |>
   add_epred_draws(fit_sex_district, dpar = TRUE)

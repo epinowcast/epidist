@@ -89,10 +89,74 @@ epidist_family_model.epidist_latent_model <- function(
     ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
     type = family$type,
     vars = c("pwindow", "swindow", "vreal1"),
-    loop = FALSE
+    loop = FALSE,
+    log_lik = epidist_gen_log_lik_latent(family),
+    posterior_predict = epidist_gen_posterior_predict(family),
+    posterior_epred = epidist_gen_posterior_epred(family)
   )
   custom_family$reparm <- family$reparm
   return(custom_family)
+}
+
+#' Create a function to calculate the pointwise log likelihood of the latent
+#' model
+#'
+#' This function creates a log likelihood function that accounts for the latent
+#' variables in the model, including primary and secondary event windows and
+#' their overlap. The returned function calculates the log likelihood for a
+#' single observation by augmenting the data with the latent variables and
+#' using the underlying brms log likelihood function.
+#'
+#' @seealso [brms::log_lik()] for details on the brms log likelihood interface.
+#'
+#' @inheritParams epidist_family
+#'
+#' @return A function that calculates the log likelihood for a single
+#' observation. The prep object must have the following variables:
+#' * `vreal1`: relative observation time
+#' * `vreal2`: primary event window
+#' * `vreal3`: secondary event window
+#'
+#' @family latent_model
+#' @autoglobal
+epidist_gen_log_lik_latent <- function(family) {
+  # Get internal brms log_lik function
+  log_lik_brms <- .get_brms_fn("log_lik", family)
+
+  .log_lik <- function(i, prep) {
+    y <- prep$data$Y[i]
+    relative_obs_time <- prep$data$vreal1[i]
+    pwindow <- prep$data$vreal2[i]
+    swindow <- prep$data$vreal3[i]
+
+    # Generates values of the swindow_raw and pwindow_raw, but really these
+    # should be extracted from prep or the fitted raws somehow. See:
+    # https://github.com/epinowcast/epidist/issues/267
+    swindow_raw <- stats::runif(prep$ndraws)
+    pwindow_raw <- stats::runif(prep$ndraws)
+
+    swindow <- swindow_raw * swindow
+
+    # For no overlap calculate as usual, for overlap ensure pwindow < swindow
+    if (i %in% prep$data$noverlap) {
+      pwindow <- pwindow_raw * pwindow
+    } else {
+      pwindow <- pwindow_raw * swindow
+    }
+
+    d <- y - pwindow + swindow
+    obs_time <- relative_obs_time - pwindow
+    # Create brms truncation upper bound
+    prep$data$ub <- rep(obs_time, length(prep$data$Y))
+    # Update augmented data
+    prep$data$Y <- rep(d, length(prep$data$Y))
+
+    # Call internal brms log_lik function with augmented data
+    lpdf <- log_lik_brms(i, prep)
+    return(lpdf)
+  }
+
+  return(.log_lik)
 }
 
 #' Define the model-specific component of an `epidist` custom formula

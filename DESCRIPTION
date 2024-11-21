@@ -34,7 +34,8 @@ Imports:
     rstan (>= 2.26.0),
     dplyr,
     tibble,
-    lubridate
+    lubridate,
+    primarycensored
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
