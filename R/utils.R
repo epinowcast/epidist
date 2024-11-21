@@ -157,3 +157,22 @@
 
   return(df)
 }
+
+#' Get a brms function by prefix and family
+#'
+#' Helper function to get internal brms functions by constructing their name
+#' from a prefix and family. Used to get functions like `log_lik_*`,
+#' `posterior_predict_*` etc.
+#'
+#' @param prefix Character string prefix of the brms function to get (e.g.
+#' "log_lik")
+#'
+#' @inheritParams epidist_family
+#' @return The requested brms function
+#' @keywords internal
+.get_brms_fn <- function(prefix, family) {
+  get(
+    paste0(prefix, "_", tolower(family$family)),
+    asNamespace("brms")
+  )
+}

@@ -25,3 +25,7 @@ data/models/*reparam
 docs
 /doc/
 /Meta/
+vignettes/**_cache/
+*.pdf
+.vscode/
+vignettes/figures/

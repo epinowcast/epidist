@@ -72,6 +72,10 @@ reference:
   desc: Functions for specifying custom Stan code to put into `brms`
   contents:
   - has_concept("stan")
+- title: Generator model functions
+  desc: Generator functions for creating family specific model utilities.
+  contents:
+  - has_concept("gen")
 - title: Simulation
   desc: Tools for simulating datasets
   contents:
