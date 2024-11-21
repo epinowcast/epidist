@@ -222,7 +222,7 @@ That is, <span class="math inline">\(\mu\)</span> and <span class="math inline">
 <h3 id="data-preparation-1">
 <span class="header-section-number">3.1</span> Data preparation<a class="anchor" aria-label="anchor" href="#data-preparation-1"></a>
 </h3>
-<p>To prepare the data, we begin by filtering for the relevant columns and converting the date columns to <code>Date</code> objects:</p>
+<p>To prepare the data, we begin by converting the date columns to <code>Date</code> objects and selecting the relevant columns:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -252,7 +252,7 @@ That is, <span class="math inline">\(\mu\)</span> and <span class="math inline">
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subsample</span> <span class="op">&lt;-</span> <span class="fl">0.2</span></span></code></pre></div>
 <p>Additionally, to speed up computation, we take a random 20% subsample of the complete data.
-(In a real analysis, we’d recommend using all the available data).</p>
+(In a real analysis, we’d recommend using all the available data.)</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_cens</span> <span class="op">&lt;-</span> <span class="va">obs_cens</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">n_complete</span> <span class="op">*</span> <span class="va">subsample</span><span class="op">)</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
@@ -263,7 +263,9 @@ That is, <span class="math inline">\(\mu\)</span> and <span class="math inline">
 <span>    pdate_lwr <span class="op">=</span> <span class="st">"date_of_symptom_onset"</span>,</span>
 <span>    sdate_lwr <span class="op">=</span> <span class="st">"date_of_sample_tested"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p>Note that this has made some assumptions about the data in that it has assumed that as we did not supply upper bounds for the primary and secondary events, that the upper bounds are one day after the lower bounds. It has also assumed that the observation time is the maximum of the secondary event upper bound as we also did not supply an observation time column.</p>
+<p>In this call to [as_epidist_linelist_data()] it has made some assumptions about the data.
+First, because we did not supply upper bounds for the primary and secondary events (<code>pdate_upr</code> and <code>sdate_upr</code>), it has assumed that the upper bounds are one day after the lower bounds.
+Second, because we also did not supply an observation time column (<code>obs_date</code>), it has assumed that the observation time is the maximum of the secondary event upper bounds.</p>
 </div>
 <div class="section level3" number="3.2">
 <h3 id="model-fitting">

@@ -78,9 +78,10 @@
 
     
     
-<p>Here we provide tips for working with the <code>epidist</code> package, and answers to “frequently” asked questions.
-If you have a question about using the package, please create an <a href="https://github.com/epinowcast/epidist/issues" class="external-link">issue</a> and we will endeavour to get back to you soon!</p>
-<p>The code block below is provided to facilitate reproduction of this script, if required!</p>
+<p>Here we provide tips for working with the <code>epidist</code> package, and answers to frequently asked questions.
+If you have a question about using the package, please create an <a href="https://github.com/epinowcast/epidist/issues" class="external-link">issue</a>.
+We will endeavour to respond promptly!</p>
+<p>The code block below facilitates reproduction of this script.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epidist.epinowcast.org/">epidist</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms" class="external-link">brms</a></span><span class="op">)</span></span>
@@ -147,7 +148,7 @@ For example, the function <code><a href="https://mc-stan.org/posterior/reference
 <span><span class="co">## # ... hidden reserved variables {'.chain', '.iteration', '.draw'}</span></span></code></pre>
 </div>
 <div class="section level3">
-<h3 id="how-can-i-assess-if-sampling-has-converged">How can I assess if sampling has converged?<a class="anchor" aria-label="anchor" href="#how-can-i-assess-if-sampling-has-converged"></a>
+<h3 id="how-can-i-assess-whether-sampling-has-converged">How can I assess whether sampling has converged?<a class="anchor" aria-label="anchor" href="#how-can-i-assess-whether-sampling-has-converged"></a>
 </h3>
 <p>The output of a call to <code>epidist</code> is compatible with typical Stan workflows.
 We recommend use of the <a href="http://mc-stan.org/bayesplot/" class="external-link"><code>bayesplot</code></a> package for sampling diagnostic plots.
@@ -162,7 +163,7 @@ For example, the function <code><a href="https://mc-stan.org/bayesplot/reference
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
 <span><span class="co">##    time samples max_rhat divergent_transitions per_divergent_transitions</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>  19.5    <span style="text-decoration: underline;">4</span>000     1.01                     0                         0</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>  20.0    <span style="text-decoration: underline;">4</span>000     1.01                     0                         0</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 3 more variables: max_treedepth &lt;dbl&gt;, no_at_max_treedepth &lt;int&gt;,</span></span></span>
 <span><span class="co">## <span style="color: #949494;">#   per_at_max_treedepth &lt;dbl&gt;</span></span></span></code></pre>
 </div>
@@ -181,7 +182,7 @@ We particularly highlight two functions which might be useful:</p>
 (Note that in that codebase, we use <code>map</code> as a part of a <a href="https://books.ropensci.org/targets/" class="external-link"><code>targets</code></a> pipeline.)</p>
 </div>
 <div class="section level3">
-<h3 id="how-did-you-choose-the-default-priors-for-epidist">How did you choose the default priors for <code>epidist</code>?<a class="anchor" aria-label="anchor" href="#how-did-you-choose-the-default-priors-for-epidist"></a>
+<h3 id="how-are-the-default-priors-for-epidist-chosen">How are the default priors for <code>epidist</code> chosen?<a class="anchor" aria-label="anchor" href="#how-are-the-default-priors-for-epidist-chosen"></a>
 </h3>
 <p><a href="http://paulbuerkner.com/brms/" class="external-link"><code>brms</code></a> provides default priors for all parameters.
 However, some of those priors do not make sense in the context of our application.
