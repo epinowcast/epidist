@@ -16,9 +16,6 @@ contributors](https://img.shields.io/github/contributors/epinowcast/epidist)](ht
 [![DOI](https://zenodo.org/badge/422611952.svg)](https://zenodo.org/badge/latestdoi/422611952)
 <!-- badges: end -->
 
-*Warning! This package is a prototype and is under active development.
-Breaking changes are likely.*
-
 ## Summary
 
 Understanding and accurately estimating epidemiological delay
