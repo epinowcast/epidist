@@ -43,41 +43,6 @@
     </div>
 
     <div class="section level2">
-      <h2 id="simulation">Simulation<a class="anchor" aria-label="anchor" href="#simulation"></a></h2>
-
-      <div class="section-desc"><p>Tools for simulating datasets</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="simulate_exponential_cases.html">simulate_exponential_cases()</a></code>
-
-        </dt>
-        <dd>Simulate exponential cases</dd>
-      </dl><dl><dt>
-
-          <code><a href="simulate_gillespie.html">simulate_gillespie()</a></code>
-
-        </dt>
-        <dd>Simulate cases from a stochastic SIR model</dd>
-      </dl><dl><dt>
-
-          <code><a href="simulate_secondary.html">simulate_secondary()</a></code>
-
-        </dt>
-        <dd>Simulate secondary events based on a delay distribution</dd>
-      </dl><dl><dt>
-
-          <code><a href="simulate_uniform_cases.html">simulate_uniform_cases()</a></code>
-
-        </dt>
-        <dd>Simulate cases from a uniform distribution</dd>
-      </dl></div><div class="section level2">
       <h2 id="linelist-data">Linelist data<a class="anchor" aria-label="anchor" href="#linelist-data"></a></h2>
 
       <div class="section-desc"><p>Functions for preparing linelist data</p></div>
@@ -124,6 +89,169 @@
 
         </dt>
         <dd>Class constructor for <code>epidist_linelist_data</code> objects</dd>
+      </dl></div><div class="section level2">
+      <h2 id="model-fitting">Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a></h2>
+
+      <div class="section-desc"><p>Functions for fitting delay distribution models using <code>brms</code></p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist.html">epidist()</a></code>
+
+        </dt>
+        <dd>Fit epidemiological delay distributions using a <code>brms</code> interface</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist.default.html">epidist(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method used for interface using <code>brms</code></dd>
+      </dl></div><div class="section level2">
+      <h2 id="naive-model">Naive model<a class="anchor" aria-label="anchor" href="#naive-model"></a></h2>
+
+      <div class="section-desc"><p>Specific methods for the naive model</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as_epidist_naive_model.html">as_epidist_naive_model()</a></code>
+
+        </dt>
+        <dd>Prepare naive model to pass through to <code>brms</code></dd>
+      </dl><dl><dt>
+
+          <code><a href="as_epidist_naive_model.epidist_linelist_data.html">as_epidist_naive_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The naive model method for <code>epidist_linelist_data</code> objects</dd>
+      </dl><dl><dt>
+
+          <code><a href="is_epidist_naive_model.html">is_epidist_naive_model()</a></code>
+
+        </dt>
+        <dd>Check if data has the <code>epidist_naive_model</code> class</dd>
+      </dl><dl><dt>
+
+          <code><a href="new_epidist_naive_model.html">new_epidist_naive_model()</a></code>
+
+        </dt>
+        <dd>Class constructor for <code>epidist_naive_model</code> objects</dd>
+      </dl></div><div class="section level2">
+      <h2 id="latent-model">Latent model<a class="anchor" aria-label="anchor" href="#latent-model"></a></h2>
+
+      <div class="section-desc"><p>Specific methods for the latent model</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as_epidist_latent_model.html">as_epidist_latent_model()</a></code>
+
+        </dt>
+        <dd>Convert an object to an <code>epidist_latent_model</code> object</dd>
+      </dl><dl><dt>
+
+          <code><a href="as_epidist_latent_model.epidist_linelist_data.html">as_epidist_latent_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The latent model method for <code>epidist_linelist_data</code> objects</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_family_model.epidist_latent_model.html">epidist_family_model(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Create the model-specific component of an <code>epidist</code> custom family</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_formula_model.epidist_latent_model.html">epidist_formula_model(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Define the model-specific component of an <code>epidist</code> custom formula</dd>
+      </dl><dl><dt>
+
+          <code><a href="is_epidist_latent_model.html">is_epidist_latent_model()</a></code>
+
+        </dt>
+        <dd>Check if data has the <code>epidist_latent_model</code> class</dd>
+      </dl><dl><dt>
+
+          <code><a href="new_epidist_latent_model.html">new_epidist_latent_model()</a></code>
+
+        </dt>
+        <dd>Class constructor for <code>epidist_latent_model</code> objects</dd>
+      </dl></div><div class="section level2">
+      <h2 id="postprocess">Postprocess<a class="anchor" aria-label="anchor" href="#postprocess"></a></h2>
+
+      <div class="section-desc"><p>Functions for postprocessing model output</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="add_mean_sd.html">add_mean_sd()</a></code>
+
+        </dt>
+        <dd>Add natural scale mean and standard deviation parameters</dd>
+      </dl><dl><dt>
+
+          <code><a href="add_mean_sd.default.html">add_mean_sd(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method for add natural scale parameters</dd>
+      </dl><dl><dt>
+
+          <code><a href="add_mean_sd.gamma_samples.html">add_mean_sd(<i>&lt;gamma_samples&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Add natural scale mean and standard deviation parameters for a latent gamma model</dd>
+      </dl><dl><dt>
+
+          <code><a href="add_mean_sd.lognormal_samples.html">add_mean_sd(<i>&lt;lognormal_samples&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Add natural scale mean and standard deviation parameters for a latent lognormal model</dd>
+      </dl><dl><dt>
+
+          <code><a href="predict_delay_parameters.html">predict_delay_parameters()</a></code> <code><a href="predict_delay_parameters.html">predict_dpar()</a></code>
+
+        </dt>
+        <dd>Extract samples of the delay distribution parameters</dd>
+      </dl></div><div class="section level2">
+      <h2 id="diagnostic-functions">Diagnostic functions<a class="anchor" aria-label="anchor" href="#diagnostic-functions"></a></h2>
+
+
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist_diagnostics.html">epidist_diagnostics()</a></code>
+
+        </dt>
+        <dd>Diagnostics for <code>epidist_fit</code> models</dd>
       </dl></div><div class="section level2">
       <h2 id="assert-validity-of-objects">Assert validity of objects<a class="anchor" aria-label="anchor" href="#assert-validity-of-objects"></a></h2>
 
@@ -288,32 +416,9 @@
         </dt>
         <dd>Default method for defining model specific Stan code</dd>
       </dl></div><div class="section level2">
-      <h2 id="model-fitting">Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a></h2>
+      <h2 id="simulation">Simulation<a class="anchor" aria-label="anchor" href="#simulation"></a></h2>
 
-      <div class="section-desc"><p>Functions for fitting delay distribution models using <code>brms</code></p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="epidist.html">epidist()</a></code>
-
-        </dt>
-        <dd>Fit epidemiological delay distributions using a <code>brms</code> interface</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist.default.html">epidist(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method used for interface using <code>brms</code></dd>
-      </dl></div><div class="section level2">
-      <h2 id="latent-model">Latent model<a class="anchor" aria-label="anchor" href="#latent-model"></a></h2>
-
-      <div class="section-desc"><p>Specific methods for the latent model</p></div>
+      <div class="section-desc"><p>Tools for simulating datasets</p></div>
 
 
     </div><div class="section level2">
@@ -323,116 +428,28 @@
 
       <dl><dt>
 
-          <code><a href="as_epidist_latent_model.html">as_epidist_latent_model()</a></code>
+          <code><a href="simulate_exponential_cases.html">simulate_exponential_cases()</a></code>
 
         </dt>
-        <dd>Convert an object to an <code>epidist_latent_model</code> object</dd>
+        <dd>Simulate exponential cases</dd>
       </dl><dl><dt>
 
-          <code><a href="as_epidist_latent_model.epidist_linelist_data.html">as_epidist_latent_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
+          <code><a href="simulate_gillespie.html">simulate_gillespie()</a></code>
 
         </dt>
-        <dd>The latent model method for <code>epidist_linelist_data</code> objects</dd>
+        <dd>Simulate cases from a stochastic SIR model</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_family_model.epidist_latent_model.html">epidist_family_model(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
+          <code><a href="simulate_secondary.html">simulate_secondary()</a></code>
 
         </dt>
-        <dd>Create the model-specific component of an <code>epidist</code> custom family</dd>
+        <dd>Simulate secondary events based on a delay distribution</dd>
       </dl><dl><dt>
 
-          <code><a href="epidist_formula_model.epidist_latent_model.html">epidist_formula_model(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
+          <code><a href="simulate_uniform_cases.html">simulate_uniform_cases()</a></code>
 
         </dt>
-        <dd>Define the model-specific component of an <code>epidist</code> custom formula</dd>
-      </dl><dl><dt>
-
-          <code><a href="is_epidist_latent_model.html">is_epidist_latent_model()</a></code>
-
-        </dt>
-        <dd>Check if data has the <code>epidist_latent_model</code> class</dd>
-      </dl><dl><dt>
-
-          <code><a href="new_epidist_latent_model.html">new_epidist_latent_model()</a></code>
-
-        </dt>
-        <dd>Class constructor for <code>epidist_latent_model</code> objects</dd>
-      </dl></div><div class="section level2">
-      <h2 id="naive-model">Naive model<a class="anchor" aria-label="anchor" href="#naive-model"></a></h2>
-
-      <div class="section-desc"><p>Specific methods for the naive model</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="as_epidist_naive_model.html">as_epidist_naive_model()</a></code>
-
-        </dt>
-        <dd>Prepare naive model to pass through to <code>brms</code></dd>
-      </dl><dl><dt>
-
-          <code><a href="as_epidist_naive_model.epidist_linelist_data.html">as_epidist_naive_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
-
-        </dt>
-        <dd>The naive model method for <code>epidist_linelist_data</code> objects</dd>
-      </dl><dl><dt>
-
-          <code><a href="is_epidist_naive_model.html">is_epidist_naive_model()</a></code>
-
-        </dt>
-        <dd>Check if data has the <code>epidist_naive_model</code> class</dd>
-      </dl><dl><dt>
-
-          <code><a href="new_epidist_naive_model.html">new_epidist_naive_model()</a></code>
-
-        </dt>
-        <dd>Class constructor for <code>epidist_naive_model</code> objects</dd>
-      </dl></div><div class="section level2">
-      <h2 id="postprocess">Postprocess<a class="anchor" aria-label="anchor" href="#postprocess"></a></h2>
-
-      <div class="section-desc"><p>Functions for postprocessing model output</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="add_mean_sd.html">add_mean_sd()</a></code>
-
-        </dt>
-        <dd>Add natural scale mean and standard deviation parameters</dd>
-      </dl><dl><dt>
-
-          <code><a href="add_mean_sd.default.html">add_mean_sd(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method for add natural scale parameters</dd>
-      </dl><dl><dt>
-
-          <code><a href="add_mean_sd.gamma_samples.html">add_mean_sd(<i>&lt;gamma_samples&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Add natural scale mean and standard deviation parameters for a latent gamma model</dd>
-      </dl><dl><dt>
-
-          <code><a href="add_mean_sd.lognormal_samples.html">add_mean_sd(<i>&lt;lognormal_samples&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Add natural scale mean and standard deviation parameters for a latent lognormal model</dd>
-      </dl><dl><dt>
-
-          <code><a href="predict_delay_parameters.html">predict_delay_parameters()</a></code> <code><a href="predict_delay_parameters.html">predict_dpar()</a></code>
-
-        </dt>
-        <dd>Extract samples of the delay distribution parameters</dd>
+        <dd>Simulate cases from a uniform distribution</dd>
       </dl></div><div class="section level2">
       <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 
@@ -450,23 +467,6 @@
 
         </dt>
         <dd>Ebola linelist data from Fang et al. (2016)</dd>
-      </dl></div><div class="section level2">
-      <h2 id="diagnostic-functions">Diagnostic functions<a class="anchor" aria-label="anchor" href="#diagnostic-functions"></a></h2>
-
-
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="epidist_diagnostics.html">epidist_diagnostics()</a></code>
-
-        </dt>
-        <dd>Diagnostics for <code>epidist_fit</code> models</dd>
       </dl></div><div class="section level2">
       <h2 id="reexported-functions">Reexported functions<a class="anchor" aria-label="anchor" href="#reexported-functions"></a></h2>
 
