@@ -26,8 +26,6 @@ license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/
 [![DOI](https://zenodo.org/badge/422611952.svg)](https://zenodo.org/badge/latestdoi/422611952)
 <!-- badges: end -->
 
-*Warning! This package is a prototype and is under active development. Breaking changes are likely.*
-
 ## Summary
 
 ```{r, results = "asis", echo=FALSE}
