@@ -163,7 +163,7 @@ For example, the function <code><a href="https://mc-stan.org/bayesplot/reference
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
 <span><span class="co">##    time samples max_rhat divergent_transitions per_divergent_transitions</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>  19.7    <span style="text-decoration: underline;">4</span>000     1.01                     0                         0</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>  19.6    <span style="text-decoration: underline;">4</span>000     1.01                     0                         0</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 3 more variables: max_treedepth &lt;dbl&gt;, no_at_max_treedepth &lt;int&gt;,</span></span></span>
 <span><span class="co">## <span style="color: #949494;">#   per_at_max_treedepth &lt;dbl&gt;</span></span></span></code></pre>
 </div>
@@ -324,6 +324,8 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Delay"</span>, y <span class="op">=</span> <span class="st">"PMF"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: Removed 1 row containing non-finite outside the scale range</span></span>
+<span><span class="co">## (`stat_count()`).</span></span></code></pre>
 <p><img src="faq_files/figure-html/unnamed-chunk-9-1.png" width="672"></p>
 <p>Importantly, this functionality is only available for <code>epidist</code> models using custom <code>brms</code> families that have <code>posterior_predict</code> and <code>posterior_epred</code> methods implemented.
 For example, for the <code>epidist_latent_model</code> model, currently methods are implemented for the <a href="https://github.com/epinowcast/epidist/blob/main/R/latent_lognormal.R" class="external-link">lognormal</a> and <a href="https://github.com/epinowcast/epidist/blob/main/R/latent_gamma.R" class="external-link">gamma</a> families.
@@ -335,7 +337,7 @@ In doing so, you may find it useful to use the <a href="https://primarycensored.
 </h2>
 <p>The <code>cmdstanr</code> backend is typically more performant than the default <code>rstan</code> backend.
 To use the <code>cmdstanr</code> backend, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "2.35.0"</span></span></code></pre>
 <div class="section level3">

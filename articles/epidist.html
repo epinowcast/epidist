@@ -329,7 +329,11 @@ Using this <code>data</code>, we now call <code><a href="../reference/epidist.ht
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the <a href="https://paul-buerkner.github.io/brms/" class="external-link"><code>brms</code></a> R package <span class="citation">(<a href="#ref-brms">Bürkner 2017</a>)</span>.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, chains <span class="op">=</span> <span class="fl">2</span>, cores <span class="op">=</span> <span class="fl">2</span>, refresh <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">data</span>, chains <span class="op">=</span> <span class="fl">2</span>, cores <span class="op">=</span> <span class="fl">2</span>, refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><strong>Note that here we use the default <code>rstan</code> backend but we generally recommend using the <code>cmdstanr</code> backend for faster sampling and additional features.</strong>
+<strong>This can be set using <code>backend = "cmdstanr"</code> after following the installing CmdStan instructions in the README.</strong></p>
 <p>The <code>fit</code> object is a <code>brmsfit</code> object containing MCMC samples from each of the parameters in the model, shown in the table below.
 Many of these parameters (e.g. <code>swindow</code> and <code>pwindow</code>) are the so called latent variables, and have lengths corresponding to the <code>sample_size</code>.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -852,35 +856,64 @@ Many of these parameters (e.g. <code>swindow</code> and <code>pwindow</code>) a
 </div>
 <p>Users familiar with Stan and <code>brms</code>, can work with <code>fit</code> directly.
 Any tool that supports <code>brms</code> fitted model objects will be compatible with <code>fit</code>.</p>
-<p><strong>Note that here we use the default <code>rstan</code> backend but we generally recommend using the <code>cmdstanr</code> backend for faster sampling and additional features.</strong>
-<strong>This can be set using <code>backend = "cmdstanr"</code> after following the installing CmdStan instructions in the README.</strong></p>
+<p>For example, we can use the built in <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> function</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  Family: latent_lognormal </span></span>
+<span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
+<span><span class="co">#&gt; Formula: delay | vreal(relative_obs_time, pwindow, swindow) ~ 1 </span></span>
+<span><span class="co">#&gt;          sigma ~ 1</span></span>
+<span><span class="co">#&gt;    Data: data (Number of observations: 200) </span></span>
+<span><span class="co">#&gt;   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
+<span><span class="co">#&gt;          total post-warmup draws = 2000</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Regression Coefficients:</span></span>
+<span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
+<span><span class="co">#&gt; Intercept           1.75      0.05     1.66     1.85 1.00     2152     1240</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.77      0.07    -0.91    -0.63 1.00     2298     1631</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
+<span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
+<span><span class="co">#&gt; scale reduction factor on split chains (at convergence, Rhat = 1).</span></span></code></pre></div>
+<p>to see that the model has converged and recovered the delay distribution distribution paramters reasonably well.</p>
 <p>The <code>epidist</code> package also provides functions to make common post-processing tasks easy.
 For example, individual predictions of the lognormal delay parameters can be extracted using:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_delay_parameters.html">predict_delay_parameters</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
-<p>Figure <a href="#fig:fitted-lognormal">2.2</a> shows the lognormal delay distribution obtained using the average of the <code>mu</code> and <code>sigma</code> draws.
+<p>Figure <a href="#fig:fitted-lognormal">2.2</a> shows the lognormal delay distribution obtained for 100 draws from the posterior distribution of the <code>mu</code> and <code>sigma</code> parameters.
 Whereas in Figure <a href="#fig:obs-est">2.1</a> the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using <code><a href="../reference/epidist.html">epidist()</a></code> we have obtained a much closer match to the truth.</p>
 
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Sample 100 random draws from the posterior</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">sample_draws</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pred</span><span class="op">)</span>, <span class="fl">100</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="co"># Plot the true distribution</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_function.html" class="external-link">geom_function</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span><span class="op">)</span>,</span>
 <span>    fun <span class="op">=</span> <span class="va">dlnorm</span>,</span>
+<span>    linewidth <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>    args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>      meanlog <span class="op">=</span> <span class="va">secondary_dist</span><span class="op">[[</span><span class="st">"mu"</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>      sdlog <span class="op">=</span> <span class="va">secondary_dist</span><span class="op">[[</span><span class="st">"sigma"</span><span class="op">]</span><span class="op">]</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_function.html" class="external-link">geom_function</a></span><span class="op">(</span></span>
-<span>    data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span><span class="op">)</span>, fun <span class="op">=</span> <span class="va">dlnorm</span>,</span>
-<span>    args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>      meanlog <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">mu</span><span class="op">)</span>,</span>
-<span>      sdlog <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">sigma</span><span class="op">)</span></span>
-<span>    <span class="op">)</span>,</span>
-<span>    col <span class="op">=</span> <span class="st">"#CC79A7"</span></span>
-<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="co"># Plot 100 sampled posterior distributions</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">sample_draws</span>, \<span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_function.html" class="external-link">geom_function</a></span><span class="op">(</span></span>
+<span>      data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span><span class="op">)</span>,</span>
+<span>      fun <span class="op">=</span> <span class="va">dlnorm</span>,</span>
+<span>      args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>        meanlog <span class="op">=</span> <span class="va">pred</span><span class="op">$</span><span class="va">mu</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>,</span>
+<span>        sdlog <span class="op">=</span> <span class="va">pred</span><span class="op">$</span><span class="va">sigma</span><span class="op">[</span><span class="va">i</span><span class="op">]</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      alpha <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>      color <span class="op">=</span> <span class="st">"#CC79A7"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="st">"Delay between primary and secondary event (days)"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Probability density"</span></span>
@@ -888,8 +921,8 @@ Whereas in Figure <a href="#fig:obs-est">2.1</a> the histogram of censored, trun
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
 <span style="display:block;" id="fig:fitted-lognormal"></span>
-<img src="figures/epidist-fitted-lognormal-1.png" alt="A fitted delay distribution (in pink) as compared with the true delay distribution (in black)." width="672"><p class="caption">
-Figure 2.2: A fitted delay distribution (in pink) as compared with the true delay distribution (in black).
+<img src="figures/epidist-fitted-lognormal-1.png" alt="The fitted delay distribution (pink lines, 100 draws from the posterior) compared to the true underlying delay distribution (black line). Each pink line represents one possible delay distribution based on the fitted model parameters." width="672"><p class="caption">
+Figure 2.2: The fitted delay distribution (pink lines, 100 draws from the posterior) compared to the true underlying delay distribution (black line). Each pink line represents one possible delay distribution based on the fitted model parameters.
 </p>
 </div>
 <div class="section level3">

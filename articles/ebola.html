@@ -303,11 +303,20 @@ As a model is not explicitly placed on <code>sigma</code>, a constant model <cod
 <span>  formula <span class="op">=</span> <span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
-<span>  refresh <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  silent <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  chains <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Chain 2 finished in 38.4 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 39.0 seconds.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Both chains finished successfully.</span></span>
+<span><span class="co">#&gt; Mean chain execution time: 38.7 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 39.2 seconds.</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <a href="https://paulbuerkner.com/brms/reference/brmsfit-class.html" class="external-link"><code>brmsfit</code></a> object, and has the associated range of methods.
 See <code>methods(class = "brmsfit")</code> for more details.
 For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> to view information about the fitted model, including posterior estimates for the regression coefficients:</p>
@@ -318,13 +327,13 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span><span class="co">#&gt; Formula: delay | vreal(relative_obs_time, pwindow, swindow) ~ 1 </span></span>
 <span><span class="co">#&gt;          sigma ~ 1</span></span>
 <span><span class="co">#&gt;    Data: data (Number of observations: 1390) </span></span>
-<span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
-<span><span class="co">#&gt;          total post-warmup draws = 4000</span></span>
+<span><span class="co">#&gt;   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
+<span><span class="co">#&gt;          total post-warmup draws = 2000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.62      0.02     1.59     1.65 1.00     9716     2688</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.54      0.02    -0.58    -0.50 1.00     9059     2914</span></span>
+<span><span class="co">#&gt; Intercept           1.62      0.02     1.59     1.65 1.00     5455     1420</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.54      0.02    -0.58    -0.50 1.00     5122     1549</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -341,11 +350,20 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span>  formula <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span><span class="op">)</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
-<span>  refresh <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  silent <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  chains <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Chain 1 finished in 42.8 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 43.8 seconds.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Both chains finished successfully.</span></span>
+<span><span class="co">#&gt; Mean chain execution time: 43.3 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 43.9 seconds.</span></span></code></pre></div>
 <p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.03) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is 0.05).
 For the <code>sexMale</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexMale</code> effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.</p>
@@ -356,15 +374,15 @@ It is important to note that the estimates represent an average of the observed 
 <span><span class="co">#&gt; Formula: delay | vreal(relative_obs_time, pwindow, swindow) ~ sex </span></span>
 <span><span class="co">#&gt;          sigma ~ 1 + sex</span></span>
 <span><span class="co">#&gt;    Data: data (Number of observations: 1390) </span></span>
-<span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
-<span><span class="co">#&gt;          total post-warmup draws = 4000</span></span>
+<span><span class="co">#&gt;   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
+<span><span class="co">#&gt;          total post-warmup draws = 2000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.60      0.02     1.56     1.65 1.00     7640     2860</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.57      0.03    -0.63    -0.51 1.00     7639     3413</span></span>
-<span><span class="co">#&gt; sexMale             0.03      0.03    -0.03     0.09 1.00     8259     3161</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.05      0.04    -0.03     0.13 1.00     7225     3271</span></span>
+<span><span class="co">#&gt; Intercept           1.60      0.02     1.56     1.65 1.00     4380     1414</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.57      0.03    -0.63    -0.51 1.00     4326     1636</span></span>
+<span><span class="co">#&gt; sexMale             0.03      0.03    -0.03     0.09 1.00     4873     1528</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.05      0.04    -0.03     0.13 1.00     3482     1689</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -386,11 +404,20 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span>  <span class="op">)</span>,</span>
 <span>  family <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
-<span>  refresh <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  silent <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  chains <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  cores <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Chain 1 finished in 48.5 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 48.6 seconds.</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Both chains finished successfully.</span></span>
+<span><span class="co">#&gt; Mean chain execution time: 48.6 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 48.8 seconds.</span></span></code></pre></div>
 <p>For this model, along with looking at the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_sex_district</span><span class="op">)</span></span>
@@ -399,21 +426,21 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; Formula: delay | vreal(relative_obs_time, pwindow, swindow) ~ sex + (1 | district) </span></span>
 <span><span class="co">#&gt;          sigma ~ 1 + sex + (1 | district)</span></span>
 <span><span class="co">#&gt;    Data: data (Number of observations: 1390) </span></span>
-<span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
-<span><span class="co">#&gt;          total post-warmup draws = 4000</span></span>
+<span><span class="co">#&gt;   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
+<span><span class="co">#&gt;          total post-warmup draws = 2000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
 <span><span class="co">#&gt; ~district (Number of levels: 14) </span></span>
 <span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)           0.13      0.04     0.07     0.22 1.00     2031     2785</span></span>
-<span><span class="co">#&gt; sd(sigma_Intercept)     0.23      0.07     0.14     0.39 1.00     1660     2425</span></span>
+<span><span class="co">#&gt; sd(Intercept)           0.13      0.04     0.07     0.22 1.00     1004     1539</span></span>
+<span><span class="co">#&gt; sd(sigma_Intercept)     0.23      0.06     0.14     0.39 1.00      783     1116</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.63      0.05     1.54     1.72 1.00     1995     2422</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.64      0.08    -0.80    -0.49 1.00     1486     1925</span></span>
-<span><span class="co">#&gt; sexMale             0.04      0.03    -0.02     0.10 1.00     9583     2802</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.04      0.04    -0.04     0.12 1.00     8840     3261</span></span>
+<span><span class="co">#&gt; Intercept           1.63      0.05     1.54     1.72 1.00      918     1268</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.64      0.08    -0.80    -0.50 1.00      735      993</span></span>
+<span><span class="co">#&gt; sexMale             0.04      0.03    -0.02     0.10 1.00     4733     1410</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.04      0.04    -0.04     0.12 1.00     3847     1697</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -423,38 +450,38 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; , , Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                   Estimate  Est.Error        Q2.5        Q97.5</span></span>
-<span><span class="co">#&gt; Bo             0.062354374 0.07793594 -0.09351771  0.218292475</span></span>
-<span><span class="co">#&gt; Bombali        0.161996426 0.04955703  0.06940822  0.264468425</span></span>
-<span><span class="co">#&gt; Bonthe         0.006244718 0.12679564 -0.24637620  0.255287025</span></span>
-<span><span class="co">#&gt; Kailahun      -0.042366892 0.05661785 -0.15803442  0.067869875</span></span>
-<span><span class="co">#&gt; Kambia         0.047736853 0.08842820 -0.12744093  0.225382750</span></span>
-<span><span class="co">#&gt; Kenema        -0.140868411 0.07190588 -0.29151928 -0.006228557</span></span>
-<span><span class="co">#&gt; Koinadugu      0.115249953 0.10252796 -0.06984558  0.323375225</span></span>
-<span><span class="co">#&gt; Kono          -0.033648450 0.07635799 -0.19061337  0.114239075</span></span>
-<span><span class="co">#&gt; Moyamba       -0.003141594 0.08211161 -0.16419105  0.154032925</span></span>
-<span><span class="co">#&gt; Port Loko      0.012306233 0.05371323 -0.09176502  0.117358425</span></span>
-<span><span class="co">#&gt; Pujehun       -0.040339979 0.11931596 -0.28476797  0.185322950</span></span>
-<span><span class="co">#&gt; Tonkolili      0.034717044 0.05846418 -0.07734945  0.152016750</span></span>
-<span><span class="co">#&gt; Western Rural  0.007570996 0.05532290 -0.10125318  0.120088900</span></span>
-<span><span class="co">#&gt; Western Urban -0.185939069 0.05412118 -0.29620172 -0.080082992</span></span>
+<span><span class="co">#&gt; Bo             0.061370570 0.07805850 -0.09434620  0.217150750</span></span>
+<span><span class="co">#&gt; Bombali        0.161739832 0.04852453  0.06956229  0.263049750</span></span>
+<span><span class="co">#&gt; Bonthe         0.006184697 0.12696442 -0.25235730  0.260503950</span></span>
+<span><span class="co">#&gt; Kailahun      -0.043140439 0.05660398 -0.15724975  0.068502460</span></span>
+<span><span class="co">#&gt; Kambia         0.048517520 0.08891895 -0.13123840  0.222670750</span></span>
+<span><span class="co">#&gt; Kenema        -0.140988285 0.07328490 -0.29453505 -0.005173668</span></span>
+<span><span class="co">#&gt; Koinadugu      0.114949950 0.10069287 -0.06990953  0.322390550</span></span>
+<span><span class="co">#&gt; Kono          -0.034245903 0.07768097 -0.19590210  0.114399625</span></span>
+<span><span class="co">#&gt; Moyamba       -0.003899371 0.08491923 -0.17035983  0.159339625</span></span>
+<span><span class="co">#&gt; Port Loko      0.012269693 0.05442444 -0.09154477  0.121246250</span></span>
+<span><span class="co">#&gt; Pujehun       -0.040962106 0.11806307 -0.28337432  0.182547750</span></span>
+<span><span class="co">#&gt; Tonkolili      0.034770215 0.05831936 -0.07535285  0.155927325</span></span>
+<span><span class="co">#&gt; Western Rural  0.007038704 0.05507077 -0.10220350  0.116271600</span></span>
+<span><span class="co">#&gt; Western Urban -0.186967015 0.05366162 -0.29733588 -0.081107455</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; , , sigma_Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5        Q97.5</span></span>
-<span><span class="co">#&gt; Bo            -0.03846943 0.12209254 -0.27656220  0.204633075</span></span>
-<span><span class="co">#&gt; Bombali       -0.28608014 0.08967155 -0.46117640 -0.110950700</span></span>
-<span><span class="co">#&gt; Bonthe        -0.05263939 0.25533418 -0.56840995  0.434322475</span></span>
-<span><span class="co">#&gt; Kailahun      -0.20092384 0.10222637 -0.40472870 -0.002501823</span></span>
-<span><span class="co">#&gt; Kambia         0.28990098 0.12193886  0.06364249  0.546610475</span></span>
-<span><span class="co">#&gt; Kenema         0.21306142 0.10361685  0.02341296  0.425560350</span></span>
-<span><span class="co">#&gt; Koinadugu      0.01608345 0.14743538 -0.26236690  0.314916075</span></span>
-<span><span class="co">#&gt; Kono           0.10647670 0.11489021 -0.10604492  0.349526025</span></span>
-<span><span class="co">#&gt; Moyamba        0.08658646 0.12012121 -0.13572768  0.338896975</span></span>
-<span><span class="co">#&gt; Port Loko      0.01543792 0.08684709 -0.15448425  0.192607250</span></span>
-<span><span class="co">#&gt; Pujehun       -0.13537132 0.23270857 -0.62131650  0.276139650</span></span>
-<span><span class="co">#&gt; Tonkolili     -0.23273016 0.10370956 -0.43821827 -0.029459557</span></span>
-<span><span class="co">#&gt; Western Rural  0.03107030 0.08897905 -0.13993570  0.210752500</span></span>
-<span><span class="co">#&gt; Western Urban  0.24903149 0.08285642  0.09742020  0.422192375</span></span></code></pre></div>
+<span><span class="co">#&gt; Bo            -0.03993660 0.11777504 -0.26971368  0.186271475</span></span>
+<span><span class="co">#&gt; Bombali       -0.28611810 0.08927144 -0.45377777 -0.112220900</span></span>
+<span><span class="co">#&gt; Bonthe        -0.05263371 0.24958489 -0.56160083  0.416555200</span></span>
+<span><span class="co">#&gt; Kailahun      -0.20056102 0.10346414 -0.41225108 -0.002420407</span></span>
+<span><span class="co">#&gt; Kambia         0.28971246 0.12194324  0.05987674  0.545790875</span></span>
+<span><span class="co">#&gt; Kenema         0.21252846 0.10264686  0.02605080  0.418920750</span></span>
+<span><span class="co">#&gt; Koinadugu      0.01504241 0.14716395 -0.26681377  0.312746900</span></span>
+<span><span class="co">#&gt; Kono           0.10537514 0.11439856 -0.10130943  0.357216475</span></span>
+<span><span class="co">#&gt; Moyamba        0.08499545 0.11743754 -0.14130670  0.330522600</span></span>
+<span><span class="co">#&gt; Port Loko      0.01460764 0.08522727 -0.15130213  0.183499425</span></span>
+<span><span class="co">#&gt; Pujehun       -0.12948202 0.23548079 -0.62976475  0.299674950</span></span>
+<span><span class="co">#&gt; Tonkolili     -0.23271106 0.10183638 -0.43356765 -0.032404575</span></span>
+<span><span class="co">#&gt; Western Rural  0.03038971 0.08725862 -0.13591113  0.197685850</span></span>
+<span><span class="co">#&gt; Western Urban  0.24764473 0.08243182  0.09715344  0.413708450</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3" number="3.3">
@@ -463,12 +490,11 @@ These random effects are specified by including <code>(1 | district)</code> in t
 </h3>
 <p>To go further than summaries of the fitted model, we recommend using the <code>tidybayes</code> package.
 For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the <code><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">modelr::data_grid()</a></code> function in combination with the <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_epred_draws()</a></code> function.
-The <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_epred_draws()</a></code> function uses the (internal) <code><a href="../reference/posterior_epred_latent_lognormal.html">posterior_epred_latent_lognormal()</a></code> function implemented in <code>epidist</code> for the <code>latent_lognormal</code> custom <code>brms</code> family.</p>
+The <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_epred_draws()</a></code> function uses the <code><a href="../reference/epidist_gen_posterior_predict.html">epidist_gen_posterior_predict()</a></code> function to generate a posterior prediction function for the <code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal()</a></code> distribution.</p>
 <p>In Figure <a href="#fig:epred">3.1</a> we show the posterior expectation of the delay distribution for each of the three fitted models.
 Figure <a href="#fig:epred">3.1</a>B illustrates the higher mean of men as compared with women.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">epred_draws</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">fit</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -480,7 +506,6 @@ Figure <a href="#fig:epred">3.1</a>B illustrates the higher mean of men as compa
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred_draws_sex</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">fit_sex</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -492,7 +517,6 @@ Figure <a href="#fig:epred">3.1</a>B illustrates the higher mean of men as compa
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred_draws_sex_district</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
