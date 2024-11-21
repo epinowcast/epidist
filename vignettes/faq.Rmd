@@ -17,10 +17,11 @@ vignette: >
 bibliography: references.bib
 ---
 
-Here we provide tips for working with the `epidist` package, and answers to "frequently" asked questions.
-If you have a question about using the package, please create an [issue](https://github.com/epinowcast/epidist/issues) and we will endeavour to get back to you soon!
+Here we provide tips for working with the `epidist` package, and answers to frequently asked questions.
+If you have a question about using the package, please create an [issue](https://github.com/epinowcast/epidist/issues).
+We will endeavour to respond promptly!
 
-The code block below is provided to facilitate reproduction of this script, if required!
+The code block below facilitates reproduction of this script.
 
 ```{r message=FALSE, results='hide', class.source='fold-hide'}
 library(epidist)
@@ -81,7 +82,7 @@ draws <- as_draws_df(fit, variable = c("Intercept", "Intercept_sigma"))
 head(draws)
 ```
 
-## How can I assess if sampling has converged?
+## How can I assess whether sampling has converged?
 
 The output of a call to `epidist` is compatible with typical Stan workflows.
 We recommend use of the [`bayesplot`](http://mc-stan.org/bayesplot/) package for sampling diagnostic plots.
@@ -109,7 +110,7 @@ We particularly highlight two functions which might be useful:
 For an example use of these functions, have a look at the [`epidist-paper`](https://github.com/parksw3/epidist-paper) repository containing the code for @park2024estimating.
 (Note that in that codebase, we use `map` as a part of a [`targets`](https://books.ropensci.org/targets/) pipeline.)
 
-## How did you choose the default priors for `epidist`?
+## How are the default priors for `epidist` chosen?
 
 [`brms`](http://paulbuerkner.com/brms/) provides default priors for all parameters.
 However, some of those priors do not make sense in the context of our application.
