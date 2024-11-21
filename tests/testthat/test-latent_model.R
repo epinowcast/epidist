@@ -56,3 +56,23 @@ test_that("epidist_stancode.epidist_latent_model produces valid stanvars", { # n
   )
   expect_s3_class(stancode, "stanvars")
 })
+
+test_that("epidist_gen_log_lik_latent returns a function that produces valid log likelihoods", { # nolint: line_length_linter.
+  skip_on_cran()
+  # Test lognormal
+  prep <- brms::prepare_predictions(fit)
+  i <- 1
+  log_lik_fn <- epidist_gen_log_lik_latent(lognormal())
+  log_lik <- log_lik_fn(i = i, prep)
+  expect_length(log_lik, prep$ndraws)
+  expect_false(anyNA(log_lik))
+  expect_true(all(is.finite(log_lik)))
+
+  # Test gamma
+  prep_gamma <- brms::prepare_predictions(fit_gamma)
+  log_lik_fn_gamma <- epidist_gen_log_lik_latent(Gamma())
+  log_lik_gamma <- log_lik_fn_gamma(i = i, prep_gamma)
+  expect_length(log_lik_gamma, prep_gamma$ndraws)
+  expect_false(anyNA(log_lik_gamma))
+  expect_true(all(is.finite(log_lik_gamma)))
+})
