@@ -315,7 +315,7 @@ ranef(fit_sex_district)
 
 To go further than summaries of the fitted model, we recommend using the `tidybayes` package.
 For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws()` function.
-The `tidybayes::add_epred_draws()` function uses the (internal) `posterior_epred_latent_lognormal()` function implemented in `epidist` for the `latent_lognormal` custom `brms` family.
+The `tidybayes::add_epred_draws()` function uses the `epidist_gen_posterior_predict()` function to generate a posterior prediction function for the `lognormal()` distribution.
 
 In Figure \@ref(fig:epred) we show the posterior expectation of the delay distribution for each of the three fitted models.
 Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with women.

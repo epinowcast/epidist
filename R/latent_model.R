@@ -109,7 +109,7 @@ epidist_family_model.epidist_latent_model <- function(
 #'
 #' @seealso [brms::log_lik()] for details on the brms log likelihood interface.
 #'
-#' @inheritParams epidist_family_model
+#' @inheritParams epidist_family
 #'
 #' @return A function that calculates the log likelihood for a single
 #' observation. The prep object must have the following variables:

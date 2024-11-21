@@ -8,8 +8,12 @@ distribution for a latent model}
 epidist_gen_posterior_epred(family)
 }
 \arguments{
-\item{family}{Output of a call to \code{brms::brmsfamily()} with additional
-information as provided by \code{.add_dpar_info()}}
+\item{family}{A description of the response distribution and link function to
+be used in the model. Every family function has a link argument allowing
+users to specify the link function to be applied on the response variable.
+If not specified, default links are used. For details of all supported
+families see \code{\link[=brmsfamily]{brmsfamily()}}. Commonly used, such as \code{\link[=lognormal]{lognormal()}}, are also
+reexported as part of \code{epidist}.}
 }
 \value{
 A function that takes a prep argument from brms and returns a matrix
@@ -19,7 +23,7 @@ per observation.
 \description{
 This function creates a function that calculates the expected value of the
 posterior predictive distribution for a latent model. The returned function
-takes a prep argument (from brms) and returns posterior expected values.
+takes a \code{prep} argument (from brms) and returns posterior expected values.
 This is used internally by \code{\link[brms:posterior_epred.brmsfit]{brms::posterior_epred()}} to calculate expected
 values for latent models.
 }

@@ -3,15 +3,15 @@
 #'
 #' This function creates a function that draws from the posterior predictive
 #' distribution for a latent model using [primarycensored::rpcens()] to handle
-#' censoring and truncation. The returned function takes a prep argument from
+#' censoring and truncation. The returned function takes a `prep` argument from
 #' `brms` and returns posterior predictions. This is used internally by
 #' [brms::posterior_predict()] to generate predictions for latent models.
 #'
-#' @inheritParams epidist_family_model
+#' @inheritParams epidist_family
 #'
-#' @return A function that takes a prep argument from brms and returns a matrix
-#' of posterior predictions, with one row per posterior draw and one column
-#' per observation. The prep object must have the following variables:
+#' @return A function that takes a `prep` argument from brms and returns a
+#' matrix of posterior predictions, with one row per posterior draw and one
+#' column per observation. The `prep` object must have the following variables:
 #' * `vreal1`: relative observation time
 #' * `vreal2`: primary event window
 #' * `vreal3`: secondary event window
@@ -53,11 +53,11 @@ epidist_gen_posterior_predict <- function(family) {
 #'
 #' This function creates a function that calculates the expected value of the
 #' posterior predictive distribution for a latent model. The returned function
-#' takes a prep argument (from brms) and returns posterior expected values.
+#' takes a `prep` argument (from brms) and returns posterior expected values.
 #' This is used internally by [brms::posterior_epred()] to calculate expected
 #' values for latent models.
 #'
-#' @inheritParams epidist_family_model
+#' @inheritParams epidist_family
 #'
 #' @return A function that takes a prep argument from brms and returns a matrix
 #' of posterior expected values, with one row per posterior draw and one column

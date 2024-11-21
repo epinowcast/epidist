@@ -167,7 +167,7 @@
 #' @param prefix Character string prefix of the brms function to get (e.g.
 #' "log_lik")
 #'
-#' @param family A brms family object
+#' @inheritParams epidist_family
 #' @return The requested brms function
 #' @keywords internal
 .get_brms_fn <- function(prefix, family) {

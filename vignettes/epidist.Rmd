@@ -290,6 +290,9 @@ fit <- epidist(
 )
 ```
 
+**Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features.**
+**This can be set using `backend = "cmdstanr"` after following the installing CmdStan instructions in the README.**
+
 The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters in the model, shown in the table below.
 Many of these parameters (e.g. `swindow` and `pwindow`) are the so called latent variables, and have lengths corresponding to the `sample_size`.
 
@@ -306,9 +309,6 @@ data.frame(
 
 Users familiar with Stan and `brms`, can work with `fit` directly.
 Any tool that supports `brms` fitted model objects will be compatible with `fit`.
-
-**Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features.**
-**This can be set using `backend = "cmdstanr"` after following the installing CmdStan instructions in the README.**
 
 For example, we can use the built in `summary()` function
 
@@ -341,7 +341,7 @@ ggplot() +
     data = data.frame(x = c(0, 30)),
     aes(x = x),
     fun = dlnorm,
-    linewidth = 2,
+    linewidth = 1.5,
     args = list(
       meanlog = secondary_dist[["mu"]],
       sdlog = secondary_dist[["sigma"]]
