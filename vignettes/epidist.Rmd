@@ -288,13 +288,8 @@ In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo 
 fit <- epidist(data = data, chains = 2, cores = 2, refresh = 0)
 ```
 
-The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters (Table \@ref(tab:pars)) in the model.
-Users familiar with Stan and `brms`, can work with `fit` directly.
-Any tool that supports `brms` fitted model objects will be compatible with `fit`.
-
-**Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features. This can be set using `backend = "cmdstanr"` after following the installing `cmdstan` instructions in the README.**
-
-(ref:pars) All of the parameters that are included in the model. Many of these parameters (e.g. `swindow` and `pwindow`) are the so called latent variables in the model, and have lengths corresponding to the `sample_size`. We extracted the model parameters using `brms::variables()` and removed the indices.
+The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters in the model, shown in the table below.
+Many of these parameters (e.g. `swindow` and `pwindow`) are the so called latent variables, and have lengths corresponding to the `sample_size`.
 
 ```{r pars}
 pars <- fit |>
@@ -304,9 +299,14 @@ pars <- fit |>
 data.frame(
   Parameter = unique(pars), Length = table(pars)
 ) |>
-  gt() |>
-  tab_caption("(ref:pars)")
+  gt()
 ```
+
+Users familiar with Stan and `brms`, can work with `fit` directly.
+Any tool that supports `brms` fitted model objects will be compatible with `fit`.
+
+**Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features.**
+**This can be set using `backend = "cmdstanr"` after following the installing CmdStan instructions in the README.**
 
 The `epidist` package also provides functions to make common post-processing tasks easy.
 For example, individual predictions of the lognormal delay parameters can be extracted using:
