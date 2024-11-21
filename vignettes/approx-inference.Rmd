@@ -102,7 +102,9 @@ library(tidybayes)
 library(cmdstanr) # nolint
 ```
 
-To access the approximate inference methods used in this vignette we will need to use the `cmdstanr` backend for `brms` (we generally recommend using this backend for fitting models). To do this, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:
+To access the approximate inference methods used in this vignette we will need to use the `cmdstanr` backend for `brms` (we generally recommend using this backend for fitting models).
+To do this, we first need to install CmdStan (see the README for more details).
+We can check we have everything we need as follows:
 
 ```{r}
 cmdstanr::cmdstan_version()
@@ -262,7 +264,7 @@ pmap_df(
 
 ## Comparison of time taken
 
-In this example, HMC took much longer than the other methods, with Pathfinder being the fastest method.
+In this example, HMC took a longer time to run than the other methods and Pathfinder was the fastest running method.
 That said, even for HMC the computation time in this case is unlikely to be prohibitive.
 
 ```{r}
