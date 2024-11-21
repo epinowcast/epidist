@@ -285,8 +285,13 @@ The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
 
 ```{r}
-fit <- epidist(data = data, chains = 2, cores = 2, refresh = 0)
+fit <- epidist(
+  data = data, chains = 2, cores = 2, refresh = as.integer(interactive())
+)
 ```
+
+**Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features.**
+**This can be set using `backend = "cmdstanr"` after following the installing CmdStan instructions in the README.**
 
 The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters in the model, shown in the table below.
 Many of these parameters (e.g. `swindow` and `pwindow`) are the so called latent variables, and have lengths corresponding to the `sample_size`.
@@ -305,8 +310,13 @@ data.frame(
 Users familiar with Stan and `brms`, can work with `fit` directly.
 Any tool that supports `brms` fitted model objects will be compatible with `fit`.
 
-**Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features.**
-**This can be set using `backend = "cmdstanr"` after following the installing CmdStan instructions in the README.**
+For example, we can use the built in `summary()` function
+
+```{r}
+summary(fit)
+```
+
+to see that the model has converged and recovered the delay distribution distribution paramters reasonably well.
 
 The `epidist` package also provides functions to make common post-processing tasks easy.
 For example, individual predictions of the lognormal delay parameters can be extracted using:
@@ -315,31 +325,42 @@ For example, individual predictions of the lognormal delay parameters can be ext
 pred <- predict_delay_parameters(fit)
 ```
 
-Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained using the average of the `mu` and `sigma` draws.
+Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained for 100 draws from the posterior distribution of the `mu` and `sigma` parameters.
 Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using `epidist()` we have obtained a much closer match to the truth.
 
-(ref:fitted-lognormal) A fitted delay distribution (in pink) as compared with the true delay distribution (in black).
+(ref:fitted-lognormal) The fitted delay distribution (pink lines, 100 draws from the posterior) compared to the true underlying delay distribution (black line). Each pink line represents one possible delay distribution based on the fitted model parameters.
 
 ```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
+# Sample 100 random draws from the posterior
+set.seed(123)
+sample_draws <- sample(nrow(pred), 100)
+
 ggplot() +
+  # Plot the true distribution
   geom_function(
     data = data.frame(x = c(0, 30)),
     aes(x = x),
     fun = dlnorm,
+    linewidth = 1.5,
     args = list(
       meanlog = secondary_dist[["mu"]],
       sdlog = secondary_dist[["sigma"]]
     )
   ) +
-  geom_function(
-    data = data.frame(x = c(0, 30)),
-    aes(x = x), fun = dlnorm,
-    args = list(
-      meanlog = mean(pred$mu),
-      sdlog = mean(pred$sigma)
-    ),
-    col = "#CC79A7"
-  ) +
+  # Plot 100 sampled posterior distributions
+  lapply(sample_draws, \(i) {
+    geom_function(
+      data = data.frame(x = c(0, 30)),
+      aes(x = x),
+      fun = dlnorm,
+      args = list(
+        meanlog = pred$mu[i],
+        sdlog = pred$sigma[i]
+      ),
+      alpha = 0.1,
+      color = "#CC79A7"
+    )
+  }) +
   labs(
     x = "Delay between primary and secondary event (days)",
     y = "Probability density"
