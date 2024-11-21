@@ -171,10 +171,12 @@ obs_cens |>
     aes(x = ptime, xend = stime, y = case, yend = case),
     col = "grey"
   ) +
+  # The primary event censoring intervals
   geom_errorbarh(
     aes(xmin = ptime_lwr, xmax = ptime_upr, y = case, yend = case),
     col = "#56B4E9", height = 5
   ) +
+  # The secondary event censoring intervals
   geom_errorbarh(
     aes(xmin = stime_lwr, xmax = stime_upr, y = case, yend = case),
     col = "#009E73", height = 5
