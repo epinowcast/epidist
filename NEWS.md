@@ -1,6 +1,8 @@
-# epidist 1.0.0
+# epidist 0.1.0
 
-This is the first major release of `epidist`.
+This is the first minor release of `epidist` intended for early test users of the package.
+As some features may change, the package is marked as experimental.
+We expect to release a stable 1.0.0 version shortly.
 
 The `epidist` package implements models for epidemiological delay distributions.
 It uses [`brms`](http://paulbuerkner.com/brms/) to perform Bayesian inference.
