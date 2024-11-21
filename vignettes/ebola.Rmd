@@ -163,7 +163,7 @@ That is, $\mu$ and $\sigma$ such that when $x \sim \mathcal{N}(\mu, \sigma)$ the
 
 ## Data preparation
 
-To prepare the data, we begin by filtering for the relevant columns and converting the date columns to `Date` objects:
+To prepare the data, we begin by converting the date columns to `Date` objects and selecting the relevant columns:
 
 ```{r}
 obs_cens <- sierra_leone_ebola_data |>
@@ -193,7 +193,7 @@ subsample <- 0.2
 ```
 
 Additionally, to speed up computation, we take a random `r 100 * subsample`% subsample of the complete data.
-(In a real analysis, we'd recommend using all the available data).
+(In a real analysis, we'd recommend using all the available data.)
 
 ```{r}
 obs_cens <- obs_cens |>
@@ -210,7 +210,9 @@ linelist_data <- obs_cens |>
   )
 ```
 
-Note that this has made some assumptions about the data in that it has assumed that as we did not supply upper bounds for the primary and secondary events, that the upper bounds are one day after the lower bounds. It has also assumed that the observation time is the maximum of the secondary event upper bound as we also did not supply an observation time column.
+In this call to [as_epidist_linelist_data()] it has made some assumptions about the data.
+First, because we did not supply upper bounds for the primary and secondary events (`pdate_upr` and `sdate_upr`), it has assumed that the upper bounds are one day after the lower bounds.
+Second, because we also did not supply an observation time column (`obs_date`), it has assumed that the observation time is the maximum of the secondary event upper bounds.
 
 ## Model fitting
 
