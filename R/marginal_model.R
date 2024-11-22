@@ -17,8 +17,14 @@ as_epidist_marginal_model <- function(data) {
 as_epidist_marginal_model.epidist_linelist_data <- function(data) {
   assert_epidist(data)
 
+  # Here we do the processing to turn an epidist_linelist_data into an aggregate
+  # dataset. In the future this would be refactored into a function which
+  # converts from linelist data to aggregate data, and a function which goes
+  # from aggregate data into the marginal model class
   data <- data |>
-    mutate(delay = .data$stime_lwr - .data$ptime_lwr)
+    mutate(delay = .data$stime_lwr - .data$ptime_lwr) |>
+    dplyr::group_by(delay) |>
+    dplyr::summarise(count = dplyr::n())
 
   data <- new_epidist_marginal_model(data)
   assert_epidist(data)
