@@ -3,6 +3,7 @@
 utils::globalVariables(c(
   "samples", # <epidist_diagnostics>
   "woverlap", # <epidist_stancode.epidist_latent_model>
+  "delay", # <as_epidist_marginal_model.epidist_linelist_data>
   "rlnorm", # <simulate_secondary>
   "fix", # <.replace_prior>
   "prior_new", # <.replace_prior>
