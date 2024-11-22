@@ -22,9 +22,19 @@ as_epidist_marginal_model.epidist_linelist_data <- function(data) {
   # converts from linelist data to aggregate data, and a function which goes
   # from aggregate data into the marginal model class
   data <- data |>
-    mutate(delay = .data$stime_lwr - .data$ptime_lwr) |>
+    mutate(
+      pwindow = ifelse(
+        .data$stime_lwr < .data$ptime_upr,
+        .data$stime_upr - .data$ptime_lwr,
+        .data$ptime_upr - .data$ptime_lwr
+      ),
+      delay = .data$stime_lwr - .data$ptime_lwr
+    ) |>
     dplyr::group_by(delay) |>
-    dplyr::summarise(count = dplyr::n())
+    dplyr::summarise(
+      count = dplyr::n(),
+      pwindow = ifelse(all(pwindow == pwindow[1]), pwindow[1], NA)
+    )
 
   data <- new_epidist_marginal_model(data)
   assert_epidist(data)
@@ -93,7 +103,7 @@ epidist_formula_model.epidist_marginal_model <- function(
     data, formula, ...) {
   # data is only used to dispatch on
   formula <- stats::update(
-    formula, delay | weights(n) + vreal(pwindow) ~ .
+    formula, delay | weights(count) + vreal(pwindow) ~ .
   )
   return(formula)
 }
@@ -115,7 +125,7 @@ epidist_stancode.epidist_marginal_model <- function(data, ...) {
 
   pcd_stanvars_functions <- brms::stanvar(
     block = "functions",
-    scode = pcd_load_stan_functions()
+    scode = primarycensored::pcd_load_stan_functions()
   )
 
   stanvars_all <- stanvars_version + stanvars_functions + pcd_stanvars_functions
