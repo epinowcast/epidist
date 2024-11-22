@@ -59,3 +59,66 @@ assert_epidist.epidist_marginal_model <- function(data, ...) {
 is_epidist_marginal_model <- function(data) {
   inherits(data, "epidist_marginal_model")
 }
+
+#' Create the model-specific component of an `epidist` custom family
+#'
+#' @inheritParams epidist_family_model
+#' @param ... Additional arguments passed to method.
+#' @method epidist_family_model epidist_marginal_model
+#' @family marginal_model
+#' @export
+epidist_family_model.epidist_marginal_model <- function(
+    data, family, ...) {
+  custom_family <- brms::custom_family(
+    "primarycensored_wrapper",
+    dpars = family$dpars,
+    links = c(family$link, family$other_links),
+    lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
+    ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
+    type = "int",
+    loop = TRUE,
+    vars = "vreal1[n]"
+  )
+  return(custom_family)
+}
+
+#' Define the model-specific component of an `epidist` custom formula
+#'
+#' @inheritParams epidist_formula_model
+#' @param ... Additional arguments passed to method.
+#' @method epidist_formula_model epidist_marginal_model
+#' @family marginal_model
+#' @export
+epidist_formula_model.epidist_marginal_model <- function(
+    data, formula, ...) {
+  # data is only used to dispatch on
+  formula <- stats::update(
+    formula, delay | weights(n) + vreal(pwindow) ~ .
+  )
+  return(formula)
+}
+
+#' @method epidist_stancode epidist_marginal_model
+#' @importFrom brms stanvar
+#' @family marginal_model
+#' @autoglobal
+#' @export
+epidist_stancode.epidist_marginal_model <- function(data, ...) {
+  assert_epidist(data)
+
+  stanvars_version <- .version_stanvar()
+
+  stanvars_functions <- brms::stanvar(
+    block = "functions",
+    scode = .stan_chunk(file.path("marginal_model", "functions.stan"))
+  )
+
+  pcd_stanvars_functions <- brms::stanvar(
+    block = "functions",
+    scode = pcd_load_stan_functions()
+  )
+
+  stanvars_all <- stanvars_version + stanvars_functions + pcd_stanvars_functions
+
+  return(stanvars_all)
+}
