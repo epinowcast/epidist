@@ -52,7 +52,8 @@ function, though you need to point to `r-universe` instead of CRAN:
 
 ``` r
 install.packages(
-  "epidist", repos = "https://epinowcast.r-universe.dev"
+  "epidist",
+  repos = "https://epinowcast.r-universe.dev"
 )
 ```
 
@@ -75,7 +76,8 @@ tag (e.g. this installs
 
 ``` r
 remotes::install_github(
-  "epinowcast/epidist", dependencies = TRUE, ref = "v0.1.0"
+  file.path("epinowcast", "epidist"),
+  dependencies = TRUE, ref = "v0.1.0"
 )
 ```
 

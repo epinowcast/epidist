@@ -67,7 +67,7 @@ Similarly, you can install historical versions by specifying the release tag (e.
 
 ```{r, eval = FALSE}
 remotes::install_github(
-  "epinowcast/epidist",
+  file.path("epinowcast", "epidist"),
   dependencies = TRUE, ref = "v0.1.0"
 )
 ```
