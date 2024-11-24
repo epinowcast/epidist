@@ -19,11 +19,12 @@ knitr::opts_chunk$set(
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![R-CMD-check](https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml) [![Codecov test coverage](https://codecov.io/gh/epinowcast/epidist/branch/main/graph/badge.svg)](https://app.codecov.io/gh/epinowcast/epidist)
+
 [![Universe](https://epinowcast.r-universe.dev/badges/epidist)](https://epinowcast.r-universe.dev/epidist)
 [![MIT
 license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/epinowcast/epidist/blob/master/LICENSE.md/)
 [![GitHub contributors](https://img.shields.io/github/contributors/epinowcast/epidist)](https://github.com/epinowcast/epidist/graphs/contributors)
-[![DOI](https://zenodo.org/badge/422611952.svg)](https://zenodo.org/badge/latestdoi/422611952)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14213017.svg)](https://doi.org/10.5281/zenodo.14213017)
 <!-- badges: end -->
 
 ## Summary
@@ -44,17 +45,16 @@ To learn more about `epidist` we recommend reading the vignettes in this order:
 
 <details><summary>Installing the package</summary>
 
-<!-- You can install the latest released version using the normal `R` function, though you need to point to `r-universe` instead of CRAN: -->
+You can install the latest released version using the normal `R` function, though you need to point to `r-universe` instead of CRAN:
 
-<!-- ```{r, eval = FALSE} -->
-<!-- install.packages( -->
-<!--   "epidist", repos = "https://epinowcast.r-universe.dev" -->
-<!-- ) -->
-<!-- ``` -->
+```{r, eval = FALSE}
+install.packages(
+  "epidist",
+  repos = "https://epinowcast.r-universe.dev"
+)
+```
 
-<!-- Alternatively, y -->
-
-You can use the [`remotes` package](https://remotes.r-lib.org/) to install the development version from Github (warning! this version may contain breaking changes and/or bugs):
+Alternatively, you can use the [`remotes` package](https://remotes.r-lib.org/) to install the development version from Github (warning! this version may contain breaking changes and/or bugs):
 
 ```{r, eval = FALSE}
 remotes::install_github(
@@ -63,15 +63,16 @@ remotes::install_github(
 )
 ```
 
-<!-- Similarly, you can install historical versions by specifying the release tag (e.g. this installs [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)): -->
+Similarly, you can install historical versions by specifying the release tag (e.g. this installs [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)): -->
 
-<!-- ```{r, eval = FALSE} -->
-<!-- remotes::install_github( -->
-<!--   "epinowcast/epidist", dependencies = TRUE, ref = "v0.2.0" -->
-<!-- ) -->
-<!-- ``` -->
+```{r, eval = FALSE}
+remotes::install_github(
+  "epinowcast/epidist",
+  dependencies = TRUE, ref = "v0.1.0"
+)
+```
 
-<!-- *Note: You can also use that last approach to install a specific commit if needed, e.g. if you want to try out a specific unreleased feature, but not the absolute latest developmental version.* -->
+*Note: You can also use that last approach to install a specific commit if needed, e.g. if you want to try out a specific unreleased feature, but not the absolute latest developmental version.*
 
 </details>
 
@@ -112,20 +113,19 @@ Our [community forum](https://community.epinowcast.org/) has areas for [question
 
 ## Contributing
 
-We welcome contributions and new contributors! We particularly appreciate help on [identifying and identified issues](https://github.com/epinowcast/epidist/issues). Please check and add to the issues, and/or add a [pull request](https://github.com/epinowcast/epidist/pulls).
+We welcome contributions and new contributors! We particularly appreciate help on [identifying and identified issues](https://github.com/epinowcast/epidist/issues). Please check and add to the issues, and/or add a [pull request](https://github.com/epinowcast/epidist/pulls) and see our [contributing guide](CONTRIBUTING.md) for more information.
 
-<!-- and see our [contributing guide](CONTRIBUTING.md) for more information. -->
+### How to make a bug report or feature request
 
-<!-- ### How to make a bug report or feature request -->
+Please briefly describe your problem and what output you expect in an [issue](https://github.com/epinowcast/epidist/issues). -->
 
-<!-- Please briefly describe your problem and what output you expect in an [issue](https://github.com/epinowcast/epidist/issues). -->
+If you have a question, please don't open an issue. Instead, ask on our [forum](https://community.epinowcast.org/).
 
-<!-- If you have a question, please don't open an issue. Instead, ask on our [Q and A page](https://github.com/epinowcast/dist/discussions/categories/q-a). -->
-<!-- See our [contributing guide](CONTRIBUTING.md) for more information. -->
+See our [contributing guide](CONTRIBUTING.md) for more information.
 
-<!-- ### Code of Conduct -->
+### Code of Conduct
 
-<!-- Please note that the `epidist` project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms. -->
+Please note that the `epidist` project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.
 
 ## Citation
 
