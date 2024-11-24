@@ -83,12 +83,12 @@ epidist_family_model.epidist_latent_model <- function(
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
-    dpars = family$dpars,
-    links = c(family$link, family$other_links),
-    lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
-    ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
+    dpars = c(family$dpars, "pwindow", "swindow"),
+    links = c(family$link, family$other_links, "identity", "identity"),
+    lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb")), 0, 0),
+    ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub")), 1, 1),
     type = family$type,
-    vars = c("pwindow", "swindow", "vreal1"),
+    vars = c("vreal1", "vreal2", "vreal3", "noverlap", "woverlap"),
     loop = FALSE,
     log_lik = epidist_gen_log_lik_latent(family),
     posterior_predict = epidist_gen_posterior_predict(family),
@@ -129,16 +129,13 @@ epidist_gen_log_lik_latent <- function(family) {
     pwindow <- prep$data$vreal2[i]
     swindow <- prep$data$vreal3[i]
 
-    # Generates values of the swindow_raw and pwindow_raw, but really these
-    # should be extracted from prep or the fitted raws somehow. See:
-    # https://github.com/epinowcast/epidist/issues/267
-    swindow_raw <- stats::runif(prep$ndraws)
-    pwindow_raw <- stats::runif(prep$ndraws)
+    pwindow_raw <- prep$dpars$pwindow[i, ]
+    swindow_raw <- prep$dpars$swindow[i, ]
 
     swindow <- swindow_raw * swindow
 
     # For no overlap calculate as usual, for overlap ensure pwindow < swindow
-    if (i %in% prep$data$noverlap) {
+    if (i %in% prep$data$woverlap) {
       pwindow <- pwindow_raw * pwindow
     } else {
       pwindow <- pwindow_raw * swindow
@@ -170,9 +167,28 @@ epidist_formula_model.epidist_latent_model <- function(
     data, formula, ...) {
   # data is only used to dispatch on
   formula <- stats::update(
-    formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
+    formula, delay | vreal(relative_obs_time, pwindow, swindow) +
+      vint(woverlap, noverlap) ~ .,
+    pwindow ~ 0 + as.factor(.row_id),
+    swindow ~ 0 + as.factor(.row_id)
   )
   return(formula)
+}
+
+#' Model specific prior distributions for latent models
+#'
+#' Defines prior distributions for the latent model parameters `pwindow_raw` and
+#' `swindow_raw` which control the width of the observation windows.
+#'
+#' @inheritParams epidist
+#' @family latent_model
+#' @export
+epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
+  priors <- c(
+    prior(uniform(0, 1), class = "b", dpar = "pwindow", lb = 0, ub = 1),
+    prior(uniform(0, 1), class = "b", dpar = "swindow", lb = 0, ub = 1)
+  )
+  return(priors)
 }
 
 #' @method epidist_stancode epidist_latent_model
@@ -240,23 +256,7 @@ epidist_stancode.epidist_latent_model <- function(
       name = "woverlap"
     )
 
-  stanvars_parameters <- stanvar(
-    block = "parameters",
-    scode = .stan_chunk(file.path("latent_model", "parameters.stan"))
-  )
-
-  stanvars_tparameters <- stanvar(
-    block = "tparameters",
-    scode = .stan_chunk(file.path("latent_model", "tparameters.stan"))
-  )
-
-  stanvars_priors <- stanvar(
-    block = "model",
-    scode = .stan_chunk(file.path("latent_model", "priors.stan"))
-  )
-
-  stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
-    stanvars_parameters + stanvars_tparameters + stanvars_priors
+  stanvars_all <- stanvars_version + stanvars_functions + stanvars_data
 
   return(stanvars_all)
 }
