@@ -33,19 +33,20 @@ biased conclusions.
 To learn more about `epidist` we recommend reading the vignettes in this
 order:
 
-  - [Getting started with
-    `epidist`](https://epidist.epinowcast.org/articles/epidist.html)
-  - [Using `epidist` to estimate delay between symptom onset and
-    positive test for an Ebola outbreak in Sierra
-    Leone](https://epidist.epinowcast.org/articles/ebola.html)
-  - [Approximate Bayesian inference in
-    `epidist`](https://epidist.epinowcast.org/articles/approx-inference.html)
+- [Getting started with
+  `epidist`](https://epidist.epinowcast.org/articles/epidist.html)
+- [Using `epidist` to estimate delay between symptom onset and positive
+  test for an Ebola outbreak in Sierra
+  Leone](https://epidist.epinowcast.org/articles/ebola.html)
+- [Approximate Bayesian inference in
+  `epidist`](https://epidist.epinowcast.org/articles/approx-inference.html)
 
 ## Installation
 
 <details>
-
-<summary>Installing the package</summary>
+<summary>
+Installing the package
+</summary>
 
 You can install the latest released version using the normal `R`
 function, though you need to point to `r-universe` instead of CRAN:
@@ -59,7 +60,7 @@ install.packages(
 
 Alternatively, you can use the [`remotes`
 package](https://remotes.r-lib.org/) to install the development version
-from Github (warning\! this version may contain breaking changes and/or
+from Github (warning! this version may contain breaking changes and/or
 bugs):
 
 ``` r
@@ -86,10 +87,10 @@ if needed, e.g. if you want to try out a specific unreleased feature,
 but not the absolute latest developmental version.*
 
 </details>
-
 <details>
-
-<summary>Installing CmdStan (optional)</summary>
+<summary>
+Installing CmdStan (optional)
+</summary>
 
 By default `epidist` uses the `rstan` package for fitting models. If you
 wish to use the `cmdstanr` package instead, you will need to install
@@ -123,8 +124,9 @@ need to install a past version of CmdStan, which you can do with the
 ## Resources
 
 <details>
-
-<summary>Organisation Website</summary>
+<summary>
+Organisation Website
+</summary>
 
 Our [organisation website](https://www.epinowcast.org/) includes links
 to other resources, [guest posts](https://www.epinowcast.org/blog.html),
@@ -132,10 +134,10 @@ and [seminar schedule](https://www.epinowcast.org/seminars.html) for
 both upcoming and past recordings.
 
 </details>
-
 <details>
-
-<summary>Community Forum</summary>
+<summary>
+Community Forum
+</summary>
 
 Our [community forum](https://community.epinowcast.org/) has areas for
 [question and answer](https://community.epinowcast.org/c/interface/15)
@@ -148,7 +150,7 @@ disease, you may find this useful even if do not use `epidist`.
 
 ## Contributing
 
-We welcome contributions and new contributors\! We particularly
+We welcome contributions and new contributors! We particularly
 appreciate help on [identifying and identified
 issues](https://github.com/epinowcast/epidist/issues). Please check and
 add to the issues, and/or add a [pull
@@ -182,24 +184,26 @@ If you use `epidist` in your work, please consider citing it using
 `citation("epidist")`.
 
 <details>
-
-<summary>Package citation information</summary>
+<summary>
+Package citation information
+</summary>
 
 ``` r
 citation("epidist")
 To cite package 'epidist' in publications use:
 
-  Park S, Sam Abbott, Adam Howes (NULL). _epidist: Estimate
-  epidemiological delay distributions for infectious diseases_.
-  doi:10.5281/zenodo.5637165 <https://doi.org/10.5281/zenodo.5637165>.
+  Adam Howes, Park S, Sam Abbott (NULL). _epidist: Estimate
+  Epidemiological Delay Distributions With brms_.
+  doi:10.5281/zenodo.14213017
+  <https://doi.org/10.5281/zenodo.14213017>.
 
 A BibTeX entry for LaTeX users is
 
   @Manual{,
-    title = {epidist: Estimate epidemiological delay distributions for infectious diseases},
-    author = {Sang Woo Park and {Sam Abbott} and {Adam Howes}},
+    title = {epidist: Estimate Epidemiological Delay Distributions With brms},
+    author = {{Adam Howes} and Sang Woo Park and {Sam Abbott}},
     year = {NULL},
-    doi = {10.5281/zenodo.5637165},
+    doi = {10.5281/zenodo.14213017},
   }
 ```
 
@@ -208,28 +212,26 @@ A BibTeX entry for LaTeX users is
 If using our methodology, or the methodology on which ours is based,
 please cite the relevant papers. This may include:
 
-  - [Estimating epidemiological delay distributions for infectious
-    diseases](https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1)
-    by Park *et al.* (2024)
-  - [Best practices for estimating and reporting epidemiological delay
-    distributions of infectious diseases using public health
-    surveillance and healthcare
-    data](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012520)
-    by Charniga *et al.* (2024)
+- [Estimating epidemiological delay distributions for infectious
+  diseases](https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1)
+  by Park *et al.* (2024)
+- [Best practices for estimating and reporting epidemiological delay
+  distributions of infectious diseases using public health surveillance
+  and healthcare
+  data](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012520)
+  by Charniga *et al.* (2024)
 
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-
 <!-- prettier-ignore-start -->
-
 <!-- markdownlint-disable -->
 
 All contributions to this project are gratefully acknowledged using the
 [`allcontributors`
 package](https://github.com/ropenscilabs/allcontributors) following the
 [all-contributors](https://allcontributors.org) specification.
-Contributions of any kind are welcome\!
+Contributions of any kind are welcome!
 
 ### Code
 
@@ -253,7 +255,5 @@ Contributions of any kind are welcome\!
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein">zsusswein</a>
 
 <!-- markdownlint-enable -->
-
 <!-- prettier-ignore-end -->
-
 <!-- ALL-CONTRIBUTORS-LIST:END -->
