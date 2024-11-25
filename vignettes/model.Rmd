@@ -1,6 +1,6 @@
 ---
 title: "Guide to the statistical models implemented in epidist"
-output: 
+output:
   bookdown::html_document2:
     fig_caption: yes
     code_folding: show
@@ -19,7 +19,7 @@ bibliography: references.bib
 ```{r setup, include=FALSE}
 # exclude compile warnings from cmdstanr
 knitr::opts_chunk$set(
-  fig.path = "figures/epidist-",
+  fig.path = file.path("figures", "epidist-"),
   cache = TRUE,
   collapse = TRUE,
   comment = "#>",
@@ -31,15 +31,6 @@ knitr::opts_chunk$set(
 
 The `epidist` package enables users to estimate delay distributions while accounting for common reporting biases.
 This vignette describes the models implemented in `epidist` and how they work.
-
-The packages used in this vignette are:
-
-```{r load-requirements}
-library(epidist)
-library(data.table)
-library(purrr)
-library(ggplot2)
-```
 
 # Background {#maths}
 
@@ -145,7 +136,7 @@ This is a tough thing to do.
 
 <!--Let $\mathbf{Y}$ be the data vector and $\boldsymbol{\theta}$ be parameters.
 Then
-$$ 
+$$
 \mathcal{L}(\mathbf{Y} \, | \, \boldsymbol{\theta}) = \prod_i \mathbb{P}(S_{L, i} < S < S_{R, i} \, | \, P_{L, i} < P < P_{R, i}, S < T).
 $$
 >
