@@ -234,11 +234,9 @@ epidist_stancode.epidist_latent_model <- function(
     ifelse(dpar %in% c("mu", names(formula$pforms)), "vector", "real")
   })
 
-  specific_dpars <- setdiff(family$dpars, c("pwindow", "swindow"))
-
   stanvars_functions[[1]]$scode <- gsub(
     "dpars_A",
-    toString(paste0(vector_real, " ", specific_dpars)),
+    toString(paste0(vector_real, " ", family$dpars)),
     stanvars_functions[[1]]$scode,
     fixed = TRUE
   )

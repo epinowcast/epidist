@@ -78,18 +78,19 @@ epidist_family_param <- function(family, ...) {
 #' @importFrom cli cli_abort
 #' @export
 epidist_family_param.default <- function(family, ...) {
-  dummy_mdl <- make_stancode(mpg ~ 1, data = mtcars, family = family$family)
+  family_name <- tolower(class(family)[1])
+  dummy_mdl <- make_stancode(mpg ~ 1, data = mtcars, family = class(family)[1])
 
   # Extract the Stan parameterisation from the dummy model code
   lpdf_pattern <- paste0(
-    "target \\+= ", tolower(family$family), "_lpdf\\(Y \\| ([^)]+)\\)" # nolint
+    "target \\+= ", family_name, "_(lpdf|lpmf)\\(Y \\| ([^)]+)\\)" # nolint
   )
   lpdf_match <- regexpr(lpdf_pattern, dummy_mdl)
   reparam <- if (lpdf_match > 0) {
     match_str <- regmatches(dummy_mdl, lpdf_match)[[1]]
     param <- sub(
       paste0(
-        "target \\+= ", tolower(family$family), "_lpdf\\(Y \\| " # nolint
+        "target \\+= ", family_name, "_(lpdf|lpmf)\\(Y \\| " # nolint
       ), "",
       match_str
     )
@@ -97,7 +98,7 @@ epidist_family_param.default <- function(family, ...) {
     family$param <- param
   } else {
     cli_abort(
-      "Unable to extract Stan parameterisation for {family$family}."
+      "Unable to extract Stan parameterisation for {family_name}."
     )
   }
   return(family)

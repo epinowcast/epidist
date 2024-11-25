@@ -5,24 +5,22 @@
   * - 'family' is replaced with the target distribution (e.g., 'lognormal')
   * - 'dpars_A' is replaced with multiple parameters in the format
   *   "vector|real paramname1, vector|real paramname2, ..." depending on whether
-  *   each parameter has a model. This includes:
-  *   - Distribution parameters
-  *   - pwindow: Vector of primary event windows (0-1 scale)
-  *   - swindow: Vector of secondary event windows (0-1 scale)
+  *   each parameter has a model. This includes distribution parameters.
+  * - 'pwindow' and 'swindow' are replaced with vectors of window positions
+  *   on a 0-1 scale
   *
   * @param y Vector of observed values (delays)
-  * @param dpars_A Distribution and window parameters (replaced via regex)
+  * @param dpars_A Distribution parameters (replaced via regex)
   * @param relative_obs_t Array of observation times relative to primary window
   * start
   * @param pwindow_width Array of primary window widths (actual time scale)
   * @param swindow_width Array of secondary window widths (actual time scale)
-  * @param noverlap Number of non-overlapping windows
   * @param woverlap Array of indices for overlapping windows
+  * @param wN Number of overlapping windows
   *
   * @return Log probability density with censoring adjustment
   */
 real latent_family_lpdf(vector y, dpars_A,
-                        array[] real pwindow, array[] real swindow,
                         array[] real relative_obs_t,
                         array[] real pwindow_width, array[] real swindow_width,
                         array[] int woverlap, int wN) {
