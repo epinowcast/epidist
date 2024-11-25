@@ -3,7 +3,7 @@
 Development version of `epidist`.
 
 
-- Remove the default method for `epidist()`. See #467.
+- Remove the default method for `epidist()`. See #473.
 
 # epidist 0.1.0
 
