@@ -200,8 +200,8 @@ epidist_formula_model.epidist_latent_model <- function(
 #' @export
 epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
   priors <- c(
-    prior(uniform(0, 1), class = "b", dpar = "pwindow", lb = 0, ub = 1),
-    prior(uniform(0, 1), class = "b", dpar = "swindow", lb = 0, ub = 1)
+    prior("uniform(0, 1)", class = "b", dpar = "pwindow"),
+    prior("uniform(0, 1)", class = "b", dpar = "swindow")
   )
   return(priors)
 }
