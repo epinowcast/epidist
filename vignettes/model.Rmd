@@ -30,11 +30,10 @@ knitr::opts_chunk$set(
 ```
 
 The `epidist` package enables users to estimate delay distributions while accounting for common reporting biases.
-This vignette describes the models implemented in `epidist` and how they work.
+This vignette first introduces the background [@park2024estimating] required to understand the models implemented in `epidist`.
+It then goes on to explain each model in turn.
 
 # Background {#maths}
-
-This section introduces the background [@park2024estimating] required to understand the models implemented in `epidist`.
 
 Let $p$ be time of primary event, and $s$ be time of secondary event.
 We assume that these events occur at rates, or equivalently incidences, $\mathcal{P}(p)$ and $\mathcal{S}(s)$, respectively.
@@ -111,7 +110,11 @@ $$
 $$
 where $ g_P(x\,|\,P_L,P_R)$ represents the conditional distribution of primary event given lower $P_L$ and upper $P_R$ bounds.
 
-# The latent individual model
+# The naive model
+
+Remains to fill.
+
+# The latent model
 
 Now, we incorporate both truncation and double censoring:
 $$
@@ -145,8 +148,7 @@ $$
 
 <!-- This is just writing the model likelihood so I think it's ok to not have prior? -->
 
-
-Instead, the approach of the `latent_individual` model [@ward2022transmission] is to:
+Instead, the approach of the latent model [@ward2022transmission] is to:
 
 1. Assume a uniformly distributed primary event times
 $$
