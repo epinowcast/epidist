@@ -23,20 +23,9 @@
 #' @param ... Additional arguments passed to `fn` method.
 #' @family fit
 #' @export
-epidist <- function(data, formula, family, prior, fn, ...) {
-  UseMethod("epidist")
-}
-
-#' Default method used for interface using `brms`
-#'
-#' @inheritParams epidist
-#' @rdname epidist.default
-#' @method epidist default
-#' @family fit
-#' @export
-epidist.default <- function(data, formula = mu ~ 1,
-                            family = lognormal(), prior = NULL,
-                            fn = brms::brm, ...) {
+epidist <- function(data, formula = mu ~ 1,
+                    family = lognormal(), prior = NULL,
+                    fn = brms::brm, ...) {
   assert_epidist(data)
   epidist_family <- epidist_family(data, family)
   epidist_formula <- epidist_formula(

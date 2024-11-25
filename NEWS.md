@@ -2,6 +2,9 @@
 
 Development version of `epidist`.
 
+
+- Remove the default method for `epidist()`. See #473.
+
 # epidist 0.1.0
 
 This is the first minor release of `epidist` intended for early test users of the package.
