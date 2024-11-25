@@ -88,7 +88,7 @@ epidist_family_model.epidist_latent_model <- function(
     lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb")), 0, 0),
     ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub")), 1, 1),
     type = family$type,
-    vars = c("vreal1", "vreal2", "vreal3", "noverlap", "woverlap"),
+    vars = c("vreal1", "vreal2", "vreal3", "woverlap", "wN"),
     loop = FALSE,
     log_lik = epidist_gen_log_lik_latent(family),
     posterior_predict = epidist_gen_posterior_predict(family),
@@ -234,19 +234,17 @@ epidist_stancode.epidist_latent_model <- function(
     ifelse(dpar %in% c("mu", names(formula$pforms)), "vector", "real")
   })
 
+  specific_dpars <- setdiff(family$dpars, c("pwindow", "swindow"))
+
   stanvars_functions[[1]]$scode <- gsub(
     "dpars_A",
-    toString(paste0(vector_real, " ", family$dpars)),
+    toString(paste0(vector_real, " ", specific_dpars)),
     stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
-  # dpars_B refers to the insertion into the lpdf call
-  # For some families, we tranform brms dpars to match Stan parameterisation
   stanvars_functions[[1]]$scode <- gsub(
-    "dpars_B",
-    toString(family$reparam),
-    stanvars_functions[[1]]$scode,
+    "dpars_B", family$param, stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
@@ -256,12 +254,6 @@ epidist_stancode.epidist_latent_model <- function(
     x = nrow(filter(data, woverlap > 0)),
     name = "wN"
   ) +
-    stanvar(
-      block = "data",
-      scode = "array[N - wN] int noverlap;",
-      x = filter(data, woverlap == 0)$.row_id,
-      name = "noverlap"
-    ) +
     stanvar(
       block = "data",
       scode = "array[wN] int woverlap;",

@@ -15,7 +15,7 @@ epidist_family <- function(data, family = lognormal(), ...) {
   family <- .add_dpar_info(family)
   custom_family <- epidist_family_model(data, family, ...)
   class(custom_family) <- c(family$family, class(custom_family))
-  custom_family <- epidist_family_reparam(custom_family)
+  custom_family <- epidist_family_param(custom_family)
   return(custom_family)
 }
 
@@ -43,29 +43,62 @@ epidist_family_model.default <- function(data, family, ...) {
 #' Reparameterise an `epidist` family to align `brms` and Stan
 #'
 #' @inheritParams epidist_family
-#' @rdname epidist_family_reparam
+#' @rdname epidist_family_param
 #' @family family
 #' @export
-epidist_family_reparam <- function(family, ...) {
-  UseMethod("epidist_family_reparam")
+epidist_family_param <- function(family, ...) {
+  UseMethod("epidist_family_param")
 }
 
 #' Default method for families which do not require a reparameterisation
 #'
-#' @inheritParams epidist_family
-#' @family family
-#' @export
-epidist_family_reparam.default <- function(family, ...) {
-  family$reparam <- family$dpars
-  return(family)
-}
-
-#' Reparameterisation for the gamma family
+#' This function extracts the Stan parameterisation for a given brms family by
+#' creating a dummy model and parsing its Stan code. It looks for the log
+#' probability density function (lpdf) call in the Stan code and extracts the
+#' parameter order used by Stan. This is needed because brms and Stan may use
+#' different parameter orderings for the same distribution.
 #'
-#' @inheritParams epidist_family
+#' @param family A brms family object containing at minimum a `family` element
+#' specifying the distribution family name
+#' @param ... Additional arguments passed to methods (not used)
+#'
+#' @details
+#' The function works by:
+#' 1. Creating a minimal dummy model using the specified family
+#' 2. Extracting the Stan code for this model
+#' 3. Finding the lpdf function call for the family
+#' 4. Parsing out the parameter ordering used in Stan
+#' 5. Adding this as the `param` element to the family object
+#'
+#' @return The input family object with an additional `param` element containing
+#' the Stan parameter ordering as a string
+#'
 #' @family family
+#' @importFrom brms make_stancode
+#' @importFrom cli cli_abort
 #' @export
-epidist_family_reparam.gamma <- function(family, ...) {
-  family$reparam <- c("shape", "shape ./ mu") # nolint
+epidist_family_param.default <- function(family, ...) {
+  dummy_mdl <- make_stancode(mpg ~ 1, data = mtcars, family = family$family)
+
+  # Extract the Stan parameterisation from the dummy model code
+  lpdf_pattern <- paste0(
+    "target \\+= ", tolower(family$family), "_lpdf\\(Y \\| ([^)]+)\\)" # nolint
+  )
+  lpdf_match <- regexpr(lpdf_pattern, dummy_mdl)
+  reparam <- if (lpdf_match > 0) {
+    match_str <- regmatches(dummy_mdl, lpdf_match)[[1]]
+    param <- sub(
+      paste0(
+        "target \\+= ", tolower(family$family), "_lpdf\\(Y \\| " # nolint
+      ), "",
+      match_str
+    )
+    param <- sub(")", "", param, fixed = TRUE)
+    family$param <- param
+  } else {
+    cli_abort(
+      "Unable to extract Stan parameterisation for {family$family}."
+    )
+  }
   return(family)
 }
