@@ -106,7 +106,7 @@ site](https://mc-stan.org/cmdstanr/), but the brief version is:
 # `Suggests` dependencies
 install.packages(
   "cmdstanr",
-  repos = c("https://mc-stan.org/r-packages/", getOption("repos"))
+  repos = c("https://stan-dev.r-universe.dev", getOption("repos"))
 )
 
 # once `cmdstanr` is installed
@@ -153,23 +153,28 @@ appreciate help on [identifying and identified
 issues](https://github.com/epinowcast/epidist/issues). Please check and
 add to the issues, and/or add a [pull
 request](https://github.com/epinowcast/epidist/pulls) and see our
-[contributing guide](CONTRIBUTING.md) for more information.
+[contributing
+guide](https://github.com/epinowcast/.github/blob/main/CONTRIBUTING.md)
+for more information.
 
 ### How to make a bug report or feature request
 
 Please briefly describe your problem and what output you expect in an
-[issue](https://github.com/epinowcast/epidist/issues). –\>
+[issue](https://github.com/epinowcast/epidist/issues).
 
 If you have a question, please don’t open an issue. Instead, ask on our
 [forum](https://community.epinowcast.org/).
 
-See our [contributing guide](CONTRIBUTING.md) for more information.
+See our [contributing
+guide](https://github.com/epinowcast/.github/blob/main/CONTRIBUTING.md)
+for more information.
 
 ### Code of Conduct
 
 Please note that the `epidist` project is released with a [Contributor
-Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project,
-you agree to abide by its terms.
+Code of
+Conduct](https://github.com/epinowcast/.github/blob/main/CODE_OF_CONDUCT.md).
+By contributing to this project, you agree to abide by its terms.
 
 ## Citation
 
