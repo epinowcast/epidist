@@ -1,7 +1,7 @@
 test_that("as_epidist_marginal_model.epidist_linelist_data with default settings an object with the correct classes", { # nolint: line_length_linter.
-  prep_obs <- as_epidist_marginal_model(sim_obs)
-  expect_s3_class(prep_obs, "data.frame")
-  expect_s3_class(prep_obs, "epidist_marginal_model")
+  prep_marginal_obs <- as_epidist_marginal_model(sim_obs)
+  expect_s3_class(prep_marginal_obs, "data.frame")
+  expect_s3_class(prep_marginal_obs, "epidist_marginal_model")
 })
 
 test_that("as_epidist_marginal_model.epidist_linelist_data when passed incorrect inputs", { # nolint: line_length_linter.
@@ -10,10 +10,13 @@ test_that("as_epidist_marginal_model.epidist_linelist_data when passed incorrect
 })
 
 # Make this data available for other tests
-family_lognormal <- epidist_family(prep_obs, family = brms::lognormal())
+family_lognormal <- epidist_family(
+  prep_marginal_obs,
+  family = brms::lognormal()
+)
 
 test_that("is_epidist_marginal_model returns TRUE for correct input", { # nolint: line_length_linter.
-  expect_true(is_epidist_marginal_model(prep_obs))
+  expect_true(is_epidist_marginal_model(prep_marginal_obs))
   expect_true({
     x <- list()
     class(x) <- "epidist_marginal_model"
@@ -31,12 +34,12 @@ test_that("is_epidist_marginal_model returns FALSE for incorrect input", { # nol
 })
 
 test_that("assert_epidist.epidist_marginal_model doesn't produce an error for correct input", { # nolint: line_length_linter.
-  expect_no_error(assert_epidist(prep_obs))
+  expect_no_error(assert_epidist(prep_marginal_obs))
 })
 
 test_that("assert_epidist.epidist_marginal_model returns FALSE for incorrect input", { # nolint: line_length_linter.
   expect_error(assert_epidist(list()))
-  expect_error(assert_epidist(prep_obs[, 1]))
+  expect_error(assert_epidist(prep_marginal_obs[, 1]))
   expect_error({
     x <- list()
     class(x) <- "epidist_marginal_model"
