@@ -45,6 +45,10 @@ reference:
   desc: Specific methods for the latent model
   contents:
   - has_concept("latent_model")
+- title: Marginal model
+  desc: Specific methods for the marginal model
+  contents:
+  - has_concept("marginal_model")
 - title: Postprocess
   desc: Functions for postprocessing model output
   contents:
