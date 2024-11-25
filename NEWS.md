@@ -2,8 +2,13 @@
 
 Development version of `epidist`.
 
+## Package
 
 - Remove the default method for `epidist()`. See #473.
+
+## Documentation
+
+- Brings the README into line with `epinowcast` standards. See #467.
 
 # epidist 0.1.0
 
