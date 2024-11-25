@@ -165,13 +165,26 @@ epidist_gen_log_lik_latent <- function(family) {
 #' @export
 epidist_formula_model.epidist_latent_model <- function(
     data, formula, ...) {
-  # data is only used to dispatch on
+  # Update main formula
   formula <- stats::update(
-    formula, delay | vreal(relative_obs_time, pwindow, swindow) +
-      vint(woverlap, noverlap) ~ .,
-    pwindow ~ 0 + as.factor(.row_id),
-    swindow ~ 0 + as.factor(.row_id)
+    formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
   )
+
+  # Only update pwindow/swindow formulas if intercept only
+  fixed_dpars <- names(formula$pfix)
+  formula_dpars <- names(formula$pforms)
+
+  # Check if pwindow needs updating
+  if (!("pwindow" %in% fixed_dpars) ||
+    identical(formula_dpars$pwindow, as.formula("pwindow ~ 1"))) {
+    formula$pforms$pwindow <- as.formula("pwindow ~ 0 + as.factor(.row_id)")
+  }
+
+  # Check if swindow needs updating
+  if (!("swindow" %in% fixed_dpars) ||
+    identical(formula_dpars$swindow, as.formula("swindow ~ 1"))) {
+    formula$pforms$swindow <- as.formula("swindow ~ 0 + as.factor(.row_id)")
+  }
   return(formula)
 }
 
