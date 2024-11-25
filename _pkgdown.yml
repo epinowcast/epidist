@@ -19,6 +19,8 @@ navbar:
       menu:
       - text: Advanced features with Ebola data
         href: articles/ebola.html
+      - text: Guide to the statistical models implemented in epidist
+        href: articles/model.html
       - text: Approximate Bayesian inference
         href: articles/approx-inference.html
 
