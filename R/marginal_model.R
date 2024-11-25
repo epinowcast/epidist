@@ -57,7 +57,7 @@ new_epidist_marginal_model <- function(data) {
 #' @export
 assert_epidist.epidist_marginal_model <- function(data, ...) {
   assert_data_frame(data)
-  assert_names(names(data), must.include = "delay")
+  assert_names(names(data), must.include = c("delay", "count", "pwindow"))
   assert_numeric(data$delay, lower = 0)
 }
 
