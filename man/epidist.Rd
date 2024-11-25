@@ -4,7 +4,14 @@
 \alias{epidist}
 \title{Fit epidemiological delay distributions using a \code{brms} interface}
 \usage{
-epidist(data, formula, family, prior, fn, ...)
+epidist(
+  data,
+  formula = mu ~ 1,
+  family = lognormal(),
+  prior = NULL,
+  fn = brms::brm,
+  ...
+)
 }
 \arguments{
 \item{data}{An object with class corresponding to an implemented model.}
@@ -36,9 +43,5 @@ These two later options may be useful for model debugging and extensions.}
 }
 \description{
 Fit epidemiological delay distributions using a \code{brms} interface
-}
-\seealso{
-Other fit: 
-\code{\link{epidist.default}()}
 }
 \concept{fit}
