@@ -54,7 +54,8 @@
 #' @param warn If `TRUE` then a warning will be displayed if a `new_prior` is
 #' provided for which there is no matching `old_prior`. Defaults to `FALSE`
 #' @autoglobal
-#' @importFrom dplyr full_join filter select
+#' @importFrom dplyr full_join filter select mutate
+#' @importFrom brms as.brmsprior
 #' @keywords internal
 .replace_prior <- function(old_prior, prior, warn = FALSE) {
   if (is.null(prior)) {
@@ -82,11 +83,17 @@
     }
   }
 
+  # Keep all rows but use new prior where available, otherwise keep old prior
   prior <- prior |>
-    filter(!is.na(.data$prior_old), !is.na(.data$prior_new)) |>
-    select(prior = prior_new, dplyr::all_of(cols), source = source_new)
+    mutate(prior = ifelse(
+      !is.na(.data$prior_new), .data$prior_new, .data$prior_old
+    )) |>
+    mutate(source = ifelse(
+      !is.na(.data$prior_new), .data$source_new, .data$source_old
+    )) |>
+    select(prior, dplyr::all_of(cols), source)
 
-  return(prior)
+  return(as.brmsprior(prior))
 }
 
 #' Additional distributional parameter information for `brms` families

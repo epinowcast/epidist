@@ -28,7 +28,7 @@ as_epidist_latent_model.epidist_linelist_data <- function(data) {
       woverlap = as.numeric(.data$stime_lwr < .data$ptime_upr),
       swindow = .data$stime_upr - .data$stime_lwr,
       delay = .data$stime_lwr - .data$ptime_lwr,
-      .row_id = dplyr::row_number()
+      .row_id = as.character(dplyr::row_number())
     )
   data <- new_epidist_latent_model(data)
   assert_epidist(data)
@@ -57,6 +57,7 @@ is_epidist_latent_model <- function(data) {
 
 #' @method assert_epidist epidist_latent_model
 #' @family latent_model
+#' @importFrom checkmate assert_names assert_numeric assert_character
 #' @export
 assert_epidist.epidist_latent_model <- function(data, ...) {
   col_names <- c(
@@ -69,6 +70,7 @@ assert_epidist.epidist_latent_model <- function(data, ...) {
   assert_numeric(data$woverlap, lower = 0)
   assert_numeric(data$swindow, lower = 0)
   assert_numeric(data$delay, lower = 0)
+  assert_character(data$.row_id)
 }
 
 #' Create the model-specific component of an `epidist` custom family
@@ -177,13 +179,13 @@ epidist_formula_model.epidist_latent_model <- function(
   # Check if pwindow needs updating
   if (!("pwindow" %in% fixed_dpars) ||
     identical(formula_dpars$pwindow, as.formula("pwindow ~ 1"))) {
-    formula$pforms$pwindow <- as.formula("pwindow ~ 0 + as.factor(.row_id)")
+    formula$pforms$pwindow <- as.formula("pwindow ~ 0 + .row_id")
   }
 
   # Check if swindow needs updating
   if (!("swindow" %in% fixed_dpars) ||
     identical(formula_dpars$swindow, as.formula("swindow ~ 1"))) {
-    formula$pforms$swindow <- as.formula("swindow ~ 0 + as.factor(.row_id)")
+    formula$pforms$swindow <- as.formula("swindow ~ 0 + .row_id")
   }
   return(formula)
 }
@@ -255,7 +257,7 @@ epidist_stancode.epidist_latent_model <- function(
     stanvar(
       block = "data",
       scode = "array[wN] int woverlap;",
-      x = filter(data, woverlap > 0)$.row_id,
+      x = as.integer(filter(data, woverlap > 0)$.row_id),
       name = "woverlap"
     )
 

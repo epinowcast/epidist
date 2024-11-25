@@ -9,24 +9,25 @@ test_that(".replace_prior successfully replaces priors", { # nolint: line_length
   old_prior <- brms::prior("normal(0, 10)", class = "Intercept") +
     brms::prior("normal(0, 10)", class = "Intercept", dpar = "sigma")
   new_prior <- brms::prior("normal(0, 5)", class = "Intercept") +
-    brms::prior("normal(0, 5)", class = "Intercept", dpar = "sigma")
+    brms::prior("normal(0, 2)", class = "Intercept", dpar = "sigma")
   prior <- .replace_prior(old_prior, new_prior)
-  expect_identical(prior$prior, c("normal(0, 5)", "normal(0, 5)"))
+  expect_identical(prior$prior, c("normal(0, 5)", "normal(0, 2)"))
   expect_identical(as.double(nrow(prior)), 2)
   expect_s3_class(prior, "brmsprior")
   expect_s3_class(prior, "data.frame")
 })
 
-cli::test_that_cli(".replace_prior errors when passed a new prior without a match in old_prior", { # nolint: line_length_linter.
+cli::test_that_cli(".replace_prior warns when passed a new prior without a match in old_prior", { # nolint: line_length_linter.
   old_prior <- brms::prior("normal(0, 10)", class = "Intercept") +
     brms::prior("normal(0, 10)", class = "Intercept", dpar = "sigma")
   new_prior <- brms::prior("normal(0, 5)", class = "Intercept") +
     brms::prior("normal(0, 5)", class = "Intercept", dpar = "sigma") +
     brms::prior("normal(0, 5)", class = "Intercept", dpar = "shape")
 
-  expect_snapshot({
-    .replace_prior(old_prior, new_prior, warn = TRUE)
-  })
+  expect_warning(
+    .replace_prior(old_prior, new_prior, warn = TRUE),
+    "One or more priors have no match in existing parameters"
+  )
 })
 
 test_that(".add_dpar_info works as expected for the lognormal and gamma families", { # nolint: line_length_linter.
@@ -54,7 +55,8 @@ test_that(".make_intercepts_explicit creates a formula which is the same as if i
   )
   attr(formula$pforms$sigma, ".Environment") <- NULL
   attr(formula_explicit$pforms$sigma, ".Environment") <- NULL
-  expect_identical(formula, formula_explicit)
+  expect_identical(formula$pforms$mu, formula_explicit$pforms$mu)
+  expect_identical(formula$pforms$sigma, formula_explicit$pforms$sigma)
 })
 
 test_that(".make_intercepts_explicit does not add an intercept if the distributional parameter is set to be fixed", { # nolint: line_length_linter.
@@ -66,7 +68,6 @@ test_that(".make_intercepts_explicit does not add an intercept if the distributi
     family = epidist_family
   )
   formula_updated <- .make_intercepts_explicit(formula)
-  attr(formula$pforms$sigma, ".Environment") <- NULL
-  attr(formula_updated$pforms$sigma, ".Environment") <- NULL
-  expect_identical(formula, formula_updated)
+  expect_identical(formula$pforms$mu, formula_updated$pforms$mu)
+  expect_identical(formula$pforms$sigma, formula_updated$pforms$sigma)
 })

@@ -1,37 +1,40 @@
-#' Define prior distributions using `brms` defaults, model specific priors,
-#' family specific priors, and user provided priors
+#' Define custom prior distributions for epidist models
 #'
-#' This function obtains the `brms` default prior distributions for a particular
-#' model, then replaces these prior distributions using:
-#' 1. Model specific prior distributions from [epidist_model_prior()]
-#' 2. Family specific prior distributions from [epidist_family_prior()]
-#' 3. User provided prior distributions
-#' Each element of this list overwrites previous elements, such that user
-#' provided prior distribution have the highest priority. At the third stage,
-#' if a prior distribution is provided which is not included in the model, then
-#' a warning will be shown. To prevent this warning, do not pass prior
-#' distributions for parameters which are not in the model.
+#' This function combines model specific prior distributions from
+#' [epidist_model_prior()], family specific prior distributions from
+#' [epidist_family_prior()], and user provided prior distributions into a single
+#' set of custom priors. Each element overwrites previous elements, such that
+#' user provided prior distributions have the highest priority. If a user prior
+#' distribution is provided which is not included in the model, a warning will
+#' be shown.
+#'
+#' Note that the matching of priors is imperfect as it does not use brms'
+#' internal prior matching functionality. For example, it cannot distinguish
+#' between a prior for all coefficients (class = "b") and a prior for a
+#' specific coefficient (class = "b" and coef specified).
 #'
 #' @inheritParams epidist
 #' @param family A description of the response distribution and link function to
 #' be used in the model created using [epidist_family()].
 #' @param formula A symbolic description of the model to be fitted created using
 #' [epidist_formula()].
+#' @return A `brmsprior` object containing the combined custom prior
+#' distributions.
 #' @rdname epidist_prior
 #' @family prior
 #' @export
 epidist_prior <- function(data, family, formula, prior) {
   assert_epidist(data)
-  default <- brms::default_prior(formula, data = data)
   model <- epidist_model_prior(data, formula)
+  if (!is.null(model)) {
+    model$source <- "model"
+  }
   family <- epidist_family_prior(family, formula)
   if (!is.null(family)) {
     family$source <- "family"
-    family[is.na(family)] <- "" # brms likes empty over NA
-    family[family == "NA"] <- NA # To keep particular NA
   }
-  internal_prior <- Reduce(.replace_prior, list(default, model, family))
-  prior <- .replace_prior(internal_prior, prior, warn = TRUE)
+  custom <- .replace_prior(family, model)
+  prior <- .replace_prior(custom, prior, warn = TRUE)
   return(prior)
 }
 
