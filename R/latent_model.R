@@ -183,14 +183,19 @@ epidist_formula_model.epidist_latent_model <- function(
 #' `swindow_raw` which control the width of the observation windows.
 #'
 #' @inheritParams epidist
+#' @importFrom brms set_prior
 #' @family latent_model
 #' @export
 epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
-  # priors <- c(
-  #   prior("uniform(0, 1)", class = "b", lb = 0, ub = 1, dpar = "pwindow"),
-  #   prior("uniform(0, 1)", class = "b", lb = 0, ub = 1, dpar = "swindow")
-  # )
-  return(NULL)
+  priors <- set_prior(
+    "target += N * uniform_lpdf(pwindow_raw | 0, 1);",
+    check = FALSE
+  ) +
+    set_prior(
+      "target += N * uniform_lpdf(swindow_raw | 0, 1);",
+      check = FALSE
+    )
+  return(priors)
 }
 
 #' @method epidist_stancode epidist_latent_model
@@ -257,17 +262,8 @@ epidist_stancode.epidist_latent_model <- function(
       scode = "vector<lower=0,upper=1>[N] swindow_raw;"
     )
 
-  stanvars_priors <- stanvar(
-    block = "model",
-    scode = "pwindow_raw ~ uniform(0, 1);"
-  ) +
-    stanvar(
-      block = "model",
-      scode = "swindow_raw ~ uniform(0, 1);"
-    )
-
   stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
-    stanvars_parameters + stanvars_priors
+    stanvars_parameters
 
   return(stanvars_all)
 }
