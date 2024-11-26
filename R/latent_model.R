@@ -85,12 +85,15 @@ epidist_family_model.epidist_latent_model <- function(
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
-    dpars = c(family$dpars, "pwindow", "swindow"),
-    links = c(family$link, family$other_links, "identity", "identity"),
-    lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb")), 0, 0),
-    ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub")), 1, 1),
+    dpars = c(family$dpar),
+    links = c(family$link, family$other_links),
+    lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
+    ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
     type = family$type,
-    vars = c("vreal1", "vreal2", "vreal3", "woverlap", "wN"),
+    vars = c(
+      "vreal1", "vreal2", "vreal3", "pwindow_raw", "swindow_raw",
+      "woverlap", "wN"
+    ),
     loop = FALSE,
     log_lik = epidist_gen_log_lik_latent(family),
     posterior_predict = epidist_gen_posterior_predict(family),
@@ -171,22 +174,6 @@ epidist_formula_model.epidist_latent_model <- function(
   formula <- stats::update(
     formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
   )
-
-  # Only update pwindow/swindow formulas if intercept only
-  fixed_dpars <- names(formula$pfix)
-  formula_dpars <- names(formula$pforms)
-
-  # Check if pwindow needs updating
-  if (!("pwindow" %in% fixed_dpars) ||
-    identical(formula_dpars$pwindow, as.formula("pwindow ~ 1"))) {
-    formula$pforms$pwindow <- as.formula("pwindow ~ 0 + .row_id")
-  }
-
-  # Check if swindow needs updating
-  if (!("swindow" %in% fixed_dpars) ||
-    identical(formula_dpars$swindow, as.formula("swindow ~ 1"))) {
-    formula$pforms$swindow <- as.formula("swindow ~ 0 + .row_id")
-  }
   return(formula)
 }
 
@@ -199,11 +186,11 @@ epidist_formula_model.epidist_latent_model <- function(
 #' @family latent_model
 #' @export
 epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
-  priors <- c(
-    prior("uniform(0, 1)", class = "b", lb = 0, ub = 1, dpar = "pwindow"),
-    prior("uniform(0, 1)", class = "b", lb = 0, ub = 1, dpar = "swindow")
-  )
-  return(priors)
+  # priors <- c(
+  #   prior("uniform(0, 1)", class = "b", lb = 0, ub = 1, dpar = "pwindow"),
+  #   prior("uniform(0, 1)", class = "b", lb = 0, ub = 1, dpar = "swindow")
+  # )
+  return(NULL)
 }
 
 #' @method epidist_stancode epidist_latent_model
@@ -261,7 +248,26 @@ epidist_stancode.epidist_latent_model <- function(
       name = "woverlap"
     )
 
-  stanvars_all <- stanvars_version + stanvars_functions + stanvars_data
+  stanvars_parameters <- stanvar(
+    block = "parameters",
+    scode = "vector<lower=0,upper=1>[N] pwindow_raw;"
+  ) +
+    stanvar(
+      block = "parameters",
+      scode = "vector<lower=0,upper=1>[N] swindow_raw;"
+    )
+
+  stanvars_priors <- stanvar(
+    block = "model",
+    scode = "pwindow_raw ~ uniform(0, 1);"
+  ) +
+    stanvar(
+      block = "model",
+      scode = "swindow_raw ~ uniform(0, 1);"
+    )
+
+  stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
+    stanvars_parameters + stanvars_priors
 
   return(stanvars_all)
 }
