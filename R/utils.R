@@ -81,6 +81,10 @@
     return(old_prior)
   }
 
+  if (is.null(old_prior)) {
+    return(prior)
+  }
+
   # Find priors defined with ~ in prior column
   tilde_priors <- prior[grepl("~", prior$prior, fix, fixed = TRUE), ]
   if (nrow(tilde_priors) > 0) {
@@ -101,38 +105,45 @@
   old_prior <- old_prior[!grepl("~", old_prior$prior, fixed = TRUE), ]
 
   cols <- c("class", "coef", "group", "resp", "dpar", "nlpar", "lb", "ub")
-  prior <- dplyr::full_join(
-    old_prior, prior,
-    by = cols, suffix = c("_old", "_new")
-  )
 
-  if (anyNA(prior$prior_old)) {
-    missing_prior <- utils::capture.output(print(
-      prior |>
-        filter(is.na(.data$prior_old)) |>
-        select(prior = prior_new, dplyr::all_of(cols), source = source_new)
-    ))
-    if (warn) {
-      msg <- c(
-        "!" = "One or more priors have no match in existing parameters:",
-        missing_prior,
-        "i" = "To remove this warning consider changing prior specification." # nolint
-      )
-      cli_warn(message = msg)
+  if (nrow(prior) == 0 && nrow(old_prior) == 0) {
+    # If no non-manual priors found, just combine manual priors
+    cli::cli_inform("No non-manual priors found, only combining manual priors")
+    prior <- bind_rows(hold_prior, hold_prior_old)
+  } else {
+    prior <- dplyr::full_join(
+      old_prior, prior,
+      by = cols, suffix = c("_old", "_new")
+    )
+
+    if (anyNA(prior$prior_old)) {
+      missing_prior <- utils::capture.output(print(
+        prior |>
+          filter(is.na(.data$prior_old)) |>
+          select(prior = prior_new, dplyr::all_of(cols), source = source_new)
+      ))
+      if (warn) {
+        msg <- c(
+          "!" = "One or more priors have no match in existing parameters:",
+          missing_prior,
+          "i" = "To remove this warning consider changing prior specification." # nolint
+        )
+        cli_warn(message = msg)
+      }
     }
+
+    # Keep all rows but use new prior where available, otherwise keep old prior
+    prior <- prior |>
+      mutate(prior = ifelse(
+        !is.na(.data$prior_new), .data$prior_new, .data$prior_old
+      )) |>
+      mutate(source = ifelse(
+        !is.na(.data$prior_new), .data$source_new, .data$source_old
+      )) |>
+      select(prior, dplyr::all_of(cols), source)
+
+    prior <- bind_rows(prior, hold_prior, hold_prior_old)
   }
-
-  # Keep all rows but use new prior where available, otherwise keep old prior
-  prior <- prior |>
-    mutate(prior = ifelse(
-      !is.na(.data$prior_new), .data$prior_new, .data$prior_old
-    )) |>
-    mutate(source = ifelse(
-      !is.na(.data$prior_new), .data$source_new, .data$source_old
-    )) |>
-    select(prior, dplyr::all_of(cols), source)
-
-  prior <- bind_rows(prior, hold_prior, hold_prior_old)
   return(as.brmsprior(prior))
 }
 

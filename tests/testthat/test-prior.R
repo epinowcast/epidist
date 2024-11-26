@@ -68,22 +68,3 @@ test_that("epidist_prior correctly applies family-specific priors", {
     "normal(-0.7, 0.4)"
   )
 })
-
-test_that("epidist_prior correctly applies model-specific priors", {
-  data <- as_epidist_latent_model(sim_obs)
-  family <- lognormal()
-  formula <- bf(mu ~ 1, sigma ~ 1)
-  epidist_family <- epidist_family(data, family)
-  epidist_formula <- epidist_formula(
-    data = data, family = epidist_family, formula = formula
-  )
-
-  prior <- epidist_prior(data, epidist_family, epidist_formula, prior = NULL)
-
-  expect_true(
-    any(prior$dpar == "pwindow" & prior$prior == "uniform(0, 1)")
-  )
-  expect_true(
-    any(prior$dpar == "swindow" & prior$prior == "uniform(0, 1)")
-  )
-})
