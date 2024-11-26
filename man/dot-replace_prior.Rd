@@ -4,20 +4,39 @@
 \alias{.replace_prior}
 \title{Replace \code{brms} prior distributions}
 \usage{
-.replace_prior(old_prior, prior, warn = FALSE)
+.replace_prior(old_prior, prior, warn = FALSE, merge = TRUE)
 }
 \arguments{
-\item{old_prior}{One or more prior distributions in the class \code{brmsprior}}
+\item{old_prior}{One or more prior distributions in the class \code{brmsprior} to
+be updated}
 
-\item{prior}{One or more prior distributions in the class \code{brmsprior}}
+\item{prior}{One or more prior distributions in the class \code{brmsprior}
+containing the new specifications. Can include custom set priors using the
+syntax \code{parameter ~ distribution}}
 
-\item{warn}{If \code{TRUE} then a warning will be displayed if a \code{new_prior} is
-provided for which there is no matching \code{old_prior}. Defaults to \code{FALSE}}
+\item{warn}{If \code{TRUE} then a warning will be displayed if a prior in \code{prior}
+has no match in \code{old_prior}. Defaults to \code{FALSE}}
+
+\item{merge}{If \code{TRUE} then merge new priors with existing ones, if \code{FALSE}
+only use new priors. Defaults to \code{TRUE}}
 }
 \description{
-This function takes \code{old_prior} and replaces any prior distributions
-contained in it by the corresponding prior distribution in \code{prior}. If there
-is a prior distribution in \code{prior} with no match in \code{old_prior} then this
-function can optionally give a warning.
+This function takes an existing set of prior distributions and updates them
+with new prior specifications. It matches priors based on their parameter
+class, coefficient, group, response, distributional parameter, and non-linear
+parameter. Any new priors that don't match existing ones can optionally
+trigger a warning.
+}
+\details{
+Prior distributions can be specified in two ways:
+\enumerate{
+\item Using the standard \code{brms} prior specification format which will update
+matching priors based on parameter metadata. These priors are joined based
+on matching parameter metadata.
+\item Using custom set priors with the syntax \code{parameter ~ distribution}. These
+will only remove existing custom priors for the same parameter name but
+will not affect priors set via the standard \code{brms} specification format.
+Custom priors are excluded from the metadata-based joining process.
+}
 }
 \keyword{internal}

@@ -187,12 +187,14 @@ epidist_formula_model.epidist_latent_model <- function(
 #' @family latent_model
 #' @export
 epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
-  priors <- set_prior(
+  priors <- prior(
     "pwindow_raw ~ uniform(0, 1);",
+    dpar = "pwindow_raw",
     check = FALSE
   ) +
-    set_prior(
+    prior(
       "swindow_raw ~ uniform(0, 1);",
+      dpar = "swindow_raw",
       check = FALSE
     )
   return(priors)

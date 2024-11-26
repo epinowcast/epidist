@@ -30,6 +30,33 @@ cli::test_that_cli(".replace_prior warns when passed a new prior without a match
   )
 })
 
+test_that(".replace_prior handles custom ~ priors correctly", {
+  # Create old priors with mix of standard and ~ syntax
+  old_prior <- brms::prior("mu ~ normal(0, 10)", check = FALSE) +
+    brms::prior("normal(0, 10)", dpar = "sigma") +
+    brms::prior("beta ~ normal(0, 1)", check = FALSE)
+
+  # Create new priors with ~ syntax
+  new_prior <- brms::prior("mu ~ normal(0, 5)", check = FALSE) +
+    brms::prior("gamma ~ normal(0, 2)", check = FALSE)
+
+  # Test that only old priors with matching ~ parameter names are removed
+  prior <- .replace_prior(old_prior, new_prior)
+
+  # Should keep sigma prior, replace mu prior, remove beta prior, add gamma
+  # prior
+  expect_identical(
+    prior$prior,
+    c(
+      "normal(0, 10)", "mu ~ normal(0, 5)", "gamma ~ normal(0, 2)",
+      "beta ~ normal(0, 1)"
+    )
+  )
+  expect_identical(as.double(nrow(prior)), 4)
+  expect_s3_class(prior, "brmsprior")
+  expect_s3_class(prior, "data.frame")
+})
+
 test_that(".add_dpar_info works as expected for the lognormal and gamma families", { # nolint: line_length_linter.
   lognormal_extra <- .add_dpar_info(lognormal())
   expect_identical(lognormal_extra$other_links, "log")

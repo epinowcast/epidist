@@ -4,7 +4,7 @@
 \alias{epidist_prior}
 \title{Define custom prior distributions for epidist models}
 \usage{
-epidist_prior(data, family, formula, prior)
+epidist_prior(data, family, formula, prior, merge = TRUE)
 }
 \arguments{
 \item{data}{An object with class corresponding to an implemented model.}
@@ -18,6 +18,11 @@ be used in the model created using \code{\link[=epidist_family]{epidist_family()
 \item{prior}{One or more \code{brmsprior} objects created by \code{\link[brms:set_prior]{brms::set_prior()}}
 or related functions. These priors are passed to \code{\link[=epidist_prior]{epidist_prior()}} in the
 \code{prior} argument.}
+
+\item{merge}{If \code{TRUE} then merge new priors with existing ones, if \code{FALSE}
+only use new priors. Defaults to \code{TRUE}. This may be useful if the built in
+approaches for merging priors are not flexible enough for a particular use
+case.}
 }
 \value{
 A \code{brmsprior} object containing the combined custom prior

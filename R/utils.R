@@ -44,23 +44,62 @@
 
 #' Replace `brms` prior distributions
 #'
-#' This function takes `old_prior` and replaces any prior distributions
-#' contained in it by the corresponding prior distribution in `prior`. If there
-#' is a prior distribution in `prior` with no match in `old_prior` then this
-#' function can optionally give a warning.
+#' This function takes an existing set of prior distributions and updates them
+#' with new prior specifications. It matches priors based on their parameter
+#' class, coefficient, group, response, distributional parameter, and non-linear
+#' parameter. Any new priors that don't match existing ones can optionally
+#' trigger a warning.
 #'
-#' @param old_prior One or more prior distributions in the class `brmsprior`
+#' Prior distributions can be specified in two ways:
+#' 1. Using the standard `brms` prior specification format which will update
+#'    matching priors based on parameter metadata. These priors are joined based
+#'    on matching parameter metadata.
+#' 2. Using custom set priors with the syntax `parameter ~ distribution`. These
+#'    will only remove existing custom priors for the same parameter name but
+#'    will not affect priors set via the standard `brms` specification format.
+#'    Custom priors are excluded from the metadata-based joining process.
+#'
+#' @param old_prior One or more prior distributions in the class `brmsprior` to
+#'   be updated
 #' @param prior One or more prior distributions in the class `brmsprior`
-#' @param warn If `TRUE` then a warning will be displayed if a `new_prior` is
-#' provided for which there is no matching `old_prior`. Defaults to `FALSE`
+#'   containing the new specifications. Can include custom set priors using the
+#'   syntax `parameter ~ distribution`
+#' @param warn If `TRUE` then a warning will be displayed if a prior in `prior`
+#'   has no match in `old_prior`. Defaults to `FALSE`
+#' @param merge If `TRUE` then merge new priors with existing ones, if `FALSE`
+#'   only use new priors. Defaults to `TRUE`
 #' @autoglobal
-#' @importFrom dplyr full_join filter select mutate
+#' @importFrom dplyr full_join filter select mutate bind_rows
 #' @importFrom brms as.brmsprior
 #' @keywords internal
-.replace_prior <- function(old_prior, prior, warn = FALSE) {
+.replace_prior <- function(old_prior, prior, warn = FALSE, merge = TRUE) {
+  if (!isTRUE(merge)) {
+    return(prior)
+  }
+
   if (is.null(prior)) {
     return(old_prior)
   }
+
+  # Find priors defined with ~ in prior column
+  tilde_priors <- prior[grepl("~", prior$prior, fix, fixed = TRUE), ]
+  if (nrow(tilde_priors) > 0) {
+    # Extract parameter names from left side of ~
+    param_names <- gsub("\\s*~.*$", "", tilde_priors$prior)
+
+    # Remove matching parameter priors from old_prior
+    old_prior <- old_prior[
+      !grepl(paste(param_names, collapse = "|"), old_prior$prior),
+    ]
+  }
+
+  # Hold out manual priors
+  hold_prior <- prior[grepl("~", prior$prior, fixed = TRUE), ]
+  hold_prior_old <- old_prior[grepl("~", old_prior$prior, fixed = TRUE), ]
+
+  prior <- prior[!grepl("~", prior$prior, fixed = TRUE), ]
+  old_prior <- old_prior[!grepl("~", old_prior$prior, fixed = TRUE), ]
+
   cols <- c("class", "coef", "group", "resp", "dpar", "nlpar", "lb", "ub")
   prior <- dplyr::full_join(
     old_prior, prior,
@@ -93,6 +132,7 @@
     )) |>
     select(prior, dplyr::all_of(cols), source)
 
+  prior <- bind_rows(prior, hold_prior, hold_prior_old)
   return(as.brmsprior(prior))
 }
 

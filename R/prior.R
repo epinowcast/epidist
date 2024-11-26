@@ -18,12 +18,16 @@
 #' be used in the model created using [epidist_family()].
 #' @param formula A symbolic description of the model to be fitted created using
 #' [epidist_formula()].
+#' @param merge If `TRUE` then merge new priors with existing ones, if `FALSE`
+#'   only use new priors. Defaults to `TRUE`. This may be useful if the built in
+#'   approaches for merging priors are not flexible enough for a particular use
+#'   case.
 #' @return A `brmsprior` object containing the combined custom prior
 #' distributions.
 #' @rdname epidist_prior
 #' @family prior
 #' @export
-epidist_prior <- function(data, family, formula, prior) {
+epidist_prior <- function(data, family, formula, prior, merge = TRUE) {
   assert_epidist(data)
   model <- epidist_model_prior(data, formula)
   if (!is.null(model)) {
@@ -33,8 +37,8 @@ epidist_prior <- function(data, family, formula, prior) {
   if (!is.null(family)) {
     family$source <- "family"
   }
-  custom <- .replace_prior(family, model)
-  prior <- .replace_prior(custom, prior, warn = TRUE)
+  custom <- .replace_prior(family, model, merge = TRUE)
+  prior <- .replace_prior(custom, prior, warn = TRUE, merge = merge)
   return(prior)
 }
 

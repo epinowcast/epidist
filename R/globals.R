@@ -4,6 +4,7 @@ utils::globalVariables(c(
   "samples", # <epidist_diagnostics>
   "woverlap", # <epidist_stancode.epidist_latent_model>
   "rlnorm", # <simulate_secondary>
+  "fix", # <.replace_prior>
   "prior_new", # <.replace_prior>
   "source_new", # <.replace_prior>
   NULL

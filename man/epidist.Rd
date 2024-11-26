@@ -9,6 +9,7 @@ epidist(
   formula = mu ~ 1,
   family = lognormal(),
   prior = NULL,
+  merge_priors = TRUE,
   fn = brms::brm,
   ...
 )
@@ -32,6 +33,11 @@ reexported as part of \code{epidist}.}
 \item{prior}{One or more \code{brmsprior} objects created by \code{\link[brms:set_prior]{brms::set_prior()}}
 or related functions. These priors are passed to \code{\link[=epidist_prior]{epidist_prior()}} in the
 \code{prior} argument.}
+
+\item{merge_priors}{If \code{TRUE} then merge new priors with existing ones, if
+\code{FALSE} only use new priors. Defaults to \code{TRUE}. This may be useful if
+the built in approaches for merging priors are not flexible enough for a
+particular use case.}
 
 \item{fn}{The internal function to be called. By default this is
 \code{\link[brms:brm]{brms::brm()}} which performs inference for the specified model. Other options
