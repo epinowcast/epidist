@@ -188,11 +188,11 @@ epidist_formula_model.epidist_latent_model <- function(
 #' @export
 epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
   priors <- set_prior(
-    "target += N * uniform_lpdf(pwindow_raw | 0, 1);",
+    "pwindow_raw ~ uniform(0, 1);",
     check = FALSE
   ) +
     set_prior(
-      "target += N * uniform_lpdf(swindow_raw | 0, 1);",
+      "swindow_raw ~ uniform(0, 1);",
       check = FALSE
     )
   return(priors)
