@@ -57,7 +57,7 @@ is_epidist_latent_model <- function(data) {
 
 #' @method assert_epidist epidist_latent_model
 #' @family latent_model
-#' @importFrom checkmate assert_names assert_numeric assert_character
+#' @importFrom checkmate assert_names assert_numeric assert_integerish
 #' @export
 assert_epidist.epidist_latent_model <- function(data, ...) {
   col_names <- c(
@@ -70,7 +70,7 @@ assert_epidist.epidist_latent_model <- function(data, ...) {
   assert_numeric(data$woverlap, lower = 0)
   assert_numeric(data$swindow, lower = 0)
   assert_numeric(data$delay, lower = 0)
-  assert_character(data$.row_id)
+  assert_integerish(data$.row_id, lower = 1)
 }
 
 #' Create the model-specific component of an `epidist` custom family

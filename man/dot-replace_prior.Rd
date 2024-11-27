@@ -4,7 +4,13 @@
 \alias{.replace_prior}
 \title{Replace \code{brms} prior distributions}
 \usage{
-.replace_prior(old_prior, prior, warn = FALSE, merge = TRUE)
+.replace_prior(
+  old_prior,
+  prior,
+  warn = FALSE,
+  merge = TRUE,
+  enforce_presence = TRUE
+)
 }
 \arguments{
 \item{old_prior}{One or more prior distributions in the class \code{brmsprior} to
@@ -19,6 +25,10 @@ has no match in \code{old_prior}. Defaults to \code{FALSE}}
 
 \item{merge}{If \code{TRUE} then merge new priors with existing ones, if \code{FALSE}
 only use new priors. Defaults to \code{TRUE}}
+
+\item{enforce_presence}{If \code{TRUE} then only keep rows that have both old and
+new priors. If \code{FALSE} then keep all rows but use new priors where
+available, otherwise keep old priors. Defaults to \code{TRUE}}
 }
 \description{
 This function takes an existing set of prior distributions and updates them
@@ -30,9 +40,9 @@ trigger a warning.
 \details{
 Prior distributions can be specified in two ways:
 \enumerate{
-\item Using the standard \code{brms} prior specification format which will update
-matching priors based on parameter metadata. These priors are joined based
-on matching parameter metadata.
+\item Using the standard \code{brms} prior specification format. These priors are
+replaced based on matching parameter metadata (class, coefficient, group,
+etc.).
 \item Using custom set priors with the syntax \code{parameter ~ distribution}. These
 will only remove existing custom priors for the same parameter name but
 will not affect priors set via the standard \code{brms} specification format.

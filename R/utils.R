@@ -51,9 +51,9 @@
 #' trigger a warning.
 #'
 #' Prior distributions can be specified in two ways:
-#' 1. Using the standard `brms` prior specification format which will update
-#'    matching priors based on parameter metadata. These priors are joined based
-#'    on matching parameter metadata.
+#' 1. Using the standard `brms` prior specification format. These priors are
+#'    replaced based on matching parameter metadata (class, coefficient, group,
+#'    etc.).
 #' 2. Using custom set priors with the syntax `parameter ~ distribution`. These
 #'    will only remove existing custom priors for the same parameter name but
 #'    will not affect priors set via the standard `brms` specification format.
@@ -68,11 +68,15 @@
 #'   has no match in `old_prior`. Defaults to `FALSE`
 #' @param merge If `TRUE` then merge new priors with existing ones, if `FALSE`
 #'   only use new priors. Defaults to `TRUE`
+#' @param enforce_presence If `TRUE` then only keep rows that have both old and
+#'   new priors. If `FALSE` then keep all rows but use new priors where
+#'   available, otherwise keep old priors. Defaults to `TRUE`
 #' @autoglobal
 #' @importFrom dplyr full_join filter select mutate bind_rows
 #' @importFrom brms as.brmsprior
 #' @keywords internal
-.replace_prior <- function(old_prior, prior, warn = FALSE, merge = TRUE) {
+.replace_prior <- function(old_prior, prior, warn = FALSE, merge = TRUE,
+                           enforce_presence = TRUE) {
   if (!isTRUE(merge)) {
     return(prior)
   }
@@ -132,16 +136,21 @@
       }
     }
 
-    # Keep all rows but use new prior where available, otherwise keep old prior
-    prior <- prior |>
-      mutate(prior = ifelse(
-        !is.na(.data$prior_new), .data$prior_new, .data$prior_old
-      )) |>
-      mutate(source = ifelse(
-        !is.na(.data$prior_new), .data$source_new, .data$source_old
-      )) |>
-      select(prior, dplyr::all_of(cols), source)
-
+    # only keep rows that have both old and new priors
+    if (enforce_presence) {
+      prior <- prior |>
+        filter(!is.na(.data$prior_old), !is.na(.data$prior_new)) |>
+        select(prior = prior_new, dplyr::all_of(cols), source = source_new)
+    } else {
+      prior <- prior |>
+        mutate(prior = ifelse(
+          !is.na(.data$prior_new), .data$prior_new, .data$prior_old
+        )) |>
+        mutate(source = ifelse(
+          !is.na(.data$prior_new), .data$source_new, .data$source_old
+        )) |>
+        select(prior, dplyr::all_of(cols), source)
+    }
     prior <- bind_rows(prior, hold_prior, hold_prior_old)
   }
   return(as.brmsprior(prior))

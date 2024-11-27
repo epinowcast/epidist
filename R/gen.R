@@ -38,7 +38,6 @@ epidist_gen_log_lik <- function(family) {
     # 1 here is equivalent  to right censored in brms
     prep$data$cens <- -1
 
-
     # Calculate density for each draw using primarycensored::dpcens()
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
       # Define pdist function that filters to current draw

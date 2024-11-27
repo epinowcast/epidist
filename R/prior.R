@@ -22,13 +22,18 @@
 #'   only use new priors. Defaults to `TRUE`. This may be useful if the built in
 #'   approaches for merging priors are not flexible enough for a particular use
 #'   case.
+#' @param enforce_presence If `TRUE` then only allow user priors that match
+#'   existing default priors. If `FALSE` then allow user priors that are not
+#'   present in the default set. Defaults to `FALSE`.
 #' @return A `brmsprior` object containing the combined custom prior
 #' distributions.
 #' @rdname epidist_prior
 #' @family prior
 #' @export
-epidist_prior <- function(data, family, formula, prior, merge = TRUE) {
+epidist_prior <- function(data, family, formula, prior, merge = TRUE,
+                          enforce_presence = FALSE) {
   assert_epidist(data)
+  default <- brms::default_prior(formula, data = data)
   model <- epidist_model_prior(data, formula)
   if (!is.null(model)) {
     model$source <- "model"
@@ -37,8 +42,13 @@ epidist_prior <- function(data, family, formula, prior, merge = TRUE) {
   if (!is.null(family)) {
     family$source <- "family"
   }
-  custom <- .replace_prior(family, model, merge = TRUE)
-  prior <- .replace_prior(custom, prior, warn = TRUE, merge = merge)
+  internal <- .replace_prior(default, c(family, model), merge = TRUE)
+  prior <- .replace_prior(
+    internal, prior,
+    warn = TRUE, merge = merge,
+    enforce_presence = enforce_presence
+  )
+
   return(prior)
 }
 

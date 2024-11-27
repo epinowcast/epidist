@@ -4,7 +4,14 @@
 \alias{epidist_prior}
 \title{Define custom prior distributions for epidist models}
 \usage{
-epidist_prior(data, family, formula, prior, merge = TRUE)
+epidist_prior(
+  data,
+  family,
+  formula,
+  prior,
+  merge = TRUE,
+  enforce_presence = FALSE
+)
 }
 \arguments{
 \item{data}{An object with class corresponding to an implemented model.}
@@ -23,6 +30,10 @@ or related functions. These priors are passed to \code{\link[=epidist_prior]{epi
 only use new priors. Defaults to \code{TRUE}. This may be useful if the built in
 approaches for merging priors are not flexible enough for a particular use
 case.}
+
+\item{enforce_presence}{If \code{TRUE} then only allow user priors that match
+existing default priors. If \code{FALSE} then allow user priors that are not
+present in the default set. Defaults to \code{FALSE}.}
 }
 \value{
 A \code{brmsprior} object containing the combined custom prior
