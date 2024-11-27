@@ -42,7 +42,11 @@ epidist_prior <- function(data, family, formula, prior, merge = TRUE,
   if (!is.null(family)) {
     family$source <- "family"
   }
-  internal <- .replace_prior(default, c(family, model), merge = TRUE)
+  custom <- .replace_prior(
+    family, model,
+    merge = TRUE, enforce_presence = FALSE
+  )
+  internal <- .replace_prior(default, custom, merge = TRUE)
   prior <- .replace_prior(
     internal, prior,
     warn = TRUE, merge = merge,
