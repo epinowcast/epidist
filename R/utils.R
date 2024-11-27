@@ -108,7 +108,8 @@
   prior <- prior[!grepl("~", prior$prior, fixed = TRUE), ]
   old_prior <- old_prior[!grepl("~", old_prior$prior, fixed = TRUE), ]
 
-  cols <- c("class", "coef", "group", "resp", "dpar", "nlpar", "lb", "ub")
+  join_cols <- c("class", "coef", "group", "resp", "dpar", "nlpar")
+  cols <- c(join_cols, "lb", "ub")
 
   if (nrow(prior) == 0 && nrow(old_prior) == 0) {
     # If no non-manual priors found, just combine manual priors
@@ -117,14 +118,14 @@
   } else {
     prior <- dplyr::full_join(
       old_prior, prior,
-      by = cols, suffix = c("_old", "_new")
+      by = join_cols, suffix = c("_old", "_new")
     )
 
     if (anyNA(prior$prior_old)) {
       missing_prior <- utils::capture.output(print(
         prior |>
           filter(is.na(.data$prior_old)) |>
-          select(prior = prior_new, dplyr::all_of(cols), source = source_new)
+          as.data.frame()
       ))
       if (warn) {
         msg <- c(
@@ -136,8 +137,15 @@
       }
     }
 
+    # use new lb and ub if prior_new is present
+    prior <- prior |>
+      mutate(
+        lb = ifelse(!is.na(.data$prior_new), .data$lb_new, .data$lb_old),
+        ub = ifelse(!is.na(.data$prior_new), .data$ub_new, .data$ub_old)
+      )
+
     # only keep rows that have both old and new priors
-    if (enforce_presence) {
+    if (isTRUE(enforce_presence)) {
       prior <- prior |>
         filter(!is.na(.data$prior_old), !is.na(.data$prior_new)) |>
         select(prior = prior_new, dplyr::all_of(cols), source = source_new)
@@ -151,6 +159,7 @@
         )) |>
         select(prior, dplyr::all_of(cols), source)
     }
+
     prior <- bind_rows(prior, hold_prior, hold_prior_old)
   }
   return(as.brmsprior(prior))
