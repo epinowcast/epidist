@@ -78,8 +78,11 @@ epidist_family_param <- function(family, ...) {
 #' @importFrom cli cli_abort
 #' @export
 epidist_family_param.default <- function(family, ...) {
+  df <- data.frame(y = c(1, 2))
+  dummy_mdl <- make_stancode(y ~ 1, data = df, family = class(family)[1])
+
+  # get the lowered family name
   family_name <- tolower(class(family)[1])
-  dummy_mdl <- make_stancode(mpg ~ 1, data = mtcars, family = class(family)[1])
 
   # Extract the Stan parameterisation from the dummy model code
   lpdf_pattern <- paste0(
