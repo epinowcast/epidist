@@ -85,7 +85,7 @@ epidist_family_model.epidist_latent_model <- function(
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
-    dpars = c(family$dpar),
+    dpars = family$dpars,
     links = c(family$link, family$other_links),
     lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
     ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
