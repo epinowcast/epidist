@@ -5,6 +5,12 @@ Development version of `epidist`.
 ## Package
 
 - Remove the default method for `epidist()`. See #473.
+- Added `enforce_presence` argument to `epidist_prior()` to allow for priors to be
+  specified if they do not match existing parameters.
+- Added a `merge` argument to `epidist_prior()` to allow for not merging user and package priors
+- Added user settable primary event priors to the latent model
+- Added a marginalised likelihood to the latent model
+- Generalised the stan reparametrisation feature to work across all distributions without manual specification by generating stan code with `brms` and then extracting the reparameterisation.
 
 ## Documentation
 
