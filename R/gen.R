@@ -23,21 +23,10 @@
 #'
 #' @family gen
 #' @autoglobal
-#' @importFrom cli cli_warn
+#' @importFrom purrr map_dbl
 epidist_gen_log_lik <- function(family) {
   # Get internal brms log_lik function
   log_lik_brms <- .get_brms_fn("log_lik", family)
-
-  pdist <- function(q, i, prep, ...) {
-    # Check and warn if lower bound is set
-    if (!is.null(prep$data$lb)) {
-      cli_warn("Lower bound should not be set for model likelihood")
-      prep$data$lb <- NULL
-    }
-    # Set upper bound for CDF calculation
-    prep$data$ub <- rep(q, length(prep$data$Y))
-    exp(log_lik_brms(i, prep))
-  }
 
   .log_lik <- function(i, prep) {
     y <- prep$data$Y[i]
@@ -45,19 +34,35 @@ epidist_gen_log_lik <- function(family) {
     pwindow <- prep$data$vreal2[i]
     swindow <- prep$data$vreal3[i]
 
-    # Calculate density using primarycensored::dpcens()
-    lpdf <- primarycensored::dpcens(
-      x = y,
-      pdist = pdist,
-      i = i,
-      prep = prep,
-      pwindow = pwindow,
-      swindow = swindow,
-      D = relative_obs_time,
-      dprimary = stats::dunif,
-      log = TRUE
-    )
+    # make the prep object censored
+    # 1 here is equivalent  to right censored in brms
+    prep$data$cens <- -1
 
+
+    # Calculate density for each draw using primarycensored::dpcens()
+    lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
+      # Define pdist function that filters to current draw
+      pdist_draw <- function(q, i, prep, ...) {
+        purrr::map_dbl(q, function(x) {
+          prep$data$Y <- rep(x, length(prep$data$Y))
+          ll <- exp(log_lik_brms(i, prep)[draw])
+          return(ll)
+        })
+      }
+
+      primarycensored::dpcens(
+        x = y,
+        pdist = pdist_draw,
+        i = i,
+        prep = prep,
+        pwindow = pwindow,
+        swindow = swindow,
+        D = relative_obs_time,
+        dprimary = stats::dunif,
+        log = TRUE
+      )
+    })
+    lpdf <- brms:::log_lik_weight(lpdf, i = i, prep = prep) # nolint
     return(lpdf)
   }
 
