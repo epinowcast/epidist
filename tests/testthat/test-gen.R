@@ -130,6 +130,7 @@ test_that("epidist_gen_log_lik returns a function that produces valid log likeli
 
   # Test gamma
   prep_gamma <- brms::prepare_predictions(fit_gamma)
+  prep$ndraws <- 10
   log_lik_fn_gamma <- epidist_gen_log_lik(Gamma())
   log_lik_gamma <- log_lik_fn_gamma(i = i, prep_gamma)
   expect_length(log_lik_gamma, prep_gamma$ndraws)
