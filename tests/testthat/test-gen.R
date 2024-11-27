@@ -120,6 +120,7 @@ test_that("epidist_gen_log_lik returns a function that produces valid log likeli
   skip_on_cran()
   # Test lognormal
   prep <- brms::prepare_predictions(fit)
+  prep$ndraws <- 10
   i <- 1
   log_lik_fn <- epidist_gen_log_lik(lognormal())
   log_lik <- log_lik_fn(i = i, prep)

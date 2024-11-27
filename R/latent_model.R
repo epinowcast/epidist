@@ -28,7 +28,7 @@ as_epidist_latent_model.epidist_linelist_data <- function(data) {
       woverlap = as.numeric(.data$stime_lwr < .data$ptime_upr),
       swindow = .data$stime_upr - .data$stime_lwr,
       delay = .data$stime_lwr - .data$ptime_lwr,
-      .row_id = as.character(dplyr::row_number())
+      .row_id = dplyr::row_number()
     )
   data <- new_epidist_latent_model(data)
   assert_epidist(data)
