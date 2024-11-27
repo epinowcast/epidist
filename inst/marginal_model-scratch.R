@@ -18,21 +18,29 @@ sim_obs <- simulate_gillespie() |>
     meanlog = meanlog,
     sdlog = sdlog
   ) |>
-  observe_process() |>
+  mutate(
+    ptime_lwr = floor(.data$ptime),
+    ptime_upr = .data$ptime_lwr + 1,
+    stime_lwr = floor(.data$stime),
+    stime_upr = .data$stime_lwr + 1,
+    obs_time = obs_time,
+    delay = stime_lwr - ptime_lwr
+  ) |>
+  filter(.data$stime_upr <= .data$obs_time) |>
   filter(.data$stime_upr <= obs_time) |>
   dplyr::slice_sample(n = sample_size, replace = FALSE)
 
 # Create cohort version of data
 
 cohort_obs <- sim_obs |>
-  group_by(delay = delay_daily) |>
+  group_by(delay) |>
   summarise(n = n())
 
 ggplot(cohort_obs, aes(x = delay, y = n)) +
   geom_col()
 
 fit_direct <- brms::brm(
-  formula = delay_daily ~ 1,
+  formula = delay ~ 1,
   family = "lognormal",
   data = sim_obs
 )
@@ -50,7 +58,7 @@ summary(fit_direct_weighted)
 lognormal <- brms::lognormal()
 
 primarycensored_family <- brms::custom_family(
-  "primarycensored_wrapper",
+  "marginal_lognormal",
   dpars = lognormal$dpar,
   links = c(lognormal$link, lognormal$link_sigma),
   type = "int",
@@ -72,13 +80,34 @@ stanvars_functions <- brms::stanvar(
   scode = .stan_chunk(file.path("marginal_model", "functions.stan"))
 )
 
-# pwindow <- data$pwindow
-#
-# stanvars_data <- brms::stanvar(
-#   x = pwindow,
-#   block = "data",
-#   scode = .stan_chunk("marginal_model/data.stan")
-# )
+
+stanvars_functions[[1]]$scode <- gsub(
+  "family", "lognormal", stanvars_functions[[1]]$scode,
+  fixed = TRUE
+)
+
+stanvars_functions[[1]]$scode <- gsub(
+  "input_dist_id", 1, stanvars_functions[[1]]$scode,
+  fixed = TRUE
+)
+
+stanvars_functions[[1]]$scode <- gsub(
+  "dpars_A", "real mu, real sigma",
+  stanvars_functions[[1]]$scode,
+  fixed = TRUE
+)
+
+stanvars_functions[[1]]$scode <- gsub(
+  "dpars_1", "mu",
+  stanvars_functions[[1]]$scode,
+  fixed = TRUE
+)
+
+stanvars_functions[[1]]$scode <- gsub(
+  "dpars_2", "sigma",
+  stanvars_functions[[1]]$scode,
+  fixed = TRUE
+)
 
 stanvars_all <- pcd_stanvars_functions + stanvars_functions
 
