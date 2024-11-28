@@ -14,9 +14,11 @@
 #' reexported as part of `epidist`.
 #' @param prior One or more `brmsprior` objects created by [brms::set_prior()]
 #' or related functions. These priors are passed to [epidist_prior()] in the
-#' `prior` argument.
-#' @param merge_priors If `TRUE` then merge new priors with existing ones, if
-#' `FALSE` only use new priors. Defaults to `TRUE`. This may be useful if
+#' `prior` argument. Some models have default priors that are automatically
+#' added (see [epidist_model_prior()]). These can be merged with user-provided
+#' priors using the `merge_priors` argument.
+#' @param merge_priors If `TRUE` then merge user priors with default priors, if
+#' `FALSE` only use user priors. Defaults to `TRUE`. This may be useful if
 #' the built in approaches for merging priors are not flexible enough for a
 #' particular use case.
 #' @param fn The internal function to be called. By default this is

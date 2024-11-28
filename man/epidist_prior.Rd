@@ -24,7 +24,9 @@ be used in the model created using \code{\link[=epidist_family]{epidist_family()
 
 \item{prior}{One or more \code{brmsprior} objects created by \code{\link[brms:set_prior]{brms::set_prior()}}
 or related functions. These priors are passed to \code{\link[=epidist_prior]{epidist_prior()}} in the
-\code{prior} argument.}
+\code{prior} argument. Some models have default priors that are automatically
+added (see \code{\link[=epidist_model_prior]{epidist_model_prior()}}). These can be merged with user-provided
+priors using the \code{merge_priors} argument.}
 
 \item{merge}{If \code{TRUE} then merge new priors with existing ones, if \code{FALSE}
 only use new priors. Defaults to \code{TRUE}. This may be useful if the built in

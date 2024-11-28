@@ -112,7 +112,6 @@ epidist_family_model.epidist_latent_model <- function(
 #' @export
 epidist_formula_model.epidist_latent_model <- function(
     data, formula, ...) {
-  # Update main formula
   formula <- stats::update(
     formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
   )
@@ -193,7 +192,7 @@ epidist_stancode.epidist_latent_model <- function(
     stanvar(
       block = "data",
       scode = "array[wN] int woverlap;",
-      x = as.integer(filter(data, woverlap > 0)$.row_id),
+      x = filter(data, woverlap > 0)$.row_id,
       name = "woverlap"
     )
 

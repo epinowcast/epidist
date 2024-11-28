@@ -35,7 +35,7 @@ epidist_gen_log_lik <- function(family) {
     swindow <- prep$data$vreal3[i]
 
     # make the prep object censored
-    # 1 here is equivalent  to right censored in brms
+    # -1 here is equivalent to right censored in brms
     prep$data$cens <- -1
 
     # Calculate density for each draw using primarycensored::dpcens()

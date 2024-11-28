@@ -90,7 +90,14 @@ epidist_family_param.default <- function(family, ...) {
   )
   lpdf_match <- regexpr(lpdf_pattern, dummy_mdl)
   reparam <- if (lpdf_match > 0) {
-    match_str <- regmatches(dummy_mdl, lpdf_match)[[1]]
+    matches <- unlist(regmatches(dummy_mdl, lpdf_match))
+    mu_matches <- matches[grepl("mu", matches, fixed = TRUE)]
+    if (length(mu_matches) > 1) {
+      cli_abort("Multiple Stan parameterisations found with 'mu' parameter.")
+    } else if (length(mu_matches) == 0) {
+      cli_abort("No Stan parameterisation found with 'mu' parameter.")
+    }
+    match_str <- mu_matches[1]
     param <- sub(
       paste0(
         "target \\+= ", family_name, "_(lpdf|lpmf)\\(Y \\| " # nolint
