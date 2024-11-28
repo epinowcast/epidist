@@ -3,7 +3,7 @@
 \name{epidist_gen_posterior_predict}
 \alias{epidist_gen_posterior_predict}
 \title{Create a function to draw from the posterior predictive distribution for a
-latent model}
+double censored and truncated delay distribution}
 \usage{
 epidist_gen_posterior_predict(family)
 }
@@ -37,6 +37,7 @@ censoring and truncation. The returned function takes a \code{prep} argument fro
 \code{brms}, \code{\link[primarycensored:rprimarycensored]{primarycensored::rpcens()}} for details on the censoring approach
 
 Other gen: 
+\code{\link{epidist_gen_log_lik}()},
 \code{\link{epidist_gen_posterior_epred}()}
 }
 \concept{gen}
