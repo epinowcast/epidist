@@ -21,8 +21,7 @@ Default method for defining a model specific family
 Other family: 
 \code{\link{epidist_family}()},
 \code{\link{epidist_family_model}()},
-\code{\link{epidist_family_reparam}()},
-\code{\link{epidist_family_reparam.default}()},
-\code{\link{epidist_family_reparam.gamma}()}
+\code{\link{epidist_family_param}()},
+\code{\link{epidist_family_param.default}()}
 }
 \concept{family}

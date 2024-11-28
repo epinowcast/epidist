@@ -21,7 +21,7 @@ test_that("the family argument in epidist_family passes as expected for brms and
 
 test_that("epidist_family contains the correct reparameterisations for lognormal (no change) and gamma (a change)", { # nolint: line_length_linter.
   family_lognormal <- epidist_family(prep_obs, family = "lognormal")
-  expect_identical(family_lognormal$reparam, c("mu", "sigma"))
+  expect_identical(family_lognormal$param, "mu, sigma") # nolint
   family_gamma <- epidist_family(prep_obs, family = Gamma(link = "log"))
-  expect_identical(family_gamma$reparam, c("shape", "shape ./ mu")) # nolint
+  expect_identical(family_gamma$param, "shape, shape ./ mu") # nolint
 })

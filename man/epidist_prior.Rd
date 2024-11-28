@@ -2,10 +2,16 @@
 % Please edit documentation in R/prior.R
 \name{epidist_prior}
 \alias{epidist_prior}
-\title{Define prior distributions using \code{brms} defaults, model specific priors,
-family specific priors, and user provided priors}
+\title{Define custom prior distributions for epidist models}
 \usage{
-epidist_prior(data, family, formula, prior)
+epidist_prior(
+  data,
+  family,
+  formula,
+  prior,
+  merge = TRUE,
+  enforce_presence = FALSE
+)
 }
 \arguments{
 \item{data}{An object with class corresponding to an implemented model.}
@@ -18,21 +24,37 @@ be used in the model created using \code{\link[=epidist_family]{epidist_family()
 
 \item{prior}{One or more \code{brmsprior} objects created by \code{\link[brms:set_prior]{brms::set_prior()}}
 or related functions. These priors are passed to \code{\link[=epidist_prior]{epidist_prior()}} in the
-\code{prior} argument.}
+\code{prior} argument. Some models have default priors that are automatically
+added (see \code{\link[=epidist_model_prior]{epidist_model_prior()}}). These can be merged with user-provided
+priors using the \code{merge_priors} argument.}
+
+\item{merge}{If \code{TRUE} then merge new priors with existing ones, if \code{FALSE}
+only use new priors. Defaults to \code{TRUE}. This may be useful if the built in
+approaches for merging priors are not flexible enough for a particular use
+case.}
+
+\item{enforce_presence}{If \code{TRUE} then only allow user priors that match
+existing default priors. If \code{FALSE} then allow user priors that are not
+present in the default set. Defaults to \code{FALSE}.}
+}
+\value{
+A \code{brmsprior} object containing the combined custom prior
+distributions.
 }
 \description{
-This function obtains the \code{brms} default prior distributions for a particular
-model, then replaces these prior distributions using:
-\enumerate{
-\item Model specific prior distributions from \code{\link[=epidist_model_prior]{epidist_model_prior()}}
-\item Family specific prior distributions from \code{\link[=epidist_family_prior]{epidist_family_prior()}}
-\item User provided prior distributions
-Each element of this list overwrites previous elements, such that user
-provided prior distribution have the highest priority. At the third stage,
-if a prior distribution is provided which is not included in the model, then
-a warning will be shown. To prevent this warning, do not pass prior
-distributions for parameters which are not in the model.
+This function combines model specific prior distributions from
+\code{\link[=epidist_model_prior]{epidist_model_prior()}}, family specific prior distributions from
+\code{\link[=epidist_family_prior]{epidist_family_prior()}}, and user provided prior distributions into a single
+set of custom priors. Each element overwrites previous elements, such that
+user provided prior distributions have the highest priority. If a user prior
+distribution is provided which is not included in the model, a warning will
+be shown.
 }
+\details{
+Note that the matching of priors is imperfect as it does not use brms'
+internal prior matching functionality. For example, it cannot distinguish
+between a prior for all coefficients (class = "b") and a prior for a
+specific coefficient (class = "b" and coef specified).
 }
 \seealso{
 Other prior: 
