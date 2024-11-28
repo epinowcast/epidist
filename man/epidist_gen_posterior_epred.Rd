@@ -3,7 +3,7 @@
 \name{epidist_gen_posterior_epred}
 \alias{epidist_gen_posterior_epred}
 \title{Create a function to draw from the expected value of the posterior predictive
-distribution for a latent model}
+distribution for a model}
 \usage{
 epidist_gen_posterior_epred(family)
 }
@@ -32,6 +32,7 @@ values for latent models.
 \code{brms}.
 
 Other gen: 
+\code{\link{epidist_gen_log_lik}()},
 \code{\link{epidist_gen_posterior_predict}()}
 }
 \concept{gen}

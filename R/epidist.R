@@ -14,7 +14,13 @@
 #' reexported as part of `epidist`.
 #' @param prior One or more `brmsprior` objects created by [brms::set_prior()]
 #' or related functions. These priors are passed to [epidist_prior()] in the
-#' `prior` argument.
+#' `prior` argument. Some models have default priors that are automatically
+#' added (see [epidist_model_prior()]). These can be merged with user-provided
+#' priors using the `merge_priors` argument.
+#' @param merge_priors If `TRUE` then merge user priors with default priors, if
+#' `FALSE` only use user priors. Defaults to `TRUE`. This may be useful if
+#' the built in approaches for merging priors are not flexible enough for a
+#' particular use case.
 #' @param fn The internal function to be called. By default this is
 #' [brms::brm()] which performs inference for the specified model. Other options
 #' are [brms::make_stancode()] which returns the Stan code for the specified
@@ -25,6 +31,7 @@
 #' @export
 epidist <- function(data, formula = mu ~ 1,
                     family = lognormal(), prior = NULL,
+                    merge_priors = TRUE,
                     fn = brms::brm, ...) {
   assert_epidist(data)
   epidist_family <- epidist_family(data, family)
@@ -32,7 +39,8 @@ epidist <- function(data, formula = mu ~ 1,
     data = data, family = epidist_family, formula = formula
   )
   epidist_prior <- epidist_prior(
-    data = data, family = epidist_family, formula = epidist_formula, prior
+    data = data, family = epidist_family, formula = epidist_formula, prior,
+    merge = merge_priors
   )
   epidist_stancode <- epidist_stancode(
     data = data, family = epidist_family, formula = epidist_formula

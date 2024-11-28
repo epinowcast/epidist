@@ -173,12 +173,12 @@ obs_cens |>
   ) +
   # The primary event censoring intervals
   geom_errorbarh(
-    aes(xmin = ptime_lwr, xmax = ptime_upr, y = case, yend = case),
+    aes(xmin = ptime_lwr, xmax = ptime_upr, y = case),
     col = "#56B4E9", height = 5
   ) +
   # The secondary event censoring intervals
   geom_errorbarh(
-    aes(xmin = stime_lwr, xmax = stime_upr, y = case, yend = case),
+    aes(xmin = stime_lwr, xmax = stime_upr, y = case),
     col = "#009E73", height = 5
   ) +
   geom_point(aes(x = ptime), fill = "white", col = "#56B4E9", shape = 21) +
@@ -190,7 +190,6 @@ obs_cens |>
 During an outbreak we will usually be estimating delays in real time.
 The result is that only those cases with a secondary event occurring before some time will be observed.
 This is called (right) truncation, and biases the observation process towards shorter delays:
-<!-- I think possible to do a better job with showing what right truncation is with a figure here! -->
 
 ```{r}
 obs_time <- 25

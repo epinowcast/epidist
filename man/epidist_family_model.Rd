@@ -32,9 +32,8 @@ The model-specific parts of an \code{epidist_formula()} call
 Other family: 
 \code{\link{epidist_family}()},
 \code{\link{epidist_family_model.default}()},
-\code{\link{epidist_family_reparam}()},
-\code{\link{epidist_family_reparam.default}()},
-\code{\link{epidist_family_reparam.gamma}()}
+\code{\link{epidist_family_param}()},
+\code{\link{epidist_family_param.default}()}
 
 Other formula: 
 \code{\link{epidist_formula}()},

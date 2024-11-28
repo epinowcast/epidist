@@ -57,6 +57,7 @@ is_epidist_latent_model <- function(data) {
 
 #' @method assert_epidist epidist_latent_model
 #' @family latent_model
+#' @importFrom checkmate assert_names assert_numeric assert_integerish
 #' @export
 assert_epidist.epidist_latent_model <- function(data, ...) {
   col_names <- c(
@@ -69,6 +70,7 @@ assert_epidist.epidist_latent_model <- function(data, ...) {
   assert_numeric(data$woverlap, lower = 0)
   assert_numeric(data$swindow, lower = 0)
   assert_numeric(data$delay, lower = 0)
+  assert_integerish(data$.row_id, lower = 1)
 }
 
 #' Create the model-specific component of an `epidist` custom family
@@ -88,75 +90,17 @@ epidist_family_model.epidist_latent_model <- function(
     lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
     ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
     type = family$type,
-    vars = c("pwindow", "swindow", "vreal1"),
+    vars = c(
+      "vreal1", "vreal2", "vreal3", "pwindow_raw", "swindow_raw",
+      "woverlap", "wN"
+    ),
     loop = FALSE,
-    log_lik = epidist_gen_log_lik_latent(family),
+    log_lik = epidist_gen_log_lik(family),
     posterior_predict = epidist_gen_posterior_predict(family),
     posterior_epred = epidist_gen_posterior_epred(family)
   )
   custom_family$reparm <- family$reparm
   return(custom_family)
-}
-
-#' Create a function to calculate the pointwise log likelihood of the latent
-#' model
-#'
-#' This function creates a log likelihood function that accounts for the latent
-#' variables in the model, including primary and secondary event windows and
-#' their overlap. The returned function calculates the log likelihood for a
-#' single observation by augmenting the data with the latent variables and
-#' using the underlying brms log likelihood function.
-#'
-#' @seealso [brms::log_lik()] for details on the brms log likelihood interface.
-#'
-#' @inheritParams epidist_family
-#'
-#' @return A function that calculates the log likelihood for a single
-#' observation. The prep object must have the following variables:
-#' * `vreal1`: relative observation time
-#' * `vreal2`: primary event window
-#' * `vreal3`: secondary event window
-#'
-#' @family latent_model
-#' @autoglobal
-epidist_gen_log_lik_latent <- function(family) {
-  # Get internal brms log_lik function
-  log_lik_brms <- .get_brms_fn("log_lik", family)
-
-  .log_lik <- function(i, prep) {
-    y <- prep$data$Y[i]
-    relative_obs_time <- prep$data$vreal1[i]
-    pwindow <- prep$data$vreal2[i]
-    swindow <- prep$data$vreal3[i]
-
-    # Generates values of the swindow_raw and pwindow_raw, but really these
-    # should be extracted from prep or the fitted raws somehow. See:
-    # https://github.com/epinowcast/epidist/issues/267
-    swindow_raw <- stats::runif(prep$ndraws)
-    pwindow_raw <- stats::runif(prep$ndraws)
-
-    swindow <- swindow_raw * swindow
-
-    # For no overlap calculate as usual, for overlap ensure pwindow < swindow
-    if (i %in% prep$data$noverlap) {
-      pwindow <- pwindow_raw * pwindow
-    } else {
-      pwindow <- pwindow_raw * swindow
-    }
-
-    d <- y - pwindow + swindow
-    obs_time <- relative_obs_time - pwindow
-    # Create brms truncation upper bound
-    prep$data$ub <- rep(obs_time, length(prep$data$Y))
-    # Update augmented data
-    prep$data$Y <- rep(d, length(prep$data$Y))
-
-    # Call internal brms log_lik function with augmented data
-    lpdf <- log_lik_brms(i, prep)
-    return(lpdf)
-  }
-
-  return(.log_lik)
 }
 
 #' Define the model-specific component of an `epidist` custom formula
@@ -168,11 +112,33 @@ epidist_gen_log_lik_latent <- function(family) {
 #' @export
 epidist_formula_model.epidist_latent_model <- function(
     data, formula, ...) {
-  # data is only used to dispatch on
   formula <- stats::update(
     formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
   )
   return(formula)
+}
+
+#' Model specific prior distributions for latent models
+#'
+#' Defines prior distributions for the latent model parameters `pwindow_raw` and
+#' `swindow_raw` which control the width of the observation windows.
+#'
+#' @inheritParams epidist
+#' @importFrom brms set_prior
+#' @family latent_model
+#' @export
+epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
+  priors <- prior(
+    "pwindow_raw ~ uniform(0, 1);",
+    dpar = "pwindow_raw",
+    check = FALSE
+  ) +
+    prior(
+      "swindow_raw ~ uniform(0, 1);",
+      dpar = "swindow_raw",
+      check = FALSE
+    )
+  return(priors)
 }
 
 #' @method epidist_stancode epidist_latent_model
@@ -212,12 +178,8 @@ epidist_stancode.epidist_latent_model <- function(
     fixed = TRUE
   )
 
-  # dpars_B refers to the insertion into the lpdf call
-  # For some families, we tranform brms dpars to match Stan parameterisation
   stanvars_functions[[1]]$scode <- gsub(
-    "dpars_B",
-    toString(family$reparam),
-    stanvars_functions[[1]]$scode,
+    "dpars_B", family$param, stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
@@ -229,12 +191,6 @@ epidist_stancode.epidist_latent_model <- function(
   ) +
     stanvar(
       block = "data",
-      scode = "array[N - wN] int noverlap;",
-      x = filter(data, woverlap == 0)$.row_id,
-      name = "noverlap"
-    ) +
-    stanvar(
-      block = "data",
       scode = "array[wN] int woverlap;",
       x = filter(data, woverlap > 0)$.row_id,
       name = "woverlap"
@@ -242,21 +198,15 @@ epidist_stancode.epidist_latent_model <- function(
 
   stanvars_parameters <- stanvar(
     block = "parameters",
-    scode = .stan_chunk(file.path("latent_model", "parameters.stan"))
-  )
-
-  stanvars_tparameters <- stanvar(
-    block = "tparameters",
-    scode = .stan_chunk(file.path("latent_model", "tparameters.stan"))
-  )
-
-  stanvars_priors <- stanvar(
-    block = "model",
-    scode = .stan_chunk(file.path("latent_model", "priors.stan"))
-  )
+    scode = "vector<lower=0,upper=1>[N] pwindow_raw;"
+  ) +
+    stanvar(
+      block = "parameters",
+      scode = "vector<lower=0,upper=1>[N] swindow_raw;"
+    )
 
   stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
-    stanvars_parameters + stanvars_tparameters + stanvars_priors
+    stanvars_parameters
 
   return(stanvars_all)
 }
