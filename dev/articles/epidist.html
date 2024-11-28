@@ -6,12 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Getting started with epidist • epidist</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
+<!-- favicons --><link rel="icon" type="image/png" sizes="48x48" href="../favicon-48x48.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -222,12 +221,12 @@ Here we suppose that the interval is daily, meaning that only the date of the pr
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="co"># The primary event censoring intervals</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_errorbarh.html" class="external-link">geom_errorbarh</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">ptime_lwr</span>, xmax <span class="op">=</span> <span class="va">ptime_upr</span>, y <span class="op">=</span> <span class="va">case</span>, yend <span class="op">=</span> <span class="va">case</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">ptime_lwr</span>, xmax <span class="op">=</span> <span class="va">ptime_upr</span>, y <span class="op">=</span> <span class="va">case</span><span class="op">)</span>,</span>
 <span>    col <span class="op">=</span> <span class="st">"#56B4E9"</span>, height <span class="op">=</span> <span class="fl">5</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="co"># The secondary event censoring intervals</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_errorbarh.html" class="external-link">geom_errorbarh</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">stime_lwr</span>, xmax <span class="op">=</span> <span class="va">stime_upr</span>, y <span class="op">=</span> <span class="va">case</span>, yend <span class="op">=</span> <span class="va">case</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xmin <span class="op">=</span> <span class="va">stime_lwr</span>, xmax <span class="op">=</span> <span class="va">stime_upr</span>, y <span class="op">=</span> <span class="va">case</span><span class="op">)</span>,</span>
 <span>    col <span class="op">=</span> <span class="st">"#009E73"</span>, height <span class="op">=</span> <span class="fl">5</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">ptime</span><span class="op">)</span>, fill <span class="op">=</span> <span class="st">"white"</span>, col <span class="op">=</span> <span class="st">"#56B4E9"</span>, shape <span class="op">=</span> <span class="fl">21</span><span class="op">)</span> <span class="op">+</span></span>
@@ -242,8 +241,7 @@ Figure 1.4: Interval censoring of the primary and secondary event times obscures
 </div>
 <p>During an outbreak we will usually be estimating delays in real time.
 The result is that only those cases with a secondary event occurring before some time will be observed.
-This is called (right) truncation, and biases the observation process towards shorter delays:
-<!-- I think possible to do a better job with showing what right truncation is with a figure here! --></p>
+This is called (right) truncation, and biases the observation process towards shorter delays:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obs_time</span> <span class="op">&lt;-</span> <span class="fl">25</span></span>
 <span><span class="va">obs_cens_trunc</span> <span class="op">&lt;-</span> <span class="va">obs_cens</span> <span class="op">|&gt;</span></span>
@@ -833,22 +831,12 @@ Many of these parameters (e.g. <code>swindow</code> and <code>pwindow</code>) a
 <td headers="Length.Freq" class="gt_row gt_right">1</td>
 </tr>
 <tr>
-<td headers="Parameter" class="gt_row gt_left">swindow_raw</td>
-<td headers="Length.pars" class="gt_row gt_center">pwindow</td>
-<td headers="Length.Freq" class="gt_row gt_right">200</td>
-</tr>
-<tr>
 <td headers="Parameter" class="gt_row gt_left">pwindow_raw</td>
 <td headers="Length.pars" class="gt_row gt_center">pwindow_raw</td>
 <td headers="Length.Freq" class="gt_row gt_right">200</td>
 </tr>
 <tr>
-<td headers="Parameter" class="gt_row gt_left">pwindow</td>
-<td headers="Length.pars" class="gt_row gt_center">swindow</td>
-<td headers="Length.Freq" class="gt_row gt_right">200</td>
-</tr>
-<tr>
-<td headers="Parameter" class="gt_row gt_left">swindow</td>
+<td headers="Parameter" class="gt_row gt_left">swindow_raw</td>
 <td headers="Length.pars" class="gt_row gt_center">swindow_raw</td>
 <td headers="Length.Freq" class="gt_row gt_right">200</td>
 </tr>
@@ -870,8 +858,8 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.75      0.05     1.67     1.85 1.00     2386     1178</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.78      0.07    -0.90    -0.64 1.00     2430     1582</span></span>
+<span><span class="co">#&gt; Intercept           1.75      0.05     1.66     1.85 1.00     3249     1563</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.77      0.07    -0.91    -0.63 1.00     2962     1559</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>

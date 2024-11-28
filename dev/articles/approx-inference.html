@@ -6,12 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Approximate Bayesian inference in epidist • epidist</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
+<!-- favicons --><link rel="icon" type="image/png" sizes="48x48" href="../favicon-48x48.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -229,12 +228,12 @@ Although a <code>save_single_paths</code> option is available, which may have al
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Number of PSIS draws is larger than the total number of draws returned by the single Pathfinders. This is likely unintentional and leads to re-sampling from the same draws. </span></span>
-<span><span class="co">#&gt; Path [1] :Initial log joint density = -1520.740908 </span></span>
+<span><span class="co">#&gt; Path [1] :Initial log joint density = -1518.268646 </span></span>
 <span><span class="co">#&gt; Error evaluating model log probability: Non-finite gradient. </span></span>
 <span><span class="co">#&gt; Path [1] : Iter      log prob        ||dx||      ||grad||     alpha      alpha0      # evals       ELBO    Best ELBO        Notes  </span></span>
-<span><span class="co">#&gt;              66      -9.381e+02      4.100e-04   3.293e-03    1.995e-01  1.000e+00      1651 -4.023e+02 -4.023e+02                   </span></span>
-<span><span class="co">#&gt; Path [1] :Best Iter: [66] ELBO (-402.252349) evaluations: (1651) </span></span>
-<span><span class="co">#&gt; Finished in  0.4 seconds.</span></span>
+<span><span class="co">#&gt;              92      -9.381e+02      5.893e-04   9.246e-03    1.000e+00  1.000e+00      2301 -4.882e+02 -4.882e+02                   </span></span>
+<span><span class="co">#&gt; Path [1] :Best Iter: [90] ELBO (-410.356567) evaluations: (2301) </span></span>
+<span><span class="co">#&gt; Finished in  0.3 seconds.</span></span>
 <span><span class="va">time_pathfinder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span></code></pre></div>
 <p>We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
 Thankfully, each algorithm is implemented to sample draws from the posterior distribution, and so post-processing is simple.</p>
@@ -731,23 +730,23 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_center">HMC</td>
-<td headers="mu" class="gt_row gt_right">1.747605</td>
-<td headers="sigma" class="gt_row gt_right">0.4616057</td>
+<td headers="mu" class="gt_row gt_right">1.747374</td>
+<td headers="sigma" class="gt_row gt_right">0.4621358</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">Laplace</td>
-<td headers="mu" class="gt_row gt_right">1.730603</td>
-<td headers="sigma" class="gt_row gt_right">0.4267116</td>
+<td headers="mu" class="gt_row gt_right">1.730724</td>
+<td headers="sigma" class="gt_row gt_right">0.4272533</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">ADVI</td>
-<td headers="mu" class="gt_row gt_right">1.799455</td>
-<td headers="sigma" class="gt_row gt_right">0.4442930</td>
+<td headers="mu" class="gt_row gt_right">1.810667</td>
+<td headers="sigma" class="gt_row gt_right">0.4316332</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">Pathfinder</td>
-<td headers="mu" class="gt_row gt_right">1.729763</td>
-<td headers="sigma" class="gt_row gt_right">0.4282182</td>
+<td headers="mu" class="gt_row gt_right">1.728704</td>
+<td headers="sigma" class="gt_row gt_right">0.4254101</td>
 </tr>
 </tbody>
 </table>
@@ -1271,19 +1270,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">31.524</td>
+<td headers="time (s)" class="gt_row gt_right">31.199</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.625</td>
+<td headers="time (s)" class="gt_row gt_right">2.114</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">2.061</td>
+<td headers="time (s)" class="gt_row gt_right">1.291</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.976</td>
+<td headers="time (s)" class="gt_row gt_right">0.805</td>
 </tr>
 </tbody>
 </table>

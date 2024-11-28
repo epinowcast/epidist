@@ -6,12 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Using epidist to estimate delay between symptom onset and positive test for an Ebola outbreak in Sierra Leone • epidist</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
+<!-- favicons --><link rel="icon" type="image/png" sizes="48x48" href="../favicon-48x48.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -312,12 +311,12 @@ As a model is not explicitly placed on <code>sigma</code>, a constant model <cod
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Chain 2 finished in 38.3 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 38.6 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 37.5 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 38.9 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 38.5 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 38.7 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 38.2 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 39.1 seconds.</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <a href="https://paulbuerkner.com/brms/reference/brmsfit-class.html" class="external-link"><code>brmsfit</code></a> object, and has the associated range of methods.
 See <code>methods(class = "brmsfit")</code> for more details.
 For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> to view information about the fitted model, including posterior estimates for the regression coefficients:</p>
@@ -333,8 +332,8 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.62      0.02     1.59     1.65 1.00     5455     1420</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.54      0.02    -0.58    -0.50 1.00     5122     1549</span></span>
+<span><span class="co">#&gt; Intercept           1.62      0.02     1.59     1.65 1.00     4465     1322</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.54      0.02    -0.58    -0.50 1.00     4424     1698</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -359,12 +358,12 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Chain 1 finished in 43.0 seconds.</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 43.7 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 40.3 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 40.8 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 43.3 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 43.8 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 40.6 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 40.9 seconds.</span></span></code></pre></div>
 <p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.03) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is 0.05).
 For the <code>sexMale</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexMale</code> effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.</p>
@@ -380,10 +379,10 @@ It is important to note that the estimates represent an average of the observed 
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.60      0.02     1.56     1.65 1.00     4380     1414</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.57      0.03    -0.63    -0.51 1.00     4326     1636</span></span>
-<span><span class="co">#&gt; sexMale             0.03      0.03    -0.03     0.09 1.00     4873     1528</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.05      0.04    -0.03     0.13 1.00     3482     1689</span></span>
+<span><span class="co">#&gt; Intercept           1.61      0.02     1.56     1.65 1.00     4066     1247</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.57      0.03    -0.63    -0.50 1.00     4012     1569</span></span>
+<span><span class="co">#&gt; sexMale             0.03      0.03    -0.03     0.09 1.00     4523     1437</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.05      0.04    -0.03     0.14 1.00     5004     1555</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -413,11 +412,11 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Chain 1 finished in 48.6 seconds.</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 48.6 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 48.4 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 48.7 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 48.6 seconds.</span></span>
+<span><span class="co">#&gt; Mean chain execution time: 48.5 seconds.</span></span>
 <span><span class="co">#&gt; Total execution time: 48.8 seconds.</span></span></code></pre></div>
 <p>For this model, along with looking at the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
@@ -433,15 +432,15 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
 <span><span class="co">#&gt; ~district (Number of levels: 14) </span></span>
 <span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)           0.13      0.04     0.07     0.22 1.00     1004     1539</span></span>
-<span><span class="co">#&gt; sd(sigma_Intercept)     0.23      0.06     0.14     0.39 1.00      783     1116</span></span>
+<span><span class="co">#&gt; sd(Intercept)           0.13      0.04     0.07     0.22 1.00     1012     1233</span></span>
+<span><span class="co">#&gt; sd(sigma_Intercept)     0.23      0.07     0.14     0.39 1.00      768      934</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.63      0.05     1.54     1.72 1.00      918     1268</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.64      0.08    -0.80    -0.50 1.00      735      993</span></span>
-<span><span class="co">#&gt; sexMale             0.04      0.03    -0.02     0.10 1.00     4733     1410</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.04      0.04    -0.04     0.12 1.00     3847     1697</span></span>
+<span><span class="co">#&gt; Intercept           1.63      0.04     1.54     1.72 1.00      944     1166</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.64      0.08    -0.80    -0.49 1.00      598      984</span></span>
+<span><span class="co">#&gt; sexMale             0.04      0.03    -0.02     0.10 1.00     3361     1297</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.04      0.04    -0.05     0.12 1.00     3979     1505</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -451,38 +450,38 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; , , Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                   Estimate  Est.Error        Q2.5        Q97.5</span></span>
-<span><span class="co">#&gt; Bo             0.061370570 0.07805850 -0.09434620  0.217150750</span></span>
-<span><span class="co">#&gt; Bombali        0.161739832 0.04852453  0.06956229  0.263049750</span></span>
-<span><span class="co">#&gt; Bonthe         0.006184697 0.12696442 -0.25235730  0.260503950</span></span>
-<span><span class="co">#&gt; Kailahun      -0.043140439 0.05660398 -0.15724975  0.068502460</span></span>
-<span><span class="co">#&gt; Kambia         0.048517520 0.08891895 -0.13123840  0.222670750</span></span>
-<span><span class="co">#&gt; Kenema        -0.140988285 0.07328490 -0.29453505 -0.005173668</span></span>
-<span><span class="co">#&gt; Koinadugu      0.114949950 0.10069287 -0.06990953  0.322390550</span></span>
-<span><span class="co">#&gt; Kono          -0.034245903 0.07768097 -0.19590210  0.114399625</span></span>
-<span><span class="co">#&gt; Moyamba       -0.003899371 0.08491923 -0.17035983  0.159339625</span></span>
-<span><span class="co">#&gt; Port Loko      0.012269693 0.05442444 -0.09154477  0.121246250</span></span>
-<span><span class="co">#&gt; Pujehun       -0.040962106 0.11806307 -0.28337432  0.182547750</span></span>
-<span><span class="co">#&gt; Tonkolili      0.034770215 0.05831936 -0.07535285  0.155927325</span></span>
-<span><span class="co">#&gt; Western Rural  0.007038704 0.05507077 -0.10220350  0.116271600</span></span>
-<span><span class="co">#&gt; Western Urban -0.186967015 0.05366162 -0.29733588 -0.081107455</span></span>
+<span><span class="co">#&gt; Bo             0.061505537 0.07619494 -0.08745565  0.211382425</span></span>
+<span><span class="co">#&gt; Bombali        0.160933768 0.05049966  0.06586322  0.263869200</span></span>
+<span><span class="co">#&gt; Bonthe         0.005896192 0.13084058 -0.26517483  0.273667675</span></span>
+<span><span class="co">#&gt; Kailahun      -0.042576409 0.05785547 -0.15993310  0.073757207</span></span>
+<span><span class="co">#&gt; Kambia         0.045223868 0.08481267 -0.12112087  0.215398475</span></span>
+<span><span class="co">#&gt; Kenema        -0.139834961 0.07700939 -0.29784868  0.009849491</span></span>
+<span><span class="co">#&gt; Koinadugu      0.114823904 0.10000902 -0.07233677  0.336662125</span></span>
+<span><span class="co">#&gt; Kono          -0.034884829 0.07364531 -0.18594252  0.104797375</span></span>
+<span><span class="co">#&gt; Moyamba       -0.002885858 0.08222040 -0.16298340  0.157276300</span></span>
+<span><span class="co">#&gt; Port Loko      0.012295405 0.05272973 -0.09304455  0.115102750</span></span>
+<span><span class="co">#&gt; Pujehun       -0.042413353 0.11706065 -0.28216468  0.176468525</span></span>
+<span><span class="co">#&gt; Tonkolili      0.033715428 0.05946116 -0.08060573  0.153809625</span></span>
+<span><span class="co">#&gt; Western Rural  0.006700341 0.05491073 -0.10102347  0.111518300</span></span>
+<span><span class="co">#&gt; Western Urban -0.187364934 0.05593534 -0.30520380 -0.080351055</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; , , sigma_Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5        Q97.5</span></span>
-<span><span class="co">#&gt; Bo            -0.03993660 0.11777504 -0.26971368  0.186271475</span></span>
-<span><span class="co">#&gt; Bombali       -0.28611810 0.08927144 -0.45377777 -0.112220900</span></span>
-<span><span class="co">#&gt; Bonthe        -0.05263371 0.24958489 -0.56160083  0.416555200</span></span>
-<span><span class="co">#&gt; Kailahun      -0.20056102 0.10346414 -0.41225108 -0.002420407</span></span>
-<span><span class="co">#&gt; Kambia         0.28971246 0.12194324  0.05987674  0.545790875</span></span>
-<span><span class="co">#&gt; Kenema         0.21252846 0.10264686  0.02605080  0.418920750</span></span>
-<span><span class="co">#&gt; Koinadugu      0.01504241 0.14716395 -0.26681377  0.312746900</span></span>
-<span><span class="co">#&gt; Kono           0.10537514 0.11439856 -0.10130943  0.357216475</span></span>
-<span><span class="co">#&gt; Moyamba        0.08499545 0.11743754 -0.14130670  0.330522600</span></span>
-<span><span class="co">#&gt; Port Loko      0.01460764 0.08522727 -0.15130213  0.183499425</span></span>
-<span><span class="co">#&gt; Pujehun       -0.12948202 0.23548079 -0.62976475  0.299674950</span></span>
-<span><span class="co">#&gt; Tonkolili     -0.23271106 0.10183638 -0.43356765 -0.032404575</span></span>
-<span><span class="co">#&gt; Western Rural  0.03038971 0.08725862 -0.13591113  0.197685850</span></span>
-<span><span class="co">#&gt; Western Urban  0.24764473 0.08243182  0.09715344  0.413708450</span></span></code></pre></div>
+<span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5       Q97.5</span></span>
+<span><span class="co">#&gt; Bo            -0.04256656 0.12013380 -0.26511432  0.20514025</span></span>
+<span><span class="co">#&gt; Bombali       -0.28812175 0.08907412 -0.45760100 -0.10950303</span></span>
+<span><span class="co">#&gt; Bonthe        -0.04653976 0.24523651 -0.53478287  0.41708900</span></span>
+<span><span class="co">#&gt; Kailahun      -0.20307607 0.10333090 -0.39441118  0.00767840</span></span>
+<span><span class="co">#&gt; Kambia         0.28821242 0.12163166  0.07750184  0.53852567</span></span>
+<span><span class="co">#&gt; Kenema         0.20986672 0.10172565  0.01970908  0.42063325</span></span>
+<span><span class="co">#&gt; Koinadugu      0.01445300 0.14926945 -0.25814375  0.32110622</span></span>
+<span><span class="co">#&gt; Kono           0.10016280 0.11293666 -0.11977785  0.33344990</span></span>
+<span><span class="co">#&gt; Moyamba        0.08512057 0.12260490 -0.14177760  0.32760045</span></span>
+<span><span class="co">#&gt; Port Loko      0.01438897 0.08744177 -0.15260362  0.19708952</span></span>
+<span><span class="co">#&gt; Pujehun       -0.13872134 0.24883274 -0.67513868  0.31296242</span></span>
+<span><span class="co">#&gt; Tonkolili     -0.23553497 0.10578498 -0.44475770 -0.02997846</span></span>
+<span><span class="co">#&gt; Western Rural  0.03013645 0.09161610 -0.13820100  0.21627057</span></span>
+<span><span class="co">#&gt; Western Urban  0.24684340 0.08450477  0.08454660  0.42205177</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3" number="3.3">
