@@ -17,23 +17,14 @@ as_epidist_marginal_model <- function(data) {
 as_epidist_marginal_model.epidist_linelist_data <- function(data) {
   assert_epidist(data)
 
-  # Here we do the processing to turn an epidist_linelist_data into an aggregate
-  # dataset. In the future this would be refactored into a function which
-  # converts from linelist data to aggregate data, and a function which goes
-  # from aggregate data into the marginal model class
   data <- data |>
     mutate(
-      pwindow = ifelse(
-        .data$stime_lwr < .data$ptime_upr,
-        .data$stime_upr - .data$ptime_lwr,
-        .data$ptime_upr - .data$ptime_lwr
-      ),
-      delay = .data$stime_lwr - .data$ptime_lwr
-    ) |>
-    dplyr::group_by(delay) |>
-    dplyr::summarise(
-      count = dplyr::n(),
-      pwindow = ifelse(all(pwindow == pwindow[1]), pwindow[1], NA)
+      pwindow = .data$ptime_upr - .data$ptime_lwr,
+      swindow = .data$stime_upr - .data$stime_lwr,
+      relative_obs_time = .data$obs_time - .data$ptime_lwr,
+      delay_lwr = .data$stime_lwr - .data$ptime_lwr,
+      delay_upr = .data$stime_upr - .data$ptime_lwr,
+      n = 1
     )
 
   data <- new_epidist_marginal_model(data)
@@ -57,8 +48,19 @@ new_epidist_marginal_model <- function(data) {
 #' @export
 assert_epidist.epidist_marginal_model <- function(data, ...) {
   assert_data_frame(data)
-  assert_names(names(data), must.include = c("delay", "count", "pwindow"))
-  assert_numeric(data$delay, lower = 0)
+  assert_names(names(data), must.include = c(
+    "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time",
+    "pwindow", "swindow", "delay_lwr", "delay_upr", "n"
+  ))
+  assert_numeric(data$pwindow, lower = 0)
+  assert_numeric(data$swindow, lower = 0)
+  assert_numeric(data$delay_lwr)
+  assert_numeric(data$delay_upr)
+  assert_true(
+    all(abs(data$delay_upr - (data$delay_lwr + data$swindow)) < 1e-10),
+    "delay_upr must equal delay_lwr + swindow"
+  )
+  assert_numeric(data$n, lower = 0)
 }
 
 #' Check if data has the `epidist_marginal_model` class
@@ -85,9 +87,14 @@ epidist_family_model.epidist_marginal_model <- function(
     links = c(family$link, family$other_links),
     lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
     ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
-    type = "int",
+    type = family$type,
+    vars = c(
+      "vreal1[n]", "vreal2[n]", "vreal3[n]", "vreal4[n]"
+    ),
     loop = TRUE,
-    vars = "vreal1[n]"
+    log_lik = epidist_gen_log_lik(family),
+    posterior_predict = epidist_gen_posterior_predict(family),
+    posterior_epred = epidist_gen_posterior_epred(family)
   )
   return(custom_family)
 }
@@ -103,7 +110,8 @@ epidist_formula_model.epidist_marginal_model <- function(
     data, formula, ...) {
   # data is only used to dispatch on
   formula <- stats::update(
-    formula, delay | weights(count) + vreal(pwindow) ~ .
+    formula, delay_lwr | weights(count) +
+      vreal(delay_upr, relative_obs_time, pwindow, swindow) ~ .
   )
   return(formula)
 }
