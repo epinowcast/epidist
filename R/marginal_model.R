@@ -49,18 +49,23 @@ new_epidist_marginal_model <- function(data) {
 assert_epidist.epidist_marginal_model <- function(data, ...) {
   assert_data_frame(data)
   assert_names(names(data), must.include = c(
-    "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time",
-    "pwindow", "swindow", "delay_lwr", "delay_upr", "n"
+    "pwindow", "swindow", "delay_lwr", "delay_upr", "n",
+    "relative_obs_time"
   ))
   assert_numeric(data$pwindow, lower = 0)
   assert_numeric(data$swindow, lower = 0)
   assert_numeric(data$delay_lwr)
   assert_numeric(data$delay_upr)
+  assert_numeric(data$relative_obs_time)
   assert_true(
     all(abs(data$delay_upr - (data$delay_lwr + data$swindow)) < 1e-10),
     "delay_upr must equal delay_lwr + swindow"
   )
-  assert_numeric(data$n, lower = 0)
+  assert_true(
+    all(data$relative_obs_time >= data$delay_upr),
+    "relative_obs_time must be greater than or equal to delay_upr"
+  )
+  assert_numeric(data$n, lower = 1)
 }
 
 #' Check if data has the `epidist_marginal_model` class
@@ -110,7 +115,7 @@ epidist_formula_model.epidist_marginal_model <- function(
     data, formula, ...) {
   # data is only used to dispatch on
   formula <- stats::update(
-    formula, delay_lwr | weights(count) +
+    formula, delay_lwr | weights(n) +
       vreal(delay_upr, relative_obs_time, pwindow, swindow) ~ .
   )
   return(formula)
@@ -156,14 +161,9 @@ epidist_stancode.epidist_marginal_model <- function(
 
   # Replace the dist_id passed to primarycensored
   stanvars_functions[[1]]$scode <- gsub(
-    "input_dist_id", dist_id, stanvars_functions[[1]]$scode,
+    "dist_id", dist_id, stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
-
-  # Inject vector or real depending if there is a model for each dpar
-  vector_real <- purrr::map_vec(family$dpars, function(dpar) {
-    return("real")
-  })
 
   stanvars_functions[[1]]$scode <- gsub(
     "dpars_A",
@@ -172,17 +172,18 @@ epidist_stancode.epidist_marginal_model <- function(
     fixed = TRUE
   )
 
-  # Need to consider whether any reparametrisation is required here for input
-  # input primarycensored. Assume not for now. Also assume two dpars
   stanvars_functions[[1]]$scode <- gsub(
-    "dpars_1", family$dpars[1],
-    stanvars_functions[[1]]$scode,
+    "dpars_B", family$param, stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
   stanvars_functions[[1]]$scode <- gsub(
-    "dpars_2", family$dpars[2],
-    stanvars_functions[[1]]$scode,
+    "primary_id", "1", stanvars_functions[[1]]$scode,
+    fixed = TRUE
+  )
+
+  stanvars_functions[[1]]$scode <- gsub(
+    "primary_params", "", stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
