@@ -123,6 +123,21 @@ epidist_formula_model.epidist_marginal_model <- function(
   return(formula)
 }
 
+#' @method epidist_transform_data_model epidist_marginal_model
+#' @family marginal_model
+#' @importFrom purrr map_chr
+#' @export
+epidist_transform_data_model.epidist_marginal_model <- function(
+    data, family, formula, ...) {
+  required_cols <- c(
+    "delay_lwr", "delay_upr", "relative_obs_time", "pwindow", "swindow"
+  )
+  trans_data <- data |>
+    .summarise_n_by_formula(by = required_cols, formula = formula) |>
+    new_epidist_marginal_model()
+  return(trans_data)
+}
+
 #' @method epidist_stancode epidist_marginal_model
 #' @importFrom brms stanvar
 #' @family marginal_model

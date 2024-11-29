@@ -219,7 +219,7 @@ Second, because we also did not supply an observation time column (`obs_date`), 
 To prepare the data for use with the latent individual model, we define the data as being a `epidist_latent_model` model object:
 
 ```{r}
-obs_prep <- as_epidist_latent_model(linelist_data)
+obs_prep <- as_epidist_marginal_model(linelist_data)
 head(obs_prep)
 ```
 
