@@ -68,6 +68,10 @@ reference:
   desc: Functions related to specifying custom `brms` formula
   contents:
   - has_concept("formula")
+- title: Transform data
+  desc: Transform data using the formula and family information
+  contents:
+  - has_concept("transform_data")
 - title: Prior distributions
   desc: Functions for specifying prior distributions
   contents:
