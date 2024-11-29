@@ -54,17 +54,19 @@ assert_epidist.epidist_marginal_model <- function(data, ...) {
   ))
   assert_numeric(data$pwindow, lower = 0)
   assert_numeric(data$swindow, lower = 0)
-  assert_numeric(data$delay_lwr)
-  assert_numeric(data$delay_upr)
+  assert_integerish(data$delay_lwr)
+  assert_integerish(data$delay_upr)
   assert_numeric(data$relative_obs_time)
-  assert_true(
-    all(abs(data$delay_upr - (data$delay_lwr + data$swindow)) < 1e-10),
-    "delay_upr must equal delay_lwr + swindow"
-  )
-  assert_true(
-    all(data$relative_obs_time >= data$delay_upr),
-    "relative_obs_time must be greater than or equal to delay_upr"
-  )
+  if (!all(abs(data$delay_upr - (data$delay_lwr + data$swindow)) < 1e-10)) {
+    cli::cli_abort(
+      "delay_upr must equal delay_lwr + swindow"
+    )
+  }
+  if (!all(data$relative_obs_time >= data$delay_upr)) {
+    cli::cli_abort(
+      "relative_obs_time must be greater than or equal to delay_upr"
+    )
+  }
   assert_numeric(data$n, lower = 1)
 }
 
@@ -92,9 +94,9 @@ epidist_family_model.epidist_marginal_model <- function(
     links = c(family$link, family$other_links),
     lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
     ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
-    type = family$type,
+    type = "int",
     vars = c(
-      "vreal1[n]", "vreal2[n]", "vreal3[n]", "vreal4[n]"
+      "vreal1[n]", "vreal2[n]", "vreal3[n]", "vreal4[n]", "primary_params"
     ),
     loop = TRUE,
     log_lik = epidist_gen_log_lik(family),
@@ -146,7 +148,6 @@ epidist_stancode.epidist_marginal_model <- function(
     fixed = TRUE
   )
 
-  # Can probably be extended to non-analytic solution families but for now
   if (family_name == "lognormal") {
     dist_id <- 1
   } else if (family_name == "gamma") {
@@ -155,7 +156,7 @@ epidist_stancode.epidist_marginal_model <- function(
     dist_id <- 3
   } else {
     cli_abort(c(
-      "!" = "No analytic solution available in primarycensored for this family"
+      "!" = "No solution available in primarycensored for this family"
     ))
   }
 
@@ -167,7 +168,7 @@ epidist_stancode.epidist_marginal_model <- function(
 
   stanvars_functions[[1]]$scode <- gsub(
     "dpars_A",
-    toString(paste0(vector_real, " ", family$dpars)),
+    toString(paste0("real ", family$dpars)),
     stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
@@ -182,9 +183,9 @@ epidist_stancode.epidist_marginal_model <- function(
     fixed = TRUE
   )
 
-  stanvars_functions[[1]]$scode <- gsub(
-    "primary_params", "", stanvars_functions[[1]]$scode,
-    fixed = TRUE
+  stanvars_parameters <- brms::stanvar(
+    block = "parameters",
+    scode = "array[0] real primary_params;"
   )
 
   pcd_stanvars_functions <- brms::stanvar(
@@ -192,7 +193,8 @@ epidist_stancode.epidist_marginal_model <- function(
     scode = primarycensored::pcd_load_stan_functions()
   )
 
-  stanvars_all <- stanvars_version + stanvars_functions + pcd_stanvars_functions
+  stanvars_all <- stanvars_version + stanvars_functions +
+    pcd_stanvars_functions + stanvars_parameters
 
   return(stanvars_all)
 }
