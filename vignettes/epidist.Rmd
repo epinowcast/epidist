@@ -285,7 +285,7 @@ In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo 
 
 ```{r}
 fit <- epidist(
-  data = data, chains = 2, cores = 2, refresh = as.integer(interactive())
+  data = data, chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0)
 )
 ```
 

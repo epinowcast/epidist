@@ -241,7 +241,7 @@ fit <- epidist(
   algorithm = "sampling",
   chains = 2,
   cores = 2,
-  refresh = as.integer(interactive()),
+  refresh = ifelse(interactive(), 250, 0),
   seed = 1,
   backend = "cmdstanr"
 )
@@ -267,7 +267,7 @@ fit_sex <- epidist(
   algorithm = "sampling",
   chains = 2,
   cores = 2,
-  refresh = as.integer(interactive()),
+  refresh = ifelse(interactive(), 250, 0),
   seed = 1,
   backend = "cmdstanr"
 )
@@ -298,7 +298,7 @@ fit_sex_district <- epidist(
   algorithm = "sampling",
   chains = 2,
   cores = 2,
-  refresh = as.integer(interactive()),
+  refresh = ifelse(interactive(), 250, 0),
   seed = 1,
   backend = "cmdstanr"
 )
@@ -321,9 +321,15 @@ In Figure \@ref(fig:epred) we show the posterior expectation of the delay distri
 Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with women.
 
 ```{r}
+# add dummmy variables
+add_marginal_dummy_vars <- function(data) {
+  data |>
+    mutate(relative_obs_time = NA, pwindow = NA, delay_upr = NA, swindow = NA)
+}
+
 epred_draws <- obs_prep |>
   data_grid(NA) |>
-  mutate(relative_obs_time = NA, pwindow = NA, swindow = NA) |>
+  add_marginal_dummy_vars() |>
   add_epred_draws(fit, dpar = TRUE)
 
 epred_base_figure <- epred_draws |>
@@ -334,7 +340,7 @@ epred_base_figure <- epred_draws |>
 
 epred_draws_sex <- obs_prep |>
   data_grid(sex) |>
-  mutate(relative_obs_time = NA, pwindow = NA, swindow = NA) |>
+  add_marginal_dummy_vars() |>
   add_epred_draws(fit_sex, dpar = TRUE)
 
 epred_sex_figure <- epred_draws_sex |>
@@ -345,7 +351,7 @@ epred_sex_figure <- epred_draws_sex |>
 
 epred_draws_sex_district <- obs_prep |>
   data_grid(sex, district) |>
-  mutate(relative_obs_time = NA, pwindow = NA, swindow = NA) |>
+  add_marginal_dummy_vars() |>
   add_epred_draws(fit_sex_district, dpar = TRUE)
 
 epred_sex_district_figure <- epred_draws_sex_district |>
@@ -376,7 +382,7 @@ For example, for the `mu` parameter in the sex-district stratified model (Figure
 linpred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
   data_grid(sex, district) |>
-  mutate(relative_obs_time = NA, pwindow = NA, swindow = NA) |>
+  add_marginal_dummy_vars() |>
   add_linpred_draws(fit_sex_district, dpar = TRUE)
 ```
 
@@ -404,9 +410,17 @@ To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and
 Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure.
 
 ```{r}
+add_marginal_pmf_vars <- function(data) {
+  data |>
+    mutate(
+      relative_obs_time = 1000, pwindow = 1, swindow = 1,
+      delay_upr = .data$delay_lwr + .data$swindow
+    )
+}
+
 draws_pmf <- obs_prep |>
   as.data.frame() |>
-  mutate(relative_obs_time = 1000, pwindow = 1, swindow = 1) |>
+  add_marginal_pmf_vars() |>
   add_predicted_draws(fit, ndraws = 1000)
 
 pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
@@ -418,7 +432,7 @@ pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
 draws_sex_pmf <- obs_prep |>
   as.data.frame() |>
   data_grid(sex) |>
-  mutate(relative_obs_time = 1000, pwindow = 1, swindow = 1) |>
+  add_marginal_pmf_vars() |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pmf_sex_figure <- draws_sex_pmf |>
@@ -432,7 +446,7 @@ pmf_sex_figure <- draws_sex_pmf |>
 draws_sex_district_pmf <- obs_prep |>
   as.data.frame() |>
   data_grid(sex, district) |>
-  mutate(relative_obs_time = 1000, pwindow = 1, swindow = 1) |>
+  add_marginal_pmf_vars() |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pmf_sex_district_figure <- draws_sex_district_pmf |>
@@ -468,9 +482,17 @@ The posterior predictive distribution under no truncation and no censoring.
 That is to produce continuous delay times (Figure \@ref(fig:pdf)):
 
 ```{r}
+add_marginal_pdf_vars <- function(data) {
+  data |>
+    mutate(
+      relative_obs_time = 1000, pwindow = 0, swindow = 0,
+      delay_upr = .data$delay_lwr + .data$swindow
+    )
+}
+
 draws_pdf <- obs_prep |>
   as.data.frame() |>
-  mutate(relative_obs_time = 1000, pwindow = 0, swindow = 0) |>
+  add_marginal_pdf_vars() |>
   add_predicted_draws(fit, ndraws = 1000)
 
 pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
@@ -482,7 +504,7 @@ pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
 draws_sex_pdf <- obs_prep |>
   as.data.frame() |>
   data_grid(sex) |>
-  mutate(relative_obs_time = 1000, pwindow = 0, swindow = 0) |>
+  add_marginal_pdf_vars() |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pdf_sex_figure <- draws_sex_pdf |>
@@ -496,7 +518,7 @@ pdf_sex_figure <- draws_sex_pdf |>
 draws_sex_district_pdf <- obs_prep |>
   as.data.frame() |>
   data_grid(sex, district) |>
-  mutate(relative_obs_time = 1000, pwindow = 0, swindow = 0) |>
+  add_marginal_pdf_vars() |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pdf_sex_district_figure <- draws_sex_district_pdf |>

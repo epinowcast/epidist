@@ -76,14 +76,13 @@ assert_epidist.epidist_marginal_model <- function(data, ...) {
   assert_data_frame(data)
   assert_names(names(data), must.include = c(
     "pwindow", "swindow", "delay_lwr", "delay_upr", "n",
-    "relative_obs_time", "orig_relative_obs_time"
+    "relative_obs_time"
   ))
   assert_numeric(data$pwindow, lower = 0)
   assert_numeric(data$swindow, lower = 0)
   assert_integerish(data$delay_lwr)
   assert_integerish(data$delay_upr)
   assert_numeric(data$relative_obs_time)
-  assert_numeric(data$orig_relative_obs_time)
   if (!all(abs(data$delay_upr - (data$delay_lwr + data$swindow)) < 1e-10)) {
     cli::cli_abort(
       "delay_upr must equal delay_lwr + swindow"
@@ -159,9 +158,32 @@ epidist_transform_data_model.epidist_marginal_model <- function(
   required_cols <- c(
     "delay_lwr", "delay_upr", "relative_obs_time", "pwindow", "swindow"
   )
+  n_rows_before <- nrow(data)
+
   trans_data <- data |>
     .summarise_n_by_formula(by = required_cols, formula = formula) |>
     new_epidist_marginal_model()
+  n_rows_after <- nrow(trans_data)
+  if (n_rows_before > n_rows_after) {
+    cli::cli_inform("Data summarised by unique combinations of:")
+
+    if (length(all.vars(formula[[3]])) > 0) {
+      cli::cli_inform(
+        paste0("* Formula terms: {.code {all.vars(formula[[3]])}}")
+      )
+    }
+
+    cli::cli_inform(paste0(
+      "* Delay windows: delay bounds, observation time, ",
+      "and primary censoring window"
+    ))
+
+    cli::cli_inform(paste0(
+      "i" = "Reduced from {n_rows_before} to {n_rows_after} rows. ", # nolint
+      "This should improve model efficiency with no loss of information."
+    ))
+  }
+
   return(trans_data)
 }
 
