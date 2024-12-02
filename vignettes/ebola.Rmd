@@ -406,20 +406,18 @@ In this section, we demonstrate how to produce either a discrete probability mas
 ### Discrete probability mass function
 
 To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
-To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and `relative_obs_time` to 1000 for no censoring.
+To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and `relative_obs_time` to `Inf` for no censoring.
 Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure.
 
 ```{r}
 add_marginal_pmf_vars <- function(data) {
   data |>
     mutate(
-      relative_obs_time = 1000, pwindow = 1, swindow = 1,
-      delay_upr = .data$delay_lwr + .data$swindow
+      relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
     )
 }
 
 draws_pmf <- obs_prep |>
-  as.data.frame() |>
   add_marginal_pmf_vars() |>
   add_predicted_draws(fit, ndraws = 1000)
 
@@ -430,7 +428,6 @@ pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
   theme_minimal()
 
 draws_sex_pmf <- obs_prep |>
-  as.data.frame() |>
   data_grid(sex) |>
   add_marginal_pmf_vars() |>
   add_predicted_draws(fit_sex, ndraws = 1000)
@@ -444,7 +441,6 @@ pmf_sex_figure <- draws_sex_pmf |>
   theme_minimal()
 
 draws_sex_district_pmf <- obs_prep |>
-  as.data.frame() |>
   data_grid(sex, district) |>
   add_marginal_pmf_vars() |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
@@ -485,13 +481,11 @@ That is to produce continuous delay times (Figure \@ref(fig:pdf)):
 add_marginal_pdf_vars <- function(data) {
   data |>
     mutate(
-      relative_obs_time = 1000, pwindow = 0, swindow = 0,
-      delay_upr = .data$delay_lwr + .data$swindow
+      relative_obs_time = Inf, pwindow = 0, swindow = 0, delay_upr = NA
     )
 }
 
 draws_pdf <- obs_prep |>
-  as.data.frame() |>
   add_marginal_pdf_vars() |>
   add_predicted_draws(fit, ndraws = 1000)
 
@@ -502,7 +496,6 @@ pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
   theme_minimal()
 
 draws_sex_pdf <- obs_prep |>
-  as.data.frame() |>
   data_grid(sex) |>
   add_marginal_pdf_vars() |>
   add_predicted_draws(fit_sex, ndraws = 1000)
@@ -516,7 +509,6 @@ pdf_sex_figure <- draws_sex_pdf |>
   theme_minimal()
 
 draws_sex_district_pdf <- obs_prep |>
-  as.data.frame() |>
   data_grid(sex, district) |>
   add_marginal_pdf_vars() |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)

@@ -11,18 +11,17 @@
   *
   * @param y Real value of observed delay
   * @param dpars_A Distribution parameters (replaced via regex)
-  * @param y_upper Upper bound of delay interval
   * @param relative_obs_t Observation time relative to primary window start
   * @param pwindow_width Primary window width (actual time scale)
   * @param swindow_width Secondary window width (actual time scale)
+  * @param y_upper Upper bound of delay interval
   * @param primary_params Array of parameters for primary distribution
   *
   * @return Log probability mass with censoring adjustment for marginal model
   */
-  real marginal_family_lpmf(data int y, dpars_A, data real y_upper,
-                            data real relative_obs_t, data real pwindow_width,
-                            data real swindow_width,
-                            array[] real primary_params) {
+  real marginal_family_lpmf(data int y, dpars_A, data real relative_obs_t,
+                            data real pwindow_width, data real swindow_width,
+                            data real y_upper, array[] real primary_params) {
 
   return primarycensored_lpmf(
       y | dist_id, {dpars_B}, pwindow_width, y_upper, relative_obs_t,

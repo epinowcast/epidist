@@ -144,7 +144,7 @@ epidist_formula_model.epidist_marginal_model <- function(
   # data is only used to dispatch on
   formula <- stats::update(
     formula, delay_lwr | weights(n) +
-      vreal(delay_upr, relative_obs_time, pwindow, swindow) ~ .
+      vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ .
   )
   return(formula)
 }
