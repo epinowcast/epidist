@@ -28,7 +28,8 @@ test_that("predict_delay_parameters accepts newdata arguments and prediction by 
   # Helper function to test sex predictions
   test_sex_predictions <- function(fit, prep = prep_obs_sex) {
     set.seed(1)
-
+    prep <- prep |>
+      dplyr::mutate(.row_id = dplyr::row_number())
     pred_sex <- predict_delay_parameters(fit, prep)
     expect_s3_class(pred_sex, "lognormal_samples")
     expect_s3_class(pred_sex, "data.frame")
