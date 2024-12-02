@@ -169,12 +169,12 @@ epidist_transform_data_model.epidist_marginal_model <- function(
 
     if (length(all.vars(formula[[3]])) > 0) {
       cli::cli_inform(
-        paste0("* Formula terms: {.code {all.vars(formula[[3]])}}")
+        paste0("* Formula variables: {.code {all.vars(formula[[3]])}}")
       )
     }
 
     cli::cli_inform(paste0(
-      "* Delay windows: delay bounds, observation time, ",
+      "* Model variables: delay bounds, observation time, ",
       "and primary censoring window"
     ))
 
