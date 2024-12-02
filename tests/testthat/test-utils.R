@@ -141,7 +141,7 @@ test_that(
     df <- data.frame(x = 1:2, n = c(1, 2))
     expect_error(
       .summarise_n_by_formula(df, by = "missing"),
-      "object 'missing' not found"
+      "Can't subset elements that don't exist"
     )
   }
 )
