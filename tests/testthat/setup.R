@@ -113,12 +113,15 @@ sim_obs_sex <- as_epidist_linelist_data(
   sim_obs_sex$obs_time,
   sex = sim_obs_sex$sex
 )
-
 prep_obs <- as_epidist_latent_model(sim_obs)
 prep_naive_obs <- as_epidist_naive_model(sim_obs)
 prep_marginal_obs <- as_epidist_marginal_model(sim_obs)
 prep_obs_gamma <- as_epidist_latent_model(sim_obs_gamma)
 prep_obs_sex <- as_epidist_latent_model(sim_obs_sex)
+
+prep_marginal_obs <- as_epidist_marginal_model(sim_obs)
+prep_marginal_obs_gamma <- as_epidist_marginal_model(sim_obs_gamma)
+prep_marginal_obs_sex <- as_epidist_marginal_model(sim_obs_sex)
 
 if (not_on_cran()) {
   set.seed(1)
@@ -130,6 +133,10 @@ if (not_on_cran()) {
   fit_rstan <- epidist(
     data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0
   )
+  fit_marginal <- suppressMessages(epidist(
+    data = prep_marginal_obs, seed = 1, chains = 2, cores = 2, silent = 2,
+    refresh = 0, backend = "cmdstanr"
+  ))
 
   fit_gamma <- epidist(
     data = prep_obs_gamma, family = Gamma(link = "log"),
@@ -137,10 +144,23 @@ if (not_on_cran()) {
     backend = "cmdstanr"
   )
 
+  fit_marginal_gamma <- suppressMessages(epidist(
+    data = prep_marginal_obs_gamma, family = Gamma(link = "log"),
+    seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
+    backend = "cmdstanr"
+  ))
+
   fit_sex <- epidist(
     data = prep_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     seed = 1, silent = 2, refresh = 0,
     cores = 2, chains = 2, backend = "cmdstanr"
   )
+
+  fit_marginal_sex <- suppressMessages(epidist(
+    data = prep_marginal_obs_sex,
+    formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
+    seed = 1, silent = 2, refresh = 50,
+    cores = 2, chains = 2, backend = "cmdstanr"
+  ))
 }

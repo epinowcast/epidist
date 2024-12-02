@@ -167,9 +167,10 @@ epidist_transform_data_model.epidist_marginal_model <- function(
   if (n_rows_before > n_rows_after) {
     cli::cli_inform("Data summarised by unique combinations of:")
 
-    if (length(all.vars(formula[[3]])) > 0) {
+    formula_vars <- setdiff(names(trans_data), c(required_cols, "n"))
+    if (length(formula_vars) > 0) {
       cli::cli_inform(
-        paste0("* Formula variables: {.code {all.vars(formula[[3]])}}")
+        paste0("* Formula variables: {.code {formula_vars}}")
       )
     }
 
