@@ -77,7 +77,7 @@ assert_epidist.epidist_marginal_model <- function(data, ...) {
   assert_data_frame(data)
   assert_names(names(data), must.include = c(
     "pwindow", "swindow", "delay_lwr", "delay_upr", "n",
-    "relative_obs_time"
+    ".row_id", "relative_obs_time"
   ))
   assert_numeric(data$pwindow, lower = 0)
   assert_numeric(data$swindow, lower = 0)
