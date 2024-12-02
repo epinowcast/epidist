@@ -31,7 +31,6 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
       orig_relative_obs_time = .data$obs_time - .data$ptime_lwr,
       delay_lwr = .data$stime_lwr - .data$ptime_lwr,
       delay_upr = .data$stime_upr - .data$ptime_lwr,
-      .row_id = dplyr::row_number(),
       n = 1
     )
 
@@ -78,14 +77,13 @@ assert_epidist.epidist_marginal_model <- function(data, ...) {
   assert_data_frame(data)
   assert_names(names(data), must.include = c(
     "pwindow", "swindow", "delay_lwr", "delay_upr", "n",
-    ".row_id", "relative_obs_time"
+    "relative_obs_time"
   ))
   assert_numeric(data$pwindow, lower = 0)
   assert_numeric(data$swindow, lower = 0)
   assert_integerish(data$delay_lwr)
   assert_integerish(data$delay_upr)
   assert_numeric(data$relative_obs_time)
-  assert_integerish(data$.row_id, lower = 1)
   if (!all(abs(data$delay_upr - (data$delay_lwr + data$swindow)) < 1e-10)) {
     cli::cli_abort(
       "delay_upr must equal delay_lwr + swindow"
