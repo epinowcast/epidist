@@ -14,7 +14,8 @@ as_epidist_marginal_model <- function(data, ...) {
 #' @param obs_time_threshold Ratio used to determine threshold for setting
 #'   relative observation times to Inf. Observation times greater than
 #'   `obs_time_threshold` times the maximum delay will be set to Inf to improve
-#'   model efficiency. Default is 2.
+#'   model efficiency by reducing the number of unique observation times.
+#'   Default is 2.
 #' @param ... Not used in this method.
 #' @method as_epidist_marginal_model epidist_linelist_data
 #' @family marginal_model
@@ -167,13 +168,15 @@ epidist_transform_data_model.epidist_marginal_model <- function(
     new_epidist_marginal_model()
   n_rows_after <- nrow(trans_data)
   if (n_rows_before > n_rows_after) {
-    cli::cli_inform("Data summarised by unique combinations of:")
+    cli::cli_inform(c(
+      "i" = "Data summarised by unique combinations of:" # nolint
+    ))
 
     formula_vars <- setdiff(names(trans_data), c(required_cols, "n"))
     if (length(formula_vars) > 0) {
-      cli::cli_inform(
-        paste0("* Formula variables: {.code {formula_vars}}")
-      )
+      cli::cli_inform(c(
+        "*" = "Formula variables: {.code {formula_vars}}"
+      ))
     }
 
     cli::cli_inform(paste0(
@@ -181,9 +184,9 @@ epidist_transform_data_model.epidist_marginal_model <- function(
       "and primary censoring window"
     ))
 
-    cli::cli_inform(paste0(
-      "i" = "Reduced from {n_rows_before} to {n_rows_after} rows. ", # nolint
-      "This should improve model efficiency with no loss of information."
+    cli::cli_inform(c(
+      "!" = paste("Reduced from", n_rows_before, "to", n_rows_after, "rows."),
+      "i" = "This should improve model efficiency with no loss of information." # nolint
     ))
   }
 

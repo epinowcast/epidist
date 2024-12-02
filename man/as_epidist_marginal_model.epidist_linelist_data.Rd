@@ -12,7 +12,8 @@
 \item{obs_time_threshold}{Ratio used to determine threshold for setting
 relative observation times to Inf. Observation times greater than
 \code{obs_time_threshold} times the maximum delay will be set to Inf to improve
-model efficiency. Default is 2.}
+model efficiency by reducing the number of unique observation times.
+Default is 2.}
 
 \item{...}{Not used in this method.}
 }
