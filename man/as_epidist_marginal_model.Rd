@@ -4,10 +4,12 @@
 \alias{as_epidist_marginal_model}
 \title{Prepare marginal model to pass through to \code{brms}}
 \usage{
-as_epidist_marginal_model(data)
+as_epidist_marginal_model(data, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \description{
 Prepare marginal model to pass through to \code{brms}

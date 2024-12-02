@@ -1,9 +1,10 @@
 #' Prepare marginal model to pass through to `brms`
 #'
 #' @param data A `data.frame` containing line list data
+#' @param ... Additional arguments passed to methods.
 #' @family marginal_model
 #' @export
-as_epidist_marginal_model <- function(data) {
+as_epidist_marginal_model <- function(data, ...) {
   UseMethod("as_epidist_marginal_model")
 }
 

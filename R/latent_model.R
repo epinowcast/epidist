@@ -38,10 +38,11 @@ as_epidist_latent_model.epidist_linelist_data <- function(data) {
 #' Class constructor for `epidist_latent_model` objects
 #'
 #' @param data An object to be set with the class `epidist_latent_model`
+#' @param ... Additional arguments passed to methods.
 #' @returns An object of class `epidist_latent_model`
 #' @family latent_model
 #' @export
-new_epidist_latent_model <- function(data) {
+new_epidist_latent_model <- function(data, ...) {
   class(data) <- c("epidist_latent_model", class(data))
   return(data)
 }
