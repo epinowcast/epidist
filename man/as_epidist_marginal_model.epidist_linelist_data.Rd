@@ -4,7 +4,7 @@
 \alias{as_epidist_marginal_model.epidist_linelist_data}
 \title{The marginal model method for \code{epidist_linelist_data} objects}
 \usage{
-\method{as_epidist_marginal_model}{epidist_linelist_data}(data, obs_time_threshold = 2)
+\method{as_epidist_marginal_model}{epidist_linelist_data}(data, obs_time_threshold = 2, ...)
 }
 \arguments{
 \item{data}{An \code{epidist_linelist_data} object}
@@ -13,6 +13,8 @@
 relative observation times to Inf. Observation times greater than
 \code{obs_time_threshold} times the maximum delay will be set to Inf to improve
 model efficiency. Default is 2.}
+
+\item{...}{Not used in this method.}
 }
 \description{
 The marginal model method for \code{epidist_linelist_data} objects

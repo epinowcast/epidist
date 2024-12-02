@@ -15,12 +15,13 @@ as_epidist_marginal_model <- function(data, ...) {
 #'   relative observation times to Inf. Observation times greater than
 #'   `obs_time_threshold` times the maximum delay will be set to Inf to improve
 #'   model efficiency. Default is 2.
+#' @param ... Not used in this method.
 #' @method as_epidist_marginal_model epidist_linelist_data
 #' @family marginal_model
 #' @autoglobal
 #' @export
 as_epidist_marginal_model.epidist_linelist_data <- function(
-    data, obs_time_threshold = 2) {
+    data, obs_time_threshold = 2, ...) {
   assert_epidist(data)
 
   data <- data |>

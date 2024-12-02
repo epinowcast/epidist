@@ -1,9 +1,10 @@
 #' Convert an object to an `epidist_latent_model` object
 #'
 #' @param data An object to be converted to the class `epidist_latent_model`
+#' @param ... Additional arguments passed to methods.
 #' @family latent_model
 #' @export
-as_epidist_latent_model <- function(data) {
+as_epidist_latent_model <- function(data, ...) {
   UseMethod("as_epidist_latent_model")
 }
 
@@ -11,11 +12,12 @@ as_epidist_latent_model <- function(data) {
 #' The latent model method for `epidist_linelist_data` objects
 #'
 #' @param data An `epidist_linelist_data` object
+#' @param ... Not used in this method.
 #' @method as_epidist_latent_model epidist_linelist_data
 #' @family latent_model
 #' @autoglobal
 #' @export
-as_epidist_latent_model.epidist_linelist_data <- function(data) {
+as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
   assert_epidist(data)
   data <- data |>
     mutate(
