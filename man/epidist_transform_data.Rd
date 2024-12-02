@@ -23,8 +23,8 @@ export it nonetheless to be transparent about what happens inside of a call
 to \code{\link[=epidist]{epidist()}}.
 }
 \seealso{
-Other transform: 
+Other transform_data: 
 \code{\link{epidist_transform_data_model}()},
 \code{\link{epidist_transform_data_model.default}()}
 }
-\concept{transform}
+\concept{transform_data}

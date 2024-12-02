@@ -20,8 +20,8 @@ be used in the model created using \code{\link[=epidist_family]{epidist_family()
 The model-specific parts of an \code{epidist_transform_data()} call
 }
 \seealso{
-Other transform: 
+Other transform_data: 
 \code{\link{epidist_transform_data}()},
 \code{\link{epidist_transform_data_model.default}()}
 }
-\concept{transform}
+\concept{transform_data}

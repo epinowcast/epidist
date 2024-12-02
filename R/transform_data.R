@@ -9,7 +9,7 @@
 #' @param family A description of the response distribution and link function to
 #' be used in the model created using [epidist_family()].
 #' @param formula A formula object created using [epidist_formula()].
-#' @family transform
+#' @family transform_data
 #' @export
 epidist_transform_data <- function(data, family, formula, ...) {
   assert_epidist(data)
@@ -21,7 +21,7 @@ epidist_transform_data <- function(data, family, formula, ...) {
 #'
 #' @inheritParams epidist_transform_data
 #' @rdname epidist_transform_data_model
-#' @family transform
+#' @family transform_data
 #' @export
 epidist_transform_data_model <- function(data, family, formula, ...) {
   UseMethod("epidist_transform_data_model")
@@ -30,7 +30,7 @@ epidist_transform_data_model <- function(data, family, formula, ...) {
 #' Default method for transforming data for a model
 #'
 #' @inheritParams epidist_transform_data_model
-#' @family transform
+#' @family transform_data
 #' @export
 epidist_transform_data_model.default <- function(data, family, formula, ...) {
   return(data)
