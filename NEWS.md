@@ -15,7 +15,7 @@ Development version of `epidist`.
   specified if they do not match existing parameters. See #474.
 - Added a `merge` argument to `epidist_prior()` to allow for not merging user and package priors. See #474.
 - Generalised the stan reparametrisation feature to work across all distributions without manual specification by generating stan code with `brms` and then extracting the reparameterisation. See #474.
-- Added a `transform_data` s3 method to allow for data to be transformed for specific models. This is specifically useful for the marginal model at the moment as it allows reducing the data to its unique strata. See #474.
+- Added a `transform_data` S3 method to allow for data to be transformed for specific models. This is specifically useful for the marginal model at the moment as it allows reducing the data to its unique strata. See #474.
 
 ## Documentation
 
