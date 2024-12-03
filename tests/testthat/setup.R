@@ -160,7 +160,7 @@ if (not_on_cran()) {
   fit_marginal_sex <- suppressMessages(epidist(
     data = prep_marginal_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-    seed = 1, silent = 2, refresh = 50,
+    seed = 1, silent = 2, refresh = 0,
     cores = 2, chains = 2, backend = "cmdstanr"
   ))
 }
