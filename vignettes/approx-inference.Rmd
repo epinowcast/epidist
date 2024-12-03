@@ -135,7 +135,7 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
   slice_sample(n = sample_size, replace = FALSE)
 ```
 
-We now prepare the data for fitting with the latent individual model, and perform inference with HMC:
+We now prepare the data for fitting with the marginal model, and perform inference with HMC:
 
 ```{r results='hide'}
 linelist_data <- as_epidist_linelist_data(
@@ -155,7 +155,7 @@ time_hmc <- proc.time() - t
 
 Note that for clarity above we specify `algorithm = "sampling"`, but if you were to call `epidist(data = data)` the result would be the same since `"sampling"` (i.e. HMC) is the default value for the `algorithm` argument.
 
-Now, we fit^[Note that in this section, and above for the MCMC, the output of the call is hidden, but if you were to call these functions yourself they would display information about the fitting procedure as it occurs] the same latent individual model using each method in Section \@ref(other).
+Now, we fit^[Note that in this section, and above for the MCMC, the output of the call is hidden, but if you were to call these functions yourself they would display information about the fitting procedure as it occurs] the same marginal model using each method in Section \@ref(other).
 To match the four Markov chains of length 1000 in HMC above, we then draw 4000 samples from each approximate posterior.
 
 ```{r results='hide'}

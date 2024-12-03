@@ -61,12 +61,13 @@ linelist_data <- as_epidist_linelist_data(
   obs_cens_trunc_samp$stime_upr,
   obs_time = obs_cens_trunc_samp$obs_time
 )
-data <- as_epidist_latent_model(linelist_data)
+data <- as_epidist_marginal_model(linelist_data)
 
 fit <- epidist(
   data,
   formula = mu ~ 1,
-  seed = 1
+  seed = 1,
+  backend = "cmdstanr"
 )
 ```
 
