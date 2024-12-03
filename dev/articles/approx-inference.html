@@ -188,7 +188,7 @@ The example data simulation process follows that used in the <a href="https://ep
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">stime_upr</span> <span class="op">&lt;=</span> <span class="va">.data</span><span class="op">$</span><span class="va">obs_time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="va">sample_size</span>, replace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p>We now prepare the data for fitting with the latent individual model, and perform inference with HMC:</p>
+<p>We now prepare the data for fitting with the marginal model, and perform inference with HMC:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">linelist_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_linelist_data.html">as_epidist_linelist_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">ptime_lwr</span>,</span>
@@ -198,13 +198,13 @@ The example data simulation process follows that used in the <a href="https://ep
 <span>  obs_time <span class="op">=</span> <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">obs_time</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_latent_model.html">as_epidist_latent_model</a></span><span class="op">(</span><span class="va">linelist_data</span><span class="op">)</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">linelist_data</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">fit_hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"sampling"</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span><span class="op">)</span></span>
 <span><span class="va">time_hmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span></code></pre></div>
 <p>Note that for clarity above we specify <code>algorithm = "sampling"</code>, but if you were to call <code>epidist(data = data)</code> the result would be the same since <code>"sampling"</code> (i.e. HMC) is the default value for the <code>algorithm</code> argument.</p>
-<p>Now, we fit<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Note that in this section, and above for the MCMC, the output of the call is hidden, but if you were to call these functions yourself they would display information about the fitting procedure as it occurs&lt;/p&gt;"><sup>2</sup></a> the same latent individual model using each method in Section <a href="#other">2</a>.
+<p>Now, we fit<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Note that in this section, and above for the MCMC, the output of the call is hidden, but if you were to call these functions yourself they would display information about the fitting procedure as it occurs&lt;/p&gt;"><sup>2</sup></a> the same marginal model using each method in Section <a href="#other">2</a>.
 To match the four Markov chains of length 1000 in HMC above, we then draw 4000 samples from each approximate posterior.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -228,12 +228,12 @@ Although a <code>save_single_paths</code> option is available, which may have al
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Number of PSIS draws is larger than the total number of draws returned by the single Pathfinders. This is likely unintentional and leads to re-sampling from the same draws. </span></span>
-<span><span class="co">#&gt; Path [1] :Initial log joint density = -1518.268646 </span></span>
+<span><span class="co">#&gt; Path [1] :Initial log joint density = -832.746523 </span></span>
 <span><span class="co">#&gt; Error evaluating model log probability: Non-finite gradient. </span></span>
 <span><span class="co">#&gt; Path [1] : Iter      log prob        ||dx||      ||grad||     alpha      alpha0      # evals       ELBO    Best ELBO        Notes  </span></span>
-<span><span class="co">#&gt;              92      -9.381e+02      5.893e-04   9.246e-03    1.000e+00  1.000e+00      2301 -4.882e+02 -4.882e+02                   </span></span>
-<span><span class="co">#&gt; Path [1] :Best Iter: [90] ELBO (-410.356567) evaluations: (2301) </span></span>
-<span><span class="co">#&gt; Finished in  0.3 seconds.</span></span>
+<span><span class="co">#&gt;              10      -3.910e+02      8.880e-04   9.142e-03    9.677e-01  9.677e-01       251 -3.950e+02 -3.950e+02                   </span></span>
+<span><span class="co">#&gt; Path [1] :Best Iter: [6] ELBO (-394.972343) evaluations: (251) </span></span>
+<span><span class="co">#&gt; Finished in  0.2 seconds.</span></span>
 <span><span class="va">time_pathfinder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span></code></pre></div>
 <p>We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
 Thankfully, each algorithm is implemented to sample draws from the posterior distribution, and so post-processing is simple.</p>
@@ -730,23 +730,23 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_center">HMC</td>
-<td headers="mu" class="gt_row gt_right">1.747374</td>
-<td headers="sigma" class="gt_row gt_right">0.4621358</td>
+<td headers="mu" class="gt_row gt_right">1.749475</td>
+<td headers="sigma" class="gt_row gt_right">0.4606589</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">Laplace</td>
-<td headers="mu" class="gt_row gt_right">1.730724</td>
-<td headers="sigma" class="gt_row gt_right">0.4272533</td>
+<td headers="mu" class="gt_row gt_right">1.742910</td>
+<td headers="sigma" class="gt_row gt_right">0.4549120</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">ADVI</td>
-<td headers="mu" class="gt_row gt_right">1.810667</td>
-<td headers="sigma" class="gt_row gt_right">0.4316332</td>
+<td headers="mu" class="gt_row gt_right">1.763108</td>
+<td headers="sigma" class="gt_row gt_right">0.4634822</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_center">Pathfinder</td>
-<td headers="mu" class="gt_row gt_right">1.728704</td>
-<td headers="sigma" class="gt_row gt_right">0.4254101</td>
+<td headers="mu" class="gt_row gt_right">1.744412</td>
+<td headers="sigma" class="gt_row gt_right">0.4560548</td>
 </tr>
 </tbody>
 </table>
@@ -813,23 +813,23 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="st">"elapsed"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/enframe.html" class="external-link">enframe</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"method"</span>, value <span class="op">=</span> <span class="st">"time (s)"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://gt.rstudio.com/reference/gt.html" class="external-link">gt</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div id="wajklsggqo" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#wajklsggqo table {
+<div id="klsggqolko" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#klsggqolko table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#wajklsggqo thead, #wajklsggqo tbody, #wajklsggqo tfoot, #wajklsggqo tr, #wajklsggqo td, #wajklsggqo th {
+#klsggqolko thead, #klsggqolko tbody, #klsggqolko tfoot, #klsggqolko tr, #klsggqolko td, #klsggqolko th {
   border-style: none;
 }
 
-#wajklsggqo p {
+#klsggqolko p {
   margin: 0;
   padding: 0;
 }
 
-#wajklsggqo .gt_table {
+#klsggqolko .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -855,12 +855,12 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   border-left-color: #D3D3D3;
 }
 
-#wajklsggqo .gt_caption {
+#klsggqolko .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#wajklsggqo .gt_title {
+#klsggqolko .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -872,7 +872,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   border-bottom-width: 0;
 }
 
-#wajklsggqo .gt_subtitle {
+#klsggqolko .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -884,7 +884,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   border-top-width: 0;
 }
 
-#wajklsggqo .gt_heading {
+#klsggqolko .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -896,13 +896,13 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   border-right-color: #D3D3D3;
 }
 
-#wajklsggqo .gt_bottom_border {
+#klsggqolko .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#wajklsggqo .gt_col_headings {
+#klsggqolko .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -917,7 +917,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   border-right-color: #D3D3D3;
 }
 
-#wajklsggqo .gt_col_heading {
+#klsggqolko .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -937,7 +937,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   overflow-x: hidden;
 }
 
-#wajklsggqo .gt_column_spanner_outer {
+#klsggqolko .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -949,15 +949,15 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   padding-right: 4px;
 }
 
-#wajklsggqo .gt_column_spanner_outer:first-child {
+#klsggqolko .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#wajklsggqo .gt_column_spanner_outer:last-child {
+#klsggqolko .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#wajklsggqo .gt_column_spanner {
+#klsggqolko .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -969,11 +969,11 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   width: 100%;
 }
 
-#wajklsggqo .gt_spanner_row {
+#klsggqolko .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#wajklsggqo .gt_group_heading {
+#klsggqolko .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -999,7 +999,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   text-align: left;
 }
 
-#wajklsggqo .gt_empty_group_heading {
+#klsggqolko .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1014,15 +1014,15 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   vertical-align: middle;
 }
 
-#wajklsggqo .gt_from_md > :first-child {
+#klsggqolko .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#wajklsggqo .gt_from_md > :last-child {
+#klsggqolko .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#wajklsggqo .gt_row {
+#klsggqolko .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1041,7 +1041,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   overflow-x: hidden;
 }
 
-#wajklsggqo .gt_stub {
+#klsggqolko .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1054,7 +1054,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   padding-right: 5px;
 }
 
-#wajklsggqo .gt_stub_row_group {
+#klsggqolko .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1068,15 +1068,15 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   vertical-align: top;
 }
 
-#wajklsggqo .gt_row_group_first td {
+#klsggqolko .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#wajklsggqo .gt_row_group_first th {
+#klsggqolko .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#wajklsggqo .gt_summary_row {
+#klsggqolko .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1086,16 +1086,16 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   padding-right: 5px;
 }
 
-#wajklsggqo .gt_first_summary_row {
+#klsggqolko .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#wajklsggqo .gt_first_summary_row.thick {
+#klsggqolko .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#wajklsggqo .gt_last_summary_row {
+#klsggqolko .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1105,7 +1105,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   border-bottom-color: #D3D3D3;
 }
 
-#wajklsggqo .gt_grand_summary_row {
+#klsggqolko .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1115,7 +1115,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   padding-right: 5px;
 }
 
-#wajklsggqo .gt_first_grand_summary_row {
+#klsggqolko .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1125,7 +1125,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   border-top-color: #D3D3D3;
 }
 
-#wajklsggqo .gt_last_grand_summary_row_top {
+#klsggqolko .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1135,11 +1135,11 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   border-bottom-color: #D3D3D3;
 }
 
-#wajklsggqo .gt_striped {
+#klsggqolko .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#wajklsggqo .gt_table_body {
+#klsggqolko .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1148,7 +1148,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   border-bottom-color: #D3D3D3;
 }
 
-#wajklsggqo .gt_footnotes {
+#klsggqolko .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1162,7 +1162,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   border-right-color: #D3D3D3;
 }
 
-#wajklsggqo .gt_footnote {
+#klsggqolko .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1171,7 +1171,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   padding-right: 5px;
 }
 
-#wajklsggqo .gt_sourcenotes {
+#klsggqolko .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1185,7 +1185,7 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   border-right-color: #D3D3D3;
 }
 
-#wajklsggqo .gt_sourcenote {
+#klsggqolko .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1193,72 +1193,72 @@ That said, even for HMC the computation time in this case is unlikely to be proh
   padding-right: 5px;
 }
 
-#wajklsggqo .gt_left {
+#klsggqolko .gt_left {
   text-align: left;
 }
 
-#wajklsggqo .gt_center {
+#klsggqolko .gt_center {
   text-align: center;
 }
 
-#wajklsggqo .gt_right {
+#klsggqolko .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#wajklsggqo .gt_font_normal {
+#klsggqolko .gt_font_normal {
   font-weight: normal;
 }
 
-#wajklsggqo .gt_font_bold {
+#klsggqolko .gt_font_bold {
   font-weight: bold;
 }
 
-#wajklsggqo .gt_font_italic {
+#klsggqolko .gt_font_italic {
   font-style: italic;
 }
 
-#wajklsggqo .gt_super {
+#klsggqolko .gt_super {
   font-size: 65%;
 }
 
-#wajklsggqo .gt_footnote_marks {
+#klsggqolko .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#wajklsggqo .gt_asterisk {
+#klsggqolko .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#wajklsggqo .gt_indent_1 {
+#klsggqolko .gt_indent_1 {
   text-indent: 5px;
 }
 
-#wajklsggqo .gt_indent_2 {
+#klsggqolko .gt_indent_2 {
   text-indent: 10px;
 }
 
-#wajklsggqo .gt_indent_3 {
+#klsggqolko .gt_indent_3 {
   text-indent: 15px;
 }
 
-#wajklsggqo .gt_indent_4 {
+#klsggqolko .gt_indent_4 {
   text-indent: 20px;
 }
 
-#wajklsggqo .gt_indent_5 {
+#klsggqolko .gt_indent_5 {
   text-indent: 25px;
 }
 
-#wajklsggqo .katex-display {
+#klsggqolko .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#wajklsggqo div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#klsggqolko div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1270,19 +1270,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">31.199</td>
+<td headers="time (s)" class="gt_row gt_right">24.152</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">2.114</td>
+<td headers="time (s)" class="gt_row gt_right">1.399</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">1.291</td>
+<td headers="time (s)" class="gt_row gt_right">1.151</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.805</td>
+<td headers="time (s)" class="gt_row gt_right">0.648</td>
 </tr>
 </tbody>
 </table>

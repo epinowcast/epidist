@@ -47,17 +47,24 @@
 <h2 class="pkg-version" data-toc-text="0.1.0.1000" id="epidist-0101000">epidist 0.1.0.1000<a class="anchor" aria-label="anchor" href="#epidist-0101000"></a></h2>
 <p>Development version of <code>epidist</code>.</p>
 <div class="section level3">
+<h3 id="models-0-1-0-1000">Models<a class="anchor" aria-label="anchor" href="#models-0-1-0-1000"></a></h3>
+<ul><li>Added a marginalised likelihood model based on <code>primarycensored</code>. This can be specified using <code><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code>. This is currently limited to Weibull, log-normal, and gamma distributions with uniform primary censoring but this will be generalised in future releases. See <a href="https://github.com/epinowcast/epidist/issues/426" class="external-link">#426</a>.</li>
+<li>Added user settable primary event priors to the latent model. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
+<li>Added a marginalised likelihood to the latent model. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="package-0-1-0-1000">Package<a class="anchor" aria-label="anchor" href="#package-0-1-0-1000"></a></h3>
 <ul><li>Remove the default method for <code><a href="../reference/epidist.html">epidist()</a></code>. See <a href="https://github.com/epinowcast/epidist/issues/473" class="external-link">#473</a>.</li>
 <li>Added <code>enforce_presence</code> argument to <code><a href="../reference/epidist_prior.html">epidist_prior()</a></code> to allow for priors to be specified if they do not match existing parameters. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
 <li>Added a <code>merge</code> argument to <code><a href="../reference/epidist_prior.html">epidist_prior()</a></code> to allow for not merging user and package priors. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
-<li>Added user settable primary event priors to the latent model. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
-<li>Added a marginalised likelihood to the latent model. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
 <li>Generalised the stan reparametrisation feature to work across all distributions without manual specification by generating stan code with <code>brms</code> and then extracting the reparameterisation. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
+<li>Added a <code>transform_data</code> S3 method to allow for data to be transformed for specific models. This is specifically useful for the marginal model at the moment as it allows reducing the data to its unique strata. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-0-1-0-1000">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-0-1000"></a></h3>
 <ul><li>Brings the README into line with <code>epinowcast</code> standards. See <a href="https://github.com/epinowcast/epidist/issues/467" class="external-link">#467</a>.</li>
+<li>Switched over to using the marginal model as default in documentation. See <a href="https://github.com/epinowcast/epidist/issues/426" class="external-link">#426</a>.</li>
+<li>Added helper functions for new variables to avoid code duplication in vignettes. See <a href="https://github.com/epinowcast/epidist/issues/426" class="external-link">#426</a>.</li>
 </ul></div>
 </div>
     <div class="section level2">

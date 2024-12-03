@@ -319,17 +319,17 @@ To do so, we first prepare the <code>data</code> using <code><a href="../referen
 <span>  obs_time <span class="op">=</span> <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">obs_time</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_latent_model.html">as_epidist_latent_model</a></span><span class="op">(</span><span class="va">linelist_data</span><span class="op">)</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">linelist_data</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "epidist_latent_model"  "epidist_linelist_data" "tbl_df"               </span></span>
-<span><span class="co">#&gt; [4] "tbl"                   "data.frame"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "epidist_marginal_model" "epidist_linelist_data"  "tbl_df"                </span></span>
+<span><span class="co">#&gt; [4] "tbl"                    "data.frame"</span></span></code></pre></div>
 <p>The <code>data</code> object now has the class <code>epidist_latent_model</code>.
 Using this <code>data</code>, we now call <code><a href="../reference/epidist.html">epidist()</a></code> to fit the model.
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the <a href="https://paul-buerkner.github.io/brms/" class="external-link"><code>brms</code></a> R package <span class="citation">(<a href="#ref-brms">Bürkner 2017</a>)</span>.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">data</span>, chains <span class="op">=</span> <span class="fl">2</span>, cores <span class="op">=</span> <span class="fl">2</span>, refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  data <span class="op">=</span> <span class="va">data</span>, chains <span class="op">=</span> <span class="fl">2</span>, cores <span class="op">=</span> <span class="fl">2</span>, refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">250</span>, <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><strong>Note that here we use the default <code>rstan</code> backend but we generally recommend using the <code>cmdstanr</code> backend for faster sampling and additional features.</strong>
 <strong>This can be set using <code>backend = "cmdstanr"</code> after following the installing CmdStan instructions in the README.</strong></p>
@@ -830,16 +830,6 @@ Many of these parameters (e.g. <code>swindow</code> and <code>pwindow</code>) a
 <td headers="Length.pars" class="gt_row gt_center">lprior</td>
 <td headers="Length.Freq" class="gt_row gt_right">1</td>
 </tr>
-<tr>
-<td headers="Parameter" class="gt_row gt_left">pwindow_raw</td>
-<td headers="Length.pars" class="gt_row gt_center">pwindow_raw</td>
-<td headers="Length.Freq" class="gt_row gt_right">200</td>
-</tr>
-<tr>
-<td headers="Parameter" class="gt_row gt_left">swindow_raw</td>
-<td headers="Length.pars" class="gt_row gt_center">swindow_raw</td>
-<td headers="Length.Freq" class="gt_row gt_right">200</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -848,18 +838,18 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
 <p>For example, we can use the built in <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> function</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Family: latent_lognormal </span></span>
+<span><span class="co">#&gt;  Family: marginal_lognormal </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
-<span><span class="co">#&gt; Formula: delay | vreal(relative_obs_time, pwindow, swindow) ~ 1 </span></span>
+<span><span class="co">#&gt; Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1 </span></span>
 <span><span class="co">#&gt;          sigma ~ 1</span></span>
-<span><span class="co">#&gt;    Data: data (Number of observations: 200) </span></span>
+<span><span class="co">#&gt;    Data: transformed_data (Number of observations: 91) </span></span>
 <span><span class="co">#&gt;   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
 <span><span class="co">#&gt;          total post-warmup draws = 2000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.75      0.05     1.66     1.85 1.00     3249     1563</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.77      0.07    -0.91    -0.63 1.00     2962     1559</span></span>
+<span><span class="co">#&gt; Intercept           1.75      0.05     1.66     1.84 1.00      688      650</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.78      0.07    -0.91    -0.64 1.00      684     1011</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>

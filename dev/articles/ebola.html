@@ -271,11 +271,11 @@ Second, because we also did not supply an observation time column (<code>obs_dat
 <h3 id="model-fitting">
 <span class="header-section-number">3.2</span> Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a>
 </h3>
-<p>To prepare the data for use with the latent individual model, we define the data as being a <code>epidist_latent_model</code> model object:</p>
+<p>To prepare the data for use with the marginal model, we define the data as being a <code>epidist_marginal_model</code> model object:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">obs_prep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_latent_model.html">as_epidist_latent_model</a></span><span class="op">(</span><span class="va">linelist_data</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">obs_prep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">linelist_data</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">obs_prep</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 20</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 21</span></span></span>
 <span><span class="co">#&gt;   ptime_lwr ptime_upr stime_lwr stime_upr obs_time  case pdate_lwr  sdate_lwr </span></span>
 <span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       108       109       111       112      480  <span style="text-decoration: underline;">1</span>101 2014-09-03 2014-09-06</span></span>
@@ -284,10 +284,11 @@ Second, because we also did not supply an observation time column (<code>obs_dat
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       138       139       142       143      480  <span style="text-decoration: underline;">2</span>483 2014-10-03 2014-10-07</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>       217       218       221       222      480  <span style="text-decoration: underline;">6</span>796 2014-12-21 2014-12-25</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>       157       158       163       164      480  <span style="text-decoration: underline;">3</span>576 2014-10-22 2014-10-28</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: age &lt;dbl&gt;, sex &lt;chr&gt;, district &lt;chr&gt;, pdate_upr &lt;date&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   sdate_upr &lt;date&gt;, obs_date &lt;date&gt;, relative_obs_time &lt;dbl&gt;, pwindow &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   woverlap &lt;dbl&gt;, swindow &lt;dbl&gt;, delay &lt;dbl&gt;, .row_id &lt;int&gt;</span></span></span></code></pre></div>
-<p>Now we are ready to fit the latent individual model.</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: age &lt;dbl&gt;, sex &lt;chr&gt;, district &lt;chr&gt;, pdate_upr &lt;date&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   sdate_upr &lt;date&gt;, obs_date &lt;date&gt;, pwindow &lt;dbl&gt;, swindow &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   relative_obs_time &lt;dbl&gt;, orig_relative_obs_time &lt;dbl&gt;, delay_lwr &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   delay_upr &lt;dbl&gt;, n &lt;dbl&gt;</span></span></span></code></pre></div>
+<p>Now we are ready to fit the marginal model.</p>
 <div class="section level4" number="3.2.1">
 <h4 id="intercept-only-model">
 <span class="header-section-number">3.2.1</span> Intercept-only model<a class="anchor" aria-label="anchor" href="#intercept-only-model"></a>
@@ -305,35 +306,34 @@ As a model is not explicitly placed on <code>sigma</code>, a constant model <cod
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
 <span>  chains <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">250</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Chain 1 finished in 37.5 seconds.</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 38.9 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 0.7 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 0.7 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 38.2 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 39.1 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 0.7 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 0.8 seconds.</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <a href="https://paulbuerkner.com/brms/reference/brmsfit-class.html" class="external-link"><code>brmsfit</code></a> object, and has the associated range of methods.
 See <code>methods(class = "brmsfit")</code> for more details.
 For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> to view information about the fitted model, including posterior estimates for the regression coefficients:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Family: latent_lognormal </span></span>
+<span><span class="co">#&gt;  Family: marginal_lognormal </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
-<span><span class="co">#&gt; Formula: delay | vreal(relative_obs_time, pwindow, swindow) ~ 1 </span></span>
+<span><span class="co">#&gt; Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1 </span></span>
 <span><span class="co">#&gt;          sigma ~ 1</span></span>
-<span><span class="co">#&gt;    Data: data (Number of observations: 1390) </span></span>
+<span><span class="co">#&gt;    Data: transformed_data (Number of observations: 46) </span></span>
 <span><span class="co">#&gt;   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
 <span><span class="co">#&gt;          total post-warmup draws = 2000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.62      0.02     1.59     1.65 1.00     4465     1322</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.54      0.02    -0.58    -0.50 1.00     4424     1698</span></span>
+<span><span class="co">#&gt; Intercept           1.62      0.02     1.59     1.65 1.00     2209     1419</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.54      0.02    -0.58    -0.50 1.00     1752     1102</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -352,37 +352,36 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
 <span>  chains <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">250</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Chain 2 finished in 40.3 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 40.8 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 1.3 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 1.4 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 40.6 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 40.9 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 1.3 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 1.5 seconds.</span></span></code></pre></div>
 <p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.03) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is 0.05).
 For the <code>sexMale</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexMale</code> effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_sex</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Family: latent_lognormal </span></span>
+<span><span class="co">#&gt;  Family: marginal_lognormal </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
-<span><span class="co">#&gt; Formula: delay | vreal(relative_obs_time, pwindow, swindow) ~ sex </span></span>
+<span><span class="co">#&gt; Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex </span></span>
 <span><span class="co">#&gt;          sigma ~ 1 + sex</span></span>
-<span><span class="co">#&gt;    Data: data (Number of observations: 1390) </span></span>
+<span><span class="co">#&gt;    Data: transformed_data (Number of observations: 69) </span></span>
 <span><span class="co">#&gt;   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
 <span><span class="co">#&gt;          total post-warmup draws = 2000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.61      0.02     1.56     1.65 1.00     4066     1247</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.57      0.03    -0.63    -0.50 1.00     4012     1569</span></span>
-<span><span class="co">#&gt; sexMale             0.03      0.03    -0.03     0.09 1.00     4523     1437</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.05      0.04    -0.03     0.14 1.00     5004     1555</span></span>
+<span><span class="co">#&gt; Intercept           1.60      0.02     1.56     1.65 1.00     2089     1304</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.57      0.03    -0.62    -0.51 1.00     2145     1537</span></span>
+<span><span class="co">#&gt; sexMale             0.03      0.03    -0.03     0.09 1.00     2146     1459</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.05      0.04    -0.02     0.14 1.00     2134     1273</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -406,41 +405,40 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span>  algorithm <span class="op">=</span> <span class="st">"sampling"</span>,</span>
 <span>  chains <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">250</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Chain 1 finished in 48.4 seconds.</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 48.7 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 26.9 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 28.8 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 48.5 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 48.8 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 27.8 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 28.9 seconds.</span></span></code></pre></div>
 <p>For this model, along with looking at the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_sex_district</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  Family: latent_lognormal </span></span>
+<span><span class="co">#&gt;  Family: marginal_lognormal </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
-<span><span class="co">#&gt; Formula: delay | vreal(relative_obs_time, pwindow, swindow) ~ sex + (1 | district) </span></span>
+<span><span class="co">#&gt; Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex + (1 | district) </span></span>
 <span><span class="co">#&gt;          sigma ~ 1 + sex + (1 | district)</span></span>
-<span><span class="co">#&gt;    Data: data (Number of observations: 1390) </span></span>
+<span><span class="co">#&gt;    Data: transformed_data (Number of observations: 299) </span></span>
 <span><span class="co">#&gt;   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
 <span><span class="co">#&gt;          total post-warmup draws = 2000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
 <span><span class="co">#&gt; ~district (Number of levels: 14) </span></span>
 <span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)           0.13      0.04     0.07     0.22 1.00     1012     1233</span></span>
-<span><span class="co">#&gt; sd(sigma_Intercept)     0.23      0.07     0.14     0.39 1.00      768      934</span></span>
+<span><span class="co">#&gt; sd(Intercept)           0.12      0.04     0.07     0.21 1.00      736      914</span></span>
+<span><span class="co">#&gt; sd(sigma_Intercept)     0.23      0.06     0.14     0.38 1.00      491      925</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.63      0.04     1.54     1.72 1.00      944     1166</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.64      0.08    -0.80    -0.49 1.00      598      984</span></span>
-<span><span class="co">#&gt; sexMale             0.04      0.03    -0.02     0.10 1.00     3361     1297</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.04      0.04    -0.05     0.12 1.00     3979     1505</span></span>
+<span><span class="co">#&gt; Intercept           1.63      0.04     1.54     1.72 1.00      591      933</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.64      0.08    -0.80    -0.50 1.00      367      453</span></span>
+<span><span class="co">#&gt; sexMale             0.04      0.03    -0.01     0.10 1.00     2584     1404</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.04      0.04    -0.04     0.12 1.00     2491     1550</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -450,38 +448,38 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; , , Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                   Estimate  Est.Error        Q2.5        Q97.5</span></span>
-<span><span class="co">#&gt; Bo             0.061505537 0.07619494 -0.08745565  0.211382425</span></span>
-<span><span class="co">#&gt; Bombali        0.160933768 0.05049966  0.06586322  0.263869200</span></span>
-<span><span class="co">#&gt; Bonthe         0.005896192 0.13084058 -0.26517483  0.273667675</span></span>
-<span><span class="co">#&gt; Kailahun      -0.042576409 0.05785547 -0.15993310  0.073757207</span></span>
-<span><span class="co">#&gt; Kambia         0.045223868 0.08481267 -0.12112087  0.215398475</span></span>
-<span><span class="co">#&gt; Kenema        -0.139834961 0.07700939 -0.29784868  0.009849491</span></span>
-<span><span class="co">#&gt; Koinadugu      0.114823904 0.10000902 -0.07233677  0.336662125</span></span>
-<span><span class="co">#&gt; Kono          -0.034884829 0.07364531 -0.18594252  0.104797375</span></span>
-<span><span class="co">#&gt; Moyamba       -0.002885858 0.08222040 -0.16298340  0.157276300</span></span>
-<span><span class="co">#&gt; Port Loko      0.012295405 0.05272973 -0.09304455  0.115102750</span></span>
-<span><span class="co">#&gt; Pujehun       -0.042413353 0.11706065 -0.28216468  0.176468525</span></span>
-<span><span class="co">#&gt; Tonkolili      0.033715428 0.05946116 -0.08060573  0.153809625</span></span>
-<span><span class="co">#&gt; Western Rural  0.006700341 0.05491073 -0.10102347  0.111518300</span></span>
-<span><span class="co">#&gt; Western Urban -0.187364934 0.05593534 -0.30520380 -0.080351055</span></span>
+<span><span class="co">#&gt; Bo             0.065384789 0.07542610 -0.08139826  0.223471575</span></span>
+<span><span class="co">#&gt; Bombali        0.162572911 0.04900274  0.06720844  0.261541250</span></span>
+<span><span class="co">#&gt; Bonthe         0.009502519 0.12723401 -0.23321665  0.278993700</span></span>
+<span><span class="co">#&gt; Kailahun      -0.040811491 0.05593079 -0.15347775  0.061143155</span></span>
+<span><span class="co">#&gt; Kambia         0.046021261 0.08766176 -0.12750958  0.217015075</span></span>
+<span><span class="co">#&gt; Kenema        -0.137557640 0.07266871 -0.28727358 -0.002860666</span></span>
+<span><span class="co">#&gt; Koinadugu      0.110881467 0.09952968 -0.08037271  0.315509050</span></span>
+<span><span class="co">#&gt; Kono          -0.031378053 0.07488119 -0.17858870  0.110600975</span></span>
+<span><span class="co">#&gt; Moyamba       -0.001488026 0.07773266 -0.15867465  0.149148525</span></span>
+<span><span class="co">#&gt; Port Loko      0.014933128 0.05227791 -0.09373499  0.115990575</span></span>
+<span><span class="co">#&gt; Pujehun       -0.038092738 0.11490210 -0.27245225  0.192172825</span></span>
+<span><span class="co">#&gt; Tonkolili      0.035818752 0.05739718 -0.07420422  0.149691550</span></span>
+<span><span class="co">#&gt; Western Rural  0.009126052 0.05293605 -0.09821705  0.113685100</span></span>
+<span><span class="co">#&gt; Western Urban -0.183142129 0.05264409 -0.29294540 -0.084999368</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; , , sigma_Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5       Q97.5</span></span>
-<span><span class="co">#&gt; Bo            -0.04256656 0.12013380 -0.26511432  0.20514025</span></span>
-<span><span class="co">#&gt; Bombali       -0.28812175 0.08907412 -0.45760100 -0.10950303</span></span>
-<span><span class="co">#&gt; Bonthe        -0.04653976 0.24523651 -0.53478287  0.41708900</span></span>
-<span><span class="co">#&gt; Kailahun      -0.20307607 0.10333090 -0.39441118  0.00767840</span></span>
-<span><span class="co">#&gt; Kambia         0.28821242 0.12163166  0.07750184  0.53852567</span></span>
-<span><span class="co">#&gt; Kenema         0.20986672 0.10172565  0.01970908  0.42063325</span></span>
-<span><span class="co">#&gt; Koinadugu      0.01445300 0.14926945 -0.25814375  0.32110622</span></span>
-<span><span class="co">#&gt; Kono           0.10016280 0.11293666 -0.11977785  0.33344990</span></span>
-<span><span class="co">#&gt; Moyamba        0.08512057 0.12260490 -0.14177760  0.32760045</span></span>
-<span><span class="co">#&gt; Port Loko      0.01438897 0.08744177 -0.15260362  0.19708952</span></span>
-<span><span class="co">#&gt; Pujehun       -0.13872134 0.24883274 -0.67513868  0.31296242</span></span>
-<span><span class="co">#&gt; Tonkolili     -0.23553497 0.10578498 -0.44475770 -0.02997846</span></span>
-<span><span class="co">#&gt; Western Rural  0.03013645 0.09161610 -0.13820100  0.21627057</span></span>
-<span><span class="co">#&gt; Western Urban  0.24684340 0.08450477  0.08454660  0.42205177</span></span></code></pre></div>
+<span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5        Q97.5</span></span>
+<span><span class="co">#&gt; Bo            -0.03774549 0.11999180 -0.25785065  0.200556075</span></span>
+<span><span class="co">#&gt; Bombali       -0.28555048 0.08677042 -0.45373752 -0.118673550</span></span>
+<span><span class="co">#&gt; Bonthe        -0.05366401 0.23360814 -0.54161525  0.398332875</span></span>
+<span><span class="co">#&gt; Kailahun      -0.19935028 0.10177844 -0.40268535  0.002002235</span></span>
+<span><span class="co">#&gt; Kambia         0.28967921 0.11477089  0.07720939  0.532490900</span></span>
+<span><span class="co">#&gt; Kenema         0.20916017 0.10375131  0.01707886  0.412750800</span></span>
+<span><span class="co">#&gt; Koinadugu      0.01993145 0.14835180 -0.25591605  0.320037675</span></span>
+<span><span class="co">#&gt; Kono           0.11108346 0.11312073 -0.10786290  0.342692150</span></span>
+<span><span class="co">#&gt; Moyamba        0.08907327 0.12367429 -0.14755035  0.343475200</span></span>
+<span><span class="co">#&gt; Port Loko      0.02020623 0.08708080 -0.15124630  0.197971375</span></span>
+<span><span class="co">#&gt; Pujehun       -0.13396524 0.23181602 -0.63350933  0.292881550</span></span>
+<span><span class="co">#&gt; Tonkolili     -0.23416646 0.10454054 -0.44190337 -0.028382105</span></span>
+<span><span class="co">#&gt; Western Rural  0.03173909 0.08798082 -0.14141063  0.207178825</span></span>
+<span><span class="co">#&gt; Western Urban  0.24722494 0.08204392  0.08320634  0.418409825</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3" number="3.3">
@@ -494,9 +492,15 @@ The <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_dr
 <p>In Figure <a href="#fig:epred">3.1</a> we show the posterior expectation of the delay distribution for each of the three fitted models.
 Figure <a href="#fig:epred">3.1</a>B illustrates the higher mean of men as compared with women.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">epred_draws</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="co"># add dummmy variables</span></span>
+<span><span class="va">add_marginal_dummy_vars</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">data</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, delay_upr <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">epred_draws</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_marginal_dummy_vars</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">fit</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred_base_figure</span> <span class="op">&lt;-</span> <span class="va">epred_draws</span> <span class="op">|&gt;</span></span>
@@ -507,7 +511,7 @@ Figure <a href="#fig:epred">3.1</a>B illustrates the higher mean of men as compa
 <span></span>
 <span><span class="va">epred_draws_sex</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_marginal_dummy_vars</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">fit_sex</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred_sex_figure</span> <span class="op">&lt;-</span> <span class="va">epred_draws_sex</span> <span class="op">|&gt;</span></span>
@@ -518,7 +522,7 @@ Figure <a href="#fig:epred">3.1</a>B illustrates the higher mean of men as compa
 <span></span>
 <span><span class="va">epred_draws_sex_district</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_marginal_dummy_vars</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred_sex_district_figure</span> <span class="op">&lt;-</span> <span class="va">epred_draws_sex_district</span> <span class="op">|&gt;</span></span>
@@ -552,7 +556,7 @@ For example, for the <code>mu</code> parameter in the sex-district stratified mo
 <code class="sourceCode R"><span><span class="va">linpred_draws_sex_district</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="cn">NA</span>, pwindow <span class="op">=</span> <span class="cn">NA</span>, swindow <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_marginal_dummy_vars</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_linpred_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, dpar <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
@@ -581,12 +585,18 @@ In this section, we demonstrate how to produce either a discrete probability mas
 <span class="header-section-number">3.5.1</span> Discrete probability mass function<a class="anchor" aria-label="anchor" href="#discrete-probability-mass-function"></a>
 </h4>
 <p>To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
-To do this, we set each of <code>pwindow</code> and <code>swindow</code> to 1 for daily censoring, and <code>relative_obs_time</code> to 1000 for no censoring.
+To do this, we set each of <code>pwindow</code> and <code>swindow</code> to 1 for daily censoring, and <code>relative_obs_time</code> to <code>Inf</code> for no censoring.
 Figure <a href="#fig:pmf">3.3</a> shows the result, where the few delays greater than 30 are omitted from the figure.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">draws_pmf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">add_marginal_pmf_vars</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">data</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>      relative_obs_time <span class="op">=</span> <span class="cn">Inf</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span>, delay_upr <span class="op">=</span> <span class="cn">NA</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">draws_pmf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_marginal_pmf_vars</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pmf_base_figure</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">draws_pmf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.prediction</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -596,9 +606,8 @@ Figure <a href="#fig:pmf">3.3</a> shows the result, where the few delays greater
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">draws_sex_pmf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_marginal_pmf_vars</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pmf_sex_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_pmf</span> <span class="op">|&gt;</span></span>
@@ -610,9 +619,8 @@ Figure <a href="#fig:pmf">3.3</a> shows the result, where the few delays greater
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">draws_sex_district_pmf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_marginal_pmf_vars</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pmf_sex_district_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_district_pmf</span> <span class="op">|&gt;</span></span>
@@ -651,9 +659,15 @@ Figure 3.3: Posterior predictions of the discrete probability mass function for 
 <p>The posterior predictive distribution under no truncation and no censoring.
 That is to produce continuous delay times (Figure <a href="#fig:pdf">3.4</a>):</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">draws_pdf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">0</span>, swindow <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">add_marginal_pdf_vars</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">data</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
+<span>      relative_obs_time <span class="op">=</span> <span class="cn">Inf</span>, pwindow <span class="op">=</span> <span class="fl">0</span>, swindow <span class="op">=</span> <span class="fl">0</span>, delay_upr <span class="op">=</span> <span class="cn">NA</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">draws_pdf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_marginal_pdf_vars</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pdf_base_figure</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">draws_pdf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.prediction</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -663,9 +677,8 @@ That is to produce continuous delay times (Figure <a href="#fig:pdf">3.4</a>):</
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">draws_sex_pdf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">0</span>, swindow <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_marginal_pdf_vars</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pdf_sex_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_pdf</span> <span class="op">|&gt;</span></span>
@@ -677,9 +690,8 @@ That is to produce continuous delay times (Figure <a href="#fig:pdf">3.4</a>):</
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">draws_sex_district_pdf</span> <span class="op">&lt;-</span> <span class="va">obs_prep</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://modelr.tidyverse.org/reference/data_grid.html" class="external-link">data_grid</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">district</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>relative_obs_time <span class="op">=</span> <span class="fl">1000</span>, pwindow <span class="op">=</span> <span class="fl">0</span>, swindow <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">add_marginal_pdf_vars</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit_sex_district</span>, ndraws <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pdf_sex_district_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_district_pdf</span> <span class="op">|&gt;</span></span>
