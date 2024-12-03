@@ -17,4 +17,5 @@
 ^pkgdown$
 ^vignettes/approx-inference\.Rmd$
 ^vignettes/ebola\.Rmd$
+^vignettes/faq\.Rmd$
 ^\.lintr$

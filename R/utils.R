@@ -204,6 +204,46 @@
   return(formula)
 }
 
+#' Extract distributional parameter terms from a brms formula
+#'
+#' This function extracts all unique terms from the right-hand side of all
+#' distributional parameters in a brms formula.
+#'
+#' @param formula A `brms formula object
+#' @return A character vector of unique terms
+#' @keywords internal
+.extract_dpar_terms <- function(formula) {
+  terms <- brms::brmsterms(formula)
+  # Extract all terms from the right hand side of all dpars
+  dpar_terms <- purrr::map(terms$dpars, \(x) all.vars(x$allvars))
+  dpar_terms <- unique(unlist(dpar_terms))
+  return(dpar_terms)
+}
+
+#' Summarise data by grouping variables and count occurrences
+#'
+#' @param data A `data.frame` to summarise which must contain a `n` column
+#' which is a count of occurrences.
+#' @param by Character vector of column names to group by.
+#' @param formula Optional `brms` formula object to extract additional grouping
+#' terms from.
+#' @return A `data.frame` summarised by the grouping variables with counts
+#' @keywords internal
+#' @importFrom dplyr group_by summarise across
+.summarise_n_by_formula <- function(data, by = character(), formula = NULL) {
+  if (!is.null(formula)) {
+    formula_terms <- .extract_dpar_terms(formula)
+    by <- c(by, formula_terms)
+  }
+  # Remove duplicates
+  by <- unique(by)
+
+  data |>
+    tibble::as_tibble() |>
+    summarise(n = sum(.data$n), .by = dplyr::all_of(by))
+}
+
+
 #' Rename the columns of a `data.frame`
 #'
 #' @param df ...

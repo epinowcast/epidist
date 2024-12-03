@@ -2,19 +2,26 @@
 
 Development version of `epidist`.
 
+## Models
+
+- Added a marginalised likelihood model based on `primarycensored`. This can be specified using `as_epidist_marginal_model()`. This is currently limited to Weibull, log-normal, and gamma distributions with uniform primary censoring but this will be generalised in future releases. See #426.
+- Added user settable primary event priors to the latent model. See #474.
+- Added a marginalised likelihood to the latent model. See #474.
+
 ## Package
 
 - Remove the default method for `epidist()`. See #473.
 - Added `enforce_presence` argument to `epidist_prior()` to allow for priors to be
   specified if they do not match existing parameters. See #474.
 - Added a `merge` argument to `epidist_prior()` to allow for not merging user and package priors. See #474.
-- Added user settable primary event priors to the latent model. See #474.
-- Added a marginalised likelihood to the latent model. See #474.
 - Generalised the stan reparametrisation feature to work across all distributions without manual specification by generating stan code with `brms` and then extracting the reparameterisation. See #474.
+- Added a `transform_data` S3 method to allow for data to be transformed for specific models. This is specifically useful for the marginal model at the moment as it allows reducing the data to its unique strata. See #474.
 
 ## Documentation
 
 - Brings the README into line with `epinowcast` standards. See #467.
+- Switched over to using the marginal model as default in documentation. See #426.
+- Added helper functions for new variables to avoid code duplication in vignettes. See #426.
 
 # epidist 0.1.0
 

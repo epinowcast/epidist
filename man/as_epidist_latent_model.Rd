@@ -4,10 +4,12 @@
 \alias{as_epidist_latent_model}
 \title{Convert an object to an \code{epidist_latent_model} object}
 \usage{
-as_epidist_latent_model(data)
+as_epidist_latent_model(data, ...)
 }
 \arguments{
 \item{data}{An object to be converted to the class \code{epidist_latent_model}}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \description{
 Convert an object to an \code{epidist_latent_model} object

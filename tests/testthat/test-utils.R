@@ -98,3 +98,58 @@ test_that(".make_intercepts_explicit does not add an intercept if the distributi
   expect_identical(formula$pforms$mu, formula_updated$pforms$mu)
   expect_identical(formula$pforms$sigma, formula_updated$pforms$sigma)
 })
+
+test_that(
+  ".summarise_n_by_formula correctly summarizes counts by grouping variables",
+  {
+    df <- tibble::tibble(
+      x = c(1, 1, 2, 2),
+      y = c("a", "b", "a", "b"),
+      n = c(2, 3, 4, 1)
+    )
+
+    # Test grouping by single variable
+    result <- .summarise_n_by_formula(df, by = "x")
+    expect_identical(result$x, c(1, 2))
+    expect_identical(result$n, c(5, 5))
+
+    # Test grouping by multiple variable
+    result <- .summarise_n_by_formula(df, by = c("x", "y"))
+    expect_identical(result$x, c(1, 1, 2, 2))
+    expect_identical(result$y, c("a", "b", "a", "b"))
+    expect_identical(result$n, c(2, 3, 4, 1))
+
+    # Test with formula
+    formula <- bf(mu ~ x + y)
+    result <- .summarise_n_by_formula(df, formula = formula)
+    expect_identical(result$x, c(1, 1, 2, 2))
+    expect_identical(result$y, c("a", "b", "a", "b"))
+    expect_identical(result$n, c(2, 3, 4, 1))
+
+    # Test with both by and formula
+    formula <- bf(mu ~ y)
+    result <- .summarise_n_by_formula(df, by = "x", formula = formula)
+    expect_identical(result$x, c(1, 1, 2, 2))
+    expect_identical(result$y, c("a", "b", "a", "b"))
+    expect_identical(result$n, c(2, 3, 4, 1))
+  }
+)
+
+test_that(
+  ".summarise_n_by_formula handles missing grouping variables appropriately",
+  {
+    df <- data.frame(x = 1:2, n = c(1, 2))
+    expect_error(
+      .summarise_n_by_formula(df, by = "missing"),
+      "Can't subset elements that don't exist"
+    )
+  }
+)
+
+test_that(".summarise_n_by_formula requires n column in data", {
+  df <- data.frame(x = 1:2)
+  expect_error(
+    .summarise_n_by_formula(df, by = "x"),
+    "Column `n` not found in `.data`."
+  )
+})
