@@ -67,6 +67,9 @@ fit <- epidist(
   data,
   formula = mu ~ 1,
   seed = 1,
+  chains = 2,
+  cores = 2,
+  refresh = ifelse(interactive(), 250, 0),
   backend = "cmdstanr"
 )
 ```
@@ -152,7 +155,8 @@ fit_ppc <- epidist(
   formula = mu ~ 1,
   family = lognormal(),
   sample_prior = "only",
-  seed = 1
+  seed = 1,
+  backend = "cmdstanr"
 )
 ```
 
@@ -218,8 +222,10 @@ To see these functions demonstrated in a vignette, see ["Advanced features with 
 As a short example, to generate 4000 predictions (equal to the number of draws) of the delay that would be observed with a double censored observation process (in which the primary and secondary censoring windows are both one) then:
 
 ```{r}
-draws_pmf <- data.frame(relative_obs_time = 1000, pwindow = 1, swindow = 1) |>
-  add_predicted_draws(fit, ndraws = 4000)
+draws_pmf <- tibble::tibble(
+  relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
+) |>
+  add_predicted_draws(fit, ndraws = 2000)
 
 ggplot(draws_pmf, aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
@@ -228,10 +234,7 @@ ggplot(draws_pmf, aes(x = .prediction)) +
   theme_minimal()
 ```
 
-Importantly, this functionality is only available for `epidist` models using custom `brms` families that have `posterior_predict` and `posterior_epred` methods implemented.
-For example, for the `epidist_latent_model` model, currently methods are implemented for the [lognormal](https://github.com/epinowcast/epidist/blob/main/R/latent_lognormal.R) and [gamma](https://github.com/epinowcast/epidist/blob/main/R/latent_gamma.R) families.
-If you are using another family, consider [submitting a pull request](https://github.com/epinowcast/epidist/pulls) to implement these methods!
-In doing so, you may find it useful to use the [`primarycensored`](https://primarycensored.epinowcast.org/) package.
+Importantly, this functionality is only available for `epidist` models using `brms` families that have a `log_lik_censor` method implemented internally in `brms`. If you are using another family, consider [submitting a pull request](https://github.com/epinowcast/epidist/pulls) to implement these methods!
 
 # How can I use the `cmdstanr` backend?
 
