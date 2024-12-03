@@ -3,11 +3,11 @@
   *
   * This function is designed to be read into R where:
   * - 'family' is replaced with the target distribution (e.g., 'lognormal')
-  * - 'dpars_A' is replaced with multiple parameters in the format
+  * - 'dpars_A' is replaced with  multiple distribution parameters in the format
   *   "vector|real paramname1, vector|real paramname2, ..." depending on whether
-  *   each parameter has a model. This includes distribution parameters.
-  * - 'dpars_B' is replaced with the same parameters as dpars_A but with window
-  *   indices removed.
+  *   each parameter has a model.
+  * - 'dpars_B' is replaced with the same parameters as dpars_A but
+  *   reparameterised according to the brms parameterisation for Stan.
   *
   * @param y Vector of observed values (delays)
   * @param dpars_A Distribution parameters (replaced via regex)
