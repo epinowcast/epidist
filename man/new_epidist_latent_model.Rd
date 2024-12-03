@@ -4,10 +4,12 @@
 \alias{new_epidist_latent_model}
 \title{Class constructor for \code{epidist_latent_model} objects}
 \usage{
-new_epidist_latent_model(data)
+new_epidist_latent_model(data, ...)
 }
 \arguments{
 \item{data}{An object to be set with the class \code{epidist_latent_model}}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \value{
 An object of class \code{epidist_latent_model}
