@@ -226,7 +226,7 @@ epidist_stancode.epidist_marginal_model <- function(
     dist_id <- 3
   } else {
     cli_abort(c(
-      "!" = "No solution available in primarycensored for this family"
+      "!" = "epidist does not currently support this family for the marginal model" # nolint
     ))
   }
 
