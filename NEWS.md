@@ -20,7 +20,7 @@ Development version of `epidist`.
 ## Documentation
 
 - Brings the README into line with `epinowcast` standards. See #467.
-- Switched over to using the marginal model everywhere. See #426.
+- Switched over to using the marginal model as default in documentation. See #426.
 - Added helper functions for new variables to avoid code duplication in vignettes. See #426.
 
 # epidist 0.1.0
