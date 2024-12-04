@@ -307,9 +307,7 @@ However, with only access to <code>obs_cens_trunc_samp</code>, the delay distrib
 Figure 2.1: The histogram of delays from the complete, retrospective data <code>obs_cens</code> match quite closely with the underlying distribution, whereas those from <code>obs_cens_trunc_samp</code> show more significant systematic bias. In this instance the extent of the bias caused by censoring is less than that caused by right truncation. Nonetheless, we always recommend [<span class="citation">Charniga et al. (<a href="#ref-charniga2024best">2024</a>)</span>; Table 2] adjusting for censoring when it is present.
 </p>
 </div>
-<p>The main function you will use for modelling is called <code><a href="../reference/epidist.html">epidist()</a></code><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Technically, &lt;code&gt;&lt;a href="../reference/epidist.html"&gt;epidist()&lt;/a&gt;&lt;/code&gt; is an &lt;a href="http://adv-r.had.co.nz/S3.html" class="external-link"&gt;S3 generic&lt;/a&gt; which allows it to work differently for inputs of different classes. This is in part why inputs must be prepared first via &lt;code&gt;&lt;a href="../reference/as_epidist_latent_model.html"&gt;as_epidist_latent_model()&lt;/a&gt;&lt;/code&gt; so that they are of the appropriate class!&lt;/p&gt;'><sup>1</sup></a>.
-We will fit the model <code>"epidist_latent_model"</code> which uses latent variables for the time of primary and secondary event of each individual<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;In a future vignette, we will explain in more detail the structure of the model!&lt;/p&gt;"><sup>2</sup></a>.
-To do so, we first prepare the <code>data</code> using <code><a href="../reference/as_epidist_latent_model.html">as_epidist_latent_model()</a></code>:</p>
+<p>The main function you will use for modelling is called <code><a href="../reference/epidist.html">epidist()</a></code>. Inputs must be prepared first via <code><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code> for our recommended default marginal model (or <code><a href="../reference/as_epidist_latent_model.html">as_epidist_latent_model()</a></code> for our latent model for example) so that the internals of <code><a href="../reference/epidist.html">epidist()</a></code> know which model functionality to use. In order to interact with our model types we first need to define our available data in a format that <code>epidist</code> understands. In this case, we have a linelist so we use <code><a href="../reference/as_epidist_latent_model.html">as_epidist_latent_model()</a></code>:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">linelist_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_linelist_data.html">as_epidist_linelist_data</a></span><span class="op">(</span></span>
 <span>  <span class="va">obs_cens_trunc_samp</span><span class="op">$</span><span class="va">ptime_lwr</span>,</span>
@@ -848,8 +846,8 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.75      0.05     1.66     1.85 1.00      953     1044</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.78      0.07    -0.91    -0.64 1.00     1112     1030</span></span>
+<span><span class="co">#&gt; Intercept           1.75      0.05     1.66     1.85 1.00     1101     1006</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.78      0.07    -0.90    -0.64 1.00     1135     1115</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -920,7 +918,6 @@ Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, Anne Cori, Nicholas G. D
 </div>
 </div>
 </div>
-
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
