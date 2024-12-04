@@ -261,9 +261,7 @@ bind_rows(
   theme(legend.position = "bottom")
 ```
 
-The main function you will use for modelling is called `epidist()`^[Technically, `epidist()` is an [S3 generic](http://adv-r.had.co.nz/S3.html) which allows it to work differently for inputs of different classes. This is in part why inputs must be prepared first via `as_epidist_latent_model()` so that they are of the appropriate class!].
-We will fit the model `"epidist_latent_model"` which uses latent variables for the time of primary and secondary event of each individual^[In a future vignette, we will explain in more detail the structure of the model!].
-To do so, we first prepare the `data` using `as_epidist_latent_model()`:
+The main function you will use for modelling is called `epidist()`. Inputs must be prepared first via `as_epidist_marginal_model()` for our recommended default marginal model (or `as_epidist_latent_model()` for our latent model for example) so that the internals of `epidist()` know which model functionality to use. In order to interact with our model types we first need to define our available data in a format that `epidist` understands. In this case, we have a linelist so we use `as_epidist_latent_model()`:
 
 ```{r}
 linelist_data <- as_epidist_linelist_data(
