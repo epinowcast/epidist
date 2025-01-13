@@ -210,7 +210,7 @@ linelist_data <- obs_cens |>
   )
 ```
 
-In this call to [as_epidist_linelist_data()] it has made some assumptions about the data.
+In this call to `as_epidist_linelist_data()` it has made some assumptions about the data.
 First, because we did not supply upper bounds for the primary and secondary events (`pdate_upr` and `sdate_upr`), it has assumed that the upper bounds are one day after the lower bounds.
 Second, because we also did not supply an observation time column (`obs_date`), it has assumed that the observation time is the maximum of the secondary event upper bounds.
 
