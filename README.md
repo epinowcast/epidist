@@ -73,7 +73,6 @@ remotes::install_github(
 Similarly, you can install historical versions by specifying the release
 tag (e.g. this installs
 [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)):
-–\>
 
 ``` r
 remotes::install_github(
