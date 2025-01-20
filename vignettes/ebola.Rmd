@@ -406,7 +406,7 @@ In this section, we demonstrate how to produce either a discrete probability mas
 ### Discrete probability mass function
 
 To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
-To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and `relative_obs_time` to `Inf` for no censoring.
+To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and `relative_obs_time` to `Inf` for no right truncation.
 Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure.
 
 ```{r}
