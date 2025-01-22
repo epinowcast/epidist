@@ -60,7 +60,7 @@ jobs:
       - name: Install cmdstan
         uses: epinowcast/actions/install-cmdstan@v1
         with:
-          cmdstan-version: '2.35.0'
+          cmdstan-version: 'latest'
           num-cores: 2
 
       - uses: r-lib/actions/check-r-package@v2
