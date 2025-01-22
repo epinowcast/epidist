@@ -17,6 +17,5 @@
 ^pkgdown$
 ^vignettes/approx-inference\.Rmd$
 ^vignettes/ebola\.Rmd$
-^inst/extdata/gadm41_SLE_shp$
 ^vignettes/faq\.Rmd$
 ^\.lintr$
