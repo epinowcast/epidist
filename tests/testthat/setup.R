@@ -125,31 +125,38 @@ prep_marginal_obs_sex <- as_epidist_marginal_model(sim_obs_sex)
 
 if (not_on_cran()) {
   set.seed(1)
+  cli::cli_inform("Compiling the latent model with cmdstanr")
   fit <- epidist(
     data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
     backend = "cmdstanr"
   )
 
+  cli::cli_inform("Compiling the latent model with rstan")
   fit_rstan <- epidist(
     data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0
   )
+
+  cli::cli_inform("Compiling the marginal model with cmdstanr")
   fit_marginal <- suppressMessages(epidist(
     data = prep_marginal_obs, seed = 1, chains = 2, cores = 2, silent = 2,
     refresh = 0, backend = "cmdstanr"
   ))
 
+  cli::cli_inform("Compiling the latent model with cmdstanr and a gamma dist")
   fit_gamma <- epidist(
     data = prep_obs_gamma, family = Gamma(link = "log"),
     seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
     backend = "cmdstanr"
   )
 
+  cli::cli_inform("Compiling the marginal model with cmdstanr and a gamma dist")
   fit_marginal_gamma <- suppressMessages(epidist(
     data = prep_marginal_obs_gamma, family = Gamma(link = "log"),
     seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
     backend = "cmdstanr"
   ))
 
+  cli::cli_inform("Compiling the latent model with cmdstanr and a sex stratification")
   fit_sex <- epidist(
     data = prep_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
@@ -157,6 +164,7 @@ if (not_on_cran()) {
     cores = 2, chains = 2, backend = "cmdstanr"
   )
 
+  cli::cli_inform("Compiling the marginal model with cmdstanr and a sex stratification")
   fit_marginal_sex <- suppressMessages(epidist(
     data = prep_marginal_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
