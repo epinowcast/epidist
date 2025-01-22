@@ -272,7 +272,7 @@ linelist_data <- as_epidist_linelist_data(
   obs_time = obs_cens_trunc_samp$obs_time
 )
 
-data <- as_epidist_marginal_model(linelist_data)
+data <- as_epidist_naive_model(linelist_data)
 class(data)
 ```
 
