@@ -156,7 +156,9 @@ if (not_on_cran()) {
     backend = "cmdstanr"
   ))
 
-  cli::cli_inform("Compiling the latent model with cmdstanr and a sex stratification")
+  cli::cli_inform(
+    "Compiling the latent model with cmdstanr and a sex stratification"
+  )
   fit_sex <- epidist(
     data = prep_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
@@ -164,7 +166,9 @@ if (not_on_cran()) {
     cores = 2, chains = 2, backend = "cmdstanr"
   )
 
-  cli::cli_inform("Compiling the marginal model with cmdstanr and a sex stratification")
+  cli::cli_inform(
+    "Compiling the marginal model with cmdstanr and a sex stratification"
+  )
   fit_marginal_sex <- suppressMessages(epidist(
     data = prep_marginal_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
