@@ -35,23 +35,24 @@ It then goes on to explain each model in turn.
 
 # Background {#maths}
 
-Let $p$ be time of primary event, and $s$ be time of secondary event.
-We assume that these events occur at rates, or equivalently incidences, $\mathcal{P}(p)$ and $\mathcal{S}(s)$, respectively.
-Let $\tau$ be a delay time such that $\tau = s - p$.
-Let $f_p(\tau)$ be probability of delay $\tau$ after observing primary event at time $p$.
-Similarly, let $b_s(\tau)$ be probability of delay $\tau$ after observing secondary event at time $s$.
-Finally, let $\mathcal{T}(p, s)$ be density of individuals with primary event at time $p$ and secondary event at time $s$.
-Then,
+Estimating a delay distribution may appear to be simple: one could imagine fitting a probability distribution to a set of observed delays.
+However, observed delays are often biased during an ongoing outbereak. 
+We begin by presenting a formalism for characterizing delay distributions as well as two main biases (truncation and censoring) affecting them.
+We then present statistical models for correcting for these biases.
+
+Any epidemiological delay requires a primary (starting) and a secondary (ending) event.
+For example, the incubation period measures the time between infection (primary event) and symptom onset (secondary event).
+Here, we use $p$ to denote the time of primary event, and $s$ to denote time of secondary event.
+
+We can measure any delay distribution in two different ways.
+First, we can measure the forward distribution $f_p(\tau)$, starting from a cohort of individuals who experienced the primary at the same time $p$ and looking at when they experienced their secondary event.
+Second, we can measure the backward distribution $b_s(\tau)$, starting from a cohort of individuals who experienced the secondary at the same time $s$ and looking at when they experienced their secondary event.
+While the length of each delay $\tau = p-s$ remains constant whether we look at it forward or backward, the shape of the distribution is affected by the differences in perspectives.
+
+To illustrate their differences, let's assume that primaryand secondary events occur at at rates, or equivalently incidences, $\mathcal{P}(p)$ and $\mathcal{S}(s)$, respectively.
+Then, the total density $\mathcal{T}(p, s)$ of individuals with primary event at time $p$ and secondary event at time $s$ can be expressed equivalently in terms of both forward and backward distributions:
 $$
-\mathcal{T}(p, s) = \mathcal{P}(p) f_p(s - p),
-$$
-and
-$$
-\mathcal{T}(p, s) = \mathcal{S}(s) b_s(s - p).
-$$
-So, by equivalence of the forwards and backwards perspectives then
-$$
-\mathcal{P}(p) f_p(s - p) = \mathcal{S}(s) b_s(s - p). (\#eq:forwards-backwards)
+\mathcal{T}(p, s) = \mathcal{P}(p) f_p(s - p)  = \mathcal{S}(s) b_s(s - p).  (\#eq:forwards-backwards)
 $$
 Rearranging Equation \@ref(eq:forwards-backwards) gives
 $$
@@ -65,13 +66,20 @@ such that
 $$
 b_s(\tau) = \frac{\mathcal{P}(s - \tau) f_{s - \tau}(\tau)}{\int_{-\infty}^\infty \mathcal{P}(s - \tau) f_{s - \tau}(\tau) \text{d} \tau}.
 $$
+Here, we see that $b_s(\tau)$ depends not only on $f_{s - \tau}(\tau)$ but also on $\mathcal{P}(s - \tau)$, meaning that past changes in the incidence pattern will affect the shape of the distribution.
+Particularly, when an epidemic is growing, we are more likely to observe shorter delays, causing underestimation of the mean delay.
+Therefore, we always want to characterize epidemiological delays from the forward perspective and estimate the forward distribution.
+Hereafter, we focus on biases that affect the estimation of the forward distribution.
 
 ## Right truncation
 
-Assume the data are right truncated and we don't observe secondary events past time $T$.
+Right truncation refers to the bias arising from inability to observe future events.
+For example, assume the data are right truncated and we don't observe secondary events past time $T$.
+Then, we will only observe delays whose secondary events occurred before time $T$, causing us to underestimate the mean of the distribution.
+
 Let $P$ and $S$ be random variables.
 Let $F_p$ be the forward cumulative distribution.
-Then
+Then, the probability of observing a delay of length $\tau$ given that the primary event occurred at time $p$ and a truncation at time $T$ can be written as:
 $$
 \begin{aligned}
 \mathbb{P}(S = P + \tau \, | \, P = p, S < T) &= \frac{\mathbb{P}(S = P + \tau, P = p, S < T)}{\mathbb{P}(P = p, S < T)} \\
@@ -85,6 +93,10 @@ Examining Equation \@ref(eq:right-truncation) illustrates that (right) truncatio
 For example, if the distribution $x \sim \text{Unif}(0, 1)$ were right truncated by $T = 0.5$ then $x \sim \text{Unif}(0, 0.5)$.
 
 ## Interval censoring
+
+The exact timing of epidemiological events is often unknown.
+Instead, we may only know that the event happened within certain interval.
+We refer to this as interval censoring.
 
 Assume the secondary event $S$ is censored and so we don't know when the event exactly happened.
 Instead, we only know that the secondary event happened between $S_L$ and $S_R$.
@@ -112,8 +124,13 @@ where $ g_P(x\,|\,P_L,P_R)$ represents the conditional distribution of primary e
 
 # The naive model
 
-Remains to fill.
-
+The simplest approach to modeling epidemiological delay distributions is to ignore both truncation and censoring biases.
+Then, the likelihood of observing a delay $\mathbf{Y}_i$ given parameter $\boldsymbol{\theta}$ is straightforward:
+$$
+\mathcal{L}(\mathbf{Y}_i \, | \, \boldsymbol{\theta}) = f(y_i - x_i).
+$$
+where $y_i$ and $x_i$ are the observed primary and secondary event times.
+ 
 # The latent model
 
 Now, we incorporate both truncation and double censoring:
