@@ -49,6 +49,7 @@
 <div class="section level3">
 <h3 id="models-0-1-0-1000">Models<a class="anchor" aria-label="anchor" href="#models-0-1-0-1000"></a></h3>
 <ul><li>Added a marginalised likelihood model based on <code>primarycensored</code>. This can be specified using <code><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code>. This is currently limited to Weibull, log-normal, and gamma distributions with uniform primary censoring but this will be generalised in future releases. See <a href="https://github.com/epinowcast/epidist/issues/426" class="external-link">#426</a>.</li>
+<li>Added a <code>weight</code> argument to <code><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code> to allow for weighted data (for example count data) to be used in the marginal model. See <a href="https://github.com/epinowcast/epidist/issues/509" class="external-link">#509</a>.</li>
 <li>Added user settable primary event priors to the latent model. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
 <li>Added a marginalised likelihood to the latent model. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
 </ul></div>

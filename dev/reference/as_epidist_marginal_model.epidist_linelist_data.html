@@ -51,7 +51,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'epidist_linelist_data'</span></span>
-<span><span class="fu"><a href="as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">data</span>, obs_time_threshold <span class="op">=</span> <span class="fl">2</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">data</span>, obs_time_threshold <span class="op">=</span> <span class="fl">2</span>, weight <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -68,6 +68,12 @@ relative observation times to Inf. Observation times greater than
 <code>obs_time_threshold</code> times the maximum delay will be set to Inf to improve
 model efficiency by reducing the number of unique observation times.
 Default is 2.</p></dd>
+
+
+<dt id="arg-weight">weight<a class="anchor" aria-label="anchor" href="#arg-weight"></a></dt>
+<dd><p>A column name to use for weighting the data in the
+likelihood. Default is NULL. Internally this is used to define the 'n'
+column of the returned object.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
