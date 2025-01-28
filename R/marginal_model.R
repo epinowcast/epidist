@@ -16,7 +16,7 @@ as_epidist_marginal_model <- function(data, ...) {
 #'   `obs_time_threshold` times the maximum delay will be set to Inf to improve
 #'   model efficiency by reducing the number of unique observation times.
 #'   Default is 2.
-#' @param weight A column name to use for weight the data in the
+#' @param weight A column name to use for weighting the data in the
 #'   likelihood. Default is NULL. Internally this is used to define the 'n'
 #'   column of the returned object.
 #' @param ... Not used in this method.

@@ -15,7 +15,7 @@ relative observation times to Inf. Observation times greater than
 model efficiency by reducing the number of unique observation times.
 Default is 2.}
 
-\item{weight}{A column name to use for weight the data in the
+\item{weight}{A column name to use for weighting the data in the
 likelihood. Default is NULL. Internally this is used to define the 'n'
 column of the returned object.}
 
