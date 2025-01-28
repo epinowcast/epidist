@@ -5,6 +5,7 @@ Development version of `epidist`.
 ## Models
 
 - Added a marginalised likelihood model based on `primarycensored`. This can be specified using `as_epidist_marginal_model()`. This is currently limited to Weibull, log-normal, and gamma distributions with uniform primary censoring but this will be generalised in future releases. See #426.
+- Added a `weight` argument to `as_epidist_marginal_model()` to allow for weighted data (for example count data) to be used in the marginal model. See #509.
 - Added user settable primary event priors to the latent model. See #474.
 - Added a marginalised likelihood to the latent model. See #474.
 
