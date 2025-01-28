@@ -50,8 +50,6 @@ as_epidist_aggregate_data.default <- function(
   return(df)
 }
 
-
-
 #' Create an epidist_aggregate_data object from a data.frame
 #'
 #' @param n A character string giving the name of the column containing the
