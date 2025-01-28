@@ -72,6 +72,24 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   return(data)
 }
 
+#' The marginal model method for `epidist_aggregate_data` objects
+#'
+#' @param data An `epidist_aggregate_data` object
+#' @inheritParams as_epidist_marginal_model.epidist_linelist_data
+#' @method as_epidist_marginal_model epidist_aggregate_data
+#' @export
+#' @family marginal_model
+#' @autoglobal
+as_epidist_marginal_model.epidist_aggregate_data <- function(
+    data, obs_time_threshold = 2, ...) {
+  as_epidist_marginal_model.epidist_linelist_data(
+    data,
+    obs_time_threshold = obs_time_threshold,
+    weight = "n",
+    ...
+  )
+}
+
 #' Class constructor for `epidist_marginal_model` objects
 #'
 #' @param data A data.frame to convert

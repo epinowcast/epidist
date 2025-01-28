@@ -43,6 +43,7 @@ Imports:
     rstan (>= 2.26.0),
     dplyr,
     tibble,
+    tidyr,
     lubridate,
     primarycensored
 Suggests:
@@ -54,7 +55,6 @@ Suggests:
     knitr,
     roxyglobals,
     bayesplot,
-    tidyr,
     posterior,
     fs,
     sf,

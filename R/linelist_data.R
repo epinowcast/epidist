@@ -158,6 +158,23 @@ as_epidist_linelist_data.data.frame <- function(
   return(result)
 }
 
+#' Convert aggregate data to linelist format
+#'
+#' This method expands an `epidist_aggregate_data` object into individual
+#' observations by uncounting the `n` column, then converts it to linelist
+#' format.
+#'
+#' @method as_epidist_linelist_data epidist_aggregate_data
+#' @inheritParams as_epidist_linelist_data
+#' @family linelist_data
+#' @autoglobal
+#' @export
+as_epidist_linelist_data.epidist_aggregate_data <- function(data, ...) {
+  expanded <- tidyr::uncount(data, weights = .data$n, .remove = TRUE)
+  class(expanded) <- setdiff(class(expanded), "epidist_aggregate_data")
+  as_epidist_linelist_data(expanded)
+}
+
 #' Class constructor for `epidist_linelist_data` objects
 #'
 #' @param data A data.frame to convert
