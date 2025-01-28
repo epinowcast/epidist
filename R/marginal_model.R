@@ -16,7 +16,7 @@ as_epidist_marginal_model <- function(data, ...) {
 #'   `obs_time_threshold` times the maximum delay will be set to Inf to improve
 #'   model efficiency by reducing the number of unique observation times.
 #'   Default is 2.
-#' @param weighting A column name to use for weighting the data in the
+#' @param weight A column name to use for weight the data in the
 #'   likelihood. Default is NULL. Internally this is used to define the 'n'
 #'   column of the returned object.
 #' @param ... Not used in this method.
@@ -25,7 +25,7 @@ as_epidist_marginal_model <- function(data, ...) {
 #' @autoglobal
 #' @export
 as_epidist_marginal_model.epidist_linelist_data <- function(
-    data, obs_time_threshold = 2, weighting = NULL, ...) {
+    data, obs_time_threshold = 2, weight = NULL, ...) {
   assert_epidist(data)
 
   data <- data |>
@@ -38,10 +38,10 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
       delay_upr = .data$stime_upr - .data$ptime_lwr
     )
 
-  if (!is.null(weighting)) {
-    assert_names(names(data), must.include = weighting)
+  if (!is.null(weight)) {
+    assert_names(names(data), must.include = weight)
     data <- data |>
-      mutate(n = .data[[weighting]])
+      mutate(n = .data[[weight]])
   } else {
     data <- data |>
       mutate(n = 1)

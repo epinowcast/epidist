@@ -4,7 +4,7 @@
 \alias{as_epidist_marginal_model.epidist_linelist_data}
 \title{The marginal model method for \code{epidist_linelist_data} objects}
 \usage{
-\method{as_epidist_marginal_model}{epidist_linelist_data}(data, obs_time_threshold = 2, weighting = NULL, ...)
+\method{as_epidist_marginal_model}{epidist_linelist_data}(data, obs_time_threshold = 2, weight = NULL, ...)
 }
 \arguments{
 \item{data}{An \code{epidist_linelist_data} object}
@@ -15,7 +15,7 @@ relative observation times to Inf. Observation times greater than
 model efficiency by reducing the number of unique observation times.
 Default is 2.}
 
-\item{weighting}{A column name to use for weighting the data in the
+\item{weight}{A column name to use for weight the data in the
 likelihood. Default is NULL. Internally this is used to define the 'n'
 column of the returned object.}
 
