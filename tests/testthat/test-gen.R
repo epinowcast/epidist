@@ -29,11 +29,11 @@ test_that("epidist_gen_posterior_predict returns a function that errors for i ou
     prep <- brms::prepare_predictions(fit)
     i_out_of_bounds <- length(prep$data$Y) + 1
     predict_fn <- epidist_gen_posterior_predict(family)
-    expect_warning(
+    suppressMessages(expect_warning(
       expect_error(
         predict_fn(i = i_out_of_bounds, prep)
       )
-    )
+    ))
   }
 
   # Test lognormal - latent and marginal

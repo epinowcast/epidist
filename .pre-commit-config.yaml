@@ -16,7 +16,7 @@ repos:
     -   id: deps-in-desc
         args: [--allow_private_imports]
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
     -   id: check-added-large-files
         args: ['--maxkb=200']
@@ -28,13 +28,12 @@ repos:
         entry: Cannot commit .Rhistory, .RData, .Rds or .rds.
         language: fail
         files: '\.Rhistory|\.RData|\.Rds|\.rds$'
-        exclude: '^inst/extdata/(fit|fit_gamma)\.rds$'
 -   repo: meta
     hooks:
     -   id: check-hooks-apply
     -   id: check-useless-excludes
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
     -   id: trailing-whitespace
     -   id: check-yaml

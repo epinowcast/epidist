@@ -13,7 +13,7 @@ test_that("epidist.epidist_latent_model Stan code has no syntax errors in the de
   mod <- cmdstanr::cmdstan_model(
     stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
   )
-  expect_true(mod$check_syntax())
+  suppressMessages(expect_true(mod$check_syntax()))
 })
 
 test_that("epidist.epidist_latent_model samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case.", { # nolint: line_length_linter.

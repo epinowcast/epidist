@@ -9,6 +9,33 @@ test_that("as_epidist_marginal_model.epidist_linelist_data errors when passed in
   expect_error(as_epidist_marginal_model(sim_obs[, 1]))
 })
 
+test_that("as_epidist_marginal_model.epidist_linelist_data respects weight variable", { # nolint: line_length_linter.
+  # Create test data with a weight column
+  weighted_data <- sim_obs
+  weighted_data$counts <- rep(c(1, 2), length.out = nrow(weighted_data))
+
+  # Check weighted model has correct n values
+  weighted_model <- as_epidist_marginal_model(
+    weighted_data,
+    weight = "counts"
+  )
+  expect_identical(weighted_model$n, weighted_data$counts)
+
+  # Check unweighted model has n=1
+  unweighted_model <- as_epidist_marginal_model(sim_obs)
+  expect_true(all(unweighted_model$n == 1))
+})
+
+test_that(
+  "as_epidist_marginal_model.epidist_linelist_data errors with invalid weight column", # nolint: line_length_linter.
+  {
+    expect_error(
+      as_epidist_marginal_model(sim_obs, weight = "nonexistent_column"),
+      regexp = "Names must include the elements"
+    )
+  }
+)
+
 # Make this data available for other tests
 family_lognormal <- epidist_family(prep_marginal_obs, family = lognormal())
 
