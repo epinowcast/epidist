@@ -29,7 +29,6 @@ as_epidist_aggregate_data <- function(data, n = NULL, ...) {
 as_epidist_aggregate_data.default <- function(
     data, n = NULL, ptime_upr = NULL, stime_lwr = NULL,
     stime_upr = NULL, obs_time = NULL, ...) {
-
   # Create linelist data first
   df <- as_epidist_linelist_data(
     data = data,
@@ -62,7 +61,6 @@ as_epidist_aggregate_data.default <- function(
 as_epidist_aggregate_data.data.frame <- function(
     data, n = NULL, pdate_lwr = NULL, sdate_lwr = NULL,
     pdate_upr = NULL, sdate_upr = NULL, obs_date = NULL, ...) {
-
   # First convert to linelist data
   df <- as_epidist_linelist_data.data.frame(
     data = data,
@@ -92,7 +90,7 @@ as_epidist_aggregate_data.data.frame <- function(
 #' @method assert_epidist epidist_aggregate_data
 #' @export
 assert_epidist.epidist_aggregate_data <- function(data, ...) {
-  NextMethod()  # Call linelist assert first
+  NextMethod() # Call linelist assert first
   assert_names(names(data), must.include = "n")
   assert_integerish(data$n, lower = 1)
   return(invisible(NULL))
