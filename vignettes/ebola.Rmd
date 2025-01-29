@@ -76,20 +76,10 @@ We begin by loading the Ebola line list data:
 data("sierra_leone_ebola_data")
 ```
 
-The data has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a unique case report `id`.
-The columns of the data are the individuals name (retracted, and hence can be removed), age, sex, the dates of Ebola symptom onset and positive sample, and their district and chiefdom.
+The data has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a unique case report ID (`id`).
+The columns of the data are the, age, sex, the dates of Ebola symptom onset and positive sample, and their district and chiefdom.
 
 ```{r}
-sierra_leone_ebola_data <- sierra_leone_ebola_data |>
-  select(-name) |>
-  mutate(
-    case = as.integer(id), .keep = "unused",
-    sex = case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male"
-    )
-  )
-
 head(sierra_leone_ebola_data)
 
 fraction <- 5
@@ -104,54 +94,20 @@ We can see that the start time and course of the epidemic varies across district
 
 ```{r ebola-outbreak, fig.cap="(ref:ebola-outbreak)", fig.height=9}
 sierra_leone_ebola_data |>
-  filter(case %% fraction == 0) |>
+  filter(id %% fraction == 0) |>
   ggplot() +
   geom_segment(
     aes(
       x = date_of_symptom_onset, xend = date_of_sample_tested,
-      y = case, yend = case
+      y = id, yend = id
     ),
     col = "grey"
   ) +
-  geom_point(aes(x = date_of_symptom_onset, y = case), col = "#56B4E9") +
-  geom_point(aes(x = date_of_sample_tested, y = case), col = "#009E73") +
+  geom_point(aes(x = date_of_symptom_onset, y = id), col = "#56B4E9") +
+  geom_point(aes(x = date_of_sample_tested, y = id), col = "#009E73") +
   facet_wrap(district ~ ., ncol = 2) +
   labs(x = "", y = "Case ID") +
   theme_minimal()
-```
-
-We can use a map to help visualise the outbreak across space.
-To create a map, we first join the Ebola data to shapefiles for the districts of Sierra Leone.
-These shapefiles were obtained from the Database of Global Administrative Areas ([GADM](https://gadm.org/)).
-
-```{r message=FALSE, warning=FALSE}
-sf <- st_read(
-  system.file(
-    "extdata", "gadm41_SLE_shp", "gadm41_SLE_2.shp",
-    package = "epidist"
-  ),
-  quiet = TRUE
-)
-
-sierra_leone_ebola_data_sf <- select(sf, district = NAME_2, geometry) |>
-  left_join(
-    sierra_leone_ebola_data |>
-      group_by(district) |>
-      summarise(cases = n())
-  )
-```
-
-Figure \@ref(fig:ebola-cloropleth) shows that the majority of cases were concentrated in the Western Urban district.
-This district contains the capital of the country, and has the highest population (as such, one may also be interested in the prevalence of Ebola, that is the number of cases divided by the population size).
-
-(ref:ebola-cloropleth) A cloropleth showing the total number of Ebola cases in each district of Sierra Leone.
-
-```{r ebola-cloropleth, fig.cap="(ref:ebola-cloropleth)"}
-ggplot(sierra_leone_ebola_data_sf, aes(fill = cases, geometry = geometry)) +
-  geom_sf() +
-  scale_fill_viridis_c(na.value = "lightgrey") +
-  theme_minimal() +
-  labs(fill = "Cases")
 ```
 
 # Fitting sex-district stratified delay distributions
@@ -163,22 +119,16 @@ That is, $\mu$ and $\sigma$ such that when $x \sim \mathcal{N}(\mu, \sigma)$ the
 
 ## Data preparation
 
-To prepare the data, we begin by converting the date columns to `Date` objects and selecting the relevant columns:
+To prepare the data, we begin by selecting the relevant columns:
 
 ```{r}
 obs_cens <- sierra_leone_ebola_data |>
-  tibble() |>
-  mutate(
-    # use lubridate::ymd() to drop any sub-date time info
-    date_of_symptom_onset = ymd(date_of_symptom_onset),
-    date_of_sample_tested = ymd(date_of_sample_tested)
-  ) |>
-  select(case, date_of_symptom_onset, date_of_sample_tested, age, sex, district)
+  select(id, date_of_symptom_onset, date_of_sample_tested, age, sex, district)
 
 head(obs_cens)
 ```
 
-For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values^[It should be a relatively simple extension to allow for missing data in the model.]).
+For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values^[An extension is neededto allow for missing data in the model - please open issue if this would be useful for you.]).
 
 ```{r}
 n <- nrow(obs_cens)
@@ -186,21 +136,15 @@ obs_cens <- obs_cens[complete.cases(obs_cens), ]
 n_complete <- nrow(obs_cens)
 ```
 
-Here, `r round(100 * n_complete / n)`% of the cases were complete.
-
-```{r}
-subsample <- 0.2
-```
-
-Additionally, to speed up computation, we take a random `r 100 * subsample`% subsample of the complete data.
-(In a real analysis, we'd recommend using all the available data.)
+To simulate being in the middle of an outbreak we will filter the data to only include cases up to the 1st of January 2015.
+**The marginal model used in this is adjusting for truncation. To check it is working try filtering instead for the `date_of_symptom_onset` and rerunning.**
 
 ```{r}
 obs_cens <- obs_cens |>
-  slice_sample(n = round(n_complete * subsample), replace = FALSE)
+  filter(date_of_sample_tested <= as.Date("2015-01-01"))
 ```
 
-Finally, we prepare the data for use with the `epidist` package by converting the data to an `epidist_linelist_data` object:
+We prepare the data for use with the `epidist` package by converting the data to an `epidist_linelist_data` object:
 
 ```{r}
 linelist_data <- obs_cens |>
@@ -219,11 +163,13 @@ Second, because we also did not supply an observation time column (`obs_date`), 
 To prepare the data for use with the marginal model, we define the data as being a `epidist_marginal_model` model object:
 
 ```{r}
-obs_prep <- as_epidist_marginal_model(linelist_data)
+obs_prep <- as_epidist_marginal_model(linelist_data, obs_time_threshold = 1)
 head(obs_prep)
 ```
 
-Now we are ready to fit the marginal model.
+Now we are ready to fit the marginal model. Note that here we set `obs_time_threshold` to 1 rather than the default of 2 because we are confident that our data contains the maximum observable delay.
+If we were not then the default or higher values would be sensible.
+**Try out other models using `as_epidist_latent_model()` for the latent model (another approach to adjusting for truncation and censoring) and `as_epidist_naive_model()` for a naive model that doesn't account for truncation or censoring.**
 
 ### Intercept-only model
 
@@ -298,11 +244,14 @@ fit_sex_district <- epidist(
   algorithm = "sampling",
   chains = 2,
   cores = 2,
+  iter = 1000,
   refresh = ifelse(interactive(), 250, 0),
   seed = 1,
   backend = "cmdstanr"
 )
 ```
+
+**As this is a longer running model we have reduced the number of iterations but for real world use cases this may not be sufficient.**
 
 For this model, along with looking at the `summary()`, we may also use the `brms::ranef()` function to look at the estimates of the random effects:
 

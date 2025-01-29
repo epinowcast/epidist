@@ -78,6 +78,12 @@ as_epidist_linelist_data.default <- function(
 #' @importFrom checkmate assert_true assert_names assert_numeric assert_date
 #' @importFrom utils hasName
 #' @export
+#' @examples
+#' sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   )
 as_epidist_linelist_data.data.frame <- function(
     data, pdate_lwr = NULL, sdate_lwr = NULL, pdate_upr = NULL,
     sdate_upr = NULL, obs_date = NULL, ...) {
@@ -125,7 +131,7 @@ as_epidist_linelist_data.data.frame <- function(
       " as the observation date (the maximum of the secondary event upper ",
       "bound)."
     ))
-    df <- mutate(df, obs_date = max(sdate_upr))
+    df <- mutate(df, obs_date = max(sdate_upr, na.rm = TRUE))
   }
 
   col_names <- c(
@@ -133,18 +139,15 @@ as_epidist_linelist_data.data.frame <- function(
   )
   assert_names(names(df), must.include = col_names)
 
-  # Check for being a datetime
   assert_true(is.timepoint(df$pdate_lwr))
   assert_true(is.timepoint(df$pdate_upr))
   assert_true(is.timepoint(df$sdate_lwr))
   assert_true(is.timepoint(df$sdate_upr))
   assert_true(is.timepoint(df$obs_date))
 
-  # Convert datetime to time
-  min_date <- min(df$pdate_lwr)
+  min_date <- min(df$pdate_lwr, na.rm = TRUE)
 
   # Convert to numeric times and use default method
-
   result <- as_epidist_linelist_data.default(
     data = as.numeric(df$pdate_lwr - min_date),
     ptime_upr = as.numeric(df$pdate_upr - min_date),

@@ -47,6 +47,14 @@ as_epidist_aggregate_data.default <- function(
 #' @family aggregate_data
 #' @autoglobal
 #' @export
+#' @examples
+#' sierra_leone_ebola_data |>
+#'   dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+#'   as_epidist_aggregate_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested",
+#'     n = "n"
+#'   )
 as_epidist_aggregate_data.data.frame <- function(
     data, n = NULL, pdate_lwr = NULL, sdate_lwr = NULL,
     pdate_upr = NULL, sdate_upr = NULL, obs_date = NULL, ...) {
