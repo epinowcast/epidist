@@ -18,8 +18,43 @@ as_epidist_marginal_model <- function(data, ...) {
 #'   Default is 2.
 #' @param weight A column name to use for weighting the data in the
 #'   likelihood. Default is NULL. Internally this is used to define the 'n'
-#'   column of the returned object.
+#'   column of the returned object. See details.
 #' @param ... Not used in this method.
+#' @details To ensure efficient computation, the model automatically
+#' identifies groups of individuals in the data that contribute identically
+#' to the likelihood, and evaluates the likelihood at the group level. Groups
+#' are defined by unique combinations of: {ptime_upr, stime_upr, stime_lwr,
+#' relative_obs_time, pwindow, swindow, and other_vars}, where the first six
+#' fields are defined by `as_epidist_linelist_data()` (see also the [getting started vignette](linelihttps://epidist.epinowcast.org/dev/articles/epidist.html#data)),
+#' and where `other_vars` includes other variables used in the model forumla,
+#' (e.g. age, sex, or location).
+#'
+#' The `weight` option can be used for convenience when working with data that
+#' contain too many individuals to represent easily in linelist format. For
+#' example, `prepped` and `prepped_weighted` would be
+#' interpreted identically by epidist():
+#'
+#' ```
+#' ## Prep as a linelist
+#' prepped <- linelist |>
+#'   as_epidist_linelist_data() |>
+#'   as_epidist_marginal_model(linelist)
+#' ```
+#'
+#' or
+#'
+#' ```
+#' ## Aggregate by relevant variables
+#' prepped_weighted <- linelist |>
+#'  as_epidist_linelist_data() |>
+#'  # summarise by unique combinations of variables
+#'   group_by(ptime_upr, stime_upr, stime_lwr,
+#'            relative_obs_time, pwindow, swindow,
+#'            other_vars) |>
+#' summarise(n = n())
+#' # prep with weight option
+#' as_epidist_marginal_model(linelist, weight = "n")
+#' ```
 #' @method as_epidist_marginal_model epidist_linelist_data
 #' @family marginal_model
 #' @autoglobal
