@@ -16,6 +16,7 @@ Convert an object to an \code{epidist_latent_model} object
 }
 \seealso{
 Other latent_model: 
+\code{\link{as_epidist_latent_model.epidist_aggregate_data}()},
 \code{\link{as_epidist_latent_model.epidist_linelist_data}()},
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{epidist_formula_model.epidist_latent_model}()},

@@ -4,12 +4,10 @@
 \alias{as_epidist_aggregate_data}
 \title{Create an epidist_aggregate_data object}
 \usage{
-as_epidist_aggregate_data(data, n = NULL, ...)
+as_epidist_aggregate_data(data, ...)
 }
 \arguments{
 \item{data}{The data to convert}
-
-\item{n}{Numeric vector of counts for each row}
 
 \item{...}{Additional arguments passed to methods}
 }

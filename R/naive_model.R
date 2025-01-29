@@ -32,6 +32,28 @@ as_epidist_naive_model.epidist_linelist_data <- function(data) {
   return(data)
 }
 
+#' The naive model method for `epidist_aggregate_data` objects
+#'
+#' @param data An `epidist_aggregate_data` object
+#' @method as_epidist_naive_model epidist_aggregate_data
+#' @family naive_model
+#' @autoglobal
+#' @export
+#' @examples
+#' sierra_leone_ebola_data |>
+#'   dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+#'   as_epidist_aggregate_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested",
+#'     n = "n"
+#'   ) |>
+#'   as_epidist_naive_model()
+as_epidist_naive_model.epidist_aggregate_data <- function(data) {
+  linelist_data <- as_epidist_linelist_data(data)
+
+  as_epidist_naive_model(linelist_data)
+}
+
 #' Class constructor for `epidist_naive_model` objects
 #'
 #' @param data An object to be set with the class `epidist_naive_model`

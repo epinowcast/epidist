@@ -17,8 +17,6 @@
 \arguments{
 \item{data}{Numeric vector giving lower bounds for primary times}
 
-\item{n}{Numeric vector of counts for each row}
-
 \item{ptime_upr}{Numeric vector giving upper bounds for primary times}
 
 \item{stime_lwr, stime_upr}{Numeric vectors giving lower and upper bounds for
@@ -33,15 +31,12 @@ Create an epidist_aggregate_data object from vectors of event times
 }
 \examples{
 as_epidist_aggregate_data(
-  data = data.frame(
-    ptime_lwr = c(1, 2, 3),
-    ptime_upr = c(2, 3, 4),
-    stime_lwr = c(3, 4, 5),
-    stime_upr = c(4, 5, 6),
-    obs_time = c(5, 6, 7),
-    n = c(1, 2, 3)
-  ),
-  n = "n"
+  data = c(1, 2, 3),
+  ptime_upr = c(2, 3, 4),
+  stime_lwr = c(3, 4, 5),
+  stime_upr = c(4, 5, 6),
+  obs_time = c(5, 6, 7),
+  n = c(1, 2, 3)
 )
 }
 \seealso{

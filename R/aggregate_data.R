@@ -1,10 +1,9 @@
 #' Create an epidist_aggregate_data object
 #'
 #' @inheritParams as_epidist_linelist_data
-#' @param n Numeric vector of counts for each row
 #' @family aggregate_data
 #' @export
-as_epidist_aggregate_data <- function(data, n = NULL, ...) {
+as_epidist_aggregate_data <- function(data, ...) {
   UseMethod("as_epidist_aggregate_data")
 }
 
@@ -17,15 +16,12 @@ as_epidist_aggregate_data <- function(data, n = NULL, ...) {
 #' @export
 #' @examples
 #' as_epidist_aggregate_data(
-#'   data = data.frame(
-#'     ptime_lwr = c(1, 2, 3),
-#'     ptime_upr = c(2, 3, 4),
-#'     stime_lwr = c(3, 4, 5),
-#'     stime_upr = c(4, 5, 6),
-#'     obs_time = c(5, 6, 7),
-#'     n = c(1, 2, 3)
-#'   ),
-#'   n = "n"
+#'   data = c(1, 2, 3),
+#'   ptime_upr = c(2, 3, 4),
+#'   stime_lwr = c(3, 4, 5),
+#'   stime_upr = c(4, 5, 6),
+#'   obs_time = c(5, 6, 7),
+#'   n = c(1, 2, 3)
 #' )
 as_epidist_aggregate_data.default <- function(
     data, n = NULL, ptime_upr = NULL, stime_lwr = NULL,
@@ -108,6 +104,7 @@ as_epidist_aggregate_data.data.frame <- function(
 #' @family aggregate_data
 #' @autoglobal
 #' @export
+#' @importFrom checkmate assert_character assert_names
 #' @examples
 #' # Default stratification by required time variables only
 #' sierra_leone_ebola_data |>

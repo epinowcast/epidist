@@ -20,6 +20,7 @@ Class constructor for \code{epidist_latent_model} objects
 \seealso{
 Other latent_model: 
 \code{\link{as_epidist_latent_model}()},
+\code{\link{as_epidist_latent_model.epidist_aggregate_data}()},
 \code{\link{as_epidist_latent_model.epidist_linelist_data}()},
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{epidist_formula_model.epidist_latent_model}()},

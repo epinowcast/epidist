@@ -23,6 +23,7 @@ Define the model-specific component of an \code{epidist} custom formula
 \seealso{
 Other latent_model: 
 \code{\link{as_epidist_latent_model}()},
+\code{\link{as_epidist_latent_model.epidist_aggregate_data}()},
 \code{\link{as_epidist_latent_model.epidist_linelist_data}()},
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{epidist_model_prior.epidist_latent_model}()},

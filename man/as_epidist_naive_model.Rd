@@ -14,6 +14,7 @@ Prepare naive model to pass through to \code{brms}
 }
 \seealso{
 Other naive_model: 
+\code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
 \code{\link{as_epidist_naive_model.epidist_linelist_data}()},
 \code{\link{is_epidist_naive_model}()},
 \code{\link{new_epidist_naive_model}()}
