@@ -44,6 +44,13 @@ observation time as a datetime. Optional, if not supplied then the maximum of
 \description{
 Create an epidist_linelist_data object from a data frame with event dates
 }
+\examples{
+sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  )
+}
 \seealso{
 Other linelist_data: 
 \code{\link{as_epidist_linelist_data}()},

@@ -12,6 +12,14 @@
 \description{
 The naive model method for \code{epidist_linelist_data} objects
 }
+\examples{
+sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_naive_model()
+}
 \seealso{
 Other naive_model: 
 \code{\link{as_epidist_naive_model}()},

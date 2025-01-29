@@ -14,6 +14,13 @@ as_epidist_naive_model <- function(data) {
 #' @family naive_model
 #' @autoglobal
 #' @export
+#' @examples
+#' sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_naive_model()
 as_epidist_naive_model.epidist_linelist_data <- function(data) {
   assert_epidist(data)
 

@@ -24,6 +24,13 @@ as_epidist_marginal_model <- function(data, ...) {
 #' @family marginal_model
 #' @autoglobal
 #' @export
+#' @examples
+#' sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_marginal_model()
 as_epidist_marginal_model.epidist_linelist_data <- function(
     data, obs_time_threshold = 2, weight = NULL, ...) {
   assert_epidist(data)
@@ -80,6 +87,15 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
 #' @export
 #' @family marginal_model
 #' @autoglobal
+#' @examples
+#' sierra_leone_ebola_data |>
+#'   dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+#'   as_epidist_aggregate_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested",
+#'     n = "n"
+#'   ) |>
+#'   as_epidist_marginal_model()
 as_epidist_marginal_model.epidist_aggregate_data <- function(
     data, obs_time_threshold = 2, ...) {
   as_epidist_marginal_model.epidist_linelist_data(

@@ -49,10 +49,20 @@ observation time as a datetime. Optional, if not supplied then the maximum of
 \description{
 Create an epidist_aggregate_data object from a data.frame
 }
+\examples{
+sierra_leone_ebola_data |>
+  dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+  as_epidist_aggregate_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested",
+    n = "n"
+  )
+}
 \seealso{
 Other aggregate_data: 
 \code{\link{as_epidist_aggregate_data}()},
 \code{\link{as_epidist_aggregate_data.default}()},
+\code{\link{as_epidist_aggregate_data.epidist_linelist_data}()},
 \code{\link{assert_epidist.epidist_aggregate_data}()},
 \code{\link{is_epidist_aggregate_data}()},
 \code{\link{new_epidist_aggregate_data}()}

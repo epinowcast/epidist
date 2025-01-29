@@ -20,6 +20,16 @@ Default is 2.}
 \description{
 The marginal model method for \code{epidist_aggregate_data} objects
 }
+\examples{
+sierra_leone_ebola_data |>
+  dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+  as_epidist_aggregate_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested",
+    n = "n"
+  ) |>
+  as_epidist_marginal_model()
+}
 \seealso{
 Other marginal_model: 
 \code{\link{as_epidist_marginal_model}()},

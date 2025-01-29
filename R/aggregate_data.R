@@ -15,6 +15,18 @@ as_epidist_aggregate_data <- function(data, n = NULL, ...) {
 #' @family aggregate_data
 #' @autoglobal
 #' @export
+#' @examples
+#' as_epidist_aggregate_data(
+#'   data = data.frame(
+#'     ptime_lwr = c(1, 2, 3),
+#'     ptime_upr = c(2, 3, 4),
+#'     stime_lwr = c(3, 4, 5),
+#'     stime_upr = c(4, 5, 6),
+#'     obs_time = c(5, 6, 7),
+#'     n = c(1, 2, 3)
+#'   ),
+#'   n = "n"
+#' )
 as_epidist_aggregate_data.default <- function(
     data, n = NULL, ptime_upr = NULL, stime_lwr = NULL,
     stime_upr = NULL, obs_time = NULL, ...) {
@@ -82,6 +94,64 @@ as_epidist_aggregate_data.data.frame <- function(
   df <- new_epidist_aggregate_data(df)
   assert_epidist(df)
   return(df)
+}
+
+#' Convert linelist data to aggregate format
+#'
+#' This method aggregates an `epidist_linelist_data` object by counting unique
+#' combinations of variables.
+#'
+#' @param by Character vector of additional variables to stratify by, beyond the
+#'   required time variables.
+#' @method as_epidist_aggregate_data epidist_linelist_data
+#' @inheritParams as_epidist_aggregate_data
+#' @family aggregate_data
+#' @autoglobal
+#' @export
+#' @examples
+#' # Default stratification by required time variables only
+#' sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_aggregate_data()
+#'
+#' # Additional stratification by other variables
+#' sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_aggregate_data(by = "age")
+as_epidist_aggregate_data.epidist_linelist_data <- function(
+    data, by = NULL, ...) {
+  assert_epidist(data)
+
+  # Required variables for epidist objects
+  group_vars <- .linelist_required_cols()
+
+  # Combine required variables with user-specified ones
+  if (!is.null(by)) {
+    assert_character(by)
+    assert_names(names(data), must.include = by)
+    group_vars <- c(group_vars, by)
+  }
+
+  agg <- data |>
+    dplyr::count(across(all_of(group_vars)), name = "n")
+  class(agg) <- setdiff(class(agg), "epidist_linelist_data")
+  aggregated <- as_epidist_aggregate_data.default(
+    data = agg$ptime_lwr,
+    ptime_upr = agg$ptime_upr,
+    stime_lwr = agg$stime_lwr,
+    stime_upr = agg$stime_upr,
+    obs_time = agg$obs_time,
+    n = agg$n,
+    ...
+  )
+  aggregated <- bind_cols(aggregated, agg[!names(agg) %in% names(aggregated)])
+  return(aggregated)
 }
 
 #' Class constructor for `epidist_aggregate_data` objects

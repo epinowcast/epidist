@@ -14,6 +14,14 @@
 \description{
 The latent model method for \code{epidist_linelist_data} objects
 }
+\examples{
+sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_latent_model()
+}
 \seealso{
 Other latent_model: 
 \code{\link{as_epidist_latent_model}()},

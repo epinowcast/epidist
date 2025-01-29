@@ -16,6 +16,16 @@ This method expands an \code{epidist_aggregate_data} object into individual
 observations by uncounting the \code{n} column, then converts it to linelist
 format.
 }
+\examples{
+sierra_leone_ebola_data |>
+  dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+  as_epidist_aggregate_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested",
+    n = "n"
+  ) |>
+  as_epidist_linelist_data()
+}
 \seealso{
 Other linelist_data: 
 \code{\link{as_epidist_linelist_data}()},

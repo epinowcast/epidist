@@ -23,7 +23,6 @@ as_epidist_linelist_data <- function(data, ...) {
 as_epidist_linelist_data.default <- function(
     data, ptime_upr = NULL, stime_lwr = NULL, stime_upr = NULL,
     obs_time = NULL, ...) {
-  # Create base data frame with required columns
   df <- tibble(
     ptime_lwr = data,
     ptime_upr = ptime_upr,
@@ -32,10 +31,12 @@ as_epidist_linelist_data.default <- function(
     obs_time = obs_time
   )
 
-  # Add any additional columns passed via ...
   extra_cols <- list(...)
   if (length(extra_cols) > 0) {
-    df <- bind_cols(df, extra_cols)
+    extra_cols <- extra_cols[!names(extra_cols) %in% names(df)]
+    if (length(extra_cols) > 0) {
+      df <- bind_cols(df, extra_cols)
+    }
   }
 
   df <- new_epidist_linelist_data(df)
@@ -100,9 +101,7 @@ as_epidist_linelist_data.data.frame <- function(
     list(pdate_lwr, pdate_upr, sdate_lwr, sdate_upr, obs_date),
     is.null
   )
-  new_names <- c(
-    "pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"
-  )
+  new_names <- .linelist_required_cols()
   old_names <- c(pdate_lwr, pdate_upr, sdate_lwr, sdate_upr, obs_date)
   df <- .rename_columns(data,
     new_names = new_names[valid_inputs],
@@ -134,9 +133,7 @@ as_epidist_linelist_data.data.frame <- function(
     df <- mutate(df, obs_date = max(sdate_upr, na.rm = TRUE))
   }
 
-  col_names <- c(
-    "pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"
-  )
+  col_names <- .linelist_required_cols()
   assert_names(names(df), must.include = col_names)
 
   assert_true(is.timepoint(df$pdate_lwr))
@@ -156,7 +153,7 @@ as_epidist_linelist_data.data.frame <- function(
     obs_time = as.numeric(df$obs_date - min_date)
   )
 
-  result <- bind_cols(result, df)
+  result <- bind_cols(result, df[!names(df) %in% names(result)])
 
   return(result)
 }
@@ -172,6 +169,15 @@ as_epidist_linelist_data.data.frame <- function(
 #' @family linelist_data
 #' @autoglobal
 #' @export
+#' @examples
+#' sierra_leone_ebola_data |>
+#'   dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+#'   as_epidist_aggregate_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested",
+#'     n = "n"
+#'   ) |>
+#'   as_epidist_linelist_data()
 as_epidist_linelist_data.epidist_aggregate_data <- function(data, ...) {
   expanded <- tidyr::uncount(data, weights = .data$n, .remove = TRUE)
   class(expanded) <- setdiff(class(expanded), "epidist_aggregate_data")
@@ -208,9 +214,7 @@ is_epidist_linelist_data <- function(data, ...) {
 #' @export
 assert_epidist.epidist_linelist_data <- function(data, ...) {
   assert_data_frame(data)
-  col_names <- c(
-    "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time"
-  )
+  col_names <- .linelist_required_cols()
   assert_names(names(data), must.include = col_names)
   assert_numeric(data$ptime_lwr, lower = 0)
   assert_numeric(data$ptime_upr, lower = 0)
@@ -221,4 +225,8 @@ assert_epidist.epidist_linelist_data <- function(data, ...) {
   assert_numeric(data$obs_time, lower = 0)
 
   return(invisible(NULL))
+}
+
+.linelist_required_cols <- function() {
+  c("ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time")
 }

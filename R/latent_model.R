@@ -17,6 +17,13 @@ as_epidist_latent_model <- function(data, ...) {
 #' @family latent_model
 #' @autoglobal
 #' @export
+#' @examples
+#' sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_latent_model()
 as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
   assert_epidist(data)
   data <- data |>
@@ -64,7 +71,7 @@ is_epidist_latent_model <- function(data) {
 #' @export
 assert_epidist.epidist_latent_model <- function(data, ...) {
   col_names <- c(
-    "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time",
+    .linelist_required_cols(),
     "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", ".row_id"
   )
   assert_names(names(data), must.include = col_names)

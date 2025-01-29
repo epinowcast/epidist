@@ -31,10 +31,24 @@ secondary times}
 \description{
 Create an epidist_aggregate_data object from vectors of event times
 }
+\examples{
+as_epidist_aggregate_data(
+  data = data.frame(
+    ptime_lwr = c(1, 2, 3),
+    ptime_upr = c(2, 3, 4),
+    stime_lwr = c(3, 4, 5),
+    stime_upr = c(4, 5, 6),
+    obs_time = c(5, 6, 7),
+    n = c(1, 2, 3)
+  ),
+  n = "n"
+)
+}
 \seealso{
 Other aggregate_data: 
 \code{\link{as_epidist_aggregate_data}()},
 \code{\link{as_epidist_aggregate_data.data.frame}()},
+\code{\link{as_epidist_aggregate_data.epidist_linelist_data}()},
 \code{\link{assert_epidist.epidist_aggregate_data}()},
 \code{\link{is_epidist_aggregate_data}()},
 \code{\link{new_epidist_aggregate_data}()}
