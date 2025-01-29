@@ -41,7 +41,6 @@ as_epidist_linelist_data.default <- function(
 
   df <- new_epidist_linelist_data(df)
   assert_epidist(df)
-
   return(df)
 }
 
@@ -101,7 +100,7 @@ as_epidist_linelist_data.data.frame <- function(
     list(pdate_lwr, pdate_upr, sdate_lwr, sdate_upr, obs_date),
     is.null
   )
-  new_names <- .linelist_required_cols()
+  new_names <- .linelist_date_cols()
   old_names <- c(pdate_lwr, pdate_upr, sdate_lwr, sdate_upr, obs_date)
   df <- .rename_columns(data,
     new_names = new_names[valid_inputs],
@@ -113,7 +112,7 @@ as_epidist_linelist_data.data.frame <- function(
       "No primary event upper bound provided, using the primary event lower ",
       "bound + 1 day as the assumed upper bound."
     ))
-    df <- mutate(df, pdate_upr = pdate_lwr + lubridate::days(1))
+    df <- mutate(df, pdate_upr = .data$pdate_lwr + lubridate::days(1))
   }
 
   if (!hasName(df, "sdate_upr")) {
@@ -121,7 +120,7 @@ as_epidist_linelist_data.data.frame <- function(
       "No secondary event upper bound provided, using the secondary event",
       " lower bound + 1 day as the assumed upper bound."
     ))
-    df <- mutate(df, sdate_upr = sdate_lwr + lubridate::days(1))
+    df <- mutate(df, sdate_upr = .data$sdate_lwr + lubridate::days(1))
   }
 
   if (!hasName(df, "obs_date")) {
@@ -130,10 +129,10 @@ as_epidist_linelist_data.data.frame <- function(
       " as the observation date (the maximum of the secondary event upper ",
       "bound)."
     ))
-    df <- mutate(df, obs_date = max(sdate_upr, na.rm = TRUE))
+    df <- mutate(df, obs_date = max(.data$sdate_upr, na.rm = TRUE))
   }
 
-  col_names <- .linelist_required_cols()
+  col_names <- .linelist_date_cols()
   assert_names(names(df), must.include = col_names)
 
   assert_true(is.timepoint(df$pdate_lwr))
@@ -225,6 +224,10 @@ assert_epidist.epidist_linelist_data <- function(data, ...) {
   assert_numeric(data$obs_time, lower = 0)
 
   return(invisible(NULL))
+}
+
+.linelist_date_cols <- function() {
+  c("pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date")
 }
 
 .linelist_required_cols <- function() {
