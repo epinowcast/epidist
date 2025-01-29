@@ -53,6 +53,8 @@ Create an epidist_aggregate_data object from a data.frame
 Other aggregate_data: 
 \code{\link{as_epidist_aggregate_data}()},
 \code{\link{as_epidist_aggregate_data.default}()},
+\code{\link{assert_epidist.epidist_aggregate_data}()},
+\code{\link{is_epidist_aggregate_data}()},
 \code{\link{new_epidist_aggregate_data}()}
 }
 \concept{aggregate_data}

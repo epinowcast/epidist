@@ -1,14 +1,3 @@
-#' Class constructor for `epidist_aggregate_data` objects
-#'
-#' @param data A data.frame to convert
-#' @returns An object of class `epidist_aggregate_data`
-#' @family aggregate_data
-#' @export
-new_epidist_aggregate_data <- function(data) {
-  class(data) <- c("epidist_aggregate_data", class(data))
-  return(data)
-}
-
 #' Create an epidist_aggregate_data object
 #'
 #' @inheritParams as_epidist_linelist_data
@@ -87,10 +76,36 @@ as_epidist_aggregate_data.data.frame <- function(
   return(df)
 }
 
+#' Class constructor for `epidist_aggregate_data` objects
+#'
+#' @param data A data.frame to convert
+#' @returns An object of class `epidist_aggregate_data`
+#' @family aggregate_data
+#' @export
+new_epidist_aggregate_data <- function(data) {
+  class(data) <- c("epidist_aggregate_data", class(data))
+  return(data)
+}
+
+#' Check if data has the `epidist_aggregate_data` class
+#'
+#' @inheritParams as_epidist_aggregate_data
+#' @param ... Additional arguments
+#' @family aggregate_data
+#' @export
+is_epidist_aggregate_data <- function(data, ...) {
+  inherits(data, "epidist_aggregate_data")
+}
+
+#' Assert validity of `epidist_aggregate_data` objects
+#'
+#' @param data An object to check
+#' @param ... Additional arguments
 #' @method assert_epidist epidist_aggregate_data
+#' @family aggregate_data
 #' @export
 assert_epidist.epidist_aggregate_data <- function(data, ...) {
-  NextMethod() # Call linelist assert first
+  assert_epidist.epidist_linelist_data(data)
   assert_names(names(data), must.include = "n")
   assert_integerish(data$n, lower = 1)
   return(invisible(NULL))

@@ -19,6 +19,8 @@ Class constructor for \code{epidist_aggregate_data} objects
 Other aggregate_data: 
 \code{\link{as_epidist_aggregate_data}()},
 \code{\link{as_epidist_aggregate_data.data.frame}()},
-\code{\link{as_epidist_aggregate_data.default}()}
+\code{\link{as_epidist_aggregate_data.default}()},
+\code{\link{assert_epidist.epidist_aggregate_data}()},
+\code{\link{is_epidist_aggregate_data}()}
 }
 \concept{aggregate_data}
