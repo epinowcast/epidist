@@ -62,7 +62,6 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
 #'   ) |>
 #'   as_epidist_latent_model()
 as_epidist_latent_model.epidist_aggregate_data <- function(data, ...) {
-  r
   linelist_data <- as_epidist_linelist_data(data)
 
   as_epidist_latent_model(linelist_data)
