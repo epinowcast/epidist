@@ -39,7 +39,7 @@ as_epidist_marginal_model <- function(data, ...) {
 #' ## Prep as a linelist
 #' prepped <- linelist |>
 #'   as_epidist_linelist_data() |>
-#'   as_epidist_marginal_model(linelist)
+#'   as_epidist_marginal_model()
 #' ```
 #'
 #' or
@@ -52,9 +52,9 @@ as_epidist_marginal_model <- function(data, ...) {
 #'   group_by(ptime_upr, stime_upr, stime_lwr,
 #'            relative_obs_time, pwindow, swindow,
 #'            other_vars) |>
-#' summarise(n = n())
+#' summarise(n = n()) |>
 #' # prep with weight option
-#' as_epidist_marginal_model(linelist, weight = "n")
+#' as_epidist_marginal_model(weight = "n")
 #' ```
 #' @method as_epidist_marginal_model epidist_linelist_data
 #' @family marginal_model
