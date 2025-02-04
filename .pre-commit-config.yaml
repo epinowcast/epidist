@@ -28,6 +28,7 @@ repos:
         entry: Cannot commit .Rhistory, .RData, .Rds or .rds.
         language: fail
         files: '\.Rhistory|\.RData|\.Rds|\.rds$'
+        exclude: '^data-raw/sierra_leone_ebola_data\.rds$'
 -   repo: meta
     hooks:
     -   id: check-hooks-apply
