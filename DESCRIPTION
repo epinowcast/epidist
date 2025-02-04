@@ -60,8 +60,8 @@ Suggests:
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
     RcppEigen (>= 0.3.3.3.0)
-Additional_repositories:
-    https://stan-dev.r-universe.dev
+Remotes:
+    stan-dev/cmdstanr
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
