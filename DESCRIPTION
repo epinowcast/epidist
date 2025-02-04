@@ -57,6 +57,7 @@ Suggests:
     tidybayes,
     modelr,
     patchwork,
+    pkgdown,
     cmdstanr,
     priorsense,
     usethis,
