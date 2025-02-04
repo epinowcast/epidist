@@ -11,6 +11,10 @@ as_epidist_aggregate_data <- function(data, ...) {
 #'
 #' @inheritParams as_epidist_linelist_data.default
 #' @inheritParams as_epidist_aggregate_data
+#'
+#' @param n An integerish vector containing the counts for each row. Must be the
+#' same length as the input data vector.
+#'
 #' @family aggregate_data
 #' @autoglobal
 #' @export
@@ -136,7 +140,7 @@ as_epidist_aggregate_data.epidist_linelist_data <- function(
   }
 
   agg <- data |>
-    dplyr::count(across(all_of(group_vars)), name = "n")
+    dplyr::count(dplyr::across(dplyr::all_of(group_vars)), name = "n")
   class(agg) <- setdiff(class(agg), "epidist_linelist_data")
   aggregated <- as_epidist_aggregate_data.default(
     data = agg$ptime_lwr,
