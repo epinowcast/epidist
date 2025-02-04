@@ -13,7 +13,7 @@ test_that("epidist.epidist_naive_model Stan code has no syntax errors in the def
   mod <- cmdstanr::cmdstan_model(
     stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
   )
-  expect_true(mod$check_syntax())
+  suppressMessages(expect_true(mod$check_syntax()))
 })
 
 test_that("epidist.epidist_naive_model fits and the MCMC converges in the default case", { # nolint: line_length_linter.
