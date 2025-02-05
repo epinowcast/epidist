@@ -14,10 +14,19 @@ Authors@R:
     person(given = "Sam Abbott",
            role = c("aut"),
            email = "contact@samabbott.co.uk",
-           comment = c(ORCID = "0000-0001-8057-8037")))
+           comment = c(ORCID = "0000-0001-8057-8037")),
+    person(given = "Sebastian",
+           family = "Funk",
+           role = c("ctb"),
+           email = "sebastian.funk@lshtm.ac.uk",
+           comment = c(ORCID = "0000-0002-2842-3406")))
 Description: Understanding and accurately estimating epidemiological delay
     distributions is important for public health policy. These estimates
-    directly influence epidemic situational awareness, control strategies, and resource allocation. In this package, we provide methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. Despite their importance, these issues are frequently overlooked, often resulting in biased conclusions.
+    influence epidemic situational awareness, control strategies,
+    and resource allocation. This package provides methods to address
+    the key challenges in estimating these distributions, including truncation,
+    interval censoring, and dynamical biases. These issues are frequently
+    overlooked, resulting in biased conclusions.
 License: MIT + file LICENSE
 URL: https://epidist.epinowcast.org/,
     https://github.com/epinowcast/epidist/
