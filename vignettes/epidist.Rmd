@@ -272,11 +272,11 @@ linelist_data <- as_epidist_linelist_data(
   obs_time = obs_cens_trunc_samp$obs_time
 )
 
-data <- as_epidist_latent_model(linelist_data)
+data <- as_epidist_marginal_model(linelist_data)
 class(data)
 ```
 
-The `data` object now has the class `epidist_latent_model`.
+The `data` object now has the class `epidist_marginal_model`.
 Using this `data`, we now call `epidist()` to fit the model.
 The parameters of the model are inferred using Bayesian inference.
 In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
