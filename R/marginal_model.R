@@ -233,7 +233,7 @@ epidist_stancode.epidist_marginal_model <- function(
     dist_id <- 1
   } else if (family_name == "gamma") {
     dist_id <- 2
-  } else if (family_name == "weibell") {
+  } else if (family_name == "weibull") {
     dist_id <- 3
   } else {
     cli_abort(c(
