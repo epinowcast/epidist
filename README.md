@@ -21,12 +21,11 @@ contributors](https://img.shields.io/github/contributors/epinowcast/epidist)](ht
 
 Understanding and accurately estimating epidemiological delay
 distributions is important for public health policy. These estimates
-directly influence epidemic situational awareness, control strategies,
-and resource allocation. In this package, we provide methods to address
-the key challenges in estimating these distributions, including
-truncation, interval censoring, and dynamical biases. Despite their
-importance, these issues are frequently overlooked, often resulting in
-biased conclusions.
+influence epidemic situational awareness, control strategies, and
+resource allocation. This package provides methods to address the key
+challenges in estimating these distributions, including truncation,
+interval censoring, and dynamical biases. These issues are frequently
+overlooked, resulting in biased conclusions.
 
 ## Quickstart
 
