@@ -71,7 +71,7 @@ Suggests:
     RcppEigen (>= 0.3.3.3.0)
 Remotes:
     stan-dev/cmdstanr,
-    epinowcast/primarycensored@get-rid-of-size
+    epinowcast/primarycensored
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
