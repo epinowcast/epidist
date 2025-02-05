@@ -22,7 +22,7 @@ as_epidist_naive_model <- function(data) {
 #'   ) |>
 #'   as_epidist_naive_model()
 as_epidist_naive_model.epidist_linelist_data <- function(data) {
-  assert_epidist(data)
+  assert_epidist.epidist_linelist_data(data)
 
   data <- data |>
     mutate(delay = .data$stime_lwr - .data$ptime_lwr)
@@ -49,7 +49,7 @@ as_epidist_naive_model.epidist_linelist_data <- function(data) {
 #'   ) |>
 #'   as_epidist_naive_model()
 as_epidist_naive_model.epidist_aggregate_data <- function(data) {
-  linelist_data <- as_epidist_linelist_data(data)
+  linelist_data <- as_epidist_linelist_data.epidist_aggregate_data(data)
 
   as_epidist_naive_model(linelist_data)
 }
