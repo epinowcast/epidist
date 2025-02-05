@@ -7,6 +7,8 @@ Development version of `epidist`. As part of this release we have moved from @at
 - Added a marginalised likelihood model based on `primarycensored`. This can be specified using `as_epidist_marginal_model()`. This is currently limited to Weibull, log-normal, and gamma distributions with uniform primary censoring but this will be generalised in future releases. See #426.
 - Added a `weight` argument to `as_epidist_marginal_model()` to allow for weighted data (for example count data) to be used in the marginal model. See #509.
 - Added a `epidist_aggregate_data` method to `as_epidist_marginal_model()` to allow straightforward use of the marginal model with aggregated data. See #510.
+- Added a `epidist_aggregate_data` method to `as_epidist_latent_model()` to allow straightforward use of the latent model with aggregated data. See #510.
+- Added a `epidist_aggregate_data` method to `as_epidist_naive_model()` to allow straightforward use of the naive model with aggregated data. See #510.
 - Added user settable primary event priors to the latent model. See #474.
 - Added a marginalised likelihood to the latent model. See #474.
 
@@ -18,8 +20,8 @@ Development version of `epidist`. As part of this release we have moved from @at
 - Added a `merge` argument to `epidist_prior()` to allow for not merging user and package priors. See #474.
 - Generalised the Stan reparametrisation feature to work across all distributions without manual specification by generating Stan code with `brms` and then extracting the reparameterisation. See #474.
 - Added a `transform_data` S3 method to allow for data to be transformed for specific models. This is specifically useful for the marginal model at the moment as it allows reducing the data to its unique strata. See #474.
-- Added new `epidist_aggregate_data` class to handle pre-aggregated line list data
-- Added a `as_epidist_linelist_data()` method for `epidist_aggregate_data` objects to allow for easy conversion to linelist data. See #510.
+- Added new `epidist_aggregate_data` class to handle pre-aggregated line list data. See #510.
+- Added an `as_epidist_linelist_data()` method for `epidist_aggregate_data` objects to allow for easy conversion to linelist data. See #510.
 
 ## Documentation
 
