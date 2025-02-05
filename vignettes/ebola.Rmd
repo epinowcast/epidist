@@ -127,7 +127,7 @@ obs_cens <- sierra_leone_ebola_data |>
 head(obs_cens)
 ```
 
-For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values^[An extension is neededto allow for missing data in the model - please open issue if this would be useful for you.]).
+For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values^[An extension is needed to allow for missing data in the model - please open issue if this would be useful for you.]).
 
 ```{r}
 n <- nrow(obs_cens)
