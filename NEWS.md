@@ -21,12 +21,12 @@ Development version of `epidist`.
 ## Documentation
 
 - Brings the README into line with `epinowcast` standards. See #467.
-- Switched over to using the marginal model as default in documentation. See #426.
-- Added helper functions for new variables to avoid code duplication in vignettes. See #426.
+- Switched over to using the marginal model as default in the documentation. See #426.
+- Added a helper functions for new variables to avoid code duplication in vignettes. See #426.
 
 ## Bugs
 
-- Switch to using a patched of `primarycensored` that doesn't make use of `size()`. This fixes some Mac compilation edge cases. See #524.
+- Switched to using a patched of `primarycensored` that doesn't make use of `size()`. This fixes some Mac compilation edge cases. See #524.
 
 # epidist 0.1.0
 
