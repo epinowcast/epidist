@@ -1,6 +1,6 @@
 # epidist 0.1.0.1000
 
-Development version of `epidist`. As part of this release we have moved from @athowes maintaining the package (who led the initial package development, implementation of the s3 infrastructure, implementation of the core models, and wrote the first versions of the getting started vignette, ebola case study, and the approximate inference vignette) to @seabbs maintaining the package.
+Development version of `epidist`. As part of this release we have moved from @athowes maintaining the package (who led the initial package development, implementation of the S3 infrastructure, implementation of the core models, and wrote the first versions of the getting started vignette, Ebola case study, FAQ section, and the approximate inference vignette) to @seabbs maintaining the package.
 
 ## Models
 
