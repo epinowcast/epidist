@@ -250,7 +250,7 @@ fit_sex_district <- epidist(
 )
 ```
 
-**As this is a longer running model we have reduced the number of iterations but for real world use cases this may not be sufficient.**
+**As this is a longer running model (~ 2 minutes) we have reduced the number of iterations but for real world use cases this may not be sufficient.**
 
 For this model, along with looking at the `summary()`, we may also use the `brms::ranef()` function to look at the estimates of the random effects:
 
