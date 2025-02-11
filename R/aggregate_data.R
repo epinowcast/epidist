@@ -108,8 +108,10 @@ as_epidist_aggregate_data.data.frame <- function(
 #'
 #' @param by Character vector of additional variables to stratify by, beyond the
 #'   required time variables.
-#' @method as_epidist_aggregate_data epidist_linelist_data
+#'
 #' @inheritParams as_epidist_aggregate_data
+#'
+#' @method as_epidist_aggregate_data epidist_linelist_data
 #' @family aggregate_data
 #' @autoglobal
 #' @export

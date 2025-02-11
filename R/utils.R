@@ -11,7 +11,7 @@
 #' @keywords internal
 .stan_chunk <- function(path) {
   local_path <- system.file("stan", path, package = "epidist")
-  paste(readLines(local_path), collapse = "\n")
+  return(paste(readLines(local_path), collapse = "\n"))
 }
 
 #' Label a `epidist` Stan model with a version indicator
@@ -27,7 +27,7 @@
 .version_stanvar <- function() {
   version <- utils::packageVersion("epidist")
   comment <- paste0("// code chunks used from epidist ", version, "\n")
-  brms::stanvar(scode = comment, block = "functions")
+  return(brms::stanvar(scode = comment, block = "functions"))
 }
 
 #' Round to the nearest multiple
@@ -44,7 +44,7 @@
 #' @keywords internal
 .floor_mult <- function(x, f = 1) {
   assert_numeric(f, lower = 0)
-  ifelse(f == 0, x, floor(x / f) * f)
+  return(ifelse(f == 0, x, floor(x / f) * f))
 }
 
 #' Replace `brms` prior distributions
@@ -256,9 +256,10 @@
   # Remove duplicates
   by <- unique(by)
 
-  data |>
+  sum_data <- data |>
     tibble::as_tibble() |>
     summarise(n = sum(.data$n), .by = dplyr::all_of(by))
+  return(sum_data)
 }
 
 
@@ -310,8 +311,34 @@
 #'
 #' @keywords internal
 .get_brms_fn <- function(prefix, family) {
-  get(
+  return(get(
     paste0(prefix, "_", tolower(family$family)),
     asNamespace("brms")
-  )
+  ))
+}
+
+#' Add weights to a data frame
+#'
+#' Helper function to add weights to a data frame, either from an existing
+#' column or defaulting to 1.
+#'
+#' @param df A data frame to add weights to
+#'
+#' @param weight A column name to use for weighting the data in the
+#'  likelihood. Default is NULL. Internally this is used to define the 'n'
+#'  column of the returned object.
+#'
+#' @return The data frame with an added 'n' column containing the weights
+#'
+#' @keywords internal
+.add_weights <- function(df, weight = NULL) {
+  if (!is.null(weight)) {
+    assert_names(names(df), must.include = weight)
+    df <- df |>
+      mutate(n = .data[[weight]])
+  } else {
+    df <- df |>
+      mutate(n = 1)
+  }
+  return(df)
 }

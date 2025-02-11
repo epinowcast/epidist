@@ -18,7 +18,10 @@ Default is 2.}
 \item{...}{Not used in this method.}
 }
 \description{
-The marginal model method for \code{epidist_aggregate_data} objects
+This method converts aggregate data to a marginal model format by
+passing it to \code{\link[=as_epidist_marginal_model.epidist_linelist_data]{as_epidist_marginal_model.epidist_linelist_data()}}
+with the \code{n} column used as weights. This ensures that the likelihood is
+weighted by the counts in the aggregate data.
 }
 \examples{
 sierra_leone_ebola_data |>

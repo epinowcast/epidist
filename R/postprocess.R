@@ -81,10 +81,10 @@ add_mean_sd.default <- function(data, ...) {
 #' @autoglobal
 #' @export
 add_mean_sd.lognormal_samples <- function(data, ...) {
-  mutate(data,
+  return(mutate(data,
     mean = exp(.data$mu + .data$sigma^2 / 2),
     sd = .data$mean * sqrt(exp(.data$sigma^2) - 1)
-  )
+  ))
 }
 
 #' Add natural scale mean and standard deviation parameters for a latent gamma
@@ -101,8 +101,8 @@ add_mean_sd.lognormal_samples <- function(data, ...) {
 #' @autoglobal
 #' @export
 add_mean_sd.gamma_samples <- function(data, ...) {
-  mutate(data,
+  return(mutate(data,
     mean = .data$mu,
     sd = .data$mu / sqrt(.data$shape)
-  )
+  ))
 }

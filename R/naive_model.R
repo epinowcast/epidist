@@ -17,9 +17,7 @@ as_epidist_naive_model <- function(data) {
 #'
 #' @param data An `epidist_linelist_data` object.
 #'
-#' @param weight A column name to use for weighting the data in the
-#'   likelihood. Default is NULL. Internally this is used to define the 'n'
-#'   column of the returned object.
+#' @inheritParams .add_weights
 #'
 #' @method as_epidist_naive_model epidist_linelist_data
 #'
@@ -39,14 +37,7 @@ as_epidist_naive_model.epidist_linelist_data <- function(data, weight = NULL) {
   data <- data |>
     mutate(delay = .data$stime_lwr - .data$ptime_lwr)
 
-  if (!is.null(weight)) {
-    assert_names(names(data), must.include = weight)
-    data <- data |>
-      mutate(n = .data[[weight]])
-  } else {
-    data <- data |>
-      mutate(n = 1)
-  }
+  data <- .add_weights(data, weight)
 
   data <- new_epidist_naive_model(data)
   assert_epidist(data)
@@ -77,7 +68,7 @@ as_epidist_naive_model.epidist_linelist_data <- function(data, weight = NULL) {
 #'   ) |>
 #'   as_epidist_naive_model()
 as_epidist_naive_model.epidist_aggregate_data <- function(data) {
-  as_epidist_naive_model.epidist_linelist_data(data, weight = "n")
+  return(as_epidist_naive_model.epidist_linelist_data(data, weight = "n"))
 }
 
 #' Class constructor for `epidist_naive_model` objects
@@ -100,7 +91,7 @@ new_epidist_naive_model <- function(data) {
 #' @family naive_model
 #' @export
 is_epidist_naive_model <- function(data) {
-  inherits(data, "epidist_naive_model")
+  return(inherits(data, "epidist_naive_model"))
 }
 
 #' @method assert_epidist epidist_naive_model
@@ -110,6 +101,7 @@ assert_epidist.epidist_naive_model <- function(data, ...) {
   assert_data_frame(data)
   assert_names(names(data), must.include = "delay")
   assert_numeric(data$delay, lower = 0)
+  return(invisible(NULL))
 }
 
 #' Define the model-specific component of an `epidist` custom formula for the
@@ -127,7 +119,7 @@ epidist_formula_model.epidist_naive_model <- function(
     data, formula, ...) {
   # data is only used to dispatch on
   formula <- stats::update(
-    formula | weights(n) ~ .
+    formula, delay | weights(n) ~ .
   )
   return(formula)
 }

@@ -15,14 +15,12 @@ as_epidist_marginal_model <- function(data, ...) {
 #' @param data An `epidist_linelist_data` object
 #'
 #' @param obs_time_threshold Ratio used to determine threshold for setting
-#'   relative observation times to Inf. Observation times greater than
-#'   `obs_time_threshold` times the maximum delay will be set to Inf to improve
-#'   model efficiency by reducing the number of unique observation times.
-#'   Default is 2.
+#'  relative observation times to Inf. Observation times greater than
+#'  `obs_time_threshold` times the maximum delay will be set to Inf to improve
+#'  model efficiency by reducing the number of unique observation times.
+#'  Default is 2.
 #'
-#' @param weight A column name to use for weighting the data in the
-#'   likelihood. Default is NULL. Internally this is used to define the 'n'
-#'   column of the returned object.
+#' @inheritParams .add_weights
 #'
 #' @param ... Not used in this method.
 #'
@@ -39,7 +37,7 @@ as_epidist_marginal_model <- function(data, ...) {
 #'   as_epidist_marginal_model()
 as_epidist_marginal_model.epidist_linelist_data <- function(
     data, obs_time_threshold = 2, weight = NULL, ...) {
-  assert_epidist(data)
+  assert_epidist.epidist_linelist_data(data)
 
   data <- data |>
     mutate(
@@ -51,14 +49,7 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
       delay_upr = .data$stime_upr - .data$ptime_lwr
     )
 
-  if (!is.null(weight)) {
-    assert_names(names(data), must.include = weight)
-    data <- data |>
-      mutate(n = .data[[weight]])
-  } else {
-    data <- data |>
-      mutate(n = 1)
-  }
+  data <- .add_weights(data, weight)
 
   # Calculate maximum delay
   max_delay <- max(data$delay_upr, na.rm = TRUE)
@@ -87,6 +78,11 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
 
 #' The marginal model method for `epidist_aggregate_data` objects
 #'
+#' This method converts aggregate data to a marginal model format by
+#' passing it to [as_epidist_marginal_model.epidist_linelist_data()]
+#' with the `n` column used as weights. This ensures that the likelihood is
+#' weighted by the counts in the aggregate data.
+#'
 #' @param data An `epidist_aggregate_data` object
 #'
 #' @inheritParams as_epidist_marginal_model.epidist_linelist_data
@@ -107,12 +103,12 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
 #'   as_epidist_marginal_model()
 as_epidist_marginal_model.epidist_aggregate_data <- function(
     data, obs_time_threshold = 2, ...) {
-  as_epidist_marginal_model.epidist_linelist_data(
+  return(as_epidist_marginal_model.epidist_linelist_data(
     data,
     obs_time_threshold = obs_time_threshold,
     weight = "n",
     ...
-  )
+  ))
 }
 
 #' Class constructor for `epidist_marginal_model` objects
@@ -151,6 +147,7 @@ assert_epidist.epidist_marginal_model <- function(data, ...) {
     )
   }
   assert_numeric(data$n, lower = 1)
+  return(invisible(NULL))
 }
 
 #' Check if data has the `epidist_marginal_model` class
@@ -159,7 +156,7 @@ assert_epidist.epidist_marginal_model <- function(data, ...) {
 #' @family marginal_model
 #' @export
 is_epidist_marginal_model <- function(data) {
-  inherits(data, "epidist_marginal_model")
+  return(inherits(data, "epidist_marginal_model"))
 }
 
 #' Create the model-specific component of an `epidist` custom family
@@ -261,7 +258,7 @@ epidist_stancode.epidist_marginal_model <- function(
     data,
     family = epidist_family(data),
     formula = epidist_formula(data), ...) {
-  assert_epidist(data)
+  assert_epidist.epidist_marginal_model(data)
 
   stanvars_version <- .version_stanvar()
 

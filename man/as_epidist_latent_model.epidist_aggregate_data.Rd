@@ -12,7 +12,12 @@
 \item{...}{Not used in this method.}
 }
 \description{
-The latent model method for \code{epidist_aggregate_data} objects
+This method converts aggregate data to a latent model format by first
+converting it to linelist format using
+\code{\link[=as_epidist_linelist_data.epidist_aggregate_data]{as_epidist_linelist_data.epidist_aggregate_data()}} and then passing it to
+\code{\link[=as_epidist_latent_model.epidist_linelist_data]{as_epidist_latent_model.epidist_linelist_data()}}. This ensures that the
+counts in the aggregate data are properly expanded into individual
+observations before fitting the latent model.
 }
 \examples{
 sierra_leone_ebola_data |>

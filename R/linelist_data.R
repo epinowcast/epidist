@@ -169,7 +169,7 @@ as_epidist_linelist_data.data.frame <- function(
 #'
 #' This method expands an `epidist_aggregate_data` object into individual
 #' observations by uncounting the `n` column, then converts it to linelist
-#' format.
+#' format using [as_epidist_linelist_data.data.frame()].
 #'
 #' @method as_epidist_linelist_data epidist_aggregate_data
 #' @inheritParams as_epidist_linelist_data
@@ -189,7 +189,7 @@ as_epidist_linelist_data.epidist_aggregate_data <- function(data, ...) {
   assert_epidist.epidist_aggregate_data(data)
   data <- tidyr::uncount(data, weights = .data$n, .remove = TRUE)
   class(data) <- setdiff(class(data), "epidist_aggregate_data")
-  as_epidist_linelist_data(data)
+  return(as_epidist_linelist_data(data))
 }
 
 #' Class constructor for `epidist_linelist_data` objects
@@ -214,7 +214,7 @@ new_epidist_linelist_data <- function(data) {
 #' @family linelist_data
 #' @export
 is_epidist_linelist_data <- function(data, ...) {
-  inherits(data, "epidist_linelist_data")
+  return(inherits(data, "epidist_linelist_data"))
 }
 
 #' Assert validity of `epidist_linelist_data` objects

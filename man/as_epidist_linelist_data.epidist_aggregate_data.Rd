@@ -14,7 +14,7 @@
 \description{
 This method expands an \code{epidist_aggregate_data} object into individual
 observations by uncounting the \code{n} column, then converts it to linelist
-format.
+format using \code{\link[=as_epidist_linelist_data.data.frame]{as_epidist_linelist_data.data.frame()}}.
 }
 \examples{
 sierra_leone_ebola_data |>

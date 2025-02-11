@@ -14,9 +14,9 @@
 #' @family simulate
 #' @export
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
-  data.frame(
+  return(data.frame(
     case = 1:sample_size, ptime = stats::runif(sample_size, 0, t)
-  )
+  ))
 }
 
 #' Simulate exponential cases
@@ -138,9 +138,10 @@ simulate_gillespie <- function(r = 0.2,
 #' @importFrom dplyr mutate
 #' @export
 simulate_secondary <- function(data, dist = rlnorm, ...) {
-  data |>
+  sim_data <- data |>
     mutate(
       delay = dist(dplyr::n(), ...),
       stime = .data$ptime + .data$delay
     )
+  return(sim_data)
 }

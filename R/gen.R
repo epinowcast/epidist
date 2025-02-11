@@ -139,5 +139,5 @@ epidist_gen_posterior_predict <- function(family) {
 #' @family gen
 #' @export
 epidist_gen_posterior_epred <- function(family) {
-  .get_brms_fn("posterior_epred", family)
+  return(.get_brms_fn("posterior_epred", family))
 }

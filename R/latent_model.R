@@ -50,6 +50,13 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
 
 #' The latent model method for `epidist_aggregate_data` objects
 #'
+#' This method converts aggregate data to a latent model format by first
+#' converting it to linelist format using
+#' [as_epidist_linelist_data.epidist_aggregate_data()] and then passing it to
+#' [as_epidist_latent_model.epidist_linelist_data()]. This ensures that the
+#' counts in the aggregate data are properly expanded into individual
+#' observations before fitting the latent model.
+#'
 #' @param data An `epidist_aggregate_data` object
 #' @param ... Not used in this method.
 #' @method as_epidist_latent_model epidist_aggregate_data
@@ -66,9 +73,8 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
 #'   ) |>
 #'   as_epidist_latent_model()
 as_epidist_latent_model.epidist_aggregate_data <- function(data, ...) {
-  linelist_data <- as_epidist_linelist_data(data)
-
-  as_epidist_latent_model(linelist_data)
+  linelist_data <- as_epidist_linelist_data.epidist_aggregate_data(data)
+  return(as_epidist_latent_model(linelist_data))
 }
 
 #' Class constructor for `epidist_latent_model` objects
@@ -112,6 +118,7 @@ assert_epidist.epidist_latent_model <- function(data, ...) {
   assert_numeric(data$swindow, lower = 0)
   assert_numeric(data$delay, lower = 0)
   assert_integerish(data$.row_id, lower = 1)
+  return(invisible(NULL))
 }
 
 #' Create the model-specific component of an `epidist` custom family
