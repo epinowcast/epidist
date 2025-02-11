@@ -36,6 +36,49 @@ test_that(
   }
 )
 
+test_that(
+  "as_epidist_marginal_model.epidist_aggregate_data works with aggregate data",
+  {
+    # Check no error when creating marginal model from aggregate data
+    expect_no_error(
+      marginal_agg <- as_epidist_marginal_model(agg_sim_obs) # nolint
+    )
+
+    # Check classes
+    expect_s3_class(marginal_agg, "data.frame")
+    expect_s3_class(marginal_agg, "epidist_marginal_model")
+    expect_s3_class(marginal_agg, "epidist_aggregate_data")
+    expect_s3_class(marginal_agg, "epidist_linelist_data")
+    # Check passes assert_epidist for each class using S3 dispatch
+    expect_no_error(assert_epidist.epidist_marginal_model(marginal_agg))
+    expect_no_error(assert_epidist.epidist_aggregate_data(marginal_agg))
+    expect_no_error(assert_epidist.epidist_linelist_data(marginal_agg))
+
+    # Check n values preserved
+    expect_identical(marginal_agg$n, agg_sim_obs$n)
+  }
+)
+
+test_that(
+  "as_epidist_marginal_model.epidist_aggregate_data preserves stratification",
+  {
+    # Create marginal model from stratified aggregate data
+    marginal_agg_sex <- as_epidist_marginal_model(agg_sim_obs_sex)
+
+    # Check sex column preserved
+    expect_true("sex" %in% names(marginal_agg_sex))
+
+    # Check sex values match original data
+    expect_identical(
+      sort(unique(marginal_agg_sex$sex)),
+      sort(unique(agg_sim_obs_sex$sex))
+    )
+
+    # Check n values preserved
+    expect_identical(marginal_agg_sex$n, agg_sim_obs_sex$n)
+  }
+)
+
 # Make this data available for other tests
 family_lognormal <- epidist_family(prep_marginal_obs, family = lognormal())
 
