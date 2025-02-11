@@ -7,7 +7,7 @@
 \method{assert_epidist}{epidist_linelist_data}(data, ...)
 }
 \arguments{
-\item{data}{An object to check}
+\item{data}{An object to check for validity.}
 
 \item{...}{Additional arguments}
 }

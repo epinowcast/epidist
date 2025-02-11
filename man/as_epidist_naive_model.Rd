@@ -7,7 +7,7 @@
 as_epidist_naive_model(data)
 }
 \arguments{
-\item{data}{An object to be converted to the class \code{epidist_naive_model}}
+\item{data}{An object to be converted to the class \code{epidist_naive_model}.}
 }
 \description{
 Prepare naive model to pass through to \code{brms}

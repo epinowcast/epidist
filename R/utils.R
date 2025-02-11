@@ -4,8 +4,10 @@
 #' the `epidist` package. It is used within the [epidist_stancode()] function.
 #'
 #' @param path The path within the `stan/` folder of the installed `epidist`
-#' package to the Stan code chunk of interest.
+#'  package to the Stan code chunk of interest.
+#'
 #' @return A character string containing the Stan code chunk of interest.
+#'
 #' @keywords internal
 .stan_chunk <- function(path) {
   local_path <- system.file("stan", path, package = "epidist")
@@ -19,7 +21,8 @@
 #' particular `epidist` model, we recommend use of [brms::make_stancode()].
 #'
 #' @return A `brms` Stan chunk containing the `epidist` package version used to
-#' build the Stan code.
+#'  build the Stan code.
+#'
 #' @keywords internal
 .version_stanvar <- function() {
   version <- utils::packageVersion("epidist")
@@ -34,8 +37,10 @@
 #' If `f = 1` then `floor_mult` behaves as `floor`. If `f = 0` then `x` is
 #' returned.
 #'
-#' @param x A number to be rounded down
+#' @param x A number to be rounded down.
+#'
 #' @param f A positive number specifying the multiple to be rounded down to
+#'
 #' @keywords internal
 .floor_mult <- function(x, f = 1) {
   assert_numeric(f, lower = 0)
@@ -60,21 +65,26 @@
 #'    Custom priors are excluded from the metadata-based joining process.
 #'
 #' @param old_prior One or more prior distributions in the class `brmsprior` to
-#'   be updated
+#'   be updated.
+#'
 #' @param prior One or more prior distributions in the class `brmsprior`
 #'   containing the new specifications. Can include custom set priors using the
 #'   syntax `parameter ~ distribution`
+#'
 #' @param warn If `TRUE` then a warning will be displayed if a prior in `prior`
 #'   has no match in `old_prior`. Defaults to `FALSE`
+#'
 #' @param merge If `TRUE` then merge new priors with existing ones, if `FALSE`
 #'   only use new priors. Defaults to `TRUE`
+#'
 #' @param enforce_presence If `TRUE` then only keep rows that have both old and
 #'   new priors. If `FALSE` then keep all rows but use new priors where
-#'   available, otherwise keep old priors. Defaults to `TRUE`
-#' @autoglobal
+#'   available, otherwise keep old priors. Defaults to `TRUE`.
+#'
+#' @keywords internal
 #' @importFrom dplyr full_join filter select mutate bind_rows
 #' @importFrom brms as.brmsprior
-#' @keywords internal
+#' @autoglobal
 .replace_prior <- function(old_prior, prior, warn = FALSE, merge = TRUE,
                            enforce_presence = TRUE) {
   if (!isTRUE(merge)) {
@@ -172,6 +182,7 @@
 #' conditional mean `mu`.
 #'
 #' @inheritParams epidist_family
+#'
 #' @keywords internal
 .add_dpar_info <- function(family) {
   other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]] # nolint
@@ -190,7 +201,8 @@
 #' object, and alters to formula to include explicit intercept parameters for
 #' them i.e. `~ 1`.
 #'
-#' @param formula ...
+#' @param formula A `brms` formula object.
+#'
 #' @keywords internal
 .make_intercepts_explicit <- function(formula) {
   other_dpars <- setdiff(formula$family$dpars, "mu")
@@ -209,8 +221,10 @@
 #' This function extracts all unique terms from the right-hand side of all
 #' distributional parameters in a brms formula.
 #'
-#' @param formula A `brms formula object
-#' @return A character vector of unique terms
+#' @param formula A `brms` formula object.
+#'
+#' @return A character vector of unique terms.
+#'
 #' @keywords internal
 .extract_dpar_terms <- function(formula) {
   terms <- brms::brmsterms(formula)
@@ -224,10 +238,14 @@
 #'
 #' @param data A `data.frame` to summarise which must contain a `n` column
 #' which is a count of occurrences.
+#'
 #' @param by Character vector of column names to group by.
+#'
 #' @param formula Optional `brms` formula object to extract additional grouping
-#' terms from.
-#' @return A `data.frame` summarised by the grouping variables with counts
+#'  terms from.
+#'
+#' @return A `data.frame` summarised by the grouping variables with counts.
+#'
 #' @keywords internal
 #' @importFrom dplyr group_by summarise across
 .summarise_n_by_formula <- function(data, by = character(), formula = NULL) {
@@ -246,9 +264,12 @@
 
 #' Rename the columns of a `data.frame`
 #'
-#' @param df ...
-#' @param new_names ...
-#' @param old_names ...
+#' @param df A `data.frame` to rename the columns of.
+#'
+#' @param new_names A character vector of new column names.
+#'
+#' @param old_names A character vector of old column names.
+#'
 #' @keywords internal
 #' @importFrom stats setNames
 .rename_columns <- function(df, new_names, old_names) {
@@ -281,10 +302,12 @@
 #' `posterior_predict_*` etc.
 #'
 #' @param prefix Character string prefix of the brms function to get (e.g.
-#' "log_lik")
+#'  "log_lik")
 #'
 #' @inheritParams epidist_family
+#'
 #' @return The requested brms function
+#'
 #' @keywords internal
 .get_brms_fn <- function(prefix, family) {
   get(

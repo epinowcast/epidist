@@ -7,7 +7,7 @@
 .floor_mult(x, f = 1)
 }
 \arguments{
-\item{x}{A number to be rounded down}
+\item{x}{A number to be rounded down.}
 
 \item{f}{A positive number specifying the multiple to be rounded down to}
 }

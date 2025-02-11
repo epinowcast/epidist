@@ -7,10 +7,10 @@
 new_epidist_naive_model(data)
 }
 \arguments{
-\item{data}{An object to be set with the class \code{epidist_naive_model}}
+\item{data}{An object to be set with the class \code{epidist_naive_model}.}
 }
 \value{
-An object of class \code{epidist_naive_model}
+An object of class \code{epidist_naive_model}.
 }
 \description{
 Class constructor for \code{epidist_naive_model} objects

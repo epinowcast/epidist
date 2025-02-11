@@ -1,7 +1,9 @@
 #' Create an epidist_linelist_data object
 #'
 #' @param data The data to convert
+#'
 #' @param ... Additional arguments passed to methods
+#'
 #' @family linelist_data
 #' @export
 as_epidist_linelist_data <- function(data, ...) {
@@ -10,12 +12,17 @@ as_epidist_linelist_data <- function(data, ...) {
 
 #' Create an epidist_linelist_data object from vectors of event times
 #'
-#' @param data Numeric vector giving lower bounds for primary times
-#' @param ptime_upr Numeric vector giving upper bounds for primary times
+#' @param data Numeric vector giving lower bounds for primary times.
+#'
+#' @param ptime_upr Numeric vector giving upper bounds for primary times.
+#'
 #' @param stime_lwr,stime_upr Numeric vectors giving lower and upper bounds for
-#' secondary times
-#' @param obs_time Numeric vector giving observation times
-#' @param ... Additional columns to add to the epidist_linelist_data object
+#'  secondary times.
+#'
+#' @param obs_time Numeric vector giving observation times.
+#'
+#' @param ... Additional columns to add to the epidist_linelist_data object.
+#'
 #' @importFrom tibble tibble
 #' @importFrom dplyr bind_cols
 #' @family linelist_data
@@ -49,28 +56,29 @@ as_epidist_linelist_data.default <- function(
 #' @param data A data.frame containing line list data
 #'
 #' @param pdate_lwr A string giving the column of `data` containing the primary
-#' event lower bound as a datetime. Defaults to `NULL` which assumes that the
-#' variable `pdate_lwr` is present.
+#'  event lower bound as a datetime. Defaults to `NULL` which assumes that the
+#'  variable `pdate_lwr` is present.
 #'
 #' @param pdate_upr A string giving the column of `data` containing the primary
-#' event upper bound as a datetime. If this column exists in the data it will be
-#' used, otherwise if not supplied then the value of `pdate_lwr` + 1 day is
-#' used.
+#'  event upper bound as a datetime. If this column exists in the data it will
+#'  be used, otherwise if not supplied then the value of `pdate_lwr` + 1 day is
+#'  used.
 #'
 #' @param sdate_lwr A string giving the column of `data` containing the
-#' secondary event lower bound as a datetime. Defaults to `NULL` which assumes
-#' that the variable `sdate_lwr` is present.
+#'  secondary event lower bound as a datetime. Defaults to `NULL` which assumes
+#'  that the variable `sdate_lwr` is present.
 #'
 #' @param sdate_upr A string giving the column of `data` containing the
-#' secondary event upper bound as a datetime. If this column exists in the data
-#' it will be used, otherwise if not supplied then the value of `sdate_lwr` + 1
-#' day is used.
+#'  secondary event upper bound as a datetime. If this column exists in the data
+#'  it will be used, otherwise if not supplied then the value of `sdate_lwr` + 1
+#'  day is used.
 #'
 #' @param obs_date A string giving the column of `data` containing the
-#' observation time as a datetime. Optional, if not supplied then the maximum of
-#' `sdate_upr` is used.
+#'  observation time as a datetime. Optional, if not supplied then the maximum
+#'  of `sdate_upr` is used.
 #'
 #' @param ... Additional arguments passed to methods
+#'
 #' @family linelist_data
 #' @importFrom dplyr bind_cols
 #' @importFrom lubridate days is.timepoint
@@ -187,7 +195,9 @@ as_epidist_linelist_data.epidist_aggregate_data <- function(data, ...) {
 #' Class constructor for `epidist_linelist_data` objects
 #'
 #' @param data A data.frame to convert
+#'
 #' @returns An object of class `epidist_linelist_data`
+#'
 #' @family linelist_data
 #' @export
 new_epidist_linelist_data <- function(data) {
@@ -198,7 +208,9 @@ new_epidist_linelist_data <- function(data) {
 #' Check if data has the `epidist_linelist_data` class
 #'
 #' @inheritParams as_epidist_linelist_data
+#'
 #' @param ... Additional arguments
+#'
 #' @family linelist_data
 #' @export
 is_epidist_linelist_data <- function(data, ...) {
@@ -207,9 +219,12 @@ is_epidist_linelist_data <- function(data, ...) {
 
 #' Assert validity of `epidist_linelist_data` objects
 #'
-#' @param data An object to check
+#' @param data An object to check for validity.
+#'
 #' @param ... Additional arguments
+#'
 #' @method assert_epidist epidist_linelist_data
+#'
 #' @family linelist_data
 #' @export
 assert_epidist.epidist_linelist_data <- function(data, ...) {

@@ -31,8 +31,8 @@ secondary event lower bound as a datetime. Defaults to \code{NULL} which assumes
 that the variable \code{sdate_lwr} is present.}
 
 \item{pdate_upr}{A string giving the column of \code{data} containing the primary
-event upper bound as a datetime. If this column exists in the data it will be
-used, otherwise if not supplied then the value of \code{pdate_lwr} + 1 day is
+event upper bound as a datetime. If this column exists in the data it will
+be used, otherwise if not supplied then the value of \code{pdate_lwr} + 1 day is
 used.}
 
 \item{sdate_upr}{A string giving the column of \code{data} containing the
@@ -41,8 +41,8 @@ it will be used, otherwise if not supplied then the value of \code{sdate_lwr} + 
 day is used.}
 
 \item{obs_date}{A string giving the column of \code{data} containing the
-observation time as a datetime. Optional, if not supplied then the maximum of
-\code{sdate_upr} is used.}
+observation time as a datetime. Optional, if not supplied then the maximum
+of \code{sdate_upr} is used.}
 
 \item{...}{Additional arguments passed to methods}
 }

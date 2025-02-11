@@ -14,16 +14,16 @@
 )
 }
 \arguments{
-\item{data}{Numeric vector giving lower bounds for primary times}
+\item{data}{Numeric vector giving lower bounds for primary times.}
 
-\item{ptime_upr}{Numeric vector giving upper bounds for primary times}
+\item{ptime_upr}{Numeric vector giving upper bounds for primary times.}
 
 \item{stime_lwr, stime_upr}{Numeric vectors giving lower and upper bounds for
-secondary times}
+secondary times.}
 
-\item{obs_time}{Numeric vector giving observation times}
+\item{obs_time}{Numeric vector giving observation times.}
 
-\item{...}{Additional columns to add to the epidist_linelist_data object}
+\item{...}{Additional columns to add to the epidist_linelist_data object.}
 }
 \description{
 Create an epidist_linelist_data object from vectors of event times

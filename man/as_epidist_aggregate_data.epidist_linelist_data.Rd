@@ -15,8 +15,13 @@ required time variables.}
 \item{...}{Additional arguments passed to methods}
 }
 \description{
-This method aggregates an \code{epidist_linelist_data} object by counting unique
-combinations of variables.
+This method takes an \code{epidist_linelist_data} object (see
+\code{\link[=as_epidist_linelist_data]{as_epidist_linelist_data()}}) and aggregates it by counting unique
+combinations of the required time variables (primary/secondary event times
+and observation time) and any additional variables specified in \code{by}. The
+result is a more compact representation of the same data where each row
+represents multiple identical observations with the count stored in the \code{n}
+column.
 }
 \examples{
 # Default stratification by required time variables only

@@ -13,7 +13,7 @@ as_epidist_aggregate_data <- function(data, ...) {
 #' @inheritParams as_epidist_aggregate_data
 #'
 #' @param n An integerish vector containing the counts for each row. Must be the
-#' same length as the input data vector.
+#'  same length as the input data vector.
 #'
 #' @family aggregate_data
 #' @autoglobal
@@ -53,8 +53,8 @@ as_epidist_aggregate_data.default <- function(
 #' Create an epidist_aggregate_data object from a data.frame
 #'
 #' @param n A character string giving the name of the column containing the
-#' counts for each row. If `NULL` then the column `n` must be present in the
-#' data.
+#'  counts for each row. If `NULL` then the column `n` must be present in the
+#'  data.
 #' @inheritParams as_epidist_linelist_data.data.frame
 #' @family aggregate_data
 #' @autoglobal
@@ -98,8 +98,13 @@ as_epidist_aggregate_data.data.frame <- function(
 
 #' Convert linelist data to aggregate format
 #'
-#' This method aggregates an `epidist_linelist_data` object by counting unique
-#' combinations of variables.
+#' This method takes an `epidist_linelist_data` object (see
+#' [as_epidist_linelist_data()]) and aggregates it by counting unique
+#' combinations of the required time variables (primary/secondary event times
+#' and observation time) and any additional variables specified in `by`. The
+#' result is a more compact representation of the same data where each row
+#' represents multiple identical observations with the count stored in the `n`
+#' column.
 #'
 #' @param by Character vector of additional variables to stratify by, beyond the
 #'   required time variables.
@@ -127,7 +132,7 @@ as_epidist_aggregate_data.data.frame <- function(
 #'   as_epidist_aggregate_data(by = "age")
 as_epidist_aggregate_data.epidist_linelist_data <- function(
     data, by = NULL, ...) {
-  assert_epidist(data)
+  assert_epidist.epidist_linelist_data(data)
 
   # Required variables for epidist objects
   group_vars <- .linelist_required_cols()

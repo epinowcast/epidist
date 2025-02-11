@@ -1,7 +1,9 @@
 #' Convert an object to an `epidist_latent_model` object
 #'
 #' @param data An object to be converted to the class `epidist_latent_model`
+#'
 #' @param ... Additional arguments passed to methods.
+#'
 #' @family latent_model
 #' @export
 as_epidist_latent_model <- function(data, ...) {
@@ -12,7 +14,9 @@ as_epidist_latent_model <- function(data, ...) {
 #' The latent model method for `epidist_linelist_data` objects
 #'
 #' @param data An `epidist_linelist_data` object
+#'
 #' @param ... Not used in this method.
+#'
 #' @method as_epidist_latent_model epidist_linelist_data
 #' @family latent_model
 #' @autoglobal
@@ -70,8 +74,11 @@ as_epidist_latent_model.epidist_aggregate_data <- function(data, ...) {
 #' Class constructor for `epidist_latent_model` objects
 #'
 #' @param data An object to be set with the class `epidist_latent_model`
+#'
 #' @param ... Additional arguments passed to methods.
+#'
 #' @returns An object of class `epidist_latent_model`
+#'
 #' @family latent_model
 #' @export
 new_epidist_latent_model <- function(data, ...) {
@@ -82,6 +89,7 @@ new_epidist_latent_model <- function(data, ...) {
 #' Check if data has the `epidist_latent_model` class
 #'
 #' @param data An object
+#'
 #' @family latent_model
 #' @export
 is_epidist_latent_model <- function(data) {
@@ -109,8 +117,11 @@ assert_epidist.epidist_latent_model <- function(data, ...) {
 #' Create the model-specific component of an `epidist` custom family
 #'
 #' @inheritParams epidist_family_model
+#'
 #' @param ... Additional arguments passed to method.
+#'
 #' @method epidist_family_model epidist_latent_model
+#'
 #' @family latent_model
 #' @export
 epidist_family_model.epidist_latent_model <- function(
@@ -139,8 +150,11 @@ epidist_family_model.epidist_latent_model <- function(
 #' Define the model-specific component of an `epidist` custom formula
 #'
 #' @inheritParams epidist_formula_model
+#'
 #' @param ... Additional arguments passed to method.
+#'
 #' @method epidist_formula_model epidist_latent_model
+#'
 #' @family latent_model
 #' @export
 epidist_formula_model.epidist_latent_model <- function(
@@ -157,7 +171,9 @@ epidist_formula_model.epidist_latent_model <- function(
 #' `swindow_raw` which control the width of the observation windows.
 #'
 #' @inheritParams epidist
+#'
 #' @importFrom brms set_prior
+#'
 #' @family latent_model
 #' @export
 epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
@@ -175,7 +191,9 @@ epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
 }
 
 #' @method epidist_stancode epidist_latent_model
+#'
 #' @importFrom brms stanvar
+#'
 #' @family latent_model
 #' @autoglobal
 #' @export

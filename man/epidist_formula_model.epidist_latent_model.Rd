@@ -10,8 +10,8 @@
 \item{data}{An object with class corresponding to an implemented model.}
 
 \item{formula}{An object of class \link[stats:formula]{stats::formula} or \link[brms:brmsformula]{brms::brmsformula}
-(or one that can be coerced to those classes). A symbolic description of the
-model to be fitted. A formula must be provided for the distributional
+(or one that can be coerced to those classes). A symbolic description of
+the model to be fitted. A formula must be provided for the distributional
 parameter \code{mu}, and may optionally be provided for other distributional
 parameters.}
 

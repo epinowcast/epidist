@@ -7,7 +7,7 @@
 \method{as_epidist_naive_model}{epidist_aggregate_data}(data)
 }
 \arguments{
-\item{data}{An \code{epidist_aggregate_data} object}
+\item{data}{An \code{epidist_aggregate_data} object.}
 }
 \description{
 The naive model method for \code{epidist_aggregate_data} objects

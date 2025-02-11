@@ -1,8 +1,11 @@
 #' Extract samples of the delay distribution parameters
 #'
-#' @param fit A model fit with [epidist::epidist()]
+#' @param fit A model fit with [epidist::epidist()].
+#'
 #' @inheritParams brms::prepare_predictions
-#' @param ... Additional arguments passed to [brms::prepare_predictions()]
+#'
+#' @param ... Additional arguments passed to [brms::prepare_predictions()].
+#'
 #' @family postprocess
 #' @autoglobal
 #' @export
@@ -35,8 +38,10 @@ predict_dpar <- predict_delay_parameters
 
 #' Add natural scale mean and standard deviation parameters
 #'
-#' @param data A dataframe of distributional parameters
+#' @param data A dataframe of distributional parameters.
+#'
 #' @param ... Additional arguments for method.
+#'
 #' @family postprocess
 #' @export
 add_mean_sd <- function(data, ...) {
@@ -46,7 +51,9 @@ add_mean_sd <- function(data, ...) {
 #' Default method for add natural scale parameters
 #'
 #' @inheritParams add_mean_sd
+#'
 #' @param ... Additional arguments for method.
+#'
 #' @family postprocess
 #' @method add_mean_sd default
 #' @export
@@ -66,7 +73,9 @@ add_mean_sd.default <- function(data, ...) {
 #' the distributional parameters used by `brms` for the `lognormal` family.
 #'
 #' @inheritParams add_mean_sd
+#'
 #' @param ... Additional arguments for method.
+#'
 #' @family postprocess
 #' @method add_mean_sd lognormal_samples
 #' @autoglobal
@@ -84,7 +93,9 @@ add_mean_sd.lognormal_samples <- function(data, ...) {
 #' Again, `mu` and `shape` here are the distributional parameters of `brms`.
 #'
 #' @inheritParams add_mean_sd
+#'
 #' @param ... Additional arguments for method.
+#'
 #' @family postprocess
 #' @method add_mean_sd gamma_samples
 #' @autoglobal

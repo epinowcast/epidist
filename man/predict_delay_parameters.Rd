@@ -10,7 +10,7 @@ predict_delay_parameters(fit, newdata = NULL, ...)
 predict_dpar(fit, newdata = NULL, ...)
 }
 \arguments{
-\item{fit}{A model fit with \code{\link[=epidist]{epidist()}}}
+\item{fit}{A model fit with \code{\link[=epidist]{epidist()}}.}
 
 \item{newdata}{An optional data.frame for which to evaluate predictions. If
 \code{NULL} (default), the original data of the model is used. \code{NA}
@@ -19,7 +19,7 @@ all dummy variables of this factor are zero. This allows, for instance, to
 make predictions of the grand mean when using sum coding. \code{NA} values
 within grouping variables are treated as a new level.}
 
-\item{...}{Additional arguments passed to \code{\link[brms:prepare_predictions]{brms::prepare_predictions()}}}
+\item{...}{Additional arguments passed to \code{\link[brms:prepare_predictions]{brms::prepare_predictions()}}.}
 }
 \description{
 Extract samples of the delay distribution parameters

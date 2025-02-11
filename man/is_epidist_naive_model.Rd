@@ -7,7 +7,7 @@
 is_epidist_naive_model(data)
 }
 \arguments{
-\item{data}{An object}
+\item{data}{An object.}
 }
 \description{
 Check if data has the \code{epidist_naive_model} class

@@ -1,6 +1,7 @@
 #' Prepare naive model to pass through to `brms`
 #'
-#' @param data An object to be converted to the class `epidist_naive_model`
+#' @param data An object to be converted to the class `epidist_naive_model`.
+#'
 #' @family naive_model
 #' @export
 as_epidist_naive_model <- function(data) {
@@ -9,8 +10,10 @@ as_epidist_naive_model <- function(data) {
 
 #' The naive model method for `epidist_linelist_data` objects
 #'
-#' @param data An `epidist_linelist_data` object
+#' @param data An `epidist_linelist_data` object.
+#'
 #' @method as_epidist_naive_model epidist_linelist_data
+#'
 #' @family naive_model
 #' @autoglobal
 #' @export
@@ -34,8 +37,10 @@ as_epidist_naive_model.epidist_linelist_data <- function(data) {
 
 #' The naive model method for `epidist_aggregate_data` objects
 #'
-#' @param data An `epidist_aggregate_data` object
+#' @param data An `epidist_aggregate_data` object.
+#'
 #' @method as_epidist_naive_model epidist_aggregate_data
+#'
 #' @family naive_model
 #' @autoglobal
 #' @export
@@ -56,8 +61,10 @@ as_epidist_naive_model.epidist_aggregate_data <- function(data) {
 
 #' Class constructor for `epidist_naive_model` objects
 #'
-#' @param data An object to be set with the class `epidist_naive_model`
-#' @returns An object of class `epidist_naive_model`
+#' @param data An object to be set with the class `epidist_naive_model`.
+#'
+#' @returns An object of class `epidist_naive_model`.
+#'
 #' @family naive_model
 #' @export
 new_epidist_naive_model <- function(data) {
@@ -67,7 +74,8 @@ new_epidist_naive_model <- function(data) {
 
 #' Check if data has the `epidist_naive_model` class
 #'
-#' @param data An object
+#' @param data An object.
+#'
 #' @family naive_model
 #' @export
 is_epidist_naive_model <- function(data) {

@@ -7,7 +7,7 @@
 \method{as_epidist_naive_model}{epidist_linelist_data}(data)
 }
 \arguments{
-\item{data}{An \code{epidist_linelist_data} object}
+\item{data}{An \code{epidist_linelist_data} object.}
 }
 \description{
 The naive model method for \code{epidist_linelist_data} objects

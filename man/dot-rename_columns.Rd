@@ -7,11 +7,11 @@
 .rename_columns(df, new_names, old_names)
 }
 \arguments{
-\item{df}{...}
+\item{df}{A \code{data.frame} to rename the columns of.}
 
-\item{new_names}{...}
+\item{new_names}{A character vector of new column names.}
 
-\item{old_names}{...}
+\item{old_names}{A character vector of old column names.}
 }
 \description{
 Rename the columns of a \code{data.frame}
