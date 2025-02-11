@@ -58,3 +58,28 @@ test_that("as_epidist_naive_model.epidist_aggregate_data example works", {
   expect_true("delay" %in% names(result))
   expect_true(all(result$delay >= 0))
 })
+
+test_that("epidist_transform_data_model.epidist_naive_model correctly transforms data and messages", { # nolint: line_length_linter.
+  family <- epidist_family(prep_naive_obs, family = lognormal())
+  formula <- epidist_formula(
+    prep_naive_obs,
+    formula = bf(mu ~ 1),
+    family = family
+  )
+  expect_no_message(
+    expect_message(
+      expect_message(
+        expect_message(
+          epidist_transform_data_model(
+            prep_naive_obs,
+            family = family,
+            formula = formula
+          ),
+          "Reduced from 500 to 144 rows."
+        ),
+        "Data summarised by unique combinations of:"
+      ),
+      "Model variables"
+    )
+  )
+})
