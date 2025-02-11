@@ -90,3 +90,23 @@ assert_epidist.epidist_naive_model <- function(data, ...) {
   assert_names(names(data), must.include = "delay")
   assert_numeric(data$delay, lower = 0)
 }
+
+#' Define the model-specific component of an `epidist` custom formula for the
+#' naive model
+#'
+#' @inheritParams epidist_formula_model
+#'
+#' @param ... Additional arguments passed to method.
+#'
+#' @method epidist_formula_model epidist_naive_model
+#'
+#' @family naive_model
+#' @export
+epidist_formula_model.epidist_naive_model <- function(
+    data, formula, ...) {
+  # data is only used to dispatch on
+  formula <- stats::update(
+    formula, delay_lwr | weights(n) ~ .
+  )
+  return(formula)
+}

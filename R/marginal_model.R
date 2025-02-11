@@ -191,7 +191,8 @@ epidist_family_model.epidist_marginal_model <- function(
   return(custom_family)
 }
 
-#' Define the model-specific component of an `epidist` custom formula
+#' Define the model-specific component of an `epidist` custom formula for the
+#' marginal model
 #'
 #' @inheritParams epidist_formula_model
 #' @param ... Additional arguments passed to method.

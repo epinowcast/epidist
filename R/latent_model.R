@@ -147,7 +147,8 @@ epidist_family_model.epidist_latent_model <- function(
   return(custom_family)
 }
 
-#' Define the model-specific component of an `epidist` custom formula
+#' Define the model-specific component of an `epidist` custom formula for the
+#' latent model
 #'
 #' @inheritParams epidist_formula_model
 #'

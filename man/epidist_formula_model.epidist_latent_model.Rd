@@ -2,7 +2,8 @@
 % Please edit documentation in R/latent_model.R
 \name{epidist_formula_model.epidist_latent_model}
 \alias{epidist_formula_model.epidist_latent_model}
-\title{Define the model-specific component of an \code{epidist} custom formula}
+\title{Define the model-specific component of an \code{epidist} custom formula for the
+latent model}
 \usage{
 \method{epidist_formula_model}{epidist_latent_model}(data, formula, ...)
 }
@@ -18,7 +19,8 @@ parameters.}
 \item{...}{Additional arguments passed to method.}
 }
 \description{
-Define the model-specific component of an \code{epidist} custom formula
+Define the model-specific component of an \code{epidist} custom formula for the
+latent model
 }
 \seealso{
 Other latent_model: 
