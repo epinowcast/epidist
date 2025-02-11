@@ -425,7 +425,7 @@ pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
 The posterior predictive distribution under no truncation and no censoring.
 That is to produce continuous delay times (Figure \@ref(fig:pdf)):
 
-```{r}
+```{r, eval = FALSE}
 add_marginal_pdf_vars <- function(data) {
   data |>
     mutate(
@@ -483,7 +483,7 @@ pdf_sex_district_figure <- draws_sex_district_pdf |>
 
 (ref:pdf) Posterior predictions of the continuous probability density function for each of the fitted models.
 
-```{r pdf, fig.cap="(ref:pdf)", fig.height = 16}
+```{r pdf, eval = FALSE, fig.cap="(ref:pdf)", fig.height = 16}
 pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 5.5))
 ```
