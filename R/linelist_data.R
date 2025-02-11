@@ -1,5 +1,10 @@
 #' Create an epidist_linelist_data object
 #'
+#' Creates an epidist_linelist_data object from various input formats. This is
+#' useful when working with individual-level data where each row represents a
+#' single observation with primary and secondary event times. See the specific
+#' methods for details on supported input formats and usage examples.
+#'
 #' @param data The data to convert
 #'
 #' @param ... Additional arguments passed to methods
@@ -11,6 +16,11 @@ as_epidist_linelist_data <- function(data, ...) {
 }
 
 #' Create an epidist_linelist_data object from vectors of event times
+#'
+#' This method takes vectors of event times (primary/secondary event times and
+#' observation time) and creates an `epidist_linelist_data` object. This format
+#' is useful when working with individual-level data where each row represents a
+#' single observation. See the other methods for other data input options.
 #'
 #' @param data Numeric vector giving lower bounds for primary times.
 #'
@@ -27,6 +37,14 @@ as_epidist_linelist_data <- function(data, ...) {
 #' @importFrom dplyr bind_cols
 #' @family linelist_data
 #' @export
+#' @examples
+#' as_epidist_linelist_data(
+#'   data = c(1, 2, 3),
+#'   ptime_upr = c(2, 3, 4),
+#'   stime_lwr = c(3, 4, 5),
+#'   stime_upr = c(4, 5, 6),
+#'   obs_time = c(5, 6, 7)
+#' )
 as_epidist_linelist_data.default <- function(
     data, ptime_upr = NULL, stime_lwr = NULL, stime_upr = NULL,
     obs_time = NULL, ...) {
@@ -52,6 +70,14 @@ as_epidist_linelist_data.default <- function(
 }
 
 #' Create an epidist_linelist_data object from a data frame with event dates
+#'
+#' This method takes a data.frame containing event dates (primary/secondary
+#' event dates and observation date) and creates an `epidist_linelist_data`
+#' object. This format is useful when working with individual-level data where
+#' each row represents a single observation. Internally it converts dates to
+#' numeric times relative to the earliest primary event date and uses
+#' [as_epidist_linelist_data.default()] to create the final object. See the
+#' other methods for other data input options.
 #'
 #' @param data A data.frame containing line list data
 #'

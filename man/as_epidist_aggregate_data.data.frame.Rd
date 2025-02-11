@@ -47,7 +47,14 @@ of \code{sdate_upr} is used.}
 \item{...}{Additional arguments passed to methods}
 }
 \description{
-Create an epidist_aggregate_data object from a data.frame
+This method takes a data.frame containing event dates (primary/secondary
+event dates and observation date) along with counts and creates an
+\code{epidist_aggregate_data} object. This format is useful when working with
+pre-aggregated data where each row represents multiple identical observations
+with the count stored in a specified column. Internally it makes use of
+\code{\link[=as_epidist_linelist_data.data.frame]{as_epidist_linelist_data.data.frame()}} to convert the data to a linelist
+format before adding the count column. See the other methods for other data
+input options.
 }
 \examples{
 sierra_leone_ebola_data |>

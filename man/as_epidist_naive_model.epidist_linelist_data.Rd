@@ -17,15 +17,21 @@ column of the returned object.}
 }
 \description{
 This method converts linelist data to a naive model format by calculating
-delays between primary and secondary events. If the input data contains an
-\code{n} column (e.g. from aggregated data), the likelihood will be weighted by
-these counts.
+delays between primary and secondary events to enable model fitting
+in \code{\link[=epidist]{epidist()}}. If the input data contains an \code{n} column (e.g. from
+aggregated data), the likelihood will be weighted by these counts.
 }
 \details{
 When a formula is specified in \code{\link[=epidist]{epidist()}}, the data will be transformed
 using \code{\link[=epidist_transform_data_model.epidist_naive_model]{epidist_transform_data_model.epidist_naive_model()}} to prepare it for
 model fitting. This transformation summarises the data by counting unique
 combinations of delays and any variables in the model formula.
+
+The naive model is the simplest approach but ignores censoring and truncation
+in the data by using only lower bounds as point estimates. For data with
+substantial censoring or truncation, consider using
+\code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}} or \code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}} which properly
+account for these features.
 }
 \examples{
 sierra_leone_ebola_data |>

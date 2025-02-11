@@ -1,6 +1,13 @@
-#' Prepare naive model to pass through to `brms`
+#' Convert an object to an `epidist_naive_model` object
 #'
-#' @param data An object to be converted to the class `epidist_naive_model`.
+#' Creates an `epidist_naive_model` object from various input formats.
+#' This enables fitting naive models for epidemiological delays using
+#' [epidist()]. The naive model approach ignores censoring and truncation in
+#' the data, using only the lower bounds of the intervals as point estimates.
+#' This is the simplest approach but may lead to biased estimates if there is
+#' substantial censoring or truncation in the data.
+#'
+#' @param data An object to be converted to the class `epidist_naive_model`
 #'
 #' @param ... Additional arguments passed to methods.
 #'
@@ -13,14 +20,20 @@ as_epidist_naive_model <- function(data, ...) {
 #' The naive model method for `epidist_linelist_data` objects
 #'
 #' This method converts linelist data to a naive model format by calculating
-#' delays between primary and secondary events. If the input data contains an
-#' `n` column (e.g. from aggregated data), the likelihood will be weighted by
-#' these counts.
+#' delays between primary and secondary events to enable model fitting
+#' in [epidist()]. If the input data contains an `n` column (e.g. from
+#' aggregated data), the likelihood will be weighted by these counts.
 #'
 #' When a formula is specified in [epidist()], the data will be transformed
 #' using [epidist_transform_data_model.epidist_naive_model()] to prepare it for
 #' model fitting. This transformation summarises the data by counting unique
 #' combinations of delays and any variables in the model formula.
+#'
+#' The naive model is the simplest approach but ignores censoring and truncation
+#' in the data by using only lower bounds as point estimates. For data with
+#' substantial censoring or truncation, consider using
+#'  [as_epidist_latent_model()] or [as_epidist_marginal_model()] which properly
+#' account for these features.
 #'
 #' @param data An `epidist_linelist_data` object.
 #'

@@ -1,5 +1,10 @@
 #' Create an epidist_aggregate_data object
 #'
+#' Creates an epidist_aggregate_data object from various input formats. This is
+#' useful when working with pre-aggregated data where each row represents
+#' multiple identical observations. See the specific methods for details on
+#' supported input formats and usage examples.
+#'
 #' @inheritParams as_epidist_linelist_data
 #' @family aggregate_data
 #' @export
@@ -8,6 +13,15 @@ as_epidist_aggregate_data <- function(data, ...) {
 }
 
 #' Create an epidist_aggregate_data object from vectors of event times
+#'
+#' This method takes vectors of event times (primary/secondary event times and
+#' observation time) along with counts and creates an `epidist_aggregate_data`
+#' object. This format is useful when working with pre-aggregated data where
+#' each row represents multiple identical observations with the count stored in
+#' the `n` column. Internally it makes use of
+#' [as_epidist_linelist_data.default()] to convert the data to a linelist
+#' format before adding the count column. See the other methods for other data
+#' input options.
 #'
 #' @inheritParams as_epidist_linelist_data.default
 #' @inheritParams as_epidist_aggregate_data
@@ -31,7 +45,7 @@ as_epidist_aggregate_data.default <- function(
     data, n = NULL, ptime_upr = NULL, stime_lwr = NULL,
     stime_upr = NULL, obs_time = NULL, ...) {
   # Create linelist data first
-  df <- as_epidist_linelist_data(
+  df <- as_epidist_linelist_data.default(
     data = data,
     ptime_upr = ptime_upr,
     stime_lwr = stime_lwr,
@@ -51,6 +65,15 @@ as_epidist_aggregate_data.default <- function(
 }
 
 #' Create an epidist_aggregate_data object from a data.frame
+#'
+#' This method takes a data.frame containing event dates (primary/secondary
+#'  event dates and observation date) along with counts and creates an
+#' `epidist_aggregate_data` object. This format is useful when working with
+#' pre-aggregated data where each row represents multiple identical observations
+#' with the count stored in a specified column. Internally it makes use of
+#' [as_epidist_linelist_data.data.frame()] to convert the data to a linelist
+#' format before adding the count column. See the other methods for other data
+#' input options.
 #'
 #' @param n A character string giving the name of the column containing the
 #'  counts for each row. If `NULL` then the column `n` must be present in the

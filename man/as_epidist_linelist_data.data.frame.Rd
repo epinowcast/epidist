@@ -42,7 +42,13 @@ of \code{sdate_upr} is used.}
 \item{...}{Additional arguments passed to methods}
 }
 \description{
-Create an epidist_linelist_data object from a data frame with event dates
+This method takes a data.frame containing event dates (primary/secondary
+event dates and observation date) and creates an \code{epidist_linelist_data}
+object. This format is useful when working with individual-level data where
+each row represents a single observation. Internally it converts dates to
+numeric times relative to the earliest primary event date and uses
+\code{\link[=as_epidist_linelist_data.default]{as_epidist_linelist_data.default()}} to create the final object. See the
+other methods for other data input options.
 }
 \examples{
 sierra_leone_ebola_data |>

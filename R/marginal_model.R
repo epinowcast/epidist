@@ -1,6 +1,16 @@
-#' Prepare marginal model to pass through to `brms`
+#' Convert an object to an `epidist_marginal_model` object
 #'
-#' @param data A `data.frame` containing line list data
+#' Creates an `epidist_marginal_model` object from various input formats.
+#' This enables fitting marginal models for epidemiological delays using
+#' [epidist()]. The marginal model approach uses the likelihood from the
+#' [primarycensored](https://primarycensored.epinowcast.org/) package to
+#' efficiently handle censoring in both primary and secondary events as well as
+#' truncation due to observation times. See the specific methods
+#' [as_epidist_marginal_model.epidist_linelist_data()] and
+#' [as_epidist_marginal_model.epidist_aggregate_data()] for details on
+#' supported input formats and usage examples.
+#'
+#' @param data An object to be converted to the class `epidist_marginal_model`
 #'
 #' @param ... Additional arguments passed to methods.
 #'
@@ -17,7 +27,9 @@ as_epidist_marginal_model <- function(data, ...) {
 #' censoring windows. The likelihood used is imported from the
 #' [primarycensored](https://primarycensored.epinowcast.org/) package
 #' which handles censoring in both primary and secondary events as well as
-#' truncation due to observation times.
+#' truncation due to observation times. In principle, this method should be
+#' more accurate and more computationally efficient than the latent model
+#' ([as_epidist_latent_model.default()]) approach in most settings.
 #'
 #' When a formula is specified in [epidist()], the data will be transformed
 #' using [epidist_transform_data_model.epidist_marginal_model()] to prepare it

@@ -27,7 +27,9 @@ delays between primary and secondary events, along with observation times and
 censoring windows. The likelihood used is imported from the
 \href{https://primarycensored.epinowcast.org/}{primarycensored} package
 which handles censoring in both primary and secondary events as well as
-truncation due to observation times.
+truncation due to observation times. In principle, this method should be
+more accurate and more computationally efficient than the latent model
+(\code{\link[=as_epidist_latent_model.default]{as_epidist_latent_model.default()}}) approach in most settings.
 }
 \details{
 When a formula is specified in \code{\link[=epidist]{epidist()}}, the data will be transformed

@@ -30,7 +30,14 @@ secondary times.}
 \item{...}{Additional columns to add to the epidist_linelist_data object.}
 }
 \description{
-Create an epidist_aggregate_data object from vectors of event times
+This method takes vectors of event times (primary/secondary event times and
+observation time) along with counts and creates an \code{epidist_aggregate_data}
+object. This format is useful when working with pre-aggregated data where
+each row represents multiple identical observations with the count stored in
+the \code{n} column. Internally it makes use of
+\code{\link[=as_epidist_linelist_data.default]{as_epidist_linelist_data.default()}} to convert the data to a linelist
+format before adding the count column. See the other methods for other data
+input options.
 }
 \examples{
 as_epidist_aggregate_data(

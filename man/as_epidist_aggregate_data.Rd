@@ -12,7 +12,10 @@ as_epidist_aggregate_data(data, ...)
 \item{...}{Additional arguments passed to methods}
 }
 \description{
-Create an epidist_aggregate_data object
+Creates an epidist_aggregate_data object from various input formats. This is
+useful when working with pre-aggregated data where each row represents
+multiple identical observations. See the specific methods for details on
+supported input formats and usage examples.
 }
 \seealso{
 Other aggregate_data: 

@@ -1,9 +1,17 @@
 #' Convert an object to an `epidist_latent_model` object
 #'
-#' @param data An object to be converted to the class `epidist_latent_model`
+#' Creates an `epidist_latent_model` object from various input formats.
+#' This enables fitting latent variable models for epidemiological delays using
+#' [epidist()], as described in Park et al. (2024) and Charniga et al. (2024)
+#' The latent model approach accounts for double interval censoring and right
+#' truncation in delay data.
+#'
+#' @param data An object to be converted to  the class `epidist_latent_model`
 #'
 #' @param ... Additional arguments passed to methods.
-#'
+#' @references
+#'   - [Park et al. (2024)](https://doi.org/10.1101/2024.01.12.24301247)
+#'   - [Charniga et al. (2024)](https://doi.org/10.1371/journal.pcbi.1012520)
 #' @family latent_model
 #' @export
 as_epidist_latent_model <- function(data, ...) {
@@ -13,7 +21,15 @@ as_epidist_latent_model <- function(data, ...) {
 
 #' The latent model method for `epidist_linelist_data` objects
 #'
-#' @param data An `epidist_linelist_data` object
+#' This method takes an `epidist_linelist_data` object and converts it to a
+#'  format suitable for fitting latent variable models. It calculates key
+#'  variables needed for the latent variable method described in Park et al.
+#'  (2024) and Charniga et al. (2024). This approach adjusts for double
+#'  interval censoring and right truncation in the data.
+#'
+#' @param data An `epidist_linelist_data` object containing individual-level
+#'   observations with primary and secondary event times. See
+#'   [as_epidist_linelist_data()] for details on creating this object.
 #'
 #' @param ... Not used in this method.
 #'
@@ -21,6 +37,9 @@ as_epidist_latent_model <- function(data, ...) {
 #' @family latent_model
 #' @autoglobal
 #' @export
+#' @references
+#'   - [Park et al. (2024)](https://doi.org/10.1101/2024.01.12.24301247)
+#'   - [Charniga et al. (2024)](https://doi.org/10.1371/journal.pcbi.1012520)
 #' @examples
 #' sierra_leone_ebola_data |>
 #'   as_epidist_linelist_data(
@@ -32,14 +51,19 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
   assert_epidist(data)
   data <- data |>
     mutate(
+      # Time since primary event to observation
       relative_obs_time = .data$obs_time - .data$ptime_lwr,
+      # Primary event window accounting for overlap with secondary event
       pwindow = ifelse(
         .data$stime_lwr < .data$ptime_upr,
         .data$stime_upr - .data$ptime_lwr,
         .data$ptime_upr - .data$ptime_lwr
       ),
+      # Indicator for overlapping primary and secondary windows
       woverlap = as.numeric(.data$stime_lwr < .data$ptime_upr),
+      # Secondary event window size
       swindow = .data$stime_upr - .data$stime_lwr,
+      # Delay between primary and secondary events
       delay = .data$stime_lwr - .data$ptime_lwr,
       .row_id = dplyr::row_number()
     )
