@@ -415,7 +415,7 @@ pmf_sex_district_figure <- draws_sex_district_pmf |>
 
 (ref:pmf) Posterior predictions of the discrete probability mass function for each of the fitted models.
 
-```{r pmf, fig.cap="(ref:pmf)", fig.height = 16}
+```{r pmf, eval = FALSE, fig.cap="(ref:pmf)", fig.height = 16}
 pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 5.5))
 ```
