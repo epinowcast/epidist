@@ -262,6 +262,47 @@
   return(sum_data)
 }
 
+#' Inform users about data summarisation
+#'
+#' This function informs users when data has been summarised by unique
+#' combinations of variables, providing information about the variables used and
+#' the reduction in number of rows.
+#'
+#' @param data The original data before summarisation
+#'
+#' @param trans_data The transformed/summarised data
+#'
+#' @param required_cols Character vector of required column names
+#' @return Nothing, called for side effects only
+#'
+#' @keywords internal
+.inform_data_summarised <- function(data, trans_data, required_cols) {
+  n_rows_before <- nrow(data)
+  n_rows_after <- nrow(trans_data)
+
+  if (n_rows_before > n_rows_after) {
+    cli::cli_inform(c(
+      "i" = "Data summarised by unique combinations of:" # nolint
+    ))
+
+    formula_vars <- setdiff(names(trans_data), c(required_cols))
+    if (length(formula_vars) > 0) {
+      cli::cli_inform(c(
+        "*" = "Formula variables: {.code {formula_vars}}"
+      ))
+    }
+
+    cli::cli_inform(paste0(
+      "* Model variables: delay bounds, observation time, ",
+      "and primary censoring window"
+    ))
+
+    cli::cli_inform(c(
+      "!" = paste("Reduced from", n_rows_before, "to", n_rows_after, "rows."),
+      "i" = "This should improve model efficiency with no loss of information." # nolint
+    ))
+  }
+}
 
 #' Rename the columns of a `data.frame`
 #'

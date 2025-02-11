@@ -21,6 +21,12 @@ delays between primary and secondary events. If the input data contains an
 \code{n} column (e.g. from aggregated data), the likelihood will be weighted by
 these counts.
 }
+\details{
+When a formula is specified in \code{\link[=epidist]{epidist()}}, the data will be transformed
+using \code{\link[=epidist_transform_data_model.epidist_naive_model]{epidist_transform_data_model.epidist_naive_model()}} to prepare it for
+model fitting. This transformation summarises the data by counting unique
+combinations of delays and any variables in the model formula.
+}
 \examples{
 sierra_leone_ebola_data |>
   as_epidist_linelist_data(
@@ -34,6 +40,7 @@ Other naive_model:
 \code{\link{as_epidist_naive_model}()},
 \code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
 \code{\link{epidist_formula_model.epidist_naive_model}()},
+\code{\link{epidist_transform_data_model.epidist_naive_model}()},
 \code{\link{is_epidist_naive_model}()},
 \code{\link{new_epidist_naive_model}()}
 }

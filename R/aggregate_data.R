@@ -168,6 +168,9 @@ as_epidist_aggregate_data.epidist_linelist_data <- function(
 #' @returns An object of class `epidist_aggregate_data`
 #' @family aggregate_data
 #' @export
+#' @examples
+#' df <- new_epidist_aggregate_data(data.frame())
+#' class(df)
 new_epidist_aggregate_data <- function(data) {
   class(data) <- c("epidist_aggregate_data", class(data))
   return(data)
@@ -190,6 +193,14 @@ is_epidist_aggregate_data <- function(data, ...) {
 #' @method assert_epidist epidist_aggregate_data
 #' @family aggregate_data
 #' @export
+#' @examples
+#' sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_aggregate_data() |>
+#'   assert_epidist()
 assert_epidist.epidist_aggregate_data <- function(data, ...) {
   assert_epidist.epidist_linelist_data(data)
   assert_names(names(data), must.include = "n")

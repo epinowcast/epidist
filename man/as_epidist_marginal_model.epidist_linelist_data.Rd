@@ -22,7 +22,19 @@ column of the returned object.}
 \item{...}{Not used in this method.}
 }
 \description{
-The marginal model method for \code{epidist_linelist_data} objects
+This method converts linelist data to a marginal model format by calculating
+delays between primary and secondary events, along with observation times and
+censoring windows. The likelihood used is imported from the
+\href{https://primarycensored.epinowcast.org/}{primarycensored} package
+which handles censoring in both primary and secondary events as well as
+truncation due to observation times.
+}
+\details{
+When a formula is specified in \code{\link[=epidist]{epidist()}}, the data will be transformed
+using \code{\link[=epidist_transform_data_model.epidist_marginal_model]{epidist_transform_data_model.epidist_marginal_model()}} to prepare it
+for model fitting. This transformation summarises the data by counting unique
+combinations of delays, observation times, censoring windows and any
+variables in the model formula.
 }
 \examples{
 sierra_leone_ebola_data |>
@@ -38,6 +50,7 @@ Other marginal_model:
 \code{\link{as_epidist_marginal_model.epidist_aggregate_data}()},
 \code{\link{epidist_family_model.epidist_marginal_model}()},
 \code{\link{epidist_formula_model.epidist_marginal_model}()},
+\code{\link{epidist_transform_data_model.epidist_marginal_model}()},
 \code{\link{is_epidist_marginal_model}()},
 \code{\link{new_epidist_marginal_model}()}
 }

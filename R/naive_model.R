@@ -17,6 +17,11 @@ as_epidist_naive_model <- function(data, ...) {
 #' `n` column (e.g. from aggregated data), the likelihood will be weighted by
 #' these counts.
 #'
+#' When a formula is specified in [epidist()], the data will be transformed
+#' using [epidist_transform_data_model.epidist_naive_model()] to prepare it for
+#' model fitting. This transformation summarises the data by counting unique
+#' combinations of delays and any variables in the model formula.
+#'
 #' @param data An `epidist_linelist_data` object.
 #'
 #' @inheritParams .add_weights
@@ -109,7 +114,7 @@ is_epidist_naive_model <- function(data) {
 #' @export
 assert_epidist.epidist_naive_model <- function(data, ...) {
   assert_data_frame(data)
-  assert_names(names(data), must.include = "delay")
+  assert_names(names(data), must.include = .naive_required_cols())
   assert_numeric(data$delay, lower = 0)
   return(invisible(NULL))
 }
@@ -132,4 +137,45 @@ epidist_formula_model.epidist_naive_model <- function(
     formula, delay | weights(n) ~ .
   )
   return(formula)
+}
+
+#' Transform data for the naive model
+#'
+#' This method transforms data into the format required by the naive model
+#' by:
+#' 1. Identifying required columns for the naive model using
+#'    [.naive_required_cols()]
+#' 2. Summarising the data by counting unique combinations of these columns and
+#'    any variables in the model formula using [.summarise_n_by_formula()]
+#' 3. Converting the summarised data to a naive model object using
+#'    [new_epidist_naive_model()]
+#' 4. Informing the user about any data aggregation that occurred using
+#'    [.inform_data_summarised()]
+#'
+#' @param data The data to transform
+#'
+#' @param family The epidist family object specifying the distribution
+#'
+#' @param formula The model formula
+#'
+#' @param ... Additional arguments passed to methods
+#'
+#' @method epidist_transform_data_model epidist_naive_model
+#' @family naive_model
+#' @importFrom purrr map_chr
+#' @export
+epidist_transform_data_model.epidist_naive_model <- function(
+    data, family, formula, ...) {
+  required_cols <- .naive_required_cols()
+  trans_data <- data |>
+    .summarise_n_by_formula(by = required_cols, formula = formula) |>
+    new_epidist_naive_model()
+
+  .inform_data_summarised(data, trans_data, c(required_cols, "n"))
+
+  return(trans_data)
+}
+
+.naive_required_cols <- function() {
+  return("delay")
 }

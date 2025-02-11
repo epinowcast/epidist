@@ -21,6 +21,16 @@
 #' @family diagnostics
 #' @autoglobal
 #' @export
+#' @examples
+#' fit <- sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_aggregate_data() |>
+#'   as_epidist_naive_model() |>
+#'   epidist()
+#' epidist_diagnostics(fit)
 epidist_diagnostics <- function(fit) {
   if (!inherits(fit, "epidist_fit")) {
     cli_abort(c(

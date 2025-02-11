@@ -15,6 +15,10 @@ An object of class \code{epidist_aggregate_data}
 \description{
 Class constructor for \code{epidist_aggregate_data} objects
 }
+\examples{
+df <- new_epidist_aggregate_data(data.frame())
+class(df)
+}
 \seealso{
 Other aggregate_data: 
 \code{\link{as_epidist_aggregate_data}()},

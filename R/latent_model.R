@@ -107,11 +107,7 @@ is_epidist_latent_model <- function(data) {
 #' @importFrom checkmate assert_names assert_numeric assert_integerish
 #' @export
 assert_epidist.epidist_latent_model <- function(data, ...) {
-  col_names <- c(
-    .linelist_required_cols(),
-    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", ".row_id"
-  )
-  assert_names(names(data), must.include = col_names)
+  assert_names(names(data), must.include = .latent_required_cols())
   assert_numeric(data$relative_obs_time, lower = 0)
   assert_numeric(data$pwindow, lower = 0)
   assert_numeric(data$woverlap, lower = 0)
@@ -268,4 +264,11 @@ epidist_stancode.epidist_latent_model <- function(
     stanvars_parameters
 
   return(stanvars_all)
+}
+
+.latent_required_cols <- function() {
+  return(c(
+    .linelist_required_cols(),
+    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", ".row_id"
+  ))
 }

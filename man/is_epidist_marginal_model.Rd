@@ -19,6 +19,7 @@ Other marginal_model:
 \code{\link{as_epidist_marginal_model.epidist_linelist_data}()},
 \code{\link{epidist_family_model.epidist_marginal_model}()},
 \code{\link{epidist_formula_model.epidist_marginal_model}()},
+\code{\link{epidist_transform_data_model.epidist_marginal_model}()},
 \code{\link{new_epidist_marginal_model}()}
 }
 \concept{marginal_model}

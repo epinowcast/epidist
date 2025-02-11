@@ -18,6 +18,7 @@ Other naive_model:
 \code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
 \code{\link{as_epidist_naive_model.epidist_linelist_data}()},
 \code{\link{epidist_formula_model.epidist_naive_model}()},
+\code{\link{epidist_transform_data_model.epidist_naive_model}()},
 \code{\link{new_epidist_naive_model}()}
 }
 \concept{naive_model}

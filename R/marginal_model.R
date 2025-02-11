@@ -12,6 +12,19 @@ as_epidist_marginal_model <- function(data, ...) {
 
 #' The marginal model method for `epidist_linelist_data` objects
 #'
+#' This method converts linelist data to a marginal model format by calculating
+#' delays between primary and secondary events, along with observation times and
+#' censoring windows. The likelihood used is imported from the
+#' [primarycensored](https://primarycensored.epinowcast.org/) package
+#' which handles censoring in both primary and secondary events as well as
+#' truncation due to observation times.
+#'
+#' When a formula is specified in [epidist()], the data will be transformed
+#' using [epidist_transform_data_model.epidist_marginal_model()] to prepare it
+#' for model fitting. This transformation summarises the data by counting unique
+#' combinations of delays, observation times, censoring windows and any
+#' variables in the model formula.
+#'
 #' @param data An `epidist_linelist_data` object
 #'
 #' @param obs_time_threshold Ratio used to determine threshold for setting
@@ -127,10 +140,7 @@ new_epidist_marginal_model <- function(data) {
 #' @export
 assert_epidist.epidist_marginal_model <- function(data, ...) {
   assert_data_frame(data)
-  assert_names(names(data), must.include = c(
-    "pwindow", "swindow", "delay_lwr", "delay_upr", "n",
-    "relative_obs_time"
-  ))
+  assert_names(names(data), must.include = .marginal_required_cols())
   assert_numeric(data$pwindow, lower = 0)
   assert_numeric(data$swindow, lower = 0)
   assert_integerish(data$delay_lwr)
@@ -208,43 +218,36 @@ epidist_formula_model.epidist_marginal_model <- function(
   return(formula)
 }
 
+#' Transform data for the marginal model
+#'
+#' This method transforms data into the format required by the marginal model
+#' by:
+#' 1. Identifying required columns for the marginal model using
+#'    [.marginal_required_cols()]
+#' 2. Summarising the data by counting unique combinations of these columns and
+#'    any variables in the model formula using [.summarise_n_by_formula()]
+#' 3. Converting the summarised data to a marginal model object using
+#'    [new_epidist_marginal_model()]
+#' 4. Informing the user about any data aggregation that occurred using
+#'    [.inform_data_summarised()]
+#'
+#' @param data The data to transform
+#' @param family The epidist family object specifying the distribution
+#' @param formula The model formula
+#' @param ... Additional arguments passed to methods
+#'
 #' @method epidist_transform_data_model epidist_marginal_model
 #' @family marginal_model
 #' @importFrom purrr map_chr
 #' @export
 epidist_transform_data_model.epidist_marginal_model <- function(
     data, family, formula, ...) {
-  required_cols <- c(
-    "delay_lwr", "delay_upr", "relative_obs_time", "pwindow", "swindow"
-  )
-  n_rows_before <- nrow(data)
-
+  required_cols <- .marginal_required_cols()
   trans_data <- data |>
     .summarise_n_by_formula(by = required_cols, formula = formula) |>
     new_epidist_marginal_model()
-  n_rows_after <- nrow(trans_data)
-  if (n_rows_before > n_rows_after) {
-    cli::cli_inform(c(
-      "i" = "Data summarised by unique combinations of:" # nolint
-    ))
 
-    formula_vars <- setdiff(names(trans_data), c(required_cols, "n"))
-    if (length(formula_vars) > 0) {
-      cli::cli_inform(c(
-        "*" = "Formula variables: {.code {formula_vars}}"
-      ))
-    }
-
-    cli::cli_inform(paste0(
-      "* Model variables: delay bounds, observation time, ",
-      "and primary censoring window"
-    ))
-
-    cli::cli_inform(c(
-      "!" = paste("Reduced from", n_rows_before, "to", n_rows_after, "rows."),
-      "i" = "This should improve model efficiency with no loss of information." # nolint
-    ))
-  }
+  .inform_data_summarised(data, trans_data, c(required_cols))
 
   return(trans_data)
 }
@@ -323,4 +326,10 @@ epidist_stancode.epidist_marginal_model <- function(
     pcd_stanvars_functions + stanvars_parameters
 
   return(stanvars_all)
+}
+
+.marginal_required_cols <- function() {
+  return(c(
+    "delay_lwr", "delay_upr", "relative_obs_time", "pwindow", "swindow", "n"
+  ))
 }
