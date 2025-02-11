@@ -36,6 +36,17 @@
 #'
 #' @family fit
 #' @export
+#' @examples
+#' fit <- sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_aggregate_data() |>
+#'   as_epidist_naive_model() |>
+#'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+#'
+#' summary(fit)
 epidist <- function(data, formula = mu ~ 1,
                     family = lognormal(), prior = NULL,
                     merge_priors = TRUE,

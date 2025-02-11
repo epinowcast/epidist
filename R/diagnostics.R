@@ -29,7 +29,7 @@
 #'   ) |>
 #'   as_epidist_aggregate_data() |>
 #'   as_epidist_naive_model() |>
-#'   epidist()
+#'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
 #' epidist_diagnostics(fit)
 epidist_diagnostics <- function(fit) {
   if (!inherits(fit, "epidist_fit")) {

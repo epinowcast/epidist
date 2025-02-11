@@ -75,7 +75,7 @@ test_that("epidist_transform_data_model.epidist_naive_model correctly transforms
             family = family,
             formula = formula
           ),
-          "Reduced from 500 to 144 rows."
+          "Reduced from 500 to 15 rows."
         ),
         "Data summarised by unique combinations of:"
       ),
