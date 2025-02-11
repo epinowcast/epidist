@@ -1,6 +1,6 @@
 # epidist 0.1.0.1000
 
-Development version of `epidist`.
+Development version of `epidist`. As part of this release we have moved from @athowes maintaining the package (who led the initial package development, implementation of the S3 infrastructure, implementation of the core models, and wrote the first versions of the getting started vignette, Ebola case study, FAQ section, and the approximate inference vignette) to @seabbs maintaining the package.
 
 ## Models
 
@@ -21,8 +21,12 @@ Development version of `epidist`.
 ## Documentation
 
 - Brings the README into line with `epinowcast` standards. See #467.
-- Switched over to using the marginal model as default in documentation. See #426.
-- Added helper functions for new variables to avoid code duplication in vignettes. See #426.
+- Switched over to using the marginal model as default in the documentation. See #426.
+- Added a helper functions for new variables to avoid code duplication in vignettes. See #426.
+
+## Bugs
+
+- Switched to using a patched of `primarycensored` that doesn't make use of `size()`. This fixes some Mac compilation edge cases. See #524.
 
 # epidist 0.1.0
 
