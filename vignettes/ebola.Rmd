@@ -368,9 +368,7 @@ add_marginal_pmf_vars <- function(data) {
 draws_pmf <- obs_prep |>
   add_marginal_pmf_vars() |>
   add_predicted_draws(fit, ndraws = 1000)
-```
 
-```{r, eval = FALSE}
 pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
   labs(x = "", y = "", title = "Intercept-only", tag = "A") +
@@ -389,12 +387,16 @@ pmf_sex_figure <- draws_sex_pmf |>
   facet_grid(. ~ sex) +
   scale_x_continuous(limits = c(0, 30)) +
   theme_minimal()
+```
 
+```{r}
 draws_sex_district_pmf <- obs_prep |>
   data_grid(sex, district) |>
   add_marginal_pmf_vars() |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
+```
 
+```{r, eval = FALSE}
 pmf_sex_district_figure <- draws_sex_district_pmf |>
   mutate(
     district = case_when(
@@ -438,9 +440,7 @@ add_marginal_pdf_vars <- function(data) {
 draws_pdf <- obs_prep |>
   add_marginal_pdf_vars() |>
   add_predicted_draws(fit, ndraws = 1000)
-```
 
-```{r, eval = FALSE}
 pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
   geom_density() +
   labs(x = "", y = "", title = "Intercept-only", tag = "A") +
@@ -459,12 +459,16 @@ pdf_sex_figure <- draws_sex_pdf |>
   facet_grid(. ~ sex) +
   scale_x_continuous(limits = c(0, 30)) +
   theme_minimal()
+```
 
+```{r}
 draws_sex_district_pdf <- obs_prep |>
   data_grid(sex, district) |>
   add_marginal_pdf_vars() |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
+```
 
+```{r, eval = FALSE}
 pdf_sex_district_figure <- draws_sex_district_pdf |>
   mutate(
     district = case_when(
