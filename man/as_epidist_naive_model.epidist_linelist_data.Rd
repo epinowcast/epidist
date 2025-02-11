@@ -4,13 +4,20 @@
 \alias{as_epidist_naive_model.epidist_linelist_data}
 \title{The naive model method for \code{epidist_linelist_data} objects}
 \usage{
-\method{as_epidist_naive_model}{epidist_linelist_data}(data)
+\method{as_epidist_naive_model}{epidist_linelist_data}(data, weight = NULL)
 }
 \arguments{
 \item{data}{An \code{epidist_linelist_data} object.}
+
+\item{weight}{A column name to use for weighting the data in the
+likelihood. Default is NULL. Internally this is used to define the 'n'
+column of the returned object.}
 }
 \description{
-The naive model method for \code{epidist_linelist_data} objects
+This method converts linelist data to a naive model format by calculating
+delays between primary and secondary events. If the input data contains an
+\code{n} column (e.g. from aggregated data), the likelihood will be weighted by
+these counts.
 }
 \examples{
 sierra_leone_ebola_data |>

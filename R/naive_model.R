@@ -10,7 +10,16 @@ as_epidist_naive_model <- function(data) {
 
 #' The naive model method for `epidist_linelist_data` objects
 #'
+#' This method converts linelist data to a naive model format by calculating
+#' delays between primary and secondary events. If the input data contains an
+#' `n` column (e.g. from aggregated data), the likelihood will be weighted by
+#' these counts.
+#'
 #' @param data An `epidist_linelist_data` object.
+#'
+#' @param weight A column name to use for weighting the data in the
+#'   likelihood. Default is NULL. Internally this is used to define the 'n'
+#'   column of the returned object.
 #'
 #' @method as_epidist_naive_model epidist_linelist_data
 #'
@@ -24,11 +33,20 @@ as_epidist_naive_model <- function(data) {
 #'     sdate_lwr = "date_of_sample_tested"
 #'   ) |>
 #'   as_epidist_naive_model()
-as_epidist_naive_model.epidist_linelist_data <- function(data) {
+as_epidist_naive_model.epidist_linelist_data <- function(data, weight = NULL) {
   assert_epidist.epidist_linelist_data(data)
 
   data <- data |>
     mutate(delay = .data$stime_lwr - .data$ptime_lwr)
+
+  if (!is.null(weight)) {
+    assert_names(names(data), must.include = weight)
+    data <- data |>
+      mutate(n = .data[[weight]])
+  } else {
+    data <- data |>
+      mutate(n = 1)
+  }
 
   data <- new_epidist_naive_model(data)
   assert_epidist(data)
@@ -36,6 +54,11 @@ as_epidist_naive_model.epidist_linelist_data <- function(data) {
 }
 
 #' The naive model method for `epidist_aggregate_data` objects
+#'
+#' This method converts aggregate data to a naive model format by passing it to
+#' [as_epidist_naive_model.epidist_linelist_data()] with the `n` column used as
+#' weights. This ensures that the likelihood is weighted by the counts in the
+#' aggregate data.
 #'
 #' @param data An `epidist_aggregate_data` object.
 #'
@@ -54,9 +77,7 @@ as_epidist_naive_model.epidist_linelist_data <- function(data) {
 #'   ) |>
 #'   as_epidist_naive_model()
 as_epidist_naive_model.epidist_aggregate_data <- function(data) {
-  linelist_data <- as_epidist_linelist_data.epidist_aggregate_data(data)
-
-  as_epidist_naive_model(linelist_data)
+  as_epidist_naive_model.epidist_linelist_data(data, weight = "n")
 }
 
 #' Class constructor for `epidist_naive_model` objects
