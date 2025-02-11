@@ -143,8 +143,7 @@ epidist_formula_model.epidist_naive_model <- function(
 #'
 #' This method transforms data into the format required by the naive model
 #' by:
-#' 1. Identifying required columns for the naive model using
-#'    [.naive_required_cols()]
+#' 1. Identifying required columns for the naive model
 #' 2. Summarising the data by counting unique combinations of these columns and
 #'    any variables in the model formula using [.summarise_n_by_formula()]
 #' 3. Converting the summarised data to a naive model object using

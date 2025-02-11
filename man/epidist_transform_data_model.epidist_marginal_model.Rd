@@ -19,8 +19,7 @@
 This method transforms data into the format required by the marginal model
 by:
 \enumerate{
-\item Identifying required columns for the marginal model using
-\code{\link[=.marginal_required_cols]{.marginal_required_cols()}}
+\item Identifying required columns for the marginal model
 \item Summarising the data by counting unique combinations of these columns and
 any variables in the model formula using \code{\link[=.summarise_n_by_formula]{.summarise_n_by_formula()}}
 \item Converting the summarised data to a marginal model object using

@@ -52,4 +52,16 @@ These two later options may be useful for model debugging and extensions.}
 \description{
 Fit epidemiological delay distributions using a \code{brms} interface
 }
+\examples{
+fit <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model() |>
+  epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+
+summary(fit)
+}
 \concept{fit}

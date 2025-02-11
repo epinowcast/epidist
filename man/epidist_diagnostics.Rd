@@ -38,8 +38,8 @@ fit <- sierra_leone_ebola_data |>
     sdate_lwr = "date_of_sample_tested"
   ) |>
   as_epidist_aggregate_data() |>
-  as_epidist_naive_model() |>
-  epidist()
+  as_epidist_marginal_model() |>
+  epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
 epidist_diagnostics(fit)
 }
 \concept{diagnostics}
