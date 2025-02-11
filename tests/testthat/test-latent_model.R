@@ -9,6 +9,71 @@ test_that("as_epidist_latent_model.epidist_linelist_data errors when passed inco
   expect_error(as_epidist_latent_model(sim_obs[, 1]))
 })
 
+test_that("as_epidist_latent_model.epidist_aggregate_data works correctly", {
+  # Create test aggregate data
+  agg_data <- suppressMessages(sierra_leone_ebola_data |>
+    dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+    as_epidist_aggregate_data(
+      pdate_lwr = "date_of_symptom_onset",
+      sdate_lwr = "date_of_sample_tested"
+    ))
+
+  # Convert to latent model format
+  latent_data <- as_epidist_latent_model(agg_data)
+
+  # Check classes
+  expect_s3_class(latent_data, "data.frame")
+  expect_s3_class(latent_data, "epidist_latent_model")
+
+  # Check number of rows matches sum of counts
+  expect_identical(nrow(latent_data), sum(agg_data$n))
+  expect_identical(nrow(latent_data), nrow(sierra_leone_ebola_data))
+
+  # Check that n has been removed
+  expect_false("n" %in% names(latent_data))
+
+  # Check required columns present
+  expect_true(all(.linelist_required_cols() %in% names(latent_data)))
+})
+
+test_that(
+  "as_epidist_latent_model.epidist_aggregate_data preserves stratification",
+  {
+    # Create test aggregate data with stratification
+    agg_data <- suppressMessages(sierra_leone_ebola_data |>
+      dplyr::count(
+        date_of_symptom_onset, date_of_sample_tested, age
+      ) |>
+      as_epidist_aggregate_data(
+        pdate_lwr = "date_of_symptom_onset",
+        sdate_lwr = "date_of_sample_tested",
+        by = "age_group"
+      ))
+
+    # Convert to latent model
+    latent_data <- as_epidist_latent_model(agg_data)
+
+    # Check stratification variable preserved
+    expect_true("age" %in% names(latent_data))
+
+    # Check counts match between stratified groups
+    expect_identical(
+      as.double(sort(table(latent_data$age))),
+      as.double(sort(tapply(agg_data$n, agg_data$age, sum)))
+    )
+
+    # Check number of rows matches sum of counts
+    expect_identical(nrow(latent_data), sum(agg_data$n))
+    expect_identical(nrow(latent_data), nrow(sierra_leone_ebola_data))
+
+    # Check that n has been removed
+    expect_false("n" %in% names(latent_data))
+
+    # Check required columns present
+    expect_true(all(.linelist_required_cols() %in% names(latent_data)))
+  }
+)
+
 # Make this data available for other tests
 family_lognormal <- epidist_family(prep_obs, family = lognormal())
 
