@@ -127,7 +127,7 @@ epidist_formula_model.epidist_naive_model <- function(
     data, formula, ...) {
   # data is only used to dispatch on
   formula <- stats::update(
-    formula, delay_lwr | weights(n) ~ .
+    formula | weights(n) ~ .
   )
   return(formula)
 }
