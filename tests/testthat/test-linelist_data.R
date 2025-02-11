@@ -142,3 +142,21 @@ test_that("as_epidist_linelist_data.epidist_aggregate_data works correctly", {
   # Check other columns preserved
   expect_true(all(.linelist_required_cols() %in% names(linelist_data)))
 })
+
+test_that("is_epidist_linelist_data returns TRUE for correct input", {
+  expect_true(is_epidist_linelist_data(sim_obs))
+  expect_true({
+    x <- list()
+    class(x) <- "epidist_linelist_data"
+    is_epidist_linelist_data(x)
+  })
+})
+
+test_that("is_epidist_linelist_data returns FALSE for incorrect input", {
+  expect_false(is_epidist_linelist_data(list()))
+  expect_false({
+    x <- list()
+    class(x) <- "epidist_linelist_data_extension"
+    is_epidist_linelist_data(x)
+  })
+})
