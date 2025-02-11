@@ -187,7 +187,9 @@ as_epidist_linelist_data.data.frame <- function(
 #'   as_epidist_linelist_data()
 as_epidist_linelist_data.epidist_aggregate_data <- function(data, ...) {
   assert_epidist.epidist_aggregate_data(data)
-  data <- tidyr::uncount(data, weights = .data$n, .remove = TRUE)
+  data <- tidyr::uncount(data, weights = .data$n, .remove = TRUE) |>
+    dplyr::select(-.data$n)
+
   class(data) <- setdiff(class(data), "epidist_aggregate_data")
   return(as_epidist_linelist_data(data))
 }

@@ -116,3 +116,29 @@ test_that("as_epidist_linelist_data preserves additional columns", {
   expect_true("extra_col" %in% names(linelist_data))
   expect_identical(linelist_data$extra_col, "test")
 })
+
+test_that("as_epidist_linelist_data.epidist_aggregate_data works correctly", {
+  # Create test aggregate data
+  agg_data <- suppressMessages(sierra_leone_ebola_data |>
+    dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+    as_epidist_aggregate_data(
+      pdate_lwr = "date_of_symptom_onset",
+      sdate_lwr = "date_of_sample_tested",
+      n = "n"
+    ))
+
+  # Convert to linelist format
+  linelist_data <- as_epidist_linelist_data(agg_data)
+
+  # Check classes
+  expect_s3_class(linelist_data, "data.frame")
+  expect_s3_class(linelist_data, "epidist_linelist_data")
+
+  # Check number of rows matches sum of counts
+  expect_identical(nrow(linelist_data), sum(agg_data$n))
+  # Check that n has been removed
+  expect_false("n" %in% names(linelist_data))
+
+  # Check other columns preserved
+  expect_true(all(.linelist_required_cols() %in% names(linelist_data)))
+})
