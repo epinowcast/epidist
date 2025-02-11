@@ -357,7 +357,7 @@ To generate a discrete probability mass function (PMF) we predict the delay dist
 To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and `relative_obs_time` to `Inf` for no right truncation.
 Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure.
 
-```{r, eval = FALSE}
+```{r}
 add_marginal_pmf_vars <- function(data) {
   data |>
     mutate(
@@ -368,7 +368,9 @@ add_marginal_pmf_vars <- function(data) {
 draws_pmf <- obs_prep |>
   add_marginal_pmf_vars() |>
   add_predicted_draws(fit, ndraws = 1000)
+```
 
+```{r, eval = FALSE}
 pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
   labs(x = "", y = "", title = "Intercept-only", tag = "A") +
@@ -425,7 +427,7 @@ pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
 The posterior predictive distribution under no truncation and no censoring.
 That is to produce continuous delay times (Figure \@ref(fig:pdf)):
 
-```{r, eval = FALSE}
+```{r}
 add_marginal_pdf_vars <- function(data) {
   data |>
     mutate(
@@ -436,7 +438,9 @@ add_marginal_pdf_vars <- function(data) {
 draws_pdf <- obs_prep |>
   add_marginal_pdf_vars() |>
   add_predicted_draws(fit, ndraws = 1000)
+```
 
+```{r, eval = FALSE}
 pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
   geom_density() +
   labs(x = "", y = "", title = "Intercept-only", tag = "A") +
