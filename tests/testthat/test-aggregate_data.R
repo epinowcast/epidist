@@ -103,3 +103,40 @@ test_that("as_epidist_aggregate_data validates counts", {
     assert_epidist(invalid_decimal)
   )
 })
+
+test_that("as_epidist_aggregate_data errors if n is missing", {
+  # Test default method
+  expect_error(
+    as_epidist_aggregate_data(
+      data = c(1, 2, 3),
+      ptime_upr = c(2, 3, 4),
+      stime_lwr = c(3, 4, 5),
+      stime_upr = c(4, 5, 6),
+      obs_time = c(5, 6, 7)
+    ),
+    "is NULL but must be provided"
+  )
+
+  # Test data.frame method
+  test_df <- data.frame(
+    pdate_lwr = as.Date("2020-01-01") + 0:2,
+    sdate_lwr = as.Date("2020-01-02") + 0:2
+  )
+
+  suppressMessages(
+    expect_error(
+      as_epidist_aggregate_data(test_df),
+      "is NULL but must be provided"
+    )
+  )
+})
+
+test_that("is_epidist_aggregate_data works correctly", {
+  # Test positive case
+  expect_true(is_epidist_aggregate_data(agg_sim_obs))
+
+  # Test negative cases
+  expect_false(is_epidist_aggregate_data(sim_obs))
+  expect_false(is_epidist_aggregate_data(data.frame()))
+  expect_false(is_epidist_aggregate_data(list()))
+})
