@@ -4,10 +4,12 @@
 \alias{as_epidist_naive_model}
 \title{Prepare naive model to pass through to \code{brms}}
 \usage{
-as_epidist_naive_model(data)
+as_epidist_naive_model(data, ...)
 }
 \arguments{
 \item{data}{An object to be converted to the class \code{epidist_naive_model}.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \description{
 Prepare naive model to pass through to \code{brms}

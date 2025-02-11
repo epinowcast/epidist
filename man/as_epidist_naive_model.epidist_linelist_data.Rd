@@ -4,7 +4,7 @@
 \alias{as_epidist_naive_model.epidist_linelist_data}
 \title{The naive model method for \code{epidist_linelist_data} objects}
 \usage{
-\method{as_epidist_naive_model}{epidist_linelist_data}(data, weight = NULL)
+\method{as_epidist_naive_model}{epidist_linelist_data}(data, weight = NULL, ...)
 }
 \arguments{
 \item{data}{An \code{epidist_linelist_data} object.}
@@ -12,6 +12,8 @@
 \item{weight}{A column name to use for weighting the data in the
 likelihood. Default is NULL. Internally this is used to define the 'n'
 column of the returned object.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \description{
 This method converts linelist data to a naive model format by calculating

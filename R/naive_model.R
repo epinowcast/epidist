@@ -2,9 +2,11 @@
 #'
 #' @param data An object to be converted to the class `epidist_naive_model`.
 #'
+#' @param ... Additional arguments passed to methods.
+#'
 #' @family naive_model
 #' @export
-as_epidist_naive_model <- function(data) {
+as_epidist_naive_model <- function(data, ...) {
   UseMethod("as_epidist_naive_model")
 }
 
@@ -18,6 +20,7 @@ as_epidist_naive_model <- function(data) {
 #' @param data An `epidist_linelist_data` object.
 #'
 #' @inheritParams .add_weights
+#' @inheritParams as_epidist_naive_model
 #'
 #' @method as_epidist_naive_model epidist_linelist_data
 #'
@@ -31,7 +34,8 @@ as_epidist_naive_model <- function(data) {
 #'     sdate_lwr = "date_of_sample_tested"
 #'   ) |>
 #'   as_epidist_naive_model()
-as_epidist_naive_model.epidist_linelist_data <- function(data, weight = NULL) {
+as_epidist_naive_model.epidist_linelist_data <- function(
+    data, weight = NULL, ...) {
   assert_epidist.epidist_linelist_data(data)
 
   data <- data |>
@@ -53,6 +57,8 @@ as_epidist_naive_model.epidist_linelist_data <- function(data, weight = NULL) {
 #'
 #' @param data An `epidist_aggregate_data` object.
 #'
+#' @inheritParams as_epidist_naive_model.epidist_linelist_data
+#'
 #' @method as_epidist_naive_model epidist_aggregate_data
 #'
 #' @family naive_model
@@ -67,8 +73,12 @@ as_epidist_naive_model.epidist_linelist_data <- function(data, weight = NULL) {
 #'     n = "n"
 #'   ) |>
 #'   as_epidist_naive_model()
-as_epidist_naive_model.epidist_aggregate_data <- function(data) {
-  return(as_epidist_naive_model.epidist_linelist_data(data, weight = "n"))
+as_epidist_naive_model.epidist_aggregate_data <- function(data, ...) {
+  return(as_epidist_naive_model.epidist_linelist_data(
+    data,
+    weight = "n",
+    ...
+  ))
 }
 
 #' Class constructor for `epidist_naive_model` objects
