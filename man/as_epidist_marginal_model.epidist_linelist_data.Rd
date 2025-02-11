@@ -29,7 +29,8 @@ censoring windows. The likelihood used is imported from the
 which handles censoring in both primary and secondary events as well as
 truncation due to observation times. In principle, this method should be
 more accurate and more computationally efficient than the latent model
-(\code{\link[=as_epidist_latent_model.default]{as_epidist_latent_model.default()}}) approach in most settings.
+(\code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}}) approach in most setting except when the
+number of unique strata approaches the number of observations.
 }
 \details{
 When a formula is specified in \code{\link[=epidist]{epidist()}}, the data will be transformed
