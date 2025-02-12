@@ -370,7 +370,7 @@ draws_pmf <- obs_prep |>
   add_predicted_draws(fit, ndraws = 1000)
 ```
 
-```{r, eval = FALSE}
+```{r}
 pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
   labs(x = "", y = "", title = "Intercept-only", tag = "A") +
