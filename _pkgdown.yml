@@ -8,7 +8,7 @@ development:
 
 navbar:
   structure:
-    left: [faq, intro, reference, articles]
+    left: [faq, intro, reference, articles, news]
     right: [search, github, lightswitch]
   components:
     faq:
