@@ -29,7 +29,7 @@ as_epidist_marginal_model <- function(data, ...) {
 #' which handles censoring in both primary and secondary events as well as
 #' truncation due to observation times. In principle, this method should be
 #' more accurate and more computationally efficient than the latent model
-#' ([as_epidist_latent_model()]) approach in most setting except when the
+#' ([as_epidist_latent_model()]) approach in most settings except when the
 #' number of unique strata approaches the number of observations.
 #'
 #' When a formula is specified in [epidist()], the data will be transformed
