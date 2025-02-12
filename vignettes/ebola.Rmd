@@ -418,7 +418,7 @@ pmf_sex_district_figure <- draws_sex_district_pmf |>
 
 (ref:pmf) Posterior predictions of the discrete probability mass function for each of the fitted models.
 
-```{r pmf, eval = FALSE, fig.cap="(ref:pmf)", fig.height = 16}
+```{r pmf, fig.cap="(ref:pmf)", fig.height = 16}
 pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 5.5))
 ```
@@ -486,7 +486,7 @@ pdf_sex_district_figure <- draws_sex_district_pdf |>
 
 (ref:pdf) Posterior predictions of the continuous probability density function for each of the fitted models.
 
-```{r pdf, eval = FALSE, fig.cap="(ref:pdf)", fig.height = 16}
+```{r pdf, fig.cap="(ref:pdf)", fig.height = 16}
 pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 5.5))
 ```
