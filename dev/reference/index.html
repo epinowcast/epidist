@@ -73,6 +73,12 @@
         <dd>Create an epidist_linelist_data object from vectors of event times</dd>
       </dl><dl><dt>
 
+          <code><a href="as_epidist_linelist_data.epidist_aggregate_data.html">as_epidist_linelist_data(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Convert aggregate data to linelist format</dd>
+      </dl><dl><dt>
+
           <code><a href="assert_epidist.epidist_linelist_data.html">assert_epidist(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
 
         </dt>
@@ -89,6 +95,59 @@
 
         </dt>
         <dd>Class constructor for <code>epidist_linelist_data</code> objects</dd>
+      </dl></div><div class="section level2">
+      <h2 id="aggregate-data">Aggregate data<a class="anchor" aria-label="anchor" href="#aggregate-data"></a></h2>
+
+      <div class="section-desc"><p>Functions for preparing aggregate data</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as_epidist_aggregate_data.html">as_epidist_aggregate_data()</a></code>
+
+        </dt>
+        <dd>Create an epidist_aggregate_data object</dd>
+      </dl><dl><dt>
+
+          <code><a href="as_epidist_aggregate_data.data.frame.html">as_epidist_aggregate_data(<i>&lt;data.frame&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Create an epidist_aggregate_data object from a data.frame</dd>
+      </dl><dl><dt>
+
+          <code><a href="as_epidist_aggregate_data.default.html">as_epidist_aggregate_data(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Create an epidist_aggregate_data object from vectors of event times</dd>
+      </dl><dl><dt>
+
+          <code><a href="as_epidist_aggregate_data.epidist_linelist_data.html">as_epidist_aggregate_data(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Convert linelist data to aggregate format</dd>
+      </dl><dl><dt>
+
+          <code><a href="assert_epidist.epidist_aggregate_data.html">assert_epidist(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Assert validity of <code>epidist_aggregate_data</code> objects</dd>
+      </dl><dl><dt>
+
+          <code><a href="is_epidist_aggregate_data.html">is_epidist_aggregate_data()</a></code>
+
+        </dt>
+        <dd>Check if data has the <code>epidist_aggregate_data</code> class</dd>
+      </dl><dl><dt>
+
+          <code><a href="new_epidist_aggregate_data.html">new_epidist_aggregate_data()</a></code>
+
+        </dt>
+        <dd>Class constructor for <code>epidist_aggregate_data</code> objects</dd>
       </dl></div><div class="section level2">
       <h2 id="model-fitting">Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a></h2>
 
@@ -122,13 +181,31 @@
           <code><a href="as_epidist_naive_model.html">as_epidist_naive_model()</a></code>
 
         </dt>
-        <dd>Prepare naive model to pass through to <code>brms</code></dd>
+        <dd>Convert an object to an <code>epidist_naive_model</code> object</dd>
+      </dl><dl><dt>
+
+          <code><a href="as_epidist_naive_model.epidist_aggregate_data.html">as_epidist_naive_model(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The naive model method for <code>epidist_aggregate_data</code> objects</dd>
       </dl><dl><dt>
 
           <code><a href="as_epidist_naive_model.epidist_linelist_data.html">as_epidist_naive_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
 
         </dt>
         <dd>The naive model method for <code>epidist_linelist_data</code> objects</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_formula_model.epidist_naive_model.html">epidist_formula_model(<i>&lt;epidist_naive_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Define the model-specific component of an <code>epidist</code> custom formula for the naive model</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_transform_data_model.epidist_naive_model.html">epidist_transform_data_model(<i>&lt;epidist_naive_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Transform data for the naive model</dd>
       </dl><dl><dt>
 
           <code><a href="is_epidist_naive_model.html">is_epidist_naive_model()</a></code>
@@ -160,6 +237,12 @@
         <dd>Convert an object to an <code>epidist_latent_model</code> object</dd>
       </dl><dl><dt>
 
+          <code><a href="as_epidist_latent_model.epidist_aggregate_data.html">as_epidist_latent_model(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The latent model method for <code>epidist_aggregate_data</code> objects</dd>
+      </dl><dl><dt>
+
           <code><a href="as_epidist_latent_model.epidist_linelist_data.html">as_epidist_latent_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
 
         </dt>
@@ -175,7 +258,7 @@
           <code><a href="epidist_formula_model.epidist_latent_model.html">epidist_formula_model(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
 
         </dt>
-        <dd>Define the model-specific component of an <code>epidist</code> custom formula</dd>
+        <dd>Define the model-specific component of an <code>epidist</code> custom formula for the latent model</dd>
       </dl><dl><dt>
 
           <code><a href="epidist_model_prior.epidist_latent_model.html">epidist_model_prior(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
@@ -210,7 +293,13 @@
           <code><a href="as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code>
 
         </dt>
-        <dd>Prepare marginal model to pass through to <code>brms</code></dd>
+        <dd>Convert an object to an <code>epidist_marginal_model</code> object</dd>
+      </dl><dl><dt>
+
+          <code><a href="as_epidist_marginal_model.epidist_aggregate_data.html">as_epidist_marginal_model(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The marginal model method for <code>epidist_aggregate_data</code> objects</dd>
       </dl><dl><dt>
 
           <code><a href="as_epidist_marginal_model.epidist_linelist_data.html">as_epidist_marginal_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
@@ -228,7 +317,13 @@
           <code><a href="epidist_formula_model.epidist_marginal_model.html">epidist_formula_model(<i>&lt;epidist_marginal_model&gt;</i>)</a></code>
 
         </dt>
-        <dd>Define the model-specific component of an <code>epidist</code> custom formula</dd>
+        <dd>Define the model-specific component of an <code>epidist</code> custom formula for the marginal model</dd>
+      </dl><dl><dt>
+
+          <code><a href="epidist_transform_data_model.epidist_marginal_model.html">epidist_transform_data_model(<i>&lt;epidist_marginal_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Transform data for the marginal model</dd>
       </dl><dl><dt>
 
           <code><a href="is_epidist_marginal_model.html">is_epidist_marginal_model()</a></code>

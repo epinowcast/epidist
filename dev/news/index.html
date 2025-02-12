@@ -45,13 +45,19 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0.1000" id="epidist-0101000">epidist 0.1.0.1000<a class="anchor" aria-label="anchor" href="#epidist-0101000"></a></h2>
-<p>Development version of <code>epidist</code>. As part of this release we have moved from <a href="https://github.com/athowes" class="external-link">@athowes</a> maintaining the package (who led the initial package development, implementation of the S3 infrastructure, implementation of the core models, and wrote the first versions of the getting started vignette, Ebola case study, FAQ section, and the approximate inference vignette) to <a href="https://github.com/seabbs" class="external-link">@seabbs</a> maintaining the package.</p>
+<p>Development version of <code>epidist</code>.</p>
+<p>This release adds a new marginal model based on <code>primarycensored</code> which provides a more efficient approach for fitting delay distributions compared to the existing latent model. We’ve also improved data handling by adding support for aggregated data across all models, added comprehensive examples using real world data, and enhanced documentation based on user feedback. The package has also undergone significant internal improvements including generalised Stan reparameterisation and improved data transformation methods.</p>
+<p>As part of this release we have moved from <a href="https://github.com/athowes" class="external-link">@athowes</a> maintaining the package (who led the initial package development, implementation of the S3 infrastructure, implementation of the core models, and wrote the first versions of the getting started vignette, Ebola case study, FAQ section, and the approximate inference vignette) to <a href="https://github.com/seabbs" class="external-link">@seabbs</a> maintaining the package.</p>
 <div class="section level3">
 <h3 id="models-0-1-0-1000">Models<a class="anchor" aria-label="anchor" href="#models-0-1-0-1000"></a></h3>
 <ul><li>Added a marginalised likelihood model based on <code>primarycensored</code>. This can be specified using <code><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code>. This is currently limited to Weibull, log-normal, and gamma distributions with uniform primary censoring but this will be generalised in future releases. See <a href="https://github.com/epinowcast/epidist/issues/426" class="external-link">#426</a>.</li>
-<li>Added a <code>weight</code> argument to <code><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code> to allow for weighted data (for example count data) to be used in the marginal model. See <a href="https://github.com/epinowcast/epidist/issues/509" class="external-link">#509</a>.</li>
 <li>Added user settable primary event priors to the latent model. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
 <li>Added a marginalised likelihood to the latent model. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
+<li>Added a <code>weight</code> argument to <code><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code> to allow for weighted data (for example count data) to be used in the marginal model. See <a href="https://github.com/epinowcast/epidist/issues/509" class="external-link">#509</a>.</li>
+<li>Added a <code>epidist_aggregate_data</code> method to <code><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code> to allow straightforward use of the marginal model with aggregated data. See <a href="https://github.com/epinowcast/epidist/issues/510" class="external-link">#510</a>.</li>
+<li>Added a <code>epidist_aggregate_data</code> method to <code><a href="../reference/as_epidist_latent_model.html">as_epidist_latent_model()</a></code> to allow straightforward use of the latent model with aggregated data. See <a href="https://github.com/epinowcast/epidist/issues/510" class="external-link">#510</a>.</li>
+<li>Added a <code>epidist_aggregate_data</code> method to <code><a href="../reference/as_epidist_naive_model.html">as_epidist_naive_model()</a></code> to allow straightforward use of the naive model with aggregated data. See <a href="https://github.com/epinowcast/epidist/issues/510" class="external-link">#510</a>.</li>
+<li>Updated the naive model to internally transform the data to be optimally aggregated as for the marginal model. See <a href="https://github.com/epinowcast/epidist/issues/510" class="external-link">#510</a>.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="package-0-1-0-1000">Package<a class="anchor" aria-label="anchor" href="#package-0-1-0-1000"></a></h3>
@@ -60,12 +66,19 @@
 <li>Added a <code>merge</code> argument to <code><a href="../reference/epidist_prior.html">epidist_prior()</a></code> to allow for not merging user and package priors. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
 <li>Generalised the Stan reparametrisation feature to work across all distributions without manual specification by generating Stan code with <code>brms</code> and then extracting the reparameterisation. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
 <li>Added a <code>transform_data</code> S3 method to allow for data to be transformed for specific models. This is specifically useful for the marginal model at the moment as it allows reducing the data to its unique strata. See <a href="https://github.com/epinowcast/epidist/issues/474" class="external-link">#474</a>.</li>
+<li>Added new <code>epidist_aggregate_data</code> class to handle pre-aggregated line list data. See <a href="https://github.com/epinowcast/epidist/issues/510" class="external-link">#510</a>.</li>
+<li>Added a <code><a href="../reference/as_epidist_aggregate_data.html">as_epidist_aggregate_data()</a></code> method for <code>epidist_linelist_data</code> objects to allow for easy conversion to aggregate data. See <a href="https://github.com/epinowcast/epidist/issues/510" class="external-link">#510</a>.</li>
+<li>Added a <code><a href="../reference/as_epidist_linelist_data.html">as_epidist_linelist_data()</a></code> method for <code>epidist_aggregate_data</code> objects to allow for easy conversion to linelist data. See <a href="https://github.com/epinowcast/epidist/issues/510" class="external-link">#510</a>.</li>
+<li>Added an example dataset <code>sierra_leone_ebola_data</code> to the package. See <a href="https://github.com/epinowcast/epidist/issues/510" class="external-link">#510</a>.</li>
+<li>Added examples to most functions to show usage of the package. See <a href="https://github.com/epinowcast/epidist/issues/510" class="external-link">#510</a>.</li>
+<li>Added improved documentation explaining how the <code><a href="../reference/epidist_transform_data.html">epidist_transform_data()</a></code> methods work for the marginal and naive models. See <a href="https://github.com/epinowcast/epidist/issues/510" class="external-link">#510</a>.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-0-1-0-1000">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-0-1000"></a></h3>
 <ul><li>Brings the README into line with <code>epinowcast</code> standards. See <a href="https://github.com/epinowcast/epidist/issues/467" class="external-link">#467</a>.</li>
 <li>Switched over to using the marginal model as default in the documentation. See <a href="https://github.com/epinowcast/epidist/issues/426" class="external-link">#426</a>.</li>
 <li>Added a helper functions for new variables to avoid code duplication in vignettes. See <a href="https://github.com/epinowcast/epidist/issues/426" class="external-link">#426</a>.</li>
+<li>Improved the Ebola case study vignette to use truncated data and to reduce the focus on exploratory data analysis. See <a href="https://github.com/epinowcast/epidist/issues/510" class="external-link">#510</a>.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="bugs-0-1-0-1000">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-1-0-1000"></a></h3>
