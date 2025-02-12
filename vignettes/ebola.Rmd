@@ -387,8 +387,11 @@ draws_sex_pmf <- obs_prep |>
 
 ```{r, eval = FALSE}
 pmf_sex_figure <- draws_sex_pmf |>
+  filter(!is.na(.prediction)) |>
   ggplot(aes(x = .prediction)) +
-  geom_bar(aes(y = after_stat(count / ave(count, PANEL, FUN = sum)))) +
+  geom_bar(aes(y = after_stat(
+    count / ave(count, PANEL, FUN = sum)
+  ))) +
   labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
   facet_grid(. ~ sex) +
   scale_x_continuous(limits = c(0, 30)) +
