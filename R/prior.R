@@ -14,10 +14,13 @@
 #' specific coefficient (class = "b" and coef specified).
 #'
 #' @inheritParams epidist
+#'
 #' @param family A description of the response distribution and link function to
-#' be used in the model created using [epidist_family()].
+#'   be used in the model created using [epidist_family()].
+#'
 #' @param formula A symbolic description of the model to be fitted created using
-#' [epidist_formula()].
+#'   [epidist_formula()].
+#'
 #' @param merge If `TRUE` then merge new priors with existing ones, if `FALSE`
 #'   only use new priors. Defaults to `TRUE`. This may be useful if the built in
 #'   approaches for merging priors are not flexible enough for a particular use
@@ -25,8 +28,10 @@
 #' @param enforce_presence If `TRUE` then only allow user priors that match
 #'   existing default priors. If `FALSE` then allow user priors that are not
 #'   present in the default set. Defaults to `FALSE`.
+#'
 #' @return A `brmsprior` object containing the combined custom prior
-#' distributions.
+#'  distributions.
+#'
 #' @rdname epidist_prior
 #' @family prior
 #' @export

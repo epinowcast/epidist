@@ -36,6 +36,91 @@ test_that(
   }
 )
 
+test_that(
+  "as_epidist_marginal_model.epidist_linelist_data handles obs_time_threshold correctly", # nolint
+  {
+    # Create test data with some large observation times
+    test_data <- suppressMessages(sierra_leone_ebola_data |>
+      dplyr::filter(date_of_sample_tested < as.Date("2015-01-01")) |>
+      as_epidist_linelist_data(
+        pdate_lwr = "date_of_symptom_onset",
+        sdate_lwr = "date_of_sample_tested"
+      ))
+
+    # Check threshold behaviour with default threshold = 2
+    expect_message(
+      model_default <- as_epidist_marginal_model(test_data), # nolint
+      "Setting"
+    )
+    expect_true(any(is.infinite(model_default$relative_obs_time)))
+    expect_identical(sum(is.infinite(model_default$relative_obs_time)), 2008L)
+
+    # Check threshold behaviour with custom threshold = 4
+    expect_message(
+      model_custom <- as_epidist_marginal_model( # nolint
+        test_data,
+        obs_time_threshold = 1
+      ),
+      "Setting"
+    )
+    expect_true(any(is.infinite(model_custom$relative_obs_time)))
+    expect_identical(sum(is.infinite(model_custom$relative_obs_time)), 4949L)
+
+    # Check threshold behaviour with no observations beyond threshold
+    expect_no_message(
+      model_none <- as_epidist_marginal_model( # nolint
+        test_data,
+        obs_time_threshold = 100
+      )
+    )
+    expect_false(any(is.infinite(model_none$relative_obs_time)))
+  }
+)
+
+
+test_that(
+  "as_epidist_marginal_model.epidist_aggregate_data works with aggregate data",
+  {
+    # Check no error when creating marginal model from aggregate data
+    expect_no_error(
+      marginal_agg <- as_epidist_marginal_model(agg_sim_obs) # nolint
+    )
+
+    # Check classes
+    expect_s3_class(marginal_agg, "data.frame")
+    expect_s3_class(marginal_agg, "epidist_marginal_model")
+    expect_s3_class(marginal_agg, "epidist_aggregate_data")
+    expect_s3_class(marginal_agg, "epidist_linelist_data")
+    # Check passes assert_epidist for each class using S3 dispatch
+    expect_no_error(assert_epidist.epidist_marginal_model(marginal_agg))
+    expect_no_error(assert_epidist.epidist_aggregate_data(marginal_agg))
+    expect_no_error(assert_epidist.epidist_linelist_data(marginal_agg))
+
+    # Check n values preserved
+    expect_identical(marginal_agg$n, agg_sim_obs$n)
+  }
+)
+
+test_that(
+  "as_epidist_marginal_model.epidist_aggregate_data preserves stratification",
+  {
+    # Create marginal model from stratified aggregate data
+    marginal_agg_sex <- as_epidist_marginal_model(agg_sim_obs_sex)
+
+    # Check sex column preserved
+    expect_true("sex" %in% names(marginal_agg_sex))
+
+    # Check sex values match original data
+    expect_identical(
+      sort(unique(marginal_agg_sex$sex)),
+      sort(unique(agg_sim_obs_sex$sex))
+    )
+
+    # Check n values preserved
+    expect_identical(marginal_agg_sex$n, agg_sim_obs_sex$n)
+  }
+)
+
 # Make this data available for other tests
 family_lognormal <- epidist_family(prep_marginal_obs, family = lognormal())
 
@@ -70,6 +155,31 @@ test_that("assert_epidist.epidist_marginal_model returns FALSE for incorrect inp
     assert_epidist(x)
   })
 })
+
+test_that(
+  "assert_epidist.epidist_marginal_model errors when delay_upr != delay_lwr + swindow", # nolint
+  {
+    bad_data <- prep_marginal_obs
+    bad_data$delay_upr <- bad_data$delay_lwr + bad_data$swindow + 1
+    expect_error(
+      assert_epidist(bad_data),
+      "delay_upr must equal delay_lwr \\+ swindow" # nolint
+    )
+  }
+)
+
+test_that(
+  "assert_epidist.epidist_marginal_model errors when relative_obs_time < delay_upr", # nolint
+  {
+    bad_data <- prep_marginal_obs
+    bad_data$relative_obs_time <- bad_data$delay_upr - 1
+    expect_error(
+      assert_epidist(bad_data),
+      "relative_obs_time must be greater than or equal to delay_upr"
+    )
+  }
+)
+
 
 test_that("epidist_stancode.epidist_marginal_model produces valid stanvars", { # nolint: line_length_linter.
   epidist_family <- epidist_family(prep_marginal_obs)

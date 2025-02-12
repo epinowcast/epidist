@@ -2,23 +2,33 @@
 % Please edit documentation in R/marginal_model.R
 \name{as_epidist_marginal_model}
 \alias{as_epidist_marginal_model}
-\title{Prepare marginal model to pass through to \code{brms}}
+\title{Convert an object to an \code{epidist_marginal_model} object}
 \usage{
 as_epidist_marginal_model(data, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing line list data}
+\item{data}{An object to be converted to the class \code{epidist_marginal_model}}
 
 \item{...}{Additional arguments passed to methods.}
 }
 \description{
-Prepare marginal model to pass through to \code{brms}
+Creates an \code{epidist_marginal_model} object from various input formats.
+This enables fitting marginal models for epidemiological delays using
+\code{\link[=epidist]{epidist()}}. The marginal model approach uses the likelihood from the
+\href{https://primarycensored.epinowcast.org/}{primarycensored} package to
+efficiently handle censoring in both primary and secondary events as well as
+truncation due to observation times. See the specific methods
+\code{\link[=as_epidist_marginal_model.epidist_linelist_data]{as_epidist_marginal_model.epidist_linelist_data()}} and
+\code{\link[=as_epidist_marginal_model.epidist_aggregate_data]{as_epidist_marginal_model.epidist_aggregate_data()}} for details on
+supported input formats and usage examples.
 }
 \seealso{
 Other marginal_model: 
+\code{\link{as_epidist_marginal_model.epidist_aggregate_data}()},
 \code{\link{as_epidist_marginal_model.epidist_linelist_data}()},
 \code{\link{epidist_family_model.epidist_marginal_model}()},
 \code{\link{epidist_formula_model.epidist_marginal_model}()},
+\code{\link{epidist_transform_data_model.epidist_marginal_model}()},
 \code{\link{is_epidist_marginal_model}()},
 \code{\link{new_epidist_marginal_model}()}
 }

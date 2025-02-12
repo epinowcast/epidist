@@ -33,6 +33,8 @@ sim_obs <- as_epidist_linelist_data(
   sim_obs$obs_time
 )
 
+agg_sim_obs <- as_epidist_aggregate_data(sim_obs)
+
 set.seed(101)
 
 shape <- 2
@@ -113,6 +115,9 @@ sim_obs_sex <- as_epidist_linelist_data(
   sim_obs_sex$obs_time,
   sex = sim_obs_sex$sex
 )
+
+agg_sim_obs_sex <- as_epidist_aggregate_data(sim_obs_sex, by = "sex")
+
 prep_obs <- as_epidist_latent_model(sim_obs)
 prep_naive_obs <- as_epidist_naive_model(sim_obs)
 prep_marginal_obs <- as_epidist_marginal_model(sim_obs)

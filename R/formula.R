@@ -6,8 +6,10 @@
 #' inside of a call to [epidist()].
 #'
 #' @inheritParams epidist
+#'
 #' @param family A description of the response distribution and link function to
-#' be used in the model created using [epidist_family()].
+#'  be used in the model created using [epidist_family()].
+#'
 #' @family formula
 #' @export
 epidist_formula <- function(data, family, formula, ...) {
@@ -24,6 +26,7 @@ epidist_formula <- function(data, family, formula, ...) {
 #' The model-specific parts of an `epidist_formula()` call
 #'
 #' @inheritParams epidist
+#'
 #' @rdname epidist_family_model
 #' @family formula
 #' @export
@@ -34,6 +37,7 @@ epidist_formula_model <- function(data, formula, ...) {
 #' Default method for defining a model specific formula
 #'
 #' @inheritParams epidist
+#'
 #' @family formula
 #' @export
 epidist_formula_model.default <- function(data, formula, ...) {

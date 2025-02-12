@@ -1,13 +1,21 @@
 # epidist 0.1.0.1000
 
-Development version of `epidist`. As part of this release we have moved from @athowes maintaining the package (who led the initial package development, implementation of the S3 infrastructure, implementation of the core models, and wrote the first versions of the getting started vignette, Ebola case study, FAQ section, and the approximate inference vignette) to @seabbs maintaining the package.
+Development version of `epidist`.
+
+This release adds a new marginal model based on `primarycensored` which provides a more efficient approach for fitting delay distributions compared to the existing latent model. We've also improved data handling by adding support for aggregated data across all models, added comprehensive examples using real world data, and enhanced documentation based on user feedback. The package has also undergone significant internal improvements including generalised Stan reparameterisation and improved data transformation methods.
+
+As part of this release we have moved from @athowes maintaining the package (who led the initial package development, implementation of the S3 infrastructure, implementation of the core models, and wrote the first versions of the getting started vignette, Ebola case study, FAQ section, and the approximate inference vignette) to @seabbs maintaining the package.
 
 ## Models
 
 - Added a marginalised likelihood model based on `primarycensored`. This can be specified using `as_epidist_marginal_model()`. This is currently limited to Weibull, log-normal, and gamma distributions with uniform primary censoring but this will be generalised in future releases. See #426.
-- Added a `weight` argument to `as_epidist_marginal_model()` to allow for weighted data (for example count data) to be used in the marginal model. See #509.
 - Added user settable primary event priors to the latent model. See #474.
 - Added a marginalised likelihood to the latent model. See #474.
+- Added a `weight` argument to `as_epidist_marginal_model()` to allow for weighted data (for example count data) to be used in the marginal model. See #509.
+- Added a `epidist_aggregate_data` method to `as_epidist_marginal_model()` to allow straightforward use of the marginal model with aggregated data. See #510.
+- Added a `epidist_aggregate_data` method to `as_epidist_latent_model()` to allow straightforward use of the latent model with aggregated data. See #510.
+- Added a `epidist_aggregate_data` method to `as_epidist_naive_model()` to allow straightforward use of the naive model with aggregated data. See #510.
+- Updated the naive model to internally transform the data to be optimally aggregated as for the marginal model. See #510.
 
 ## Package
 
@@ -17,12 +25,19 @@ Development version of `epidist`. As part of this release we have moved from @at
 - Added a `merge` argument to `epidist_prior()` to allow for not merging user and package priors. See #474.
 - Generalised the Stan reparametrisation feature to work across all distributions without manual specification by generating Stan code with `brms` and then extracting the reparameterisation. See #474.
 - Added a `transform_data` S3 method to allow for data to be transformed for specific models. This is specifically useful for the marginal model at the moment as it allows reducing the data to its unique strata. See #474.
+- Added new `epidist_aggregate_data` class to handle pre-aggregated line list data. See #510.
+- Added a `as_epidist_aggregate_data()` method for `epidist_linelist_data` objects to allow for easy conversion to aggregate data. See #510.
+- Added a `as_epidist_linelist_data()` method for `epidist_aggregate_data` objects to allow for easy conversion to linelist data. See #510.
+- Added an example dataset `sierra_leone_ebola_data` to the package. See #510.
+- Added examples to most functions to show usage of the package. See #510.
+- Added improved documentation explaining how the `epidist_transform_data()` methods work for the marginal and naive models. See #510.
 
 ## Documentation
 
 - Brings the README into line with `epinowcast` standards. See #467.
 - Switched over to using the marginal model as default in the documentation. See #426.
 - Added a helper functions for new variables to avoid code duplication in vignettes. See #426.
+- Improved the Ebola case study vignette to use truncated data and to reduce the focus on exploratory data analysis. See #510.
 
 ## Bugs
 

@@ -18,4 +18,5 @@ assert_epidist.default <- function(data, ...) {
       "i" = "Please convert to epidist object first using as_epidist_<class>()" # nolint
     )
   )
+  return(invisible(NULL))
 }

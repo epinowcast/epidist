@@ -43,35 +43,30 @@ Imports:
     rstan (>= 2.26.0),
     dplyr,
     tibble,
+    tidyr,
     lubridate,
     primarycensored
 Suggests:
     bookdown,
     testthat (>= 3.0.0),
-    readxl,
-    janitor,
     gt,
     knitr,
     roxyglobals,
     bayesplot,
-    tidyr,
     posterior,
-    fs,
-    sf,
     tidybayes,
     modelr,
     patchwork,
+    pkgdown,
     cmdstanr,
     priorsense,
     usethis,
-    pkgdown,
     CodeDepends,
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
     RcppEigen (>= 0.3.3.3.0)
 Remotes:
-    stan-dev/cmdstanr,
-    epinowcast/primarycensored
+    stan-dev/cmdstanr
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme

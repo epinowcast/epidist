@@ -16,7 +16,7 @@ which is a count of occurrences.}
 terms from.}
 }
 \value{
-A \code{data.frame} summarised by the grouping variables with counts
+A \code{data.frame} summarised by the grouping variables with counts.
 }
 \description{
 Summarise data by grouping variables and count occurrences

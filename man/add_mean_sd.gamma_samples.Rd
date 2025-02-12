@@ -8,7 +8,7 @@ model}
 \method{add_mean_sd}{gamma_samples}(data, ...)
 }
 \arguments{
-\item{data}{A dataframe of distributional parameters}
+\item{data}{A dataframe of distributional parameters.}
 
 \item{...}{Additional arguments for method.}
 }

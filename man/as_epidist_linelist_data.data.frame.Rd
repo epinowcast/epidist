@@ -26,8 +26,8 @@ secondary event lower bound as a datetime. Defaults to \code{NULL} which assumes
 that the variable \code{sdate_lwr} is present.}
 
 \item{pdate_upr}{A string giving the column of \code{data} containing the primary
-event upper bound as a datetime. If this column exists in the data it will be
-used, otherwise if not supplied then the value of \code{pdate_lwr} + 1 day is
+event upper bound as a datetime. If this column exists in the data it will
+be used, otherwise if not supplied then the value of \code{pdate_lwr} + 1 day is
 used.}
 
 \item{sdate_upr}{A string giving the column of \code{data} containing the
@@ -36,18 +36,32 @@ it will be used, otherwise if not supplied then the value of \code{sdate_lwr} + 
 day is used.}
 
 \item{obs_date}{A string giving the column of \code{data} containing the
-observation time as a datetime. Optional, if not supplied then the maximum of
-\code{sdate_upr} is used.}
+observation time as a datetime. Optional, if not supplied then the maximum
+of \code{sdate_upr} is used.}
 
 \item{...}{Additional arguments passed to methods}
 }
 \description{
-Create an epidist_linelist_data object from a data frame with event dates
+This method takes a data.frame containing event dates (primary/secondary
+event dates and observation date) and creates an \code{epidist_linelist_data}
+object. This format is useful when working with individual-level data where
+each row represents a single observation. Internally it converts dates to
+numeric times relative to the earliest primary event date and uses
+\code{\link[=as_epidist_linelist_data.default]{as_epidist_linelist_data.default()}} to create the final object. See the
+other methods for other data input options.
+}
+\examples{
+sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  )
 }
 \seealso{
 Other linelist_data: 
 \code{\link{as_epidist_linelist_data}()},
 \code{\link{as_epidist_linelist_data.default}()},
+\code{\link{as_epidist_linelist_data.epidist_aggregate_data}()},
 \code{\link{assert_epidist.epidist_linelist_data}()},
 \code{\link{is_epidist_linelist_data}()},
 \code{\link{new_epidist_linelist_data}()}

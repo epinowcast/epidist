@@ -2,19 +2,29 @@
 % Please edit documentation in R/naive_model.R
 \name{as_epidist_naive_model}
 \alias{as_epidist_naive_model}
-\title{Prepare naive model to pass through to \code{brms}}
+\title{Convert an object to an \code{epidist_naive_model} object}
 \usage{
-as_epidist_naive_model(data)
+as_epidist_naive_model(data, ...)
 }
 \arguments{
 \item{data}{An object to be converted to the class \code{epidist_naive_model}}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \description{
-Prepare naive model to pass through to \code{brms}
+Creates an \code{epidist_naive_model} object from various input formats.
+This enables fitting naive models for epidemiological delays using
+\code{\link[=epidist]{epidist()}}. The naive model approach ignores censoring and truncation in
+the data, using only the lower bounds of the intervals as point estimates.
+This is the simplest approach but may lead to biased estimates if there is
+substantial censoring or truncation in the data.
 }
 \seealso{
 Other naive_model: 
+\code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
 \code{\link{as_epidist_naive_model.epidist_linelist_data}()},
+\code{\link{epidist_formula_model.epidist_naive_model}()},
+\code{\link{epidist_transform_data_model.epidist_naive_model}()},
 \code{\link{is_epidist_naive_model}()},
 \code{\link{new_epidist_naive_model}()}
 }

@@ -8,7 +8,7 @@
 }
 \arguments{
 \item{family}{A brms family object containing at minimum a \code{family} element
-specifying the distribution family name}
+specifying the distribution family name.}
 
 \item{...}{Additional arguments passed to methods (not used)}
 }

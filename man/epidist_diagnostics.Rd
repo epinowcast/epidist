@@ -31,4 +31,15 @@ transitions
 When the fitting algorithm is not \code{"sampling"} (see \code{\link[brms:brm]{brms::brm()}} for other
 possible algorithms) then diagnostics are yet to be implemented.
 }
+\examples{
+fit <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model() |>
+  epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+epidist_diagnostics(fit)
+}
 \concept{diagnostics}

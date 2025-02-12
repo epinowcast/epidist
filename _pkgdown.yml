@@ -33,6 +33,10 @@ reference:
   desc: Functions for preparing linelist data
   contents:
   - has_concept("linelist_data")
+- title: Aggregate data
+  desc: Functions for preparing aggregate data
+  contents:
+  - has_concept("aggregate_data")
 - title: Model fitting
   desc: Functions for fitting delay distribution models using `brms`
   contents:

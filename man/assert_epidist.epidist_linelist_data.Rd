@@ -7,7 +7,7 @@
 \method{assert_epidist}{epidist_linelist_data}(data, ...)
 }
 \arguments{
-\item{data}{An object to check}
+\item{data}{An object to check for validity.}
 
 \item{...}{Additional arguments}
 }
@@ -19,6 +19,7 @@ Other linelist_data:
 \code{\link{as_epidist_linelist_data}()},
 \code{\link{as_epidist_linelist_data.data.frame}()},
 \code{\link{as_epidist_linelist_data.default}()},
+\code{\link{as_epidist_linelist_data.epidist_aggregate_data}()},
 \code{\link{is_epidist_linelist_data}()},
 \code{\link{new_epidist_linelist_data}()}
 }
