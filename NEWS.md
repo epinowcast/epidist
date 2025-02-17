@@ -1,6 +1,11 @@
 # epidist 0.2.0.1000
 
 This is the development version of `epidist`.
+
+## Package
+
+- Remove caching of vignettes. See #533.
+
 # epidist 0.2.0
 
 This release adds a new marginal model based on `primarycensored` which provides a more efficient approach for fitting delay distributions compared to the existing latent model. We've also improved data handling by adding support for aggregated data across all models, added comprehensive examples using real world data, and enhanced documentation based on user feedback. The package has also undergone significant internal improvements including generalised Stan reparameterisation and improved data transformation methods.

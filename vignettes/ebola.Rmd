@@ -21,13 +21,11 @@ bibliography: references.bib
 # exclude compile warnings from cmdstanr
 knitr::opts_chunk$set(
   fig.path = file.path("figures", "epidist-"),
-  cache = TRUE,
   collapse = TRUE,
   comment = "#>",
   message = FALSE,
   warning = FALSE,
-  error = FALSE,
-  cache.lazy = FALSE
+  error = FALSE
 )
 ```
 
