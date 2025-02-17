@@ -4,7 +4,7 @@ This is the development version of `epidist`.
 
 ## Package
 
-- Remove caching of vignettes.
+- Remove caching of vignettes. See #533.
 
 # epidist 0.2.0
 
