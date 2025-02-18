@@ -81,7 +81,7 @@ Then, we will only observe delays whose secondary events occurred before time $T
 
 Bias from right truncation is greater when events are more likely to be more recent.
 A common example of severely right truncated data is data collected during outbreaks when growth in incidence is exponential (so you are much more likely to have a recent event).
-On the other hand if data collection is continued until the end of an outbreak then many fewer events are likely to be more recent and so there will be little right truncation in general.
+On the other hand, if data collection is continued until the end of an outbreak then many fewer events are likely to be more recent and so there will be little right truncation in general.
 
 Mathematically right truncation can be described as follows.
 Let $P$ and $S$ be random variables.
@@ -105,7 +105,7 @@ The exact timing of epidemiological events is often unknown.
 Instead, we may only know that the event happened within a certain interval.
 We refer to this as interval censoring.
 A very common example of interval censoring in epidemiology is date censoring, where we only know, or are using, data to the day of an event rather than the precise time.
-Other forms of interval censoring, like weekly or monthly interval censoring are also common.
+Other forms of interval censoring, like weekly or monthly interval censoring, are also common.
 When both primary and secondary events are interval censored, this is referred to as double censoring.
 
 Mathematically single interval censoring is defined as follows.
@@ -136,7 +136,7 @@ where $ g_P(x\,|\,P_L,P_R)$ represents the conditional distribution of primary e
 
 # The naive model
 
-The simplest approach to modelling epidemiological delay distributions is ignoring truncation and censoring biases and simply treating the delays as continuous fully oberserved data.
+The simplest approach to modelling epidemiological delay distributions is ignoring truncation and censoring biases and simply treating the delays as continuous fully observed data.
 Then, the likelihood of observing a delay $\mathbf{Y}_i$ given parameter $\boldsymbol{\theta}$ is straightforward:
 $$
 \mathcal{L}(\mathbf{Y}_i \, | \, \boldsymbol{\theta}) = f(y_i - x_i).
@@ -149,13 +149,13 @@ Where right truncation is also present biases can be more severe with plausible 
 # The latent model
 
 This approach aims to account for the right truncation and double censoring using a generative modelling approach.
-For each event a latent variable is used to represent the exact time of the event.
-This then allows modelling the continuous distribution, adjusted for right truncation.
+For each event, a latent variable is used to represent the exact time of the event.
+This then allows the modelling of the continuous distribution, adjusted for the right truncation.
 Whilst this is an approximation [@park2024estimating] showed good recovery of simulated distributions in a range of settings.
-However, the use of two latent variables per observed delays means that this approach may scale poorly with larger datasets.
+However, the use of two latent variables per observed delay means that this approach may scale poorly with larger datasets.
 That being said this approach has been used successfully in multiple real-world outbreak settings ([@ward2022transmission]).
 
-Mathematically this model is desribed as follows.
+Mathematically this model is described as follows.
 We look at the conditional probability that the secondary event $S$ falls between $S_L$ and $S_R$, given that the primary event $P$ falls between $P_L$ and $P_R$ and that the secondary event $S$ occurs before the truncation time $T$:
 $$
 \begin{aligned}
