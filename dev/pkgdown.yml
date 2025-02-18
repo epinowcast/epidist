@@ -6,7 +6,8 @@ articles:
   ebola: ebola.html
   epidist: epidist.html
   faq: faq.html
-last_built: 2025-02-17T14:46Z
+  model: model.html
+last_built: 2025-02-18T12:19Z
 urls:
   reference: https://epidist.epinowcast.org/reference
   article: https://epidist.epinowcast.org/articles

@@ -46,6 +46,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/ebola.html">Advanced features with Ebola data</a></li>
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
+    <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -307,12 +308,12 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 14.3 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 14.2 seconds.</span></span>
 <span><span class="co">#&gt; Chain 1 finished in 14.8 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
 <span><span class="co">#&gt; Mean chain execution time: 14.5 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 14.9 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Total execution time: 14.8 seconds.</span></span></code></pre></div>
 <p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.04) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is 0.02).
 For the <code>sexMale</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexMale</code> effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.</p>
@@ -361,12 +362,12 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 203.1 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 220.7 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 202.8 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 220.4 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 211.9 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 220.9 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 211.6 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 220.5 seconds.</span></span></code></pre></div>
 <p><strong>As this is a longer running model (~ 2 minutes) we have reduced the number of iterations but for real world use cases this may not be sufficient.</strong></p>
 <p>For this model, along with looking at the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
