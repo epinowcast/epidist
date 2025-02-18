@@ -21,6 +21,8 @@ navbar:
         href: articles/ebola.html
       - text: Approximate Bayesian inference
         href: articles/approx-inference.html
+      - text: Guide to the statistical models implemented in epidist
+        href: articles/model.html
 
 authors:
   Adam Howes:
