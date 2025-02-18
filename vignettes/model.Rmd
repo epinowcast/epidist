@@ -70,7 +70,7 @@ $$
 Here, we see that $b_s(\tau)$ depends not only on $f_{s - \tau}(\tau)$ but also on $\mathcal{P}(s - \tau)$, meaning that past changes in the incidence pattern will affect the shape of the distribution.
 Particularly, when an epidemic is growing, we are more likely to observe shorter delays, causing an underestimation of the mean delay.
 Therefore, we always want to characterize epidemiological delays from the forward perspective and estimate the forward distribution.
-For this reason, Our current methodology focusses on biases that affect the estimation of the forward distribution.
+For this reason, our current methodology focuses on biases that affect the estimation of the forward distribution.
 
 ## Right truncation
 
