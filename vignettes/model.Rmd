@@ -176,34 +176,4 @@ y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
 $$
 As before, $g_P(z \, | \, p_{L, i}, p_{R, i})$ represents the conditional distribution of the primary event given lower $P_L$ and upper $P_R$ bounds; this is equivalent to modelling the incidence in primary events.
 
-
-<!--Let $\mathbf{Y}$ be the data vector and $\boldsymbol{\theta}$ be parameters.
-Then
-$$
-\mathcal{L}(\mathbf{Y} \, | \, \boldsymbol{\theta}) = \prod_i \mathbb{P}(S_{L, i} < S < S_{R, i} \, | \, P_{L, i} < P < P_{R, i}, S < T).
-$$
->
-
-However, we often do not know the exact incidence of primary events.
-Instead, the approach of the latent model [@ward2022transmission] is to:
-
-1. Assume a uniformly distributed primary event times
-$$
-\begin{aligned}
-x_i &\sim \text{Unif}(p_{L, i}, p_{R, i}) \\
-y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}).
-\end{aligned}
-$$
-
-2. Assume that the censoring interval is narrow such that
-$$
-\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_{x_i}(T - z) \text{d}z \approx F_{x_i}(T - x_i).
-$$
-
-Then, the likelihood simplifies as follows:
-$$
-\mathcal{L}(\mathbf{Y}_i \, | \, \boldsymbol{\theta}) = \frac{f_x(y_i - x_i)}{F_x(T - x_i)}.
-$$
-
-
-## Bibliography {-}
+## References {-}
