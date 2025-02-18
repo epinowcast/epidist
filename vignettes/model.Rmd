@@ -35,7 +35,7 @@ It then goes on to explain each model in turn.
 # Background {#maths}
 
 Estimating a delay distribution may appear to be simple: one could imagine fitting a probability distribution to a set of observed delays.
-However, observed delays are often biased during an ongoing outbreak. 
+However, observed delays are often biased during an ongoing outbreak.
 We begin by presenting a formalism for characterizing delay distributions as well as two main biases (truncation and censoring) affecting them.
 We then present statistical models for correcting for these biases.
 
@@ -145,7 +145,7 @@ where $y_i$ and $x_i$ are the observed primary and secondary event times.
 
 As shown in [@park2024estimating]  when the data is double censored this modelling approach biases the mean by approximately a day as well as the standard deviation.
 Where right truncation is also present biases can be more severe with plausible simulated scenarios leading to biased means that were >30% shorter than the true distributions.
- 
+
 # The latent model
 
 This approach aims to account for the right truncation and double censoring using a generative modelling approach.
