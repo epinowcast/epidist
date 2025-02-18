@@ -7,7 +7,7 @@
 .make_intercepts_explicit(formula)
 }
 \arguments{
-\item{formula}{...}
+\item{formula}{A \code{brms} formula object.}
 }
 \description{
 This function detects the distributional parameters in a \code{brms} formula

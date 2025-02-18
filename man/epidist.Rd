@@ -18,8 +18,8 @@ epidist(
 \item{data}{An object with class corresponding to an implemented model.}
 
 \item{formula}{An object of class \link[stats:formula]{stats::formula} or \link[brms:brmsformula]{brms::brmsformula}
-(or one that can be coerced to those classes). A symbolic description of the
-model to be fitted. A formula must be provided for the distributional
+(or one that can be coerced to those classes). A symbolic description of
+the model to be fitted. A formula must be provided for the distributional
 parameter \code{mu}, and may optionally be provided for other distributional
 parameters.}
 
@@ -51,5 +51,17 @@ These two later options may be useful for model debugging and extensions.}
 }
 \description{
 Fit epidemiological delay distributions using a \code{brms} interface
+}
+\examples{
+fit <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model() |>
+  epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+
+summary(fit)
 }
 \concept{fit}

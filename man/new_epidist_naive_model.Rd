@@ -7,10 +7,10 @@
 new_epidist_naive_model(data)
 }
 \arguments{
-\item{data}{An object to be set with the class \code{epidist_naive_model}}
+\item{data}{An object to be set with the class \code{epidist_naive_model}.}
 }
 \value{
-An object of class \code{epidist_naive_model}
+An object of class \code{epidist_naive_model}.
 }
 \description{
 Class constructor for \code{epidist_naive_model} objects
@@ -18,7 +18,10 @@ Class constructor for \code{epidist_naive_model} objects
 \seealso{
 Other naive_model: 
 \code{\link{as_epidist_naive_model}()},
+\code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
 \code{\link{as_epidist_naive_model.epidist_linelist_data}()},
+\code{\link{epidist_formula_model.epidist_naive_model}()},
+\code{\link{epidist_transform_data_model.epidist_naive_model}()},
 \code{\link{is_epidist_naive_model}()}
 }
 \concept{naive_model}

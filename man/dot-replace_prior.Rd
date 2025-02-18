@@ -14,7 +14,7 @@
 }
 \arguments{
 \item{old_prior}{One or more prior distributions in the class \code{brmsprior} to
-be updated}
+be updated.}
 
 \item{prior}{One or more prior distributions in the class \code{brmsprior}
 containing the new specifications. Can include custom set priors using the
@@ -28,7 +28,7 @@ only use new priors. Defaults to \code{TRUE}}
 
 \item{enforce_presence}{If \code{TRUE} then only keep rows that have both old and
 new priors. If \code{FALSE} then keep all rows but use new priors where
-available, otherwise keep old priors. Defaults to \code{TRUE}}
+available, otherwise keep old priors. Defaults to \code{TRUE}.}
 }
 \description{
 This function takes an existing set of prior distributions and updates them

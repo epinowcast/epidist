@@ -4,12 +4,14 @@
 #' the `epidist` package. It is used within the [epidist_stancode()] function.
 #'
 #' @param path The path within the `stan/` folder of the installed `epidist`
-#' package to the Stan code chunk of interest.
+#'  package to the Stan code chunk of interest.
+#'
 #' @return A character string containing the Stan code chunk of interest.
+#'
 #' @keywords internal
 .stan_chunk <- function(path) {
   local_path <- system.file("stan", path, package = "epidist")
-  paste(readLines(local_path), collapse = "\n")
+  return(paste(readLines(local_path), collapse = "\n"))
 }
 
 #' Label a `epidist` Stan model with a version indicator
@@ -19,12 +21,13 @@
 #' particular `epidist` model, we recommend use of [brms::make_stancode()].
 #'
 #' @return A `brms` Stan chunk containing the `epidist` package version used to
-#' build the Stan code.
+#'  build the Stan code.
+#'
 #' @keywords internal
 .version_stanvar <- function() {
   version <- utils::packageVersion("epidist")
   comment <- paste0("// code chunks used from epidist ", version, "\n")
-  brms::stanvar(scode = comment, block = "functions")
+  return(brms::stanvar(scode = comment, block = "functions"))
 }
 
 #' Round to the nearest multiple
@@ -34,12 +37,14 @@
 #' If `f = 1` then `floor_mult` behaves as `floor`. If `f = 0` then `x` is
 #' returned.
 #'
-#' @param x A number to be rounded down
+#' @param x A number to be rounded down.
+#'
 #' @param f A positive number specifying the multiple to be rounded down to
+#'
 #' @keywords internal
 .floor_mult <- function(x, f = 1) {
   assert_numeric(f, lower = 0)
-  ifelse(f == 0, x, floor(x / f) * f)
+  return(ifelse(f == 0, x, floor(x / f) * f))
 }
 
 #' Replace `brms` prior distributions
@@ -60,21 +65,26 @@
 #'    Custom priors are excluded from the metadata-based joining process.
 #'
 #' @param old_prior One or more prior distributions in the class `brmsprior` to
-#'   be updated
+#'   be updated.
+#'
 #' @param prior One or more prior distributions in the class `brmsprior`
 #'   containing the new specifications. Can include custom set priors using the
 #'   syntax `parameter ~ distribution`
+#'
 #' @param warn If `TRUE` then a warning will be displayed if a prior in `prior`
 #'   has no match in `old_prior`. Defaults to `FALSE`
+#'
 #' @param merge If `TRUE` then merge new priors with existing ones, if `FALSE`
 #'   only use new priors. Defaults to `TRUE`
+#'
 #' @param enforce_presence If `TRUE` then only keep rows that have both old and
 #'   new priors. If `FALSE` then keep all rows but use new priors where
-#'   available, otherwise keep old priors. Defaults to `TRUE`
-#' @autoglobal
+#'   available, otherwise keep old priors. Defaults to `TRUE`.
+#'
+#' @keywords internal
 #' @importFrom dplyr full_join filter select mutate bind_rows
 #' @importFrom brms as.brmsprior
-#' @keywords internal
+#' @autoglobal
 .replace_prior <- function(old_prior, prior, warn = FALSE, merge = TRUE,
                            enforce_presence = TRUE) {
   if (!isTRUE(merge)) {
@@ -172,6 +182,7 @@
 #' conditional mean `mu`.
 #'
 #' @inheritParams epidist_family
+#'
 #' @keywords internal
 .add_dpar_info <- function(family) {
   other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]] # nolint
@@ -190,7 +201,8 @@
 #' object, and alters to formula to include explicit intercept parameters for
 #' them i.e. `~ 1`.
 #'
-#' @param formula ...
+#' @param formula A `brms` formula object.
+#'
 #' @keywords internal
 .make_intercepts_explicit <- function(formula) {
   other_dpars <- setdiff(formula$family$dpars, "mu")
@@ -209,8 +221,10 @@
 #' This function extracts all unique terms from the right-hand side of all
 #' distributional parameters in a brms formula.
 #'
-#' @param formula A `brms formula object
-#' @return A character vector of unique terms
+#' @param formula A `brms` formula object.
+#'
+#' @return A character vector of unique terms.
+#'
 #' @keywords internal
 .extract_dpar_terms <- function(formula) {
   terms <- brms::brmsterms(formula)
@@ -224,10 +238,14 @@
 #'
 #' @param data A `data.frame` to summarise which must contain a `n` column
 #' which is a count of occurrences.
+#'
 #' @param by Character vector of column names to group by.
+#'
 #' @param formula Optional `brms` formula object to extract additional grouping
-#' terms from.
-#' @return A `data.frame` summarised by the grouping variables with counts
+#'  terms from.
+#'
+#' @return A `data.frame` summarised by the grouping variables with counts.
+#'
 #' @keywords internal
 #' @importFrom dplyr group_by summarise across
 .summarise_n_by_formula <- function(data, by = character(), formula = NULL) {
@@ -238,17 +256,62 @@
   # Remove duplicates
   by <- unique(by)
 
-  data |>
+  sum_data <- data |>
     tibble::as_tibble() |>
     summarise(n = sum(.data$n), .by = dplyr::all_of(by))
+  return(sum_data)
 }
 
+#' Inform users about data summarisation
+#'
+#' This function informs users when data has been summarised by unique
+#' combinations of variables, providing information about the variables used and
+#' the reduction in number of rows.
+#'
+#' @param data The original data before summarisation
+#'
+#' @param trans_data The transformed/summarised data
+#'
+#' @param required_cols Character vector of required column names
+#' @return Nothing, called for side effects only
+#'
+#' @keywords internal
+.inform_data_summarised <- function(data, trans_data, required_cols) {
+  n_rows_before <- nrow(data)
+  n_rows_after <- nrow(trans_data)
+
+  if (n_rows_before > n_rows_after) {
+    cli::cli_inform(c(
+      "i" = "Data summarised by unique combinations of:" # nolint
+    ))
+
+    formula_vars <- setdiff(names(trans_data), c(required_cols))
+    if (length(formula_vars) > 0) {
+      cli::cli_inform(c(
+        "*" = "Formula variables: {.code {formula_vars}}"
+      ))
+    }
+
+    cli::cli_inform(paste0(
+      "* Model variables: delay bounds, observation time, ",
+      "and primary censoring window"
+    ))
+
+    cli::cli_inform(c(
+      "!" = paste("Reduced from", n_rows_before, "to", n_rows_after, "rows."),
+      "i" = "This should improve model efficiency with no loss of information." # nolint
+    ))
+  }
+}
 
 #' Rename the columns of a `data.frame`
 #'
-#' @param df ...
-#' @param new_names ...
-#' @param old_names ...
+#' @param df A `data.frame` to rename the columns of.
+#'
+#' @param new_names A character vector of new column names.
+#'
+#' @param old_names A character vector of old column names.
+#'
 #' @keywords internal
 #' @importFrom stats setNames
 .rename_columns <- function(df, new_names, old_names) {
@@ -281,14 +344,42 @@
 #' `posterior_predict_*` etc.
 #'
 #' @param prefix Character string prefix of the brms function to get (e.g.
-#' "log_lik")
+#'  "log_lik")
 #'
 #' @inheritParams epidist_family
+#'
 #' @return The requested brms function
+#'
 #' @keywords internal
 .get_brms_fn <- function(prefix, family) {
-  get(
+  return(get(
     paste0(prefix, "_", tolower(family$family)),
     asNamespace("brms")
-  )
+  ))
+}
+
+#' Add weights to a data frame
+#'
+#' Helper function to add weights to a data frame, either from an existing
+#' column or defaulting to 1.
+#'
+#' @param df A data frame to add weights to
+#'
+#' @param weight A column name to use for weighting the data in the
+#'  likelihood. Default is NULL. Internally this is used to define the 'n'
+#'  column of the returned object.
+#'
+#' @return The data frame with an added 'n' column containing the weights
+#'
+#' @keywords internal
+.add_weights <- function(df, weight = NULL) {
+  if (!is.null(weight)) {
+    assert_names(names(df), must.include = weight)
+    df <- df |>
+      mutate(n = .data[[weight]])
+  } else {
+    df <- df |>
+      mutate(n = 1)
+  }
+  return(df)
 }

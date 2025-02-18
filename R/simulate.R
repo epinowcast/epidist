@@ -4,18 +4,19 @@
 #' event times are uniformly distributed between 0 and `t`.
 #'
 #' @param sample_size The number of cases to simulate.
+#'
 #' @param t Upper bound of the uniform distribution to generate primary event
-#' times.
+#'  times.
 #'
 #' @return A `data.frame` with two columns: `case` (case number) and `ptime`
-#' (primary event time).
+#'  (primary event time).
 #'
 #' @family simulate
 #' @export
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
-  data.frame(
+  return(data.frame(
     case = 1:sample_size, ptime = stats::runif(sample_size, 0, t)
-  )
+  ))
 }
 
 #' Simulate exponential cases
@@ -26,12 +27,15 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 #' uniform distribution.
 #'
 #' @param r The exponential growth rate parameter. Defaults to 0.2.
+#'
 #' @param sample_size The number of cases to simulate. Defaults to 10000.
+#'
 #' @param seed The random seed to be used in the simulation process.
+#'
 #' @param t Upper bound of the survival time. Defaults to 30.
 #'
 #' @return A `data.frame` with two columns: `case` (case number) and `ptime`
-#' (primary event time).
+#'  (primary event time).
 #'
 #' @family simulate
 #' @export
@@ -62,9 +66,13 @@ simulate_exponential_cases <- function(r = 0.2,
 #' population size \eqn{N}.
 #'
 #' @param r The initial epidemic growth rate. Defaults to 0.2.
+#'
 #' @param gamma The rate of recovery. Defaults to 1/7.
+#'
 #' @param I0 The initial number of infected people. Defaults to 50.
+#'
 #' @param N The total population size. Defaults to 10000.
+#'
 #' @param seed The random seed to be used in the simulation process.
 #'
 #' @return A `data.frame` with two columns: `case` (case number) and `ptime`
@@ -117,20 +125,23 @@ simulate_gillespie <- function(r = 0.2,
 #' column named `ptime`.
 #'
 #' @param data A data frame with the primary event times.
+#'
 #' @param dist The delay distribution to be used. Defaults to [rlnorm()].
+#'
 #' @param ... Arguments to be passed to the delay distribution function.
 #'
 #' @return A `data.frame` that augments `data` with two new columns: `delay`
-#' (secondary event latency) and `stime` (the time of the secondary event).
+#'  (secondary event latency) and `stime` (the time of the secondary event).
 #'
 #' @family simulate
 #' @autoglobal
 #' @importFrom dplyr mutate
 #' @export
 simulate_secondary <- function(data, dist = rlnorm, ...) {
-  data |>
+  sim_data <- data |>
     mutate(
       delay = dist(dplyr::n(), ...),
       stime = .data$ptime + .data$delay
     )
+  return(sim_data)
 }

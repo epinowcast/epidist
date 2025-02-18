@@ -22,8 +22,10 @@ epidist_family <- function(data, family = lognormal(), ...) {
 #' The model-specific parts of an `epidist_family()` call
 #'
 #' @inheritParams epidist
+#'
 #' @param family Output of a call to `brms::brmsfamily()` with additional
 #' information as provided by `.add_dpar_info()`
+#'
 #' @rdname epidist_family_model
 #' @family family
 #' @export
@@ -59,7 +61,8 @@ epidist_family_param <- function(family, ...) {
 #' different parameter orderings for the same distribution.
 #'
 #' @param family A brms family object containing at minimum a `family` element
-#' specifying the distribution family name
+#'  specifying the distribution family name.
+#'
 #' @param ... Additional arguments passed to methods (not used)
 #'
 #' @details

@@ -29,10 +29,6 @@ test_that("epidist_transform_data works with different model types", {
   formula <- epidist_formula(prep_obs, family = family, formula = bf(mu ~ 1))
 
   expect_identical(
-    epidist_transform_data(prep_naive_obs, family, formula),
-    prep_naive_obs
-  )
-  expect_identical(
     epidist_transform_data(prep_obs_gamma, family, formula),
     prep_obs_gamma
   )

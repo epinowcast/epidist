@@ -14,24 +14,37 @@
 )
 }
 \arguments{
-\item{data}{Numeric vector giving lower bounds for primary times}
+\item{data}{Numeric vector giving lower bounds for primary times.}
 
-\item{ptime_upr}{Numeric vector giving upper bounds for primary times}
+\item{ptime_upr}{Numeric vector giving upper bounds for primary times.}
 
 \item{stime_lwr, stime_upr}{Numeric vectors giving lower and upper bounds for
-secondary times}
+secondary times.}
 
-\item{obs_time}{Numeric vector giving observation times}
+\item{obs_time}{Numeric vector giving observation times.}
 
-\item{...}{Additional columns to add to the epidist_linelist_data object}
+\item{...}{Additional columns to add to the epidist_linelist_data object.}
 }
 \description{
-Create an epidist_linelist_data object from vectors of event times
+This method takes vectors of event times (primary/secondary event times and
+observation time) and creates an \code{epidist_linelist_data} object. This format
+is useful when working with individual-level data where each row represents a
+single observation. See the other methods for other data input options.
+}
+\examples{
+as_epidist_linelist_data(
+  data = c(1, 2, 3),
+  ptime_upr = c(2, 3, 4),
+  stime_lwr = c(3, 4, 5),
+  stime_upr = c(4, 5, 6),
+  obs_time = c(5, 6, 7)
+)
 }
 \seealso{
 Other linelist_data: 
 \code{\link{as_epidist_linelist_data}()},
 \code{\link{as_epidist_linelist_data.data.frame}()},
+\code{\link{as_epidist_linelist_data.epidist_aggregate_data}()},
 \code{\link{assert_epidist.epidist_linelist_data}()},
 \code{\link{is_epidist_linelist_data}()},
 \code{\link{new_epidist_linelist_data}()}

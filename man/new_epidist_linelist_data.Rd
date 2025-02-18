@@ -20,6 +20,7 @@ Other linelist_data:
 \code{\link{as_epidist_linelist_data}()},
 \code{\link{as_epidist_linelist_data.data.frame}()},
 \code{\link{as_epidist_linelist_data.default}()},
+\code{\link{as_epidist_linelist_data.epidist_aggregate_data}()},
 \code{\link{assert_epidist.epidist_linelist_data}()},
 \code{\link{is_epidist_linelist_data}()}
 }

@@ -1,34 +1,52 @@
 #' Fit epidemiological delay distributions using a `brms` interface
 #'
 #' @param data An object with class corresponding to an implemented model.
+#'
 #' @param formula An object of class [stats::formula] or [brms::brmsformula]
-#' (or one that can be coerced to those classes). A symbolic description of the
-#' model to be fitted. A formula must be provided for the distributional
-#' parameter `mu`, and may optionally be provided for other distributional
-#' parameters.
+#'  (or one that can be coerced to those classes). A symbolic description of
+#'  the model to be fitted. A formula must be provided for the distributional
+#'  parameter `mu`, and may optionally be provided for other distributional
+#'  parameters.
+#'
 #' @param family A description of the response distribution and link function to
-#' be used in the model. Every family function has a link argument allowing
-#' users to specify the link function to be applied on the response variable.
-#' If not specified, default links are used. For details of all supported
-#' families see [brmsfamily()]. Commonly used, such as [lognormal()], are also
-#' reexported as part of `epidist`.
+#'  be used in the model. Every family function has a link argument allowing
+#'  users to specify the link function to be applied on the response variable.
+#'  If not specified, default links are used. For details of all supported
+#'  families see [brmsfamily()]. Commonly used, such as [lognormal()], are also
+#'  reexported as part of `epidist`.
+#'
 #' @param prior One or more `brmsprior` objects created by [brms::set_prior()]
-#' or related functions. These priors are passed to [epidist_prior()] in the
-#' `prior` argument. Some models have default priors that are automatically
-#' added (see [epidist_model_prior()]). These can be merged with user-provided
-#' priors using the `merge_priors` argument.
+#'  or related functions. These priors are passed to [epidist_prior()] in the
+#'  `prior` argument. Some models have default priors that are automatically
+#'  added (see [epidist_model_prior()]). These can be merged with user-provided
+#'  priors using the `merge_priors` argument.
+#'
 #' @param merge_priors If `TRUE` then merge user priors with default priors, if
-#' `FALSE` only use user priors. Defaults to `TRUE`. This may be useful if
-#' the built in approaches for merging priors are not flexible enough for a
-#' particular use case.
+#'  `FALSE` only use user priors. Defaults to `TRUE`. This may be useful if
+#'  the built in approaches for merging priors are not flexible enough for a
+#'  particular use case.
+#'
 #' @param fn The internal function to be called. By default this is
 #' [brms::brm()] which performs inference for the specified model. Other options
 #' are [brms::make_stancode()] which returns the Stan code for the specified
 #' model, or [brms::make_standata()] which returns the data passed to Stan.
 #' These two later options may be useful for model debugging and extensions.
+#'
 #' @param ... Additional arguments passed to `fn` method.
+#'
 #' @family fit
 #' @export
+#' @examples
+#' fit <- sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_aggregate_data() |>
+#'   as_epidist_marginal_model() |>
+#'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+#'
+#' summary(fit)
 epidist <- function(data, formula = mu ~ 1,
                     family = lognormal(), prior = NULL,
                     merge_priors = TRUE,

@@ -4,17 +4,49 @@
 \alias{as_epidist_naive_model.epidist_linelist_data}
 \title{The naive model method for \code{epidist_linelist_data} objects}
 \usage{
-\method{as_epidist_naive_model}{epidist_linelist_data}(data)
+\method{as_epidist_naive_model}{epidist_linelist_data}(data, weight = NULL, ...)
 }
 \arguments{
-\item{data}{An \code{epidist_linelist_data} object}
+\item{data}{An \code{epidist_linelist_data} object.}
+
+\item{weight}{A column name to use for weighting the data in the
+likelihood. Default is NULL. Internally this is used to define the 'n'
+column of the returned object.}
+
+\item{...}{Additional arguments passed to methods.}
 }
 \description{
-The naive model method for \code{epidist_linelist_data} objects
+This method converts linelist data to a naive model format by calculating
+delays between primary and secondary events to enable model fitting
+in \code{\link[=epidist]{epidist()}}. If the input data contains an \code{n} column (e.g. from
+aggregated data), the likelihood will be weighted by these counts.
+}
+\details{
+When a formula is specified in \code{\link[=epidist]{epidist()}}, the data will be transformed
+using \code{\link[=epidist_transform_data_model.epidist_naive_model]{epidist_transform_data_model.epidist_naive_model()}} to prepare it for
+model fitting. This transformation summarises the data by counting unique
+combinations of delays and any variables in the model formula.
+
+The naive model is the simplest approach but ignores censoring and truncation
+in the data by using only lower bounds as point estimates. For data with
+substantial censoring or truncation, consider using
+\code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}} or \code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}} which properly
+account for these features.
+}
+\examples{
+sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_naive_model()
 }
 \seealso{
 Other naive_model: 
 \code{\link{as_epidist_naive_model}()},
+\code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
+\code{\link{epidist_formula_model.epidist_naive_model}()},
+\code{\link{epidist_transform_data_model.epidist_naive_model}()},
 \code{\link{is_epidist_naive_model}()},
 \code{\link{new_epidist_naive_model}()}
 }

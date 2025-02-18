@@ -1,7 +1,17 @@
 #' Convert an object to an `epidist_latent_model` object
 #'
-#' @param data An object to be converted to the class `epidist_latent_model`
+#' Creates an `epidist_latent_model` object from various input formats.
+#' This enables fitting latent variable models for epidemiological delays using
+#' [epidist()], as described in Park et al. (2024) and Charniga et al. (2024)
+#' The latent model approach accounts for double interval censoring and right
+#' truncation in delay data.
+#'
+#' @param data An object to be converted to  the class `epidist_latent_model`
+#'
 #' @param ... Additional arguments passed to methods.
+#' @references
+#'   - [Park et al. (2024)](https://doi.org/10.1101/2024.01.12.24301247)
+#'   - [Charniga et al. (2024)](https://doi.org/10.1371/journal.pcbi.1012520)
 #' @family latent_model
 #' @export
 as_epidist_latent_model <- function(data, ...) {
@@ -11,24 +21,49 @@ as_epidist_latent_model <- function(data, ...) {
 
 #' The latent model method for `epidist_linelist_data` objects
 #'
-#' @param data An `epidist_linelist_data` object
+#' This method takes an `epidist_linelist_data` object and converts it to a
+#'  format suitable for fitting latent variable models. It calculates key
+#'  variables needed for the latent variable method described in Park et al.
+#'  (2024) and Charniga et al. (2024). This approach adjusts for double
+#'  interval censoring and right truncation in the data.
+#'
+#' @param data An `epidist_linelist_data` object containing individual-level
+#'   observations with primary and secondary event times. See
+#'   [as_epidist_linelist_data()] for details on creating this object.
+#'
 #' @param ... Not used in this method.
+#'
 #' @method as_epidist_latent_model epidist_linelist_data
 #' @family latent_model
 #' @autoglobal
 #' @export
+#' @references
+#'   - [Park et al. (2024)](https://doi.org/10.1101/2024.01.12.24301247)
+#'   - [Charniga et al. (2024)](https://doi.org/10.1371/journal.pcbi.1012520)
+#' @examples
+#' sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_latent_model()
 as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
   assert_epidist(data)
   data <- data |>
     mutate(
+      # Time since primary event to observation
       relative_obs_time = .data$obs_time - .data$ptime_lwr,
+      # Primary event window accounting for overlap with secondary event
       pwindow = ifelse(
         .data$stime_lwr < .data$ptime_upr,
         .data$stime_upr - .data$ptime_lwr,
         .data$ptime_upr - .data$ptime_lwr
       ),
+      # Indicator for overlapping primary and secondary windows
       woverlap = as.numeric(.data$stime_lwr < .data$ptime_upr),
+      # Secondary event window size
       swindow = .data$stime_upr - .data$stime_lwr,
+      # Delay between primary and secondary events
       delay = .data$stime_lwr - .data$ptime_lwr,
       .row_id = dplyr::row_number()
     )
@@ -37,11 +72,43 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
   return(data)
 }
 
+#' The latent model method for `epidist_aggregate_data` objects
+#'
+#' This method converts aggregate data to a latent model format by first
+#' converting it to linelist format using
+#' [as_epidist_linelist_data.epidist_aggregate_data()] and then passing it to
+#' [as_epidist_latent_model.epidist_linelist_data()]. This ensures that the
+#' counts in the aggregate data are properly expanded into individual
+#' observations before fitting the latent model.
+#'
+#' @param data An `epidist_aggregate_data` object
+#' @param ... Not used in this method.
+#' @method as_epidist_latent_model epidist_aggregate_data
+#' @family latent_model
+#' @autoglobal
+#' @export
+#' @examples
+#' sierra_leone_ebola_data |>
+#'   dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+#'   as_epidist_aggregate_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested",
+#'     n = "n"
+#'   ) |>
+#'   as_epidist_latent_model()
+as_epidist_latent_model.epidist_aggregate_data <- function(data, ...) {
+  linelist_data <- as_epidist_linelist_data.epidist_aggregate_data(data)
+  return(as_epidist_latent_model(linelist_data))
+}
+
 #' Class constructor for `epidist_latent_model` objects
 #'
 #' @param data An object to be set with the class `epidist_latent_model`
+#'
 #' @param ... Additional arguments passed to methods.
+#'
 #' @returns An object of class `epidist_latent_model`
+#'
 #' @family latent_model
 #' @export
 new_epidist_latent_model <- function(data, ...) {
@@ -52,6 +119,7 @@ new_epidist_latent_model <- function(data, ...) {
 #' Check if data has the `epidist_latent_model` class
 #'
 #' @param data An object
+#'
 #' @family latent_model
 #' @export
 is_epidist_latent_model <- function(data) {
@@ -63,24 +131,24 @@ is_epidist_latent_model <- function(data) {
 #' @importFrom checkmate assert_names assert_numeric assert_integerish
 #' @export
 assert_epidist.epidist_latent_model <- function(data, ...) {
-  col_names <- c(
-    "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time",
-    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", ".row_id"
-  )
-  assert_names(names(data), must.include = col_names)
+  assert_names(names(data), must.include = .latent_required_cols())
   assert_numeric(data$relative_obs_time, lower = 0)
   assert_numeric(data$pwindow, lower = 0)
   assert_numeric(data$woverlap, lower = 0)
   assert_numeric(data$swindow, lower = 0)
   assert_numeric(data$delay, lower = 0)
   assert_integerish(data$.row_id, lower = 1)
+  return(invisible(NULL))
 }
 
 #' Create the model-specific component of an `epidist` custom family
 #'
 #' @inheritParams epidist_family_model
+#'
 #' @param ... Additional arguments passed to method.
+#'
 #' @method epidist_family_model epidist_latent_model
+#'
 #' @family latent_model
 #' @export
 epidist_family_model.epidist_latent_model <- function(
@@ -106,11 +174,15 @@ epidist_family_model.epidist_latent_model <- function(
   return(custom_family)
 }
 
-#' Define the model-specific component of an `epidist` custom formula
+#' Define the model-specific component of an `epidist` custom formula for the
+#' latent model
 #'
 #' @inheritParams epidist_formula_model
+#'
 #' @param ... Additional arguments passed to method.
+#'
 #' @method epidist_formula_model epidist_latent_model
+#'
 #' @family latent_model
 #' @export
 epidist_formula_model.epidist_latent_model <- function(
@@ -127,7 +199,9 @@ epidist_formula_model.epidist_latent_model <- function(
 #' `swindow_raw` which control the width of the observation windows.
 #'
 #' @inheritParams epidist
+#'
 #' @importFrom brms set_prior
+#'
 #' @family latent_model
 #' @export
 epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
@@ -145,7 +219,9 @@ epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
 }
 
 #' @method epidist_stancode epidist_latent_model
+#'
 #' @importFrom brms stanvar
+#'
 #' @family latent_model
 #' @autoglobal
 #' @export
@@ -212,4 +288,11 @@ epidist_stancode.epidist_latent_model <- function(
     stanvars_parameters
 
   return(stanvars_all)
+}
+
+.latent_required_cols <- function() {
+  return(c(
+    .linelist_required_cols(),
+    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", ".row_id"
+  ))
 }

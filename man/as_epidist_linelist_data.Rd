@@ -12,12 +12,16 @@ as_epidist_linelist_data(data, ...)
 \item{...}{Additional arguments passed to methods}
 }
 \description{
-Create an epidist_linelist_data object
+Creates an epidist_linelist_data object from various input formats. This is
+useful when working with individual-level data where each row represents a
+single observation with primary and secondary event times. See the specific
+methods for details on supported input formats and usage examples.
 }
 \seealso{
 Other linelist_data: 
 \code{\link{as_epidist_linelist_data.data.frame}()},
 \code{\link{as_epidist_linelist_data.default}()},
+\code{\link{as_epidist_linelist_data.epidist_aggregate_data}()},
 \code{\link{assert_epidist.epidist_linelist_data}()},
 \code{\link{is_epidist_linelist_data}()},
 \code{\link{new_epidist_linelist_data}()}

@@ -7,15 +7,26 @@
 as_epidist_latent_model(data, ...)
 }
 \arguments{
-\item{data}{An object to be converted to the class \code{epidist_latent_model}}
+\item{data}{An object to be converted to  the class \code{epidist_latent_model}}
 
 \item{...}{Additional arguments passed to methods.}
 }
 \description{
-Convert an object to an \code{epidist_latent_model} object
+Creates an \code{epidist_latent_model} object from various input formats.
+This enables fitting latent variable models for epidemiological delays using
+\code{\link[=epidist]{epidist()}}, as described in Park et al. (2024) and Charniga et al. (2024)
+The latent model approach accounts for double interval censoring and right
+truncation in delay data.
+}
+\references{
+\itemize{
+\item \href{https://doi.org/10.1101/2024.01.12.24301247}{Park et al. (2024)}
+\item \href{https://doi.org/10.1371/journal.pcbi.1012520}{Charniga et al. (2024)}
+}
 }
 \seealso{
 Other latent_model: 
+\code{\link{as_epidist_latent_model.epidist_aggregate_data}()},
 \code{\link{as_epidist_latent_model.epidist_linelist_data}()},
 \code{\link{epidist_family_model.epidist_latent_model}()},
 \code{\link{epidist_formula_model.epidist_latent_model}()},

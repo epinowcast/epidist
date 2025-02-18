@@ -7,10 +7,10 @@
 .extract_dpar_terms(formula)
 }
 \arguments{
-\item{formula}{A `brms formula object}
+\item{formula}{A \code{brms} formula object.}
 }
 \value{
-A character vector of unique terms
+A character vector of unique terms.
 }
 \description{
 This function extracts all unique terms from the right-hand side of all
