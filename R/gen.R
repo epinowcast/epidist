@@ -31,6 +31,12 @@ epidist_gen_log_lik <- function(family) {
   # Get the name of the primary distribution
   primary_dist_name <- primarycensored::pcd_dist_name(tolower(family$family))
 
+  .log_lik <- .generic_gen_log_lik(log_lik_brms)
+
+  return(.log_lik)
+}
+
+.generic_gen_log_lik <- function(log_lik_brms) {
   .log_lik <- function(i, prep) {
     y <- prep$data$Y[i]
     relative_obs_time <- prep$data$vreal1[i]
@@ -51,11 +57,6 @@ epidist_gen_log_lik <- function(family) {
           return(ll)
         })
       }
-      # Add a name attribute to the primary distribution function
-      # this is used to identify analytical solutions if they exist
-      pdist_draw <- primarycensored::add_name_attribute(
-        pdist_draw, primary_dist_name
-      )
 
       primarycensored::dpcens(
         x = y,

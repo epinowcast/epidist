@@ -289,17 +289,7 @@ epidist_stancode.epidist_marginal_model <- function(
     fixed = TRUE
   )
 
-  if (family_name == "lognormal") {
-    dist_id <- 1
-  } else if (family_name == "gamma") {
-    dist_id <- 2
-  } else if (family_name == "weibull") {
-    dist_id <- 3
-  } else {
-    cli_abort(c(
-      "!" = "epidist does not currently support this family for the marginal model" # nolint
-    ))
-  }
+  dist_id <- primarycensored::pcd_stan_dist_id(family_name)
 
   # Replace the dist_id passed to primarycensored
   stanvars_functions[[1]]$scode <- gsub(
