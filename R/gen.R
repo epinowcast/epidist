@@ -45,6 +45,7 @@ epidist_gen_log_lik <- function(family) {
 
     # make the prep object censored
     # -1 here is equivalent to right censored in brms
+    # this means we get the cdf of the target distribution
     prep$data$cens <- -1
 
     # Calculate density for each draw using primarycensored::dpcens()
@@ -53,6 +54,7 @@ epidist_gen_log_lik <- function(family) {
       pdist_draw <- function(q, i, prep, ...) {
         purrr::map_dbl(q, function(x) {
           prep$data$Y <- rep(x, length(prep$data$Y))
+          prep$data$weights[i] <- NULL
           ll <- exp(log_lik_brms(i, prep)[draw])
           return(ll)
         })
