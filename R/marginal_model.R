@@ -87,11 +87,15 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   if (n_beyond > 0) {
     cli::cli_inform(c(
       "!" = paste0(
-        "Setting {n_beyond} observation time{?s} beyond ",
-        "{threshold} (={obs_time_threshold}x max delay) to Inf. ",
-        "This improves model efficiency by reducing unique observation times ",
-        "while maintaining model accuracy as these times should have ",
-        "negligible impact."
+        "Setting {n_beyond} relative observation time{?s} beyond ",
+        "{threshold} (= {obs_time_threshold} x max delay) to Inf. ",
+        "This improves model efficiency by reducing the number of unique ",
+        "observation times in the data. The impact on model accuracy should ",
+        "be negligible as the extent of right truncation bias for high ",
+        "relative observation times is limited. Use the ",
+        "{.var obs_time_threshold} variable to alter this behaviour. The ",
+        "original relative observation times are stored in ",
+        "{.var orig_relative_obs_time}."
       )
     ))
     data$relative_obs_time[data$relative_obs_time > threshold] <- Inf
