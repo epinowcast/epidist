@@ -171,7 +171,7 @@ if (not_on_cran()) {
     cores = 2,
     silent = 2,
     refresh = 0,
-    samples = 1000,
+    iter = 1000,
     backend = "cmdstanr"
   )
 
@@ -183,7 +183,7 @@ if (not_on_cran()) {
     cores = 2,
     silent = 2,
     refresh = 0,
-    samples = 1000
+    iter = 1000
   )
 
   cli::cli_alert_info("Compiling the marginal model with cmdstanr")
@@ -194,7 +194,7 @@ if (not_on_cran()) {
     cores = 2,
     silent = 2,
     refresh = 0,
-    samples = 1000,
+    iter = 1000,
     backend = "cmdstanr"
   ))
 
@@ -209,7 +209,7 @@ if (not_on_cran()) {
     cores = 2,
     silent = 2,
     refresh = 0,
-    samples = 1000,
+    iter = 1000,
     backend = "cmdstanr"
   )
 
@@ -222,7 +222,7 @@ if (not_on_cran()) {
     seed = 1,
     chains = 2,
     cores = 2,
-    samples = 1000,
+    iter = 1000,
     backend = "cmdstanr"
   )
 
@@ -235,8 +235,7 @@ if (not_on_cran()) {
     seed = 1,
     chains = 2,
     cores = 2,
-    silent = 2,
-    refresh = 0,
+    iter = 1000,
     backend = "cmdstanr"
   ))
 
@@ -247,8 +246,7 @@ if (not_on_cran()) {
     data = prep_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     seed = 1,
-    silent = 2,
-    refresh = 0,
+    iter = 1000,
     cores = 2,
     chains = 2,
     backend = "cmdstanr"
@@ -261,8 +259,7 @@ if (not_on_cran()) {
     data = prep_marginal_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
     seed = 1,
-    silent = 2,
-    refresh = 0,
+    iter = 1000,
     cores = 2,
     chains = 2,
     backend = "cmdstanr"

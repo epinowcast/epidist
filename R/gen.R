@@ -157,7 +157,7 @@ epidist_gen_log_lik <- function(family) {
 }
 
 .get_supported_dists <- function() {
-  c("plnorm", "pgamma", "weibull")
+  c("plnorm", "pgamma", "pweibull")
 }
 
 .transpose_named_list2 <- function(lst) {
