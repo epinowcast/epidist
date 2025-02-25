@@ -36,6 +36,17 @@ epidist_gen_log_lik <- function(family) {
   if (primary_dist_name %in% .get_supported_dists()) {
     .log_lik <- .analytical_gen_log_lik(primary_dist_name)
   } else {
+    cli::cli_inform(
+      c(
+        "Falling back to default dependency on brms for {primary_dist_name}",
+        "distribution when generating the log likelihood in R. To improve",
+        "performance, implement a .get_supported_dist_args_{primary_dist_name}",
+        "function and ensure that p{primary_dist_name} is an available",
+        "function."
+      ),
+      .frequency = "once",
+      .frequency_id = paste0("epidist_gen_log_lik_", primary_dist_name)
+    )
     .log_lik <- .generic_gen_log_lik(log_lik_brms)
   }
 

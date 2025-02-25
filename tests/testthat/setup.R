@@ -68,6 +68,38 @@ sim_obs_gamma <- as_epidist_linelist_data(
   sim_obs_gamma$obs_time
 )
 
+# Simulate from a Weibull distribution
+
+shape_weibull <- 2
+scale_weibull <- 7
+
+sim_obs_weibull <- simulate_gillespie() |>
+  simulate_secondary(
+    dist = rweibull,
+    shape = shape_weibull,
+    scale = scale_weibull
+  ) |>
+  dplyr::mutate(
+    ptime_lwr = floor(.data$ptime),
+    ptime_upr = .data$ptime_lwr + 1,
+    stime_lwr = floor(.data$stime),
+    stime_upr = .data$stime_lwr + 1,
+    obs_time = obs_time
+  ) |>
+  dplyr::filter(.data$stime_upr <= .data$obs_time) |>
+  dplyr::slice_sample(n = sample_size, replace = FALSE)
+
+# Temporary solution for classing time data
+sim_obs_weibull <- as_epidist_linelist_data(
+  sim_obs_weibull$ptime_lwr,
+  sim_obs_weibull$ptime_upr,
+  sim_obs_weibull$stime_lwr,
+  sim_obs_weibull$stime_upr,
+  sim_obs_weibull$obs_time
+)
+
+agg_sim_obs_weibull <- as_epidist_aggregate_data(sim_obs_weibull)
+
 # Data with a sex difference
 
 meanlog_m <- 2.0
@@ -127,32 +159,70 @@ prep_obs_sex <- as_epidist_latent_model(sim_obs_sex)
 prep_marginal_obs <- as_epidist_marginal_model(sim_obs)
 prep_marginal_obs_gamma <- as_epidist_marginal_model(sim_obs_gamma)
 prep_marginal_obs_sex <- as_epidist_marginal_model(sim_obs_sex)
+prep_marginal_obs_weibull <- as_epidist_marginal_model(sim_obs_weibull)
 
 if (not_on_cran()) {
   set.seed(1)
   cli::cli_alert_info("Compiling the latent model with cmdstanr")
   fit <- epidist(
-    data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
+    data = prep_obs,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    samples = 1000,
     backend = "cmdstanr"
   )
 
   cli::cli_alert_info("Compiling the latent model with rstan")
   fit_rstan <- epidist(
-    data = prep_obs, seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0
+    data = prep_obs,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    samples = 1000
   )
 
   cli::cli_alert_info("Compiling the marginal model with cmdstanr")
   fit_marginal <- suppressMessages(epidist(
-    data = prep_marginal_obs, seed = 1, chains = 2, cores = 2, silent = 2,
-    refresh = 0, backend = "cmdstanr"
+    data = prep_marginal_obs,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    samples = 1000,
+    backend = "cmdstanr"
   ))
 
   cli::cli_alert_info(
     "Compiling the latent model with cmdstanr and a gamma dist"
   )
   fit_gamma <- epidist(
-    data = prep_obs_gamma, family = Gamma(link = "log"),
-    seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
+    data = prep_obs_gamma,
+    family = Gamma(link = "log"),
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    samples = 1000,
+    backend = "cmdstanr"
+  )
+
+  cli::cli_alert_info(
+    "Compiling the marginal model with cmdstanr and a weibull dist"
+  )
+  fit_marginal_weibull <- epidist(
+    data = prep_marginal_obs_weibull,
+    family = "weibull",
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    samples = 1000,
     backend = "cmdstanr"
   )
 
@@ -160,8 +230,13 @@ if (not_on_cran()) {
     "Compiling the marginal model with cmdstanr and a gamma dist"
   )
   fit_marginal_gamma <- suppressMessages(epidist(
-    data = prep_marginal_obs_gamma, family = Gamma(link = "log"),
-    seed = 1, chains = 2, cores = 2, silent = 2, refresh = 0,
+    data = prep_marginal_obs_gamma,
+    family = Gamma(link = "log"),
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
     backend = "cmdstanr"
   ))
 
@@ -171,8 +246,12 @@ if (not_on_cran()) {
   fit_sex <- epidist(
     data = prep_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-    seed = 1, silent = 2, refresh = 0,
-    cores = 2, chains = 2, backend = "cmdstanr"
+    seed = 1,
+    silent = 2,
+    refresh = 0,
+    cores = 2,
+    chains = 2,
+    backend = "cmdstanr"
   )
 
   cli::cli_alert_info(
@@ -181,7 +260,11 @@ if (not_on_cran()) {
   fit_marginal_sex <- suppressMessages(epidist(
     data = prep_marginal_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
-    seed = 1, silent = 2, refresh = 0,
-    cores = 2, chains = 2, backend = "cmdstanr"
+    seed = 1,
+    silent = 2,
+    refresh = 0,
+    cores = 2,
+    chains = 2,
+    backend = "cmdstanr"
   ))
 }

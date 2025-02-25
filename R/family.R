@@ -89,7 +89,9 @@ epidist_family_param.default <- function(family, ...) {
 
   # Extract the Stan parameterisation from the dummy model code
   lpdf_pattern <- paste0(
-    "target \\+= ", family_name, "_(lpdf|lpmf)\\(Y \\| ([^)]+)\\)" # nolint
+    "target \\+= ",
+    family_name,
+    "_(lpdf|lpmf)\\(Y \\| (.+?)\\)" # nolint
   )
   lpdf_match <- regexpr(lpdf_pattern, dummy_mdl)
   reparam <- if (lpdf_match > 0) {
@@ -103,8 +105,11 @@ epidist_family_param.default <- function(family, ...) {
     match_str <- mu_matches[1]
     param <- sub(
       paste0(
-        "target \\+= ", family_name, "_(lpdf|lpmf)\\(Y \\| " # nolint
-      ), "",
+        "target \\+= ",
+        family_name,
+        "_(lpdf|lpmf)\\(Y \\| " # nolint
+      ),
+      "",
       match_str
     )
     param <- sub(")", "", param, fixed = TRUE)

@@ -70,6 +70,7 @@ fit <- epidist(
   chains = 2,
   cores = 2,
   refresh = ifelse(interactive(), 250, 0),
+  iter = 1000,
   backend = "cmdstanr"
 )
 ```
@@ -186,7 +187,7 @@ quantile(pred$sd, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 
 We recommend use of the [`priorsense`](https://github.com/n-kall/priorsense) package [@kallioinen2024detecting] to check how sensitive the posterior distribution is to perturbations of the prior distribution and likelihood using power-scaling analysis:
 
-```{r, eval = FALSE}
+```{r}
 library(priorsense)
 powerscale_plot_dens(fit, variable = c("Intercept", "Intercept_sigma")) +
   theme_minimal()

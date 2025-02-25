@@ -35,36 +35,39 @@ Depends:
     R (>= 4.0.0)
 Imports:
     brms,
-    ggplot2,
-    purrr,
-    stats,
-    cli,
     checkmate,
-    rstan (>= 2.26.0),
+    cli,
     dplyr,
-    tibble,
-    tidyr,
+    ggplot2,
     lubridate,
-    primarycensored
+    primarycensored,
+    purrr,
+    rstan (>= 2.26.0),
+    stats,
+    tibble,
+    tidyr
 Suggests:
+    bayesplot,
+    BH (>= 1.66.0),
     bookdown,
-    testthat (>= 3.0.0),
+    cmdstanr,
+    CodeDepends,
+    collapse,
     gt,
     knitr,
-    roxyglobals,
-    bayesplot,
-    posterior,
-    tidybayes,
+    loo,
+    marginaleffects,
     modelr,
     patchwork,
     pkgdown,
-    cmdstanr,
+    posterior,
     priorsense,
-    usethis,
-    CodeDepends,
-    BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
-    RcppEigen (>= 0.3.3.3.0)
+    RcppEigen (>= 0.3.3.3.0),
+    roxyglobals,
+    testthat (>= 3.0.0),
+    tidybayes,
+    usethis
 Remotes:
     stan-dev/cmdstanr
 Config/Needs/website:
