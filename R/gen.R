@@ -98,18 +98,21 @@ epidist_gen_log_lik <- function(family) {
 
     # Calculate density for each draw using primarycensored::dpcens()
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
-      do.call(primarycensored::dpcens, c(
-        list(
-          x = y,
-          pdist = get(dist, envir = asNamespace("stats")),
-          pwindow = pwindow,
-          swindow = swindow,
-          D = relative_obs_time,
-          dprimary = stats::dunif,
-          log = TRUE
-        ),
-        args[[draw]]
-      ))
+      do.call(
+        primarycensored::dpcens,
+        c(
+          list(
+            x = y,
+            pdist = get(dist, envir = asNamespace("stats")),
+            pwindow = pwindow,
+            swindow = swindow,
+            D = relative_obs_time,
+            dprimary = stats::dunif,
+            log = TRUE
+          ),
+          args[[draw]]
+        )
+      )
     })
     lpdf <- brms:::log_lik_weight(lpdf, i = i, prep = prep) # nolint
     return(lpdf)
@@ -130,13 +133,20 @@ epidist_gen_log_lik <- function(family) {
         meanlog = brms::get_dpar(prep, "mu", i),
         sdlog = brms::get_dpar(prep, "sigma", i = i)
       )
+    },
+    pweibull = {
+      shape <- brms::get_dpar(prep, "shape", i = i)
+      list(
+        shape = shape,
+        scale = brms::get_dpar(prep, "mu", i = i) / gamma(1 + 1 / shape)
+      )
     }
   )
   return(.transpose_named_list2(args))
 }
 
 .get_supported_dists <- function() {
-  c("plnorm", "pgamma")
+  c("plnorm", "pgamma", "weibull")
 }
 
 .transpose_named_list2 <- function(lst) {
