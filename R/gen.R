@@ -105,7 +105,7 @@ epidist_gen_log_lik <- function(family) {
     swindow <- prep$data$vreal3[i]
 
     # Get distribution-specific parameters
-    args <- .get_supported_dist_args(dist, prep, i)
+    dist_args <- .get_supported_dist_args(dist, prep, i)
 
     # Calculate density for each draw using primarycensored::dpcens()
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
@@ -121,7 +121,7 @@ epidist_gen_log_lik <- function(family) {
             dprimary = stats::dunif,
             log = TRUE
           ),
-          args[[draw]]
+          dist_args[[draw]]
         )
       )
     })
@@ -134,7 +134,8 @@ epidist_gen_log_lik <- function(family) {
 
 # Helper to get distribution-specific arguments
 .get_supported_dist_args <- function(dist, prep, i) {
-  args <- switch(dist,
+  dist_params <- switch(
+    dist,
     pgamma = {
       shape <- brms::get_dpar(prep, "shape", i = i)
       list(shape = shape, scale = brms::get_dpar(prep, "mu", i) / shape)
@@ -153,18 +154,19 @@ epidist_gen_log_lik <- function(family) {
       )
     }
   )
-  return(.transpose_named_list2(args))
+  return(.transpose_named_list2(dist_params))
 }
 
 .get_supported_dists <- function() {
-  c("plnorm", "pgamma", "pweibull")
+  return(c("plnorm", "pgamma", "pweibull"))
 }
 
 .transpose_named_list2 <- function(lst) {
   n <- length(lst[[1]])
-  lapply(seq_len(n), function(i) {
+  result <- lapply(seq_len(n), function(i) {
     setNames(lapply(lst, `[`, i), names(lst))
   })
+  return(result)
 }
 
 #' Create a function to draw from the posterior predictive distribution for a
@@ -195,7 +197,8 @@ epidist_gen_posterior_predict <- function(family) {
 
   rdist <- function(n, i, prep, ...) {
     prep$ndraws <- n
-    do.call(dist_fn, list(i = i, prep = prep))
+    result <- do.call(dist_fn, list(i = i, prep = prep))
+    return(result)
   }
 
   .predict <- function(i, prep, ...) {
@@ -203,7 +206,7 @@ epidist_gen_posterior_predict <- function(family) {
     pwindow <- prep$data$vreal2[i]
     swindow <- prep$data$vreal3[i]
 
-    as.matrix(primarycensored::rpcens(
+    result <- as.matrix(primarycensored::rpcens(
       n = prep$ndraws,
       rdist = rdist,
       rprimary = stats::runif,
@@ -213,6 +216,7 @@ epidist_gen_posterior_predict <- function(family) {
       i = i,
       prep = prep
     ))
+    return(result)
   }
   return(.predict)
 }
@@ -238,5 +242,6 @@ epidist_gen_posterior_predict <- function(family) {
 #' @family gen
 #' @export
 epidist_gen_posterior_epred <- function(family) {
-  return(.get_brms_fn("posterior_epred", family))
+  result <- .get_brms_fn("posterior_epred", family)
+  return(result)
 }
