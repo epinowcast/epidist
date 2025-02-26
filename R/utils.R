@@ -90,11 +90,12 @@
 #' @importFrom brms as.brmsprior
 #' @autoglobal
 .replace_prior <- function(
-    old_prior,
-    prior,
-    warn = FALSE,
-    merge = TRUE,
-    enforce_presence = TRUE) {
+  old_prior,
+  prior,
+  warn = FALSE,
+  merge = TRUE,
+  enforce_presence = TRUE
+) {
   if (!isTRUE(merge)) {
     return(prior)
   }
@@ -144,8 +145,7 @@
     if (anyNA(prior$prior_old)) {
       missing_prior <- utils::capture.output(
         print(
-          filter(prior, is.na(.data$prior_old)) |>
-            as.data.frame()
+          as.data.frame(filter(prior, is.na(.data$prior_old)))
         )
       )
       if (warn) {
