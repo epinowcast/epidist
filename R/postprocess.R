@@ -16,21 +16,21 @@ predict_delay_parameters <- function(fit, newdata = NULL, ...) {
   pp <- brms::prepare_predictions(fit, newdata = newdata, ...)
   # Every brms model has the parameter mu
   lp_mu <- brms::get_dpar(pp, dpar = "mu", inv_link = TRUE)
-  df <- expand.grid(
+  samples_df <- expand.grid(
     draw = seq_len(nrow(lp_mu)),
     index = seq_len(ncol(lp_mu))
   )
-  df[["mu"]] <- as.vector(lp_mu)
+  samples_df[["mu"]] <- as.vector(lp_mu)
   for (dpar in setdiff(names(pp$dpars), "mu")) {
     lp_dpar <- brms::get_dpar(pp, dpar = dpar, inv_link = TRUE)
-    df[[dpar]] <- as.vector(lp_dpar)
+    samples_df[[dpar]] <- as.vector(lp_dpar)
   }
-  class(df) <- c(
+  class(samples_df) <- c(
     paste0(sub(".*_", "", fit$family$name), "_samples"),
-    class(df)
+    class(samples_df)
   )
-  df <- add_mean_sd(df)
-  return(df)
+  samples_df <- add_mean_sd(samples_df)
+  return(samples_df)
 }
 
 #' @rdname predict_delay_parameters

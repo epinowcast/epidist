@@ -144,3 +144,24 @@ test_that("epidist_gen_log_lik returns a function that produces valid log likeli
   expect_false(anyNA(log_lik_gamma))
   expect_true(all(is.finite(log_lik_gamma)))
 })
+
+test_that("epidist_gen_log_lik falls back to generic method for unsupported distributions", {
+  skip_on_cran()
+
+  # Test with normal distribution which doesn't have an analytical solution
+  prep <- brms::prepare_predictions(fit)
+  prep$ndraws <- 10
+  i <- 1
+
+  # Capture the message about falling back to generic method
+  suppressMessages(
+    log_lik_fn <- epidist_gen_log_lik(brms::brmsfamily("gaussian")),
+    "Falling back to default dependency on brms for normal"
+  )
+
+  # Test that the generic method produces valid log likelihoods
+  log_lik <- log_lik_fn(i = i, prep)
+  expect_length(log_lik, prep$ndraws)
+  expect_false(anyNA(log_lik))
+  expect_true(all(is.finite(log_lik)))
+})

@@ -260,7 +260,7 @@ epidist_stancode.epidist_latent_model <- function(
 
   # Inject vector or real depending if there is a model for each dpar
   vector_real <- purrr::map_vec(family$dpars, function(dpar) {
-    ifelse(dpar %in% c("mu", names(formula$pforms)), "vector", "real")
+    return(ifelse(dpar %in% c("mu", names(formula$pforms)), "vector", "real"))
   })
 
   stanvars_functions[[1]]$scode <- gsub(
@@ -280,7 +280,7 @@ epidist_stancode.epidist_latent_model <- function(
   stanvars_data <- stanvar(
     block = "data",
     scode = "int wN;",
-    x = nrow(filter(data, woverlap > 0)),
+    x = sum(data$woverlap > 0, na.rm = TRUE),
     name = "wN"
   ) +
     stanvar(

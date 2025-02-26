@@ -25,9 +25,13 @@
 #'
 #' @keywords internal
 .version_stanvar <- function() {
-  version <- utils::packageVersion("epidist")
-  comment <- paste0("// code chunks used from epidist ", version, "\n")
-  return(brms::stanvar(scode = comment, block = "functions"))
+  pkg_version <- utils::packageVersion("epidist")
+  version_comment <- paste0(
+    "// code chunks used from epidist ",
+    pkg_version,
+    "\n"
+  )
+  return(brms::stanvar(scode = version_comment, block = "functions"))
 }
 
 #' Round to the nearest multiple
@@ -138,11 +142,12 @@
     )
 
     if (anyNA(prior$prior_old)) {
-      missing_prior <- utils::capture.output(print(
-        prior |>
-          filter(is.na(.data$prior_old)) |>
-          as.data.frame()
-      ))
+      missing_prior <- utils::capture.output(
+        print(
+          filter(prior, is.na(.data$prior_old)) |>
+            as.data.frame()
+        )
+      )
       if (warn) {
         msg <- c(
           "!" = "One or more priors have no match in existing parameters:",
@@ -154,37 +159,30 @@
     }
 
     # use new lb and ub if prior_new is present
-    prior <- prior |>
-      mutate(
-        lb = ifelse(!is.na(.data$prior_new), .data$lb_new, .data$lb_old),
-        ub = ifelse(!is.na(.data$prior_new), .data$ub_new, .data$ub_old)
+    prior <- mutate(
+      prior,
+      lb = ifelse(!is.na(.data$prior_new), .data$lb_new, .data$lb_old),
+      ub = ifelse(!is.na(.data$prior_new), .data$ub_new, .data$ub_old),
+      prior = ifelse(
+        !is.na(.data$prior_new),
+        .data$prior_new,
+        .data$prior_old
+      ),
+      source = ifelse(
+        !is.na(.data$prior_new),
+        .data$source_new,
+        .data$source_old
       )
+    )
 
     # only keep rows that have both old and new priors
     if (isTRUE(enforce_presence)) {
-      prior <- prior |>
-        filter(!is.na(.data$prior_old), !is.na(.data$prior_new)) |>
-        select(prior = prior_new, dplyr::all_of(cols), source = source_new)
-    } else {
-      prior <- prior |>
-        mutate(
-          prior = ifelse(
-            !is.na(.data$prior_new),
-            .data$prior_new,
-            .data$prior_old
-          )
-        ) |>
-        mutate(
-          source = ifelse(
-            !is.na(.data$prior_new),
-            .data$source_new,
-            .data$source_old
-          )
-        ) |>
-        select(prior, dplyr::all_of(cols), source)
+      prior <- filter(prior, !is.na(.data$prior_old), !is.na(.data$prior_new))
     }
 
-    prior <- bind_rows(prior, hold_prior, hold_prior_old)
+    prior <- prior |>
+      select(prior, dplyr::all_of(cols), source) |>
+      bind_rows(hold_prior, hold_prior_old)
   }
   return(as.brmsprior(prior))
 }
@@ -242,9 +240,9 @@
 #'
 #' @keywords internal
 .extract_dpar_terms <- function(formula) {
-  terms <- brms::brmsterms(formula)
+  formula_terms <- brms::brmsterms(formula)
   # Extract all terms from the right hand side of all dpars
-  dpar_terms <- purrr::map(terms$dpars, \(x) all.vars(x$allvars))
+  dpar_terms <- purrr::map(formula_terms$dpars, \(x) all.vars(x$allvars))
   dpar_terms <- unique(unlist(dpar_terms))
   return(dpar_terms)
 }
@@ -271,9 +269,8 @@
   # Remove duplicates
   by <- unique(by)
 
-  sum_data <- data |>
-    tibble::as_tibble() |>
-    summarise(n = sum(.data$n), .by = dplyr::all_of(by))
+  sum_data <- tibble::as_tibble(data)
+  sum_data <- summarise(sum_data, n = sum(.data$n), .by = dplyr::all_of(by))
   return(sum_data)
 }
 
@@ -317,6 +314,7 @@
       "i" = "This should improve model efficiency with no loss of information." # nolint
     ))
   }
+  return(invisible(NULL))
 }
 
 #' Rename the columns of a `data.frame`
@@ -390,11 +388,9 @@
 .add_weights <- function(data, weight = NULL) {
   if (!is.null(weight)) {
     assert_names(names(data), must.include = weight)
-    data <- data |>
-      mutate(n = .data[[weight]])
+    data$n <- data[[weight]]
   } else {
-    data <- data |>
-      mutate(n = 1)
+    data$n <- 1
   }
   return(data)
 }

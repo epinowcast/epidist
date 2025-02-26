@@ -58,8 +58,7 @@ as_epidist_naive_model.epidist_linelist_data <- function(
     ...) {
   assert_epidist.epidist_linelist_data(data)
 
-  data <- data |>
-    mutate(delay = .data$stime_lwr - .data$ptime_lwr)
+  data <- mutate(data, delay = .data$stime_lwr - .data$ptime_lwr)
 
   data <- .add_weights(data, weight)
 

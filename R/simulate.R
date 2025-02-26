@@ -91,24 +91,24 @@ simulate_gillespie <- function(
   if (!missing(seed)) {
     set.seed(seed)
   }
-  t <- 0
+  current_time <- 0
   state <- c(N - I0, I0, 0)
-  beta <- r + gamma
+  transmission_rate <- r + gamma
   go <- TRUE
   ptime <- NULL
 
   while (go) {
-    rates <- c(beta * state[1] * state[2] / N, gamma * state[2])
+    rates <- c(transmission_rate * state[1] * state[2] / N, gamma * state[2])
     srates <- sum(rates)
 
     if (srates > 0) {
-      deltat <- stats::rexp(1, rate = srates)
-      t <- t + deltat
+      time_increment <- stats::rexp(1, rate = srates)
+      current_time <- current_time + time_increment
       wevent <- sample(seq_along(rates), size = 1, prob = rates)
 
       if (wevent == 1) {
         state <- c(state[1] - 1, state[2] + 1, state[3])
-        ptime <- c(ptime, t)
+        ptime <- c(ptime, current_time)
       } else {
         state <- c(state[1], state[2] - 1, state[3] + 1)
       }

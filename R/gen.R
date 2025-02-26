@@ -30,7 +30,10 @@ epidist_gen_log_lik <- function(family) {
   log_lik_brms <- .get_brms_fn("log_lik", family)
 
   # Get the name of the primary distribution
-  primary_dist_name <- primarycensored::pcd_dist_name(tolower(family$family))
+  primary_dist_name <- tryCatch(
+    primarycensored::pcd_dist_name(tolower(family$family)),
+    error = function(e) tolower(family$family)
+  )
 
   # Check if family is supported with a analytical solution
   if (primary_dist_name %in% .get_supported_dists()) {
@@ -69,13 +72,13 @@ epidist_gen_log_lik <- function(family) {
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
       # Define pdist function that filters to current draw
       pdist_draw <- function(q, i, prep, ...) {
-        purrr::map_dbl(q, function(x) {
+        return(purrr::map_dbl(q, function(x) {
           prep$data$Y <- rep(x, length(prep$data$Y))
           prep$data$weights <- NULL
           prep$ndraws <- 1
           ll <- exp(log_lik_brms(i, prep)[draw])
           return(ll)
-        })
+        }))
       }
 
       return(
@@ -167,7 +170,7 @@ epidist_gen_log_lik <- function(family) {
 .transpose_named_list2 <- function(lst) {
   n <- length(lst[[1]])
   result <- lapply(seq_len(n), function(i) {
-    setNames(lapply(lst, `[`, i), names(lst))
+    return(setNames(lapply(lst, `[`, i), names(lst)))
   })
   return(result)
 }
