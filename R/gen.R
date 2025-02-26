@@ -78,16 +78,18 @@ epidist_gen_log_lik <- function(family) {
         })
       }
 
-      return(primarycensored::dpcens(
-        x = y,
-        pdist = pdist_draw,
-        i = i,
-        prep = prep,
-        pwindow = pwindow,
-        swindow = swindow,
-        D = relative_obs_time,
-        dprimary = stats::dunif,
-        log = TRUE
+      return(
+        primarycensored::dpcens(
+          x = y,
+          pdist = pdist_draw,
+          i = i,
+          prep = prep,
+          pwindow = pwindow,
+          swindow = swindow,
+          D = relative_obs_time,
+          dprimary = stats::dunif,
+          log = TRUE
+        )
       )
     })
     lpdf <- brms:::log_lik_weight(lpdf, i = i, prep = prep) # nolint
@@ -110,15 +112,20 @@ epidist_gen_log_lik <- function(family) {
     # Calculate density for each draw using primarycensored::dpcens()
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
       return(
-        primarycensored::dpcens(
-          x = y,
-          pdist = get(dist, envir = asNamespace("stats")),
-          pwindow = pwindow,
-          swindow = swindow,
-          D = relative_obs_time,
-          dprimary = stats::dunif,
-          log = TRUE,
-          dist_args[[draw]]
+        do.call(
+          primarycensored::dpcens,
+          c(
+            list(
+              x = y,
+              pdist = get(dist, envir = asNamespace("stats")),
+              pwindow = pwindow,
+              swindow = swindow,
+              D = relative_obs_time,
+              dprimary = stats::dunif,
+              log = TRUE
+            ),
+            dist_args[[draw]]
+          )
         )
       )
     })
@@ -131,8 +138,7 @@ epidist_gen_log_lik <- function(family) {
 
 # Helper to get distribution-specific arguments
 .get_supported_dist_args <- function(dist, prep, i) {
-  dist_params <- switch(
-    dist,
+  dist_params <- switch(dist,
     pgamma = {
       shape <- brms::get_dpar(prep, "shape", i = i)
       list(shape = shape, scale = brms::get_dpar(prep, "mu", i) / shape)

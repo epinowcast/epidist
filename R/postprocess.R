@@ -26,7 +26,8 @@ predict_delay_parameters <- function(fit, newdata = NULL, ...) {
     df[[dpar]] <- as.vector(lp_dpar)
   }
   class(df) <- c(
-    paste0(sub(".*_", "", fit$family$name), "_samples"), class(df)
+    paste0(sub(".*_", "", fit$family$name), "_samples"),
+    class(df)
   )
   df <- add_mean_sd(df)
   return(df)
@@ -66,7 +67,7 @@ add_mean_sd.default <- function(data, ...) {
   return(data)
 }
 
-#' Add natural scale mean and standard deviation parameters for a latent
+#' Add natural scale mean and standard deviation parameters for a
 #' lognormal model
 #'
 #' Note that the input parameters here are `mu` and `sigma`, corresponding to
@@ -81,13 +82,14 @@ add_mean_sd.default <- function(data, ...) {
 #' @autoglobal
 #' @export
 add_mean_sd.lognormal_samples <- function(data, ...) {
-  return(mutate(data,
+  return(mutate(
+    data,
     mean = exp(.data$mu + .data$sigma^2 / 2),
     sd = .data$mean * sqrt(exp(.data$sigma^2) - 1)
   ))
 }
 
-#' Add natural scale mean and standard deviation parameters for a latent gamma
+#' Add natural scale mean and standard deviation parameters for a Gamma
 #' model
 #'
 #' Again, `mu` and `shape` here are the distributional parameters of `brms`.
@@ -101,8 +103,28 @@ add_mean_sd.lognormal_samples <- function(data, ...) {
 #' @autoglobal
 #' @export
 add_mean_sd.gamma_samples <- function(data, ...) {
-  return(mutate(data,
+  return(mutate(data, mean = .data$mu, sd = .data$mu / sqrt(.data$shape)))
+}
+
+#' Add natural scale mean and standard deviation parameters for a Weibull
+#' model
+#'
+#' Note that the input parameters here are `mu` and `shape`, corresponding to
+#' the distributional parameters used by `brms` for the `weibull` family.
+#'
+#' @inheritParams add_mean_sd
+#'
+#' @param ... Additional arguments for method.
+#'
+#' @family postprocess
+#' @method add_mean_sd weibull_samples
+#' @autoglobal
+#' @export
+add_mean_sd.weibull_samples <- function(data, ...) {
+  return(mutate(
+    data,
     mean = .data$mu,
-    sd = .data$mu / sqrt(.data$shape)
+    sd = .data$mu *
+      sqrt(gamma(1 + 2 / .data$shape) / (gamma(1 + 1 / .data$shape)^2) - 1)
   ))
 }

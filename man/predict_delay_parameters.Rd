@@ -29,6 +29,7 @@ Other postprocess:
 \code{\link{add_mean_sd}()},
 \code{\link{add_mean_sd.default}()},
 \code{\link{add_mean_sd.gamma_samples}()},
-\code{\link{add_mean_sd.lognormal_samples}()}
+\code{\link{add_mean_sd.lognormal_samples}()},
+\code{\link{add_mean_sd.weibull_samples}()}
 }
 \concept{postprocess}
