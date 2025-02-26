@@ -1,3 +1,4 @@
+# fmt: skip file
 test_that("epidist_gen_posterior_predict returns a function that outputs positive integers with length equal to draws", { # nolint: line_length_linter.
   skip_on_cran()
 

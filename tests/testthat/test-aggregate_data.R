@@ -1,13 +1,11 @@
-test_that(
-  "as_epidist_aggregate_data assigns epidist_aggregate_data class to data",
-  {
-    expect_s3_class(agg_sim_obs, "epidist_aggregate_data")
-  }
-)
+test_that("as_epidist_aggregate_data assigns epidist_aggregate_data class to data", {
+  expect_s3_class(agg_sim_obs, "epidist_aggregate_data")
+})
 
 test_that("as_epidist_aggregate_data.default works with vectors", {
   expect_no_error(
-    agg_data <- as_epidist_aggregate_data( # nolint
+    agg_data <- as_epidist_aggregate_data(
+      # nolint
       data = c(1, 2, 3),
       ptime_upr = c(2, 3, 4),
       stime_lwr = c(3, 4, 5),
@@ -32,7 +30,11 @@ test_that("as_epidist_aggregate_data works with dates", {
       obs_date = as.Date("2023-01-01") + obs_time
     ) |>
     dplyr::select(
-      pdate_lwr, pdate_upr, sdate_lwr, sdate_upr, obs_date
+      pdate_lwr,
+      pdate_upr,
+      sdate_lwr,
+      sdate_upr,
+      obs_date
     ) |>
     dplyr::mutate(n = 1)
 
@@ -58,33 +60,30 @@ test_that("as_epidist_aggregate_data preserves additional columns", {
   )
 })
 
-test_that(
-  "as_epidist_aggregate_data.epidist_linelist_data aggregates correctly",
-  {
-    # Create small test dataset with age stratification
-    test_data <- sim_obs_sex |>
-      dplyr::slice_head(n = 100)
+test_that("as_epidist_aggregate_data.epidist_linelist_data aggregates correctly", {
+  # Create small test dataset with age stratification
+  test_data <- sim_obs_sex |>
+    dplyr::slice_head(n = 100)
 
-    # Create aggregated versions
-    agg_test <- as_epidist_aggregate_data(test_data)
-    agg_test_sex <- as_epidist_aggregate_data(test_data, by = "sex")
+  # Create aggregated versions
+  agg_test <- as_epidist_aggregate_data(test_data)
+  agg_test_sex <- as_epidist_aggregate_data(test_data, by = "sex")
 
-    # Check sex column only present in stratified data
-    expect_true("sex" %in% names(agg_test_sex))
-    expect_false("sex" %in% names(agg_test))
+  # Check sex column only present in stratified data
+  expect_true("sex" %in% names(agg_test_sex))
+  expect_false("sex" %in% names(agg_test))
 
-    # Compare default vs age-stratified aggregation
-    expect_gt(nrow(agg_test_sex), nrow(agg_test))
+  # Compare default vs age-stratified aggregation
+  expect_gt(nrow(agg_test_sex), nrow(agg_test))
 
-    # Check total counts match between stratified and unstratified
-    expect_identical(sum(agg_test$n), sum(agg_test_sex$n))
-    expect_identical(sum(agg_test$n), 100L)
+  # Check total counts match between stratified and unstratified
+  expect_identical(sum(agg_test$n), sum(agg_test_sex$n))
+  expect_identical(sum(agg_test$n), 100L)
 
-    # Check n values are sensible
-    expect_true(all(agg_test$n >= 1))
-    expect_true(all(agg_test_sex$n >= 1))
-  }
-)
+  # Check n values are sensible
+  expect_true(all(agg_test$n >= 1))
+  expect_true(all(agg_test_sex$n >= 1))
+})
 
 test_that("as_epidist_aggregate_data validates counts", {
   # Test zero counts

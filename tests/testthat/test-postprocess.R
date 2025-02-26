@@ -1,3 +1,4 @@
+# fmt: skip file
 test_that(
   "predict_delay_parameters works with NULL newdata and the latent and marginal lognormal model", # nolint: line_length_linter.
   {

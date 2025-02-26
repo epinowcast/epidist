@@ -4,10 +4,10 @@
 \alias{.add_weights}
 \title{Add weights to a data frame}
 \usage{
-.add_weights(df, weight = NULL)
+.add_weights(data, weight = NULL)
 }
 \arguments{
-\item{df}{A data frame to add weights to}
+\item{data}{A data frame to add weights to}
 
 \item{weight}{A column name to use for weighting the data in the
 likelihood. Default is NULL. Internally this is used to define the 'n'

@@ -1,3 +1,4 @@
+# fmt: skip file
 test_that("epidist_diagnostics", { # nolint: line_length_linter.
   skip_on_cran()
   set.seed(1)

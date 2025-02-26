@@ -1,3 +1,4 @@
+# fmt: skip file
 test_that("as_epidist_naive_model.data.frame with default settings an object with the correct classes", { # nolint: line_length_linter.
   prep_obs <- as_epidist_naive_model(sim_obs)
   expect_s3_class(prep_obs, "data.frame")

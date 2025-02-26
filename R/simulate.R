@@ -15,7 +15,8 @@
 #' @export
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
   return(data.frame(
-    case = 1:sample_size, ptime = stats::runif(sample_size, 0, t)
+    case = 1:sample_size,
+    ptime = stats::runif(sample_size, 0, t)
   ))
 }
 
@@ -39,10 +40,11 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 #'
 #' @family simulate
 #' @export
-simulate_exponential_cases <- function(r = 0.2,
-                                       sample_size = 10000,
-                                       seed,
-                                       t = 30) {
+simulate_exponential_cases <- function(
+    r = 0.2,
+    sample_size = 10000,
+    seed,
+    t = 30) {
   if (!missing(seed)) {
     set.seed(seed)
   }
@@ -80,11 +82,12 @@ simulate_exponential_cases <- function(r = 0.2,
 #'
 #' @family simulate
 #' @export
-simulate_gillespie <- function(r = 0.2,
-                               gamma = 1 / 7,
-                               I0 = 50, # nolint: object_name_linter
-                               N = 10000, # nolint: object_name_linter
-                               seed) {
+simulate_gillespie <- function(
+    r = 0.2,
+    gamma = 1 / 7,
+    I0 = 50, # nolint: object_name_linter
+    N = 10000, # nolint: object_name_linter
+    seed) {
   if (!missing(seed)) {
     set.seed(seed)
   }

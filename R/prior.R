@@ -35,8 +35,13 @@
 #' @rdname epidist_prior
 #' @family prior
 #' @export
-epidist_prior <- function(data, family, formula, prior, merge = TRUE,
-                          enforce_presence = FALSE) {
+epidist_prior <- function(
+    data,
+    family,
+    formula,
+    prior,
+    merge = TRUE,
+    enforce_presence = FALSE) {
   assert_epidist(data)
   default <- brms::default_prior(formula, data = data)
   model <- epidist_model_prior(data, formula)
@@ -48,13 +53,17 @@ epidist_prior <- function(data, family, formula, prior, merge = TRUE,
     family$source <- "family"
   }
   custom <- .replace_prior(
-    family, model,
-    merge = TRUE, enforce_presence = FALSE
+    family,
+    model,
+    merge = TRUE,
+    enforce_presence = FALSE
   )
   internal <- .replace_prior(default, custom, merge = TRUE)
   prior <- .replace_prior(
-    internal, prior,
-    warn = TRUE, merge = merge,
+    internal,
+    prior,
+    warn = TRUE,
+    merge = merge,
     enforce_presence = enforce_presence
   )
 

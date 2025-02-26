@@ -123,7 +123,7 @@ new_epidist_latent_model <- function(data, ...) {
 #' @family latent_model
 #' @export
 is_epidist_latent_model <- function(data) {
-  inherits(data, "epidist_latent_model")
+  return(inherits(data, "epidist_latent_model"))
 }
 
 #' @method assert_epidist epidist_latent_model
@@ -152,7 +152,9 @@ assert_epidist.epidist_latent_model <- function(data, ...) {
 #' @family latent_model
 #' @export
 epidist_family_model.epidist_latent_model <- function(
-    data, family, ...) {
+    data,
+    family,
+    ...) {
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
@@ -162,8 +164,13 @@ epidist_family_model.epidist_latent_model <- function(
     ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
     type = family$type,
     vars = c(
-      "vreal1", "vreal2", "vreal3", "pwindow_raw", "swindow_raw",
-      "woverlap", "wN"
+      "vreal1",
+      "vreal2",
+      "vreal3",
+      "pwindow_raw",
+      "swindow_raw",
+      "woverlap",
+      "wN"
     ),
     loop = FALSE,
     log_lik = epidist_gen_log_lik(family),
@@ -186,9 +193,12 @@ epidist_family_model.epidist_latent_model <- function(
 #' @family latent_model
 #' @export
 epidist_formula_model.epidist_latent_model <- function(
-    data, formula, ...) {
+    data,
+    formula,
+    ...) {
   formula <- stats::update(
-    formula, delay | vreal(relative_obs_time, pwindow, swindow) ~ .
+    formula,
+    delay | vreal(relative_obs_time, pwindow, swindow) ~ .
   )
   return(formula)
 }
@@ -228,7 +238,8 @@ epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
 epidist_stancode.epidist_latent_model <- function(
     data,
     family = epidist_family(data),
-    formula = epidist_formula(data), ...) {
+    formula = epidist_formula(data),
+    ...) {
   assert_epidist(data)
 
   stanvars_version <- .version_stanvar()
@@ -241,7 +252,9 @@ epidist_stancode.epidist_latent_model <- function(
   family_name <- gsub("latent_", "", family$name, fixed = TRUE)
 
   stanvars_functions[[1]]$scode <- gsub(
-    "family", family_name, stanvars_functions[[1]]$scode,
+    "family",
+    family_name,
+    stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
@@ -258,7 +271,9 @@ epidist_stancode.epidist_latent_model <- function(
   )
 
   stanvars_functions[[1]]$scode <- gsub(
-    "dpars_B", family$param, stanvars_functions[[1]]$scode,
+    "dpars_B",
+    family$param,
+    stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
@@ -284,7 +299,9 @@ epidist_stancode.epidist_latent_model <- function(
       scode = "vector<lower=0,upper=1>[N] swindow_raw;"
     )
 
-  stanvars_all <- stanvars_version + stanvars_functions + stanvars_data +
+  stanvars_all <- stanvars_version +
+    stanvars_functions +
+    stanvars_data +
     stanvars_parameters
 
   return(stanvars_all)
@@ -293,6 +310,11 @@ epidist_stancode.epidist_latent_model <- function(
 .latent_required_cols <- function() {
   return(c(
     .linelist_required_cols(),
-    "relative_obs_time", "pwindow", "woverlap", "swindow", "delay", ".row_id"
+    "relative_obs_time",
+    "pwindow",
+    "woverlap",
+    "swindow",
+    "delay",
+    ".row_id"
   ))
 }

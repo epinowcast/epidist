@@ -53,7 +53,9 @@ as_epidist_naive_model <- function(data, ...) {
 #'   ) |>
 #'   as_epidist_naive_model()
 as_epidist_naive_model.epidist_linelist_data <- function(
-    data, weight = NULL, ...) {
+    data,
+    weight = NULL,
+    ...) {
   assert_epidist.epidist_linelist_data(data)
 
   data <- data |>
@@ -144,10 +146,13 @@ assert_epidist.epidist_naive_model <- function(data, ...) {
 #' @family naive_model
 #' @export
 epidist_formula_model.epidist_naive_model <- function(
-    data, formula, ...) {
+    data,
+    formula,
+    ...) {
   # data is only used to dispatch on
   formula <- stats::update(
-    formula, delay | weights(n) ~ .
+    formula,
+    delay | weights(n) ~ .
   )
   return(formula)
 }
@@ -177,7 +182,10 @@ epidist_formula_model.epidist_naive_model <- function(
 #' @importFrom purrr map_chr
 #' @export
 epidist_transform_data_model.epidist_naive_model <- function(
-    data, family, formula, ...) {
+    data,
+    family,
+    formula,
+    ...) {
   required_cols <- .naive_required_cols()
   trans_data <- data |>
     .summarise_n_by_formula(by = required_cols, formula = formula) |>

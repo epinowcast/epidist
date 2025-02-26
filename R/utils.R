@@ -85,8 +85,12 @@
 #' @importFrom dplyr full_join filter select mutate bind_rows
 #' @importFrom brms as.brmsprior
 #' @autoglobal
-.replace_prior <- function(old_prior, prior, warn = FALSE, merge = TRUE,
-                           enforce_presence = TRUE) {
+.replace_prior <- function(
+    old_prior,
+    prior,
+    warn = FALSE,
+    merge = TRUE,
+    enforce_presence = TRUE) {
   if (!isTRUE(merge)) {
     return(prior)
   }
@@ -127,8 +131,10 @@
     prior <- bind_rows(hold_prior, hold_prior_old)
   } else {
     prior <- dplyr::full_join(
-      old_prior, prior,
-      by = join_cols, suffix = c("_old", "_new")
+      old_prior,
+      prior,
+      by = join_cols,
+      suffix = c("_old", "_new")
     )
 
     if (anyNA(prior$prior_old)) {
@@ -161,12 +167,20 @@
         select(prior = prior_new, dplyr::all_of(cols), source = source_new)
     } else {
       prior <- prior |>
-        mutate(prior = ifelse(
-          !is.na(.data$prior_new), .data$prior_new, .data$prior_old
-        )) |>
-        mutate(source = ifelse(
-          !is.na(.data$prior_new), .data$source_new, .data$source_old
-        )) |>
+        mutate(
+          prior = ifelse(
+            !is.na(.data$prior_new),
+            .data$prior_new,
+            .data$prior_old
+          )
+        ) |>
+        mutate(
+          source = ifelse(
+            !is.na(.data$prior_new),
+            .data$source_new,
+            .data$source_old
+          )
+        ) |>
         select(prior, dplyr::all_of(cols), source)
     }
 
@@ -187,7 +201,8 @@
 .add_dpar_info <- function(family) {
   other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]] # nolint
   other_bounds <- lapply(
-    family$dpars[-1], brms:::dpar_bounds, # nolint
+    family$dpars[-1],
+    brms:::dpar_bounds, # nolint
     family = family$family
   )
   family$other_links <- other_links
@@ -306,7 +321,7 @@
 
 #' Rename the columns of a `data.frame`
 #'
-#' @param df A `data.frame` to rename the columns of.
+#' @param data A `data.frame` to rename the columns of.
 #'
 #' @param new_names A character vector of new column names.
 #'
@@ -314,14 +329,14 @@
 #'
 #' @keywords internal
 #' @importFrom stats setNames
-.rename_columns <- function(df, new_names, old_names) {
+.rename_columns <- function(data, new_names, old_names) {
   are_valid <- is.character(new_names) & is.character(old_names)
 
   valid_new_names <- new_names[are_valid]
   valid_old_names <- old_names[are_valid]
 
   # Check if old names exist in dataframe
-  missing_cols <- setdiff(valid_old_names, names(df))
+  missing_cols <- setdiff(valid_old_names, names(data))
   if (length(missing_cols) > 0) {
     cli::cli_abort(paste0(
       "The following columns are not present in the data: ",
@@ -331,10 +346,10 @@
 
   if (length(valid_new_names) > 0) {
     rename_map <- setNames(valid_old_names, valid_new_names)
-    df <- dplyr::rename(df, !!!rename_map)
+    data <- dplyr::rename(data, !!!rename_map)
   }
 
-  return(df)
+  return(data)
 }
 
 #' Get a brms function by prefix and family
@@ -363,7 +378,7 @@
 #' Helper function to add weights to a data frame, either from an existing
 #' column or defaulting to 1.
 #'
-#' @param df A data frame to add weights to
+#' @param data A data frame to add weights to
 #'
 #' @param weight A column name to use for weighting the data in the
 #'  likelihood. Default is NULL. Internally this is used to define the 'n'
@@ -372,14 +387,14 @@
 #' @return The data frame with an added 'n' column containing the weights
 #'
 #' @keywords internal
-.add_weights <- function(df, weight = NULL) {
+.add_weights <- function(data, weight = NULL) {
   if (!is.null(weight)) {
-    assert_names(names(df), must.include = weight)
-    df <- df |>
+    assert_names(names(data), must.include = weight)
+    data <- data |>
       mutate(n = .data[[weight]])
   } else {
-    df <- df |>
+    data <- data |>
       mutate(n = 1)
   }
-  return(df)
+  return(data)
 }
