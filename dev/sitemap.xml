@@ -14,6 +14,7 @@
 <url><loc>https://epidist.epinowcast.org/dev/reference/add_mean_sd.gamma_samples.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/dev/reference/add_mean_sd.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/dev/reference/add_mean_sd.lognormal_samples.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/dev/reference/add_mean_sd.weibull_samples.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/dev/reference/as_epidist_aggregate_data.data.frame.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/dev/reference/as_epidist_aggregate_data.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/dev/reference/as_epidist_aggregate_data.epidist_linelist_data.html</loc></url>
