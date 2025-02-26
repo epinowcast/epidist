@@ -1,7 +1,6 @@
 linters: all_linters(
     packages = "lintr",
     implicit_integer_linter = NULL,
-    extraction_operator_linter = NULL,
     undesirable_function_linter = NULL,
     function_argument_linter = NULL,
     indentation_linter = NULL,

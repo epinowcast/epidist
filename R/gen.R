@@ -78,7 +78,7 @@ epidist_gen_log_lik <- function(family) {
         })
       }
 
-      primarycensored::dpcens(
+      return(primarycensored::dpcens(
         x = y,
         pdist = pdist_draw,
         i = i,
@@ -109,18 +109,15 @@ epidist_gen_log_lik <- function(family) {
 
     # Calculate density for each draw using primarycensored::dpcens()
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
-      do.call(
-        primarycensored::dpcens,
-        c(
-          list(
-            x = y,
-            pdist = get(dist, envir = asNamespace("stats")),
-            pwindow = pwindow,
-            swindow = swindow,
-            D = relative_obs_time,
-            dprimary = stats::dunif,
-            log = TRUE
-          ),
+      return(
+        primarycensored::dpcens(
+          x = y,
+          pdist = get(dist, envir = asNamespace("stats")),
+          pwindow = pwindow,
+          swindow = swindow,
+          D = relative_obs_time,
+          dprimary = stats::dunif,
+          log = TRUE,
           dist_args[[draw]]
         )
       )
