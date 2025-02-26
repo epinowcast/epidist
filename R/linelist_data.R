@@ -46,9 +46,14 @@ as_epidist_linelist_data <- function(data, ...) {
 #'   obs_time = c(5, 6, 7)
 #' )
 as_epidist_linelist_data.default <- function(
-    data, ptime_upr = NULL, stime_lwr = NULL, stime_upr = NULL,
-    obs_time = NULL, ...) {
-  df <- tibble(
+  data,
+  ptime_upr = NULL,
+  stime_lwr = NULL,
+  stime_upr = NULL,
+  obs_time = NULL,
+  ...
+) {
+  data_frame <- tibble(
     ptime_lwr = data,
     ptime_upr = ptime_upr,
     stime_lwr = stime_lwr,
@@ -58,15 +63,15 @@ as_epidist_linelist_data.default <- function(
 
   extra_cols <- list(...)
   if (length(extra_cols) > 0) {
-    extra_cols <- extra_cols[!names(extra_cols) %in% names(df)]
+    extra_cols <- extra_cols[!names(extra_cols) %in% names(data_frame)]
     if (length(extra_cols) > 0) {
-      df <- bind_cols(df, extra_cols)
+      data_frame <- bind_cols(data_frame, extra_cols)
     }
   }
 
-  df <- new_epidist_linelist_data(df)
-  assert_epidist(df)
-  return(df)
+  data_frame <- new_epidist_linelist_data(data_frame)
+  assert_epidist(data_frame)
+  return(data_frame)
 }
 
 #' Create an epidist_linelist_data object from a data frame with event dates
@@ -119,8 +124,14 @@ as_epidist_linelist_data.default <- function(
 #'     sdate_lwr = "date_of_sample_tested"
 #'   )
 as_epidist_linelist_data.data.frame <- function(
-    data, pdate_lwr = NULL, sdate_lwr = NULL, pdate_upr = NULL,
-    sdate_upr = NULL, obs_date = NULL, ...) {
+  data,
+  pdate_lwr = NULL,
+  sdate_lwr = NULL,
+  pdate_upr = NULL,
+  sdate_upr = NULL,
+  obs_date = NULL,
+  ...
+) {
   if (is.null(pdate_lwr) && !hasName(data, "pdate_lwr")) {
     cli::cli_abort("{.var pdate_lwr} is NULL but must be provided.")
   }
@@ -136,57 +147,65 @@ as_epidist_linelist_data.data.frame <- function(
   )
   new_names <- .linelist_date_cols()
   old_names <- c(pdate_lwr, pdate_upr, sdate_lwr, sdate_upr, obs_date)
-  df <- .rename_columns(data,
+  data_tbl <- .rename_columns(
+    data,
     new_names = new_names[valid_inputs],
     old_names = old_names
   )
 
-  if (!hasName(df, "pdate_upr")) {
+  if (!hasName(data_tbl, "pdate_upr")) {
     cli::cli_alert_info(paste0(
       "No primary event upper bound provided, using the primary event lower ",
       "bound + 1 day as the assumed upper bound."
     ))
-    df <- mutate(df, pdate_upr = .data$pdate_lwr + lubridate::days(1))
+    data_tbl <- mutate(
+      data_tbl,
+      pdate_upr = .data$pdate_lwr + lubridate::days(1)
+    )
   }
 
-  if (!hasName(df, "sdate_upr")) {
+  if (!hasName(data_tbl, "sdate_upr")) {
     cli::cli_alert_info(paste0(
       "No secondary event upper bound provided, using the secondary event",
       " lower bound + 1 day as the assumed upper bound."
     ))
-    df <- mutate(df, sdate_upr = .data$sdate_lwr + lubridate::days(1))
+    data_tbl <- mutate(
+      data_tbl,
+      sdate_upr = .data$sdate_lwr + lubridate::days(1)
+    )
   }
 
-  if (!hasName(df, "obs_date")) {
+  if (!hasName(data_tbl, "obs_date")) {
     cli::cli_alert_info(paste0(
-      "No observation time column provided, using ", max(df$sdate_upr),
+      "No observation time column provided, using ",
+      max(data_tbl$sdate_upr),
       " as the observation date (the maximum of the secondary event upper ",
       "bound)."
     ))
-    df <- mutate(df, obs_date = max(.data$sdate_upr, na.rm = TRUE))
+    data_tbl <- mutate(data_tbl, obs_date = max(.data$sdate_upr, na.rm = TRUE))
   }
 
   col_names <- .linelist_date_cols()
-  assert_names(names(df), must.include = col_names)
+  assert_names(names(data_tbl), must.include = col_names)
 
-  assert_true(is.timepoint(df$pdate_lwr))
-  assert_true(is.timepoint(df$pdate_upr))
-  assert_true(is.timepoint(df$sdate_lwr))
-  assert_true(is.timepoint(df$sdate_upr))
-  assert_true(is.timepoint(df$obs_date))
+  assert_true(is.timepoint(data_tbl$pdate_lwr))
+  assert_true(is.timepoint(data_tbl$pdate_upr))
+  assert_true(is.timepoint(data_tbl$sdate_lwr))
+  assert_true(is.timepoint(data_tbl$sdate_upr))
+  assert_true(is.timepoint(data_tbl$obs_date))
 
-  min_date <- min(df$pdate_lwr, na.rm = TRUE)
+  min_date <- min(data_tbl$pdate_lwr, na.rm = TRUE)
 
   # Convert to numeric times and use default method
   result <- as_epidist_linelist_data.default(
-    data = as.numeric(df$pdate_lwr - min_date),
-    ptime_upr = as.numeric(df$pdate_upr - min_date),
-    stime_lwr = as.numeric(df$sdate_lwr - min_date),
-    stime_upr = as.numeric(df$sdate_upr - min_date),
-    obs_time = as.numeric(df$obs_date - min_date)
+    data = as.numeric(data_tbl$pdate_lwr - min_date),
+    ptime_upr = as.numeric(data_tbl$pdate_upr - min_date),
+    stime_lwr = as.numeric(data_tbl$sdate_lwr - min_date),
+    stime_upr = as.numeric(data_tbl$sdate_upr - min_date),
+    obs_time = as.numeric(data_tbl$obs_date - min_date)
   )
 
-  result <- bind_cols(result, df[!names(df) %in% names(result)])
+  result <- bind_cols(result, data_tbl[!names(data_tbl) %in% names(result)])
 
   return(result)
 }
@@ -214,7 +233,7 @@ as_epidist_linelist_data.data.frame <- function(
 as_epidist_linelist_data.epidist_aggregate_data <- function(data, ...) {
   assert_epidist.epidist_aggregate_data(data)
   data <- tidyr::uncount(data, weights = .data$n, .remove = TRUE) |>
-    dplyr::select(-.data$n)
+    dplyr::select(-"n")
 
   class(data) <- setdiff(class(data), "epidist_aggregate_data")
   return(as_epidist_linelist_data(data))
@@ -271,9 +290,9 @@ assert_epidist.epidist_linelist_data <- function(data, ...) {
 }
 
 .linelist_date_cols <- function() {
-  c("pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date")
+  return(c("pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"))
 }
 
 .linelist_required_cols <- function() {
-  c("ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time")
+  return(c("ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time"))
 }

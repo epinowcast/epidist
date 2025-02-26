@@ -1,3 +1,4 @@
+# fmt: skip file
 prep_obs_gamma <- as_epidist_latent_model(sim_obs_gamma)
 
 family_lognormal <- epidist_family(prep_obs, family = lognormal())

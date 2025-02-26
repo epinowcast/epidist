@@ -1,3 +1,4 @@
+# fmt: skip file
 test_that(
   "as_epidist_aggregate_data assigns epidist_aggregate_data class to data",
   {
@@ -32,7 +33,11 @@ test_that("as_epidist_aggregate_data works with dates", {
       obs_date = as.Date("2023-01-01") + obs_time
     ) |>
     dplyr::select(
-      pdate_lwr, pdate_upr, sdate_lwr, sdate_upr, obs_date
+      pdate_lwr,
+      pdate_upr,
+      sdate_lwr,
+      sdate_upr,
+      obs_date
     ) |>
     dplyr::mutate(n = 1)
 
@@ -62,8 +67,7 @@ test_that(
   "as_epidist_aggregate_data.epidist_linelist_data aggregates correctly",
   {
     # Create small test dataset with age stratification
-    test_data <- sim_obs_sex |>
-      dplyr::slice_head(n = 100)
+    test_data <- dplyr::slice_head(sim_obs_sex, n = 100)
 
     # Create aggregated versions
     agg_test <- as_epidist_aggregate_data(test_data)
@@ -88,16 +92,14 @@ test_that(
 
 test_that("as_epidist_aggregate_data validates counts", {
   # Test zero counts
-  invalid_zero <- agg_sim_obs |>
-    dplyr::mutate(n = 0)
+  invalid_zero <- dplyr::mutate(agg_sim_obs, n = 0)
 
   expect_error(
     assert_epidist(invalid_zero)
   )
 
   # Test non-integer counts
-  invalid_decimal <- agg_sim_obs |>
-    dplyr::mutate(n = 1.5)
+  invalid_decimal <- dplyr::mutate(agg_sim_obs, n = 1.5)
 
   expect_error(
     assert_epidist(invalid_decimal)

@@ -1,3 +1,4 @@
+# fmt: skip file
 test_that(
   "predict_delay_parameters works with NULL newdata and the latent and marginal lognormal model", # nolint: line_length_linter.
   {
@@ -93,6 +94,19 @@ test_that("add_mean_sd.gamma_samples works with simulated gamma distribution par
   class(df) <- c("gamma_samples", class(df))
   x <- add_mean_sd(df)
   expect_named(x, c("shape", "rate", "mu", "mean", "sd"))
+  expect_true(all(x$mean > 0))
+  expect_true(all(x$sd > 0))
+})
+
+test_that("add_mean_sd.weibull_samples works with simulated weibull distribution parameter data", { # nolint: line_length_linter.
+  set.seed(1)
+  df <- dplyr::tibble(
+    mu = rnorm(n = 100, mean = 3, sd = 0.2),
+    shape = rnorm(n = 100, mean = 2, sd = 0.1)
+  )
+  class(df) <- c("weibull_samples", class(df))
+  x <- add_mean_sd(df)
+  expect_named(x, c("mu", "shape", "mean", "sd"))
   expect_true(all(x$mean > 0))
   expect_true(all(x$sd > 0))
 })

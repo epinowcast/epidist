@@ -1,20 +1,22 @@
-test_that(
-  "as_epidist_linelist_data assigns epidist_linelist_data class to data",
-  {
-    data <- data.frame(
-      case = 1,
-      pdate_lwr = as.POSIXct("2023-01-01 00:00:00"),
-      pdate_upr = as.POSIXct("2023-01-02 00:00:00"),
-      sdate_lwr = as.POSIXct("2023-01-03 00:00:00"),
-      sdate_upr = as.POSIXct("2023-01-04 00:00:00"),
-      obs_date = as.POSIXct("2023-01-05 00:00:00")
-    )
-    linelist_data <- suppressMessages(as_epidist_linelist_data(
-      data, "pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"
-    ))
-    expect_s3_class(linelist_data, "epidist_linelist_data")
-  }
-)
+test_that("as_epidist_linelist_data assigns epidist_linelist_data class to data", {
+  data <- data.frame(
+    case = 1,
+    pdate_lwr = as.POSIXct("2023-01-01 00:00:00"),
+    pdate_upr = as.POSIXct("2023-01-02 00:00:00"),
+    sdate_lwr = as.POSIXct("2023-01-03 00:00:00"),
+    sdate_upr = as.POSIXct("2023-01-04 00:00:00"),
+    obs_date = as.POSIXct("2023-01-05 00:00:00")
+  )
+  linelist_data <- suppressMessages(as_epidist_linelist_data(
+    data,
+    "pdate_lwr",
+    "pdate_upr",
+    "sdate_lwr",
+    "sdate_upr",
+    "obs_date"
+  ))
+  expect_s3_class(linelist_data, "epidist_linelist_data")
+})
 
 test_that("as_epidist_linelist_data correctly renames columns", {
   data <- data.frame(
@@ -26,7 +28,12 @@ test_that("as_epidist_linelist_data correctly renames columns", {
     observation = as.POSIXct("2023-01-05")
   )
   linelist_data <- suppressMessages(as_epidist_linelist_data(
-    data, "p_lower", "p_upper", "s_lower", "s_upper", "observation"
+    data,
+    "p_lower",
+    "p_upper",
+    "s_lower",
+    "s_upper",
+    "observation"
   ))
   col_names <- c("pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date")
   expect_true(all(col_names %in% names(linelist_data)))
@@ -43,7 +50,12 @@ test_that("as_epidist_linelist_data works with dates", {
   )
   expect_no_error(
     suppressMessages(as_epidist_linelist_data(
-      data, "pdate_lwr", "pdate_upr", "sdate_lwr", "sdate_upr", "obs_date"
+      data,
+      "pdate_lwr",
+      "pdate_upr",
+      "sdate_lwr",
+      "sdate_upr",
+      "obs_date"
     ))
   )
 })
@@ -59,8 +71,13 @@ test_that("as_epidist_linelist_data works with default column names", {
   expect_true(
     all(
       c(
-        "ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time"
-      ) %in% names(linelist_data)
+        "ptime_lwr",
+        "ptime_upr",
+        "stime_lwr",
+        "stime_upr",
+        "obs_time"
+      ) %in%
+        names(linelist_data)
     )
   )
 })
@@ -119,13 +136,15 @@ test_that("as_epidist_linelist_data preserves additional columns", {
 
 test_that("as_epidist_linelist_data.epidist_aggregate_data works correctly", {
   # Create test aggregate data
-  agg_data <- suppressMessages(sierra_leone_ebola_data |>
-    dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
-    as_epidist_aggregate_data(
-      pdate_lwr = "date_of_symptom_onset",
-      sdate_lwr = "date_of_sample_tested",
-      n = "n"
-    ))
+  agg_data <- suppressMessages(
+    sierra_leone_ebola_data |>
+      dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+      as_epidist_aggregate_data(
+        pdate_lwr = "date_of_symptom_onset",
+        sdate_lwr = "date_of_sample_tested",
+        n = "n"
+      )
+  )
 
   # Convert to linelist format
   linelist_data <- as_epidist_linelist_data(agg_data)

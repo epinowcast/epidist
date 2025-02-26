@@ -62,18 +62,22 @@ as_epidist_marginal_model <- function(data, ...) {
 #'   ) |>
 #'   as_epidist_marginal_model()
 as_epidist_marginal_model.epidist_linelist_data <- function(
-    data, obs_time_threshold = 2, weight = NULL, ...) {
+  data,
+  obs_time_threshold = 2,
+  weight = NULL,
+  ...
+) {
   assert_epidist.epidist_linelist_data(data)
 
-  data <- data |>
-    mutate(
-      pwindow = .data$ptime_upr - .data$ptime_lwr,
-      swindow = .data$stime_upr - .data$stime_lwr,
-      relative_obs_time = .data$obs_time - .data$ptime_lwr,
-      orig_relative_obs_time = .data$obs_time - .data$ptime_lwr,
-      delay_lwr = .data$stime_lwr - .data$ptime_lwr,
-      delay_upr = .data$stime_upr - .data$ptime_lwr
-    )
+  data <- mutate(
+    data,
+    pwindow = .data$ptime_upr - .data$ptime_lwr,
+    swindow = .data$stime_upr - .data$stime_lwr,
+    relative_obs_time = .data$obs_time - .data$ptime_lwr,
+    orig_relative_obs_time = .data$obs_time - .data$ptime_lwr,
+    delay_lwr = .data$stime_lwr - .data$ptime_lwr,
+    delay_upr = .data$stime_upr - .data$ptime_lwr
+  )
 
   data <- .add_weights(data, weight)
 
@@ -128,7 +132,10 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
 #'   ) |>
 #'   as_epidist_marginal_model()
 as_epidist_marginal_model.epidist_aggregate_data <- function(
-    data, obs_time_threshold = 2, ...) {
+  data,
+  obs_time_threshold = 2,
+  ...
+) {
   return(as_epidist_marginal_model.epidist_linelist_data(
     data,
     obs_time_threshold = obs_time_threshold,
@@ -192,7 +199,10 @@ is_epidist_marginal_model <- function(data) {
 #' @family marginal_model
 #' @export
 epidist_family_model.epidist_marginal_model <- function(
-    data, family, ...) {
+  data,
+  family,
+  ...
+) {
   custom_family <- brms::custom_family(
     paste0("marginal_", family$family),
     dpars = family$dpars,
@@ -201,7 +211,11 @@ epidist_family_model.epidist_marginal_model <- function(
     ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
     type = "int",
     vars = c(
-      "vreal1[n]", "vreal2[n]", "vreal3[n]", "vreal4[n]", "primary_params"
+      "vreal1[n]",
+      "vreal2[n]",
+      "vreal3[n]",
+      "vreal4[n]",
+      "primary_params"
     ),
     loop = TRUE,
     log_lik = epidist_gen_log_lik(family),
@@ -222,11 +236,17 @@ epidist_family_model.epidist_marginal_model <- function(
 #' @family marginal_model
 #' @export
 epidist_formula_model.epidist_marginal_model <- function(
-    data, formula, ...) {
+  data,
+  formula,
+  ...
+) {
   # data is only used to dispatch on
   formula <- stats::update(
-    formula, delay_lwr | weights(n) +
-      vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ .
+    formula,
+    delay_lwr |
+      weights(n) +
+        vreal(relative_obs_time, pwindow, swindow, delay_upr) ~
+      .
   )
   return(formula)
 }
@@ -253,7 +273,11 @@ epidist_formula_model.epidist_marginal_model <- function(
 #' @importFrom purrr map_chr
 #' @export
 epidist_transform_data_model.epidist_marginal_model <- function(
-    data, family, formula, ...) {
+  data,
+  family,
+  formula,
+  ...
+) {
   required_cols <- .marginal_required_cols()
   trans_data <- data |>
     .summarise_n_by_formula(by = required_cols, formula = formula) |>
@@ -270,9 +294,11 @@ epidist_transform_data_model.epidist_marginal_model <- function(
 #' @autoglobal
 #' @export
 epidist_stancode.epidist_marginal_model <- function(
-    data,
-    family = epidist_family(data),
-    formula = epidist_formula(data), ...) {
+  data,
+  family = epidist_family(data),
+  formula = epidist_formula(data),
+  ...
+) {
   assert_epidist.epidist_marginal_model(data)
 
   stanvars_version <- .version_stanvar()
@@ -285,25 +311,19 @@ epidist_stancode.epidist_marginal_model <- function(
   family_name <- gsub("marginal_", "", family$name, fixed = TRUE)
 
   stanvars_functions[[1]]$scode <- gsub(
-    "family", family_name, stanvars_functions[[1]]$scode,
+    "family",
+    family_name,
+    stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
-  if (family_name == "lognormal") {
-    dist_id <- 1
-  } else if (family_name == "gamma") {
-    dist_id <- 2
-  } else if (family_name == "weibull") {
-    dist_id <- 3
-  } else {
-    cli_abort(c(
-      "!" = "epidist does not currently support this family for the marginal model" # nolint
-    ))
-  }
+  dist_id <- primarycensored::pcd_stan_dist_id(family_name)
 
   # Replace the dist_id passed to primarycensored
   stanvars_functions[[1]]$scode <- gsub(
-    "dist_id", dist_id, stanvars_functions[[1]]$scode,
+    "dist_id",
+    dist_id,
+    stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
@@ -315,12 +335,16 @@ epidist_stancode.epidist_marginal_model <- function(
   )
 
   stanvars_functions[[1]]$scode <- gsub(
-    "dpars_B", family$param, stanvars_functions[[1]]$scode,
+    "dpars_B",
+    family$param,
+    stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
   stanvars_functions[[1]]$scode <- gsub(
-    "primary_id", "1", stanvars_functions[[1]]$scode,
+    "primary_id",
+    "1",
+    stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
@@ -334,14 +358,21 @@ epidist_stancode.epidist_marginal_model <- function(
     scode = primarycensored::pcd_load_stan_functions()
   )
 
-  stanvars_all <- stanvars_version + stanvars_functions +
-    pcd_stanvars_functions + stanvars_parameters
+  stanvars_all <- stanvars_version +
+    stanvars_functions +
+    pcd_stanvars_functions +
+    stanvars_parameters
 
   return(stanvars_all)
 }
 
 .marginal_required_cols <- function() {
   return(c(
-    "delay_lwr", "delay_upr", "relative_obs_time", "pwindow", "swindow", "n"
+    "delay_lwr",
+    "delay_upr",
+    "relative_obs_time",
+    "pwindow",
+    "swindow",
+    "n"
   ))
 }

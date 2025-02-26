@@ -2,7 +2,7 @@
 % Please edit documentation in R/postprocess.R
 \name{add_mean_sd.gamma_samples}
 \alias{add_mean_sd.gamma_samples}
-\title{Add natural scale mean and standard deviation parameters for a latent gamma
+\title{Add natural scale mean and standard deviation parameters for a Gamma
 model}
 \usage{
 \method{add_mean_sd}{gamma_samples}(data, ...)
@@ -20,6 +20,7 @@ Other postprocess:
 \code{\link{add_mean_sd}()},
 \code{\link{add_mean_sd.default}()},
 \code{\link{add_mean_sd.lognormal_samples}()},
+\code{\link{add_mean_sd.weibull_samples}()},
 \code{\link{predict_delay_parameters}()}
 }
 \concept{postprocess}

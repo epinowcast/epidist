@@ -2,6 +2,11 @@
 
 This is the development version of `epidist`.
 
+## Models
+
+- Added Stan-side support for fitting all distributions supported by `primarycensored` in the marginal model. See #540.
+- Added R-side analytical likelihood support for Lognormal, Gamma, and Weibull distributions. See #540.
+
 ## Package
 
 - Remove caching of vignettes. See #533.
@@ -9,6 +14,11 @@ This is the development version of `epidist`.
 ## Documentation
 
 - Added a new vignette "Guide to the statistical models implemented in epidist". See #514.
+
+## Bugs
+
+- Fixed a vector length issue for censoring that was causing problems in some likelihood calls. See #540.
+- Fixed a bug in the preprocessing of the Weibull family. See #540.
 
 # epidist 0.2.0
 

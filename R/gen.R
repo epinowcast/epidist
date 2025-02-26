@@ -3,9 +3,10 @@
 #'
 #' This function creates a log likelihood function that calculates the marginal
 #' likelihood for a single observation by integrating over the latent primary
-#' and secondary event windows. The integration is performed numerically using
-#' [primarycensored::dpcens()] which handles the double censoring and truncation
-#' of the delay distribution.
+#' and secondary event windows. Where analytical solutions exist in
+#' [primarycensored::dpcens()] these are used, otherwise the integration is
+#' performed numerically. [primarycensored::dpcens()] handles the double
+#' censoring and truncation of the delay distribution.
 #'
 #' The marginal likelihood accounts for uncertainty in both the primary and
 #' secondary event windows by integrating over their possible values, weighted
@@ -28,6 +29,34 @@ epidist_gen_log_lik <- function(family) {
   # Get internal brms log_lik function
   log_lik_brms <- .get_brms_fn("log_lik", family)
 
+  # Get the name of the primary distribution
+  primary_dist_name <- tryCatch(
+    primarycensored::pcd_dist_name(tolower(family$family)),
+    error = function(e) tolower(family$family)
+  )
+
+  # Check if family is supported with a analytical solution
+  if (primary_dist_name %in% .get_supported_dists()) {
+    .log_lik <- .analytical_gen_log_lik(primary_dist_name)
+  } else {
+    cli::cli_inform(
+      c(
+        "Falling back to default dependency on brms for {primary_dist_name}",
+        "distribution when generating the log likelihood in R. To improve",
+        "performance, implement a .get_supported_dist_args_{primary_dist_name}",
+        "function and ensure that p{primary_dist_name} is an available",
+        "function."
+      ),
+      .frequency = "once",
+      .frequency_id = paste0("epidist_gen_log_lik_", primary_dist_name)
+    )
+    .log_lik <- .generic_gen_log_lik(log_lik_brms)
+  }
+
+  return(.log_lik)
+}
+
+.generic_gen_log_lik <- function(log_lik_brms) {
   .log_lik <- function(i, prep) {
     y <- prep$data$Y[i]
     relative_obs_time <- prep$data$vreal1[i]
@@ -36,29 +65,34 @@ epidist_gen_log_lik <- function(family) {
 
     # make the prep object censored
     # -1 here is equivalent to right censored in brms
-    prep$data$cens <- -1
+    # this means we get the cdf of the target distribution
+    prep$data$cens <- rep(-1, prep$nobs)
 
     # Calculate density for each draw using primarycensored::dpcens()
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
       # Define pdist function that filters to current draw
       pdist_draw <- function(q, i, prep, ...) {
-        purrr::map_dbl(q, function(x) {
+        return(purrr::map_dbl(q, function(x) {
           prep$data$Y <- rep(x, length(prep$data$Y))
+          prep$data$weights <- NULL
+          prep$ndraws <- 1
           ll <- exp(log_lik_brms(i, prep)[draw])
           return(ll)
-        })
+        }))
       }
 
-      primarycensored::dpcens(
-        x = y,
-        pdist = pdist_draw,
-        i = i,
-        prep = prep,
-        pwindow = pwindow,
-        swindow = swindow,
-        D = relative_obs_time,
-        dprimary = stats::dunif,
-        log = TRUE
+      return(
+        primarycensored::dpcens(
+          x = y,
+          pdist = pdist_draw,
+          i = i,
+          prep = prep,
+          pwindow = pwindow,
+          swindow = swindow,
+          D = relative_obs_time,
+          dprimary = stats::dunif,
+          log = TRUE
+        )
       )
     })
     lpdf <- brms:::log_lik_weight(lpdf, i = i, prep = prep) # nolint
@@ -66,6 +100,79 @@ epidist_gen_log_lik <- function(family) {
   }
 
   return(.log_lik)
+}
+
+.analytical_gen_log_lik <- function(dist) {
+  .log_lik <- function(i, prep) {
+    y <- prep$data$Y[i]
+    relative_obs_time <- prep$data$vreal1[i]
+    pwindow <- prep$data$vreal2[i]
+    swindow <- prep$data$vreal3[i]
+
+    # Get distribution-specific parameters
+    dist_args <- .get_supported_dist_args(dist, prep, i)
+
+    # Calculate density for each draw using primarycensored::dpcens()
+    lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
+      return(
+        do.call(
+          primarycensored::dpcens,
+          c(
+            list(
+              x = y,
+              pdist = get(dist, envir = asNamespace("stats")),
+              pwindow = pwindow,
+              swindow = swindow,
+              D = relative_obs_time,
+              dprimary = stats::dunif,
+              log = TRUE
+            ),
+            dist_args[[draw]]
+          )
+        )
+      )
+    })
+    lpdf <- brms:::log_lik_weight(lpdf, i = i, prep = prep) # nolint
+    return(lpdf)
+  }
+
+  return(.log_lik)
+}
+
+# Helper to get distribution-specific arguments
+.get_supported_dist_args <- function(dist, prep, i) {
+  dist_params <- switch(dist,
+    pgamma = {
+      shape <- brms::get_dpar(prep, "shape", i = i)
+      list(shape = shape, scale = brms::get_dpar(prep, "mu", i) / shape)
+    },
+    plnorm = {
+      list(
+        meanlog = brms::get_dpar(prep, "mu", i),
+        sdlog = brms::get_dpar(prep, "sigma", i = i)
+      )
+    },
+    pweibull = {
+      shape <- brms::get_dpar(prep, "shape", i = i)
+      list(
+        shape = shape,
+        scale = brms::get_dpar(prep, "mu", i = i) / gamma(1 + 1 / shape)
+      )
+    }
+  )
+  return(.transpose_named_list2(dist_params))
+}
+
+.get_supported_dists <- function() {
+  return(c("plnorm", "pgamma", "pweibull"))
+}
+
+.transpose_named_list2 <- function(lst) {
+  n <- length(lst[[1]])
+  result <- lapply(seq_len(n), function(i) {
+    return(setNames(lapply(lst, `[`, i), names(lst)))
+  })
+  return(result)
 }
 
 #' Create a function to draw from the posterior predictive distribution for a
@@ -96,7 +203,8 @@ epidist_gen_posterior_predict <- function(family) {
 
   rdist <- function(n, i, prep, ...) {
     prep$ndraws <- n
-    do.call(dist_fn, list(i = i, prep = prep))
+    result <- do.call(dist_fn, list(i = i, prep = prep))
+    return(result)
   }
 
   .predict <- function(i, prep, ...) {
@@ -104,7 +212,7 @@ epidist_gen_posterior_predict <- function(family) {
     pwindow <- prep$data$vreal2[i]
     swindow <- prep$data$vreal3[i]
 
-    as.matrix(primarycensored::rpcens(
+    result <- as.matrix(primarycensored::rpcens(
       n = prep$ndraws,
       rdist = rdist,
       rprimary = stats::runif,
@@ -114,6 +222,7 @@ epidist_gen_posterior_predict <- function(family) {
       i = i,
       prep = prep
     ))
+    return(result)
   }
   return(.predict)
 }
@@ -139,5 +248,6 @@ epidist_gen_posterior_predict <- function(family) {
 #' @family gen
 #' @export
 epidist_gen_posterior_epred <- function(family) {
-  return(.get_brms_fn("posterior_epred", family))
+  result <- .get_brms_fn("posterior_epred", family)
+  return(result)
 }

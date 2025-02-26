@@ -47,29 +47,45 @@
 #'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
 #'
 #' summary(fit)
-epidist <- function(data, formula = mu ~ 1,
-                    family = lognormal(), prior = NULL,
-                    merge_priors = TRUE,
-                    fn = brms::brm, ...) {
+epidist <- function(
+    data,
+    formula = mu ~ 1,
+    family = lognormal(),
+    prior = NULL,
+    merge_priors = TRUE,
+    fn = brms::brm,
+    ...) {
   assert_epidist(data)
   epidist_family <- epidist_family(data, family)
   epidist_formula <- epidist_formula(
-    data = data, family = epidist_family, formula = formula
+    data = data,
+    family = epidist_family,
+    formula = formula
   )
   transformed_data <- epidist_transform_data(
-    data, epidist_family, epidist_formula
+    data,
+    epidist_family,
+    epidist_formula
   )
   epidist_prior <- epidist_prior(
-    data = transformed_data, family = epidist_family,
-    formula = epidist_formula, prior,
+    data = transformed_data,
+    family = epidist_family,
+    formula = epidist_formula,
+    prior,
     merge = merge_priors
   )
   epidist_stancode <- epidist_stancode(
-    data = transformed_data, family = epidist_family, formula = epidist_formula
+    data = transformed_data,
+    family = epidist_family,
+    formula = epidist_formula
   )
   fit <- fn(
-    formula = epidist_formula, family = epidist_family, prior = epidist_prior,
-    stanvars = epidist_stancode, data = transformed_data, ...
+    formula = epidist_formula,
+    family = epidist_family,
+    prior = epidist_prior,
+    stanvars = epidist_stancode,
+    data = transformed_data,
+    ...
   )
   class(fit) <- c(class(fit), "epidist_fit")
   return(fit)

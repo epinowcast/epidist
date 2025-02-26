@@ -70,6 +70,7 @@ fit <- epidist(
   chains = 2,
   cores = 2,
   refresh = ifelse(interactive(), 250, 0),
+  iter = 1000,
   backend = "cmdstanr"
 )
 ```
@@ -186,7 +187,7 @@ quantile(pred$sd, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 
 We recommend use of the [`priorsense`](https://github.com/n-kall/priorsense) package [@kallioinen2024detecting] to check how sensitive the posterior distribution is to perturbations of the prior distribution and likelihood using power-scaling analysis:
 
-```{r, eval = FALSE}
+```{r}
 library(priorsense)
 powerscale_plot_dens(fit, variable = c("Intercept", "Intercept_sigma")) +
   theme_minimal()
@@ -204,6 +205,8 @@ Here, we provide a table giving the correspondence between the distributional pa
 | `lognormal()` | `sigma`          | `sdlog`     |
 | `Gamma()`     | `mu`             | `shape / scale` |
 | `Gamma()`     | `shape`          | `shape`     |
+| `weibull()`   | `mu`             | `scale * gamma(1 + 1 / shape)` |
+| `weibull()`   | `shape`          | `shape`     |
 
 Note that all families in `brms` are parameterised with some measure of centrality `mu` as their first parameter.
 This parameter does not necessarily correspond to the mean: hence the provision of a function `add_mean_sd()` within `epidist` to add columns containing the natural scale mean and standard deviation to a `data.frame` of draws.
@@ -225,7 +228,7 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 draws_pmf <- tibble::tibble(
   relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
 ) |>
-  add_predicted_draws(fit, ndraws = 2000)
+  add_predicted_draws(fit)
 
 ggplot(draws_pmf, aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
