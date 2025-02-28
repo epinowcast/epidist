@@ -46,7 +46,7 @@ Relevant posterior quantities such as expectations may then be computed using th
 A drawback of MCMC methods, like NUTS, is that simulations can be quite computational intensive, especially for complex models or large data.
 
 The `epidist` package is built using `brms` [@brms], which stands for "Bayesian Regression Models using Stan", where Stan [@carpenter2017stan] is a probabilistic programming language.
-Although NUTS the the primary inference algorithm used in Stan, additional options are available.
+Although NUTS is the primary inference algorithm used in Stan, additional options are available.
 These additional inference algorithms are also available in `epidist` due to its dependence on `brms`.
 
 In this vignette, we first briefly describe the alternative algorithms available (Section \@ref(other)) as well as directing you to more detailed resources.
