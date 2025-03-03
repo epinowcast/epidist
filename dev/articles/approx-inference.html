@@ -11,11 +11,17 @@
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
-<script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="../deps/MathJax-3.2.2/tex-chtml.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Approximate Bayesian inference in epidist">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Approximate Bayesian inference in epidist">
 <meta name="description" content='"A demonstration of how to fit models in epidist using approximate Bayesian
 inference methods such as the Laplace approximation, ADVI, and Pathfinder."
 '>
@@ -101,7 +107,7 @@ When MCMC algorithms are run for sufficiently many iterations, and have reached 
 Relevant posterior quantities such as expectations may then be computed using these samples.
 A drawback of MCMC methods, like NUTS, is that simulations can be quite computational intensive, especially for complex models or large data.</p>
 <p>The <code>epidist</code> package is built using <code>brms</code> <span class="citation">(<a href="#ref-brms">Bürkner 2017</a>)</span>, which stands for “Bayesian Regression Models using Stan”, where Stan <span class="citation">(<a href="#ref-carpenter2017stan">Carpenter et al. 2017</a>)</span> is a probabilistic programming language.
-Although NUTS the the primary inference algorithm used in Stan, additional options are available.
+Although NUTS is the primary inference algorithm used in Stan, additional options are available.
 These additional inference algorithms are also available in <code>epidist</code> due to its dependence on <code>brms</code>.</p>
 <p>In this vignette, we first briefly describe the alternative algorithms available (Section <a href="#other">2</a>) as well as directing you to more detailed resources.
 Then (Section <a href="#demo">3</a>) we demonstrate their application to fitting simulated data, before extracting and comparing posterior distributions.
@@ -1274,19 +1280,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <tbody class="gt_table_body">
 <tr>
 <td headers="method" class="gt_row gt_left">HMC</td>
-<td headers="time (s)" class="gt_row gt_right">24.773</td>
+<td headers="time (s)" class="gt_row gt_right">22.831</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Laplace</td>
-<td headers="time (s)" class="gt_row gt_right">1.431</td>
+<td headers="time (s)" class="gt_row gt_right">1.401</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">ADVI</td>
-<td headers="time (s)" class="gt_row gt_right">1.285</td>
+<td headers="time (s)" class="gt_row gt_right">1.253</td>
 </tr>
 <tr>
 <td headers="method" class="gt_row gt_left">Pathfinder</td>
-<td headers="time (s)" class="gt_row gt_right">0.689</td>
+<td headers="time (s)" class="gt_row gt_right">0.662</td>
 </tr>
 </tbody>
 </table>
