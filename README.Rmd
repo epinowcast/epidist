@@ -149,6 +149,7 @@ This may include:
 
 
 
+
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -158,10 +159,12 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 ### Code
 
 
-<a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>,
-<a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>,
-<a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>,
-<a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>, 
+<a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>, 
+<a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>, 
+<a href="https://github.com/epinowcast/epidist/commits?author=sbfnk">sbfnk</a>, 
+<a href="https://github.com/epinowcast/epidist/commits?author=cherz4">cherz4</a>, 
+<a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>, 
 <a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>
 
 
@@ -169,9 +172,9 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 ### Issue Authors
 
 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>,
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>,
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>, 
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>, 
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajonathonmellor">jonathonmellor</a>
 
 
@@ -179,13 +182,13 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 ### Issue Contributors
 
 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>,
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Asbfnk">sbfnk</a>,
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1">SamuelBrand1</a>,
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein">zsusswein</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>, 
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1">SamuelBrand1</a>, 
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein">zsusswein</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Akcharniga">kcharniga</a>
 
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+
