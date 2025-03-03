@@ -272,7 +272,7 @@ As a model is not explicitly placed on <code>sigma</code>, a constant model <cod
 <span><span class="co">#&gt; Chain 1 finished in 7.2 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 6.8 seconds.</span></span>
+<span><span class="co">#&gt; Mean chain execution time: 6.7 seconds.</span></span>
 <span><span class="co">#&gt; Total execution time: 7.4 seconds.</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <a href="https://paulbuerkner.com/brms/reference/brmsfit-class.html" class="external-link"><code>brmsfit</code></a> object, and has the associated range of methods.
 See <code>methods(class = "brmsfit")</code> for more details.
@@ -314,8 +314,8 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 14.2 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 14.9 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 14.3 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 14.8 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
 <span><span class="co">#&gt; Mean chain execution time: 14.6 seconds.</span></span>
@@ -368,12 +368,12 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 202.9 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 223.2 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 202.5 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 220.3 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 213.1 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 223.4 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 211.4 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 220.5 seconds.</span></span></code></pre></div>
 <p><strong>As this is a longer running model (~ 2 minutes) we have reduced the number of iterations but for real world use cases this may not be sufficient.</strong></p>
 <p>For this model, along with looking at the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
