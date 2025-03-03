@@ -172,9 +172,9 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 ### Issue Authors
 
 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>, 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>, 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>, 
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajonathonmellor">jonathonmellor</a>
 
 
@@ -182,9 +182,9 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 ### Issue Contributors
 
 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>, 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1">SamuelBrand1</a>, 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein">zsusswein</a>, 
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1">SamuelBrand1</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein">zsusswein</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Akcharniga">kcharniga</a>
 
 
