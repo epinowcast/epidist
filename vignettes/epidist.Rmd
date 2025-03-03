@@ -81,7 +81,7 @@ outbreak |>
 
 `outbreak` is a `data.frame` with the two columns: `case` and `ptime`.
 Here `ptime` is a numeric column giving the time of infection.
-In reality, it is more common to recive primary event times as a date rather than a numeric.
+In reality, it is more common to receive primary event times as a date rather than a numeric.
 
 ```{r}
 head(outbreak)
