@@ -14,6 +14,8 @@ This is the development version of `epidist`.
 ## Documentation
 
 - Added a new vignette "Guide to the statistical models implemented in epidist". See #514.
+- Added a new FAQ section showcasing how to use the `posterior` package with `epidist` models, particularly for working with random variables (`rvars`) to propagate uncertainty in calculations. See #547.
+- Added a new FAQ section on how to use the `marginaleffects` package with `epidist` models. See #547.
 
 ## Bugs
 
