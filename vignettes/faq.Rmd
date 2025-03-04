@@ -34,16 +34,39 @@ library(tidybayes)
 
 set.seed(1)
 
-meanlog <- 1.8
-sdlog <- 0.5
+# Define different parameters for each location
+meanlog_0 <- 1.6
+sdlog_0 <- 0.4
+meanlog_1 <- 2.1
+sdlog_1 <- 0.6
+
 obs_time <- 25
 sample_size <- 200
 
-obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
+# Create base data with location assignments
+base_data <- simulate_gillespie(seed = 101)
+base_data$location <- rbinom(n = nrow(base_data), size = 1, prob = 0.5)
+
+# Create location 0 data
+location_0_data <- base_data |>
+  filter(location == 0) |>
   simulate_secondary(
-    meanlog = meanlog,
-    sdlog = sdlog
+    meanlog = meanlog_0,
+    sdlog = sdlog_0
   ) |>
+  select(case, ptime, delay, stime, location)
+
+# Create location 1 data
+location_1_data <- base_data |>
+  filter(location == 1) |>
+  simulate_secondary(
+    meanlog = meanlog_1,
+    sdlog = sdlog_1
+  ) |>
+  select(case, ptime, delay, stime, location)
+
+# Combine datasets
+obs_cens_trunc_samp <- bind_rows(location_0_data, location_1_data) |>
   mutate(
     ptime_lwr = floor(.data$ptime),
     ptime_upr = .data$ptime_lwr + 1,
@@ -59,13 +82,25 @@ linelist_data <- as_epidist_linelist_data(
   obs_cens_trunc_samp$ptime_upr,
   obs_cens_trunc_samp$stime_lwr,
   obs_cens_trunc_samp$stime_upr,
-  obs_time = obs_cens_trunc_samp$obs_time
+  obs_time = obs_cens_trunc_samp$obs_time,
+  covariates = data.frame(location = obs_cens_trunc_samp$location)
 )
 data <- as_epidist_marginal_model(linelist_data)
 
 fit <- epidist(
   data,
   formula = mu ~ 1,
+  seed = 1,
+  chains = 2,
+  cores = 2,
+  refresh = ifelse(interactive(), 250, 0),
+  iter = 1000,
+  backend = "cmdstanr"
+)
+
+fit_location <- epidist(
+  data,
+  formula = bf(mu ~ location, sigma ~ location),
   seed = 1,
   chains = 2,
   cores = 2,
@@ -238,6 +273,29 @@ ggplot(draws_pmf, aes(x = .prediction)) +
 ```
 
 Importantly, this functionality is only available for `epidist` models using `brms` families that have a `log_lik_censor` method implemented internally in `brms`. If you are using another family, consider [submitting a pull request](https://github.com/epinowcast/epidist/pulls) to implement these methods!
+
+# How can I use the `marginaleffects` package with my fitted `epidist` model?
+
+The [`marginaleffects`](https://marginaleffects.com/) package provides tools for computing and visualising marginal effects, contrasts, and predictions from regression models. It works with `epidist` models because they are built on top of `brms`.
+
+For `epidist` models with covariates, you can use `marginaleffects` to:
+- Compute average marginal effects
+- Make comparisons between different covariate values
+- Visualise model predictions across the range of covariates
+
+Here's a simple example using a model that includes location as a covariate:
+
+```{r}
+library(marginaleffects)
+
+# Compare outcomes between location categories (0 and 1)
+avg_comparisons(
+  fit_location,
+  variables = list(location = c(0, 1))
+)
+```
+
+For more details on the available functions and their use, see the [`marginaleffects` documentation](https://marginaleffects.com/).
 
 # How can I use the `cmdstanr` backend?
 
