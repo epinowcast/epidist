@@ -138,9 +138,9 @@ rv <- as_draws_rvars(fit_location)
 rv$b_Intercept
 
 # Calculate the mean delay (on natural scale) for each location
-mean_delay_loc0 <- exp(rv$b_Intercept + 0.5 * rv$b_sigma_Intercept^2)
-mean_delay_loc1 <- exp(rv$b_Intercept + rv$b_location +
-                       0.5 * (rv$b_sigma_Intercept + rv$b_sigma_location)^2)
+mean_delay_loc0 <- exp(rv$b_Intercept + 0.5 * exp(rv$b_sigma_Intercept)^2)
+mean_delay_loc1 <- exp(rv$b_Intercept +
+  rv$b_location + 0.5 * (exp(rv$b_sigma_Intercept + rv$b_sigma_location))^2)
 
 # Summarize the distributions
 summary(mean_delay_loc0)
