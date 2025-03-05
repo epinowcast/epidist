@@ -30,20 +30,42 @@ library(dplyr)
 library(ggplot2)
 library(scales)
 library(tidyr)
-library(tidybayes)
 
 set.seed(1)
 
-meanlog <- 1.8
-sdlog <- 0.5
+# Define different parameters for each location
+meanlog_0 <- 1.6
+sdlog_0 <- 0.4
+meanlog_1 <- 2.1
+sdlog_1 <- 0.6
+
 obs_time <- 25
 sample_size <- 200
 
-obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
+# Create base data with location assignments
+base_data <- simulate_gillespie(seed = 101)
+base_data$location <- rbinom(n = nrow(base_data), size = 1, prob = 0.5)
+
+# Create location 0 data
+location_0_data <- base_data |>
+  filter(location == 0) |>
   simulate_secondary(
-    meanlog = meanlog,
-    sdlog = sdlog
+    meanlog = meanlog_0,
+    sdlog = sdlog_0
   ) |>
+  select(case, ptime, delay, stime, location)
+
+# Create location 1 data
+location_1_data <- base_data |>
+  filter(location == 1) |>
+  simulate_secondary(
+    meanlog = meanlog_1,
+    sdlog = sdlog_1
+  ) |>
+  select(case, ptime, delay, stime, location)
+
+# Combine datasets
+obs_cens_trunc_samp <- bind_rows(location_0_data, location_1_data) |>
   mutate(
     ptime_lwr = floor(.data$ptime),
     ptime_upr = .data$ptime_lwr + 1,
@@ -59,7 +81,8 @@ linelist_data <- as_epidist_linelist_data(
   obs_cens_trunc_samp$ptime_upr,
   obs_cens_trunc_samp$stime_lwr,
   obs_cens_trunc_samp$stime_upr,
-  obs_time = obs_cens_trunc_samp$obs_time
+  obs_time = obs_cens_trunc_samp$obs_time,
+  covariates = data.frame(location = obs_cens_trunc_samp$location)
 )
 data <- as_epidist_marginal_model(linelist_data)
 
@@ -73,19 +96,62 @@ fit <- epidist(
   iter = 1000,
   backend = "cmdstanr"
 )
+
+fit_location <- epidist(
+  data,
+  formula = bf(mu ~ location, sigma ~ location),
+  seed = 1,
+  chains = 2,
+  cores = 2,
+  refresh = ifelse(interactive(), 250, 0),
+  iter = 1000,
+  backend = "cmdstanr"
+)
 ```
 
-## I would like to work with the samples output
+## Working with posterior samples
 
 The output of a call to `epidist` is compatible with typical Stan workflows.
-We recommend use of the [`posterior`](https://mc-stan.org/posterior/) package for working with samples from MCMC or other sampling algorithms.
-For example, the function `posterior::as_draws_df()` may be used to obtain a dataframe of MCMC draws for specified parameters.
+We recommend use of the [`posterior`](https://mc-stan.org/posterior/) package for working with samples.
+
+### Getting a `data.frame` of posterior samples
+
+The function `posterior::as_draws_df()` may be used to obtain a dataframe of MCMC draws for specified parameters.
 
 ```{r message = FALSE}
 library(posterior)
 draws <- as_draws_df(fit, variable = c("Intercept", "Intercept_sigma"))
 head(draws)
 ```
+
+### Using random variables (`rvars`) for uncertainty propagation
+
+The `posterior` package also provides the `rvar` class for working with posterior samples as random variables.
+This approach allows you to perform mathematical operations directly with posterior distributions while propagating uncertainty.
+
+```{r}
+library(posterior)
+# Convert model parameters to rvars
+rv <- as_draws_rvars(fit_location)
+
+# Look at the intercept in rvar form
+rv$b_Intercept
+
+# Calculate the mean delay (on natural scale) for each location
+mean_delay_loc0 <- exp(rv$b_Intercept + 0.5 * exp(rv$b_sigma_Intercept)^2)
+mean_delay_loc1 <- exp(rv$b_Intercept +
+  rv$b_location + 0.5 * (exp(rv$b_sigma_Intercept + rv$b_sigma_location))^2)
+
+# Summarize the distributions
+summary(mean_delay_loc0)
+summary(mean_delay_loc1)
+
+# Calculate the difference between locations
+delay_diff <- mean_delay_loc1 - mean_delay_loc0
+delay_diff
+```
+
+For more details, see the [`posterior` package documentation](https://mc-stan.org/posterior/articles/rvar.html).
 
 ## How can I assess whether sampling has converged?
 
@@ -183,7 +249,7 @@ quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 quantile(pred$sd, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 ```
 
-# How can I assess how sensitive the fitted posterior distribution is to the prior distribution used?
+## How can I assess how sensitive the fitted posterior distribution is to the prior distribution used?
 
 We recommend use of the [`priorsense`](https://github.com/n-kall/priorsense) package [@kallioinen2024detecting] to check how sensitive the posterior distribution is to perturbations of the prior distribution and likelihood using power-scaling analysis:
 
@@ -225,6 +291,7 @@ To see these functions demonstrated in a vignette, see ["Advanced features with 
 As a short example, to generate 4000 predictions (equal to the number of draws) of the delay that would be observed with a double censored observation process (in which the primary and secondary censoring windows are both one) then:
 
 ```{r}
+library(tidybayes)
 draws_pmf <- tibble::tibble(
   relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
 ) |>
@@ -239,7 +306,31 @@ ggplot(draws_pmf, aes(x = .prediction)) +
 
 Importantly, this functionality is only available for `epidist` models using `brms` families that have a `log_lik_censor` method implemented internally in `brms`. If you are using another family, consider [submitting a pull request](https://github.com/epinowcast/epidist/pulls) to implement these methods!
 
-# How can I use the `cmdstanr` backend?
+## How can I use the `marginaleffects` package with my fitted `epidist` model?
+
+The [`marginaleffects`](https://marginaleffects.com/) package provides tools for computing and visualising marginal effects, contrasts, and predictions from regression models. It works with `epidist` models because they are built on top of `brms`.
+
+For `epidist` models with covariates, you can use `marginaleffects` to:
+- Compute average marginal effects
+- Make comparisons between different covariate values
+- Visualise model predictions across the range of covariates
+
+Here's a simple example using a model that includes location as a covariate:
+
+```{r}
+library(marginaleffects)
+
+# Compare outcomes between location categories (0 and 1)
+avg_comparisons(
+  fit_location,
+  variables = list(location = c(0, 1))
+)
+```
+
+For more details on the available functions and their use, see the [`marginaleffects` documentation](https://marginaleffects.com/).
+
+
+## How can I use the `cmdstanr` backend?
 
 The `cmdstanr` backend is typically more performant than the default `rstan` backend.
 To use the `cmdstanr` backend, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:
