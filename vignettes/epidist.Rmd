@@ -56,7 +56,6 @@ To run this vignette yourself, as well as the `epidist` package, you will need t
 
 ```{r load-requirements}
 library(epidist)
-library(brms)
 library(ggplot2)
 library(dplyr)
 ```
@@ -94,11 +93,10 @@ To generate secondary events, we will use a lognormal distribution (Figure \@ref
 
 ```{r}
 secondary_dist <- data.frame(mu = 1.8, sigma = 0.5)
-class(secondary_dist) <- c("lognormal_samples", class(secondary_dist))
-secondary_dist <- add_mean_sd(secondary_dist)
 
-obs <- outbreak |>
-  simulate_secondary(
+obs <- simulate_secondary(
+    outbreak,
+    dist = rlnorm,
     meanlog = secondary_dist[["mu"]],
     sdlog = secondary_dist[["sigma"]]
   )
@@ -221,6 +219,8 @@ Whereas each case is equally likely to appear in the sample above, under ascerta
 
 With our censored, truncated, and sampled data, we are now ready to try to recover the underlying delay distribution using `epidist`.
 
+</details>
+
 # Preprocessing the data {#preprocessing}
 
 If we had access to the complete and unaltered `obs`, it would be simple to estimate the delay distribution.
@@ -323,49 +323,6 @@ However, with only access to `obs_cens_trunc_samp`, the delay distribution we ob
 
 (ref:obs-est) The histogram of delays from the complete, retrospective data `obs_cens` match quite closely with the underlying distribution, whereas those from `obs_cens_trunc_samp` show more significant systematic bias. In this instance the extent of the bias caused by censoring is less than that caused by right truncation. Nonetheless, we always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present.
 
-```{r obs-est, fig.cap="(ref:obs-est)"}
-# Prepare the complete, retrospective data
-complete_data <- obs_cens |>
-  mutate(type = "Complete, retrospective data") |>
-  select(delay = delay_daily, type)
-
-# Prepare the censored, truncated, sampled data
-censored_data <- obs_cens_trunc_samp |>
-  mutate(type = "Censored, truncated,\nsampled data") |>
-  select(delay = delay_daily, type)
-
-# Combine the datasets
-combined_data <- bind_rows(complete_data, censored_data)
-
-# Calculate proportions
-plot_data <- combined_data |>
-  group_by(type, delay, .drop = FALSE) |>
-  summarise(n = n()) |>
-  mutate(p = n / sum(n))
-
-# Create the plot
-ggplot(plot_data) +
-  geom_col(
-    aes(x = delay, y = p, fill = type, group = type),
-    position = position_dodge2(preserve = "single")
-  ) +
-  scale_fill_manual(values = c("#CC79A7", "#0072B2")) +
-  geom_function(
-    data = data.frame(x = c(0, 30)), aes(x = x),
-    fun = dlnorm,
-    args = list(
-      meanlog = secondary_dist[["mu"]],
-      sdlog = secondary_dist[["sigma"]]
-    )
-  ) +
-  labs(
-    x = "Delay between primary and secondary event (days)",
-    y = "Probability density",
-    fill = ""
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-```
 
 The main function you will use for modelling is called `epidist()`. Inputs must be prepared first via `as_epidist_marginal_model()` for our recommended default marginal model (or `as_epidist_latent_model()` for our latent model for example) so that the internals of `epidist()` know which model functionality to use. In order to interact with our model types we first need to define our available data in a format that `epidist` understands. In this case, we have a linelist so we use `as_epidist_latent_model()`:
 
