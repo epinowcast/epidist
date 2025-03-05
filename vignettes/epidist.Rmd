@@ -50,17 +50,20 @@ Then, in Section \@ref(fit), we show how `epidist` can be used to accurately est
 If you would like more technical details, the `epidist` package implements models following best practices as described in @park2024estimating and @charniga2024best.
 We also recommend the introduction provided by the [nowcasting and forecasting infectious disease dynamics](https://nfidd.github.io/nfidd/) course.
 
+# Setup {#setup}
+
 To run this vignette yourself, as well as the `epidist` package, you will need the following packages:
 
 ```{r load-requirements}
 library(epidist)
 library(brms)
 library(ggplot2)
-library(gt)
 library(dplyr)
 ```
 
-# Example data {#data}
+# Simulating data {#data .tabset}
+
+<details><summary>Click to expand for simulation details</summary>
 
 First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data (Figure \@ref(fig:outbreak)) from a stochastic compartmental model.
 
@@ -218,6 +221,101 @@ Whereas each case is equally likely to appear in the sample above, under ascerta
 
 With our censored, truncated, and sampled data, we are now ready to try to recover the underlying delay distribution using `epidist`.
 
+# Preprocessing the data {#preprocessing}
+
+If we had access to the complete and unaltered `obs`, it would be simple to estimate the delay distribution.
+However, with only access to `obs_cens_trunc_samp`, the delay distribution we observe is biased (Figure \@ref(fig:obs-est)) and we must use a statistical model.
+
+(ref:obs-est) The histogram of delays from the complete, retrospective data `obs_cens` match quite closely with the underlying distribution, whereas those from `obs_cens_trunc_samp` show more significant systematic bias. In this instance the extent of the bias caused by censoring is less than that caused by right truncation. Nonetheless, we always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present.
+
+```{r obs-est, fig.cap="(ref:obs-est)"}
+# Prepare the complete, retrospective data
+complete_data <- obs_cens |>
+  mutate(type = "Complete, retrospective data") |>
+  select(delay = delay_daily, type)
+
+# Prepare the censored, truncated, sampled data
+censored_data <- obs_cens_trunc_samp |>
+  mutate(type = "Censored, truncated,\nsampled data") |>
+  select(delay = delay_daily, type)
+
+# Combine the datasets
+combined_data <- bind_rows(complete_data, censored_data)
+
+# Calculate proportions
+plot_data <- combined_data |>
+  group_by(type, delay, .drop = FALSE) |>
+  summarise(n = n()) |>
+  mutate(p = n / sum(n))
+
+# Create the plot
+ggplot(plot_data) +
+  geom_col(
+    aes(x = delay, y = p, fill = type, group = type),
+    position = position_dodge2(preserve = "single")
+  ) +
+  scale_fill_manual(values = c("#CC79A7", "#0072B2")) +
+  geom_function(
+    data = data.frame(x = c(0, 30)), aes(x = x),
+    fun = dlnorm,
+    args = list(
+      meanlog = secondary_dist[["mu"]],
+      sdlog = secondary_dist[["sigma"]]
+    )
+  ) +
+  labs(
+    x = "Delay between primary and secondary event (days)",
+    y = "Probability density",
+    fill = ""
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+linelist_data <- as_epidist_linelist_data(
+  obs_cens_trunc_samp$ptime_lwr,
+  obs_cens_trunc_samp$ptime_upr,
+  obs_cens_trunc_samp$stime_lwr,
+  obs_cens_trunc_samp$stime_upr,
+  obs_time = obs_cens_trunc_samp$obs_time
+)
+```
+
+# Fit the naive model {#naive}
+
+- Fit the model
+- Summarise the distribution parameters
+- Say they differ from the true parameters
+
+# Fit the marginal model {#marginal}
+
+- Introduce the marginal model
+- Say what it accounts for
+- Say this is just one of the models that epidist supports but is the one we recommend for the majority of delay estimation task
+- Point at model methods vignettes for more details of other models
+- Fit the model
+- Summarise the distribution parameter
+- Say they are similar to the true parameters
+
+# Compare the models {#compare}
+
+- Plot the estimated parameters from the naive and marginal models
+- Also plot the true distributions
+
+# Postprocessing {#postprocessing}
+
+- Show to plot PMFs and compare to observed data
+- Show how to get PMF for daily censored data
+
+# Learning more {#learning-more}
+
+- Point at model methods vignettes for more details of other models
+- Point  at ebola vignette for an example of how to use `epidist` for real data and how to use more complex models
+- Point at approximate vignette for details of how to use approximate inference methods.
+- Point at other vignettes for more details of postprocessing
+- Point at the FAQ for answers to common questions and more tips for working with other packages
+
 # Fit the model and compare estimates {#fit}
 
 If we had access to the complete and unaltered `obs`, it would be simple to estimate the delay distribution.
@@ -226,18 +324,27 @@ However, with only access to `obs_cens_trunc_samp`, the delay distribution we ob
 (ref:obs-est) The histogram of delays from the complete, retrospective data `obs_cens` match quite closely with the underlying distribution, whereas those from `obs_cens_trunc_samp` show more significant systematic bias. In this instance the extent of the bias caused by censoring is less than that caused by right truncation. Nonetheless, we always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present.
 
 ```{r obs-est, fig.cap="(ref:obs-est)"}
-bind_rows(
-  obs_cens |>
-    mutate(type = "Complete, retrospective data") |>
-    select(delay = delay_daily, type),
-  obs_cens_trunc_samp |>
-    mutate(type = "Censored, truncated,\nsampled data") |>
-    select(delay = delay_daily, type)
-) |>
+# Prepare the complete, retrospective data
+complete_data <- obs_cens |>
+  mutate(type = "Complete, retrospective data") |>
+  select(delay = delay_daily, type)
+
+# Prepare the censored, truncated, sampled data
+censored_data <- obs_cens_trunc_samp |>
+  mutate(type = "Censored, truncated,\nsampled data") |>
+  select(delay = delay_daily, type)
+
+# Combine the datasets
+combined_data <- bind_rows(complete_data, censored_data)
+
+# Calculate proportions
+plot_data <- combined_data |>
   group_by(type, delay, .drop = FALSE) |>
   summarise(n = n()) |>
-  mutate(p = n / sum(n)) |>
-  ggplot() +
+  mutate(p = n / sum(n))
+
+# Create the plot
+ggplot(plot_data) +
   geom_col(
     aes(x = delay, y = p, fill = type, group = type),
     position = position_dodge2(preserve = "single")
@@ -271,8 +378,8 @@ linelist_data <- as_epidist_linelist_data(
   obs_time = obs_cens_trunc_samp$obs_time
 )
 
-data <- as_epidist_marginal_model(linelist_data)
-class(data)
+naive_data <- as_epidist_naive_model(linelist_data)
+marginal_data <- as_epidist_marginal_model(linelist_data)
 ```
 
 The `data` object now has the class `epidist_marginal_model`.
@@ -282,27 +389,16 @@ In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo 
 
 ```{r}
 fit <- epidist(
-  data = data, chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0)
+  data = marginal_data, chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0)
 )
 ```
 
-**Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features.**
-**This can be set using `backend = "cmdstanr"` after following the installing CmdStan instructions in the README.**
+::: {.alert .alert-primary}
+Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features.
+This can be set using `backend = "cmdstanr"` after following the installing CmdStan instructions in the README.
+:::
 
 The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters in the model, shown in the table below.
-Many of these parameters (e.g. `swindow` and `pwindow`) are the so called latent variables, and have lengths corresponding to the `sample_size`.
-
-```{r pars}
-pars <- fit |>
-  variables(reserved = FALSE) |>
-  gsub(pattern = "\\[\\d+\\]", replacement = "")
-
-data.frame(
-  Parameter = unique(pars), Length = table(pars)
-) |>
-  gt()
-```
-
 Users familiar with Stan and `brms`, can work with `fit` directly.
 Any tool that supports `brms` fitted model objects will be compatible with `fit`.
 
