@@ -62,12 +62,31 @@ library(dplyr)
 
 # Simulating data {#data .tabset}
 
+We simulate data from an outbreak setting where the primary event is symptom onset and the secondary event is case notification.
+As would be the typical we assume that both events are dates and so we do not know precise event times.
+This is a simplified version of the more complete setting that `epidist` supports where events can have different censoring intervals.
+We also assume that we are observing a sample of cases during the outbreak.
+This means that our data is both interval censored for each event and truncated for the secondary event.
+
+We first assume that the reporting delay is lognormal with a mean log of 1.8 and a log standard deviation of 0.5.
+
+```{r}
+secondary_dist <- data.frame(mu = 1.6, sigma = 0.5)
+```
+
+We the simulate the stochastic outbreak in continuous time, sample a reporting delay for each event and finally observe the events (i.e restrict them to be dates).
+We assume that the outbreak has a growth rate of 0.2 and that we observe the outbreak for 25 days.
+
+```r
+growth_rate <- 0.2
+obs_time <- 25
+```
 <details><summary>Click to expand for simulation details</summary>
 
 First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data (Figure \@ref(fig:outbreak)) from a stochastic compartmental model.
 
 ```{r}
-outbreak <- simulate_gillespie(seed = 101)
+outbreak <- simulate_gillespie(r = growth_rate, seed = 101)
 ```
 
 (ref:outbreak) Early on in the epidemic, there is a high rate of growth in new cases. As more people are infected, the rate of growth slows. (Only every 50th case is shown to avoid over-plotting.)
@@ -92,14 +111,12 @@ head(outbreak)
 To generate secondary events, we will use a lognormal distribution (Figure \@ref(fig:lognormal)) for the delay between primary and secondary events:
 
 ```{r}
-secondary_dist <- data.frame(mu = 1.8, sigma = 0.5)
-
 obs <- simulate_secondary(
-    outbreak,
-    dist = rlnorm,
-    meanlog = secondary_dist[["mu"]],
-    sdlog = secondary_dist[["sigma"]]
-  )
+  outbreak,
+  dist = rlnorm,
+  meanlog = secondary_dist[["mu"]],
+  sdlog = secondary_dist[["sigma"]]
+)
 ```
 
 (ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
@@ -156,8 +173,7 @@ obs_cens <- obs |>
     ptime_lwr = floor(.data$ptime),
     ptime_upr = .data$ptime_lwr + 1,
     stime_lwr = floor(.data$stime),
-    stime_upr = .data$stime_lwr + 1,
-    delay_daily = stime_lwr - ptime_lwr
+    stime_upr = .data$stime_lwr + 1
   )
 ```
 
@@ -192,7 +208,6 @@ The result is that only those cases with a secondary event occurring before some
 This is called (right) truncation, and biases the observation process towards shorter delays:
 
 ```{r}
-obs_time <- 25
 obs_cens_trunc <- obs_cens |>
   mutate(obs_time = obs_time) |>
   filter(.data$stime_upr <= .data$obs_time)
@@ -212,21 +227,11 @@ obs_cens_trunc_samp <- obs_cens_trunc |>
   slice_sample(n = sample_size, replace = FALSE)
 ```
 
-Another issue, which `epidist` currently does not account for, is that sometimes only the secondary event might be observed, and not the primary event.
-For example, symptom onset may be reported, but start of infection unknown.
-Discarding events of this type leads to what are called ascertainment biases.
-Whereas each case is equally likely to appear in the sample above, under ascertainment bias some cases are more likely to appear in the data than others.
-
-With our censored, truncated, and sampled data, we are now ready to try to recover the underlying delay distribution using `epidist`.
-
-</details>
-
-# Preprocessing the data {#preprocessing}
-
-If we had access to the complete and unaltered `obs`, it would be simple to estimate the delay distribution.
-However, with only access to `obs_cens_trunc_samp`, the delay distribution we observe is biased (Figure \@ref(fig:obs-est)) and we must use a statistical model.
-
-(ref:obs-est) The histogram of delays from the complete, retrospective data `obs_cens` match quite closely with the underlying distribution, whereas those from `obs_cens_trunc_samp` show more significant systematic bias. In this instance the extent of the bias caused by censoring is less than that caused by right truncation. Nonetheless, we always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present.
+(ref:obs-est) The histogram of delays from the fully observed by double interval censored data `obs_cens` is slightly biased relative to the true distribution (black line).
+This bias is absolute [@park2024estimating] and so will be more problematic for shorter delays.
+The data that was observed in real-time, `obs_cens_trunc_samp`, is more biased still due to right truncation.
+This bias is relative and so will be more problematic for longer delays or when more of the data is truncated.
+We always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present and considering if the data is also meaningfully right truncated.
 
 ```{r obs-est, fig.cap="(ref:obs-est)"}
 # Prepare the complete, retrospective data
@@ -271,6 +276,47 @@ ggplot(plot_data) +
   theme_minimal() +
   theme(legend.position = "bottom")
 ```
+
+<details>
+<summary>Issues not considered</summary>
+
+Another issue, which `epidist` currently does not account for, is that sometimes only the secondary event might be observed, and not the primary event.
+For example, symptom onset may be reported, but start of infection unknown.
+Discarding events of this type leads to what are called ascertainment biases.
+Whereas each case is equally likely to appear in the sample above, under ascertainment bias some cases are more likely to appear in the data than others.
+
+</details>
+
+Our data is now very nearly what we would observe in practice but as a final step we will transform it to use meaningful dates.
+To do this we introduce a `outbreakstart_date` which is the date of the first infection.
+
+```{r}
+outbreak_start_date <- as.Date("2024-02-01")
+
+obs_data <- obs_cens_trunc_samp |>
+  select(case, ptime_lwr, ptime_upr, stime_lwr, stime_upr, obs_time) |>
+  transmute(
+    id = case,
+    symptom_onset = outbreak_start_date + ptime_lwr,
+    case_notification = outbreak_start_date + stime_lwr,
+    obs_time = outbreak_start_date + obs_time
+  )
+```
+
+</details>
+
+The resulting `obs_data` has 4 columns: `id`, `symptom_onset`, `case_notification`, and `obs_time`.
+Where `symptom_onset` and `case_notification` are dates and `obs_time` is the date of the last observation based on case notification.
+
+```{r}
+head(obs_data)
+```
+
+# Preprocessing the data {#preprocessing}
+
+The first step in using `epidist` is to convert the data into a format that `epidist` understands.
+The most common format is a linelist, which is a table with one row per case and columns for the primary and secondary event times.
+Other formats are supported for example aggregate data (e.g. daily case counts) and there is functionality to map between these formats.
 
 ```{r}
 linelist_data <- as_epidist_linelist_data(
