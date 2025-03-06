@@ -384,8 +384,11 @@ For example, we can use the built in `summary()` function to summarise the poste
 summary(naive_fit)
 ```
 
+Here we see some information about our model including the links used for each parameter, the formula used (this contains the formula you specified as well some additions we add for each model), summaries of the data, the posterior samples, and the regression coefficients, and some fitting diagnostics.
+As we used a simple model with only an intercept (see `vignettes("ebola")` for some complex options) the `Intercept` term corresponds to the mean log of the lognormal and the `sigma_Intercept` term corresponds to the sd log of the lognormal.
+
 Remember that we simulated the data with a meanlog of 1.6 and a log standard deviation of 0.5.
-We see that we have recovered neither of these parameters well and that means that the resulting distribution we have estimated will not reflect the data well.
+We see that we have recovered neither of these parameters well (we have used a log link for the log sd so the target value is ~-0.69) and that means that the resulting distribution we have estimated will not reflect the data well.
 If we were going to use this estimate in additional analyses it could lead to biases and flawed decisions.
 
 # Fit a model that accounts for biases and truncation {#marginal}
@@ -400,7 +403,8 @@ marginal_data <- as_epidist_marginal_model(linelist_data)
 ```
 
 The `data` object now has the class `epidist_marginal_model`.
-Using this `data`, we now call `epidist()` to fit the model.
+Using this `data`, we now call again `epidist()` to fit the model.
+Note that because of the different `as_epidist_<model>_model()` function we have used the marginal rather than naive model will be fit.
 
 ```{r}
 marginal_fit <- epidist(
@@ -409,13 +413,13 @@ marginal_fit <- epidist(
 )
 ```
 
-- Introduce the marginal model
-- Say what it accounts for
-- Say this is just one of the models that epidist supports but is the one we recommend for the majority of delay estimation task
-- Point at model methods vignettes for more details of other models
-- Fit the model
-- Summarise the distribution parameter
-- Say they are similar to the true parameters
+We again summarise the posterior using `summary()`,
+
+```{r}
+summary(marginal_fit)
+```
+
+Compared to the naive fit we see good recovery of the true distribution parameters (remember these were 1.6 for the logmean and 0.5 (or ~-0.69 on te log scale)) for the log sd.
 
 # Compare the models {#compare}
 
@@ -426,29 +430,6 @@ marginal_fit <- epidist(
 
 - Show to plot PMFs and compare to observed data
 - Show how to get PMF for daily censored data
-
-# Learning more {#learning-more}
-
-- Point at model methods vignettes for more details of other models
-- Point  at ebola vignette for an example of how to use `epidist` for real data and how to use more complex models
-- Point at approximate vignette for details of how to use approximate inference methods.
-- Point at other vignettes for more details of postprocessing
-- Point at the FAQ for answers to common questions and more tips for working with other packages
-
-# Fit the model and compare estimates {#fit}
-
-If we had access to the complete and unaltered `obs`, it would be simple to estimate the delay distribution.
-However, with only access to `obs_cens_trunc_samp`, the delay distribution we observe is biased (Figure \@ref(fig:obs-est)) and we must use a statistical model.
-
-(ref:obs-est) The histogram of delays from the complete, retrospective data `obs_cens` match quite closely with the underlying distribution, whereas those from `obs_cens_trunc_samp` show more significant systematic bias. In this instance the extent of the bias caused by censoring is less than that caused by right truncation. Nonetheless, we always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present.
-
-
-The main function you will use for modelling is called `epidist()`. Inputs must be prepared first via `as_epidist_marginal_model()` for our recommended default marginal model (or `as_epidist_latent_model()` for our latent model for example) so that the internals of `epidist()` know which model functionality to use. In order to interact with our model types we first need to define our available data in a format that `epidist` understands. In this case, we have a linelist so we use `as_epidist_latent_model()`:
-
-
-
-
-to see that the model has converged and recovered the delay distribution distribution paramters reasonably well.
 
 The `epidist` package also provides functions to make common post-processing tasks easy.
 For example, individual predictions of the lognormal delay parameters can be extracted using:
@@ -470,7 +451,7 @@ sample_draws <- sample(nrow(pred), 100)
 ggplot() +
   # Plot the true distribution
   geom_function(
-    data = data.frame(x = c(0, 30)),
+    data = data.frame(x = c(0, 15)),
     aes(x = x),
     fun = dlnorm,
     linewidth = 1.5,
@@ -482,7 +463,7 @@ ggplot() +
   # Plot 100 sampled posterior distributions
   lapply(sample_draws, \(i) {
     geom_function(
-      data = data.frame(x = c(0, 30)),
+      data = data.frame(x = c(0, 15)),
       aes(x = x),
       fun = dlnorm,
       args = list(
@@ -500,4 +481,13 @@ ggplot() +
   theme_minimal()
 ```
 
-## Bibliography {-}
+# Learning more {#learning-more}
+
+The `epidist` package provides several additional vignettes to help you learn more about the package and its capabilities:
+
+- For more details on the different models available in `epidist`, see `vignette("model")`.
+- For a real-world example using `epidist` with Ebola data and demonstrations of more complex modelling approaches, see `vignette("ebola")`.
+- If you're interested in approximate inference methods for faster computation with large datasets, see `vignette("approx-inference")`.
+- For answers to common questions and tips for integrating `epidist` with other packages in your workflow, see our FAQ at `vignette("faq")`.
+
+## References {-}

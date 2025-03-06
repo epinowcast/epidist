@@ -287,4 +287,4 @@ We found that these algorithms do produce reasonable approximations in far less 
 Of course, this vignette only includes one example, and a more thorough investigation would be required to make specific recommendations.
 That said, currently we do not recommend use of the Pathfinder algorithm due to its unstable performance in our testing, and early stage software implementation.
 
-## Bibliography {-}
+## References {-}

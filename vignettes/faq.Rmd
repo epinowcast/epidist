@@ -339,4 +339,4 @@ To use the `cmdstanr` backend, we first need to install CmdStan (see the README 
 cmdstanr::cmdstan_version()
 ```
 
-## Bibliography
+## References

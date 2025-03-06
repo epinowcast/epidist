@@ -496,4 +496,4 @@ These models can be stratified by covariates such as sex and district using fixe
 Post-processing and prediction with fitted models is possible using the `tidybayes` package.
 We illustrate generating posterior expectations, the posteriors of linear predictors, as well as discrete and continuous representations of the delay distribution.
 
-## Bibliography {-}
+## References {-}
