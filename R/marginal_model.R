@@ -207,8 +207,14 @@ epidist_family_model.epidist_marginal_model <- function(
     paste0("marginal_", family$family),
     dpars = family$dpars,
     links = c(family$link, family$other_links),
-    lb = c(NA, as.numeric(lapply(family$other_bounds, "[[", "lb"))),
-    ub = c(NA, as.numeric(lapply(family$other_bounds, "[[", "ub"))),
+    lb = c(
+      as.numeric(family$ybounds[1]),
+      as.numeric(lapply(family$other_bounds, "[[", "lb"))
+    ),
+    ub = c(
+      as.numeric(family$ybounds[2]),
+      as.numeric(lapply(family$other_bounds, "[[", "ub"))
+    ),
     type = "int",
     vars = c(
       "vreal1[n]",

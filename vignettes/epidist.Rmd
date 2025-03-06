@@ -68,7 +68,7 @@ This is a simplified version of the more complete setting that `epidist` support
 We also assume that we are observing a sample of cases during the outbreak.
 This means that our data is both interval censored for each event and truncated for the secondary event.
 
-We first assume that the reporting delay is lognormal with a mean log of 1.8 and a log standard deviation of 0.5.
+We first assume that the reporting delay is lognormal with a mean log of 1.6 and a log standard deviation of 0.5.
 
 ```{r}
 secondary_dist <- data.frame(mu = 1.6, sigma = 0.5)
@@ -77,7 +77,7 @@ secondary_dist <- data.frame(mu = 1.6, sigma = 0.5)
 We the simulate the stochastic outbreak in continuous time, sample a reporting delay for each event and finally observe the events (i.e restrict them to be dates).
 We assume that the outbreak has a growth rate of 0.2 and that we observe the outbreak for 25 days.
 
-```r
+```{r}
 growth_rate <- 0.2
 obs_time <- 25
 ```
@@ -112,11 +112,11 @@ To generate secondary events, we will use a lognormal distribution (Figure \@ref
 
 ```{r}
 obs <- simulate_secondary(
-  outbreak,
-  dist = rlnorm,
-  meanlog = secondary_dist[["mu"]],
-  sdlog = secondary_dist[["sigma"]]
-)
+    outbreak,
+    dist = rlnorm,
+    meanlog = secondary_dist[["mu"]],
+    sdlog = secondary_dist[["sigma"]]
+  )
 ```
 
 (ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
@@ -168,12 +168,13 @@ This means that rather than exact event times, we observe event times within an 
 Here we suppose that the interval is daily, meaning that only the date of the primary or secondary event, not the exact event time, is reported (Figure \@ref(fig:cens)):
 
 ```{r}
-obs_cens <- obs |>
-  mutate(
+obs_cens <- mutate(
+    obs,
     ptime_lwr = floor(.data$ptime),
     ptime_upr = .data$ptime_lwr + 1,
     stime_lwr = floor(.data$stime),
-    stime_upr = .data$stime_lwr + 1
+    stime_upr = .data$stime_lwr + 1,
+    delay_daily = ptime_lwr - stime_lwr
   )
 ```
 
@@ -223,8 +224,9 @@ sample_size <- 200
 This sample size corresponds to `r 100 * round(sample_size / nrow(obs_cens_trunc), 3)`% of the data.
 
 ```{r}
-obs_cens_trunc_samp <- obs_cens_trunc |>
-  slice_sample(n = sample_size, replace = FALSE)
+obs_cens_trunc_samp <- slice_sample(
+  obs_cens_trunc, n = sample_size, replace = FALSE
+)
 ```
 
 (ref:obs-est) The histogram of delays from the fully observed by double interval censored data `obs_cens` is slightly biased relative to the true distribution (black line).
@@ -299,14 +301,14 @@ obs_data <- obs_cens_trunc_samp |>
     id = case,
     symptom_onset = outbreak_start_date + ptime_lwr,
     case_notification = outbreak_start_date + stime_lwr,
-    obs_time = outbreak_start_date + obs_time
+    obs_date = outbreak_start_date + obs_time
   )
 ```
 
 </details>
 
-The resulting `obs_data` has 4 columns: `id`, `symptom_onset`, `case_notification`, and `obs_time`.
-Where `symptom_onset` and `case_notification` are dates and `obs_time` is the date of the last observation based on case notification.
+The resulting simulated data `obs_data` has 4 columns: `id`, `symptom_onset`, `case_notification`, and `obs_time`.
+Where `symptom_onset` and `case_notification` are dates and `obs_date` is the date of the last observation based on case notification.
 
 ```{r}
 head(obs_data)
@@ -316,25 +318,96 @@ head(obs_data)
 
 The first step in using `epidist` is to convert the data into a format that `epidist` understands.
 The most common format is a linelist, which is a table with one row per case and columns for the primary and secondary event times.
-Other formats are supported for example aggregate data (e.g. daily case counts) and there is functionality to map between these formats.
+
+The `as_epidist_linelist_data()` function converts the data into a linelist format.
+It has a few different entry points depending on the format of the data you have but the most common is to use a `data.frame` containing dates.
+This dispatches to `as_epidist_linelist_data.data.frame()` which takes the column names of the primary and secondary event dates and the observation date.
 
 ```{r}
 linelist_data <- as_epidist_linelist_data(
-  obs_cens_trunc_samp$ptime_lwr,
-  obs_cens_trunc_samp$ptime_upr,
-  obs_cens_trunc_samp$stime_lwr,
-  obs_cens_trunc_samp$stime_upr,
-  obs_time = obs_cens_trunc_samp$obs_time
+  obs_data,
+  pdate_lwr = "symptom_onset",
+  sdate_lwr = "case_notification",
+  obs_date = "obs_date"
+)
+
+head(linelist_data)
+```
+
+Here you can see that `epidist` has assumed that the events are both daily censored as upper bounds have not been provided.
+If your data was not daily censored, you can provide the upper bounds (`pdate_upr` and `sdate_upr`) to `as_epidist_linelist_data()` and it will use the correct model.
+Internally this function converts the data into a relative (to the first event date) time format and creates a variable (`delay`) which contains the observed delay.
+These are the variables that `epidist` will use to fit the model.
+
+
+Other formats are supported for example aggregate data (e.g. daily case counts) and there is functionality to map between these formats.
+
+# Fit a model that doesn't account for censoring and truncation {#naive}
+
+`epidist` provides a range of models for different settings.
+ The simplest is the naive model which does not account for censoring or truncation.
+ Behind the scenes this model is essentially just a wrapper around the `brms` package.
+ To use this model we need to use the `as_epidist_naive_model()` function.
+ Here all this does is define a class so that subsequent functions know which model is being used but for more complex models their `as_epidist_<model>model()` functions will create variables required specifically by the model and potentially take additional input.
+
+```{r}
+naive_data <- as_epidist_naive_model(linelist_data)
+```
+
+and now we fit the model using the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
+
+```{r}
+naive_fit <- epidist(
+  naive_data, chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0)
 )
 ```
 
-# Fit the naive model {#naive}
+::: {.alert .alert-primary}
+Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features.
+This can be set using `backend = "cmdstanr"` after following the installing CmdStan instructions in the README.
+:::
 
-- Fit the model
-- Summarise the distribution parameters
-- Say they differ from the true parameters
+::: {.alert .alert-primary}
+One of the progress messages output here is "Reduced from 200 to 91 rows.".
+What this is indicating is that non-unique rows (based on the user formula) have been aggregated.
+This is done in several of the `epidist` models for efficiency and should have no impact on accuracy.
+If you want to explore this see the documentation for the `epidist_transform_data_model()`.
+:::
 
-# Fit the marginal model {#marginal}
+The `naive_fit` object is a `brmsfit` object containing MCMC samples from each of the parameters in the model, shown in the table below.
+Users familiar with Stan and `brms`, can work with `fit` directly.
+Any tool that supports `brms` fitted model objects will be compatible with `fit`.
+
+For example, we can use the built in `summary()` function to summarise the posterior distribution of the parameters.
+
+```{r}
+summary(naive_fit)
+```
+
+Remember that we simulated the data with a meanlog of 1.6 and a log standard deviation of 0.5.
+We see that we have recovered neither of these parameters well and that means that the resulting distribution we have estimated will not reflect the data well.
+If we were going to use this estimate in additional analyses it could lead to biases and flawed decisions.
+
+# Fit a model that accounts for biases and truncation {#marginal}
+
+`epidist` provides a range of models that can account for biases in observed data. In most cases, we recommend using the marginal model.
+This model accounts for interval censoring of the primary and secondary events and right truncation of the secondary event.
+Behind the scenes it uses a likelihood from the [`primarycensored` R package](primarycensored.epinowcast.org).
+The documentation for `primarycensored` is a good place for learning more about this.
+
+```{r}
+marginal_data <- as_epidist_marginal_model(linelist_data)
+```
+
+The `data` object now has the class `epidist_marginal_model`.
+Using this `data`, we now call `epidist()` to fit the model.
+
+```{r}
+marginal_fit <- epidist(
+  data = marginal_data, chains = 2, cores = 2,
+  refresh = ifelse(interactive(), 250, 0)
+)
+```
 
 - Introduce the marginal model
 - Say what it accounts for
@@ -372,44 +445,8 @@ However, with only access to `obs_cens_trunc_samp`, the delay distribution we ob
 
 The main function you will use for modelling is called `epidist()`. Inputs must be prepared first via `as_epidist_marginal_model()` for our recommended default marginal model (or `as_epidist_latent_model()` for our latent model for example) so that the internals of `epidist()` know which model functionality to use. In order to interact with our model types we first need to define our available data in a format that `epidist` understands. In this case, we have a linelist so we use `as_epidist_latent_model()`:
 
-```{r}
-linelist_data <- as_epidist_linelist_data(
-  obs_cens_trunc_samp$ptime_lwr,
-  obs_cens_trunc_samp$ptime_upr,
-  obs_cens_trunc_samp$stime_lwr,
-  obs_cens_trunc_samp$stime_upr,
-  obs_time = obs_cens_trunc_samp$obs_time
-)
 
-naive_data <- as_epidist_naive_model(linelist_data)
-marginal_data <- as_epidist_marginal_model(linelist_data)
-```
 
-The `data` object now has the class `epidist_marginal_model`.
-Using this `data`, we now call `epidist()` to fit the model.
-The parameters of the model are inferred using Bayesian inference.
-In particular, we use the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
-
-```{r}
-fit <- epidist(
-  data = marginal_data, chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0)
-)
-```
-
-::: {.alert .alert-primary}
-Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features.
-This can be set using `backend = "cmdstanr"` after following the installing CmdStan instructions in the README.
-:::
-
-The `fit` object is a `brmsfit` object containing MCMC samples from each of the parameters in the model, shown in the table below.
-Users familiar with Stan and `brms`, can work with `fit` directly.
-Any tool that supports `brms` fitted model objects will be compatible with `fit`.
-
-For example, we can use the built in `summary()` function
-
-```{r}
-summary(fit)
-```
 
 to see that the model has converged and recovered the delay distribution distribution paramters reasonably well.
 
@@ -417,7 +454,7 @@ The `epidist` package also provides functions to make common post-processing tas
 For example, individual predictions of the lognormal delay parameters can be extracted using:
 
 ```{r}
-pred <- predict_delay_parameters(fit)
+pred <- predict_delay_parameters(naive_fit)
 ```
 
 Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained for 100 draws from the posterior distribution of the `mu` and `sigma` parameters.
