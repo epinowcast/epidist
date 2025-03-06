@@ -58,6 +58,7 @@ To run this vignette yourself, as well as the `epidist` package, you will need t
 library(epidist)
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 ```
 
 # Simulating data {#data .tabset}
@@ -69,9 +70,14 @@ We also assume that we are observing a sample of cases during the outbreak.
 This means that our data is both interval censored for each event and truncated for the secondary event.
 
 We first assume that the reporting delay is lognormal with a mean log of 1.6 and a log standard deviation of 0.5.
+Here we use the `add_mean_sd()` function to add the mean and sd to the `data.frame`.
 
 ```{r}
 secondary_dist <- data.frame(mu = 1.6, sigma = 0.5)
+class(secondary_dist) <- c("lognormal_samples", class(secondary_dist))
+secondary_dist <- add_mean_sd(secondary_dist)
+
+secondary_dist
 ```
 
 We the simulate the stochastic outbreak in continuous time, sample a reporting delay for each event and finally observe the events (i.e restrict them to be dates).
@@ -358,7 +364,7 @@ and now we fit the model using the the No-U-Turn Sampler (NUTS) Markov chain Mon
 
 ```{r}
 naive_fit <- epidist(
-  naive_data, chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0)
+  naive_data, chains = 4, cores = 2, refresh = ifelse(interactive(), 250, 0)
 )
 ```
 
@@ -408,7 +414,7 @@ Note that because of the different `as_epidist_<model>_model()` function we have
 
 ```{r}
 marginal_fit <- epidist(
-  data = marginal_data, chains = 2, cores = 2,
+  data = marginal_data, chains = 4, cores = 2,
   refresh = ifelse(interactive(), 250, 0)
 )
 ```
@@ -421,22 +427,67 @@ summary(marginal_fit)
 
 Compared to the naive fit we see good recovery of the true distribution parameters (remember these were 1.6 for the logmean and 0.5 (or ~-0.69 on te log scale)) for the log sd.
 
-# Compare the models {#compare}
+# Compare the {#compare}
 
-- Plot the estimated parameters from the naive and marginal models
-- Also plot the true distributions
+We can compare the two models by plotting the estimated parameters from the naive and marginal models.
+One way to do this is to use the `predict_delay_parameters()` function to extract the posterior samples and then plot them.
+Internally this function uses can also add the mean and standard deviation parameters to the output so that it is easier to understand the distribution.
+```{r}
+predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
+  lapply(predict_delay_parameters) |>
+  bind_rows(.id = "model") |>
+  filter(index == 1)
 
-# Postprocessing {#postprocessing}
+head(predicted_parameters)
+```
 
-- Show to plot PMFs and compare to observed data
-- Show how to get PMF for daily censored data
+::: {.alert .alert-primary}
+Note that by default `predict_delay_parameters()` gives predictions for every row in the transformed data. 
+Here as we only want posterior draws for the summary parameters we filter to the first row or the first data point.
+This prevents repeating the same prediction for each row.
+Another approach to this would be prodividing `newdata` to `predict_delay_parameters()` representing the data we want to make predictions for.
+:::
 
-The `epidist` package also provides functions to make common post-processing tasks easy.
-For example, individual predictions of the lognormal delay parameters can be extracted using:
+
+We can now plot posterior draws for the summary parameters from the two models.
 
 ```{r}
-pred <- predict_delay_parameters(naive_fit)
+# Create a data frame with true parameter values
+true_params <- secondary_dist |>
+  mutate(model = "true") |>
+  pivot_longer(
+    cols = c("mu", "sigma", "mean", "sd"),
+    names_to = "parameter",
+    values_to = "value"
+  )
+
+# Plot with true values as vertical lines
+predicted_parameters |>
+  tidyr::pivot_longer(
+    cols = c("mu", "sigma", "mean", "sd"),
+    names_to = "parameter",
+    values_to = "value"
+  ) |>
+  ggplot() +
+  geom_density(
+    aes(x = value, fill = model, group = model), alpha = 0.5
+  ) +
+  geom_vline(
+    data = true_params,
+    aes(xintercept = value),
+    linetype = "dashed",
+    linewidth = 1, col = "black"
+  ) +
+  facet_wrap(~parameter, scales = "free") +
+  theme_minimal() +
+  labs(title = "Parameter estimates compared to true values") +
+  theme(legend.position = "bottom")
 ```
+
+As expected we see that the naive model has done a very poor job of recovering the true parameters and the marginal model has done a much better job.
+However, it is important to note that the marginal model doesn't perfectly recover the true parameters either due to information loss in the censoring and truncation and due to the inherent uncertainty in the posterior distribution.
+
+# Visualise posterior predictions of the true delay distribution {#postprocessing}
 
 Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained for 100 draws from the posterior distribution of the `mu` and `sigma` parameters.
 Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using `epidist()` we have obtained a much closer match to the truth.
@@ -444,34 +495,25 @@ Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampl
 (ref:fitted-lognormal) The fitted delay distribution (pink lines, 100 draws from the posterior) compared to the true underlying delay distribution (black line). Each pink line represents one possible delay distribution based on the fitted model parameters.
 
 ```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
-# Sample 100 random draws from the posterior
 set.seed(123)
-sample_draws <- sample(nrow(pred), 100)
 
-ggplot() +
-  # Plot the true distribution
-  geom_function(
-    data = data.frame(x = c(0, 15)),
-    aes(x = x),
-    fun = dlnorm,
-    linewidth = 1.5,
-    args = list(
-      meanlog = secondary_dist[["mu"]],
-      sdlog = secondary_dist[["sigma"]]
+predicted_parameters |>
+  group_by(model) |>
+  slice_sample(n = 100) |>
+  bind_rows(mutate(secondary_dist, model = "true")) |>
+  group_by(model) |>
+  mutate(draw_id = row_number()) |>
+  mutate(
+    predictions = purrr::map2(
+      mu, sigma,
+      ~tibble(x = seq(0, 15, by = 1),
+        y = dlnorm(x, meanlog = .x, sdlog = .y)
+      )
     )
-  ) +
-  # Plot 100 sampled posterior distributions
-  lapply(sample_draws, \(i) {
-    geom_function(
-      data = data.frame(x = c(0, 15)),
-      aes(x = x),
-      fun = dlnorm,
-      args = list(
-        meanlog = pred$mu[i],
-        sdlog = pred$sigma[i]
-      ),
-      alpha = 0.1,
-      color = "#CC79A7"
+  ) |>
+  unnest(predictions)
+  ggplot() +
+  # Plot the true distributionlor = "#CC79A7"
     )
   }) +
   labs(

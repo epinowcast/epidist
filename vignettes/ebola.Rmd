@@ -270,8 +270,13 @@ Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with wom
 ```{r}
 # add dummmy variables
 add_marginal_dummy_vars <- function(data) {
-  data |>
-    mutate(relative_obs_time = NA, pwindow = NA, delay_upr = NA, swindow = NA)
+  mutate(
+    data,
+    relative_obs_time = NA,
+    pwindow = NA,
+    delay_upr = NA,
+    swindow = NA
+  )
 }
 
 epred_draws <- obs_prep |>
