@@ -21,7 +21,7 @@ Here we provide tips for working with the `epidist` package, and answers to freq
 If you have a question about using the package, please create an [issue](https://github.com/epinowcast/epidist/issues).
 We will endeavour to respond promptly!
 
-The code block below facilitates reproduction of this script.
+<details><summary>Click to expand for code to reproduce the examples in this vignette</summary>
 
 ```{r message=FALSE, results='hide', class.source='fold-hide'}
 library(epidist)
@@ -108,6 +108,8 @@ fit_location <- epidist(
   backend = "cmdstanr"
 )
 ```
+
+</details>
 
 ## Working with posterior samples
 
@@ -339,4 +341,4 @@ To use the `cmdstanr` backend, we first need to install CmdStan (see the README 
 cmdstanr::cmdstan_version()
 ```
 
-## Bibliography
+## References

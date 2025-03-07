@@ -25,8 +25,14 @@ predict_delay_parameters <- function(fit, newdata = NULL, ...) {
     lp_dpar <- brms::get_dpar(pp, dpar = dpar, inv_link = TRUE)
     samples_df[[dpar]] <- as.vector(lp_dpar)
   }
+  # Use family$name if it exists, otherwise fall back to family
+  family_name <- if (!is.null(fit$family$name)) {
+    sub(".*_", "", fit$family$name)
+  } else {
+    fit$family$family
+  }
   class(samples_df) <- c(
-    paste0(sub(".*_", "", fit$family$name), "_samples"),
+    paste0(family_name, "_samples"),
     class(samples_df)
   )
   samples_df <- add_mean_sd(samples_df)
