@@ -219,11 +219,10 @@ The mean estimated value of each parameter, from each method is as follows.
 pars <- draws |>
   group_by(method, parameter) |>
   summarise(value = mean(value)) |>
-  pivot_wider(names_from = parameter, values_from = value)
+  pivot_wider(names_from = parameter, values_from = value) |>
+  ungroup()
 
-pars |>
-  ungroup() |>
-  gt()
+pars
 ```
 
 More comprehensively, the estimated posterior distributions are shown in Figure \@ref(fig:posterior).
@@ -256,10 +255,11 @@ pmap_df(
   )
 ) |>
   ggplot(aes(x = x, y = density, col = method)) +
-  geom_line() +
+  geom_line(linewidth = 1) +
   scale_color_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
   theme_minimal() +
-  labs(x = "", y = "", col = "Method")
+  labs(x = "", y = "", col = "Method") +
+  theme(legend.position = "bottom")
 ```
 
 ## Comparison of time taken
