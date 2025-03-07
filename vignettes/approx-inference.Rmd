@@ -235,8 +235,6 @@ pars
 
 More comprehensively, the estimated posterior distributions are shown in Figure \@ref(fig:posterior).
 
-(ref:posterior) Estimated posterior distributions for the `mu` and `sigma` parameters using each inference method, shown using `tidybayes::stat_slabinterval()`.
-
 <details><summary>Click to expand for code to create posterior distribution plot</summary>
 
 ```{r}
@@ -253,6 +251,8 @@ p_posterior <- draws |>
 
 </details>
 
+(ref:posterior) Estimated posterior distributions for the `mu` and `sigma` parameters using each inference method, shown using `tidybayes::stat_slabinterval()`.
+
 ```{r posterior, fig.cap="(ref:posterior)"}
 p_posterior
 ```
@@ -260,8 +260,6 @@ p_posterior
 ## Comparison of resulting delay distributions
 
 Figure \@ref(fig:delay-pdf) shows how the different `mu` and `sigma` posterior mean estimates from each inference method alter an estimated delay distribution.
-
-(ref:delay-pdf) Delay probability density functions obtained based on the posterior mean estimated `mu` and `sigma` parameters.
 
 <details><summary>Click to expand for code to create delay PDF plot</summary>
 
@@ -281,6 +279,8 @@ p_delay_pdf <- pmap_df(
 ```
 
 </details>
+
+(ref:delay-pdf) Delay probability density functions obtained based on the posterior mean estimated `mu` and `sigma` parameters.
 
 ```{r delay-pdf, fig.cap="(ref:delay-pdf)"}
 p_delay_pdf
