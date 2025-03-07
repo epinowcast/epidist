@@ -454,9 +454,11 @@ If we were going to use this estimate in additional analyses it could lead to bi
 
 # Fit a model that accounts for biases and truncation {#marginal}
 
-`epidist` provides a range of models that can account for biases in observed data. In most cases, we recommend using the marginal model.
+`epidist` provides a range of models that can account for biases in observed data.
+In most cases, we recommend using the marginal model.
 This model accounts for interval censoring of the primary and secondary events and right truncation of the secondary event.
-Behind the scenes it uses a likelihood from the [`primarycensored` R package](primarycensored.epinowcast.org).
+Behind the scenes it uses a likelihood from the [`primarycensored` R package](https://primarycensored.epinowcast.org/).
+This package contains exact numerical and analytical solutions for numerous double censored and truncated distributions in both Stan and R.
 The documentation for `primarycensored` is a good place for learning more about this.
 
 ```{r}
@@ -594,7 +596,7 @@ predicted_pmfs |>
     y = "Probability density"
   ) +
   theme_minimal() +
-  facet_wrap(~model, scales = "free") +
+  facet_wrap(~model, scales = "free", nrow = 2) +
   scale_color_brewer(palette = "Set2") +
   theme(legend.position = "none")
 ```
