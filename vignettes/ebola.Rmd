@@ -449,6 +449,7 @@ add_marginal_pdf_vars <- function(data) {
       pwindow = 0,
       swindow = 0,
       delay_upr = NA
+    )
   )
 }
 
