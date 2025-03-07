@@ -1,4 +1,4 @@
-# epidist 0.2.0.1000
+# epidist 0.3.0
 
 This release adds support for a wider range of distributions in the marginal model, improves documentation with new vignettes and FAQ sections, enhances the getting started guide with clearer examples of model comparison, and fixes several bugs related to parameter bounds and likelihood calculations.
 
