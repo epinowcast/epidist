@@ -279,6 +279,7 @@ add_marginal_dummy_vars <- function(data) {
       pwindow = NA,
       delay_upr = NA,
       swindow = NA
+    )
   )
 }
 
