@@ -23,6 +23,25 @@ test_that(
   }
 )
 
+test_that(
+  "predict_delay_parameters works with the naive lognormal model",
+  {
+    skip_on_cran()
+
+    # Test naive model predictions
+    set.seed(1)
+    pred_naive <- predict_delay_parameters(fit_naive)
+    expect_s3_class(pred_naive, "lognormal_samples")
+    expect_s3_class(pred_naive, "data.frame")
+    expect_named(pred_naive, c("draw", "index", "mu", "sigma", "mean", "sd"))
+    expect_true(all(pred_naive$mean > 0))
+    expect_true(all(pred_naive$sd > 0))
+    expect_length(unique(pred_naive$index), nrow(prep_naive_obs))
+    expect_length(unique(pred_naive$draw), summary(fit_naive)$total_ndraws)
+  }
+)
+
+
 test_that("predict_delay_parameters accepts newdata arguments and prediction by sex recovers underlying parameters", { # nolint: line_length_linter.
   skip_on_cran()
 

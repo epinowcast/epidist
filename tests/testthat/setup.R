@@ -198,6 +198,18 @@ if (not_on_cran()) {
     backend = "cmdstanr"
   ))
 
+  cli::cli_alert_info("Compiling the naive model with cmdstanr")
+  fit_naive <- epidist(
+    data = prep_naive_obs,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  )
+
   cli::cli_alert_info(
     "Compiling the latent model with cmdstanr and a gamma dist"
   )
