@@ -59,7 +59,7 @@ library(epidist)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-library(purrr)
+library(purrr)  # nolint
 ```
 
 # Simulating data {#data}
@@ -506,11 +506,11 @@ predicted_pmfs <- predicted_parameters |>
   slice_sample(n = 100) |>
   bind_rows(mutate(secondary_dist, model = "true")) |>
   group_by(model) |>
-  mutate(draw_id = row_number()) |>
   mutate(
+    draw_id = row_number(),
     predictions = purrr::map2(
       mu, sigma,
-      ~tibble(x = seq(0, 15, by = 0.1),
+      ~data.frame(x = seq(0, 15, by = 0.1),
         y = dlnorm(x, meanlog = .x, sdlog = .y)
       )
     )

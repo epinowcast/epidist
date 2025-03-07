@@ -93,7 +93,6 @@ In this demonstration, we use the following packages:
 library(epidist)
 library(ggplot2)
 library(dplyr)
-library(gt)
 library(purrr)
 library(tidyr)
 library(tibble)
@@ -196,7 +195,8 @@ fits <- list(
 )
 
 draws <- imap(fits, function(fit, name) {
-  predict_delay_parameters(fit) |>
+  draws <- fit |>
+    predict_delay_parameters() |>
     as.data.frame() |>
     pivot_longer(
       cols = c("mu", "sigma", "mean", "sd"),
@@ -205,6 +205,7 @@ draws <- imap(fits, function(fit, name) {
     ) |>
     filter(parameter %in% c("mu", "sigma")) |>
     mutate(method = as.factor(name))
+  return(draws)
 })
 
 draws <- bind_rows(draws)
@@ -274,10 +275,7 @@ times <- list(
   Pathfinder = time_pathfinder
 )
 
-times |>
-  map_dbl("elapsed") |>
-  enframe(name = "method", value = "time (s)") |>
-  gt()
+times
 ```
 
 # Conclusion

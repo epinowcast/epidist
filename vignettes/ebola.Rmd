@@ -44,13 +44,11 @@ set.seed(123)
 
 library(epidist)
 library(brms)
-library(tibble)
 library(dplyr)
 library(ggplot2)
-library(tidybayes)
-library(modelr)
-library(patchwork)
-library(lubridate)
+library(tidybayes)  # nolint
+library(modelr)  # nolint
+library(patchwork)  # nolint
 library(cmdstanr) # nolint
 ```
 
@@ -120,8 +118,10 @@ That is, $\mu$ and $\sigma$ such that when $x \sim \mathcal{N}(\mu, \sigma)$ the
 To prepare the data, we begin by selecting the relevant columns:
 
 ```{r}
-obs_cens <- sierra_leone_ebola_data |>
-  select(id, date_of_symptom_onset, date_of_sample_tested, age, sex, district)
+obs_cens <- select(
+  sierra_leone_ebola_data,
+  id, date_of_symptom_onset, date_of_sample_tested, age, sex, district
+)
 
 head(obs_cens)
 ```
@@ -138,18 +138,20 @@ To simulate being in the middle of an outbreak we will filter the data to only i
 **The marginal model used in this is adjusting for truncation. To check it is working try filtering instead for the `date_of_symptom_onset` and rerunning.**
 
 ```{r}
-obs_cens <- obs_cens |>
-  filter(date_of_sample_tested <= as.Date("2015-01-31"))
+obs_cens_trunc <- filter(
+  obs_cens,
+  date_of_sample_tested <= as.Date("2015-01-31")
+)
 ```
 
 We prepare the data for use with the `epidist` package by converting the data to an `epidist_linelist_data` object:
 
 ```{r}
-linelist_data <- obs_cens |>
-  as_epidist_linelist_data(
-    pdate_lwr = "date_of_symptom_onset",
-    sdate_lwr = "date_of_sample_tested"
-  )
+linelist_data <- as_epidist_linelist_data(
+  obs_cens_trunc,
+  pdate_lwr = "date_of_symptom_onset",
+  sdate_lwr = "date_of_sample_tested"
+)
 ```
 
 In this call to `as_epidist_linelist_data()` it has made some assumptions about the data.
@@ -270,12 +272,13 @@ Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with wom
 ```{r}
 # add dummmy variables
 add_marginal_dummy_vars <- function(data) {
-  mutate(
-    data,
-    relative_obs_time = NA,
-    pwindow = NA,
-    delay_upr = NA,
-    swindow = NA
+  return(
+    mutate(
+      data,
+      relative_obs_time = NA,
+      pwindow = NA,
+      delay_upr = NA,
+      swindow = NA
   )
 }
 
@@ -363,10 +366,15 @@ Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are
 
 ```{r}
 add_marginal_pmf_vars <- function(data) {
-  data |>
+  return(
     mutate(
-      relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
+      data,
+      relative_obs_time = Inf,
+      pwindow = 1,
+      swindow = 1,
+      delay_upr = NA
     )
+  )
 }
 
 draws_pmf <- obs_prep |>
@@ -433,10 +441,14 @@ That is to produce continuous delay times (Figure \@ref(fig:pdf)):
 
 ```{r}
 add_marginal_pdf_vars <- function(data) {
-  data |>
+  return(
     mutate(
-      relative_obs_time = Inf, pwindow = 0, swindow = 0, delay_upr = NA
-    )
+      data,
+      relative_obs_time = Inf,
+      pwindow = 0,
+      swindow = 0,
+      delay_upr = NA
+  )
 }
 
 draws_pdf <- obs_prep |>
