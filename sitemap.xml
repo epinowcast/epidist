@@ -7,6 +7,7 @@
 <url><loc>https://epidist.epinowcast.org/articles/epidist.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/articles/faq.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/articles/index.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/articles/model.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/authors.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/index.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/news/index.html</loc></url>
@@ -14,6 +15,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.gamma_samples.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.lognormal_samples.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/add_mean_sd.weibull_samples.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/as_epidist_aggregate_data.data.frame.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/as_epidist_aggregate_data.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/as_epidist_aggregate_data.epidist_linelist_data.html</loc></url>
