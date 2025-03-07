@@ -231,7 +231,8 @@ obs_cens |>
 During an outbreak we will usually be estimating delays in real time.
 The result is that only those cases with a secondary event occurring before some time will be observed.
 This is called (right) truncation, and biases the observation process towards shorter delays.
-(ref:trunc) right truncation of the secondary event times biases the observation process towards shorter delays.
+In (ref:trunc) we see a simulation of this process where we have restricted the data to only include cases where the secondary event occurred before day 10.
+
 
 ```{r trunc, fig.cap="(ref:trunc)", class.source = 'fold-hide'}
 obs_cens |>
@@ -400,27 +401,6 @@ These are the variables that `epidist` will use to fit the model.
 
 Other formats are supported, for example aggregate data (e.g. daily case counts), and there is functionality to map between these formats.
 See `?as_epidist_aggregate_data()` for more details.
-
-# Visualising the data
-
-Before fitting a model, it's useful to visualise the data to understand the distribution of delays and the observation process.
-We'll create a plot showing the primary event times (symptom onset), secondary event times (case notification), and the observation time.
-
-```{r}
-linelist_data |>
-  as_epidist_aggregate_data() |>
-  select(ptime_lwr, stime_lwr, n) |>
-  pivot_longer(
-    cols = c("ptime_lwr", "stime_lwr"),
-    names_to = "type",
-    values_to = "time"
-  ) |>
-  ggplot() +
-  geom_point(aes(x = date, y = n, col = type)) +
-  geom_point(aes(x = obs_time, y = delay))
-```
-
-Note that here we have used `as_epidist_aggregate_data()` to convert the data into an aggregate format in order to make plotting the data easier.
 
 # Fit a model that doesn't account for censoring and truncation {#naive}
 
