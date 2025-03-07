@@ -18,6 +18,7 @@ This release adds support for a wider range of distributions in the marginal mod
 - Added a new FAQ section on how to use the `marginaleffects` package with `epidist` models. See #547.
 - Reduced the focus on simulating data in the getting started vignette to make it more accessible. See #549.
 - Made the entry to the package friendlier with clearer examples and improved documentation. See #549.
+- Added a schematic to explain right truncation more clearly to the getting started vignette. See #549.
 - Added a comparison of fitting naive and marginal models in the getting started vignette to highlight the importance of accounting for biases. See #549.
 - Added examples showing how to extract estimated parameters and plot them against true values to evaluate model performance. See #549.
 

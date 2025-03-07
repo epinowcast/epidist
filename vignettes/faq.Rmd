@@ -23,7 +23,7 @@ We will endeavour to respond promptly!
 
 The code block below facilitates reproduction of this script.
 
-```{r message=FALSE, results='hide', class.source='fold-hide'}
+```{r setup, class.source='fold-hide', message=FALSE, results='hide'}
 library(epidist)
 library(brms)
 library(dplyr)

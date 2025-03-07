@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
   fig.path = file.path("figures", "epidist-"),
   collapse = TRUE,
   comment = "#>",
-  message = FALSE,
+  message = TRUE,
   warning = FALSE,
   error = FALSE
 )
@@ -35,8 +35,8 @@ By building on `brms`, `epidist` inherits the ability to work within the broader
 See the `vignette("faq")` for more details on the tools available in the `brms` ecosystem.
 
 In this vignettte, we will give a quick start guide to using the `epidist` package.
-To get started we will introduce some of the key concepts in delay distribution estimation, and then simulate some data.
-Using this simulated data we will then show how to use the `epidist` package to estimate these distributions using a simple model and a model that accounts for some of the common issues in delay distribution estimation.
+To get started we will introduce some of the key concepts in delay distribution estimation, and then simulate some data delay data from a stochastic outbreak that includes common biases.
+Using this simulated data we will then show how to use the `epidist` package to estimate a distribution using a simple model and then a model that accounts for some of the common issues in delay distribution estimation.
 We will then compare the output of these models to the true delay distribution used to simulate the data again using `epidst` tools.
 
 # Key concepts in delay distribution estimation
@@ -159,7 +159,8 @@ ggplot(data.frame(x = c(0, 30)), aes(x = x)) +
   )
 ```
 
-(ref:delay) Secondary events (in green) occur with a delay drawn from the lognormal distribution (Figure \@ref(fig:lognormal)). As with Figure \@ref(fig:outbreak), to make this figure easier to read, only every 50th case is shown.
+(ref:delay) Secondary events (in green) occur with a delay drawn from the lognormal distribution (Figure \@ref(fig:lognormal)).
+As with Figure \@ref(fig:outbreak), to make this figure easier to read, only every 50th case is shown.
 
 ```{r delay, fig.cap="(ref:delay)"}
 obs |>
@@ -231,8 +232,10 @@ obs_cens |>
 During an outbreak we will usually be estimating delays in real time.
 The result is that only those cases with a secondary event occurring before some time will be observed.
 This is called (right) truncation, and biases the observation process towards shorter delays.
-In (ref:trunc) we see a simulation of this process where we have restricted the data to only include cases where the secondary event occurred before day 10.
+In Figure \@ref(fig:trunc) we see a simulation of this process where we have restricted the data to only include cases where the secondary event occurred before day 10.
 
+(ref:trunc) This figure duplicates Figure \@ref(fig:cens) but adds truncation at 10 days due to stopping the observation period at this point.
+Event pairs using dashed lines are now not observed.
 
 ```{r trunc, fig.cap="(ref:trunc)", class.source = 'fold-hide'}
 obs_cens |>
@@ -350,7 +353,7 @@ Whereas each case is equally likely to appear in the sample above, under ascerta
 </details>
 
 Our data is now very nearly what we would observe in practice but as a final step we will transform it to use meaningful dates.
-To do this we introduce a `outbreakstart_date` which is the date of the first infection.
+To do this we introduce a `outbreak_start_date` which is the date of the first infection.
 
 ```{r}
 outbreak_start_date <- as.Date("2024-02-01")
@@ -377,7 +380,7 @@ head(obs_data)
 # Preprocessing the data {#preprocessing}
 
 The first step in using `epidist` is to convert the data into a format that `epidist` understands.
-The most common format is a linelist, which is a table with one row per case and columns for the primary and secondary event times.
+The most common format is a linelist, which is a table with one row per case and columns for the primary and secondary event dates.
 
 The `as_epidist_linelist_data()` function converts the data into a linelist format.
 It has a few different entry points depending on the format of the data you have but the most common is to use a `data.frame` containing dates.
@@ -402,16 +405,22 @@ These are the variables that `epidist` will use to fit the model.
 Other formats are supported, for example aggregate data (e.g. daily case counts), and there is functionality to map between these formats.
 See `?as_epidist_aggregate_data()` for more details.
 
-# Fit a model that doesn't account for censoring and truncation {#naive}
+# Fitting models {#fit}
 
+Now we are ready to fit some `epidist` models.
 `epidist` provides a range of models for different settings.
- The simplest is the naive model which does not account for censoring or truncation.
- Behind the scenes this model is essentially just a wrapper around the `brms` package.
- To use this model we need to use the `as_epidist_naive_model()` function.
- Here all this does is define a class so that subsequent functions know which model is being used but for more complex models their `as_epidist_<model>model()` functions will create variables required specifically by the model and potentially take additional input.
+All `epidist` models have a `as_epidist_<model>_model()` function that can be used to convert the data into a format that the model can use.
+
+
+## Fit a model that doesn't account for censoring and truncation {#naive}
+
+We will start with the simplest model, which does not account for censoring or truncation.
+Behind the scenes this model is essentially just a wrapper around the `brms` package.
+To use this model we need to use the `as_epidist_naive_model()` function.
 
 ```{r}
 naive_data <- as_epidist_naive_model(linelist_data)
+naive_data
 ```
 
 and now we fit the model using the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
@@ -429,7 +438,7 @@ This can be set using `backend = "cmdstanr"` after following the installing CmdS
 :::
 
 ::: {.alert .alert-primary}
-One of the progress messages output here is "Reduced from 200 to 91 rows.".
+One of the progress messages output here is "Reduced from 200 to 91 rows".
 What this is indicating is that non-unique rows (based on the user formula) have been aggregated.
 This is done in several of the `epidist` models for efficiency and should have no impact on accuracy.
 If you want to explore this see the documentation for the `epidist_transform_data_model()`.
@@ -446,13 +455,13 @@ summary(naive_fit)
 ```
 
 Here we see some information about our model including the links used for each parameter, the formula used (this contains the formula you specified as well some additions we add for each model), summaries of the data, the posterior samples, and the regression coefficients, and some fitting diagnostics.
-As we used a simple model with only an intercept (see `vignettes("ebola")` for some complex options) the `Intercept` term corresponds to the mean log of the lognormal and the `sigma_Intercept` term corresponds to the sd log of the lognormal.
+As we used a simple model with only an intercept (see `vignettes("ebola")` for some complex options) the `Intercept` term corresponds to the mean log of the lognormal and the `sigma_Intercept` term corresponds to the log (due to the log link) of the log standard deviation of the lognormal.
 
 Remember that we simulated the data with a meanlog of 1.6 and a log standard deviation of 0.5.
-We see that we have recovered neither of these parameters well (we have used a log link for the log sd so the target value is ~-0.69) and that means that the resulting distribution we have estimated will not reflect the data well.
+We see that we have recovered neither of these parameters well (applying the log to the log standard deviation means our target value is ~-0.69) and that means that the resulting distribution we have estimated will not reflect the data well.
 If we were going to use this estimate in additional analyses it could lead to biases and flawed decisions.
 
-# Fit a model that accounts for biases and truncation {#marginal}
+## Fit a model that accounts for biases and truncation {#marginal}
 
 `epidist` provides a range of models that can account for biases in observed data.
 In most cases, we recommend using the marginal model.
@@ -463,6 +472,7 @@ The documentation for `primarycensored` is a good place for learning more about 
 
 ```{r}
 marginal_data <- as_epidist_marginal_model(linelist_data)
+marginal_data
 ```
 
 The `data` object now has the class `epidist_marginal_model`.
@@ -482,7 +492,7 @@ We again summarise the posterior using `summary()`,
 summary(marginal_fit)
 ```
 
-Compared to the naive fit we see good recovery of the true distribution parameters (remember these were 1.6 for the logmean and 0.5 (or ~-0.69 on te log scale)) for the log sd.
+Compared to the naive fit we see good recovery of the true distribution parameters (remember these were 1.6 for the logmean and 0.5 (or ~-0.69 on the log scale)) for the log sd.
 
 # Compare the two models estimated delay parameters {#compare}
 
@@ -509,7 +519,7 @@ Another approach to this would be prodividing `newdata` to `predict_delay_parame
 
 We can now plot posterior draws for the summary parameters from the two models.
 
-```{r class.source = 'fold-hide'}
+```{r pp-params, fig.cap="(ref:pp-params)", class.source = 'fold-hide'}
 # Create a data frame with true parameter values
 true_params <- secondary_dist |>
   mutate(model = "true") |>
@@ -543,6 +553,8 @@ predicted_parameters |>
   scale_fill_brewer(palette = "Set2") +
   theme(legend.position = "bottom")
 ```
+
+(ref:pp-params) The density of posterior draws from the marginal and naive models compared to the true underlying delay distribution (vertical dashed black line).
 
 As expected we see that the naive model has done a very poor job of recovering the true parameters and the marginal model has done a much better job.
 However, it is important to note that the marginal model doesn't perfectly recover the true parameters either due to information loss in the censoring and truncation and due to the inherent uncertainty in the posterior distribution.
@@ -602,6 +614,7 @@ predicted_pmfs |>
 ```
 
 As expected based on the recovery of the parameters, the marginal model better recovers the true distribution than the naive model which has a substantially shorter mean and different shape.
+
 # Learning more {#learning-more}
 
 The `epidist` package provides several additional vignettes to help you learn more about the package and its capabilities:
