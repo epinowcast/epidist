@@ -111,6 +111,8 @@ cmdstanr::cmdstan_version()
 We can simulate data to use for fitting models.
 The example data simulation process follows that used in the [Getting started with epidist](https://epidist.epinowcast.org/articles/epidist.html#data) vignette, so we will not detail exactly what is happening here, but please consult that vignette if interested:
 
+<details><summary>Click to expand for data simulation code</summary>
+
 ```{r}
 meanlog <- 1.8
 sdlog <- 0.5
@@ -132,6 +134,8 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
   filter(.data$stime_upr <= .data$obs_time) |>
   slice_sample(n = sample_size, replace = FALSE)
 ```
+
+</details>
 
 We now prepare the data for fitting with the marginal model, and perform inference with HMC:
 
@@ -186,6 +190,8 @@ time_pathfinder <- proc.time() - t
 We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
 Thankfully, each algorithm is implemented to sample draws from the posterior distribution, and so post-processing is simple.
 
+<details><summary>Click to expand for code to extract posterior draws</summary>
+
 ```{r}
 fits <- list(
   HMC = fit_hmc,
@@ -211,6 +217,8 @@ draws <- imap(fits, function(fit, name) {
 draws <- bind_rows(draws)
 ```
 
+</details>
+
 ## Comparison of parameter posterior distributions
 
 The mean estimated value of each parameter, from each method is as follows.
@@ -229,8 +237,10 @@ More comprehensively, the estimated posterior distributions are shown in Figure 
 
 (ref:posterior) Estimated posterior distributions for the `mu` and `sigma` parameters using each inference method, shown using `tidybayes::stat_slabinterval()`.
 
-```{r posterior, fig.cap="(ref:posterior)"}
-draws |>
+<details><summary>Click to expand for code to create posterior distribution plot</summary>
+
+```{r}
+p_posterior <- draws |>
   ggplot(aes(x = value, col = method)) +
   stat_slabinterval(density = "histogram", breaks = 30, alpha = 0.8) +
   scale_colour_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
@@ -241,14 +251,22 @@ draws |>
   theme(legend.position = "bottom")
 ```
 
+</details>
+
+```{r posterior, fig.cap="(ref:posterior)"}
+p_posterior
+```
+
 ## Comparison of resulting delay distributions
 
 Figure \@ref(fig:delay-pdf) shows how the different `mu` and `sigma` posterior mean estimates from each inference method alter an estimated delay distribution.
 
 (ref:delay-pdf) Delay probability density functions obtained based on the posterior mean estimated `mu` and `sigma` parameters.
 
-```{r delay-pdf, fig.cap="(ref:delay-pdf)"}
-pmap_df(
+<details><summary>Click to expand for code to create delay PDF plot</summary>
+
+```{r}
+p_delay_pdf <- pmap_df(
   filter(pars), ~ tibble(
     x = seq(0, 25, by = 0.1),
     method = ..1, density = dlnorm(x, ..2, ..3)
@@ -260,6 +278,12 @@ pmap_df(
   theme_minimal() +
   labs(x = "", y = "", col = "Method") +
   theme(legend.position = "bottom")
+```
+
+</details>
+
+```{r delay-pdf, fig.cap="(ref:delay-pdf)"}
+p_delay_pdf
 ```
 
 ## Comparison of time taken

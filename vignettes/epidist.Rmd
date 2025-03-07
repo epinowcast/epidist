@@ -411,7 +411,6 @@ Now we are ready to fit some `epidist` models.
 `epidist` provides a range of models for different settings.
 All `epidist` models have a `as_epidist_<model>_model()` function that can be used to convert the data into a format that the model can use.
 
-
 ## Fit a model that doesn't account for censoring and truncation {#naive}
 
 We will start with the simplest model, which does not account for censoring or truncation.
@@ -519,7 +518,11 @@ Another approach to this would be prodividing `newdata` to `predict_delay_parame
 
 We can now plot posterior draws for the summary parameters from the two models.
 
-```{r pp-params, fig.cap="(ref:pp-params)", class.source = 'fold-hide'}
+(ref:pp-params) The density of posterior draws from the marginal and naive models compared to the true underlying delay distribution (vertical dashed black line).
+
+<details><summary>Click to expand for parameter comparison plot code</summary>
+
+```{r}
 # Create a data frame with true parameter values
 true_params <- secondary_dist |>
   mutate(model = "true") |>
@@ -530,7 +533,7 @@ true_params <- secondary_dist |>
   )
 
 # Plot with true values as vertical lines
-predicted_parameters |>
+p_pp_params <- predicted_parameters |>
   tidyr::pivot_longer(
     cols = c("mu", "sigma", "mean", "sd"),
     names_to = "parameter",
@@ -554,7 +557,11 @@ predicted_parameters |>
   theme(legend.position = "bottom")
 ```
 
-(ref:pp-params) The density of posterior draws from the marginal and naive models compared to the true underlying delay distribution (vertical dashed black line).
+</details>
+
+```{r pp-params, fig.cap="(ref:pp-params)"}
+p_pp_params
+```
 
 As expected we see that the naive model has done a very poor job of recovering the true parameters and the marginal model has done a much better job.
 However, it is important to note that the marginal model doesn't perfectly recover the true parameters either due to information loss in the censoring and truncation and due to the inherent uncertainty in the posterior distribution.
@@ -568,7 +575,9 @@ This tells us how good a fit the estimated delay distribution is to the true del
  Each coloured line represents one possible delay distribution based on the estimated model parameters.
  The naive model shows substantial bias whilst the marginal model better recovers the true distribution.
 
-```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)", class.source = 'fold-hide'}
+<details><summary>Click to expand for code to create fitted distribution plot</summary>
+
+```{r}
 set.seed(123)
 
 predicted_pmfs <- predicted_parameters |>
@@ -590,7 +599,7 @@ predicted_pmfs <- predicted_parameters |>
   ungroup() |>
   mutate(model = factor(model, levels = c("naive", "marginal", "true")))
 
-predicted_pmfs |>
+p_fitted_lognormal <- predicted_pmfs |>
   filter(model != "true") |>
   ggplot() +
   geom_line(
@@ -611,6 +620,12 @@ predicted_pmfs |>
   facet_wrap(~model, scales = "free", nrow = 2) +
   scale_color_brewer(palette = "Set2") +
   theme(legend.position = "none")
+```
+
+</details>
+
+```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
+p_fitted_lognormal
 ```
 
 As expected based on the recovery of the parameters, the marginal model better recovers the true distribution than the naive model which has a substantially shorter mean and different shape.
