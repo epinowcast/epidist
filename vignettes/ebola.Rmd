@@ -273,10 +273,12 @@ To go further than summaries of the fitted model, we recommend using the `tidyba
 For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws()` function.
 The `tidybayes::add_epred_draws()` function uses the `epidist_gen_posterior_predict()` function to generate a posterior prediction function for the `lognormal()` distribution.
 
-<details><summary>Click to expand for code to prepare data for post-processing</summary>
+In Figure \@ref(fig:epred) we show the posterior expectation of the delay distribution for each of the three fitted models.
+Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with women.
+
+<details><summary>Click to expand for code to the posterior expectation plots</summary>
 
 ```{r}
-# add dummmy variables
 add_marginal_dummy_vars <- function(data) {
   return(
     mutate(
@@ -288,38 +290,18 @@ add_marginal_dummy_vars <- function(data) {
     )
   )
 }
-```
 
-</details>
-
-<details><summary>Click to expand for code to prepare expectation plot</summary>
-
-```{r}
 expectation_draws <- obs_prep |>
   data_grid(NA) |>
   add_marginal_dummy_vars() |>
   add_epred_draws(fit, dpar = TRUE)
 
-p_expec_naive <- expectation_draws |>
+p_expec_base <- expectation_draws |>
   ggplot(aes(x = .epred)) +
   stat_halfeye() +
   labs(x = "", y = "", title = "Intercept-only", tag = "A") +
   theme_minimal()
-```
 
-</details>
-
-(ref:expec-naive) Posterior prediction of the delay expectation for the naive (no stratification) model.
-
-```{r expec-naive, fig.cap="(ref:expec-naive)"}
-p_expec_naive
-```
-
-We can do the same with the sex-stratified model (Figure \@ref(fig:expec-sex)):
-
-<details><summary>Click to expand for code to prepare sex-stratified expectation plot</summary>
-
-```{r}
 expectation_draws_sex <- obs_prep |>
   data_grid(sex) |>
   add_marginal_dummy_vars() |>
@@ -330,21 +312,7 @@ p_expec_sex <- expectation_draws_sex |>
   stat_halfeye() +
   labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
   theme_minimal()
-```
 
-</details>
-
-(ref:expec-sex) Posterior prediction of the delay expectation for the sex-stratified model.
-
-```{r expec-sex, fig.cap="(ref:expec-sex)"}
-p_expec_sex
-```
-
-And if we want to see the posterior expectations for all combinations of sex and district, we would do (Figure \@ref(fig:expec-sex-district)):
-
-<details><summary>Click to expand for code to prepare sex-district expectation plot</summary>
-
-```{r}
 expectation_draws_sex_district <- obs_prep |>
   data_grid(sex, district) |>
   add_marginal_dummy_vars() |>
@@ -364,10 +332,11 @@ p_expec_sex_district <- expectation_draws_sex_district |>
 
 </details>
 
-(ref:expec-sex-district) Posterior prediction of the delay expectation for the sex-district stratified model.
+(ref:epred) The fitted posterior expectations of the delay distribution for each model.
 
-```{r expec-sex-district, fig.cap="(ref:expec-sex-district)"}
-p_expec_sex_district
+```{r epred, fig.cap="(ref:epred)", fig.height = 8}
+epred_base_figure / epred_sex_figure / epred_sex_district_figure +
+  plot_layout(heights = c(1, 1.5, 2.5))
 ```
 
 ## Linear predictor posteriors
@@ -475,9 +444,6 @@ pmf_sex_district_figure <- draws_sex_district_pmf |>
   facet_grid(district ~ sex) +
   scale_x_continuous(limits = c(0, 30)) +
   theme_minimal()
-
-p_pmf <- pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
-  plot_layout(heights = c(1, 1.5, 5.5))
 ```
 
 </details>
@@ -485,7 +451,8 @@ p_pmf <- pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
 (ref:pmf) Posterior predictions of the discrete probability mass function for each of the fitted models.
 
 ```{r pmf, fig.cap="(ref:pmf)", fig.height = 16}
-p_pmf
+pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
+  plot_layout(heights = c(1, 1.5, 5.5))
 ```
 
 ### Continuous probability density function
@@ -554,9 +521,6 @@ pdf_sex_district_figure <- draws_sex_district_pdf |>
   facet_grid(district ~ sex) +
   scale_x_continuous(limits = c(0, 30)) +
   theme_minimal()
-
-p_pdf <- pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
-  plot_layout(heights = c(1, 1.5, 5.5))
 ```
 
 </details>
@@ -564,7 +528,8 @@ p_pdf <- pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
 (ref:pdf) Posterior predictions of the continuous probability density function for each of the fitted models.
 
 ```{r pdf, fig.cap="(ref:pdf)", fig.height = 16}
-p_pdf
+pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
+  plot_layout(heights = c(1, 1.5, 5.5))
 ```
 
 # Conclusion
