@@ -1,6 +1,6 @@
 # epidist 0.2.0.1000
 
-This is the development version of `epidist`.
+This release adds support for a wider range of distributions in the marginal model, improves documentation with new vignettes and FAQ sections, enhances the getting started guide with clearer examples of model comparison, and fixes several bugs related to parameter bounds and likelihood calculations.
 
 ## Models
 
@@ -16,11 +16,17 @@ This is the development version of `epidist`.
 - Added a new vignette "Guide to the statistical models implemented in epidist". See #514.
 - Added a new FAQ section showcasing how to use the `posterior` package with `epidist` models, particularly for working with random variables (`rvars`) to propagate uncertainty in calculations. See #547.
 - Added a new FAQ section on how to use the `marginaleffects` package with `epidist` models. See #547.
+- Reduced the focus on simulating data in the getting started vignette to make it more accessible. See #549.
+- Made the entry to the package friendlier with clearer examples and improved documentation. See #549.
+- Added a comparison of fitting naive and marginal models in the getting started vignette to highlight the importance of accounting for biases. See #549.
+- Added examples showing how to extract estimated parameters and plot them against true values to evaluate model performance. See #549.
 
 ## Bugs
 
 - Fixed a vector length issue for censoring that was causing problems in some likelihood calls. See #540.
 - Fixed a bug in the preprocessing of the Weibull family. See #540.
+- Fixed a bug where bounds were not set for mu parameters in custom families. See #549.
+- Fixed a bug in `predict_delay_parameters()` where it couldn't detect brms families when used directly. See #549.
 
 # epidist 0.2.0
 
