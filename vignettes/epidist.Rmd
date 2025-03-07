@@ -203,7 +203,7 @@ obs_cens <- mutate(
 <details><summary>Click to expand for code to create the censored data figure</summary>
 
 ```{r}
-p_censobs_cens |>
+p_cens <- obs_cens |>
   filter(case %% 50 == 0, case <= 500) |>
   ggplot(aes(y = case)) +
   geom_segment(
