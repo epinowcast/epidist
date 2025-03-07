@@ -201,9 +201,7 @@ obs_cens <- mutate(
 )
 ```
 
-(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times.
-A common example of this is when events are reported as daily aggregates.
-While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
+(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. A common example of this is when events are reported as daily aggregates. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
 
 ```{r cens, fig.cap="(ref:cens)", class.source = 'fold-hide'}
 obs_cens |>
@@ -234,8 +232,7 @@ The result is that only those cases with a secondary event occurring before some
 This is called (right) truncation, and biases the observation process towards shorter delays.
 In Figure \@ref(fig:trunc) we see a simulation of this process where we have restricted the data to only include cases where the secondary event occurred before day 10.
 
-(ref:trunc) This figure duplicates Figure \@ref(fig:cens) but adds truncation at 10 days due to stopping the observation period at this point.
-Event pairs using dashed lines are now not observed.
+(ref:trunc) This figure duplicates Figure \@ref(fig:cens) but adds truncation at 10 days due to stopping the observation period at this point. Event pairs using dashed lines are now not observed.
 
 ```{r trunc, fig.cap="(ref:trunc)", class.source = 'fold-hide'}
 obs_cens |>
@@ -291,11 +288,7 @@ obs_cens_trunc_samp <- slice_sample(
 )
 ```
 
-(ref:obs-est) The histogram of delays from the fully observed by double interval censored data `obs_cens` is slightly biased relative to the true distribution (black line).
-This bias is absolute [@park2024estimating] and so will be more problematic for shorter delays.
-The data that was observed in real-time, `obs_cens_trunc_samp`, is more biased still due to right truncation.
-This bias is relative and so will be more problematic for longer delays or when more of the data is truncated.
-We always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present and considering if the data is also meaningfully right truncated.
+(ref:obs-est) The histogram of delays from the fully observed by double interval censored data `obs_cens` is slightly biased relative to the true distribution (black line). This bias is absolute [@park2024estimating] and so will be more problematic for shorter delays. The data that was observed in real-time, `obs_cens_trunc_samp`, is more biased still due to right truncation. This bias is relative and so will be more problematic for longer delays or when more of the data is truncated. We always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present and considering if the data is also meaningfully right truncated.
 
 ```{r obs-est, fig.cap="(ref:obs-est)", class.source = 'fold-hide'}
 # Prepare the complete, retrospective data
@@ -518,8 +511,6 @@ Another approach to this would be prodividing `newdata` to `predict_delay_parame
 
 We can now plot posterior draws for the summary parameters from the two models.
 
-(ref:pp-params) The density of posterior draws from the marginal and naive models compared to the true underlying delay distribution (vertical dashed black line).
-
 <details><summary>Click to expand for parameter comparison plot code</summary>
 
 ```{r}
@@ -559,6 +550,8 @@ p_pp_params <- predicted_parameters |>
 
 </details>
 
+(ref:pp-params) The density of posterior draws from the marginal and naive models compared to the true underlying delay distribution (vertical dashed black line).
+
 ```{r pp-params, fig.cap="(ref:pp-params)"}
 p_pp_params
 ```
@@ -570,10 +563,6 @@ However, it is important to note that the marginal model doesn't perfectly recov
 
 As a final step we can visualise the posterior predictions of the delay distribution.
 This tells us how good a fit the estimated delay distribution is to the true delay distribution.
-
-(ref:fitted-lognormal) The posterior draws from the marginal and naive models (coloured lines, 100 draws from each posterior) compared to the true underlying delay distribution (black line).
- Each coloured line represents one possible delay distribution based on the estimated model parameters.
- The naive model shows substantial bias whilst the marginal model better recovers the true distribution.
 
 <details><summary>Click to expand for code to create fitted distribution plot</summary>
 
@@ -623,6 +612,8 @@ p_fitted_lognormal <- predicted_pmfs |>
 ```
 
 </details>
+
+(ref:fitted-lognormal) The posterior draws from the marginal and naive models (coloured lines, 100 draws from each posterior) compared to the true underlying delay distribution (black line). Each coloured line represents one possible delay distribution based on the estimated model parameters. The naive model shows substantial bias whilst the marginal model better recovers the true distribution.
 
 ```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
 p_fitted_lognormal

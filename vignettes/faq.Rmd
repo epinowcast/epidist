@@ -261,7 +261,7 @@ We recommend use of the [`priorsense`](https://github.com/n-kall/priorsense) pac
 library(priorsense)
 powerscale_plot_dens(fit, variable = c("Intercept", "Intercept_sigma")) +
   theme_minimal()
-```{r}
+```
 
 # What do the parameters in my model output correspond to?
 
