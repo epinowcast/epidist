@@ -46,9 +46,9 @@ library(epidist)
 library(brms)
 library(dplyr)
 library(ggplot2)
-library(tidybayes)  # nolint
-library(modelr)  # nolint
-library(patchwork)  # nolint
+library(tidybayes) # nolint
+library(modelr) # nolint
+library(patchwork) # nolint
 library(cmdstanr) # nolint
 ```
 
