@@ -29,26 +29,26 @@ knitr::opts_chunk$set(
 )
 ```
 
-Many quantities in epidemiology can be thought of as the time between two events or "delays".
-Important examples include:
+In epidemiology, we often need to understand the time between key events - what we call "delays".
+Think about things like:
 
-* the incubation period (time between infection and symptom onset),
-* serial interval (time between symptom onset of infectee and symptom onset of infected), and
-* generation interval (time between infection of infectee and infection of infected).
+* incubation period (how long between getting infected and showing symptoms),
+* serial interval (time between when one person shows symptoms and when someone they infected shows symptoms), and
+* generation interval (time between when one person gets infected and when they infect someone else).
 
-We encompass all of these delays as the time between a "primary event" and "secondary event".
-Unfortunately, estimating delays accurately from observational data is usually difficult.
-In our experience, the two main issues are:
+We can think of all these as the time between a "primary event" and a "secondary event".
 
-1. interval censoring, and
-2. right truncation.
+The tricky bit? Getting accurate estimates of these delays from real-world data is a challenge. The two main challenges we typically face are:
 
-Don't worry if you've not come across these terms before.
-First, in Section \@ref(data), we explain interval censoring and right truncation by simulating data like that we might observe during an ongoing infectious disease outbreak.
-Then, in Section \@ref(fit), we show how `epidist` can be used to accurately estimate delay distributions by using a statistical model which properly accounts for these two issues.
+1. interval censoring (we often only know events happened within a time window, not the exact time), and
+2. right truncation (we might miss observing later events if our observation period ends).
 
-If you would like more technical details, the `epidist` package implements models following best practices as described in @park2024estimating and @charniga2024best.
-We also recommend the introduction provided by the [nowcasting and forecasting infectious disease dynamics](https://nfidd.github.io/nfidd/) course.
+Don't worry if these terms sound a bit technical! In Section \@ref(data), we'll walk through what these issues look like by simulating the kind of data you might see during an outbreak.
+Then in Section \@ref(fit), we'll show how `epidist` helps you estimate delay distributions accurately by accounting for these issues.
+
+For those interested in the technical details, `epidist` implements models following best practices in the field.
+Check out @park2024estimating for a methodological overview and @charniga2024best for a practical checklist designed for applied users.
+We also recommend the [nowcasting and forecasting infectious disease dynamics](https://nfidd.github.io/nfidd/) course for more hands on learning.
 
 # Setup {#setup}
 
@@ -59,9 +59,10 @@ library(epidist)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(purrr)
 ```
 
-# Simulating data {#data .tabset}
+# Simulating data {#data}
 
 We simulate data from an outbreak setting where the primary event is symptom onset and the secondary event is case notification.
 As would be the typical we assume that both events are dates and so we do not know precise event times.
@@ -87,6 +88,7 @@ We assume that the outbreak has a growth rate of 0.2 and that we observe the out
 growth_rate <- 0.2
 obs_time <- 25
 ```
+
 <details><summary>Click to expand for simulation details</summary>
 
 First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data (Figure \@ref(fig:outbreak)) from a stochastic compartmental model.
@@ -127,7 +129,7 @@ obs <- simulate_secondary(
 
 (ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
 
-```{r lognormal, fig.cap="(ref:lognormal)"}
+```{r lognormal, fig.cap="(ref:lognormal)", class.source = 'fold-hide'}
 ggplot(data.frame(x = c(0, 30)), aes(x = x)) +
   geom_function(
     fun = dlnorm,
@@ -180,13 +182,13 @@ obs_cens <- mutate(
     ptime_upr = .data$ptime_lwr + 1,
     stime_lwr = floor(.data$stime),
     stime_upr = .data$stime_lwr + 1,
-    delay_daily = ptime_lwr - stime_lwr
+    delay_daily = stime_lwr - ptime_lwr
   )
 ```
 
 (ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. A common example of this is when events are reported as daily aggregates. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
 
-```{r cens, fig.cap="(ref:cens)"}
+```{r cens, fig.cap="(ref:cens)", class.source = 'fold-hide'}
 obs_cens |>
   filter(case %% 50 == 0, case <= 250) |>
   ggplot(aes(y = case)) +
@@ -241,7 +243,7 @@ The data that was observed in real-time, `obs_cens_trunc_samp`, is more biased s
 This bias is relative and so will be more problematic for longer delays or when more of the data is truncated.
 We always recommend [@charniga2024best; Table 2] adjusting for censoring when it is present and considering if the data is also meaningfully right truncated.
 
-```{r obs-est, fig.cap="(ref:obs-est)"}
+```{r obs-est, fig.cap="(ref:obs-est)", class.source = 'fold-hide'}
 # Prepare the complete, retrospective data
 complete_data <- obs_cens |>
   mutate(type = "Complete, retrospective data") |>
@@ -427,11 +429,12 @@ summary(marginal_fit)
 
 Compared to the naive fit we see good recovery of the true distribution parameters (remember these were 1.6 for the logmean and 0.5 (or ~-0.69 on te log scale)) for the log sd.
 
-# Compare the {#compare}
+# Compare the two models estimated delay parameters {#compare}
 
 We can compare the two models by plotting the estimated parameters from the naive and marginal models.
 One way to do this is to use the `predict_delay_parameters()` function to extract the posterior samples and then plot them.
 Internally this function uses can also add the mean and standard deviation parameters to the output so that it is easier to understand the distribution.
+
 ```{r}
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
   lapply(predict_delay_parameters) |>
@@ -448,10 +451,9 @@ This prevents repeating the same prediction for each row.
 Another approach to this would be prodividing `newdata` to `predict_delay_parameters()` representing the data we want to make predictions for.
 :::
 
-
 We can now plot posterior draws for the summary parameters from the two models.
 
-```{r}
+```{r class.source = 'fold-hide'}
 # Create a data frame with true parameter values
 true_params <- secondary_dist |>
   mutate(model = "true") |>
@@ -489,15 +491,17 @@ However, it is important to note that the marginal model doesn't perfectly recov
 
 # Visualise posterior predictions of the true delay distribution {#postprocessing}
 
-Figure \@ref(fig:fitted-lognormal) shows the lognormal delay distribution obtained for 100 draws from the posterior distribution of the `mu` and `sigma` parameters.
-Whereas in Figure \@ref(fig:obs-est) the histogram of censored, truncated, sampled data was substantially different to the underlying delay distribution, using `epidist()` we have obtained a much closer match to the truth.
+As a final step we can visualise the posterior predictions of the delay distribution.
+This tells us how good a fit the estimated delay distribution is to the true delay distribution.
 
-(ref:fitted-lognormal) The fitted delay distribution (pink lines, 100 draws from the posterior) compared to the true underlying delay distribution (black line). Each pink line represents one possible delay distribution based on the fitted model parameters.
+(ref:fitted-lognormal) The posterior draws from the marginal and naive models (coloured lines, 100 draws from each posterior) compared to the true underlying delay distribution (black line).
+ Each coloured line represents one possible delay distribution based on the estimated model parameters.
+ The naive model shows substantial bias whilst the marginal model better recovers the true distribution.
 
-```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
+```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)", class.source = 'fold-hide'}
 set.seed(123)
 
-predicted_parameters |>
+predicted_pmfs <- predicted_parameters |>
   group_by(model) |>
   slice_sample(n = 100) |>
   bind_rows(mutate(secondary_dist, model = "true")) |>
@@ -506,23 +510,37 @@ predicted_parameters |>
   mutate(
     predictions = purrr::map2(
       mu, sigma,
-      ~tibble(x = seq(0, 15, by = 1),
+      ~tibble(x = seq(0, 15, by = 0.1),
         y = dlnorm(x, meanlog = .x, sdlog = .y)
       )
     )
   ) |>
-  unnest(predictions)
+  unnest(predictions) |>
+  ungroup()
+
+
+predicted_pmfs |>
+  filter(model != "true") |>
   ggplot() +
-  # Plot the true distributionlor = "#CC79A7"
-    )
-  }) +
+  geom_line(
+    aes(x = x, y = y, col = model, group = draw), alpha = 0.05, linewidth = 1
+  ) +
+  geom_line(
+    data = select(filter(predicted_pmfs, model == "true"), -model),
+    aes(x = x, y = y),
+    linewidth = 1.5,
+    col = "black"
+  ) +
   labs(
     x = "Delay between primary and secondary event (days)",
     y = "Probability density"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  facet_wrap(~model, scales = "free") +
+  theme(legend.position = "none")
 ```
 
+As expected based on the recovery of the parameters, the marginal model better recovers the true distribution than the naive model which has a substantially shorter mean and different shape.
 # Learning more {#learning-more}
 
 The `epidist` package provides several additional vignettes to help you learn more about the package and its capabilities:
