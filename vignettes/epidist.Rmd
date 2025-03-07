@@ -200,11 +200,13 @@ obs_cens <- mutate(
 )
 ```
 
-(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. A common example of this is when events are reported as daily aggregates. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
+(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times.
+A common example of this is when events are reported as daily aggregates.
+While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
 
 ```{r cens, fig.cap="(ref:cens)", class.source = 'fold-hide'}
 obs_cens |>
-  filter(case %% 50 == 0, case <= 250) |>
+  filter(case %% 50 == 0, case <= 500) |>
   ggplot(aes(y = case)) +
   geom_segment(
     aes(x = ptime, xend = stime, y = case, yend = case),
@@ -228,7 +230,40 @@ obs_cens |>
 
 During an outbreak we will usually be estimating delays in real time.
 The result is that only those cases with a secondary event occurring before some time will be observed.
-This is called (right) truncation, and biases the observation process towards shorter delays:
+This is called (right) truncation, and biases the observation process towards shorter delays.
+(ref:trunc) right truncation of the secondary event times biases the observation process towards shorter delays.
+
+```{r trunc, fig.cap="(ref:trunc)", class.source = 'fold-hide'}
+obs_cens |>
+  filter(case %% 50 == 0, case <= 500) |>
+  mutate(
+    observed = ifelse(stime_upr <= 10, "observed", "not observed"),
+    observed = factor(observed, levels = c("observed", "not observed"))
+  ) |>
+  ggplot(aes(y = case)) +
+  geom_segment(
+    aes(x = ptime, xend = stime, y = case, yend = case, linetype = observed),
+    col = "grey"
+  ) +
+  # The primary event censoring intervals
+  geom_errorbarh(
+    aes(xmin = ptime_lwr, xmax = ptime_upr, y = case),
+    col = "#56B4E9", height = 5
+  ) +
+  # The secondary event censoring intervals
+  geom_errorbarh(
+    aes(xmin = stime_lwr, xmax = stime_upr, y = case),
+    col = "#009E73", height = 5
+  ) +
+  geom_point(aes(x = ptime), fill = "white", col = "#56B4E9", shape = 21) +
+  geom_point(aes(x = stime), fill = "white", col = "#009E73", shape = 21) +
+  geom_vline(xintercept = 10, col = "black", linetype = "dashed") +
+  labs(x = "Event time (day)", y = "Case number") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+We can simulate the effect of right truncation by restricting the data to only include cases where the secondary event occurred before the observation time.
 
 ```{r}
 obs_cens_trunc <- obs_cens |>
@@ -261,7 +296,7 @@ We always recommend [@charniga2024best; Table 2] adjusting for censoring when it
 ```{r obs-est, fig.cap="(ref:obs-est)", class.source = 'fold-hide'}
 # Prepare the complete, retrospective data
 complete_data <- obs_cens |>
-  mutate(type = "Complete, retrospective data") |>
+  mutate(type = "Censored retrospective data") |>
   select(delay = delay_daily, type)
 
 # Prepare the censored, truncated, sampled data
@@ -284,14 +319,15 @@ ggplot(plot_data) +
     aes(x = delay, y = p, fill = type, group = type),
     position = position_dodge2(preserve = "single")
   ) +
-  scale_fill_manual(values = c("#CC79A7", "#0072B2")) +
+  scale_fill_brewer(palette = "Set2") +
   geom_function(
     data = data.frame(x = c(0, 30)), aes(x = x),
     fun = dlnorm,
     args = list(
       meanlog = secondary_dist[["mu"]],
       sdlog = secondary_dist[["sigma"]]
-    )
+    ),
+    linewidth = 1.5
   ) +
   labs(
     x = "Delay between primary and secondary event (days)",
@@ -362,8 +398,29 @@ If your data was not daily censored, you can provide the upper bounds (`pdate_up
 Internally this function converts the data into a relative (to the first event date) time format and creates a variable (`delay`) which contains the observed delay.
 These are the variables that `epidist` will use to fit the model.
 
+Other formats are supported, for example aggregate data (e.g. daily case counts), and there is functionality to map between these formats.
+See `?as_epidist_aggregate_data()` for more details.
 
-Other formats are supported for example aggregate data (e.g. daily case counts) and there is functionality to map between these formats.
+# Visualising the data
+
+Before fitting a model, it's useful to visualise the data to understand the distribution of delays and the observation process.
+We'll create a plot showing the primary event times (symptom onset), secondary event times (case notification), and the observation time.
+
+```{r}
+linelist_data |>
+  as_epidist_aggregate_data() |>
+  select(ptime_lwr, stime_lwr, n) |>
+  pivot_longer(
+    cols = c("ptime_lwr", "stime_lwr"),
+    names_to = "type",
+    values_to = "time"
+  ) |>
+  ggplot() +
+  geom_point(aes(x = date, y = n, col = type)) +
+  geom_point(aes(x = obs_time, y = delay))
+```
+
+Note that here we have used `as_epidist_aggregate_data()` to convert the data into an aggregate format in order to make plotting the data easier.
 
 # Fit a model that doesn't account for censoring and truncation {#naive}
 
@@ -455,6 +512,7 @@ Internally this function uses can also add the mean and standard deviation param
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
   lapply(predict_delay_parameters) |>
   bind_rows(.id = "model") |>
+  mutate(model = factor(model, levels = c("naive", "marginal"))) |>
   filter(index == 1)
 
 head(predicted_parameters)
@@ -500,6 +558,7 @@ predicted_parameters |>
   facet_wrap(~parameter, scales = "free") +
   theme_minimal() +
   labs(title = "Parameter estimates compared to true values") +
+  scale_fill_brewer(palette = "Set2") +
   theme(legend.position = "bottom")
 ```
 
@@ -534,8 +593,8 @@ predicted_pmfs <- predicted_parameters |>
     )
   ) |>
   unnest(predictions) |>
-  ungroup()
-
+  ungroup() |>
+  mutate(model = factor(model, levels = c("naive", "marginal", "true")))
 
 predicted_pmfs |>
   filter(model != "true") |>
@@ -556,6 +615,7 @@ predicted_pmfs |>
   ) +
   theme_minimal() +
   facet_wrap(~model, scales = "free") +
+  scale_color_brewer(palette = "Set2") +
   theme(legend.position = "none")
 ```
 
