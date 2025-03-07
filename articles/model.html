@@ -79,7 +79,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Guide to the statistical models implemented in epidist</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/epinowcast/epidist/blob/v0.3.0/vignettes/model.Rmd" class="external-link"><code>vignettes/model.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/epinowcast/epidist/blob/main/vignettes/model.Rmd" class="external-link"><code>vignettes/model.Rmd</code></a></small>
       <div class="d-none name"><code>model.Rmd</code></div>
     </div>
 
@@ -144,15 +144,15 @@ On the other hand, if data collection is continued until the end of an outbreak 
 Let <span class="math inline">\(P\)</span> and <span class="math inline">\(S\)</span> be random variables.
 Let <span class="math inline">\(F_p\)</span> be the forward cumulative distribution.
 Then, the probability of observing a delay of length <span class="math inline">\(\tau\)</span> given that the primary event occurred at time <span class="math inline">\(p\)</span> and a truncation at time <span class="math inline">\(T\)</span> can be written as:
-<span class="math display" id="eq:right-truncation">\[
+<span class="math display">\[
 \begin{aligned}
 \mathbb{P}(S = P + \tau \, | \, P = p, S &lt; T) &amp;= \frac{\mathbb{P}(S = P + \tau, P = p, S &lt; T)}{\mathbb{P}(P = p, S &lt; T)} \\
 &amp;= \frac{\mathbb{P}(S = P + \tau &lt; T \, | \, P = p)\mathbb{P}(P = p)}{\mathbb{P}(S &lt; T \, | \, P = p)\mathbb{P}(P = p)} \\
 &amp;= \frac{\mathbb{P}(S = P + \tau &lt; T \, | \, P = p)}{\mathbb{P}(S &lt; T \, | \, P = p)} \\
-&amp;= \frac{f_p(\tau)}{\int_0^{T - p} f_p(x) \text{d}x} = \frac{f_p(\tau)}{F_p(T - p)}, \quad p + \tau &lt; T. \tag{1.3}
+&amp;= \frac{f_p(\tau)}{\int_0^{T - p} f_p(x) \text{d}x} = \frac{f_p(\tau)}{F_p(T - p)}, \quad p + \tau &lt; T.
 \end{aligned}
 \]</span></p>
-<p>Examining Equation <a href="#eq:right-truncation">(1.3)</a> illustrates that (right) truncation renormalises the density by the values which are possible.
+<p>Examining this equation illustrates that (right) truncation renormalises the density by the values which are possible.
 For example, if the distribution <span class="math inline">\(x \sim \text{Unif}(0, 1)\)</span> were right truncated by <span class="math inline">\(T = 0.5\)</span> then <span class="math inline">\(x \sim \text{Unif}(0, 0.5)\)</span>.</p>
 </div>
 <div class="section level3" number="1.3">
@@ -196,9 +196,9 @@ where $ g_P(x,|,P_L,P_R)$ represents the conditional distribution of primary eve
 <span class="header-section-number">2</span> The naive model<a class="anchor" aria-label="anchor" href="#the-naive-model"></a>
 </h2>
 <p>The simplest approach to modelling epidemiological delay distributions is ignoring truncation and censoring biases and simply treating the delays as continuous fully observed data.
-Then, the likelihood of observing a delay <span class="math inline">\(\mathbf{Y}_i\)</span> given parameter <span class="math inline">\(\boldsymbol{\theta}\)</span> is straightforward:
+Then, the likelihood of observing a delay <span class="math inline">\(\mathbf{Y}_i\)</span> given parameter <span class="math inline">\(\mathbf{\theta}\)</span> is straightforward:
 <span class="math display">\[
-\mathcal{L}(\mathbf{Y}_i \, | \, \boldsymbol{\theta}) = f(y_i - x_i).
+\mathcal{L}(\mathbf{Y}_i \, | \, \mathbf{\theta}) = f(y_i - x_i).
 \]</span>
 where <span class="math inline">\(y_i\)</span> and <span class="math inline">\(x_i\)</span> are the observed primary and secondary event times.</p>
 <p>As shown in <span class="citation">(<a href="#ref-park2024estimating">Park et al. 2024</a>)</span> when the data is double censored this modelling approach biases the mean by approximately a day as well as the standard deviation.
@@ -230,7 +230,7 @@ Using latent variables, we can now rewrite the observation likelihood as:
 \begin{aligned}
 x_i &amp;\sim g_P(x_i \, | \, p_{L, i}, p_{R, i}) \\
 y_i &amp;\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
-\mathcal{L}(\mathbf{Y} \, | \, \boldsymbol{\theta}) &amp;= \prod_i \left[ \frac{f_{x_i}(y_i - x_i)}{\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_z(T - z) \text{d}z} \right].
+\mathcal{L}(\mathbf{Y} \, | \, \mathbf{\theta}) &amp;= \prod_i \left[ \frac{f_{x_i}(y_i - x_i)}{\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_z(T - z) \text{d}z} \right].
 \end{aligned}
 \]</span>
 As before, <span class="math inline">\(g_P(z \, | \, p_{L, i}, p_{R, i})\)</span> represents the conditional distribution of the primary event given lower <span class="math inline">\(P_L\)</span> and upper <span class="math inline">\(P_R\)</span> bounds; this is equivalent to modelling the incidence in primary events.</p>
