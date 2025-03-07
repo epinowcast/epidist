@@ -296,7 +296,7 @@ expectation_draws <- obs_prep |>
   add_marginal_dummy_vars() |>
   add_epred_draws(fit, dpar = TRUE)
 
-p_expec_base <- expectation_draws |>
+epred_base_figure <- expectation_draws |>
   ggplot(aes(x = .epred)) +
   stat_halfeye() +
   labs(x = "", y = "", title = "Intercept-only", tag = "A") +
@@ -307,7 +307,7 @@ expectation_draws_sex <- obs_prep |>
   add_marginal_dummy_vars() |>
   add_epred_draws(fit_sex, dpar = TRUE)
 
-p_expec_sex <- expectation_draws_sex |>
+epred_sex_figure <- expectation_draws_sex |>
   ggplot(aes(x = .epred, y = sex)) +
   stat_halfeye() +
   labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
@@ -318,7 +318,7 @@ expectation_draws_sex_district <- obs_prep |>
   add_marginal_dummy_vars() |>
   add_epred_draws(fit_sex_district, dpar = TRUE)
 
-p_expec_sex_district <- expectation_draws_sex_district |>
+epred_sex_district_figure <- expectation_draws_sex_district |>
   ggplot(aes(x = .epred, y = district)) +
   stat_pointinterval() +
   facet_grid(. ~ sex) +
