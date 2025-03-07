@@ -21,8 +21,8 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/faq.html">FAQ</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/epidist.html">Get started</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/epidist.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/faq.html">FAQ</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
@@ -53,7 +53,7 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0.1000" id="epidist-0201000">epidist 0.2.0.1000<a class="anchor" aria-label="anchor" href="#epidist-0201000"></a></h2>
-<p>This is the development version of <code>epidist</code>.</p>
+<p>This release adds support for a wider range of distributions in the marginal model, improves documentation with new vignettes and FAQ sections, enhances the getting started guide with clearer examples of model comparison, and fixes several bugs related to parameter bounds and likelihood calculations.</p>
 <div class="section level3">
 <h3 id="models-0-2-0-1000">Models<a class="anchor" aria-label="anchor" href="#models-0-2-0-1000"></a></h3>
 <ul><li>Added Stan-side support for fitting all distributions supported by <code>primarycensored</code> in the marginal model. See <a href="https://github.com/epinowcast/epidist/issues/540" class="external-link">#540</a>.</li>
@@ -68,11 +68,18 @@
 <ul><li>Added a new vignette “Guide to the statistical models implemented in epidist”. See <a href="https://github.com/epinowcast/epidist/issues/514" class="external-link">#514</a>.</li>
 <li>Added a new FAQ section showcasing how to use the <code>posterior</code> package with <code>epidist</code> models, particularly for working with random variables (<code>rvars</code>) to propagate uncertainty in calculations. See <a href="https://github.com/epinowcast/epidist/issues/547" class="external-link">#547</a>.</li>
 <li>Added a new FAQ section on how to use the <code>marginaleffects</code> package with <code>epidist</code> models. See <a href="https://github.com/epinowcast/epidist/issues/547" class="external-link">#547</a>.</li>
+<li>Reduced the focus on simulating data in the getting started vignette to make it more accessible. See <a href="https://github.com/epinowcast/epidist/issues/549" class="external-link">#549</a>.</li>
+<li>Made the entry to the package friendlier with clearer examples and improved documentation. See <a href="https://github.com/epinowcast/epidist/issues/549" class="external-link">#549</a>.</li>
+<li>Added a schematic to explain right truncation more clearly to the getting started vignette. See <a href="https://github.com/epinowcast/epidist/issues/549" class="external-link">#549</a>.</li>
+<li>Added a comparison of fitting naive and marginal models in the getting started vignette to highlight the importance of accounting for biases. See <a href="https://github.com/epinowcast/epidist/issues/549" class="external-link">#549</a>.</li>
+<li>Added examples showing how to extract estimated parameters and plot them against true values to evaluate model performance. See <a href="https://github.com/epinowcast/epidist/issues/549" class="external-link">#549</a>.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="bugs-0-2-0-1000">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-2-0-1000"></a></h3>
 <ul><li>Fixed a vector length issue for censoring that was causing problems in some likelihood calls. See <a href="https://github.com/epinowcast/epidist/issues/540" class="external-link">#540</a>.</li>
 <li>Fixed a bug in the preprocessing of the Weibull family. See <a href="https://github.com/epinowcast/epidist/issues/540" class="external-link">#540</a>.</li>
+<li>Fixed a bug where bounds were not set for mu parameters in custom families. See <a href="https://github.com/epinowcast/epidist/issues/549" class="external-link">#549</a>.</li>
+<li>Fixed a bug in <code><a href="../reference/predict_delay_parameters.html">predict_delay_parameters()</a></code> where it couldn’t detect brms families when used directly. See <a href="https://github.com/epinowcast/epidist/issues/549" class="external-link">#549</a>.</li>
 </ul></div>
 </div>
     <div class="section level2">
