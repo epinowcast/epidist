@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.0.1000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.1000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,19 +52,23 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.2.0.1000" id="epidist-0201000">epidist 0.2.0.1000<a class="anchor" aria-label="anchor" href="#epidist-0201000"></a></h2>
+<h2 class="pkg-version" data-toc-text="3.0.0.1000" id="epidist-3001000">epidist 3.0.0.1000<a class="anchor" aria-label="anchor" href="#epidist-3001000"></a></h2>
+<p>This is the development release.</p>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="epidist-030">epidist 0.3.0<a class="anchor" aria-label="anchor" href="#epidist-030"></a></h2>
 <p>This release adds support for a wider range of distributions in the marginal model, improves documentation with new vignettes and FAQ sections, enhances the getting started guide with clearer examples of model comparison, and fixes several bugs related to parameter bounds and likelihood calculations.</p>
 <div class="section level3">
-<h3 id="models-0-2-0-1000">Models<a class="anchor" aria-label="anchor" href="#models-0-2-0-1000"></a></h3>
+<h3 id="models-0-3-0">Models<a class="anchor" aria-label="anchor" href="#models-0-3-0"></a></h3>
 <ul><li>Added Stan-side support for fitting all distributions supported by <code>primarycensored</code> in the marginal model. See <a href="https://github.com/epinowcast/epidist/issues/540" class="external-link">#540</a>.</li>
 <li>Added R-side analytical likelihood support for Lognormal, Gamma, and Weibull distributions. See <a href="https://github.com/epinowcast/epidist/issues/540" class="external-link">#540</a>.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="package-0-2-0-1000">Package<a class="anchor" aria-label="anchor" href="#package-0-2-0-1000"></a></h3>
+<h3 id="package-0-3-0">Package<a class="anchor" aria-label="anchor" href="#package-0-3-0"></a></h3>
 <ul><li>Remove caching of vignettes. See <a href="https://github.com/epinowcast/epidist/issues/533" class="external-link">#533</a>.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="documentation-0-2-0-1000">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-2-0-1000"></a></h3>
+<h3 id="documentation-0-3-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-3-0"></a></h3>
 <ul><li>Added a new vignette “Guide to the statistical models implemented in epidist”. See <a href="https://github.com/epinowcast/epidist/issues/514" class="external-link">#514</a>.</li>
 <li>Added a new FAQ section showcasing how to use the <code>posterior</code> package with <code>epidist</code> models, particularly for working with random variables (<code>rvars</code>) to propagate uncertainty in calculations. See <a href="https://github.com/epinowcast/epidist/issues/547" class="external-link">#547</a>.</li>
 <li>Added a new FAQ section on how to use the <code>marginaleffects</code> package with <code>epidist</code> models. See <a href="https://github.com/epinowcast/epidist/issues/547" class="external-link">#547</a>.</li>
@@ -75,7 +79,7 @@
 <li>Added examples showing how to extract estimated parameters and plot them against true values to evaluate model performance. See <a href="https://github.com/epinowcast/epidist/issues/549" class="external-link">#549</a>.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="bugs-0-2-0-1000">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-2-0-1000"></a></h3>
+<h3 id="bugs-0-3-0">Bugs<a class="anchor" aria-label="anchor" href="#bugs-0-3-0"></a></h3>
 <ul><li>Fixed a vector length issue for censoring that was causing problems in some likelihood calls. See <a href="https://github.com/epinowcast/epidist/issues/540" class="external-link">#540</a>.</li>
 <li>Fixed a bug in the preprocessing of the Weibull family. See <a href="https://github.com/epinowcast/epidist/issues/540" class="external-link">#540</a>.</li>
 <li>Fixed a bug where bounds were not set for mu parameters in custom families. See <a href="https://github.com/epinowcast/epidist/issues/549" class="external-link">#549</a>.</li>
