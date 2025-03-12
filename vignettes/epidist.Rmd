@@ -29,6 +29,13 @@ knitr::opts_chunk$set(
 )
 ```
 
+::: {.alert .alert-primary}
+`epidist` implements models following best practices in the field of infectious disease epidemiology.
+We highly recommend reading @charniga2024best before starting this vignette.
+For those interested in the technical details, check out @park2024estimating.
+We also recommend the [nowcasting and forecasting infectious disease dynamics](https://nfidd.github.io/nfidd/) course for more hands on learning.
+:::
+
 `epidist` is a toolkit for flexibly estimating epidemiological delays built on top of `brms` (Bayesian Regression Models using Stan).
 `brms` provides a powerful framework for Bayesian modelling with an accessible R interface to Stan.
 By building on `brms`, `epidist` inherits the ability to work within the broader `brms` ecosystem, allowing users to leverage existing tools for model diagnostics, posterior predictive checks, and model comparison while addressing the specific challenges of delay distribution estimation.
@@ -57,10 +64,6 @@ The tricky bit? Getting accurate estimates of these delays from real-world data 
 
 Don't worry if these terms sound a bit technical! In Section \@ref(data), we'll walk through what these issues look like by simulating the kind of data you might see during an outbreak.
 Then in Section \@ref(fit), we'll show how `epidist` helps you estimate delay distributions accurately by accounting for these issues.
-
-For those interested in the technical details, `epidist` implements models following best practices in the field.
-Check out @park2024estimating for a methodological overview and @charniga2024best for a practical checklist designed for applied users.
-We also recommend the [nowcasting and forecasting infectious disease dynamics](https://nfidd.github.io/nfidd/) course for more hands on learning.
 
 # Setup {#setup}
 
