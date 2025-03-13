@@ -27,9 +27,10 @@ observation. The prep object must have the following variables:
 \description{
 This function creates a log likelihood function that calculates the marginal
 likelihood for a single observation by integrating over the latent primary
-and secondary event windows. The integration is performed numerically using
-\code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}} which handles the double censoring and truncation
-of the delay distribution.
+and secondary event windows. Where analytical solutions exist in
+\code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}} these are used, otherwise the integration is
+performed numerically. \code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}} handles the double
+censoring and truncation of the delay distribution.
 }
 \details{
 The marginal likelihood accounts for uncertainty in both the primary and

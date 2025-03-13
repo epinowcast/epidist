@@ -40,7 +40,8 @@ epidist_diagnostics <- function(fit) {
   if (fit$algorithm %in% c("laplace", "meanfield", "fullrank", "pathfinder")) {
     cli_abort(c(
       "!" = paste0(
-        "Diagnostics not yet supported for the algorithm: ", fit$algorithm
+        "Diagnostics not yet supported for the algorithm: ",
+        fit$algorithm
       )
     ))
   }
@@ -57,8 +58,9 @@ epidist_diagnostics <- function(fit) {
       max_treedepth = max(np[treedepth_ind, ]$Value)
     ) |>
       mutate(
-        no_at_max_treedepth =
-          sum(np[treedepth_ind, ]$Value == .data$max_treedepth),
+        no_at_max_treedepth = sum(
+          np[treedepth_ind, ]$Value == .data$max_treedepth
+        ),
         per_at_max_treedepth = .data$no_at_max_treedepth / samples
       )
   } else {

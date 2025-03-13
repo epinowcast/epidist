@@ -1,6 +1,6 @@
 Package: epidist
 Title: Estimate Epidemiological Delay Distributions With brms
-Version: 0.2.0.1000
+Version: 0.3.0.1000
 Authors@R:
   c(person(given = "Adam Howes",
            role = c("aut"),
@@ -26,7 +26,9 @@ Description: Understanding and accurately estimating epidemiological delay
     and resource allocation. This package provides methods to address
     the key challenges in estimating these distributions, including truncation,
     interval censoring, and dynamical biases. These issues are frequently
-    overlooked, resulting in biased conclusions.
+    overlooked, resulting in biased conclusions. Built on top of 'brms',
+    it allows for flexible modelling including time-varying spatial components
+    and partially pooled estimates of demographic characteristics.
 License: MIT + file LICENSE
 URL: https://epidist.epinowcast.org/,
     https://github.com/epinowcast/epidist/
@@ -35,36 +37,38 @@ Depends:
     R (>= 4.0.0)
 Imports:
     brms,
-    ggplot2,
-    purrr,
-    stats,
-    cli,
     checkmate,
-    rstan (>= 2.26.0),
+    cli,
     dplyr,
-    tibble,
-    tidyr,
     lubridate,
-    primarycensored
+    primarycensored,
+    purrr,
+    rstan (>= 2.26.0),
+    stats,
+    tibble,
+    tidyr
 Suggests:
-    bookdown,
-    testthat (>= 3.0.0),
-    gt,
-    knitr,
-    roxyglobals,
     bayesplot,
-    posterior,
-    tidybayes,
+    BH (>= 1.66.0),
+    bookdown,
+    cmdstanr,
+    CodeDepends,
+    collapse,
+    ggplot2,
+    knitr,
+    loo,
+    marginaleffects,
     modelr,
     patchwork,
     pkgdown,
-    cmdstanr,
+    posterior,
     priorsense,
-    usethis,
-    CodeDepends,
-    BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
-    RcppEigen (>= 0.3.3.3.0)
+    RcppEigen (>= 0.3.3.3.0),
+    roxyglobals,
+    testthat (>= 3.0.0),
+    tidybayes,
+    usethis
 Remotes:
     stan-dev/cmdstanr
 Config/Needs/website:

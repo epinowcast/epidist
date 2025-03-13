@@ -4,10 +4,10 @@
 \alias{.rename_columns}
 \title{Rename the columns of a \code{data.frame}}
 \usage{
-.rename_columns(df, new_names, old_names)
+.rename_columns(data, new_names, old_names)
 }
 \arguments{
-\item{df}{A \code{data.frame} to rename the columns of.}
+\item{data}{A \code{data.frame} to rename the columns of.}
 
 \item{new_names}{A character vector of new column names.}
 

@@ -1,3 +1,4 @@
+# fmt: skip file
 test_that("epidist_family.default gives an error when passed a list", { # nolint: line_length_linter.
   expect_error(epidist_family(list()))
 })

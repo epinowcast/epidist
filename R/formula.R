@@ -42,7 +42,8 @@ epidist_formula_model <- function(data, formula, ...) {
 #' @export
 epidist_formula_model.default <- function(data, formula, ...) {
   formula <- stats::update(
-    formula, delay ~ .
+    formula,
+    delay ~ .
   )
   return(formula)
 }

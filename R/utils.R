@@ -25,9 +25,13 @@
 #'
 #' @keywords internal
 .version_stanvar <- function() {
-  version <- utils::packageVersion("epidist")
-  comment <- paste0("// code chunks used from epidist ", version, "\n")
-  return(brms::stanvar(scode = comment, block = "functions"))
+  pkg_version <- utils::packageVersion("epidist")
+  version_comment <- paste0(
+    "// code chunks used from epidist ",
+    pkg_version,
+    "\n"
+  )
+  return(brms::stanvar(scode = version_comment, block = "functions"))
 }
 
 #' Round to the nearest multiple
@@ -85,8 +89,13 @@
 #' @importFrom dplyr full_join filter select mutate bind_rows
 #' @importFrom brms as.brmsprior
 #' @autoglobal
-.replace_prior <- function(old_prior, prior, warn = FALSE, merge = TRUE,
-                           enforce_presence = TRUE) {
+.replace_prior <- function(
+  old_prior,
+  prior,
+  warn = FALSE,
+  merge = TRUE,
+  enforce_presence = TRUE
+) {
   if (!isTRUE(merge)) {
     return(prior)
   }
@@ -127,16 +136,18 @@
     prior <- bind_rows(hold_prior, hold_prior_old)
   } else {
     prior <- dplyr::full_join(
-      old_prior, prior,
-      by = join_cols, suffix = c("_old", "_new")
+      old_prior,
+      prior,
+      by = join_cols,
+      suffix = c("_old", "_new")
     )
 
     if (anyNA(prior$prior_old)) {
-      missing_prior <- utils::capture.output(print(
-        prior |>
-          filter(is.na(.data$prior_old)) |>
-          as.data.frame()
-      ))
+      missing_prior <- utils::capture.output(
+        print(
+          as.data.frame(filter(prior, is.na(.data$prior_old)))
+        )
+      )
       if (warn) {
         msg <- c(
           "!" = "One or more priors have no match in existing parameters:",
@@ -148,29 +159,30 @@
     }
 
     # use new lb and ub if prior_new is present
-    prior <- prior |>
-      mutate(
-        lb = ifelse(!is.na(.data$prior_new), .data$lb_new, .data$lb_old),
-        ub = ifelse(!is.na(.data$prior_new), .data$ub_new, .data$ub_old)
+    prior <- mutate(
+      prior,
+      lb = ifelse(!is.na(.data$prior_new), .data$lb_new, .data$lb_old),
+      ub = ifelse(!is.na(.data$prior_new), .data$ub_new, .data$ub_old),
+      prior = ifelse(
+        !is.na(.data$prior_new),
+        .data$prior_new,
+        .data$prior_old
+      ),
+      source = ifelse(
+        !is.na(.data$prior_new),
+        .data$source_new,
+        .data$source_old
       )
+    )
 
     # only keep rows that have both old and new priors
     if (isTRUE(enforce_presence)) {
-      prior <- prior |>
-        filter(!is.na(.data$prior_old), !is.na(.data$prior_new)) |>
-        select(prior = prior_new, dplyr::all_of(cols), source = source_new)
-    } else {
-      prior <- prior |>
-        mutate(prior = ifelse(
-          !is.na(.data$prior_new), .data$prior_new, .data$prior_old
-        )) |>
-        mutate(source = ifelse(
-          !is.na(.data$prior_new), .data$source_new, .data$source_old
-        )) |>
-        select(prior, dplyr::all_of(cols), source)
+      prior <- filter(prior, !is.na(.data$prior_old), !is.na(.data$prior_new))
     }
 
-    prior <- bind_rows(prior, hold_prior, hold_prior_old)
+    prior <- prior |>
+      select(prior, dplyr::all_of(cols), source) |>
+      bind_rows(hold_prior, hold_prior_old)
   }
   return(as.brmsprior(prior))
 }
@@ -187,7 +199,8 @@
 .add_dpar_info <- function(family) {
   other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]] # nolint
   other_bounds <- lapply(
-    family$dpars[-1], brms:::dpar_bounds, # nolint
+    family$dpars[-1],
+    brms:::dpar_bounds, # nolint
     family = family$family
   )
   family$other_links <- other_links
@@ -227,9 +240,9 @@
 #'
 #' @keywords internal
 .extract_dpar_terms <- function(formula) {
-  terms <- brms::brmsterms(formula)
+  formula_terms <- brms::brmsterms(formula)
   # Extract all terms from the right hand side of all dpars
-  dpar_terms <- purrr::map(terms$dpars, \(x) all.vars(x$allvars))
+  dpar_terms <- purrr::map(formula_terms$dpars, \(x) all.vars(x$allvars))
   dpar_terms <- unique(unlist(dpar_terms))
   return(dpar_terms)
 }
@@ -256,9 +269,8 @@
   # Remove duplicates
   by <- unique(by)
 
-  sum_data <- data |>
-    tibble::as_tibble() |>
-    summarise(n = sum(.data$n), .by = dplyr::all_of(by))
+  sum_data <- tibble::as_tibble(data)
+  sum_data <- summarise(sum_data, n = sum(.data$n), .by = dplyr::all_of(by))
   return(sum_data)
 }
 
@@ -302,11 +314,12 @@
       "i" = "This should improve model efficiency with no loss of information." # nolint
     ))
   }
+  return(invisible(NULL))
 }
 
 #' Rename the columns of a `data.frame`
 #'
-#' @param df A `data.frame` to rename the columns of.
+#' @param data A `data.frame` to rename the columns of.
 #'
 #' @param new_names A character vector of new column names.
 #'
@@ -314,14 +327,14 @@
 #'
 #' @keywords internal
 #' @importFrom stats setNames
-.rename_columns <- function(df, new_names, old_names) {
+.rename_columns <- function(data, new_names, old_names) {
   are_valid <- is.character(new_names) & is.character(old_names)
 
   valid_new_names <- new_names[are_valid]
   valid_old_names <- old_names[are_valid]
 
   # Check if old names exist in dataframe
-  missing_cols <- setdiff(valid_old_names, names(df))
+  missing_cols <- setdiff(valid_old_names, names(data))
   if (length(missing_cols) > 0) {
     cli::cli_abort(paste0(
       "The following columns are not present in the data: ",
@@ -331,10 +344,10 @@
 
   if (length(valid_new_names) > 0) {
     rename_map <- setNames(valid_old_names, valid_new_names)
-    df <- dplyr::rename(df, !!!rename_map)
+    data <- dplyr::rename(data, !!!rename_map)
   }
 
-  return(df)
+  return(data)
 }
 
 #' Get a brms function by prefix and family
@@ -363,7 +376,7 @@
 #' Helper function to add weights to a data frame, either from an existing
 #' column or defaulting to 1.
 #'
-#' @param df A data frame to add weights to
+#' @param data A data frame to add weights to
 #'
 #' @param weight A column name to use for weighting the data in the
 #'  likelihood. Default is NULL. Internally this is used to define the 'n'
@@ -372,14 +385,12 @@
 #' @return The data frame with an added 'n' column containing the weights
 #'
 #' @keywords internal
-.add_weights <- function(df, weight = NULL) {
+.add_weights <- function(data, weight = NULL) {
   if (!is.null(weight)) {
-    assert_names(names(df), must.include = weight)
-    df <- df |>
-      mutate(n = .data[[weight]])
+    assert_names(names(data), must.include = weight)
+    data$n <- data[[weight]]
   } else {
-    df <- df |>
-      mutate(n = 1)
+    data$n <- 1
   }
-  return(df)
+  return(data)
 }

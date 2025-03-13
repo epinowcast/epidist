@@ -1,9 +1,4 @@
-# Note: some tests in this script are stochastic. As such, test failure may be
-# bad luck rather than indicate an issue with the code. However, as these tests
-# are reproducible, the distribution of test failures may be investigated by
-# varying the input seed. Test failure at an unusually high rate does suggest
-# a potential code issue.
-
+# fmt: skip file
 test_that("epidist.epidist_marginal_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
   stancode <- suppressMessages(epidist(

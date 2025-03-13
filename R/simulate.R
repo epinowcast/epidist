@@ -15,7 +15,8 @@
 #' @export
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
   return(data.frame(
-    case = 1:sample_size, ptime = stats::runif(sample_size, 0, t)
+    case = 1:sample_size,
+    ptime = stats::runif(sample_size, 0, t)
   ))
 }
 
@@ -39,10 +40,12 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 #'
 #' @family simulate
 #' @export
-simulate_exponential_cases <- function(r = 0.2,
-                                       sample_size = 10000,
-                                       seed,
-                                       t = 30) {
+simulate_exponential_cases <- function(
+  r = 0.2,
+  sample_size = 10000,
+  seed,
+  t = 30
+) {
   if (!missing(seed)) {
     set.seed(seed)
   }
@@ -80,32 +83,34 @@ simulate_exponential_cases <- function(r = 0.2,
 #'
 #' @family simulate
 #' @export
-simulate_gillespie <- function(r = 0.2,
-                               gamma = 1 / 7,
-                               I0 = 50, # nolint: object_name_linter
-                               N = 10000, # nolint: object_name_linter
-                               seed) {
+simulate_gillespie <- function(
+  r = 0.2,
+  gamma = 1 / 7,
+  I0 = 50, # nolint: object_name_linter
+  N = 10000, # nolint: object_name_linter
+  seed
+) {
   if (!missing(seed)) {
     set.seed(seed)
   }
-  t <- 0
+  current_time <- 0
   state <- c(N - I0, I0, 0)
-  beta <- r + gamma
+  transmission_rate <- r + gamma
   go <- TRUE
   ptime <- NULL
 
   while (go) {
-    rates <- c(beta * state[1] * state[2] / N, gamma * state[2])
+    rates <- c(transmission_rate * state[1] * state[2] / N, gamma * state[2])
     srates <- sum(rates)
 
     if (srates > 0) {
-      deltat <- stats::rexp(1, rate = srates)
-      t <- t + deltat
+      time_increment <- stats::rexp(1, rate = srates)
+      current_time <- current_time + time_increment
       wevent <- sample(seq_along(rates), size = 1, prob = rates)
 
       if (wevent == 1) {
         state <- c(state[1] - 1, state[2] + 1, state[3])
-        ptime <- c(ptime, t)
+        ptime <- c(ptime, current_time)
       } else {
         state <- c(state[1], state[2] - 1, state[3] + 1)
       }

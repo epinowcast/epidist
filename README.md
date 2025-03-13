@@ -25,7 +25,9 @@ influence epidemic situational awareness, control strategies, and
 resource allocation. This package provides methods to address the key
 challenges in estimating these distributions, including truncation,
 interval censoring, and dynamical biases. These issues are frequently
-overlooked, resulting in biased conclusions.
+overlooked, resulting in biased conclusions. Built on top of ‘brms’, it
+allows for flexible modelling including time-varying spatial components
+and partially pooled estimates of demographic characteristics.
 
 ## Quickstart
 
@@ -235,6 +237,8 @@ specification. Contributions of any kind are welcome!
 <a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=sbfnk">sbfnk</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=cherz4">cherz4</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>
 
@@ -248,7 +252,6 @@ specification. Contributions of any kind are welcome!
 ### Issue Contributors
 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>,
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Asbfnk">sbfnk</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1">SamuelBrand1</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein">zsusswein</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Akcharniga">kcharniga</a>
