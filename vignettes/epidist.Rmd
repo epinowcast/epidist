@@ -58,9 +58,11 @@ The tricky bit? Getting accurate estimates of these delays from real-world data 
 Don't worry if these terms sound a bit technical! In Section \@ref(data), we'll walk through what these issues look like by simulating the kind of data you might see during an outbreak.
 Then in Section \@ref(fit), we'll show how `epidist` helps you estimate delay distributions accurately by accounting for these issues.
 
+::: {.alert .alert-primary}
 For those interested in the technical details, `epidist` implements models following best practices in the field.
 Check out @park2024estimating for a methodological overview and @charniga2024best for a practical checklist designed for applied users.
 We also recommend the [nowcasting and forecasting infectious disease dynamics](https://nfidd.github.io/nfidd/) course for more hands on learning.
+:::
 
 # Setup {#setup}
 
