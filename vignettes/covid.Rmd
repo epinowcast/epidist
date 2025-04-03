@@ -1,0 +1,635 @@
+---
+title: "Using epidist to estimate delay between symptom onset in infector and infectee for COVID-19 in China"
+description: "A more detailed guide to using the epidist R package"
+output:
+  bookdown::html_document2:
+    fig_caption: yes
+    code_folding: show
+    number_sections: true
+pkgdown:
+  as_is: true
+# csl: https://raw.githubusercontent.com/citation-style-language/styles/master/apa-numeric-superscript-brackets.csl
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Getting in depth with epidist}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+
+```{r setup, include=FALSE}
+# exclude compile warnings from cmdstanr
+knitr::opts_chunk$set(
+  fig.path = file.path("figures", "epidist-"),
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE
+)
+```
+
+In this vignette, we use the `epidist` package to analyze transmission pairs line list data from the COVID-19 outbreak in China.
+These data were collated by @ali2020transmission.
+We provide the data in the `epidist` package via `?china_covid_data`.
+In analyzing this data, we demonstrate the following features of `epidist`:
+
+1. Fitting serial interval delay distribution estimates with a lognormal delay distribution.
+2. Post-processing and plotting functionality using the integration of `brms` functionality with the [`tidybayes`](http://mjskay.github.io/tidybayes/) package.
+
+The packages used in this article are:
+
+```{r load-requirements}
+set.seed(123)
+
+library(epidist)
+library(brms)
+library(dplyr)
+library(ggplot2)
+library(tidybayes) # nolint
+library(modelr) # nolint
+library(patchwork) # nolint
+library(cmdstanr) # nolint
+```
+
+For users new to `epidist`, before reading this article we recommend beginning with the "[Getting started with `epidist`](http://epidist.epinowcast.org/articles/epidist.html)" vignette.
+
+
+
+# Using the cmdstanr backend
+
+As the models explored in this vignette are relatively complex, we recommend using the `cmdstanr` backend for fitting models as it is typically more performant than the default `rstan` backend.
+To use the `cmdstanr` backend, we first need to install CmdStan (see the README for more details).
+We can check we have everything we need as follows:
+
+```{r}
+cmdstanr::cmdstan_version()
+```
+
+# Data preparation
+
+We begin by loading the COVID-19 line list data and doing some data wrangling to generate unique pair IDs:
+
+```{r}
+china_covid_data <- read.csv("data/china_covid_data.csv")
+china_covid_data <- data.frame(lapply(china_covid_data, trimws), stringsAsFactors = FALSE)
+china_covid_data <- china_covid_data |>
+  mutate(
+    infector_id = sub(".*_", "", infector_id), # Remove prefix up to and including "_"
+    infectee_id = sub(".*_", "", infectee_id) # Remove prefix up to and including "_"
+  ) |>
+  mutate(
+    infector_id = ifelse(
+      grepl("^[^-]+-[^-]+-", infector_id), # Check if the format is characters-cityname-#
+      sub("^[^-]+-", "", infector_id), # Remove the first part (characters-)
+      infector_id # Leave unchanged if it doesn't match
+    ),
+    infectee_id = ifelse(
+      grepl("^[^-]+-[^-]+-", infectee_id), # Check if the format is characters-cityname-#
+      sub("^[^-]+-", "", infectee_id), # Remove the first part (characters-)
+      infectee_id # Leave unchanged if it doesn't match
+    )
+  ) |>
+  mutate(
+    infector_id = sub("dehong", "ruili", infector_id),
+    infectee_id = sub("dehong", "ruili", infectee_id),
+    infector_id = sub("luohe", "tahe", infector_id),
+    infectee_id = sub("luohe", "tahe", infectee_id),
+    infector_id = sub("qiannan", "qiannanzhou", infector_id),
+    infectee_id = sub("qiannan", "qiannanzhou", infectee_id),
+    infector_id = sub("qiandong", "qiandongnanzhou", infector_id),
+    infectee_id = sub("qiandong", "qiandongnanzhou", infectee_id),
+    infectee_id = sub("chaoyang", "zhaoyang", infectee_id)
+  )
+
+city_mapping <- china_covid_data |>
+  select(infector_reportCity, infectee_reportCity) |>
+  tidyr::pivot_longer(cols = everything(), values_to = "city") |>
+  distinct(city) |>
+  arrange(city) |>
+  mutate(city_id = row_number())
+
+replace_city_with_id <- function(id, city_mapping) {
+  sapply(id, function(x) {
+    if (!grepl("-", x)) {
+      return(NA) # Handle unexpected formats
+    }
+    city_name <- sub("-.*", "", x)
+    numeric_id <- city_mapping$city_id[city_mapping$city == city_name]
+    numeric_part <- sub(".*-", "", x)
+    if (length(numeric_id) == 0 || is.na(numeric_part)) {
+      return(NA) # Handle missing city or numeric part
+    }
+    paste0(numeric_id, numeric_part)
+  })
+}
+
+china_covid_data <- china_covid_data |>
+  left_join(city_mapping, by = c("infector_reportCity" = "city")) |>
+  mutate(
+    infector_id_clean = replace_city_with_id(infector_id, city_mapping),
+    infectee_id_clean = replace_city_with_id(infectee_id, city_mapping)
+  ) |>
+  mutate(
+    unique_pair_id = as.integer(paste0(infector_id_clean, infectee_id_clean))
+  )
+
+# Check:
+na_values <- china_covid_data |> filter(if_any(everything(), is.na))
+na_values
+dup_ids <- china_covid_data$unique_pair_id[duplicated(china_covid_data$unique_pair_id)] # will figure out how to handle these later, they are legitimate
+dup_ids
+
+china_covid_data <- china_covid_data |> filter(!unique_pair_id %in% dup_ids)
+```
+
+The data has `r nrow(china_covid_data)` rows, each corresponding to a unique case report ID (`infector_id`).
+The columns of the data present for both the infector and infectee in a transmission  pair include age, sex, city location, infection severity, relationship to infectee, and indication if they are in the same household.
+Additionally there are several dates including symptom onset, return from other city, isolation before symptoms, isolation after symptoms, first hospital visit, lab confirmation, and disclosure.
+
+```{r}
+head(china_covid_data)
+
+fraction <- 5
+ncity <- length(unique(city_mapping$city))
+```
+
+Figure \@ref(fig:covid-outbreak) shows the dates of symptom onset and sample testing for cases across in each city.
+(In this figure, we filter down to every `r fraction`th case in order to avoid overplotting.)
+We can see that the start time and course of the epidemic varies across cities.
+
+<details><summary>Click to expand for code to prepare outbreak plot</summary>
+
+```{r}
+p_outbreak <- china_covid_data |>
+  filter(unique_pair_id %% fraction == 0) |>
+  ggplot() +
+  geom_segment(
+    aes(
+      x = infector_onsetDate, xend = infectee_onsetDate,
+      y = unique_pair_id, yend = unique_pair_id
+    ),
+    col = "grey"
+  ) +
+  geom_point(aes(x = infector_onsetDate, y = unique_pair_id), col = "#56B4E9") +
+  geom_point(aes(x = infectee_onsetDate, y = unique_pair_id), col = "#009E73") +
+  # facet_wrap(infector_reportCity ~ ., ncol = 2) +  # too many cities
+  labs(x = "", y = "Case ID") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+</details>
+(ref:covid-outbreak) Primary and secondary event times for every `r fraction`th case, over the `r ncity` cities of China.
+
+```{r covid-outbreak, fig.cap="(ref:covid-outbreak)", fig.height=9}
+p_outbreak
+```
+
+# Fitting sex-city stratified delay distributions
+
+To understand the delay between time of symptom onset in the infector and the infectee (eg the serial interval), we fit a range of statistical models using the `epidist` package.
+In some models, we vary the parameters of the delay distribution by sex or by city.
+For the lognormal delay distribution these parameters are the mean and standard deviation of the underlying normal distribution.
+That is, $\mu$ and $\sigma$ such that when $x \sim \mathcal{N}(\mu, \sigma)$ then $\exp(x)$ has a lognormal distribution.
+
+## Data preparation
+
+To prepare the data, we begin by selecting the relevant columns:
+
+```{r}
+obs_cens <- select(
+  china_covid_data,
+  unique_pair_id, infector_onsetDate, infectee_onsetDate, infector_age, infector_sex, infector_reportCity # what about age and sex of infectee?
+) |>
+  mutate(
+    infector_onsetDate = case_when(trimws(infector_onsetDate) == "unknown" ~ NA, TRUE ~ infector_onsetDate),
+    infectee_onsetDate = case_when(trimws(infectee_onsetDate) == "unknown" ~ NA, TRUE ~ infectee_onsetDate),
+    infector_age = case_when(trimws(infector_age) == "unknown" ~ NA, TRUE ~ infector_age),
+    infector_sex = case_when(trimws(infector_sex) == "unknown" ~ NA, TRUE ~ infector_sex),
+    infector_reportCity = case_when(trimws(infector_reportCity) == "unknown" ~ NA, TRUE ~ infector_reportCity),
+  )
+
+head(obs_cens)
+```
+
+For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values^[An extension is needed to allow for missing data in the model - please open issue if this would be useful for you.]).
+
+```{r}
+n <- nrow(obs_cens)
+obs_cens <- obs_cens[complete.cases(obs_cens), ]
+n_complete <- nrow(obs_cens)
+```
+
+To simulate being in the middle of an outbreak we will filter the data to only include cases up to the 31st of January 2020 (dates of infectee_onsetDate range from 1/10/2020 to 2/28/2020).
+**The marginal model used in this is adjusting for truncation. To check it is working try filtering instead for the `date_of_symptom_onset` and rerunning.**
+
+```{r}
+obs_cens_trunc <- filter(
+  obs_cens,
+  infectee_onsetDate <= as.Date("2020-01-31")
+) |>
+  mutate(
+    infector_onsetDate = as.Date(infector_onsetDate),
+    infectee_onsetDate = as.Date(infectee_onsetDate),
+    infector_age = as.double(infector_age)
+  )
+```
+
+We prepare the data for use with the `epidist` package by converting the data to an `epidist_linelist_data` object:
+
+```{r}
+linelist_data <- as_epidist_linelist_data(
+  obs_cens_trunc,
+  pdate_lwr = "infector_onsetDate",
+  sdate_lwr = "infectee_onsetDate"
+)
+```
+
+In this call to `as_epidist_linelist_data()` it has made some assumptions about the data.
+First, because we did not supply upper bounds for the primary and secondary events (`pdate_upr` and `sdate_upr`), it has assumed that the upper bounds are one day after the lower bounds.
+Second, because we also did not supply an observation time column (`obs_date`), it has assumed that the observation time is the maximum of the secondary event upper bounds.
+
+## Model fitting
+
+To prepare the data for use with the marginal model, we define the data as being a `epidist_marginal_model` model object:
+
+```{r}
+obs_prep <- as_epidist_marginal_model(linelist_data, obs_time_threshold = 2)
+head(obs_prep)
+
+# obs_prep_lat <- as_epidist_latent_model(linelist_data, obs_time_threshold = 2)
+# head(obs_prep_lat)
+
+# obs_prep_naive <- as_epidist_naive_model(linelist_data, obs_time_threshold = 2)
+# head(obs_prep_naive)
+
+# Both other models have this error:
+# algorithmError in assert_epidist.epidist_naive_model(data) :
+#   Assertion on 'data$delay' failed: Element 18 is not >= 0.
+```
+
+Now we are ready to fit the marginal model. Note that if we were confident that our data contains the maximum observable delay, we would set `obs_time_threshold` to 1 rather than the default of 2. Here we set to 2 because when we set to 1 at leaset one relative_obs_time is Inf.
+Here, the default or higher values would be sensible.
+**Try out other models using `as_epidist_latent_model()` for the latent model (another approach to adjusting for truncation and censoring) and `as_epidist_naive_model()` for a naive model that doesn't account for truncation or censoring.**
+
+### Intercept-only model
+
+We start by fitting a single lognormal distribution to the data.
+This model assumes that a single distribution describes all delays in the data, regardless of the case's location, sex, or any other covariates.
+To do this, we set `formula = mu ~ 1` to place an model with only an intercept parameter (i.e. `~ 1` in R formula syntax) on the `mu` parameter of the lognormal distribution specified using `family = lognormal()`.
+(Note that the lognormal distribution has two distributional parameters `mu` and `sigma`.
+As a model is not explicitly placed on `sigma`, a constant model `sigma ~ 1` is assumed.)
+
+```{r}
+fit <- epidist(
+  data = obs_prep,
+  formula = mu ~ 1,
+  family = lognormal(),
+  algorithm = "sampling",
+  chains = 2,
+  cores = 2,
+  refresh = ifelse(interactive(), 250, 0),
+  seed = 1,
+  backend = "cmdstanr"
+)
+```
+
+The `fit` object is a [`brmsfit`](https://paulbuerkner.com/brms/reference/brmsfit-class.html) object, and has the associated range of methods.
+See `methods(class = "brmsfit")` for more details.
+For example, we may use `summary()` to view information about the fitted model, including posterior estimates for the regression coefficients:
+
+```{r}
+summary(fit)
+```
+
+
+### Sex-stratified model
+
+To fit a model which varies the parameters of the fitted lognormal distribution, `mu` and `sigma`, by sex we alter the `formula` specification to include fixed effects for sex `~ 1 + sex` as follows:
+
+```{r}
+fit_sex <- epidist(
+  data = obs_prep,
+  formula = bf(mu ~ 1 + infector_sex, sigma ~ 1 + infector_sex),
+  family = lognormal(),
+  algorithm = "sampling",
+  chains = 2,
+  cores = 2,
+  refresh = ifelse(interactive(), 250, 0),
+  seed = 1,
+  backend = "cmdstanr"
+)
+```
+
+A summary of the model shows that .....
+It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.
+
+```{r}
+summary(fit_sex)
+```
+
+### Sex-city stratified model
+
+Finally, we will fit a model which also varies by city.
+To do this, we will use city level random effects, assumed to be drawn from a shared normal distribution, within the model for both the `mu` and `sigma` parameters.
+These random effects are specified by including `(1 | city)` in the formulas:
+
+```{r}
+fit_sex_city <- epidist(
+  data = obs_prep,
+  formula = bf(
+    mu ~ 1 + infector_sex + (1 | infector_reportCity),
+    sigma ~ 1 + infector_sex + (1 | infector_reportCity)
+  ),
+  family = lognormal(),
+  algorithm = "sampling",
+  chains = 2,
+  cores = 2,
+  iter = 1000,
+  refresh = ifelse(interactive(), 250, 0),
+  seed = 1,
+  backend = "cmdstanr"
+)
+```
+
+**As this is a longer running model (~ 2 minutes) we have reduced the number of iterations but for real world use cases this may not be sufficient.**
+
+For this model, along with looking at the `summary()`, we may also use the `brms::ranef()` function to look at the estimates of the random effects:
+
+```{r}
+summary(fit_sex_city)
+ranef(fit_sex_city)
+```
+
+## Posterior expectations {#posterior-expectation}
+
+To go further than summaries of the fitted model, we recommend using the `tidybayes` package.
+For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws()` function.
+The `tidybayes::add_epred_draws()` function uses the `epidist_gen_posterior_predict()` function to generate a posterior prediction function for the `lognormal()` distribution.
+
+In Figure \@ref(fig:epred) we show the posterior expectation of the delay distribution for each of the three fitted models.
+Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with women.
+
+<details><summary>Click to expand for code to the posterior expectation plots</summary>
+
+```{r}
+add_marginal_dummy_vars <- function(data) {
+  return(
+    mutate(
+      data,
+      relative_obs_time = NA,
+      pwindow = NA,
+      delay_upr = NA,
+      swindow = NA
+    )
+  )
+}
+
+expectation_draws <- obs_prep |>
+  data_grid(NA) |>
+  add_marginal_dummy_vars() |>
+  add_epred_draws(fit, dpar = TRUE)
+
+epred_base_figure <- expectation_draws |>
+  ggplot(aes(x = .epred)) +
+  stat_halfeye() +
+  labs(x = "", y = "", title = "Intercept-only", tag = "A") +
+  theme_minimal()
+
+expectation_draws_sex <- obs_prep |>
+  data_grid(infector_sex) |>
+  add_marginal_dummy_vars() |>
+  add_epred_draws(fit_sex, dpar = TRUE)
+
+epred_sex_figure <- expectation_draws_sex |>
+  ggplot(aes(x = .epred, y = infector_sex)) +
+  stat_halfeye() +
+  labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
+  theme_minimal()
+
+expectation_draws_sex_city <- obs_prep |>
+  data_grid(infector_sex, infector_reportCity) |>
+  add_marginal_dummy_vars() |>
+  add_epred_draws(fit_sex_city, dpar = TRUE)
+
+epred_sex_city_figure <- expectation_draws_sex_city |>
+  ggplot(aes(x = .epred, y = infector_reportCity)) +
+  stat_pointinterval() +
+  facet_grid(. ~ infector_sex) +
+  labs(
+    x = "Posterior expectation of the delay", y = "",
+    title = "Sex-city-stratified", tag = "C"
+  ) +
+  scale_y_discrete(limits = rev) +
+  theme_minimal()
+```
+
+</details>
+
+(ref:epred) The fitted posterior expectations of the delay distribution for each model.
+
+```{r epred, fig.cap="(ref:epred)", fig.height = 8}
+epred_base_figure / epred_sex_figure / epred_sex_city_figure +
+  plot_layout(heights = c(1, 1.5, 2.5))
+```
+
+## Linear predictor posteriors
+
+The `tidybayes` package also allows users to generate draws of the linear predictors for all distributional parameters using `tidybayes::add_linpred_draws()`.
+For example, for the `mu` parameter in the sex-city stratified model (Figure \@ref(fig:linpred-sex-city)):
+
+<details><summary>Click to expand for code to prepare linear predictor plot</summary>
+
+```{r}
+linpred_draws_sex_city <- obs_prep |>
+  as.data.frame() |>
+  data_grid(infector_sex, infector_reportCity) |>
+  add_marginal_dummy_vars() |>
+  add_linpred_draws(fit_sex_city, dpar = TRUE)
+
+p_linpred_sex_city <- linpred_draws_sex_city |>
+  ggplot(aes(x = mu, y = infector_reportCity)) +
+  stat_pointinterval() +
+  facet_grid(. ~ infector_sex) +
+  labs(x = "Posterior of the mu linear predictor", y = "") +
+  scale_y_discrete(limits = rev) +
+  theme_minimal()
+```
+
+</details>
+
+(ref:linpred-sex-city) The posterior distribution of the linear predictor of `mu` parameter within the sex-city stratified model. The posterior expectations in Section \@ref(posterior-expectation) are a function of both the `mu` linear predictor posterior distribution and `sigma` linear predictor posterior distribution.
+
+```{r linpred-sex-city, fig.cap="(ref:linpred-sex-city)"}
+p_linpred_sex_city
+```
+
+## Delay posterior distributions
+
+Posterior predictions of the delay distribution are an important output of an analysis with the `epidist` package.
+In this section, we demonstrate how to produce either a discrete probability mass function representation, or continuous probability density function representation of the delay distribution.
+
+### Discrete probability mass function
+
+To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
+To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and `relative_obs_time` to `Inf` for no right truncation.
+Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure.
+
+<details><summary>Click to expand for code to prepare PMF plots</summary>
+
+```{r}
+add_marginal_pmf_vars <- function(data) {
+  return(
+    mutate(
+      data,
+      relative_obs_time = Inf,
+      pwindow = 1,
+      swindow = 1,
+      delay_upr = NA
+    )
+  )
+}
+
+draws_pmf <- obs_prep |>
+  add_marginal_pmf_vars() |>
+  add_predicted_draws(fit, ndraws = 1000)
+
+pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
+  geom_bar(aes(y = after_stat(count / sum(count)))) +
+  labs(x = "", y = "", title = "Intercept-only", tag = "A") +
+  scale_x_continuous(limits = c(0, 30)) +
+  theme_minimal()
+
+draws_sex_pmf <- obs_prep |>
+  data_grid(infector_sex) |>
+  add_marginal_pmf_vars() |>
+  add_predicted_draws(fit_sex, ndraws = 1000)
+
+pmf_sex_figure <- draws_sex_pmf |>
+  ggplot(aes(x = .prediction)) +
+  geom_bar(aes(y = after_stat(
+    count / ave(count, PANEL, FUN = sum)
+  ))) +
+  labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
+  facet_grid(. ~ infector_sex) +
+  scale_x_continuous(limits = c(0, 30)) +
+  theme_minimal()
+
+draws_sex_city_pmf <- obs_prep |>
+  data_grid(infector_sex, infector_reportCity) |>
+  add_marginal_pmf_vars() |>
+  add_predicted_draws(fit_sex_city, ndraws = 1000)
+
+pmf_sex_city_figure <- draws_sex_city_pmf |>
+  mutate(
+    infector_reportCity = case_when(
+      .default = infector_reportCity
+    )
+  ) |>
+  ggplot(aes(x = .prediction)) +
+  geom_bar(aes(y = after_stat(count / ave(count, PANEL, FUN = sum)))) +
+  labs(
+    x = "PMF with daily censoring and no truncation", y = "",
+    title = "Sex-city-stratified", tag = "C"
+  ) +
+  facet_grid(infector_reportCity ~ infector_sex) +
+  scale_x_continuous(limits = c(0, 30)) +
+  theme_minimal()
+```
+
+</details>
+
+(ref:pmf) Posterior predictions of the discrete probability mass function for each of the fitted models.
+
+```{r pmf, fig.cap="(ref:pmf)", fig.height = 16}
+pmf_base_figure / pmf_sex_figure / pmf_sex_city_figure +
+  plot_layout(heights = c(1, 1.5, 5.5))
+```
+
+### Continuous probability density function
+
+The posterior predictive distribution under no truncation and no censoring.
+That is to produce continuous delay times (Figure \@ref(fig:pdf)):
+
+<details><summary>Click to expand for code to prepare PDF plots</summary>
+
+```{r}
+add_marginal_pdf_vars <- function(data) {
+  return(
+    mutate(
+      data,
+      relative_obs_time = Inf,
+      pwindow = 0,
+      swindow = 0,
+      delay_upr = NA
+    )
+  )
+}
+
+draws_pdf <- obs_prep |>
+  add_marginal_pdf_vars() |>
+  add_predicted_draws(fit, ndraws = 1000)
+
+pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
+  geom_density() +
+  labs(x = "", y = "", title = "Intercept-only", tag = "A") +
+  scale_x_continuous(limits = c(0, 30)) +
+  theme_minimal()
+
+draws_sex_pdf <- obs_prep |>
+  data_grid(infector_sex) |>
+  add_marginal_pdf_vars() |>
+  add_predicted_draws(fit_sex, ndraws = 1000)
+
+pdf_sex_figure <- draws_sex_pdf |>
+  ggplot(aes(x = .prediction)) +
+  geom_density() +
+  labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
+  facet_grid(. ~ infector_sex) +
+  scale_x_continuous(limits = c(0, 30)) +
+  theme_minimal()
+
+draws_sex_city_pdf <- obs_prep |>
+  data_grid(infector_sex, infector_reportCity) |>
+  add_marginal_pdf_vars() |>
+  add_predicted_draws(fit_sex_city, ndraws = 1000)
+
+pdf_sex_city_figure <- draws_sex_city_pdf |>
+  mutate(
+    infector_reportCity = case_when(
+      .default = infector_reportCity
+    )
+  ) |>
+  ggplot(aes(x = .prediction)) +
+  geom_density() +
+  labs(
+    x = "PDF with no censoring and no truncation", y = "",
+    title = "Sex-city-stratified", tag = "C"
+  ) +
+  facet_grid(infector_reportCity ~ infector_sex) +
+  scale_x_continuous(limits = c(0, 30)) +
+  theme_minimal()
+```
+
+</details>
+
+(ref:pdf) Posterior predictions of the continuous probability density function for each of the fitted models.
+
+```{r pdf, fig.cap="(ref:pdf)", fig.height = 16}
+pdf_base_figure / pdf_sex_figure / pdf_sex_city_figure +
+  plot_layout(heights = c(1, 1.5, 5.5))
+```
+
+
+
+
+# Conclusion
+
+In this vignette, we demonstrate how the `epidist` package can be used to fit delay distribution models.
+Post-processing and prediction with fitted models is possible using the `tidybayes` package.
+We illustrate generating posterior expectations, the posteriors of linear predictors, as well as discrete and continuous representations of the delay distribution.
+
+
+## References {-}
