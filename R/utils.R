@@ -90,12 +90,11 @@
 #' @importFrom brms as.brmsprior
 #' @autoglobal
 .replace_prior <- function(
-  old_prior,
-  prior,
-  warn = FALSE,
-  merge = TRUE,
-  enforce_presence = TRUE
-) {
+    old_prior,
+    prior,
+    warn = FALSE,
+    merge = TRUE,
+    enforce_presence = TRUE) {
   if (!isTRUE(merge)) {
     return(prior)
   }

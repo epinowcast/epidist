@@ -308,7 +308,7 @@ obs_cens_trunc_samp <- slice_sample(
 <details><summary>Click to expand for code to create the observed data histogram</summary>
 
 ```{r}
-#Prepare the complete, retrospective data
+# Prepare the complete, retrospective data
 complete_data <- obs_cens |>
   mutate(type = "Censored retrospective data") |>
   select(delay = delay_daily, type)

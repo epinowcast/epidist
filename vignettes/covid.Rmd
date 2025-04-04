@@ -51,6 +51,7 @@ library(tidybayes) # nolint
 library(modelr) # nolint
 library(patchwork) # nolint
 library(cmdstanr) # nolint
+library(here)
 ```
 
 For users new to `epidist`, before reading this article we recommend beginning with the "[Getting started with `epidist`](http://epidist.epinowcast.org/articles/epidist.html)" vignette.
@@ -72,23 +73,23 @@ cmdstanr::cmdstan_version()
 We begin by loading the COVID-19 line list data and doing some data wrangling to generate unique pair IDs:
 
 ```{r}
-china_covid_data <- read.csv("data/china_covid_data.csv")
+china_covid_data <- read.csv(here("data", "china_covid_data.csv"))
 china_covid_data <- data.frame(lapply(china_covid_data, trimws), stringsAsFactors = FALSE)
 china_covid_data <- china_covid_data |>
   mutate(
     infector_id = sub(".*_", "", infector_id), # Remove prefix up to and including "_"
-    infectee_id = sub(".*_", "", infectee_id) # Remove prefix up to and including "_"
+    infectee_id = sub(".*_", "", infectee_id)
   ) |>
   mutate(
     infector_id = ifelse(
       grepl("^[^-]+-[^-]+-", infector_id), # Check if the format is characters-cityname-#
-      sub("^[^-]+-", "", infector_id), # Remove the first part (characters-)
-      infector_id # Leave unchanged if it doesn't match
+      sub("^[^-]+-", "", infector_id),
+      infector_id
     ),
     infectee_id = ifelse(
       grepl("^[^-]+-[^-]+-", infectee_id), # Check if the format is characters-cityname-#
-      sub("^[^-]+-", "", infectee_id), # Remove the first part (characters-)
-      infectee_id # Leave unchanged if it doesn't match
+      sub("^[^-]+-", "", infectee_id),
+      infectee_id
     )
   ) |>
   mutate(
@@ -113,13 +114,13 @@ city_mapping <- china_covid_data |>
 replace_city_with_id <- function(id, city_mapping) {
   sapply(id, function(x) {
     if (!grepl("-", x)) {
-      return(NA) # Handle unexpected formats
+      return(NA)
     }
     city_name <- sub("-.*", "", x)
     numeric_id <- city_mapping$city_id[city_mapping$city == city_name]
     numeric_part <- sub(".*-", "", x)
     if (length(numeric_id) == 0 || is.na(numeric_part)) {
-      return(NA) # Handle missing city or numeric part
+      return(NA)
     }
     paste0(numeric_id, numeric_part)
   })
@@ -138,7 +139,7 @@ china_covid_data <- china_covid_data |>
 # Check:
 na_values <- china_covid_data |> filter(if_any(everything(), is.na))
 na_values
-dup_ids <- china_covid_data$unique_pair_id[duplicated(china_covid_data$unique_pair_id)] # will figure out how to handle these later, they are legitimate
+dup_ids <- china_covid_data$unique_pair_id[duplicated(china_covid_data$unique_pair_id)] # will figure out how to handle these later, they are legitimate data
 dup_ids
 
 china_covid_data <- china_covid_data |> filter(!unique_pair_id %in% dup_ids)
@@ -260,15 +261,17 @@ obs_prep <- as_epidist_marginal_model(linelist_data, obs_time_threshold = 1)
 head(obs_prep)
 
 # Remove the rows where infectee onset date is before infector
-negatives <- obs_prep %>% filter_if(is.numeric, any_vars(.<0))
+negatives <- obs_prep %>% filter_if(is.numeric, any_vars(. < 0))
 obs_prep <- obs_prep %>% anti_join(negatives, by = colnames(obs_prep))
 
+# nolint start
 # obs_prep_lat <- as_epidist_latent_model(linelist_data, obs_time_threshold = 2)
 # head(obs_prep_lat)
 
 # obs_prep_naive <- as_epidist_naive_model(linelist_data, obs_time_threshold = 2)
 # head(obs_prep_naive)
 
+# nolint end
 # Both other models have this error:
 # algorithmError in assert_epidist.epidist_naive_model(data) :
 #   Assertion on 'data$delay' failed: Element 18 is not >= 0.
@@ -327,7 +330,7 @@ fit_sex <- epidist(
 )
 ```
 
-A summary of the model shows that males tend to have longer delays (the posterior mean of the sexMale) and greater delay variation (the posterior mean of sigma_sexMale is 0.09). 
+A summary of the model shows that males tend to have longer delays (the posterior mean of the sexMale) and greater delay variation (the posterior mean of sigma_sexMale is 0.09).
 For the sexMale effect and sigma_sexMale effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.
 
@@ -352,7 +355,7 @@ fit_sex_city <- epidist(
   algorithm = "sampling",
   chains = 2,
   cores = 2,
-  #iter = 1000,
+  # iter = 1000,
   refresh = ifelse(interactive(), 250, 0),
   seed = 1,
   backend = "cmdstanr"

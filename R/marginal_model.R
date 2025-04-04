@@ -62,11 +62,10 @@ as_epidist_marginal_model <- function(data, ...) {
 #'   ) |>
 #'   as_epidist_marginal_model()
 as_epidist_marginal_model.epidist_linelist_data <- function(
-  data,
-  obs_time_threshold = 2,
-  weight = NULL,
-  ...
-) {
+    data,
+    obs_time_threshold = 2,
+    weight = NULL,
+    ...) {
   assert_epidist.epidist_linelist_data(data)
 
   data <- mutate(
@@ -132,10 +131,9 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
 #'   ) |>
 #'   as_epidist_marginal_model()
 as_epidist_marginal_model.epidist_aggregate_data <- function(
-  data,
-  obs_time_threshold = 2,
-  ...
-) {
+    data,
+    obs_time_threshold = 2,
+    ...) {
   return(as_epidist_marginal_model.epidist_linelist_data(
     data,
     obs_time_threshold = obs_time_threshold,
@@ -199,10 +197,9 @@ is_epidist_marginal_model <- function(data) {
 #' @family marginal_model
 #' @export
 epidist_family_model.epidist_marginal_model <- function(
-  data,
-  family,
-  ...
-) {
+    data,
+    family,
+    ...) {
   custom_family <- brms::custom_family(
     paste0("marginal_", family$family),
     dpars = family$dpars,
@@ -242,10 +239,9 @@ epidist_family_model.epidist_marginal_model <- function(
 #' @family marginal_model
 #' @export
 epidist_formula_model.epidist_marginal_model <- function(
-  data,
-  formula,
-  ...
-) {
+    data,
+    formula,
+    ...) {
   # data is only used to dispatch on
   formula <- stats::update(
     formula,
@@ -279,11 +275,10 @@ epidist_formula_model.epidist_marginal_model <- function(
 #' @importFrom purrr map_chr
 #' @export
 epidist_transform_data_model.epidist_marginal_model <- function(
-  data,
-  family,
-  formula,
-  ...
-) {
+    data,
+    family,
+    formula,
+    ...) {
   required_cols <- .marginal_required_cols()
   trans_data <- data |>
     .summarise_n_by_formula(by = required_cols, formula = formula) |>
@@ -300,11 +295,10 @@ epidist_transform_data_model.epidist_marginal_model <- function(
 #' @autoglobal
 #' @export
 epidist_stancode.epidist_marginal_model <- function(
-  data,
-  family = epidist_family(data),
-  formula = epidist_formula(data),
-  ...
-) {
+    data,
+    family = epidist_family(data),
+    formula = epidist_formula(data),
+    ...) {
   assert_epidist.epidist_marginal_model(data)
 
   stanvars_version <- .version_stanvar()

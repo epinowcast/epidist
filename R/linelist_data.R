@@ -46,13 +46,12 @@ as_epidist_linelist_data <- function(data, ...) {
 #'   obs_time = c(5, 6, 7)
 #' )
 as_epidist_linelist_data.default <- function(
-  data,
-  ptime_upr = NULL,
-  stime_lwr = NULL,
-  stime_upr = NULL,
-  obs_time = NULL,
-  ...
-) {
+    data,
+    ptime_upr = NULL,
+    stime_lwr = NULL,
+    stime_upr = NULL,
+    obs_time = NULL,
+    ...) {
   data_frame <- tibble(
     ptime_lwr = data,
     ptime_upr = ptime_upr,
@@ -124,14 +123,13 @@ as_epidist_linelist_data.default <- function(
 #'     sdate_lwr = "date_of_sample_tested"
 #'   )
 as_epidist_linelist_data.data.frame <- function(
-  data,
-  pdate_lwr = NULL,
-  sdate_lwr = NULL,
-  pdate_upr = NULL,
-  sdate_upr = NULL,
-  obs_date = NULL,
-  ...
-) {
+    data,
+    pdate_lwr = NULL,
+    sdate_lwr = NULL,
+    pdate_upr = NULL,
+    sdate_upr = NULL,
+    obs_date = NULL,
+    ...) {
   if (is.null(pdate_lwr) && !hasName(data, "pdate_lwr")) {
     cli::cli_abort("{.var pdate_lwr} is NULL but must be provided.")
   }

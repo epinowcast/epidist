@@ -152,10 +152,9 @@ assert_epidist.epidist_latent_model <- function(data, ...) {
 #' @family latent_model
 #' @export
 epidist_family_model.epidist_latent_model <- function(
-  data,
-  family,
-  ...
-) {
+    data,
+    family,
+    ...) {
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
@@ -200,10 +199,9 @@ epidist_family_model.epidist_latent_model <- function(
 #' @family latent_model
 #' @export
 epidist_formula_model.epidist_latent_model <- function(
-  data,
-  formula,
-  ...
-) {
+    data,
+    formula,
+    ...) {
   formula <- stats::update(
     formula,
     delay | vreal(relative_obs_time, pwindow, swindow) ~ .
@@ -244,11 +242,10 @@ epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
 #' @autoglobal
 #' @export
 epidist_stancode.epidist_latent_model <- function(
-  data,
-  family = epidist_family(data),
-  formula = epidist_formula(data),
-  ...
-) {
+    data,
+    family = epidist_family(data),
+    formula = epidist_formula(data),
+    ...) {
   assert_epidist(data)
 
   stanvars_version <- .version_stanvar()

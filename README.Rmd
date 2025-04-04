@@ -159,12 +159,12 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 ### Code
 
 
-<a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>, 
-<a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>, 
-<a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>, 
-<a href="https://github.com/epinowcast/epidist/commits?author=sbfnk">sbfnk</a>, 
-<a href="https://github.com/epinowcast/epidist/commits?author=cherz4">cherz4</a>, 
-<a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>, 
+<a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=sbfnk">sbfnk</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=cherz4">cherz4</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>
 
 
@@ -191,4 +191,3 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
-
