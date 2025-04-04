@@ -632,5 +632,6 @@ We illustrate generating posterior expectations, the posteriors of linear predic
 
 
 ## References {-}
+https://www.science.org/doi/10.1126/science.abc9004
 https://mc-stan.org/docs/2_19/reference-manual/divergent-transitions
 https://mc-stan.org/learn-stan/diagnostics-warnings.html
