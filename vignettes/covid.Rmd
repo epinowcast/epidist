@@ -256,8 +256,12 @@ Second, because we also did not supply an observation time column (`obs_date`), 
 To prepare the data for use with the marginal model, we define the data as being a `epidist_marginal_model` model object:
 
 ```{r}
-obs_prep <- as_epidist_marginal_model(linelist_data, obs_time_threshold = 2)
+obs_prep <- as_epidist_marginal_model(linelist_data, obs_time_threshold = 1)
 head(obs_prep)
+
+# Remove the rows where infectee onset date is before infector
+negatives <- obs_prep %>% filter_if(is.numeric, any_vars(.<0))
+obs_prep <- obs_prep %>% anti_join(negatives, by = colnames(obs_prep))
 
 # obs_prep_lat <- as_epidist_latent_model(linelist_data, obs_time_threshold = 2)
 # head(obs_prep_lat)
@@ -323,7 +327,8 @@ fit_sex <- epidist(
 )
 ```
 
-A summary of the model shows that .....
+A summary of the model shows that males tend to have longer delays (the posterior mean of the sexMale) and greater delay variation (the posterior mean of sigma_sexMale is 0.09). 
+For the sexMale effect and sigma_sexMale effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.
 
 ```{r}
@@ -347,14 +352,15 @@ fit_sex_city <- epidist(
   algorithm = "sampling",
   chains = 2,
   cores = 2,
-  iter = 1000,
+  #iter = 1000,
   refresh = ifelse(interactive(), 250, 0),
   seed = 1,
   backend = "cmdstanr"
 )
 ```
 
-**As this is a longer running model (~ 2 minutes) we have reduced the number of iterations but for real world use cases this may not be sufficient.**
+**As this is a longer running model than the previous two models but still runs within 1 minute (at 1000 iterations as well as the default of 2000). It is possible that for real world use cases this may not be sufficient.**
+A small number of transitions ended in divergence. Read more about divergences and diagnostics from the links in the References below.
 
 For this model, along with looking at the `summary()`, we may also use the `brms::ranef()` function to look at the estimates of the random effects:
 
@@ -523,11 +529,6 @@ draws_sex_city_pmf <- obs_prep |>
   add_predicted_draws(fit_sex_city, ndraws = 1000)
 
 pmf_sex_city_figure <- draws_sex_city_pmf |>
-  mutate(
-    infector_reportCity = case_when(
-      .default = infector_reportCity
-    )
-  ) |>
   ggplot(aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / ave(count, PANEL, FUN = sum)))) +
   labs(
@@ -597,11 +598,6 @@ draws_sex_city_pdf <- obs_prep |>
   add_predicted_draws(fit_sex_city, ndraws = 1000)
 
 pdf_sex_city_figure <- draws_sex_city_pdf |>
-  mutate(
-    infector_reportCity = case_when(
-      .default = infector_reportCity
-    )
-  ) |>
   ggplot(aes(x = .prediction)) +
   geom_density() +
   labs(
@@ -633,3 +629,5 @@ We illustrate generating posterior expectations, the posteriors of linear predic
 
 
 ## References {-}
+https://mc-stan.org/docs/2_19/reference-manual/divergent-transitions
+https://mc-stan.org/learn-stan/diagnostics-warnings.html
