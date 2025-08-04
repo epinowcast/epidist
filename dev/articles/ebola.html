@@ -274,7 +274,7 @@ As a model is not explicitly placed on <code>sigma</code>, a constant model <cod
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
 <span><span class="co">#&gt; Chain 2 finished in 6.2 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 7.1 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 7.2 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
 <span><span class="co">#&gt; Mean chain execution time: 6.7 seconds.</span></span>
@@ -320,11 +320,11 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
 <span><span class="co">#&gt; Chain 2 finished in 14.2 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 14.9 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 14.6 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 14.6 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 15.1 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 14.4 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 14.7 seconds.</span></span></code></pre></div>
 <p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.04) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is 0.02).
 For the <code>sexMale</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexMale</code> effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.</p>
@@ -373,12 +373,12 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 202.9 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 221.8 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 204.9 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 222.3 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 212.3 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 221.9 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 213.6 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 222.4 seconds.</span></span></code></pre></div>
 <p><strong>As this is a longer running model (~ 2 minutes) we have reduced the number of iterations but for real world use cases this may not be sufficient.</strong></p>
 <p>For this model, along with looking at the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -746,7 +746,7 @@ World Health Organization. 2016. <span>“Ebola Outbreak 2014-2016 - West Africa
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.9000.</p>
 </div>
 
     </footer>
