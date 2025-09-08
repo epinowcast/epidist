@@ -240,7 +240,8 @@ specification. Contributions of any kind are welcome!
 <a href="https://github.com/epinowcast/epidist/commits?author=sbfnk">sbfnk</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=cherz4">cherz4</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>,
-<a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>
+<a href="https://github.com/epinowcast/epidist/commits?author=medewitt">medewitt</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=kcharniga">kcharniga</a>
 
 ### Issue Authors
 
@@ -254,7 +255,7 @@ specification. Contributions of any kind are welcome!
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1">SamuelBrand1</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein">zsusswein</a>,
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Akcharniga">kcharniga</a>
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Aoswaldogressani">oswaldogressani</a>
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
