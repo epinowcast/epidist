@@ -109,7 +109,7 @@
   }
 
   # Find priors defined with ~ in prior column
-  tilde_priors <- prior[grepl("~", prior$prior, fix, fixed = TRUE), ]
+  tilde_priors <- prior[grepl("~", prior$prior, fixed = TRUE), ]
   if (nrow(tilde_priors) > 0) {
     # Extract parameter names from left side of ~
     param_names <- gsub("\\s*~.*$", "", tilde_priors$prior)

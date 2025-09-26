@@ -1,8 +1,6 @@
 #' @keywords internal
 "_PACKAGE"
 
-#' @import ggplot2
-
 ## usethis namespace: start
 #' @importFrom dplyr filter select
 #' @importFrom brms bf prior

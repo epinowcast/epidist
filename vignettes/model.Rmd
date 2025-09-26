@@ -92,11 +92,11 @@ $$
 \mathbb{P}(S = P + \tau \, | \, P = p, S < T) &= \frac{\mathbb{P}(S = P + \tau, P = p, S < T)}{\mathbb{P}(P = p, S < T)} \\
 &= \frac{\mathbb{P}(S = P + \tau < T \, | \, P = p)\mathbb{P}(P = p)}{\mathbb{P}(S < T \, | \, P = p)\mathbb{P}(P = p)} \\
 &= \frac{\mathbb{P}(S = P + \tau < T \, | \, P = p)}{\mathbb{P}(S < T \, | \, P = p)} \\
-&= \frac{f_p(\tau)}{\int_0^{T - p} f_p(x) \text{d}x} = \frac{f_p(\tau)}{F_p(T - p)}, \quad p + \tau < T. (\#eq:right-truncation)
+&= \frac{f_p(\tau)}{\int_0^{T - p} f_p(x) \text{d}x} = \frac{f_p(\tau)}{F_p(T - p)}, \quad p + \tau < T.
 \end{aligned}
 $$
 
-Examining Equation \@ref(eq:right-truncation) illustrates that (right) truncation renormalises the density by the values which are possible.
+Examining this equation illustrates that (right) truncation renormalises the density by the values which are possible.
 For example, if the distribution $x \sim \text{Unif}(0, 1)$ were right truncated by $T = 0.5$ then $x \sim \text{Unif}(0, 0.5)$.
 
 ## Interval censoring
@@ -132,14 +132,14 @@ $$
 &= \int_{P_L}^{P_R} \int_{S_L}^{S_R} g_P(x\,|\,P_L,P_R) f_x(y-x) \,dy\, dx
 \end{aligned}
 $$
-where $ g_P(x\,|\,P_L,P_R)$ represents the conditional distribution of primary event given lower $P_L$ and upper $P_R$ bounds.
+where $g_P(x\,|\,P_L,P_R)$ represents the conditional distribution of primary event given lower $P_L$ and upper $P_R$ bounds.
 
 # The naive model
 
 The simplest approach to modelling epidemiological delay distributions is ignoring truncation and censoring biases and simply treating the delays as continuous fully observed data.
-Then, the likelihood of observing a delay $\mathbf{Y}_i$ given parameter $\boldsymbol{\theta}$ is straightforward:
+Then, the likelihood of observing a delay $\mathbf{Y}_i$ given parameter $\mathbf{\theta}$ is straightforward:
 $$
-\mathcal{L}(\mathbf{Y}_i \, | \, \boldsymbol{\theta}) = f(y_i - x_i).
+\mathcal{L}(\mathbf{Y}_i \, | \, \mathbf{\theta}) = f(y_i - x_i).
 $$
 where $y_i$ and $x_i$ are the observed primary and secondary event times.
 
@@ -159,7 +159,8 @@ Mathematically this model is described as follows.
 We look at the conditional probability that the secondary event $S$ falls between $S_L$ and $S_R$, given that the primary event $P$ falls between $P_L$ and $P_R$ and that the secondary event $S$ occurs before the truncation time $T$:
 $$
 \begin{aligned}
-\mathbb{P}(S_L < S < S_R \, | \, P_L < P < P_R, S<T) &= \mathbb{P}(P_L < P < P_R, S_L < S < S_R, S<T \, | \, P_L < P < P_R, S<T)\\
+&\mathbb{P}(S_L < S < S_R \, | \, P_L < P < P_R, S<T)\\
+&= \mathbb{P}(P_L < P < P_R, S_L < S < S_R, S<T \, | \, P_L < P < P_R, S<T)\\
 &= \frac{\mathbb{P}(P_L < P < P_R, S_L < S < S_R, S<T)}{\mathbb{P}(P_L < P < P_R, S<T)}\\
 &= \frac{\int_{P_L}^{P_R} \int_{S_L}^{S_R} g_P(x) f_x(y-x) \,dy\, dx}{\int_{P_L}^{P_R} \int_{z}^T g_P(z) f_z(w-z) \, dz \,dw  }\\
 &= \frac{\int_{P_L}^{P_R} \int_{S_L}^{S_R} g_P(x) f_x(y-x) \,dy\, dx}{\int_{P_L}^{P_R} g_P(z) F_z(T-z) \,dw  }\\
@@ -171,7 +172,7 @@ $$
 \begin{aligned}
 x_i &\sim g_P(x_i \, | \, p_{L, i}, p_{R, i}) \\
 y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
-\mathcal{L}(\mathbf{Y} \, | \, \boldsymbol{\theta}) &= \prod_i \left[ \frac{f_{x_i}(y_i - x_i)}{\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_z(T - z) \text{d}z} \right].
+\mathcal{L}(\mathbf{Y} \, | \, \mathbf{\theta}) &= \prod_i \left[ \frac{f_{x_i}(y_i - x_i)}{\int_{P_{L, i}}^{P_{R, i}} g_P(z \, | \, p_{L, i}, p_{R, i}) F_z(T - z) \text{d}z} \right].
 \end{aligned}
 $$
 As before, $g_P(z \, | \, p_{L, i}, p_{R, i})$ represents the conditional distribution of the primary event given lower $P_L$ and upper $P_R$ bounds; this is equivalent to modelling the incidence in primary events.

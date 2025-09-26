@@ -7,7 +7,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Understanding and accurately estimating epidemiological delay distributions is important for public health policy. These estimates influence epidemic situational awareness, control strategies, and resource allocation. This package provides methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. These issues are frequently overlooked, resulting in biased conclusions.
+Understanding and accurately estimating epidemiological delay distributions is important for public health policy. These estimates influence epidemic situational awareness, control strategies, and resource allocation. This package provides methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. These issues are frequently overlooked, resulting in biased conclusions. Built on top of 'brms', it allows for flexible modelling including time-varying spatial components and partially pooled estimates of demographic characteristics.
 }
 \seealso{
 Useful links:

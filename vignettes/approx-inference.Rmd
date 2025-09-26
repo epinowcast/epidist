@@ -46,7 +46,7 @@ Relevant posterior quantities such as expectations may then be computed using th
 A drawback of MCMC methods, like NUTS, is that simulations can be quite computational intensive, especially for complex models or large data.
 
 The `epidist` package is built using `brms` [@brms], which stands for "Bayesian Regression Models using Stan", where Stan [@carpenter2017stan] is a probabilistic programming language.
-Although NUTS the the primary inference algorithm used in Stan, additional options are available.
+Although NUTS is the primary inference algorithm used in Stan, additional options are available.
 These additional inference algorithms are also available in `epidist` due to its dependence on `brms`.
 
 In this vignette, we first briefly describe the alternative algorithms available (Section \@ref(other)) as well as directing you to more detailed resources.
@@ -93,7 +93,6 @@ In this demonstration, we use the following packages:
 library(epidist)
 library(ggplot2)
 library(dplyr)
-library(gt)
 library(purrr)
 library(tidyr)
 library(tibble)
@@ -111,6 +110,8 @@ cmdstanr::cmdstan_version()
 
 We can simulate data to use for fitting models.
 The example data simulation process follows that used in the [Getting started with epidist](https://epidist.epinowcast.org/articles/epidist.html#data) vignette, so we will not detail exactly what is happening here, but please consult that vignette if interested:
+
+<details><summary>Click to expand for data simulation code</summary>
 
 ```{r}
 meanlog <- 1.8
@@ -133,6 +134,8 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
   filter(.data$stime_upr <= .data$obs_time) |>
   slice_sample(n = sample_size, replace = FALSE)
 ```
+
+</details>
 
 We now prepare the data for fitting with the marginal model, and perform inference with HMC:
 
@@ -187,6 +190,8 @@ time_pathfinder <- proc.time() - t
 We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
 Thankfully, each algorithm is implemented to sample draws from the posterior distribution, and so post-processing is simple.
 
+<details><summary>Click to expand for code to extract posterior draws</summary>
+
 ```{r}
 fits <- list(
   HMC = fit_hmc,
@@ -196,7 +201,8 @@ fits <- list(
 )
 
 draws <- imap(fits, function(fit, name) {
-  predict_delay_parameters(fit) |>
+  draws <- fit |>
+    predict_delay_parameters() |>
     as.data.frame() |>
     pivot_longer(
       cols = c("mu", "sigma", "mean", "sd"),
@@ -205,10 +211,13 @@ draws <- imap(fits, function(fit, name) {
     ) |>
     filter(parameter %in% c("mu", "sigma")) |>
     mutate(method = as.factor(name))
+  return(draws)
 })
 
 draws <- bind_rows(draws)
 ```
+
+</details>
 
 ## Comparison of parameter posterior distributions
 
@@ -218,19 +227,18 @@ The mean estimated value of each parameter, from each method is as follows.
 pars <- draws |>
   group_by(method, parameter) |>
   summarise(value = mean(value)) |>
-  pivot_wider(names_from = parameter, values_from = value)
+  pivot_wider(names_from = parameter, values_from = value) |>
+  ungroup()
 
-pars |>
-  ungroup() |>
-  gt()
+pars
 ```
 
 More comprehensively, the estimated posterior distributions are shown in Figure \@ref(fig:posterior).
 
-(ref:posterior) Estimated posterior distributions for the `mu` and `sigma` parameters using each inference method, shown using `tidybayes::stat_slabinterval()`.
+<details><summary>Click to expand for code to create posterior distribution plot</summary>
 
-```{r posterior, fig.cap="(ref:posterior)"}
-draws |>
+```{r}
+p_posterior <- draws |>
   ggplot(aes(x = value, col = method)) +
   stat_slabinterval(density = "histogram", breaks = 30, alpha = 0.8) +
   scale_colour_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
@@ -241,24 +249,41 @@ draws |>
   theme(legend.position = "bottom")
 ```
 
+</details>
+
+(ref:posterior) Estimated posterior distributions for the `mu` and `sigma` parameters using each inference method, shown using `tidybayes::stat_slabinterval()`.
+
+```{r posterior, fig.cap="(ref:posterior)"}
+p_posterior
+```
+
 ## Comparison of resulting delay distributions
 
 Figure \@ref(fig:delay-pdf) shows how the different `mu` and `sigma` posterior mean estimates from each inference method alter an estimated delay distribution.
 
-(ref:delay-pdf) Delay probability density functions obtained based on the posterior mean estimated `mu` and `sigma` parameters.
+<details><summary>Click to expand for code to create delay PDF plot</summary>
 
-```{r delay-pdf, fig.cap="(ref:delay-pdf)"}
-pmap_df(
+```{r}
+p_delay_pdf <- pmap_df(
   filter(pars), ~ tibble(
     x = seq(0, 25, by = 0.1),
     method = ..1, density = dlnorm(x, ..2, ..3)
   )
 ) |>
   ggplot(aes(x = x, y = density, col = method)) +
-  geom_line() +
+  geom_line(linewidth = 1) +
   scale_color_manual(values = c("#56B4E9", "#009E73", "#E69F00", "#CC79A7")) +
   theme_minimal() +
-  labs(x = "", y = "", col = "Method")
+  labs(x = "", y = "", col = "Method") +
+  theme(legend.position = "bottom")
+```
+
+</details>
+
+(ref:delay-pdf) Delay probability density functions obtained based on the posterior mean estimated `mu` and `sigma` parameters.
+
+```{r delay-pdf, fig.cap="(ref:delay-pdf)"}
+p_delay_pdf
 ```
 
 ## Comparison of time taken
@@ -274,10 +299,7 @@ times <- list(
   Pathfinder = time_pathfinder
 )
 
-times |>
-  map_dbl("elapsed") |>
-  enframe(name = "method", value = "time (s)") |>
-  gt()
+times
 ```
 
 # Conclusion
@@ -287,4 +309,4 @@ We found that these algorithms do produce reasonable approximations in far less 
 Of course, this vignette only includes one example, and a more thorough investigation would be required to make specific recommendations.
 That said, currently we do not recommend use of the Pathfinder algorithm due to its unstable performance in our testing, and early stage software implementation.
 
-## Bibliography {-}
+## References {-}

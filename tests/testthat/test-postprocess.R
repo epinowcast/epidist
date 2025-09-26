@@ -15,6 +15,7 @@ test_that(
       expect_true(all(pred$sd > 0))
       expect_length(unique(pred$index), expected_rows)
       expect_length(unique(pred$draw), summary(fit)$total_ndraws)
+      return(invisible(NULL))
     }
 
     # Test latent and marginal models
@@ -23,14 +24,31 @@ test_that(
   }
 )
 
+test_that(
+  "predict_delay_parameters works with the naive lognormal model",
+  {
+    skip_on_cran()
+
+    # Test naive model predictions
+    set.seed(1)
+    pred_naive <- predict_delay_parameters(fit_naive)
+    expect_s3_class(pred_naive, "lognormal_samples")
+    expect_s3_class(pred_naive, "data.frame")
+    expect_named(pred_naive, c("draw", "index", "mu", "sigma", "mean", "sd"))
+    expect_true(all(pred_naive$mean > 0))
+    expect_true(all(pred_naive$sd > 0))
+    expect_length(unique(pred_naive$draw), summary(fit_naive)$total_ndraws)
+  }
+)
+
+
 test_that("predict_delay_parameters accepts newdata arguments and prediction by sex recovers underlying parameters", { # nolint: line_length_linter.
   skip_on_cran()
 
   # Helper function to test sex predictions
   test_sex_predictions <- function(fit, prep = prep_obs_sex) {
     set.seed(1)
-    prep <- prep |>
-      dplyr::mutate(.row_id = dplyr::row_number())
+    prep <- dplyr::mutate(prep, .row_id = dplyr::row_number())
     pred_sex <- predict_delay_parameters(fit, prep)
     expect_s3_class(pred_sex, "lognormal_samples")
     expect_s3_class(pred_sex, "data.frame")
@@ -64,6 +82,7 @@ test_that("predict_delay_parameters accepts newdata arguments and prediction by 
       c(meanlog_f, sdlog_f),
       tolerance = 0.1
     )
+    return(invisible(NULL))
   }
 
   # Test latent and marginal models
