@@ -174,21 +174,21 @@ fit_advi <- epidist(
 time_advi <- proc.time() - t
 ```
 
-For the Pathfinder algorithm we will set `num_paths = 1`.
-Although in testing both the Laplace and ADVI methods ran without problem in all cases, we found Pathfinder often produced "Error evaluating model log probability: Non-finite gradient.".
+For the Pathfinder algorithm we will set `chains = 1`.
+Although both the Laplace and ADVI methods ran without problems in all cases during testing, we found that Pathfinder often produced the error message "Error evaluating model log probability: Non-finite gradient."
 Although a `save_single_paths` option is available, which may have allowed recovery of individual Pathfinder paths (and therefore removing faulty paths), it does not appear to be working currently^[See https://github.com/stan-dev/cmdstanr/issues/878].
 
 ```{r}
 t <- proc.time()
 fit_pathfinder <- epidist(
-  data = data, algorithm = "pathfinder", draws = 4000, num_paths = 1,
+  data = data, algorithm = "pathfinder", draws = 4000, chains = 1,
   backend = "cmdstanr"
 )
 time_pathfinder <- proc.time() - t
 ```
 
-We now extract posterior distribution for the delay parameters from the fitted model for each inference method.
-Thankfully, each algorithm is implemented to sample draws from the posterior distribution, and so post-processing is simple.
+We now extract the posterior distribution for the delay parameters from the fitted model for each inference method.
+Thankfully, each algorithm is implemented to sample draws from the posterior distribution, making post-processing straightforward.
 
 <details><summary>Click to expand for code to extract posterior draws</summary>
 
@@ -221,7 +221,7 @@ draws <- bind_rows(draws)
 
 ## Comparison of parameter posterior distributions
 
-The mean estimated value of each parameter, from each method is as follows.
+The mean estimated value of each parameter, from each method, is as follows.
 
 ```{r}
 pars <- draws |>
@@ -307,6 +307,6 @@ times
 The range of alternative approximation algorithms available, and their ease of use, is an attractive feature of `brms`.
 We found that these algorithms do produce reasonable approximations in far less time than HMC.
 Of course, this vignette only includes one example, and a more thorough investigation would be required to make specific recommendations.
-That said, currently we do not recommend use of the Pathfinder algorithm due to its unstable performance in our testing, and early stage software implementation.
+That said, currently we do not recommend use of the Pathfinder algorithm due to its unstable performance in our testing and early stage software implementation.
 
 ## References {-}
