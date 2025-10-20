@@ -172,6 +172,40 @@ We also provide a function `epidist_diagnostics()` which can be used to obtain c
 epidist_diagnostics(fit)
 ```
 
+## How can I use `pp_check()` for posterior predictive checks?
+
+The `brms::pp_check()` function is a useful tool for checking model fit by comparing observed data to simulated data from the posterior predictive distribution.
+However, when working with `epidist` models that use aggregated/weighted data, `pp_check()` does not automatically account for the observation weights stored in the model.
+
+### The problem
+
+When you call `pp_check()` on an `epidist` model fitted with aggregated data, the visualization will show only the unique delay values rather than reflecting the counts/weights for each observation:
+
+```{r eval=FALSE}
+# This will not properly show the weighted data
+brms::pp_check(fit, ndraws = 50, type = "bars")
+```
+
+### The solution
+
+To get correct posterior predictive checks, you need to expand the aggregated data back to individual-level observations and pass this expanded data to `pp_check()` using the `newdata` argument:
+
+```{r eval=FALSE}
+# Expand the aggregated data to individual observations
+expanded_data <- data[rep(seq_len(nrow(data)), data$n), ]
+
+# Now use pp_check with the expanded data
+brms::pp_check(fit, newdata = expanded_data, ndraws = 50, type = "bars")
+```
+
+This approach manually expands each row of your aggregated data according to its weight (stored in the `n` column), creating a dataset where each observation appears as many times as specified by its count.
+The `pp_check()` function will then properly visualize the weighted data structure.
+
+### Alternative approach for other brms functions
+
+Similar issues may arise with other `brms` functions like `loo()` for leave-one-out cross-validation.
+The same principle applies: expand your aggregated data before passing it to these functions if they don't properly handle the weights.
+
 ## I'd like to run a simulation study
 
 We recommend use of the [`purrr`](https://purrr.tidyverse.org/) package for running many `epidist` models, for example as a part of a simulation study.
