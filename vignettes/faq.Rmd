@@ -172,39 +172,60 @@ We also provide a function `epidist_diagnostics()` which can be used to obtain c
 epidist_diagnostics(fit)
 ```
 
-## How can I use `pp_check()` for posterior predictive checks?
+## How can I perform posterior predictive checks?
 
-The `brms::pp_check()` function is a useful tool for checking model fit by comparing observed data to simulated data from the posterior predictive distribution.
-However, when working with `epidist` models that use aggregated/weighted data, `pp_check()` does not automatically account for the observation weights stored in the model.
+Posterior predictive checks are a useful tool for assessing model fit by comparing observed data to simulated data from the posterior predictive distribution.
+While `brms::pp_check()` is a convenient function for this, it does not automatically handle the aggregated/weighted data structure used by `epidist` models.
 
-### The problem
+Instead, we recommend using `tidybayes::add_predicted_draws()` to generate posterior predictive samples and then creating custom visualizations to compare them with your observed data.
+This approach is consistent with the other prediction workflows demonstrated throughout the `epidist` documentation.
 
-When you call `pp_check()` on an `epidist` model fitted with aggregated data, the visualization will show only the unique delay values rather than reflecting the counts/weights for each observation:
+### Generating posterior predictive samples
 
-```{r eval=FALSE}
-# This will not properly show the weighted data
-brms::pp_check(fit, ndraws = 50, type = "bars")
+Use `tidybayes::add_predicted_draws()` to generate posterior predictive samples that match your observation process (accounting for censoring and truncation):
+
+```{r}
+library(tidybayes)
+
+# Generate posterior predictive samples using the same observation structure
+pp_samples <- data |>
+  add_predicted_draws(fit, ndraws = 100)
 ```
 
-### The solution
+### Comparing observed and predicted distributions
 
-To get correct posterior predictive checks, you need to expand the aggregated data back to individual-level observations and pass this expanded data to `pp_check()` using the `newdata` argument:
+You can then visualize the posterior predictive distribution alongside your observed data:
 
-```{r eval=FALSE}
-# Expand the aggregated data to individual observations
-expanded_data <- data[rep(seq_len(nrow(data)), data$n), ]
-
-# Now use pp_check with the expanded data
-brms::pp_check(fit, newdata = expanded_data, ndraws = 50, type = "bars")
+```{r}
+# Create a histogram comparing observed (weighted by n) and predicted delays
+ggplot() +
+  # Posterior predictive samples
+  geom_bar(
+    data = pp_samples,
+    aes(x = .prediction, group = .draw),
+    alpha = 0.05,
+    fill = "skyblue"
+  ) +
+  # Observed data (accounting for weights)
+  geom_bar(
+    data = data,
+    aes(x = delay_lwr, weight = n),
+    fill = NA,
+    color = "black",
+    linewidth = 1
+  ) +
+  labs(
+    x = "Delay",
+    y = "Count",
+    title = "Posterior predictive check"
+  ) +
+  theme_minimal()
 ```
 
-This approach manually expands each row of your aggregated data according to its weight (stored in the `n` column), creating a dataset where each observation appears as many times as specified by its count.
-The `pp_check()` function will then properly visualize the weighted data structure.
+This visualization shows the posterior predictive distribution (light blue bars, with each draw creating a semi-transparent layer) compared to the observed data (black outline).
+Good model fit is indicated when the observed data falls within the range of the posterior predictive samples.
 
-### Alternative approach for other brms functions
-
-Similar issues may arise with other `brms` functions like `loo()` for leave-one-out cross-validation.
-The same principle applies: expand your aggregated data before passing it to these functions if they don't properly handle the weights.
+For additional posterior predictive check approaches, see the ["Advanced features with Ebola data"](https://epidist.epinowcast.org/articles/ebola.html) vignette which demonstrates generating discrete PMFs and continuous PDFs from posterior predictions.
 
 ## I'd like to run a simulation study
 
