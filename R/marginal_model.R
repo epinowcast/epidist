@@ -32,6 +32,12 @@ as_epidist_marginal_model <- function(data, ...) {
 #' ([as_epidist_latent_model()]) approach in most settings except when the
 #' number of unique strata approaches the number of observations.
 #'
+#' The marginal model performs internal aggregation to optimize computational
+#' efficiency while preserving all statistical information. If your data already
+#' contains repeated observations with identical characteristics, you can use
+#' the `weight` parameter to provide counts of these duplicates. This allows for
+#' more efficient data representation without any loss of information.
+#'
 #' When a formula is specified in [epidist()], the data will be transformed
 #' using [epidist_transform_data_model.epidist_marginal_model()] to prepare it
 #' for model fitting. This transformation summarises the data by counting unique
@@ -46,7 +52,14 @@ as_epidist_marginal_model <- function(data, ...) {
 #'  model efficiency by reducing the number of unique observation times.
 #'  Default is 2.
 #'
-#' @inheritParams .add_weights
+#' @param weight A column name containing counts of identical linelist items.
+#'  When specified, the user is declaring that rows with the same values
+#'  represent the same observation occurring multiple times. This allows for
+#'  efficient data representation by storing unique patterns with their counts
+#'  rather than repeating identical rows. The marginal model will further
+#'  aggregate these counts based on the formula specification. Default is NULL,
+#'  which assigns a count of 1 to each row. Internally this is used to define
+#'  the 'n' column of the returned object.
 #'
 #' @param ... Not used in this method.
 #'
