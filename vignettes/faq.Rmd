@@ -172,6 +172,61 @@ We also provide a function `epidist_diagnostics()` which can be used to obtain c
 epidist_diagnostics(fit)
 ```
 
+## How can I perform posterior predictive checks?
+
+Posterior predictive checks are a useful tool for assessing model fit by comparing observed data to simulated data from the posterior predictive distribution.
+While `brms::pp_check()` is a convenient function for this, it does not automatically handle the aggregated/weighted data structure used by `epidist` models.
+
+Instead, we recommend using `tidybayes::add_predicted_draws()` to generate posterior predictive samples and then creating custom visualizations to compare them with your observed data.
+This approach is consistent with the other prediction workflows demonstrated throughout the `epidist` documentation.
+
+### Generating posterior predictive samples
+
+Use `tidybayes::add_predicted_draws()` to generate posterior predictive samples that match your observation process (accounting for censoring and truncation):
+
+```{r}
+library(tidybayes)
+
+# Generate posterior predictive samples using the same observation structure
+pp_samples <- data |>
+  add_predicted_draws(fit, ndraws = 100)
+```
+
+### Comparing observed and predicted distributions
+
+You can then visualize the posterior predictive distribution alongside your observed data:
+
+```{r}
+# Create a histogram comparing observed (weighted by n) and predicted delays
+ggplot() +
+  # Posterior predictive samples
+  geom_bar(
+    data = pp_samples,
+    aes(x = .prediction, group = .draw),
+    alpha = 0.05,
+    fill = "skyblue"
+  ) +
+  # Observed data (accounting for weights)
+  geom_bar(
+    data = data,
+    aes(x = delay_lwr, weight = n),
+    fill = NA,
+    color = "black",
+    linewidth = 1
+  ) +
+  labs(
+    x = "Delay",
+    y = "Count",
+    title = "Posterior predictive check"
+  ) +
+  theme_minimal()
+```
+
+This visualization shows the posterior predictive distribution (light blue bars, with each draw creating a semi-transparent layer) compared to the observed data (black outline).
+Good model fit is indicated when the observed data falls within the range of the posterior predictive samples.
+
+For additional posterior predictive check approaches, see the ["Advanced features with Ebola data"](https://epidist.epinowcast.org/articles/ebola.html) vignette which demonstrates generating discrete PMFs and continuous PDFs from posterior predictions.
+
 ## I'd like to run a simulation study
 
 We recommend use of the [`purrr`](https://purrr.tidyverse.org/) package for running many `epidist` models, for example as a part of a simulation study.
