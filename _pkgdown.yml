@@ -64,7 +64,7 @@ reference:
 - subtitle: Diagnostic functions
   contents:
   - has_concept("diagnostics")
-- title: Advanced: Adding a new model
+- title: "Advanced: Adding a new model"
 - subtitle: Assert validity of objects
   desc: Functions used to assert the validity of package objects
   contents:
