@@ -13,7 +13,7 @@ test_that("as_epidist_marginal_model.epidist_linelist_data errors when passed in
 test_that("as_epidist_marginal_model.epidist_linelist_data respects weight variable", { # nolint: line_length_linter.
   # Create test data with a weight column
   weighted_data <- sim_obs
-  weighted_data$counts <- rep_len(c(1, 2), weighted_data)
+  weighted_data$counts <- rep(c(1, 2), length.out = nrow(weighted_data)) # nolint
 
   # Check weighted model has correct n values
   weighted_model <- as_epidist_marginal_model(
