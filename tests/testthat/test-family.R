@@ -38,7 +38,7 @@ test_that(
     expect_identical(family_gamma$param, "shape, shape ./ mu") # nolint
     family_weibull <- epidist_family(prep_obs, family = "Weibull")
     expect_identical(
-      family_weibull$param, "shape, mu ./ tgamma(1 + 1 ./ shape)"
+      family_weibull$param, "shape, mu ./ tgamma(1 + 1 ./ shape)" # nolint: nonportable_path_linter.
     )
   }
 )

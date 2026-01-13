@@ -8,8 +8,7 @@ linters: all_linters(
     object_usage_linter = NULL,
     namespace_linter = NULL,
     missing_package_linter = NULL,
-    return_linter(return_style = "explicit"),
-    cyclocomp_linter = NULL
+    return_linter(return_style = "explicit")
   )
 exclusions: list(
     "inst",
