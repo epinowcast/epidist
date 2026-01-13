@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.1000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.1.1000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -138,10 +138,13 @@ These two later options may be useful for model debugging and extensions.</p></d
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Setting 2394 observation times beyond 98 (=2x max delay) to Inf. This</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   improves model efficiency by reducing unique observation times while</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   maintaining model accuracy as these times should have negligible impact.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Found infinite values in the data, which may cause issues for Stan.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Data summarised by unique combinations of:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> * Model variables: delay bounds, observation time, and primary censoring window</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Reduced from 2453 to 272 rows.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> This should improve model efficiency with no loss of information.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Found infinite values in the data, which may cause issues for Stan.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Found infinite values in the data, which may cause issues for Stan.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Compiling Stan program...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Start sampling</span>
 <span class="r-in"><span></span></span>
@@ -156,8 +159,8 @@ These two later options may be useful for model debugging and extensions.</p></d
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Regression Coefficients:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept           1.62      0.01     1.61     1.63 1.00     1907     1325</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1383     1077</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept           1.62      0.01     1.60     1.63 1.00     1655     1082</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1679     1130</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> and Tail_ESS are effective sample size measures, and Rhat is the potential</span>
@@ -173,7 +176,7 @@ These two later options may be useful for model debugging and extensions.</p></d
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
 </div>
 
     </footer></div>

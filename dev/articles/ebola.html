@@ -35,7 +35,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.1000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.1.1000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -119,7 +119,7 @@ To use the <code>cmdstanr</code> backend, we first need to install CmdStan (see 
 We can check we have everything we need as follows:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "2.36.0"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "2.37.0"</span></span></code></pre></div>
 </div>
 <div class="section level2" number="2">
 <h2 id="data-preparation">
@@ -274,11 +274,11 @@ As a model is not explicitly placed on <code>sigma</code>, a constant model <cod
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
 <span><span class="co">#&gt; Chain 2 finished in 6.3 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 7.1 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 7.3 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 6.7 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 7.3 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 6.8 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 7.5 seconds.</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <a href="https://paulbuerkner.com/brms/reference/brmsfit-class.html" class="external-link"><code>brmsfit</code></a> object, and has the associated range of methods.
 See <code>methods(class = "brmsfit")</code> for more details.
 For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> to view information about the fitted model, including posterior estimates for the regression coefficients:</p>
@@ -319,12 +319,12 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 14.3 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 14.7 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 14.5 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 15.1 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 14.5 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 14.8 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 14.8 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 15.2 seconds.</span></span></code></pre></div>
 <p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.04) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is 0.02).
 For the <code>sexMale</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexMale</code> effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.</p>
@@ -373,12 +373,12 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 205.0 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 221.7 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 208.3 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 232.0 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 213.4 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 221.9 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 220.1 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 232.1 seconds.</span></span></code></pre></div>
 <p><strong>As this is a longer running model (~ 2 minutes) we have reduced the number of iterations but for real world use cases this may not be sufficient.</strong></p>
 <p>For this model, along with looking at the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -412,38 +412,38 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; , , Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                    Estimate  Est.Error         Q2.5       Q97.5</span></span>
-<span><span class="co">#&gt; Bo            -3.838507e-03 0.05347376 -0.110682275  0.10185087</span></span>
-<span><span class="co">#&gt; Bombali        2.581286e-01 0.04472119  0.174180825  0.34849830</span></span>
-<span><span class="co">#&gt; Bonthe        -1.862213e-02 0.13306808 -0.299108475  0.24800622</span></span>
-<span><span class="co">#&gt; Kailahun      -9.955586e-05 0.04513036 -0.091952980  0.08956600</span></span>
-<span><span class="co">#&gt; Kambia        -5.973642e-02 0.05880347 -0.176033550  0.05695112</span></span>
-<span><span class="co">#&gt; Kenema        -2.480167e-01 0.05043556 -0.348884675 -0.15341470</span></span>
-<span><span class="co">#&gt; Koinadugu      1.856984e-01 0.07527595  0.044445255  0.33407015</span></span>
-<span><span class="co">#&gt; Kono          -7.707571e-02 0.05419185 -0.179583950  0.03888698</span></span>
-<span><span class="co">#&gt; Moyamba       -7.067646e-03 0.06004876 -0.125565400  0.11777542</span></span>
-<span><span class="co">#&gt; Port Loko      1.454416e-01 0.04598757  0.055714808  0.23771160</span></span>
-<span><span class="co">#&gt; Pujehun       -5.130905e-02 0.09275505 -0.230238975  0.13392550</span></span>
-<span><span class="co">#&gt; Tonkolili      8.347059e-02 0.04697200 -0.008465083  0.17489370</span></span>
-<span><span class="co">#&gt; Western Rural -2.038493e-02 0.04587658 -0.110987350  0.07276795</span></span>
-<span><span class="co">#&gt; Western Urban -1.505765e-01 0.04555376 -0.242774150 -0.06006802</span></span>
+<span><span class="co">#&gt; Bo            -3.838507e-03 0.05347376 -0.110682116  0.10185108</span></span>
+<span><span class="co">#&gt; Bombali        2.581286e-01 0.04472120  0.174180357  0.34849843</span></span>
+<span><span class="co">#&gt; Bonthe        -1.862214e-02 0.13306808 -0.299108915  0.24800634</span></span>
+<span><span class="co">#&gt; Kailahun      -9.955841e-05 0.04513035 -0.091953006  0.08956599</span></span>
+<span><span class="co">#&gt; Kambia        -5.973642e-02 0.05880347 -0.176033186  0.05695112</span></span>
+<span><span class="co">#&gt; Kenema        -2.480167e-01 0.05043557 -0.348885038 -0.15341421</span></span>
+<span><span class="co">#&gt; Koinadugu      1.856984e-01 0.07527596  0.044445254  0.33407039</span></span>
+<span><span class="co">#&gt; Kono          -7.707570e-02 0.05419184 -0.179583662  0.03888700</span></span>
+<span><span class="co">#&gt; Moyamba       -7.067652e-03 0.06004876 -0.125565870  0.11777569</span></span>
+<span><span class="co">#&gt; Port Loko      1.454416e-01 0.04598757  0.055714857  0.23771194</span></span>
+<span><span class="co">#&gt; Pujehun       -5.130905e-02 0.09275505 -0.230239019  0.13392576</span></span>
+<span><span class="co">#&gt; Tonkolili      8.347061e-02 0.04697201 -0.008465082  0.17489416</span></span>
+<span><span class="co">#&gt; Western Rural -2.038493e-02 0.04587659 -0.110987340  0.07276795</span></span>
+<span><span class="co">#&gt; Western Urban -1.505765e-01 0.04555376 -0.242773652 -0.06006800</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; , , sigma_Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5      Q97.5</span></span>
-<span><span class="co">#&gt; Bo             0.18896215 0.07296301  0.05330906  0.3352376</span></span>
-<span><span class="co">#&gt; Bombali       -0.22756598 0.06220791 -0.34967355 -0.0960459</span></span>
-<span><span class="co">#&gt; Bonthe        -0.13516201 0.20615938 -0.57906983  0.2538547</span></span>
-<span><span class="co">#&gt; Kailahun      -0.33400693 0.06548897 -0.45963662 -0.1942981</span></span>
-<span><span class="co">#&gt; Kambia         0.05900935 0.08002008 -0.09201563  0.2221611</span></span>
-<span><span class="co">#&gt; Kenema         0.11135971 0.06839117 -0.01683754  0.2521803</span></span>
-<span><span class="co">#&gt; Koinadugu      0.07387654 0.09657278 -0.11703302  0.2542935</span></span>
-<span><span class="co">#&gt; Kono           0.03210721 0.07086334 -0.09476273  0.1735740</span></span>
-<span><span class="co">#&gt; Moyamba        0.09484336 0.07423207 -0.04620333  0.2429108</span></span>
-<span><span class="co">#&gt; Port Loko     -0.02356363 0.06397508 -0.14071705  0.1052845</span></span>
-<span><span class="co">#&gt; Pujehun       -0.09048644 0.15079205 -0.37209650  0.2205086</span></span>
-<span><span class="co">#&gt; Tonkolili     -0.15436247 0.06547716 -0.27559662 -0.0215666</span></span>
-<span><span class="co">#&gt; Western Rural  0.07162684 0.06427340 -0.04773832  0.2033333</span></span>
-<span><span class="co">#&gt; Western Urban  0.26897389 0.06036981  0.15346425  0.3954492</span></span></code></pre></div>
+<span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5       Q97.5</span></span>
+<span><span class="co">#&gt; Bo             0.18896217 0.07296300  0.05330906  0.33523742</span></span>
+<span><span class="co">#&gt; Bombali       -0.22756599 0.06220792 -0.34967369 -0.09604593</span></span>
+<span><span class="co">#&gt; Bonthe        -0.13516201 0.20615939 -0.57907015  0.25385463</span></span>
+<span><span class="co">#&gt; Kailahun      -0.33400691 0.06548897 -0.45963666 -0.19429786</span></span>
+<span><span class="co">#&gt; Kambia         0.05900935 0.08002009 -0.09201566  0.22216105</span></span>
+<span><span class="co">#&gt; Kenema         0.11135971 0.06839117 -0.01683758  0.25217995</span></span>
+<span><span class="co">#&gt; Koinadugu      0.07387654 0.09657278 -0.11703268  0.25429403</span></span>
+<span><span class="co">#&gt; Kono           0.03210721 0.07086333 -0.09476272  0.17357427</span></span>
+<span><span class="co">#&gt; Moyamba        0.09484337 0.07423208 -0.04620331  0.24291048</span></span>
+<span><span class="co">#&gt; Port Loko     -0.02356363 0.06397509 -0.14071705  0.10528427</span></span>
+<span><span class="co">#&gt; Pujehun       -0.09048644 0.15079204 -0.37209659  0.22050890</span></span>
+<span><span class="co">#&gt; Tonkolili     -0.15436247 0.06547717 -0.27559706 -0.02156661</span></span>
+<span><span class="co">#&gt; Western Rural  0.07162684 0.06427341 -0.04773829  0.20333298</span></span>
+<span><span class="co">#&gt; Western Urban  0.26897389 0.06036980  0.15346442  0.39544933</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3" number="3.3">
@@ -746,7 +746,7 @@ World Health Organization. 2016. <span>“Ebola Outbreak 2014-2016 - West Africa
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
 </div>
 
     </footer>
