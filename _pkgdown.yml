@@ -40,11 +40,7 @@ reference:
   desc: Functions for preparing aggregate data
   contents:
   - has_concept("aggregate_data")
-- title: Modelling
-- subtitle: Model fitting
-  desc: Functions for fitting delay distribution models using `brms`
-  contents:
-  - has_concept("fit")
+- title: Models
 - subtitle: Naive model
   desc: Specific methods for the naive model
   contents:
@@ -57,6 +53,11 @@ reference:
   desc: Specific methods for the marginal model
   contents:
   - has_concept("marginal_model")
+- title: Model fitting
+- subtitle: Model fitting
+  desc: Functions for fitting delay distribution models using `brms`
+  contents:
+  - has_concept("fit")
 - subtitle: Postprocess
   desc: Functions for postprocessing model output
   contents:
@@ -64,11 +65,7 @@ reference:
 - subtitle: Diagnostic functions
   contents:
   - has_concept("diagnostics")
-- title: "Advanced: Adding a new model"
-- subtitle: Assert validity of objects
-  desc: Functions used to assert the validity of package objects
-  contents:
-  - has_concept("assert")
+- title: Model specification
 - subtitle: Family
   desc: Functions related to specifying custom `brms` families
   contents:
@@ -77,10 +74,6 @@ reference:
   desc: Functions related to specifying custom `brms` formula
   contents:
   - has_concept("formula")
-- subtitle: Transform data
-  desc: Transform data using the formula and family information
-  contents:
-  - has_concept("transform_data")
 - subtitle: Prior distributions
   desc: Functions for specifying prior distributions
   contents:
@@ -89,10 +82,19 @@ reference:
   desc: Functions for specifying custom Stan code to put into `brms`
   contents:
   - has_concept("stan")
+- title: Package internals
+- subtitle: Transform data
+  desc: Transform data using the formula and family information
+  contents:
+  - has_concept("transform_data")
 - subtitle: Generator model functions
   desc: Generator functions for creating family specific model utilities.
   contents:
   - has_concept("gen")
+- subtitle: Assert validity of objects
+  desc: Functions used to assert the validity of package objects
+  contents:
+  - has_concept("assert")
 - title: Simulation and Data
 - subtitle: Simulation
   desc: Tools for simulating datasets
