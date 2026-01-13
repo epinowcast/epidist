@@ -14,7 +14,7 @@
 be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
-families see \code{\link[=brmsfamily]{brmsfamily()}}. Commonly used, such as \code{\link[=lognormal]{lognormal()}}, are also
+families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as \code{\link[=lognormal]{lognormal()}}, are also
 reexported as part of \code{epidist}.}
 }
 \value{

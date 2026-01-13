@@ -15,9 +15,9 @@ relative observation times to Inf. Observation times greater than
 model efficiency by reducing the number of unique observation times.
 Default is 2.}
 
-\item{weight}{A column name to use for weighting the data in the
-likelihood. Default is NULL. Internally this is used to define the 'n'
-column of the returned object.}
+\item{weight}{A column name containing counts of identical linelist items.
+Default is NULL (each row counts as 1). For aggregated data, it is
+recommended to use \code{\link[=as_epidist_marginal_model.epidist_aggregate_data]{as_epidist_marginal_model.epidist_aggregate_data()}}.}
 
 \item{...}{Not used in this method.}
 }
