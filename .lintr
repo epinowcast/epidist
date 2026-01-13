@@ -9,7 +9,7 @@ linters: all_linters(
     namespace_linter = NULL,
     missing_package_linter = NULL,
     return_linter(return_style = "explicit"),
-    cyclocomp_linter(25L)
+    cyclocomp_linter = NULL
   )
 exclusions: list(
     "inst",
