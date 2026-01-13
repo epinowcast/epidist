@@ -44,6 +44,7 @@ epidist_prior <- function(
   enforce_presence = FALSE
 ) {
   assert_epidist(data)
+  .check_latent_priors(data, prior)
   default <- brms::default_prior(formula, data = data)
   model <- epidist_model_prior(data, formula)
   if (!is.null(model)) {
@@ -132,4 +133,46 @@ epidist_family_prior.lognormal <- function(family, formula, ...) {
   sigma_prior <- prior("normal(-0.7, 0.4)", class = "Intercept", dpar = "sigma")
   prior <- prior + sigma_prior
   return(prior)
+}
+
+.check_latent_priors <- function(data, prior) {
+  if (is_epidist_latent_model(data) && !is.null(prior)) {
+    # Define parameters to check with their severity and messages
+    params <- list(
+      list(
+        name = "swindow_raw",
+        severity = "stop",
+        msg = "Priors for the secondary event window (swindow_raw) must be uniform(0, 1)." # nolint
+      ),
+      list(
+        name = "pwindow_raw",
+        severity = "warning",
+        msg = "Non-uniform priors for the primary event window (pwindow_raw) are not fully supported and may lead to misleading posterior predictions and log-likelihoods." # nolint
+      )
+    )
+
+    for (param in params) {
+      rows <- which(
+        prior$dpar == param$name |
+          grepl(param$name, prior$prior, fixed = TRUE)
+      )
+
+      if (length(rows) > 0) {
+        for (i in rows) {
+          p_str <- prior$prior[i]
+          p_clean <- gsub("\\s+", "", p_str)
+
+          is_uniform <- grepl("uniform(0,1)", p_clean, fixed = TRUE)
+          if (!is_uniform) {
+            if (param$severity == "stop") {
+              cli::cli_abort(param$msg, call = NULL)
+            } else {
+              cli::cli_warn(param$msg, call = NULL)
+            }
+          }
+        }
+      }
+    }
+  }
+  return(invisible(NULL))
 }
