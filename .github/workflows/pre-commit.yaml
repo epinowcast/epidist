@@ -12,4 +12,6 @@ jobs:
     - uses: actions/checkout@v6
     - uses: actions/setup-python@v6
     - uses: r-lib/actions/setup-r@v2
+    - name: Install cyclocomp
+      run: Rscript -e 'install.packages("cyclocomp", repos = "https://cloud.r-project.org")'
     - uses: ./.github/actions/pre-commit
