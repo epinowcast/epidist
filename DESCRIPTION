@@ -52,7 +52,6 @@ Suggests:
     BH (>= 1.66.0),
     bookdown,
     cmdstanr,
-    CodeDepends,
     collapse,
     ggplot2,
     knitr,
