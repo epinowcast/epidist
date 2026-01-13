@@ -12,8 +12,8 @@ test_that("as_epidist_latent_model.epidist_linelist_data errors when passed inco
 
 test_that("as_epidist_latent_model.epidist_aggregate_data works correctly", {
   # Create test aggregate data
-  agg_data <- suppressMessages(sierra_leone_ebola_data |>
-    dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+  agg_data <- suppressMessages(sierra_leone_ebola_data |> # nolint
+    dplyr::count(date_of_symptom_onset, date_of_sample_tested) |> # nolint
     as_epidist_aggregate_data(
       pdate_lwr = "date_of_symptom_onset",
       sdate_lwr = "date_of_sample_tested"
