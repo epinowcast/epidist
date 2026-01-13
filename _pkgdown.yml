@@ -31,70 +31,76 @@ authors:
     href: "https://www.samabbott.co.uk/"
 
 reference:
-- title: Linelist data
+- title: Data preparation
+- subtitle: Linelist data
   desc: Functions for preparing linelist data
   contents:
   - has_concept("linelist_data")
-- title: Aggregate data
+- subtitle: Aggregate data
   desc: Functions for preparing aggregate data
   contents:
   - has_concept("aggregate_data")
-- title: Model fitting
-  desc: Functions for fitting delay distribution models using `brms`
-  contents:
-  - has_concept("fit")
-- title: Naive model
+- title: Models
+- subtitle: Naive model
   desc: Specific methods for the naive model
   contents:
   - has_concept("naive_model")
-- title: Latent model
+- subtitle: Latent model
   desc: Specific methods for the latent model
   contents:
   - has_concept("latent_model")
-- title: Marginal model
+- subtitle: Marginal model
   desc: Specific methods for the marginal model
   contents:
   - has_concept("marginal_model")
-- title: Postprocess
+- title: Model fitting
+- subtitle: Model fitting
+  desc: Functions for fitting delay distribution models using `brms`
+  contents:
+  - has_concept("fit")
+- subtitle: Postprocess
   desc: Functions for postprocessing model output
   contents:
   - has_concept("postprocess")
-- title: Diagnostic functions
+- subtitle: Diagnostic functions
   contents:
   - has_concept("diagnostics")
-- title: Assert validity of objects
-  desc: Functions used to assert the validity of package objects
-  contents:
-  - has_concept("assert")
-- title: Family
+- title: Model specification
+- subtitle: Family
   desc: Functions related to specifying custom `brms` families
   contents:
   - has_concept("family")
-- title: Formula
+- subtitle: Formula
   desc: Functions related to specifying custom `brms` formula
   contents:
   - has_concept("formula")
-- title: Transform data
-  desc: Transform data using the formula and family information
-  contents:
-  - has_concept("transform_data")
-- title: Prior distributions
+- subtitle: Prior distributions
   desc: Functions for specifying prior distributions
   contents:
   - has_concept("prior")
-- title: Stan code
+- subtitle: Stan code
   desc: Functions for specifying custom Stan code to put into `brms`
   contents:
   - has_concept("stan")
-- title: Generator model functions
+- title: Package internals
+- subtitle: Transform data
+  desc: Transform data using the formula and family information
+  contents:
+  - has_concept("transform_data")
+- subtitle: Generator model functions
   desc: Generator functions for creating family specific model utilities.
   contents:
   - has_concept("gen")
-- title: Simulation
+- subtitle: Assert validity of objects
+  desc: Functions used to assert the validity of package objects
+  contents:
+  - has_concept("assert")
+- title: Simulation and Data
+- subtitle: Simulation
   desc: Tools for simulating datasets
   contents:
   - has_concept("simulate")
-- title: Data
+- subtitle: Data
   desc: Data included with the package
   contents:
   - has_concept("data")
