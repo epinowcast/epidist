@@ -137,49 +137,42 @@ epidist_family_prior.lognormal <- function(family, formula, ...) {
 
 .check_latent_priors <- function(data, prior) {
   if (is_epidist_latent_model(data) && !is.null(prior)) {
-    # Check swindow_raw
-    swindow_rows <- which(
-      prior$dpar == "swindow_raw" | grepl("swindow_raw", prior$prior)
+    # Define parameters to check with their severity and messages
+    params <- list(
+      list(
+        name = "swindow_raw",
+        severity = "stop",
+        msg = "Priors for the secondary event window (swindow_raw) must be uniform(0, 1)." # nolint
+      ),
+      list(
+        name = "pwindow_raw",
+        severity = "warning",
+        msg = "Non-uniform priors for the primary event window (pwindow_raw) are not fully supported and may lead to misleading posterior predictions and log-likelihoods." # nolint
+      )
     )
-    if (length(swindow_rows) > 0) {
-      for (i in swindow_rows) {
-        p_str <- prior$prior[i]
-        # Clean up string: remove spaces
-        p_clean <- gsub("\\s+", "", p_str)
-        # Check if it contains "uniform(0,1)" or matches "uniform(0,1)"
-        # Default prior is "pwindow_raw ~ uniform(0, 1);"
-        # User prior might be "uniform(0,1)" if dpar is set.
 
-        is_uniform <- grepl("uniform\\(0,1\\)", p_clean)
-        if (!is_uniform) {
-          stop(
-            "Priors for the secondary event window (swindow_raw) must be ",
-            "uniform(0, 1).",
-            call. = FALSE
-          )
-        }
-      }
-    }
+    for (param in params) {
+      rows <- which(
+        prior$dpar == param$name |
+          grepl(param$name, prior$prior, fixed = TRUE)
+      )
 
-    # Check pwindow_raw
-    pwindow_rows <- which(
-      prior$dpar == "pwindow_raw" | grepl("pwindow_raw", prior$prior)
-    )
-    if (length(pwindow_rows) > 0) {
-      for (i in pwindow_rows) {
-        p_str <- prior$prior[i]
-        p_clean <- gsub("\\s+", "", p_str)
+      if (length(rows) > 0) {
+        for (i in rows) {
+          p_str <- prior$prior[i]
+          p_clean <- gsub("\\s+", "", p_str)
 
-        is_uniform <- grepl("uniform\\(0,1\\)", p_clean)
-        if (!is_uniform) {
-          warning(
-            "Non-uniform or non-IID priors for the primary event window ",
-            "(pwindow_raw) are not fully supported and may lead to misleading ",
-            "posterior predictions and log-likelihoods.",
-            call. = FALSE
-          )
+          is_uniform <- grepl("uniform(0,1)", p_clean, fixed = TRUE)
+          if (!is_uniform) {
+            if (param$severity == "stop") {
+              stop(param$msg, call. = FALSE)
+            } else {
+              warning(param$msg, call. = FALSE)
+            }
+          }
         }
       }
     }
   }
+  return(invisible(NULL))
 }
