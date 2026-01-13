@@ -41,7 +41,7 @@ test_that(
   "as_epidist_latent_model.epidist_aggregate_data preserves stratification",
   {
     # Create test aggregate data with stratification
-    agg_data <- suppressMessages(sierra_leone_ebola_data |>
+    agg_data <- suppressMessages(sierra_leone_ebola_data |> # nolint
       dplyr::count(
         date_of_symptom_onset, date_of_sample_tested, age
       ) |>
