@@ -245,12 +245,12 @@ fit <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 6.3 seconds.
+#> Chain 2 finished in 6.4 seconds.
 #> Chain 1 finished in 7.3 seconds.
 #> 
 #> Both chains finished successfully.
 #> Mean chain execution time: 6.8 seconds.
-#> Total execution time: 7.5 seconds.
+#> Total execution time: 7.4 seconds.
 ```
 
 The `fit` object is a
@@ -300,11 +300,11 @@ fit_sex <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 14.5 seconds.
+#> Chain 2 finished in 14.6 seconds.
 #> Chain 1 finished in 15.1 seconds.
 #> 
 #> Both chains finished successfully.
-#> Mean chain execution time: 14.8 seconds.
+#> Mean chain execution time: 14.9 seconds.
 #> Total execution time: 15.2 seconds.
 ```
 
@@ -364,12 +364,12 @@ fit_sex_district <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 208.3 seconds.
-#> Chain 1 finished in 232.0 seconds.
+#> Chain 2 finished in 208.1 seconds.
+#> Chain 1 finished in 226.1 seconds.
 #> 
 #> Both chains finished successfully.
-#> Mean chain execution time: 220.1 seconds.
-#> Total execution time: 232.1 seconds.
+#> Mean chain execution time: 217.1 seconds.
+#> Total execution time: 226.2 seconds.
 ```
 
 **As this is a longer running model (~ 2 minutes) we have reduced the
