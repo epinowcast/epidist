@@ -192,8 +192,8 @@ fit_advi <- epidist(
 time_advi <- proc.time() - t
 ```
 
-For the Pathfinder algorithm we will set `chains = 1`. Although both the
-Laplace and ADVI methods ran without problems in all cases during
+For the Pathfinder algorithm we will set `num_paths = 1`. Although both
+the Laplace and ADVI methods ran without problems in all cases during
 testing, we found that Pathfinder often produced the error message
 “Error evaluating model log probability: Non-finite gradient.” Although
 a `save_single_paths` option is available, which may have allowed
@@ -203,7 +203,7 @@ paths), it does not appear to be working currently[³](#fn3).
 ``` r
 t <- proc.time()
 fit_pathfinder <- epidist(
-  data = data, algorithm = "pathfinder", draws = 4000, chains = 1,
+  data = data, algorithm = "pathfinder", draws = 4000, num_paths = 1,
   backend = "cmdstanr"
 )
 time_pathfinder <- proc.time() - t

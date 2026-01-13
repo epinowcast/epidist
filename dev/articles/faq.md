@@ -207,9 +207,48 @@ epidist_diagnostics(fit)
     ## # A tibble: 1 × 8
     ##    time samples max_rhat divergent_transitions per_divergent_transitions
     ##   <dbl>   <dbl>    <dbl>                 <dbl>                     <dbl>
-    ## 1  2.51    1000     1.00                     0                         0
+    ## 1  2.50    1000     1.00                     0                         0
     ## # ℹ 3 more variables: max_treedepth <dbl>, no_at_max_treedepth <int>,
     ## #   per_at_max_treedepth <dbl>
+
+### How can I perform posterior predictive checks?
+
+Posterior predictive checks are a useful tool for assessing model fit by
+comparing observed data to simulated data from the posterior predictive
+distribution.
+[`brms::pp_check()`](https://mc-stan.org/bayesplot/reference/pp_check.html)
+is a convenient function for this, but it does not automatically handle
+the aggregated/weighted data structure used by `epidist` models. Because
+[`brms::pp_check()`](https://mc-stan.org/bayesplot/reference/pp_check.html)
+ignores the `weights` argument when plotting observed data, passing
+aggregated data directly will result in an incorrect comparison between
+observed and predicted distributions.
+
+To use
+[`pp_check()`](https://mc-stan.org/bayesplot/reference/pp_check.html)
+correctly with aggregated data, you must first expand the data to an
+individual-level format (one row per observation) using
+[`tidyr::uncount()`](https://tidyr.tidyverse.org/reference/uncount.html).
+Then, pass this expanded data to the `newdata` argument of
+[`pp_check()`](https://mc-stan.org/bayesplot/reference/pp_check.html).
+
+``` r
+# Expand the aggregated data to individual-level data
+# Note: We must ensure the weight column 'n' is present but set to 1
+data_expanded <- data |>
+  tidyr::uncount(weights = n) |>
+  mutate(n = 1)
+
+# Run pp_check with the expanded data
+pp_check(fit, newdata = data_expanded, ndraws = 100)
+```
+
+![](faq_files/figure-html/unnamed-chunk-6-1.png)
+
+For more advanced custom visualizations, you can also use
+[`tidybayes::add_predicted_draws()`](https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html)
+as demonstrated in the [“Advanced features with Ebola
+data”](https://epidist.epinowcast.org/articles/ebola.html) vignette.
 
 ### I’d like to run a simulation study
 
@@ -314,7 +353,7 @@ pred |>
 
     ## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.
 
-![](faq_files/figure-html/unnamed-chunk-8-1.png)
+![](faq_files/figure-html/unnamed-chunk-9-1.png)
 
 ``` r
 quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
@@ -344,7 +383,7 @@ powerscale_plot_dens(fit, variable = c("Intercept", "Intercept_sigma")) +
   theme_minimal()
 ```
 
-![](faq_files/figure-html/unnamed-chunk-9-1.png)
+![](faq_files/figure-html/unnamed-chunk-10-1.png)
 
 ## What do the parameters in my model output correspond to?
 
@@ -429,7 +468,7 @@ ggplot(draws_pmf, aes(x = .prediction)) +
     ## Warning: Removed 1 row containing missing values or values outside the scale range
     ## (`geom_bar()`).
 
-![](faq_files/figure-html/unnamed-chunk-10-1.png)
+![](faq_files/figure-html/unnamed-chunk-11-1.png)
 
 Importantly, this functionality is only available for `epidist` models
 using `brms` families that have a `log_lik_censor` method implemented

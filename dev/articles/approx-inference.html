@@ -226,13 +226,13 @@ To match the four Markov chains of length 1000 in HMC above, we then draw 4000 s
 <span>  data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"meanfield"</span>, draws <span class="op">=</span> <span class="fl">4000</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">time_advi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span></code></pre></div>
-<p>For the Pathfinder algorithm we will set <code>chains = 1</code>.
+<p>For the Pathfinder algorithm we will set <code>num_paths = 1</code>.
 Although both the Laplace and ADVI methods ran without problems in all cases during testing, we found that Pathfinder often produced the error message “Error evaluating model log probability: Non-finite gradient.”
 Although a <code>save_single_paths</code> option is available, which may have allowed recovery of individual Pathfinder paths (and therefore removing faulty paths), it does not appear to be working currently<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;See &lt;a href="https://github.com/stan-dev/cmdstanr/issues/878" class="external-link uri"&gt;https://github.com/stan-dev/cmdstanr/issues/878&lt;/a&gt;&lt;/p&gt;'><sup>3</sup></a>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">fit_pathfinder</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
-<span>  data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"pathfinder"</span>, draws <span class="op">=</span> <span class="fl">4000</span>, chains <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">data</span>, algorithm <span class="op">=</span> <span class="st">"pathfinder"</span>, draws <span class="op">=</span> <span class="fl">4000</span>, num_paths <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">time_pathfinder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/proc.time.html" class="external-link">proc.time</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="va">t</span></span></code></pre></div>

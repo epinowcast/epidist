@@ -222,7 +222,9 @@ specification. Contributions of any kind are welcome!
 
 # Package index
 
-## Linelist data
+## Data preparation
+
+### Linelist data
 
 Functions for preparing linelist data
 
@@ -254,7 +256,7 @@ Functions for preparing linelist data
 
   Class constructor for `epidist_linelist_data` objects
 
-## Aggregate data
+### Aggregate data
 
 Functions for preparing aggregate data
 
@@ -285,16 +287,9 @@ Functions for preparing aggregate data
 
   Class constructor for `epidist_aggregate_data` objects
 
-## Model fitting
+## Models
 
-Functions for fitting delay distribution models using `brms`
-
-- [`epidist()`](https://epidist.epinowcast.org/dev/reference/epidist.md)
-  :
-
-  Fit epidemiological delay distributions using a `brms` interface
-
-## Naive model
+### Naive model
 
 Specific methods for the naive model
 
@@ -332,7 +327,7 @@ Specific methods for the naive model
 
   Class constructor for `epidist_naive_model` objects
 
-## Latent model
+### Latent model
 
 Specific methods for the latent model
 
@@ -375,7 +370,7 @@ Specific methods for the latent model
 
   Class constructor for `epidist_latent_model` objects
 
-## Marginal model
+### Marginal model
 
 Specific methods for the marginal model
 
@@ -418,7 +413,18 @@ Specific methods for the marginal model
 
   Class constructor for `epidist_marginal_model` objects
 
-## Postprocess
+## Model fitting
+
+### Model fitting
+
+Functions for fitting delay distribution models using `brms`
+
+- [`epidist()`](https://epidist.epinowcast.org/dev/reference/epidist.md)
+  :
+
+  Fit epidemiological delay distributions using a `brms` interface
+
+### Postprocess
 
 Functions for postprocessing model output
 
@@ -439,21 +445,16 @@ Functions for postprocessing model output
   [`predict_dpar()`](https://epidist.epinowcast.org/dev/reference/predict_delay_parameters.md)
   : Extract samples of the delay distribution parameters
 
-## Diagnostic functions
+### Diagnostic functions
 
 - [`epidist_diagnostics()`](https://epidist.epinowcast.org/dev/reference/epidist_diagnostics.md)
   :
 
   Diagnostics for `epidist_fit` models
 
-## Assert validity of objects
+## Model specification
 
-Functions used to assert the validity of package objects
-
-- [`assert_epidist()`](https://epidist.epinowcast.org/dev/reference/assert_epidist.md)
-  : Validation for epidist objects
-
-## Family
+### Family
 
 Functions related to specifying custom `brms` families
 
@@ -482,7 +483,7 @@ Functions related to specifying custom `brms` families
   : Default method for families which do not require a
   reparameterisation
 
-## Formula
+### Formula
 
 Functions related to specifying custom `brms` formula
 
@@ -500,24 +501,7 @@ Functions related to specifying custom `brms` formula
 - [`epidist_formula_model(`*`<default>`*`)`](https://epidist.epinowcast.org/dev/reference/epidist_formula_model.default.md)
   : Default method for defining a model specific formula
 
-## Transform data
-
-Transform data using the formula and family information
-
-- [`epidist_transform_data()`](https://epidist.epinowcast.org/dev/reference/epidist_transform_data.md)
-  : Transform data for an epidist model
-
-- [`epidist_transform_data_model()`](https://epidist.epinowcast.org/dev/reference/epidist_transform_data_model.md)
-  :
-
-  The model-specific parts of an
-  [`epidist_transform_data()`](https://epidist.epinowcast.org/dev/reference/epidist_transform_data.md)
-  call
-
-- [`epidist_transform_data_model(`*`<default>`*`)`](https://epidist.epinowcast.org/dev/reference/epidist_transform_data_model.default.md)
-  : Default method for transforming data for a model
-
-## Prior distributions
+### Prior distributions
 
 Functions for specifying prior distributions
 
@@ -534,7 +518,7 @@ Functions for specifying prior distributions
 - [`epidist_prior()`](https://epidist.epinowcast.org/dev/reference/epidist_prior.md)
   : Define custom prior distributions for epidist models
 
-## Stan code
+### Stan code
 
 Functions for specifying custom Stan code to put into `brms`
 
@@ -543,7 +527,26 @@ Functions for specifying custom Stan code to put into `brms`
 - [`epidist_stancode(`*`<default>`*`)`](https://epidist.epinowcast.org/dev/reference/epidist_stancode.default.md)
   : Default method for defining model specific Stan code
 
-## Generator model functions
+## Package internals
+
+### Transform data
+
+Transform data using the formula and family information
+
+- [`epidist_transform_data()`](https://epidist.epinowcast.org/dev/reference/epidist_transform_data.md)
+  : Transform data for an epidist model
+
+- [`epidist_transform_data_model()`](https://epidist.epinowcast.org/dev/reference/epidist_transform_data_model.md)
+  :
+
+  The model-specific parts of an
+  [`epidist_transform_data()`](https://epidist.epinowcast.org/dev/reference/epidist_transform_data.md)
+  call
+
+- [`epidist_transform_data_model(`*`<default>`*`)`](https://epidist.epinowcast.org/dev/reference/epidist_transform_data_model.default.md)
+  : Default method for transforming data for a model
+
+### Generator model functions
 
 Generator functions for creating family specific model utilities.
 
@@ -557,7 +560,16 @@ Generator functions for creating family specific model utilities.
   : Create a function to draw from the posterior predictive distribution
   for a double censored and truncated delay distribution
 
-## Simulation
+### Assert validity of objects
+
+Functions used to assert the validity of package objects
+
+- [`assert_epidist()`](https://epidist.epinowcast.org/dev/reference/assert_epidist.md)
+  : Validation for epidist objects
+
+## Simulation and Data
+
+### Simulation
 
 Tools for simulating datasets
 
@@ -570,7 +582,7 @@ Tools for simulating datasets
 - [`simulate_uniform_cases()`](https://epidist.epinowcast.org/dev/reference/simulate_uniform_cases.md)
   : Simulate cases from a uniform distribution
 
-## Data
+### Data
 
 Data included with the package
 

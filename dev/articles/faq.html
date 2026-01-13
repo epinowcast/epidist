@@ -255,9 +255,29 @@ For example, the function <code><a href="https://mc-stan.org/bayesplot/reference
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
 <span><span class="co">##    time samples max_rhat divergent_transitions per_divergent_transitions</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>  2.51    <span style="text-decoration: underline;">1</span>000     1.00                     0                         0</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>  2.50    <span style="text-decoration: underline;">1</span>000     1.00                     0                         0</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 3 more variables: max_treedepth &lt;dbl&gt;, no_at_max_treedepth &lt;int&gt;,</span></span></span>
 <span><span class="co">## <span style="color: #949494;">#   per_at_max_treedepth &lt;dbl&gt;</span></span></span></code></pre>
+</div>
+<div class="section level3">
+<h3 id="how-can-i-perform-posterior-predictive-checks">How can I perform posterior predictive checks?<a class="anchor" aria-label="anchor" href="#how-can-i-perform-posterior-predictive-checks"></a>
+</h3>
+<p>Posterior predictive checks are a useful tool for assessing model fit by comparing observed data to simulated data from the posterior predictive distribution.
+<code><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">brms::pp_check()</a></code> is a convenient function for this, but it does not automatically handle the aggregated/weighted data structure used by <code>epidist</code> models.
+Because <code><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">brms::pp_check()</a></code> ignores the <code>weights</code> argument when plotting observed data, passing aggregated data directly will result in an incorrect comparison between observed and predicted distributions.</p>
+<p>To use <code><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">pp_check()</a></code> correctly with aggregated data, you must first expand the data to an individual-level format (one row per observation) using <code><a href="https://tidyr.tidyverse.org/reference/uncount.html" class="external-link">tidyr::uncount()</a></code>.
+Then, pass this expanded data to the <code>newdata</code> argument of <code><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">pp_check()</a></code>.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Expand the aggregated data to individual-level data</span></span>
+<span><span class="co"># Note: We must ensure the weight column 'n' is present but set to 1</span></span>
+<span><span class="va">data_expanded</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/uncount.html" class="external-link">uncount</a></span><span class="op">(</span>weights <span class="op">=</span> <span class="va">n</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Run pp_check with the expanded data</span></span>
+<span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">pp_check</a></span><span class="op">(</span><span class="va">fit</span>, newdata <span class="op">=</span> <span class="va">data_expanded</span>, ndraws <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
+<p><img src="faq_files/figure-html/unnamed-chunk-6-1.png" alt="" width="672"></p>
+<p>For more advanced custom visualizations, you can also use <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_predicted_draws()</a></code> as demonstrated in the <a href="https://epidist.epinowcast.org/articles/ebola.html">“Advanced features with Ebola data”</a> vignette.</p>
 </div>
 <div class="section level3">
 <h3 id="id-like-to-run-a-simulation-study">I’d like to run a simulation study<a class="anchor" aria-label="anchor" href="#id-like-to-run-a-simulation-study"></a>
@@ -280,7 +300,7 @@ We particularly highlight two functions which might be useful:</p>
 However, some of those priors do not make sense in the context of our application.
 Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html" class="external-link">prior predictive checking</a> to set <code>epidist</code>-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.</p>
 <p>For example, for the <code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">brms::lognormal()</a></code> latent individual model, we suggest the following prior distributions for the <code>brms</code> <code>mu</code> and <code>sigma</code> intercept parameters:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Note that we export lognormal() as part of epidist hence no need for brms::</span></span>
 <span><span class="va">family</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -305,7 +325,7 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <span><span class="co">##  student_t(3, 0, 2.5) Intercept                 sigma                 default</span></span></code></pre>
 <p>(Note that the functions <code><a href="../reference/epidist_family.html">epidist_family()</a></code> and <code><a href="../reference/epidist_prior.html">epidist_prior()</a></code> are mostly for internal use!)</p>
 <p>Here are the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">fit_ppc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">data</span>,</span>
@@ -315,7 +335,7 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_delay_parameters.html">predict_delay_parameters</a></span><span class="op">(</span><span class="va">fit_ppc</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pred</span> <span class="op">|&gt;</span></span>
@@ -333,12 +353,12 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="va">comma</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</span></span></code></pre>
-<p><img src="faq_files/figure-html/unnamed-chunk-8-1.png" alt="" width="672"></p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<p><img src="faq_files/figure-html/unnamed-chunk-9-1.png" alt="" width="672"></p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">mean</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.99</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         1%        10%        25%        50%        75%        90%        99% </span></span>
 <span><span class="co">##  0.3172760  0.8667011  1.6163277  3.2461963  6.6291746 12.0852973 34.0415723</span></span></code></pre>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">sd</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.99</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         1%        10%        25%        50%        75%        90%        99% </span></span>
 <span><span class="co">##  0.1335500  0.3950604  0.7687361  1.7107506  3.9206460  8.1670947 33.4423697</span></span></code></pre>
@@ -347,11 +367,11 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <h3 id="how-can-i-assess-how-sensitive-the-fitted-posterior-distribution-is-to-the-prior-distribution-used">How can I assess how sensitive the fitted posterior distribution is to the prior distribution used?<a class="anchor" aria-label="anchor" href="#how-can-i-assess-how-sensitive-the-fitted-posterior-distribution-is-to-the-prior-distribution-used"></a>
 </h3>
 <p>We recommend use of the <a href="https://github.com/n-kall/priorsense" class="external-link"><code>priorsense</code></a> package <span class="citation">(<a href="#ref-kallioinen2024detecting">Kallioinen et al. 2024</a>)</span> to check how sensitive the posterior distribution is to perturbations of the prior distribution and likelihood using power-scaling analysis:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/n-kall/priorsense" class="external-link">priorsense</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://n-kall.github.io/priorsense/reference/powerscale_plots.html" class="external-link">powerscale_plot_dens</a></span><span class="op">(</span><span class="va">fit</span>, variable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Intercept"</span>, <span class="st">"Intercept_sigma"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="faq_files/figure-html/unnamed-chunk-9-1.png" alt="" width="672"></p>
+<p><img src="faq_files/figure-html/unnamed-chunk-10-1.png" alt="" width="672"></p>
 </div>
 <div class="section level2">
 <h2 id="what-do-the-parameters-in-my-model-output-correspond-to">What do the parameters in my model output correspond to?<a class="anchor" aria-label="anchor" href="#what-do-the-parameters-in-my-model-output-correspond-to"></a>
@@ -418,20 +438,20 @@ In particular, following functions may be useful:</p>
 </ol>
 <p>To see these functions demonstrated in a vignette, see <a href="https://epidist.epinowcast.org/articles/ebola.html">“Advanced features with Ebola data”</a>.
 As a short example, to generate 4000 predictions (equal to the number of draws) of the delay that would be observed with a double censored observation process (in which the primary and secondary censoring windows are both one) then:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mjskay.github.io/tidybayes/" class="external-link">tidybayes</a></span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Attaching package: 'tidybayes'</span></span></code></pre>
 <pre><code><span><span class="co">## The following objects are masked from 'package:brms':</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">##     dstudent_t, pstudent_t, qstudent_t, rstudent_t</span></span></code></pre>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">draws_pmf</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
 <span>  relative_obs_time <span class="op">=</span> <span class="cn">Inf</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span>, delay_upr <span class="op">=</span> <span class="cn">NA</span></span>
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Found infinite values in the data, which may cause issues for Stan.</span></span></code></pre>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">draws_pmf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.prediction</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">count</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Delay"</span>, y <span class="op">=</span> <span class="st">"PMF"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -441,7 +461,7 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 <span><span class="co">## (`stat_count()`).</span></span></code></pre>
 <pre><code><span><span class="co">## Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_bar()`).</span></span></code></pre>
-<p><img src="faq_files/figure-html/unnamed-chunk-10-1.png" alt="" width="672"></p>
+<p><img src="faq_files/figure-html/unnamed-chunk-11-1.png" alt="" width="672"></p>
 <p>Importantly, this functionality is only available for <code>epidist</code> models using <code>brms</code> families that have a <code>log_lik_censor</code> method implemented internally in <code>brms</code>. If you are using another family, consider <a href="https://github.com/epinowcast/epidist/pulls" class="external-link">submitting a pull request</a> to implement these methods!</p>
 <div class="section level3">
 <h3 id="how-can-i-use-the-marginaleffects-package-with-my-fitted-epidist-model">How can I use the <code>marginaleffects</code> package with my fitted <code>epidist</code> model?<a class="anchor" aria-label="anchor" href="#how-can-i-use-the-marginaleffects-package-with-my-fitted-epidist-model"></a>
@@ -452,7 +472,7 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 - Make comparisons between different covariate values
 - Visualise model predictions across the range of covariates</p>
 <p>Here’s a simple example using a model that includes location as a covariate:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://marginaleffects.com/" class="external-link">marginaleffects</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Compare outcomes between location categories (0 and 1)</span></span>
@@ -474,7 +494,7 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 </h3>
 <p>The <code>cmdstanr</code> backend is typically more performant than the default <code>rstan</code> backend.
 To use the <code>cmdstanr</code> backend, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "2.37.0"</span></span></code></pre>
 </div>
