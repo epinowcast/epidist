@@ -46,7 +46,9 @@ as_epidist_marginal_model <- function(data, ...) {
 #'  model efficiency by reducing the number of unique observation times.
 #'  Default is 2.
 #'
-#' @inheritParams .add_weights
+#' @param weight A column name containing counts of identical linelist items.
+#'  Default is NULL (each row counts as 1). For aggregated data, it is
+#'  recommended to use [as_epidist_marginal_model.epidist_aggregate_data()].
 #'
 #' @param ... Not used in this method.
 #'
