@@ -43,7 +43,7 @@ test_that(
     # Create test data with some large observation times
     test_data <- suppressMessages(sierra_leone_ebola_data |> # nolint
       dplyr::filter(date_of_sample_tested < as.Date("2015-01-01")) |> # nolint
-      as_epidist_linelist_data( 
+      as_epidist_linelist_data(
         pdate_lwr = "date_of_symptom_onset",
         sdate_lwr = "date_of_sample_tested"
       ))
