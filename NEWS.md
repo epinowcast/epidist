@@ -1,4 +1,7 @@
-# epidist 3.0.1
+# epidist 0.4.0
+
+
+# epidist 0.3.1
 
 Hotfix release to patch a change in how the `grepl` function works in new versions of R.
 
