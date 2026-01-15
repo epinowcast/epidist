@@ -203,7 +203,7 @@ paths), it does not appear to be working currently[³](#fn3).
 ``` r
 t <- proc.time()
 fit_pathfinder <- epidist(
-  data = data, algorithm = "pathfinder", draws = 4000, num_paths = 1,
+  data = data, algorithm = "pathfinder", draws = 4000, chains = 1,
   backend = "cmdstanr"
 )
 time_pathfinder <- proc.time() - t

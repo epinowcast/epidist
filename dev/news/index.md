@@ -1,6 +1,26 @@
 # Changelog
 
-## epidist 3.0.1
+## epidist 0.4.0
+
+### Package
+
+- Enforce line length and use cli for latent prior checks. See
+  [\#580](https://github.com/epinowcast/epidist/issues/580).
+- Removed CodeDepends from DESCRIPTION dependencies.
+
+### Documentation
+
+- Restructured pkgdown reference with higher-level categories. See
+  [\#574](https://github.com/epinowcast/epidist/issues/574).
+- Updated FAQ to recommend pp_check with expanded data. See
+  [\#575](https://github.com/epinowcast/epidist/issues/575).
+- Clarified weight parameter documentation in
+  [`as_epidist_marginal_model()`](https://epidist.epinowcast.org/dev/reference/as_epidist_marginal_model.md).
+  See [\#565](https://github.com/epinowcast/epidist/issues/565).
+- Fixed pathfinder parameter usage in approximate inference vignette.
+  See [\#573](https://github.com/epinowcast/epidist/issues/573).
+
+## epidist 0.3.1
 
 Hotfix release to patch a change in how the `grepl` function works in
 new versions of R.
