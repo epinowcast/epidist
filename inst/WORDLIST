@@ -2,6 +2,7 @@ ADVI
 CMD
 Charniga
 CmdStan
+CodeDepends
 Codecov
 Gelman
 Generalised
@@ -32,6 +33,7 @@ athowes
 brms
 brms’
 cherz
+cli
 cmdstanr
 codebase
 coef
@@ -76,6 +78,7 @@ parameterised
 parksw
 pearsonca
 performant
+pkgdown
 postprocess
 pre
 primarycensored
