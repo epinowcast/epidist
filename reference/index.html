@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,12 +51,16 @@
     </div>
 
     <div class="section level2">
-      <h2 id="linelist-data">Linelist data<a class="anchor" aria-label="anchor" href="#linelist-data"></a></h2>
+      <h2 id="data-preparation">Data preparation<a class="anchor" aria-label="anchor" href="#data-preparation"></a></h2>
 
+
+
+      <dl></dl></div><div class="section level2">
+
+      <h3 id="linelist-data">Linelist data<a class="anchor" aria-label="anchor" href="#linelist-data"></a></h3>
       <div class="section-desc"><p>Functions for preparing linelist data</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -67,49 +71,54 @@
 
         </dt>
         <dd>Create an epidist_linelist_data object</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="as_epidist_linelist_data.data.frame.html">as_epidist_linelist_data(<i>&lt;data.frame&gt;</i>)</a></code>
 
         </dt>
         <dd>Create an epidist_linelist_data object from a data frame with event dates</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="as_epidist_linelist_data.default.html">as_epidist_linelist_data(<i>&lt;default&gt;</i>)</a></code>
 
         </dt>
         <dd>Create an epidist_linelist_data object from vectors of event times</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="as_epidist_linelist_data.epidist_aggregate_data.html">as_epidist_linelist_data(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
 
         </dt>
         <dd>Convert aggregate data to linelist format</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="assert_epidist.epidist_linelist_data.html">assert_epidist(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
 
         </dt>
         <dd>Assert validity of <code>epidist_linelist_data</code> objects</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="is_epidist_linelist_data.html">is_epidist_linelist_data()</a></code>
 
         </dt>
         <dd>Check if data has the <code>epidist_linelist_data</code> class</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="new_epidist_linelist_data.html">new_epidist_linelist_data()</a></code>
 
         </dt>
         <dd>Class constructor for <code>epidist_linelist_data</code> objects</dd>
       </dl></div><div class="section level2">
-      <h2 id="aggregate-data">Aggregate data<a class="anchor" aria-label="anchor" href="#aggregate-data"></a></h2>
 
+      <h3 id="aggregate-data">Aggregate data<a class="anchor" aria-label="anchor" href="#aggregate-data"></a></h3>
       <div class="section-desc"><p>Functions for preparing aggregate data</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -120,49 +129,252 @@
 
         </dt>
         <dd>Create an epidist_aggregate_data object</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="as_epidist_aggregate_data.data.frame.html">as_epidist_aggregate_data(<i>&lt;data.frame&gt;</i>)</a></code>
 
         </dt>
         <dd>Create an epidist_aggregate_data object from a data.frame</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="as_epidist_aggregate_data.default.html">as_epidist_aggregate_data(<i>&lt;default&gt;</i>)</a></code>
 
         </dt>
         <dd>Create an epidist_aggregate_data object from vectors of event times</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="as_epidist_aggregate_data.epidist_linelist_data.html">as_epidist_aggregate_data(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
 
         </dt>
         <dd>Convert linelist data to aggregate format</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="assert_epidist.epidist_aggregate_data.html">assert_epidist(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
 
         </dt>
         <dd>Assert validity of <code>epidist_aggregate_data</code> objects</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="is_epidist_aggregate_data.html">is_epidist_aggregate_data()</a></code>
 
         </dt>
         <dd>Check if data has the <code>epidist_aggregate_data</code> class</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="new_epidist_aggregate_data.html">new_epidist_aggregate_data()</a></code>
 
         </dt>
         <dd>Class constructor for <code>epidist_aggregate_data</code> objects</dd>
       </dl></div><div class="section level2">
+      <h2 id="models">Models<a class="anchor" aria-label="anchor" href="#models"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+      <h3 id="naive-model">Naive model<a class="anchor" aria-label="anchor" href="#naive-model"></a></h3>
+      <div class="section-desc"><p>Specific methods for the naive model</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as_epidist_naive_model.html">as_epidist_naive_model()</a></code>
+
+        </dt>
+        <dd>Convert an object to an <code>epidist_naive_model</code> object</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_naive_model.epidist_aggregate_data.html">as_epidist_naive_model(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The naive model method for <code>epidist_aggregate_data</code> objects</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_naive_model.epidist_linelist_data.html">as_epidist_naive_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The naive model method for <code>epidist_linelist_data</code> objects</dd>
+
+        <dt>
+
+          <code><a href="epidist_formula_model.epidist_naive_model.html">epidist_formula_model(<i>&lt;epidist_naive_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Define the model-specific component of an <code>epidist</code> custom formula for the naive model</dd>
+
+        <dt>
+
+          <code><a href="epidist_transform_data_model.epidist_naive_model.html">epidist_transform_data_model(<i>&lt;epidist_naive_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Transform data for the naive model</dd>
+
+        <dt>
+
+          <code><a href="is_epidist_naive_model.html">is_epidist_naive_model()</a></code>
+
+        </dt>
+        <dd>Check if data has the <code>epidist_naive_model</code> class</dd>
+
+        <dt>
+
+          <code><a href="new_epidist_naive_model.html">new_epidist_naive_model()</a></code>
+
+        </dt>
+        <dd>Class constructor for <code>epidist_naive_model</code> objects</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="latent-model">Latent model<a class="anchor" aria-label="anchor" href="#latent-model"></a></h3>
+      <div class="section-desc"><p>Specific methods for the latent model</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as_epidist_latent_model.html">as_epidist_latent_model()</a></code>
+
+        </dt>
+        <dd>Convert an object to an <code>epidist_latent_model</code> object</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_latent_model.epidist_aggregate_data.html">as_epidist_latent_model(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The latent model method for <code>epidist_aggregate_data</code> objects</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_latent_model.epidist_linelist_data.html">as_epidist_latent_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The latent model method for <code>epidist_linelist_data</code> objects</dd>
+
+        <dt>
+
+          <code><a href="epidist_family_model.epidist_latent_model.html">epidist_family_model(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Create the model-specific component of an <code>epidist</code> custom family</dd>
+
+        <dt>
+
+          <code><a href="epidist_formula_model.epidist_latent_model.html">epidist_formula_model(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Define the model-specific component of an <code>epidist</code> custom formula for the latent model</dd>
+
+        <dt>
+
+          <code><a href="epidist_model_prior.epidist_latent_model.html">epidist_model_prior(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Model specific prior distributions for latent models</dd>
+
+        <dt>
+
+          <code><a href="is_epidist_latent_model.html">is_epidist_latent_model()</a></code>
+
+        </dt>
+        <dd>Check if data has the <code>epidist_latent_model</code> class</dd>
+
+        <dt>
+
+          <code><a href="new_epidist_latent_model.html">new_epidist_latent_model()</a></code>
+
+        </dt>
+        <dd>Class constructor for <code>epidist_latent_model</code> objects</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="marginal-model">Marginal model<a class="anchor" aria-label="anchor" href="#marginal-model"></a></h3>
+      <div class="section-desc"><p>Specific methods for the marginal model</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code>
+
+        </dt>
+        <dd>Convert an object to an <code>epidist_marginal_model</code> object</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_marginal_model.epidist_aggregate_data.html">as_epidist_marginal_model(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The marginal model method for <code>epidist_aggregate_data</code> objects</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_marginal_model.epidist_linelist_data.html">as_epidist_marginal_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The marginal model method for <code>epidist_linelist_data</code> objects</dd>
+
+        <dt>
+
+          <code><a href="epidist_family_model.epidist_marginal_model.html">epidist_family_model(<i>&lt;epidist_marginal_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Create the model-specific component of an <code>epidist</code> custom family</dd>
+
+        <dt>
+
+          <code><a href="epidist_formula_model.epidist_marginal_model.html">epidist_formula_model(<i>&lt;epidist_marginal_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Define the model-specific component of an <code>epidist</code> custom formula for the marginal model</dd>
+
+        <dt>
+
+          <code><a href="epidist_transform_data_model.epidist_marginal_model.html">epidist_transform_data_model(<i>&lt;epidist_marginal_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Transform data for the marginal model</dd>
+
+        <dt>
+
+          <code><a href="is_epidist_marginal_model.html">is_epidist_marginal_model()</a></code>
+
+        </dt>
+        <dd>Check if data has the <code>epidist_marginal_model</code> class</dd>
+
+        <dt>
+
+          <code><a href="new_epidist_marginal_model.html">new_epidist_marginal_model()</a></code>
+
+        </dt>
+        <dd>Class constructor for <code>epidist_marginal_model</code> objects</dd>
+      </dl></div><div class="section level2">
       <h2 id="model-fitting">Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a></h2>
 
+
+
+      <dl></dl></div><div class="section level2">
+
+      <h3 id="model-fitting-1">Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting-1"></a></h3>
       <div class="section-desc"><p>Functions for fitting delay distribution models using <code>brms</code></p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -174,183 +386,11 @@
         </dt>
         <dd>Fit epidemiological delay distributions using a <code>brms</code> interface</dd>
       </dl></div><div class="section level2">
-      <h2 id="naive-model">Naive model<a class="anchor" aria-label="anchor" href="#naive-model"></a></h2>
 
-      <div class="section-desc"><p>Specific methods for the naive model</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="as_epidist_naive_model.html">as_epidist_naive_model()</a></code>
-
-        </dt>
-        <dd>Convert an object to an <code>epidist_naive_model</code> object</dd>
-      </dl><dl><dt>
-
-          <code><a href="as_epidist_naive_model.epidist_aggregate_data.html">as_epidist_naive_model(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
-
-        </dt>
-        <dd>The naive model method for <code>epidist_aggregate_data</code> objects</dd>
-      </dl><dl><dt>
-
-          <code><a href="as_epidist_naive_model.epidist_linelist_data.html">as_epidist_naive_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
-
-        </dt>
-        <dd>The naive model method for <code>epidist_linelist_data</code> objects</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_formula_model.epidist_naive_model.html">epidist_formula_model(<i>&lt;epidist_naive_model&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Define the model-specific component of an <code>epidist</code> custom formula for the naive model</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_transform_data_model.epidist_naive_model.html">epidist_transform_data_model(<i>&lt;epidist_naive_model&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Transform data for the naive model</dd>
-      </dl><dl><dt>
-
-          <code><a href="is_epidist_naive_model.html">is_epidist_naive_model()</a></code>
-
-        </dt>
-        <dd>Check if data has the <code>epidist_naive_model</code> class</dd>
-      </dl><dl><dt>
-
-          <code><a href="new_epidist_naive_model.html">new_epidist_naive_model()</a></code>
-
-        </dt>
-        <dd>Class constructor for <code>epidist_naive_model</code> objects</dd>
-      </dl></div><div class="section level2">
-      <h2 id="latent-model">Latent model<a class="anchor" aria-label="anchor" href="#latent-model"></a></h2>
-
-      <div class="section-desc"><p>Specific methods for the latent model</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="as_epidist_latent_model.html">as_epidist_latent_model()</a></code>
-
-        </dt>
-        <dd>Convert an object to an <code>epidist_latent_model</code> object</dd>
-      </dl><dl><dt>
-
-          <code><a href="as_epidist_latent_model.epidist_aggregate_data.html">as_epidist_latent_model(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
-
-        </dt>
-        <dd>The latent model method for <code>epidist_aggregate_data</code> objects</dd>
-      </dl><dl><dt>
-
-          <code><a href="as_epidist_latent_model.epidist_linelist_data.html">as_epidist_latent_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
-
-        </dt>
-        <dd>The latent model method for <code>epidist_linelist_data</code> objects</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_family_model.epidist_latent_model.html">epidist_family_model(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Create the model-specific component of an <code>epidist</code> custom family</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_formula_model.epidist_latent_model.html">epidist_formula_model(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Define the model-specific component of an <code>epidist</code> custom formula for the latent model</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_model_prior.epidist_latent_model.html">epidist_model_prior(<i>&lt;epidist_latent_model&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Model specific prior distributions for latent models</dd>
-      </dl><dl><dt>
-
-          <code><a href="is_epidist_latent_model.html">is_epidist_latent_model()</a></code>
-
-        </dt>
-        <dd>Check if data has the <code>epidist_latent_model</code> class</dd>
-      </dl><dl><dt>
-
-          <code><a href="new_epidist_latent_model.html">new_epidist_latent_model()</a></code>
-
-        </dt>
-        <dd>Class constructor for <code>epidist_latent_model</code> objects</dd>
-      </dl></div><div class="section level2">
-      <h2 id="marginal-model">Marginal model<a class="anchor" aria-label="anchor" href="#marginal-model"></a></h2>
-
-      <div class="section-desc"><p>Specific methods for the marginal model</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code>
-
-        </dt>
-        <dd>Convert an object to an <code>epidist_marginal_model</code> object</dd>
-      </dl><dl><dt>
-
-          <code><a href="as_epidist_marginal_model.epidist_aggregate_data.html">as_epidist_marginal_model(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
-
-        </dt>
-        <dd>The marginal model method for <code>epidist_aggregate_data</code> objects</dd>
-      </dl><dl><dt>
-
-          <code><a href="as_epidist_marginal_model.epidist_linelist_data.html">as_epidist_marginal_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
-
-        </dt>
-        <dd>The marginal model method for <code>epidist_linelist_data</code> objects</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_family_model.epidist_marginal_model.html">epidist_family_model(<i>&lt;epidist_marginal_model&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Create the model-specific component of an <code>epidist</code> custom family</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_formula_model.epidist_marginal_model.html">epidist_formula_model(<i>&lt;epidist_marginal_model&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Define the model-specific component of an <code>epidist</code> custom formula for the marginal model</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_transform_data_model.epidist_marginal_model.html">epidist_transform_data_model(<i>&lt;epidist_marginal_model&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Transform data for the marginal model</dd>
-      </dl><dl><dt>
-
-          <code><a href="is_epidist_marginal_model.html">is_epidist_marginal_model()</a></code>
-
-        </dt>
-        <dd>Check if data has the <code>epidist_marginal_model</code> class</dd>
-      </dl><dl><dt>
-
-          <code><a href="new_epidist_marginal_model.html">new_epidist_marginal_model()</a></code>
-
-        </dt>
-        <dd>Class constructor for <code>epidist_marginal_model</code> objects</dd>
-      </dl></div><div class="section level2">
-      <h2 id="postprocess">Postprocess<a class="anchor" aria-label="anchor" href="#postprocess"></a></h2>
-
+      <h3 id="postprocess">Postprocess<a class="anchor" aria-label="anchor" href="#postprocess"></a></h3>
       <div class="section-desc"><p>Functions for postprocessing model output</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -361,43 +401,47 @@
 
         </dt>
         <dd>Add natural scale mean and standard deviation parameters</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="add_mean_sd.default.html">add_mean_sd(<i>&lt;default&gt;</i>)</a></code>
 
         </dt>
         <dd>Default method for add natural scale parameters</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="add_mean_sd.gamma_samples.html">add_mean_sd(<i>&lt;gamma_samples&gt;</i>)</a></code>
 
         </dt>
         <dd>Add natural scale mean and standard deviation parameters for a Gamma model</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="add_mean_sd.lognormal_samples.html">add_mean_sd(<i>&lt;lognormal_samples&gt;</i>)</a></code>
 
         </dt>
         <dd>Add natural scale mean and standard deviation parameters for a lognormal model</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="add_mean_sd.weibull_samples.html">add_mean_sd(<i>&lt;weibull_samples&gt;</i>)</a></code>
 
         </dt>
         <dd>Add natural scale mean and standard deviation parameters for a Weibull model</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="predict_delay_parameters.html">predict_delay_parameters()</a></code> <code><a href="predict_delay_parameters.html">predict_dpar()</a></code>
 
         </dt>
         <dd>Extract samples of the delay distribution parameters</dd>
       </dl></div><div class="section level2">
-      <h2 id="diagnostic-functions">Diagnostic functions<a class="anchor" aria-label="anchor" href="#diagnostic-functions"></a></h2>
+
+      <h3 id="diagnostic-functions">Diagnostic functions<a class="anchor" aria-label="anchor" href="#diagnostic-functions"></a></h3>
 
 
-
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -409,12 +453,229 @@
         </dt>
         <dd>Diagnostics for <code>epidist_fit</code> models</dd>
       </dl></div><div class="section level2">
-      <h2 id="assert-validity-of-objects">Assert validity of objects<a class="anchor" aria-label="anchor" href="#assert-validity-of-objects"></a></h2>
+      <h2 id="model-specification">Model specification<a class="anchor" aria-label="anchor" href="#model-specification"></a></h2>
 
+
+
+      <dl></dl></div><div class="section level2">
+
+      <h3 id="family">Family<a class="anchor" aria-label="anchor" href="#family"></a></h3>
+      <div class="section-desc"><p>Functions related to specifying custom <code>brms</code> families</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist_family.html">epidist_family()</a></code>
+
+        </dt>
+        <dd>Define <code>epidist</code> family</dd>
+
+        <dt>
+
+          <code><a href="epidist_family_model.html">epidist_family_model()</a></code> <code><a href="epidist_family_model.html">epidist_formula_model()</a></code>
+
+        </dt>
+        <dd>The model-specific parts of an <code><a href="../reference/epidist_family.html">epidist_family()</a></code> call</dd>
+
+        <dt>
+
+          <code><a href="epidist_family_model.default.html">epidist_family_model(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method for defining a model specific family</dd>
+
+        <dt>
+
+          <code><a href="epidist_family_param.html">epidist_family_param()</a></code>
+
+        </dt>
+        <dd>Reparameterise an <code>epidist</code> family to align <code>brms</code> and Stan</dd>
+
+        <dt>
+
+          <code><a href="epidist_family_param.default.html">epidist_family_param(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method for families which do not require a reparameterisation</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="formula">Formula<a class="anchor" aria-label="anchor" href="#formula"></a></h3>
+      <div class="section-desc"><p>Functions related to specifying custom <code>brms</code> formula</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist_family_model.html">epidist_family_model()</a></code> <code><a href="epidist_family_model.html">epidist_formula_model()</a></code>
+
+        </dt>
+        <dd>The model-specific parts of an <code><a href="../reference/epidist_family.html">epidist_family()</a></code> call</dd>
+
+        <dt>
+
+          <code><a href="epidist_formula.html">epidist_formula()</a></code>
+
+        </dt>
+        <dd>Define a model specific formula</dd>
+
+        <dt>
+
+          <code><a href="epidist_formula_model.default.html">epidist_formula_model(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method for defining a model specific formula</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="prior-distributions">Prior distributions<a class="anchor" aria-label="anchor" href="#prior-distributions"></a></h3>
+      <div class="section-desc"><p>Functions for specifying prior distributions</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist_family_prior.html">epidist_family_prior()</a></code>
+
+        </dt>
+        <dd>Family specific prior distributions</dd>
+
+        <dt>
+
+          <code><a href="epidist_family_prior.default.html">epidist_family_prior(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default family specific prior distributions</dd>
+
+        <dt>
+
+          <code><a href="epidist_family_prior.lognormal.html">epidist_family_prior(<i>&lt;lognormal&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Family specific prior distributions for the lognormal family</dd>
+
+        <dt>
+
+          <code><a href="epidist_model_prior.html">epidist_model_prior()</a></code>
+
+        </dt>
+        <dd>Model specific prior distributions</dd>
+
+        <dt>
+
+          <code><a href="epidist_model_prior.default.html">epidist_model_prior(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default model specific prior distributions</dd>
+
+        <dt>
+
+          <code><a href="epidist_prior.html">epidist_prior()</a></code>
+
+        </dt>
+        <dd>Define custom prior distributions for epidist models</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="stan-code">Stan code<a class="anchor" aria-label="anchor" href="#stan-code"></a></h3>
+      <div class="section-desc"><p>Functions for specifying custom Stan code to put into <code>brms</code></p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist_stancode.html">epidist_stancode()</a></code>
+
+        </dt>
+        <dd>Define model specific Stan code</dd>
+
+        <dt>
+
+          <code><a href="epidist_stancode.default.html">epidist_stancode(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method for defining model specific Stan code</dd>
+      </dl></div><div class="section level2">
+      <h2 id="package-internals">Package internals<a class="anchor" aria-label="anchor" href="#package-internals"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+      <h3 id="transform-data">Transform data<a class="anchor" aria-label="anchor" href="#transform-data"></a></h3>
+      <div class="section-desc"><p>Transform data using the formula and family information</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist_transform_data.html">epidist_transform_data()</a></code>
+
+        </dt>
+        <dd>Transform data for an epidist model</dd>
+
+        <dt>
+
+          <code><a href="epidist_transform_data_model.html">epidist_transform_data_model()</a></code>
+
+        </dt>
+        <dd>The model-specific parts of an <code><a href="../reference/epidist_transform_data.html">epidist_transform_data()</a></code> call</dd>
+
+        <dt>
+
+          <code><a href="epidist_transform_data_model.default.html">epidist_transform_data_model(<i>&lt;default&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Default method for transforming data for a model</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="generator-model-functions">Generator model functions<a class="anchor" aria-label="anchor" href="#generator-model-functions"></a></h3>
+      <div class="section-desc"><p>Generator functions for creating family specific model utilities.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="epidist_gen_log_lik.html">epidist_gen_log_lik()</a></code>
+
+        </dt>
+        <dd>Create a function to calculate the marginalised log likelihood for double censored and truncated delay distributions</dd>
+
+        <dt>
+
+          <code><a href="epidist_gen_posterior_epred.html">epidist_gen_posterior_epred()</a></code>
+
+        </dt>
+        <dd>Create a function to draw from the expected value of the posterior predictive distribution for a model</dd>
+
+        <dt>
+
+          <code><a href="epidist_gen_posterior_predict.html">epidist_gen_posterior_predict()</a></code>
+
+        </dt>
+        <dd>Create a function to draw from the posterior predictive distribution for a double censored and truncated delay distribution</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="assert-validity-of-objects">Assert validity of objects<a class="anchor" aria-label="anchor" href="#assert-validity-of-objects"></a></h3>
       <div class="section-desc"><p>Functions used to assert the validity of package objects</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -426,210 +687,16 @@
         </dt>
         <dd>Validation for epidist objects</dd>
       </dl></div><div class="section level2">
-      <h2 id="family">Family<a class="anchor" aria-label="anchor" href="#family"></a></h2>
+      <h2 id="simulation-and-data">Simulation and Data<a class="anchor" aria-label="anchor" href="#simulation-and-data"></a></h2>
 
-      <div class="section-desc"><p>Functions related to specifying custom <code>brms</code> families</p></div>
 
 
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
-
-
-
-      <dl><dt>
-
-          <code><a href="epidist_family.html">epidist_family()</a></code>
-
-        </dt>
-        <dd>Define <code>epidist</code> family</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_family_model.html">epidist_family_model()</a></code> <code><a href="epidist_family_model.html">epidist_formula_model()</a></code>
-
-        </dt>
-        <dd>The model-specific parts of an <code><a href="../reference/epidist_family.html">epidist_family()</a></code> call</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_family_model.default.html">epidist_family_model(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method for defining a model specific family</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_family_param.html">epidist_family_param()</a></code>
-
-        </dt>
-        <dd>Reparameterise an <code>epidist</code> family to align <code>brms</code> and Stan</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_family_param.default.html">epidist_family_param(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method for families which do not require a reparameterisation</dd>
-      </dl></div><div class="section level2">
-      <h2 id="formula">Formula<a class="anchor" aria-label="anchor" href="#formula"></a></h2>
-
-      <div class="section-desc"><p>Functions related to specifying custom <code>brms</code> formula</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="epidist_family_model.html">epidist_family_model()</a></code> <code><a href="epidist_family_model.html">epidist_formula_model()</a></code>
-
-        </dt>
-        <dd>The model-specific parts of an <code><a href="../reference/epidist_family.html">epidist_family()</a></code> call</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_formula.html">epidist_formula()</a></code>
-
-        </dt>
-        <dd>Define a model specific formula</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_formula_model.default.html">epidist_formula_model(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method for defining a model specific formula</dd>
-      </dl></div><div class="section level2">
-      <h2 id="transform-data">Transform data<a class="anchor" aria-label="anchor" href="#transform-data"></a></h2>
-
-      <div class="section-desc"><p>Transform data using the formula and family information</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="epidist_transform_data.html">epidist_transform_data()</a></code>
-
-        </dt>
-        <dd>Transform data for an epidist model</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_transform_data_model.html">epidist_transform_data_model()</a></code>
-
-        </dt>
-        <dd>The model-specific parts of an <code><a href="../reference/epidist_transform_data.html">epidist_transform_data()</a></code> call</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_transform_data_model.default.html">epidist_transform_data_model(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method for transforming data for a model</dd>
-      </dl></div><div class="section level2">
-      <h2 id="prior-distributions">Prior distributions<a class="anchor" aria-label="anchor" href="#prior-distributions"></a></h2>
-
-      <div class="section-desc"><p>Functions for specifying prior distributions</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="epidist_family_prior.html">epidist_family_prior()</a></code>
-
-        </dt>
-        <dd>Family specific prior distributions</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_family_prior.default.html">epidist_family_prior(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default family specific prior distributions</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_family_prior.lognormal.html">epidist_family_prior(<i>&lt;lognormal&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Family specific prior distributions for the lognormal family</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_model_prior.html">epidist_model_prior()</a></code>
-
-        </dt>
-        <dd>Model specific prior distributions</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_model_prior.default.html">epidist_model_prior(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default model specific prior distributions</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_prior.html">epidist_prior()</a></code>
-
-        </dt>
-        <dd>Define custom prior distributions for epidist models</dd>
-      </dl></div><div class="section level2">
-      <h2 id="stan-code">Stan code<a class="anchor" aria-label="anchor" href="#stan-code"></a></h2>
-
-      <div class="section-desc"><p>Functions for specifying custom Stan code to put into <code>brms</code></p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="epidist_stancode.html">epidist_stancode()</a></code>
-
-        </dt>
-        <dd>Define model specific Stan code</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_stancode.default.html">epidist_stancode(<i>&lt;default&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Default method for defining model specific Stan code</dd>
-      </dl></div><div class="section level2">
-      <h2 id="generator-model-functions">Generator model functions<a class="anchor" aria-label="anchor" href="#generator-model-functions"></a></h2>
-
-      <div class="section-desc"><p>Generator functions for creating family specific model utilities.</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="epidist_gen_log_lik.html">epidist_gen_log_lik()</a></code>
-
-        </dt>
-        <dd>Create a function to calculate the marginalised log likelihood for double censored and truncated delay distributions</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_gen_posterior_epred.html">epidist_gen_posterior_epred()</a></code>
-
-        </dt>
-        <dd>Create a function to draw from the expected value of the posterior predictive distribution for a model</dd>
-      </dl><dl><dt>
-
-          <code><a href="epidist_gen_posterior_predict.html">epidist_gen_posterior_predict()</a></code>
-
-        </dt>
-        <dd>Create a function to draw from the posterior predictive distribution for a double censored and truncated delay distribution</dd>
-      </dl></div><div class="section level2">
-      <h2 id="simulation">Simulation<a class="anchor" aria-label="anchor" href="#simulation"></a></h2>
-
+      <h3 id="simulation">Simulation<a class="anchor" aria-label="anchor" href="#simulation"></a></h3>
       <div class="section-desc"><p>Tools for simulating datasets</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -640,31 +707,33 @@
 
         </dt>
         <dd>Simulate exponential cases</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="simulate_gillespie.html">simulate_gillespie()</a></code>
 
         </dt>
         <dd>Simulate cases from a stochastic SIR model</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="simulate_secondary.html">simulate_secondary()</a></code>
 
         </dt>
         <dd>Simulate secondary events based on a delay distribution</dd>
-      </dl><dl><dt>
+
+        <dt>
 
           <code><a href="simulate_uniform_cases.html">simulate_uniform_cases()</a></code>
 
         </dt>
         <dd>Simulate cases from a uniform distribution</dd>
       </dl></div><div class="section level2">
-      <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 
+      <h3 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h3>
       <div class="section-desc"><p>Data included with the package</p></div>
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -680,8 +749,7 @@
 
 
 
-
-    </div><div class="section level2">
+      <dl></dl></div><div class="section level2">
 
 
 
@@ -702,7 +770,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
 </div>
 
     </footer></div>

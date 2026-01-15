@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,7 +79,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Guide to the statistical models implemented in epidist</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/epinowcast/epidist/blob/main/vignettes/model.Rmd" class="external-link"><code>vignettes/model.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/epinowcast/epidist/blob/v0.4.0/vignettes/model.Rmd" class="external-link"><code>vignettes/model.Rmd</code></a></small>
       <div class="d-none name"><code>model.Rmd</code></div>
     </div>
 
@@ -188,7 +188,7 @@ Then,
 &amp;= \int_{P_L}^{P_R} \int_{S_L}^{S_R} g_P(x\,|\,P_L,P_R) f_x(y-x) \,dy\, dx
 \end{aligned}
 \]</span>
-where $ g_P(x,|,P_L,P_R)$ represents the conditional distribution of primary event given lower <span class="math inline">\(P_L\)</span> and upper <span class="math inline">\(P_R\)</span> bounds.</p>
+where <span class="math inline">\(g_P(x\,|\,P_L,P_R)\)</span> represents the conditional distribution of primary event given lower <span class="math inline">\(P_L\)</span> and upper <span class="math inline">\(P_R\)</span> bounds.</p>
 </div>
 </div>
 <div class="section level2" number="2">
@@ -213,12 +213,13 @@ For each event, a latent variable is used to represent the exact time of the eve
 This then allows the modelling of the continuous distribution, adjusted for the right truncation.
 Whilst this is an approximation <span class="citation">(<a href="#ref-park2024estimating">Park et al. 2024</a>)</span> showed good recovery of simulated distributions in a range of settings.
 However, the use of two latent variables per observed delay means that this approach may scale poorly with larger datasets.
-That being said this approach has been used successfully in multiple real-world outbreak settings (<span class="citation">(<a href="#ref-ward2022transmission"><strong>ward2022transmission?</strong></a>)</span>).</p>
+That being said this approach has been used successfully in multiple real-world outbreak settings (<span class="citation">(<a href="#ref-ward2022transmission">Ward et al. 2022</a>)</span>).</p>
 <p>Mathematically this model is described as follows.
 We look at the conditional probability that the secondary event <span class="math inline">\(S\)</span> falls between <span class="math inline">\(S_L\)</span> and <span class="math inline">\(S_R\)</span>, given that the primary event <span class="math inline">\(P\)</span> falls between <span class="math inline">\(P_L\)</span> and <span class="math inline">\(P_R\)</span> and that the secondary event <span class="math inline">\(S\)</span> occurs before the truncation time <span class="math inline">\(T\)</span>:
 <span class="math display">\[
 \begin{aligned}
-\mathbb{P}(S_L &lt; S &lt; S_R \, | \, P_L &lt; P &lt; P_R, S&lt;T) &amp;= \mathbb{P}(P_L &lt; P &lt; P_R, S_L &lt; S &lt; S_R, S&lt;T \, | \, P_L &lt; P &lt; P_R, S&lt;T)\\
+&amp;\mathbb{P}(S_L &lt; S &lt; S_R \, | \, P_L &lt; P &lt; P_R, S&lt;T)\\
+&amp;= \mathbb{P}(P_L &lt; P &lt; P_R, S_L &lt; S &lt; S_R, S&lt;T \, | \, P_L &lt; P &lt; P_R, S&lt;T)\\
 &amp;= \frac{\mathbb{P}(P_L &lt; P &lt; P_R, S_L &lt; S &lt; S_R, S&lt;T)}{\mathbb{P}(P_L &lt; P &lt; P_R, S&lt;T)}\\
 &amp;= \frac{\int_{P_L}^{P_R} \int_{S_L}^{S_R} g_P(x) f_x(y-x) \,dy\, dx}{\int_{P_L}^{P_R} \int_{z}^T g_P(z) f_z(w-z) \, dz \,dw  }\\
 &amp;= \frac{\int_{P_L}^{P_R} \int_{S_L}^{S_R} g_P(x) f_x(y-x) \,dy\, dx}{\int_{P_L}^{P_R} g_P(z) F_z(T-z) \,dw  }\\
@@ -241,6 +242,9 @@ As before, <span class="math inline">\(g_P(z \, | \, p_{L, i}, p_{R, i})\)</span
 <div id="ref-park2024estimating" class="csl-entry">
 Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, Anne Cori, Nicholas G. Davies, Jonathan Dushoff, Sebastian Funk, et al. 2024. <span>“Estimating Epidemiological Delay Distributions for Infectious Diseases.”</span> <em>medRxiv</em>. <a href="https://doi.org/10.1101/2024.01.12.24301247" class="external-link">https://doi.org/10.1101/2024.01.12.24301247</a>.
 </div>
+<div id="ref-ward2022transmission" class="csl-entry">
+Ward, Thomas, Rachel Christie, Robert S Paton, Fergus Cumming, and Christopher E Overton. 2022. <span>“Transmission Dynamics of Monkeypox in the United Kingdom: Contact Tracing Study.”</span> <em>BMJ</em> 379. <a href="https://doi.org/10.1136/bmj-2022-073153" class="external-link">https://doi.org/10.1136/bmj-2022-073153</a>.
+</div>
 </div>
 </div>
 </div>
@@ -255,7 +259,7 @@ Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, Anne Cori, Nicholas G. D
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
 </div>
 
     </footer>
