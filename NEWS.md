@@ -1,5 +1,16 @@
 # epidist 0.4.0
 
+## Package
+
+- Enforce line length and use cli for latent prior checks. See #580.
+- Removed CodeDepends from DESCRIPTION dependencies.
+
+## Documentation
+
+- Restructured pkgdown reference with higher-level categories. See #574.
+- Updated FAQ to recommend pp_check with expanded data. See #575.
+- Clarified weight parameter documentation in `as_epidist_marginal_model()`. See #565.
+- Fixed pathfinder parameter usage in approximate inference vignette. See #573.
 
 # epidist 0.3.1
 
