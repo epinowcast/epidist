@@ -246,7 +246,7 @@ fit <- epidist(
 )
 #> Running MCMC with 2 parallel chains...
 #> Chain 2 finished in 6.4 seconds.
-#> Chain 1 finished in 7.5 seconds.
+#> Chain 1 finished in 7.4 seconds.
 #> 
 #> Both chains finished successfully.
 #> Mean chain execution time: 6.9 seconds.
@@ -365,11 +365,11 @@ fit_sex_district <- epidist(
 )
 #> Running MCMC with 2 parallel chains...
 #> Chain 2 finished in 208.6 seconds.
-#> Chain 1 finished in 220.2 seconds.
+#> Chain 1 finished in 220.9 seconds.
 #> 
 #> Both chains finished successfully.
-#> Mean chain execution time: 214.4 seconds.
-#> Total execution time: 220.3 seconds.
+#> Mean chain execution time: 214.8 seconds.
+#> Total execution time: 221.0 seconds.
 ```
 
 **As this is a longer running model (~ 2 minutes) we have reduced the
