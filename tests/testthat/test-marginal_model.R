@@ -13,7 +13,7 @@ test_that("as_epidist_marginal_model.epidist_linelist_data errors when passed in
 test_that("as_epidist_marginal_model.epidist_linelist_data respects weight variable", { # nolint: line_length_linter.
   # Create test data with a weight column
   weighted_data <- sim_obs
-  weighted_data$counts <- rep(c(1, 2), length.out = nrow(weighted_data))
+  weighted_data$counts <- rep(c(1, 2), length.out = nrow(weighted_data)) # nolint
 
   # Check weighted model has correct n values
   weighted_model <- as_epidist_marginal_model(
@@ -41,8 +41,8 @@ test_that(
   "as_epidist_marginal_model.epidist_linelist_data handles obs_time_threshold correctly", # nolint
   {
     # Create test data with some large observation times
-    test_data <- suppressMessages(sierra_leone_ebola_data |>
-      dplyr::filter(date_of_sample_tested < as.Date("2015-01-01")) |>
+    test_data <- suppressMessages(sierra_leone_ebola_data |> # nolint
+      dplyr::filter(date_of_sample_tested < as.Date("2015-01-01")) |> # nolint
       as_epidist_linelist_data(
         pdate_lwr = "date_of_symptom_onset",
         sdate_lwr = "date_of_sample_tested"
