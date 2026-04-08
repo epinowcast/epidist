@@ -657,8 +657,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3542     2306
-#> sigma_Intercept    -0.76      0.05    -0.85    -0.65 1.00     2608     2468
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3400     2448
+#> sigma_Intercept    -0.75      0.05    -0.85    -0.66 1.00     3575     2570
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -766,8 +766,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.66 1.00     1855     1521
-#> sigma_Intercept    -0.69      0.07    -0.81    -0.55 1.00     2243     2253
+#> Intercept           1.55      0.05     1.46     1.65 1.00     2264     2217
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     1858     1974
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -797,12 +797,12 @@ predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
 
 head(predicted_parameters)
 #>      model draw index       mu     sigma     mean       sd
-#> 1 marginal    1     1 1.568079 0.4759718 5.372822 2.709225
-#> 2 marginal    2     1 1.456454 0.5327800 4.945023 2.833113
-#> 3 marginal    3     1 1.546100 0.5200222 5.372599 2.993839
-#> 4 marginal    4     1 1.555283 0.4650681 5.277364 2.593223
-#> 5 marginal    5     1 1.539193 0.5185034 5.331412 2.960990
-#> 6 marginal    6     1 1.560164 0.4635560 5.299467 2.594673
+#> 1 marginal    1     1 1.561120 0.5474328 5.534280 3.271460
+#> 2 marginal    2     1 1.475864 0.4916690 4.936880 2.581667
+#> 3 marginal    3     1 1.466562 0.4915273 4.890826 2.556754
+#> 4 marginal    4     1 1.462708 0.4881935 4.864064 2.523374
+#> 5 marginal    5     1 1.480497 0.4901966 4.956220 2.583048
+#> 6 marginal    6     1 1.528581 0.4685946 5.146779 2.550408
 ```
 
 Note that by default

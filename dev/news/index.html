@@ -60,6 +60,10 @@
 <li>Updated test expectations for changed primarycensored error handling.</li>
 </ul></div>
 <div class="section level3">
+<h3 id="package-0-4-0-1000">Package<a class="anchor" aria-label="anchor" href="#package-0-4-0-1000"></a></h3>
+<ul><li>Load only required primarycensored Stan functions (<code>primarycensored_lpmf</code> and ODE/distribution helpers) with <code>pcd_load_stan_functions(dependencies = TRUE)</code> instead of loading all functions. See <a href="https://github.com/epinowcast/epidist/issues/582" class="external-link">#582</a>.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="ci-0-4-0-1000">CI<a class="anchor" aria-label="anchor" href="#ci-0-4-0-1000"></a></h3>
 <ul><li>Extended <code>check-cmdstan</code> workflow to also check marginal model Stan syntax.</li>
 </ul></div>
