@@ -70,6 +70,7 @@ Suggests:
     tidybayes,
     usethis
 Remotes:
+    paul-buerkner/brms,
     stan-dev/cmdstanr
 Config/Needs/website:
     r-lib/pkgdown,
