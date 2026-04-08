@@ -52,7 +52,7 @@ jobs:
           cmdstan-version: 'latest'
           num-cores: 2
 
-      - name: Compile model and check syntax
+      - name: Check latent model syntax
         run: |
           dummy_obs <- dplyr::tibble(
             pdate_lwr = as.Date("2020-01-01"),
@@ -72,6 +72,32 @@ jobs:
           )
           # We can't use TRUE here as pendatic check return lots of false
           # positives related to our use of functions.
+          stopifnot(
+            length(message) != 0 &&
+            all(message == "Stan program is syntactically correct")
+          )
+        shell: Rscript {0}
+
+      - name: Check marginal model syntax
+        run: |
+          dummy_obs <- dplyr::tibble(
+            pdate_lwr = as.Date("2020-01-01"),
+            sdate_lwr = as.Date("2020-02-01")
+          )
+          dummy_obs <- epidist::as_epidist_linelist_data(dummy_obs)
+          dummy_obs <- suppressMessages(
+            epidist::as_epidist_marginal_model(dummy_obs)
+          )
+          stancode <- epidist::epidist(
+            data = dummy_obs, fn = brms::make_stancode
+          )
+          mod <- cmdstanr::cmdstan_model(
+            stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
+          )
+          message <- capture.output(
+            mod$check_syntax(pedantic = FALSE),
+            type = "message"
+          )
           stopifnot(
             length(message) != 0 &&
             all(message == "Stan program is syntactically correct")

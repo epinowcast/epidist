@@ -41,7 +41,7 @@ Imports:
     cli,
     dplyr,
     lubridate,
-    primarycensored,
+    primarycensored (>= 1.4.0),
     purrr,
     rstan (>= 2.26.0),
     stats,
