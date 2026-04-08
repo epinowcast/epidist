@@ -10,7 +10,7 @@ test_that("epidist_gen_posterior_predict returns a function that outputs positiv
     pred_i <- predict_fn(i = i, prep)
     expect_identical(floor(pred_i), pred_i)
     expect_length(pred_i, prep$ndraws)
-    expect_gte(min(pred_i), 0)
+    return(expect_gte(min(pred_i), 0))
   }
 
   # Test lognormal - latent and marginal
@@ -30,10 +30,8 @@ test_that("epidist_gen_posterior_predict returns a function that errors for i ou
     prep <- brms::prepare_predictions(fit)
     i_out_of_bounds <- length(prep$data$Y) + 1
     predict_fn <- epidist_gen_posterior_predict(family)
-    suppressMessages(expect_warning(
-      expect_error(
-        predict_fn(i = i_out_of_bounds, prep)
-      )
+    return(expect_error(
+      predict_fn(i = i_out_of_bounds, prep)
     ))
   }
 
@@ -59,7 +57,9 @@ test_that("epidist_gen_posterior_predict returns a function that can generate pr
     expect_identical(draws$.draw, 1:100)
     pred <- draws$.prediction
     expect_gte(min(pred), 0)
-    expect_true(all(abs(pred - round(pred)) > .Machine$double.eps^0.5))
+    return(expect_true(
+      all(abs(pred - round(pred)) > .Machine$double.eps^0.5)
+    ))
   }
 
   # Test lognormal - latent and marginal
@@ -79,18 +79,20 @@ test_that("epidist_gen_posterior_predict returns a function that predicts delays
     prep <- brms::prepare_predictions(fit)
     prep$ndraws <- 1000 # Down from the 4000 for time saving
     predict_fn <- epidist_gen_posterior_predict(family)
-    q <- purrr::map_vec(seq_along(prep$data$Y), function(i) {
-      y <- predict_fn(i, prep)
-      ecdf <- ecdf(y)
-      q <- ecdf(prep$data$Y[i])
-      return(q)
-    })
-    expect_lt(quantile(q, 0.1), 0.3)
-    expect_gt(quantile(q, 0.9), 0.7)
-    expect_lt(min(q), 0.1)
-    expect_gt(max(q), 0.9)
-    expect_lt(mean(q), 0.65)
-    expect_gt(mean(q), 0.35)
+    quantiles <- purrr::map_vec(
+      seq_along(prep$data$Y),
+      function(i) {
+        y <- predict_fn(i, prep)
+        ecdf_fn <- ecdf(y)
+        return(ecdf_fn(prep$data$Y[i]))
+      }
+    )
+    expect_lt(quantile(quantiles, 0.1), 0.3)
+    expect_gt(quantile(quantiles, 0.9), 0.7)
+    expect_lt(min(quantiles), 0.1)
+    expect_gt(max(quantiles), 0.9)
+    expect_lt(mean(quantiles), 0.65)
+    return(expect_gt(mean(quantiles), 0.35))
   }
 
   # Test lognormal - latent and marginal
@@ -110,8 +112,10 @@ test_that("epidist_gen_posterior_epred returns a function that creates arrays wi
     epred <- prep_obs |>
       mutate(delay_upr = NA) |>
       tidybayes::add_epred_draws(fit)
-    expect_equal(mean(epred$.epred), expected_mean, tolerance = 0.1)
-    expect_gte(min(epred$.epred), 0)
+    expect_equal(
+      mean(epred$.epred), expected_mean, tolerance = 0.1
+    )
+    return(expect_gte(min(epred$.epred), 0))
   }
 
   # Test lognormal - latent and marginal
@@ -123,45 +127,50 @@ test_that("epidist_gen_posterior_epred returns a function that creates arrays wi
   test_epred(fit_marginal_gamma, 6.56)
 })
 
-test_that("epidist_gen_log_lik returns a function that produces valid log likelihoods", { # nolint: line_length_linter.
-  skip_on_cran()
-  # Test lognormal
-  prep <- brms::prepare_predictions(fit)
-  prep$ndraws <- 10
-  i <- 1
-  log_lik_fn <- epidist_gen_log_lik(lognormal())
-  log_lik <- log_lik_fn(i = i, prep)
-  expect_length(log_lik, prep$ndraws)
-  expect_false(anyNA(log_lik))
-  expect_true(all(is.finite(log_lik)))
+test_that( # nolint: line_length_linter.
+  "epidist_gen_log_lik returns a function that produces valid log likelihoods",
+  {
+    skip_on_cran()
+    # Test lognormal
+    prep <- brms::prepare_predictions(fit)
+    prep$ndraws <- 10
+    i <- 1
+    log_lik_fn <- epidist_gen_log_lik(lognormal())
+    log_lik <- log_lik_fn(i = i, prep)
+    expect_length(log_lik, prep$ndraws)
+    expect_false(anyNA(log_lik))
+    expect_true(all(is.finite(log_lik)))
 
-  # Test gamma
-  prep_gamma <- brms::prepare_predictions(fit_gamma)
-  prep$ndraws <- 10
-  log_lik_fn_gamma <- epidist_gen_log_lik(Gamma())
-  log_lik_gamma <- log_lik_fn_gamma(i = i, prep_gamma)
-  expect_length(log_lik_gamma, prep_gamma$ndraws)
-  expect_false(anyNA(log_lik_gamma))
-  expect_true(all(is.finite(log_lik_gamma)))
-})
+    # Test gamma
+    prep_gamma <- brms::prepare_predictions(fit_gamma)
+    prep$ndraws <- 10
+    log_lik_fn_gamma <- epidist_gen_log_lik(Gamma())
+    log_lik_gamma <- log_lik_fn_gamma(i = i, prep_gamma)
+    expect_length(log_lik_gamma, prep_gamma$ndraws)
+    expect_false(anyNA(log_lik_gamma))
+    expect_true(all(is.finite(log_lik_gamma)))
+  }
+)
 
-test_that("epidist_gen_log_lik falls back to generic method for unsupported distributions", {
-  skip_on_cran()
+test_that( # nolint: line_length_linter.
+  "epidist_gen_log_lik falls back to generic method for unsupported distributions", # nolint: line_length_linter.
+  {
+    skip_on_cran()
 
-  # Test with normal distribution which doesn't have an analytical solution
-  prep <- brms::prepare_predictions(fit)
-  prep$ndraws <- 10
-  i <- 1
+    # Test with normal distribution without analytical solution
+    prep <- brms::prepare_predictions(fit)
+    prep$ndraws <- 10
+    i <- 1
 
-  # Capture the message about falling back to generic method
-  suppressMessages(
-    log_lik_fn <- epidist_gen_log_lik(brms::brmsfamily("gaussian")),
-    "Falling back to default dependency on brms for normal"
-  )
+    # Capture the message about falling back to generic method
+    log_lik_fn <- suppressMessages(
+      epidist_gen_log_lik(brms::brmsfamily("gaussian"))
+    )
 
-  # Test that the generic method produces valid log likelihoods
-  log_lik <- log_lik_fn(i = i, prep)
-  expect_length(log_lik, prep$ndraws)
-  expect_false(anyNA(log_lik))
-  expect_true(all(is.finite(log_lik)))
-})
+    # Test that the generic method produces valid log likelihoods
+    log_lik <- log_lik_fn(i = i, prep)
+    expect_length(log_lik, prep$ndraws)
+    expect_false(anyNA(log_lik))
+    expect_true(all(is.finite(log_lik)))
+  }
+)

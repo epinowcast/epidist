@@ -23,7 +23,7 @@
                             data real y_upper, array[] real primary_params) {
 
   return primarycensored_lpmf(
-      y | dist_id, {dpars_B}, pwindow_width, y_upper, relative_obs_t,
-      primary_id, primary_params
+      y | dist_id, {dpars_B}, pwindow_width, y_upper,
+      0, relative_obs_t, primary_id, primary_params
     );
 }
