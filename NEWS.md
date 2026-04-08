@@ -8,6 +8,13 @@
 - Added `primarycensored (>= 1.4.0)` version bound to DESCRIPTION.
 - Updated test expectations for changed primarycensored error handling.
 
+## Package
+
+- Load only required primarycensored Stan functions
+  (`primarycensored_lpmf` and ODE/distribution helpers) with
+  `pcd_load_stan_functions(dependencies = TRUE)` instead of loading all
+  functions. See #582.
+
 ## CI
 
 - Extended `check-cmdstan` workflow to also check marginal model Stan syntax.
