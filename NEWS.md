@@ -10,9 +10,10 @@
 
 ## Package
 
-- Use primarycensored's automatic dependency resolution for Stan function
-  loading via `pcd_load_stan_functions(dependencies = TRUE)` instead of
-  loading all functions. See #582.
+- Load only required primarycensored Stan functions
+  (`primarycensored_lpmf` and ODE/distribution helpers) with
+  `pcd_load_stan_functions(dependencies = TRUE)` instead of loading all
+  functions. See #582.
 
 ## CI
 
