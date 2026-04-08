@@ -4,6 +4,7 @@ Charniga
 CmdStan
 CodeDepends
 Codecov
+DrAuxetic
 Gelman
 Generalised
 Gillepsie
@@ -29,9 +30,11 @@ Unif
 Variational
 Visualise
 al
+allcontributors
 athowes
 brms
 brms’
+burdon
 cherz
 cli
 cmdstanr
