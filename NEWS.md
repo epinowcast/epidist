@@ -7,6 +7,8 @@
   the marginal model. See #583.
 - Added `primarycensored (>= 1.4.0)` version bound to DESCRIPTION.
 - Updated test expectations for changed primarycensored error handling.
+- Re-enabled approximate inference vignette evaluation using dev brms with
+  pathfinder path fix. See #579.
 
 ## CI
 
