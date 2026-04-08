@@ -179,7 +179,7 @@ As before, $g_P(z \, | \, p_{L, i}, p_{R, i})$ represents the conditional distri
 
 # The marginal model
 
-The marginal model corrects for the same biases as the latent model but integrates out the exact event times analytically rather than sampling latent variables.
+The marginal model corrects for the same biases as the latent model but integrates out the exact event times numerically, or analytically where closed-form solutions exist, rather than sampling latent variables.
 This approach uses the primary event censored distribution implemented in the [`primarycensored`](https://primarycensored.epinowcast.org/) package.
 
 Under the assumption that the forward distribution is shift-invariant (i.e. $f_x = f$ for all $x$), the double censoring probability from Section \@ref(interval-censoring) simplifies to
