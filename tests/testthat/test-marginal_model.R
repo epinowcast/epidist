@@ -38,6 +38,72 @@ test_that(
 )
 
 test_that(
+  "as_epidist_marginal_model defaults delay_min to 0",
+  {
+    model <- as_epidist_marginal_model(sim_obs)
+    expect_true("delay_min" %in% names(model))
+    expect_true(all(model$delay_min == 0))
+  }
+)
+
+test_that(
+  "as_epidist_marginal_model handles scalar delay_min",
+  {
+    model <- as_epidist_marginal_model(sim_obs, delay_min = 1)
+    expect_true(all(model$delay_min == 1))
+  }
+)
+
+test_that(
+  "as_epidist_marginal_model handles column name delay_min",
+  {
+    data_with_min <- sim_obs
+    data_with_min$my_min <- 0
+    model <- as_epidist_marginal_model(
+      data_with_min, delay_min = "my_min"
+    )
+    expect_true(all(model$delay_min == 0))
+  }
+)
+
+test_that(
+  "as_epidist_marginal_model inherits delay_min from data",
+  {
+    data_with_min <- sim_obs
+    data_with_min$delay_min <- 0
+    model <- as_epidist_marginal_model(data_with_min)
+    expect_true(all(model$delay_min == 0))
+  }
+)
+
+test_that(
+  "as_epidist_marginal_model errors with invalid delay_min",
+  {
+    expect_error(
+      as_epidist_marginal_model(
+        sim_obs, delay_min = "nonexistent"
+      ),
+      regexp = "Names must include the elements"
+    )
+    expect_error(
+      as_epidist_marginal_model(sim_obs, delay_min = -1)
+    )
+  }
+)
+
+test_that(
+  "assert_epidist.epidist_marginal_model errors when delay_lwr < delay_min", # nolint
+  {
+    bad_data <- prep_marginal_obs
+    bad_data$delay_min <- bad_data$delay_lwr + 1
+    expect_error(
+      assert_epidist(bad_data),
+      "delay_lwr must be greater than or equal to delay_min"
+    )
+  }
+)
+
+test_that(
   "as_epidist_marginal_model.epidist_linelist_data handles obs_time_threshold correctly", # nolint
   {
     # Create test data with some large observation times

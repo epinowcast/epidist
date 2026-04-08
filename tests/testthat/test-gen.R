@@ -51,7 +51,8 @@ test_that("epidist_gen_posterior_predict returns a function that can generate pr
   test_uncensored <- function(fit, family) {
     predict_fn <- epidist_gen_posterior_predict(family)
     draws <- data.frame(
-      relative_obs_time = Inf, pwindow = 0, swindow = 0, delay_upr = NA
+      relative_obs_time = Inf, pwindow = 0, swindow = 0,
+      delay_upr = NA, delay_min = 0
     ) |>
       tidybayes::add_predicted_draws(fit, ndraws = 100)
     expect_identical(draws$.draw, 1:100)
@@ -110,7 +111,7 @@ test_that("epidist_gen_posterior_epred returns a function that creates arrays wi
   # Helper function to test epred
   test_epred <- function(fit, expected_mean) {
     epred <- prep_obs |>
-      mutate(delay_upr = NA) |>
+      mutate(delay_upr = NA, delay_min = 0) |>
       tidybayes::add_epred_draws(fit)
     expect_equal(
       mean(epred$.epred), expected_mean, tolerance = 0.1

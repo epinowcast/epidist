@@ -61,6 +61,14 @@ as_epidist_marginal_model <- function(data, ...) {
 #'  which assigns a count of 1 to each row. Internally this is used to define
 #'  the 'n' column of the returned object.
 #'
+#' @param delay_min Minimum delay (left truncation point). Can be:
+#'  - `NULL` (default): uses a `delay_min` column from the data if present,
+#'    otherwise defaults to 0 (no left truncation).
+#'  - A numeric scalar: applied to all observations.
+#'  - A column name string: looks up the named column in the data.
+#'  This is passed as the `L` parameter to
+#'  [primarycensored::dpcens()].
+#'
 #' @param ... Not used in this method.
 #'
 #' @method as_epidist_marginal_model epidist_linelist_data
@@ -78,6 +86,7 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   data,
   obs_time_threshold = 2,
   weight = NULL,
+  delay_min = NULL,
   ...
 ) {
   assert_epidist.epidist_linelist_data(data)
@@ -93,6 +102,7 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   )
 
   data <- .add_weights(data, weight)
+  data <- .add_delay_min(data, delay_min)
 
   # Calculate maximum delay
   max_delay <- max(data$delay_upr, na.rm = TRUE)
@@ -147,12 +157,14 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
 as_epidist_marginal_model.epidist_aggregate_data <- function(
   data,
   obs_time_threshold = 2,
+  delay_min = NULL,
   ...
 ) {
   return(as_epidist_marginal_model.epidist_linelist_data(
     data,
     obs_time_threshold = obs_time_threshold,
     weight = "n",
+    delay_min = delay_min,
     ...
   ))
 }
@@ -178,7 +190,13 @@ assert_epidist.epidist_marginal_model <- function(data, ...) {
   assert_numeric(data$swindow, lower = 0)
   assert_integerish(data$delay_lwr)
   assert_integerish(data$delay_upr)
+  assert_numeric(data$delay_min, lower = 0)
   assert_numeric(data$relative_obs_time)
+  if (!all(data$delay_lwr >= data$delay_min)) {
+    cli::cli_abort(
+      "delay_lwr must be greater than or equal to delay_min"
+    )
+  }
   if (!all(abs(data$delay_upr - (data$delay_lwr + data$swindow)) < 1e-10)) {
     cli::cli_abort(
       "delay_upr must equal delay_lwr + swindow"
@@ -234,6 +252,7 @@ epidist_family_model.epidist_marginal_model <- function(
       "vreal2[n]",
       "vreal3[n]",
       "vreal4[n]",
+      "vreal5[n]",
       "primary_params"
     ),
     loop = TRUE,
@@ -264,7 +283,10 @@ epidist_formula_model.epidist_marginal_model <- function(
     formula,
     delay_lwr |
       weights(n) +
-        vreal(relative_obs_time, pwindow, swindow, delay_upr) ~
+        vreal(
+          relative_obs_time, pwindow, swindow,
+          delay_upr, delay_min
+        ) ~
       .
   )
   return(formula)
@@ -397,6 +419,7 @@ epidist_stancode.epidist_marginal_model <- function(
   return(c(
     "delay_lwr",
     "delay_upr",
+    "delay_min",
     "relative_obs_time",
     "pwindow",
     "swindow",
