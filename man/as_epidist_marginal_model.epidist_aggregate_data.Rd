@@ -4,7 +4,7 @@
 \alias{as_epidist_marginal_model.epidist_aggregate_data}
 \title{The marginal model method for \code{epidist_aggregate_data} objects}
 \usage{
-\method{as_epidist_marginal_model}{epidist_aggregate_data}(data, obs_time_threshold = 2, ...)
+\method{as_epidist_marginal_model}{epidist_aggregate_data}(data, obs_time_threshold = 2, delay_min = NULL, ...)
 }
 \arguments{
 \item{data}{An \code{epidist_aggregate_data} object}
@@ -14,6 +14,16 @@ relative observation times to Inf. Observation times greater than
 \code{obs_time_threshold} times the maximum delay will be set to Inf to improve
 model efficiency by reducing the number of unique observation times.
 Default is 2.}
+
+\item{delay_min}{Minimum delay (left truncation point). Can be:
+\itemize{
+\item \code{NULL} (default): uses a \code{delay_min} column from the data if present,
+otherwise defaults to 0 (no left truncation).
+\item A numeric scalar: applied to all observations.
+\item A column name string: looks up the named column in the data.
+This is passed as the \code{L} parameter to
+\code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}}.
+}}
 
 \item{...}{Not used in this method.}
 }

@@ -394,3 +394,33 @@
   }
   return(data)
 }
+
+#' Add delay_min column to data
+#'
+#' Resolves the `delay_min` argument into a column on the data frame.
+#' If NULL, uses an existing `delay_min` column or defaults to 0.
+#' If numeric, uses that scalar. If character, looks up the named
+#' column.
+#'
+#' @param data A data frame
+#' @param delay_min NULL, a numeric scalar, or a column name string
+#' @return The data frame with a `delay_min` column
+#' @keywords internal
+.add_delay_min <- function(data, delay_min = NULL) {
+  if (is.null(delay_min)) {
+    if (!"delay_min" %in% names(data)) {
+      data$delay_min <- 0
+    }
+  } else if (is.character(delay_min)) {
+    assert_names(names(data), must.include = delay_min)
+    data$delay_min <- data[[delay_min]]
+  } else if (is.numeric(delay_min)) {
+    assert_numeric(delay_min, lower = 0, len = 1)
+    data$delay_min <- delay_min
+  } else {
+    cli::cli_abort(
+      "{.var delay_min} must be NULL, a column name, or a numeric scalar."
+    )
+  }
+  return(data)
+}

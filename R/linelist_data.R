@@ -285,6 +285,9 @@ assert_epidist.epidist_linelist_data <- function(data, ...) {
   assert_numeric(data$stime_upr, lower = 0)
   assert_true(all(data$stime_upr - data$stime_lwr > 0))
   assert_numeric(data$obs_time, lower = 0)
+  if ("delay_min" %in% names(data)) {
+    assert_numeric(data$delay_min, lower = 0)
+  }
 
   return(invisible(NULL))
 }
@@ -295,4 +298,8 @@ assert_epidist.epidist_linelist_data <- function(data, ...) {
 
 .linelist_required_cols <- function() {
   return(c("ptime_lwr", "ptime_upr", "stime_lwr", "stime_upr", "obs_time"))
+}
+
+.linelist_optional_cols <- function() {
+  return("delay_min")
 }
