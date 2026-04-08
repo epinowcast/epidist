@@ -154,9 +154,8 @@ data <- as_epidist_marginal_model(linelist_data)
 
 # Pre-compile the model so compilation time is not included
 # in the timing comparisons
-fit_hmc <- epidist(
-  data = data, algorithm = "sampling", backend = "cmdstanr",
-  chains = 1, iter = 5
+fit_empty <- epidist(
+  data = data, backend = "cmdstanr", empty = TRUE
 )
 ```
 
@@ -164,7 +163,7 @@ We now perform inference with HMC:
 
 ```{r results='hide'}
 t <- proc.time()
-fit_hmc <- update(fit_hmc, chains = 4, iter = 2000)
+fit_hmc <- update(fit_empty, chains = 4, iter = 2000)
 time_hmc <- proc.time() - t
 ```
 
@@ -176,13 +175,13 @@ To match the four Markov chains of length 1000 in HMC above, we then draw 4000 s
 ```{r results='hide'}
 t <- proc.time()
 fit_laplace <- update(
-  fit_hmc, algorithm = "laplace", draws = 4000
+  fit_empty, algorithm = "laplace", draws = 4000
 )
 time_laplace <- proc.time() - t
 
 t <- proc.time()
 fit_advi <- update(
-  fit_hmc, algorithm = "meanfield", draws = 4000
+  fit_empty, algorithm = "meanfield", draws = 4000
 )
 time_advi <- proc.time() - t
 ```
@@ -192,7 +191,7 @@ For the Pathfinder algorithm we will set `num_paths = 1`.
 ```{r results='hide'}
 t <- proc.time()
 fit_pathfinder <- update(
-  fit_hmc, algorithm = "pathfinder", draws = 4000,
+  fit_empty, algorithm = "pathfinder", draws = 4000,
   chains = 1
 )
 time_pathfinder <- proc.time() - t
