@@ -194,8 +194,9 @@ $$
 \mathcal{L}(\mathbf{Y} \mid \mathbf{\theta}) = \prod_i \frac{\mathbb{P}(S_{L,i} < S_i < S_{R,i} \mid P_{L,i} < P_i < P_{R,i})}{\int_{P_{L,i}}^{P_{R,i}} g_P(z \mid p_{L,i}, p_{R,i}) F(T - z) \, \text{d}z}.
 $$
 
-Since no latent variables are required, identical observations can be aggregated and the likelihood computed once per unique combination of delay, censoring windows, and covariates.
-This makes the marginal model substantially more efficient than the latent model for larger datasets, particularly with daily-censored data where many observations share the same structure.
+Removing the latent variables reduces the number of parameters that must be sampled, and where analytical solutions exist the likelihood can be evaluated without numerical integration.
+In addition, identical observations can be aggregated and the likelihood computed once per unique combination of delay, censoring windows, and covariates.
+Together these make the marginal model substantially more efficient than the latent model, particularly for larger datasets with daily-censored data where many observations share the same structure.
 
 For the mathematical details of primary event censored distributions, including the survival function derivation and closed-form solutions for specific distributions, see `vignette("why-it-works", package = "primarycensored")` and `vignette("analytic-solutions", package = "primarycensored")`.
 
