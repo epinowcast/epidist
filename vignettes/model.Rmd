@@ -154,6 +154,7 @@ This then allows the modelling of the continuous distribution, adjusted for the 
 Whilst this is an approximation [@park2024estimating] showed good recovery of simulated distributions in a range of settings.
 However, the use of two latent variables per observed delay means that this approach may scale poorly with larger datasets.
 That being said this approach has been used successfully in multiple real-world outbreak settings ([@ward2022transmission]).
+If using the latent model, please cite @park2024estimating in addition to `epidist`.
 
 Mathematically this model is described as follows.
 We look at the conditional probability that the secondary event $S$ falls between $S_L$ and $S_R$, given that the primary event $P$ falls between $P_L$ and $P_R$ and that the secondary event $S$ occurs before the truncation time $T$:
@@ -180,7 +181,8 @@ As before, $g_P(z \, | \, p_{L, i}, p_{R, i})$ represents the conditional distri
 # The marginal model
 
 The marginal model corrects for the same biases as the latent model but integrates out the exact event times numerically, or analytically where closed-form solutions exist, rather than sampling latent variables.
-This approach uses the primary event censored distribution implemented in the [`primarycensored`](https://primarycensored.epinowcast.org/) package.
+This approach uses the primary event censored distribution implemented in the [`primarycensored`](https://primarycensored.epinowcast.org/) package [@primarycensored].
+If using the marginal model, please cite `primarycensored` in addition to `epidist`.
 
 Under the assumption that the forward distribution does not change within the censoring interval (i.e. $f_x = f$ for $x \in [P_L, P_R]$), the double censoring probability from Section \@ref(interval-censoring) simplifies to
 $$
