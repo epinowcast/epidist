@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.1.1000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.0.1000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -255,7 +255,7 @@ For example, the function <code><a href="https://mc-stan.org/bayesplot/reference
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
 <span><span class="co">##    time samples max_rhat divergent_transitions per_divergent_transitions</span></span>
 <span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>  2.52    <span style="text-decoration: underline;">1</span>000     1.00                     0                         0</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>  2.60    <span style="text-decoration: underline;">1</span>000     1.00                     0                         0</span></span>
 <span><span class="co">## <span style="color: #949494;"># ℹ 3 more variables: max_treedepth &lt;dbl&gt;, no_at_max_treedepth &lt;int&gt;,</span></span></span>
 <span><span class="co">## <span style="color: #949494;">#   per_at_max_treedepth &lt;dbl&gt;</span></span></span></code></pre>
 </div>
@@ -476,7 +476,7 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://marginaleffects.com/" class="external-link">marginaleffects</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Compare outcomes between location categories (0 and 1)</span></span>
-<span><span class="fu"><a href="https://marginaleffects.com/man/r/comparisons.html" class="external-link">avg_comparisons</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/marginaleffects/man/comparisons.html" class="external-link">avg_comparisons</a></span><span class="op">(</span></span>
 <span>  <span class="va">fit_location</span>,</span>
 <span>  variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>location <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>

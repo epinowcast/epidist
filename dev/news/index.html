@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.1.1000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.0.1000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,19 @@
       <small>Source: <a href="https://github.com/epinowcast/epidist/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.0.1000" id="epidist-0401000">epidist 0.4.0.1000<a class="anchor" aria-label="anchor" href="#epidist-0401000"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-4-0-1000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-4-0-1000"></a></h3>
+<ul><li>Fixed Stan compilation failure with primarycensored &gt;= 1.4.0 by adding the new <code>L</code> (left truncation) parameter to the <code>primarycensored_lpmf</code> call in the marginal model. See <a href="https://github.com/epinowcast/epidist/issues/583" class="external-link">#583</a>.</li>
+<li>Added <code>primarycensored (&gt;= 1.4.0)</code> version bound to DESCRIPTION.</li>
+<li>Updated test expectations for changed primarycensored error handling.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="ci-0-4-0-1000">CI<a class="anchor" aria-label="anchor" href="#ci-0-4-0-1000"></a></h3>
+<ul><li>Extended <code>check-cmdstan</code> workflow to also check marginal model Stan syntax.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="epidist-040">epidist 0.4.0<a class="anchor" aria-label="anchor" href="#epidist-040"></a></h2>
 <div class="section level3">

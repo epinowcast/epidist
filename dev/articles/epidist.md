@@ -397,8 +397,12 @@ plot_data <- combined_data |>
   group_by(type, delay, .drop = FALSE) |>
   summarise(n = n()) |>
   mutate(p = n / sum(n))
-#> `summarise()` has grouped output by 'type'. You can override using the
-#> `.groups` argument.
+#> `summarise()` has regrouped the output.
+#> ℹ Summaries were computed grouped by type and delay.
+#> ℹ Output is grouped by type.
+#> ℹ Use `summarise(.groups = "drop_last")` to silence this message.
+#> ℹ Use `summarise(.by = c(type, delay))` for per-operation grouping
+#>   (`?dplyr::dplyr_by`) instead.
 
 # Create the plot
 delay_histogram <- ggplot(plot_data) +
@@ -604,9 +608,9 @@ naive_fit <- epidist(
 #> Compiling Stan program...
 #> 
 #> Trying to compile a simple C file
-#> Running /opt/R/4.5.2/lib/R/bin/R CMD SHLIB foo.c
-#> using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0’
-#> gcc -std=gnu2x -I"/opt/R/4.5.2/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/"  -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o
+#> Running /opt/R/4.5.3/lib/R/bin/R CMD SHLIB foo.c
+#> using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0’
+#> gcc -std=gnu2x -I"/opt/R/4.5.3/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/"  -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o
 #> In file included from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Core:19,
 #>                  from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Dense:1,
 #>                  from /home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22,
@@ -615,7 +619,7 @@ naive_fit <- epidist(
 #>   679 | #include <cmath>
 #>       |          ^~~~~~~
 #> compilation terminated.
-#> make: *** [/opt/R/4.5.2/lib/R/etc/Makeconf:202: foo.o] Error 1
+#> make: *** [/opt/R/4.5.3/lib/R/etc/Makeconf:202: foo.o] Error 1
 #> Start sampling
 ```
 
@@ -653,8 +657,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3457     2688
-#> sigma_Intercept    -0.75      0.05    -0.85    -0.66 1.00     3465     2362
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3542     2306
+#> sigma_Intercept    -0.76      0.05    -0.85    -0.65 1.00     2608     2468
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -732,9 +736,9 @@ marginal_fit <- epidist(
 #> Compiling Stan program...
 #> 
 #> Trying to compile a simple C file
-#> Running /opt/R/4.5.2/lib/R/bin/R CMD SHLIB foo.c
-#> using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0’
-#> gcc -std=gnu2x -I"/opt/R/4.5.2/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/"  -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o
+#> Running /opt/R/4.5.3/lib/R/bin/R CMD SHLIB foo.c
+#> using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0’
+#> gcc -std=gnu2x -I"/opt/R/4.5.3/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/"  -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o
 #> In file included from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Core:19,
 #>                  from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Dense:1,
 #>                  from /home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22,
@@ -743,7 +747,7 @@ marginal_fit <- epidist(
 #>   679 | #include <cmath>
 #>       |          ^~~~~~~
 #> compilation terminated.
-#> make: *** [/opt/R/4.5.2/lib/R/etc/Makeconf:202: foo.o] Error 1
+#> make: *** [/opt/R/4.5.3/lib/R/etc/Makeconf:202: foo.o] Error 1
 #> Start sampling
 ```
 
@@ -762,8 +766,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.47     1.65 1.00     2168     2146
-#> sigma_Intercept    -0.70      0.07    -0.82    -0.56 1.00     2021     2436
+#> Intercept           1.55      0.05     1.46     1.66 1.00     1855     1521
+#> sigma_Intercept    -0.69      0.07    -0.81    -0.55 1.00     2243     2253
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -793,12 +797,12 @@ predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
 
 head(predicted_parameters)
 #>      model draw index       mu     sigma     mean       sd
-#> 1 marginal    1     1 1.606125 0.4812171 5.595204 2.856172
-#> 2 marginal    2     1 1.518663 0.4693530 5.097801 2.530692
-#> 3 marginal    3     1 1.516017 0.5020221 5.165648 2.765575
-#> 4 marginal    4     1 1.604855 0.5498854 5.789475 3.440074
-#> 5 marginal    5     1 1.525693 0.4404084 5.066616 2.344082
-#> 6 marginal    6     1 1.507987 0.4889513 5.091251 2.645843
+#> 1 marginal    1     1 1.568079 0.4759718 5.372822 2.709225
+#> 2 marginal    2     1 1.456454 0.5327800 4.945023 2.833113
+#> 3 marginal    3     1 1.546100 0.5200222 5.372599 2.993839
+#> 4 marginal    4     1 1.555283 0.4650681 5.277364 2.593223
+#> 5 marginal    5     1 1.539193 0.5185034 5.331412 2.960990
+#> 6 marginal    6     1 1.560164 0.4635560 5.299467 2.594673
 ```
 
 Note that by default

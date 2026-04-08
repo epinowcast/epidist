@@ -1,5 +1,21 @@
 # Changelog
 
+## epidist 0.4.0.1000
+
+### Bug fixes
+
+- Fixed Stan compilation failure with primarycensored \>= 1.4.0 by
+  adding the new `L` (left truncation) parameter to the
+  `primarycensored_lpmf` call in the marginal model. See
+  [\#583](https://github.com/epinowcast/epidist/issues/583).
+- Added `primarycensored (>= 1.4.0)` version bound to DESCRIPTION.
+- Updated test expectations for changed primarycensored error handling.
+
+### CI
+
+- Extended `check-cmdstan` workflow to also check marginal model Stan
+  syntax.
+
 ## epidist 0.4.0
 
 ### Package

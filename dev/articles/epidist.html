@@ -35,7 +35,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.1.1000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.0.1000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -380,8 +380,12 @@ Click to expand for code to create the observed data histogram
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">type</span>, <span class="va">delay</span>, .drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>p <span class="op">=</span> <span class="va">n</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; `summarise()` has grouped output by 'type'. You can override using the</span></span>
-<span><span class="co">#&gt; `.groups` argument.</span></span>
+<span><span class="co">#&gt; `summarise()` has regrouped the output.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Summaries were computed grouped by <span style="color: #0000BB;">type</span> and <span style="color: #0000BB;">delay</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Output is grouped by <span style="color: #0000BB;">type</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `summarise(.groups = "drop_last")` to silence this message.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `summarise(.by = c(type, delay))` for per-operation grouping</span></span>
+<span><span class="co">#&gt;   (`?dplyr::dplyr_by`) instead.</span></span>
 <span></span>
 <span><span class="co"># Create the plot</span></span>
 <span><span class="va">delay_histogram</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plot_data</span><span class="op">)</span> <span class="op">+</span></span>
@@ -528,9 +532,9 @@ To use this model we need to use the <code><a href="../reference/as_epidist_naiv
 <span><span class="co">#&gt; Compiling Stan program...</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Trying to compile a simple C file</span></span>
-<span><span class="co">#&gt; Running /opt/R/4.5.2/lib/R/bin/R CMD SHLIB foo.c</span></span>
-<span><span class="co">#&gt; using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0’</span></span>
-<span><span class="co">#&gt; gcc -std=gnu2x -I"/opt/R/4.5.2/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/"  -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o</span></span>
+<span><span class="co">#&gt; Running /opt/R/4.5.3/lib/R/bin/R CMD SHLIB foo.c</span></span>
+<span><span class="co">#&gt; using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0’</span></span>
+<span><span class="co">#&gt; gcc -std=gnu2x -I"/opt/R/4.5.3/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/"  -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o</span></span>
 <span><span class="co">#&gt; In file included from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Core:19,</span></span>
 <span><span class="co">#&gt;                  from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Dense:1,</span></span>
 <span><span class="co">#&gt;                  from /home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22,</span></span>
@@ -539,7 +543,7 @@ To use this model we need to use the <code><a href="../reference/as_epidist_naiv
 <span><span class="co">#&gt;   679 | #include &lt;cmath&gt;</span></span>
 <span><span class="co">#&gt;       |          ^~~~~~~</span></span>
 <span><span class="co">#&gt; compilation terminated.</span></span>
-<span><span class="co">#&gt; make: *** [/opt/R/4.5.2/lib/R/etc/Makeconf:202: foo.o] Error 1</span></span>
+<span><span class="co">#&gt; make: *** [/opt/R/4.5.3/lib/R/etc/Makeconf:202: foo.o] Error 1</span></span>
 <span><span class="co">#&gt; Start sampling</span></span></code></pre></div>
 <div class="alert alert-primary">
 <p>Note that here we use the default <code>rstan</code> backend but we generally recommend using the <code>cmdstanr</code> backend for faster sampling and additional features.
@@ -567,8 +571,8 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.42      0.03     1.35     1.48 1.00     3457     2688</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.75      0.05    -0.85    -0.66 1.00     3465     2362</span></span>
+<span><span class="co">#&gt; Intercept           1.42      0.03     1.35     1.48 1.00     3542     2306</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.76      0.05    -0.85    -0.65 1.00     2608     2468</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -624,9 +628,9 @@ Note that because of the different <code>as_epidist_&lt;model&gt;_model()</code>
 <span><span class="co">#&gt; Compiling Stan program...</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Trying to compile a simple C file</span></span>
-<span><span class="co">#&gt; Running /opt/R/4.5.2/lib/R/bin/R CMD SHLIB foo.c</span></span>
-<span><span class="co">#&gt; using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0’</span></span>
-<span><span class="co">#&gt; gcc -std=gnu2x -I"/opt/R/4.5.2/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/"  -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o</span></span>
+<span><span class="co">#&gt; Running /opt/R/4.5.3/lib/R/bin/R CMD SHLIB foo.c</span></span>
+<span><span class="co">#&gt; using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0’</span></span>
+<span><span class="co">#&gt; gcc -std=gnu2x -I"/opt/R/4.5.3/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/"  -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o</span></span>
 <span><span class="co">#&gt; In file included from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Core:19,</span></span>
 <span><span class="co">#&gt;                  from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Dense:1,</span></span>
 <span><span class="co">#&gt;                  from /home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22,</span></span>
@@ -635,7 +639,7 @@ Note that because of the different <code>as_epidist_&lt;model&gt;_model()</code>
 <span><span class="co">#&gt;   679 | #include &lt;cmath&gt;</span></span>
 <span><span class="co">#&gt;       |          ^~~~~~~</span></span>
 <span><span class="co">#&gt; compilation terminated.</span></span>
-<span><span class="co">#&gt; make: *** [/opt/R/4.5.2/lib/R/etc/Makeconf:202: foo.o] Error 1</span></span>
+<span><span class="co">#&gt; make: *** [/opt/R/4.5.3/lib/R/etc/Makeconf:202: foo.o] Error 1</span></span>
 <span><span class="co">#&gt; Start sampling</span></span></code></pre></div>
 <p>We again summarise the posterior using <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>,</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
@@ -650,8 +654,8 @@ Note that because of the different <code>as_epidist_&lt;model&gt;_model()</code>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.55      0.05     1.47     1.65 1.00     2168     2146</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.70      0.07    -0.82    -0.56 1.00     2021     2436</span></span>
+<span><span class="co">#&gt; Intercept           1.55      0.05     1.46     1.66 1.00     1855     1521</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.69      0.07    -0.81    -0.55 1.00     2243     2253</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -675,12 +679,12 @@ Internally this function uses can also add the mean and standard deviation param
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">predicted_parameters</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      model draw index       mu     sigma     mean       sd</span></span>
-<span><span class="co">#&gt; 1 marginal    1     1 1.606125 0.4812171 5.595204 2.856172</span></span>
-<span><span class="co">#&gt; 2 marginal    2     1 1.518663 0.4693530 5.097801 2.530692</span></span>
-<span><span class="co">#&gt; 3 marginal    3     1 1.516017 0.5020221 5.165648 2.765575</span></span>
-<span><span class="co">#&gt; 4 marginal    4     1 1.604855 0.5498854 5.789475 3.440074</span></span>
-<span><span class="co">#&gt; 5 marginal    5     1 1.525693 0.4404084 5.066616 2.344082</span></span>
-<span><span class="co">#&gt; 6 marginal    6     1 1.507987 0.4889513 5.091251 2.645843</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 marginal    1     1 1.568079 0.4759718 5.372822 2.709225</span></span>
+<span><span class="co">#&gt; 2 marginal    2     1 1.456454 0.5327800 4.945023 2.833113</span></span>
+<span><span class="co">#&gt; 3 marginal    3     1 1.546100 0.5200222 5.372599 2.993839</span></span>
+<span><span class="co">#&gt; 4 marginal    4     1 1.555283 0.4650681 5.277364 2.593223</span></span>
+<span><span class="co">#&gt; 5 marginal    5     1 1.539193 0.5185034 5.331412 2.960990</span></span>
+<span><span class="co">#&gt; 6 marginal    6     1 1.560164 0.4635560 5.299467 2.594673</span></span></code></pre></div>
 <div class="alert alert-primary">
 <p>Note that by default <code><a href="../reference/predict_delay_parameters.html">predict_delay_parameters()</a></code> gives predictions for every row in the transformed data.
 Here as we only want posterior draws for the summary parameters we filter to the first row or the first data point.
