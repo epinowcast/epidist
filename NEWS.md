@@ -8,6 +8,12 @@
 - Added `primarycensored (>= 1.4.0)` version bound to DESCRIPTION.
 - Updated test expectations for changed primarycensored error handling.
 
+## Package
+
+- Use primarycensored's automatic dependency resolution for Stan function
+  loading via `pcd_load_stan_functions(dependencies = TRUE)` instead of
+  loading all functions. See #582.
+
 ## CI
 
 - Extended `check-cmdstan` workflow to also check marginal model Stan syntax.

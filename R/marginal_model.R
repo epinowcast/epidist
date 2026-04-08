@@ -374,7 +374,15 @@ epidist_stancode.epidist_marginal_model <- function(
 
   pcd_stanvars_functions <- brms::stanvar(
     block = "functions",
-    scode = primarycensored::pcd_load_stan_functions()
+    scode = primarycensored::pcd_load_stan_functions(
+      c(
+        "primarycensored_lpmf",
+        "primarycensored_ode",
+        "dist_lcdf",
+        "primary_lpdf"
+      ),
+      dependencies = TRUE
+    )
   )
 
   stanvars_all <- stanvars_version +
