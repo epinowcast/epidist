@@ -45,39 +45,39 @@ library(tidybayes)
 
 # Simulate data with left truncation
 
-We simulate delay data from a lognormal distribution, then remove all observations with delays below a threshold to mimic left truncation.
-This is a simplified version of how generation interval data might look when same-day events are excluded.
+We use the package's simulation tools to generate outbreak data, then remove all observations with delays below a threshold to mimic left truncation.
 
 ```{r simulate}
-set.seed(42)
-n <- 500
 true_meanlog <- 1.5
 true_sdlog <- 0.6
 delay_min <- 1
 
-# Simulate delays from lognormal, removing those below delay_min
-delays_raw <- rlnorm(n * 2, meanlog = true_meanlog, sdlog = true_sdlog)
-delays <- delays_raw[delays_raw >= delay_min][seq_len(n)]
+outbreak <- simulate_gillespie(r = 0.2, seed = 101)
+obs <- simulate_secondary(
+  outbreak,
+  dist = rlnorm,
+  meanlog = true_meanlog,
+  sdlog = true_sdlog
+)
 
-# Create linelist-style data with daily censoring
-obs_time <- 100
-sim_data <- data.frame(
-  ptime_lwr = runif(n, 0, obs_time - max(delays)),
-  delay = delays
-) |>
+# Apply left truncation: remove delays below threshold
+obs_trunc <- obs |>
+  filter(delay >= delay_min) |>
   mutate(
+    ptime_lwr = floor(ptime),
     ptime_upr = ptime_lwr + 1,
-    stime_lwr = floor(ptime_lwr + delay),
+    stime_lwr = floor(stime),
     stime_upr = stime_lwr + 1,
-    obs_time = obs_time
+    obs_time = max(stime_upr)
   ) |>
-  filter(stime_upr <= obs_time)
+  filter(stime_upr <= obs_time) |>
+  slice_sample(n = 200)
 ```
 
 The observed delay distribution is visibly truncated at `delay_min = `r delay_min``:
 
 ```{r hist, fig.cap="Observed delays are truncated below the minimum delay threshold (dashed line)."}
-ggplot(sim_data, aes(x = stime_lwr - ptime_lwr)) +
+ggplot(obs_trunc, aes(x = stime_lwr - ptime_lwr)) +
   geom_histogram(
     aes(y = after_stat(density)),
     binwidth = 1, fill = "#56B4E9", alpha = 0.7
@@ -89,53 +89,35 @@ ggplot(sim_data, aes(x = stime_lwr - ptime_lwr)) +
   theme_minimal()
 ```
 
-# Prepare data
+# Prepare data and fit models
 
-We convert the simulated data into an `epidist` linelist and then prepare marginal models with and without the `delay_min` adjustment.
+We convert the simulated data into an `epidist` linelist and prepare marginal models with and without the `delay_min` adjustment.
 
-```{r prepare}
+```{r prepare-and-fit}
 linelist <- as_epidist_linelist_data(
-  sim_data,
-  ptime_lwr = "ptime_lwr",
-  ptime_upr = "ptime_upr",
-  stime_lwr = "stime_lwr",
-  stime_upr = "stime_upr",
-  obs_time = "obs_time"
+  obs_trunc$ptime_lwr,
+  ptime_upr = obs_trunc$ptime_upr,
+  stime_lwr = obs_trunc$stime_lwr,
+  stime_upr = obs_trunc$stime_upr,
+  obs_time = obs_trunc$obs_time
 )
 
 # Without left truncation adjustment
-marginal_no_trunc <- as_epidist_marginal_model(linelist)
-
-# With left truncation adjustment
-marginal_trunc <- as_epidist_marginal_model(
-  linelist, delay_min = delay_min
-)
-```
-
-# Fit models
-
-We fit two marginal models: one ignoring left truncation and one accounting for it.
-
-```{r fit}
 fit_no_trunc <- epidist(
-  marginal_no_trunc,
+  as_epidist_marginal_model(linelist),
   chains = 4, cores = 2, refresh = ifelse(interactive(), 250, 0)
 )
 
+# With left truncation adjustment
 fit_trunc <- epidist(
-  marginal_trunc,
+  as_epidist_marginal_model(linelist, delay_min = delay_min),
   chains = 4, cores = 2, refresh = ifelse(interactive(), 250, 0)
 )
 ```
 
 # Compare parameter estimates
 
-We extract the estimated parameters and compare them to the true values.
-
 ```{r compare-params}
-params_no_trunc <- predict_delay_parameters(fit_no_trunc)
-params_trunc <- predict_delay_parameters(fit_trunc)
-
 true_params <- data.frame(
   parameter = c("meanlog", "sdlog"),
   true_value = c(true_meanlog, true_sdlog),
@@ -143,8 +125,14 @@ true_params <- data.frame(
 )
 
 param_summary <- bind_rows(
-  mutate(params_no_trunc, model = "No truncation adjustment"),
-  mutate(params_trunc, model = "With delay_min")
+  mutate(
+    predict_delay_parameters(fit_no_trunc),
+    model = "No truncation adjustment"
+  ),
+  mutate(
+    predict_delay_parameters(fit_trunc),
+    model = "With delay_min"
+  )
 ) |>
   filter(parameter %in% c("meanlog", "sdlog"))
 ```
@@ -169,8 +157,6 @@ ggplot(param_summary, aes(x = mean, y = model, col = model)) +
 ```
 
 # Compare fitted distributions
-
-We can also compare the fitted delay distributions by generating predictions from each model.
 
 ```{r predict}
 pred_data <- data.frame(
@@ -218,7 +204,6 @@ ggplot(draws_combined, aes(x = .prediction)) +
 # Using delay_min with aggregate data
 
 Left truncation also works with aggregate data.
-If your data is already aggregated, `delay_min` can be passed through the same interface.
 
 ```{r aggregate}
 agg_data <- as_epidist_aggregate_data(linelist)
@@ -230,9 +215,9 @@ marginal_agg <- as_epidist_marginal_model(
 head(marginal_agg[, c("delay_lwr", "delay_upr", "delay_min", "n")])
 ```
 
-# Using a per-observation delay_min column
+# Per-observation delay_min
 
-For cases where the truncation point varies across observations, you can provide `delay_min` as a column in the data.
+When the truncation point varies across observations, provide `delay_min` as a column name.
 
 ```{r per-obs}
 linelist_varying <- linelist
