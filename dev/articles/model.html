@@ -214,7 +214,8 @@ For each event, a latent variable is used to represent the exact time of the eve
 This then allows the modelling of the continuous distribution, adjusted for the right truncation.
 Whilst this is an approximation <span class="citation">(<a href="#ref-park2024estimating">Park et al. 2024</a>)</span> showed good recovery of simulated distributions in a range of settings.
 However, the use of two latent variables per observed delay means that this approach may scale poorly with larger datasets.
-That being said this approach has been used successfully in multiple real-world outbreak settings (<span class="citation">(<a href="#ref-ward2022transmission">Ward et al. 2022</a>)</span>).</p>
+That being said this approach has been used successfully in multiple real-world outbreak settings (<span class="citation">(<a href="#ref-ward2022transmission">Ward et al. 2022</a>)</span>).
+If using the latent model, please cite <span class="citation">Park et al. (<a href="#ref-park2024estimating">2024</a>)</span> in addition to <code>epidist</code>.</p>
 <p>Mathematically this model is described as follows.
 We look at the conditional probability that the secondary event <span class="math inline">\(S\)</span> falls between <span class="math inline">\(S_L\)</span> and <span class="math inline">\(S_R\)</span>, given that the primary event <span class="math inline">\(P\)</span> falls between <span class="math inline">\(P_L\)</span> and <span class="math inline">\(P_R\)</span> and that the secondary event <span class="math inline">\(S\)</span> occurs before the truncation time <span class="math inline">\(T\)</span>:
 <span class="math display">\[
@@ -236,10 +237,35 @@ y_i &amp;\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
 \end{aligned}
 \]</span>
 As before, <span class="math inline">\(g_P(z \, | \, p_{L, i}, p_{R, i})\)</span> represents the conditional distribution of the primary event given lower <span class="math inline">\(P_L\)</span> and upper <span class="math inline">\(P_R\)</span> bounds; this is equivalent to modelling the incidence in primary events.</p>
+</div>
+<div class="section level2" number="4">
+<h2 id="the-marginal-model">
+<span class="header-section-number">4</span> The marginal model<a class="anchor" aria-label="anchor" href="#the-marginal-model"></a>
+</h2>
+<p>The marginal model corrects for the same biases as the latent model but integrates out the exact event times numerically, or analytically where closed-form solutions exist, rather than sampling latent variables.
+This approach uses the primary event censored distribution implemented in the <a href="https://primarycensored.epinowcast.org/" class="external-link"><code>primarycensored</code></a> package <span class="citation">(<a href="#ref-primarycensored">Abbott et al. 2025</a>)</span>.
+If using the marginal model, please cite <code>primarycensored</code> in addition to <code>epidist</code>.</p>
+<p>Under the assumption that the forward distribution does not change within the censoring interval (i.e. <span class="math inline">\(f_x = f\)</span> for <span class="math inline">\(x \in [P_L, P_R]\)</span>), the double censoring probability from Section <a href="#interval-censoring">1.3</a> simplifies to
+<span class="math display">\[
+\mathbb{P}(S_L &lt; S &lt; S_R \mid P_L &lt; P &lt; P_R) = \int_{P_L}^{P_R} g_P(x \mid P_L, P_R) \left[F(S_R - x) - F(S_L - x)\right] \text{d}x.
+\]</span>
+For common delay and primary event distributions, such as gamma or lognormal delays with uniform primary events, <code>primarycensored</code> provides closed-form analytical solutions to this integral.
+For other combinations, numerical integration is used.</p>
+<p>Right truncation at time <span class="math inline">\(T\)</span> is handled by normalising the likelihood as in the latent model:
+<span class="math display">\[
+\mathcal{L}(\mathbf{Y} \mid \mathbf{\theta}) = \prod_i \frac{\mathbb{P}(S_{L,i} &lt; S_i &lt; S_{R,i} \mid P_{L,i} &lt; P_i &lt; P_{R,i})}{\int_{P_{L,i}}^{P_{R,i}} g_P(z \mid p_{L,i}, p_{R,i}) F(T - z) \, \text{d}z}.
+\]</span></p>
+<p>Removing the latent variables reduces the number of parameters that must be sampled, and where analytical solutions exist the likelihood can be evaluated without numerical integration.
+In addition, identical observations can be aggregated and the likelihood computed once per unique combination of delay, censoring windows, and covariates.
+Together these make the marginal model substantially more efficient than the latent model, particularly for larger datasets with daily-censored data where many observations share the same structure.</p>
+<p>For the mathematical details of primary event censored distributions, including the survival function derivation and closed-form solutions for specific distributions, see <code><a href="https://primarycensored.epinowcast.org/articles/why-it-works.html" class="external-link">vignette("why-it-works", package = "primarycensored")</a></code> and <code><a href="https://primarycensored.epinowcast.org/articles/analytic-solutions.html" class="external-link">vignette("analytic-solutions", package = "primarycensored")</a></code>.</p>
 <div class="section level3">
 <h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
 <div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-primarycensored" class="csl-entry">
+Abbott, Sam, Sam Brand, James Mba Azam, Carl Pearson, Sebastian Funk, and Kelly Charniga. 2025. <em>Primarycensored: Primary Event Censored Distributions</em>. <a href="https://doi.org/10.5281/zenodo.13632839" class="external-link">https://doi.org/10.5281/zenodo.13632839</a>.
+</div>
 <div id="ref-park2024estimating" class="csl-entry">
 Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, Anne Cori, Nicholas G. Davies, Jonathan Dushoff, Sebastian Funk, et al. 2024. <span>“Estimating Epidemiological Delay Distributions for Infectious Diseases.”</span> <em>medRxiv</em>. <a href="https://doi.org/10.1101/2024.01.12.24301247" class="external-link">https://doi.org/10.1101/2024.01.12.24301247</a>.
 </div>

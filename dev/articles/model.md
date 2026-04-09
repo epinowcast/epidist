@@ -160,7 +160,9 @@ distributions in a range of settings. However, the use of two latent
 variables per observed delay means that this approach may scale poorly
 with larger datasets. That being said this approach has been used
 successfully in multiple real-world outbreak settings (([Ward et al.
-2022](#ref-ward2022transmission))).
+2022](#ref-ward2022transmission))). If using the latent model, please
+cite Park et al. ([2024](#ref-park2024estimating)) in addition to
+`epidist`.
 
 Mathematically this model is described as follows. We look at the
 conditional probability that the secondary event \\S\\ falls between
@@ -187,7 +189,54 @@ conditional distribution of the primary event given lower \\P_L\\ and
 upper \\P_R\\ bounds; this is equivalent to modelling the incidence in
 primary events.
 
+## 4 The marginal model
+
+The marginal model corrects for the same biases as the latent model but
+integrates out the exact event times numerically, or analytically where
+closed-form solutions exist, rather than sampling latent variables. This
+approach uses the primary event censored distribution implemented in the
+[`primarycensored`](https://primarycensored.epinowcast.org/) package
+([Abbott et al. 2025](#ref-primarycensored)). If using the marginal
+model, please cite `primarycensored` in addition to `epidist`.
+
+Under the assumption that the forward distribution does not change
+within the censoring interval (i.e. \\f_x = f\\ for \\x \in \[P_L,
+P_R\]\\), the double censoring probability from Section
+[1.3](#interval-censoring) simplifies to \\ \mathbb{P}(S_L \< S \< S_R
+\mid P_L \< P \< P_R) = \int\_{P_L}^{P_R} g_P(x \mid P_L, P_R)
+\left\[F(S_R - x) - F(S_L - x)\right\] \text{d}x. \\ For common delay
+and primary event distributions, such as gamma or lognormal delays with
+uniform primary events, `primarycensored` provides closed-form
+analytical solutions to this integral. For other combinations, numerical
+integration is used.
+
+Right truncation at time \\T\\ is handled by normalising the likelihood
+as in the latent model: \\ \mathcal{L}(\mathbf{Y} \mid \mathbf{\theta})
+= \prod_i \frac{\mathbb{P}(S\_{L,i} \< S_i \< S\_{R,i} \mid P\_{L,i} \<
+P_i \< P\_{R,i})}{\int\_{P\_{L,i}}^{P\_{R,i}} g_P(z \mid p\_{L,i},
+p\_{R,i}) F(T - z) \\ \text{d}z}. \\
+
+Removing the latent variables reduces the number of parameters that must
+be sampled, and where analytical solutions exist the likelihood can be
+evaluated without numerical integration. In addition, identical
+observations can be aggregated and the likelihood computed once per
+unique combination of delay, censoring windows, and covariates. Together
+these make the marginal model substantially more efficient than the
+latent model, particularly for larger datasets with daily-censored data
+where many observations share the same structure.
+
+For the mathematical details of primary event censored distributions,
+including the survival function derivation and closed-form solutions for
+specific distributions, see
+[`vignette("why-it-works", package = "primarycensored")`](https://primarycensored.epinowcast.org/articles/why-it-works.html)
+and
+[`vignette("analytic-solutions", package = "primarycensored")`](https://primarycensored.epinowcast.org/articles/analytic-solutions.html).
+
 ### References
+
+Abbott, Sam, Sam Brand, James Mba Azam, Carl Pearson, Sebastian Funk,
+and Kelly Charniga. 2025. *Primarycensored: Primary Event Censored
+Distributions*. <https://doi.org/10.5281/zenodo.13632839>.
 
 Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, Anne Cori,
 Nicholas G. Davies, Jonathan Dushoff, Sebastian Funk, et al. 2024.
