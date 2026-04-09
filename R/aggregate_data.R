@@ -175,6 +175,10 @@ as_epidist_aggregate_data.epidist_linelist_data <- function(
   # Required variables for epidist objects
   group_vars <- .linelist_required_cols()
 
+  # Auto-include optional columns that exist in the data
+  optional_cols <- intersect(.linelist_optional_cols(), names(data))
+  group_vars <- c(group_vars, optional_cols)
+
   # Combine required variables with user-specified ones
   if (!is.null(by)) {
     assert_character(by)

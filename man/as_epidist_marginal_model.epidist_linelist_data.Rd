@@ -4,7 +4,13 @@
 \alias{as_epidist_marginal_model.epidist_linelist_data}
 \title{The marginal model method for \code{epidist_linelist_data} objects}
 \usage{
-\method{as_epidist_marginal_model}{epidist_linelist_data}(data, obs_time_threshold = 2, weight = NULL, ...)
+\method{as_epidist_marginal_model}{epidist_linelist_data}(
+  data,
+  obs_time_threshold = 2,
+  weight = NULL,
+  delay_min = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{An \code{epidist_linelist_data} object}
@@ -15,9 +21,24 @@ relative observation times to Inf. Observation times greater than
 model efficiency by reducing the number of unique observation times.
 Default is 2.}
 
-\item{weight}{A column name to use for weighting the data in the
-likelihood. Default is NULL. Internally this is used to define the 'n'
-column of the returned object.}
+\item{weight}{A column name containing counts of identical linelist items.
+When specified, the user is declaring that rows with the same values
+represent the same observation occurring multiple times. This allows for
+efficient data representation by storing unique patterns with their counts
+rather than repeating identical rows. The marginal model will further
+aggregate these counts based on the formula specification. Default is NULL,
+which assigns a count of 1 to each row. Internally this is used to define
+the 'n' column of the returned object.}
+
+\item{delay_min}{Minimum delay (left truncation point). Can be:
+\itemize{
+\item \code{NULL} (default): uses a \code{delay_min} column from the data if present,
+otherwise defaults to 0 (no left truncation).
+\item A numeric scalar: applied to all observations.
+\item A column name string: looks up the named column in the data.
+This is passed as the \code{L} parameter to
+\code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}}.
+}}
 
 \item{...}{Not used in this method.}
 }
@@ -33,6 +54,12 @@ more accurate and more computationally efficient than the latent model
 number of unique strata approaches the number of observations.
 }
 \details{
+The marginal model performs internal aggregation to optimize computational
+efficiency while preserving all statistical information. If your data already
+contains repeated observations with identical characteristics, you can use
+the \code{weight} parameter to provide counts of these duplicates. This allows for
+more efficient data representation without any loss of information.
+
 When a formula is specified in \code{\link[=epidist]{epidist()}}, the data will be transformed
 using \code{\link[=epidist_transform_data_model.epidist_marginal_model]{epidist_transform_data_model.epidist_marginal_model()}} to prepare it
 for model fitting. This transformation summarises the data by counting unique
