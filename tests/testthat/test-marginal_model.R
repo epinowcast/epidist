@@ -88,6 +88,10 @@ test_that(
     expect_error(
       as_epidist_marginal_model(sim_obs, delay_min = -1)
     )
+    expect_error(
+      as_epidist_marginal_model(sim_obs, delay_min = TRUE),
+      "delay_min"
+    )
   }
 )
 
