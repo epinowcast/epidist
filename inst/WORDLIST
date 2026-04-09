@@ -4,6 +4,7 @@ Charniga
 CmdStan
 CodeDepends
 Codecov
+DrAuxetic
 Gelman
 Generalised
 Gillepsie
@@ -29,9 +30,11 @@ Unif
 Variational
 Visualise
 al
+allcontributors
 athowes
 brms
 brms’
+burdon
 cherz
 cli
 cmdstanr
@@ -49,8 +52,6 @@ et
 factorised
 frac
 generalised
-github
-https
 infty
 initialising
 integerish
@@ -69,6 +70,7 @@ mathcal
 meanlog
 medewitt
 modelling
+normalising
 nowcasting
 ocurs
 optimisation

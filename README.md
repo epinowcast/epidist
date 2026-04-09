@@ -214,12 +214,16 @@ please cite the relevant papers. This may include:
 
 - [Estimating epidemiological delay distributions for infectious
   diseases](https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1)
-  by Park *et al.* (2024)
+  by Park *et al.* (2024) – if using the latent model
 - [Best practices for estimating and reporting epidemiological delay
   distributions of infectious diseases using public health surveillance
   and healthcare
   data](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012520)
   by Charniga *et al.* (2024)
+
+If using the marginal model, please also cite the
+[`primarycensored`](https://primarycensored.epinowcast.org/) package
+using `citation("primarycensored")`.
 
 ## Contributors
 
@@ -229,7 +233,7 @@ please cite the relevant papers. This may include:
 
 All contributions to this project are gratefully acknowledged using the
 [`allcontributors` package](https://github.com/ropensci/allcontributors)
-following the [all-contributors](https://allcontributors.org)
+following the [allcontributors](https://allcontributors.org)
 specification. Contributions of any kind are welcome!
 
 ### Code
@@ -255,7 +259,9 @@ specification. Contributions of any kind are welcome!
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca">pearsonca</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1">SamuelBrand1</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein">zsusswein</a>,
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Aoswaldogressani">oswaldogressani</a>
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Aoswaldogressani">oswaldogressani</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ADrAuxetic">DrAuxetic</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Amark-burdon">mark-burdon</a>
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
