@@ -51,6 +51,7 @@ Suggests:
     bayesplot,
     BH (>= 1.66.0),
     bookdown,
+    cyclocomp,
     cmdstanr,
     collapse,
     ggplot2,

@@ -42,13 +42,14 @@ as_epidist_aggregate_data <- function(data, ...) {
 #'   n = c(1, 2, 3)
 #' )
 as_epidist_aggregate_data.default <- function(
-    data,
-    n = NULL,
-    ptime_upr = NULL,
-    stime_lwr = NULL,
-    stime_upr = NULL,
-    obs_time = NULL,
-    ...) {
+  data,
+  n = NULL,
+  ptime_upr = NULL,
+  stime_lwr = NULL,
+  stime_upr = NULL,
+  obs_time = NULL,
+  ...
+) {
   # Create linelist data first
   linelist_data <- as_epidist_linelist_data.default(
     data = data,
@@ -96,14 +97,15 @@ as_epidist_aggregate_data.default <- function(
 #'     n = "n"
 #'   )
 as_epidist_aggregate_data.data.frame <- function(
-    data,
-    n = NULL,
-    pdate_lwr = NULL,
-    sdate_lwr = NULL,
-    pdate_upr = NULL,
-    sdate_upr = NULL,
-    obs_date = NULL,
-    ...) {
+  data,
+  n = NULL,
+  pdate_lwr = NULL,
+  sdate_lwr = NULL,
+  pdate_upr = NULL,
+  sdate_upr = NULL,
+  obs_date = NULL,
+  ...
+) {
   # First convert to linelist data
   linelist_data <- as_epidist_linelist_data.data.frame(
     data = data,
@@ -167,9 +169,10 @@ as_epidist_aggregate_data.data.frame <- function(
 #'   ) |>
 #'   as_epidist_aggregate_data(by = "age")
 as_epidist_aggregate_data.epidist_linelist_data <- function(
-    data,
-    by = NULL,
-    ...) {
+  data,
+  by = NULL,
+  ...
+) {
   assert_epidist.epidist_linelist_data(data)
 
   # Required variables for epidist objects
