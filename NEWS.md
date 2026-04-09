@@ -17,19 +17,19 @@
   `pcd_load_stan_functions(dependencies = TRUE)` instead of loading all
   functions. See #582.
 
+## Models
+
+- Added left truncation support via `delay_min` parameter in
+  `as_epidist_marginal_model()`. This passes the `L` parameter to
+  `primarycensored` functions. See #588.
+
 ## CI
 
 - Extended `check-cmdstan` workflow to also check marginal model Stan syntax.
 
 # epidist 0.4.0
 
-## Models
-
-- Added left truncation support via `delay_min` parameter in `as_epidist_marginal_model()`. This passes the `L` parameter to `primarycensored` functions. See #588.
-
 ## Package
-
-- Now requires primarycensored >= 1.4.0 for left truncation support. See #583.
 
 - Enforce line length and use cli for latent prior checks. See #580.
 - Removed CodeDepends from DESCRIPTION dependencies.
