@@ -10,6 +10,9 @@
   [\#583](https://github.com/epinowcast/epidist/issues/583).
 - Added `primarycensored (>= 1.4.0)` version bound to DESCRIPTION.
 - Updated test expectations for changed primarycensored error handling.
+- Re-enabled approximate inference vignette evaluation using dev brms
+  with pathfinder path fix. See
+  [\#579](https://github.com/epinowcast/epidist/issues/579).
 
 ### Package
 

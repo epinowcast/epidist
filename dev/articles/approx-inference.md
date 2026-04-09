@@ -118,6 +118,7 @@ we have everything we need as follows:
 
 ``` r
 cmdstanr::cmdstan_version()
+#> [1] "2.38.0"
 ```
 
 We can simulate data to use for fitting models. The example data
@@ -150,8 +151,9 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
   slice_sample(n = sample_size, replace = FALSE)
 ```
 
-We now prepare the data for fitting with the marginal model, and perform
-inference with HMC:
+We now prepare the data for fitting with the marginal model. We first
+pre-compile the Stan model so that compilation time is excluded from the
+timing comparisons below.
 
 ``` r
 linelist_data <- as_epidist_linelist_data(
@@ -164,8 +166,19 @@ linelist_data <- as_epidist_linelist_data(
 
 data <- as_epidist_marginal_model(linelist_data)
 
+# Pre-compile the model so compilation time is not included
+# in the timing comparisons
+fit_compile <- epidist(
+  data = data, backend = "cmdstanr",
+  chains = 1, iter = 5
+)
+```
+
+We now perform inference with HMC:
+
+``` r
 t <- proc.time()
-fit_hmc <- epidist(data = data, algorithm = "sampling", backend = "cmdstanr")
+fit_hmc <- update(fit_compile, chains = 4, iter = 2000)
 time_hmc <- proc.time() - t
 ```
 
@@ -180,31 +193,25 @@ HMC above, we then draw 4000 samples from each approximate posterior.
 
 ``` r
 t <- proc.time()
-fit_laplace <- epidist(
-  data = data, algorithm = "laplace", draws = 4000, backend = "cmdstanr"
+fit_laplace <- update(
+  fit_compile, algorithm = "laplace", draws = 4000
 )
 time_laplace <- proc.time() - t
 
 t <- proc.time()
-fit_advi <- epidist(
-  data = data, algorithm = "meanfield", draws = 4000, backend = "cmdstanr"
+fit_advi <- update(
+  fit_compile, algorithm = "meanfield", draws = 4000
 )
 time_advi <- proc.time() - t
 ```
 
-For the Pathfinder algorithm we will set `num_paths = 1`. Although both
-the Laplace and ADVI methods ran without problems in all cases during
-testing, we found that Pathfinder often produced the error message
-“Error evaluating model log probability: Non-finite gradient.” Although
-a `save_single_paths` option is available, which may have allowed
-recovery of individual Pathfinder paths (and therefore removing faulty
-paths), it does not appear to be working currently[³](#fn3).
+For the Pathfinder algorithm we will set `num_paths = 1`.
 
 ``` r
 t <- proc.time()
-fit_pathfinder <- epidist(
-  data = data, algorithm = "pathfinder", draws = 4000, chains = 1,
-  backend = "cmdstanr"
+fit_pathfinder <- update(
+  fit_compile, algorithm = "pathfinder", draws = 4000,
+  chains = 1
 )
 time_pathfinder <- proc.time() - t
 ```
@@ -254,10 +261,17 @@ pars <- draws |>
   ungroup()
 
 pars
+#> # A tibble: 4 × 3
+#>   method        mu sigma
+#>   <fct>      <dbl> <dbl>
+#> 1 HMC         1.75 0.459
+#> 2 Laplace     1.74 0.455
+#> 3 ADVI        1.77 0.513
+#> 4 Pathfinder  1.74 0.456
 ```
 
 More comprehensively, the estimated posterior distributions are shown in
-Figure [**??**](#fig:posterior).
+Figure [3.1](#fig:posterior).
 
 Click to expand for code to create posterior distribution plot
 
@@ -277,9 +291,17 @@ p_posterior <- draws |>
 p_posterior
 ```
 
+![Estimated posterior distributions for the mu and sigma parameters
+using each inference method, shown using
+tidybayes::stat_slabinterval().](figures/epidist-posterior-1.png)
+
+Figure 3.1: Estimated posterior distributions for the `mu` and `sigma`
+parameters using each inference method, shown using
+[`tidybayes::stat_slabinterval()`](https://mjskay.github.io/ggdist/reference/stat_slabinterval.html).
+
 ### 3.2 Comparison of resulting delay distributions
 
-Figure [**??**](#fig:delay-pdf) shows how the different `mu` and `sigma`
+Figure [3.2](#fig:delay-pdf) shows how the different `mu` and `sigma`
 posterior mean estimates from each inference method alter an estimated
 delay distribution.
 
@@ -304,6 +326,13 @@ p_delay_pdf <- pmap_df(
 p_delay_pdf
 ```
 
+![Delay probability density functions obtained based on the posterior
+mean estimated mu and sigma
+parameters.](figures/epidist-delay-pdf-1.png)
+
+Figure 3.2: Delay probability density functions obtained based on the
+posterior mean estimated `mu` and `sigma` parameters.
+
 ### 3.3 Comparison of time taken
 
 In this example, HMC took a longer time to run than the other methods
@@ -319,6 +348,21 @@ times <- list(
 )
 
 times
+#> $HMC
+#>    user  system elapsed 
+#>   8.344   0.263   8.672 
+#> 
+#> $Laplace
+#>    user  system elapsed 
+#>   1.161   0.154   1.499 
+#> 
+#> $ADVI
+#>    user  system elapsed 
+#>   1.074   0.050   1.180 
+#> 
+#> $Pathfinder
+#>    user  system elapsed 
+#>   0.371   0.067   0.516
 ```
 
 ## 4 Conclusion
@@ -326,11 +370,8 @@ times
 The range of alternative approximation algorithms available, and their
 ease of use, is an attractive feature of `brms`. We found that these
 algorithms do produce reasonable approximations in far less time than
-HMC. Of course, this vignette only includes one example, and a more
-thorough investigation would be required to make specific
-recommendations. That said, currently we do not recommend use of the
-Pathfinder algorithm due to its unstable performance in our testing and
-early stage software implementation.
+HMC. Of course, this vignette only includes one example, so results may
+differ for other models and datasets.
 
 ### References
 
@@ -374,5 +415,3 @@ Machine Learning Research* 23 (306): 1–49.
     call is hidden, but if you were to call these functions yourself
     they would display information about the fitting procedure as it
     occurs
-
-3.  See <https://github.com/stan-dev/cmdstanr/issues/878>
