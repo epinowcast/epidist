@@ -24,7 +24,7 @@ column per observation. The \code{prep} object must have the following variables
 \item \code{vreal2}: primary event window
 \item \code{vreal3}: secondary event window
 \item \code{vreal4}: delay upper bound
-\item \code{vreal5}: minimum delay (left truncation point)
+\item \code{vreal5}: minimum delay (left truncation point; defaults to 0 if absent)
 }
 }
 \description{

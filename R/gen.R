@@ -22,7 +22,7 @@
 #' * `vreal2`: primary event window
 #' * `vreal3`: secondary event window
 #' * `vreal4`: delay upper bound
-#' * `vreal5`: minimum delay (left truncation point)
+#' * `vreal5`: minimum delay (left truncation point; defaults to 0 if absent)
 #'
 #' @family gen
 #' @autoglobal
@@ -199,7 +199,7 @@ epidist_gen_log_lik <- function(family) {
 #' * `vreal2`: primary event window
 #' * `vreal3`: secondary event window
 #' * `vreal4`: delay upper bound
-#' * `vreal5`: minimum delay (left truncation point)
+#' * `vreal5`: minimum delay (left truncation point; defaults to 0 if absent)
 #'
 #' @seealso [brms::posterior_predict()] for details on how this is used within
 #' `brms`, [primarycensored::rpcens()] for details on the censoring approach
