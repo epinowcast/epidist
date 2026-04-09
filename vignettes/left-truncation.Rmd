@@ -1,0 +1,254 @@
+---
+title: "Left truncation with delay_min"
+description: "Using delay_min to exclude delays below a threshold"
+output:
+  bookdown::html_document2:
+    fig_caption: yes
+    code_folding: show
+    number_sections: true
+pkgdown:
+  as_is: true
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Left truncation with delay_min}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  fig.path = file.path("figures", "left-truncation-"),
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE
+)
+```
+
+Some delay distributions have a natural lower bound above zero.
+For example, generation intervals (time between successive infections) are often defined to exclude day zero, as same-day transmission may not be meaningful for a given pathogen.
+The `delay_min` parameter in `as_epidist_marginal_model()` supports this by left-truncating the delay distribution at a specified minimum value.
+This is passed as the `L` parameter to the [`primarycensored`](https://primarycensored.epinowcast.org/) likelihood.
+
+In this vignette, we demonstrate how to use `delay_min` by simulating data with a known left truncation point and fitting models with and without the truncation adjustment.
+
+# Setup
+
+```{r load-packages}
+library(epidist)
+library(ggplot2)
+library(dplyr)
+library(tidybayes)
+```
+
+# Simulate data with left truncation
+
+We simulate delay data from a lognormal distribution, then remove all observations with delays below a threshold to mimic left truncation.
+This is a simplified version of how generation interval data might look when same-day events are excluded.
+
+```{r simulate}
+set.seed(42)
+n <- 500
+true_meanlog <- 1.5
+true_sdlog <- 0.6
+delay_min <- 1
+
+# Simulate delays from lognormal, removing those below delay_min
+delays_raw <- rlnorm(n * 2, meanlog = true_meanlog, sdlog = true_sdlog)
+delays <- delays_raw[delays_raw >= delay_min][seq_len(n)]
+
+# Create linelist-style data with daily censoring
+obs_time <- 100
+sim_data <- data.frame(
+  ptime_lwr = runif(n, 0, obs_time - max(delays)),
+  delay = delays
+) |>
+  mutate(
+    ptime_upr = ptime_lwr + 1,
+    stime_lwr = floor(ptime_lwr + delay),
+    stime_upr = stime_lwr + 1,
+    obs_time = obs_time
+  ) |>
+  filter(stime_upr <= obs_time)
+```
+
+The observed delay distribution is visibly truncated at `delay_min = `r delay_min``:
+
+```{r hist, fig.cap="Observed delays are truncated below the minimum delay threshold (dashed line)."}
+ggplot(sim_data, aes(x = stime_lwr - ptime_lwr)) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    binwidth = 1, fill = "#56B4E9", alpha = 0.7
+  ) +
+  geom_vline(
+    xintercept = delay_min, linetype = "dashed", linewidth = 0.8
+  ) +
+  labs(x = "Observed delay (days)", y = "Density") +
+  theme_minimal()
+```
+
+# Prepare data
+
+We convert the simulated data into an `epidist` linelist and then prepare marginal models with and without the `delay_min` adjustment.
+
+```{r prepare}
+linelist <- as_epidist_linelist_data(
+  sim_data,
+  ptime_lwr = "ptime_lwr",
+  ptime_upr = "ptime_upr",
+  stime_lwr = "stime_lwr",
+  stime_upr = "stime_upr",
+  obs_time = "obs_time"
+)
+
+# Without left truncation adjustment
+marginal_no_trunc <- as_epidist_marginal_model(linelist)
+
+# With left truncation adjustment
+marginal_trunc <- as_epidist_marginal_model(
+  linelist, delay_min = delay_min
+)
+```
+
+# Fit models
+
+We fit two marginal models: one ignoring left truncation and one accounting for it.
+
+```{r fit}
+fit_no_trunc <- epidist(
+  marginal_no_trunc,
+  chains = 4, cores = 2, refresh = ifelse(interactive(), 250, 0)
+)
+
+fit_trunc <- epidist(
+  marginal_trunc,
+  chains = 4, cores = 2, refresh = ifelse(interactive(), 250, 0)
+)
+```
+
+# Compare parameter estimates
+
+We extract the estimated parameters and compare them to the true values.
+
+```{r compare-params}
+params_no_trunc <- predict_delay_parameters(fit_no_trunc)
+params_trunc <- predict_delay_parameters(fit_trunc)
+
+true_params <- data.frame(
+  parameter = c("meanlog", "sdlog"),
+  true_value = c(true_meanlog, true_sdlog),
+  stringsAsFactors = FALSE
+)
+
+param_summary <- bind_rows(
+  mutate(params_no_trunc, model = "No truncation adjustment"),
+  mutate(params_trunc, model = "With delay_min")
+) |>
+  filter(parameter %in% c("meanlog", "sdlog"))
+```
+
+```{r params-plot, fig.cap="Posterior estimates of the lognormal parameters. The model accounting for left truncation (orange) recovers the true values (dashed lines) while the unadjusted model (blue) is biased."}
+ggplot(param_summary, aes(x = mean, y = model, col = model)) +
+  geom_point(size = 3) +
+  geom_linerange(aes(xmin = q5, xmax = q95)) +
+  geom_vline(
+    data = true_params,
+    aes(xintercept = true_value),
+    linetype = "dashed"
+  ) +
+  facet_wrap(~parameter, scales = "free_x") +
+  scale_colour_manual(values = c(
+    "No truncation adjustment" = "#56B4E9",
+    "With delay_min" = "#E69F00"
+  )) +
+  labs(x = "Estimate", y = "", col = "") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+# Compare fitted distributions
+
+We can also compare the fitted delay distributions by generating predictions from each model.
+
+```{r predict}
+pred_data <- data.frame(
+  relative_obs_time = Inf, pwindow = 0, swindow = 0,
+  delay_upr = NA, delay_min = 0
+)
+
+pred_data_trunc <- data.frame(
+  relative_obs_time = Inf, pwindow = 0, swindow = 0,
+  delay_upr = NA, delay_min = delay_min
+)
+
+draws_no_trunc <- add_predicted_draws(
+  pred_data, fit_no_trunc, ndraws = 1000
+)
+
+draws_trunc <- add_predicted_draws(
+  pred_data_trunc, fit_trunc, ndraws = 1000
+)
+```
+
+```{r pdf-plot, fig.cap="Predicted delay distributions compared with the true lognormal density (black line). The left-truncated model correctly recovers the distribution shape above the truncation point."}
+draws_combined <- bind_rows(
+  mutate(draws_no_trunc, model = "No truncation adjustment"),
+  mutate(draws_trunc, model = "With delay_min")
+)
+
+ggplot(draws_combined, aes(x = .prediction)) +
+  geom_density(aes(col = model), linewidth = 0.8) +
+  geom_function(
+    fun = dlnorm,
+    args = list(meanlog = true_meanlog, sdlog = true_sdlog),
+    linewidth = 1, linetype = "solid"
+  ) +
+  scale_colour_manual(values = c(
+    "No truncation adjustment" = "#56B4E9",
+    "With delay_min" = "#E69F00"
+  )) +
+  coord_cartesian(xlim = c(0, 30)) +
+  labs(x = "Delay (days)", y = "Density", col = "") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+# Using delay_min with aggregate data
+
+Left truncation also works with aggregate data.
+If your data is already aggregated, `delay_min` can be passed through the same interface.
+
+```{r aggregate}
+agg_data <- as_epidist_aggregate_data(linelist)
+
+marginal_agg <- as_epidist_marginal_model(
+  agg_data, delay_min = delay_min
+)
+
+head(marginal_agg[, c("delay_lwr", "delay_upr", "delay_min", "n")])
+```
+
+# Using a per-observation delay_min column
+
+For cases where the truncation point varies across observations, you can provide `delay_min` as a column in the data.
+
+```{r per-obs}
+linelist_varying <- linelist
+linelist_varying$my_min <- sample(
+  c(0, 1), nrow(linelist_varying), replace = TRUE
+)
+
+marginal_varying <- as_epidist_marginal_model(
+  linelist_varying, delay_min = "my_min"
+)
+
+table(marginal_varying$delay_min)
+```
+
+# Summary
+
+The `delay_min` parameter provides a simple way to account for left truncation when estimating delay distributions.
+When delays below a threshold are excluded from the data (as is common for generation intervals), ignoring this truncation biases parameter estimates.
+Setting `delay_min` corrects for this by adjusting the likelihood via the [`primarycensored`](https://primarycensored.epinowcast.org/) package.
