@@ -350,19 +350,19 @@ times <- list(
 times
 #> $HMC
 #>    user  system elapsed 
-#>   7.721   0.185   7.968 
+#>   6.742   0.229   7.151 
 #> 
 #> $Laplace
 #>    user  system elapsed 
-#>   0.850   0.083   1.039 
+#>   0.732   0.101   0.935 
 #> 
 #> $ADVI
 #>    user  system elapsed 
-#>   1.033   0.052   1.081 
+#>   0.907   0.062   0.969 
 #> 
 #> $Pathfinder
 #>    user  system elapsed 
-#>   0.352   0.055   0.486
+#>   0.313   0.063   0.374
 ```
 
 ## 4 Conclusion
