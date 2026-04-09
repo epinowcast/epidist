@@ -412,6 +412,7 @@
       data$delay_min <- 0
     }
   } else if (is.character(delay_min)) {
+    assert_character(delay_min, len = 1)
     assert_names(names(data), must.include = delay_min)
     data$delay_min <- data[[delay_min]]
   } else if (is.numeric(delay_min)) {
