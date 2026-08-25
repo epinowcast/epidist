@@ -154,6 +154,7 @@ If using the marginal model, please also cite the [`primarycensored`](https://pr
 
 
 
+
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
@@ -180,7 +181,8 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>, 
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>, 
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajonathonmellor">jonathonmellor</a>
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajonathonmellor">jonathonmellor</a>, 
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ARodrigoZepeda">RodrigoZepeda</a>
 
 
 
@@ -198,6 +200,7 @@ All contributions to this project are gratefully acknowledged using the [`allcon
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+
 
 
 

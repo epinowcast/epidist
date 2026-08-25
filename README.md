@@ -45,7 +45,9 @@ order:
 ## Installation
 
 <details>
+
 <summary>
+
 Installing the package
 </summary>
 
@@ -87,8 +89,11 @@ if needed, e.g. if you want to try out a specific unreleased feature,
 but not the absolute latest developmental version.*
 
 </details>
+
 <details>
+
 <summary>
+
 Installing CmdStan (optional)
 </summary>
 
@@ -124,7 +129,9 @@ need to install a past version of CmdStan, which you can do with the
 ## Resources
 
 <details>
+
 <summary>
+
 Organisation Website
 </summary>
 
@@ -134,8 +141,11 @@ and [seminar schedule](https://www.epinowcast.org/seminars.html) for
 both upcoming and past recordings.
 
 </details>
+
 <details>
+
 <summary>
+
 Community Forum
 </summary>
 
@@ -184,7 +194,9 @@ If you use `epidist` in your work, please consider citing it using
 `citation("epidist")`.
 
 <details>
+
 <summary>
+
 Package citation information
 </summary>
 
@@ -228,7 +240,9 @@ using `citation("primarycensored")`.
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+
 <!-- prettier-ignore-start -->
+
 <!-- markdownlint-disable -->
 
 All contributions to this project are gratefully acknowledged using the
@@ -252,7 +266,8 @@ specification. Contributions of any kind are welcome!
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic">kgostic</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor">TimTaylor</a>,
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam">jamesmbaazam</a>,
-<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajonathonmellor">jonathonmellor</a>
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajonathonmellor">jonathonmellor</a>,
+<a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ARodrigoZepeda">RodrigoZepeda</a>
 
 ### Issue Contributors
 
@@ -264,5 +279,7 @@ specification. Contributions of any kind are welcome!
 <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Amark-burdon">mark-burdon</a>
 
 <!-- markdownlint-enable -->
+
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
