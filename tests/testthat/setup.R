@@ -150,6 +150,37 @@ sim_obs_sex <- as_epidist_linelist_data(
 
 agg_sim_obs_sex <- as_epidist_aggregate_data(sim_obs_sex, by = "sex")
 
+# Weekly censored data. With windows this wide the primary and secondary
+# windows overlap for a large share of observations, which is the case the
+# latent model Jacobian adjustment applies to. See #606.
+set.seed(101)
+
+obs_time_weekly <- 35
+
+sim_obs_weekly <- simulate_gillespie(seed = 101) |>
+  simulate_secondary(
+    dist = rlnorm,
+    meanlog = meanlog,
+    sdlog = sdlog
+  ) |>
+  dplyr::mutate(
+    ptime_lwr = 7 * floor(.data$ptime / 7),
+    ptime_upr = .data$ptime_lwr + 7,
+    stime_lwr = 7 * floor(.data$stime / 7),
+    stime_upr = .data$stime_lwr + 7,
+    obs_time = obs_time_weekly
+  ) |>
+  dplyr::filter(.data$stime_upr <= .data$obs_time) |>
+  dplyr::slice_sample(n = sample_size, replace = FALSE)
+
+sim_obs_weekly <- as_epidist_linelist_data(
+  sim_obs_weekly$ptime_lwr,
+  sim_obs_weekly$ptime_upr,
+  sim_obs_weekly$stime_lwr,
+  sim_obs_weekly$stime_upr,
+  sim_obs_weekly$obs_time
+)
+
 prep_obs <- as_epidist_latent_model(sim_obs)
 prep_naive_obs <- as_epidist_naive_model(sim_obs)
 prep_marginal_obs <- as_epidist_marginal_model(sim_obs)
@@ -160,6 +191,11 @@ prep_marginal_obs <- as_epidist_marginal_model(sim_obs)
 prep_marginal_obs_gamma <- as_epidist_marginal_model(sim_obs_gamma)
 prep_marginal_obs_sex <- as_epidist_marginal_model(sim_obs_sex)
 prep_marginal_obs_weibull <- as_epidist_marginal_model(sim_obs_weibull)
+
+prep_obs_weekly <- as_epidist_latent_model(sim_obs_weekly)
+prep_marginal_obs_weekly <- suppressMessages(
+  as_epidist_marginal_model(sim_obs_weekly)
+)
 
 if (not_on_cran()) {
   set.seed(1)
@@ -263,6 +299,34 @@ if (not_on_cran()) {
     chains = 2,
     backend = "cmdstanr"
   )
+
+  cli::cli_alert_info(
+    "Compiling the latent model with cmdstanr and weekly censoring"
+  )
+  fit_weekly <- epidist(
+    data = prep_obs_weekly,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  )
+
+  cli::cli_alert_info(
+    "Compiling the marginal model with cmdstanr and weekly censoring"
+  )
+  fit_marginal_weekly <- suppressMessages(epidist(
+    data = prep_marginal_obs_weekly,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  ))
 
   cli::cli_alert_info(
     "Compiling the marginal model with cmdstanr and a sex stratification"

@@ -2,6 +2,9 @@
 
 ## Bug fixes
 
+- Added a missing Jacobian adjustment to the latent model for observations whose primary and secondary censoring windows overlap.
+Without it the latent model did not target the same likelihood as the marginal model, biasing estimates for those observations, which under daily censoring are the zero-delay cases.
+See #606.
 - Declared `reformulas` in `Suggests` and skipped the `marginaleffects` integration test when it is absent.
 `insight` needs `reformulas` to read the formula of a `brmsfit`, but only suggests it, so the test failed on a clean library.
 See #601.
@@ -12,7 +15,6 @@ See #601.
 The tagged v0.4.3 lockfile pins `digest` 0.6.36, which calls `Calloc` and `Free`.
 Those were removed from the R API in R 4.5, so the hook environment failed to build and the `pre-commit` job failed on every pull request.
 See #578.
-
 
 # epidist 0.4.1
 

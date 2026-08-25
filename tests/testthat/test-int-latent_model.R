@@ -178,3 +178,21 @@ test_that("epidist.epidist_latent_model recovers a sex effect", { # nolint: line
   expect_s3_class(fit_sex, "epidist_fit")
   expect_convergence(fit_sex)
 })
+
+test_that("epidist.epidist_latent_model agrees with the marginal model when the censoring windows overlap", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  # Regression test for the missing Jacobian adjustment. See #606.
+  skip_on_cran()
+  set.seed(1)
+  expect_gt(mean(prep_obs_weekly$woverlap > 0), 0.2)
+  pred_latent <- predict_delay_parameters(fit_weekly)
+  pred_marginal <- predict_delay_parameters(fit_marginal_weekly)
+  expect_equal(
+    mean(pred_latent$mu), mean(pred_marginal$mu),
+    tolerance = 0.05
+  )
+  expect_equal(
+    mean(pred_latent$sigma), mean(pred_marginal$sigma),
+    tolerance = 0.1
+  )
+})

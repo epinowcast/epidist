@@ -178,6 +178,14 @@ y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
 $$
 As before, $g_P(z \, | \, p_{L, i}, p_{R, i})$ represents the conditional distribution of the primary event given lower $P_L$ and upper $P_R$ bounds; this is equivalent to modelling the incidence in primary events.
 
+In `epidist` the latent primary event time is sampled as an offset from $p_{L, i}$ using a unit scale parameter.
+Where the primary and secondary censoring windows overlap the primary event must also occur before the sampled secondary event, so the upper bound of that offset is itself a parameter.
+Writing the offset as $x_i = s_i u_i$, with $s_i$ the sampled secondary event offset and $u_i \sim \text{Unif}(0, 1)$, the change of variables has Jacobian determinant $s_i$.
+The term $\log s_i$ is therefore added to the log density of these observations, using the primary event density unnormalised.
+Without it the implied primary event density is proportional to $1 / s_i$ rather than flat across the window, and the latent model no longer matches the double censored likelihood.
+This correction was identified in @brand2026scalable.
+It only affects observations with overlapping windows, which for daily censoring means delays observed as zero.
+
 # The marginal model
 
 The marginal model corrects for the same biases as the latent model but integrates out the exact event times numerically, or analytically where closed-form solutions exist, rather than sampling latent variables.
