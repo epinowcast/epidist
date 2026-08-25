@@ -92,6 +92,12 @@ test_that(
       as_epidist_marginal_model(sim_obs, delay_min = TRUE),
       "delay_min"
     )
+    expect_error(
+      as_epidist_marginal_model(sim_obs, delay_min = NA_real_)
+    )
+    expect_error(
+      as_epidist_marginal_model(sim_obs, delay_min = c(1, 2))
+    )
   }
 )
 

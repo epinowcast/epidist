@@ -286,7 +286,7 @@ assert_epidist.epidist_linelist_data <- function(data, ...) {
   assert_true(all(data$stime_upr - data$stime_lwr > 0))
   assert_numeric(data$obs_time, lower = 0)
   if ("delay_min" %in% names(data)) {
-    assert_numeric(data$delay_min, lower = 0)
+    assert_numeric(data$delay_min, lower = 0, any.missing = FALSE)
   }
 
   return(invisible(NULL))

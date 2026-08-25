@@ -183,3 +183,53 @@ test_that( # nolint: line_length_linter.
     expect_true(all(is.finite(log_lik)))
   }
 )
+
+test_that(
+  "epidist_gen_log_lik passes delay_min as L and relative_obs_time as D",
+  {
+    skip_on_cran()
+
+    # vreal1 (D) and vreal5 (L) are given distinct values so that a swap
+    # between them changes the answer.
+    prep <- brms::prepare_predictions(fit_marginal)
+    prep$ndraws <- 5
+    i <- 1
+    prep$data$Y[i] <- 5
+    prep$data$vreal1[i] <- 12
+    prep$data$vreal2[i] <- 1
+    prep$data$vreal3[i] <- 1
+    prep$data$vreal4[i] <- 6
+    prep$data$vreal5[i] <- 2
+    prep$data$weights <- NULL
+
+    log_lik_fn <- epidist_gen_log_lik(lognormal())
+    log_lik <- log_lik_fn(i = i, prep)
+
+    meanlog <- brms::get_dpar(prep, "mu", i = i)
+    sdlog <- brms::get_dpar(prep, "sigma", i = i)
+    expected <- vapply(
+      seq_len(prep$ndraws),
+      function(draw) {
+        return(primarycensored::dpcens(
+          x = 5,
+          pdist = stats::plnorm,
+          pwindow = 1,
+          swindow = 1,
+          L = 2,
+          D = 12,
+          dprimary = stats::dunif,
+          log = TRUE,
+          meanlog = meanlog[draw],
+          sdlog = sdlog[draw]
+        ))
+      },
+      numeric(1)
+    )
+    expect_equal(log_lik, expected, tolerance = 1e-8)
+
+    # The same call with no left truncation must give a different answer,
+    # otherwise this test would pass even if delay_min were ignored.
+    prep$data$vreal5[i] <- 0
+    expect_false(isTRUE(all.equal(log_lik_fn(i = i, prep), expected)))
+  }
+)

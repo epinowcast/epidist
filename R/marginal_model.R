@@ -190,7 +190,7 @@ assert_epidist.epidist_marginal_model <- function(data, ...) {
   assert_numeric(data$swindow, lower = 0)
   assert_integerish(data$delay_lwr)
   assert_integerish(data$delay_upr)
-  assert_numeric(data$delay_min, lower = 0)
+  assert_numeric(data$delay_min, lower = 0, any.missing = FALSE)
   assert_numeric(data$relative_obs_time)
   if (!all(data$delay_lwr >= data$delay_min)) {
     cli::cli_abort(

@@ -416,7 +416,7 @@
     assert_names(names(data), must.include = delay_min)
     data$delay_min <- data[[delay_min]]
   } else if (is.numeric(delay_min)) {
-    assert_numeric(delay_min, lower = 0, len = 1)
+    assert_numeric(delay_min, lower = 0, len = 1, any.missing = FALSE)
     data$delay_min <- delay_min
   } else {
     cli::cli_abort(

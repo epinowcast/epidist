@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-Some delays are only ever observed above a minimum value.
+Some delays are only ever recorded above a minimum value.
 Generation intervals are often defined to exclude same day transmission.
 Case definitions sometimes require a minimum time between two events before a pair is recorded.
 In both settings the observed delays are a left truncated sample from the delay distribution of interest.
@@ -37,6 +37,9 @@ In both settings the observed delays are a left truncated sample from the delay 
 The `delay_min` argument of `as_epidist_marginal_model()` handles this.
 It sets the `L` argument of the [`primarycensored`](https://primarycensored.epinowcast.org/) likelihood, which renormalises the delay distribution over the interval that could have been observed.
 Ignoring left truncation biases estimates because the model has to explain the missing short delays by shifting the whole distribution.
+
+`delay_min` truncates on the same scale as the response, that is the observed delay between the primary window lower bound and the secondary event.
+Data should therefore be excluded on the observed delay rather than on the underlying continuous delay.
 
 # Setup
 
@@ -50,8 +53,8 @@ library(tidybayes)
 
 # Simulate left truncated data
 
-We simulate an outbreak and a lognormal delay from each primary event, then keep only the delays of at least `delay_min` days.
-The parameters are chosen so that a substantial share of the distribution falls below the truncation point.
+We simulate an outbreak and a lognormal delay from each primary event.
+The parameters are chosen so that a large share of the distribution falls below the truncation point.
 
 ```{r simulate}
 set.seed(101)
@@ -68,24 +71,24 @@ obs <- simulate_gillespie(r = 0.2, seed = 101) |>
   )
 ```
 
-The share of the true distribution below the truncation point is:
+Roughly this share of the delay distribution lies below the truncation point.
 
 ```{r truncated-share}
 plnorm(delay_min, true_meanlog, true_sdlog)
 ```
 
-We now apply the truncation and add daily censoring windows.
+We add daily censoring windows and then drop the pairs whose observed delay is below `delay_min`.
 
 ```{r truncate}
 obs_trunc <- obs |>
-  filter(delay >= delay_min) |>
   mutate(
     ptime_lwr = floor(ptime),
     ptime_upr = ptime_lwr + 1,
     stime_lwr = floor(stime),
-    stime_upr = stime_lwr + 1,
-    obs_time = max(stime_upr)
+    stime_upr = stime_lwr + 1
   ) |>
+  filter(stime_lwr - ptime_lwr >= delay_min) |>
+  mutate(obs_time = max(stime_upr)) |>
   slice_sample(n = 500)
 ```
 
@@ -159,7 +162,8 @@ param_draws <- list(
 
 true_params <- data.frame(
   parameter = c("mu", "sigma"),
-  value = c(true_meanlog, true_sdlog)
+  value = c(true_meanlog, true_sdlog),
+  stringsAsFactors = FALSE
 )
 ```
 

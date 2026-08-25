@@ -9,16 +9,16 @@ test_that("epidist_stancode.default returns NULL", { # nolint: line_length_linte
 
 # Split a Stan argument list into bare argument names
 .stan_arg_names <- function(x) {
-  args <- trimws(strsplit(x, ",")[[1]])
-  return(sub(".*[[:space:]]", "", args))
+  parts <- trimws(strsplit(x, ",", fixed = TRUE)[[1]])
+  return(sub(".*[[:space:]]", "", parts))
 }
 
 # Extract the argument list of a call or declaration by name
 .stan_call_args <- function(source, pattern) {
   source <- .flatten_stan(source)
-  call <- regmatches(source, regexpr(pattern, source))
-  expect_length(call, 1)
-  return(.stan_arg_names(sub(pattern, "\\1", call)))
+  matched <- regmatches(source, regexpr(pattern, source))
+  expect_length(matched, 1)
+  return(.stan_arg_names(sub(pattern, "\\1", matched)))
 }
 
 test_that("the marginal model passes delay_min as L and relative_obs_t as D to primarycensored_lpmf", { # nolint: line_length_linter.
