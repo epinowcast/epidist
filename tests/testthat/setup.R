@@ -161,7 +161,10 @@ prep_marginal_obs_gamma <- as_epidist_marginal_model(sim_obs_gamma)
 prep_marginal_obs_sex <- as_epidist_marginal_model(sim_obs_sex)
 prep_marginal_obs_weibull <- as_epidist_marginal_model(sim_obs_weibull)
 
-if (not_on_cran()) {
+# The shared fits below use the cmdstanr backend, so they are only built
+# when cmdstanr and CmdStan are both available. Tests that use them call
+# `skip_if_no_cmdstanr()`.
+if (not_on_cran() && has_cmdstanr()) {
   set.seed(1)
   cli::cli_alert_info("Compiling the latent model with cmdstanr")
   fit <- epidist(

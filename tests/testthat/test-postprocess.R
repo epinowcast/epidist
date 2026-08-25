@@ -3,6 +3,7 @@ test_that(
   "predict_delay_parameters works with NULL newdata and the latent and marginal lognormal model", # nolint: line_length_linter.
   {
     skip_on_cran()
+    skip_if_no_cmdstanr()
 
     # Helper function to test predictions
     test_predictions <- function(fit, expected_rows = nrow(prep_obs)) {
@@ -28,6 +29,7 @@ test_that(
   "predict_delay_parameters works with the naive lognormal model",
   {
     skip_on_cran()
+    skip_if_no_cmdstanr()
 
     # Test naive model predictions
     set.seed(1)
@@ -44,6 +46,7 @@ test_that(
 
 test_that("predict_delay_parameters accepts newdata arguments and prediction by sex recovers underlying parameters", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
 
   # Helper function to test sex predictions
   test_sex_predictions <- function(fit, prep = prep_obs_sex) {

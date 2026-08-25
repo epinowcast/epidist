@@ -61,7 +61,7 @@ test_that(".add_dpar_info works as expected for the lognormal and gamma families
   lognormal_extra <- .add_dpar_info(lognormal())
   expect_identical(lognormal_extra$other_links, "log")
   expect_identical(lognormal_extra$other_bounds, list(list(lb = "0", ub = "")))
-  gamma_extra <- .add_dpar_info(brms:::validate_family(Gamma())) # nolint
+  gamma_extra <- .add_dpar_info(.validate_family(Gamma()))
   expect_null(gamma_extra$other_links)
   expect_identical(gamma_extra$other_bounds, list(list(lb = "0", ub = "")))
 })
@@ -69,13 +69,13 @@ test_that(".add_dpar_info works as expected for the lognormal and gamma families
 test_that(".make_intercepts_explicit creates a formula which is the same as if it had been explicitly created", { # nolint: line_length_linter.
   prep_obs <- as_epidist_latent_model(sim_obs)
   epidist_family <- epidist_family(prep_obs, family = lognormal())
-  formula <- brms:::validate_formula( # nolint
+  formula <- .validate_formula(
     formula = bf(mu ~ 1),
     data = prep_obs,
     family = epidist_family
   )
   formula <- .make_intercepts_explicit(formula)
-  formula_explicit <- brms:::validate_formula( # nolint
+  formula_explicit <- .validate_formula(
     formula = bf(mu ~ 1, sigma ~ 1),
     data = prep_obs,
     family = epidist_family
@@ -89,7 +89,7 @@ test_that(".make_intercepts_explicit creates a formula which is the same as if i
 test_that(".make_intercepts_explicit does not add an intercept if the distributional parameter is set to be fixed", { # nolint: line_length_linter.
   prep_obs <- as_epidist_latent_model(sim_obs)
   epidist_family <- epidist_family(prep_obs, family = lognormal())
-  formula <- brms:::validate_formula( # nolint
+  formula <- .validate_formula(
     formula = bf(mu ~ 1, sigma = 1),
     data = prep_obs,
     family = epidist_family

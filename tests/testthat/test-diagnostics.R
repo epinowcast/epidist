@@ -1,6 +1,7 @@
 # fmt: skip file
 test_that("epidist_diagnostics", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   diag <- epidist_diagnostics(fit)
   expected_names <- c(
@@ -23,6 +24,7 @@ test_that("epidist_diagnostics", { # nolint: line_length_linter.
 
 test_that("epidist_diagnostics gives the same results for cmdstanr and rstan", {
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   diag_cmdstanr <- epidist_diagnostics(fit)
   diag_rstan <- epidist_diagnostics(fit_rstan)
@@ -41,6 +43,7 @@ test_that("epidist_diagnostics gives the same results for cmdstanr and rstan", {
 
 test_that("epidist_diagnostics gives an error when passed model fit using the Laplace algorithm", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   prep_obs <- as_epidist_latent_model(sim_obs)
   fit_laplace <- epidist(
