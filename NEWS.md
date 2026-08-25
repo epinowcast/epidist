@@ -1,4 +1,4 @@
-# epidist 0.4.0.1000
+# epidist 0.4.1
 
 ## Bug fixes
 
