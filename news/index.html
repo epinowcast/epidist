@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,15 +52,36 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.4.1.1000" id="epidist-0411000">epidist 0.4.1.1000<a class="anchor" aria-label="anchor" href="#epidist-0411000"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.5.0" id="epidist-050">epidist 0.5.0<a class="anchor" aria-label="anchor" href="#epidist-050"></a></h2>
 <div class="section level3">
-<h3 id="bug-fixes-0-4-1-1000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-4-1-1000"></a></h3>
-<ul><li>Declared <code>reformulas</code> in <code>Suggests</code> and skipped the <code>marginaleffects</code> integration test when it is absent. <code>insight</code> needs <code>reformulas</code> to read the formula of a <code>brmsfit</code>, but only suggests it, so the test failed on a clean library. See <a href="https://github.com/epinowcast/epidist/issues/601" class="external-link">#601</a>.</li>
+<h3 id="package-0-5-0">Package<a class="anchor" aria-label="anchor" href="#package-0-5-0"></a></h3>
+<ul><li>Removed the calls to unexported <code>brms</code> functions that <code>R CMD check --as-cran</code> flags. <code>R/brms-compat.R</code> now holds small internal helpers reproducing the narrow behaviour <code>epidist</code> relied on from <code>brms:::validate_family()</code>, <code>brms:::validate_formula()</code>, <code>brms:::validate_data()</code>, <code>brms:::dpar_bounds()</code> and <code>brms:::log_lik_weight()</code>. The helpers are written against the public <code>brms</code> interface rather than copied from <code>brms</code>. <code>tests/testthat/test-brms-compat.R</code> checks each one against the <code>brms</code> internal it replaces. Those checks are skipped on CRAN, since they reach into <code>brms</code> internals. Credit for the original behaviour goes to the <code>brms</code> authors. See <a href="https://github.com/epinowcast/epidist/issues/420" class="external-link">#420</a> and paul-buerkner/brms#1676.</li>
+<li>Removed the <code>Remotes</code> field from <code>DESCRIPTION</code> so dependencies resolve from CRAN. <code>cmdstanr</code> is now found through <code>Additional_repositories</code> and the development version of <code>brms</code> is no longer used. See <a href="https://github.com/epinowcast/epidist/issues/592" class="external-link">#592</a>.</li>
+<li>Turned off evaluation of the approximate inference vignette. It uses <code>pathfinder</code>, which needs an unreleased <code>brms</code> fix. This release resolves <code>brms</code> from CRAN. See <a href="https://github.com/epinowcast/epidist/issues/579" class="external-link">#579</a>.</li>
+<li>Added a <code>brms (&gt;= 2.23.0)</code> floor, the version the compatibility helpers were checked against.</li>
+<li>Pointed the CI workflows at the Stan r-universe with <code>extra-repositories</code>. Dropping <code>Remotes</code> means <code>pak</code> can no longer resolve <code>cmdstanr</code>. <code>pak</code> does not read <code>Additional_repositories</code>.</li>
+<li>Raised the minimum R version to 4.1.0. The package uses the native pipe and the lambda shorthand. Both need R 4.1.0.</li>
+<li>Added the copyright holder role to Sam Abbott in <code>DESCRIPTION</code>.</li>
+<li>Guarded the shared test fits and the tests that use them so the suite runs without <code>cmdstanr</code>.</li>
+<li>Wrapped the <code><a href="../reference/epidist.html">epidist()</a></code> and <code><a href="../reference/epidist_diagnostics.html">epidist_diagnostics()</a></code> examples in <code>\donttest{}</code>. Both fit a model. They ran for 118 and 110 seconds against CRAN’s 5 second guidance.</li>
+<li>Anchored the <code>brms</code> links in the documentation so <code>R CMD check</code> no longer reports Rd cross-references with missing package anchors.</li>
+<li>Dropped a stale <code>fix</code> entry from the declared global variables.</li>
+<li>Updated the <code>brms</code> documentation URL, which had moved.</li>
+<li>Added <code>cran-comments.md</code>.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="ci-0-4-1-1000">CI<a class="anchor" aria-label="anchor" href="#ci-0-4-1-1000"></a></h3>
+<h3 id="bug-fixes-0-5-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-5-0"></a></h3>
+<ul><li>Added a missing Jacobian adjustment to the latent model for observations whose primary and secondary censoring windows overlap. Without it the latent model did not target the same likelihood as the marginal model. Under daily censoring the affected observations are the zero-delay cases. See <a href="https://github.com/epinowcast/epidist/issues/606" class="external-link">#606</a>.</li>
+<li>Declared <code>reformulas</code> in <code>Suggests</code> and skipped the <code>marginaleffects</code> integration test when it is absent. <code>insight</code> needs <code>reformulas</code> to read the formula of a <code>brmsfit</code>, but only suggests it, so the test failed on a clean library. See <a href="https://github.com/epinowcast/epidist/issues/601" class="external-link">#601</a>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="ci-0-5-0">CI<a class="anchor" aria-label="anchor" href="#ci-0-5-0"></a></h3>
 <ul><li>Passed the coverage report to <code>codecov/codecov-action</code> through <code>files</code> rather than <code>file</code>. <code>file</code> is not an input the action accepts, so with <code>disable_search</code> set it found no report and the <code>test-coverage</code> job failed on <code>main</code>.</li>
 <li>Pinned the <code>precommit</code> hooks to a revision whose lockfile uses <code>digest</code> 0.6.39. The tagged v0.4.3 lockfile pins <code>digest</code> 0.6.36, which calls <code>Calloc</code> and <code>Free</code>. Those were removed from the R API in R 4.5, so the hook environment failed to build and the <code>pre-commit</code> job failed on every pull request. See <a href="https://github.com/epinowcast/epidist/issues/578" class="external-link">#578</a>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-5-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-5-0"></a></h3>
+<ul><li>Documented installing from CRAN in the README, with <code>r-universe</code> as the route to the latest version.</li>
 </ul></div>
 </div>
     <div class="section level2">

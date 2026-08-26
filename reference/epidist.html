@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,7 +90,8 @@ parameters.</p></dd>
 be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
-families see <code>brmsfamily()</code>. Commonly used, such as <code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal()</a></code>, are also
+families see <code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">brms::brmsfamily()</a></code>. Commonly used, such as
+<code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">brms::lognormal()</a></code>, are also
 reexported as part of <code>epidist</code>.</p></dd>
 
 
@@ -124,7 +125,8 @@ These two later options may be useful for model debugging and extensions.</p></d
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="as_epidist_linelist_data.html">as_epidist_linelist_data</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    pdate_lwr <span class="op">=</span> <span class="st">"date_of_symptom_onset"</span>,</span></span>
 <span class="r-in"><span>    sdate_lwr <span class="op">=</span> <span class="st">"date_of_sample_tested"</span></span></span>
@@ -159,12 +161,13 @@ These two later options may be useful for model debugging and extensions.</p></d
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Regression Coefficients:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept           1.62      0.01     1.61     1.63 1.00     2206     1532</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     2012     1409</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept           1.62      0.01     1.61     1.63 1.00     1846     1344</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1689     1026</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> and Tail_ESS are effective sample size measures, and Rhat is the potential</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> scale reduction factor on split chains (at convergence, Rhat = 1).</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -38,8 +38,10 @@ epidist(
   used in the model. Every family function has a link argument allowing
   users to specify the link function to be applied on the response
   variable. If not specified, default links are used. For details of all
-  supported families see `brmsfamily()`. Commonly used, such as
-  [`lognormal()`](https://paulbuerkner.com/brms/reference/brmsfamily.html),
+  supported families see
+  [`brms::brmsfamily()`](https://paulbuerkner.com/brms/reference/brmsfamily.html).
+  Commonly used, such as
+  [`brms::lognormal()`](https://paulbuerkner.com/brms/reference/brmsfamily.html),
   are also reexported as part of `epidist`.
 
 - prior:
@@ -79,6 +81,7 @@ epidist(
 ## Examples
 
 ``` r
+# \donttest{
 fit <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",
@@ -114,10 +117,11 @@ summary(fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.62      0.01     1.61     1.63 1.00     2206     1532
-#> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     2012     1409
+#> Intercept           1.62      0.01     1.61     1.63 1.00     1846     1344
+#> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1689     1026
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
 #> scale reduction factor on split chains (at convergence, Rhat = 1).
+# }
 ```

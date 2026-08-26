@@ -44,6 +44,7 @@ other possible algorithms) then diagnostics are yet to be implemented.
 ## Examples
 
 ``` r
+# \donttest{
 fit <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",
@@ -71,7 +72,8 @@ epidist_diagnostics(fit)
 #> # A tibble: 1 × 8
 #>    time samples max_rhat divergent_transitions per_divergent_transitions
 #>   <dbl>   <dbl>    <dbl>                 <dbl>                     <dbl>
-#> 1  10.5    2000     1.00                     0                         0
+#> 1  11.5    2000     1.00                     0                         0
 #> # ℹ 3 more variables: max_treedepth <dbl>, no_at_max_treedepth <int>,
 #> #   per_at_max_treedepth <dbl>
+# }
 ```

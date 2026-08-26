@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -236,6 +236,45 @@ y_i &amp;\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
 \end{aligned}
 \]</span>
 As before, <span class="math inline">\(g_P(z \, | \, p_{L, i}, p_{R, i})\)</span> represents the conditional distribution of the primary event given lower <span class="math inline">\(P_L\)</span> and upper <span class="math inline">\(P_R\)</span> bounds; this is equivalent to modelling the incidence in primary events.</p>
+<div class="section level3" number="3.1">
+<h3 id="latent-bound">
+<span class="header-section-number">3.1</span> Bounding the latent primary event time<a class="anchor" aria-label="anchor" href="#latent-bound"></a>
+</h3>
+<p><code>epidist</code> samples both latent offsets on the unit scale.
+Write <span class="math inline">\(w_{P, i} = p_{R, i} - p_{L, i}\)</span> and <span class="math inline">\(w_{S, i} = s_{R, i} - s_{L, i}\)</span> for the two censoring window widths.
+Then
+<span class="math display">\[
+\tilde{p}_i \sim \text{Unif}(0, 1), \qquad
+\tilde{s}_i \sim \text{Unif}(0, 1), \qquad
+s_i = w_{S, i}\, \tilde{s}_i,
+\]</span>
+and the primary event offset is ordinarily
+<span class="math display">\[
+p_i = w_{P, i}\, \tilde{p}_i .
+\]</span></p>
+<p>When the two censoring windows overlap the delay must still be non-negative.
+The primary event therefore has to precede the sampled secondary event.
+The offset is then bounded by the sampled secondary offset rather than by the window width.
+<span class="math display">\[
+p_i = s_i\, \tilde{p}_i .
+\]</span></p>
+<p>That upper bound is itself a parameter.
+The map <span class="math inline">\(\tilde{p}_i \mapsto p_i\)</span> therefore has Jacobian determinant
+<span class="math display">\[
+\left| \frac{\partial p_i}{\partial \tilde{p}_i} \right| = s_i ,
+\]</span>
+Stan does not add this term for a transformation written this way.
+See the <a href="https://mc-stan.org/docs/stan-users-guide/reparameterization.html#changes-of-variables" class="external-link">Stan user’s guide on changes of variables</a>.
+The log density of these observations needs it explicitly.
+<span class="math display">\[
+\log \mathcal{L}_i \;\longmapsto\; \log \mathcal{L}_i + \log s_i .
+\]</span>
+The non-overlapping case needs no such term because <span class="math inline">\(w_{P, i}\)</span> is data, so its Jacobian is a constant that cancels.
+The primary event density is used unnormalised here.
+A constant normalising it over <span class="math inline">\([0, s_i]\)</span> would itself depend on <span class="math inline">\(s_i\)</span>.</p>
+<p>The latent model formulation follows <span class="citation">Ward et al. (<a href="#ref-ward2022transmission">2022</a>)</span>.
+The need for this adjustment was identified in <span class="citation">Funk and Abbott (<a href="#ref-bdbvlinelist">2026</a>)</span> and derived in <span class="citation">Brand et al. (<a href="#ref-brand2026scalable">2026</a>)</span>.</p>
+</div>
 </div>
 <div class="section level2" number="4">
 <h2 id="the-marginal-model">
@@ -264,6 +303,12 @@ Together these make the marginal model substantially more efficient than the lat
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-primarycensored" class="csl-entry">
 Abbott, Sam, Sam Brand, James Mba Azam, Carl Pearson, Sebastian Funk, and Kelly Charniga. 2025. <em>Primarycensored: Primary Event Censored Distributions</em>. <a href="https://doi.org/10.5281/zenodo.13632839" class="external-link">https://doi.org/10.5281/zenodo.13632839</a>.
+</div>
+<div id="ref-brand2026scalable" class="csl-entry">
+Brand, Samuel P. C., Barbora Nemcova, Carl A. B. Pearson, et al. 2026. <span>“A Scalable Marginalisation Approach for Double Interval Censored Epidemiological Delays.”</span> Unpublished manuscript.
+</div>
+<div id="ref-bdbvlinelist" class="csl-entry">
+Funk, Sebastian, and Sam Abbott. 2026. <em>Bayesian Re-Analysis of the 2012 Isiro Bundibugyo Ebola Virus Line List</em>. GitHub repository. <a href="https://github.com/epiforecasts/bdbv-linelist-analysis" class="external-link">https://github.com/epiforecasts/bdbv-linelist-analysis</a>.
 </div>
 <div id="ref-park2024estimating" class="csl-entry">
 Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, et al. 2024. <span>“Estimating Epidemiological Delay Distributions for Infectious Diseases.”</span> <em>medRxiv</em>, ahead of print. <a href="https://doi.org/10.1101/2024.01.12.24301247" class="external-link">https://doi.org/10.1101/2024.01.12.24301247</a>.

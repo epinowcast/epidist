@@ -615,9 +615,9 @@ naive_data
 #> #   delay <dbl>, n <dbl>
 ```
 
-and now we fit the model using the the No-U-Turn Sampler (NUTS) Markov
-chain Monte Carlo (MCMC) algorithm via the
-[`brms`](https://paul-buerkner.github.io/brms/) R package ([Bürkner
+and now we fit the model using the No-U-Turn Sampler (NUTS) Markov chain
+Monte Carlo (MCMC) algorithm via the
+[`brms`](https://paulbuerkner.com/brms/) R package ([Bürkner
 2017](#ref-brms)).
 
 ``` r
@@ -683,8 +683,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3394     2616
-#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3497     2716
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3644     2693
+#> sigma_Intercept    -0.75      0.05    -0.85    -0.66 1.00     3151     2406
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -795,8 +795,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.65 1.00     2036     2186
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     1881     2171
+#> Intercept           1.55      0.05     1.46     1.65 1.00     2170     1616
+#> sigma_Intercept    -0.69      0.07    -0.83    -0.56 1.00     1981     1981
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -827,12 +827,12 @@ predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
 
 head(predicted_parameters)
 #>      model draw index       mu     sigma     mean       sd
-#> 1 marginal    1     1 1.560511 0.5184822 5.446228 3.024616
-#> 2 marginal    2     1 1.567522 0.4994651 5.431716 2.891281
-#> 3 marginal    3     1 1.536912 0.5000826 5.269596 2.808905
-#> 4 marginal    4     1 1.547448 0.4999197 5.324973 2.837378
-#> 5 marginal    5     1 1.555402 0.4837829 5.325063 2.734525
-#> 6 marginal    6     1 1.522994 0.5031181 5.204677 2.793355
+#> 1 marginal    1     1 1.622032 0.5169970 5.787351 3.203569
+#> 2 marginal    2     1 1.465034 0.5133336 4.937160 2.710910
+#> 3 marginal    3     1 1.464410 0.5005607 4.902233 2.615910
+#> 4 marginal    4     1 1.589620 0.4574656 5.442605 2.625930
+#> 5 marginal    5     1 1.496693 0.4937244 5.045895 2.651102
+#> 6 marginal    6     1 1.574086 0.4834479 5.424616 2.783484
 ```
 
 Note that by default

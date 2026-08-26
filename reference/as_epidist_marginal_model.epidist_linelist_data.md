@@ -34,15 +34,28 @@ as_epidist_marginal_model(data, obs_time_threshold = 2, weight = NULL, ...)
 
 - weight:
 
-  A column name to use for weighting the data in the likelihood. Default
-  is NULL. Internally this is used to define the 'n' column of the
-  returned object.
+  A column name containing counts of identical linelist items. When
+  specified, the user is declaring that rows with the same values
+  represent the same observation occurring multiple times. This allows
+  for efficient data representation by storing unique patterns with
+  their counts rather than repeating identical rows. The marginal model
+  will further aggregate these counts based on the formula
+  specification. Default is NULL, which assigns a count of 1 to each
+  row. Internally this is used to define the 'n' column of the returned
+  object.
 
 - ...:
 
   Not used in this method.
 
 ## Details
+
+The marginal model performs internal aggregation to optimize
+computational efficiency while preserving all statistical information.
+If your data already contains repeated observations with identical
+characteristics, you can use the `weight` parameter to provide counts of
+these duplicates. This allows for more efficient data representation
+without any loss of information.
 
 When a formula is specified in
 [`epidist()`](https://epidist.epinowcast.org/reference/epidist.md), the

@@ -23,7 +23,7 @@ Useful links:
 ## Author
 
 **Maintainer**: Sam Abbott <contact@samabbott.co.uk>
-([ORCID](https://orcid.org/0000-0001-8057-8037))
+([ORCID](https://orcid.org/0000-0001-8057-8037)) \[copyright holder\]
 
 Authors:
 

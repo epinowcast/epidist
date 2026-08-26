@@ -29,7 +29,7 @@ number of unique strata approaches the number of observations."><meta property="
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,9 +103,14 @@ Default is 2.</p></dd>
 
 
 <dt id="arg-weight">weight<a class="anchor" aria-label="anchor" href="#arg-weight"></a></dt>
-<dd><p>A column name to use for weighting the data in the
-likelihood. Default is NULL. Internally this is used to define the 'n'
-column of the returned object.</p></dd>
+<dd><p>A column name containing counts of identical linelist items.
+When specified, the user is declaring that rows with the same values
+represent the same observation occurring multiple times. This allows for
+efficient data representation by storing unique patterns with their counts
+rather than repeating identical rows. The marginal model will further
+aggregate these counts based on the formula specification. Default is NULL,
+which assigns a count of 1 to each row. Internally this is used to define
+the 'n' column of the returned object.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -114,7 +119,12 @@ column of the returned object.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>When a formula is specified in <code><a href="epidist.html">epidist()</a></code>, the data will be transformed
+    <p>The marginal model performs internal aggregation to optimize computational
+efficiency while preserving all statistical information. If your data already
+contains repeated observations with identical characteristics, you can use
+the <code>weight</code> parameter to provide counts of these duplicates. This allows for
+more efficient data representation without any loss of information.</p>
+<p>When a formula is specified in <code><a href="epidist.html">epidist()</a></code>, the data will be transformed
 using <code><a href="epidist_transform_data_model.epidist_marginal_model.html">epidist_transform_data_model.epidist_marginal_model()</a></code> to prepare it
 for model fitting. This transformation summarises the data by counting unique
 combinations of delays, observation times, censoring windows and any

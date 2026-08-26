@@ -17,9 +17,9 @@ column or defaulting to 1.
 
 - weight:
 
-  A column name to use for weighting the data in the likelihood. Default
-  is NULL. Internally this is used to define the 'n' column of the
-  returned object.
+  A column name to use for weighting. If NULL, weights default to 1.
+  Internally this is used to define the 'n' column of the returned
+  object.
 
 ## Value
 

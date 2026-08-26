@@ -118,7 +118,6 @@ we have everything we need as follows:
 ``` r
 
 cmdstanr::cmdstan_version()
-#> [1] "2.39.0"
 ```
 
 We can simulate data to use for fitting models. The example data
@@ -271,17 +270,10 @@ pars <- draws |>
   ungroup()
 
 pars
-#> # A tibble: 4 × 3
-#>   method        mu sigma
-#>   <fct>      <dbl> <dbl>
-#> 1 HMC         1.75 0.460
-#> 2 Laplace     1.74 0.455
-#> 3 ADVI        1.79 0.540
-#> 4 Pathfinder  1.74 0.456
 ```
 
 More comprehensively, the estimated posterior distributions are shown in
-Figure [3.1](#fig:posterior).
+Figure [**??**](#fig:posterior).
 
 Click to expand for code to create posterior distribution plot
 
@@ -303,17 +295,9 @@ p_posterior <- draws |>
 p_posterior
 ```
 
-![Estimated posterior distributions for the mu and sigma parameters
-using each inference method, shown using
-tidybayes::stat_slabinterval().](figures/epidist-posterior-1.png)
-
-Figure 3.1: Estimated posterior distributions for the `mu` and `sigma`
-parameters using each inference method, shown using
-[`tidybayes::stat_slabinterval()`](https://mjskay.github.io/ggdist/reference/stat_slabinterval.html).
-
 ### 3.2 Comparison of resulting delay distributions
 
-Figure [3.2](#fig:delay-pdf) shows how the different `mu` and `sigma`
+Figure [**??**](#fig:delay-pdf) shows how the different `mu` and `sigma`
 posterior mean estimates from each inference method alter an estimated
 delay distribution.
 
@@ -340,13 +324,6 @@ p_delay_pdf <- pmap_df(
 p_delay_pdf
 ```
 
-![Delay probability density functions obtained based on the posterior
-mean estimated mu and sigma
-parameters.](figures/epidist-delay-pdf-1.png)
-
-Figure 3.2: Delay probability density functions obtained based on the
-posterior mean estimated `mu` and `sigma` parameters.
-
 ### 3.3 Comparison of time taken
 
 In this example, HMC took a longer time to run than the other methods
@@ -363,21 +340,6 @@ times <- list(
 )
 
 times
-#> $HMC
-#>    user  system elapsed 
-#>   8.522   0.287   8.896 
-#> 
-#> $Laplace
-#>    user  system elapsed 
-#>   0.926   0.116   1.209 
-#> 
-#> $ADVI
-#>    user  system elapsed 
-#>   1.131   0.079   1.227 
-#> 
-#> $Pathfinder
-#>    user  system elapsed 
-#>   0.354   0.090   0.523
 ```
 
 ## 4 Conclusion

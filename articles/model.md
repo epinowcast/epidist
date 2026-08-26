@@ -189,6 +189,38 @@ conditional distribution of the primary event given lower \\P_L\\ and
 upper \\P_R\\ bounds; this is equivalent to modelling the incidence in
 primary events.
 
+### 3.1 Bounding the latent primary event time
+
+`epidist` samples both latent offsets on the unit scale. Write \\w\_{P,
+i} = p\_{R, i} - p\_{L, i}\\ and \\w\_{S, i} = s\_{R, i} - s\_{L, i}\\
+for the two censoring window widths. Then \\ \tilde{p}\_i \sim
+\text{Unif}(0, 1), \qquad \tilde{s}\_i \sim \text{Unif}(0, 1), \qquad
+s_i = w\_{S, i}\\ \tilde{s}\_i, \\ and the primary event offset is
+ordinarily \\ p_i = w\_{P, i}\\ \tilde{p}\_i . \\
+
+When the two censoring windows overlap the delay must still be
+non-negative. The primary event therefore has to precede the sampled
+secondary event. The offset is then bounded by the sampled secondary
+offset rather than by the window width. \\ p_i = s_i\\ \tilde{p}\_i . \\
+
+That upper bound is itself a parameter. The map \\\tilde{p}\_i \mapsto
+p_i\\ therefore has Jacobian determinant \\ \left\| \frac{\partial
+p_i}{\partial \tilde{p}\_i} \right\| = s_i , \\ Stan does not add this
+term for a transformation written this way. See the [Stan user’s guide
+on changes of
+variables](https://mc-stan.org/docs/stan-users-guide/reparameterization.html#changes-of-variables).
+The log density of these observations needs it explicitly. \\ \log
+\mathcal{L}\_i \\\longmapsto\\ \log \mathcal{L}\_i + \log s_i . \\ The
+non-overlapping case needs no such term because \\w\_{P, i}\\ is data,
+so its Jacobian is a constant that cancels. The primary event density is
+used unnormalised here. A constant normalising it over \\\[0, s_i\]\\
+would itself depend on \\s_i\\.
+
+The latent model formulation follows Ward et al.
+([2022](#ref-ward2022transmission)). The need for this adjustment was
+identified in Funk and Abbott ([2026](#ref-bdbvlinelist)) and derived in
+Brand et al. ([2026](#ref-brand2026scalable)).
+
 ## 4 The marginal model
 
 The marginal model corrects for the same biases as the latent model but
@@ -237,6 +269,14 @@ and
 Abbott, Sam, Sam Brand, James Mba Azam, Carl Pearson, Sebastian Funk,
 and Kelly Charniga. 2025. *Primarycensored: Primary Event Censored
 Distributions*. <https://doi.org/10.5281/zenodo.13632839>.
+
+Brand, Samuel P. C., Barbora Nemcova, Carl A. B. Pearson, et al. 2026.
+“A Scalable Marginalisation Approach for Double Interval Censored
+Epidemiological Delays.” Unpublished manuscript.
+
+Funk, Sebastian, and Sam Abbott. 2026. *Bayesian Re-Analysis of the 2012
+Isiro Bundibugyo Ebola Virus Line List*. GitHub repository.
+<https://github.com/epiforecasts/bdbv-linelist-analysis>.
 
 Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, et al. 2024.
 “Estimating Epidemiological Delay Distributions for Infectious

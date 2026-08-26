@@ -7,8 +7,8 @@
 
 - **Sang Woo Park**. Author. [](https://orcid.org/0000-0003-2202-3361)
 
-- **[Sam Abbott](https://www.samabbott.co.uk/)**. Author, maintainer.
-  [](https://orcid.org/0000-0001-8057-8037)
+- **[Sam Abbott](https://www.samabbott.co.uk/)**. Author, maintainer,
+  copyright holder. [](https://orcid.org/0000-0001-8057-8037)
 
 - **Sebastian Funk**. Contributor.
   [](https://orcid.org/0000-0002-2842-3406)
