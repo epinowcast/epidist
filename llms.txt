@@ -490,11 +490,6 @@ Functions related to specifying custom `brms` families
 - [`epidist_family_model(`*`<default>`*`)`](https://epidist.epinowcast.org/reference/epidist_family_model.default.md)
   : Default method for defining a model specific family
 
-- [`epidist_family_param()`](https://epidist.epinowcast.org/reference/epidist_family_param.md)
-  :
-
-  Reparameterise an `epidist` family to align `brms` and Stan
-
 - [`epidist_family_param(`*`<default>`*`)`](https://epidist.epinowcast.org/reference/epidist_family_param.default.md)
   : Default method for families which do not require a
   reparameterisation
@@ -548,9 +543,6 @@ Functions for specifying custom Stan code to put into `brms`
 ### Transform data
 
 Transform data using the formula and family information
-
-- [`epidist_transform_data()`](https://epidist.epinowcast.org/reference/epidist_transform_data.md)
-  : Transform data for an epidist model
 
 - [`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md)
   :
@@ -635,6 +627,11 @@ Data included with the package
   epidist](https://epidist.epinowcast.org/articles/epidist.md):
 
   A quick start guide to using the epidist R package
+
+- [Extending
+  epidist](https://epidist.epinowcast.org/articles/extending-epidist.md):
+
+  Building your own model type
 
 - [Frequently asked questions and
   tips](https://epidist.epinowcast.org/articles/faq.md):

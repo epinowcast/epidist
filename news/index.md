@@ -46,6 +46,33 @@
 - Updated the `brms` documentation URL, which had moved.
 - Added `cran-comments.md`.
 
+### Documentation
+
+- Added an `extending-epidist` vignette covering why you might build
+  your own model type, the six generics a model type implements, a
+  worked example, and a table of the packages that already extend
+  `epidist`.
+
+### Package
+
+- Made
+  [`epidist_family_param()`](https://epidist.epinowcast.org/reference/epidist_family_param.md)
+  internal. It is reached through
+  [`epidist_family()`](https://epidist.epinowcast.org/reference/epidist_family.md),
+  and a custom model supplies its family through
+  [`epidist_family_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md)
+  instead. See [\#79](https://github.com/epinowcast/epidist/issues/79).
+- Exported
+  [`epidist_gen_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_log_lik.md),
+  which was the only one of the three post-processing generators not
+  exported. See [\#79](https://github.com/epinowcast/epidist/issues/79).
+- Made
+  [`epidist_transform_data()`](https://epidist.epinowcast.org/reference/epidist_transform_data.md)
+  internal. It is a wrapper that dispatches to
+  [`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md),
+  which is the generic an extension implements and which remains
+  exported. See [\#79](https://github.com/epinowcast/epidist/issues/79).
+
 ### Bug fixes
 
 - Added a missing Jacobian adjustment to the latent model for

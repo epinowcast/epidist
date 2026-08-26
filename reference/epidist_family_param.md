@@ -1,6 +1,10 @@
 # Reparameterise an `epidist` family to align `brms` and Stan
 
-Reparameterise an `epidist` family to align `brms` and Stan
+Called by
+[`epidist_family()`](https://epidist.epinowcast.org/reference/epidist_family.md).
+A custom model supplies its family through
+[`epidist_family_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md)
+rather than by calling this.
 
 ## Usage
 

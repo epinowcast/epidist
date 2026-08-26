@@ -20,6 +20,11 @@
 
   A quick start guide to using the epidist R package
 
+- [Extending
+  epidist](https://epidist.epinowcast.org/articles/extending-epidist.md):
+
+  Building your own model type
+
 - [Frequently asked questions and
   tips](https://epidist.epinowcast.org/articles/faq.md):
 

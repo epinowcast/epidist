@@ -5,10 +5,10 @@ to see their documentation.
 
 - brms:
 
-  [`bf`](https://paulbuerkner.com/brms/reference/brmsformula.html),
-  [`lognormal`](https://paulbuerkner.com/brms/reference/brmsfamily.html),
-  [`weibull`](https://paulbuerkner.com/brms/reference/brmsfamily.html)
+  [`bf()`](https://paulbuerkner.com/brms/reference/brmsformula.html),
+  [`lognormal()`](https://paulbuerkner.com/brms/reference/brmsfamily.html),
+  [`weibull()`](https://paulbuerkner.com/brms/reference/brmsfamily.html)
 
 - stats:
 
-  [`Gamma`](https://rdrr.io/r/stats/family.html)
+  [`Gamma()`](https://rdrr.io/r/stats/family.html)

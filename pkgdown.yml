@@ -5,9 +5,10 @@ articles:
   approx-inference: approx-inference.html
   ebola: ebola.html
   epidist: epidist.html
+  extending-epidist: extending-epidist.html
   faq: faq.html
   model: model.html
-last_built: 2026-08-26T16:12Z
+last_built: 2026-08-26T16:27Z
 urls:
   reference: https://epidist.epinowcast.org/reference
   article: https://epidist.epinowcast.org/articles

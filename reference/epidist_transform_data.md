@@ -2,10 +2,12 @@
 
 This function is used within
 [`epidist()`](https://epidist.epinowcast.org/reference/epidist.md) to
-transform data before passing to `brms`. It is unlikely that as a user
-you will need this function, but we export it nonetheless to be
-transparent about what happens inside of a call to
-[`epidist()`](https://epidist.epinowcast.org/reference/epidist.md).
+transform data before passing to `brms`. It dispatches to
+[`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md),
+which is the generic a custom model implements. This wrapper is
+internal; extensions should write a method for
+[`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md)
+instead.
 
 ## Usage
 
