@@ -12,7 +12,8 @@ epidist_gen_posterior_epred(family)
 be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
-families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as \code{\link[=lognormal]{lognormal()}}, are also
+families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
+\code{\link[brms:lognormal]{brms::lognormal()}}, are also
 reexported as part of \code{epidist}.}
 }
 \value{
@@ -24,15 +25,15 @@ per observation.
 This function creates a function that calculates the expected value of the
 posterior predictive distribution for a latent model. The returned function
 takes a \code{prep} argument (from brms) and returns posterior expected values.
-This is used internally by \code{\link[brms:posterior_epred.brmsfit]{brms::posterior_epred()}} to calculate expected
+This is used internally by \code{\link[brms:posterior_epred]{brms::posterior_epred()}} to calculate expected
 values for latent models.
 }
 \seealso{
-\code{\link[brms:posterior_epred.brmsfit]{brms::posterior_epred()}} for details on how this is used within
+\code{\link[brms:posterior_epred]{brms::posterior_epred()}} for details on how this is used within
 \code{brms}.
 
-Other gen: 
-\code{\link{epidist_gen_log_lik}()},
-\code{\link{epidist_gen_posterior_predict}()}
+Other gen:
+\code{\link[=epidist_gen_log_lik]{epidist_gen_log_lik()}},
+\code{\link[=epidist_gen_posterior_predict]{epidist_gen_posterior_predict()}}
 }
 \concept{gen}

@@ -11,7 +11,8 @@
 be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
-families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as \code{\link[=lognormal]{lognormal()}}, are also
+families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
+\code{\link[brms:lognormal]{brms::lognormal()}}, are also
 reexported as part of \code{epidist}.}
 
 \item{formula}{An object of class \link[stats:formula]{stats::formula} or \link[brms:brmsformula]{brms::brmsformula}
@@ -26,11 +27,11 @@ parameters.}
 By default, we do not return any family specific prior distributions.
 }
 \seealso{
-Other prior: 
-\code{\link{epidist_family_prior}()},
-\code{\link{epidist_family_prior.lognormal}()},
-\code{\link{epidist_model_prior}()},
-\code{\link{epidist_model_prior.default}()},
-\code{\link{epidist_prior}()}
+Other prior:
+\code{\link[=epidist_family_prior]{epidist_family_prior()}},
+\code{\link[=epidist_family_prior.lognormal]{epidist_family_prior.lognormal()}},
+\code{\link[=epidist_model_prior]{epidist_model_prior()}},
+\code{\link[=epidist_model_prior.default]{epidist_model_prior.default()}},
+\code{\link[=epidist_prior]{epidist_prior()}}
 }
 \concept{prior}

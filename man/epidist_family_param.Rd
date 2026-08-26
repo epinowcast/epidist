@@ -11,19 +11,22 @@ epidist_family_param(family, ...)
 be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
-families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as \code{\link[=lognormal]{lognormal()}}, are also
+families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
+\code{\link[brms:lognormal]{brms::lognormal()}}, are also
 reexported as part of \code{epidist}.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
 \description{
-Reparameterise an \code{epidist} family to align \code{brms} and Stan
+Called by \code{\link[=epidist_family]{epidist_family()}}. A custom model supplies its family through
+\code{\link[=epidist_family_model]{epidist_family_model()}} rather than by calling this.
 }
 \seealso{
-Other family: 
-\code{\link{epidist_family}()},
-\code{\link{epidist_family_model}()},
-\code{\link{epidist_family_model.default}()},
-\code{\link{epidist_family_param.default}()}
+Other family:
+\code{\link[=epidist_family]{epidist_family()}},
+\code{\link[=epidist_family_model]{epidist_family_model()}},
+\code{\link[=epidist_family_model.default]{epidist_family_model.default()}},
+\code{\link[=epidist_family_param.default]{epidist_family_param.default()}}
 }
 \concept{family}
+\keyword{internal}

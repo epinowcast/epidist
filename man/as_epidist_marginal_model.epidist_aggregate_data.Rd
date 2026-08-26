@@ -22,7 +22,7 @@ otherwise defaults to 0 (no left truncation).
 \item A numeric scalar: applied to all observations.
 \item A column name string: looks up the named column in the data.
 This is passed as the \code{L} parameter to
-\code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}}.
+\code{\link[primarycensored:dpcens]{primarycensored::dpcens()}}.
 }}
 
 \item{...}{Not used in this method.}
