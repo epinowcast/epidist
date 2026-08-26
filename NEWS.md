@@ -12,6 +12,8 @@ See #420 and paul-buerkner/brms#1676.
 `cmdstanr` is now found through `Additional_repositories` and the development version of `brms` is no longer used.
 See #592.
 - Added a `brms (>= 2.23.0)` floor, the version the compatibility helpers were checked against.
+- Pointed the CI workflows at the Stan r-universe with `extra-repositories`.
+Dropping `Remotes` means `pak` can no longer resolve `cmdstanr`, because it does not read `Additional_repositories`.
 - Raised the minimum R version to 4.1.0.
 The package uses the native pipe and the lambda shorthand, both of which need R 4.1.0.
 - Added the copyright holder role to Sam Abbott in `DESCRIPTION`.
