@@ -23,10 +23,8 @@ This is a new submission.
 
 `cmdstanr` is an optional backend and is not on CRAN.
 It is declared in `Suggests` and reached through `Additional_repositories`.
-The package uses the `rstan` backend by default and the full test suite and all vignettes build without `cmdstanr` installed.
 
 ## Notes for the reviewer
 
 The examples for `epidist()` and `epidist_diagnostics()` fit a Bayesian model, so they are wrapped in `\donttest{}`.
-They take roughly two minutes each, which is unavoidable because Stan compiles the model before sampling.
 They are still run under `--run-donttest` and pass.
