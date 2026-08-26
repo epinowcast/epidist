@@ -95,52 +95,12 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
 ) {
   assert_epidist.epidist_linelist_data(data)
 
-  data <- mutate(
+  data <- .prepare_marginal_data(
     data,
-    pwindow = .data$ptime_upr - .data$ptime_lwr,
-    swindow = .data$stime_upr - .data$stime_lwr,
-    relative_obs_time = .data$obs_time - .data$ptime_lwr,
-    orig_relative_obs_time = .data$obs_time - .data$ptime_lwr,
-    delay_lwr = .data$stime_lwr - .data$ptime_lwr,
-    delay_upr = .data$stime_upr - .data$ptime_lwr
+    obs_time_threshold = obs_time_threshold,
+    weight = weight
   )
-
-  data <- .add_weights(data, weight)
   data <- .add_delay_min(data, delay_min)
-
-  # Calculate maximum delay
-  max_delay <- max(data$delay_upr, na.rm = TRUE)
-  threshold <- max_delay * obs_time_threshold
-
-  # Count observations beyond threshold
-  n_beyond <- sum(data$relative_obs_time > threshold, na.rm = TRUE)
-
-  if (n_beyond > 0) {
-    msg <- c(
-      paste0(
-        "Setting {n_beyond} relative observation time{?s} ",
-        "({.var relative_obs_time}) greater than {threshold} ",
-        "({obs_time_threshold}x the maximum delay) to {.val {Inf}}."
-      ),
-      paste0(
-        "This improves model efficiency by reducing the number of unique ",
-        "observation times in the data."
-      ),
-      paste0(
-        "The impact on model accuracy should be negligible because these ",
-        "relative observation times are high enough to cause very limited ",
-        "right truncation."
-      ),
-      paste0(
-        "The original relative observation times are available in ",
-        "{.var orig_relative_obs_time}."
-      ),
-      "Raise {.arg obs_time_threshold} to avoid this behaviour."
-    )
-    names(msg) <- c("!", rep("i", length(msg) - 1))
-    cli::cli_inform(msg)
-    data$relative_obs_time[data$relative_obs_time > threshold] <- Inf
-  }
 
   data <- new_epidist_marginal_model(data)
   assert_epidist(data)
@@ -524,6 +484,59 @@ epidist_newdata.epidist_marginal_model <- function(
   return(newdata)
 }
 
+
+#' Prepare linelist data for a marginal likelihood
+#'
+#' Calculates the delay bounds, censoring windows and relative observation
+#' times required by the marginal likelihood, adds weights, and sets
+#' observation times far beyond the maximum delay to `Inf`. Shared by
+#' [as_epidist_marginal_model()] and [as_epidist_meta_model()].
+#'
+#' @inheritParams as_epidist_marginal_model.epidist_linelist_data
+#'
+#' @returns The input data with the marginal likelihood columns added.
+#'
+#' @keywords internal
+#' @autoglobal
+.prepare_marginal_data <- function(
+  data,
+  obs_time_threshold = 2,
+  weight = NULL
+) {
+  data <- mutate(
+    data,
+    pwindow = .data$ptime_upr - .data$ptime_lwr,
+    swindow = .data$stime_upr - .data$stime_lwr,
+    relative_obs_time = .data$obs_time - .data$ptime_lwr,
+    orig_relative_obs_time = .data$obs_time - .data$ptime_lwr,
+    delay_lwr = .data$stime_lwr - .data$ptime_lwr,
+    delay_upr = .data$stime_upr - .data$ptime_lwr
+  )
+
+  data <- .add_weights(data, weight)
+
+  # Calculate maximum delay
+  max_delay <- max(data$delay_upr, na.rm = TRUE)
+  threshold <- max_delay * obs_time_threshold
+
+  # Count observations beyond threshold
+  n_beyond <- sum(data$relative_obs_time > threshold, na.rm = TRUE)
+
+  if (n_beyond > 0) {
+    cli::cli_inform(c(
+      "!" = paste0(
+        "Setting {n_beyond} observation time{?s} beyond ",
+        "{threshold} (={obs_time_threshold}x max delay) to Inf. ",
+        "This improves model efficiency by reducing unique observation times ",
+        "while maintaining model accuracy as these times should have ",
+        "negligible impact."
+      )
+    ))
+    data$relative_obs_time[data$relative_obs_time > threshold] <- Inf
+  }
+
+  return(data)
+}
 .marginal_required_cols <- function() {
   return(c(
     "delay_lwr",
