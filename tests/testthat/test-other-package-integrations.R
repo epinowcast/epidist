@@ -31,6 +31,7 @@ test_that("Integration with priorsense works as expected", {
 test_that("Integration with marginaleffects works as expected", {
   skip_if_not_installed("marginaleffects")
   skip_if_not_installed("collapse")
+  skip_if_not_installed("reformulas")
   skip_on_cran()
 
   # Test that avg_comparisons works for stratified models
