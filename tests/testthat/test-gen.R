@@ -113,7 +113,8 @@ test_that("epidist_gen_posterior_epred returns a function that creates arrays wi
       mutate(delay_upr = NA) |>
       tidybayes::add_epred_draws(fit)
     expect_equal(
-      mean(epred$.epred), expected_mean, tolerance = 0.1
+      mean(epred$.epred), expected_mean,
+      tolerance = 0.1
     )
     return(expect_gte(min(epred$.epred), 0))
   }
