@@ -2,10 +2,7 @@
 
 ## Package
 
-- Added `simulate_dates()`, which turns the event times produced by `simulate_gillespie()` and `simulate_secondary()` into the dates an analyst would receive.
-Times are floored to the day and offset from an outbreak start date.
-The returned columns are named to match `as_epidist_linelist_data()`.
-See #443.
+- Added `simulate_dates()`, which turns simulated event times into the censored dates an analyst would receive.
 - Removed the calls to unexported `brms` functions that `R CMD check --as-cran` flags.
 `R/brms-compat.R` now holds small internal helpers reproducing the narrow behaviour `epidist` relied on from `brms:::validate_family()`, `brms:::validate_formula()`, `brms:::validate_data()`, `brms:::dpar_bounds()` and `brms:::log_lik_weight()`.
 The helpers are written against the public `brms` interface rather than copied from `brms`.

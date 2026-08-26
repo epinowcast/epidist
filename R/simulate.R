@@ -155,8 +155,9 @@ simulate_secondary <- function(data, dist = rlnorm, ...) {
 #'
 #' Takes the continuous event times produced by [simulate_gillespie()] and
 #' [simulate_secondary()] and returns the dates an analyst would actually
-#' receive. Event times are floored to the day, so each event is known only by
-#' the date it fell on, and are then offset from `outbreak_start_date`.
+#' receive. Event times are floored to the reporting window, so each event is
+#' known only by the window it fell in, and are then offset from
+#' `outbreak_start_date`.
 #'
 #' The returned columns are named to match [as_epidist_linelist_data()], so the
 #' output can be passed straight to it.
@@ -166,6 +167,9 @@ simulate_secondary <- function(data, dist = rlnorm, ...) {
 #'
 #' @param outbreak_start_date The date the outbreak started, corresponding to
 #'  time zero.
+#'
+#' @param censoring_window Width of the reporting window in days. The default
+#'  of 1 gives daily reporting. Use 7 for weekly reporting.
 #'
 #' @param obs_time Optional numeric observation time, in the same units as
 #'  `ptime` and `stime`. When supplied an `obs_date` column is added. When
@@ -182,6 +186,7 @@ simulate_secondary <- function(data, dist = rlnorm, ...) {
 #' @autoglobal
 #' @importFrom dplyr mutate select all_of
 #' @importFrom checkmate assert_names assert_date assert_number
+#' @importFrom checkmate assert_integerish
 #' @export
 #' @examples
 #' simulate_gillespie(seed = 1) |>
@@ -191,23 +196,25 @@ simulate_secondary <- function(data, dist = rlnorm, ...) {
 simulate_dates <- function(
   data,
   outbreak_start_date = as.Date("2024-01-01"),
+  censoring_window = 1,
   obs_time = NULL,
   keep_times = FALSE
 ) {
   assert_names(names(data), must.include = c("ptime", "stime"))
   assert_date(outbreak_start_date, len = 1, any.missing = FALSE)
+  assert_integerish(censoring_window, lower = 1, len = 1, any.missing = FALSE)
   if (!is.null(obs_time)) {
     assert_number(obs_time, lower = 0, finite = TRUE)
   }
 
   sim_data <- data |>
     mutate(
-      # An event observed on a date is known only to have happened somewhere
-      # in that day, which is the lower and upper bound of its window.
-      pdate_lwr = outbreak_start_date + floor(.data$ptime),
-      pdate_upr = .data$pdate_lwr + 1,
-      sdate_lwr = outbreak_start_date + floor(.data$stime),
-      sdate_upr = .data$sdate_lwr + 1
+      pdate_lwr = outbreak_start_date +
+        censoring_window * floor(.data$ptime / censoring_window),
+      pdate_upr = .data$pdate_lwr + censoring_window,
+      sdate_lwr = outbreak_start_date +
+        censoring_window * floor(.data$stime / censoring_window),
+      sdate_upr = .data$sdate_lwr + censoring_window
     )
 
   if (!is.null(obs_time)) {

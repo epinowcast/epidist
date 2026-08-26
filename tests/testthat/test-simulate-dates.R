@@ -65,3 +65,24 @@ test_that("simulate_dates output can be used by as_epidist_linelist_data", {
   expect_s3_class(linelist, "epidist_linelist_data")
   expect_true(all(linelist$stime_lwr >= linelist$ptime_lwr))
 })
+
+test_that("simulate_dates supports a wider censoring window", {
+  data <- data.frame(ptime = c(0, 3, 8), stime = c(6, 9, 20))
+  start <- as.Date("2024-02-01")
+
+  weekly <- simulate_dates(data, start, censoring_window = 7)
+
+  # Times 0, 3 and 8 fall in the weeks starting at 0, 0 and 7.
+  expect_identical(weekly$pdate_lwr, start + c(0, 0, 7))
+  expect_identical(weekly$sdate_lwr, start + c(0, 7, 14))
+  # Windows are as wide as the reporting interval.
+  expect_identical(weekly$pdate_upr, weekly$pdate_lwr + 7)
+  expect_identical(weekly$sdate_upr, weekly$sdate_lwr + 7)
+})
+
+test_that("simulate_dates rejects an invalid censoring window", {
+  data <- data.frame(ptime = 1, stime = 2)
+
+  expect_error(simulate_dates(data, censoring_window = 0), "not >= 1")
+  expect_error(simulate_dates(data, censoring_window = 1.5), "integerish")
+})

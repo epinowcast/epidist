@@ -7,6 +7,7 @@
 simulate_dates(
   data,
   outbreak_start_date = as.Date("2024-01-01"),
+  censoring_window = 1,
   obs_time = NULL,
   keep_times = FALSE
 )
@@ -17,6 +18,9 @@ returned by \code{\link[=simulate_secondary]{simulate_secondary()}}.}
 
 \item{outbreak_start_date}{The date the outbreak started, corresponding to
 time zero.}
+
+\item{censoring_window}{Width of the reporting window in days. The default
+of 1 gives daily reporting. Use 7 for weekly reporting.}
 
 \item{obs_time}{Optional numeric observation time, in the same units as
 \code{ptime} and \code{stime}. When supplied an \code{obs_date} column is added. When
@@ -33,8 +37,9 @@ A \code{data.frame} with \code{pdate_lwr}, \code{pdate_upr}, \code{sdate_lwr} an
 \description{
 Takes the continuous event times produced by \code{\link[=simulate_gillespie]{simulate_gillespie()}} and
 \code{\link[=simulate_secondary]{simulate_secondary()}} and returns the dates an analyst would actually
-receive. Event times are floored to the day, so each event is known only by
-the date it fell on, and are then offset from \code{outbreak_start_date}.
+receive. Event times are floored to the reporting window, so each event is
+known only by the window it fell in, and are then offset from
+\code{outbreak_start_date}.
 }
 \details{
 The returned columns are named to match \code{\link[=as_epidist_linelist_data]{as_epidist_linelist_data()}}, so the
@@ -47,10 +52,10 @@ simulate_gillespie(seed = 1) |>
   head()
 }
 \seealso{
-Other simulate: 
-\code{\link{simulate_exponential_cases}()},
-\code{\link{simulate_gillespie}()},
-\code{\link{simulate_secondary}()},
-\code{\link{simulate_uniform_cases}()}
+Other simulate:
+\code{\link[=simulate_exponential_cases]{simulate_exponential_cases()}},
+\code{\link[=simulate_gillespie]{simulate_gillespie()}},
+\code{\link[=simulate_secondary]{simulate_secondary()}},
+\code{\link[=simulate_uniform_cases]{simulate_uniform_cases()}}
 }
 \concept{simulate}
