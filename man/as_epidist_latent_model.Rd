@@ -11,6 +11,9 @@ as_epidist_latent_model(data, ...)
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_latent_model}.
+}
 \description{
 Creates an \code{epidist_latent_model} object from various input formats.
 This enables fitting latent variable models for epidemiological delays using

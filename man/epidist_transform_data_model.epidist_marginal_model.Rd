@@ -15,6 +15,9 @@
 
 \item{...}{Additional arguments passed to methods}
 }
+\value{
+The data transformed ready for fitting.
+}
 \description{
 This method transforms data into the format required by the marginal model
 by:

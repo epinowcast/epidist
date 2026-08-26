@@ -9,6 +9,10 @@ is_epidist_latent_model(data)
 \arguments{
 \item{data}{An object}
 }
+\value{
+A logical, \code{TRUE} if \code{data} inherits from \code{epidist_latent_model} and
+\code{FALSE} otherwise.
+}
 \description{
 Check if data has the \code{epidist_latent_model} class
 }

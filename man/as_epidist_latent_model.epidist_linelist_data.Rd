@@ -13,6 +13,9 @@ observations with primary and secondary event times. See
 
 \item{...}{Not used in this method.}
 }
+\value{
+An object of class \code{epidist_latent_model}.
+}
 \description{
 This method takes an \code{epidist_linelist_data} object and converts it to a
 format suitable for fitting latent variable models. It calculates key

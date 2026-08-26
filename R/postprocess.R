@@ -8,6 +8,9 @@
 #'
 #' @family postprocess
 #' @autoglobal
+#' @returns A `data.frame` of posterior draws of the delay distribution
+#'  parameters.
+#'
 #' @export
 predict_delay_parameters <- function(fit, newdata = NULL, ...) {
   if (!is.null(newdata)) {
@@ -50,6 +53,8 @@ predict_dpar <- predict_delay_parameters
 #' @param ... Additional arguments for method.
 #'
 #' @family postprocess
+#' @returns The input with natural scale `mean` and `sd` columns added.
+#'
 #' @export
 add_mean_sd <- function(data, ...) {
   UseMethod("add_mean_sd")
@@ -63,6 +68,8 @@ add_mean_sd <- function(data, ...) {
 #'
 #' @family postprocess
 #' @method add_mean_sd default
+#' @returns The input with natural scale `mean` and `sd` columns added.
+#'
 #' @export
 add_mean_sd.default <- function(data, ...) {
   cli_inform(c(
@@ -86,6 +93,8 @@ add_mean_sd.default <- function(data, ...) {
 #' @family postprocess
 #' @method add_mean_sd lognormal_samples
 #' @autoglobal
+#' @returns The input with natural scale `mean` and `sd` columns added.
+#'
 #' @export
 add_mean_sd.lognormal_samples <- function(data, ...) {
   return(mutate(
@@ -107,6 +116,8 @@ add_mean_sd.lognormal_samples <- function(data, ...) {
 #' @family postprocess
 #' @method add_mean_sd gamma_samples
 #' @autoglobal
+#' @returns The input with natural scale `mean` and `sd` columns added.
+#'
 #' @export
 add_mean_sd.gamma_samples <- function(data, ...) {
   return(mutate(data, mean = .data$mu, sd = .data$mu / sqrt(.data$shape)))
@@ -125,6 +136,8 @@ add_mean_sd.gamma_samples <- function(data, ...) {
 #' @family postprocess
 #' @method add_mean_sd weibull_samples
 #' @autoglobal
+#' @returns The input with natural scale `mean` and `sd` columns added.
+#'
 #' @export
 add_mean_sd.weibull_samples <- function(data, ...) {
   return(mutate(

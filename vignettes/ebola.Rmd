@@ -43,7 +43,7 @@ library(patchwork) # nolint
 library(cmdstanr) # nolint
 ```
 
-For users new to `epidist`, before reading this article we recommend beginning with the "[Getting started with `epidist`](http://epidist.epinowcast.org/articles/epidist.html)" vignette.
+For users new to `epidist`, before reading this article we recommend beginning with the "[Getting started with `epidist`](https://epidist.epinowcast.org/articles/epidist.html)" vignette.
 
 # Using the cmdstanr backend
 

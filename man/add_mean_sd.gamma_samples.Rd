@@ -12,6 +12,9 @@ model}
 
 \item{...}{Additional arguments for method.}
 }
+\value{
+The input with natural scale \code{mean} and \code{sd} columns added.
+}
 \description{
 Again, \code{mu} and \code{shape} here are the distributional parameters of \code{brms}.
 }

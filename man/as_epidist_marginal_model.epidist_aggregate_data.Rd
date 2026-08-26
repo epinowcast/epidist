@@ -27,6 +27,9 @@ This is passed as the \code{L} parameter to
 
 \item{...}{Not used in this method.}
 }
+\value{
+An object of class \code{epidist_marginal_model}.
+}
 \description{
 This method converts aggregate data to a marginal model format by
 passing it to \code{\link[=as_epidist_marginal_model.epidist_linelist_data]{as_epidist_marginal_model.epidist_linelist_data()}}

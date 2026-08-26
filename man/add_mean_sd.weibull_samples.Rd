@@ -12,6 +12,9 @@ model}
 
 \item{...}{Additional arguments for method.}
 }
+\value{
+The input with natural scale \code{mean} and \code{sd} columns added.
+}
 \description{
 Note that the input parameters here are \code{mu} and \code{shape}, corresponding to
 the distributional parameters used by \code{brms} for the \code{weibull} family.

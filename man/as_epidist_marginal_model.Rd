@@ -11,6 +11,9 @@ as_epidist_marginal_model(data, ...)
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_marginal_model}.
+}
 \description{
 Creates an \code{epidist_marginal_model} object from various input formats.
 This enables fitting marginal models for epidemiological delays using

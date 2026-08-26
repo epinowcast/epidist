@@ -9,6 +9,10 @@ is_epidist_marginal_model(data)
 \arguments{
 \item{data}{A \code{data.frame} containing line list data}
 }
+\value{
+A logical, \code{TRUE} if \code{data} inherits from \code{epidist_marginal_model}
+and \code{FALSE} otherwise.
+}
 \description{
 Check if data has the \code{epidist_marginal_model} class
 }

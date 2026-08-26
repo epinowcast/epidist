@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments}
 }
+\value{
+\code{NULL}, invisibly. Called for the side effect of validating \code{data}.
+}
 \description{
 Assert validity of \code{epidist_linelist_data} objects
 }

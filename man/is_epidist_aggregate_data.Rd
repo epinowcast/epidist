@@ -11,6 +11,10 @@ is_epidist_aggregate_data(data, ...)
 
 \item{...}{Additional arguments}
 }
+\value{
+A logical, \code{TRUE} if \code{data} inherits from \code{epidist_aggregate_data}
+and \code{FALSE} otherwise.
+}
 \description{
 Check if data has the \code{epidist_aggregate_data} class
 }

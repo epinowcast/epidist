@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments for method.}
 }
+\value{
+The input with natural scale \code{mean} and \code{sd} columns added.
+}
 \description{
 Default method for add natural scale parameters
 }

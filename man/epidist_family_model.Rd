@@ -23,6 +23,11 @@ the model to be fitted. A formula must be provided for the distributional
 parameter \code{mu}, and may optionally be provided for other distributional
 parameters.}
 }
+\value{
+A \code{brms} custom family object.
+
+A \code{brmsformula} object.
+}
 \description{
 The model-specific parts of an \code{epidist_family()} call
 

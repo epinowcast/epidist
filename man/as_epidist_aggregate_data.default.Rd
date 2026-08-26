@@ -29,6 +29,9 @@ secondary times.}
 
 \item{...}{Additional columns to add to the epidist_linelist_data object.}
 }
+\value{
+An object of class \code{epidist_aggregate_data}.
+}
 \description{
 This method takes vectors of event times (primary/secondary event times and
 observation time) along with counts and creates an \code{epidist_aggregate_data}

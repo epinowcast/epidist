@@ -11,6 +11,9 @@ add_mean_sd(data, ...)
 
 \item{...}{Additional arguments for method.}
 }
+\value{
+The input with natural scale \code{mean} and \code{sd} columns added.
+}
 \description{
 Add natural scale mean and standard deviation parameters
 }

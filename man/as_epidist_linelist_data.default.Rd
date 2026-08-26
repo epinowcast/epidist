@@ -25,6 +25,9 @@ secondary times.}
 
 \item{...}{Additional columns to add to the epidist_linelist_data object.}
 }
+\value{
+An object of class \code{epidist_linelist_data}.
+}
 \description{
 This method takes vectors of event times (primary/secondary event times and
 observation time) and creates an \code{epidist_linelist_data} object. This format

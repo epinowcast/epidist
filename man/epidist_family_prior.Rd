@@ -17,6 +17,9 @@ reexported as part of \code{epidist}.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+A \code{brmsprior} object, or \code{NULL} when the model adds no priors.
+}
 \description{
 This function contains \code{brms} prior distributions which are specific to
 particular likelihood families e.g. \code{\link[brms:brmsfamily]{brms::lognormal()}}.

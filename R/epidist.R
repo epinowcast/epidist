@@ -36,6 +36,8 @@
 #' @param ... Additional arguments passed to `fn` method.
 #'
 #' @family fit
+#' @returns A fitted model of class `epidist_fit`.
+#'
 #' @export
 #' @examples
 #' \donttest{

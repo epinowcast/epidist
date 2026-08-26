@@ -19,6 +19,9 @@ reexported as part of \code{epidist}.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+A \code{brms} custom family object.
+}
 \description{
 This function is used within \code{\link[=epidist]{epidist()}} to create a model specific custom
 \code{brms} family object. This custom family is passed to \code{brms}. It is unlikely

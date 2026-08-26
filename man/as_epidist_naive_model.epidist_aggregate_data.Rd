@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_naive_model}.
+}
 \description{
 This method converts aggregate data to a naive model format by passing it to
 \code{\link[=as_epidist_naive_model.epidist_linelist_data]{as_epidist_naive_model.epidist_linelist_data()}} with the \code{n} column used as

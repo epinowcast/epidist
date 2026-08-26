@@ -11,6 +11,9 @@ as_epidist_naive_model(data, ...)
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_naive_model}.
+}
 \description{
 Creates an \code{epidist_naive_model} object from various input formats.
 This enables fitting naive models for epidemiological delays using

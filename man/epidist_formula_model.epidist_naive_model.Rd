@@ -18,6 +18,9 @@ parameters.}
 
 \item{...}{Additional arguments passed to method.}
 }
+\value{
+A \code{brmsformula} object.
+}
 \description{
 Define the model-specific component of an \code{epidist} custom formula for the
 naive model

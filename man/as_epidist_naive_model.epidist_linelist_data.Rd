@@ -15,6 +15,9 @@ object.}
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_naive_model}.
+}
 \description{
 This method converts linelist data to a naive model format by calculating
 delays between primary and secondary events to enable model fitting

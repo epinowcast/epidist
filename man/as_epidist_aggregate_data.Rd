@@ -11,6 +11,9 @@ as_epidist_aggregate_data(data, ...)
 
 \item{...}{Additional arguments passed to methods}
 }
+\value{
+An object of class \code{epidist_aggregate_data}.
+}
 \description{
 Creates an epidist_aggregate_data object from various input formats. This is
 useful when working with pre-aggregated data where each row represents

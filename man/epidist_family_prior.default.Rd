@@ -23,6 +23,9 @@ parameters.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+A \code{brmsprior} object, or \code{NULL} when the model adds no priors.
+}
 \description{
 By default, we do not return any family specific prior distributions.
 }

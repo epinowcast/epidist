@@ -10,6 +10,8 @@
 #' @param ... Additional arguments passed to methods
 #'
 #' @family linelist_data
+#' @returns An object of class `epidist_linelist_data`.
+#'
 #' @export
 as_epidist_linelist_data <- function(data, ...) {
   UseMethod("as_epidist_linelist_data")
@@ -36,6 +38,8 @@ as_epidist_linelist_data <- function(data, ...) {
 #' @importFrom tibble tibble
 #' @importFrom dplyr bind_cols
 #' @family linelist_data
+#' @returns An object of class `epidist_linelist_data`.
+#'
 #' @export
 #' @examples
 #' as_epidist_linelist_data(
@@ -116,6 +120,8 @@ as_epidist_linelist_data.default <- function(
 #' @importFrom cli cli_abort cli_alert_info
 #' @importFrom checkmate assert_true assert_names assert_numeric assert_date
 #' @importFrom utils hasName
+#' @returns An object of class `epidist_linelist_data`.
+#'
 #' @export
 #' @examples
 #' sierra_leone_ebola_data |>
@@ -220,6 +226,8 @@ as_epidist_linelist_data.data.frame <- function(
 #' @inheritParams as_epidist_linelist_data
 #' @family linelist_data
 #' @autoglobal
+#' @returns An object of class `epidist_linelist_data`.
+#'
 #' @export
 #' @examples
 #' sierra_leone_ebola_data |>
@@ -256,6 +264,9 @@ new_epidist_linelist_data <- function(data) {
 #' @param ... Additional arguments
 #'
 #' @family linelist_data
+#' @returns A logical, `TRUE` if `data` inherits from `epidist_linelist_data`
+#'  and `FALSE` otherwise.
+#'
 #' @export
 is_epidist_linelist_data <- function(data, ...) {
   return(inherits(data, "epidist_linelist_data"))
@@ -270,6 +281,8 @@ is_epidist_linelist_data <- function(data, ...) {
 #' @method assert_epidist epidist_linelist_data
 #'
 #' @family linelist_data
+#' @returns `NULL`, invisibly. Called for the side effect of validating `data`.
+#'
 #' @export
 assert_epidist.epidist_linelist_data <- function(data, ...) {
   assert_data_frame(data)

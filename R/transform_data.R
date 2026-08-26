@@ -27,6 +27,8 @@ epidist_transform_data <- function(data, family, formula, ...) {
 #' @rdname epidist_transform_data_model
 #'
 #' @family transform_data
+#' @returns The data transformed ready for fitting.
+#'
 #' @export
 epidist_transform_data_model <- function(data, family, formula, ...) {
   UseMethod("epidist_transform_data_model")
@@ -37,6 +39,8 @@ epidist_transform_data_model <- function(data, family, formula, ...) {
 #' @inheritParams epidist_transform_data_model
 #'
 #' @family transform_data
+#' @returns The data transformed ready for fitting.
+#'
 #' @export
 epidist_transform_data_model.default <- function(data, family, formula, ...) {
   return(data)

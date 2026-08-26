@@ -50,6 +50,9 @@ These two later options may be useful for model debugging and extensions.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+A fitted model of class \code{epidist_fit}.
+}
 \description{
 Fit epidemiological delay distributions using a \code{brms} interface
 }

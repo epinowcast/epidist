@@ -14,6 +14,9 @@ information as provided by \code{.add_dpar_info()}}
 
 \item{...}{Additional arguments passed to method.}
 }
+\value{
+A \code{brms} custom family object.
+}
 \description{
 Create the model-specific component of an \code{epidist} custom family
 }

@@ -7,6 +7,8 @@
 #'
 #' @inheritParams epidist
 #' @family family
+#' @returns A `brms` custom family object.
+#'
 #' @export
 epidist_family <- function(data, family = lognormal(), ...) {
   assert_epidist(data)
@@ -28,6 +30,8 @@ epidist_family <- function(data, family = lognormal(), ...) {
 #'
 #' @rdname epidist_family_model
 #' @family family
+#' @returns A `brms` custom family object.
+#'
 #' @export
 epidist_family_model <- function(data, family, ...) {
   UseMethod("epidist_family_model")
@@ -37,6 +41,8 @@ epidist_family_model <- function(data, family, ...) {
 #'
 #' @inheritParams epidist_family_model
 #' @family family
+#' @returns A `brms` custom family object.
+#'
 #' @export
 epidist_family_model.default <- function(data, family, ...) {
   return(family)

@@ -1,5 +1,5 @@
 Package: epidist
-Title: Estimate Epidemiological Delay Distributions With brms
+Title: Estimate Epidemiological Delay Distributions with 'brms'
 Version: 0.5.0
 Authors@R:
   c(person(given = "Adam Howes",
@@ -81,6 +81,7 @@ Config/roxyglobals/unique: FALSE
 LazyData: true
 VignetteBuilder: knitr
 Encoding: UTF-8
+Language: en-GB
 Roxygen: list(markdown = TRUE, roclets = c("collate", "namespace", "rd",
     "roxyglobals::global_roclet"))
 Config/roxygen2/version: 8.0.0

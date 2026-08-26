@@ -11,6 +11,9 @@ epidist_model_prior(data, ...)
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+A \code{brmsprior} object, or \code{NULL} when the model adds no priors.
+}
 \description{
 This function contains \code{brms} prior distributions which are specific to
 particular \code{epidist} models e.g. the \code{latent_lognormal} model.

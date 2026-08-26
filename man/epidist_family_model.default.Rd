@@ -14,6 +14,9 @@ information as provided by \code{.add_dpar_info()}}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+A \code{brms} custom family object.
+}
 \description{
 Default method for defining a model specific family
 }

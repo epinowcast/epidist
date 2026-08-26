@@ -14,6 +14,9 @@ required time variables.}
 
 \item{...}{Additional arguments passed to methods}
 }
+\value{
+An object of class \code{epidist_aggregate_data}.
+}
 \description{
 This method takes an \code{epidist_linelist_data} object (see
 \code{\link[=as_epidist_linelist_data]{as_epidist_linelist_data()}}) and aggregates it by counting unique

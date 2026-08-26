@@ -7,6 +7,8 @@
 #'
 #' @inheritParams as_epidist_linelist_data
 #' @family aggregate_data
+#' @returns An object of class `epidist_aggregate_data`.
+#'
 #' @export
 as_epidist_aggregate_data <- function(data, ...) {
   UseMethod("as_epidist_aggregate_data")
@@ -31,6 +33,8 @@ as_epidist_aggregate_data <- function(data, ...) {
 #'
 #' @family aggregate_data
 #' @autoglobal
+#' @returns An object of class `epidist_aggregate_data`.
+#'
 #' @export
 #' @examples
 #' as_epidist_aggregate_data(
@@ -87,6 +91,8 @@ as_epidist_aggregate_data.default <- function(
 #' @inheritParams as_epidist_linelist_data.data.frame
 #' @family aggregate_data
 #' @autoglobal
+#' @returns An object of class `epidist_aggregate_data`.
+#'
 #' @export
 #' @examples
 #' sierra_leone_ebola_data |>
@@ -150,6 +156,8 @@ as_epidist_aggregate_data.data.frame <- function(
 #' @method as_epidist_aggregate_data epidist_linelist_data
 #' @family aggregate_data
 #' @autoglobal
+#' @returns An object of class `epidist_aggregate_data`.
+#'
 #' @export
 #' @importFrom checkmate assert_character assert_names
 #' @examples
@@ -221,6 +229,9 @@ new_epidist_aggregate_data <- function(data) {
 #' @inheritParams as_epidist_aggregate_data
 #' @param ... Additional arguments
 #' @family aggregate_data
+#' @returns A logical, `TRUE` if `data` inherits from `epidist_aggregate_data`
+#'  and `FALSE` otherwise.
+#'
 #' @export
 is_epidist_aggregate_data <- function(data, ...) {
   return(inherits(data, "epidist_aggregate_data"))
@@ -232,6 +243,8 @@ is_epidist_aggregate_data <- function(data, ...) {
 #' @param ... Additional arguments
 #' @method assert_epidist epidist_aggregate_data
 #' @family aggregate_data
+#' @returns `NULL`, invisibly. Called for the side effect of validating `data`.
+#'
 #' @export
 #' @examples
 #' sierra_leone_ebola_data |>

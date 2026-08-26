@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments passed to methods}
 }
+\value{
+An object of class \code{epidist_linelist_data}.
+}
 \description{
 This method expands an \code{epidist_aggregate_data} object into individual
 observations by uncounting the \code{n} column, then converts it to linelist

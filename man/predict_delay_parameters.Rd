@@ -21,6 +21,10 @@ within grouping variables are treated as a new level.}
 
 \item{...}{Additional arguments passed to \code{\link[brms:prepare_predictions]{brms::prepare_predictions()}}.}
 }
+\value{
+A \code{data.frame} of posterior draws of the delay distribution
+parameters.
+}
 \description{
 Extract samples of the delay distribution parameters
 }

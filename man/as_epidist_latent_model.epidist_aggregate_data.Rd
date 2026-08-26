@@ -11,6 +11,9 @@
 
 \item{...}{Not used in this method.}
 }
+\value{
+An object of class \code{epidist_latent_model}.
+}
 \description{
 This method converts aggregate data to a latent model format by first
 converting it to linelist format using

@@ -41,6 +41,9 @@ of \code{sdate_upr} is used.}
 
 \item{...}{Additional arguments passed to methods}
 }
+\value{
+An object of class \code{epidist_linelist_data}.
+}
 \description{
 This method takes a data.frame containing event dates (primary/secondary
 event dates and observation date) and creates an \code{epidist_linelist_data}

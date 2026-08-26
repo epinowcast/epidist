@@ -42,6 +42,9 @@ This is passed as the \code{L} parameter to
 
 \item{...}{Not used in this method.}
 }
+\value{
+An object of class \code{epidist_marginal_model}.
+}
 \description{
 This method converts linelist data to a marginal model format by calculating
 delays between primary and secondary events, along with observation times and
