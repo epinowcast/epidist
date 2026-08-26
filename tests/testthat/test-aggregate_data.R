@@ -23,23 +23,30 @@ test_that("as_epidist_aggregate_data.default works with vectors", {
 })
 
 test_that("as_epidist_aggregate_data works with dates", {
+  dated <- dplyr::mutate(
+    sim_obs,
+    pdate_lwr = as.Date("2023-01-01") + ptime_lwr,
+    pdate_upr = as.Date("2023-01-01") + ptime_upr,
+    sdate_lwr = as.Date("2023-01-01") + stime_lwr,
+    sdate_upr = as.Date("2023-01-01") + stime_upr,
+    obs_date = as.Date("2023-01-01") + obs_time
+  )
+  date_cols <- c(
+    "pdate_lwr",
+    "pdate_upr",
+    "sdate_lwr",
+    "sdate_upr",
+    "obs_date"
+  )
+
   # Selecting only the date columns drops the columns the linelist class
   # requires, so the class is dropped along with them. See `?epidist_data`.
-  data <- sim_obs |>
-    dplyr::mutate(
-      pdate_lwr = as.Date("2023-01-01") + ptime_lwr,
-      pdate_upr = as.Date("2023-01-01") + ptime_upr,
-      sdate_lwr = as.Date("2023-01-01") + stime_lwr,
-      sdate_upr = as.Date("2023-01-01") + stime_upr,
-      obs_date = as.Date("2023-01-01") + obs_time
-    ) |>
-    dplyr::select(
-      pdate_lwr,
-      pdate_upr,
-      sdate_lwr,
-      sdate_upr,
-      obs_date
-    ) |>
+  expect_warning(
+    dplyr::select(dated, dplyr::all_of(date_cols)),
+    "Dropping the"
+  )
+  data <- dated |>
+    dplyr::select(dplyr::all_of(date_cols)) |>
     dplyr::mutate(n = 1) |>
     suppressWarnings()
   expect_false(is_epidist_linelist_data(data))

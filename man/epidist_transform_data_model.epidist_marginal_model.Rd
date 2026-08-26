@@ -23,7 +23,7 @@ by:
 \item Summarising the data by counting unique combinations of these columns and
 any variables in the model formula using \code{\link[=.summarise_n_by_formula]{.summarise_n_by_formula()}}
 \item Converting the summarised data to a marginal model object using
-\code{\link[=new_epidist_marginal_model]{new_epidist_marginal_model()}}
+\code{\link[=new_epidist_marginal_model]{new_epidist_marginal_model()}} and checking it with \code{\link[=assert_epidist]{assert_epidist()}}
 \item Informing the user about any data aggregation that occurred using
 \code{\link[=.inform_data_summarised]{.inform_data_summarised()}}
 }
