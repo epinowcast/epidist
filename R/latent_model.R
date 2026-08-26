@@ -424,7 +424,11 @@ epidist_stancode.epidist_latent_model <- function(
     stanvars_all <- stanvars_all +
       stanvar(
         block = "functions",
-        scode = primarycensored::pcd_load_stan_functions("expgrowth_lpdf")
+        scode = paste0(
+          primarycensored::pcd_load_stan_functions("expgrowth_lpdf"),
+          "\n",
+          .stan_chunk(file.path("latent_model", "expgrowth.stan"))
+        )
       )
   }
 
