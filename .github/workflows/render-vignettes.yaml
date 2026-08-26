@@ -1,0 +1,66 @@
+# Rebuilds the precomputed vignettes.
+#
+# `ebola`, `faq` and `approx-inference` fit models and need cmdstanr, so they
+# are knitted from a `.Rmd.orig` source into a committed `.Rmd` holding static
+# output. That keeps them in the package without needing cmdstanr, or a long
+# model fit, at build time.
+on:
+  push:
+    paths:
+      - 'vignettes/*.Rmd.orig'
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+name: render-vignettes
+
+jobs:
+  render-vignettes:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+          extra-repositories: 'https://stan-dev.r-universe.dev'
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: local::.
+
+      - name: Install cmdstan
+        uses: epinowcast/actions/install-cmdstan@v1
+        with:
+          cmdstan-version: 'latest'
+          num-cores: 2
+
+      - name: Render vignettes
+        run: |
+          setwd("vignettes")
+          for (file in list.files(pattern = "[.]Rmd[.]orig$")) {
+            message("knitting ", file)
+            knitr::knit(file, sub("[.]orig$", "", file))
+          }
+        shell: Rscript {0}
+
+      - name: Create pull request
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "docs: rebuild precomputed vignettes"
+          title: "docs: rebuild precomputed vignettes"
+          body: |
+            Automated rebuild of the precomputed vignettes from their
+            `.Rmd.orig` sources.
+          branch: rebuild-precomputed-vignettes
+          add-paths: |
+            vignettes/*.Rmd
+            vignettes/figures

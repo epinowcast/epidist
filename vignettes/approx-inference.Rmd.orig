@@ -23,7 +23,7 @@ bibliography: references.bib
 set.seed(2)
 
 knitr::opts_chunk$set(
-  fig.path = file.path("figures", "epidist-"),
+  fig.path = file.path("figures", "approx-inference-"),
   collapse = TRUE,
   comment = "#>",
   message = FALSE,
