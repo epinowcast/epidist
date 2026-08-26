@@ -117,15 +117,29 @@ See #588 and #596.
 
 ## Models
 
-- Added the meta model, which fits a delay distribution to published summary
-  estimates, individual level data, or a mix of the two. Published estimates
-  are forward modelled from the study's own estimation procedure, so summaries
-  that did not adjust for right truncation or that treated interval censored
-  data as continuous still contribute unbiased information. See
-  `as_epidist_meta_model()`. See #617.
+- Added the meta model, for fitting to summarised and potentially biased
+  published estimates, jointly with individual level data. Published
+  estimates are forward modelled from the study's own estimation procedure,
+  so summaries that did not adjust for right truncation or that treated
+  interval censored data as continuous still contribute unbiased
+  information. See `as_epidist_meta_model()`. See #617.
 - Added `as_epidist_estimates_data()` for preparing published summary
   estimates, with documentation of the study metadata the meta model needs.
   See #617.
+- The meta model supports studies that stopped collecting at a calendar date
+  through the `trunc_design` field of `as_epidist_estimates_data()`, which
+  weights the estimand by the follow up available to each delay rather than
+  conditioning on a single cohort cutoff. See #617.
+- The meta model supports midpoint imputation, where a study assigned each
+  delay to the centre of the interval it was observed in, as `cens_adjusted`
+  code 3. See #617.
+- A standard error supplied for a quantile row of
+  `as_epidist_estimates_data()` is now interpreted on the delay scale, as
+  studies report it, and converted to the cumulative probability scale by the
+  delta method. See #617.
+- `as_epidist_estimates_data()` now rejects a reported quantile at or beyond
+  the largest delay its study could have seen, which would otherwise
+  contribute a constant to the likelihood rather than information. See #617.
 
 ## Documentation
 
