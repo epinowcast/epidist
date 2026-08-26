@@ -11,6 +11,9 @@ See #420 and paul-buerkner/brms#1676.
 - Removed the `Remotes` field from `DESCRIPTION` so dependencies resolve from CRAN.
 `cmdstanr` is now found through `Additional_repositories` and the development version of `brms` is no longer used.
 See #592.
+- Turned off evaluation of the approximate inference vignette.
+It uses `pathfinder`, which needs a `brms` fix that is merged but unreleased, and this release resolves `brms` from CRAN.
+See #579.
 - Added a `brms (>= 2.23.0)` floor, the version the compatibility helpers were checked against.
 - Pointed the CI workflows at the Stan r-universe with `extra-repositories`.
 Dropping `Remotes` means `pak` can no longer resolve `cmdstanr`, because it does not read `Additional_repositories`.
