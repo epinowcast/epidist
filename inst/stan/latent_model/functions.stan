@@ -1,3 +1,14 @@
+  // Unit scale offsets under an exponentially growing primary event. The
+  // rate is scaled by each bound so the time scale distribution is right.
+  // Follows the primarycensored paper.
+  real dot_expgrowth_raw_lpdf(vector raw, vector r, vector bound) {
+    real total = 0;
+    for (i in 1:num_elements(raw)) {
+      total += expgrowth_lpdf(raw[i] | 0, 1, r[i] * bound[i]);
+    }
+    return total;
+  }
+
 /**
   * Compute the log probability density function for a latent model with censoring
   *
@@ -19,6 +30,9 @@
   * @param swindow_raw Vector of secondary window positions (0-1 scale)
   * @param woverlap Array of indices for overlapping windows
   * @param wN Number of overlapping windows
+  *
+  * 'primary_lpdf_term' is 0 for a uniform primary event, or the log density
+  * of a tilted one. See vignette("model").
   *
   * For observations where the primary and secondary windows overlap the
   * primary offset is bounded by the sampled secondary offset, so the change of
@@ -46,6 +60,14 @@ real latent_family_lpdf(vector y, dpars_A,
   vector[n] d = y - pwindow + swindow;
   vector[n] obs_time = to_vector(relative_obs_t) - pwindow;
   real log_jacobian = wN ? sum(log(swindow[woverlap])) : 0;
+  // The upper bound of the primary window is the sampled secondary offset
+  // where the windows overlap, and the window width otherwise.
+  // Bounded by the sampled secondary offset where the windows overlap.
+  vector[n] pbound = to_vector(pwindow_width);
+  if (wN) {
+    pbound[woverlap] = swindow[woverlap];
+  }
+  real log_primary = primary_lpdf_term;
   return family_lpdf(d | dpars_B) - family_lcdf(obs_time | dpars_B) +
-    log_jacobian;
+    log_jacobian + log_primary;
 }
