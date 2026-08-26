@@ -150,6 +150,42 @@ sim_obs_sex <- as_epidist_linelist_data(
 
 agg_sim_obs_sex <- as_epidist_aggregate_data(sim_obs_sex, by = "sex")
 
+# Weekly censoring windows against the default delay, which leaves a third or
+# so of observations with overlapping primary and secondary windows. This is
+# the case the latent model Jacobian adjustment applies to.
+set.seed(101)
+
+overlap_n <- sample_size
+
+sim_obs_overlap <- simulate_gillespie(seed = 101) |>
+  simulate_secondary(
+    dist = rlnorm,
+    meanlog = meanlog,
+    sdlog = sdlog
+  ) |>
+  dplyr::mutate(
+    ptime_lwr = 7 * floor(.data$ptime / 7),
+    ptime_upr = .data$ptime_lwr + 7,
+    stime_lwr = 7 * floor(.data$stime / 7),
+    stime_upr = .data$stime_lwr + 7,
+    obs_time = 35
+  ) |>
+  dplyr::filter(.data$stime_upr <= .data$obs_time) |>
+  dplyr::slice_sample(n = overlap_n, replace = FALSE)
+
+sim_obs_overlap <- as_epidist_linelist_data(
+  sim_obs_overlap$ptime_lwr,
+  sim_obs_overlap$ptime_upr,
+  sim_obs_overlap$stime_lwr,
+  sim_obs_overlap$stime_upr,
+  sim_obs_overlap$obs_time
+)
+
+prep_obs_overlap <- as_epidist_latent_model(sim_obs_overlap)
+prep_marginal_obs_overlap <- suppressMessages(
+  as_epidist_marginal_model(sim_obs_overlap)
+)
+
 prep_obs <- as_epidist_latent_model(sim_obs)
 prep_naive_obs <- as_epidist_naive_model(sim_obs)
 prep_marginal_obs <- as_epidist_marginal_model(sim_obs)
@@ -263,6 +299,28 @@ if (not_on_cran()) {
     chains = 2,
     backend = "cmdstanr"
   )
+
+  cli::cli_alert_info("Compiling the latent model with overlapping windows")
+  fit_overlap <- epidist(
+    data = prep_obs_overlap,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    backend = "cmdstanr"
+  )
+
+  cli::cli_alert_info("Compiling the marginal model with overlapping windows")
+  fit_marginal_overlap <- suppressMessages(epidist(
+    data = prep_marginal_obs_overlap,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    backend = "cmdstanr"
+  ))
 
   cli::cli_alert_info(
     "Compiling the marginal model with cmdstanr and a sex stratification"

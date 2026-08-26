@@ -20,6 +20,15 @@
   * @param woverlap Array of indices for overlapping windows
   * @param wN Number of overlapping windows
   *
+  * For observations where the primary and secondary windows overlap the
+  * primary offset is bounded by the sampled secondary offset, so the change of
+  * variables pwindow = swindow * pwindow_raw has a parameter dependent
+  * Jacobian. Its log determinant is log(swindow) (the log(swindow_width) part
+  * is data and drops out), and it must be added here because Stan only adds
+  * Jacobians for transformations it can see. Without it a uniform prior on
+  * pwindow_raw implies a primary event density proportional to 1 / swindow
+  * rather than a flat density over the primary window.
+  *
   * @return Log probability density with censoring adjustment for latent model
   */
 real latent_family_lpdf(vector y, dpars_A,
@@ -36,5 +45,7 @@ real latent_family_lpdf(vector y, dpars_A,
   }
   vector[n] d = y - pwindow + swindow;
   vector[n] obs_time = to_vector(relative_obs_t) - pwindow;
-  return family_lpdf(d | dpars_B) - family_lcdf(obs_time | dpars_B);
+  real log_jacobian = wN ? sum(log(swindow[woverlap])) : 0;
+  return family_lpdf(d | dpars_B) - family_lcdf(obs_time | dpars_B) +
+    log_jacobian;
 }
