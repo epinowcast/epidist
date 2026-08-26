@@ -79,6 +79,9 @@ jobs:
             Automated rebuild of the precomputed vignettes from their
             `.Rmd.orig` sources.
           branch: rebuild-precomputed-vignettes
+          # The precomputed figures are negated out of .gitignore so a
+          # plain git add can stage them. Without that this would update the
+          # text and silently leave the images behind.
           add-paths: |
             vignettes/*.Rmd
             vignettes/figures
