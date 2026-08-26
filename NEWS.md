@@ -20,6 +20,7 @@ The package uses the native pipe and the lambda shorthand, both of which need R 
 Both fit a model, so they ran for 118 and 110 seconds against CRAN's 5 second guidance for a single example.
 - Anchored the `brms` links in the documentation so `R CMD check` no longer reports Rd cross-references with missing package anchors.
 - Dropped a stale `fix` entry from the declared global variables.
+- Updated the `brms` documentation URL, which had moved, and added `cran-comments.md`.
 
 ## Bug fixes
 
