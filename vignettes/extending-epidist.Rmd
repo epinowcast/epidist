@@ -32,28 +32,6 @@ If you are building a model that shares those problems but has a different likel
 
 Two packages already do this, in two different ways.
 
-```{r packages-table, eval = TRUE, echo = FALSE}
-knitr::kable(
-  data.frame(
-    Package = c("cfrnow", "tbl.now"),
-    Extends = c("Model type", "Data source"),
-    What = c(
-      paste(
-        "Real-time case fatality ratio via a Bayesian mixture-cure",
-        "survival model. The CFR and the onset-to-death delay both take",
-        "brms formulas."
-      ),
-      paste(
-        "A tidy nowcast tibble class, with methods so it converts into",
-        "epidist's own data classes."
-      )
-    ),
-    stringsAsFactors = FALSE
-  ),
-  col.names = c("Package", "Extends", "What it does")
-)
-```
-
 - [`cfrnow`](https://github.com/epiforecasts/cfrnow) registers a new **model type**.
 - [`tbl.now`](https://github.com/RodrigoZepeda/tbl.now) adds a new **data source**, by writing `as_epidist_linelist_data()` and `as_epidist_aggregate_data()` methods for its own class.
 
