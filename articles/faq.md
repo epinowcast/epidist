@@ -9,6 +9,7 @@ to respond promptly!
 Click to expand for code to reproduce the examples in this vignette
 
 ``` r
+
 library(epidist)
 library(brms)
 library(dplyr)
@@ -109,6 +110,7 @@ may be used to obtain a dataframe of MCMC draws for specified
 parameters.
 
 ``` r
+
 library(posterior)
 draws <- as_draws_df(fit, variable = c("Intercept", "Intercept_sigma"))
 head(draws)
@@ -116,12 +118,12 @@ head(draws)
 
     ## # A draws_df: 6 iterations, 1 chains, and 2 variables
     ##   Intercept Intercept_sigma
-    ## 1       1.8           -0.59
-    ## 2       1.8           -0.56
-    ## 3       1.8           -0.49
-    ## 4       1.8           -0.61
-    ## 5       1.9           -0.53
-    ## 6       1.9           -0.52
+    ## 1       1.7           -0.59
+    ## 2       1.8           -0.57
+    ## 3       1.8           -0.58
+    ## 4       1.7           -0.56
+    ## 5       1.8           -0.53
+    ## 6       1.7           -0.60
     ## # ... hidden reserved variables {'.chain', '.iteration', '.draw'}
 
 #### Using random variables (`rvars`) for uncertainty propagation
@@ -132,6 +134,7 @@ perform mathematical operations directly with posterior distributions
 while propagating uncertainty.
 
 ``` r
+
 library(posterior)
 # Convert model parameters to rvars
 rv <- as_draws_rvars(fit_location)
@@ -141,9 +144,10 @@ rv$b_Intercept
 ```
 
     ## rvar<500,2>[1] mean ± sd:
-    ## [1] 1.6 ± 0.063
+    ## [1] 1.6 ± 0.064
 
 ``` r
+
 # Calculate the mean delay (on natural scale) for each location
 mean_delay_loc0 <- exp(rv$b_Intercept + 0.5 * exp(rv$b_sigma_Intercept)^2)
 mean_delay_loc1 <- exp(rv$b_Intercept +
@@ -156,25 +160,27 @@ summary(mean_delay_loc0)
     ## # A tibble: 1 × 10
     ##   variable         mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail
     ##   <chr>           <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-    ## 1 mean_delay_loc0  5.54   5.48 0.449 0.389  4.95  6.32  1.00     661.     685.
+    ## 1 mean_delay_loc0  5.54   5.47 0.441 0.396  4.94  6.30  1.00     891.     658.
 
 ``` r
+
 summary(mean_delay_loc1)
 ```
 
     ## # A tibble: 1 × 10
     ##   variable         mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail
     ##   <chr>           <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-    ## 1 mean_delay_loc1  12.8   11.4  5.45  2.82  8.24  21.4  1.01     208.     197.
+    ## 1 mean_delay_loc1  13.3   11.2  7.23  2.76  8.27  25.9  1.02     140.     133.
 
 ``` r
+
 # Calculate the difference between locations
 delay_diff <- mean_delay_loc1 - mean_delay_loc0
 delay_diff
 ```
 
     ## rvar<500,2>[1] mean ± sd:
-    ## [1] 7.3 ± 5.5
+    ## [1] 7.7 ± 7.3
 
 For more details, see the [`posterior` package
 documentation](https://mc-stan.org/posterior/articles/rvar.html).
@@ -189,6 +195,7 @@ diagnostic plots. For example, the function
 can be used to produce traceplots for specified parameters.
 
 ``` r
+
 library(bayesplot)
 mcmc_trace(fit, pars = c("Intercept", "Intercept_sigma"))
 ```
@@ -201,13 +208,14 @@ which can be used to obtain common diagnostics used to assess the
 quality of a fitted model.
 
 ``` r
+
 epidist_diagnostics(fit)
 ```
 
     ## # A tibble: 1 × 8
     ##    time samples max_rhat divergent_transitions per_divergent_transitions
     ##   <dbl>   <dbl>    <dbl>                 <dbl>                     <dbl>
-    ## 1  2.51    1000     1.00                     0                         0
+    ## 1  2.66    1000     1.00                     0                         0
     ## # ℹ 3 more variables: max_treedepth <dbl>, no_at_max_treedepth <int>,
     ## #   per_at_max_treedepth <dbl>
 
@@ -233,6 +241,7 @@ Then, pass this expanded data to the `newdata` argument of
 [`pp_check()`](https://mc-stan.org/bayesplot/reference/pp_check.html).
 
 ``` r
+
 # Expand the aggregated data to individual-level data
 # Note: We must ensure the weight column 'n' is present but set to 1
 data_expanded <- data |>
@@ -286,6 +295,7 @@ latent individual model, we suggest the following prior distributions
 for the `brms` `mu` and `sigma` intercept parameters:
 
 ``` r
+
 # Note that we export lognormal() as part of epidist hence no need for brms::
 family <- lognormal()
 
@@ -321,6 +331,7 @@ Here are the distributions on the delay distribution mean and standard
 deviation parameters that these prior distributions imply:
 
 ``` r
+
 set.seed(1)
 fit_ppc <- epidist(
   data = data,
@@ -333,6 +344,7 @@ fit_ppc <- epidist(
 ```
 
 ``` r
+
 pred <- predict_delay_parameters(fit_ppc)
 
 pred |>
@@ -356,6 +368,7 @@ pred |>
 ![](faq_files/figure-html/unnamed-chunk-9-1.png)
 
 ``` r
+
 quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 ```
 
@@ -363,6 +376,7 @@ quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
     ##  0.3172760  0.8667011  1.6163277  3.2461963  6.6291746 12.0852973 34.0415723
 
 ``` r
+
 quantile(pred$sd, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 ```
 
@@ -378,6 +392,7 @@ sensitive the posterior distribution is to perturbations of the prior
 distribution and likelihood using power-scaling analysis:
 
 ``` r
+
 library(priorsense)
 powerscale_plot_dens(fit, variable = c("Intercept", "Intercept_sigma")) +
   theme_minimal()
@@ -393,14 +408,14 @@ names for parameters. Here, we provide a table giving the correspondence
 between the distributional parameter names used in `brms` and those used
 in standard R functions for some common likelihood families.
 
-| Family                                                                   | `brms` parameter | R parameter                    |
-|--------------------------------------------------------------------------|------------------|--------------------------------|
-| [`lognormal()`](https://paulbuerkner.com/brms/reference/brmsfamily.html) | `mu`             | `meanlog`                      |
-| [`lognormal()`](https://paulbuerkner.com/brms/reference/brmsfamily.html) | `sigma`          | `sdlog`                        |
-| [`Gamma()`](https://rdrr.io/r/stats/family.html)                         | `mu`             | `shape / scale`                |
-| [`Gamma()`](https://rdrr.io/r/stats/family.html)                         | `shape`          | `shape`                        |
-| [`weibull()`](https://paulbuerkner.com/brms/reference/brmsfamily.html)   | `mu`             | `scale * gamma(1 + 1 / shape)` |
-| [`weibull()`](https://paulbuerkner.com/brms/reference/brmsfamily.html)   | `shape`          | `shape`                        |
+| Family | `brms` parameter | R parameter |
+|----|----|----|
+| [`lognormal()`](https://paulbuerkner.com/brms/reference/brmsfamily.html) | `mu` | `meanlog` |
+| [`lognormal()`](https://paulbuerkner.com/brms/reference/brmsfamily.html) | `sigma` | `sdlog` |
+| [`Gamma()`](https://rdrr.io/r/stats/family.html) | `mu` | `shape / scale` |
+| [`Gamma()`](https://rdrr.io/r/stats/family.html) | `shape` | `shape` |
+| [`weibull()`](https://paulbuerkner.com/brms/reference/brmsfamily.html) | `mu` | `scale * gamma(1 + 1 / shape)` |
+| [`weibull()`](https://paulbuerkner.com/brms/reference/brmsfamily.html) | `shape` | `shape` |
 
 Note that all families in `brms` are parameterised with some measure of
 centrality `mu` as their first parameter. This parameter does not
@@ -435,6 +450,7 @@ process (in which the primary and secondary censoring windows are both
 one) then:
 
 ``` r
+
 library(tidybayes)
 ```
 
@@ -446,6 +462,7 @@ library(tidybayes)
     ##     dstudent_t, pstudent_t, qstudent_t, rstudent_t
 
 ``` r
+
 draws_pmf <- tibble::tibble(
   relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
 ) |>
@@ -455,6 +472,7 @@ draws_pmf <- tibble::tibble(
     ## Warning: Found infinite values in the data, which may cause issues for Stan.
 
 ``` r
+
 ggplot(draws_pmf, aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
   labs(x = "Delay", y = "PMF") +
@@ -462,7 +480,7 @@ ggplot(draws_pmf, aes(x = .prediction)) +
   theme_minimal()
 ```
 
-    ## Warning: Removed 6 rows containing non-finite outside the scale range
+    ## Warning: Removed 3 rows containing non-finite outside the scale range
     ## (`stat_count()`).
 
     ## Warning: Removed 1 row containing missing values or values outside the scale range
@@ -492,6 +510,7 @@ Here’s a simple example using a model that includes location as a
 covariate:
 
 ``` r
+
 library(marginaleffects)
 
 # Compare outcomes between location categories (0 and 1)
@@ -503,7 +522,7 @@ avg_comparisons(
 
     ## 
     ##  Estimate 2.5 % 97.5 %
-    ##      5.86  2.21   20.2
+    ##      5.66  2.22   29.9
     ## 
     ## Term: location
     ## Type: response
@@ -520,10 +539,11 @@ CmdStan (see the README for more details). We can check we have
 everything we need as follows:
 
 ``` r
+
 cmdstanr::cmdstan_version()
 ```
 
-    ## [1] "2.38.0"
+    ## [1] "2.39.0"
 
 ### References
 
@@ -531,7 +551,7 @@ Kallioinen, Noa, Topi Paananen, Paul-Christian Bürkner, and Aki Vehtari.
 2024. “Detecting and Diagnosing Prior and Likelihood Sensitivity with
 Power-Scaling.” *Statistics and Computing* 34 (1): 57.
 
-Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, Anne Cori,
-Nicholas G. Davies, Jonathan Dushoff, Sebastian Funk, et al. 2024.
+Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, et al. 2024.
 “Estimating Epidemiological Delay Distributions for Infectious
-Diseases.” *medRxiv*. <https://doi.org/10.1101/2024.01.12.24301247>.
+Diseases.” *medRxiv*, ahead of print.
+<https://doi.org/10.1101/2024.01.12.24301247>.

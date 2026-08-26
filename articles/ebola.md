@@ -18,6 +18,7 @@ In analyzing this data, we demonstrate the following features of
 The packages used in this article are:
 
 ``` r
+
 set.seed(123)
 
 library(epidist)
@@ -43,8 +44,9 @@ typically more performant than the default `rstan` backend. To use the
 more details). We can check we have everything we need as follows:
 
 ``` r
+
 cmdstanr::cmdstan_version()
-#> [1] "2.38.0"
+#> [1] "2.39.0"
 ```
 
 ## 2 Data preparation
@@ -52,6 +54,7 @@ cmdstanr::cmdstan_version()
 We begin by loading the Ebola line list data:
 
 ``` r
+
 data("sierra_leone_ebola_data")
 ```
 
@@ -60,6 +63,7 @@ The data has 8358 rows, each corresponding to a unique case report ID
 symptom onset and positive sample, and their district and chiefdom.
 
 ``` r
+
 head(sierra_leone_ebola_data)
 #> # A tibble: 6 × 7
 #>      id   age sex    date_of_symptom_onset date_of_sample_tested district
@@ -85,6 +89,7 @@ districts.
 Click to expand for code to prepare outbreak plot
 
 ``` r
+
 p_outbreak <- sierra_leone_ebola_data |>
   filter(id %% fraction == 0) |>
   ggplot() +
@@ -103,6 +108,7 @@ p_outbreak <- sierra_leone_ebola_data |>
 ```
 
 ``` r
+
 p_outbreak
 ```
 
@@ -128,6 +134,7 @@ distribution.
 To prepare the data, we begin by selecting the relevant columns:
 
 ``` r
+
 obs_cens <- select(
   sierra_leone_ebola_data,
   id, date_of_symptom_onset, date_of_sample_tested, age, sex, district
@@ -146,9 +153,10 @@ head(obs_cens)
 ```
 
 For the time being, we filter the data to only complete cases (i.e. rows
-of the data which have no missing values[¹](#fn1)).
+of the data which have no missing values[^1]).
 
 ``` r
+
 n <- nrow(obs_cens)
 obs_cens <- obs_cens[complete.cases(obs_cens), ]
 n_complete <- nrow(obs_cens)
@@ -160,6 +168,7 @@ model used in this is adjusting for truncation. To check it is working
 try filtering instead for the `date_of_symptom_onset` and rerunning.**
 
 ``` r
+
 obs_cens_trunc <- filter(
   obs_cens,
   date_of_sample_tested <= as.Date("2015-01-31")
@@ -170,6 +179,7 @@ We prepare the data for use with the `epidist` package by converting the
 data to an `epidist_linelist_data` object:
 
 ``` r
+
 linelist_data <- as_epidist_linelist_data(
   obs_cens_trunc,
   pdate_lwr = "date_of_symptom_onset",
@@ -192,6 +202,7 @@ To prepare the data for use with the marginal model, we define the data
 as being a `epidist_marginal_model` model object:
 
 ``` r
+
 obs_prep <- as_epidist_marginal_model(linelist_data, obs_time_threshold = 1)
 head(obs_prep)
 #> # A tibble: 6 × 21
@@ -233,6 +244,7 @@ distributional parameters `mu` and `sigma`. As a model is not explicitly
 placed on `sigma`, a constant model `sigma ~ 1` is assumed.)
 
 ``` r
+
 fit <- epidist(
   data = obs_prep,
   formula = mu ~ 1,
@@ -245,12 +257,12 @@ fit <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 6.4 seconds.
-#> Chain 1 finished in 7.4 seconds.
+#> Chain 2 finished in 7.0 seconds.
+#> Chain 1 finished in 7.2 seconds.
 #> 
 #> Both chains finished successfully.
-#> Mean chain execution time: 6.9 seconds.
-#> Total execution time: 7.6 seconds.
+#> Mean chain execution time: 7.1 seconds.
+#> Total execution time: 7.4 seconds.
 ```
 
 The `fit` object is a
@@ -262,6 +274,7 @@ about the fitted model, including posterior estimates for the regression
 coefficients:
 
 ``` r
+
 summary(fit)
 #>  Family: marginal_lognormal 
 #>   Links: mu = identity; sigma = log 
@@ -273,8 +286,8 @@ summary(fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.65      0.01     1.64     1.67 1.00     1946     1261
-#> sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1751     1160
+#> Intercept           1.65      0.01     1.64     1.67 1.00     1935     1157
+#> sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1406     1202
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -288,6 +301,7 @@ distribution, `mu` and `sigma`, by sex we alter the `formula`
 specification to include fixed effects for sex `~ 1 + sex` as follows:
 
 ``` r
+
 fit_sex <- epidist(
   data = obs_prep,
   formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
@@ -300,11 +314,11 @@ fit_sex <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 14.6 seconds.
-#> Chain 1 finished in 15.0 seconds.
+#> Chain 2 finished in 14.8 seconds.
+#> Chain 1 finished in 15.1 seconds.
 #> 
 #> Both chains finished successfully.
-#> Mean chain execution time: 14.8 seconds.
+#> Mean chain execution time: 14.9 seconds.
 #> Total execution time: 15.1 seconds.
 ```
 
@@ -318,6 +332,7 @@ observed data, and individual delays between men and women vary
 significantly.
 
 ``` r
+
 summary(fit_sex)
 #>  Family: marginal_lognormal 
 #>   Links: mu = identity; sigma = log 
@@ -329,10 +344,10 @@ summary(fit_sex)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.63      0.01     1.61     1.65 1.00     2033     1531
-#> sigma_Intercept    -0.58      0.01    -0.60    -0.55 1.00     2072     1530
-#> sexMale             0.04      0.01     0.01     0.07 1.00     2283     1568
-#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2001     1546
+#> Intercept           1.63      0.01     1.61     1.65 1.00     2375     1418
+#> sigma_Intercept    -0.58      0.01    -0.60    -0.55 1.00     2010     1437
+#> sexMale             0.04      0.01     0.01     0.07 1.00     2401     1451
+#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2289     1570
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -348,6 +363,7 @@ shared normal distribution, within the model for both the `mu` and
 `(1 | district)` in the formulas:
 
 ``` r
+
 fit_sex_district <- epidist(
   data = obs_prep,
   formula = bf(
@@ -364,12 +380,12 @@ fit_sex_district <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 208.6 seconds.
-#> Chain 1 finished in 220.9 seconds.
+#> Chain 1 finished in 205.4 seconds.
+#> Chain 2 finished in 225.2 seconds.
 #> 
 #> Both chains finished successfully.
-#> Mean chain execution time: 214.8 seconds.
-#> Total execution time: 221.0 seconds.
+#> Mean chain execution time: 215.3 seconds.
+#> Total execution time: 225.4 seconds.
 ```
 
 **As this is a longer running model (~ 2 minutes) we have reduced the
@@ -382,6 +398,7 @@ For this model, along with looking at the
 function to look at the estimates of the random effects:
 
 ``` r
+
 summary(fit_sex_district)
 #>  Family: marginal_lognormal 
 #>   Links: mu = identity; sigma = log 
@@ -394,15 +411,15 @@ summary(fit_sex_district)
 #> Multilevel Hyperparameters:
 #> ~district (Number of levels: 14) 
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.16      0.04     0.10     0.25 1.00      207      293
-#> sd(sigma_Intercept)     0.21      0.06     0.13     0.36 1.00      245      366
+#> sd(Intercept)           0.16      0.04     0.10     0.26 1.01      243      425
+#> sd(sigma_Intercept)     0.20      0.05     0.13     0.33 1.00      320      544
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.63      0.04     1.54     1.72 1.01      213      434
-#> sigma_Intercept    -0.67      0.07    -0.80    -0.55 1.01      201      294
-#> sexMale             0.04      0.01     0.01     0.07 1.00     1934      734
-#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1723      764
+#> Intercept           1.63      0.05     1.53     1.73 1.01      203      229
+#> sigma_Intercept    -0.66      0.06    -0.78    -0.55 1.00      180      475
+#> sexMale             0.04      0.01     0.02     0.07 1.00     1155      711
+#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1046      717
 #> 
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -411,39 +428,39 @@ ranef(fit_sex_district)
 #> $district
 #> , , Intercept
 #> 
-#>                    Estimate  Est.Error        Q2.5       Q97.5
-#> Bo            -0.0009210240 0.05664249 -0.11873351  0.10726897
-#> Bombali        0.2587855987 0.04540714  0.16517171  0.34570734
-#> Bonthe        -0.0235014760 0.12842589 -0.29452619  0.22570139
-#> Kailahun       0.0006459925 0.04615691 -0.09354821  0.08951358
-#> Kambia        -0.0582745253 0.05957083 -0.17900171  0.05470313
-#> Kenema        -0.2469096296 0.05072071 -0.35069624 -0.15413390
-#> Koinadugu      0.1892247487 0.07419837  0.04445494  0.33645555
-#> Kono          -0.0756692093 0.05565176 -0.18441099  0.03758468
-#> Moyamba       -0.0052760903 0.05925683 -0.12781572  0.11200662
-#> Port Loko      0.1471717280 0.04664893  0.04923815  0.23613262
-#> Pujehun       -0.0538013944 0.09149991 -0.23033858  0.12194116
-#> Tonkolili      0.0837159780 0.04743135 -0.02100962  0.17261701
-#> Western Rural -0.0189135775 0.04612329 -0.11158204  0.06608856
-#> Western Urban -0.1493767018 0.04648789 -0.24938924 -0.06284867
+#>                   Estimate  Est.Error        Q2.5       Q97.5
+#> Bo            -0.004734519 0.06053815 -0.12442781  0.11376508
+#> Bombali        0.257345374 0.05117867  0.15151442  0.35946819
+#> Bonthe        -0.022324727 0.13050027 -0.27022801  0.23445881
+#> Kailahun      -0.001974225 0.05185061 -0.10456039  0.10976209
+#> Kambia        -0.059364435 0.06267521 -0.18155077  0.06619807
+#> Kenema        -0.249843953 0.05602416 -0.36410389 -0.14078391
+#> Koinadugu      0.181596312 0.07955986  0.03722483  0.34475640
+#> Kono          -0.079611313 0.05983969 -0.19577006  0.04451104
+#> Moyamba       -0.010432806 0.06624814 -0.14170206  0.12703567
+#> Port Loko      0.145291432 0.05196573  0.04169572  0.24574739
+#> Pujehun       -0.053640887 0.09941718 -0.25354477  0.13246247
+#> Tonkolili      0.080918781 0.05311473 -0.01953644  0.18756047
+#> Western Rural -0.022943546 0.05273685 -0.13024891  0.07967034
+#> Western Urban -0.152138721 0.05269011 -0.26340244 -0.03901819
 #> 
 #> , , sigma_Intercept
 #> 
 #>                  Estimate  Est.Error        Q2.5       Q97.5
-#> Bo             0.19020929 0.07815741  0.04429724  0.33524902
-#> Bombali       -0.22693848 0.06964522 -0.35254667 -0.09407397
-#> Bonthe        -0.14889910 0.22185044 -0.65160628  0.25438133
-#> Kailahun      -0.33200847 0.07257209 -0.46346387 -0.19334103
-#> Kambia         0.06107378 0.08787791 -0.09926696  0.23226268
-#> Kenema         0.11347448 0.07295670 -0.02256332  0.25655658
-#> Koinadugu      0.07147546 0.10160307 -0.11819123  0.25429403
-#> Kono           0.03445527 0.07759814 -0.10308857  0.17789994
-#> Moyamba        0.09751999 0.08207333 -0.05967818  0.24594033
-#> Port Loko     -0.02217677 0.06965297 -0.15334155  0.11168515
-#> Pujehun       -0.09056796 0.15336893 -0.40017127  0.21191173
-#> Tonkolili     -0.15278693 0.07316292 -0.27935941 -0.01903359
-#> Western Rural  0.07230188 0.06950024 -0.05320194  0.20406381
-#> Western Urban  0.27012811 0.06731920  0.14920194  0.40089394
+#> Bo             0.18569262 0.07369534  0.04482826  0.33737619
+#> Bombali       -0.22775131 0.06437477 -0.35554116 -0.11495850
+#> Bonthe        -0.12969344 0.21161946 -0.58030178  0.23547407
+#> Kailahun      -0.33616645 0.06800887 -0.47243605 -0.21498099
+#> Kambia         0.05750006 0.08168920 -0.09891025  0.21946416
+#> Kenema         0.11012150 0.06758485 -0.01744927  0.25279819
+#> Koinadugu      0.06908751 0.09597918 -0.11773948  0.26293122
+#> Kono           0.03001546 0.07544342 -0.12010087  0.18096483
+#> Moyamba        0.09643314 0.07632248 -0.05890960  0.25667593
+#> Port Loko     -0.02593841 0.06372404 -0.15444021  0.09431119
+#> Pujehun       -0.09253076 0.13856786 -0.36327888  0.19085602
+#> Tonkolili     -0.15478393 0.06856191 -0.28870574 -0.02958416
+#> Western Rural  0.07046308 0.06427971 -0.05123806  0.18937480
+#> Western Urban  0.26692945 0.06209873  0.14346072  0.38832898
 ```
 
 ### 3.3 Posterior expectations
@@ -470,6 +487,7 @@ women.
 Click to expand for code to the posterior expectation plots
 
 ``` r
+
 add_marginal_dummy_vars <- function(data) {
   return(
     mutate(
@@ -522,6 +540,7 @@ epred_sex_district_figure <- expectation_draws_sex_district |>
 ```
 
 ``` r
+
 epred_base_figure / epred_sex_figure / epred_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 2.5))
 ```
@@ -543,6 +562,7 @@ For example, for the `mu` parameter in the sex-district stratified model
 Click to expand for code to prepare linear predictor plot
 
 ``` r
+
 linpred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
   data_grid(sex, district) |>
@@ -559,6 +579,7 @@ p_linpred_sex_district <- linpred_draws_sex_district |>
 ```
 
 ``` r
+
 p_linpred_sex_district
 ```
 
@@ -594,6 +615,7 @@ delays greater than 30 are omitted from the figure.
 Click to expand for code to prepare PMF plots
 
 ``` r
+
 add_marginal_pmf_vars <- function(data) {
   return(
     mutate(
@@ -657,6 +679,7 @@ pmf_sex_district_figure <- draws_sex_district_pmf |>
 ```
 
 ``` r
+
 pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 5.5))
 ```
@@ -676,6 +699,7 @@ censoring. That is to produce continuous delay times (Figure
 Click to expand for code to prepare PDF plots
 
 ``` r
+
 add_marginal_pdf_vars <- function(data) {
   return(
     mutate(
@@ -737,6 +761,7 @@ pdf_sex_district_figure <- draws_sex_district_pdf |>
 ```
 
 ``` r
+
 pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 5.5))
 ```
@@ -759,16 +784,14 @@ representations of the delay distribution.
 
 ### References
 
-Fang, Li-Qun, Yang Yang, Jia-Fu Jiang, Hong-Wu Yao, David Kargbo,
-Xin-Lou Li, Bao-Gui Jiang, et al. 2016. “Transmission Dynamics of Ebola
-Virus Disease and Intervention Effectiveness in Sierra Leone.”
-*Proceedings of the National Academy of Sciences* 113 (16): 4488–93.
+Fang, Li-Qun, Yang Yang, Jia-Fu Jiang, et al. 2016. “Transmission
+Dynamics of Ebola Virus Disease and Intervention Effectiveness in Sierra
+Leone.” *Proceedings of the National Academy of Sciences* 113 (16):
+4488–93.
 
-World Health Organization. 2016. “Ebola Outbreak 2014-2016 - West
-Africa.”
+World Health Organization. 2016. *Ebola Outbreak 2014-2016 - West
+Africa*.
 <https://www.who.int/emergencies/situations/ebola-outbreak-2014-2016-West-Africa>.
 
-------------------------------------------------------------------------
-
-1.  An extension is needed to allow for missing data in the model -
+[^1]: An extension is needed to allow for missing data in the model -
     please open issue if this would be useful for you.

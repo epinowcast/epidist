@@ -1,5 +1,51 @@
 # Changelog
 
+## epidist 0.4.1.1000
+
+### Bug fixes
+
+- Declared `reformulas` in `Suggests` and skipped the `marginaleffects`
+  integration test when it is absent. `insight` needs `reformulas` to
+  read the formula of a `brmsfit`, but only suggests it, so the test
+  failed on a clean library. See
+  [\#601](https://github.com/epinowcast/epidist/issues/601).
+
+### CI
+
+- Pinned the `precommit` hooks to a revision whose lockfile uses
+  `digest` 0.6.39. The tagged v0.4.3 lockfile pins `digest` 0.6.36,
+  which calls `Calloc` and `Free`. Those were removed from the R API in
+  R 4.5, so the hook environment failed to build and the `pre-commit`
+  job failed on every pull request. See
+  [\#578](https://github.com/epinowcast/epidist/issues/578).
+
+## epidist 0.4.1
+
+### Bug fixes
+
+- Fixed Stan compilation failure with primarycensored \>= 1.4.0 by
+  adding the new `L` (left truncation) parameter to the
+  `primarycensored_lpmf` call in the marginal model. See
+  [\#583](https://github.com/epinowcast/epidist/issues/583).
+- Added `primarycensored (>= 1.4.0)` version bound to DESCRIPTION.
+- Updated test expectations for changed primarycensored error handling.
+- Re-enabled approximate inference vignette evaluation using dev brms
+  with pathfinder path fix. See
+  [\#579](https://github.com/epinowcast/epidist/issues/579).
+
+### Package
+
+- Load only required primarycensored Stan functions
+  (`primarycensored_lpmf` and ODE/distribution helpers) with
+  `pcd_load_stan_functions(dependencies = TRUE)` instead of loading all
+  functions. See
+  [\#582](https://github.com/epinowcast/epidist/issues/582).
+
+### CI
+
+- Extended `check-cmdstan` workflow to also check marginal model Stan
+  syntax.
+
 ## epidist 0.4.0
 
 ### Package

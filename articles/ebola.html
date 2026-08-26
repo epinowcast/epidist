@@ -18,8 +18,8 @@
     }
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Using epidist to estimate delay between symptom onset and positive test for an Ebola outbreak in Sierra Leone">
 <meta name="description" content="A more detailed guide to using the epidist R package">
@@ -34,7 +34,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,7 +89,7 @@
     
     
 <p>In this vignette, we use the <code>epidist</code> package to analyze line list data from the 2014-2016 outbreak of Ebola in Sierra Leone <span class="citation">(<a href="#ref-who_ebola_2014_2016">World Health Organization 2016</a>)</span>.
-These data were collated by <span class="citation">Fang et al. (<a href="#ref-fang2016transmission">2016</a>)</span>.
+These data were collated by <span class="citation"><span class="nocase">Fang et al.</span> (<a href="#ref-fang2016transmission">2016</a>)</span>.
 We provide the data in the <code>epidist</code> package via <code><a href="../reference/sierra_leone_ebola_data.html">?sierra_leone_ebola_data</a></code>.
 In analyzing this data, we demonstrate the following features of <code>epidist</code>:</p>
 <ol style="list-style-type: decimal">
@@ -118,7 +118,7 @@ To use the <code>cmdstanr</code> backend, we first need to install CmdStan (see 
 We can check we have everything we need as follows:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "2.38.0"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "2.39.0"</span></span></code></pre></div>
 </div>
 <div class="section level2" number="2">
 <h2 id="data-preparation">
@@ -272,12 +272,12 @@ As a model is not explicitly placed on <code>sigma</code>, a constant model <cod
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 6.4 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 7.4 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 7.0 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 7.2 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 6.9 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 7.6 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 7.1 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 7.4 seconds.</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <a href="https://paulbuerkner.com/brms/reference/brmsfit-class.html" class="external-link"><code>brmsfit</code></a> object, and has the associated range of methods.
 See <code>methods(class = "brmsfit")</code> for more details.
 For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> to view information about the fitted model, including posterior estimates for the regression coefficients:</p>
@@ -293,8 +293,8 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.65      0.01     1.64     1.67 1.00     1946     1261</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1751     1160</span></span>
+<span><span class="co">#&gt; Intercept           1.65      0.01     1.64     1.67 1.00     1935     1157</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1406     1202</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -318,11 +318,11 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 14.6 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 15.0 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 14.8 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 15.1 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 14.8 seconds.</span></span>
+<span><span class="co">#&gt; Mean chain execution time: 14.9 seconds.</span></span>
 <span><span class="co">#&gt; Total execution time: 15.1 seconds.</span></span></code></pre></div>
 <p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.04) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is 0.02).
 For the <code>sexMale</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexMale</code> effect the 95% credible interval includes zero.
@@ -339,10 +339,10 @@ It is important to note that the estimates represent an average of the observed 
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.63      0.01     1.61     1.65 1.00     2033     1531</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.58      0.01    -0.60    -0.55 1.00     2072     1530</span></span>
-<span><span class="co">#&gt; sexMale             0.04      0.01     0.01     0.07 1.00     2283     1568</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2001     1546</span></span>
+<span><span class="co">#&gt; Intercept           1.63      0.01     1.61     1.65 1.00     2375     1418</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.58      0.01    -0.60    -0.55 1.00     2010     1437</span></span>
+<span><span class="co">#&gt; sexMale             0.04      0.01     0.01     0.07 1.00     2401     1451</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2289     1570</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -372,12 +372,12 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 208.6 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 220.9 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 205.4 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 225.2 seconds.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 214.8 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 221.0 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 215.3 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 225.4 seconds.</span></span></code></pre></div>
 <p><strong>As this is a longer running model (~ 2 minutes) we have reduced the number of iterations but for real world use cases this may not be sufficient.</strong></p>
 <p>For this model, along with looking at the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -393,15 +393,15 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
 <span><span class="co">#&gt; ~district (Number of levels: 14) </span></span>
 <span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)           0.16      0.04     0.10     0.25 1.00      207      293</span></span>
-<span><span class="co">#&gt; sd(sigma_Intercept)     0.21      0.06     0.13     0.36 1.00      245      366</span></span>
+<span><span class="co">#&gt; sd(Intercept)           0.16      0.04     0.10     0.26 1.01      243      425</span></span>
+<span><span class="co">#&gt; sd(sigma_Intercept)     0.20      0.05     0.13     0.33 1.00      320      544</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.63      0.04     1.54     1.72 1.01      213      434</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.67      0.07    -0.80    -0.55 1.01      201      294</span></span>
-<span><span class="co">#&gt; sexMale             0.04      0.01     0.01     0.07 1.00     1934      734</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1723      764</span></span>
+<span><span class="co">#&gt; Intercept           1.63      0.05     1.53     1.73 1.01      203      229</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.66      0.06    -0.78    -0.55 1.00      180      475</span></span>
+<span><span class="co">#&gt; sexMale             0.04      0.01     0.02     0.07 1.00     1155      711</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1046      717</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -410,39 +410,39 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; $district</span></span>
 <span><span class="co">#&gt; , , Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                    Estimate  Est.Error        Q2.5       Q97.5</span></span>
-<span><span class="co">#&gt; Bo            -0.0009210240 0.05664249 -0.11873351  0.10726897</span></span>
-<span><span class="co">#&gt; Bombali        0.2587855987 0.04540714  0.16517171  0.34570734</span></span>
-<span><span class="co">#&gt; Bonthe        -0.0235014760 0.12842589 -0.29452619  0.22570139</span></span>
-<span><span class="co">#&gt; Kailahun       0.0006459925 0.04615691 -0.09354821  0.08951358</span></span>
-<span><span class="co">#&gt; Kambia        -0.0582745253 0.05957083 -0.17900171  0.05470313</span></span>
-<span><span class="co">#&gt; Kenema        -0.2469096296 0.05072071 -0.35069624 -0.15413390</span></span>
-<span><span class="co">#&gt; Koinadugu      0.1892247487 0.07419837  0.04445494  0.33645555</span></span>
-<span><span class="co">#&gt; Kono          -0.0756692093 0.05565176 -0.18441099  0.03758468</span></span>
-<span><span class="co">#&gt; Moyamba       -0.0052760903 0.05925683 -0.12781572  0.11200662</span></span>
-<span><span class="co">#&gt; Port Loko      0.1471717280 0.04664893  0.04923815  0.23613262</span></span>
-<span><span class="co">#&gt; Pujehun       -0.0538013944 0.09149991 -0.23033858  0.12194116</span></span>
-<span><span class="co">#&gt; Tonkolili      0.0837159780 0.04743135 -0.02100962  0.17261701</span></span>
-<span><span class="co">#&gt; Western Rural -0.0189135775 0.04612329 -0.11158204  0.06608856</span></span>
-<span><span class="co">#&gt; Western Urban -0.1493767018 0.04648789 -0.24938924 -0.06284867</span></span>
+<span><span class="co">#&gt;                   Estimate  Est.Error        Q2.5       Q97.5</span></span>
+<span><span class="co">#&gt; Bo            -0.004734519 0.06053815 -0.12442781  0.11376508</span></span>
+<span><span class="co">#&gt; Bombali        0.257345374 0.05117867  0.15151442  0.35946819</span></span>
+<span><span class="co">#&gt; Bonthe        -0.022324727 0.13050027 -0.27022801  0.23445881</span></span>
+<span><span class="co">#&gt; Kailahun      -0.001974225 0.05185061 -0.10456039  0.10976209</span></span>
+<span><span class="co">#&gt; Kambia        -0.059364435 0.06267521 -0.18155077  0.06619807</span></span>
+<span><span class="co">#&gt; Kenema        -0.249843953 0.05602416 -0.36410389 -0.14078391</span></span>
+<span><span class="co">#&gt; Koinadugu      0.181596312 0.07955986  0.03722483  0.34475640</span></span>
+<span><span class="co">#&gt; Kono          -0.079611313 0.05983969 -0.19577006  0.04451104</span></span>
+<span><span class="co">#&gt; Moyamba       -0.010432806 0.06624814 -0.14170206  0.12703567</span></span>
+<span><span class="co">#&gt; Port Loko      0.145291432 0.05196573  0.04169572  0.24574739</span></span>
+<span><span class="co">#&gt; Pujehun       -0.053640887 0.09941718 -0.25354477  0.13246247</span></span>
+<span><span class="co">#&gt; Tonkolili      0.080918781 0.05311473 -0.01953644  0.18756047</span></span>
+<span><span class="co">#&gt; Western Rural -0.022943546 0.05273685 -0.13024891  0.07967034</span></span>
+<span><span class="co">#&gt; Western Urban -0.152138721 0.05269011 -0.26340244 -0.03901819</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; , , sigma_Intercept</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5       Q97.5</span></span>
-<span><span class="co">#&gt; Bo             0.19020929 0.07815741  0.04429724  0.33524902</span></span>
-<span><span class="co">#&gt; Bombali       -0.22693848 0.06964522 -0.35254667 -0.09407397</span></span>
-<span><span class="co">#&gt; Bonthe        -0.14889910 0.22185044 -0.65160628  0.25438133</span></span>
-<span><span class="co">#&gt; Kailahun      -0.33200847 0.07257209 -0.46346387 -0.19334103</span></span>
-<span><span class="co">#&gt; Kambia         0.06107378 0.08787791 -0.09926696  0.23226268</span></span>
-<span><span class="co">#&gt; Kenema         0.11347448 0.07295670 -0.02256332  0.25655658</span></span>
-<span><span class="co">#&gt; Koinadugu      0.07147546 0.10160307 -0.11819123  0.25429403</span></span>
-<span><span class="co">#&gt; Kono           0.03445527 0.07759814 -0.10308857  0.17789994</span></span>
-<span><span class="co">#&gt; Moyamba        0.09751999 0.08207333 -0.05967818  0.24594033</span></span>
-<span><span class="co">#&gt; Port Loko     -0.02217677 0.06965297 -0.15334155  0.11168515</span></span>
-<span><span class="co">#&gt; Pujehun       -0.09056796 0.15336893 -0.40017127  0.21191173</span></span>
-<span><span class="co">#&gt; Tonkolili     -0.15278693 0.07316292 -0.27935941 -0.01903359</span></span>
-<span><span class="co">#&gt; Western Rural  0.07230188 0.06950024 -0.05320194  0.20406381</span></span>
-<span><span class="co">#&gt; Western Urban  0.27012811 0.06731920  0.14920194  0.40089394</span></span></code></pre></div>
+<span><span class="co">#&gt; Bo             0.18569262 0.07369534  0.04482826  0.33737619</span></span>
+<span><span class="co">#&gt; Bombali       -0.22775131 0.06437477 -0.35554116 -0.11495850</span></span>
+<span><span class="co">#&gt; Bonthe        -0.12969344 0.21161946 -0.58030178  0.23547407</span></span>
+<span><span class="co">#&gt; Kailahun      -0.33616645 0.06800887 -0.47243605 -0.21498099</span></span>
+<span><span class="co">#&gt; Kambia         0.05750006 0.08168920 -0.09891025  0.21946416</span></span>
+<span><span class="co">#&gt; Kenema         0.11012150 0.06758485 -0.01744927  0.25279819</span></span>
+<span><span class="co">#&gt; Koinadugu      0.06908751 0.09597918 -0.11773948  0.26293122</span></span>
+<span><span class="co">#&gt; Kono           0.03001546 0.07544342 -0.12010087  0.18096483</span></span>
+<span><span class="co">#&gt; Moyamba        0.09643314 0.07632248 -0.05890960  0.25667593</span></span>
+<span><span class="co">#&gt; Port Loko     -0.02593841 0.06372404 -0.15444021  0.09431119</span></span>
+<span><span class="co">#&gt; Pujehun       -0.09253076 0.13856786 -0.36327888  0.19085602</span></span>
+<span><span class="co">#&gt; Tonkolili     -0.15478393 0.06856191 -0.28870574 -0.02958416</span></span>
+<span><span class="co">#&gt; Western Rural  0.07046308 0.06427971 -0.05123806  0.18937480</span></span>
+<span><span class="co">#&gt; Western Urban  0.26692945 0.06209873  0.14346072  0.38832898</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3" number="3.3">
@@ -607,7 +607,7 @@ Click to expand for code to prepare PMF plots
 <span></span>
 <span><span class="va">pmf_sex_district_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_district_pmf</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    district <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
+<span>    district <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
 <span>      <span class="va">district</span> <span class="op">==</span> <span class="st">"Port Loko"</span> <span class="op">~</span> <span class="st">"Port\nLoko"</span>,</span>
 <span>      <span class="va">district</span> <span class="op">==</span> <span class="st">"Western Rural"</span> <span class="op">~</span> <span class="st">"Western\nRural"</span>,</span>
 <span>      <span class="va">district</span> <span class="op">==</span> <span class="st">"Western Urban"</span> <span class="op">~</span> <span class="st">"Western\nUrban"</span>,</span>
@@ -684,7 +684,7 @@ Click to expand for code to prepare PDF plots
 <span></span>
 <span><span class="va">pdf_sex_district_figure</span> <span class="op">&lt;-</span> <span class="va">draws_sex_district_pdf</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    district <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
+<span>    district <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case-and-replace-when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
 <span>      <span class="va">district</span> <span class="op">==</span> <span class="st">"Port Loko"</span> <span class="op">~</span> <span class="st">"Port\nLoko"</span>,</span>
 <span>      <span class="va">district</span> <span class="op">==</span> <span class="st">"Western Rural"</span> <span class="op">~</span> <span class="st">"Western\nRural"</span>,</span>
 <span>      <span class="va">district</span> <span class="op">==</span> <span class="st">"Western Urban"</span> <span class="op">~</span> <span class="st">"Western\nUrban"</span>,</span>
@@ -723,12 +723,12 @@ We illustrate generating posterior expectations, the posteriors of linear predic
 <div class="section level3">
 <h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-fang2016transmission" class="csl-entry">
-Fang, Li-Qun, Yang Yang, Jia-Fu Jiang, Hong-Wu Yao, David Kargbo, Xin-Lou Li, Bao-Gui Jiang, et al. 2016. <span>“Transmission Dynamics of Ebola Virus Disease and Intervention Effectiveness in Sierra Leone.”</span> <em>Proceedings of the National Academy of Sciences</em> 113 (16): 4488–93.
+<span class="nocase">Fang, Li-Qun, Yang Yang, Jia-Fu Jiang, et al.</span> 2016. <span>“Transmission Dynamics of Ebola Virus Disease and Intervention Effectiveness in Sierra Leone.”</span> <em>Proceedings of the National Academy of Sciences</em> 113 (16): 4488–93.
 </div>
 <div id="ref-who_ebola_2014_2016" class="csl-entry">
-World Health Organization. 2016. <span>“Ebola Outbreak 2014-2016 - West Africa.”</span> <a href="https://www.who.int/emergencies/situations/ebola-outbreak-2014-2016-West-Africa" class="external-link">https://www.who.int/emergencies/situations/ebola-outbreak-2014-2016-West-Africa</a>.
+World Health Organization. 2016. <em>Ebola Outbreak 2014-2016 - West Africa</em>. <a href="https://www.who.int/emergencies/situations/ebola-outbreak-2014-2016-West-Africa" class="external-link">https://www.who.int/emergencies/situations/ebola-outbreak-2014-2016-West-Africa</a>.
 </div>
 </div>
 </div>
@@ -745,7 +745,7 @@ World Health Organization. 2016. <span>“Ebola Outbreak 2014-2016 - West Africa
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.9000.</p>
 </div>
 
     </footer>

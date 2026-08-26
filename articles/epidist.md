@@ -66,6 +66,7 @@ To run this vignette yourself, as well as the `epidist` package, you
 will need the following packages:
 
 ``` r
+
 library(epidist)
 library(ggplot2)
 library(dplyr)
@@ -100,6 +101,7 @@ We first assume that the reporting delay is lognormal with a mean log of
 function to add the mean and sd to the `data.frame`.
 
 ``` r
+
 secondary_dist <- data.frame(mu = 1.6, sigma = 0.5)
 class(secondary_dist) <- c("lognormal_samples", class(secondary_dist))
 secondary_dist <- add_mean_sd(secondary_dist)
@@ -115,6 +117,7 @@ restrict them to be dates). We assume that the outbreak has a growth
 rate of 0.2 and that we observe the outbreak for 25 days.
 
 ``` r
+
 growth_rate <- 0.2
 obs_time <- 25
 ```
@@ -127,10 +130,12 @@ generate infectious disease outbreak data (Figure [3.1](#fig:outbreak))
 from a stochastic compartmental model.
 
 ``` r
+
 outbreak <- simulate_gillespie(r = growth_rate, seed = 101)
 ```
 
 ``` r
+
 outbreak |>
   filter(case %% 50 == 0) |>
   ggplot(aes(x = ptime, y = case)) +
@@ -153,6 +158,7 @@ reality, it is more common to receive primary event times as a date
 rather than a numeric.
 
 ``` r
+
 head(outbreak)
 #>   case      ptime
 #> 1    1 0.04884052
@@ -168,6 +174,7 @@ To generate secondary events, we will use a lognormal distribution
 secondary events:
 
 ``` r
+
 obs <- simulate_secondary(
   outbreak,
   dist = rlnorm,
@@ -177,6 +184,7 @@ obs <- simulate_secondary(
 ```
 
 ``` r
+
 ggplot(data.frame(x = c(0, 30)), aes(x = x)) +
   geom_function(
     fun = dlnorm,
@@ -199,6 +207,7 @@ Figure 3.2: The lognormal distribution is skewed to the right. Long
 delay times still have some probability.
 
 ``` r
+
 obs |>
   filter(case %% 50 == 0) |>
   ggplot(aes(y = case)) +
@@ -227,6 +236,7 @@ the lognormal distribution (Figure [3.2](#fig:lognormal)).As with Figure
 the delay:
 
 ``` r
+
 all(obs$ptime + obs$delay == obs$stime)
 #> [1] TRUE
 ```
@@ -242,6 +252,7 @@ daily, meaning that only the date of the primary or secondary event, not
 the exact event time, is reported (Figure [3.4](#fig:cens)):
 
 ``` r
+
 obs_cens <- mutate(
   obs,
   ptime_lwr = floor(.data$ptime),
@@ -255,6 +266,7 @@ obs_cens <- mutate(
 Click to expand for code to create the censored data figure
 
 ``` r
+
 p_cens <- obs_cens |>
   filter(case %% 50 == 0, case <= 500) |>
   ggplot(aes(y = case)) +
@@ -279,6 +291,7 @@ p_cens <- obs_cens |>
 ```
 
 ``` r
+
 p_cens
 #> `height` was translated to `width`.
 #> `height` was translated to `width`.
@@ -307,6 +320,7 @@ occurred before day 10.
 Click to expand for code to create the truncated data figure
 
 ``` r
+
 p_trunc <- obs_cens |>
   filter(case %% 50 == 0, case <= 500) |>
   mutate(
@@ -337,6 +351,7 @@ p_trunc <- obs_cens |>
 ```
 
 ``` r
+
 p_trunc
 #> `height` was translated to `width`.
 #> `height` was translated to `width`.
@@ -355,6 +370,7 @@ to only include cases where the secondary event occurred before the
 observation time.
 
 ``` r
+
 obs_cens_trunc <- obs_cens |>
   mutate(obs_time = obs_time) |>
   filter(.data$stime_upr <= .data$obs_time)
@@ -364,12 +380,14 @@ Finally, in reality, it’s not possible to observe every case. We suppose
 that a sample of individuals of size `sample_size` are observed:
 
 ``` r
+
 sample_size <- 200
 ```
 
 This sample size corresponds to 7.7% of the data.
 
 ``` r
+
 obs_cens_trunc_samp <- slice_sample(
   obs_cens_trunc,
   n = sample_size, replace = FALSE
@@ -379,7 +397,8 @@ obs_cens_trunc_samp <- slice_sample(
 Click to expand for code to create the observed data histogram
 
 ``` r
-#Prepare the complete, retrospective data
+
+# Prepare the complete, retrospective data
 complete_data <- obs_cens |>
   mutate(type = "Censored retrospective data") |>
   select(delay = delay_daily, type)
@@ -397,8 +416,12 @@ plot_data <- combined_data |>
   group_by(type, delay, .drop = FALSE) |>
   summarise(n = n()) |>
   mutate(p = n / sum(n))
-#> `summarise()` has grouped output by 'type'. You can override using the
-#> `.groups` argument.
+#> `summarise()` has regrouped the output.
+#> ℹ Summaries were computed grouped by type and delay.
+#> ℹ Output is grouped by type.
+#> ℹ Use `summarise(.groups = "drop_last")` to silence this message.
+#> ℹ Use `summarise(.by = c(type, delay))` for per-operation grouping
+#>   (`?dplyr::dplyr_by`) instead.
 
 # Create the plot
 delay_histogram <- ggplot(plot_data) +
@@ -426,6 +449,7 @@ delay_histogram <- ggplot(plot_data) +
 ```
 
 ``` r
+
 delay_histogram
 ```
 
@@ -468,6 +492,7 @@ introduce a `outbreak_start_date` which is the date of the first
 infection.
 
 ``` r
+
 outbreak_start_date <- as.Date("2024-02-01")
 
 obs_data <- obs_cens_trunc_samp |>
@@ -486,6 +511,7 @@ The resulting simulated data `obs_data` has 4 columns: `id`,
 date of the last observation based on case notification.
 
 ``` r
+
 head(obs_data)
 #>     id symptom_onset case_notification   obs_date
 #> 1 1280    2024-02-16        2024-02-24 2024-02-26
@@ -514,6 +540,7 @@ which takes the column names of the primary and secondary event dates
 and the observation date.
 
 ``` r
+
 linelist_data <- as_epidist_linelist_data(
   obs_data,
   pdate_lwr = "symptom_onset",
@@ -567,6 +594,7 @@ use the
 function.
 
 ``` r
+
 naive_data <- as_epidist_naive_model(linelist_data)
 naive_data
 #> # A tibble: 200 × 13
@@ -593,6 +621,7 @@ chain Monte Carlo (MCMC) algorithm via the
 2017](#ref-brms)).
 
 ``` r
+
 naive_fit <- epidist(
   naive_data,
   chains = 4, cores = 2, refresh = ifelse(interactive(), 250, 0)
@@ -604,9 +633,9 @@ naive_fit <- epidist(
 #> Compiling Stan program...
 #> 
 #> Trying to compile a simple C file
-#> Running /opt/R/4.5.2/lib/R/bin/R CMD SHLIB foo.c
-#> using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0’
-#> gcc -std=gnu2x -I"/opt/R/4.5.2/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/"  -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o
+#> Running /opt/R/4.6.1/lib/R/bin/R CMD SHLIB foo.c
+#> using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0’
+#> gcc -std=gnu2x -I"/opt/R/4.6.1/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/" -DRCPP_PARALLEL_USE_TBB=1 -DTBB_INTERFACE_NEW -I/home/runner/work/_temp/Library/RcppParallel/include -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o
 #> In file included from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Core:19,
 #>                  from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Dense:1,
 #>                  from /home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22,
@@ -615,7 +644,7 @@ naive_fit <- epidist(
 #>   679 | #include <cmath>
 #>       |          ^~~~~~~
 #> compilation terminated.
-#> make: *** [/opt/R/4.5.2/lib/R/etc/Makeconf:202: foo.o] Error 1
+#> make: *** [/opt/R/4.6.1/lib/R/etc/Makeconf:190: foo.o] Error 1
 #> Start sampling
 ```
 
@@ -642,6 +671,7 @@ For example, we can use the built in
 the posterior distribution of the parameters.
 
 ``` r
+
 summary(naive_fit)
 #>  Family: lognormal 
 #>   Links: mu = identity; sigma = log 
@@ -653,8 +683,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3603     2810
-#> sigma_Intercept    -0.75      0.05    -0.85    -0.66 1.00     3158     2569
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3504     2643
+#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3217     2555
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -692,6 +722,7 @@ and truncated distributions in both Stan and R. The documentation for
 `primarycensored` is a good place for learning more about this.
 
 ``` r
+
 marginal_data <- as_epidist_marginal_model(linelist_data)
 marginal_data
 #> # A tibble: 200 × 18
@@ -721,6 +752,7 @@ fit the model. Note that because of the different
 than naive model will be fit.
 
 ``` r
+
 marginal_fit <- epidist(
   data = marginal_data, chains = 4, cores = 2,
   refresh = ifelse(interactive(), 250, 0)
@@ -732,9 +764,9 @@ marginal_fit <- epidist(
 #> Compiling Stan program...
 #> 
 #> Trying to compile a simple C file
-#> Running /opt/R/4.5.2/lib/R/bin/R CMD SHLIB foo.c
-#> using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0’
-#> gcc -std=gnu2x -I"/opt/R/4.5.2/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/"  -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o
+#> Running /opt/R/4.6.1/lib/R/bin/R CMD SHLIB foo.c
+#> using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0’
+#> gcc -std=gnu2x -I"/opt/R/4.6.1/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/" -DRCPP_PARALLEL_USE_TBB=1 -DTBB_INTERFACE_NEW -I/home/runner/work/_temp/Library/RcppParallel/include -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o
 #> In file included from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Core:19,
 #>                  from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Dense:1,
 #>                  from /home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22,
@@ -743,7 +775,7 @@ marginal_fit <- epidist(
 #>   679 | #include <cmath>
 #>       |          ^~~~~~~
 #> compilation terminated.
-#> make: *** [/opt/R/4.5.2/lib/R/etc/Makeconf:202: foo.o] Error 1
+#> make: *** [/opt/R/4.6.1/lib/R/etc/Makeconf:190: foo.o] Error 1
 #> Start sampling
 ```
 
@@ -751,6 +783,7 @@ We again summarise the posterior using
 [`summary()`](https://rdrr.io/r/base/summary.html),
 
 ``` r
+
 summary(marginal_fit)
 #>  Family: marginal_lognormal 
 #>   Links: mu = identity; sigma = log 
@@ -762,8 +795,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.64 1.00     2072     2033
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     2180     2234
+#> Intercept           1.55      0.05     1.46     1.65 1.00     1850     2008
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     1951     2255
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -785,6 +818,7 @@ parameters to the output so that it is easier to understand the
 distribution.
 
 ``` r
+
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
   lapply(predict_delay_parameters) |>
   bind_rows(.id = "model") |>
@@ -793,12 +827,12 @@ predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
 
 head(predicted_parameters)
 #>      model draw index       mu     sigma     mean       sd
-#> 1 marginal    1     1 1.518526 0.5062751 5.189738 2.805144
-#> 2 marginal    2     1 1.560447 0.4905194 5.369589 2.800558
-#> 3 marginal    3     1 1.580128 0.4817225 5.452948 2.786830
-#> 4 marginal    4     1 1.492256 0.4484298 4.917501 2.320800
-#> 5 marginal    5     1 1.533323 0.5117124 5.281697 2.889677
-#> 6 marginal    6     1 1.525644 0.5400181 5.319893 3.095582
+#> 1 marginal    1     1 1.554402 0.4933681 5.344712 2.805817
+#> 2 marginal    2     1 1.559596 0.5135684 5.427465 2.981680
+#> 3 marginal    3     1 1.518467 0.5104883 5.200560 2.837554
+#> 4 marginal    4     1 1.521670 0.5736144 5.398853 3.369958
+#> 5 marginal    5     1 1.622620 0.4694701 5.656590 2.808871
+#> 6 marginal    6     1 1.498074 0.5323672 5.154045 2.950239
 ```
 
 Note that by default
@@ -816,6 +850,7 @@ models.
 Click to expand for parameter comparison plot code
 
 ``` r
+
 # Create a data frame with true parameter values
 true_params <- secondary_dist |>
   mutate(model = "true") |>
@@ -851,6 +886,7 @@ p_pp_params <- predicted_parameters |>
 ```
 
 ``` r
+
 p_pp_params
 ```
 
@@ -878,6 +914,7 @@ distribution is to the true delay distribution.
 Click to expand for code to create fitted distribution plot
 
 ``` r
+
 set.seed(123)
 
 predicted_pmfs <- predicted_parameters |>
@@ -923,6 +960,7 @@ p_fitted_lognormal <- predicted_pmfs |>
 ```
 
 ``` r
+
 p_fitted_lognormal
 ```
 
@@ -967,13 +1005,12 @@ Bürkner, Paul-Christian. 2017. “brms: An R Package for Bayesian
 Multilevel Models Using Stan.” *Journal of Statistical Software* 80 (1):
 1–28. <https://doi.org/10.18637/jss.v080.i01>.
 
-Charniga, Kelly, Sang Woo Park, Andrei R. Akhmetzhanov, Anne Cori,
-Jonathan Dushoff, Sebastian Funk, Katelyn M. Gostic, et al. 2024. “Best
-Practices for Estimating and Reporting Epidemiological Delay
+Charniga, Kelly, Sang Woo Park, Andrei R. Akhmetzhanov, et al. 2024.
+“Best Practices for Estimating and Reporting Epidemiological Delay
 Distributions of Infectious Diseases.” *PLOS Computational Biology* 20
 (10): 1–21. <https://doi.org/10.1371/journal.pcbi.1012520>.
 
-Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, Anne Cori,
-Nicholas G. Davies, Jonathan Dushoff, Sebastian Funk, et al. 2024.
+Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, et al. 2024.
 “Estimating Epidemiological Delay Distributions for Infectious
-Diseases.” *medRxiv*. <https://doi.org/10.1101/2024.01.12.24301247>.
+Diseases.” *medRxiv*, ahead of print.
+<https://doi.org/10.1101/2024.01.12.24301247>.

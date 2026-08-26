@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Changelog"><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Changelog"><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,6 +51,35 @@
       <small>Source: <a href="https://github.com/epinowcast/epidist/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.1.1000" id="epidist-0411000">epidist 0.4.1.1000<a class="anchor" aria-label="anchor" href="#epidist-0411000"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-4-1-1000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-4-1-1000"></a></h3>
+<ul><li>Declared <code>reformulas</code> in <code>Suggests</code> and skipped the <code>marginaleffects</code> integration test when it is absent. <code>insight</code> needs <code>reformulas</code> to read the formula of a <code>brmsfit</code>, but only suggests it, so the test failed on a clean library. See <a href="https://github.com/epinowcast/epidist/issues/601" class="external-link">#601</a>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="ci-0-4-1-1000">CI<a class="anchor" aria-label="anchor" href="#ci-0-4-1-1000"></a></h3>
+<ul><li>Pinned the <code>precommit</code> hooks to a revision whose lockfile uses <code>digest</code> 0.6.39. The tagged v0.4.3 lockfile pins <code>digest</code> 0.6.36, which calls <code>Calloc</code> and <code>Free</code>. Those were removed from the R API in R 4.5, so the hook environment failed to build and the <code>pre-commit</code> job failed on every pull request. See <a href="https://github.com/epinowcast/epidist/issues/578" class="external-link">#578</a>.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.1" id="epidist-041">epidist 0.4.1<a class="anchor" aria-label="anchor" href="#epidist-041"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-4-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-4-1"></a></h3>
+<ul><li>Fixed Stan compilation failure with primarycensored &gt;= 1.4.0 by adding the new <code>L</code> (left truncation) parameter to the <code>primarycensored_lpmf</code> call in the marginal model. See <a href="https://github.com/epinowcast/epidist/issues/583" class="external-link">#583</a>.</li>
+<li>Added <code>primarycensored (&gt;= 1.4.0)</code> version bound to DESCRIPTION.</li>
+<li>Updated test expectations for changed primarycensored error handling.</li>
+<li>Re-enabled approximate inference vignette evaluation using dev brms with pathfinder path fix. See <a href="https://github.com/epinowcast/epidist/issues/579" class="external-link">#579</a>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="package-0-4-1">Package<a class="anchor" aria-label="anchor" href="#package-0-4-1"></a></h3>
+<ul><li>Load only required primarycensored Stan functions (<code>primarycensored_lpmf</code> and ODE/distribution helpers) with <code>pcd_load_stan_functions(dependencies = TRUE)</code> instead of loading all functions. See <a href="https://github.com/epinowcast/epidist/issues/582" class="external-link">#582</a>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="ci-0-4-1">CI<a class="anchor" aria-label="anchor" href="#ci-0-4-1"></a></h3>
+<ul><li>Extended <code>check-cmdstan</code> workflow to also check marginal model Stan syntax.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="epidist-040">epidist 0.4.0<a class="anchor" aria-label="anchor" href="#epidist-040"></a></h2>
 <div class="section level3">
@@ -169,7 +198,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.9000.</p>
 </div>
 
     </footer></div>

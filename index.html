@@ -18,8 +18,8 @@
     }
   };
 </script><script src="lightswitch.js"></script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Estimate Epidemiological Delay Distributions With brms">
 <meta name="description" content="Understanding and accurately estimating epidemiological delay distributions is important for public health policy. These estimates influence epidemic situational awareness, control strategies, and resource allocation. This package provides methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. These issues are frequently overlooked, resulting in biased conclusions. Built on top of brms, it allows for flexible modelling including time-varying spatial components and partially pooled estimates of demographic characteristics.">
@@ -34,7 +34,7 @@
 
     <a class="navbar-brand me-2" href="index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,13 +113,13 @@ Installing the package
 <span><span class="op">)</span></span></code></pre></div>
 <p>Alternatively, you can use the <a href="https://remotes.r-lib.org/" class="external-link"><code>remotes</code> package</a> to install the development version from Github (warning! this version may contain breaking changes and/or bugs):</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"epinowcast"</span>, <span class="st">"epidist"</span><span class="op">)</span>,</span>
 <span>  dependencies <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Similarly, you can install historical versions by specifying the release tag (e.g. this installs <a href="https://github.com/epinowcast/epidist/releases/tag/v0.1.0" class="external-link"><code>0.1.0</code></a>):</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"epinowcast"</span>, <span class="st">"epidist"</span><span class="op">)</span>,</span>
 <span>  dependencies <span class="op">=</span> <span class="cn">TRUE</span>, ref <span class="op">=</span> <span class="st">"v0.1.0"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -193,10 +193,11 @@ Package citation information
 </details><p>If using our methodology, or the methodology on which ours is based, please cite the relevant papers. This may include:</p>
 <ul>
 <li>
-<a href="https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1" class="external-link">Estimating epidemiological delay distributions for infectious diseases</a> by Park <em>et al.</em> (2024)</li>
+<a href="https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1" class="external-link">Estimating epidemiological delay distributions for infectious diseases</a> by Park <em>et al.</em> (2024) – if using the latent model</li>
 <li>
 <a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012520" class="external-link">Best practices for estimating and reporting epidemiological delay distributions of infectious diseases using public health surveillance and healthcare data</a> by Charniga <em>et al.</em> (2024)</li>
 </ul>
+<p>If using the marginal model, please also cite the <a href="https://primarycensored.epinowcast.org/" class="external-link"><code>primarycensored</code></a> package using <code>citation("primarycensored")</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="contributors">Contributors<a class="anchor" aria-label="anchor" href="#contributors"></a>
@@ -204,7 +205,7 @@ Package citation information
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
-<p>All contributions to this project are gratefully acknowledged using the <a href="https://github.com/ropensci/allcontributors" class="external-link"><code>allcontributors</code> package</a> following the <a href="https://allcontributors.org" class="external-link">all-contributors</a> specification. Contributions of any kind are welcome!</p>
+<p>All contributions to this project are gratefully acknowledged using the <a href="https://github.com/ropensci/allcontributors" class="external-link"><code>allcontributors</code> package</a> following the <a href="https://allcontributors.org" class="external-link">allcontributors</a> specification. Contributions of any kind are welcome!</p>
 <div class="section level3">
 <h3 id="code">Code<a class="anchor" aria-label="anchor" href="#code"></a>
 </h3>
@@ -213,12 +214,12 @@ Package citation information
 <div class="section level3">
 <h3 id="issue-authors">Issue Authors<a class="anchor" aria-label="anchor" href="#issue-authors"></a>
 </h3>
-<p><a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic" class="external-link">kgostic</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor" class="external-link">TimTaylor</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam" class="external-link">jamesmbaazam</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajonathonmellor" class="external-link">jonathonmellor</a></p>
+<p><a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic" class="external-link">kgostic</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor" class="external-link">TimTaylor</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam" class="external-link">jamesmbaazam</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajonathonmellor" class="external-link">jonathonmellor</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ARodrigoZepeda" class="external-link">RodrigoZepeda</a></p>
 </div>
 <div class="section level3">
 <h3 id="issue-contributors">Issue Contributors<a class="anchor" aria-label="anchor" href="#issue-contributors"></a>
 </h3>
-<p><a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca" class="external-link">pearsonca</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1" class="external-link">SamuelBrand1</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein" class="external-link">zsusswein</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Aoswaldogressani" class="external-link">oswaldogressani</a></p>
+<p><a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca" class="external-link">pearsonca</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1" class="external-link">SamuelBrand1</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein" class="external-link">zsusswein</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Aoswaldogressani" class="external-link">oswaldogressani</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ADrAuxetic" class="external-link">DrAuxetic</a>, <a href="https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Amark-burdon" class="external-link">mark-burdon</a></p>
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
@@ -282,7 +283,7 @@ Package citation information
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.9000.</p>
 </div>
 
     </footer>

@@ -40,6 +40,7 @@ You can install the latest released version using the normal `R`
 function, though you need to point to `r-universe` instead of CRAN:
 
 ``` r
+
 install.packages(
   "epidist",
   repos = "https://epinowcast.r-universe.dev"
@@ -52,6 +53,7 @@ from Github (warning! this version may contain breaking changes and/or
 bugs):
 
 ``` r
+
 remotes::install_github(
   file.path("epinowcast", "epidist"),
   dependencies = TRUE
@@ -63,6 +65,7 @@ tag (e.g. this installs
 [`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)):
 
 ``` r
+
 remotes::install_github(
   file.path("epinowcast", "epidist"),
   dependencies = TRUE, ref = "v0.1.0"
@@ -86,6 +89,7 @@ vignette, with other details and support at the [package
 site](https://mc-stan.org/cmdstanr/), but the brief version is:
 
 ``` r
+
 # if you have not yet installed `epidist`, or you installed it without
 # `Suggests` dependencies
 install.packages(
@@ -181,18 +185,22 @@ please cite the relevant papers. This may include:
 
 - [Estimating epidemiological delay distributions for infectious
   diseases](https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1)
-  by Park *et al.* (2024)
+  by Park *et al.* (2024) – if using the latent model
 - [Best practices for estimating and reporting epidemiological delay
   distributions of infectious diseases using public health surveillance
   and healthcare
   data](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012520)
   by Charniga *et al.* (2024)
 
+If using the marginal model, please also cite the
+[`primarycensored`](https://primarycensored.epinowcast.org/) package
+using `citation("primarycensored")`.
+
 ## Contributors
 
 All contributions to this project are gratefully acknowledged using the
 [`allcontributors` package](https://github.com/ropensci/allcontributors)
-following the [all-contributors](https://allcontributors.org)
+following the [allcontributors](https://allcontributors.org)
 specification. Contributions of any kind are welcome!
 
 ### Code
@@ -211,11 +219,14 @@ specification. Contributions of any kind are welcome!
 [kgostic](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Akgostic),
 [TimTaylor](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ATimTaylor),
 [jamesmbaazam](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajamesmbaazam),
-[jonathonmellor](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajonathonmellor)
+[jonathonmellor](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3Ajonathonmellor),
+[RodrigoZepeda](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+author%3ARodrigoZepeda)
 
 ### Issue Contributors
 
 [pearsonca](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Apearsonca),
 [SamuelBrand1](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ASamuelBrand1),
 [zsusswein](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Azsusswein),
-[oswaldogressani](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Aoswaldogressani)
+[oswaldogressani](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Aoswaldogressani),
+[DrAuxetic](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3ADrAuxetic),
+[mark-burdon](https://github.com/epinowcast/epidist/issues?q=is%3Aissue+commenter%3Amark-burdon)
