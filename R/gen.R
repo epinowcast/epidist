@@ -72,33 +72,74 @@ epidist_gen_log_lik <- function(family) {
     # this means we get the cdf of the target distribution
     prep$data$cens <- rep(-1, prep$nobs)
 
-    # Calculate density for each draw using primarycensored::dpcens()
-    lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
-      # Define pdist function that filters to current draw
-      pdist_draw <- function(q, i, prep, ...) {
-        return(purrr::map_dbl(q, function(x) {
-          prep$data$Y <- rep(x, length(prep$data$Y))
-          prep$data$weights <- NULL
-          prep$ndraws <- 1
-          ll <- exp(log_lik_brms(i, prep)[draw])
-          return(ll)
-        }))
-      }
-
-      return(
-        primarycensored::dpcens(
-          x = y,
-          pdist = pdist_draw,
-          i = i,
-          prep = prep,
-          pwindow = pwindow,
-          swindow = swindow,
-          L = delay_min,
-          D = relative_obs_time,
-          dprimary = stats::dunif,
-          log = TRUE
+    if (y + swindow > relative_obs_time) {
+      cli::cli_abort(
+        c(
+          "Upper delay bound is greater than the relative observation time.",
+          i = "For observation {i} it is {y + swindow} and the relative
+               observation time is {relative_obs_time}."
         )
       )
+    }
+
+    # A single call to the brms log likelihood returns the cdf at one delay
+    # for every draw, so cache those columns by delay and evaluate each delay
+    # once instead of once per draw. The numerical integration below uses the
+    # same quadrature nodes for each draw, so after the first draw the
+    # lookups are cache hits.
+    cache <- new.env(parent = emptyenv())
+    cache$delays <- numeric(0)
+    cache$cdf <- NULL
+    cache$draw <- 1L
+
+    fill_cache <- function(q) {
+      new_delays <- unique(q[!(q %in% cache$delays)])
+      if (length(new_delays) > 0) {
+        new_cdf <- lapply(new_delays, function(x) {
+          prep_x <- prep
+          prep_x$data$Y <- rep(x, length(prep$data$Y))
+          prep_x$data$weights <- NULL
+          return(exp(log_lik_brms(i, prep_x)))
+        })
+        cache$delays <- c(cache$delays, new_delays)
+        cache$cdf <- cbind(cache$cdf, do.call(cbind, new_cdf))
+      }
+      return(match(q, cache$delays))
+    }
+
+    pdist_draw <- function(q, ...) {
+      # `fill_cache()` grows `cache$cdf`, so resolve the index first.
+      idx <- fill_cache(q)
+      return(cache$cdf[cache$draw, idx])
+    }
+
+    # [primarycensored::dpcens()] revalidates `pdist` at random points on
+    # every call, which would miss the cache once per draw, so integrate with
+    # [primarycensored::pcens_cdf()] and form the censored pmf here.
+    pcens_obj <- primarycensored::new_pcens(
+      pdist = pdist_draw,
+      dprimary = stats::dunif,
+      dprimary_args = list()
+    )
+    delays <- unique(c(y, y + swindow, relative_obs_time, delay_min))
+    delays <- sort(delays[is.finite(delays)])
+    upr <- match(y + swindow, delays)
+    lwr <- match(y, delays)
+    trunc_idx <- match(relative_obs_time, delays)
+    min_idx <- match(delay_min, delays)
+
+    lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(d) {
+      cache$draw <- d
+      cdfs <- primarycensored::pcens_cdf(pcens_obj, delays, pwindow)
+      pmf <- cdfs[upr] - cdfs[lwr]
+      # Normalise over the interval that could have been observed, which runs
+      # from the left truncation point to the relative observation time, as
+      # [primarycensored::dpcens()] does.
+      lower_mass <- if (is.na(min_idx)) 0 else cdfs[min_idx]
+      if (!is.na(trunc_idx)) {
+        pmf <- pmf / (cdfs[trunc_idx] - lower_mass)
+      }
+      return(log(max(0, pmf)))
     })
     lpdf <- .log_lik_weight(lpdf, i = i, prep = prep)
     return(lpdf)

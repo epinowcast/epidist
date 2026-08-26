@@ -233,3 +233,59 @@ test_that(
     expect_false(isTRUE(all.equal(log_lik_fn(i = i, prep), expected)))
   }
 )
+
+test_that( # nolint: line_length_linter.
+  "epidist_gen_log_lik generic method agrees with the analytical method",
+  {
+    skip_on_cran()
+    skip_if_no_cmdstanr()
+
+    analytical <- epidist_gen_log_lik(lognormal())
+    log_lik_brms <- .get_brms_fn("log_lik", lognormal())
+    generic <- .generic_gen_log_lik(log_lik_brms)
+
+    # The marginal fit is weighted, so this also checks that the observation
+    # weights are applied once rather than folded into the cdf.
+    for (model_fit in list(fit, fit_marginal)) {
+      prep <- brms::prepare_predictions(model_fit)
+      prep$ndraws <- 10
+      for (i in 1:3) {
+        expect_equal(generic(i, prep), analytical(i, prep), tolerance = 1e-5)
+      }
+    }
+  }
+)
+
+test_that( # nolint: line_length_linter.
+  "epidist_gen_log_lik generic method evaluates each delay once for all draws",
+  {
+    skip_on_cran()
+    skip_if_no_cmdstanr()
+
+    prep <- brms::prepare_predictions(fit)
+
+    log_lik_brms <- .get_brms_fn("log_lik", lognormal())
+    counter <- new.env(parent = emptyenv())
+    counter$calls <- 0
+    counting_log_lik <- function(i, prep) {
+      counter$calls <- counter$calls + 1
+      return(log_lik_brms(i, prep))
+    }
+    generic <- .generic_gen_log_lik(counting_log_lik)
+
+    prep$ndraws <- 10
+    generic(1, prep)
+    calls_10 <- counter$calls
+
+    counter$calls <- 0
+    prep$ndraws <- 100
+    generic(1, prep)
+    calls_100 <- counter$calls
+
+    # The number of brms evaluations is set by the quadrature nodes rather
+    # than by the number of draws, so a ten fold increase in draws must not
+    # scale the number of calls.
+    expect_lt(calls_100, 2 * calls_10)
+    expect_lt(calls_100, 100)
+  }
+)
