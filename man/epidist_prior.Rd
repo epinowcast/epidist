@@ -57,11 +57,11 @@ between a prior for all coefficients (class = "b") and a prior for a
 specific coefficient (class = "b" and coef specified).
 }
 \seealso{
-Other prior:
-\code{\link[=epidist_family_prior]{epidist_family_prior()}},
-\code{\link[=epidist_family_prior.default]{epidist_family_prior.default()}},
-\code{\link[=epidist_family_prior.lognormal]{epidist_family_prior.lognormal()}},
-\code{\link[=epidist_model_prior]{epidist_model_prior()}},
-\code{\link[=epidist_model_prior.default]{epidist_model_prior.default()}}
+Other prior: 
+\code{\link{epidist_family_prior}()},
+\code{\link{epidist_family_prior.default}()},
+\code{\link{epidist_family_prior.lognormal}()},
+\code{\link{epidist_model_prior}()},
+\code{\link{epidist_model_prior.default}()}
 }
 \concept{prior}

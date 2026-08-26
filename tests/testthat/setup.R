@@ -193,6 +193,15 @@ prep_obs_gamma <- as_epidist_latent_model(sim_obs_gamma)
 prep_obs_sex <- as_epidist_latent_model(sim_obs_sex)
 
 prep_marginal_obs <- as_epidist_marginal_model(sim_obs)
+# An exponential growth primary event with a rate of zero is the same model as
+# a uniform primary event, but it takes the expgrowth path through the Stan
+# code. Fitting it checks that path compiles and that the boundary agrees.
+prep_marginal_obs_expgrowth <- as_epidist_marginal_model(
+  sim_obs,
+  primary = "expgrowth",
+  growth_rate = 0
+)
+
 prep_marginal_obs_gamma <- as_epidist_marginal_model(sim_obs_gamma)
 prep_marginal_obs_sex <- as_epidist_marginal_model(sim_obs_sex)
 prep_marginal_obs_weibull <- as_epidist_marginal_model(sim_obs_weibull)
@@ -228,6 +237,18 @@ if (not_on_cran() && has_cmdstanr()) {
   cli::cli_alert_info("Compiling the marginal model with cmdstanr")
   fit_marginal <- suppressMessages(epidist(
     data = prep_marginal_obs,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  ))
+
+  cli::cli_alert_info("Compiling the marginal model with an expgrowth primary")
+  fit_marginal_expgrowth <- suppressMessages(epidist(
+    data = prep_marginal_obs_expgrowth,
     seed = 1,
     chains = 2,
     cores = 2,

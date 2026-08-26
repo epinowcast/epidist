@@ -96,8 +96,7 @@ summary(fit_uniform)
 summary(fit_growing)
 ```
 
-On the Ebola data above, which has daily windows and a delay of several days, moving the rate from 0 to 1 shifts the estimated `mu` from 1.593 to 1.576.
-The latent and marginal models agree closely on the same data, as they should.
+The Ebola data above has daily windows and a delay of several days, so the effect there is small.
 
 If you are unsure of the growth rate, fit under a few plausible values and check whether your conclusions change.
 

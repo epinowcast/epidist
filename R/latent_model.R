@@ -37,8 +37,10 @@ as_epidist_latent_model <- function(data, ...) {
 #'  of the window at rate `growth_rate`.
 #'
 #' @param growth_rate The exponential growth rate used when
-#'  `primary = "expgrowth"`. Treated as known rather than estimated. Ignored,
-#'  and must be `NULL`, when `primary = "uniform"`.
+#'  `primary = "expgrowth"`. Positive values tilt the primary event towards
+#'  the end of the window, negative values towards the start. Treated as known
+#'  rather than estimated. Ignored, and must be `NULL`, when
+#'  `primary = "uniform"`.
 #'
 #' @param ... Not used in this method.
 #'
@@ -107,8 +109,10 @@ as_epidist_latent_model.epidist_linelist_data <- function(
 #'  of the window at rate `growth_rate`.
 #'
 #' @param growth_rate The exponential growth rate used when
-#'  `primary = "expgrowth"`. Treated as known rather than estimated. Ignored,
-#'  and must be `NULL`, when `primary = "uniform"`.
+#'  `primary = "expgrowth"`. Positive values tilt the primary event towards
+#'  the end of the window, negative values towards the start. Treated as known
+#'  rather than estimated. Ignored, and must be `NULL`, when
+#'  `primary = "uniform"`.
 #'
 #' @param ... Not used in this method.
 #' @method as_epidist_latent_model epidist_aggregate_data

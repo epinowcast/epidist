@@ -22,8 +22,10 @@ likely at any point in the window. \code{"expgrowth"} tilts it towards the end
 of the window at rate \code{growth_rate}.}
 
 \item{growth_rate}{The exponential growth rate used when
-\code{primary = "expgrowth"}. Treated as known rather than estimated. Ignored,
-and must be \code{NULL}, when \code{primary = "uniform"}.}
+\code{primary = "expgrowth"}. Positive values tilt the primary event towards
+the end of the window, negative values towards the start. Treated as known
+rather than estimated. Ignored, and must be \code{NULL}, when
+\code{primary = "uniform"}.}
 
 \item{...}{Not used in this method.}
 }
@@ -49,13 +51,13 @@ sierra_leone_ebola_data |>
 }
 }
 \seealso{
-Other latent_model:
-\code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}},
-\code{\link[=as_epidist_latent_model.epidist_aggregate_data]{as_epidist_latent_model.epidist_aggregate_data()}},
-\code{\link[=epidist_family_model.epidist_latent_model]{epidist_family_model.epidist_latent_model()}},
-\code{\link[=epidist_formula_model.epidist_latent_model]{epidist_formula_model.epidist_latent_model()}},
-\code{\link[=epidist_model_prior.epidist_latent_model]{epidist_model_prior.epidist_latent_model()}},
-\code{\link[=is_epidist_latent_model]{is_epidist_latent_model()}},
-\code{\link[=new_epidist_latent_model]{new_epidist_latent_model()}}
+Other latent_model: 
+\code{\link{as_epidist_latent_model}()},
+\code{\link{as_epidist_latent_model.epidist_aggregate_data}()},
+\code{\link{epidist_family_model.epidist_latent_model}()},
+\code{\link{epidist_formula_model.epidist_latent_model}()},
+\code{\link{epidist_model_prior.epidist_latent_model}()},
+\code{\link{is_epidist_latent_model}()},
+\code{\link{new_epidist_latent_model}()}
 }
 \concept{latent_model}

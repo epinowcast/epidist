@@ -21,9 +21,9 @@ This function simulates cases from a uniform distribution, where the primary
 event times are uniformly distributed between 0 and \code{t}.
 }
 \seealso{
-Other simulate:
-\code{\link[=simulate_exponential_cases]{simulate_exponential_cases()}},
-\code{\link[=simulate_gillespie]{simulate_gillespie()}},
-\code{\link[=simulate_secondary]{simulate_secondary()}}
+Other simulate: 
+\code{\link{simulate_exponential_cases}()},
+\code{\link{simulate_gillespie}()},
+\code{\link{simulate_secondary}()}
 }
 \concept{simulate}

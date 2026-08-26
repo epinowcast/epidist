@@ -411,13 +411,13 @@
 #'
 #' @keywords internal
 .validate_primary <- function(primary, growth_rate) {
-  primary <- match.arg(primary, c("uniform", "expgrowth"))
+  # Both callers have already run match.arg() on primary.
   if (identical(primary, "expgrowth")) {
     assert_numeric(growth_rate, len = 1, any.missing = FALSE, finite = TRUE)
     return(as.numeric(growth_rate))
   }
   if (!is.null(growth_rate)) {
-    cli_abort(
+    cli::cli_abort(
       "{.arg growth_rate} is only used when {.arg primary} is {.val expgrowth}."
     )
   }

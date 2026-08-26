@@ -21,11 +21,11 @@ parameters.}
 By default, we do not return any model specific prior distributions.
 }
 \seealso{
-Other prior:
-\code{\link[=epidist_family_prior]{epidist_family_prior()}},
-\code{\link[=epidist_family_prior.default]{epidist_family_prior.default()}},
-\code{\link[=epidist_family_prior.lognormal]{epidist_family_prior.lognormal()}},
-\code{\link[=epidist_model_prior]{epidist_model_prior()}},
-\code{\link[=epidist_prior]{epidist_prior()}}
+Other prior: 
+\code{\link{epidist_family_prior}()},
+\code{\link{epidist_family_prior.default}()},
+\code{\link{epidist_family_prior.lognormal}()},
+\code{\link{epidist_model_prior}()},
+\code{\link{epidist_prior}()}
 }
 \concept{prior}
