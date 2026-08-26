@@ -1,5 +1,11 @@
 # epidist 0.5.0
 
+## Models
+
+- Added an exponentially growing primary event distribution to the latent model.
+`as_epidist_latent_model(primary = "expgrowth")` makes the growth rate a distributional parameter, so it takes a `brms` formula and prior and can vary by covariate.
+See #489 and #618.
+
 ## Features
 
 - Added `epidist_newdata()`, which builds the `newdata` needed to predict from a fitted model.
@@ -19,7 +25,6 @@ See #399.
 - `epidist_transform_data_model()` now checks the object it builds for the marginal and naive models.
 That object was never checked before, which only showed once the check in `epidist_stancode()` was removed.
 See #399.
-
 ## Package
 
 - Reworded the message `as_epidist_marginal_model()` gives when it sets relative observation times to `Inf`.
