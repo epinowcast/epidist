@@ -25,6 +25,7 @@
 #' @family gen
 #' @autoglobal
 #' @importFrom purrr map_dbl
+#' @export
 epidist_gen_log_lik <- function(family) {
   # Get internal brms log_lik function
   log_lik_brms <- .get_brms_fn("log_lik", family)

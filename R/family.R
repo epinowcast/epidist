@@ -44,10 +44,13 @@ epidist_family_model.default <- function(data, family, ...) {
 
 #' Reparameterise an `epidist` family to align `brms` and Stan
 #'
+#' Called by [epidist_family()]. A custom model supplies its family through
+#' [epidist_family_model()] rather than by calling this.
+#'
 #' @inheritParams epidist_family
 #' @rdname epidist_family_param
 #' @family family
-#' @export
+#' @keywords internal
 epidist_family_param <- function(family, ...) {
   UseMethod("epidist_family_param")
 }

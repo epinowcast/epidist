@@ -18,13 +18,14 @@ be used in the model created using \code{\link[=epidist_family]{epidist_family()
 }
 \description{
 This function is used within \code{\link[=epidist]{epidist()}} to transform data before passing to
-\code{brms}. It is unlikely that as a user you will need this function, but we
-export it nonetheless to be transparent about what happens inside of a call
-to \code{\link[=epidist]{epidist()}}.
+\code{brms}. It dispatches to \code{\link[=epidist_transform_data_model]{epidist_transform_data_model()}}, which is the
+generic a custom model implements. This wrapper is internal; extensions
+should write a method for \code{\link[=epidist_transform_data_model]{epidist_transform_data_model()}} instead.
 }
 \seealso{
-Other transform_data: 
-\code{\link{epidist_transform_data_model}()},
-\code{\link{epidist_transform_data_model.default}()}
+Other transform_data:
+\code{\link[=epidist_transform_data_model]{epidist_transform_data_model()}},
+\code{\link[=epidist_transform_data_model.default]{epidist_transform_data_model.default()}}
 }
 \concept{transform_data}
+\keyword{internal}

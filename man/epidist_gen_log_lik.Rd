@@ -13,7 +13,7 @@ be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
 families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
-\code{\link[brms:brmsfamily]{brms::lognormal()}}, are also
+\code{\link[brms:lognormal]{brms::lognormal()}}, are also
 reexported as part of \code{epidist}.}
 }
 \value{
@@ -29,8 +29,8 @@ observation. The prep object must have the following variables:
 This function creates a log likelihood function that calculates the marginal
 likelihood for a single observation by integrating over the latent primary
 and secondary event windows. Where analytical solutions exist in
-\code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}} these are used, otherwise the integration is
-performed numerically. \code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}} handles the double
+\code{\link[primarycensored:dpcens]{primarycensored::dpcens()}} these are used, otherwise the integration is
+performed numerically. \code{\link[primarycensored:dpcens]{primarycensored::dpcens()}} handles the double
 censoring and truncation of the delay distribution.
 }
 \details{
@@ -39,10 +39,10 @@ secondary event windows by integrating over their possible values, weighted
 by their respective uniform distributions.
 }
 \seealso{
-\code{\link[brms:log_lik.brmsfit]{brms::log_lik()}} for details on the brms log likelihood interface.
+\code{\link[brms:log_lik]{brms::log_lik()}} for details on the brms log likelihood interface.
 
-Other gen: 
-\code{\link{epidist_gen_posterior_epred}()},
-\code{\link{epidist_gen_posterior_predict}()}
+Other gen:
+\code{\link[=epidist_gen_posterior_epred]{epidist_gen_posterior_epred()}},
+\code{\link[=epidist_gen_posterior_predict]{epidist_gen_posterior_predict()}}
 }
 \concept{gen}

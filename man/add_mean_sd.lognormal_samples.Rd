@@ -17,11 +17,11 @@ Note that the input parameters here are \code{mu} and \code{sigma}, correspondin
 the distributional parameters used by \code{brms} for the \code{lognormal} family.
 }
 \seealso{
-Other postprocess: 
-\code{\link{add_mean_sd}()},
-\code{\link{add_mean_sd.default}()},
-\code{\link{add_mean_sd.gamma_samples}()},
-\code{\link{add_mean_sd.weibull_samples}()},
-\code{\link{predict_delay_parameters}()}
+Other postprocess:
+\code{\link[=add_mean_sd]{add_mean_sd()}},
+\code{\link[=add_mean_sd.default]{add_mean_sd.default()}},
+\code{\link[=add_mean_sd.gamma_samples]{add_mean_sd.gamma_samples()}},
+\code{\link[=add_mean_sd.weibull_samples]{add_mean_sd.weibull_samples()}},
+\code{\link[=predict_delay_parameters]{predict_delay_parameters()}}
 }
 \concept{postprocess}

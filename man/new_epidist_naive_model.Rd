@@ -16,12 +16,12 @@ An object of class \code{epidist_naive_model}.
 Class constructor for \code{epidist_naive_model} objects
 }
 \seealso{
-Other naive_model: 
-\code{\link{as_epidist_naive_model}()},
-\code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_naive_model.epidist_linelist_data}()},
-\code{\link{epidist_formula_model.epidist_naive_model}()},
-\code{\link{epidist_transform_data_model.epidist_naive_model}()},
-\code{\link{is_epidist_naive_model}()}
+Other naive_model:
+\code{\link[=as_epidist_naive_model]{as_epidist_naive_model()}},
+\code{\link[=as_epidist_naive_model.epidist_aggregate_data]{as_epidist_naive_model.epidist_aggregate_data()}},
+\code{\link[=as_epidist_naive_model.epidist_linelist_data]{as_epidist_naive_model.epidist_linelist_data()}},
+\code{\link[=epidist_formula_model.epidist_naive_model]{epidist_formula_model.epidist_naive_model()}},
+\code{\link[=epidist_transform_data_model.epidist_naive_model]{epidist_transform_data_model.epidist_naive_model()}},
+\code{\link[=is_epidist_naive_model]{is_epidist_naive_model()}}
 }
 \concept{naive_model}
