@@ -201,8 +201,9 @@ is_epidist_data <- function(data, ...) {
 #' requirements of. Modifications that leave the object unchanged are not
 #' checked. Used by the methods documented in [epidist_data].
 #'
-#' @param data A modified `epidist` object. Checking is skipped when `data` has
-#'  no columns, which happens when `vctrs` takes a prototype of the object.
+#' @param data A modified `epidist` object. An object with no columns is never
+#'  valid, and is unclassed without a warning because it is usually the
+#'  prototype `vctrs` takes rather than something the user asked for.
 #'
 #' @param original The object before it was modified. Checking is skipped when
 #'  the modification left the object unchanged.
@@ -217,11 +218,12 @@ is_epidist_data <- function(data, ...) {
   if (!is.data.frame(data) || identical(data, original)) {
     return(data)
   }
-  # `vctrs` takes a zero column prototype of the object in, for example,
-  # `dplyr::bind_cols()`. That prototype is not a modification of the object,
-  # so leave it alone.
+  # A zero column object is never a valid `epidist` object. `vctrs` takes one
+  # as a prototype of the object in, for example, `dplyr::bind_cols()`, so drop
+  # the classes without warning rather than warning about an object the user
+  # never sees.
   if (ncol(data) == 0) {
-    return(data)
+    return(.drop_epidist_class(data))
   }
   classes <- .epidist_classes(data)
   problems <- lapply(classes, .check_epidist_class, data = data)

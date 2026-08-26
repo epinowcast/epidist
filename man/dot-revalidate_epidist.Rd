@@ -7,8 +7,9 @@
 .revalidate_epidist(data, original = NULL)
 }
 \arguments{
-\item{data}{A modified \code{epidist} object. Checking is skipped when \code{data} has
-no columns, which happens when \code{vctrs} takes a prototype of the object.}
+\item{data}{A modified \code{epidist} object. An object with no columns is never
+valid, and is unclassed without a warning because it is usually the
+prototype \code{vctrs} takes rather than something the user asked for.}
 
 \item{original}{The object before it was modified. Checking is skipped when
 the modification left the object unchanged.}

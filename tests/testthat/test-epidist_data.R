@@ -111,6 +111,19 @@ test_that("modifications that change nothing are not checked", {
   expect_silent(dplyr::bind_cols(sim_obs, tibble::tibble(extra = 1)))
 })
 
+test_that("a zero column result is unclassed without a warning", {
+  expect_silent(dplyr::select(sim_obs, character(0)))
+  expect_false(is_epidist_data(dplyr::select(sim_obs, character(0))))
+  expect_silent(sim_obs[0])
+  expect_false(is_epidist_data(sim_obs[0]))
+})
+
+test_that("dplyr::group_by() drops the class, see epidist issue 629", {
+  grouped <- dplyr::group_by(sim_obs, obs_time)
+  expect_false(is_epidist_data(grouped))
+  expect_false(is_epidist_linelist_data(grouped))
+})
+
 test_that(".new_epidist_data adds epidist_data once", {
   data <- tibble::tibble() |>
     new_epidist_linelist_data() |>
