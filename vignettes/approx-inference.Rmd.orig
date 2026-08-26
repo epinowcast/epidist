@@ -29,11 +29,10 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE,
   error = FALSE,
-  # Evaluation is off because this vignette uses pathfinder, which needs a
-  # brms path fix that is merged upstream but not yet in a CRAN release.
-  # The package now resolves brms from CRAN, so that fix is unavailable.
-  # Turn this back on once brms releases it, or precompute the vignette.
-  eval = FALSE
+  # This is the source knitted by the render-vignettes workflow, not the
+  # vignette that ships. It needs development brms for pathfinder, which the
+  # workflow installs. See the committed approx-inference.Rmd for the output.
+  eval = TRUE
 )
 ```
 
