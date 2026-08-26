@@ -63,7 +63,8 @@ test_that("predict_delay_parameters accepts newdata arguments and prediction by 
 
     pred_sex_summary <- pred_sex |>
       dplyr::left_join(
-        dplyr::select(prep, index = .row_id, sex),
+        # Selecting two columns drops the epidist classes, see `?epidist_data`
+        suppressWarnings(dplyr::select(prep, index = .row_id, sex)),
         by = "index"
       ) |>
       dplyr::group_by(sex) |>
