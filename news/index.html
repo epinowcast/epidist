@@ -59,7 +59,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="ci-0-4-1-1000">CI<a class="anchor" aria-label="anchor" href="#ci-0-4-1-1000"></a></h3>
-<ul><li>Pinned the <code>precommit</code> hooks to a revision whose lockfile uses <code>digest</code> 0.6.39. The tagged v0.4.3 lockfile pins <code>digest</code> 0.6.36, which calls <code>Calloc</code> and <code>Free</code>. Those were removed from the R API in R 4.5, so the hook environment failed to build and the <code>pre-commit</code> job failed on every pull request. See <a href="https://github.com/epinowcast/epidist/issues/578" class="external-link">#578</a>.</li>
+<ul><li>Passed the coverage report to <code>codecov/codecov-action</code> through <code>files</code> rather than <code>file</code>. <code>file</code> is not an input the action accepts, so with <code>disable_search</code> set it found no report and the <code>test-coverage</code> job failed on <code>main</code>.</li>
+<li>Pinned the <code>precommit</code> hooks to a revision whose lockfile uses <code>digest</code> 0.6.39. The tagged v0.4.3 lockfile pins <code>digest</code> 0.6.36, which calls <code>Calloc</code> and <code>Free</code>. Those were removed from the R API in R 4.5, so the hook environment failed to build and the <code>pre-commit</code> job failed on every pull request. See <a href="https://github.com/epinowcast/epidist/issues/578" class="external-link">#578</a>.</li>
 </ul></div>
 </div>
     <div class="section level2">
