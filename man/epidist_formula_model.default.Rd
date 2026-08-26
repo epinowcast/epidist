@@ -21,8 +21,8 @@ parameters.}
 Default method for defining a model specific formula
 }
 \seealso{
-Other formula:
-\code{\link[=epidist_family_model]{epidist_family_model()}},
-\code{\link[=epidist_formula]{epidist_formula()}}
+Other formula: 
+\code{\link{epidist_family_model}()},
+\code{\link{epidist_formula}()}
 }
 \concept{formula}

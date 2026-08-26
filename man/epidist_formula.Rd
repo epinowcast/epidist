@@ -27,8 +27,8 @@ export it nonetheless to be transparent about what exactly is happening
 inside of a call to \code{\link[=epidist]{epidist()}}.
 }
 \seealso{
-Other formula:
-\code{\link[=epidist_family_model]{epidist_family_model()}},
-\code{\link[=epidist_formula_model.default]{epidist_formula_model.default()}}
+Other formula: 
+\code{\link{epidist_family_model}()},
+\code{\link{epidist_formula_model.default}()}
 }
 \concept{formula}

@@ -13,11 +13,18 @@
 #' input. [dplyr::group_by()] is an exception, as it builds a grouped tibble
 #' rather than restoring the class of its input. See epidist issue 629.
 #'
+#' A result with no columns is unclassed without a warning. Such a result is
+#' almost always the prototype `vctrs` takes internally, in [dplyr::bind_cols()]
+#' for example, rather than something the user asked for, and it cannot be told
+#' apart from a deliberate empty selection.
+#'
 #' @param x An object with the `epidist_data` class.
 #'
 #' @param data,template Passed to [dplyr::dplyr_reconstruct()].
 #'
 #' @param value A replacement value.
+#'
+#' @param deparse.level Passed to [base::rbind()].
 #'
 #' @param ... Passed to the underlying method.
 #'
@@ -78,6 +85,14 @@ NULL
 `names<-.epidist_data` <- function(x, value) {
   out <- NextMethod()
   return(.revalidate_epidist(out, x))
+}
+
+#' @rdname epidist_data
+#' @method rbind epidist_data
+#' @export
+rbind.epidist_data <- function(..., deparse.level = 1) {
+  out <- base::rbind.data.frame(..., deparse.level = deparse.level)
+  return(.revalidate_epidist(out))
 }
 
 #' @rdname epidist_data

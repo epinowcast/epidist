@@ -108,7 +108,34 @@ test_that("replacement functions check the object", {
 
 test_that("modifications that change nothing are not checked", {
   expect_silent(sim_obs[])
+})
+
+test_that("binding columns keeps the class without warning", {
   expect_silent(dplyr::bind_cols(sim_obs, tibble::tibble(extra = 1)))
+  expect_s3_class(
+    dplyr::bind_cols(sim_obs, tibble::tibble(extra = 1)),
+    "epidist_linelist_data"
+  )
+})
+
+test_that("binding rows checks the combined object", {
+  bad_row <- tibble::tibble(
+    ptime_lwr = -1,
+    ptime_upr = 0,
+    stime_lwr = 1,
+    stime_upr = 2,
+    obs_time = 3
+  )
+
+  expect_s3_class(rbind(sim_obs, sim_obs), "epidist_linelist_data")
+  expect_warning(rbind(sim_obs, bad_row), "Dropping the")
+  expect_false(is_epidist_data(suppressWarnings(rbind(sim_obs, bad_row))))
+
+  expect_s3_class(dplyr::bind_rows(sim_obs, sim_obs), "epidist_linelist_data")
+  expect_warning(dplyr::bind_rows(sim_obs, bad_row), "Dropping the")
+  expect_false(
+    is_epidist_data(suppressWarnings(dplyr::bind_rows(sim_obs, bad_row)))
+  )
 })
 
 test_that("a zero column result is unclassed without a warning", {

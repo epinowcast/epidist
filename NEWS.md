@@ -3,12 +3,16 @@
 ## Features
 
 - `epidist` data objects now check themselves when they are modified.
-Every object also carries a shared `epidist_data` class with methods for subsetting, replacement and the `dplyr` verbs.
+Every object also carries a shared `epidist_data` class with methods for subsetting, replacement, `rbind()` and the `dplyr` verbs.
 These re-check the object and drop any `epidist` class whose requirements it no longer meets, warning about what was dropped and why.
 An object that still carries an `epidist` class is therefore a valid object of that class.
+`dplyr::group_by()` and results with no columns are exceptions, both documented in `?epidist_data`.
 See `?epidist_data` and #399.
 - Dropped the checks that ran on objects which had already been checked when they were created.
 The `as_epidist_*()` and `epidist_stancode()` methods now trust the class they dispatch on.
+See #399.
+- `epidist_transform_data_model()` now checks the object it builds for the marginal and naive models.
+That object was never checked before, which only showed once the check in `epidist_stancode()` was removed.
 See #399.
 
 ## Package

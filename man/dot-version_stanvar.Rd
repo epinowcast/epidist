@@ -13,6 +13,6 @@ build the Stan code.
 \description{
 This function is used within \code{\link[=epidist_stancode]{epidist_stancode()}} to label the generated Stan
 code with the version of \code{epidist} used. To view the full Stan code for any
-particular \code{epidist} model, we recommend use of \code{\link[brms:make_stancode]{brms::make_stancode()}}.
+particular \code{epidist} model, we recommend use of \code{\link[brms:stancode]{brms::make_stancode()}}.
 }
 \keyword{internal}

@@ -7,6 +7,7 @@
 \alias{[[<-.epidist_data}
 \alias{$<-.epidist_data}
 \alias{names<-.epidist_data}
+\alias{rbind.epidist_data}
 \alias{dplyr_reconstruct.epidist_data}
 \title{Keep \code{epidist} objects in their class}
 \usage{
@@ -20,6 +21,8 @@
 
 \method{names}{epidist_data}(x) <- value
 
+\method{rbind}{epidist_data}(..., deparse.level = 1)
+
 \method{dplyr_reconstruct}{epidist_data}(data, template)
 }
 \arguments{
@@ -28,6 +31,8 @@
 \item{...}{Passed to the underlying method.}
 
 \item{value}{A replacement value.}
+
+\item{deparse.level}{Passed to \code{\link[base:cbind]{base::rbind()}}.}
 
 \item{data, template}{Passed to \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_reconstruct()}}.}
 }
@@ -49,6 +54,11 @@ Methods are provided for base subsetting and replacement, and for
 \code{\link[dplyr:filter]{dplyr::filter()}} and \code{\link[dplyr:select]{dplyr::select()}} use to restore the class of their
 input. \code{\link[dplyr:group_by]{dplyr::group_by()}} is an exception, as it builds a grouped tibble
 rather than restoring the class of its input. See epidist issue 629.
+
+A result with no columns is unclassed without a warning. Such a result is
+almost always the prototype \code{vctrs} takes internally, in \code{\link[dplyr:bind_cols]{dplyr::bind_cols()}}
+for example, rather than something the user asked for, and it cannot be told
+apart from a deliberate empty selection.
 }
 \examples{
 linelist_data <- sierra_leone_ebola_data |>

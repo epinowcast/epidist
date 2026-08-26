@@ -107,9 +107,15 @@ test_that(
   "assert_epidist.epidist_marginal_model errors when delay_lwr < delay_min", # nolint
   {
     bad_data <- prep_marginal_obs
-    bad_data$delay_min <- bad_data$delay_lwr + 1
+    expect_warning(
+      {
+        bad_data$delay_min <- bad_data$delay_lwr + 1
+      },
+      "delay_lwr must be greater than or equal to delay_min"
+    )
+    expect_false(is_epidist_marginal_model(bad_data))
     expect_error(
-      assert_epidist(bad_data),
+      assert_epidist(new_epidist_marginal_model(bad_data)),
       "delay_lwr must be greater than or equal to delay_min"
     )
   }
