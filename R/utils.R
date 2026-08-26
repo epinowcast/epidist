@@ -461,3 +461,21 @@
   }
   return(invisible(NULL))
 }
+
+#' The primary event distribution of an `epidist` object
+#'
+#' Returns `"uniform"` when the attribute is absent, so objects created before
+#' this was configurable keep their behaviour.
+#'
+#' @param data An `epidist` data object.
+#'
+#' @returns The primary event distribution as a string.
+#'
+#' @keywords internal
+.primary_dist <- function(data) {
+  primary <- attr(data, "primary")
+  if (is.null(primary)) {
+    return("uniform")
+  }
+  return(primary)
+}

@@ -4,7 +4,7 @@
 \alias{as_epidist_latent_model.epidist_aggregate_data}
 \title{The latent model method for \code{epidist_aggregate_data} objects}
 \usage{
-\method{as_epidist_latent_model}{epidist_aggregate_data}(data, ...)
+\method{as_epidist_latent_model}{epidist_aggregate_data}(data, primary = c("uniform", "expgrowth"), ...)
 }
 \arguments{
 \item{data}{An \code{epidist_aggregate_data} object}
