@@ -11,6 +11,8 @@ model by:
 
 3.  Converting the summarised data to a marginal model object using
     [`new_epidist_marginal_model()`](https://epidist.epinowcast.org/reference/new_epidist_marginal_model.md)
+    and checking it with
+    [`assert_epidist()`](https://epidist.epinowcast.org/reference/assert_epidist.md)
 
 4.  Informing the user about any data aggregation that occurred using
     [`.inform_data_summarised()`](https://epidist.epinowcast.org/reference/dot-inform_data_summarised.md)

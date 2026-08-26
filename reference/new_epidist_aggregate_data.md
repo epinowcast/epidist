@@ -33,5 +33,5 @@ Other aggregate_data:
 ``` r
 df <- new_epidist_aggregate_data(data.frame())
 class(df)
-#> [1] "epidist_aggregate_data" "data.frame"            
+#> [1] "epidist_aggregate_data" "epidist_data"           "data.frame"            
 ```

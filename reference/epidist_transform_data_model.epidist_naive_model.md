@@ -11,6 +11,8 @@ by:
 
 3.  Converting the summarised data to a naive model object using
     [`new_epidist_naive_model()`](https://epidist.epinowcast.org/reference/new_epidist_naive_model.md)
+    and checking it with
+    [`assert_epidist()`](https://epidist.epinowcast.org/reference/assert_epidist.md)
 
 4.  Informing the user about any data aggregation that occurred using
     [`.inform_data_summarised()`](https://epidist.epinowcast.org/reference/dot-inform_data_summarised.md)

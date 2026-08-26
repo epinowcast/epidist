@@ -2,6 +2,35 @@
 
 ## epidist 0.5.0
 
+### Features
+
+- `epidist` data objects now check themselves when they are modified.
+  Every object also carries a shared `epidist_data` class with methods
+  for subsetting, replacement,
+  [`rbind()`](https://rdrr.io/r/base/cbind.html) and the `dplyr` verbs.
+  These re-check the object and drop any `epidist` class whose
+  requirements it no longer meets, warning about what was dropped and
+  why. An object that still carries an `epidist` class is therefore a
+  valid object of that class.
+  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
+  and results with no columns are exceptions, both documented in
+  [`?epidist_data`](https://epidist.epinowcast.org/reference/epidist_data.md).
+  See
+  [`?epidist_data`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  and [\#399](https://github.com/epinowcast/epidist/issues/399).
+- Dropped the checks that ran on objects which had already been checked
+  when they were created. The `as_epidist_*()` and
+  [`epidist_stancode()`](https://epidist.epinowcast.org/reference/epidist_stancode.md)
+  methods now trust the class they dispatch on. See
+  [\#399](https://github.com/epinowcast/epidist/issues/399).
+- [`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md)
+  now checks the object it builds for the marginal and naive models.
+  That object was never checked before, which only showed once the check
+  in
+  [`epidist_stancode()`](https://epidist.epinowcast.org/reference/epidist_stancode.md)
+  was removed. See
+  [\#399](https://github.com/epinowcast/epidist/issues/399).
+
 ### Package
 
 - Added

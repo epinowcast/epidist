@@ -304,6 +304,26 @@ Functions for preparing aggregate data
 
   Class constructor for `epidist_aggregate_data` objects
 
+### Class methods
+
+Methods that keep modified objects in their `epidist` class
+
+- [`` `[`( ``*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  [`` `[<-`( ``*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  [`` `[[<-`( ``*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  [`` `$<-`( ``*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  [`` `names<-`( ``*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  [`rbind(`*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  [`dplyr_reconstruct(`*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  :
+
+  Keep `epidist` objects in their class
+
+- [`is_epidist_data()`](https://epidist.epinowcast.org/reference/is_epidist_data.md)
+  :
+
+  Check if data has the `epidist_data` class
+
 ## Models
 
 ### Naive model

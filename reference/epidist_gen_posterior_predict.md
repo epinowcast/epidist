@@ -6,7 +6,7 @@ predictive distribution for a latent model using
 to handle censoring and truncation. The returned function takes a `prep`
 argument from `brms` and returns posterior predictions. This is used
 internally by
-[`brms::posterior_predict()`](https://mc-stan.org/rstantools/reference/posterior_predict.html)
+[`brms::posterior_predict()`](https://paulbuerkner.com/brms/reference/posterior_predict.brmsfit.html)
 to generate predictions for latent models.
 
 ## Usage
@@ -48,7 +48,7 @@ per observation. The `prep` object must have the following variables:
 
 ## See also
 
-[`brms::posterior_predict()`](https://mc-stan.org/rstantools/reference/posterior_predict.html)
+[`brms::posterior_predict()`](https://paulbuerkner.com/brms/reference/posterior_predict.brmsfit.html)
 for details on how this is used within `brms`,
 [`primarycensored::rpcens()`](https://primarycensored.epinowcast.org/reference/rprimarycensored.html)
 for details on the censoring approach
