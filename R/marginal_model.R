@@ -61,6 +61,18 @@ as_epidist_marginal_model <- function(data, ...) {
 #'  which assigns a count of 1 to each row. Internally this is used to define
 #'  the 'n' column of the returned object.
 #'
+#' @param primary The distribution of the primary event within its censoring
+#'  window. `"uniform"`, the default, assumes the primary event is equally
+#'  likely at any point in the window. `"expgrowth"` tilts it towards the end
+#'  of the window at rate `growth_rate`, which is appropriate when incidence
+#'  is growing or shrinking exponentially over the window.
+#'
+#' @param growth_rate The exponential growth rate used when
+#'  `primary = "expgrowth"`. Positive values tilt the primary event towards
+#'  the end of the window, negative values towards the start. It is treated as
+#'  known rather than estimated. Ignored, and must be `NULL`, when
+#'  `primary = "uniform"`.
+#'
 #' @param ... Not used in this method.
 #'
 #' @method as_epidist_marginal_model epidist_linelist_data
@@ -78,8 +90,11 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   data,
   obs_time_threshold = 2,
   weight = NULL,
+  primary = c("uniform", "expgrowth"),
+  growth_rate = NULL,
   ...
 ) {
+  primary <- match.arg(primary)
   assert_epidist.epidist_linelist_data(data)
 
   data <- mutate(
@@ -114,7 +129,11 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
     data$relative_obs_time[data$relative_obs_time > threshold] <- Inf
   }
 
-  data <- new_epidist_marginal_model(data)
+  data <- new_epidist_marginal_model(
+    data,
+    primary = primary,
+    growth_rate = growth_rate
+  )
   assert_epidist(data)
   return(data)
 }
@@ -160,10 +179,29 @@ as_epidist_marginal_model.epidist_aggregate_data <- function(
 #' Class constructor for `epidist_marginal_model` objects
 #'
 #' @param data A data.frame to convert
+#' @param primary The primary event distribution, `"uniform"` or
+#'  `"expgrowth"`.
+#' @param growth_rate The exponential growth rate, required when `primary` is
+#'  `"expgrowth"` and otherwise `NULL`.
 #' @returns An object of class `epidist_marginal_model`
 #' @family marginal_model
 #' @export
-new_epidist_marginal_model <- function(data) {
+new_epidist_marginal_model <- function(
+  data,
+  primary = "uniform",
+  growth_rate = NULL
+) {
+  primary <- match.arg(primary, c("uniform", "expgrowth"))
+  if (identical(primary, "expgrowth")) {
+    assert_numeric(growth_rate, len = 1, any.missing = FALSE, finite = TRUE)
+  } else if (!is.null(growth_rate)) {
+    cli_abort(
+      "{.arg growth_rate} is only used when {.arg primary} is
+       {.val expgrowth}."
+    )
+  }
+  attr(data, "primary") <- primary
+  attr(data, "growth_rate") <- growth_rate
   class(data) <- c("epidist_marginal_model", class(data))
   return(data)
 }
@@ -298,9 +336,16 @@ epidist_transform_data_model.epidist_marginal_model <- function(
   ...
 ) {
   required_cols <- .marginal_required_cols()
+  primary <- attr(data, "primary")
+  if (is.null(primary)) {
+    primary <- "uniform"
+  }
   trans_data <- data |>
     .summarise_n_by_formula(by = required_cols, formula = formula) |>
-    new_epidist_marginal_model()
+    new_epidist_marginal_model(
+      primary = primary,
+      growth_rate = attr(data, "growth_rate")
+    )
 
   .inform_data_summarised(data, trans_data, c(required_cols))
 
@@ -360,17 +405,41 @@ epidist_stancode.epidist_marginal_model <- function(
     fixed = TRUE
   )
 
+  primary <- attr(data, "primary")
+  if (is.null(primary)) {
+    primary <- "uniform"
+  }
+  growth_rate <- attr(data, "growth_rate")
+
+  # Ids follow primarycensored::pcd_primary_distributions(): 1 is uniform and
+  # 2 is exponential growth, which takes the growth rate as its one parameter.
+  primary_id <- switch(primary,
+    uniform = "1",
+    expgrowth = "2"
+  )
+
   stanvars_functions[[1]]$scode <- gsub(
     "primary_id",
-    "1",
+    primary_id,
     stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
 
-  stanvars_parameters <- brms::stanvar(
-    block = "parameters",
-    scode = "array[0] real primary_params;"
-  )
+  if (identical(primary, "expgrowth")) {
+    # The growth rate is fixed rather than estimated, so it belongs in the
+    # data block.
+    stanvars_parameters <- brms::stanvar(
+      block = "data",
+      x = as.array(as.numeric(growth_rate)),
+      name = "primary_params",
+      scode = "array[1] real primary_params;"
+    )
+  } else {
+    stanvars_parameters <- brms::stanvar(
+      block = "parameters",
+      scode = "array[0] real primary_params;"
+    )
+  }
 
   pcd_stanvars_functions <- brms::stanvar(
     block = "functions",

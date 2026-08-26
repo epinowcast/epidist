@@ -1,0 +1,102 @@
+---
+title: "Primary event distributions"
+description: "Choosing how the primary event is distributed within its censoring window"
+output:
+  bookdown::html_vignette2:
+    fig_caption: yes
+    code_folding: show
+pkgdown:
+  as_is: true
+bibliography: references.bib
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Primary event distributions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+# The problem
+
+When an event is only observed within a window, say a day or a week, the model needs an assumption about where in that window the event actually happened.
+`epidist` calls this the primary event distribution.
+
+The default assumes the primary event is equally likely at any point in its window.
+That is reasonable when incidence is flat across the window.
+It is wrong when incidence is growing or shrinking quickly, because then the event is more likely to have happened towards one end of the window.
+Ignoring that biases the estimated delay distribution [@charniga2024best].
+
+# Setting the distribution
+
+```{r}
+library(epidist)
+library(dplyr)
+
+obs <- sierra_leone_ebola_data |>
+  slice_sample(n = 200) |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  )
+```
+
+The default is a uniform primary event.
+
+```{r}
+uniform <- as_epidist_marginal_model(obs)
+```
+
+To tilt the primary event towards the end of its window, use `primary = "expgrowth"` and give the exponential growth rate.
+
+```{r}
+growing <- as_epidist_marginal_model(
+  obs,
+  primary = "expgrowth",
+  growth_rate = 0.2
+)
+```
+
+A negative rate tilts it towards the start of the window, which is what you want during a declining epidemic.
+
+```{r}
+declining <- as_epidist_marginal_model(
+  obs,
+  primary = "expgrowth",
+  growth_rate = -0.2
+)
+```
+
+The growth rate is treated as known rather than estimated.
+In practice you would take it from a separate estimate of epidemic growth over the period the data cover.
+
+# Does it matter?
+
+The effect is largest when the censoring windows are wide relative to the delay, and when growth is fast.
+With daily windows and a delay of several days it is usually small.
+
+```{r fit, eval = FALSE}
+fit_uniform <- epidist(uniform, chains = 2, cores = 2, refresh = 0)
+fit_growing <- epidist(growing, chains = 2, cores = 2, refresh = 0)
+
+summary(fit_uniform)
+summary(fit_growing)
+```
+
+If you are unsure of the growth rate, fit under a few plausible values and check whether your conclusions change.
+
+# Limitations
+
+The growth rate is fixed, not estimated, so its uncertainty does not propagate into the delay estimates.
+
+Only the marginal model supports a non-uniform primary event.
+The latent model currently assumes a uniform primary event.
+
+# References

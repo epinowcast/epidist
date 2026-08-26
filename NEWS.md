@@ -48,6 +48,16 @@ See #79.
 It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
 See #79.
 
+## Models
+
+- Added support for an exponentially growing primary event distribution in the marginal model.
+`as_epidist_marginal_model()` gains `primary` and `growth_rate` arguments, with the previous uniform behaviour as the default.
+The rate is treated as known rather than estimated, and the latent model still assumes a uniform primary event.
+
+## Documentation
+
+- Added a `primary-events` vignette covering when the uniform assumption is reasonable and how to set an exponentially growing primary event.
+
 ## Bug fixes
 
 - Added a missing Jacobian adjustment to the latent model for observations whose primary and secondary censoring windows overlap.

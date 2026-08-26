@@ -244,3 +244,75 @@ test_that("epidist_transform_data_model.epidist_marginal_model correctly transfo
     "ptime_lwr"
   )
 })
+
+test_that("as_epidist_marginal_model defaults to a uniform primary event", {
+  model <- as_epidist_marginal_model(sim_obs)
+  expect_identical(attr(model, "primary"), "uniform")
+  expect_null(attr(model, "growth_rate"))
+})
+
+test_that("as_epidist_marginal_model records an exponential growth primary", {
+  model <- as_epidist_marginal_model(
+    sim_obs,
+    primary = "expgrowth",
+    growth_rate = 0.2
+  )
+  expect_identical(attr(model, "primary"), "expgrowth")
+  expect_identical(attr(model, "growth_rate"), 0.2)
+})
+
+test_that("as_epidist_marginal_model rejects inconsistent primary arguments", {
+  expect_error(
+    as_epidist_marginal_model(sim_obs, primary = "expgrowth"),
+    class = "checkmate_error"
+  )
+  expect_error(
+    as_epidist_marginal_model(sim_obs, growth_rate = 0.2),
+    "only used when"
+  )
+  expect_error(
+    as_epidist_marginal_model(sim_obs, primary = "gamma"),
+    "should be one of"
+  )
+})
+
+test_that("the primary event distribution reaches the Stan code and data", {
+  uniform <- as_epidist_marginal_model(sim_obs)
+  expgrowth <- as_epidist_marginal_model(
+    sim_obs,
+    primary = "expgrowth",
+    growth_rate = 0.2
+  )
+
+  code_uniform <- as.character(epidist(uniform, fn = brms::make_stancode))
+  code_expgrowth <- as.character(epidist(expgrowth, fn = brms::make_stancode))
+
+  # Ids follow primarycensored::pcd_primary_distributions().
+  expect_match(code_uniform, "relative_obs_t,\\s*1, primary_params")
+  expect_match(code_expgrowth, "relative_obs_t,\\s*2, primary_params")
+
+  expect_no_match(code_uniform, "array[1] real primary_params", fixed = TRUE)
+  expect_match(code_expgrowth, "array[1] real primary_params", fixed = TRUE)
+
+  data_uniform <- epidist(uniform, fn = brms::make_standata)
+  data_expgrowth <- epidist(expgrowth, fn = brms::make_standata)
+  expect_null(data_uniform$primary_params)
+  expect_equal(as.numeric(data_expgrowth$primary_params), 0.2)
+})
+
+test_that("the primary event distribution survives the data transformation", {
+  # The transformation rebuilds the object, so the setting has to be carried
+  # across it rather than reset to the default.
+  model <- as_epidist_marginal_model(
+    sim_obs,
+    primary = "expgrowth",
+    growth_rate = -0.1
+  )
+  transformed <- epidist_transform_data(
+    model,
+    family = epidist_family(model),
+    formula = epidist_formula(model, family = epidist_family(model))
+  )
+  expect_identical(attr(transformed, "primary"), "expgrowth")
+  expect_identical(attr(transformed, "growth_rate"), -0.1)
+})
