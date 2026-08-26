@@ -178,6 +178,46 @@ y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
 $$
 As before, $g_P(z \, | \, p_{L, i}, p_{R, i})$ represents the conditional distribution of the primary event given lower $P_L$ and upper $P_R$ bounds; this is equivalent to modelling the incidence in primary events.
 
+## Bounding the latent primary event time {#latent-bound}
+
+`epidist` samples both latent offsets on the unit scale.
+Write $w_{P, i} = p_{R, i} - p_{L, i}$ and $w_{S, i} = s_{R, i} - s_{L, i}$ for the two censoring window widths.
+Then
+$$
+\tilde{p}_i \sim \text{Unif}(0, 1), \qquad
+\tilde{s}_i \sim \text{Unif}(0, 1), \qquad
+s_i = w_{S, i}\, \tilde{s}_i,
+$$
+and the primary event offset is ordinarily
+$$
+p_i = w_{P, i}\, \tilde{p}_i .
+$$
+
+When the two censoring windows overlap the delay must still be non-negative.
+The primary event therefore has to precede the sampled secondary event.
+The offset is then bounded by the sampled secondary offset rather than by the window width.
+$$
+p_i = s_i\, \tilde{p}_i .
+$$
+
+That upper bound is itself a parameter.
+The map $\tilde{p}_i \mapsto p_i$ therefore has Jacobian determinant
+$$
+\left| \frac{\partial p_i}{\partial \tilde{p}_i} \right| = s_i ,
+$$
+Stan does not add this term for a transformation written this way.
+See the [Stan user's guide on changes of variables](https://mc-stan.org/docs/stan-users-guide/reparameterization.html#changes-of-variables).
+The log density of these observations needs it explicitly.
+$$
+\log \mathcal{L}_i \;\longmapsto\; \log \mathcal{L}_i + \log s_i .
+$$
+The non-overlapping case needs no such term because $w_{P, i}$ is data, so its Jacobian is a constant that cancels.
+The primary event density is used unnormalised here.
+A constant normalising it over $[0, s_i]$ would itself depend on $s_i$.
+
+The latent model formulation follows @ward2022transmission.
+The need for this adjustment was identified in @bdbvlinelist and derived in @brand2026scalable.
+
 # The marginal model
 
 The marginal model corrects for the same biases as the latent model but integrates out the exact event times numerically, or analytically where closed-form solutions exist, rather than sampling latent variables.

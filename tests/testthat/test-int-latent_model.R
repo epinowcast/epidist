@@ -189,3 +189,36 @@ test_that("epidist.epidist_latent_model recovers a sex effect", { # nolint: line
   expect_s3_class(fit_sex, "epidist_fit")
   expect_convergence(fit_sex)
 })
+
+test_that("the latent and marginal models agree when censoring windows overlap", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  # The latent model bounds the primary event offset by the sampled secondary
+  # offset when the two censoring windows overlap. That bound is a parameter,
+  # so the reparameterisation carries a log(swindow) Jacobian. Without it the
+  # latent model targets a different likelihood to the marginal model, and the
+  # two disagree. The fixtures use weekly censoring windows, which leaves
+  # around a quarter of observations overlapping.
+  skip_on_cran()
+
+  overlap_fraction <- mean(prep_obs_overlap$woverlap > 0)
+  # Guard against the fixture drifting into a case with no overlap at all,
+  # which would make the comparison below pass regardless of the adjustment.
+  expect_gt(overlap_fraction, 0.2)
+
+  pred_latent <- predict_delay_parameters(fit_overlap)
+  pred_marginal <- predict_delay_parameters(fit_marginal_overlap)
+
+  # The adjustment shows up in the standard deviation rather than the mean.
+  # On this fixture the latent model gives sigma 0.518 against the marginal
+  # model's 0.501, a relative difference of 0.03. Removing the Jacobian term
+  # from the Stan code inflates it to 0.779, a relative difference of 0.56,
+  # so the sigma check below is what makes this test worth having.
+  expect_equal(
+    mean(pred_latent$mu), mean(pred_marginal$mu),
+    tolerance = 0.05
+  )
+  expect_equal(
+    mean(pred_latent$sigma), mean(pred_marginal$sigma),
+    tolerance = 0.1
+  )
+})
