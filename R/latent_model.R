@@ -31,6 +31,15 @@ as_epidist_latent_model <- function(data, ...) {
 #'   observations with primary and secondary event times. See
 #'   [as_epidist_linelist_data()] for details on creating this object.
 #'
+#' @param primary The distribution of the primary event within its censoring
+#'  window. `"uniform"`, the default, assumes the primary event is equally
+#'  likely at any point in the window. `"expgrowth"` tilts it towards the end
+#'  of the window at rate `growth_rate`.
+#'
+#' @param growth_rate The exponential growth rate used when
+#'  `primary = "expgrowth"`. Treated as known rather than estimated. Ignored,
+#'  and must be `NULL`, when `primary = "uniform"`.
+#'
 #' @param ... Not used in this method.
 #'
 #' @method as_epidist_latent_model epidist_linelist_data

@@ -264,7 +264,7 @@ test_that("as_epidist_marginal_model records an exponential growth primary", {
 test_that("as_epidist_marginal_model rejects inconsistent primary arguments", {
   expect_error(
     as_epidist_marginal_model(sim_obs, primary = "expgrowth"),
-    class = "checkmate_error"
+    "Must be of type 'numeric'"
   )
   expect_error(
     as_epidist_marginal_model(sim_obs, growth_rate = 0.2),
@@ -308,10 +308,11 @@ test_that("the primary event distribution survives the data transformation", {
     primary = "expgrowth",
     growth_rate = -0.1
   )
+  family <- epidist_family(model)
   transformed <- epidist_transform_data(
     model,
-    family = epidist_family(model),
-    formula = epidist_formula(model, family = epidist_family(model))
+    family = family,
+    formula = epidist_formula(model, family = family, formula = mu ~ 1)
   )
   expect_identical(attr(transformed, "primary"), "expgrowth")
   expect_identical(attr(transformed, "growth_rate"), -0.1)

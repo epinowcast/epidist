@@ -134,7 +134,7 @@ test_that("as_epidist_latent_model defaults to a uniform primary event", {
 test_that("as_epidist_latent_model rejects inconsistent primary arguments", {
   expect_error(
     as_epidist_latent_model(sim_obs, primary = "expgrowth"),
-    class = "checkmate_error"
+    "Must be of type 'numeric'"
   )
   expect_error(
     as_epidist_latent_model(sim_obs, growth_rate = 0.2),
