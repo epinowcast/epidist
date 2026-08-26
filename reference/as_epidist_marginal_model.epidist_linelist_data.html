@@ -44,6 +44,7 @@ number of unique strata approaches the number of observations."><meta property="
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/ebola.html">Advanced features with Ebola data</a></li>
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
+    <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul></li>
@@ -84,7 +85,13 @@ number of unique strata approaches the number of observations.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'epidist_linelist_data'</span></span>
-<span><span class="fu"><a href="as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">data</span>, obs_time_threshold <span class="op">=</span> <span class="fl">2</span>, weight <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  obs_time_threshold <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  weight <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  delay_min <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -112,6 +119,16 @@ rather than repeating identical rows. The marginal model will further
 aggregate these counts based on the formula specification. Default is NULL,
 which assigns a count of 1 to each row. Internally this is used to define
 the 'n' column of the returned object.</p></dd>
+
+
+<dt id="arg-delay-min">delay_min<a class="anchor" aria-label="anchor" href="#arg-delay-min"></a></dt>
+<dd><p>Minimum delay (left truncation point). Can be:</p><ul><li><p><code>NULL</code> (default): uses a <code>delay_min</code> column from the data if present,
+otherwise defaults to 0 (no left truncation).</p></li>
+<li><p>A numeric scalar: applied to all observations.</p></li>
+<li><p>A column name string: looks up the named column in the data.
+This is passed as the <code>L</code> parameter to
+<code><a href="https://primarycensored.epinowcast.org/reference/dprimarycensored.html" class="external-link">primarycensored::dpcens()</a></code>.</p></li>
+</ul></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -157,7 +174,7 @@ variables in the model formula.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Setting 8294 observation times beyond 98 (=2x max delay) to Inf. This</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   improves model efficiency by reducing unique observation times while</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   maintaining model accuracy as these times should have negligible impact.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8,358 × 22</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8,358 × 23</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id   age sex   pdate_lwr </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>         0         1         5         6      484     1    20 Fema… 2014-05-18</span>
@@ -171,10 +188,10 @@ variables in the model formula.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>         4         5         9        10      484     9    54 Fema… 2014-05-22</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>         4         5         9        10      484    10    57 Fema… 2014-05-22</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 8,348 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 13 more variables: sdate_lwr &lt;date&gt;, district &lt;chr&gt;, chiefdom &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 14 more variables: sdate_lwr &lt;date&gt;, district &lt;chr&gt;, chiefdom &lt;chr&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   pdate_upr &lt;date&gt;, sdate_upr &lt;date&gt;, obs_date &lt;date&gt;, pwindow &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   swindow &lt;dbl&gt;, relative_obs_time &lt;dbl&gt;, orig_relative_obs_time &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   delay_lwr &lt;dbl&gt;, delay_upr &lt;dbl&gt;, n &lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   delay_lwr &lt;dbl&gt;, delay_upr &lt;dbl&gt;, n &lt;dbl&gt;, delay_min &lt;dbl&gt;</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

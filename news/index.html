@@ -28,6 +28,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/ebola.html">Advanced features with Ebola data</a></li>
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
+    <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul></li>
@@ -83,6 +84,10 @@
 <li>Made <code><a href="../reference/epidist_transform_data.html">epidist_transform_data()</a></code> internal. It is a wrapper that dispatches to <code><a href="../reference/epidist_transform_data_model.html">epidist_transform_data_model()</a></code>, which is the generic an extension implements and which remains exported. See <a href="https://github.com/epinowcast/epidist/issues/79" class="external-link">#79</a>.</li>
 </ul></div>
 <div class="section level3">
+<h3 id="models-0-5-0">Models<a class="anchor" aria-label="anchor" href="#models-0-5-0"></a></h3>
+<ul><li>Added left truncation support via a <code>delay_min</code> parameter in <code><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code>. This passes the <code>L</code> (left truncation) argument through to the <code>primarycensored</code> likelihood. The default of 0 reproduces the previous behaviour. See <a href="https://github.com/epinowcast/epidist/issues/588" class="external-link">#588</a> and <a href="https://github.com/epinowcast/epidist/issues/596" class="external-link">#596</a>.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="ci-0-5-0">CI<a class="anchor" aria-label="anchor" href="#ci-0-5-0"></a></h3>
 <ul><li>Added a <code>render-vignettes</code> workflow that rebuilds the precomputed vignettes and opens a pull request with the result.</li>
 </ul></div>
@@ -92,12 +97,16 @@
 <li>Declared <code>reformulas</code> in <code>Suggests</code> and skipped the <code>marginaleffects</code> integration test when it is absent. <code>insight</code> needs <code>reformulas</code> to read the formula of a <code>brmsfit</code>, but only suggests it, so the test failed on a clean library. See <a href="https://github.com/epinowcast/epidist/issues/601" class="external-link">#601</a>.</li>
 </ul></div>
 <div class="section level3">
+<h3 id="documentation-0-5-0-1">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-5-0-1"></a></h3>
+<ul><li>Added a <code>left-truncation</code> vignette showing how to use <code>delay_min</code>. See <a href="https://github.com/epinowcast/epidist/issues/596" class="external-link">#596</a>.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="ci-0-5-0-1">CI<a class="anchor" aria-label="anchor" href="#ci-0-5-0-1"></a></h3>
 <ul><li>Passed the coverage report to <code>codecov/codecov-action</code> through <code>files</code> rather than <code>file</code>. <code>file</code> is not an input the action accepts, so with <code>disable_search</code> set it found no report and the <code>test-coverage</code> job failed on <code>main</code>.</li>
 <li>Pinned the <code>precommit</code> hooks to a revision whose lockfile uses <code>digest</code> 0.6.39. The tagged v0.4.3 lockfile pins <code>digest</code> 0.6.36, which calls <code>Calloc</code> and <code>Free</code>. Those were removed from the R API in R 4.5, so the hook environment failed to build and the <code>pre-commit</code> job failed on every pull request. See <a href="https://github.com/epinowcast/epidist/issues/578" class="external-link">#578</a>.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="documentation-0-5-0-1">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-5-0-1"></a></h3>
+<h3 id="documentation-0-5-0-2">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-5-0-2"></a></h3>
 <ul><li>Documented installing from CRAN in the README, with <code>r-universe</code> as the route to the latest version.</li>
 </ul></div>
 </div>

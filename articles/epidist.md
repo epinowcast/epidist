@@ -683,8 +683,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3554     2891
-#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3942     2843
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3301     2349
+#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3309     2752
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -725,7 +725,7 @@ and truncated distributions in both Stan and R. The documentation for
 
 marginal_data <- as_epidist_marginal_model(linelist_data)
 marginal_data
-#> # A tibble: 200 × 18
+#> # A tibble: 200 × 19
 #>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr 
 #>        <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>    
 #>  1        15        16        23        24       25  1280 2024-02-16 2024-02-24
@@ -739,9 +739,10 @@ marginal_data
 #>  9         7         8        12        13       25   286 2024-02-08 2024-02-13
 #> 10        16        17        22        23       25  1616 2024-02-17 2024-02-23
 #> # ℹ 190 more rows
-#> # ℹ 10 more variables: obs_date <date>, pdate_upr <date>, sdate_upr <date>,
+#> # ℹ 11 more variables: obs_date <date>, pdate_upr <date>, sdate_upr <date>,
 #> #   pwindow <dbl>, swindow <dbl>, relative_obs_time <dbl>,
-#> #   orig_relative_obs_time <dbl>, delay_lwr <dbl>, delay_upr <dbl>, n <dbl>
+#> #   orig_relative_obs_time <dbl>, delay_lwr <dbl>, delay_upr <dbl>, n <dbl>,
+#> #   delay_min <dbl>
 ```
 
 The `data` object now has the class `epidist_marginal_model`. Using this
@@ -787,7 +788,7 @@ We again summarise the posterior using
 summary(marginal_fit)
 #>  Family: marginal_lognormal 
 #>   Links: mu = identity; sigma = log 
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1 
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min) ~ 1 
 #>          sigma ~ 1
 #>    Data: transformed_data (Number of observations: 92) 
 #>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
@@ -795,8 +796,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.65 1.00     2437     2375
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2020     2236
+#> Intercept           1.55      0.05     1.46     1.65 1.00     1914     2033
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2145     1728
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -827,12 +828,12 @@ predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
 
 head(predicted_parameters)
 #>      model draw index       mu     sigma     mean       sd
-#> 1 marginal    1     1 1.490737 0.4950304 5.019168 2.644924
-#> 2 marginal    2     1 1.468042 0.5081743 4.938997 2.680975
-#> 3 marginal    3     1 1.468042 0.5081743 4.938997 2.680975
-#> 4 marginal    4     1 1.590223 0.4960320 5.546940 2.929712
-#> 5 marginal    5     1 1.514867 0.4496574 5.032733 2.382364
-#> 6 marginal    6     1 1.501334 0.4853570 5.048646 2.602046
+#> 1 marginal    1     1 1.539222 0.4863068 5.246019 2.709711
+#> 2 marginal    2     1 1.537802 0.4829135 5.229968 2.680280
+#> 3 marginal    3     1 1.537802 0.4829135 5.229968 2.680280
+#> 4 marginal    4     1 1.561404 0.4862020 5.363411 2.769677
+#> 5 marginal    5     1 1.560944 0.4991282 5.395195 2.869653
+#> 6 marginal    6     1 1.538928 0.4946886 5.266078 2.772877
 ```
 
 Note that by default

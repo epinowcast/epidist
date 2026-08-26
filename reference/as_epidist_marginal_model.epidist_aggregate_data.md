@@ -10,7 +10,7 @@ weighted by the counts in the aggregate data.
 
 ``` r
 # S3 method for class 'epidist_aggregate_data'
-as_epidist_marginal_model(data, obs_time_threshold = 2, ...)
+as_epidist_marginal_model(data, obs_time_threshold = 2, delay_min = NULL, ...)
 ```
 
 ## Arguments
@@ -25,6 +25,19 @@ as_epidist_marginal_model(data, obs_time_threshold = 2, ...)
   times to Inf. Observation times greater than `obs_time_threshold`
   times the maximum delay will be set to Inf to improve model efficiency
   by reducing the number of unique observation times. Default is 2.
+
+- delay_min:
+
+  Minimum delay (left truncation point). Can be:
+
+  - `NULL` (default): uses a `delay_min` column from the data if
+    present, otherwise defaults to 0 (no left truncation).
+
+  - A numeric scalar: applied to all observations.
+
+  - A column name string: looks up the named column in the data. This is
+    passed as the `L` parameter to
+    [`primarycensored::dpcens()`](https://primarycensored.epinowcast.org/reference/dprimarycensored.html).
 
 - ...:
 
@@ -58,7 +71,7 @@ sierra_leone_ebola_data |>
 #> ! Setting 2394 observation times beyond 98 (=2x max delay) to Inf. This
 #>   improves model efficiency by reducing unique observation times while
 #>   maintaining model accuracy as these times should have negligible impact.
-#> # A tibble: 2,453 × 17
+#> # A tibble: 2,453 × 18
 #>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time pdate_lwr  sdate_lwr      n
 #>        <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <date>     <date>     <int>
 #>  1         0         1         5         6      484 2014-05-18 2014-05-23     1
@@ -72,7 +85,8 @@ sierra_leone_ebola_data |>
 #>  9        13        14        18        19      484 2014-05-31 2014-06-05     1
 #> 10        13        14        20        21      484 2014-05-31 2014-06-07     1
 #> # ℹ 2,443 more rows
-#> # ℹ 9 more variables: pdate_upr <date>, sdate_upr <date>, obs_date <date>,
+#> # ℹ 10 more variables: pdate_upr <date>, sdate_upr <date>, obs_date <date>,
 #> #   pwindow <dbl>, swindow <dbl>, relative_obs_time <dbl>,
-#> #   orig_relative_obs_time <dbl>, delay_lwr <dbl>, delay_upr <dbl>
+#> #   orig_relative_obs_time <dbl>, delay_lwr <dbl>, delay_upr <dbl>,
+#> #   delay_min <dbl>
 ```

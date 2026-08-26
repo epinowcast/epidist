@@ -82,6 +82,16 @@
   which is the generic an extension implements and which remains
   exported. See [\#79](https://github.com/epinowcast/epidist/issues/79).
 
+### Models
+
+- Added left truncation support via a `delay_min` parameter in
+  [`as_epidist_marginal_model()`](https://epidist.epinowcast.org/reference/as_epidist_marginal_model.md).
+  This passes the `L` (left truncation) argument through to the
+  `primarycensored` likelihood. The default of 0 reproduces the previous
+  behaviour. See
+  [\#588](https://github.com/epinowcast/epidist/issues/588) and
+  [\#596](https://github.com/epinowcast/epidist/issues/596).
+
 ### CI
 
 - Added a `render-vignettes` workflow that rebuilds the precomputed
@@ -100,6 +110,11 @@
   read the formula of a `brmsfit`, but only suggests it, so the test
   failed on a clean library. See
   [\#601](https://github.com/epinowcast/epidist/issues/601).
+
+### Documentation
+
+- Added a `left-truncation` vignette showing how to use `delay_min`. See
+  [\#596](https://github.com/epinowcast/epidist/issues/596).
 
 ### CI
 

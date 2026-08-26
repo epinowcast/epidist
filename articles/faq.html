@@ -48,6 +48,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/ebola.html">Advanced features with Ebola data</a></li>
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
+    <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul>
@@ -455,7 +456,8 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 <span><span class="co">##     dstudent_t, pstudent_t, qstudent_t, rstudent_t</span></span></code></pre>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">draws_pmf</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
-<span>  relative_obs_time <span class="op">=</span> <span class="cn">Inf</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span>, delay_upr <span class="op">=</span> <span class="cn">NA</span></span>
+<span>  relative_obs_time <span class="op">=</span> <span class="cn">Inf</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  delay_upr <span class="op">=</span> <span class="cn">NA</span>, delay_min <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: Found infinite values in the data, which may cause issues for Stan.</span></span></code></pre>
