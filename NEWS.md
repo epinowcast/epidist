@@ -39,6 +39,11 @@ They ran for 118 and 110 seconds against CRAN's 5 second guidance.
 
 ## Package
 
+- Made `epidist_family_param()` internal.
+It is reached through `epidist_family()`, and a custom model supplies its family through `epidist_family_model()` instead.
+See #79.
+- Exported `epidist_gen_log_lik()`, which was the only one of the three post-processing generators not exported.
+See #79.
 - Made `epidist_transform_data()` internal.
 It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
 See #79.

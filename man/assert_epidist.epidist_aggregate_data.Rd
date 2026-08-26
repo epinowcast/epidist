@@ -24,12 +24,12 @@ sierra_leone_ebola_data |>
   assert_epidist()
 }
 \seealso{
-Other aggregate_data: 
-\code{\link{as_epidist_aggregate_data}()},
-\code{\link{as_epidist_aggregate_data.data.frame}()},
-\code{\link{as_epidist_aggregate_data.default}()},
-\code{\link{as_epidist_aggregate_data.epidist_linelist_data}()},
-\code{\link{is_epidist_aggregate_data}()},
-\code{\link{new_epidist_aggregate_data}()}
+Other aggregate_data:
+\code{\link[=as_epidist_aggregate_data]{as_epidist_aggregate_data()}},
+\code{\link[=as_epidist_aggregate_data.data.frame]{as_epidist_aggregate_data.data.frame()}},
+\code{\link[=as_epidist_aggregate_data.default]{as_epidist_aggregate_data.default()}},
+\code{\link[=as_epidist_aggregate_data.epidist_linelist_data]{as_epidist_aggregate_data.epidist_linelist_data()}},
+\code{\link[=is_epidist_aggregate_data]{is_epidist_aggregate_data()}},
+\code{\link[=new_epidist_aggregate_data]{new_epidist_aggregate_data()}}
 }
 \concept{aggregate_data}

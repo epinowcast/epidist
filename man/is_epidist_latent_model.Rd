@@ -13,13 +13,13 @@ is_epidist_latent_model(data)
 Check if data has the \code{epidist_latent_model} class
 }
 \seealso{
-Other latent_model: 
-\code{\link{as_epidist_latent_model}()},
-\code{\link{as_epidist_latent_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_latent_model.epidist_linelist_data}()},
-\code{\link{epidist_family_model.epidist_latent_model}()},
-\code{\link{epidist_formula_model.epidist_latent_model}()},
-\code{\link{epidist_model_prior.epidist_latent_model}()},
-\code{\link{new_epidist_latent_model}()}
+Other latent_model:
+\code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}},
+\code{\link[=as_epidist_latent_model.epidist_aggregate_data]{as_epidist_latent_model.epidist_aggregate_data()}},
+\code{\link[=as_epidist_latent_model.epidist_linelist_data]{as_epidist_latent_model.epidist_linelist_data()}},
+\code{\link[=epidist_family_model.epidist_latent_model]{epidist_family_model.epidist_latent_model()}},
+\code{\link[=epidist_formula_model.epidist_latent_model]{epidist_formula_model.epidist_latent_model()}},
+\code{\link[=epidist_model_prior.epidist_latent_model]{epidist_model_prior.epidist_latent_model()}},
+\code{\link[=new_epidist_latent_model]{new_epidist_latent_model()}}
 }
 \concept{latent_model}
