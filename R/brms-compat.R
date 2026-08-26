@@ -84,8 +84,7 @@
   if (unsupported) {
     cli_abort(c(
       "{.val {family$family}} is not a supported {.pkg epidist} family.",
-      "i" = "Ordinal, categorical, mixture and Cox families are not
-             supported."
+      i = "Ordinal, categorical, mixture and Cox families are not supported."
     ))
   }
   return(invisible(family))
@@ -244,7 +243,7 @@
   if (is.null(out)) {
     cli_abort(c(
       "Bounds for the distributional parameter {.val {dpar}} are unknown.",
-      "i" = "Supported parameters are {.val {names(bounds)}}."
+      i = "Supported parameters are {.val {names(bounds)}}."
     ))
   }
   return(out)
