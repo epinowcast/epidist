@@ -1,5 +1,22 @@
 # epidist 0.4.1.1000
 
+## Package
+
+- Removed the calls to unexported `brms` functions that `R CMD check --as-cran` flags.
+`R/brms-compat.R` now holds small internal helpers reproducing the narrow behaviour `epidist` relied on from `brms:::validate_family()`, `brms:::validate_formula()`, `brms:::validate_data()`, `brms:::dpar_bounds()` and `brms:::log_lik_weight()`.
+The helpers are written against the public `brms` interface rather than copied from `brms`.
+`tests/testthat/test-brms-compat.R` checks each one against the `brms` internal it replaces.
+Credit for the original behaviour goes to the `brms` authors.
+See #420 and paul-buerkner/brms#1676.
+- Removed the `Remotes` field from `DESCRIPTION` so dependencies resolve from CRAN.
+`cmdstanr` is now found through `Additional_repositories` and the development version of `brms` is no longer used.
+See #592.
+- Added a `brms (>= 2.23.0)` floor, the version the compatibility helpers were checked against.
+- Raised the minimum R version to 4.1.0.
+The package uses the native pipe and the lambda shorthand, both of which need R 4.1.0.
+- Added the copyright holder role to Sam Abbott in `DESCRIPTION`.
+- Guarded the shared test fits and the tests that use them so the suite runs without `cmdstanr`.
+
 ## Bug fixes
 
 - Declared `reformulas` in `Suggests` and skipped the `marginaleffects` integration test when it is absent.
@@ -12,7 +29,6 @@ See #601.
 The tagged v0.4.3 lockfile pins `digest` 0.6.36, which calls `Calloc` and `Free`.
 Those were removed from the R API in R 4.5, so the hook environment failed to build and the `pre-commit` job failed on every pull request.
 See #578.
-
 
 # epidist 0.4.1
 
