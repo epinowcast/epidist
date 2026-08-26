@@ -53,6 +53,13 @@ See #79.
 It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
 See #79.
 
+## Models
+
+- Added left truncation support via a `delay_min` parameter in `as_epidist_marginal_model()`.
+This passes the `L` (left truncation) argument through to the `primarycensored` likelihood.
+The default of 0 reproduces the previous behaviour.
+See #588 and #596.
+
 ## CI
 
 - Added a `render-vignettes` workflow that rebuilds the precomputed vignettes and opens a pull request with the result.
@@ -66,6 +73,11 @@ See #606.
 - Declared `reformulas` in `Suggests` and skipped the `marginaleffects` integration test when it is absent.
 `insight` needs `reformulas` to read the formula of a `brmsfit`, but only suggests it, so the test failed on a clean library.
 See #601.
+
+## Documentation
+
+- Added a `left-truncation` vignette showing how to use `delay_min`.
+See #596.
 
 ## CI
 

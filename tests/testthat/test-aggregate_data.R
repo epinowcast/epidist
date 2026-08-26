@@ -142,3 +142,14 @@ test_that("is_epidist_aggregate_data works correctly", {
   expect_false(is_epidist_aggregate_data(data.frame()))
   expect_false(is_epidist_aggregate_data(list()))
 })
+
+test_that(
+  "as_epidist_aggregate_data.epidist_linelist_data preserves delay_min", # nolint
+  {
+    data_with_min <- sim_obs
+    data_with_min$delay_min <- 1
+    agg <- as_epidist_aggregate_data(data_with_min)
+    expect_true("delay_min" %in% names(agg))
+    expect_true(all(agg$delay_min == 1))
+  }
+)

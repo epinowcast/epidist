@@ -1,5 +1,6 @@
 /**
-  * Compute the log probability mass function for a marginal model with censoring
+  * Compute the log probability mass function for a marginal model with
+  * censoring
   *
   * This function is designed to be read into R where:
   * - 'family' is replaced with the target distribution (e.g., 'lognormal')
@@ -10,20 +11,24 @@
   *
   * @param y Real value of observed delay
   * @param dpars_A Distribution parameters (replaced via regex)
-  * @param relative_obs_t Observation time relative to primary window start
+  * @param relative_obs_t Observation time relative to primary window start.
+  *   Passed as D (the relative observation time) to primarycensored.
   * @param pwindow_width Primary window width (actual time scale)
   * @param swindow_width Secondary window width (actual time scale)
   * @param y_upper Upper bound of delay interval
+  * @param delay_min Minimum delay. Passed as L (the left truncation point)
+  *   to primarycensored.
   * @param primary_params Array of parameters for primary distribution
   *
   * @return Log probability mass with censoring adjustment for marginal model
   */
   real marginal_family_lpmf(data int y, dpars_A, data real relative_obs_t,
                             data real pwindow_width, data real swindow_width,
-                            data real y_upper, array[] real primary_params) {
+                            data real y_upper, data real delay_min,
+                            array[] real primary_params) {
 
   return primarycensored_lpmf(
       y | dist_id, {dpars_B}, pwindow_width, y_upper,
-      0, relative_obs_t, primary_id, primary_params
+      delay_min, relative_obs_t, primary_id, primary_params
     );
 }

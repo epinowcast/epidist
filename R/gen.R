@@ -21,6 +21,8 @@
 #' * `vreal1`: relative observation time
 #' * `vreal2`: primary event window
 #' * `vreal3`: secondary event window
+#' * `vreal4`: delay upper bound
+#' * `vreal5`: minimum delay (left truncation point; defaults to 0 if absent)
 #'
 #' @family gen
 #' @autoglobal
@@ -63,6 +65,7 @@ epidist_gen_log_lik <- function(family) {
     relative_obs_time <- prep$data$vreal1[i]
     pwindow <- prep$data$vreal2[i]
     swindow <- prep$data$vreal3[i]
+    delay_min <- if (is.null(prep$data$vreal5)) 0 else prep$data$vreal5[i]
 
     # make the prep object censored
     # -1 here is equivalent to right censored in brms
@@ -90,6 +93,7 @@ epidist_gen_log_lik <- function(family) {
           prep = prep,
           pwindow = pwindow,
           swindow = swindow,
+          L = delay_min,
           D = relative_obs_time,
           dprimary = stats::dunif,
           log = TRUE
@@ -109,6 +113,7 @@ epidist_gen_log_lik <- function(family) {
     relative_obs_time <- prep$data$vreal1[i]
     pwindow <- prep$data$vreal2[i]
     swindow <- prep$data$vreal3[i]
+    delay_min <- if (is.null(prep$data$vreal5)) 0 else prep$data$vreal5[i]
 
     # Get distribution-specific parameters
     dist_args <- .get_supported_dist_args(dist, prep, i)
@@ -124,6 +129,7 @@ epidist_gen_log_lik <- function(family) {
               pdist = get(dist, envir = asNamespace("stats")),
               pwindow = pwindow,
               swindow = swindow,
+              L = delay_min,
               D = relative_obs_time,
               dprimary = stats::dunif,
               log = TRUE
@@ -193,6 +199,8 @@ epidist_gen_log_lik <- function(family) {
 #' * `vreal1`: relative observation time
 #' * `vreal2`: primary event window
 #' * `vreal3`: secondary event window
+#' * `vreal4`: delay upper bound
+#' * `vreal5`: minimum delay (left truncation point; defaults to 0 if absent)
 #'
 #' @seealso [brms::posterior_predict()] for details on how this is used within
 #' `brms`, [primarycensored::rpcens()] for details on the censoring approach
@@ -212,14 +220,16 @@ epidist_gen_posterior_predict <- function(family) {
     relative_obs_time <- prep$data$vreal1[i]
     pwindow <- prep$data$vreal2[i]
     swindow <- prep$data$vreal3[i]
+    delay_min <- if (is.null(prep$data$vreal5)) 0 else prep$data$vreal5[i]
 
     result <- as.matrix(primarycensored::rpcens(
       n = prep$ndraws,
       rdist = rdist,
       rprimary = stats::runif,
-      pwindow = prep$data$vreal2[i],
-      swindow = prep$data$vreal3[i],
-      D = prep$data$vreal1[i],
+      pwindow = pwindow,
+      swindow = swindow,
+      L = delay_min,
+      D = relative_obs_time,
       i = i,
       prep = prep
     ))
