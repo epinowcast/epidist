@@ -52,6 +52,10 @@ The tagged v0.4.3 lockfile pins `digest` 0.6.36, which calls `Calloc` and `Free`
 Those were removed from the R API in R 4.5, so the hook environment failed to build and the `pre-commit` job failed on every pull request.
 See #578.
 
+## Documentation
+
+- Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
+
 # epidist 0.4.1
 
 ## Bug fixes
