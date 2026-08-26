@@ -48,13 +48,14 @@
 #'
 #' summary(fit)
 epidist <- function(
-    data,
-    formula = mu ~ 1,
-    family = lognormal(),
-    prior = NULL,
-    merge_priors = TRUE,
-    fn = brms::brm,
-    ...) {
+  data,
+  formula = mu ~ 1,
+  family = lognormal(),
+  prior = NULL,
+  merge_priors = TRUE,
+  fn = brms::brm,
+  ...
+) {
   assert_epidist(data)
   epidist_family <- epidist_family(data, family)
   epidist_formula <- epidist_formula(

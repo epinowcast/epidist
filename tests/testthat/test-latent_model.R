@@ -12,12 +12,13 @@ test_that("as_epidist_latent_model.epidist_linelist_data errors when passed inco
 
 test_that("as_epidist_latent_model.epidist_aggregate_data works correctly", {
   # Create test aggregate data
-  agg_data <- suppressMessages(sierra_leone_ebola_data |>
+  agg_data <- sierra_leone_ebola_data |>
     dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
     as_epidist_aggregate_data(
       pdate_lwr = "date_of_symptom_onset",
       sdate_lwr = "date_of_sample_tested"
-    ))
+    ) |>
+    suppressMessages()
 
   # Convert to latent model format
   latent_data <- as_epidist_latent_model(agg_data)
@@ -41,7 +42,7 @@ test_that(
   "as_epidist_latent_model.epidist_aggregate_data preserves stratification",
   {
     # Create test aggregate data with stratification
-    agg_data <- suppressMessages(sierra_leone_ebola_data |>
+    agg_data <- sierra_leone_ebola_data |>
       dplyr::count(
         date_of_symptom_onset, date_of_sample_tested, age
       ) |>
@@ -49,7 +50,8 @@ test_that(
         pdate_lwr = "date_of_symptom_onset",
         sdate_lwr = "date_of_sample_tested",
         by = "age_group"
-      ))
+      ) |>
+      suppressMessages()
 
     # Convert to latent model
     latent_data <- as_epidist_latent_model(agg_data)

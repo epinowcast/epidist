@@ -1,4 +1,4 @@
-test_that("as_epidist_linelist_data assigns epidist_linelist_data class to data", {
+test_that("as_epidist_linelist_data assigns epidist_linelist_data class to data", { # nolint: line_length_linter.
   data <- data.frame(
     case = 1,
     pdate_lwr = as.POSIXct("2023-01-01 00:00:00"),
@@ -136,15 +136,14 @@ test_that("as_epidist_linelist_data preserves additional columns", {
 
 test_that("as_epidist_linelist_data.epidist_aggregate_data works correctly", {
   # Create test aggregate data
-  agg_data <- suppressMessages(
-    sierra_leone_ebola_data |>
-      dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
-      as_epidist_aggregate_data(
-        pdate_lwr = "date_of_symptom_onset",
-        sdate_lwr = "date_of_sample_tested",
-        n = "n"
-      )
-  )
+  agg_data <- sierra_leone_ebola_data |>
+    dplyr::count(date_of_symptom_onset, date_of_sample_tested) |>
+    as_epidist_aggregate_data(
+      pdate_lwr = "date_of_symptom_onset",
+      sdate_lwr = "date_of_sample_tested",
+      n = "n"
+    ) |>
+    suppressMessages()
 
   # Convert to linelist format
   linelist_data <- as_epidist_linelist_data(agg_data)
