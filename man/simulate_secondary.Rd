@@ -24,6 +24,7 @@ column named \code{ptime}.
 }
 \seealso{
 Other simulate:
+\code{\link[=simulate_dates]{simulate_dates()}},
 \code{\link[=simulate_exponential_cases]{simulate_exponential_cases()}},
 \code{\link[=simulate_gillespie]{simulate_gillespie()}},
 \code{\link[=simulate_uniform_cases]{simulate_uniform_cases()}}

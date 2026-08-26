@@ -29,6 +29,7 @@ population size \eqn{N}.
 }
 \seealso{
 Other simulate:
+\code{\link[=simulate_dates]{simulate_dates()}},
 \code{\link[=simulate_exponential_cases]{simulate_exponential_cases()}},
 \code{\link[=simulate_secondary]{simulate_secondary()}},
 \code{\link[=simulate_uniform_cases]{simulate_uniform_cases()}}

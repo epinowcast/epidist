@@ -27,6 +27,7 @@ uniform distribution.
 }
 \seealso{
 Other simulate:
+\code{\link[=simulate_dates]{simulate_dates()}},
 \code{\link[=simulate_gillespie]{simulate_gillespie()}},
 \code{\link[=simulate_secondary]{simulate_secondary()}},
 \code{\link[=simulate_uniform_cases]{simulate_uniform_cases()}}

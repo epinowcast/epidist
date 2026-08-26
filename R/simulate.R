@@ -150,3 +150,128 @@ simulate_secondary <- function(data, dist = rlnorm, ...) {
     )
   return(sim_data)
 }
+
+#' Convert simulated event times to dates
+#'
+#' Takes the continuous event times produced by [simulate_gillespie()] and
+#' [simulate_secondary()] and returns the dates an analyst would actually
+#' receive. Event times are floored to their reporting window, so each event is
+#' known only by the window it fell in, and are then offset from
+#' `outbreak_start_date`.
+#'
+#' The returned columns are named to match [as_epidist_linelist_data()], so the
+#' output can be passed straight to it.
+#'
+#' @param data A `data.frame` with numeric `ptime` and `stime` columns, as
+#'  returned by [simulate_secondary()].
+#'
+#' @param outbreak_start_date The date the outbreak started, corresponding to
+#'  time zero.
+#'
+#' @param primary_window Width of the primary event reporting window in days.
+#'  Either a single value used for every observation, or one value per row of
+#'  `data`. The default of 1 gives daily reporting. Use 7 for weekly.
+#'
+#' @param secondary_window Width of the secondary event reporting window in
+#'  days, in the same form as `primary_window`. Defaults to `primary_window`,
+#'  so the two events share a reporting interval unless you say otherwise.
+#'
+#' @param obs_time Optional numeric observation time, in the same units as
+#'  `ptime` and `stime`. When supplied an `obs_date` column is added. When
+#'  `NULL`, the default, no observation date is added and
+#'  [as_epidist_linelist_data()] falls back to the day after the last
+#'  secondary event.
+#'
+#' @param keep_times Whether to keep the underlying numeric times. Useful when
+#'  comparing estimates against the values used to simulate.
+#'
+#' @returns A `data.frame` with `pdate_lwr`, `pdate_upr`, `sdate_lwr` and
+#'  `sdate_upr` columns, and `obs_date` when `obs_time` is supplied.
+#'
+#' @family simulate
+#' @autoglobal
+#' @importFrom dplyr mutate select all_of
+#' @importFrom checkmate assert_names assert_date assert_number
+#' @importFrom checkmate assert_integerish
+#' @export
+#' @examples
+#' simulate_gillespie(seed = 1) |>
+#'   simulate_secondary(meanlog = 1.8, sdlog = 0.5) |>
+#'   simulate_dates(outbreak_start_date = as.Date("2024-02-01")) |>
+#'   head()
+simulate_dates <- function(
+  data,
+  outbreak_start_date = as.Date("2024-01-01"),
+  primary_window = 1,
+  secondary_window = primary_window,
+  obs_time = NULL,
+  keep_times = FALSE
+) {
+  assert_names(names(data), must.include = c("ptime", "stime"))
+  assert_date(outbreak_start_date, len = 1, any.missing = FALSE)
+  primary_window <- .assert_window(primary_window, nrow(data), "primary_window")
+  secondary_window <- .assert_window(
+    secondary_window, nrow(data), "secondary_window"
+  )
+  if (!is.null(obs_time)) {
+    assert_number(obs_time, lower = 0, finite = TRUE)
+  }
+
+  sim_data <- data |>
+    mutate(
+      pdate_lwr = outbreak_start_date +
+        primary_window * floor(.data$ptime / primary_window),
+      pdate_upr = .data$pdate_lwr + primary_window,
+      sdate_lwr = outbreak_start_date +
+        secondary_window * floor(.data$stime / secondary_window),
+      sdate_upr = .data$sdate_lwr + secondary_window
+    )
+
+  if (!is.null(obs_time)) {
+    sim_data <- mutate(
+      sim_data,
+      obs_date = outbreak_start_date + floor(obs_time)
+    )
+  }
+
+  if (!keep_times) {
+    sim_data <- select(sim_data, -all_of(intersect(
+      c("ptime", "stime", "delay"), names(sim_data)
+    )))
+  }
+
+  return(sim_data)
+}
+
+#' Check a reporting window argument
+#'
+#' Accepts a single value or one value per observation, and recycles a single
+#' value so the caller can treat them the same.
+#'
+#' @param window The reporting window argument to check.
+#'
+#' @param n The number of observations it has to cover.
+#'
+#' @param name The argument name, used in error messages.
+#'
+#' @returns The window as a vector of length `n`.
+#'
+#' @keywords internal
+.assert_window <- function(window, n, name) {
+  assert_integerish(
+    window,
+    lower = 1,
+    any.missing = FALSE,
+    .var.name = name
+  )
+  if (length(window) == 1) {
+    return(rep(window, n))
+  }
+  if (length(window) != n) {
+    cli::cli_abort(
+      "{.arg {name}} must be a single value or one per observation
+       ({n}), not {length(window)}."
+    )
+  }
+  return(window)
+}

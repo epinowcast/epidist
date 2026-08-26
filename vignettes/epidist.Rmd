@@ -371,18 +371,22 @@ Whereas each case is equally likely to appear in the sample above, under ascerta
 </details>
 
 Our data is now very nearly what we would observe in practice but as a final step we will transform it to use meaningful dates.
-To do this we introduce a `outbreak_start_date` which is the date of the first infection.
+To do this we introduce a `outbreak_start_date` which is the date of the first infection, and use `simulate_dates()` to floor the event times to their reporting window and offset them from it.
+Here we rename the columns to show that `epidist` does not require particular names.
 
 ```{r}
 outbreak_start_date <- as.Date("2024-02-01")
 
 obs_data <- obs_cens_trunc_samp |>
-  select(case, ptime_lwr, ptime_upr, stime_lwr, stime_upr, obs_time) |>
+  simulate_dates(
+    outbreak_start_date = outbreak_start_date,
+    obs_time = obs_time
+  ) |>
   transmute(
     id = case,
-    symptom_onset = outbreak_start_date + ptime_lwr,
-    case_notification = outbreak_start_date + stime_lwr,
-    obs_date = outbreak_start_date + obs_time
+    symptom_onset = pdate_lwr,
+    case_notification = sdate_lwr,
+    obs_date = obs_date
   )
 ```
 
