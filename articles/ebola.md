@@ -67,7 +67,7 @@ symptom onset and positive sample, and their district and chiefdom.
 head(sierra_leone_ebola_data)
 #> # A tibble: 6 × 7
 #>      id   age sex    date_of_symptom_onset date_of_sample_tested district
-#>   <int> <dbl> <chr>  <date>                <date>                <chr>   
+#>   <int> <dbl> <chr>  <date>                <date>                <chr>
 #> 1     1    20 Female 2014-05-18            2014-05-23            Kailahun
 #> 2     2    42 Female 2014-05-20            2014-05-25            Kailahun
 #> 3     3    45 Female 2014-05-20            2014-05-25            Kailahun
@@ -80,9 +80,9 @@ fraction <- 5
 ndistrict <- length(unique(sierra_leone_ebola_data$district))
 ```
 
-Figure [2.1](#fig:ebola-outbreak) shows the dates of symptom onset and
-sample testing for cases across in each district. (In this figure, we
-filter down to every 5th case in order to avoid overplotting.) We can
+Figure [**??**](#fig:ebola-outbreak) shows the dates of symptom onset
+and sample testing for cases across in each district. (In this figure,
+we filter down to every 5th case in order to avoid overplotting.) We can
 see that the start time and course of the epidemic varies across
 districts.
 
@@ -113,10 +113,10 @@ p_outbreak
 ```
 
 ![Primary and secondary event times for every 5th case, over the 14
-districts of Sierra Leone.](figures/epidist-ebola-outbreak-1.png)
+districts of Sierra Leone.](figures/ebola-ebola-outbreak-1.png)
 
-Figure 2.1: Primary and secondary event times for every 5th case, over
-the 14 districts of Sierra Leone.
+Primary and secondary event times for every 5th case, over the 14
+districts of Sierra Leone.
 
 ## 3 Fitting sex-district stratified delay distributions
 
@@ -143,7 +143,7 @@ obs_cens <- select(
 head(obs_cens)
 #> # A tibble: 6 × 6
 #>      id date_of_symptom_onset date_of_sample_tested   age sex    district
-#>   <int> <date>                <date>                <dbl> <chr>  <chr>   
+#>   <int> <date>                <date>                <dbl> <chr>  <chr>
 #> 1     1 2014-05-18            2014-05-23               20 Female Kailahun
 #> 2     2 2014-05-20            2014-05-25               42 Female Kailahun
 #> 3     3 2014-05-20            2014-05-25               45 Female Kailahun
@@ -206,8 +206,8 @@ as being a `epidist_marginal_model` model object:
 obs_prep <- as_epidist_marginal_model(linelist_data, obs_time_threshold = 1)
 head(obs_prep)
 #> # A tibble: 6 × 21
-#>   ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr 
-#>       <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>    
+#>   ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr
+#>       <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>
 #> 1         0         1         5         6      259     1 2014-05-18 2014-05-23
 #> 2         2         3         7         8      259     2 2014-05-20 2014-05-25
 #> 3         2         3         7         8      259     3 2014-05-20 2014-05-25
@@ -257,12 +257,12 @@ fit <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 7.5 seconds.
-#> Chain 1 finished in 7.8 seconds.
-#> 
+#> Chain 1 finished in 8.3 seconds.
+#> Chain 2 finished in 8.9 seconds.
+#>
 #> Both chains finished successfully.
-#> Mean chain execution time: 7.6 seconds.
-#> Total execution time: 7.9 seconds.
+#> Mean chain execution time: 8.6 seconds.
+#> Total execution time: 9.0 seconds.
 ```
 
 The `fit` object is a
@@ -276,19 +276,19 @@ coefficients:
 ``` r
 
 summary(fit)
-#>  Family: marginal_lognormal 
-#>   Links: mu = identity; sigma = log 
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1 
+#>  Family: marginal_lognormal
+#>   Links: mu = identity; sigma = log
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1
 #>          sigma ~ 1
-#>    Data: transformed_data (Number of observations: 380) 
+#>    Data: transformed_data (Number of observations: 380)
 #>   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
 #>          total post-warmup draws = 2000
-#> 
+#>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.65      0.01     1.64     1.67 1.00     1935     1157
-#> sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1406     1202
-#> 
+#> Intercept           1.65      0.01     1.64     1.67 1.00     1855     1143
+#> sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1847     1341
+#>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
 #> scale reduction factor on split chains (at convergence, Rhat = 1).
@@ -314,12 +314,12 @@ fit_sex <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 15.8 seconds.
-#> Chain 2 finished in 15.9 seconds.
-#> 
+#> Chain 1 finished in 18.5 seconds.
+#> Chain 2 finished in 19.0 seconds.
+#>
 #> Both chains finished successfully.
-#> Mean chain execution time: 15.8 seconds.
-#> Total execution time: 16.0 seconds.
+#> Mean chain execution time: 18.7 seconds.
+#> Total execution time: 19.2 seconds.
 ```
 
 A summary of the model shows that males tend to have longer delays (the
@@ -334,21 +334,21 @@ significantly.
 ``` r
 
 summary(fit_sex)
-#>  Family: marginal_lognormal 
-#>   Links: mu = identity; sigma = log 
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex 
+#>  Family: marginal_lognormal
+#>   Links: mu = identity; sigma = log
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex
 #>          sigma ~ 1 + sex
-#>    Data: transformed_data (Number of observations: 584) 
+#>    Data: transformed_data (Number of observations: 584)
 #>   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
 #>          total post-warmup draws = 2000
-#> 
+#>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.63      0.01     1.61     1.65 1.00     2375     1418
-#> sigma_Intercept    -0.58      0.01    -0.60    -0.55 1.00     2010     1437
-#> sexMale             0.04      0.01     0.01     0.07 1.00     2401     1451
-#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2289     1570
-#> 
+#> Intercept           1.63      0.01     1.61     1.65 1.00     1904     1150
+#> sigma_Intercept    -0.57      0.01    -0.60    -0.55 1.00     2051     1399
+#> sexMale             0.04      0.01     0.01     0.07 1.00     1898     1417
+#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2244     1515
+#>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
 #> scale reduction factor on split chains (at convergence, Rhat = 1).
@@ -380,12 +380,12 @@ fit_sex_district <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 216.0 seconds.
-#> Chain 2 finished in 238.6 seconds.
-#> 
+#> Chain 1 finished in 268.4 seconds.
+#> Chain 2 finished in 281.9 seconds.
+#>
 #> Both chains finished successfully.
-#> Mean chain execution time: 227.3 seconds.
-#> Total execution time: 238.8 seconds.
+#> Mean chain execution time: 275.1 seconds.
+#> Total execution time: 282.1 seconds.
 ```
 
 **As this is a longer running model (~ 2 minutes) we have reduced the
@@ -400,67 +400,67 @@ function to look at the estimates of the random effects:
 ``` r
 
 summary(fit_sex_district)
-#>  Family: marginal_lognormal 
-#>   Links: mu = identity; sigma = log 
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex + (1 | district) 
+#>  Family: marginal_lognormal
+#>   Links: mu = identity; sigma = log
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex + (1 | district)
 #>          sigma ~ 1 + sex + (1 | district)
-#>    Data: transformed_data (Number of observations: 1296) 
+#>    Data: transformed_data (Number of observations: 1296)
 #>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
 #>          total post-warmup draws = 1000
-#> 
+#>
 #> Multilevel Hyperparameters:
-#> ~district (Number of levels: 14) 
+#> ~district (Number of levels: 14)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.16      0.04     0.10     0.26 1.01      243      425
-#> sd(sigma_Intercept)     0.20      0.05     0.13     0.33 1.00      320      544
-#> 
+#> sd(Intercept)           0.16      0.04     0.10     0.24 1.00      259      446
+#> sd(sigma_Intercept)     0.20      0.05     0.13     0.32 1.01      254      474
+#>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.63      0.05     1.53     1.73 1.01      203      229
-#> sigma_Intercept    -0.66      0.06    -0.78    -0.55 1.00      180      475
-#> sexMale             0.04      0.01     0.02     0.07 1.00     1155      711
-#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1046      717
-#> 
+#> Intercept           1.63      0.05     1.53     1.73 1.01      170      282
+#> sigma_Intercept    -0.67      0.06    -0.79    -0.54 1.01      183      330
+#> sexMale             0.04      0.01     0.01     0.07 1.00     1141      686
+#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1205      703
+#>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
 #> scale reduction factor on split chains (at convergence, Rhat = 1).
 ranef(fit_sex_district)
 #> $district
 #> , , Intercept
-#> 
+#>
 #>                   Estimate  Est.Error        Q2.5       Q97.5
-#> Bo            -0.004734519 0.06053815 -0.12442781  0.11376508
-#> Bombali        0.257345374 0.05117867  0.15151442  0.35946819
-#> Bonthe        -0.022324727 0.13050027 -0.27022801  0.23445881
-#> Kailahun      -0.001974225 0.05185061 -0.10456039  0.10976209
-#> Kambia        -0.059364435 0.06267521 -0.18155077  0.06619807
-#> Kenema        -0.249843953 0.05602416 -0.36410389 -0.14078391
-#> Koinadugu      0.181596312 0.07955986  0.03722483  0.34475640
-#> Kono          -0.079611313 0.05983969 -0.19577006  0.04451104
-#> Moyamba       -0.010432806 0.06624814 -0.14170206  0.12703567
-#> Port Loko      0.145291432 0.05196573  0.04169572  0.24574739
-#> Pujehun       -0.053640887 0.09941718 -0.25354477  0.13246247
-#> Tonkolili      0.080918781 0.05311473 -0.01953644  0.18756047
-#> Western Rural -0.022943546 0.05273685 -0.13024891  0.07967034
-#> Western Urban -0.152138721 0.05269011 -0.26340244 -0.03901819
-#> 
+#> Bo            -0.006158585 0.06220838 -0.12304219  0.12377490
+#> Bombali        0.254115275 0.05060460  0.15856773  0.36111235
+#> Bonthe        -0.024767442 0.12436464 -0.25897236  0.21558009
+#> Kailahun      -0.004668086 0.05183190 -0.10285680  0.10328736
+#> Kambia        -0.062983727 0.06754188 -0.19255074  0.07834435
+#> Kenema        -0.252068254 0.05518018 -0.34977753 -0.14369848
+#> Koinadugu      0.180704418 0.07559129  0.03982933  0.33461280
+#> Kono          -0.081461066 0.05958411 -0.19768665  0.03808316
+#> Moyamba       -0.012431539 0.06226322 -0.13464909  0.10981984
+#> Port Loko      0.142411745 0.05158247  0.04797036  0.24942303
+#> Pujehun       -0.058408537 0.09686889 -0.25288343  0.13608435
+#> Tonkolili      0.079991588 0.05251091 -0.02180646  0.19440843
+#> Western Rural -0.025285392 0.05154071 -0.12658207  0.08097643
+#> Western Urban -0.154396595 0.05086562 -0.24670189 -0.05030481
+#>
 #> , , sigma_Intercept
-#> 
+#>
 #>                  Estimate  Est.Error        Q2.5       Q97.5
-#> Bo             0.18569262 0.07369534  0.04482826  0.33737619
-#> Bombali       -0.22775131 0.06437477 -0.35554116 -0.11495850
-#> Bonthe        -0.12969344 0.21161946 -0.58030178  0.23547407
-#> Kailahun      -0.33616645 0.06800887 -0.47243605 -0.21498099
-#> Kambia         0.05750006 0.08168920 -0.09891025  0.21946416
-#> Kenema         0.11012150 0.06758485 -0.01744927  0.25279819
-#> Koinadugu      0.06908751 0.09597918 -0.11773948  0.26293122
-#> Kono           0.03001546 0.07544342 -0.12010087  0.18096483
-#> Moyamba        0.09643314 0.07632248 -0.05890960  0.25667593
-#> Port Loko     -0.02593841 0.06372404 -0.15444021  0.09431119
-#> Pujehun       -0.09253076 0.13856786 -0.36327888  0.19085602
-#> Tonkolili     -0.15478393 0.06856191 -0.28870574 -0.02958416
-#> Western Rural  0.07046308 0.06427971 -0.05123806  0.18937480
-#> Western Urban  0.26692945 0.06209873  0.14346072  0.38832898
+#> Bo             0.18934154 0.07598873  0.03753509  0.34116977
+#> Bombali       -0.22748581 0.06556108 -0.36094037 -0.09106680
+#> Bonthe        -0.13264758 0.22096364 -0.59589669  0.25900935
+#> Kailahun      -0.33669501 0.07051905 -0.47925440 -0.19439993
+#> Kambia         0.05784031 0.08642514 -0.10888867  0.23301059
+#> Kenema         0.11076648 0.07051324 -0.02893602  0.25800634
+#> Koinadugu      0.06914323 0.10147113 -0.11821161  0.28991576
+#> Kono           0.03074981 0.07383101 -0.11334024  0.17313831
+#> Moyamba        0.09764688 0.07673829 -0.04564167  0.25758396
+#> Port Loko     -0.02384964 0.06643858 -0.15344605  0.11486325
+#> Pujehun       -0.09187713 0.13602892 -0.37114994  0.16620781
+#> Tonkolili     -0.15490163 0.07059913 -0.29877070 -0.01713229
+#> Western Rural  0.07162734 0.06633976 -0.05988099  0.20137678
+#> Western Urban  0.27032342 0.06447178  0.13707603  0.40278738
 ```
 
 ### 3.3 Posterior expectations
@@ -479,10 +479,10 @@ function to generate a posterior prediction function for the
 [`lognormal()`](https://paulbuerkner.com/brms/reference/brmsfamily.html)
 distribution.
 
-In Figure [3.1](#fig:epred) we show the posterior expectation of the
+In Figure [**??**](#fig:epred) we show the posterior expectation of the
 delay distribution for each of the three fitted models. Figure
-[3.1](#fig:epred)B illustrates the higher mean of men as compared with
-women.
+[**??**](#fig:epred)B illustrates the higher mean of men as compared
+with women.
 
 Click to expand for code to the posterior expectation plots
 
@@ -495,7 +495,8 @@ add_marginal_dummy_vars <- function(data) {
       relative_obs_time = NA,
       pwindow = NA,
       delay_upr = NA,
-      swindow = NA
+      swindow = NA,
+      delay_min = 0
     )
   )
 }
@@ -546,10 +547,10 @@ epred_base_figure / epred_sex_figure / epred_sex_district_figure +
 ```
 
 ![The fitted posterior expectations of the delay distribution for each
-model.](figures/epidist-epred-1.png)
+model.](figures/ebola-epred-1.png)
 
-Figure 3.1: The fitted posterior expectations of the delay distribution
-for each model.
+The fitted posterior expectations of the delay distribution for each
+model.
 
 ### 3.4 Linear predictor posteriors
 
@@ -557,7 +558,7 @@ The `tidybayes` package also allows users to generate draws of the
 linear predictors for all distributional parameters using
 [`tidybayes::add_linpred_draws()`](https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html).
 For example, for the `mu` parameter in the sex-district stratified model
-(Figure [3.2](#fig:linpred-sex-district)):
+(Figure [**??**](#fig:linpred-sex-district)):
 
 Click to expand for code to prepare linear predictor plot
 
@@ -587,13 +588,13 @@ p_linpred_sex_district
 within the sex-district stratified model. The posterior expectations in
 Section 3.3 are a function of both the mu linear predictor posterior
 distribution and sigma linear predictor posterior
-distribution.](figures/epidist-linpred-sex-district-1.png)
+distribution.](figures/ebola-linpred-sex-district-1.png)
 
-Figure 3.2: The posterior distribution of the linear predictor of `mu`
-parameter within the sex-district stratified model. The posterior
-expectations in Section [3.3](#posterior-expectation) are a function of
-both the `mu` linear predictor posterior distribution and `sigma` linear
-predictor posterior distribution.
+The posterior distribution of the linear predictor of `mu` parameter
+within the sex-district stratified model. The posterior expectations in
+Section [3.3](#posterior-expectation) are a function of both the `mu`
+linear predictor posterior distribution and `sigma` linear predictor
+posterior distribution.
 
 ### 3.5 Delay posterior distributions
 
@@ -609,7 +610,7 @@ To generate a discrete probability mass function (PMF) we predict the
 delay distribution that would be observed with daily censoring and no
 right truncation. To do this, we set each of `pwindow` and `swindow` to
 1 for daily censoring, and `relative_obs_time` to `Inf` for no right
-truncation. Figure [3.3](#fig:pmf) shows the result, where the few
+truncation. Figure [**??**](#fig:pmf) shows the result, where the few
 delays greater than 30 are omitted from the figure.
 
 Click to expand for code to prepare PMF plots
@@ -623,7 +624,8 @@ add_marginal_pmf_vars <- function(data) {
       relative_obs_time = Inf,
       pwindow = 1,
       swindow = 1,
-      delay_upr = NA
+      delay_upr = NA,
+      delay_min = 0
     )
   )
 }
@@ -685,16 +687,16 @@ pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
 ```
 
 ![Posterior predictions of the discrete probability mass function for
-each of the fitted models.](figures/epidist-pmf-1.png)
+each of the fitted models.](figures/ebola-pmf-1.png)
 
-Figure 3.3: Posterior predictions of the discrete probability mass
-function for each of the fitted models.
+Posterior predictions of the discrete probability mass function for each
+of the fitted models.
 
 #### 3.5.2 Continuous probability density function
 
 The posterior predictive distribution under no truncation and no
 censoring. That is to produce continuous delay times (Figure
-[3.4](#fig:pdf)):
+[**??**](#fig:pdf)):
 
 Click to expand for code to prepare PDF plots
 
@@ -707,7 +709,8 @@ add_marginal_pdf_vars <- function(data) {
       relative_obs_time = Inf,
       pwindow = 0,
       swindow = 0,
-      delay_upr = NA
+      delay_upr = NA,
+      delay_min = 0
     )
   )
 }
@@ -767,10 +770,10 @@ pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
 ```
 
 ![Posterior predictions of the continuous probability density function
-for each of the fitted models.](figures/epidist-pdf-1.png)
+for each of the fitted models.](figures/ebola-pdf-1.png)
 
-Figure 3.4: Posterior predictions of the continuous probability density
-function for each of the fitted models.
+Posterior predictions of the continuous probability density function for
+each of the fitted models.
 
 ## 4 Conclusion
 

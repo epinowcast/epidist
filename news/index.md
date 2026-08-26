@@ -52,6 +52,15 @@
   your own model type, the six generics a model type implements, a
   worked example, and a table of the packages that already extend
   `epidist`.
+- Precomputed the `ebola`, `faq` and `approx-inference` vignettes. All
+  three fit models and need `cmdstanr`, so they were excluded from the
+  build by `.Rbuildignore` and never reached anyone who installed the
+  package. They are now knitted from a `.Rmd.orig` source into a
+  committed `.Rmd` holding static output, so they ship without needing
+  `cmdstanr` or a model fit at build time.
+- Gave each precomputed vignette its own figure prefix. `ebola` and
+  `approx-inference` both wrote to `figures/epidist-`, which would
+  collide once more than one is precomputed.
 
 ### Package
 
@@ -73,6 +82,21 @@
   which is the generic an extension implements and which remains
   exported. See [\#79](https://github.com/epinowcast/epidist/issues/79).
 
+### Models
+
+- Added left truncation support via a `delay_min` parameter in
+  [`as_epidist_marginal_model()`](https://epidist.epinowcast.org/reference/as_epidist_marginal_model.md).
+  This passes the `L` (left truncation) argument through to the
+  `primarycensored` likelihood. The default of 0 reproduces the previous
+  behaviour. See
+  [\#588](https://github.com/epinowcast/epidist/issues/588) and
+  [\#596](https://github.com/epinowcast/epidist/issues/596).
+
+### CI
+
+- Added a `render-vignettes` workflow that rebuilds the precomputed
+  vignettes and opens a pull request with the result.
+
 ### Bug fixes
 
 - Added a missing Jacobian adjustment to the latent model for
@@ -86,6 +110,11 @@
   read the formula of a `brmsfit`, but only suggests it, so the test
   failed on a clean library. See
   [\#601](https://github.com/epinowcast/epidist/issues/601).
+
+### Documentation
+
+- Added a `left-truncation` vignette showing how to use `delay_min`. See
+  [\#596](https://github.com/epinowcast/epidist/issues/596).
 
 ### CI
 

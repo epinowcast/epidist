@@ -109,7 +109,7 @@ fit <- sierra_leone_ebola_data |>
 summary(fit)
 #>  Family: marginal_lognormal 
 #>   Links: mu = identity; sigma = log 
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1 
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min) ~ 1 
 #>          sigma ~ 1
 #>    Data: transformed_data (Number of observations: 272) 
 #>   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
@@ -117,8 +117,8 @@ summary(fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.62      0.01     1.60     1.63 1.00     1989     1240
-#> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1631     1212
+#> Intercept           1.62      0.01     1.61     1.63 1.00     2125     1357
+#> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1768     1304
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential

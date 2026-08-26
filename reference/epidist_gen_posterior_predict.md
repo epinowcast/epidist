@@ -41,6 +41,11 @@ per observation. The `prep` object must have the following variables:
 
 - `vreal3`: secondary event window
 
+- `vreal4`: delay upper bound
+
+- `vreal5`: minimum delay (left truncation point; defaults to 0 if
+  absent)
+
 ## See also
 
 [`brms::posterior_predict()`](https://mc-stan.org/rstantools/reference/posterior_predict.html)

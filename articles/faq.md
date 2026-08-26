@@ -118,12 +118,12 @@ head(draws)
 
     ## # A draws_df: 6 iterations, 1 chains, and 2 variables
     ##   Intercept Intercept_sigma
-    ## 1       1.7           -0.59
-    ## 2       1.8           -0.57
-    ## 3       1.8           -0.58
-    ## 4       1.7           -0.56
-    ## 5       1.8           -0.53
-    ## 6       1.7           -0.60
+    ## 1       1.9           -0.46
+    ## 2       1.9           -0.39
+    ## 3       1.8           -0.44
+    ## 4       1.8           -0.53
+    ## 5       1.8           -0.50
+    ## 6       1.8           -0.54
     ## # ... hidden reserved variables {'.chain', '.iteration', '.draw'}
 
 #### Using random variables (`rvars`) for uncertainty propagation
@@ -144,7 +144,7 @@ rv$b_Intercept
 ```
 
     ## rvar<500,2>[1] mean ± sd:
-    ## [1] 1.6 ± 0.064
+    ## [1] 1.6 ± 0.069
 
 ``` r
 
@@ -160,7 +160,7 @@ summary(mean_delay_loc0)
     ## # A tibble: 1 × 10
     ##   variable         mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail
     ##   <chr>           <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-    ## 1 mean_delay_loc0  5.54   5.47 0.441 0.396  4.94  6.30  1.00     891.     658.
+    ## 1 mean_delay_loc0  5.54   5.51 0.469 0.447  4.87  6.34  1.00     702.     430.
 
 ``` r
 
@@ -170,7 +170,7 @@ summary(mean_delay_loc1)
     ## # A tibble: 1 × 10
     ##   variable         mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail
     ##   <chr>           <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-    ## 1 mean_delay_loc1  13.3   11.2  7.23  2.76  8.27  25.9  1.02     140.     133.
+    ## 1 mean_delay_loc1  12.6   10.9  6.61  2.64  8.17  21.0  1.01     221.     195.
 
 ``` r
 
@@ -180,7 +180,7 @@ delay_diff
 ```
 
     ## rvar<500,2>[1] mean ± sd:
-    ## [1] 7.7 ± 7.3
+    ## [1] 7.1 ± 6.7
 
 For more details, see the [`posterior` package
 documentation](https://mc-stan.org/posterior/articles/rvar.html).
@@ -200,7 +200,9 @@ library(bayesplot)
 mcmc_trace(fit, pars = c("Intercept", "Intercept_sigma"))
 ```
 
-![](faq_files/figure-html/unnamed-chunk-4-1.png)
+![plot of chunk unnamed-chunk-4](figures/faq-unnamed-chunk-4-1.png)
+
+plot of chunk unnamed-chunk-4
 
 We also provide a function
 [`epidist_diagnostics()`](https://epidist.epinowcast.org/reference/epidist_diagnostics.md)
@@ -215,7 +217,7 @@ epidist_diagnostics(fit)
     ## # A tibble: 1 × 8
     ##    time samples max_rhat divergent_transitions per_divergent_transitions
     ##   <dbl>   <dbl>    <dbl>                 <dbl>                     <dbl>
-    ## 1  2.86    1000     1.00                     0                         0
+    ## 1  3.10    1000    0.999                     0                         0
     ## # ℹ 3 more variables: max_treedepth <dbl>, no_at_max_treedepth <int>,
     ## #   per_at_max_treedepth <dbl>
 
@@ -252,7 +254,9 @@ data_expanded <- data |>
 pp_check(fit, newdata = data_expanded, ndraws = 100)
 ```
 
-![](faq_files/figure-html/unnamed-chunk-6-1.png)
+![plot of chunk unnamed-chunk-6](figures/faq-unnamed-chunk-6-1.png)
+
+plot of chunk unnamed-chunk-6
 
 For more advanced custom visualizations, you can also use
 [`tidybayes::add_predicted_draws()`](https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html)
@@ -365,14 +369,16 @@ pred |>
 
     ## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.
 
-![](faq_files/figure-html/unnamed-chunk-9-1.png)
+![plot of chunk unnamed-chunk-9](figures/faq-unnamed-chunk-9-1.png)
+
+plot of chunk unnamed-chunk-9
 
 ``` r
 
 quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 ```
 
-    ##         1%        10%        25%        50%        75%        90%        99% 
+    ##         1%        10%        25%        50%        75%        90%        99%
     ##  0.3172760  0.8667011  1.6163277  3.2461963  6.6291746 12.0852973 34.0415723
 
 ``` r
@@ -380,7 +386,7 @@ quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 quantile(pred$sd, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 ```
 
-    ##         1%        10%        25%        50%        75%        90%        99% 
+    ##         1%        10%        25%        50%        75%        90%        99%
     ##  0.1335500  0.3950604  0.7687361  1.7107506  3.9206460  8.1670947 33.4423697
 
 ### How can I assess how sensitive the fitted posterior distribution is to the prior distribution used?
@@ -398,7 +404,9 @@ powerscale_plot_dens(fit, variable = c("Intercept", "Intercept_sigma")) +
   theme_minimal()
 ```
 
-![](faq_files/figure-html/unnamed-chunk-10-1.png)
+![plot of chunk unnamed-chunk-10](figures/faq-unnamed-chunk-10-1.png)
+
+plot of chunk unnamed-chunk-10
 
 ## What do the parameters in my model output correspond to?
 
@@ -454,17 +462,18 @@ one) then:
 library(tidybayes)
 ```
 
-    ## 
+    ##
     ## Attaching package: 'tidybayes'
 
     ## The following objects are masked from 'package:brms':
-    ## 
+    ##
     ##     dstudent_t, pstudent_t, qstudent_t, rstudent_t
 
 ``` r
 
 draws_pmf <- tibble::tibble(
-  relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
+  relative_obs_time = Inf, pwindow = 1, swindow = 1,
+  delay_upr = NA, delay_min = 0
 ) |>
   add_predicted_draws(fit)
 ```
@@ -480,13 +489,15 @@ ggplot(draws_pmf, aes(x = .prediction)) +
   theme_minimal()
 ```
 
-    ## Warning: Removed 3 rows containing non-finite outside the scale range
+    ## Warning: Removed 7 rows containing non-finite outside the scale range
     ## (`stat_count()`).
 
     ## Warning: Removed 1 row containing missing values or values outside the scale range
     ## (`geom_bar()`).
 
-![](faq_files/figure-html/unnamed-chunk-11-1.png)
+![plot of chunk unnamed-chunk-11](figures/faq-unnamed-chunk-11-1.png)
+
+plot of chunk unnamed-chunk-11
 
 Importantly, this functionality is only available for `epidist` models
 using `brms` families that have a `log_lik_censor` method implemented
@@ -520,10 +531,10 @@ avg_comparisons(
 )
 ```
 
-    ## 
+    ##
     ##  Estimate 2.5 % 97.5 %
-    ##      5.66  2.22   29.9
-    ## 
+    ##      5.42  2.08   22.8
+    ##
     ## Term: location
     ## Type: response
     ## Comparison: 1 - 0

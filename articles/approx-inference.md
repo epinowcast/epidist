@@ -118,6 +118,7 @@ we have everything we need as follows:
 ``` r
 
 cmdstanr::cmdstan_version()
+#> [1] "2.39.0"
 ```
 
 We can simulate data to use for fitting models. The example data
@@ -270,6 +271,13 @@ pars <- draws |>
   ungroup()
 
 pars
+#> # A tibble: 4 × 3
+#>   method        mu sigma
+#>   <fct>      <dbl> <dbl>
+#> 1 HMC         1.75 0.459
+#> 2 Laplace     1.74 0.455
+#> 3 ADVI        1.79 0.540
+#> 4 Pathfinder  1.74 0.456
 ```
 
 More comprehensively, the estimated posterior distributions are shown in
@@ -294,6 +302,14 @@ p_posterior <- draws |>
 
 p_posterior
 ```
+
+![Estimated posterior distributions for the mu and sigma parameters
+using each inference method, shown using
+tidybayes::stat_slabinterval().](figures/approx-inference-posterior-1.png)
+
+Estimated posterior distributions for the `mu` and `sigma` parameters
+using each inference method, shown using
+[`tidybayes::stat_slabinterval()`](https://mjskay.github.io/ggdist/reference/stat_slabinterval.html).
 
 ### 3.2 Comparison of resulting delay distributions
 
@@ -324,6 +340,13 @@ p_delay_pdf <- pmap_df(
 p_delay_pdf
 ```
 
+![Delay probability density functions obtained based on the posterior
+mean estimated mu and sigma
+parameters.](figures/approx-inference-delay-pdf-1.png)
+
+Delay probability density functions obtained based on the posterior mean
+estimated `mu` and `sigma` parameters.
+
 ### 3.3 Comparison of time taken
 
 In this example, HMC took a longer time to run than the other methods
@@ -340,6 +363,21 @@ times <- list(
 )
 
 times
+#> $HMC
+#>    user  system elapsed
+#>  10.495   0.279  10.847
+#>
+#> $Laplace
+#>    user  system elapsed
+#>   1.042   0.107   1.261
+#>
+#> $ADVI
+#>    user  system elapsed
+#>   1.387   0.060   1.518
+#>
+#> $Pathfinder
+#>    user  system elapsed
+#>   0.475   0.075   0.607
 ```
 
 ## 4 Conclusion

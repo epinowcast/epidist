@@ -51,6 +51,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/ebola.html">Advanced features with Ebola data</a></li>
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
+    <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul>
@@ -571,8 +572,8 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.42      0.03     1.35     1.48 1.00     3484     2552</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3340     2353</span></span>
+<span><span class="co">#&gt; Intercept           1.42      0.03     1.35     1.48 1.00     3838     2890</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.76      0.05    -0.85    -0.65 1.00     3116     2566</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -596,7 +597,7 @@ The documentation for <code>primarycensored</code> is a good place for learning 
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">marginal_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">linelist_data</span><span class="op">)</span></span>
 <span><span class="va">marginal_data</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 200 × 18</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 200 × 19</span></span></span>
 <span><span class="co">#&gt;    ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr </span></span>
 <span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        15        16        23        24       25  <span style="text-decoration: underline;">1</span>280 2024-02-16 2024-02-24</span></span>
@@ -610,9 +611,10 @@ The documentation for <code>primarycensored</code> is a good place for learning 
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>         7         8        12        13       25   286 2024-02-08 2024-02-13</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        16        17        22        23       25  <span style="text-decoration: underline;">1</span>616 2024-02-17 2024-02-23</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 190 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 10 more variables: obs_date &lt;date&gt;, pdate_upr &lt;date&gt;, sdate_upr &lt;date&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more variables: obs_date &lt;date&gt;, pdate_upr &lt;date&gt;, sdate_upr &lt;date&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   pwindow &lt;dbl&gt;, swindow &lt;dbl&gt;, relative_obs_time &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   orig_relative_obs_time &lt;dbl&gt;, delay_lwr &lt;dbl&gt;, delay_upr &lt;dbl&gt;, n &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   orig_relative_obs_time &lt;dbl&gt;, delay_lwr &lt;dbl&gt;, delay_upr &lt;dbl&gt;, n &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   delay_min &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>The <code>data</code> object now has the class <code>epidist_marginal_model</code>.
 Using this <code>data</code>, we now call again <code><a href="../reference/epidist.html">epidist()</a></code> to fit the model.
 Note that because of the different <code>as_epidist_&lt;model&gt;_model()</code> function we have used the marginal rather than naive model will be fit.</p>
@@ -646,7 +648,7 @@ Note that because of the different <code>as_epidist_&lt;model&gt;_model()</code>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">marginal_fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  Family: marginal_lognormal </span></span>
 <span><span class="co">#&gt;   Links: mu = identity; sigma = log </span></span>
-<span><span class="co">#&gt; Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1 </span></span>
+<span><span class="co">#&gt; Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min) ~ 1 </span></span>
 <span><span class="co">#&gt;          sigma ~ 1</span></span>
 <span><span class="co">#&gt;    Data: transformed_data (Number of observations: 92) </span></span>
 <span><span class="co">#&gt;   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;</span></span>
@@ -654,8 +656,8 @@ Note that because of the different <code>as_epidist_&lt;model&gt;_model()</code>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.55      0.05     1.47     1.65 1.00     2140     2079</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2189     2142</span></span>
+<span><span class="co">#&gt; Intercept           1.55      0.05     1.46     1.65 1.00     2075     2069</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.69      0.07    -0.81    -0.55 1.00     2019     1933</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -679,12 +681,12 @@ Internally this function uses can also add the mean and standard deviation param
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">predicted_parameters</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      model draw index       mu     sigma     mean       sd</span></span>
-<span><span class="co">#&gt; 1 marginal    1     1 1.526996 0.4596922 5.117439 2.482373</span></span>
-<span><span class="co">#&gt; 2 marginal    2     1 1.577588 0.4632255 5.391785 2.637782</span></span>
-<span><span class="co">#&gt; 3 marginal    3     1 1.596207 0.4811124 5.539705 2.827152</span></span>
-<span><span class="co">#&gt; 4 marginal    4     1 1.610298 0.6022795 5.999451 3.967189</span></span>
-<span><span class="co">#&gt; 5 marginal    5     1 1.577081 0.4774828 5.425315 2.745405</span></span>
-<span><span class="co">#&gt; 6 marginal    6     1 1.599213 0.4970840 5.599960 2.964795</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 marginal    1     1 1.574720 0.4613293 5.371633 2.615978</span></span>
+<span><span class="co">#&gt; 2 marginal    2     1 1.519842 0.4853677 5.142979 2.650730</span></span>
+<span><span class="co">#&gt; 3 marginal    3     1 1.485893 0.4700138 4.934985 2.453709</span></span>
+<span><span class="co">#&gt; 4 marginal    4     1 1.580541 0.5060793 5.521219 2.983006</span></span>
+<span><span class="co">#&gt; 5 marginal    5     1 1.580967 0.5655806 5.702517 3.501199</span></span>
+<span><span class="co">#&gt; 6 marginal    6     1 1.604937 0.5271626 5.719535 3.237250</span></span></code></pre></div>
 <div class="alert alert-primary">
 <p>Note that by default <code><a href="../reference/predict_delay_parameters.html">predict_delay_parameters()</a></code> gives predictions for every row in the transformed data.
 Here as we only want posterior draws for the summary parameters we filter to the first row or the first data point.

@@ -34,6 +34,7 @@ weighted by the counts in the aggregate data."><meta property="og:image" content
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/ebola.html">Advanced features with Ebola data</a></li>
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
+    <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul></li>
@@ -69,7 +70,7 @@ weighted by the counts in the aggregate data.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'epidist_aggregate_data'</span></span>
-<span><span class="fu"><a href="as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">data</span>, obs_time_threshold <span class="op">=</span> <span class="fl">2</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">data</span>, obs_time_threshold <span class="op">=</span> <span class="fl">2</span>, delay_min <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -86,6 +87,16 @@ relative observation times to Inf. Observation times greater than
 <code>obs_time_threshold</code> times the maximum delay will be set to Inf to improve
 model efficiency by reducing the number of unique observation times.
 Default is 2.</p></dd>
+
+
+<dt id="arg-delay-min">delay_min<a class="anchor" aria-label="anchor" href="#arg-delay-min"></a></dt>
+<dd><p>Minimum delay (left truncation point). Can be:</p><ul><li><p><code>NULL</code> (default): uses a <code>delay_min</code> column from the data if present,
+otherwise defaults to 0 (no left truncation).</p></li>
+<li><p>A numeric scalar: applied to all observations.</p></li>
+<li><p>A column name string: looks up the named column in the data.
+This is passed as the <code>L</code> parameter to
+<code><a href="https://primarycensored.epinowcast.org/reference/dprimarycensored.html" class="external-link">primarycensored::dpcens()</a></code>.</p></li>
+</ul></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -120,7 +131,7 @@ Default is 2.</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Setting 2394 observation times beyond 98 (=2x max delay) to Inf. This</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   improves model efficiency by reducing unique observation times while</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   maintaining model accuracy as these times should have negligible impact.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,453 × 17</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,453 × 18</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time pdate_lwr  sdate_lwr      n</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>         0         1         5         6      484 2014-05-18 2014-05-23     1</span>
@@ -134,9 +145,10 @@ Default is 2.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>        13        14        18        19      484 2014-05-31 2014-06-05     1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>        13        14        20        21      484 2014-05-31 2014-06-07     1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2,443 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 9 more variables: pdate_upr &lt;date&gt;, sdate_upr &lt;date&gt;, obs_date &lt;date&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 10 more variables: pdate_upr &lt;date&gt;, sdate_upr &lt;date&gt;, obs_date &lt;date&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   pwindow &lt;dbl&gt;, swindow &lt;dbl&gt;, relative_obs_time &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   orig_relative_obs_time &lt;dbl&gt;, delay_lwr &lt;dbl&gt;, delay_upr &lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   orig_relative_obs_time &lt;dbl&gt;, delay_lwr &lt;dbl&gt;, delay_upr &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   delay_min &lt;dbl&gt;</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -55,6 +55,7 @@ inference methods such as the Laplace approximation, ADVI, and Pathfinder."
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/ebola.html">Advanced features with Ebola data</a></li>
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
+    <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul>
@@ -171,7 +172,8 @@ See the section <a href="https://mc-stan.org/docs/cmdstan-guide/pathfinder_confi
 To do this, we first need to install CmdStan (see the README for more details).
 We can check we have everything we need as follows:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "2.39.0"</span></span></code></pre></div>
 <p>We can simulate data to use for fitting models.
 The example data simulation process follows that used in the <a href="https://epidist.epinowcast.org/articles/epidist.html#data">Getting started with epidist</a> vignette, so we will not detail exactly what is happening here, but please consult that vignette if interested:</p>
 <details><summary>
@@ -285,7 +287,14 @@ Click to expand for code to extract posterior draws
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">parameter</span>, values_from <span class="op">=</span> <span class="va">value</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">pars</span></span></code></pre></div>
+<span><span class="va">pars</span></span>
+<span><span class="co">#&gt; # A tibble: 4 × 3</span></span>
+<span><span class="co">#&gt;   method        mu sigma</span></span>
+<span><span class="co">#&gt;   &lt;fct&gt;      &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 HMC         1.75 0.459</span></span>
+<span><span class="co">#&gt; 2 Laplace     1.74 0.455</span></span>
+<span><span class="co">#&gt; 3 ADVI        1.79 0.540</span></span>
+<span><span class="co">#&gt; 4 Pathfinder  1.74 0.456</span></span></code></pre></div>
 <p>More comprehensively, the estimated posterior distributions are shown in Figure <a href="#fig:posterior"><strong>??</strong></a>.</p>
 <details><summary>
 Click to expand for code to create posterior distribution plot
@@ -301,6 +310,9 @@ Click to expand for code to create posterior distribution plot
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 </details><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_posterior</span></span></code></pre></div>
+<div class="float">
+<img src="figures/approx-inference-posterior-1.png" alt="Estimated posterior distributions for the mu and sigma parameters using each inference method, shown using tidybayes::stat_slabinterval()."><div class="figcaption">Estimated posterior distributions for the <code>mu</code> and <code>sigma</code> parameters using each inference method, shown using <code><a href="https://mjskay.github.io/ggdist/reference/stat_slabinterval.html" class="external-link">tidybayes::stat_slabinterval()</a></code>.</div>
+</div>
 </div>
 <div class="section level3" number="3.2">
 <h3 id="comparison-of-resulting-delay-distributions">
@@ -324,6 +336,9 @@ Click to expand for code to create delay PDF plot
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 </details><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_delay_pdf</span></span></code></pre></div>
+<div class="float">
+<img src="figures/approx-inference-delay-pdf-1.png" alt="Delay probability density functions obtained based on the posterior mean estimated mu and sigma parameters."><div class="figcaption">Delay probability density functions obtained based on the posterior mean estimated <code>mu</code> and <code>sigma</code> parameters.</div>
+</div>
 </div>
 <div class="section level3" number="3.3">
 <h3 id="comparison-of-time-taken">
@@ -339,7 +354,22 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <span>  Pathfinder <span class="op">=</span> <span class="va">time_pathfinder</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">times</span></span></code></pre></div>
+<span><span class="va">times</span></span>
+<span><span class="co">#&gt; $HMC</span></span>
+<span><span class="co">#&gt;    user  system elapsed</span></span>
+<span><span class="co">#&gt;  10.495   0.279  10.847</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; $Laplace</span></span>
+<span><span class="co">#&gt;    user  system elapsed</span></span>
+<span><span class="co">#&gt;   1.042   0.107   1.261</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; $ADVI</span></span>
+<span><span class="co">#&gt;    user  system elapsed</span></span>
+<span><span class="co">#&gt;   1.387   0.060   1.518</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; $Pathfinder</span></span>
+<span><span class="co">#&gt;    user  system elapsed</span></span>
+<span><span class="co">#&gt;   0.475   0.075   0.607</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2" number="4">
