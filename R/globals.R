@@ -13,6 +13,7 @@ utils::globalVariables(c(
   ".data", # <add_mean_sd.weibull_samples>
   "rlnorm", # <simulate_secondary>
   ".data", # <simulate_secondary>
+  ".data", # <simulate_dates>
   ".data", # <.replace_prior>
   NULL
 ))
