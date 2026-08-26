@@ -7,7 +7,8 @@
 simulate_dates(
   data,
   outbreak_start_date = as.Date("2024-01-01"),
-  censoring_window = 1,
+  primary_window = 1,
+  secondary_window = primary_window,
   obs_time = NULL,
   keep_times = FALSE
 )
@@ -19,13 +20,19 @@ returned by \code{\link[=simulate_secondary]{simulate_secondary()}}.}
 \item{outbreak_start_date}{The date the outbreak started, corresponding to
 time zero.}
 
-\item{censoring_window}{Width of the reporting window in days. The default
-of 1 gives daily reporting. Use 7 for weekly reporting.}
+\item{primary_window}{Width of the primary event reporting window in days.
+Either a single value used for every observation, or one value per row of
+\code{data}. The default of 1 gives daily reporting. Use 7 for weekly.}
+
+\item{secondary_window}{Width of the secondary event reporting window in
+days, in the same form as \code{primary_window}. Defaults to \code{primary_window},
+so the two events share a reporting interval unless you say otherwise.}
 
 \item{obs_time}{Optional numeric observation time, in the same units as
 \code{ptime} and \code{stime}. When supplied an \code{obs_date} column is added. When
 \code{NULL}, the default, no observation date is added and
-\code{\link[=as_epidist_linelist_data]{as_epidist_linelist_data()}} will assume the last secondary event.}
+\code{\link[=as_epidist_linelist_data]{as_epidist_linelist_data()}} falls back to the day after the last
+secondary event.}
 
 \item{keep_times}{Whether to keep the underlying numeric times. Useful when
 comparing estimates against the values used to simulate.}
@@ -37,7 +44,7 @@ A \code{data.frame} with \code{pdate_lwr}, \code{pdate_upr}, \code{sdate_lwr} an
 \description{
 Takes the continuous event times produced by \code{\link[=simulate_gillespie]{simulate_gillespie()}} and
 \code{\link[=simulate_secondary]{simulate_secondary()}} and returns the dates an analyst would actually
-receive. Event times are floored to the reporting window, so each event is
+receive. Event times are floored to their reporting window, so each event is
 known only by the window it fell in, and are then offset from
 \code{outbreak_start_date}.
 }
