@@ -154,10 +154,10 @@ test_that(".validate_formula matches brms::validate_formula for the formula shap
   family <- epidist_family(prep_obs, family = brms::lognormal())
   formulas <- list(
     "plain formula" = mu ~ 1,
-    "brmsformula" = brms::bf(mu ~ 1),
+    brmsformula = brms::bf(mu ~ 1),
     "explicit sigma" = brms::bf(mu ~ 1, sigma ~ 1),
     "fixed sigma" = brms::bf(mu ~ 1, sigma = 1),
-    "covariate" = brms::bf(mu ~ 1 + ptime_lwr),
+    covariate = brms::bf(mu ~ 1 + ptime_lwr),
     "random effect" = brms::bf(mu ~ 1 + (1 | ptime_lwr)),
     "both dpars with covariate" = brms::bf(
       mu ~ 1 + ptime_lwr, sigma ~ 1 + ptime_lwr
