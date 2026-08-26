@@ -22,7 +22,7 @@ Availability using Additional_repositories specification:
 This is a new submission.
 
 `cmdstanr` is an optional backend and is not on CRAN.
-It is declared in `Suggests` and reached through `Additional_repositories`, and the check confirms it is available there.
+It is declared in `Suggests` and reached through `Additional_repositories`.
 The package uses the `rstan` backend by default and the full test suite and all vignettes build without `cmdstanr` installed.
 
 ## Notes for the reviewer
