@@ -342,6 +342,8 @@ Functions used to assert the validity of package objects
 
 Tools for simulating datasets
 
+- [`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md)
+  : Convert simulated event times to dates
 - [`simulate_exponential_cases()`](https://epidist.epinowcast.org/reference/simulate_exponential_cases.md)
   : Simulate exponential cases
 - [`simulate_gillespie()`](https://epidist.epinowcast.org/reference/simulate_gillespie.md)

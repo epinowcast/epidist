@@ -4,6 +4,10 @@
 
 ### Package
 
+- Added
+  [`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md),
+  which turns simulated event times into the censored dates an analyst
+  would receive.
 - Removed the calls to unexported `brms` functions that
   `R CMD check --as-cran` flags. `R/brms-compat.R` now holds small
   internal helpers reproducing the narrow behaviour `epidist` relied on

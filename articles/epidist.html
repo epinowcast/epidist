@@ -426,17 +426,21 @@ For example, symptom onset may be reported, but start of infection unknown.
 Discarding events of this type leads to what are called ascertainment biases.
 Whereas each case is equally likely to appear in the sample above, under ascertainment bias some cases are more likely to appear in the data than others.</p>
 </details><p>Our data is now very nearly what we would observe in practice but as a final step we will transform it to use meaningful dates.
-To do this we introduce a <code>outbreak_start_date</code> which is the date of the first infection.</p>
+To do this we introduce a <code>outbreak_start_date</code> which is the date of the first infection, and use <code><a href="../reference/simulate_dates.html">simulate_dates()</a></code> to floor the event times to their reporting window and offset them from it.
+Here we rename the columns to show that <code>epidist</code> does not require particular names.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">outbreak_start_date</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-02-01"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">obs_data</span> <span class="op">&lt;-</span> <span class="va">obs_cens_trunc_samp</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">case</span>, <span class="va">ptime_lwr</span>, <span class="va">ptime_upr</span>, <span class="va">stime_lwr</span>, <span class="va">stime_upr</span>, <span class="va">obs_time</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/simulate_dates.html">simulate_dates</a></span><span class="op">(</span></span>
+<span>    outbreak_start_date <span class="op">=</span> <span class="va">outbreak_start_date</span>,</span>
+<span>    obs_time <span class="op">=</span> <span class="va">obs_time</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span></span>
 <span>    id <span class="op">=</span> <span class="va">case</span>,</span>
-<span>    symptom_onset <span class="op">=</span> <span class="va">outbreak_start_date</span> <span class="op">+</span> <span class="va">ptime_lwr</span>,</span>
-<span>    case_notification <span class="op">=</span> <span class="va">outbreak_start_date</span> <span class="op">+</span> <span class="va">stime_lwr</span>,</span>
-<span>    obs_date <span class="op">=</span> <span class="va">outbreak_start_date</span> <span class="op">+</span> <span class="va">obs_time</span></span>
+<span>    symptom_onset <span class="op">=</span> <span class="va">pdate_lwr</span>,</span>
+<span>    case_notification <span class="op">=</span> <span class="va">sdate_lwr</span>,</span>
+<span>    obs_date <span class="op">=</span> <span class="va">obs_date</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 </details><p>The resulting simulated data <code>obs_data</code> has 4 columns: <code>id</code>, <code>symptom_onset</code>, <code>case_notification</code>, and <code>obs_time</code>.
 Where <code>symptom_onset</code> and <code>case_notification</code> are dates and <code>obs_date</code> is the date of the last observation based on case notification.</p>
@@ -572,8 +576,8 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.42      0.03     1.35     1.48 1.00     3301     2349</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3309     2752</span></span>
+<span><span class="co">#&gt; Intercept           1.42      0.03     1.35     1.49 1.00     3656     2275</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     4051     2585</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -656,8 +660,8 @@ Note that because of the different <code>as_epidist_&lt;model&gt;_model()</code>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.55      0.05     1.46     1.65 1.00     1914     2033</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2145     1728</span></span>
+<span><span class="co">#&gt; Intercept           1.55      0.05     1.46     1.65 1.00     1797     1796</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     1920     2043</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -681,12 +685,12 @@ Internally this function uses can also add the mean and standard deviation param
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">predicted_parameters</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      model draw index       mu     sigma     mean       sd</span></span>
-<span><span class="co">#&gt; 1 marginal    1     1 1.539222 0.4863068 5.246019 2.709711</span></span>
-<span><span class="co">#&gt; 2 marginal    2     1 1.537802 0.4829135 5.229968 2.680280</span></span>
-<span><span class="co">#&gt; 3 marginal    3     1 1.537802 0.4829135 5.229968 2.680280</span></span>
-<span><span class="co">#&gt; 4 marginal    4     1 1.561404 0.4862020 5.363411 2.769677</span></span>
-<span><span class="co">#&gt; 5 marginal    5     1 1.560944 0.4991282 5.395195 2.869653</span></span>
-<span><span class="co">#&gt; 6 marginal    6     1 1.538928 0.4946886 5.266078 2.772877</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 marginal    1     1 1.579357 0.5096020 5.524561 3.008394</span></span>
+<span><span class="co">#&gt; 2 marginal    2     1 1.548407 0.4888687 5.301041 2.754344</span></span>
+<span><span class="co">#&gt; 3 marginal    3     1 1.576013 0.5318234 5.570198 3.184710</span></span>
+<span><span class="co">#&gt; 4 marginal    4     1 1.585565 0.5179454 5.582848 3.096830</span></span>
+<span><span class="co">#&gt; 5 marginal    5     1 1.546530 0.4765359 5.259695 2.655695</span></span>
+<span><span class="co">#&gt; 6 marginal    6     1 1.481543 0.4387681 4.844293 2.232045</span></span></code></pre></div>
 <div class="alert alert-primary">
 <p>Note that by default <code><a href="../reference/predict_delay_parameters.html">predict_delay_parameters()</a></code> gives predictions for every row in the transformed data.
 Here as we only want posterior draws for the summary parameters we filter to the first row or the first data point.

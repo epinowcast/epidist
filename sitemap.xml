@@ -42,6 +42,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-add_dpar_info.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-add_weights.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_supported_family.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-assert_window.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-dpar_bounds.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-expand_dot_formula.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-extract_dpar_terms.html</loc></url>
@@ -105,6 +106,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/predict_delay_parameters.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/reexports.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/sierra_leone_ebola_data.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/simulate_dates.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/simulate_exponential_cases.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/simulate_gillespie.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/simulate_secondary.html</loc></url>

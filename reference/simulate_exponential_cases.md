@@ -37,6 +37,7 @@ A `data.frame` with two columns: `case` (case number) and `ptime`
 ## See also
 
 Other simulate:
+[`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md),
 [`simulate_gillespie()`](https://epidist.epinowcast.org/reference/simulate_gillespie.md),
 [`simulate_secondary()`](https://epidist.epinowcast.org/reference/simulate_secondary.md),
 [`simulate_uniform_cases()`](https://epidist.epinowcast.org/reference/simulate_uniform_cases.md)

@@ -489,19 +489,26 @@ likely to appear in the data than others.
 Our data is now very nearly what we would observe in practice but as a
 final step we will transform it to use meaningful dates. To do this we
 introduce a `outbreak_start_date` which is the date of the first
-infection.
+infection, and use
+[`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md)
+to floor the event times to their reporting window and offset them from
+it. Here we rename the columns to show that `epidist` does not require
+particular names.
 
 ``` r
 
 outbreak_start_date <- as.Date("2024-02-01")
 
 obs_data <- obs_cens_trunc_samp |>
-  select(case, ptime_lwr, ptime_upr, stime_lwr, stime_upr, obs_time) |>
+  simulate_dates(
+    outbreak_start_date = outbreak_start_date,
+    obs_time = obs_time
+  ) |>
   transmute(
     id = case,
-    symptom_onset = outbreak_start_date + ptime_lwr,
-    case_notification = outbreak_start_date + stime_lwr,
-    obs_date = outbreak_start_date + obs_time
+    symptom_onset = pdate_lwr,
+    case_notification = sdate_lwr,
+    obs_date = obs_date
   )
 ```
 
@@ -683,8 +690,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3301     2349
-#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3309     2752
+#> Intercept           1.42      0.03     1.35     1.49 1.00     3656     2275
+#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     4051     2585
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -796,8 +803,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.65 1.00     1914     2033
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2145     1728
+#> Intercept           1.55      0.05     1.46     1.65 1.00     1797     1796
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     1920     2043
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -828,12 +835,12 @@ predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
 
 head(predicted_parameters)
 #>      model draw index       mu     sigma     mean       sd
-#> 1 marginal    1     1 1.539222 0.4863068 5.246019 2.709711
-#> 2 marginal    2     1 1.537802 0.4829135 5.229968 2.680280
-#> 3 marginal    3     1 1.537802 0.4829135 5.229968 2.680280
-#> 4 marginal    4     1 1.561404 0.4862020 5.363411 2.769677
-#> 5 marginal    5     1 1.560944 0.4991282 5.395195 2.869653
-#> 6 marginal    6     1 1.538928 0.4946886 5.266078 2.772877
+#> 1 marginal    1     1 1.579357 0.5096020 5.524561 3.008394
+#> 2 marginal    2     1 1.548407 0.4888687 5.301041 2.754344
+#> 3 marginal    3     1 1.576013 0.5318234 5.570198 3.184710
+#> 4 marginal    4     1 1.585565 0.5179454 5.582848 3.096830
+#> 5 marginal    5     1 1.546530 0.4765359 5.259695 2.655695
+#> 6 marginal    6     1 1.481543 0.4387681 4.844293 2.232045
 ```
 
 Note that by default
