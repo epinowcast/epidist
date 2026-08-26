@@ -17,7 +17,17 @@ vignette: >
 bibliography: references.bib
 ---
 
-
+```{r setup, include=FALSE}
+# exclude compile warnings from cmdstanr
+knitr::opts_chunk$set(
+  fig.path = file.path("figures", "ebola-"),
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  error = FALSE
+)
+```
 
 In this vignette, we use the `epidist` package to analyze line list data from the 2014-2016 outbreak of Ebola in Sierra Leone [@who_ebola_2014_2016].
 These data were collated by @fang2016transmission.
@@ -29,8 +39,7 @@ In analyzing this data, we demonstrate the following features of `epidist`:
 
 The packages used in this article are:
 
-
-``` r
+```{r load-requirements}
 set.seed(123)
 
 library(epidist)
@@ -51,50 +60,35 @@ As the models explored in this vignette are relatively complex, we recommend usi
 To use the `cmdstanr` backend, we first need to install CmdStan (see the README for more details).
 We can check we have everything we need as follows:
 
-
-``` r
+```{r}
 cmdstanr::cmdstan_version()
-#> [1] "2.39.0"
 ```
 
 # Data preparation
 
 We begin by loading the Ebola line list data:
 
-
-``` r
+```{r}
 data("sierra_leone_ebola_data")
 ```
 
-The data has 8358 rows, each corresponding to a unique case report ID (`id`).
+The data has `r nrow(sierra_leone_ebola_data)` rows, each corresponding to a unique case report ID (`id`).
 The columns of the data are the, age, sex, the dates of Ebola symptom onset and positive sample, and their district and chiefdom.
 
-
-``` r
+```{r}
 head(sierra_leone_ebola_data)
-#> # A tibble: 6 × 7
-#>      id   age sex    date_of_symptom_onset date_of_sample_tested district
-#>   <int> <dbl> <chr>  <date>                <date>                <chr>
-#> 1     1    20 Female 2014-05-18            2014-05-23            Kailahun
-#> 2     2    42 Female 2014-05-20            2014-05-25            Kailahun
-#> 3     3    45 Female 2014-05-20            2014-05-25            Kailahun
-#> 4     4    15 Female 2014-05-21            2014-05-26            Kailahun
-#> 5     5    19 Female 2014-05-21            2014-05-26            Kailahun
-#> 6     6    55 Female 2014-05-21            2014-05-26            Kailahun
-#> # ℹ 1 more variable: chiefdom <chr>
 
 fraction <- 5
 ndistrict <- length(unique(sierra_leone_ebola_data$district))
 ```
 
 Figure \@ref(fig:ebola-outbreak) shows the dates of symptom onset and sample testing for cases across in each district.
-(In this figure, we filter down to every 5th case in order to avoid overplotting.)
+(In this figure, we filter down to every `r fraction`th case in order to avoid overplotting.)
 We can see that the start time and course of the epidemic varies across districts.
 
 <details><summary>Click to expand for code to prepare outbreak plot</summary>
 
-
-``` r
+```{r}
 p_outbreak <- sierra_leone_ebola_data |>
   filter(id %% fraction == 0) |>
   ggplot() +
@@ -113,14 +107,11 @@ p_outbreak <- sierra_leone_ebola_data |>
 ```
 
 </details>
-(ref:ebola-outbreak) Primary and secondary event times for every 5th case, over the 14 districts of Sierra Leone.
+(ref:ebola-outbreak) Primary and secondary event times for every `r fraction`th case, over the `r ndistrict` districts of Sierra Leone.
 
-
-``` r
+```{r ebola-outbreak, fig.cap="(ref:ebola-outbreak)", fig.height=9}
 p_outbreak
 ```
-
-![(ref:ebola-outbreak)](figures/ebola-ebola-outbreak-1.png)
 
 # Fitting sex-district stratified delay distributions
 
@@ -133,29 +124,18 @@ That is, $\mu$ and $\sigma$ such that when $x \sim \mathcal{N}(\mu, \sigma)$ the
 
 To prepare the data, we begin by selecting the relevant columns:
 
-
-``` r
+```{r}
 obs_cens <- select(
   sierra_leone_ebola_data,
   id, date_of_symptom_onset, date_of_sample_tested, age, sex, district
 )
 
 head(obs_cens)
-#> # A tibble: 6 × 6
-#>      id date_of_symptom_onset date_of_sample_tested   age sex    district
-#>   <int> <date>                <date>                <dbl> <chr>  <chr>
-#> 1     1 2014-05-18            2014-05-23               20 Female Kailahun
-#> 2     2 2014-05-20            2014-05-25               42 Female Kailahun
-#> 3     3 2014-05-20            2014-05-25               45 Female Kailahun
-#> 4     4 2014-05-21            2014-05-26               15 Female Kailahun
-#> 5     5 2014-05-21            2014-05-26               19 Female Kailahun
-#> 6     6 2014-05-21            2014-05-26               55 Female Kailahun
 ```
 
 For the time being, we filter the data to only complete cases (i.e. rows of the data which have no missing values^[An extension is needed to allow for missing data in the model - please open issue if this would be useful for you.]).
 
-
-``` r
+```{r}
 n <- nrow(obs_cens)
 obs_cens <- obs_cens[complete.cases(obs_cens), ]
 n_complete <- nrow(obs_cens)
@@ -164,8 +144,7 @@ n_complete <- nrow(obs_cens)
 To simulate being in the middle of an outbreak we will filter the data to only include cases up to the 31st of January 2015.
 **The marginal model used in this is adjusting for truncation. To check it is working try filtering instead for the `date_of_symptom_onset` and rerunning.**
 
-
-``` r
+```{r}
 obs_cens_trunc <- filter(
   obs_cens,
   date_of_sample_tested <= as.Date("2015-01-31")
@@ -174,8 +153,7 @@ obs_cens_trunc <- filter(
 
 We prepare the data for use with the `epidist` package by converting the data to an `epidist_linelist_data` object:
 
-
-``` r
+```{r}
 linelist_data <- as_epidist_linelist_data(
   obs_cens_trunc,
   pdate_lwr = "date_of_symptom_onset",
@@ -191,23 +169,9 @@ Second, because we also did not supply an observation time column (`obs_date`), 
 
 To prepare the data for use with the marginal model, we define the data as being a `epidist_marginal_model` model object:
 
-
-``` r
+```{r}
 obs_prep <- as_epidist_marginal_model(linelist_data, obs_time_threshold = 1)
 head(obs_prep)
-#> # A tibble: 6 × 21
-#>   ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr
-#>       <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>
-#> 1         0         1         5         6      259     1 2014-05-18 2014-05-23
-#> 2         2         3         7         8      259     2 2014-05-20 2014-05-25
-#> 3         2         3         7         8      259     3 2014-05-20 2014-05-25
-#> 4         3         4         8         9      259     4 2014-05-21 2014-05-26
-#> 5         3         4         8         9      259     5 2014-05-21 2014-05-26
-#> 6         3         4         8         9      259     6 2014-05-21 2014-05-26
-#> # ℹ 13 more variables: age <dbl>, sex <chr>, district <chr>, pdate_upr <date>,
-#> #   sdate_upr <date>, obs_date <date>, pwindow <dbl>, swindow <dbl>,
-#> #   relative_obs_time <dbl>, orig_relative_obs_time <dbl>, delay_lwr <dbl>,
-#> #   delay_upr <dbl>, n <dbl>
 ```
 
 Now we are ready to fit the marginal model. Note that here we set `obs_time_threshold` to 1 rather than the default of 2 because we are confident that our data contains the maximum observable delay.
@@ -222,8 +186,7 @@ To do this, we set `formula = mu ~ 1` to place an model with only an intercept p
 (Note that the lognormal distribution has two distributional parameters `mu` and `sigma`.
 As a model is not explicitly placed on `sigma`, a constant model `sigma ~ 1` is assumed.)
 
-
-``` r
+```{r}
 fit <- epidist(
   data = obs_prep,
   formula = mu ~ 1,
@@ -235,46 +198,21 @@ fit <- epidist(
   seed = 1,
   backend = "cmdstanr"
 )
-#> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 8.3 seconds.
-#> Chain 2 finished in 8.9 seconds.
-#>
-#> Both chains finished successfully.
-#> Mean chain execution time: 8.6 seconds.
-#> Total execution time: 9.0 seconds.
 ```
 
 The `fit` object is a [`brmsfit`](https://paulbuerkner.com/brms/reference/brmsfit-class.html) object, and has the associated range of methods.
 See `methods(class = "brmsfit")` for more details.
 For example, we may use `summary()` to view information about the fitted model, including posterior estimates for the regression coefficients:
 
-
-``` r
+```{r}
 summary(fit)
-#>  Family: marginal_lognormal
-#>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1
-#>          sigma ~ 1
-#>    Data: transformed_data (Number of observations: 380)
-#>   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
-#>          total post-warmup draws = 2000
-#>
-#> Regression Coefficients:
-#>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.65      0.01     1.64     1.67 1.00     1855     1143
-#> sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1847     1341
-#>
-#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
-#> and Tail_ESS are effective sample size measures, and Rhat is the potential
-#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
 ### Sex-stratified model
 
 To fit a model which varies the parameters of the fitted lognormal distribution, `mu` and `sigma`, by sex we alter the `formula` specification to include fixed effects for sex `~ 1 + sex` as follows:
 
-
-``` r
+```{r}
 fit_sex <- epidist(
   data = obs_prep,
   formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
@@ -286,40 +224,14 @@ fit_sex <- epidist(
   seed = 1,
   backend = "cmdstanr"
 )
-#> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 18.5 seconds.
-#> Chain 2 finished in 19.0 seconds.
-#>
-#> Both chains finished successfully.
-#> Mean chain execution time: 18.7 seconds.
-#> Total execution time: 19.2 seconds.
 ```
 
-A summary of the model shows that males tend to have longer delays (the posterior mean of `sexMale` is 0.04) and greater delay variation (the posterior mean of `sigma_sexMale` is 0.02).
+A summary of the model shows that males tend to have longer delays (the posterior mean of `sexMale` is `r round(summary(fit_sex)$fixed[3, "Estimate"], 2)`) and greater delay variation (the posterior mean of `sigma_sexMale` is `r round(summary(fit_sex)$fixed[4, "Estimate"], 2)`).
 For the `sexMale` effect, the 95% credible interval is greater than zero, whereas for the `sigma_sexMale` effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.
 
-
-``` r
+```{r}
 summary(fit_sex)
-#>  Family: marginal_lognormal
-#>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex
-#>          sigma ~ 1 + sex
-#>    Data: transformed_data (Number of observations: 584)
-#>   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
-#>          total post-warmup draws = 2000
-#>
-#> Regression Coefficients:
-#>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.63      0.01     1.61     1.65 1.00     1904     1150
-#> sigma_Intercept    -0.57      0.01    -0.60    -0.55 1.00     2051     1399
-#> sexMale             0.04      0.01     0.01     0.07 1.00     1898     1417
-#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2244     1515
-#>
-#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
-#> and Tail_ESS are effective sample size measures, and Rhat is the potential
-#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
 ### Sex-district stratified model
@@ -328,8 +240,7 @@ Finally, we will fit a model which also varies by district.
 To do this, we will use district level random effects, assumed to be drawn from a shared normal distribution, within the model for both the `mu` and `sigma` parameters.
 These random effects are specified by including `(1 | district)` in the formulas:
 
-
-``` r
+```{r}
 fit_sex_district <- epidist(
   data = obs_prep,
   formula = bf(
@@ -345,83 +256,15 @@ fit_sex_district <- epidist(
   seed = 1,
   backend = "cmdstanr"
 )
-#> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 268.4 seconds.
-#> Chain 2 finished in 281.9 seconds.
-#>
-#> Both chains finished successfully.
-#> Mean chain execution time: 275.1 seconds.
-#> Total execution time: 282.1 seconds.
 ```
 
 **As this is a longer running model (~ 2 minutes) we have reduced the number of iterations but for real world use cases this may not be sufficient.**
 
 For this model, along with looking at the `summary()`, we may also use the `brms::ranef()` function to look at the estimates of the random effects:
 
-
-``` r
+```{r}
 summary(fit_sex_district)
-#>  Family: marginal_lognormal
-#>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex + (1 | district)
-#>          sigma ~ 1 + sex + (1 | district)
-#>    Data: transformed_data (Number of observations: 1296)
-#>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
-#>          total post-warmup draws = 1000
-#>
-#> Multilevel Hyperparameters:
-#> ~district (Number of levels: 14)
-#>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.16      0.04     0.10     0.24 1.00      259      446
-#> sd(sigma_Intercept)     0.20      0.05     0.13     0.32 1.01      254      474
-#>
-#> Regression Coefficients:
-#>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.63      0.05     1.53     1.73 1.01      170      282
-#> sigma_Intercept    -0.67      0.06    -0.79    -0.54 1.01      183      330
-#> sexMale             0.04      0.01     0.01     0.07 1.00     1141      686
-#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1205      703
-#>
-#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
-#> and Tail_ESS are effective sample size measures, and Rhat is the potential
-#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ranef(fit_sex_district)
-#> $district
-#> , , Intercept
-#>
-#>                   Estimate  Est.Error        Q2.5       Q97.5
-#> Bo            -0.006158585 0.06220838 -0.12304219  0.12377490
-#> Bombali        0.254115275 0.05060460  0.15856773  0.36111235
-#> Bonthe        -0.024767442 0.12436464 -0.25897236  0.21558009
-#> Kailahun      -0.004668086 0.05183190 -0.10285680  0.10328736
-#> Kambia        -0.062983727 0.06754188 -0.19255074  0.07834435
-#> Kenema        -0.252068254 0.05518018 -0.34977753 -0.14369848
-#> Koinadugu      0.180704418 0.07559129  0.03982933  0.33461280
-#> Kono          -0.081461066 0.05958411 -0.19768665  0.03808316
-#> Moyamba       -0.012431539 0.06226322 -0.13464909  0.10981984
-#> Port Loko      0.142411745 0.05158247  0.04797036  0.24942303
-#> Pujehun       -0.058408537 0.09686889 -0.25288343  0.13608435
-#> Tonkolili      0.079991588 0.05251091 -0.02180646  0.19440843
-#> Western Rural -0.025285392 0.05154071 -0.12658207  0.08097643
-#> Western Urban -0.154396595 0.05086562 -0.24670189 -0.05030481
-#>
-#> , , sigma_Intercept
-#>
-#>                  Estimate  Est.Error        Q2.5       Q97.5
-#> Bo             0.18934154 0.07598873  0.03753509  0.34116977
-#> Bombali       -0.22748581 0.06556108 -0.36094037 -0.09106680
-#> Bonthe        -0.13264758 0.22096364 -0.59589669  0.25900935
-#> Kailahun      -0.33669501 0.07051905 -0.47925440 -0.19439993
-#> Kambia         0.05784031 0.08642514 -0.10888867  0.23301059
-#> Kenema         0.11076648 0.07051324 -0.02893602  0.25800634
-#> Koinadugu      0.06914323 0.10147113 -0.11821161  0.28991576
-#> Kono           0.03074981 0.07383101 -0.11334024  0.17313831
-#> Moyamba        0.09764688 0.07673829 -0.04564167  0.25758396
-#> Port Loko     -0.02384964 0.06643858 -0.15344605  0.11486325
-#> Pujehun       -0.09187713 0.13602892 -0.37114994  0.16620781
-#> Tonkolili     -0.15490163 0.07059913 -0.29877070 -0.01713229
-#> Western Rural  0.07162734 0.06633976 -0.05988099  0.20137678
-#> Western Urban  0.27032342 0.06447178  0.13707603  0.40278738
 ```
 
 ## Posterior expectations {#posterior-expectation}
@@ -435,8 +278,7 @@ Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with wom
 
 <details><summary>Click to expand for code to the posterior expectation plots</summary>
 
-
-``` r
+```{r}
 add_marginal_dummy_vars <- function(data) {
   return(
     mutate(
@@ -444,8 +286,7 @@ add_marginal_dummy_vars <- function(data) {
       relative_obs_time = NA,
       pwindow = NA,
       delay_upr = NA,
-      swindow = NA,
-      delay_min = 0
+      swindow = NA
     )
   )
 }
@@ -493,13 +334,10 @@ epred_sex_district_figure <- expectation_draws_sex_district |>
 
 (ref:epred) The fitted posterior expectations of the delay distribution for each model.
 
-
-``` r
+```{r epred, fig.cap="(ref:epred)", fig.height = 8}
 epred_base_figure / epred_sex_figure / epred_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 2.5))
 ```
-
-![(ref:epred)](figures/ebola-epred-1.png)
 
 ## Linear predictor posteriors
 
@@ -508,8 +346,7 @@ For example, for the `mu` parameter in the sex-district stratified model (Figure
 
 <details><summary>Click to expand for code to prepare linear predictor plot</summary>
 
-
-``` r
+```{r}
 linpred_draws_sex_district <- obs_prep |>
   as.data.frame() |>
   data_grid(sex, district) |>
@@ -529,12 +366,9 @@ p_linpred_sex_district <- linpred_draws_sex_district |>
 
 (ref:linpred-sex-district) The posterior distribution of the linear predictor of `mu` parameter within the sex-district stratified model. The posterior expectations in Section \@ref(posterior-expectation) are a function of both the `mu` linear predictor posterior distribution and `sigma` linear predictor posterior distribution.
 
-
-``` r
+```{r linpred-sex-district, fig.cap="(ref:linpred-sex-district)"}
 p_linpred_sex_district
 ```
-
-![(ref:linpred-sex-district)](figures/ebola-linpred-sex-district-1.png)
 
 ## Delay posterior distributions
 
@@ -549,8 +383,7 @@ Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are
 
 <details><summary>Click to expand for code to prepare PMF plots</summary>
 
-
-``` r
+```{r}
 add_marginal_pmf_vars <- function(data) {
   return(
     mutate(
@@ -558,8 +391,7 @@ add_marginal_pmf_vars <- function(data) {
       relative_obs_time = Inf,
       pwindow = 1,
       swindow = 1,
-      delay_upr = NA,
-      delay_min = 0
+      delay_upr = NA
     )
   )
 }
@@ -618,13 +450,10 @@ pmf_sex_district_figure <- draws_sex_district_pmf |>
 
 (ref:pmf) Posterior predictions of the discrete probability mass function for each of the fitted models.
 
-
-``` r
+```{r pmf, fig.cap="(ref:pmf)", fig.height = 16}
 pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 5.5))
 ```
-
-![(ref:pmf)](figures/ebola-pmf-1.png)
 
 ### Continuous probability density function
 
@@ -633,8 +462,7 @@ That is to produce continuous delay times (Figure \@ref(fig:pdf)):
 
 <details><summary>Click to expand for code to prepare PDF plots</summary>
 
-
-``` r
+```{r}
 add_marginal_pdf_vars <- function(data) {
   return(
     mutate(
@@ -642,8 +470,7 @@ add_marginal_pdf_vars <- function(data) {
       relative_obs_time = Inf,
       pwindow = 0,
       swindow = 0,
-      delay_upr = NA,
-      delay_min = 0
+      delay_upr = NA
     )
   )
 }
@@ -700,13 +527,10 @@ pdf_sex_district_figure <- draws_sex_district_pdf |>
 
 (ref:pdf) Posterior predictions of the continuous probability density function for each of the fitted models.
 
-
-``` r
+```{r pdf, fig.cap="(ref:pdf)", fig.height = 16}
 pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 5.5))
 ```
-
-![(ref:pdf)](figures/ebola-pdf-1.png)
 
 # Conclusion
 
