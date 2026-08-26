@@ -584,7 +584,8 @@ epidist_gen_meta_log_lik <- function(family) {
       summaries <- .meta_summary_terms(slots, dist_name, args)
       return(stats::dnorm(
         summaries[["observed"]], summaries[["implied"]],
-        summaries[["se"]], log = TRUE
+        summaries[["se"]],
+        log = TRUE
       ))
     })
     lpdf <- brms:::log_lik_weight(lpdf, i = i, prep = prep) # nolint

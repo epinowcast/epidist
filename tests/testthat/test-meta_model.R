@@ -105,7 +105,8 @@ test_that("epidist_family_model.epidist_meta_model returns a meta custom family"
 test_that("epidist_formula_model.epidist_meta_model binds the required slots", {
   family <- epidist_family(prep_meta_obs, family = lognormal())
   formula <- epidist_formula(
-    prep_meta_obs, family, formula = bf(mu ~ 1)
+    prep_meta_obs, family,
+    formula = bf(mu ~ 1)
   )
   form <- as_string_formula(formula$formula)
   expect_true(grepl("delay_lwr", form, fixed = TRUE))
@@ -127,7 +128,8 @@ test_that("epidist_formula_model.epidist_meta_model binds the required slots", {
 test_that("epidist_transform_data_model.epidist_meta_model aggregates only individual rows", { # nolint: line_length_linter.
   family <- epidist_family(prep_meta_obs, family = lognormal())
   formula <- epidist_formula(
-    prep_meta_obs, family, formula = bf(mu ~ 1)
+    prep_meta_obs, family,
+    formula = bf(mu ~ 1)
   )
   trans <- suppressMessages(
     epidist_transform_data_model(prep_meta_obs, family, formula)
@@ -143,10 +145,12 @@ test_that("epidist_transform_data_model.epidist_meta_model aggregates only indiv
 test_that("epidist_stancode.epidist_meta_model produces valid stanvars", {
   family <- epidist_family(prep_meta_obs, family = lognormal())
   formula <- epidist_formula(
-    prep_meta_obs, family, formula = bf(mu ~ 1)
+    prep_meta_obs, family,
+    formula = bf(mu ~ 1)
   )
   stancode <- epidist_stancode(
-    prep_meta_obs, family = family, formula = formula
+    prep_meta_obs,
+    family = family, formula = formula
   )
   expect_s3_class(stancode, "stanvars")
   scode <- stancode[[2]]$scode
@@ -173,7 +177,8 @@ test_that(".meta_implied_moments matches Monte Carlo naive daily discretisation"
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 30
   moments <- .meta_implied_moments(
-    "plnorm", args, cutoff = cutoff, pwindow = 1, swindow = 1,
+    "plnorm", args,
+    cutoff = cutoff, pwindow = 1, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0
   )
   n_sim <- 2e5
@@ -190,7 +195,8 @@ test_that(".meta_implied_moments matches Monte Carlo naive discretisation with a
   args <- list(shape = 2, scale = 2.5)
   cutoff <- 40
   moments <- .meta_implied_moments(
-    "pgamma", args, cutoff = cutoff, pwindow = 2, swindow = 2,
+    "pgamma", args,
+    cutoff = cutoff, pwindow = 2, swindow = 2,
     trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0
   )
   n_sim <- 2e5
@@ -205,7 +211,8 @@ test_that(".meta_implied_moments matches Monte Carlo naive discretisation with a
 test_that(".meta_implied_moments returns the analytic moments when fully adjusted", { # nolint: line_length_linter.
   args <- list(meanlog = 1.6, sdlog = 0.6)
   moments <- .meta_implied_moments(
-    "plnorm", args, cutoff = 50, pwindow = 1, swindow = 1,
+    "plnorm", args,
+    cutoff = 50, pwindow = 1, swindow = 1,
     trunc_adjusted = 1L, cens_adjusted = 1L, growth_rate = 0
   )
   expected_mean <- exp(args$meanlog + args$sdlog^2 / 2)
@@ -219,7 +226,8 @@ test_that(".meta_implied_moments matches Monte Carlo right truncated continuous 
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 8
   moments <- .meta_implied_moments(
-    "plnorm", args, cutoff = cutoff, pwindow = 1, swindow = 1,
+    "plnorm", args,
+    cutoff = cutoff, pwindow = 1, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0
   )
   n_sim <- 5e5
@@ -232,16 +240,19 @@ test_that(".meta_implied_moments matches Monte Carlo right truncated continuous 
 test_that(".meta_implied_moments applies the uniform single interval correction", { # nolint: line_length_linter.
   args <- list(meanlog = 1.6, sdlog = 0.6)
   adjusted <- .meta_implied_moments(
-    "plnorm", args, cutoff = 50, pwindow = 1, swindow = 1,
+    "plnorm", args,
+    cutoff = 50, pwindow = 1, swindow = 1,
     trunc_adjusted = 1L, cens_adjusted = 1L, growth_rate = 0
   )
   approx <- .meta_implied_moments(
-    "plnorm", args, cutoff = 50, pwindow = 1, swindow = 1,
+    "plnorm", args,
+    cutoff = 50, pwindow = 1, swindow = 1,
     trunc_adjusted = 1L, cens_adjusted = 2L, growth_rate = 0
   )
   expect_equal(approx[["mean"]], adjusted[["mean"]] + 0.5, tolerance = 1e-8)
   expect_equal(
-    approx[["sd"]], sqrt(adjusted[["sd"]]^2 + 1 / 12), tolerance = 1e-8
+    approx[["sd"]], sqrt(adjusted[["sd"]]^2 + 1 / 12),
+    tolerance = 1e-8
   )
 })
 
@@ -250,7 +261,8 @@ test_that(".meta_implied_moments truncates the uniform single interval estimand 
   args <- list(meanlog = 1.8, sdlog = 0.5)
   cutoff <- 8
   moments <- .meta_implied_moments(
-    "plnorm", args, cutoff = cutoff, pwindow = 1, swindow = 1,
+    "plnorm", args,
+    cutoff = cutoff, pwindow = 1, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 2L, growth_rate = 0
   )
   n_sim <- 1e6
@@ -260,7 +272,8 @@ test_that(".meta_implied_moments truncates the uniform single interval estimand 
   expect_equal(moments[["sd"]], stats::sd(observed), tolerance = 0.01)
   # shifting the truncated continuous moments instead is materially biased
   truncated <- .meta_implied_moments(
-    "plnorm", args, cutoff = cutoff, pwindow = 1, swindow = 1,
+    "plnorm", args,
+    cutoff = cutoff, pwindow = 1, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0
   )
   expect_gt(truncated[["mean"]] + 0.5, moments[["mean"]] * 1.02)
@@ -269,7 +282,8 @@ test_that(".meta_implied_moments truncates the uniform single interval estimand 
 test_that(".meta_implied_moments treats an underflowing primary censored CDF as zero", { # nolint: line_length_linter.
   args <- list(meanlog = 6, sdlog = 0.2)
   moments <- .meta_implied_moments(
-    "plnorm", args, cutoff = 800, pwindow = 2, swindow = 1,
+    "plnorm", args,
+    cutoff = 800, pwindow = 2, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 2L, growth_rate = 0.15
   )
   expect_true(all(is.finite(moments)))
@@ -287,11 +301,13 @@ test_that(".meta_implied_prob matches the continuity corrected naive empirical C
   obs <- floor(stime[stime <= floor(cutoff)])
   for (y in c(3, 5, 8, 12)) {
     prob <- .meta_implied_prob(
-      y, "plnorm", args, cutoff = cutoff, pwindow = 1, swindow = 1,
+      y, "plnorm", args,
+      cutoff = cutoff, pwindow = 1, swindow = 1,
       trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0
     )
     expect_equal(
-      prob, mean(obs < y) + mean(obs == y) / 2, tolerance = 0.02
+      prob, mean(obs < y) + mean(obs == y) / 2,
+      tolerance = 0.02
     )
     expect_lt(prob, mean(obs <= y))
     expect_gt(prob, mean(obs < y))
@@ -302,7 +318,8 @@ test_that(".meta_implied_prob interpolates the naive grid between its cells", {
   args <- list(meanlog = 1.6, sdlog = 0.6)
   prob <- function(y) {
     return(.meta_implied_prob(
-      y, "plnorm", args, cutoff = 30, pwindow = 1, swindow = 1,
+      y, "plnorm", args,
+      cutoff = 30, pwindow = 1, swindow = 1,
       trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0
     ))
   }
@@ -316,7 +333,8 @@ test_that(".meta_implied_prob interpolates the naive grid between its cells", {
 test_that(".meta_implied_prob returns the truncated continuous CDF when fully adjusted", { # nolint: line_length_linter.
   args <- list(meanlog = 1.6, sdlog = 0.6)
   prob <- .meta_implied_prob(
-    9, "plnorm", args, cutoff = 12, pwindow = 1, swindow = 1,
+    9, "plnorm", args,
+    cutoff = 12, pwindow = 1, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0
   )
   expected <- stats::plnorm(9, args$meanlog, args$sdlog) /
@@ -329,7 +347,8 @@ test_that(".meta_implied_moments returns the kurtosis of the naive estimand", {
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 30
   moments <- .meta_implied_moments(
-    "plnorm", args, cutoff = cutoff, pwindow = 1, swindow = 1,
+    "plnorm", args,
+    cutoff = cutoff, pwindow = 1, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0
   )
   n_sim <- 5e5
@@ -345,7 +364,8 @@ test_that(".meta_implied_moments returns the kurtosis of the naive estimand", {
 test_that(".meta_implied_moments returns the analytic kurtosis when fully adjusted", { # nolint: line_length_linter.
   args <- list(meanlog = 1.6, sdlog = 0.6)
   moments <- .meta_implied_moments(
-    "plnorm", args, cutoff = 50, pwindow = 1, swindow = 1,
+    "plnorm", args,
+    cutoff = 50, pwindow = 1, swindow = 1,
     trunc_adjusted = 1L, cens_adjusted = 1L, growth_rate = 0
   )
   s2 <- args$sdlog^2
@@ -358,7 +378,8 @@ test_that(".meta_implied_moments returns the kurtosis of a right truncated distr
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 8
   moments <- .meta_implied_moments(
-    "plnorm", args, cutoff = cutoff, pwindow = 1, swindow = 1,
+    "plnorm", args,
+    cutoff = cutoff, pwindow = 1, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0
   )
   n_sim <- 5e5
@@ -412,7 +433,8 @@ test_that(".meta_implied_moments accounts for exponential growth in the primary 
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 30
   moments <- .meta_implied_moments(
-    "plnorm", args, cutoff = cutoff, pwindow = 1, swindow = 1,
+    "plnorm", args,
+    cutoff = cutoff, pwindow = 1, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0.4
   )
   n_sim <- 2e5
@@ -426,13 +448,15 @@ test_that(".meta_implied_moments accounts for exponential growth in the primary 
 test_that(".meta_grid_pmf returns a normalised grid of the expected length", {
   args <- list(meanlog = 1.6, sdlog = 0.6)
   mass <- .meta_grid_pmf(
-    "plnorm", args, cutoff = 20, pwindow = 1, swindow = 1, growth_rate = 0
+    "plnorm", args,
+    cutoff = 20, pwindow = 1, swindow = 1, growth_rate = 0
   )
   expect_length(mass, 20)
   expect_equal(sum(mass), 1, tolerance = 1e-12)
   expect_true(all(mass >= 0))
   wide <- .meta_grid_pmf(
-    "plnorm", args, cutoff = 20, pwindow = 2, swindow = 2, growth_rate = 0
+    "plnorm", args,
+    cutoff = 20, pwindow = 2, swindow = 2, growth_rate = 0
   )
   expect_length(wide, 10)
   expect_equal(sum(wide), 1, tolerance = 1e-12)
@@ -441,7 +465,8 @@ test_that(".meta_grid_pmf returns a normalised grid of the expected length", {
 test_that(".meta_implied_moments matches the analytic gamma summaries", {
   args <- list(shape = 3, scale = 2)
   moments <- .meta_implied_moments(
-    "pgamma", args, cutoff = 60, pwindow = 1, swindow = 1,
+    "pgamma", args,
+    cutoff = 60, pwindow = 1, swindow = 1,
     trunc_adjusted = 1L, cens_adjusted = 1L, growth_rate = 0
   )
   expect_equal(moments[["mean"]], 6, tolerance = 1e-8)
@@ -453,7 +478,8 @@ test_that(".meta_implied_moments matches Monte Carlo weibull summaries", {
   set.seed(109)
   args <- list(shape = 1.7, scale = 8)
   moments <- .meta_implied_moments(
-    "pweibull", args, cutoff = 100, pwindow = 1, swindow = 1,
+    "pweibull", args,
+    cutoff = 100, pwindow = 1, swindow = 1,
     trunc_adjusted = 1L, cens_adjusted = 1L, growth_rate = 0
   )
   delay <- rweibull(5e5, shape = args$shape, scale = args$scale)
@@ -470,18 +496,21 @@ test_that(".meta_implied_moments matches Monte Carlo weibull summaries", {
 test_that(".meta_implied_prob uses the primary censored CDF for the uniform single interval approximation", { # nolint: line_length_linter.
   args <- list(meanlog = 1.6, sdlog = 0.6)
   prob <- .meta_implied_prob(
-    9, "plnorm", args, cutoff = 100, pwindow = 1, swindow = 1,
+    9, "plnorm", args,
+    cutoff = 100, pwindow = 1, swindow = 1,
     trunc_adjusted = 1L, cens_adjusted = 2L, growth_rate = 0
   )
   expected <- primarycensored::pprimarycensored(
-    9, stats::plnorm, pwindow = 1, meanlog = args$meanlog, sdlog = args$sdlog
+    9, stats::plnorm,
+    pwindow = 1, meanlog = args$meanlog, sdlog = args$sdlog
   )
   expect_equal(prob, expected, tolerance = 1e-8)
   # adding the primary offset shifts probability mass to longer delays, and
   # the exact CDF is close to but not equal to the half window shift
   expect_lt(prob, stats::plnorm(9, args$meanlog, args$sdlog))
   expect_equal(
-    prob, stats::plnorm(8.5, args$meanlog, args$sdlog), tolerance = 1e-2
+    prob, stats::plnorm(8.5, args$meanlog, args$sdlog),
+    tolerance = 1e-2
   )
 })
 
@@ -494,7 +523,8 @@ test_that(".meta_implied_prob truncates the primary censored CDF when the study 
   observed <- observed[observed < cutoff]
   for (y in c(3, 5, 8)) {
     prob <- .meta_implied_prob(
-      y, "plnorm", args, cutoff = cutoff, pwindow = 1, swindow = 1,
+      y, "plnorm", args,
+      cutoff = cutoff, pwindow = 1, swindow = 1,
       trunc_adjusted = 0L, cens_adjusted = 2L, growth_rate = 0
     )
     expect_equal(prob, mean(observed <= y), tolerance = 0.02)

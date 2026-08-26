@@ -32,6 +32,8 @@ knitr::opts_chunk$set(
 Systematic reviews of epidemiological delays mostly collect published summary values, such as a mean and standard deviation, or a median and interquartile range, rather than individual level data.
 Those summaries are usually biased, because studies often do not adjust for right truncation, treat day rounded delays as if they were continuous, or only partially correct for interval censoring.
 The meta model lets us fit directly to these published summaries, forward modelling what the study's own estimation procedure would have converged to, and combine that evidence with any individual level data we do have.
+Jointly synthesising individual level data and published summaries in one hierarchical model overlaps with the federated analysis approach of the [ddsynth](https://github.com/cm401/ddsynth) package.
+The meta model differs in adjusting each summary for the biases of the study's own estimation procedure rather than treating it as an unbiased estimate of the continuous delay, and in building on `brms`, so formulas, families, priors and post-processing all carry over.
 
 ::: {.alert .alert-primary}
 For a methodological overview of the biases in published delay estimates see @park2024estimating, and for a practical checklist aimed at applied users see @charniga2024best.
