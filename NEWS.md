@@ -1,3 +1,12 @@
+# epidist 0.4.1.1000
+
+## CI
+
+- Pinned the `precommit` hooks to a revision whose lockfile uses `digest` 0.6.39.
+The tagged v0.4.3 lockfile pins `digest` 0.6.36, which calls `Calloc` and `Free`.
+Those were removed from the R API in R 4.5, so the hook environment failed to build and the `pre-commit` job failed on every pull request.
+See #578.
+
 # epidist 0.4.1
 
 ## Bug fixes

@@ -3,7 +3,7 @@
 exclude: '\.Rd$'  # Excludes all .Rd files from pre-commit hooks
 repos:
 -   repo: https://github.com/lorenzwalthert/precommit
-    rev: v0.4.3
+    rev: 2cec721823fdfd0495ed97fb31d43a9f394914e3
     hooks:
     -   id: style-files
         args: [--style_pkg=styler, --style_fun=tidyverse_style]
