@@ -48,7 +48,7 @@ Methods are provided for base subsetting and replacement, and for
 \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_reconstruct()}}, which \code{dplyr} verbs such as \code{\link[dplyr:mutate]{dplyr::mutate()}},
 \code{\link[dplyr:filter]{dplyr::filter()}} and \code{\link[dplyr:select]{dplyr::select()}} use to restore the class of their
 input. \code{\link[dplyr:group_by]{dplyr::group_by()}} is an exception, as it builds a grouped tibble
-rather than restoring the class of its input.
+rather than restoring the class of its input. See epidist issue 629.
 }
 \examples{
 linelist_data <- sierra_leone_ebola_data |>

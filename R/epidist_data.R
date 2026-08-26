@@ -11,7 +11,7 @@
 #' [dplyr::dplyr_reconstruct()], which `dplyr` verbs such as [dplyr::mutate()],
 #' [dplyr::filter()] and [dplyr::select()] use to restore the class of their
 #' input. [dplyr::group_by()] is an exception, as it builds a grouped tibble
-#' rather than restoring the class of its input.
+#' rather than restoring the class of its input. See epidist issue 629.
 #'
 #' @param x An object with the `epidist_data` class.
 #'
