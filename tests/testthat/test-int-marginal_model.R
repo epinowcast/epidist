@@ -1,6 +1,7 @@
 # fmt: skip file
 test_that("epidist.epidist_marginal_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   stancode <- suppressMessages(epidist(
     data = prep_marginal_obs,
     fn = brms::make_stancode
@@ -14,6 +15,7 @@ test_that("epidist.epidist_marginal_model Stan code has no syntax errors in the 
 test_that("epidist.epidist_marginal_model fits and the MCMC converges in the default case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   expect_s3_class(fit_marginal, "brmsfit")
   expect_s3_class(fit_marginal, "epidist_fit")
   expect_convergence(fit_marginal)
@@ -22,6 +24,7 @@ test_that("epidist.epidist_marginal_model fits and the MCMC converges in the def
 test_that("epidist.epidist_marginal_model recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   pred <- predict_delay_parameters(fit_marginal)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
@@ -31,6 +34,7 @@ test_that("epidist.epidist_marginal_model recovers the simulation settings for t
 test_that("epidist.epidist_marginal_model fits and the MCMC converges in the gamma delay case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   expect_s3_class(fit_marginal_gamma, "brmsfit")
   expect_s3_class(fit_marginal_gamma, "epidist_fit")
@@ -40,6 +44,7 @@ test_that("epidist.epidist_marginal_model fits and the MCMC converges in the gam
 test_that("epidist.epidist_marginal_model recovers the simulation settings for the delay distribution in the gamma delay case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   draws_gamma <- posterior::as_draws_df(fit_marginal_gamma$fit)
   draws_gamma_mu <- exp(draws_gamma$Intercept)
@@ -57,6 +62,7 @@ test_that("epidist.epidist_marginal_model recovers the simulation settings for t
 test_that("epidist.epidist_marginal_model fits and recovers a sex effect", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   expect_s3_class(fit_marginal_sex, "brmsfit")
   expect_s3_class(fit_marginal_sex, "epidist_fit")

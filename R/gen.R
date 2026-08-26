@@ -95,7 +95,7 @@ epidist_gen_log_lik <- function(family) {
         )
       )
     })
-    lpdf <- brms:::log_lik_weight(lpdf, i = i, prep = prep) # nolint
+    lpdf <- .log_lik_weight(lpdf, i = i, prep = prep)
     return(lpdf)
   }
 
@@ -132,7 +132,7 @@ epidist_gen_log_lik <- function(family) {
         )
       )
     })
-    lpdf <- brms:::log_lik_weight(lpdf, i = i, prep = prep) # nolint
+    lpdf <- .log_lik_weight(lpdf, i = i, prep = prep)
     return(lpdf)
   }
 

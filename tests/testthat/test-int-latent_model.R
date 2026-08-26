@@ -1,6 +1,7 @@
 # fmt: skip file
 test_that("epidist.epidist_latent_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   stancode <- epidist(
     data = prep_obs,
     fn = brms::make_stancode
@@ -14,6 +15,7 @@ test_that("epidist.epidist_latent_model Stan code has no syntax errors in the de
 test_that("epidist.epidist_latent_model samples from the prior according to marginal Kolmogorov-Smirnov tests in the default case.", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   prior_samples <- epidist(
     data = prep_obs,
@@ -51,6 +53,7 @@ test_that("epidist.epidist_latent_model samples from the prior according to marg
 test_that("epidist.epidist_latent_model fits and the MCMC converges in the default case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   expect_s3_class(fit, "brmsfit")
   expect_s3_class(fit, "epidist_fit")
   expect_convergence(fit)
@@ -59,6 +62,7 @@ test_that("epidist.epidist_latent_model fits and the MCMC converges in the defau
 test_that("epidist.epidist_latent_model fits, the MCMC converges, and the draws of sigma are indeed a constant, when setting sigma = 1 (a constant)", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   fit_constant <- epidist(
     data = prep_obs,
@@ -78,6 +82,7 @@ test_that("epidist.epidist_latent_model fits, the MCMC converges, and the draws 
 test_that("epidist.epidist_latent_model Stan code has no syntax errors", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   stancode_string <- epidist(
     data = prep_obs,
@@ -95,6 +100,7 @@ test_that("epidist.epidist_latent_model Stan code has no syntax errors", { # nol
 test_that("epidist.epidist_latent_model recovers the simulation settings for the delay distribution in the default case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   pred <- predict_delay_parameters(fit)
   # Unclear the extent to which we should expect parameter recovery here
@@ -104,6 +110,7 @@ test_that("epidist.epidist_latent_model recovers the simulation settings for the
 
 test_that("epidist.epidist_latent_model Stan code has no syntax errors and compiles in the gamma delay case", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   stancode_gamma <- epidist(
     data = prep_obs_gamma,
     family = Gamma(link = "log"),
@@ -121,6 +128,7 @@ test_that("epidist.epidist_latent_model Stan code has no syntax errors and compi
 test_that("epidist.epidist_latent_model fits and the MCMC converges in the gamma delay case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   expect_s3_class(fit_gamma, "brmsfit")
   expect_s3_class(fit_gamma, "epidist_fit")
@@ -130,6 +138,7 @@ test_that("epidist.epidist_latent_model fits and the MCMC converges in the gamma
 test_that("epidist.epidist_latent_model recovers the simulation settings for the delay distribution in the gamma delay case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
   draws_gamma_mu <- exp(draws_gamma$Intercept)
@@ -146,6 +155,7 @@ test_that("epidist.epidist_latent_model recovers the simulation settings for the
 
 test_that("epidist.epidist_latent_model Stan code has no syntax errors for an alternative formula", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   stancode_sex <- epidist(
     data = prep_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),
@@ -161,6 +171,7 @@ test_that("epidist.epidist_latent_model Stan code has no syntax errors for an al
 test_that("epidist.epidist_latent_model recovers a sex effect", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   draws <- posterior::as_draws_df(fit_sex$fit)
   expect_equal(mean(draws$b_Intercept), meanlog_m, tolerance = 0.3)

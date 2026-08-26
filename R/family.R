@@ -10,7 +10,7 @@
 #' @export
 epidist_family <- function(data, family = lognormal(), ...) {
   assert_epidist(data)
-  family <- brms:::validate_family(family) # nolint
+  family <- .validate_family(family)
   class(family) <- c(family$family, class(family))
   family <- .add_dpar_info(family)
   custom_family <- epidist_family_model(data, family, ...)

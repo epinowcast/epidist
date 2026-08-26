@@ -440,7 +440,7 @@ naive_data <- as_epidist_naive_model(linelist_data)
 naive_data
 ```
 
-and now we fit the model using the the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paul-buerkner.github.io/brms/) R package [@brms].
+and now we fit the model using the No-U-Turn Sampler (NUTS) Markov chain Monte Carlo (MCMC) algorithm via the [`brms`](https://paulbuerkner.com/brms/) R package [@brms].
 
 ```{r}
 naive_fit <- epidist(

@@ -200,7 +200,7 @@
   other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]] # nolint
   other_bounds <- lapply(
     family$dpars[-1],
-    brms:::dpar_bounds, # nolint
+    .dpar_bounds,
     family = family$family
   )
   family$other_links <- other_links

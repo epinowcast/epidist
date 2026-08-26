@@ -19,3 +19,4 @@
 ^vignettes/ebola\.Rmd$
 ^vignettes/faq\.Rmd$
 ^\.lintr$
+^cran-comments\.md$

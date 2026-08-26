@@ -12,7 +12,8 @@
 #'  be used in the model. Every family function has a link argument allowing
 #'  users to specify the link function to be applied on the response variable.
 #'  If not specified, default links are used. For details of all supported
-#'  families see [brmsfamily()]. Commonly used, such as [lognormal()], are also
+#'  families see [brms::brmsfamily()]. Commonly used, such as
+#'  [brms::lognormal()], are also
 #'  reexported as part of `epidist`.
 #'
 #' @param prior One or more `brmsprior` objects created by [brms::set_prior()]
@@ -37,6 +38,7 @@
 #' @family fit
 #' @export
 #' @examples
+#' \donttest{
 #' fit <- sierra_leone_ebola_data |>
 #'   as_epidist_linelist_data(
 #'     pdate_lwr = "date_of_symptom_onset",
@@ -47,6 +49,7 @@
 #'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
 #'
 #' summary(fit)
+#' }
 epidist <- function(
   data,
   formula = mu ~ 1,

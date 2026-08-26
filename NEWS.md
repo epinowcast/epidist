@@ -1,4 +1,37 @@
-# epidist 0.4.1.1000
+# epidist 0.5.0
+
+## Package
+
+- Removed the calls to unexported `brms` functions that `R CMD check --as-cran` flags.
+`R/brms-compat.R` now holds small internal helpers reproducing the narrow behaviour `epidist` relied on from `brms:::validate_family()`, `brms:::validate_formula()`, `brms:::validate_data()`, `brms:::dpar_bounds()` and `brms:::log_lik_weight()`.
+The helpers are written against the public `brms` interface rather than copied from `brms`.
+`tests/testthat/test-brms-compat.R` checks each one against the `brms` internal it replaces.
+Those checks are skipped on CRAN, since they reach into `brms` internals.
+Credit for the original behaviour goes to the `brms` authors.
+See #420 and paul-buerkner/brms#1676.
+- Removed the `Remotes` field from `DESCRIPTION` so dependencies resolve from CRAN.
+`cmdstanr` is now found through `Additional_repositories` and the development version of `brms` is no longer used.
+See #592.
+- Turned off evaluation of the approximate inference vignette.
+It uses `pathfinder`, which needs an unreleased `brms` fix.
+This release resolves `brms` from CRAN.
+See #579.
+- Added a `brms (>= 2.23.0)` floor, the version the compatibility helpers were checked against.
+- Pointed the CI workflows at the Stan r-universe with `extra-repositories`.
+Dropping `Remotes` means `pak` can no longer resolve `cmdstanr`.
+`pak` does not read `Additional_repositories`.
+- Raised the minimum R version to 4.1.0.
+The package uses the native pipe and the lambda shorthand.
+Both need R 4.1.0.
+- Added the copyright holder role to Sam Abbott in `DESCRIPTION`.
+- Guarded the shared test fits and the tests that use them so the suite runs without `cmdstanr`.
+- Wrapped the `epidist()` and `epidist_diagnostics()` examples in `\donttest{}`.
+Both fit a model.
+They ran for 118 and 110 seconds against CRAN's 5 second guidance.
+- Anchored the `brms` links in the documentation so `R CMD check` no longer reports Rd cross-references with missing package anchors.
+- Dropped a stale `fix` entry from the declared global variables.
+- Updated the `brms` documentation URL, which had moved.
+- Added `cran-comments.md`.
 
 ## Bug fixes
 

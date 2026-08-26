@@ -1,5 +1,6 @@
 test_that("epidist.epidist_naive_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   stancode <- epidist(
     data = prep_naive_obs,
     fn = brms::make_stancode
@@ -13,6 +14,7 @@ test_that("epidist.epidist_naive_model Stan code has no syntax errors in the def
 test_that("epidist.epidist_naive_model fits and the MCMC converges in the default case", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   fit <- epidist(
     data = prep_naive_obs,

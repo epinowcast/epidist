@@ -6,6 +6,24 @@ not_on_cran <- function() {
   return(identical(Sys.getenv("NOT_CRAN"), "true"))
 }
 
+has_cmdstanr <- function() {
+  if (!requireNamespace("cmdstanr", quietly = TRUE)) {
+    return(FALSE)
+  }
+  installed <- try(
+    cmdstanr::cmdstan_version(error_on_NA = FALSE),
+    silent = TRUE
+  )
+  return(!inherits(installed, "try-error") && !is.null(installed))
+}
+
+skip_if_no_cmdstanr <- function() {
+  if (has_cmdstanr()) {
+    return(invisible(TRUE))
+  }
+  return(testthat::skip("cmdstanr or CmdStan is not available"))
+}
+
 skip_on_local <- function() {
   if (on_ci()) {
     return(invisible(TRUE))

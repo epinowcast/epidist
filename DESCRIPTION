@@ -1,6 +1,6 @@
 Package: epidist
 Title: Estimate Epidemiological Delay Distributions With brms
-Version: 0.4.1.1000
+Version: 0.5.0
 Authors@R:
   c(person(given = "Adam Howes",
            role = c("aut"),
@@ -12,7 +12,7 @@ Authors@R:
            email = "swp2@princeton.edu",
            comment = c(ORCID = "0000-0003-2202-3361")),
     person(given = "Sam Abbott",
-           role = c("aut", "cre"),
+           role = c("aut", "cre", "cph"),
            email = "contact@samabbott.co.uk",
            comment = c(ORCID = "0000-0001-8057-8037")),
     person(given = "Sebastian",
@@ -34,9 +34,9 @@ URL: https://epidist.epinowcast.org/,
     https://github.com/epinowcast/epidist/
 BugReports: https://github.com/epinowcast/epidist/issues/
 Depends:
-    R (>= 4.0.0)
+    R (>= 4.1.0)
 Imports:
-    brms,
+    brms (>= 2.23.0),
     checkmate,
     cli,
     dplyr,
@@ -70,9 +70,8 @@ Suggests:
     testthat (>= 3.0.0),
     tidybayes,
     usethis
-Remotes:
-    paul-buerkner/brms,
-    stan-dev/cmdstanr
+Additional_repositories:
+    https://stan-dev.r-universe.dev
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme

@@ -22,6 +22,7 @@
 #' @autoglobal
 #' @export
 #' @examples
+#' \donttest{
 #' fit <- sierra_leone_ebola_data |>
 #'   as_epidist_linelist_data(
 #'     pdate_lwr = "date_of_symptom_onset",
@@ -31,6 +32,7 @@
 #'   as_epidist_marginal_model() |>
 #'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
 #' epidist_diagnostics(fit)
+#' }
 epidist_diagnostics <- function(fit) {
   if (!inherits(fit, "epidist_fit")) {
     cli_abort(c(

@@ -1,6 +1,7 @@
 # fmt: skip file
 test_that("epidist_gen_posterior_predict returns a function that outputs positive integers with length equal to draws", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
 
   # Helper function to test predictions
   test_predictions <- function(fit, family) {
@@ -24,6 +25,7 @@ test_that("epidist_gen_posterior_predict returns a function that outputs positiv
 
 test_that("epidist_gen_posterior_predict returns a function that errors for i out of bounds", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
 
   # Helper function to test out of bounds errors
   test_out_of_bounds <- function(fit, family) {
@@ -46,6 +48,7 @@ test_that("epidist_gen_posterior_predict returns a function that errors for i ou
 
 test_that("epidist_gen_posterior_predict returns a function that can generate predictions with no censoring", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
 
   # Helper function to test uncensored predictions
   test_uncensored <- function(fit, family) {
@@ -73,6 +76,7 @@ test_that("epidist_gen_posterior_predict returns a function that can generate pr
 
 test_that("epidist_gen_posterior_predict returns a function that predicts delays in the 95% credible interval", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
 
   # Helper function to test credible intervals
   test_credible_intervals <- function(fit, family) {
@@ -106,6 +110,7 @@ test_that("epidist_gen_posterior_predict returns a function that predicts delays
 
 test_that("epidist_gen_posterior_epred returns a function that creates arrays with correct dimensions", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
 
   # Helper function to test epred
   test_epred <- function(fit, expected_mean) {
@@ -132,6 +137,7 @@ test_that( # nolint: line_length_linter.
   "epidist_gen_log_lik returns a function that produces valid log likelihoods",
   {
     skip_on_cran()
+    skip_if_no_cmdstanr()
     # Test lognormal
     prep <- brms::prepare_predictions(fit)
     prep$ndraws <- 10
@@ -157,6 +163,7 @@ test_that( # nolint: line_length_linter.
   "epidist_gen_log_lik falls back to generic method for unsupported distributions", # nolint: line_length_linter.
   {
     skip_on_cran()
+    skip_if_no_cmdstanr()
 
     # Test with normal distribution without analytical solution
     prep <- brms::prepare_predictions(fit)

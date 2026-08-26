@@ -9,9 +9,9 @@
 \arguments{
 \item{data}{A data frame to add weights to}
 
-\item{weight}{A column name to use for weighting the data in the
-likelihood. Default is NULL. Internally this is used to define the 'n'
-column of the returned object.}
+\item{weight}{A column name to use for weighting. If NULL, weights default
+to 1. Internally this is used to define the 'n' column of the returned
+object.}
 }
 \value{
 The data frame with an added 'n' column containing the weights
