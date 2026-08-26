@@ -173,8 +173,6 @@ as_epidist_aggregate_data.epidist_linelist_data <- function(
   by = NULL,
   ...
 ) {
-  assert_epidist.epidist_linelist_data(data)
-
   # Required variables for epidist objects
   group_vars <- .linelist_required_cols()
 
@@ -187,7 +185,7 @@ as_epidist_aggregate_data.epidist_linelist_data <- function(
 
   agg <- data |>
     dplyr::count(dplyr::across(dplyr::all_of(group_vars)), name = "n")
-  class(agg) <- setdiff(class(agg), "epidist_linelist_data")
+  agg <- .drop_epidist_class(agg)
   aggregated <- as_epidist_aggregate_data.default(
     data = agg$ptime_lwr,
     ptime_upr = agg$ptime_upr,
@@ -211,8 +209,7 @@ as_epidist_aggregate_data.epidist_linelist_data <- function(
 #' df <- new_epidist_aggregate_data(data.frame())
 #' class(df)
 new_epidist_aggregate_data <- function(data) {
-  class(data) <- c("epidist_aggregate_data", class(data))
-  return(data)
+  return(.new_epidist_data(data, "epidist_aggregate_data"))
 }
 
 #' Check if data has the `epidist_aggregate_data` class

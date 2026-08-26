@@ -1,5 +1,16 @@
 # epidist 0.5.0
 
+## Features
+
+- `epidist` data objects now check themselves when they are modified.
+Every object also carries a shared `epidist_data` class with methods for subsetting, replacement and the `dplyr` verbs.
+These re-check the object and drop any `epidist` class whose requirements it no longer meets, warning about what was dropped and why.
+An object that still carries an `epidist` class is therefore a valid object of that class.
+See `?epidist_data` and #399.
+- Dropped the checks that ran on objects which had already been checked when they were created.
+The `as_epidist_*()` and `epidist_stancode()` methods now trust the class they dispatch on.
+See #399.
+
 ## Package
 
 - Removed the calls to unexported `brms` functions that `R CMD check --as-cran` flags.

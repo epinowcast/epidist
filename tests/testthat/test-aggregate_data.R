@@ -23,7 +23,8 @@ test_that("as_epidist_aggregate_data.default works with vectors", {
 })
 
 test_that("as_epidist_aggregate_data works with dates", {
-  # Create test data with dates from sim_obs
+  # Selecting only the date columns drops the columns the linelist class
+  # requires, so the class is dropped along with them. See `?epidist_data`.
   data <- sim_obs |>
     dplyr::mutate(
       pdate_lwr = as.Date("2023-01-01") + ptime_lwr,
@@ -39,9 +40,10 @@ test_that("as_epidist_aggregate_data works with dates", {
       sdate_upr,
       obs_date
     ) |>
-    dplyr::mutate(n = 1)
+    dplyr::mutate(n = 1) |>
+    suppressWarnings()
+  expect_false(is_epidist_linelist_data(data))
 
-  class(data) <- setdiff(class(data), "epidist_linelist_data")
   expect_no_error(
     as_epidist_aggregate_data(
       data,
@@ -92,17 +94,25 @@ test_that(
 
 test_that("as_epidist_aggregate_data validates counts", {
   # Test zero counts
-  invalid_zero <- dplyr::mutate(agg_sim_obs, n = 0)
-
+  expect_warning(
+    dplyr::mutate(agg_sim_obs, n = 0),
+    "Element 1 is not >= 1"
+  )
+  invalid_zero <- suppressWarnings(dplyr::mutate(agg_sim_obs, n = 0))
+  expect_false(is_epidist_aggregate_data(invalid_zero))
   expect_error(
-    assert_epidist(invalid_zero)
+    assert_epidist(new_epidist_aggregate_data(invalid_zero))
   )
 
   # Test non-integer counts
-  invalid_decimal <- dplyr::mutate(agg_sim_obs, n = 1.5)
-
+  expect_warning(
+    dplyr::mutate(agg_sim_obs, n = 1.5),
+    "Must be of type 'integerish'"
+  )
+  invalid_decimal <- suppressWarnings(dplyr::mutate(agg_sim_obs, n = 1.5))
+  expect_false(is_epidist_aggregate_data(invalid_decimal))
   expect_error(
-    assert_epidist(invalid_decimal)
+    assert_epidist(new_epidist_aggregate_data(invalid_decimal))
   )
 })
 

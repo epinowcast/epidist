@@ -7,7 +7,7 @@ test_that("as_epidist_marginal_model.epidist_linelist_data with default settings
 
 test_that("as_epidist_marginal_model.epidist_linelist_data errors when passed incorrect inputs", { # nolint: line_length_linter.
   expect_error(as_epidist_marginal_model(list()))
-  expect_error(as_epidist_marginal_model(sim_obs[, 1]))
+  expect_error(as_epidist_marginal_model(suppressWarnings(sim_obs[, 1])))
 })
 
 test_that("as_epidist_marginal_model.epidist_linelist_data respects weight variable", { # nolint: line_length_linter.
@@ -150,7 +150,9 @@ test_that("assert_epidist.epidist_marginal_model doesn't produce an error for co
 
 test_that("assert_epidist.epidist_marginal_model returns FALSE for incorrect input", { # nolint: line_length_linter.
   expect_error(assert_epidist(list()))
-  expect_error(assert_epidist(prep_marginal_obs[, 1]))
+  expect_error(
+    assert_epidist(suppressWarnings(prep_marginal_obs[, 1]))
+  )
   expect_error({
     x <- list()
     class(x) <- "epidist_marginal_model"
@@ -162,9 +164,15 @@ test_that(
   "assert_epidist.epidist_marginal_model errors when delay_upr != delay_lwr + swindow", # nolint
   {
     bad_data <- prep_marginal_obs
-    bad_data$delay_upr <- bad_data$delay_lwr + bad_data$swindow + 1
+    expect_warning(
+      {
+        bad_data$delay_upr <- bad_data$delay_lwr + bad_data$swindow + 1
+      },
+      "delay_upr must equal delay_lwr \\+ swindow" # nolint
+    )
+    expect_false(is_epidist_marginal_model(bad_data))
     expect_error(
-      assert_epidist(bad_data),
+      assert_epidist(new_epidist_marginal_model(bad_data)),
       "delay_upr must equal delay_lwr \\+ swindow" # nolint
     )
   }
@@ -174,9 +182,15 @@ test_that(
   "assert_epidist.epidist_marginal_model errors when relative_obs_time < delay_upr", # nolint
   {
     bad_data <- prep_marginal_obs
-    bad_data$relative_obs_time <- bad_data$delay_upr - 1
+    expect_warning(
+      {
+        bad_data$relative_obs_time <- bad_data$delay_upr - 1
+      },
+      "relative_obs_time must be greater than or equal to delay_upr"
+    )
+    expect_false(is_epidist_marginal_model(bad_data))
     expect_error(
-      assert_epidist(bad_data),
+      assert_epidist(new_epidist_marginal_model(bad_data)),
       "relative_obs_time must be greater than or equal to delay_upr"
     )
   }

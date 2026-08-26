@@ -80,8 +80,6 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   weight = NULL,
   ...
 ) {
-  assert_epidist.epidist_linelist_data(data)
-
   data <- mutate(
     data,
     pwindow = .data$ptime_upr - .data$ptime_lwr,
@@ -164,8 +162,7 @@ as_epidist_marginal_model.epidist_aggregate_data <- function(
 #' @family marginal_model
 #' @export
 new_epidist_marginal_model <- function(data) {
-  class(data) <- c("epidist_marginal_model", class(data))
-  return(data)
+  return(.new_epidist_data(data, "epidist_marginal_model"))
 }
 
 #' @method assert_epidist epidist_marginal_model
@@ -318,8 +315,6 @@ epidist_stancode.epidist_marginal_model <- function(
   formula = epidist_formula(data),
   ...
 ) {
-  assert_epidist.epidist_marginal_model(data)
-
   stanvars_version <- .version_stanvar()
 
   stanvars_functions <- brms::stanvar(

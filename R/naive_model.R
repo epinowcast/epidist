@@ -57,8 +57,6 @@ as_epidist_naive_model.epidist_linelist_data <- function(
   weight = NULL,
   ...
 ) {
-  assert_epidist.epidist_linelist_data(data)
-
   data <- mutate(data, delay = .data$stime_lwr - .data$ptime_lwr)
 
   data <- .add_weights(data, weight)
@@ -110,8 +108,7 @@ as_epidist_naive_model.epidist_aggregate_data <- function(data, ...) {
 #' @family naive_model
 #' @export
 new_epidist_naive_model <- function(data) {
-  class(data) <- c("epidist_naive_model", class(data))
-  return(data)
+  return(.new_epidist_data(data, "epidist_naive_model"))
 }
 
 #' Check if data has the `epidist_naive_model` class

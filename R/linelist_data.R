@@ -231,11 +231,9 @@ as_epidist_linelist_data.data.frame <- function(
 #'   ) |>
 #'   as_epidist_linelist_data()
 as_epidist_linelist_data.epidist_aggregate_data <- function(data, ...) {
-  assert_epidist.epidist_aggregate_data(data)
+  data <- .drop_epidist_class(data)
   data <- tidyr::uncount(data, weights = .data$n, .remove = TRUE) |>
     dplyr::select(-"n")
-
-  class(data) <- setdiff(class(data), "epidist_aggregate_data")
   return(as_epidist_linelist_data(data))
 }
 
@@ -248,8 +246,7 @@ as_epidist_linelist_data.epidist_aggregate_data <- function(data, ...) {
 #' @family linelist_data
 #' @export
 new_epidist_linelist_data <- function(data) {
-  class(data) <- c("epidist_linelist_data", class(data))
-  return(data)
+  return(.new_epidist_data(data, "epidist_linelist_data"))
 }
 
 #' Check if data has the `epidist_linelist_data` class
