@@ -36,6 +36,11 @@ They ran for 118 and 110 seconds against CRAN's 5 second guidance.
 ## Documentation
 
 - Added an `extending-epidist` vignette covering why you might build your own model type, the six generics a model type implements, a worked example, and a table of the packages that already extend `epidist`.
+- Precomputed the `ebola`, `faq` and `approx-inference` vignettes.
+All three fit models and need `cmdstanr`, so they were excluded from the build by `.Rbuildignore` and never reached anyone who installed the package.
+They are now knitted from a `.Rmd.orig` source into a committed `.Rmd` holding static output, so they ship without needing `cmdstanr` or a model fit at build time.
+- Gave each precomputed vignette its own figure prefix.
+`ebola` and `approx-inference` both wrote to `figures/epidist-`, which would collide once more than one is precomputed.
 
 ## Package
 
@@ -47,6 +52,10 @@ See #79.
 - Made `epidist_transform_data()` internal.
 It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
 See #79.
+
+## CI
+
+- Added a `render-vignettes` workflow that rebuilds the precomputed vignettes and opens a pull request with the result.
 
 ## Bug fixes
 

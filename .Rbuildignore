@@ -15,8 +15,6 @@
 ^Meta$
 ^README.Rmd$
 ^pkgdown$
-^vignettes/approx-inference\.Rmd$
-^vignettes/ebola\.Rmd$
-^vignettes/faq\.Rmd$
 ^\.lintr$
 ^cran-comments\.md$
+^vignettes/.*\.Rmd\.orig$

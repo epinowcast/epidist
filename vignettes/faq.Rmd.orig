@@ -17,7 +17,11 @@ vignette: >
 bibliography: references.bib
 ---
 
-
+```{r knitr-setup, include = FALSE}
+knitr::opts_chunk$set(
+  fig.path = file.path("figures", "faq-")
+)
+```
 
 Here we provide tips for working with the `epidist` package, and answers to frequently asked questions.
 If you have a question about using the package, please create an [issue](https://github.com/epinowcast/epidist/issues).
@@ -25,8 +29,7 @@ We will endeavour to respond promptly!
 
 <details><summary>Click to expand for code to reproduce the examples in this vignette</summary>
 
-
-```{.r .fold-hide}
+```{r message=FALSE, results='hide', class.source='fold-hide'}
 library(epidist)
 library(brms)
 library(dplyr)
@@ -123,23 +126,10 @@ We recommend use of the [`posterior`](https://mc-stan.org/posterior/) package fo
 
 The function `posterior::as_draws_df()` may be used to obtain a dataframe of MCMC draws for specified parameters.
 
-
-``` r
+```{r message = FALSE}
 library(posterior)
 draws <- as_draws_df(fit, variable = c("Intercept", "Intercept_sigma"))
 head(draws)
-```
-
-```
-## # A draws_df: 6 iterations, 1 chains, and 2 variables
-##   Intercept Intercept_sigma
-## 1       1.9           -0.46
-## 2       1.9           -0.39
-## 3       1.8           -0.44
-## 4       1.8           -0.53
-## 5       1.8           -0.50
-## 6       1.8           -0.54
-## # ... hidden reserved variables {'.chain', '.iteration', '.draw'}
 ```
 
 ### Using random variables (`rvars`) for uncertainty propagation
@@ -147,22 +137,14 @@ head(draws)
 The `posterior` package also provides the `rvar` class for working with posterior samples as random variables.
 This approach allows you to perform mathematical operations directly with posterior distributions while propagating uncertainty.
 
-
-``` r
+```{r}
 library(posterior)
 # Convert model parameters to rvars
 rv <- as_draws_rvars(fit_location)
 
 # Look at the intercept in rvar form
 rv$b_Intercept
-```
 
-```
-## rvar<500,2>[1] mean ± sd:
-## [1] 1.6 ± 0.069
-```
-
-``` r
 # Calculate the mean delay (on natural scale) for each location
 mean_delay_loc0 <- exp(rv$b_Intercept + 0.5 * exp(rv$b_sigma_Intercept)^2)
 mean_delay_loc1 <- exp(rv$b_Intercept +
@@ -170,35 +152,11 @@ mean_delay_loc1 <- exp(rv$b_Intercept +
 
 # Summarize the distributions
 summary(mean_delay_loc0)
-```
-
-```
-## # A tibble: 1 × 10
-##   variable         mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail
-##   <chr>           <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-## 1 mean_delay_loc0  5.54   5.51 0.469 0.447  4.87  6.34  1.00     702.     430.
-```
-
-``` r
 summary(mean_delay_loc1)
-```
 
-```
-## # A tibble: 1 × 10
-##   variable         mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail
-##   <chr>           <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-## 1 mean_delay_loc1  12.6   10.9  6.61  2.64  8.17  21.0  1.01     221.     195.
-```
-
-``` r
 # Calculate the difference between locations
 delay_diff <- mean_delay_loc1 - mean_delay_loc0
 delay_diff
-```
-
-```
-## rvar<500,2>[1] mean ± sd:
-## [1] 7.1 ± 6.7
 ```
 
 For more details, see the [`posterior` package documentation](https://mc-stan.org/posterior/articles/rvar.html).
@@ -209,28 +167,15 @@ The output of a call to `epidist` is compatible with typical Stan workflows.
 We recommend use of the [`bayesplot`](http://mc-stan.org/bayesplot/) package for sampling diagnostic plots.
 For example, the function `bayesplot::mcmc_trace()` can be used to produce traceplots for specified parameters.
 
-
-``` r
+```{r message = FALSE}
 library(bayesplot)
 mcmc_trace(fit, pars = c("Intercept", "Intercept_sigma"))
 ```
 
-![plot of chunk unnamed-chunk-4](figures/faq-unnamed-chunk-4-1.png)
-
 We also provide a function `epidist_diagnostics()` which can be used to obtain common diagnostics used to assess the quality of a fitted model.
 
-
-``` r
+```{r message = FALSE}
 epidist_diagnostics(fit)
-```
-
-```
-## # A tibble: 1 × 8
-##    time samples max_rhat divergent_transitions per_divergent_transitions
-##   <dbl>   <dbl>    <dbl>                 <dbl>                     <dbl>
-## 1  3.10    1000    0.999                     0                         0
-## # ℹ 3 more variables: max_treedepth <dbl>, no_at_max_treedepth <int>,
-## #   per_at_max_treedepth <dbl>
 ```
 
 ## How can I perform posterior predictive checks?
@@ -242,8 +187,7 @@ Because `brms::pp_check()` ignores the `weights` argument when plotting observed
 To use `pp_check()` correctly with aggregated data, you must first expand the data to an individual-level format (one row per observation) using `tidyr::uncount()`.
 Then, pass this expanded data to the `newdata` argument of `pp_check()`.
 
-
-``` r
+```{r}
 # Expand the aggregated data to individual-level data
 # Note: We must ensure the weight column 'n' is present but set to 1
 data_expanded <- data |>
@@ -253,8 +197,6 @@ data_expanded <- data |>
 # Run pp_check with the expanded data
 pp_check(fit, newdata = data_expanded, ndraws = 100)
 ```
-
-![plot of chunk unnamed-chunk-6](figures/faq-unnamed-chunk-6-1.png)
 
 For more advanced custom visualizations, you can also use `tidybayes::add_predicted_draws()` as demonstrated in the ["Advanced features with Ebola data"](https://epidist.epinowcast.org/articles/ebola.html) vignette.
 
@@ -277,8 +219,7 @@ Instead, we used [prior predictive checking](https://mc-stan.org/docs/stan-users
 
 For example, for the `brms::lognormal()` latent individual model, we suggest the following prior distributions for the `brms` `mu` and `sigma` intercept parameters:
 
-
-``` r
+```{r}
 # Note that we export lognormal() as part of epidist hence no need for brms::
 family <- lognormal()
 
@@ -300,18 +241,11 @@ epidist_prior <- epidist_prior(
 epidist_prior
 ```
 
-```
-##                 prior     class coef group resp  dpar nlpar lb ub tag  source
-##    student_t(3, 5, 3) Intercept                                       default
-##  student_t(3, 0, 2.5) Intercept                 sigma                 default
-```
-
 (Note that the functions `epidist_family()` and `epidist_prior()` are mostly for internal use!)
 
 Here are the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:
 
-
-``` r
+```{r message=FALSE, results='hide'}
 set.seed(1)
 fit_ppc <- epidist(
   data = data,
@@ -323,8 +257,7 @@ fit_ppc <- epidist(
 )
 ```
 
-
-``` r
+```{r}
 pred <- predict_delay_parameters(fit_ppc)
 
 pred |>
@@ -341,44 +274,20 @@ pred |>
   labs(x = "", y = "Density") +
   theme_minimal() +
   scale_x_log10(labels = comma)
-```
 
-```
-## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.
-```
-
-![plot of chunk unnamed-chunk-9](figures/faq-unnamed-chunk-9-1.png)
-
-``` r
 quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
-```
-
-```
-##         1%        10%        25%        50%        75%        90%        99%
-##  0.3172760  0.8667011  1.6163277  3.2461963  6.6291746 12.0852973 34.0415723
-```
-
-``` r
 quantile(pred$sd, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
-```
-
-```
-##         1%        10%        25%        50%        75%        90%        99%
-##  0.1335500  0.3950604  0.7687361  1.7107506  3.9206460  8.1670947 33.4423697
 ```
 
 ## How can I assess how sensitive the fitted posterior distribution is to the prior distribution used?
 
 We recommend use of the [`priorsense`](https://github.com/n-kall/priorsense) package [@kallioinen2024detecting] to check how sensitive the posterior distribution is to perturbations of the prior distribution and likelihood using power-scaling analysis:
 
-
-``` r
+```{r}
 library(priorsense)
 powerscale_plot_dens(fit, variable = c("Intercept", "Intercept_sigma")) +
   theme_minimal()
 ```
-
-![plot of chunk unnamed-chunk-10](figures/faq-unnamed-chunk-10-1.png)
 
 # What do the parameters in my model output correspond to?
 
@@ -411,52 +320,19 @@ In particular, following functions may be useful:
 To see these functions demonstrated in a vignette, see ["Advanced features with Ebola data"](https://epidist.epinowcast.org/articles/ebola.html).
 As a short example, to generate 4000 predictions (equal to the number of draws) of the delay that would be observed with a double censored observation process (in which the primary and secondary censoring windows are both one) then:
 
-
-``` r
+```{r}
 library(tidybayes)
-```
-
-```
-##
-## Attaching package: 'tidybayes'
-```
-
-```
-## The following objects are masked from 'package:brms':
-##
-##     dstudent_t, pstudent_t, qstudent_t, rstudent_t
-```
-
-``` r
 draws_pmf <- tibble::tibble(
   relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
 ) |>
   add_predicted_draws(fit)
-```
 
-```
-## Warning: Found infinite values in the data, which may cause issues for Stan.
-```
-
-``` r
 ggplot(draws_pmf, aes(x = .prediction)) +
   geom_bar(aes(y = after_stat(count / sum(count)))) +
   labs(x = "Delay", y = "PMF") +
   scale_x_continuous(limits = c(0, 30)) +
   theme_minimal()
 ```
-
-```
-## Warning: Removed 7 rows containing non-finite outside the scale range
-## (`stat_count()`).
-```
-
-```
-## Warning: Removed 1 row containing missing values or values outside the scale range
-## (`geom_bar()`).
-```
-
-![plot of chunk unnamed-chunk-11](figures/faq-unnamed-chunk-11-1.png)
 
 Importantly, this functionality is only available for `epidist` models using `brms` families that have a `log_lik_censor` method implemented internally in `brms`. If you are using another family, consider [submitting a pull request](https://github.com/epinowcast/epidist/pulls) to implement these methods!
 
@@ -471,8 +347,7 @@ For `epidist` models with covariates, you can use `marginaleffects` to:
 
 Here's a simple example using a model that includes location as a covariate:
 
-
-``` r
+```{r}
 library(marginaleffects)
 
 # Compare outcomes between location categories (0 and 1)
@@ -480,16 +355,6 @@ avg_comparisons(
   fit_location,
   variables = list(location = c(0, 1))
 )
-```
-
-```
-##
-##  Estimate 2.5 % 97.5 %
-##      5.42  2.08   22.8
-##
-## Term: location
-## Type: response
-## Comparison: 1 - 0
 ```
 
 For more details on the available functions and their use, see the [`marginaleffects` documentation](https://marginaleffects.com/).
@@ -500,13 +365,8 @@ For more details on the available functions and their use, see the [`marginaleff
 The `cmdstanr` backend is typically more performant than the default `rstan` backend.
 To use the `cmdstanr` backend, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:
 
-
-``` r
+```{r}
 cmdstanr::cmdstan_version()
-```
-
-```
-## [1] "2.39.0"
 ```
 
 ## References
