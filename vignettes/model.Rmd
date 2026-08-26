@@ -193,8 +193,9 @@ $$
 p_i = w_{P, i}\, \tilde{p}_i .
 $$
 
-When the two censoring windows overlap the delay must still be non-negative, so the primary event has to precede the sampled secondary event.
-The offset is then bounded by the sampled secondary offset instead of by the window width,
+When the two censoring windows overlap the delay must still be non-negative.
+The primary event therefore has to precede the sampled secondary event.
+The offset is then bounded by the sampled secondary offset rather than by the window width.
 $$
 p_i = s_i\, \tilde{p}_i .
 $$
@@ -204,23 +205,18 @@ The map $\tilde{p}_i \mapsto p_i$ therefore has Jacobian determinant
 $$
 \left| \frac{\partial p_i}{\partial \tilde{p}_i} \right| = s_i ,
 $$
-and Stan does not add it for a transformation written this way.
-The log density of these observations needs the corresponding term,
+Stan does not add this term for a transformation written this way.
+See the [Stan user's guide on changes of variables](https://mc-stan.org/docs/stan-users-guide/reparameterization.html#changes-of-variables).
+The log density of these observations needs it explicitly.
 $$
 \log \mathcal{L}_i \;\longmapsto\; \log \mathcal{L}_i + \log s_i .
 $$
-The ordinary case needs no such term because $w_{P, i}$ is data, so its Jacobian is a constant that cancels.
-The primary event density has to be used unnormalised here, since a constant normalising it over $[0, s_i]$ would itself depend on $s_i$.
-
-With the adjustment, integrating the augmented density over $\tilde{p}_i$ and $\tilde{s}_i$ recovers the double interval censored likelihood of Section \@ref(interval-censoring), up to a constant that does not depend on $\theta$.
-The latent and marginal models then target the same likelihood.
-Without it the implied primary event density is proportional to $1 / s_i$ rather than flat across the window.
-
-Only observations whose windows overlap are affected.
-Under daily censoring these are exactly the delays observed as zero, so the bias is small when windows are short relative to the delay and grows as they widen.
+The non-overlapping case needs no such term because $w_{P, i}$ is data, so its Jacobian is a constant that cancels.
+The primary event density is used unnormalised here.
+A constant normalising it over $[0, s_i]$ would itself depend on $s_i$.
 
 The latent model formulation follows @ward2022transmission.
-The missing adjustment was identified in a re-analysis of the 2012 Isiro Bundibugyo virus disease line list [@bdbvlinelist], and is derived in @brand2026scalable.
+The need for this adjustment was identified in @bdbvlinelist and derived in @brand2026scalable.
 
 # The marginal model
 

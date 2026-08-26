@@ -3,7 +3,8 @@
 ## Bug fixes
 
 - Added a missing Jacobian adjustment to the latent model for observations whose primary and secondary censoring windows overlap.
-Without it the latent model did not target the same likelihood as the marginal model, biasing estimates for those observations, which under daily censoring are the zero-delay cases.
+Without it the latent model did not target the same likelihood as the marginal model.
+Under daily censoring the affected observations are the zero-delay cases.
 See #606.
 - Declared `reformulas` in `Suggests` and skipped the `marginaleffects` integration test when it is absent.
 `insight` needs `reformulas` to read the formula of a `brmsfit`, but only suggests it, so the test failed on a clean library.
