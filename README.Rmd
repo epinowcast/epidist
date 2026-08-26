@@ -45,7 +45,13 @@ To learn more about `epidist` we recommend reading the vignettes in this order:
 
 <details><summary>Installing the package</summary>
 
-You can install the latest released version using the normal `R` function, though you need to point to `r-universe` instead of CRAN:
+Install the released version from CRAN:
+
+```{r, eval = FALSE}
+install.packages("epidist")
+```
+
+Install the latest version from our `r-universe` repository:
 
 ```{r, eval = FALSE}
 install.packages(

@@ -4,7 +4,13 @@
 \alias{as_epidist_marginal_model.epidist_linelist_data}
 \title{The marginal model method for \code{epidist_linelist_data} objects}
 \usage{
-\method{as_epidist_marginal_model}{epidist_linelist_data}(data, obs_time_threshold = 2, weight = NULL, ...)
+\method{as_epidist_marginal_model}{epidist_linelist_data}(
+  data,
+  obs_time_threshold = 2,
+  weight = NULL,
+  delay_min = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{An \code{epidist_linelist_data} object}
@@ -23,6 +29,16 @@ rather than repeating identical rows. The marginal model will further
 aggregate these counts based on the formula specification. Default is NULL,
 which assigns a count of 1 to each row. Internally this is used to define
 the 'n' column of the returned object.}
+
+\item{delay_min}{Minimum delay (left truncation point). Can be:
+\itemize{
+\item \code{NULL} (default): uses a \code{delay_min} column from the data if present,
+otherwise defaults to 0 (no left truncation).
+\item A numeric scalar: applied to all observations.
+\item A column name string: looks up the named column in the data.
+This is passed as the \code{L} parameter to
+\code{\link[primarycensored:dpcens]{primarycensored::dpcens()}}.
+}}
 
 \item{...}{Not used in this method.}
 }
@@ -59,13 +75,13 @@ sierra_leone_ebola_data |>
   as_epidist_marginal_model()
 }
 \seealso{
-Other marginal_model: 
-\code{\link{as_epidist_marginal_model}()},
-\code{\link{as_epidist_marginal_model.epidist_aggregate_data}()},
-\code{\link{epidist_family_model.epidist_marginal_model}()},
-\code{\link{epidist_formula_model.epidist_marginal_model}()},
-\code{\link{epidist_transform_data_model.epidist_marginal_model}()},
-\code{\link{is_epidist_marginal_model}()},
-\code{\link{new_epidist_marginal_model}()}
+Other marginal_model:
+\code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}},
+\code{\link[=as_epidist_marginal_model.epidist_aggregate_data]{as_epidist_marginal_model.epidist_aggregate_data()}},
+\code{\link[=epidist_family_model.epidist_marginal_model]{epidist_family_model.epidist_marginal_model()}},
+\code{\link[=epidist_formula_model.epidist_marginal_model]{epidist_formula_model.epidist_marginal_model()}},
+\code{\link[=epidist_transform_data_model.epidist_marginal_model]{epidist_transform_data_model.epidist_marginal_model()}},
+\code{\link[=is_epidist_marginal_model]{is_epidist_marginal_model()}},
+\code{\link[=new_epidist_marginal_model]{new_epidist_marginal_model()}}
 }
 \concept{marginal_model}

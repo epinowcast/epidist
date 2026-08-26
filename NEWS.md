@@ -13,6 +13,7 @@ See #399.
 
 ## Package
 
+- Added `simulate_dates()`, which turns simulated event times into the censored dates an analyst would receive.
 - Removed the calls to unexported `brms` functions that `R CMD check --as-cran` flags.
 `R/brms-compat.R` now holds small internal helpers reproducing the narrow behaviour `epidist` relied on from `brms:::validate_family()`, `brms:::validate_formula()`, `brms:::validate_data()`, `brms:::dpar_bounds()` and `brms:::log_lik_weight()`.
 The helpers are written against the public `brms` interface rather than copied from `brms`.
@@ -44,6 +45,37 @@ They ran for 118 and 110 seconds against CRAN's 5 second guidance.
 - Updated the `brms` documentation URL, which had moved.
 - Added `cran-comments.md`.
 
+## Documentation
+
+- Added an `extending-epidist` vignette covering why you might build your own model type, the six generics a model type implements, a worked example, and a table of the packages that already extend `epidist`.
+- Precomputed the `ebola`, `faq` and `approx-inference` vignettes.
+All three fit models and need `cmdstanr`, so they were excluded from the build by `.Rbuildignore` and never reached anyone who installed the package.
+They are now knitted from a `.Rmd.orig` source into a committed `.Rmd` holding static output, so they ship without needing `cmdstanr` or a model fit at build time.
+- Gave each precomputed vignette its own figure prefix.
+`ebola` and `approx-inference` both wrote to `figures/epidist-`, which would collide once more than one is precomputed.
+
+## Package
+
+- Made `epidist_family_param()` internal.
+It is reached through `epidist_family()`, and a custom model supplies its family through `epidist_family_model()` instead.
+See #79.
+- Exported `epidist_gen_log_lik()`, which was the only one of the three post-processing generators not exported.
+See #79.
+- Made `epidist_transform_data()` internal.
+It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
+See #79.
+
+## Models
+
+- Added left truncation support via a `delay_min` parameter in `as_epidist_marginal_model()`.
+This passes the `L` (left truncation) argument through to the `primarycensored` likelihood.
+The default of 0 reproduces the previous behaviour.
+See #588 and #596.
+
+## CI
+
+- Added a `render-vignettes` workflow that rebuilds the precomputed vignettes and opens a pull request with the result.
+
 ## Bug fixes
 
 - Added a missing Jacobian adjustment to the latent model for observations whose primary and secondary censoring windows overlap.
@@ -54,6 +86,11 @@ See #606.
 `insight` needs `reformulas` to read the formula of a `brmsfit`, but only suggests it, so the test failed on a clean library.
 See #601.
 
+## Documentation
+
+- Added a `left-truncation` vignette showing how to use `delay_min`.
+See #596.
+
 ## CI
 
 - Passed the coverage report to `codecov/codecov-action` through `files` rather than `file`.
@@ -62,6 +99,10 @@ See #601.
 The tagged v0.4.3 lockfile pins `digest` 0.6.36, which calls `Calloc` and `Free`.
 Those were removed from the R API in R 4.5, so the hook environment failed to build and the `pre-commit` job failed on every pull request.
 See #578.
+
+## Documentation
+
+- Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
 
 # epidist 0.4.1
 

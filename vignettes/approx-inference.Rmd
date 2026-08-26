@@ -19,23 +19,7 @@ vignette: >
 bibliography: references.bib
 ---
 
-```{r setup, include=FALSE}
-set.seed(2)
 
-knitr::opts_chunk$set(
-  fig.path = file.path("figures", "epidist-"),
-  collapse = TRUE,
-  comment = "#>",
-  message = FALSE,
-  warning = FALSE,
-  error = FALSE,
-  # Evaluation is off because this vignette uses pathfinder, which needs a
-  # brms path fix that is merged upstream but not yet in a CRAN release.
-  # The package now resolves brms from CRAN, so that fix is unavailable.
-  # Turn this back on once brms releases it, or precompute the vignette.
-  eval = FALSE
-)
-```
 
 # Background
 
@@ -94,7 +78,8 @@ See the section [Pathfinder Method for Approximate Bayesian Inference](https://m
 
 In this demonstration, we use the following packages:
 
-```{r load-requirements}
+
+``` r
 library(epidist)
 library(ggplot2)
 library(dplyr)
@@ -109,8 +94,10 @@ To access the approximate inference methods used in this vignette we will need t
 To do this, we first need to install CmdStan (see the README for more details).
 We can check we have everything we need as follows:
 
-```{r}
+
+``` r
 cmdstanr::cmdstan_version()
+#> [1] "2.39.0"
 ```
 
 We can simulate data to use for fitting models.
@@ -118,7 +105,8 @@ The example data simulation process follows that used in the [Getting started wi
 
 <details><summary>Click to expand for data simulation code</summary>
 
-```{r}
+
+``` r
 meanlog <- 1.8
 sdlog <- 0.5
 obs_time <- 25
@@ -145,7 +133,8 @@ obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
 We now prepare the data for fitting with the marginal model.
 We first pre-compile the Stan model so that compilation time is excluded from the timing comparisons below.
 
-```{r results='hide'}
+
+``` r
 linelist_data <- as_epidist_linelist_data(
   obs_cens_trunc_samp$ptime_lwr,
   obs_cens_trunc_samp$ptime_upr,
@@ -166,7 +155,8 @@ fit_compile <- epidist(
 
 We now perform inference with HMC:
 
-```{r results='hide'}
+
+``` r
 t <- proc.time()
 fit_hmc <- update(fit_compile, chains = 4, iter = 2000)
 time_hmc <- proc.time() - t
@@ -177,7 +167,8 @@ Note that for clarity above we specify `algorithm = "sampling"`, but if you were
 Now, we fit^[Note that in this section, and above for the MCMC, the output of the call is hidden, but if you were to call these functions yourself they would display information about the fitting procedure as it occurs] the same marginal model using each method in Section \@ref(other).
 To match the four Markov chains of length 1000 in HMC above, we then draw 4000 samples from each approximate posterior.
 
-```{r results='hide'}
+
+``` r
 t <- proc.time()
 fit_laplace <- update(
   fit_compile,
@@ -195,7 +186,8 @@ time_advi <- proc.time() - t
 
 For the Pathfinder algorithm we will set `num_paths = 1`.
 
-```{r results='hide'}
+
+``` r
 t <- proc.time()
 fit_pathfinder <- update(
   fit_compile,
@@ -210,7 +202,8 @@ Thankfully, each algorithm is implemented to sample draws from the posterior dis
 
 <details><summary>Click to expand for code to extract posterior draws</summary>
 
-```{r}
+
+``` r
 fits <- list(
   HMC = fit_hmc,
   Laplace = fit_laplace,
@@ -241,7 +234,8 @@ draws <- bind_rows(draws)
 
 The mean estimated value of each parameter, from each method, is as follows.
 
-```{r}
+
+``` r
 pars <- draws |>
   group_by(method, parameter) |>
   summarise(value = mean(value)) |>
@@ -249,13 +243,21 @@ pars <- draws |>
   ungroup()
 
 pars
+#> # A tibble: 4 × 3
+#>   method        mu sigma
+#>   <fct>      <dbl> <dbl>
+#> 1 HMC         1.75 0.459
+#> 2 Laplace     1.74 0.455
+#> 3 ADVI        1.79 0.540
+#> 4 Pathfinder  1.74 0.456
 ```
 
 More comprehensively, the estimated posterior distributions are shown in Figure \@ref(fig:posterior).
 
 <details><summary>Click to expand for code to create posterior distribution plot</summary>
 
-```{r}
+
+``` r
 p_posterior <- draws |>
   ggplot(aes(x = value, col = method)) +
   stat_slabinterval(density = "histogram", breaks = 30, alpha = 0.8) +
@@ -271,9 +273,12 @@ p_posterior <- draws |>
 
 (ref:posterior) Estimated posterior distributions for the `mu` and `sigma` parameters using each inference method, shown using `tidybayes::stat_slabinterval()`.
 
-```{r posterior, fig.cap="(ref:posterior)"}
+
+``` r
 p_posterior
 ```
+
+![(ref:posterior)](figures/approx-inference-posterior-1.png)
 
 ## Comparison of resulting delay distributions
 
@@ -281,7 +286,8 @@ Figure \@ref(fig:delay-pdf) shows how the different `mu` and `sigma` posterior m
 
 <details><summary>Click to expand for code to create delay PDF plot</summary>
 
-```{r}
+
+``` r
 p_delay_pdf <- pmap_df(
   filter(pars), ~ tibble(
     x = seq(0, 25, by = 0.1),
@@ -300,16 +306,20 @@ p_delay_pdf <- pmap_df(
 
 (ref:delay-pdf) Delay probability density functions obtained based on the posterior mean estimated `mu` and `sigma` parameters.
 
-```{r delay-pdf, fig.cap="(ref:delay-pdf)"}
+
+``` r
 p_delay_pdf
 ```
+
+![(ref:delay-pdf)](figures/approx-inference-delay-pdf-1.png)
 
 ## Comparison of time taken
 
 In this example, HMC took a longer time to run than the other methods and Pathfinder was the fastest running method.
 That said, even for HMC the computation time in this case is unlikely to be prohibitive.
 
-```{r}
+
+``` r
 times <- list(
   HMC = time_hmc,
   Laplace = time_laplace,
@@ -318,6 +328,21 @@ times <- list(
 )
 
 times
+#> $HMC
+#>    user  system elapsed
+#>  10.495   0.279  10.847
+#>
+#> $Laplace
+#>    user  system elapsed
+#>   1.042   0.107   1.261
+#>
+#> $ADVI
+#>    user  system elapsed
+#>   1.387   0.060   1.518
+#>
+#> $Pathfinder
+#>    user  system elapsed
+#>   0.475   0.075   0.607
 ```
 
 # Conclusion
