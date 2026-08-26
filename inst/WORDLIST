@@ -1,5 +1,6 @@
 ADVI
 CMD
+CRAN's
 Charniga
 CmdStan
 CodeDepends
@@ -34,8 +35,10 @@ Visualise
 al
 allcontributors
 athowes
+behaviour
 brms
 brms’
+buerkner
 burdon
 cherz
 cli
@@ -63,8 +66,11 @@ kcharniga
 kgostic
 lik
 linelist
+lockfile
 logmean
+longmapsto
 lpdf
+mapsto
 marginalised
 mathbb
 mathbf
@@ -80,6 +86,7 @@ organisation
 oswaldogressani
 parameterised
 parksw
+paul
 pearsonca
 performant
 pkgdown
@@ -87,6 +94,7 @@ postprocess
 pre
 primarycensored
 prodividing
+qquad
 renormalises
 reparameterisation
 reparametrisation
@@ -104,6 +112,7 @@ traceplots
 treedepth
 uncounting
 unnormalised
+unrecognised
 variational
 vignettte
 visualise
