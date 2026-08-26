@@ -197,6 +197,32 @@ prep_marginal_obs_gamma <- as_epidist_marginal_model(sim_obs_gamma)
 prep_marginal_obs_sex <- as_epidist_marginal_model(sim_obs_sex)
 prep_marginal_obs_weibull <- as_epidist_marginal_model(sim_obs_weibull)
 
+# Published summary estimates for the meta model. Study A reports naive
+# daily discretised summaries from a right truncated snapshot, study B a
+# fully adjusted mean and quantile, and study C a quantile from a study
+# that only corrected the secondary interval.
+sim_estimates <- suppressMessages(as_epidist_estimates_data(
+  data.frame(
+    study = c("A", "A", "B", "B", "C"),
+    type = c("mean", "sd", "mean", "quantile", "quantile"),
+    value = c(7.5, 3.6, 6.4, 11.2, 5.4),
+    p = c(NA, NA, NA, 0.9, 0.5),
+    n = c(120, 120, 80, 80, 200),
+    relative_obs_time = c(20, 20, Inf, Inf, 30),
+    trunc_adjusted = c(FALSE, FALSE, TRUE, TRUE, FALSE),
+    cens_adjusted = c(0, 0, 1, 1, 2),
+    stringsAsFactors = FALSE
+  )
+))
+
+prep_meta_individual <- suppressMessages(as_epidist_meta_model(sim_obs))
+prep_meta_estimates <- suppressMessages(
+  as_epidist_meta_model(estimates = sim_estimates)
+)
+prep_meta_obs <- suppressMessages(
+  as_epidist_meta_model(sim_obs, estimates = sim_estimates)
+)
+
 # The shared fits below use the cmdstanr backend, so they are only built
 # when cmdstanr and CmdStan are both available. Tests that use them call
 # `skip_if_no_cmdstanr()`.
@@ -335,6 +361,81 @@ if (not_on_cran() && has_cmdstanr()) {
     iter = 1000,
     cores = 2,
     chains = 2,
+    backend = "cmdstanr"
+  ))
+
+  # Synthetic "published" estimates produced by applying naive estimators
+  # (integer date differences, no right truncation adjustment) to samples
+  # from the same lognormal delay distribution used above.
+  # A study observing up to study_obs_time keeps an integer delay k when
+  # k + 1 <= study_obs_time, which is the same conditioning the meta model
+  # applies through its grid.
+  set.seed(2)
+  naive_summaries <- function(size, study_obs_time) {
+    ptime <- stats::runif(size, 0, 1)
+    delay <- stats::rlnorm(size, meanlog, sdlog)
+    obs <- floor(ptime + delay)
+    obs <- obs[obs + 1 <= study_obs_time]
+    return(list(
+      mean = mean(obs), sd = stats::sd(obs), size = length(obs),
+      q90 = stats::quantile(obs, 0.9, names = FALSE)
+    ))
+  }
+
+  study_obs_times <- c(12, 15, 18, 20, 25, 30)
+  naive_draws <- lapply(study_obs_times, naive_summaries, size = 2000)
+
+  sim_biased_estimates <- suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = rep(paste0("study_", seq_along(study_obs_times)), each = 3),
+      type = rep(c("mean", "sd", "quantile"), times = length(study_obs_times)),
+      value = as.numeric(rbind(
+        vapply(naive_draws, `[[`, numeric(1), "mean"),
+        vapply(naive_draws, `[[`, numeric(1), "sd"),
+        vapply(naive_draws, `[[`, numeric(1), "q90")
+      )),
+      p = rep(c(NA, NA, 0.9), times = length(study_obs_times)),
+      n = rep(vapply(naive_draws, `[[`, numeric(1), "size"), each = 3),
+      relative_obs_time = rep(study_obs_times, each = 3),
+      trunc_adjusted = FALSE,
+      cens_adjusted = 0,
+      stringsAsFactors = FALSE
+    )
+  ))
+
+  prep_meta_biased <- suppressMessages(
+    as_epidist_meta_model(estimates = sim_biased_estimates)
+  )
+  prep_meta_mixed <- suppressMessages(as_epidist_meta_model(
+    sim_obs,
+    estimates = sim_biased_estimates
+  ))
+
+  cli::cli_alert_info(
+    "Compiling the meta model with cmdstanr and summary estimates only"
+  )
+  fit_meta_estimates <- suppressMessages(epidist(
+    data = prep_meta_biased,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  ))
+
+  cli::cli_alert_info(
+    "Compiling the meta model with cmdstanr and mixed data"
+  )
+  fit_meta_mixed <- suppressMessages(epidist(
+    data = prep_meta_mixed,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
     backend = "cmdstanr"
   ))
 }
