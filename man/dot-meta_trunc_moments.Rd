@@ -4,7 +4,7 @@
 \alias{.meta_trunc_moments}
 \title{Summaries of a right truncated delay distribution}
 \usage{
-.meta_trunc_moments(dist, args, cutoff)
+.meta_trunc_moments(dist, args, cutoff, growth_rate = 0, accrual = 0L)
 }
 \arguments{
 \item{dist}{A \code{primarycensored} distribution function name.}
@@ -13,11 +13,18 @@
 
 \item{cutoff}{The grid cutoff, either the study observation time or
 \code{max_delay}.}
+
+\item{growth_rate}{The exponential growth rate of primary events.}
+
+\item{accrual}{1 to apply the accrual weight, 0 otherwise.}
 }
 \value{
 A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis}.
 }
 \description{
-Summaries of a right truncated delay distribution
+Under an accrual design the quadrature is reweighted by the follow up
+available to each delay before the moments are taken, which is exact for a
+study that adjusted for censoring because the weight then applies to the
+delay itself.
 }
 \keyword{internal}

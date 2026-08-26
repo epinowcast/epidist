@@ -4,7 +4,7 @@
 \alias{.meta_grid_pmf}
 \title{The discrete delay distribution a naive study would observe}
 \usage{
-.meta_grid_pmf(dist, args, cutoff, pwindow, swindow, growth_rate)
+.meta_grid_pmf(dist, args, cutoff, pwindow, swindow, growth_rate, accrual = 0L)
 }
 \arguments{
 \item{dist}{A \code{primarycensored} distribution function name.}
@@ -17,6 +17,8 @@
 \item{pwindow, swindow}{The primary and secondary censoring window widths.}
 
 \item{growth_rate}{The exponential growth rate of primary events.}
+
+\item{accrual}{1 to apply the accrual weight, 0 otherwise.}
 }
 \value{
 A numeric vector of probabilities summing to one.
@@ -29,5 +31,10 @@ multiple of \code{swindow} whose upper bound is within \code{cutoff}, and is
 renormalised so that it conditions on delays falling within the grid. This
 renormalisation is what applies the study's right truncation, and it
 discretises the truncation point to the nearest grid boundary.
+}
+\details{
+Under an accrual design the cell masses are additionally weighted by the
+follow up available to the delay each cell records, which is the delay at
+its lower edge, before renormalising.
 }
 \keyword{internal}

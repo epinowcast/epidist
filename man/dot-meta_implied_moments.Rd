@@ -12,7 +12,8 @@
   swindow,
   trunc_adjusted,
   cens_adjusted,
-  growth_rate
+  growth_rate,
+  trunc_design = 0L
 )
 }
 \arguments{
@@ -28,9 +29,11 @@
 \item{trunc_adjusted}{1 if the study adjusted for right truncation, 0
 otherwise.}
 
-\item{cens_adjusted}{The censoring adjustment code, one of 0, 1, or 2.}
+\item{cens_adjusted}{The censoring adjustment code, one of 0, 1, 2, or 3.}
 
 \item{growth_rate}{The exponential growth rate of primary events.}
+
+\item{trunc_design}{0 for a cohort design, 1 for an accrual design.}
 }
 \value{
 A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis}.
@@ -48,5 +51,10 @@ uniform within their window this is the analytic convolution, which adds
 \code{pwindow / 2} to the mean and \code{pwindow^2 / 12} to the variance. Otherwise
 the moments of the primary censored delay, truncated at \code{cutoff}, are used
 directly.
+
+Under midpoint imputation (\code{cens_adjusted} of 3) the study assigned each
+delay to the centre of the interval it was observed in, so the estimand is
+the naive discrete grid shifted up by \code{swindow / 2}. The shift moves the
+mean and leaves every central moment unchanged.
 }
 \keyword{internal}

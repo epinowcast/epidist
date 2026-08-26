@@ -13,7 +13,8 @@
   swindow,
   trunc_adjusted,
   cens_adjusted,
-  growth_rate
+  growth_rate,
+  trunc_design = 0L
 )
 }
 \arguments{
@@ -31,9 +32,11 @@
 \item{trunc_adjusted}{1 if the study adjusted for right truncation, 0
 otherwise.}
 
-\item{cens_adjusted}{The censoring adjustment code, one of 0, 1, or 2.}
+\item{cens_adjusted}{The censoring adjustment code, one of 0, 1, 2, or 3.}
 
 \item{growth_rate}{The exponential growth rate of primary events.}
+
+\item{trunc_design}{0 for a cohort design, 1 for an accrual design.}
 }
 \value{
 A probability.
@@ -45,11 +48,10 @@ distribution function, which has no closed form on the discrete grid.
 }
 \details{
 For a naive study (\code{cens_adjusted} of 0) the estimand is discrete, so the
-step distribution function is replaced by the continuity corrected version
-that interpolates it linearly through the mid points of the grid cells.
-Without this correction a quantile of day resolution data, which must land
-on a jump of the step function, biases the implied probability upwards by
-several sampling standard errors.
+continuity corrected grid distribution function of \code{\link[=.meta_grid_prob]{.meta_grid_prob()}} is
+used. Midpoint imputation (\code{cens_adjusted} of 3) uses the same function
+evaluated half a secondary window lower, because the study shifted every
+delay up by that amount.
 
 For the uniform single interval approximation (\code{cens_adjusted} of 2) the
 distribution function of the primary censored delay is used, so that it

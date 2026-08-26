@@ -36,8 +36,9 @@ as_epidist_estimates_data <- function(data, ...) {
 #' Concretely, for each study we need:
 #'
 #' * **Roughly how it adjusted for censoring** (`cens_adjusted`).
-#'   We deliberately support only three common approaches rather than trying to
-#'   encode every possible method:
+#'   The codes are a taxonomy of the common mistakes made when summarising
+#'   interval censored delays, and are deliberately limited to a few widely
+#'   used approaches rather than trying to encode every possible method:
 #'   * `0`: no adjustment. The study took integer date differences (for example
 #'     date of onset subtracted from date of report) and summarised them
 #'     directly. This is the most common case in the literature.
@@ -47,12 +48,18 @@ as_epidist_estimates_data <- function(data, ...) {
 #'   * `2`: uniform single interval approximation. The study adjusted the
 #'     secondary interval only, assuming a uniform delay within it, and left
 #'     the primary interval uncorrected.
+#'   * `3`: midpoint imputation. The study assigned each delay to the centre of
+#'     the interval it was observed in, which shifts every reported delay up by
+#'     half a secondary window without changing its spread.
 #' * **Whether it adjusted for right truncation** (`trunc_adjusted`) and, if it
-#'   did not, **the observation time** (`relative_obs_time`).
-#'   The observation time is the truncation point on the delay scale, that is
-#'   how long after the primary events the data were extracted. Real time
-#'   estimates made partway through an outbreak are right truncated unless the
-#'   study corrected for it.
+#'   did not, **the observation time** (`relative_obs_time`) and **how
+#'   collection stopped** (`trunc_design`).
+#'   For a cohort design the observation time is the truncation point on the
+#'   delay scale, that is how long after the primary events the data were
+#'   extracted. For an accrual design, where collection stopped at a calendar
+#'   date, it is instead the length of the collection window, which is usually
+#'   easier to read off a paper. Real time estimates made partway through an
+#'   outbreak are right truncated unless the study corrected for it.
 #' * **The censoring windows** (`pwindow`, `swindow`). The width, in the same
 #'   time units as the delay, of the interval each event was observed in. Daily
 #'   reporting gives windows of 1, weekly reporting gives 7.
@@ -61,10 +68,12 @@ as_epidist_estimates_data <- function(data, ...) {
 #'   standard error (`se`) may be given instead, and takes precedence when
 #'   supplied.
 #'
-#' Only the three censoring adjustments above are supported. Anything more
-#' exotic must be approximated by whichever of them is closest, and if you
-#' cannot tell which a study used you should state the assumption you are
-#' making explicitly.
+#' Only the censoring adjustments above are supported. Anything more exotic
+#' must be approximated by whichever of them is closest, and if you cannot tell
+#' which a study used you should state the assumption you are making
+#' explicitly. The list is extensible: each code is a forward model of one
+#' common estimation mistake, so a further mistake can be added as a further
+#' code.
 #'
 #' Systematic reviews rarely record all of this. Where a value is not reported
 #' you must supply your own assumption, and we recommend saying so alongside
@@ -86,10 +95,11 @@ as_epidist_estimates_data <- function(data, ...) {
 #'
 #' @param se A string giving the column of `data` containing the reported
 #'  standard error of the summary. Optional. When supplied it overrides the
-#'  standard error implied by the sample size. For rows with `type` of
-#'  `"quantile"` the model works on the cumulative probability scale, so any
-#'  `se` supplied for them must be a standard error for `p` rather than for
-#'  the reported delay.
+#'  standard error implied by the sample size. It is always on the scale of the
+#'  reported `value`, so for rows with `type` of `"quantile"` it is a standard
+#'  error for the reported delay. The model fits quantile rows on the
+#'  cumulative probability scale and converts a supplied `se` to that scale
+#'  internally by the delta method.
 #'
 #' @param n A string giving the column of `data` containing the number of
 #'  delays the summary was computed from. Required unless `se` is supplied.
@@ -104,16 +114,27 @@ as_epidist_estimates_data <- function(data, ...) {
 #'
 #' @param relative_obs_time A string giving the column of `data` containing the
 #'  observation time relative to the primary event, that is the right
-#'  truncation point on the delay scale. Defaults to `Inf`, meaning no
+#'  truncation point on the delay scale for a cohort design, or the length of
+#'  the collection window for an accrual design. Defaults to `Inf`, meaning no
 #'  truncation.
 #'
 #' @param trunc_adjusted A string giving the column of `data` containing a
 #'  logical flag for whether the study corrected for right truncation. Defaults
 #'  to `TRUE` where no `relative_obs_time` is supplied and `FALSE` otherwise.
 #'
+#' @param trunc_design A string giving the column of `data` containing how the
+#'  study stopped collecting data, either `"cohort"` or `"accrual"`. A cohort
+#'  design followed every primary event for the same `relative_obs_time`, so a
+#'  delay is observed if it is shorter than that time. An accrual design
+#'  collected primary events over a window of length `relative_obs_time` and
+#'  stopped at its calendar end, so a delay of `d` is observed only for the
+#'  primary events that occurred at least `d` before the stop. Defaults to
+#'  `"cohort"`, and is only used for studies that did not adjust for right
+#'  truncation.
+#'
 #' @param cens_adjusted A string giving the column of `data` containing the
-#'  censoring adjustment code (`0`, `1`, or `2`, as described above). Defaults
-#'  to 0.
+#'  censoring adjustment code (`0`, `1`, `2`, or `3`, as described above).
+#'  Defaults to 0.
 #'
 #' @param growth_rate A string giving the column of `data` containing the
 #'  exponential growth rate of primary events during the study period. Defaults
@@ -162,6 +183,7 @@ as_epidist_estimates_data.data.frame <- function(
   swindow = NULL,
   relative_obs_time = NULL,
   trunc_adjusted = NULL,
+  trunc_design = NULL,
   cens_adjusted = NULL,
   growth_rate = NULL,
   max_delay = NULL,
@@ -171,7 +193,7 @@ as_epidist_estimates_data.data.frame <- function(
 
   supplied <- list(
     study, type, value, se, n, p, pwindow, swindow, relative_obs_time,
-    trunc_adjusted, cens_adjusted, growth_rate, max_delay
+    trunc_adjusted, trunc_design, cens_adjusted, growth_rate, max_delay
   )
   valid_inputs <- !vapply(supplied, is.null, logical(1))
   data_tbl <- .rename_columns(
@@ -249,6 +271,20 @@ as_epidist_estimates_data.data.frame <- function(
       )
     ))
   }
+  data$trunc_adjusted <- as.logical(data$trunc_adjusted)
+  if (!hasName(data, "trunc_design")) {
+    if (!all(data$trunc_adjusted)) {
+      cli::cli_inform(c(
+        i = paste0(
+          "No trunc_design column supplied, assuming every study that did ",
+          "not adjust for right truncation followed a cohort with a common ",
+          "observation time rather than accruing primary events up to a ",
+          "calendar collection stop."
+        )
+      ))
+    }
+    data$trunc_design <- "cohort"
+  }
   if (!hasName(data, "cens_adjusted")) {
     cli::cli_inform(c(
       i = paste0(
@@ -264,7 +300,7 @@ as_epidist_estimates_data.data.frame <- function(
   if (!hasName(data, "max_delay")) {
     data <- .add_default_max_delay(data)
   }
-  data$trunc_adjusted <- as.logical(data$trunc_adjusted)
+  data$trunc_design <- as.character(data$trunc_design)
   data$cens_adjusted <- as.integer(data$cens_adjusted)
   data$p[data$type != "quantile"] <- NA_real_
   return(data)
@@ -317,7 +353,8 @@ as_epidist_estimates_data.data.frame <- function(
 #' @keywords internal
 .estimates_short_cutoff <- function(data) {
   quadrature <- data$cens_adjusted == 2 & data$growth_rate != 0
-  uses_grid <- data$trunc_adjusted & (data$cens_adjusted == 0 | quadrature)
+  uses_grid <- data$trunc_adjusted &
+    (data$cens_adjusted %in% c(0L, 3L) | quadrature)
   if (!any(uses_grid)) {
     return(character(0))
   }
@@ -391,7 +428,11 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
   assert_numeric(data$swindow, lower = 0, any.missing = FALSE)
   assert_numeric(data$relative_obs_time, lower = 0, any.missing = FALSE)
   assert_logical(data$trunc_adjusted, any.missing = FALSE)
-  assert_subset(data$cens_adjusted, 0:2, .var.name = "cens_adjusted")
+  assert_subset(
+    data$trunc_design, .estimates_trunc_designs(),
+    .var.name = "trunc_design"
+  )
+  assert_subset(data$cens_adjusted, 0:3, .var.name = "cens_adjusted")
   assert_numeric(data$growth_rate, any.missing = FALSE, finite = TRUE)
   assert_numeric(
     data$max_delay,
@@ -435,6 +476,18 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     ))
   }
 
+  beyond <- is_quantile & data$value >= .estimates_quantile_limit(data)
+  if (any(beyond)) {
+    cli::cli_abort(paste0(
+      "Reported quantiles must fall below the largest delay the study could ",
+      "have seen, which is its observation time, or {.var max_delay} where ",
+      "the study adjusted for right truncation, and the top of the discrete ",
+      "grid where it did not adjust for censoring. This fails for ",
+      "{.val {unique(as.character(data$study)[beyond])}}, whose reported ",
+      "quantile carries no information about the delay distribution."
+    ))
+  }
+
   short <- .estimates_short_cutoff(data)
   if (length(short) > 0) {
     cli::cli_inform(c(
@@ -467,8 +520,38 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
   ))
 }
 
+#' The largest reported quantile a set of summary estimates can support
+#'
+#' A quantile reported at or beyond the top of the estimand's support has an
+#' implied cumulative probability of one and an implied density of zero, so the
+#' delta method conversion of a delay scale standard error hits its floor and
+#' the row contributes a constant to the likelihood instead of information.
+#' The limit is the top of the discrete grid for a study that did not adjust
+#' for censoring, allowing for the half cell the continuity correction adds and
+#' for the half window midpoint imputation shifts by, and the grid cutoff
+#' otherwise.
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns A numeric vector of limits, one per row.
+#'
+#' @keywords internal
+.estimates_quantile_limit <- function(data) {
+  cutoff <- .estimates_grid_cutoff(data)
+  top <- floor(cutoff / data$swindow) * data$swindow
+  return(dplyr::case_when(
+    data$cens_adjusted == 0L ~ top - data$swindow / 2,
+    data$cens_adjusted == 3L ~ top,
+    .default = cutoff
+  ))
+}
+
 .estimates_types <- function() {
   return(c("mean", "sd", "quantile"))
+}
+
+.estimates_trunc_designs <- function() {
+  return(c("cohort", "accrual"))
 }
 
 .estimates_required_cols <- function() {
@@ -483,6 +566,7 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     "swindow",
     "relative_obs_time",
     "trunc_adjusted",
+    "trunc_design",
     "cens_adjusted",
     "growth_rate",
     "max_delay"

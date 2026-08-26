@@ -83,6 +83,140 @@
   return(pmin(cdf, 1))
 }
 
+#' The smallest cumulative probability standard error the model will use
+#'
+#' A quantile standard error supplied on the delay scale is converted to the
+#' cumulative probability scale by multiplying it by the density of the biased
+#' estimand at the reported value. That density is zero beyond the support of a
+#' discrete estimand and vanishingly small far into a tail, either of which
+#' would give a degenerate likelihood, so the converted standard error is held
+#' at or above this value.
+#'
+#' @returns A probability scale standard error.
+#'
+#' @keywords internal
+.meta_min_prob_se <- function() {
+  return(1e-6)
+}
+
+#' Whether accrual weighting applies to a summary row
+#'
+#' The truncation design only matters for a study that did not adjust for right
+#' truncation, because a study that did has already removed the effect the
+#' design would have had.
+#'
+#' @param trunc_adjusted 1 if the study adjusted for right truncation, 0
+#'  otherwise.
+#'
+#' @param trunc_design 0 for a cohort design, 1 for an accrual design.
+#'
+#' @returns 1 if the accrual weight applies, 0 otherwise.
+#'
+#' @keywords internal
+.meta_accrual_flag <- function(trunc_adjusted, trunc_design) {
+  return(as.integer(trunc_adjusted != 1 && trunc_design == 1))
+}
+
+#' The log follow up available to a delay under an accrual design
+#'
+#' A study that collected primary events over a window of length `window` and
+#' stopped at its calendar end could only observe a delay of `d` for the
+#' primary events that occurred at least `d` before the stop. With primary
+#' events arriving at a rate proportional to \eqn{\exp(r t)} the amount of such
+#' follow up is
+#' \eqn{w(d) = \int_0^{window - d} \exp(r t) \text{d}t =
+#' (\exp(r (window - d)) - 1) / r}, which tends to `window - d` as \eqn{r} tends
+#' to zero. This is the dynamical bias of Park et al. (2024); for a long window
+#' and a growing epidemic it approaches an exponential tilt of the delay
+#' distribution by \eqn{\exp(-r d)}.
+#'
+#' Working on the log scale keeps the weight finite for a fast growing epidemic
+#' observed over a long window, where the weight itself would overflow.
+#'
+#' @param d A numeric vector of delays.
+#'
+#' @param window The length of the collection window.
+#'
+#' @param growth_rate The exponential growth rate of primary events.
+#'
+#' @returns A numeric vector of log follow up times.
+#'
+#' @keywords internal
+.meta_log_accrual_weight <- function(d, window, growth_rate) {
+  remaining <- pmax(window - d, 0)
+  if (growth_rate == 0) {
+    return(log(remaining))
+  }
+  if (growth_rate > 0) {
+    scaled <- growth_rate * remaining
+    return(scaled + log(-expm1(-scaled)) - log(growth_rate))
+  }
+  return(log(-expm1(growth_rate * remaining)) - log(-growth_rate))
+}
+
+#' The follow up available to a delay under an accrual design, up to a constant
+#'
+#' Every use of the accrual weight renormalises afterwards, so the weights are
+#' returned relative to their largest value to avoid overflow.
+#'
+#' @inheritParams .meta_log_accrual_weight
+#'
+#' @returns A numeric vector of relative weights with a maximum of one.
+#'
+#' @keywords internal
+.meta_accrual_weight <- function(d, window, growth_rate) {
+  log_weight <- .meta_log_accrual_weight(d, window, growth_rate)
+  return(exp(log_weight - max(log_weight)))
+}
+
+#' Reweight a distribution function for an accrual design
+#'
+#' Weights the probability mass between consecutive quadrature nodes by the
+#' follow up available at the midpoint of the interval, then renormalises, so
+#' that the returned distribution function is that of the delays a study
+#' collecting up to a calendar stop would have seen. The midpoint is used
+#' rather than a node because it makes the quadrature second order accurate.
+#'
+#' The follow up available to a primary event depends on the calendar time of
+#' the event itself, which is only known to within its censoring window. Where
+#' the quantity being weighted already includes the offset of the primary event
+#' within that window, as it does for the uniform single interval
+#' approximation, `weight_offset` shifts the weight so that it is evaluated at
+#' the underlying primary event time. Averaging over the window makes the shift
+#' half its width. Without it the follow up is systematically half a window
+#' short, which biases the implied summaries downwards.
+#'
+#' @param cdf The distribution function at equally spaced nodes running from
+#'  zero to `cutoff`.
+#'
+#' @param cutoff The length of the collection window.
+#'
+#' @param growth_rate The exponential growth rate of primary events.
+#'
+#' @param weight_offset The amount by which the quantity being weighted
+#'  overstates the time from the primary event's censoring window to the
+#'  secondary event.
+#'
+#' @returns A distribution function at the same nodes, running from zero to
+#'  one.
+#'
+#' @keywords internal
+.meta_accrual_reweight <- function(
+  cdf,
+  cutoff,
+  growth_rate,
+  weight_offset = 0
+) {
+  n_quad <- length(cdf) - 1
+  midpoint <- (seq_len(n_quad) - 0.5) * cutoff / n_quad - weight_offset
+  mass <- diff(cdf) * .meta_accrual_weight(midpoint, cutoff, growth_rate)
+  total <- sum(mass)
+  if (!is.finite(total) || total <= 0) {
+    return(cdf)
+  }
+  return(c(0, cumsum(mass)) / total)
+}
+
 #' The discrete delay distribution a naive study would observe
 #'
 #' Builds the probability mass function of the interval censored delays a study
@@ -92,6 +226,10 @@
 #' renormalised so that it conditions on delays falling within the grid. This
 #' renormalisation is what applies the study's right truncation, and it
 #' discretises the truncation point to the nearest grid boundary.
+#'
+#' Under an accrual design the cell masses are additionally weighted by the
+#' follow up available to the delay each cell records, which is the delay at
+#' its lower edge, before renormalising.
 #'
 #' @param dist A `primarycensored` distribution function name.
 #'
@@ -104,14 +242,28 @@
 #'
 #' @param growth_rate The exponential growth rate of primary events.
 #'
+#' @param accrual 1 to apply the accrual weight, 0 otherwise.
+#'
 #' @returns A numeric vector of probabilities summing to one.
 #'
 #' @keywords internal
-.meta_grid_pmf <- function(dist, args, cutoff, pwindow, swindow, growth_rate) {
+.meta_grid_pmf <- function(
+  dist,
+  args,
+  cutoff,
+  pwindow,
+  swindow,
+  growth_rate,
+  accrual = 0L
+) {
   n_grid <- floor(cutoff / swindow)
   boundary <- seq_len(n_grid) * swindow
   cdf <- .meta_pcens_cdf(boundary, dist, args, pwindow, growth_rate)
   mass <- diff(c(0, cdf))
+  if (accrual == 1L) {
+    mass <- mass *
+      .meta_accrual_weight(boundary - swindow, cutoff, growth_rate)
+  }
   return(mass / sum(mass))
 }
 
@@ -249,21 +401,38 @@
 
 #' Summaries of a right truncated delay distribution
 #'
+#' Under an accrual design the quadrature is reweighted by the follow up
+#' available to each delay before the moments are taken, which is exact for a
+#' study that adjusted for censoring because the weight then applies to the
+#' delay itself.
+#'
 #' @inheritParams .meta_grid_pmf
 #'
 #' @inherit .meta_moment_vector return
 #'
 #' @keywords internal
-.meta_trunc_moments <- function(dist, args, cutoff) {
+.meta_trunc_moments <- function(
+  dist,
+  args,
+  cutoff,
+  growth_rate = 0,
+  accrual = 0L
+) {
   quad <- seq(0, cutoff, length.out = .meta_n_quad() + 1)
   cdf <- do.call(.meta_pdist(dist), c(list(q = quad), args))
+  if (accrual == 1L) {
+    cdf <- .meta_accrual_reweight(cdf, cutoff, growth_rate)
+  }
   return(.meta_survival_moments(cdf, cutoff))
 }
 
 #' Summaries of a right truncated primary censored delay distribution
 #'
 #' The estimand is the delay plus the primary event offset within its window,
-#' conditioned on falling below the cutoff.
+#' conditioned on falling below the cutoff. Under an accrual design the
+#' quadrature is reweighted by the follow up available to each delay, offset by
+#' half a primary window because the estimand already includes the primary
+#' event offset. See [.meta_accrual_reweight()].
 #'
 #' @inheritParams .meta_grid_pmf
 #'
@@ -275,10 +444,14 @@
   args,
   cutoff,
   pwindow,
-  growth_rate
+  growth_rate,
+  accrual = 0L
 ) {
   quad <- seq(0, cutoff, length.out = .meta_n_quad() + 1)
   cdf <- .meta_pcens_cdf(quad, dist, args, pwindow, growth_rate)
+  if (accrual == 1L) {
+    cdf <- .meta_accrual_reweight(cdf, cutoff, growth_rate, pwindow / 2)
+  }
   return(.meta_survival_moments(cdf, cutoff))
 }
 
@@ -323,12 +496,19 @@
 #' the moments of the primary censored delay, truncated at `cutoff`, are used
 #' directly.
 #'
+#' Under midpoint imputation (`cens_adjusted` of 3) the study assigned each
+#' delay to the centre of the interval it was observed in, so the estimand is
+#' the naive discrete grid shifted up by `swindow / 2`. The shift moves the
+#' mean and leaves every central moment unchanged.
+#'
 #' @inheritParams .meta_grid_pmf
 #'
 #' @param trunc_adjusted 1 if the study adjusted for right truncation, 0
 #'  otherwise.
 #'
-#' @param cens_adjusted The censoring adjustment code, one of 0, 1, or 2.
+#' @param cens_adjusted The censoring adjustment code, one of 0, 1, 2, or 3.
+#'
+#' @param trunc_design 0 for a cohort design, 1 for an accrual design.
 #'
 #' @inherit .meta_moment_vector return
 #'
@@ -341,24 +521,115 @@
   swindow,
   trunc_adjusted,
   cens_adjusted,
-  growth_rate
+  growth_rate,
+  trunc_design = 0L
 ) {
-  if (cens_adjusted == 0) {
+  accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
+  if (cens_adjusted == 0 || cens_adjusted == 3) {
     mass <- .meta_grid_pmf(
-      dist, args, cutoff, pwindow, swindow, growth_rate
+      dist, args, cutoff, pwindow, swindow, growth_rate, accrual
     )
-    return(.meta_grid_moments(mass, swindow))
+    moments <- .meta_grid_moments(mass, swindow)
+    if (cens_adjusted == 3) {
+      moments[["mean"]] <- moments[["mean"]] + swindow / 2
+    }
+    return(moments)
   }
   if (cens_adjusted == 2) {
     if (trunc_adjusted == 1 && growth_rate == 0) {
       return(.meta_add_uniform(.meta_continuous_moments(dist, args), pwindow))
     }
-    return(.meta_pcens_trunc_moments(dist, args, cutoff, pwindow, growth_rate))
+    return(.meta_pcens_trunc_moments(
+      dist, args, cutoff, pwindow, growth_rate, accrual
+    ))
   }
   if (trunc_adjusted == 1) {
     return(.meta_continuous_moments(dist, args))
   }
-  return(.meta_trunc_moments(dist, args, cutoff))
+  return(.meta_trunc_moments(dist, args, cutoff, growth_rate, accrual))
+}
+
+#' The continuity corrected distribution function of a discrete delay grid
+#'
+#' The step distribution function of the grid is replaced by the version that
+#' interpolates it linearly through the mid points of its cells. Without this
+#' correction a quantile of day resolution data, which must land on a jump of
+#' the step function, biases the implied probability upwards by several
+#' sampling standard errors.
+#'
+#' @param y The delay to evaluate the distribution function at.
+#'
+#' @inheritParams .meta_grid_pmf
+#'
+#' @returns A probability.
+#'
+#' @keywords internal
+.meta_grid_prob <- function(
+  y,
+  dist,
+  args,
+  cutoff,
+  pwindow,
+  swindow,
+  growth_rate,
+  accrual = 0L
+) {
+  n_grid <- floor(cutoff / swindow)
+  cell <- floor(y / swindow + 0.5)
+  frac <- y / swindow + 0.5 - cell
+  if (cell < 0) {
+    return(0)
+  }
+  if (cell >= n_grid) {
+    return(1)
+  }
+  grid_cdf <- c(0, cumsum(.meta_grid_pmf(
+    dist, args, cutoff, pwindow, swindow, growth_rate, accrual
+  )))
+  return(grid_cdf[cell + 1] * (1 - frac) + grid_cdf[cell + 2] * frac)
+}
+
+#' The distribution function of a continuous estimand under an accrual design
+#'
+#' Builds the accrual weighted distribution function on the quadrature grid and
+#' interpolates it linearly at the reported value. The weight is offset by half
+#' a primary window for the uniform single interval approximation, matching
+#' [.meta_pcens_trunc_moments()], so that the reported quantile and the
+#' reported moments describe the same estimand.
+#'
+#' @param y The reported quantile value.
+#'
+#' @inheritParams .meta_implied_moments
+#'
+#' @returns A probability.
+#'
+#' @keywords internal
+.meta_accrual_prob <- function(
+  y,
+  dist,
+  args,
+  cutoff,
+  pwindow,
+  cens_adjusted,
+  growth_rate
+) {
+  if (y >= cutoff) {
+    return(1)
+  }
+  n_quad <- .meta_n_quad()
+  quad <- seq(0, cutoff, length.out = n_quad + 1)
+  if (cens_adjusted == 2) {
+    cdf <- .meta_pcens_cdf(quad, dist, args, pwindow, growth_rate)
+    weight_offset <- pwindow / 2
+  } else {
+    cdf <- do.call(.meta_pdist(dist), c(list(q = quad), args))
+    weight_offset <- 0
+  }
+  weighted <- .meta_accrual_reweight(cdf, cutoff, growth_rate, weight_offset)
+  position <- y / cutoff * n_quad
+  lower <- floor(position)
+  frac <- position - lower
+  return(weighted[lower + 1] * (1 - frac) + weighted[lower + 2] * frac)
 }
 
 #' The cumulative probability a study using a given procedure would report
@@ -368,11 +639,10 @@
 #' distribution function, which has no closed form on the discrete grid.
 #'
 #' For a naive study (`cens_adjusted` of 0) the estimand is discrete, so the
-#' step distribution function is replaced by the continuity corrected version
-#' that interpolates it linearly through the mid points of the grid cells.
-#' Without this correction a quantile of day resolution data, which must land
-#' on a jump of the step function, biases the implied probability upwards by
-#' several sampling standard errors.
+#' continuity corrected grid distribution function of [.meta_grid_prob()] is
+#' used. Midpoint imputation (`cens_adjusted` of 3) uses the same function
+#' evaluated half a secondary window lower, because the study shifted every
+#' delay up by that amount.
 #'
 #' For the uniform single interval approximation (`cens_adjusted` of 2) the
 #' distribution function of the primary censored delay is used, so that it
@@ -394,25 +664,23 @@
   swindow,
   trunc_adjusted,
   cens_adjusted,
-  growth_rate
+  growth_rate,
+  trunc_design = 0L
 ) {
-  if (cens_adjusted == 0) {
-    n_grid <- floor(cutoff / swindow)
-    cell <- floor(y / swindow + 0.5)
-    frac <- y / swindow + 0.5 - cell
-    if (cell < 0) {
-      return(0)
-    }
-    if (cell >= n_grid) {
-      return(1)
-    }
-    grid_cdf <- c(0, cumsum(.meta_grid_pmf(
-      dist, args, cutoff, pwindow, swindow, growth_rate
-    )))
-    return(grid_cdf[cell + 1] * (1 - frac) + grid_cdf[cell + 2] * frac)
+  accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
+  if (cens_adjusted == 0 || cens_adjusted == 3) {
+    shift <- ifelse(cens_adjusted == 3, swindow / 2, 0)
+    return(.meta_grid_prob(
+      y - shift, dist, args, cutoff, pwindow, swindow, growth_rate, accrual
+    ))
   }
   if (y <= 0) {
     return(0)
+  }
+  if (accrual == 1L) {
+    return(.meta_accrual_prob(
+      y, dist, args, cutoff, pwindow, cens_adjusted, growth_rate
+    ))
   }
   if (cens_adjusted == 2) {
     cdf <- function(q) {
@@ -432,6 +700,62 @@
   return(cdf(y) / cdf(cutoff))
 }
 
+#' The density of the biased estimand at a reported quantile value
+#'
+#' Used to convert a quantile standard error reported on the delay scale to the
+#' cumulative probability scale the model works on, by the delta method.
+#' For a discrete estimand the density is the mass of the grid cell the value
+#' falls in divided by the grid spacing, which is exactly the slope of the
+#' continuity corrected distribution function there. For a continuous estimand
+#' it is a central difference of the implied distribution function, which keeps
+#' the same code path for every censoring adjustment and truncation design.
+#'
+#' @param y The reported quantile value.
+#'
+#' @inheritParams .meta_implied_moments
+#'
+#' @returns A density on the delay scale.
+#'
+#' @keywords internal
+.meta_implied_density <- function(
+  y,
+  dist,
+  args,
+  cutoff,
+  pwindow,
+  swindow,
+  trunc_adjusted,
+  cens_adjusted,
+  growth_rate,
+  trunc_design = 0L
+) {
+  accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
+  if (cens_adjusted == 0 || cens_adjusted == 3) {
+    shift <- ifelse(cens_adjusted == 3, swindow / 2, 0)
+    n_grid <- floor(cutoff / swindow)
+    cell <- floor((y - shift) / swindow + 0.5)
+    if (cell < 0 || cell >= n_grid) {
+      return(0)
+    }
+    mass <- .meta_grid_pmf(
+      dist, args, cutoff, pwindow, swindow, growth_rate, accrual
+    )
+    return(mass[cell + 1] / swindow)
+  }
+  half_width <- max(1e-6, 1e-4 * y)
+  lower <- max(y - half_width, 0)
+  upper <- y + half_width
+  prob_upper <- .meta_implied_prob(
+    upper, dist, args, cutoff, pwindow, swindow, trunc_adjusted,
+    cens_adjusted, growth_rate, trunc_design
+  )
+  prob_lower <- .meta_implied_prob(
+    lower, dist, args, cutoff, pwindow, swindow, trunc_adjusted,
+    cens_adjusted, growth_rate, trunc_design
+  )
+  return(max((prob_upper - prob_lower) / (upper - lower), 0))
+}
+
 #' Extract the meta model slots for a single row
 #'
 #' @param i The row index.
@@ -448,6 +772,7 @@
     study_n = prep$data$vint2[i],
     trunc_adjusted = prep$data$vint3[i],
     cens_adjusted = prep$data$vint4[i],
+    trunc_design = prep$data$vint5[i],
     cutoff = prep$data$vreal1[i],
     pwindow = prep$data$vreal2[i],
     swindow = prep$data$vreal3[i],
@@ -481,6 +806,10 @@
 
 #' The implied summary and its standard error for one summary row and one draw
 #'
+#' A standard error reported for a quantile row is on the scale of the reported
+#' delay, as studies report it, so it is converted to the cumulative
+#' probability scale by the delta method using [.meta_implied_density()].
+#'
 #' @param slots The output of [.meta_row_slots()].
 #'
 #' @param dist A `primarycensored` distribution function name.
@@ -495,14 +824,25 @@
   if (slots$obs_type == 4L) {
     implied <- .meta_implied_prob(
       slots$value, dist, args, slots$cutoff, slots$pwindow, slots$swindow,
-      slots$trunc_adjusted, slots$cens_adjusted, slots$growth_rate
+      slots$trunc_adjusted, slots$cens_adjusted, slots$growth_rate,
+      slots$trunc_design
     )
-    se <- sqrt(slots$quantile_p * (1 - slots$quantile_p) / slots$study_n)
     observed <- slots$quantile_p
+    if (slots$report_se > 0) {
+      implied_density <- .meta_implied_density(
+        slots$value, dist, args, slots$cutoff, slots$pwindow, slots$swindow,
+        slots$trunc_adjusted, slots$cens_adjusted, slots$growth_rate,
+        slots$trunc_design
+      )
+      se <- max(implied_density * slots$report_se, .meta_min_prob_se())
+    } else {
+      se <- sqrt(slots$quantile_p * (1 - slots$quantile_p) / slots$study_n)
+    }
   } else {
     moments <- .meta_implied_moments(
       dist, args, slots$cutoff, slots$pwindow, slots$swindow,
-      slots$trunc_adjusted, slots$cens_adjusted, slots$growth_rate
+      slots$trunc_adjusted, slots$cens_adjusted, slots$growth_rate,
+      slots$trunc_design
     )
     observed <- slots$value
     if (slots$obs_type == 2L) {
@@ -512,9 +852,9 @@
       implied <- moments[["sd"]]
       se <- .meta_sd_se(moments, slots$study_n)
     }
-  }
-  if (slots$report_se > 0) {
-    se <- slots$report_se
+    if (slots$report_se > 0) {
+      se <- slots$report_se
+    }
   }
   return(c(observed = unname(observed), implied = unname(implied), se = se))
 }

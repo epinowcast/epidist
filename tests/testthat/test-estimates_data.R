@@ -106,10 +106,60 @@ test_that("as_epidist_estimates_data errors when an unadjusted study has no obse
 
 test_that("as_epidist_estimates_data errors on an unsupported adjustment code", { # nolint: line_length_linter.
   bad <- est_df
-  bad$cens_adjusted[1] <- 3
+  bad$cens_adjusted[1] <- 4
   expect_error(
     suppressMessages(as_epidist_estimates_data(bad)),
     "cens_adjusted"
+  )
+})
+
+test_that("as_epidist_estimates_data accepts midpoint imputation as a censoring adjustment", { # nolint: line_length_linter.
+  mid <- est_df
+  mid$cens_adjusted[1] <- 3
+  est <- suppressMessages(as_epidist_estimates_data(mid))
+  expect_identical(est$cens_adjusted[1], 3L)
+})
+
+test_that("as_epidist_estimates_data defaults the truncation design to cohort", { # nolint: line_length_linter.
+  est <- suppressMessages(as_epidist_estimates_data(est_df))
+  expect_identical(est$trunc_design, rep("cohort", 4))
+})
+
+test_that("as_epidist_estimates_data messages about the assumed truncation design", { # nolint: line_length_linter.
+  msgs <- capture_messages(as_epidist_estimates_data(est_df))
+  expect_true(any(grepl("trunc_design", msgs, fixed = TRUE)))
+})
+
+test_that("as_epidist_estimates_data stays quiet about the truncation design when every study adjusted", { # nolint: line_length_linter.
+  adjusted <- est_df
+  adjusted$trunc_adjusted <- TRUE
+  adjusted$relative_obs_time <- Inf
+  msgs <- capture_messages(as_epidist_estimates_data(adjusted))
+  expect_false(any(grepl("trunc_design", msgs, fixed = TRUE)))
+})
+
+test_that("as_epidist_estimates_data accepts an accrual truncation design", {
+  accrual <- est_df
+  accrual$trunc_design <- c("accrual", "accrual", "cohort", "accrual")
+  est <- suppressMessages(as_epidist_estimates_data(accrual))
+  expect_identical(est$trunc_design, accrual$trunc_design)
+})
+
+test_that("as_epidist_estimates_data renames a supplied truncation design column", { # nolint: line_length_linter.
+  renamed <- est_df
+  renamed$design <- "accrual"
+  est <- suppressMessages(
+    as_epidist_estimates_data(renamed, trunc_design = "design")
+  )
+  expect_identical(est$trunc_design, rep("accrual", 4))
+})
+
+test_that("as_epidist_estimates_data errors on an unsupported truncation design", { # nolint: line_length_linter.
+  bad <- est_df
+  bad$trunc_design <- "calendar"
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(bad)),
+    "trunc_design"
   )
 })
 
@@ -185,4 +235,39 @@ test_that("assert_epidist.epidist_estimates_data errors for incorrect input", {
     class(x) <- "epidist_estimates_data"
     assert_epidist(x)
   })
+})
+
+test_that("as_epidist_estimates_data errors on a quantile beyond the grid", {
+  beyond <- data.frame(
+    study = "A", type = "quantile", value = 21, p = 0.9, n = 100,
+    relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 1,
+    stringsAsFactors = FALSE
+  )
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(beyond)),
+    "carries no information"
+  )
+})
+
+test_that("as_epidist_estimates_data errors on a quantile in the top grid cell", { # nolint: line_length_linter.
+  # A naive study's grid is continuity corrected, so it reaches one half a
+  # cell below the top of the grid.
+  top <- data.frame(
+    study = "A", type = "quantile", value = 19.6, p = 0.9, n = 100,
+    relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 0,
+    stringsAsFactors = FALSE
+  )
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(top)), "carries no information"
+  )
+  top$value <- 19
+  expect_no_error(suppressMessages(as_epidist_estimates_data(top)))
+})
+
+test_that(".estimates_quantile_limit allows for the midpoint imputation shift", { # nolint: line_length_linter.
+  data <- data.frame(
+    trunc_adjusted = rep(FALSE, 3), relative_obs_time = rep(20, 3),
+    max_delay = rep(100, 3), swindow = rep(2, 3), cens_adjusted = c(0L, 1L, 3L)
+  )
+  expect_identical(.estimates_quantile_limit(data), c(19, 20, 20))
 })

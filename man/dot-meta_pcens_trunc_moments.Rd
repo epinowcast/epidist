@@ -4,7 +4,14 @@
 \alias{.meta_pcens_trunc_moments}
 \title{Summaries of a right truncated primary censored delay distribution}
 \usage{
-.meta_pcens_trunc_moments(dist, args, cutoff, pwindow, growth_rate)
+.meta_pcens_trunc_moments(
+  dist,
+  args,
+  cutoff,
+  pwindow,
+  growth_rate,
+  accrual = 0L
+)
 }
 \arguments{
 \item{dist}{A \code{primarycensored} distribution function name.}
@@ -15,12 +22,17 @@
 \code{max_delay}.}
 
 \item{growth_rate}{The exponential growth rate of primary events.}
+
+\item{accrual}{1 to apply the accrual weight, 0 otherwise.}
 }
 \value{
 A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis}.
 }
 \description{
 The estimand is the delay plus the primary event offset within its window,
-conditioned on falling below the cutoff.
+conditioned on falling below the cutoff. Under an accrual design the
+quadrature is reweighted by the follow up available to each delay, offset by
+half a primary window because the estimand already includes the primary
+event offset. See \code{\link[=.meta_accrual_reweight]{.meta_accrual_reweight()}}.
 }
 \keyword{internal}

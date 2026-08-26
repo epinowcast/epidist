@@ -16,6 +16,7 @@
   swindow = NULL,
   relative_obs_time = NULL,
   trunc_adjusted = NULL,
+  trunc_design = NULL,
   cens_adjusted = NULL,
   growth_rate = NULL,
   max_delay = NULL,
@@ -39,10 +40,11 @@ is present.}
 
 \item{se}{A string giving the column of \code{data} containing the reported
 standard error of the summary. Optional. When supplied it overrides the
-standard error implied by the sample size. For rows with \code{type} of
-\code{"quantile"} the model works on the cumulative probability scale, so any
-\code{se} supplied for them must be a standard error for \code{p} rather than for
-the reported delay.}
+standard error implied by the sample size. It is always on the scale of the
+reported \code{value}, so for rows with \code{type} of \code{"quantile"} it is a standard
+error for the reported delay. The model fits quantile rows on the
+cumulative probability scale and converts a supplied \code{se} to that scale
+internally by the delta method.}
 
 \item{n}{A string giving the column of \code{data} containing the number of
 delays the summary was computed from. Required unless \code{se} is supplied.}
@@ -57,16 +59,27 @@ reporting) when not supplied.}
 
 \item{relative_obs_time}{A string giving the column of \code{data} containing the
 observation time relative to the primary event, that is the right
-truncation point on the delay scale. Defaults to \code{Inf}, meaning no
+truncation point on the delay scale for a cohort design, or the length of
+the collection window for an accrual design. Defaults to \code{Inf}, meaning no
 truncation.}
 
 \item{trunc_adjusted}{A string giving the column of \code{data} containing a
 logical flag for whether the study corrected for right truncation. Defaults
 to \code{TRUE} where no \code{relative_obs_time} is supplied and \code{FALSE} otherwise.}
 
+\item{trunc_design}{A string giving the column of \code{data} containing how the
+study stopped collecting data, either \code{"cohort"} or \code{"accrual"}. A cohort
+design followed every primary event for the same \code{relative_obs_time}, so a
+delay is observed if it is shorter than that time. An accrual design
+collected primary events over a window of length \code{relative_obs_time} and
+stopped at its calendar end, so a delay of \code{d} is observed only for the
+primary events that occurred at least \code{d} before the stop. Defaults to
+\code{"cohort"}, and is only used for studies that did not adjust for right
+truncation.}
+
 \item{cens_adjusted}{A string giving the column of \code{data} containing the
-censoring adjustment code (\code{0}, \code{1}, or \code{2}, as described above). Defaults
-to 0.}
+censoring adjustment code (\code{0}, \code{1}, \code{2}, or \code{3}, as described above).
+Defaults to 0.}
 
 \item{growth_rate}{A string giving the column of \code{data} containing the
 exponential growth rate of primary events during the study period. Defaults
@@ -99,8 +112,9 @@ biases we support, along with the data process it saw.
 Concretely, for each study we need:
 \itemize{
 \item \strong{Roughly how it adjusted for censoring} (\code{cens_adjusted}).
-We deliberately support only three common approaches rather than trying to
-encode every possible method:
+The codes are a taxonomy of the common mistakes made when summarising
+interval censored delays, and are deliberately limited to a few widely
+used approaches rather than trying to encode every possible method:
 \itemize{
 \item \code{0}: no adjustment. The study took integer date differences (for example
 date of onset subtracted from date of report) and summarised them
@@ -111,13 +125,19 @@ continuous distribution, such as a latent variable or marginal
 \item \code{2}: uniform single interval approximation. The study adjusted the
 secondary interval only, assuming a uniform delay within it, and left
 the primary interval uncorrected.
+\item \code{3}: midpoint imputation. The study assigned each delay to the centre of
+the interval it was observed in, which shifts every reported delay up by
+half a secondary window without changing its spread.
 }
 \item \strong{Whether it adjusted for right truncation} (\code{trunc_adjusted}) and, if it
-did not, \strong{the observation time} (\code{relative_obs_time}).
-The observation time is the truncation point on the delay scale, that is
-how long after the primary events the data were extracted. Real time
-estimates made partway through an outbreak are right truncated unless the
-study corrected for it.
+did not, \strong{the observation time} (\code{relative_obs_time}) and \strong{how
+collection stopped} (\code{trunc_design}).
+For a cohort design the observation time is the truncation point on the
+delay scale, that is how long after the primary events the data were
+extracted. For an accrual design, where collection stopped at a calendar
+date, it is instead the length of the collection window, which is usually
+easier to read off a paper. Real time estimates made partway through an
+outbreak are right truncated unless the study corrected for it.
 \item \strong{The censoring windows} (\code{pwindow}, \code{swindow}). The width, in the same
 time units as the delay, of the interval each event was observed in. Daily
 reporting gives windows of 1, weekly reporting gives 7.
@@ -127,10 +147,12 @@ standard error (\code{se}) may be given instead, and takes precedence when
 supplied.
 }
 
-Only the three censoring adjustments above are supported. Anything more
-exotic must be approximated by whichever of them is closest, and if you
-cannot tell which a study used you should state the assumption you are
-making explicitly.
+Only the censoring adjustments above are supported. Anything more exotic
+must be approximated by whichever of them is closest, and if you cannot tell
+which a study used you should state the assumption you are making
+explicitly. The list is extensible: each code is a forward model of one
+common estimation mistake, so a further mistake can be added as a further
+code.
 
 Systematic reviews rarely record all of this. Where a value is not reported
 you must supply your own assumption, and we recommend saying so alongside

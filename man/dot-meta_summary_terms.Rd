@@ -18,6 +18,8 @@ A named numeric vector with elements \code{observed}, \code{implied} and
 \code{se}.
 }
 \description{
-The implied summary and its standard error for one summary row and one draw
+A standard error reported for a quantile row is on the scale of the reported
+delay, as studies report it, so it is converted to the cumulative
+probability scale by the delta method using \code{\link[=.meta_implied_density]{.meta_implied_density()}}.
 }
 \keyword{internal}

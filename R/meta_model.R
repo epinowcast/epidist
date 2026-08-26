@@ -42,13 +42,26 @@
 #' * Quantiles read off a fitted distribution rather than the empirical data
 #'   have smaller sampling error than assumed here. Supply a reported `se` in
 #'   [as_epidist_estimates_data()] for those rows. For quantile rows that `se`
-#'   is interpreted on the cumulative probability scale, not on the scale of
-#'   the reported delay.
+#'   is on the scale of the reported delay, as studies report it, and is
+#'   converted to the cumulative probability scale by the delta method, that is
+#'   by multiplying it by the density of the biased estimand at the reported
+#'   value. The converted standard error is held away from zero so that a
+#'   quantile reported far into the tail cannot give a degenerate likelihood.
 #' * A study that took integer date differences reports quantiles of a
 #'   discrete distribution, so the implied cumulative probability is
 #'   continuity corrected by interpolating the grid distribution function
 #'   through the mid points of its cells. A small discretisation bias remains
 #'   that does not shrink with the study sample size.
+#' * A study that stopped collecting at a calendar date (`trunc_design` of
+#'   `"accrual"`) is modelled by weighting the estimand by the length of
+#'   follow up available to each delay. The follow up available to a primary
+#'   event is a step function of its censoring window, and is replaced here by
+#'   its smooth average over that window. This is exact for a study that
+#'   adjusted for censoring, and exact for a naive study whose primary and
+#'   secondary windows are equal and divide the collection window, because
+#'   the calendar stop and the date differencing then discretise together.
+#'   Otherwise it is accurate to the curvature of the delay distribution over
+#'   one censoring window.
 #' * Studies that adjusted for right truncation but not for censoring are
 #'   summarised on a grid running to `max_delay`, so a distribution with a
 #'   long tail needs a larger `max_delay` than the default.
@@ -250,6 +263,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     obs_type = 1L,
     study_n = 0L,
     trunc_adjusted = 0L,
+    trunc_design = 0L,
     cens_adjusted = 0L,
     relative_obs_time = as.numeric(data$relative_obs_time),
     pwindow = as.numeric(data$pwindow),
@@ -278,6 +292,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     obs_type = .meta_obs_type(estimates$type),
     study_n = as.integer(ifelse(is.na(estimates$n), 0L, estimates$n)),
     trunc_adjusted = as.integer(estimates$trunc_adjusted),
+    trunc_design = .meta_trunc_design(estimates$trunc_design),
     cens_adjusted = as.integer(estimates$cens_adjusted),
     relative_obs_time = as.numeric(.estimates_grid_cutoff(estimates)),
     pwindow = as.numeric(estimates$pwindow),
@@ -290,6 +305,18 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
   consumed <- setdiff(.estimates_required_cols(), "study")
   extra <- estimates[setdiff(names(estimates), c(names(rows), consumed))]
   return(bind_cols(rows, extra))
+}
+
+#' Map truncation designs to their slot codes
+#'
+#' @param design A character vector of truncation designs.
+#'
+#' @returns An integer vector, 0 for a cohort design and 1 for an accrual
+#'  design.
+#'
+#' @keywords internal
+.meta_trunc_design <- function(design) {
+  return(match(design, .estimates_trunc_designs()) - 1L)
 }
 
 #' Map summary types to their observation type codes
@@ -340,6 +367,8 @@ assert_epidist.epidist_meta_model <- function(data, ...) {
   assert_data_frame(data)
   assert_names(names(data), must.include = .meta_required_cols())
   assert_subset(data$obs_type, 1:4, .var.name = "obs_type")
+  assert_subset(data$trunc_design, 0:1, .var.name = "trunc_design")
+  assert_subset(data$cens_adjusted, 0:3, .var.name = "cens_adjusted")
   assert_integerish(data$delay_lwr)
   assert_numeric(data$n, lower = 0)
   assert_numeric(data$pwindow, lower = 0)
@@ -427,7 +456,7 @@ epidist_family_model.epidist_meta_model <- function(
     ),
     type = "int",
     vars = c(
-      paste0("vint", 1:4, "[n]"),
+      paste0("vint", 1:5, "[n]"),
       paste0("vreal", 1:7, "[n]"),
       "primary_params"
     ),
@@ -460,7 +489,9 @@ epidist_formula_model.epidist_meta_model <- function(
     formula,
     delay_lwr |
       weights(n) +
-        vint(obs_type, study_n, trunc_adjusted, cens_adjusted) +
+        vint(
+          obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design
+        ) +
         vreal(
           relative_obs_time,
           pwindow,
@@ -617,6 +648,7 @@ epidist_stancode.epidist_meta_model <- function(
     "obs_type",
     "study_n",
     "trunc_adjusted",
+    "trunc_design",
     "cens_adjusted",
     "relative_obs_time",
     "pwindow",

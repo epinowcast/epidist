@@ -385,22 +385,85 @@ if (not_on_cran() && has_cmdstanr()) {
   study_obs_times <- c(12, 15, 18, 20, 25, 30)
   naive_draws <- lapply(study_obs_times, naive_summaries, size = 2000)
 
-  sim_biased_estimates <- suppressMessages(as_epidist_estimates_data(
-    data.frame(
-      study = rep(paste0("study_", seq_along(study_obs_times)), each = 3),
-      type = rep(c("mean", "sd", "quantile"), times = length(study_obs_times)),
-      value = as.numeric(rbind(
-        vapply(naive_draws, `[[`, numeric(1), "mean"),
-        vapply(naive_draws, `[[`, numeric(1), "sd"),
-        vapply(naive_draws, `[[`, numeric(1), "q90")
-      )),
-      p = rep(c(NA, NA, 0.9), times = length(study_obs_times)),
-      n = rep(vapply(naive_draws, `[[`, numeric(1), "size"), each = 3),
-      relative_obs_time = rep(study_obs_times, each = 3),
-      trunc_adjusted = FALSE,
-      cens_adjusted = 0,
-      stringsAsFactors = FALSE
+  sim_biased_cohort <- data.frame(
+    study = rep(paste0("study_", seq_along(study_obs_times)), each = 3),
+    type = rep(c("mean", "sd", "quantile"), times = length(study_obs_times)),
+    value = as.numeric(rbind(
+      vapply(naive_draws, `[[`, numeric(1), "mean"),
+      vapply(naive_draws, `[[`, numeric(1), "sd"),
+      vapply(naive_draws, `[[`, numeric(1), "q90")
+    )),
+    se = NA_real_,
+    p = rep(c(NA, NA, 0.9), times = length(study_obs_times)),
+    n = rep(vapply(naive_draws, `[[`, numeric(1), "size"), each = 3),
+    relative_obs_time = rep(study_obs_times, each = 3),
+    trunc_adjusted = FALSE,
+    trunc_design = "cohort",
+    cens_adjusted = 0,
+    growth_rate = 0,
+    stringsAsFactors = FALSE
+  )
+
+  # Three further studies that stopped collecting at a calendar date, so their
+  # primary events accrued over the window and the longer delays were less
+  # likely to be seen. One reported integer date differences, one imputed the
+  # midpoint of each interval, and one adjusted the secondary interval only.
+  # All three reported a median with a standard error on the delay scale.
+  # Together these exercise the accrual, midpoint imputation and delta method
+  # branches of the Stan code.
+  accrual_summaries <- function(size, window, growth_rate, cens) {
+    u <- stats::runif(size)
+    ptime <- if (growth_rate == 0) {
+      u * window
+    } else {
+      log1p(u * expm1(growth_rate * window)) / growth_rate
+    }
+    delay <- stats::rlnorm(size, meanlog, sdlog)
+    keep <- ptime + delay <= window
+    ptime <- ptime[keep]
+    delay <- delay[keep]
+    obs <- switch(as.character(cens),
+      "0" = floor(ptime + delay) - floor(ptime),
+      "2" = ptime - floor(ptime) + delay,
+      "3" = floor(ptime + delay) - floor(ptime) + 0.5
     )
+    return(list(
+      mean = mean(obs), sd = stats::sd(obs), size = length(obs),
+      med = stats::median(obs),
+      med_se = 1.2533 * stats::sd(obs) / sqrt(length(obs))
+    ))
+  }
+
+  accrual_windows <- c(16, 24, 20)
+  accrual_rates <- c(0, 0.15, 0)
+  accrual_cens <- c(0, 3, 2)
+  accrual_draws <- Map(
+    accrual_summaries, 3000, accrual_windows, accrual_rates, accrual_cens
+  )
+
+  sim_accrual_estimates <- data.frame(
+    study = rep(paste0("accrual_", seq_along(accrual_windows)), each = 3),
+    type = rep(c("mean", "sd", "quantile"), times = length(accrual_windows)),
+    value = as.numeric(rbind(
+      vapply(accrual_draws, `[[`, numeric(1), "mean"),
+      vapply(accrual_draws, `[[`, numeric(1), "sd"),
+      vapply(accrual_draws, `[[`, numeric(1), "med")
+    )),
+    se = as.numeric(rbind(
+      NA, NA, vapply(accrual_draws, `[[`, numeric(1), "med_se")
+    )),
+    p = rep(c(NA, NA, 0.5), times = length(accrual_windows)),
+    n = rep(vapply(accrual_draws, `[[`, numeric(1), "size"), each = 3),
+    relative_obs_time = rep(accrual_windows, each = 3),
+    trunc_adjusted = FALSE,
+    trunc_design = "accrual",
+    cens_adjusted = rep(accrual_cens, each = 3),
+    growth_rate = rep(accrual_rates, each = 3),
+    stringsAsFactors = FALSE
+  )
+
+  sim_biased_estimates <- suppressMessages(as_epidist_estimates_data(
+    rbind(sim_biased_cohort, sim_accrual_estimates)
   ))
 
   prep_meta_biased <- suppressMessages(

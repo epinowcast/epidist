@@ -60,13 +60,26 @@ Allow for genuine differences between studies with a formula term such as
 \item Quantiles read off a fitted distribution rather than the empirical data
 have smaller sampling error than assumed here. Supply a reported \code{se} in
 \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} for those rows. For quantile rows that \code{se}
-is interpreted on the cumulative probability scale, not on the scale of
-the reported delay.
+is on the scale of the reported delay, as studies report it, and is
+converted to the cumulative probability scale by the delta method, that is
+by multiplying it by the density of the biased estimand at the reported
+value. The converted standard error is held away from zero so that a
+quantile reported far into the tail cannot give a degenerate likelihood.
 \item A study that took integer date differences reports quantiles of a
 discrete distribution, so the implied cumulative probability is
 continuity corrected by interpolating the grid distribution function
 through the mid points of its cells. A small discretisation bias remains
 that does not shrink with the study sample size.
+\item A study that stopped collecting at a calendar date (\code{trunc_design} of
+\code{"accrual"}) is modelled by weighting the estimand by the length of
+follow up available to each delay. The follow up available to a primary
+event is a step function of its censoring window, and is replaced here by
+its smooth average over that window. This is exact for a study that
+adjusted for censoring, and exact for a naive study whose primary and
+secondary windows are equal and divide the collection window, because
+the calendar stop and the date differencing then discretise together.
+Otherwise it is accurate to the curvature of the delay distribution over
+one censoring window.
 \item Studies that adjusted for right truncation but not for censoring are
 summarised on a grid running to \code{max_delay}, so a distribution with a
 long tail needs a larger \code{max_delay} than the default.

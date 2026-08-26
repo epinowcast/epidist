@@ -98,7 +98,7 @@ test_that("epidist_family_model.epidist_meta_model returns a meta custom family"
   expect_identical(family$name, "meta_lognormal")
   expect_identical(family$dpars, c("mu", "sigma"))
   expect_identical(family$type, "int")
-  expect_true(all(paste0("vint", 1:4, "[n]") %in% family$vars))
+  expect_true(all(paste0("vint", 1:5, "[n]") %in% family$vars))
   expect_true(all(paste0("vreal", 1:7, "[n]") %in% family$vars))
 })
 
@@ -112,7 +112,8 @@ test_that("epidist_formula_model.epidist_meta_model binds the required slots", {
   expect_true(grepl("delay_lwr", form, fixed = TRUE))
   expect_true(grepl("weights(n)", form, fixed = TRUE))
   expect_true(grepl(
-    "vint(obs_type, study_n, trunc_adjusted, cens_adjusted)", form,
+    "vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design)",
+    form,
     fixed = TRUE
   ))
   expect_true(grepl(
@@ -398,7 +399,8 @@ test_that(".meta_summary_terms uses the kurtosis based standard error for report
   slots <- list(
     obs_type = 3L, study_n = study_n, trunc_adjusted = 0L,
     cens_adjusted = 0L, cutoff = cutoff, pwindow = 1, swindow = 1,
-    value = 3, report_se = 0, quantile_p = 0, growth_rate = 0
+    value = 3, report_se = 0, quantile_p = 0, growth_rate = 0,
+    trunc_design = 0L
   )
   terms <- .meta_summary_terms(slots, "plnorm", args)
   n_sim <- 2e5
@@ -422,7 +424,7 @@ test_that(".meta_summary_terms uses a reported standard error when one is given"
   slots <- list(
     obs_type = 3L, study_n = 0L, trunc_adjusted = 1L, cens_adjusted = 1L,
     cutoff = 40, pwindow = 1, swindow = 1, value = 3, report_se = 0.42,
-    quantile_p = 0, growth_rate = 0
+    quantile_p = 0, growth_rate = 0, trunc_design = 0L
   )
   terms <- .meta_summary_terms(slots, "plnorm", args)
   expect_identical(terms[["se"]], 0.42)
@@ -539,7 +541,8 @@ test_that(".meta_summary_terms uses the implied sd over root n for reported mean
   slots <- list(
     obs_type = 2L, study_n = study_n, trunc_adjusted = 0L,
     cens_adjusted = 0L, cutoff = cutoff, pwindow = 1, swindow = 1,
-    value = 4, report_se = 0, quantile_p = 0, growth_rate = 0
+    value = 4, report_se = 0, quantile_p = 0, growth_rate = 0,
+    trunc_design = 0L
   )
   terms <- .meta_summary_terms(slots, "plnorm", args)
   expect_identical(terms[["observed"]], 4)
@@ -562,7 +565,7 @@ test_that(".meta_summary_terms uses the binomial standard error for reported qua
   slots <- list(
     obs_type = 4L, study_n = 250L, trunc_adjusted = 1L, cens_adjusted = 1L,
     cutoff = 60, pwindow = 1, swindow = 1, value = 6, report_se = 0,
-    quantile_p = 0.75, growth_rate = 0
+    quantile_p = 0.75, growth_rate = 0, trunc_design = 0L
   )
   terms <- .meta_summary_terms(slots, "plnorm", args)
   expect_identical(terms[["observed"]], 0.75)
@@ -571,5 +574,363 @@ test_that(".meta_summary_terms uses the binomial standard error for reported qua
     stats::plnorm(6, args$meanlog, args$sdlog),
     tolerance = 1e-8
   )
+  expect_equal(terms[["se"]], sqrt(0.75 * 0.25 / 250), tolerance = 1e-8)
+})
+
+# Accrual truncation, midpoint imputation and delay scale quantile standard
+# errors, checked against direct simulation of the processes they describe.
+
+sim_accrual_ptime <- function(n, window, growth_rate) {
+  u <- runif(n)
+  if (growth_rate == 0) {
+    return(u * window)
+  }
+  return(log1p(u * expm1(growth_rate * window)) / growth_rate)
+}
+
+test_that(".meta_implied_moments matches Monte Carlo accrual truncation without growth", { # nolint: line_length_linter.
+  set.seed(120)
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  window <- 30
+  moments <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = window, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0,
+    trunc_design = 1L
+  )
+  n_sim <- 1e6
+  ptime <- sim_accrual_ptime(n_sim, window, 0)
+  stime <- ptime + rlnorm(n_sim, args$meanlog, args$sdlog)
+  keep <- stime <= window
+  obs <- floor(stime[keep]) - floor(ptime[keep])
+  expect_equal(moments[["mean"]], mean(obs), tolerance = 0.02)
+  expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.03)
+})
+
+test_that(".meta_implied_moments matches Monte Carlo accrual truncation with growth", { # nolint: line_length_linter.
+  set.seed(121)
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  window <- 30
+  growth_rate <- 0.2
+  moments <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = window, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = growth_rate,
+    trunc_design = 1L
+  )
+  n_sim <- 1e6
+  ptime <- sim_accrual_ptime(n_sim, window, growth_rate)
+  stime <- ptime + rlnorm(n_sim, args$meanlog, args$sdlog)
+  keep <- stime <= window
+  obs <- floor(stime[keep]) - floor(ptime[keep])
+  expect_equal(moments[["mean"]], mean(obs), tolerance = 0.03)
+  expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.04)
+})
+
+test_that(".meta_implied_moments matches Monte Carlo accrual truncation of a continuous estimand", { # nolint: line_length_linter.
+  set.seed(122)
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  window <- 20
+  moments <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = window, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0,
+    trunc_design = 1L
+  )
+  n_sim <- 1e6
+  ptime <- sim_accrual_ptime(n_sim, window, 0)
+  delay <- rlnorm(n_sim, args$meanlog, args$sdlog)
+  obs <- delay[ptime + delay <= window]
+  expect_equal(moments[["mean"]], mean(obs), tolerance = 0.01)
+  expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.02)
+})
+
+test_that(".meta_implied_moments matches Monte Carlo accrual truncation of the uniform single interval approximation", { # nolint: line_length_linter.
+  set.seed(127)
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  window <- 15
+  pwindow <- 2
+  moments <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = window, pwindow = pwindow, swindow = pwindow,
+    trunc_adjusted = 0L, cens_adjusted = 2L, growth_rate = 0,
+    trunc_design = 1L
+  )
+  n_sim <- 2e6
+  ptime <- sim_accrual_ptime(n_sim, window, 0)
+  delay <- rlnorm(n_sim, args$meanlog, args$sdlog)
+  keep <- ptime + delay <= window
+  # The study left the primary interval uncorrected, so it summarised the time
+  # from the start of the primary censoring window to the secondary event.
+  obs <- ptime[keep] - pwindow * floor(ptime[keep] / pwindow) + delay[keep]
+  expect_equal(moments[["mean"]], mean(obs), tolerance = 0.01)
+  expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.01)
+})
+
+test_that(".meta_implied_moments accrual weight offsets the primary window only for the uniform single interval approximation", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  cdf <- .meta_pcens_cdf(
+    seq(0, 15, length.out = .meta_n_quad() + 1), "plnorm", args, 2, 0
+  )
+  expect_identical(
+    .meta_accrual_reweight(cdf, 15, 0),
+    .meta_accrual_reweight(cdf, 15, 0, weight_offset = 0)
+  )
+  # A positive offset leaves more follow up for long delays, so it shifts the
+  # reweighted distribution function down.
+  expect_true(all(
+    .meta_accrual_reweight(cdf, 15, 0, weight_offset = 1)[-1] <=
+      .meta_accrual_reweight(cdf, 15, 0)[-1]
+  ))
+  continuous <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = 15, pwindow = 2, swindow = 2,
+    trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0,
+    trunc_design = 1L
+  )
+  quad <- seq(0, 15, length.out = .meta_n_quad() + 1)
+  unoffset <- .meta_survival_moments(
+    .meta_accrual_reweight(
+      do.call(.meta_pdist("plnorm"), c(list(q = quad), args)), 15, 0
+    ),
+    15
+  )
+  expect_identical(continuous, unoffset)
+})
+
+test_that(".meta_implied_prob matches the accrual truncated uniform single interval CDF", { # nolint: line_length_linter.
+  set.seed(128)
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  window <- 15
+  n_sim <- 2e6
+  ptime <- sim_accrual_ptime(n_sim, window, 0)
+  delay <- rlnorm(n_sim, args$meanlog, args$sdlog)
+  keep <- ptime + delay <= window
+  obs <- ptime[keep] - floor(ptime[keep]) + delay[keep]
+  for (y in c(4, 6, 9)) {
+    prob <- .meta_implied_prob(
+      y, "plnorm", args,
+      cutoff = window, pwindow = 1, swindow = 1,
+      trunc_adjusted = 0L, cens_adjusted = 2L, growth_rate = 0,
+      trunc_design = 1L
+    )
+    expect_equal(prob, mean(obs <= y), tolerance = 0.01)
+  }
+})
+
+test_that(".meta_implied_moments accrual truncation is more severe than cohort truncation", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  cohort <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = 20, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0,
+    trunc_design = 0L
+  )
+  accrual <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = 20, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0,
+    trunc_design = 1L
+  )
+  expect_lt(accrual[["mean"]], cohort[["mean"]])
+})
+
+test_that(".meta_implied_moments accrual truncation is continuous in the growth rate", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  zero <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = 20, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0,
+    trunc_design = 1L
+  )
+  tiny <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = 20, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 1e-8,
+    trunc_design = 1L
+  )
+  expect_equal(zero[["mean"]], tiny[["mean"]], tolerance = 1e-6)
+  expect_equal(zero[["sd"]], tiny[["sd"]], tolerance = 1e-6)
+})
+
+test_that(".meta_implied_moments ignores the truncation design when the study adjusted", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  cohort <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = 50, pwindow = 1, swindow = 1,
+    trunc_adjusted = 1L, cens_adjusted = 0L, growth_rate = 0,
+    trunc_design = 0L
+  )
+  accrual <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = 50, pwindow = 1, swindow = 1,
+    trunc_adjusted = 1L, cens_adjusted = 0L, growth_rate = 0,
+    trunc_design = 1L
+  )
+  expect_identical(cohort, accrual)
+})
+
+test_that(".meta_implied_prob matches the accrual truncated empirical CDF", {
+  set.seed(123)
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  window <- 20
+  n_sim <- 5e5
+  ptime <- sim_accrual_ptime(n_sim, window, 0)
+  delay <- rlnorm(n_sim, args$meanlog, args$sdlog)
+  obs <- delay[ptime + delay <= window]
+  for (y in c(3, 5, 8)) {
+    prob <- .meta_implied_prob(
+      y, "plnorm", args,
+      cutoff = window, pwindow = 1, swindow = 1,
+      trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0,
+      trunc_design = 1L
+    )
+    expect_equal(prob, mean(obs <= y), tolerance = 0.02)
+  }
+})
+
+test_that(".meta_implied_moments matches Monte Carlo midpoint imputation", {
+  set.seed(124)
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  cutoff <- 30
+  moments <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = cutoff, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 3L, growth_rate = 0
+  )
+  n_sim <- 5e5
+  ptime <- runif(n_sim, 0, 1)
+  stime <- ptime + rlnorm(n_sim, args$meanlog, args$sdlog)
+  obs <- floor(stime[stime <= floor(cutoff)]) + 0.5
+  expect_equal(moments[["mean"]], mean(obs), tolerance = 0.02)
+  expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.02)
+})
+
+test_that(".meta_implied_moments shifts the naive grid by half a secondary window", { # nolint: line_length_linter.
+  args <- list(shape = 2, scale = 3)
+  naive <- .meta_implied_moments(
+    "pgamma", args,
+    cutoff = 40, pwindow = 2, swindow = 2,
+    trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0
+  )
+  midpoint <- .meta_implied_moments(
+    "pgamma", args,
+    cutoff = 40, pwindow = 2, swindow = 2,
+    trunc_adjusted = 0L, cens_adjusted = 3L, growth_rate = 0
+  )
+  expect_equal(midpoint[["mean"]], naive[["mean"]] + 1, tolerance = 1e-10)
+  expect_identical(midpoint[["sd"]], naive[["sd"]])
+  expect_identical(midpoint[["kurtosis"]], naive[["kurtosis"]])
+})
+
+test_that(".meta_implied_prob shifts the naive grid CDF for midpoint imputation", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  shifted <- .meta_implied_prob(
+    6.5, "plnorm", args,
+    cutoff = 30, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 3L, growth_rate = 0
+  )
+  unshifted <- .meta_implied_prob(
+    6, "plnorm", args,
+    cutoff = 30, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0
+  )
+  expect_identical(shifted, unshifted)
+})
+
+test_that(".meta_implied_prob matches the midpoint imputed empirical CDF", {
+  set.seed(125)
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  cutoff <- 30
+  n_sim <- 5e5
+  ptime <- runif(n_sim, 0, 1)
+  stime <- ptime + rlnorm(n_sim, args$meanlog, args$sdlog)
+  obs <- floor(stime[stime <= floor(cutoff)]) + 0.5
+  for (y in c(3.5, 5.5, 8.5)) {
+    prob <- .meta_implied_prob(
+      y, "plnorm", args,
+      cutoff = cutoff, pwindow = 1, swindow = 1,
+      trunc_adjusted = 0L, cens_adjusted = 3L, growth_rate = 0
+    )
+    expect_equal(
+      prob, mean(obs < y) + mean(obs == y) / 2,
+      tolerance = 0.02
+    )
+  }
+})
+
+test_that(".meta_summary_terms converts a delay scale quantile se by the delta method", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.5, sdlog = 0.5)
+  slots <- list(
+    obs_type = 4L, study_n = 250L, trunc_adjusted = 1L, cens_adjusted = 1L,
+    cutoff = 60, pwindow = 1, swindow = 1, value = 6, report_se = 0.4,
+    quantile_p = 0.75, growth_rate = 0, trunc_design = 0L
+  )
+  terms <- .meta_summary_terms(slots, "plnorm", args)
+  expect_equal(
+    terms[["se"]],
+    stats::dlnorm(6, args$meanlog, args$sdlog) * 0.4,
+    tolerance = 1e-4
+  )
+})
+
+test_that(".meta_summary_terms uses the grid mass as the density for a naive study", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.5, sdlog = 0.5)
+  slots <- list(
+    obs_type = 4L, study_n = 250L, trunc_adjusted = 0L, cens_adjusted = 0L,
+    cutoff = 20, pwindow = 1, swindow = 1, value = 5, report_se = 0.6,
+    quantile_p = 0.6, growth_rate = 0, trunc_design = 0L
+  )
+  terms <- .meta_summary_terms(slots, "plnorm", args)
+  mass <- .meta_grid_pmf("plnorm", args, 20, 1, 1, 0)
+  expect_equal(terms[["se"]], mass[6] * 0.6, tolerance = 1e-10)
+})
+
+test_that(".meta_summary_terms guards a delay scale quantile se away from zero", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.5, sdlog = 0.5)
+  slots <- list(
+    obs_type = 4L, study_n = 250L, trunc_adjusted = 0L, cens_adjusted = 0L,
+    cutoff = 20, pwindow = 1, swindow = 1, value = 19, report_se = 0.6,
+    quantile_p = 0.99, growth_rate = 0, trunc_design = 0L
+  )
+  terms <- .meta_summary_terms(slots, "plnorm", args)
+  expect_gt(terms[["se"]], 0)
+  expect_true(is.finite(terms[["se"]]))
+})
+
+test_that(".meta_summary_terms delta method matches a bootstrapped quantile se", { # nolint: line_length_linter.
+  set.seed(126)
+  args <- list(meanlog = 1.5, sdlog = 0.5)
+  cutoff <- 20
+  study_n <- 200
+  pool <- rlnorm(2e5, args$meanlog, args$sdlog)
+  pool <- pool[pool <= cutoff]
+  y <- stats::median(pool)
+  boot <- vapply(
+    seq_len(2000),
+    function(i) {
+      draw <- sample(pool, study_n, replace = TRUE)
+      return(c(stats::median(draw), mean(draw <= y)))
+    },
+    numeric(2)
+  )
+  slots <- list(
+    obs_type = 4L, study_n = study_n, trunc_adjusted = 0L, cens_adjusted = 1L,
+    cutoff = cutoff, pwindow = 1, swindow = 1, value = y,
+    report_se = stats::sd(boot[1, ]), quantile_p = 0.5, growth_rate = 0,
+    trunc_design = 0L
+  )
+  terms <- .meta_summary_terms(slots, "plnorm", args)
+  expect_equal(terms[["se"]], stats::sd(boot[2, ]), tolerance = 0.1)
+})
+
+test_that(".meta_summary_terms keeps the binomial se when no quantile se is given", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.5, sdlog = 0.5)
+  slots <- list(
+    obs_type = 4L, study_n = 250L, trunc_adjusted = 1L, cens_adjusted = 1L,
+    cutoff = 60, pwindow = 1, swindow = 1, value = 6, report_se = 0,
+    quantile_p = 0.75, growth_rate = 0, trunc_design = 0L
+  )
+  terms <- .meta_summary_terms(slots, "plnorm", args)
   expect_equal(terms[["se"]], sqrt(0.75 * 0.25 / 250), tolerance = 1e-8)
 })
