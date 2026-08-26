@@ -64,6 +64,7 @@ Suggests:
     priorsense,
     Rcpp (>= 0.12.0),
     RcppEigen (>= 0.3.3.3.0),
+    reformulas,
     roxyglobals,
     spelling,
     testthat (>= 3.0.0),

@@ -1,3 +1,11 @@
+# epidist 0.4.1.1000
+
+## Bug fixes
+
+- Declared `reformulas` in `Suggests` and skipped the `marginaleffects` integration test when it is absent.
+`insight` needs `reformulas` to read the formula of a `brmsfit`, but only suggests it, so the test failed on a clean library.
+See #601.
+
 # epidist 0.4.1
 
 ## Bug fixes
