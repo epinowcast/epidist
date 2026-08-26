@@ -42,6 +42,20 @@ jobs:
           cmdstan-version: 'latest'
           num-cores: 2
 
+      # approx-inference uses pathfinder, which needs the path fix in
+      # paul-buerkner/brms#1831. That is merged but not in a CRAN release.
+      # It is only needed to generate the static output, not to build or use
+      # the package, so it is installed here and nowhere else. Drop this step
+      # once brms releases the fix.
+      - name: Install development brms for precomputing
+        run: |
+          remotes::install_github(
+            "paul-buerkner/brms",
+            dependencies = FALSE,
+            upgrade = "never"
+          )
+        shell: Rscript {0}
+
       - name: Render vignettes
         run: |
           setwd("vignettes")
