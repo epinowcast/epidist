@@ -124,3 +124,44 @@ test_that("epidist_stancode.epidist_latent_model produces valid stanvars", { # n
   )
   expect_s3_class(stancode, "stanvars")
 })
+
+test_that("as_epidist_latent_model defaults to a uniform primary event", {
+  model <- as_epidist_latent_model(sim_obs)
+  expect_identical(attr(model, "primary"), "uniform")
+  expect_null(attr(model, "growth_rate"))
+})
+
+test_that("as_epidist_latent_model rejects inconsistent primary arguments", {
+  expect_error(
+    as_epidist_latent_model(sim_obs, primary = "expgrowth"),
+    class = "checkmate_error"
+  )
+  expect_error(
+    as_epidist_latent_model(sim_obs, growth_rate = 0.2),
+    "only used when"
+  )
+})
+
+test_that("the latent primary event rate reaches the Stan code and data", {
+  uniform <- as_epidist_latent_model(sim_obs)
+  expgrowth <- as_epidist_latent_model(
+    sim_obs,
+    primary = "expgrowth",
+    growth_rate = 0.3
+  )
+
+  code <- as.character(epidist(expgrowth, fn = brms::make_stancode))
+  expect_match(code, "real primary_r;", fixed = TRUE)
+  # The rate has to reach latent_family_lpdf, not just sit in the data block.
+  expect_match(code, "primary_r)", fixed = TRUE)
+
+  # A uniform primary event is the same model with a rate of zero, so the
+  # generated code is identical and only the data differ.
+  expect_identical(
+    as.character(epidist(uniform, fn = brms::make_stancode)), code
+  )
+  expect_identical(epidist(uniform, fn = brms::make_standata)$primary_r, 0)
+  expect_identical(
+    epidist(expgrowth, fn = brms::make_standata)$primary_r, 0.3
+  )
+})

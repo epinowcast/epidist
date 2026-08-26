@@ -192,14 +192,7 @@ new_epidist_marginal_model <- function(
   growth_rate = NULL
 ) {
   primary <- match.arg(primary, c("uniform", "expgrowth"))
-  if (identical(primary, "expgrowth")) {
-    assert_numeric(growth_rate, len = 1, any.missing = FALSE, finite = TRUE)
-  } else if (!is.null(growth_rate)) {
-    cli_abort(
-      "{.arg growth_rate} is only used when {.arg primary} is
-       {.val expgrowth}."
-    )
-  }
+  .validate_primary(primary, growth_rate)
   attr(data, "primary") <- primary
   attr(data, "growth_rate") <- growth_rate
   class(data) <- c("epidist_marginal_model", class(data))

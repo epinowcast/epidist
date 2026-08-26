@@ -19,6 +19,8 @@
   * @param swindow_raw Vector of secondary window positions (0-1 scale)
   * @param woverlap Array of indices for overlapping windows
   * @param wN Number of overlapping windows
+  * @param primary_r Exponential growth rate of the primary event
+  *   distribution. Zero gives a uniform primary event.
   *
   * For observations where the primary and secondary windows overlap the
   * primary offset is bounded by the sampled secondary offset, so the change of
@@ -35,7 +37,8 @@ real latent_family_lpdf(vector y, dpars_A,
                         array[] real relative_obs_t,
                         array[] real pwindow_width, array[] real swindow_width,
                         vector pwindow_raw, vector swindow_raw,
-                        array[] int woverlap, int wN) {
+                        array[] int woverlap, int wN,
+                        data real primary_r) {
   int n = num_elements(y);
   vector[n] pwindow = to_vector(pwindow_width) .* pwindow_raw;
   vector[n] swindow = to_vector(swindow_width) .* swindow_raw;
@@ -46,6 +49,13 @@ real latent_family_lpdf(vector y, dpars_A,
   vector[n] d = y - pwindow + swindow;
   vector[n] obs_time = to_vector(relative_obs_t) - pwindow;
   real log_jacobian = wN ? sum(log(swindow[woverlap])) : 0;
+  // Exponentially growing primary event, used unnormalised. For
+  // non-overlapping observations the normalising constant over
+  // [0, pwindow_width] is data and drops out. For overlapping observations
+  // the constant would run over [0, swindow] and so depend on a parameter,
+  // which is why the unnormalised density plus the Jacobian above is used
+  // instead. primary_r of 0 recovers a uniform primary event.
+  real log_primary = primary_r == 0 ? 0 : primary_r * sum(pwindow);
   return family_lpdf(d | dpars_B) - family_lcdf(obs_time | dpars_B) +
-    log_jacobian;
+    log_jacobian + log_primary;
 }

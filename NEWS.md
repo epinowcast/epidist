@@ -50,9 +50,10 @@ See #79.
 
 ## Models
 
-- Added support for an exponentially growing primary event distribution in the marginal model.
-`as_epidist_marginal_model()` gains `primary` and `growth_rate` arguments, with the previous uniform behaviour as the default.
-The rate is treated as known rather than estimated, and the latent model still assumes a uniform primary event.
+- Added support for an exponentially growing primary event distribution in both the marginal and latent models.
+`as_epidist_marginal_model()` and `as_epidist_latent_model()` gain `primary` and `growth_rate` arguments, with the previous uniform behaviour as the default.
+In the latent model the tilt is applied unnormalised, because for observations with overlapping censoring windows a normalising constant would depend on the sampled secondary event.
+The rate is treated as known rather than estimated.
 
 ## Documentation
 

@@ -4,10 +4,24 @@
 \alias{as_epidist_latent_model.epidist_aggregate_data}
 \title{The latent model method for \code{epidist_aggregate_data} objects}
 \usage{
-\method{as_epidist_latent_model}{epidist_aggregate_data}(data, ...)
+\method{as_epidist_latent_model}{epidist_aggregate_data}(
+  data,
+  primary = c("uniform", "expgrowth"),
+  growth_rate = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{An \code{epidist_aggregate_data} object}
+
+\item{primary}{The distribution of the primary event within its censoring
+window. \code{"uniform"}, the default, assumes the primary event is equally
+likely at any point in the window. \code{"expgrowth"} tilts it towards the end
+of the window at rate \code{growth_rate}.}
+
+\item{growth_rate}{The exponential growth rate used when
+\code{primary = "expgrowth"}. Treated as known rather than estimated. Ignored,
+and must be \code{NULL}, when \code{primary = "uniform"}.}
 
 \item{...}{Not used in this method.}
 }

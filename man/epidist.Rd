@@ -27,8 +27,7 @@ parameters.}
 be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
-families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
-\code{\link[brms:lognormal]{brms::lognormal()}}, are also
+families see \code{\link[brms:brmsfamily]{brmsfamily()}}. Commonly used, such as \code{\link[=lognormal]{lognormal()}}, are also
 reexported as part of \code{epidist}.}
 
 \item{prior}{One or more \code{brmsprior} objects created by \code{\link[brms:set_prior]{brms::set_prior()}}
@@ -54,7 +53,6 @@ These two later options may be useful for model debugging and extensions.}
 Fit epidemiological delay distributions using a \code{brms} interface
 }
 \examples{
-\donttest{
 fit <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",
@@ -65,6 +63,5 @@ fit <- sierra_leone_ebola_data |>
   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
 
 summary(fit)
-}
 }
 \concept{fit}

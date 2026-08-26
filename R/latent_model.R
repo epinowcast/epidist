@@ -47,8 +47,14 @@ as_epidist_latent_model <- function(data, ...) {
 #'     sdate_lwr = "date_of_sample_tested"
 #'   ) |>
 #'   as_epidist_latent_model()
-as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
+as_epidist_latent_model.epidist_linelist_data <- function(
+  data,
+  primary = c("uniform", "expgrowth"),
+  growth_rate = NULL,
+  ...
+) {
   assert_epidist(data)
+  primary <- match.arg(primary)
   data <- data |>
     mutate(
       # Time since primary event to observation
@@ -67,7 +73,11 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
       delay = .data$stime_lwr - .data$ptime_lwr,
       .row_id = dplyr::row_number()
     )
-  data <- new_epidist_latent_model(data)
+  data <- new_epidist_latent_model(
+    data,
+    primary = primary,
+    growth_rate = growth_rate
+  )
   assert_epidist(data)
   return(data)
 }
@@ -82,6 +92,15 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
 #' observations before fitting the latent model.
 #'
 #' @param data An `epidist_aggregate_data` object
+#' @param primary The distribution of the primary event within its censoring
+#'  window. `"uniform"`, the default, assumes the primary event is equally
+#'  likely at any point in the window. `"expgrowth"` tilts it towards the end
+#'  of the window at rate `growth_rate`.
+#'
+#' @param growth_rate The exponential growth rate used when
+#'  `primary = "expgrowth"`. Treated as known rather than estimated. Ignored,
+#'  and must be `NULL`, when `primary = "uniform"`.
+#'
 #' @param ... Not used in this method.
 #' @method as_epidist_latent_model epidist_aggregate_data
 #' @family latent_model
@@ -96,14 +115,30 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
 #'     n = "n"
 #'   ) |>
 #'   as_epidist_latent_model()
-as_epidist_latent_model.epidist_aggregate_data <- function(data, ...) {
+as_epidist_latent_model.epidist_aggregate_data <- function(
+  data,
+  primary = c("uniform", "expgrowth"),
+  growth_rate = NULL,
+  ...
+) {
+  primary <- match.arg(primary)
   linelist_data <- as_epidist_linelist_data.epidist_aggregate_data(data)
-  return(as_epidist_latent_model(linelist_data))
+  return(as_epidist_latent_model(
+    linelist_data,
+    primary = primary,
+    growth_rate = growth_rate
+  ))
 }
 
 #' Class constructor for `epidist_latent_model` objects
 #'
 #' @param data An object to be set with the class `epidist_latent_model`
+#'
+#' @param primary The primary event distribution, `"uniform"` or
+#'  `"expgrowth"`.
+#'
+#' @param growth_rate The exponential growth rate, required when `primary` is
+#'  `"expgrowth"` and otherwise `NULL`.
 #'
 #' @param ... Additional arguments passed to methods.
 #'
@@ -111,7 +146,16 @@ as_epidist_latent_model.epidist_aggregate_data <- function(data, ...) {
 #'
 #' @family latent_model
 #' @export
-new_epidist_latent_model <- function(data, ...) {
+new_epidist_latent_model <- function(
+  data,
+  primary = "uniform",
+  growth_rate = NULL,
+  ...
+) {
+  primary <- match.arg(primary, c("uniform", "expgrowth"))
+  .validate_primary(primary, growth_rate)
+  attr(data, "primary") <- primary
+  attr(data, "growth_rate") <- growth_rate
   class(data) <- c("epidist_latent_model", class(data))
   return(data)
 }
@@ -177,7 +221,8 @@ epidist_family_model.epidist_latent_model <- function(
       "pwindow_raw",
       "swindow_raw",
       "woverlap",
-      "wN"
+      "wN",
+      "primary_r"
     ),
     loop = FALSE,
     log_lik = epidist_gen_log_lik(family),
@@ -297,6 +342,20 @@ epidist_stancode.epidist_latent_model <- function(
       scode = "array[wN] int woverlap;",
       x = filter(data, woverlap > 0)$.row_id,
       name = "woverlap"
+    )
+
+  primary <- attr(data, "primary")
+  if (is.null(primary)) {
+    primary <- "uniform"
+  }
+  primary_r <- .validate_primary(primary, attr(data, "growth_rate"))
+
+  stanvars_data <- stanvars_data +
+    stanvar(
+      block = "data",
+      scode = "real primary_r;",
+      x = primary_r,
+      name = "primary_r"
     )
 
   stanvars_parameters <- stanvar(

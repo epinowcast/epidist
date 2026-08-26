@@ -54,6 +54,12 @@ The default is a uniform primary event.
 uniform <- as_epidist_marginal_model(obs)
 ```
 
+Both the marginal and the latent model take the same arguments.
+
+```{r}
+uniform_latent <- as_epidist_latent_model(obs)
+```
+
 To tilt the primary event towards the end of its window, use `primary = "expgrowth"` and give the exponential growth rate.
 
 ```{r}
@@ -90,13 +96,24 @@ summary(fit_uniform)
 summary(fit_growing)
 ```
 
+On the Ebola data above, which has daily windows and a delay of several days, moving the rate from 0 to 1 shifts the estimated `mu` from 1.593 to 1.576.
+The latent and marginal models agree closely on the same data, as they should.
+
 If you are unsure of the growth rate, fit under a few plausible values and check whether your conclusions change.
+
+# How it is implemented
+
+For the marginal model the primary event distribution is handled by `primarycensored`, which integrates over it directly [@primarycensored].
+
+The latent model instead samples the primary event time.
+There the exponential tilt is applied unnormalised.
+For an observation whose primary and secondary censoring windows do not overlap the normalising constant runs over the primary window, which is data, so it drops out.
+For an overlapping observation the primary event is bounded by the sampled secondary event, so a normalising constant would depend on a parameter, and the unnormalised density is used together with the Jacobian described in `vignette("model")`.
+Setting `growth_rate = 0` recovers the uniform case exactly.
 
 # Limitations
 
 The growth rate is fixed, not estimated, so its uncertainty does not propagate into the delay estimates.
-
-Only the marginal model supports a non-uniform primary event.
-The latent model currently assumes a uniform primary event.
+If that matters, fit under a range of rates and compare.
 
 # References

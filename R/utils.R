@@ -394,3 +394,32 @@
   }
   return(data)
 }
+
+#' Validate a primary event distribution and its growth rate
+#'
+#' Shared by the latent and marginal models so both accept the same arguments
+#' and report the same errors.
+#'
+#' @param primary The primary event distribution, `"uniform"` or
+#'  `"expgrowth"`.
+#'
+#' @param growth_rate The exponential growth rate, required when `primary` is
+#'  `"expgrowth"` and otherwise `NULL`.
+#'
+#' @returns The exponential growth rate as a scalar, 0 for a uniform primary
+#'  event.
+#'
+#' @keywords internal
+.validate_primary <- function(primary, growth_rate) {
+  primary <- match.arg(primary, c("uniform", "expgrowth"))
+  if (identical(primary, "expgrowth")) {
+    assert_numeric(growth_rate, len = 1, any.missing = FALSE, finite = TRUE)
+    return(as.numeric(growth_rate))
+  }
+  if (!is.null(growth_rate)) {
+    cli_abort(
+      "{.arg growth_rate} is only used when {.arg primary} is {.val expgrowth}."
+    )
+  }
+  return(0)
+}

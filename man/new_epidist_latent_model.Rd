@@ -4,10 +4,16 @@
 \alias{new_epidist_latent_model}
 \title{Class constructor for \code{epidist_latent_model} objects}
 \usage{
-new_epidist_latent_model(data, ...)
+new_epidist_latent_model(data, primary = "uniform", growth_rate = NULL, ...)
 }
 \arguments{
 \item{data}{An object to be set with the class \code{epidist_latent_model}}
+
+\item{primary}{The primary event distribution, \code{"uniform"} or
+\code{"expgrowth"}.}
+
+\item{growth_rate}{The exponential growth rate, required when \code{primary} is
+\code{"expgrowth"} and otherwise \code{NULL}.}
 
 \item{...}{Additional arguments passed to methods.}
 }
