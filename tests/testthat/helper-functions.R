@@ -14,7 +14,7 @@ skip_on_local <- function() {
 }
 
 as_string_formula <- function(formula) {
-  form <- paste(deparse(formula), collapse = " ")
+  form <- deparse1(formula, collapse = " ")
   form <- gsub("\\s+", " ", form, perl = FALSE)
   return(form)
 }
