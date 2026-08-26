@@ -26,5 +26,6 @@ It is declared in `Suggests` and reached through `Additional_repositories`.
 
 ## Notes for the reviewer
 
-The examples for `epidist()` and `epidist_diagnostics()` fit a Bayesian model, so they are wrapped in `\donttest{}`.
+The examples for `epidist()` and `epidist_diagnostics()` fit a Bayesian model.
+They are wrapped in `\donttest{}`.
 They are still run under `--run-donttest` and pass.

@@ -1,3 +1,6 @@
+# These compare against unexported `brms` internals, which CRAN checks should
+# not depend on. They exist to catch drift during development.
+skip_on_cran()
 skip_if_not_installed("brms")
 
 # The `brms` internals that the helpers in `R/brms-compat.R` replace. They
