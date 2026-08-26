@@ -74,7 +74,7 @@ The columns of the data are the, age, sex, the dates of Ebola symptom onset and 
 head(sierra_leone_ebola_data)
 #> # A tibble: 6 × 7
 #>      id   age sex    date_of_symptom_onset date_of_sample_tested district
-#>   <int> <dbl> <chr>  <date>                <date>                <chr>   
+#>   <int> <dbl> <chr>  <date>                <date>                <chr>
 #> 1     1    20 Female 2014-05-18            2014-05-23            Kailahun
 #> 2     2    42 Female 2014-05-20            2014-05-25            Kailahun
 #> 3     3    45 Female 2014-05-20            2014-05-25            Kailahun
@@ -143,7 +143,7 @@ obs_cens <- select(
 head(obs_cens)
 #> # A tibble: 6 × 6
 #>      id date_of_symptom_onset date_of_sample_tested   age sex    district
-#>   <int> <date>                <date>                <dbl> <chr>  <chr>   
+#>   <int> <date>                <date>                <dbl> <chr>  <chr>
 #> 1     1 2014-05-18            2014-05-23               20 Female Kailahun
 #> 2     2 2014-05-20            2014-05-25               42 Female Kailahun
 #> 3     3 2014-05-20            2014-05-25               45 Female Kailahun
@@ -196,8 +196,8 @@ To prepare the data for use with the marginal model, we define the data as being
 obs_prep <- as_epidist_marginal_model(linelist_data, obs_time_threshold = 1)
 head(obs_prep)
 #> # A tibble: 6 × 21
-#>   ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr 
-#>       <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>    
+#>   ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr
+#>       <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>
 #> 1         0         1         5         6      259     1 2014-05-18 2014-05-23
 #> 2         2         3         7         8      259     2 2014-05-20 2014-05-25
 #> 3         2         3         7         8      259     3 2014-05-20 2014-05-25
@@ -238,7 +238,7 @@ fit <- epidist(
 #> Running MCMC with 2 parallel chains...
 #> Chain 1 finished in 8.3 seconds.
 #> Chain 2 finished in 8.9 seconds.
-#> 
+#>
 #> Both chains finished successfully.
 #> Mean chain execution time: 8.6 seconds.
 #> Total execution time: 9.0 seconds.
@@ -251,19 +251,19 @@ For example, we may use `summary()` to view information about the fitted model, 
 
 ``` r
 summary(fit)
-#>  Family: marginal_lognormal 
-#>   Links: mu = identity; sigma = log 
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1 
+#>  Family: marginal_lognormal
+#>   Links: mu = identity; sigma = log
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1
 #>          sigma ~ 1
-#>    Data: transformed_data (Number of observations: 380) 
+#>    Data: transformed_data (Number of observations: 380)
 #>   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
 #>          total post-warmup draws = 2000
-#> 
+#>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
 #> Intercept           1.65      0.01     1.64     1.67 1.00     1855     1143
 #> sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1847     1341
-#> 
+#>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
 #> scale reduction factor on split chains (at convergence, Rhat = 1).
@@ -289,7 +289,7 @@ fit_sex <- epidist(
 #> Running MCMC with 2 parallel chains...
 #> Chain 1 finished in 18.5 seconds.
 #> Chain 2 finished in 19.0 seconds.
-#> 
+#>
 #> Both chains finished successfully.
 #> Mean chain execution time: 18.7 seconds.
 #> Total execution time: 19.2 seconds.
@@ -302,21 +302,21 @@ It is important to note that the estimates represent an average of the observed 
 
 ``` r
 summary(fit_sex)
-#>  Family: marginal_lognormal 
-#>   Links: mu = identity; sigma = log 
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex 
+#>  Family: marginal_lognormal
+#>   Links: mu = identity; sigma = log
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex
 #>          sigma ~ 1 + sex
-#>    Data: transformed_data (Number of observations: 584) 
+#>    Data: transformed_data (Number of observations: 584)
 #>   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
 #>          total post-warmup draws = 2000
-#> 
+#>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
 #> Intercept           1.63      0.01     1.61     1.65 1.00     1904     1150
 #> sigma_Intercept    -0.57      0.01    -0.60    -0.55 1.00     2051     1399
 #> sexMale             0.04      0.01     0.01     0.07 1.00     1898     1417
 #> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2244     1515
-#> 
+#>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
 #> scale reduction factor on split chains (at convergence, Rhat = 1).
@@ -348,7 +348,7 @@ fit_sex_district <- epidist(
 #> Running MCMC with 2 parallel chains...
 #> Chain 1 finished in 268.4 seconds.
 #> Chain 2 finished in 281.9 seconds.
-#> 
+#>
 #> Both chains finished successfully.
 #> Mean chain execution time: 275.1 seconds.
 #> Total execution time: 282.1 seconds.
@@ -361,34 +361,34 @@ For this model, along with looking at the `summary()`, we may also use the `brms
 
 ``` r
 summary(fit_sex_district)
-#>  Family: marginal_lognormal 
-#>   Links: mu = identity; sigma = log 
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex + (1 | district) 
+#>  Family: marginal_lognormal
+#>   Links: mu = identity; sigma = log
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex + (1 | district)
 #>          sigma ~ 1 + sex + (1 | district)
-#>    Data: transformed_data (Number of observations: 1296) 
+#>    Data: transformed_data (Number of observations: 1296)
 #>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
 #>          total post-warmup draws = 1000
-#> 
+#>
 #> Multilevel Hyperparameters:
-#> ~district (Number of levels: 14) 
+#> ~district (Number of levels: 14)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
 #> sd(Intercept)           0.16      0.04     0.10     0.24 1.00      259      446
 #> sd(sigma_Intercept)     0.20      0.05     0.13     0.32 1.01      254      474
-#> 
+#>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
 #> Intercept           1.63      0.05     1.53     1.73 1.01      170      282
 #> sigma_Intercept    -0.67      0.06    -0.79    -0.54 1.01      183      330
 #> sexMale             0.04      0.01     0.01     0.07 1.00     1141      686
 #> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1205      703
-#> 
+#>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
 #> scale reduction factor on split chains (at convergence, Rhat = 1).
 ranef(fit_sex_district)
 #> $district
 #> , , Intercept
-#> 
+#>
 #>                   Estimate  Est.Error        Q2.5       Q97.5
 #> Bo            -0.006158585 0.06220838 -0.12304219  0.12377490
 #> Bombali        0.254115275 0.05060460  0.15856773  0.36111235
@@ -404,9 +404,9 @@ ranef(fit_sex_district)
 #> Tonkolili      0.079991588 0.05251091 -0.02180646  0.19440843
 #> Western Rural -0.025285392 0.05154071 -0.12658207  0.08097643
 #> Western Urban -0.154396595 0.05086562 -0.24670189 -0.05030481
-#> 
+#>
 #> , , sigma_Intercept
-#> 
+#>
 #>                  Estimate  Est.Error        Q2.5       Q97.5
 #> Bo             0.18934154 0.07598873  0.03753509  0.34116977
 #> Bombali       -0.22748581 0.06556108 -0.36094037 -0.09106680

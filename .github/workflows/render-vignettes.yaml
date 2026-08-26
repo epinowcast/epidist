@@ -61,7 +61,11 @@ jobs:
           setwd("vignettes")
           for (file in list.files(pattern = "[.]Rmd[.]orig$")) {
             message("knitting ", file)
-            knitr::knit(file, sub("[.]orig$", "", file))
+            out <- sub("[.]orig$", "", file)
+            knitr::knit(file, out)
+            # knitr leaves trailing whitespace in printed output, which the
+            # pre-commit hooks reject.
+            writeLines(sub("[ \t]+$", "", readLines(out)), out)
           }
         shell: Rscript {0}
 
