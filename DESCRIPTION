@@ -53,6 +53,7 @@ Suggests:
     bookdown,
     cmdstanr,
     collapse,
+    epireview,
     ggplot2,
     knitr,
     loo,

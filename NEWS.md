@@ -145,6 +145,26 @@ See #578.
 
 # epidist 0.4.1
 
+## Models
+
+- Added the meta model, which fits a delay distribution to published summary
+  estimates, individual level data, or a mix of the two. Published estimates
+  are forward modelled from the study's own estimation procedure, so summaries
+  that did not adjust for right truncation or that treated interval censored
+  data as continuous still contribute unbiased information. See
+  `as_epidist_meta_model()`. See #617.
+- Added `as_epidist_estimates_data()` for preparing published summary
+  estimates, with documentation of the study metadata the meta model needs.
+  See #617.
+
+## Documentation
+
+- Added a "The meta model" section to the model guide vignette, with the
+  forward model and sampling likelihoods used for published summary
+  estimates. See #617.
+- Added a vignette showcasing the meta model on simulated data and published
+  delay estimates from `epireview`. See #617.
+
 ## Bug fixes
 
 - Fixed Stan compilation failure with primarycensored >= 1.4.0 by adding the

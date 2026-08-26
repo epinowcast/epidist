@@ -32,3 +32,4 @@ vignettes/figures/*
 !vignettes/figures/ebola-*.png
 !vignettes/figures/faq-*.png
 !vignettes/figures/approx-inference-*.png
+design/

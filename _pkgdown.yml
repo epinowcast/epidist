@@ -25,6 +25,8 @@ navbar:
         href: articles/left-truncation.html
       - text: Extending epidist
         href: articles/extending-epidist.html
+      - text: Fitting to published estimates
+        href: articles/meta.html
       - text: Guide to the statistical models implemented in epidist
         href: articles/model.html
 
@@ -48,6 +50,10 @@ reference:
   desc: Methods that keep modified objects in their `epidist` class
   contents:
   - has_concept("epidist_data")
+- subtitle: Estimates data
+  desc: Functions for preparing published summary estimates
+  contents:
+  - has_concept("estimates_data")
 - title: Models
 - subtitle: Naive model
   desc: Specific methods for the naive model
@@ -61,6 +67,10 @@ reference:
   desc: Specific methods for the marginal model
   contents:
   - has_concept("marginal_model")
+- subtitle: Meta model
+  desc: Specific methods for the meta model
+  contents:
+  - has_concept("meta_model")
 - title: Model fitting
 - subtitle: Model fitting
   desc: Functions for fitting delay distribution models using `brms`
