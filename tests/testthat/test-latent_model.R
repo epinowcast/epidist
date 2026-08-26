@@ -7,7 +7,7 @@ test_that("as_epidist_latent_model.epidist_linelist_data with default settings a
 
 test_that("as_epidist_latent_model.epidist_linelist_data errors when passed incorrect inputs", { # nolint: line_length_linter.
   expect_error(as_epidist_latent_model(list()))
-  expect_error(as_epidist_latent_model(sim_obs[, 1]))
+  expect_error(as_epidist_latent_model(suppressWarnings(sim_obs[, 1])))
 })
 
 test_that("as_epidist_latent_model.epidist_aggregate_data works correctly", {
@@ -104,7 +104,7 @@ test_that("assert_epidist.epidist_latent_model doesn't produce an error for corr
 
 test_that("assert_epidist.epidist_latent_model returns FALSE for incorrect input", { # nolint: line_length_linter.
   expect_error(assert_epidist(list()))
-  expect_error(assert_epidist(prep_obs[, 1]))
+  expect_error(assert_epidist(suppressWarnings(prep_obs[, 1])))
   expect_error({
     x <- list()
     class(x) <- "epidist_latent_model"

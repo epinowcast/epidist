@@ -29,15 +29,15 @@ The model-specific parts of an \code{epidist_family()} call
 The model-specific parts of an \code{epidist_formula()} call
 }
 \seealso{
-Other family:
-\code{\link[=epidist_family]{epidist_family()}},
-\code{\link[=epidist_family_model.default]{epidist_family_model.default()}},
-\code{\link[=epidist_family_param]{epidist_family_param()}},
-\code{\link[=epidist_family_param.default]{epidist_family_param.default()}}
+Other family: 
+\code{\link{epidist_family}()},
+\code{\link{epidist_family_model.default}()},
+\code{\link{epidist_family_param}()},
+\code{\link{epidist_family_param.default}()}
 
-Other formula:
-\code{\link[=epidist_formula]{epidist_formula()}},
-\code{\link[=epidist_formula_model.default]{epidist_formula_model.default()}}
+Other formula: 
+\code{\link{epidist_formula}()},
+\code{\link{epidist_formula_model.default}()}
 }
 \concept{family}
 \concept{formula}

@@ -23,18 +23,18 @@ by:
 \item Summarising the data by counting unique combinations of these columns and
 any variables in the model formula using \code{\link[=.summarise_n_by_formula]{.summarise_n_by_formula()}}
 \item Converting the summarised data to a naive model object using
-\code{\link[=new_epidist_naive_model]{new_epidist_naive_model()}}
+\code{\link[=new_epidist_naive_model]{new_epidist_naive_model()}} and checking it with \code{\link[=assert_epidist]{assert_epidist()}}
 \item Informing the user about any data aggregation that occurred using
 \code{\link[=.inform_data_summarised]{.inform_data_summarised()}}
 }
 }
 \seealso{
-Other naive_model:
-\code{\link[=as_epidist_naive_model]{as_epidist_naive_model()}},
-\code{\link[=as_epidist_naive_model.epidist_aggregate_data]{as_epidist_naive_model.epidist_aggregate_data()}},
-\code{\link[=as_epidist_naive_model.epidist_linelist_data]{as_epidist_naive_model.epidist_linelist_data()}},
-\code{\link[=epidist_formula_model.epidist_naive_model]{epidist_formula_model.epidist_naive_model()}},
-\code{\link[=is_epidist_naive_model]{is_epidist_naive_model()}},
-\code{\link[=new_epidist_naive_model]{new_epidist_naive_model()}}
+Other naive_model: 
+\code{\link{as_epidist_naive_model}()},
+\code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
+\code{\link{as_epidist_naive_model.epidist_linelist_data}()},
+\code{\link{epidist_formula_model.epidist_naive_model}()},
+\code{\link{is_epidist_naive_model}()},
+\code{\link{new_epidist_naive_model}()}
 }
 \concept{naive_model}

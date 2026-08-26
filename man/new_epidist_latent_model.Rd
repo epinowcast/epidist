@@ -18,13 +18,13 @@ An object of class \code{epidist_latent_model}
 Class constructor for \code{epidist_latent_model} objects
 }
 \seealso{
-Other latent_model:
-\code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}},
-\code{\link[=as_epidist_latent_model.epidist_aggregate_data]{as_epidist_latent_model.epidist_aggregate_data()}},
-\code{\link[=as_epidist_latent_model.epidist_linelist_data]{as_epidist_latent_model.epidist_linelist_data()}},
-\code{\link[=epidist_family_model.epidist_latent_model]{epidist_family_model.epidist_latent_model()}},
-\code{\link[=epidist_formula_model.epidist_latent_model]{epidist_formula_model.epidist_latent_model()}},
-\code{\link[=epidist_model_prior.epidist_latent_model]{epidist_model_prior.epidist_latent_model()}},
-\code{\link[=is_epidist_latent_model]{is_epidist_latent_model()}}
+Other latent_model: 
+\code{\link{as_epidist_latent_model}()},
+\code{\link{as_epidist_latent_model.epidist_aggregate_data}()},
+\code{\link{as_epidist_latent_model.epidist_linelist_data}()},
+\code{\link{epidist_family_model.epidist_latent_model}()},
+\code{\link{epidist_formula_model.epidist_latent_model}()},
+\code{\link{epidist_model_prior.epidist_latent_model}()},
+\code{\link{is_epidist_latent_model}()}
 }
 \concept{latent_model}

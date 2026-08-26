@@ -48,7 +48,6 @@ as_epidist_latent_model <- function(data, ...) {
 #'   ) |>
 #'   as_epidist_latent_model()
 as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
-  assert_epidist(data)
   data <- data |>
     mutate(
       # Time since primary event to observation
@@ -112,8 +111,7 @@ as_epidist_latent_model.epidist_aggregate_data <- function(data, ...) {
 #' @family latent_model
 #' @export
 new_epidist_latent_model <- function(data, ...) {
-  class(data) <- c("epidist_latent_model", class(data))
-  return(data)
+  return(.new_epidist_data(data, "epidist_latent_model"))
 }
 
 #' Check if data has the `epidist_latent_model` class
@@ -249,8 +247,6 @@ epidist_stancode.epidist_latent_model <- function(
   formula = epidist_formula(data),
   ...
 ) {
-  assert_epidist(data)
-
   stanvars_version <- .version_stanvar()
 
   stanvars_functions <- stanvar(

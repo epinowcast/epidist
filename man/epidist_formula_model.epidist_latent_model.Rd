@@ -23,13 +23,13 @@ Define the model-specific component of an \code{epidist} custom formula for the
 latent model
 }
 \seealso{
-Other latent_model:
-\code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}},
-\code{\link[=as_epidist_latent_model.epidist_aggregate_data]{as_epidist_latent_model.epidist_aggregate_data()}},
-\code{\link[=as_epidist_latent_model.epidist_linelist_data]{as_epidist_latent_model.epidist_linelist_data()}},
-\code{\link[=epidist_family_model.epidist_latent_model]{epidist_family_model.epidist_latent_model()}},
-\code{\link[=epidist_model_prior.epidist_latent_model]{epidist_model_prior.epidist_latent_model()}},
-\code{\link[=is_epidist_latent_model]{is_epidist_latent_model()}},
-\code{\link[=new_epidist_latent_model]{new_epidist_latent_model()}}
+Other latent_model: 
+\code{\link{as_epidist_latent_model}()},
+\code{\link{as_epidist_latent_model.epidist_aggregate_data}()},
+\code{\link{as_epidist_latent_model.epidist_linelist_data}()},
+\code{\link{epidist_family_model.epidist_latent_model}()},
+\code{\link{epidist_model_prior.epidist_latent_model}()},
+\code{\link{is_epidist_latent_model}()},
+\code{\link{new_epidist_latent_model}()}
 }
 \concept{latent_model}

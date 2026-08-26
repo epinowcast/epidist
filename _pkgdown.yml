@@ -44,6 +44,10 @@ reference:
   desc: Functions for preparing aggregate data
   contents:
   - has_concept("aggregate_data")
+- subtitle: Class methods
+  desc: Methods that keep modified objects in their `epidist` class
+  contents:
+  - has_concept("epidist_data")
 - title: Models
 - subtitle: Naive model
   desc: Specific methods for the naive model

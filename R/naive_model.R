@@ -57,8 +57,6 @@ as_epidist_naive_model.epidist_linelist_data <- function(
   weight = NULL,
   ...
 ) {
-  assert_epidist.epidist_linelist_data(data)
-
   data <- mutate(data, delay = .data$stime_lwr - .data$ptime_lwr)
 
   data <- .add_weights(data, weight)
@@ -110,8 +108,7 @@ as_epidist_naive_model.epidist_aggregate_data <- function(data, ...) {
 #' @family naive_model
 #' @export
 new_epidist_naive_model <- function(data) {
-  class(data) <- c("epidist_naive_model", class(data))
-  return(data)
+  return(.new_epidist_data(data, "epidist_naive_model"))
 }
 
 #' Check if data has the `epidist_naive_model` class
@@ -166,7 +163,7 @@ epidist_formula_model.epidist_naive_model <- function(
 #' 2. Summarising the data by counting unique combinations of these columns and
 #'    any variables in the model formula using [.summarise_n_by_formula()]
 #' 3. Converting the summarised data to a naive model object using
-#'    [new_epidist_naive_model()]
+#'    [new_epidist_naive_model()] and checking it with [assert_epidist()]
 #' 4. Informing the user about any data aggregation that occurred using
 #'    [.inform_data_summarised()]
 #'
@@ -192,6 +189,7 @@ epidist_transform_data_model.epidist_naive_model <- function(
   trans_data <- data |>
     .summarise_n_by_formula(by = required_cols, formula = formula) |>
     new_epidist_naive_model()
+  assert_epidist(trans_data)
 
   .inform_data_summarised(data, trans_data, c(required_cols, "n"))
 

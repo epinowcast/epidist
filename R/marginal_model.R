@@ -89,8 +89,6 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   delay_min = NULL,
   ...
 ) {
-  assert_epidist.epidist_linelist_data(data)
-
   data <- mutate(
     data,
     pwindow = .data$ptime_upr - .data$ptime_lwr,
@@ -176,8 +174,7 @@ as_epidist_marginal_model.epidist_aggregate_data <- function(
 #' @family marginal_model
 #' @export
 new_epidist_marginal_model <- function(data) {
-  class(data) <- c("epidist_marginal_model", class(data))
-  return(data)
+  return(.new_epidist_data(data, "epidist_marginal_model"))
 }
 
 #' @method assert_epidist epidist_marginal_model
@@ -300,7 +297,7 @@ epidist_formula_model.epidist_marginal_model <- function(
 #' 2. Summarising the data by counting unique combinations of these columns and
 #'    any variables in the model formula using [.summarise_n_by_formula()]
 #' 3. Converting the summarised data to a marginal model object using
-#'    [new_epidist_marginal_model()]
+#'    [new_epidist_marginal_model()] and checking it with [assert_epidist()]
 #' 4. Informing the user about any data aggregation that occurred using
 #'    [.inform_data_summarised()]
 #'
@@ -323,6 +320,7 @@ epidist_transform_data_model.epidist_marginal_model <- function(
   trans_data <- data |>
     .summarise_n_by_formula(by = required_cols, formula = formula) |>
     new_epidist_marginal_model()
+  assert_epidist(trans_data)
 
   .inform_data_summarised(data, trans_data, c(required_cols))
 
@@ -340,8 +338,6 @@ epidist_stancode.epidist_marginal_model <- function(
   formula = epidist_formula(data),
   ...
 ) {
-  assert_epidist.epidist_marginal_model(data)
-
   stanvars_version <- .version_stanvar()
 
   stanvars_functions <- brms::stanvar(

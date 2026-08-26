@@ -7,7 +7,7 @@ test_that("as_epidist_naive_model.data.frame with default settings an object wit
 
 test_that("as_epidist_naive_model.data.frame errors when passed incorrect inputs", { # nolint: line_length_linter.
   expect_error(as_epidist_naive_model(list()))
-  expect_error(as_epidist_naive_model(sim_obs[, 1]))
+  expect_error(as_epidist_naive_model(suppressWarnings(sim_obs[, 1])))
 })
 
 # Make this data available for other tests
@@ -36,7 +36,7 @@ test_that("assert_epidist.epidist_naive_model doesn't produce an error for corre
 
 test_that("assert_epidist.epidist_naive_model returns FALSE for incorrect input", { # nolint: line_length_linter.
   expect_error(assert_epidist(list()))
-  expect_error(assert_epidist(prep_naive_obs[, 1]))
+  expect_error(assert_epidist(suppressWarnings(prep_naive_obs[, 1])))
   expect_error({
     x <- list()
     class(x) <- "epidist_naive_model"
