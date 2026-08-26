@@ -28,7 +28,6 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/ebola.html">Advanced features with Ebola data</a></li>
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
-    <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul></li>
@@ -155,7 +154,7 @@ These two later options may be useful for model debugging and extensions.</p></d
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Family: marginal_lognormal </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Links: mu = identity; sigma = log </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min) ~ 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          sigma ~ 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Data: transformed_data (Number of observations: 272) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;</span>
@@ -163,8 +162,8 @@ These two later options may be useful for model debugging and extensions.</p></d
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Regression Coefficients:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept           1.62      0.01     1.61     1.63 1.00     2125     1357</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1768     1304</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept           1.62      0.01     1.60     1.63 1.00     1894     1444</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1756     1279</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> and Tail_ESS are effective sample size measures, and Rhat is the potential</span>

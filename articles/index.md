@@ -28,11 +28,5 @@
 - [Frequently asked questions and
   tips](https://epidist.epinowcast.org/articles/faq.md):
 
-- [Left truncation with
-  delay_min](https://epidist.epinowcast.org/articles/left-truncation.md):
-
-  “How to use the delay_min argument to account for delays that are only
-  observed above a minimum value.”
-
 - [Guide to the statistical models implemented in
   epidist](https://epidist.epinowcast.org/articles/model.md):

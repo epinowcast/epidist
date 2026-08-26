@@ -472,8 +472,7 @@ library(tidybayes)
 ``` r
 
 draws_pmf <- tibble::tibble(
-  relative_obs_time = Inf, pwindow = 1, swindow = 1,
-  delay_upr = NA, delay_min = 0
+  relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
 ) |>
   add_predicted_draws(fit)
 ```

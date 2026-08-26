@@ -40,11 +40,6 @@ observation. The prep object must have the following variables:
 
 - `vreal3`: secondary event window
 
-- `vreal4`: delay upper bound
-
-- `vreal5`: minimum delay (left truncation point; defaults to 0 if
-  absent)
-
 ## Details
 
 The marginal likelihood accounts for uncertainty in both the primary and

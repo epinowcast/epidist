@@ -51,7 +51,6 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/ebola.html">Advanced features with Ebola data</a></li>
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
-    <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul>
@@ -463,8 +462,7 @@ Click to expand for code to the posterior expectation plots
 <span>      relative_obs_time <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>      pwindow <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>      delay_upr <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>      swindow <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>      delay_min <span class="op">=</span> <span class="fl">0</span></span>
+<span>      swindow <span class="op">=</span> <span class="cn">NA</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -564,8 +562,7 @@ Click to expand for code to prepare PMF plots
 <span>      relative_obs_time <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>      pwindow <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>      swindow <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>      delay_upr <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>      delay_min <span class="op">=</span> <span class="fl">0</span></span>
+<span>      delay_upr <span class="op">=</span> <span class="cn">NA</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -641,8 +638,7 @@ Click to expand for code to prepare PDF plots
 <span>      relative_obs_time <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>      pwindow <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>      swindow <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>      delay_upr <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>      delay_min <span class="op">=</span> <span class="fl">0</span></span>
+<span>      delay_upr <span class="op">=</span> <span class="cn">NA</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span>

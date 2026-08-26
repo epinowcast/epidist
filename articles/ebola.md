@@ -495,8 +495,7 @@ add_marginal_dummy_vars <- function(data) {
       relative_obs_time = NA,
       pwindow = NA,
       delay_upr = NA,
-      swindow = NA,
-      delay_min = 0
+      swindow = NA
     )
   )
 }
@@ -624,8 +623,7 @@ add_marginal_pmf_vars <- function(data) {
       relative_obs_time = Inf,
       pwindow = 1,
       swindow = 1,
-      delay_upr = NA,
-      delay_min = 0
+      delay_upr = NA
     )
   )
 }
@@ -709,8 +707,7 @@ add_marginal_pdf_vars <- function(data) {
       relative_obs_time = Inf,
       pwindow = 0,
       swindow = 0,
-      delay_upr = NA,
-      delay_min = 0
+      delay_upr = NA
     )
   )
 }
