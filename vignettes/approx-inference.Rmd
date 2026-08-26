@@ -29,11 +29,10 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE,
   error = FALSE,
-  # This vignette uses pathfinder, which needs the path fix in
-  # paul-buerkner/brms#1831. That is merged but not in a CRAN release, and
-  # this pull request drops the development brms pin so the package resolves
-  # from CRAN. Evaluation is off until brms releases the fix or the vignette
-  # is precomputed. See #579 and #592.
+  # Evaluation is off because this vignette uses pathfinder, which needs a
+  # brms path fix that is merged upstream but not yet in a CRAN release.
+  # The package now resolves brms from CRAN, so that fix is unavailable.
+  # Turn this back on once brms releases it, or precompute the vignette.
   eval = FALSE
 )
 ```
