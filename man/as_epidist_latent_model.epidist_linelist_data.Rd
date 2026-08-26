@@ -33,8 +33,8 @@ sierra_leone_ebola_data |>
 }
 \references{
 \itemize{
-\item \href{https://doi.org/10.1101/2024.01.12.24301247}{Park et al. (2024)}
-\item \href{https://doi.org/10.1371/journal.pcbi.1012520}{Charniga et al. (2024)}
+\item Park et al. (2024) \doi{10.1101/2024.01.12.24301247}
+\item Charniga et al. (2024) \doi{10.1371/journal.pcbi.1012520}
 }
 }
 \seealso{

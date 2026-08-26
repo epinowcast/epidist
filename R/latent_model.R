@@ -10,8 +10,8 @@
 #'
 #' @param ... Additional arguments passed to methods.
 #' @references
-#'   - [Park et al. (2024)](https://doi.org/10.1101/2024.01.12.24301247)
-#'   - [Charniga et al. (2024)](https://doi.org/10.1371/journal.pcbi.1012520)
+#'   - Park et al. (2024) \doi{10.1101/2024.01.12.24301247}
+#'   - Charniga et al. (2024) \doi{10.1371/journal.pcbi.1012520}
 #' @family latent_model
 #' @returns An object of class `epidist_latent_model`.
 #'
@@ -42,8 +42,8 @@ as_epidist_latent_model <- function(data, ...) {
 #'
 #' @export
 #' @references
-#'   - [Park et al. (2024)](https://doi.org/10.1101/2024.01.12.24301247)
-#'   - [Charniga et al. (2024)](https://doi.org/10.1371/journal.pcbi.1012520)
+#'   - Park et al. (2024) \doi{10.1101/2024.01.12.24301247}
+#'   - Charniga et al. (2024) \doi{10.1371/journal.pcbi.1012520}
 #' @examples
 #' sierra_leone_ebola_data |>
 #'   as_epidist_linelist_data(
