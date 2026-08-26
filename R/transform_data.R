@@ -1,9 +1,9 @@
 #' Transform data for an epidist model
 #'
 #' This function is used within [epidist()] to transform data before passing to
-#' `brms`. It is unlikely that as a user you will need this function, but we
-#' export it nonetheless to be transparent about what happens inside of a call
-#' to [epidist()].
+#' `brms`. It dispatches to [epidist_transform_data_model()], which is the
+#' generic a custom model implements. This wrapper is internal; extensions
+#' should write a method for [epidist_transform_data_model()] instead.
 #'
 #' @inheritParams epidist
 #'
@@ -13,7 +13,7 @@
 #' @param formula A formula object created using [epidist_formula()].
 #'
 #' @family transform_data
-#' @export
+#' @keywords internal
 epidist_transform_data <- function(data, family, formula, ...) {
   assert_epidist(data)
   data <- epidist_transform_data_model(data, family, formula)

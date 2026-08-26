@@ -1,0 +1,150 @@
+---
+title: "Extending epidist"
+description: "Building your own model type, and the packages that already do"
+output:
+  bookdown::html_vignette2:
+    fig_caption: yes
+    code_folding: show
+pkgdown:
+  as_is: true
+bibliography: references.bib
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Extending epidist}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Why extend `epidist`?
+
+`epidist` handles the parts of delay estimation that are tedious and easy to get wrong.
+Censoring, truncation, the `brms` formula interface, priors, and the Stan code that ties them together.
+
+If you are building a model that shares those problems but has a different likelihood, you can reuse all of it rather than rewriting it.
+Your package supplies the likelihood and the Stan code specific to your model.
+`epidist` supplies everything around it, and your users get the `brms` formula interface for free.
+
+Two packages already do this, in two different ways.
+
+```{r packages-table, eval = TRUE, echo = FALSE}
+knitr::kable(
+  data.frame(
+    Package = c("cfrnow", "tbl.now"),
+    Extends = c("Model type", "Data source"),
+    What = c(
+      paste(
+        "Real-time case fatality ratio via a Bayesian mixture-cure",
+        "survival model. The CFR and the onset-to-death delay both take",
+        "brms formulas."
+      ),
+      paste(
+        "A tidy nowcast tibble class, with methods so it converts into",
+        "epidist's own data classes."
+      )
+    ),
+    stringsAsFactors = FALSE
+  ),
+  col.names = c("Package", "Extends", "What it does")
+)
+```
+
+- [`cfrnow`](https://github.com/epiforecasts/cfrnow) registers a new **model type**.
+- [`tbl.now`](https://github.com/RodrigoZepeda/tbl.now) adds a new **data source**, by writing `as_epidist_linelist_data()` and `as_epidist_aggregate_data()` methods for its own class.
+
+# Adding a data source
+
+This is the smaller job.
+Write methods for `as_epidist_linelist_data()` or `as_epidist_aggregate_data()` that turn your class into one `epidist` understands.
+Nothing else is needed, because from that point your data is an ordinary `epidist` object.
+
+# Adding a model type
+
+A model type is an S3 class plus methods for six generics.
+`cfrnow` implements exactly these and nothing else, so this is the whole extension interface:
+
+| Generic | What you supply |
+|---|---|
+| `assert_epidist()` | Validation. What columns your data must have, and what must be true of them |
+| `epidist_family_model()` | The `brms` custom family, including the likelihood name and its `vars` |
+| `epidist_formula_model()` | How the user's formula is rewritten, usually adding `vreal()` terms |
+| `epidist_transform_data_model()` | Any reshaping needed before fitting. Return the data unchanged if none |
+| `epidist_model_prior()` | Model specific priors, or `NULL` |
+| `epidist_stancode()` | The Stan code injected through `brms` `stanvars` |
+
+You also write a constructor that sets your class, by convention `as_epidist_<name>_model()`.
+
+The skeleton looks like this.
+
+```{r skeleton}
+as_epidist_my_model <- function(data) {
+  class(data) <- c("epidist_my_model", class(data))
+  assert_epidist(data)
+  return(data)
+}
+
+#' @importFrom epidist assert_epidist
+#' @export
+assert_epidist.epidist_my_model <- function(data, ...) {
+  checkmate::assert_names(names(data), must.include = c("delay", "n"))
+  return(invisible(NULL))
+}
+
+#' @importFrom epidist epidist_family_model
+#' @export
+epidist_family_model.epidist_my_model <- function(data, family, ...) {
+  return(brms::custom_family(
+    paste0("my_model_", family$family),
+    dpars = family$dpars,
+    vars = "vreal1",
+    loop = FALSE
+  ))
+}
+
+#' @importFrom epidist epidist_formula_model
+#' @export
+epidist_formula_model.epidist_my_model <- function(data, formula, ...) {
+  return(stats::update(formula, delay | vreal(n) ~ .))
+}
+
+#' @importFrom epidist epidist_stancode
+#' @export
+epidist_stancode.epidist_my_model <- function(data, family, formula, ...) {
+  return(brms::stanvar(block = "functions", scode = "// your lpdf here"))
+}
+```
+
+Register the S3 methods in your `NAMESPACE` and import the generics from `epidist`, as `cfrnow` does:
+
+```
+importFrom(epidist,assert_epidist)
+importFrom(epidist,epidist_family_model)
+S3method(assert_epidist,epidist_my_model)
+S3method(epidist_family_model,epidist_my_model)
+```
+
+Users then call `epidist()` exactly as they would for a built-in model.
+
+```{r use}
+data |>
+  as_epidist_my_model() |>
+  epidist(formula = mu ~ 1)
+```
+
+# A worked example
+
+`cfrnow` is the clearest one to read.
+Its [`R/cure_model.R`](https://github.com/epiforecasts/cfrnow/blob/main/R/cure_model.R) is about two hundred lines and implements the six generics above for a mixture-cure survival model.
+It is a good template because the model is genuinely different from the built-in ones, yet almost all the code is about its own likelihood rather than about `epidist`.
+
+# Getting help
+
+If you are building an extension and something in this interface is awkward, please open an issue.
+The generics above are the supported surface, and we would rather change them than have you work around them.

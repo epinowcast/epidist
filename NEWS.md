@@ -33,6 +33,16 @@ They ran for 118 and 110 seconds against CRAN's 5 second guidance.
 - Updated the `brms` documentation URL, which had moved.
 - Added `cran-comments.md`.
 
+## Documentation
+
+- Added an `extending-epidist` vignette covering why you might build your own model type, the six generics a model type implements, a worked example, and a table of the packages that already extend `epidist`.
+
+## Package
+
+- Made `epidist_transform_data()` internal.
+It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
+See #79.
+
 ## Bug fixes
 
 - Added a missing Jacobian adjustment to the latent model for observations whose primary and secondary censoring windows overlap.
