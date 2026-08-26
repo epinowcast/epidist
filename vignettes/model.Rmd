@@ -178,13 +178,49 @@ y_i &\sim \text{Unif}(s_{L, i}, s_{R, i}) \\
 $$
 As before, $g_P(z \, | \, p_{L, i}, p_{R, i})$ represents the conditional distribution of the primary event given lower $P_L$ and upper $P_R$ bounds; this is equivalent to modelling the incidence in primary events.
 
-In `epidist` the latent primary event time is sampled as an offset from $p_{L, i}$ using a unit scale parameter.
-Where the primary and secondary censoring windows overlap the primary event must also occur before the sampled secondary event, so the upper bound of that offset is itself a parameter.
-Writing the offset as $x_i = s_i u_i$, with $s_i$ the sampled secondary event offset and $u_i \sim \text{Unif}(0, 1)$, the change of variables has Jacobian determinant $s_i$.
-The term $\log s_i$ is therefore added to the log density of these observations, using the primary event density unnormalised.
-Without it the implied primary event density is proportional to $1 / s_i$ rather than flat across the window, and the latent model no longer matches the double censored likelihood.
-This correction was identified in @brand2026scalable.
-It only affects observations with overlapping windows, which for daily censoring means delays observed as zero.
+## Bounding the latent primary event time {#latent-bound}
+
+`epidist` samples both latent offsets on the unit scale.
+Write $w_{P, i} = p_{R, i} - p_{L, i}$ and $w_{S, i} = s_{R, i} - s_{L, i}$ for the two censoring window widths.
+Then
+$$
+\tilde{p}_i \sim \text{Unif}(0, 1), \qquad
+\tilde{s}_i \sim \text{Unif}(0, 1), \qquad
+s_i = w_{S, i}\, \tilde{s}_i,
+$$
+and the primary event offset is ordinarily
+$$
+p_i = w_{P, i}\, \tilde{p}_i .
+$$
+
+When the two censoring windows overlap the delay must still be non-negative, so the primary event has to precede the sampled secondary event.
+The offset is then bounded by the sampled secondary offset instead of by the window width,
+$$
+p_i = s_i\, \tilde{p}_i .
+$$
+
+That upper bound is itself a parameter.
+The map $\tilde{p}_i \mapsto p_i$ therefore has Jacobian determinant
+$$
+\left| \frac{\partial p_i}{\partial \tilde{p}_i} \right| = s_i ,
+$$
+and Stan does not add it for a transformation written this way.
+The log density of these observations needs the corresponding term,
+$$
+\log \mathcal{L}_i \;\longmapsto\; \log \mathcal{L}_i + \log s_i .
+$$
+The ordinary case needs no such term because $w_{P, i}$ is data, so its Jacobian is a constant that cancels.
+The primary event density has to be used unnormalised here, since a constant normalising it over $[0, s_i]$ would itself depend on $s_i$.
+
+With the adjustment, integrating the augmented density over $\tilde{p}_i$ and $\tilde{s}_i$ recovers the double interval censored likelihood of Section \@ref(interval-censoring), up to a constant that does not depend on $\theta$.
+The latent and marginal models then target the same likelihood.
+Without it the implied primary event density is proportional to $1 / s_i$ rather than flat across the window.
+
+Only observations whose windows overlap are affected.
+Under daily censoring these are exactly the delays observed as zero, so the bias is small when windows are short relative to the delay and grows as they widen.
+
+The latent model formulation follows @ward2022transmission.
+The missing adjustment was identified in a re-analysis of the 2012 Isiro Bundibugyo virus disease line list [@bdbvlinelist], and is derived in @brand2026scalable.
 
 # The marginal model
 
