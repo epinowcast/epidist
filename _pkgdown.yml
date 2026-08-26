@@ -21,7 +21,7 @@ navbar:
         href: articles/ebola.html
       - text: Approximate Bayesian inference
         href: articles/approx-inference.html
-      - text: Left truncation with delay_min
+      - text: Adjusting for left truncation
         href: articles/left-truncation.html
       - text: Extending epidist
         href: articles/extending-epidist.html

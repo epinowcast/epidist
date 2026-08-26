@@ -34,9 +34,22 @@ Generation intervals are often defined to exclude same day transmission.
 Case definitions sometimes require a minimum time between two events before a pair is recorded.
 In both settings the observed delays are a left truncated sample from the delay distribution of interest.
 
-The `delay_min` argument of `as_epidist_marginal_model()` handles this.
-It sets the `L` argument of the [`primarycensored`](https://primarycensored.epinowcast.org/) likelihood, which renormalises the delay distribution over the interval that could have been observed.
-Ignoring left truncation biases estimates because the model has to explain the missing short delays by shifting the whole distribution.
+Write $L$ for that minimum and $F$ for the delay distribution.
+Only delays above $L$ can enter the sample, so the observed delays follow the conditional distribution
+$$
+F(t \mid T > L) = \frac{F(t) - F(L)}{1 - F(L)}, \qquad t > L .
+$$
+Fitting $F$ directly to such a sample biases the estimate.
+The model has to explain the missing short delays by shifting the whole distribution.
+
+With right truncation at $D$ as well, the likelihood renormalises over $[L, D]$
+$$
+\frac{F(t) - F(L)}{F(D) - F(L)} .
+$$
+
+The `delay_min` argument of `as_epidist_marginal_model()` sets $L$.
+It is passed to the [`primarycensored`](https://primarycensored.epinowcast.org/) likelihood as its `L` argument.
+`delay_min` is a duration in the same units as the delay, not a date.
 
 `delay_min` truncates on the same scale as the response, that is the observed delay between the primary window lower bound and the secondary event.
 Data should therefore be excluded on the observed delay rather than on the underlying continuous delay.
@@ -122,10 +135,22 @@ marginal_no_trunc <- as_epidist_marginal_model(linelist)
 marginal_trunc <- as_epidist_marginal_model(linelist, delay_min = delay_min)
 ```
 
+A `delay_min` column already in the data is picked up without the argument.
+Pass a column name instead of a number when the minimum varies between observations.
+
+```{r column}
+linelist$delay_min <- delay_min
+
+identical(
+  as_epidist_marginal_model(linelist)$delay_min,
+  marginal_trunc$delay_min
+)
+```
+
 `delay_min` is stored as a column and passed to the likelihood.
 
 ```{r show-data}
-head(marginal_trunc[, c("delay_lwr", "delay_upr", "delay_min", "n")])
+marginal_trunc
 ```
 
 ```{r fit}
@@ -227,36 +252,9 @@ ggplot(draws_pred, aes(x = .prediction)) +
   theme(legend.position = "bottom")
 ```
 
-# Other ways to supply delay_min
-
-Aggregate data works the same way.
-
-```{r aggregate}
-agg_data <- as_epidist_aggregate_data(linelist)
-
-marginal_agg <- as_epidist_marginal_model(agg_data, delay_min = delay_min)
-
-head(marginal_agg[, c("delay_lwr", "delay_upr", "delay_min", "n")])
-```
-
-When the truncation point varies between observations, pass a column name instead of a number.
-
-```{r per-obs}
-linelist_varying <- linelist
-linelist_varying$my_min <- rep_len(c(0, 2), nrow(linelist_varying))
-
-marginal_varying <- as_epidist_marginal_model(
-  linelist_varying,
-  delay_min = "my_min"
-)
-
-table(marginal_varying$delay_min)
-```
-
-A `delay_min` column already present in the data is used automatically, so `as_epidist_marginal_model()` can be called without any extra argument.
-
 # Summary
 
 Set `delay_min` whenever delays below a threshold could not have been observed.
-The default of 0 leaves the likelihood unchanged, so existing models are unaffected.
-Note that `delay_min` must not exceed the smallest observed delay, otherwise the data are impossible under the model and `as_epidist_marginal_model()` will error.
+The default of 0 leaves the likelihood unchanged.
+`delay_min` must not exceed the smallest observed delay.
+Above it the data are impossible under the model and `as_epidist_marginal_model()` errors.

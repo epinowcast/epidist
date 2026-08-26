@@ -27,9 +27,6 @@
                             data real y_upper, data real delay_min,
                             array[] real primary_params) {
 
-  // primarycensored_lpmf takes the distribution id, its parameters, the
-  // primary window, the delay upper bound, then L (left truncation) and
-  // D (relative observation time) in that order.
   return primarycensored_lpmf(
       y | dist_id, {dpars_B}, pwindow_width, y_upper,
       delay_min, relative_obs_t, primary_id, primary_params
