@@ -60,7 +60,8 @@ test_that(
     data_with_min <- sim_obs
     data_with_min$my_min <- 0
     model <- as_epidist_marginal_model(
-      data_with_min, delay_min = "my_min"
+      data_with_min,
+      delay_min = "my_min"
     )
     expect_true(all(model$delay_min == 0))
   }
@@ -81,7 +82,8 @@ test_that(
   {
     expect_error(
       as_epidist_marginal_model(
-        sim_obs, delay_min = "nonexistent"
+        sim_obs,
+        delay_min = "nonexistent"
       ),
       regexp = "Names must include the elements"
     )

@@ -198,10 +198,12 @@ pred_data <- data.frame(
 
 draws_pred <- bind_rows(
   "No adjustment" = add_predicted_draws(
-    pred_data, fit_no_trunc, ndraws = 1000
+    pred_data, fit_no_trunc,
+    ndraws = 1000
   ),
   "With delay_min" = add_predicted_draws(
-    pred_data, fit_trunc, ndraws = 1000
+    pred_data, fit_trunc,
+    ndraws = 1000
   ),
   .id = "model"
 )
