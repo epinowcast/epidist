@@ -1,12 +1,12 @@
 # Compatibility helpers for internal 'brms' behaviour
 #
-# 'epidist' used to call `brms:::validate_family()`,
+# These helpers replace `brms:::validate_family()`,
 # `brms:::validate_formula()`, `brms:::validate_data()`,
-# `brms:::dpar_bounds()` and `brms:::log_lik_weight()`. Calls to unexported
-# functions are flagged by `R CMD check --as-cran` and are not covered by
-# the 'brms' interface guarantees. The helpers below reproduce only the
-# narrow behaviour that 'epidist' depends on, written against the public
-# 'brms' interface rather than copied from the 'brms' source.
+# `brms:::dpar_bounds()` and `brms:::log_lik_weight()`, because calls to
+# unexported functions are flagged by `R CMD check --as-cran` and are not
+# covered by the 'brms' interface guarantees. They reproduce only the narrow
+# behaviour that 'epidist' depends on, written against the public 'brms'
+# interface rather than copied from the 'brms' source.
 #
 # Behaviour was checked against 'brms' 2.23.0. The equivalence tests in
 # `tests/testthat/test-brms-compat.R` compare each helper against the

@@ -36,7 +36,7 @@ BugReports: https://github.com/epinowcast/epidist/issues/
 Depends:
     R (>= 4.1.0)
 Imports:
-    brms,
+    brms (>= 2.23.0),
     checkmate,
     cli,
     dplyr,
