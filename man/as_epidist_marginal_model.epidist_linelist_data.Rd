@@ -40,7 +40,8 @@ is growing or shrinking exponentially over the window.}
 \item{growth_rate}{The exponential growth rate used when
 \code{primary = "expgrowth"}. Positive values tilt the primary event towards
 the end of the window, negative values towards the start. It is treated as
-known rather than estimated. Ignored, and must be \code{NULL}, when
+known rather than estimated. A rate of 0 falls back to the uniform primary
+event, which is faster. Ignored, and must be \code{NULL}, when
 \code{primary = "uniform"}.}
 
 \item{...}{Not used in this method.}

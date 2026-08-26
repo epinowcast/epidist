@@ -317,3 +317,22 @@ test_that("the primary event distribution survives the data transformation", {
   expect_identical(attr(transformed, "primary"), "expgrowth")
   expect_identical(attr(transformed, "growth_rate"), -0.1)
 })
+
+test_that("a zero growth rate falls back to the uniform primary event", {
+  # exp(0 * pwindow) is 1, so the two are the same model. The uniform
+  # distribution has an analytical solution in primarycensored while
+  # exponential growth is solved by ODE, so the fallback is worth having.
+  uniform <- as_epidist_marginal_model(sim_obs)
+  zero_rate <- as_epidist_marginal_model(
+    sim_obs,
+    primary = "expgrowth",
+    growth_rate = 0
+  )
+
+  expect_identical(attr(zero_rate, "primary"), "expgrowth")
+  expect_identical(
+    as.character(epidist(zero_rate, fn = brms::make_stancode)),
+    as.character(epidist(uniform, fn = brms::make_stancode))
+  )
+  expect_null(epidist(zero_rate, fn = brms::make_standata)$primary_params)
+})

@@ -82,25 +82,17 @@ test_that("epidist.epidist_marginal_model fits and recovers a sex effect", { # n
   )
 })
 
-test_that("a zero growth rate reproduces the uniform primary event fit", { # nolint: line_length_linter.
+test_that("the marginal model fits with an exponential growth primary event", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
-  # exp(0 * pwindow) is 1, so an exponential growth primary event with a rate
-  # of zero is the uniform primary event. It still takes the expgrowth path
-  # through primarycensored, so this checks that path fits and that it agrees
-  # with the uniform one where the two must coincide.
+  # A non-zero rate takes the ODE path through primarycensored, so this checks
+  # that path compiles and samples rather than only that the Stan code
+  # mentions it.
   skip_on_cran()
 
-  expect_identical(attr(prep_marginal_obs_expgrowth, "primary"), "expgrowth")
+  expect_s3_class(fit_marginal_expgrowth, "epidist_fit")
+  expect_convergence(fit_marginal_expgrowth)
 
-  pred_uniform <- predict_delay_parameters(fit_marginal)
-  pred_expgrowth <- predict_delay_parameters(fit_marginal_expgrowth)
-
-  expect_equal(
-    mean(pred_uniform$mu), mean(pred_expgrowth$mu),
-    tolerance = 0.01
-  )
-  expect_equal(
-    mean(pred_uniform$sigma), mean(pred_expgrowth$sigma),
-    tolerance = 0.01
-  )
+  pred <- predict_delay_parameters(fit_marginal_expgrowth)
+  expect_true(all(is.finite(pred$mu)))
+  expect_true(all(pred$sigma > 0))
 })

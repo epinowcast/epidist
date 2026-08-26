@@ -193,13 +193,12 @@ prep_obs_gamma <- as_epidist_latent_model(sim_obs_gamma)
 prep_obs_sex <- as_epidist_latent_model(sim_obs_sex)
 
 prep_marginal_obs <- as_epidist_marginal_model(sim_obs)
-# An exponential growth primary event with a rate of zero is the same model as
-# a uniform primary event, but it takes the expgrowth path through the Stan
-# code. Fitting it checks that path compiles and that the boundary agrees.
+# A non-zero growth rate takes the exponential growth path through
+# primarycensored, which has no analytical solution and is solved by ODE.
 prep_marginal_obs_expgrowth <- as_epidist_marginal_model(
   sim_obs,
   primary = "expgrowth",
-  growth_rate = 0
+  growth_rate = 0.2
 )
 
 prep_marginal_obs_gamma <- as_epidist_marginal_model(sim_obs_gamma)

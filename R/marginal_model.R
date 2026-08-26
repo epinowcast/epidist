@@ -70,7 +70,8 @@ as_epidist_marginal_model <- function(data, ...) {
 #' @param growth_rate The exponential growth rate used when
 #'  `primary = "expgrowth"`. Positive values tilt the primary event towards
 #'  the end of the window, negative values towards the start. It is treated as
-#'  known rather than estimated. Ignored, and must be `NULL`, when
+#'  known rather than estimated. A rate of 0 falls back to the uniform primary
+#'  event, which is faster. Ignored, and must be `NULL`, when
 #'  `primary = "uniform"`.
 #'
 #' @param ... Not used in this method.
@@ -403,6 +404,14 @@ epidist_stancode.epidist_marginal_model <- function(
     primary <- "uniform"
   }
   growth_rate <- attr(data, "growth_rate")
+
+  # A growth rate of zero is the uniform primary event. Use the uniform
+  # distribution for it, which has an analytical solution, rather than the
+  # exponential growth one, which does not.
+  if (identical(primary, "expgrowth") && isTRUE(growth_rate == 0)) {
+    primary <- "uniform"
+    growth_rate <- NULL
+  }
 
   # Ids follow primarycensored::pcd_primary_distributions(): 1 is uniform and
   # 2 is exponential growth, which takes the growth rate as its one parameter.

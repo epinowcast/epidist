@@ -54,6 +54,7 @@ See #79.
 `as_epidist_marginal_model()` and `as_epidist_latent_model()` gain `primary` and `growth_rate` arguments, with the previous uniform behaviour as the default.
 In the latent model the tilt is applied unnormalised, because for observations with overlapping censoring windows a normalising constant would depend on the sampled secondary event.
 The rate is treated as known rather than estimated.
+A rate of zero falls back to the uniform primary event, which has an analytical solution in `primarycensored` rather than an ODE one.
 
 ## Documentation
 
