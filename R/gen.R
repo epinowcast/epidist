@@ -72,6 +72,10 @@ epidist_gen_log_lik <- function(family) {
     # this means we get the cdf of the target distribution
     prep$data$cens <- rep(-1, prep$nobs)
 
+    # This integrates with pcens_cdf() rather than dpcens(), so the guard
+    # dpcens() applies has to be reproduced here. Without it the truncation
+    # normalisation below divides by a cdf evaluated before the delay upper
+    # bound, which can push the density above one.
     if (y + swindow > relative_obs_time) {
       cli::cli_abort(
         c(

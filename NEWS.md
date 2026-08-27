@@ -52,7 +52,7 @@ They ran for 118 and 110 seconds against CRAN's 5 second guidance.
 A single `brms` call already returns the cdf for every draw, so the results are cached and reused.
 The method also calls `primarycensored::pcens_cdf()` directly instead of `primarycensored::dpcens()`, which revalidates the distribution function at random points on every call and so would defeat the cache.
 Cost is now linear rather than quadratic in the number of draws.
-For 500 draws this is around 80 times faster, and the log likelihoods are unchanged.
+For 500 draws this is around 80 times faster, and the log likelihoods are unchanged. The guard that `dpcens()` applied when the delay upper bound exceeds the relative observation time is reproduced explicitly, since this no longer goes through `dpcens()`.
 See #476.
 
 ## Documentation

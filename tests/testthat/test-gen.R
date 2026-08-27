@@ -289,3 +289,29 @@ test_that( # nolint: line_length_linter.
     expect_lt(calls_100, 100)
   }
 )
+
+test_that("the generic log likelihood rejects a delay beyond the observation time", { # nolint: line_length_linter.
+  # dpcens() errors on this, and the refactor integrates with pcens_cdf()
+  # instead, so the same guard has to be applied here. Without it the
+  # truncation normalisation can return a density above one.
+  skip_on_cran()
+
+  expect_error(
+    primarycensored::dpcens(
+      x = 5, pdist = stats::plnorm, meanlog = 1.5, sdlog = 0.5,
+      pwindow = 1, swindow = 1, D = 5.5, dprimary = stats::dunif
+    ),
+    "Upper truncation point is greater than D"
+  )
+
+  log_lik <- epidist_gen_log_lik(epidist_family(prep_obs))
+  prep <- list(
+    data = list(Y = 5, vreal1 = 5.5, vreal2 = 1, vreal3 = 1),
+    ndraws = 1,
+    nobs = 1
+  )
+  expect_error(
+    log_lik(1, prep),
+    "greater than the relative observation time"
+  )
+})
