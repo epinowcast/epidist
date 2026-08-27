@@ -167,18 +167,17 @@ fit_trunc <- epidist(
 
 # Compare parameter estimates
 
-`predict_delay_parameters()` returns posterior draws of the distributional parameters.
+`add_delay_parameter_draws()` returns posterior draws of the distributional parameters.
 For the lognormal family `mu` is the log scale mean and `sigma` is the log scale standard deviation.
-We take the first row of the transformed data because there are no covariates here.
+We use `epidist_strata()` to take a single row of the transformed data because there are no covariates here.
 
 ```{r compare-params}
 param_draws <- list(
   "No adjustment" = fit_no_trunc,
   "With delay_min" = fit_trunc
 ) |>
-  lapply(predict_delay_parameters) |>
+  lapply(\(fit) ungroup(add_delay_parameter_draws(epidist_strata(fit), fit))) |>
   bind_rows(.id = "model") |>
-  filter(index == 1) |>
   pivot_longer(
     cols = c("mu", "sigma"),
     names_to = "parameter",

@@ -219,7 +219,9 @@ fits <- list(
 
 draws <- imap(fits, function(fit, name) {
   draws <- fit |>
-    predict_delay_parameters() |>
+    epidist_strata() |>
+    add_delay_parameter_draws(fit) |>
+    add_summaries() |>
     as.data.frame() |>
     pivot_longer(
       cols = c("mu", "sigma", "mean", "sd"),
