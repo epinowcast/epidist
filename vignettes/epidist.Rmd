@@ -629,7 +629,7 @@ p_fitted_lognormal <- predicted_pmfs |>
   filter(model != "true") |>
   ggplot() +
   geom_line(
-    aes(x = x, y = y, col = model, group = draw),
+    aes(x = x, y = y, col = model, group = draw_id),
     alpha = 0.05, linewidth = 1
   ) +
   geom_line(
