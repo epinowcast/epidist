@@ -213,6 +213,35 @@ epidist_transform_data_model.epidist_naive_model <- function(
   return(trans_data)
 }
 
+#' Build `newdata` for the naive model
+#'
+#' The naive model accounts for neither censoring nor truncation, so the only
+#' variable it uses beyond those in the model formula is the response. This
+#' method adds it, set to `NA` because it is the quantity being predicted.
+#'
+#' @inheritParams epidist_newdata
+#'
+#' @method epidist_newdata epidist_naive_model
+#' @family naive_model
+#' @family newdata
+#' @returns A [tibble::tibble()] of `newdata` ready to predict from.
+#'
+#' @export
+#' @examples
+#' prep_obs <- sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_naive_model()
+#'
+#' # A row for each sex
+#' epidist_newdata(prep_obs, sex)
+epidist_newdata.epidist_naive_model <- function(data, ...) {
+  newdata <- .build_newdata(data, ..., .cols = list(delay = NA_real_))
+  return(newdata)
+}
+
 .naive_required_cols <- function() {
   return("delay")
 }

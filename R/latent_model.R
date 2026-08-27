@@ -385,6 +385,75 @@ epidist_stancode.epidist_latent_model <- function(
   return(stanvars_all)
 }
 
+#' Build `newdata` for the latent model
+#'
+#' The latent model uses the response, the observation time relative to the
+#' primary event, and the primary and secondary censoring windows. This method
+#' adds all of them. The response is set to `NA` because it is the quantity
+#' being predicted. The rest are set here.
+#'
+#' The defaults give the delay distribution with no censoring and no
+#' truncation, which is a continuous probability density function. For a
+#' discrete probability mass function with daily censoring set `pwindow` and
+#' `swindow` to 1. For the delay distribution as it would be seen at a given
+#' time set `relative_obs_time` to that time relative to the primary event.
+#'
+#' @inheritParams epidist_newdata
+#'
+#' @param pwindow Width of the primary event censoring window. Defaults to 0,
+#'  which is no censoring.
+#'
+#' @param swindow Width of the secondary event censoring window. Defaults to 0,
+#'  which is no censoring.
+#'
+#' @param relative_obs_time Observation time relative to the primary event.
+#'  Defaults to `Inf`, which is no right truncation. `brms` warns about
+#'  infinite values in the data when this is `Inf`. That warning is safe here,
+#'  because prediction is done in R and never passes the value to Stan.
+#'
+#' @method epidist_newdata epidist_latent_model
+#' @family latent_model
+#' @family newdata
+#' @returns A [tibble::tibble()] of `newdata` ready to predict from.
+#'
+#' @export
+#' @examples
+#' prep_obs <- sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_latent_model()
+#'
+#' # A row for each sex, with no censoring and no truncation
+#' epidist_newdata(prep_obs, sex)
+#'
+#' # The same, with daily censoring
+#' epidist_newdata(prep_obs, sex, pwindow = 1, swindow = 1)
+epidist_newdata.epidist_latent_model <- function(
+  data,
+  ...,
+  pwindow = 0,
+  swindow = 0,
+  relative_obs_time = Inf
+) {
+  assert_numeric(pwindow, lower = 0, any.missing = FALSE)
+  assert_numeric(swindow, lower = 0, any.missing = FALSE)
+  assert_numeric(relative_obs_time, lower = 0, any.missing = FALSE)
+  newdata <- .build_newdata(
+    data,
+    ...,
+    .cols = list(
+      delay = NA_real_,
+      relative_obs_time = relative_obs_time,
+      pwindow = pwindow,
+      swindow = swindow
+    ),
+    .supplied = names(match.call())
+  )
+  return(newdata)
+}
+
 .latent_required_cols <- function() {
   return(c(
     .linelist_required_cols(),

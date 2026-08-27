@@ -446,6 +446,84 @@ epidist_stancode.epidist_marginal_model <- function(
   return(stanvars_all)
 }
 
+#' Build `newdata` for the marginal model
+#'
+#' The marginal model uses the response, the observation time relative to the
+#' primary event, the primary and secondary censoring windows, the upper bound
+#' of the delay and the minimum delay. This method adds all of them. The
+#' response and its upper bound are set to 0. `brms` needs the response in
+#' `newdata` and needs it to be a whole number for this model, but prediction
+#' ignores its value. The rest are set here.
+#'
+#' The defaults give the delay distribution with no censoring and no
+#' truncation, which is a continuous probability density function. For a
+#' discrete probability mass function with daily censoring set `pwindow` and
+#' `swindow` to 1. For the delay distribution as it would be seen at a given
+#' time set `relative_obs_time` to that time relative to the primary event.
+#'
+#' @inheritParams epidist_newdata
+#'
+#' @param pwindow Width of the primary event censoring window. Defaults to 0,
+#'  which is no censoring.
+#'
+#' @param swindow Width of the secondary event censoring window. Defaults to 0,
+#'  which is no censoring.
+#'
+#' @param relative_obs_time Observation time relative to the primary event.
+#'  Defaults to `Inf`, which is no right truncation. `brms` warns about
+#'  infinite values in the data when this is `Inf`. That warning is safe here,
+#'  because prediction is done in R and never passes the value to Stan.
+#'
+#' @param delay_min Minimum delay, the left truncation point. Defaults to 0,
+#'  which is no left truncation.
+#'
+#' @method epidist_newdata epidist_marginal_model
+#' @family marginal_model
+#' @family newdata
+#' @returns A [tibble::tibble()] of `newdata` ready to predict from.
+#'
+#' @export
+#' @examples
+#' prep_obs <- sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_marginal_model()
+#'
+#' # A row for each sex, with no censoring and no truncation
+#' epidist_newdata(prep_obs, sex)
+#'
+#' # The same, with daily censoring
+#' epidist_newdata(prep_obs, sex, pwindow = 1, swindow = 1)
+epidist_newdata.epidist_marginal_model <- function(
+  data,
+  ...,
+  pwindow = 0,
+  swindow = 0,
+  relative_obs_time = Inf,
+  delay_min = 0
+) {
+  assert_numeric(pwindow, lower = 0, any.missing = FALSE)
+  assert_numeric(swindow, lower = 0, any.missing = FALSE)
+  assert_numeric(relative_obs_time, lower = 0, any.missing = FALSE)
+  assert_numeric(delay_min, lower = 0, any.missing = FALSE)
+  newdata <- .build_newdata(
+    data,
+    ...,
+    .cols = list(
+      delay_lwr = 0,
+      relative_obs_time = relative_obs_time,
+      pwindow = pwindow,
+      swindow = swindow,
+      delay_upr = 0,
+      delay_min = delay_min
+    ),
+    .supplied = names(match.call())
+  )
+  return(newdata)
+}
+
 .marginal_required_cols <- function() {
   return(c(
     "delay_lwr",
