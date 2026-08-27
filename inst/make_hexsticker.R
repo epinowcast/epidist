@@ -6,9 +6,8 @@ library(magick)
 # Make standard plot
 outbreak <- simulate_gillespie(seed = 101)
 
-secondary_dist <- data.frame(mu = 1.8, sigma = 0.5)
-class(secondary_dist) <- c("lognormal_samples", class(secondary_dist))
-secondary_dist <- add_mean_sd(secondary_dist)
+secondary_dist <- data.frame(mu = 1.8, sigma = 0.5) |>
+  add_summaries(family = "lognormal")
 
 obs <- outbreak |>
   simulate_secondary(

@@ -87,12 +87,11 @@ We also assume that we are observing a sample of cases during the outbreak.
 This means that our data is both interval censored for each event and truncated for the secondary event.
 
 We first assume that the reporting delay is lognormal with a mean log of 1.6 and a log standard deviation of 0.5.
-Here we use the `add_mean_sd()` function to add the mean and sd to the `data.frame`.
+Here we use the `add_summaries()` function to add the mean and sd to the `data.frame`.
 
 ```{r}
-secondary_dist <- data.frame(mu = 1.6, sigma = 0.5)
-class(secondary_dist) <- c("lognormal_samples", class(secondary_dist))
-secondary_dist <- add_mean_sd(secondary_dist)
+secondary_dist <- data.frame(mu = 1.6, sigma = 0.5) |>
+  add_summaries(family = "lognormal")
 
 secondary_dist
 ```
@@ -518,25 +517,32 @@ Compared to the naive fit we see good recovery of the true distribution paramete
 # Compare the two models estimated delay parameters {#compare}
 
 We can compare the two models by plotting the estimated parameters from the naive and marginal models.
-One way to do this is to use the `predict_delay_parameters()` function to extract the posterior samples and then plot them.
-Internally this function uses can also add the mean and standard deviation parameters to the output so that it is easier to understand the distribution.
+One way to do this is to use the `add_delay_parameter_draws()` function to extract the posterior samples and then plot them.
+The `add_summaries()` function then adds the mean and standard deviation of the delay distribution so that it is easier to understand.
 
 ```{r}
+draw_parameters <- function(fit) {
+  fit |>
+    epidist_strata() |>
+    add_delay_parameter_draws(fit) |>
+    add_summaries() |>
+    ungroup()
+}
+
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
-  lapply(predict_delay_parameters) |>
+  lapply(draw_parameters) |>
   bind_rows(.id = "model") |>
-  mutate(model = factor(model, levels = c("naive", "marginal"))) |>
-  filter(index == 1)
+  mutate(model = factor(model, levels = c("naive", "marginal")))
 
 head(predicted_parameters)
 ```
 
 ::: {.alert .alert-primary}
-Note that by default `predict_delay_parameters()` gives predictions for every row in the transformed data.
-Here as we only want posterior draws for the summary parameters we filter to the first row or the first data point.
-This prevents repeating the same prediction for each row.
-Another approach to this would be providing `newdata` to `predict_delay_parameters()` representing the data we want to make predictions for.
-`epidist_newdata()` builds that `newdata` for us.
+Note that by default `add_delay_parameter_draws()` gives draws for every row of the data passed to it.
+Neither model here has covariates, so `epidist_strata()` reduces the data to the single row they all share.
+This prevents repeating the same draws for each row.
+
+Another approach to building the data to predict for is `epidist_newdata()`, which adds the response and observation process columns the models expect.
 :::
 
 We can now plot posterior draws for the summary parameters from the two models.
