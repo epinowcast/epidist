@@ -45,3 +45,19 @@ test_that("epidist_prior warns or errors for latent model non-uniform priors", {
   p5 <- rbind(p1, p3)
   expect_error(.check_model_prior(data, p5), "secondary event")
 })
+
+test_that("epidist_prior rejects a non-uniform secondary event window prior", {
+  data <- as_epidist_latent_model(sim_obs)
+  family <- lognormal()
+  formula <- bf(mu ~ 1, sigma ~ 1)
+  epidist_family <- epidist_family(data, family)
+  epidist_formula <- epidist_formula(
+    data = data, family = epidist_family, formula = formula
+  )
+
+  user_prior <- prior("normal(0, 1)", dpar = "swindow_raw", check = FALSE)
+  expect_error(
+    epidist_prior(data, epidist_family, epidist_formula, prior = user_prior),
+    "secondary event"
+  )
+})
