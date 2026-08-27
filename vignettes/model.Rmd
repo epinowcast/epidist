@@ -229,6 +229,7 @@ Its constant depends on $r_i$, which is estimated, so dropping it would let the 
 
 $r$ is a distributional parameter, so it takes a formula and a prior like any other.
 This allows the rate to vary by covariate.
+The delays carry little information about $r$, so it is normally supplied as an informed prior taken from a separate estimate of epidemic growth rather than learned here.
 ```r
 epidist(data, formula = bf(mu ~ 1, pgrowth ~ 1 + region))
 ```
