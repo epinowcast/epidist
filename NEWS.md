@@ -53,6 +53,7 @@ A single `brms` call already returns the cdf for every draw, so the results are 
 The method also calls `primarycensored::pcens_cdf()` directly instead of `primarycensored::dpcens()`, which revalidates the distribution function at random points on every call and so would defeat the cache.
 Cost is now linear rather than quadratic in the number of draws.
 For 500 draws this is around 80 times faster, and the log likelihoods are unchanged. The guard that `dpcens()` applied when the delay upper bound exceeds the relative observation time is reproduced explicitly, since this no longer goes through `dpcens()`.
+Left truncation is carried through the rewritten path: the density is normalised over the interval from `delay_min` to the relative observation time.
 See #476.
 
 ## Documentation
