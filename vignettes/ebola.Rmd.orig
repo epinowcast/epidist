@@ -47,7 +47,6 @@ library(brms)
 library(dplyr)
 library(ggplot2)
 library(tidybayes) # nolint
-library(modelr) # nolint
 library(patchwork) # nolint
 library(cmdstanr) # nolint
 ```
@@ -270,7 +269,9 @@ ranef(fit_sex_district)
 ## Posterior expectations {#posterior-expectation}
 
 To go further than summaries of the fitted model, we recommend using the `tidybayes` package.
-For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws()` function.
+For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use `epidist_newdata()` in combination with the `tidybayes::add_epred_draws()` function.
+`epidist_newdata()` expands the variables we give it into a grid and adds the response and observation process variables the model uses, which saves us knowing the column names the marginal model expects.
+Its defaults are no censoring and no truncation.
 The `tidybayes::add_epred_draws()` function uses the `epidist_gen_posterior_predict()` function to generate a posterior prediction function for the `lognormal()` distribution.
 
 In Figure \@ref(fig:epred) we show the posterior expectation of the delay distribution for each of the three fitted models.
@@ -279,21 +280,8 @@ Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with wom
 <details><summary>Click to expand for code to the posterior expectation plots</summary>
 
 ```{r}
-add_marginal_dummy_vars <- function(data) {
-  return(
-    mutate(
-      data,
-      relative_obs_time = NA,
-      pwindow = NA,
-      delay_upr = NA,
-      swindow = NA
-    )
-  )
-}
-
 expectation_draws <- obs_prep |>
-  data_grid(NA) |>
-  add_marginal_dummy_vars() |>
+  epidist_newdata() |>
   add_epred_draws(fit, dpar = TRUE)
 
 epred_base_figure <- expectation_draws |>
@@ -303,8 +291,7 @@ epred_base_figure <- expectation_draws |>
   theme_minimal()
 
 expectation_draws_sex <- obs_prep |>
-  data_grid(sex) |>
-  add_marginal_dummy_vars() |>
+  epidist_newdata(sex) |>
   add_epred_draws(fit_sex, dpar = TRUE)
 
 epred_sex_figure <- expectation_draws_sex |>
@@ -314,8 +301,7 @@ epred_sex_figure <- expectation_draws_sex |>
   theme_minimal()
 
 expectation_draws_sex_district <- obs_prep |>
-  data_grid(sex, district) |>
-  add_marginal_dummy_vars() |>
+  epidist_newdata(sex, district) |>
   add_epred_draws(fit_sex_district, dpar = TRUE)
 
 epred_sex_district_figure <- expectation_draws_sex_district |>
@@ -348,9 +334,7 @@ For example, for the `mu` parameter in the sex-district stratified model (Figure
 
 ```{r}
 linpred_draws_sex_district <- obs_prep |>
-  as.data.frame() |>
-  data_grid(sex, district) |>
-  add_marginal_dummy_vars() |>
+  epidist_newdata(sex, district) |>
   add_linpred_draws(fit_sex_district, dpar = TRUE)
 
 p_linpred_sex_district <- linpred_draws_sex_district |>
@@ -378,26 +362,14 @@ In this section, we demonstrate how to produce either a discrete probability mas
 ### Discrete probability mass function
 
 To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
-To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and `relative_obs_time` to `Inf` for no right truncation.
+To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and leave `relative_obs_time` at its default of `Inf` for no right truncation.
 Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure.
 
 <details><summary>Click to expand for code to prepare PMF plots</summary>
 
 ```{r}
-add_marginal_pmf_vars <- function(data) {
-  return(
-    mutate(
-      data,
-      relative_obs_time = Inf,
-      pwindow = 1,
-      swindow = 1,
-      delay_upr = NA
-    )
-  )
-}
-
 draws_pmf <- obs_prep |>
-  add_marginal_pmf_vars() |>
+  epidist_newdata(pwindow = 1, swindow = 1) |>
   add_predicted_draws(fit, ndraws = 1000)
 
 pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
@@ -407,8 +379,7 @@ pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
   theme_minimal()
 
 draws_sex_pmf <- obs_prep |>
-  data_grid(sex) |>
-  add_marginal_pmf_vars() |>
+  epidist_newdata(sex, pwindow = 1, swindow = 1) |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pmf_sex_figure <- draws_sex_pmf |>
@@ -422,8 +393,7 @@ pmf_sex_figure <- draws_sex_pmf |>
   theme_minimal()
 
 draws_sex_district_pmf <- obs_prep |>
-  data_grid(sex, district) |>
-  add_marginal_pmf_vars() |>
+  epidist_newdata(sex, district, pwindow = 1, swindow = 1) |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pmf_sex_district_figure <- draws_sex_district_pmf |>
@@ -463,20 +433,8 @@ That is to produce continuous delay times (Figure \@ref(fig:pdf)):
 <details><summary>Click to expand for code to prepare PDF plots</summary>
 
 ```{r}
-add_marginal_pdf_vars <- function(data) {
-  return(
-    mutate(
-      data,
-      relative_obs_time = Inf,
-      pwindow = 0,
-      swindow = 0,
-      delay_upr = NA
-    )
-  )
-}
-
 draws_pdf <- obs_prep |>
-  add_marginal_pdf_vars() |>
+  epidist_newdata() |>
   add_predicted_draws(fit, ndraws = 1000)
 
 pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
@@ -486,8 +444,7 @@ pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
   theme_minimal()
 
 draws_sex_pdf <- obs_prep |>
-  data_grid(sex) |>
-  add_marginal_pdf_vars() |>
+  epidist_newdata(sex) |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pdf_sex_figure <- draws_sex_pdf |>
@@ -499,8 +456,7 @@ pdf_sex_figure <- draws_sex_pdf |>
   theme_minimal()
 
 draws_sex_district_pdf <- obs_prep |>
-  data_grid(sex, district) |>
-  add_marginal_pdf_vars() |>
+  epidist_newdata(sex, district) |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pdf_sex_district_figure <- draws_sex_district_pdf |>
