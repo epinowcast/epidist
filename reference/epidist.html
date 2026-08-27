@@ -143,9 +143,15 @@ These two later options may be useful for model debugging and extensions.</p></d
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No primary event upper bound provided, using the primary event lower bound + 1 day as the assumed upper bound.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No secondary event upper bound provided, using the secondary event lower bound + 1 day as the assumed upper bound.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No observation time column provided, using 2015-09-14 as the observation date (the maximum of the secondary event upper bound).</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Setting 2394 observation times beyond 98 (=2x max delay) to Inf. This</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   improves model efficiency by reducing unique observation times while</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   maintaining model accuracy as these times should have negligible impact.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Setting 2394 relative observation times (`relative_obs_time`) greater than 98</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   (2x the maximum delay) to <span style="color: #0000BB;">Inf</span>.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> This improves model efficiency by reducing the number of unique observation</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   times in the data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The impact on model accuracy should be negligible because these relative</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   observation times are high enough to cause very limited right truncation.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The original relative observation times are available in</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   `orig_relative_obs_time`.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Raise `obs_time_threshold` to avoid this behaviour.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Found infinite values in the data, which may cause issues for Stan.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Data summarised by unique combinations of:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> * Model variables: delay bounds, observation time, and primary censoring window</span>
@@ -167,8 +173,8 @@ These two later options may be useful for model debugging and extensions.</p></d
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Regression Coefficients:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept           1.62      0.01     1.60     1.63 1.00     1724     1575</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1568     1219</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Intercept           1.62      0.01     1.60     1.63 1.00     1983     1234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1457     1189</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> and Tail_ESS are effective sample size measures, and Rhat is the potential</span>

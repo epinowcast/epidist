@@ -175,9 +175,15 @@ variables in the model formula.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No primary event upper bound provided, using the primary event lower bound + 1 day as the assumed upper bound.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No secondary event upper bound provided, using the secondary event lower bound + 1 day as the assumed upper bound.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No observation time column provided, using 2015-09-14 as the observation date (the maximum of the secondary event upper bound).</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Setting 8294 observation times beyond 98 (=2x max delay) to Inf. This</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   improves model efficiency by reducing unique observation times while</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   maintaining model accuracy as these times should have negligible impact.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Setting 8294 relative observation times (`relative_obs_time`) greater than 98</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   (2x the maximum delay) to <span style="color: #0000BB;">Inf</span>.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> This improves model efficiency by reducing the number of unique observation</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   times in the data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The impact on model accuracy should be negligible because these relative</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   observation times are high enough to cause very limited right truncation.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The original relative observation times are available in</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   `orig_relative_obs_time`.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Raise `obs_time_threshold` to avoid this behaviour.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8,358 × 23</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id   age sex   pdate_lwr </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>    </span>

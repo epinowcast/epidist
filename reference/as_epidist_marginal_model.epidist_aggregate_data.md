@@ -72,9 +72,15 @@ sierra_leone_ebola_data |>
 #> ℹ No primary event upper bound provided, using the primary event lower bound + 1 day as the assumed upper bound.
 #> ℹ No secondary event upper bound provided, using the secondary event lower bound + 1 day as the assumed upper bound.
 #> ℹ No observation time column provided, using 2015-09-14 as the observation date (the maximum of the secondary event upper bound).
-#> ! Setting 2394 observation times beyond 98 (=2x max delay) to Inf. This
-#>   improves model efficiency by reducing unique observation times while
-#>   maintaining model accuracy as these times should have negligible impact.
+#> ! Setting 2394 relative observation times (`relative_obs_time`) greater than 98
+#>   (2x the maximum delay) to Inf.
+#> ℹ This improves model efficiency by reducing the number of unique observation
+#>   times in the data.
+#> ℹ The impact on model accuracy should be negligible because these relative
+#>   observation times are high enough to cause very limited right truncation.
+#> ℹ The original relative observation times are available in
+#>   `orig_relative_obs_time`.
+#> ℹ Raise `obs_time_threshold` to avoid this behaviour.
 #> # A tibble: 2,453 × 18
 #>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time pdate_lwr  sdate_lwr      n
 #>        <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <date>     <date>     <int>

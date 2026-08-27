@@ -97,9 +97,15 @@ fit <- sierra_leone_ebola_data |>
 #> ℹ No primary event upper bound provided, using the primary event lower bound + 1 day as the assumed upper bound.
 #> ℹ No secondary event upper bound provided, using the secondary event lower bound + 1 day as the assumed upper bound.
 #> ℹ No observation time column provided, using 2015-09-14 as the observation date (the maximum of the secondary event upper bound).
-#> ! Setting 2394 observation times beyond 98 (=2x max delay) to Inf. This
-#>   improves model efficiency by reducing unique observation times while
-#>   maintaining model accuracy as these times should have negligible impact.
+#> ! Setting 2394 relative observation times (`relative_obs_time`) greater than 98
+#>   (2x the maximum delay) to Inf.
+#> ℹ This improves model efficiency by reducing the number of unique observation
+#>   times in the data.
+#> ℹ The impact on model accuracy should be negligible because these relative
+#>   observation times are high enough to cause very limited right truncation.
+#> ℹ The original relative observation times are available in
+#>   `orig_relative_obs_time`.
+#> ℹ Raise `obs_time_threshold` to avoid this behaviour.
 #> Warning: Found infinite values in the data, which may cause issues for Stan.
 #> ℹ Data summarised by unique combinations of:
 #> * Model variables: delay bounds, observation time, and primary censoring window
@@ -121,8 +127,8 @@ summary(fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.62      0.01     1.60     1.63 1.00     1724     1575
-#> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1568     1219
+#> Intercept           1.62      0.01     1.60     1.63 1.00     1983     1234
+#> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1457     1189
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
