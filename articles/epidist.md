@@ -11,7 +11,7 @@ delay distribution estimation. See the
 [`vignette("faq")`](https://epidist.epinowcast.org/articles/faq.md) for
 more details on the tools available in the `brms` ecosystem.
 
-In this vignettte, we will give a quick start guide to using the
+In this vignette, we will give a quick start guide to using the
 `epidist` package. To get started we will introduce some of the key
 concepts in delay distribution estimation, and then simulate some data
 delay data from a stochastic outbreak that includes common biases. Using
@@ -124,7 +124,7 @@ obs_time <- 25
 
 Click to expand for simulation details
 
-First, we use the [Gillepsie
+First, we use the [Gillespie
 algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to
 generate infectious disease outbreak data (Figure [3.1](#fig:outbreak))
 from a stochastic compartmental model.
@@ -690,8 +690,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3772     2281
-#> sigma_Intercept    -0.75      0.05    -0.85    -0.66 1.00     3126     2583
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3107     2241
+#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     2861     2191
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -803,8 +803,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.64 1.00     2258     2013
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     2121     2257
+#> Intercept           1.55      0.05     1.47     1.65 1.00     2169     2256
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2280     2299
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -835,12 +835,12 @@ predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
 
 head(predicted_parameters)
 #>      model draw index       mu     sigma     mean       sd
-#> 1 marginal    1     1 1.565037 0.4957535 5.408234 2.854643
-#> 2 marginal    2     1 1.545730 0.5355712 5.414869 3.120987
-#> 3 marginal    3     1 1.545730 0.5355712 5.414869 3.120987
-#> 4 marginal    4     1 1.563033 0.5504664 5.554116 3.304267
-#> 5 marginal    5     1 1.496832 0.4792426 5.011169 2.546291
-#> 6 marginal    6     1 1.484102 0.5158373 5.038690 2.782023
+#> 1 marginal    1     1 1.479523 0.4655606 4.893446 2.407404
+#> 2 marginal    2     1 1.626628 0.5610847 5.953836 3.621612
+#> 3 marginal    3     1 1.584103 0.5210361 5.583650 3.118371
+#> 4 marginal    4     1 1.554844 0.5128959 5.399870 2.962101
+#> 5 marginal    5     1 1.562424 0.5092150 5.430731 2.954749
+#> 6 marginal    6     1 1.598750 0.5319331 5.698635 3.258915
 ```
 
 Note that by default
@@ -848,7 +848,7 @@ Note that by default
 gives predictions for every row in the transformed data. Here as we only
 want posterior draws for the summary parameters we filter to the first
 row or the first data point. This prevents repeating the same prediction
-for each row. Another approach to this would be prodividing `newdata` to
+for each row. Another approach to this would be providing `newdata` to
 [`predict_delay_parameters()`](https://epidist.epinowcast.org/reference/predict_delay_parameters.md)
 representing the data we want to make predictions for.
 

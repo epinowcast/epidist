@@ -18,6 +18,11 @@ is_epidist_aggregate_data(data, ...)
 
   Additional arguments
 
+## Value
+
+A logical, `TRUE` if `data` inherits from `epidist_aggregate_data` and
+`FALSE` otherwise.
+
 ## See also
 
 Other aggregate_data:

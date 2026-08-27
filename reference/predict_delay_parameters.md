@@ -31,6 +31,10 @@ predict_dpar(fit, newdata = NULL, ...)
   Additional arguments passed to
   [`brms::prepare_predictions()`](https://paulbuerkner.com/brms/reference/prepare_predictions.html).
 
+## Value
+
+A `data.frame` of posterior draws of the delay distribution parameters.
+
 ## See also
 
 Other postprocess:

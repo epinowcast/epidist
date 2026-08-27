@@ -30,6 +30,10 @@ epidist_formula_model(data, formula, ...)
 
   Additional arguments passed to method.
 
+## Value
+
+A `brmsformula` object.
+
 ## See also
 
 Other naive_model:

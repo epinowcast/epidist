@@ -22,6 +22,10 @@ as_epidist_linelist_data(data, ...)
 
   Additional arguments passed to methods
 
+## Value
+
+An object of class `epidist_linelist_data`.
+
 ## See also
 
 Other linelist_data:

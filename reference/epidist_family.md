@@ -36,6 +36,10 @@ epidist_family(data, family = lognormal(), ...)
 
   Additional arguments passed to `fn` method.
 
+## Value
+
+A `brms` custom family object.
+
 ## See also
 
 Other family:

@@ -28,6 +28,10 @@ as_epidist_marginal_model(data, ...)
 
   Additional arguments passed to methods.
 
+## Value
+
+An object of class `epidist_marginal_model`.
+
 ## See also
 
 Other marginal_model:

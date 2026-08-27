@@ -24,11 +24,17 @@ as_epidist_latent_model(data, ...)
 
   Additional arguments passed to methods.
 
+## Value
+
+An object of class `epidist_latent_model`.
+
 ## References
 
-- [Park et al. (2024)](https://doi.org/10.1101/2024.01.12.24301247)
+- Park et al. (2024)
+  [doi:10.1101/2024.01.12.24301247](https://doi.org/10.1101/2024.01.12.24301247)
 
-- [Charniga et al. (2024)](https://doi.org/10.1371/journal.pcbi.1012520)
+- Charniga et al. (2024)
+  [doi:10.1371/journal.pcbi.1012520](https://doi.org/10.1371/journal.pcbi.1012520)
 
 ## See also
 

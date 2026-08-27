@@ -1,11 +1,12 @@
-# Default method for defining a model specific formula
+# The model-specific parts of an `epidist_formula()` call
 
-Default method for defining a model specific formula
+The model-specific parts of an
+[`epidist_formula()`](https://epidist.epinowcast.org/reference/epidist_formula.md)
+call
 
 ## Usage
 
 ``` r
-# Default S3 method
 epidist_formula_model(data, formula, ...)
 ```
 
@@ -37,4 +38,4 @@ A `brmsformula` object.
 
 Other formula:
 [`epidist_formula()`](https://epidist.epinowcast.org/reference/epidist_formula.md),
-[`epidist_formula_model()`](https://epidist.epinowcast.org/reference/epidist_formula_model.md)
+[`epidist_formula_model.default()`](https://epidist.epinowcast.org/reference/epidist_formula_model.default.md)

@@ -14,6 +14,11 @@ is_epidist_marginal_model(data)
 
   A `data.frame` containing line list data
 
+## Value
+
+A logical, `TRUE` if `data` inherits from `epidist_marginal_model` and
+`FALSE` otherwise.
+
 ## See also
 
 Other marginal_model:

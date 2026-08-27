@@ -21,6 +21,10 @@ as_epidist_aggregate_data(data, ...)
 
   Additional arguments passed to methods
 
+## Value
+
+An object of class `epidist_aggregate_data`.
+
 ## See also
 
 Other aggregate_data:

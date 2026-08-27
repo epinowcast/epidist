@@ -18,6 +18,10 @@ add_mean_sd(data, ...)
 
   Additional arguments for method.
 
+## Value
+
+The input with natural scale `mean` and `sd` columns added.
+
 ## See also
 
 Other postprocess:

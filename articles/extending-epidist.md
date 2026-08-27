@@ -65,7 +65,7 @@ Three are optional.
 
 | Generic | What you supply | If you skip it |
 |----|----|----|
-| [`epidist_formula_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md) | How the user’s formula is rewritten, usually adding `vreal()` terms | Returns the formula unchanged |
+| [`epidist_formula_model()`](https://epidist.epinowcast.org/reference/epidist_formula_model.md) | How the user’s formula is rewritten, usually adding `vreal()` terms | Returns the formula unchanged |
 | [`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md) | Reshaping before fitting | Returns the data unchanged |
 | [`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md) | Model specific priors | `NULL` |
 

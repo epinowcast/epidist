@@ -19,6 +19,10 @@ assert_epidist(data, ...)
 
   Additional arguments
 
+## Value
+
+`NULL`, invisibly. Called for the side effect of validating `data`.
+
 ## See also
 
 Other aggregate_data:

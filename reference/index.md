@@ -261,7 +261,6 @@ Functions related to specifying custom `brms` families
   Define `epidist` family
 
 - [`epidist_family_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md)
-  [`epidist_formula_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md)
   :
 
   The model-specific parts of an
@@ -279,16 +278,15 @@ Functions related to specifying custom `brms` families
 
 Functions related to specifying custom `brms` formula
 
-- [`epidist_family_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md)
-  [`epidist_formula_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md)
+- [`epidist_formula()`](https://epidist.epinowcast.org/reference/epidist_formula.md)
+  : Define a model specific formula
+
+- [`epidist_formula_model()`](https://epidist.epinowcast.org/reference/epidist_formula_model.md)
   :
 
   The model-specific parts of an
-  [`epidist_family()`](https://epidist.epinowcast.org/reference/epidist_family.md)
+  [`epidist_formula()`](https://epidist.epinowcast.org/reference/epidist_formula.md)
   call
-
-- [`epidist_formula()`](https://epidist.epinowcast.org/reference/epidist_formula.md)
-  : Define a model specific formula
 
 - [`epidist_formula_model(`*`<default>`*`)`](https://epidist.epinowcast.org/reference/epidist_formula_model.default.md)
   : Default method for defining a model specific formula

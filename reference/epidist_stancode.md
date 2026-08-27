@@ -24,6 +24,10 @@ epidist_stancode(data, ...)
 
   Additional arguments passed to `fn` method.
 
+## Value
+
+A list of `stanvars` objects, or `NULL` when none are needed.
+
 ## See also
 
 Other stan:

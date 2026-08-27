@@ -14,6 +14,11 @@ is_epidist_latent_model(data)
 
   An object
 
+## Value
+
+A logical, `TRUE` if `data` inherits from `epidist_latent_model` and
+`FALSE` otherwise.
+
 ## See also
 
 Other latent_model:

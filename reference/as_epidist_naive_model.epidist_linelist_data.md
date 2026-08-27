@@ -30,6 +30,10 @@ as_epidist_naive_model(data, weight = NULL, ...)
 
   Additional arguments passed to methods.
 
+## Value
+
+An object of class `epidist_naive_model`.
+
 ## Details
 
 When a formula is specified in

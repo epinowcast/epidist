@@ -18,13 +18,13 @@
 Source:
 [`inst/CITATION`](https://github.com/epinowcast/epidist/blob/main/inst/CITATION)
 
-Adam Howes, Park S, Sam Abbott (NULL). *epidist: Estimate
-Epidemiological Delay Distributions With brms*.
+Adam Howes, Park S, Sam Abbott (2026). *epidist: Estimate
+Epidemiological Delay Distributions with 'brms'*.
 [doi:10.5281/zenodo.14213017](https://doi.org/10.5281/zenodo.14213017).
 
     @Manual{,
-      title = {epidist: Estimate Epidemiological Delay Distributions With brms},
+      title = {epidist: Estimate Epidemiological Delay Distributions with 'brms'},
       author = {{Adam Howes} and Sang Woo Park and {Sam Abbott}},
-      year = {NULL},
+      year = {2026},
       doi = {10.5281/zenodo.14213017},
     }

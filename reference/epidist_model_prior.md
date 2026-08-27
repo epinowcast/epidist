@@ -19,6 +19,10 @@ epidist_model_prior(data, ...)
 
   Additional arguments passed to `fn` method.
 
+## Value
+
+A `brmsprior` object, or `NULL` when the model adds no priors.
+
 ## See also
 
 Other prior:

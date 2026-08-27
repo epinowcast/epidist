@@ -43,6 +43,10 @@ as_epidist_marginal_model(data, obs_time_threshold = 2, delay_min = NULL, ...)
 
   Not used in this method.
 
+## Value
+
+An object of class `epidist_marginal_model`.
+
 ## See also
 
 Other marginal_model:

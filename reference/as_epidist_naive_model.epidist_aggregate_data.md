@@ -23,6 +23,10 @@ as_epidist_naive_model(data, ...)
 
   Additional arguments passed to methods.
 
+## Value
+
+An object of class `epidist_naive_model`.
+
 ## See also
 
 Other naive_model:

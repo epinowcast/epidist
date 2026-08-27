@@ -18,6 +18,11 @@ is_epidist_linelist_data(data, ...)
 
   Additional arguments
 
+## Value
+
+A logical, `TRUE` if `data` inherits from `epidist_linelist_data` and
+`FALSE` otherwise.
+
 ## See also
 
 Other linelist_data:

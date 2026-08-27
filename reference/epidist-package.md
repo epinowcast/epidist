@@ -1,4 +1,4 @@
-# epidist: Estimate Epidemiological Delay Distributions With brms
+# epidist: Estimate Epidemiological Delay Distributions with 'brms'
 
 Understanding and accurately estimating epidemiological delay
 distributions is important for public health policy. These estimates
@@ -26,6 +26,9 @@ Useful links:
 ([ORCID](https://orcid.org/0000-0001-8057-8037)) \[copyright holder\]
 
 Authors:
+
+- Sam Abbott <contact@samabbott.co.uk>
+  ([ORCID](https://orcid.org/0000-0001-8057-8037)) \[copyright holder\]
 
 - Adam Howes <adamthowes@gmail.com>
   ([ORCID](https://orcid.org/0000-0003-2386-4031))

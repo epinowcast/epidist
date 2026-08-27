@@ -33,7 +33,8 @@ library(cmdstanr) # nolint
 
 For users new to `epidist`, before reading this article we recommend
 beginning with the “[Getting started with
-`epidist`](http://epidist.epinowcast.org/articles/epidist.md)” vignette.
+`epidist`](https://epidist.epinowcast.org/articles/epidist.html)”
+vignette.
 
 ## 1 Using the cmdstanr backend
 

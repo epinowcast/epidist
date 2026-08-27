@@ -67,6 +67,10 @@ as_epidist_marginal_model(
 
   Not used in this method.
 
+## Value
+
+An object of class `epidist_marginal_model`.
+
 ## Details
 
 The marginal model performs internal aggregation to optimize

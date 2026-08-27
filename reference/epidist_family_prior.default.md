@@ -37,6 +37,10 @@ epidist_family_prior(family, formula, ...)
 
   Additional arguments passed to `fn` method.
 
+## Value
+
+A `brmsprior` object, or `NULL` when the model adds no priors.
+
 ## See also
 
 Other prior:

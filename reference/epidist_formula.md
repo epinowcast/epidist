@@ -39,8 +39,12 @@ epidist_formula(data, family, formula, ...)
 
   Additional arguments passed to `fn` method.
 
+## Value
+
+A `brmsformula` object.
+
 ## See also
 
 Other formula:
-[`epidist_family_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md),
+[`epidist_formula_model()`](https://epidist.epinowcast.org/reference/epidist_formula_model.md),
 [`epidist_formula_model.default()`](https://epidist.epinowcast.org/reference/epidist_formula_model.default.md)

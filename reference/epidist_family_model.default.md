@@ -26,6 +26,10 @@ epidist_family_model(data, family, ...)
 
   Additional arguments passed to `fn` method.
 
+## Value
+
+A `brms` custom family object.
+
 ## See also
 
 Other family:

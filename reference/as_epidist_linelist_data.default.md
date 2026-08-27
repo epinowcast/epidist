@@ -42,6 +42,10 @@ as_epidist_linelist_data(
 
   Additional columns to add to the epidist_linelist_data object.
 
+## Value
+
+An object of class `epidist_linelist_data`.
+
 ## See also
 
 Other linelist_data:

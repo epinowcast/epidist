@@ -14,6 +14,11 @@ is_epidist_naive_model(data)
 
   An object.
 
+## Value
+
+A logical, `TRUE` if `data` inherits from `epidist_naive_model` and
+`FALSE` otherwise.
+
 ## See also
 
 Other naive_model:

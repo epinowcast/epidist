@@ -25,6 +25,10 @@ as_epidist_latent_model(data, ...)
 
   Not used in this method.
 
+## Value
+
+An object of class `epidist_latent_model`.
+
 ## See also
 
 Other latent_model:
