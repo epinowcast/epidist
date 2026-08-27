@@ -51,8 +51,9 @@ It adds a forward model of the naive estimator for summary rows, so both kinds o
 # What we need from a study {#metadata}
 
 Reviews rarely record exactly how a study estimated its delay.
-To use a reported summary we need to know roughly how the study handled two common biases, along with the data process it saw.
+To use a reported summary we need to know roughly how the study handled the common biases, along with the data process it saw.
 The meta model supports only a few common approaches, encoded as follows.
+We plan to support further biases, such as right and left censoring, across all of the models in the package.
 
 * **How the study adjusted for censoring** (`cens_adjusted`), one of `0` if it took integer date differences and summarised them directly (the most common case), `1` if it used a method that targets the continuous delay, such as a latent variable or marginal likelihood, `2` if it adjusted only the secondary interval assuming a uniform delay within it, or `3` if it assigned each delay to the centre of the interval it was observed in.
 * **Whether it adjusted for right truncation** (`trunc_adjusted`), and if not, **the observation time** (`relative_obs_time`) and **how collection stopped** (`trunc_design`).

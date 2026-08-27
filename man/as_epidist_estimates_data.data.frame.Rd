@@ -129,8 +129,10 @@ corresponding argument.
 Published delay estimates are almost never estimates of the true continuous
 delay distribution.
 To use them we forward model what the study's estimation procedure would
-converge to, which means we need to know how the study handled the two
-biases we support, along with the data process it saw.
+converge to, which means we need to know how the study handled the biases
+we support, along with the data process it saw.
+We plan to support further biases, such as right and left censoring, across
+all of the models in the package.
 For each study we need:
 \itemize{
 \item \strong{Roughly how it adjusted for censoring} (\code{cens_adjusted}).
