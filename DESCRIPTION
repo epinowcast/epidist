@@ -75,6 +75,8 @@ Suggests:
     usethis
 Additional_repositories:
     https://stan-dev.r-universe.dev
+Remotes:
+    mrc-ide/epireview
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
