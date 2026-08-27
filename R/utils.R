@@ -87,6 +87,24 @@
   return(c("class", "coef", "group", "resp", "dpar", "nlpar"))
 }
 
+#' Choose between the new and the old value of a prior column
+#'
+#' Keeps the result a character vector when there are no priors to choose
+#' between, so that the result can still be combined with other priors.
+#'
+#' @param updated A logical vector flagging where a new prior was supplied.
+#'
+#' @param new The values from the new priors.
+#'
+#' @param old The values from the old priors.
+#'
+#' @returns A character vector the same length as `updated`.
+#'
+#' @keywords internal
+.pick_prior_col <- function(updated, new, old) {
+  return(as.character(ifelse(updated, new, old)))
+}
+
 #' Replace `brms` prior distributions
 #'
 #' This function takes an existing set of prior distributions and updates them
@@ -149,10 +167,12 @@
   standard <- mutate(
     standard,
     updated = !is.na(.data$prior_new),
-    lb = ifelse(.data$updated, .data$lb_new, .data$lb_old),
-    ub = ifelse(.data$updated, .data$ub_new, .data$ub_old),
-    prior = ifelse(.data$updated, .data$prior_new, .data$prior_old),
-    source = ifelse(.data$updated, .data$source_new, .data$source_old)
+    lb = .pick_prior_col(.data$updated, .data$lb_new, .data$lb_old),
+    ub = .pick_prior_col(.data$updated, .data$ub_new, .data$ub_old),
+    prior = .pick_prior_col(.data$updated, .data$prior_new, .data$prior_old),
+    source = .pick_prior_col(
+      .data$updated, .data$source_new, .data$source_old
+    )
   )
 
   if (isTRUE(enforce_presence)) {

@@ -87,6 +87,31 @@ test_that(".replace_prior handles custom ~ priors correctly", {
   expect_s3_class(prior, "data.frame")
 })
 
+test_that(".replace_prior handles priors which are all manual", {
+  old_prior <- brms::prior("mu ~ normal(0, 10)", check = FALSE)
+  new_prior <- brms::prior("mu ~ normal(0, 5)", check = FALSE) +
+    brms::prior("gamma ~ normal(0, 2)", check = FALSE)
+
+  prior <- .replace_prior(old_prior, new_prior)
+  expect_identical(
+    prior$prior,
+    c("mu ~ normal(0, 5)", "gamma ~ normal(0, 2)")
+  )
+  expect_s3_class(prior, "brmsprior")
+})
+
+test_that(".replace_prior handles empty priors", {
+  old_prior <- brms::prior("normal(0, 10)", class = "Intercept")
+
+  expect_identical(as.double(nrow(.replace_prior(
+    old_prior, brms::empty_prior()
+  ))), 0)
+  expect_identical(
+    .replace_prior(brms::empty_prior(), old_prior, enforce_presence = FALSE)$prior, # nolint: line_length_linter.
+    "normal(0, 10)"
+  )
+})
+
 test_that(".add_dpar_info works as expected for the lognormal and gamma families", { # nolint: line_length_linter.
   lognormal_extra <- .add_dpar_info(lognormal())
   expect_identical(lognormal_extra$other_links, "log")

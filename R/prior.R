@@ -113,8 +113,7 @@ epidist_prior <- function(
   if (nrow(standard) == 0) {
     return(invisible(NULL))
   }
-  matched <- dplyr::semi_join(standard, known, by = .prior_match_cols())
-  unmatched <- dplyr::anti_join(standard, matched, by = .prior_match_cols())
+  unmatched <- dplyr::anti_join(standard, known, by = .prior_match_cols())
   if (nrow(unmatched) > 0) {
     msg <- c(
       "!" = "One or more priors have no match in existing parameters:",
