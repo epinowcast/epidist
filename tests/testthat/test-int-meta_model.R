@@ -294,12 +294,17 @@ test_that("epidist.epidist_meta_model recovers known parameters from simulated g
 test_that("epidist.epidist_meta_model recovers known parameters from reported fits and posterior draws", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   # Five studies published lognormal parameters fitted to their own naive
-  # date differences. A sixth published posterior draws of the delay mean and
-  # standard deviation with the covariance between them.
+  # date differences, each summary carrying its own standard error. A sixth
+  # published posterior draws of the delay mean and standard deviation, so
+  # only that study contributes a covariance.
   skip_on_cran()
   skip_if_no_cmdstanr()
   expect_convergence(fit_meta_reported)
-  expect_length(.estimates_vcov(sim_reported_estimates), 6)
+  expect_named(.estimates_vcov(sim_reported_estimates), "posterior_draws")
+  expect_true(all(
+    !is.na(sim_reported_estimates$se) |
+      sim_reported_estimates$mvn_id == "posterior_draws"
+  ))
   expect_identical(
     unique(sim_reported_estimates$type), c("mean", "sd")
   )
