@@ -41,6 +41,8 @@ censoring and truncation. The returned function takes a \code{prep} argument fro
 
 Other gen: 
 \code{\link{epidist_gen_log_lik}()},
+\code{\link{epidist_gen_meta_log_lik}()},
+\code{\link{epidist_gen_meta_predict}()},
 \code{\link{epidist_gen_posterior_epred}()}
 }
 \concept{gen}

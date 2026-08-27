@@ -7,6 +7,7 @@
 .meta_implied_moments(
   dist,
   args,
+  lower = 0,
   cutoff,
   pwindow,
   swindow,
@@ -20,6 +21,8 @@
 \item{dist}{A \code{primarycensored} distribution function name.}
 
 \item{args}{A named list of distribution parameters.}
+
+\item{lower}{The study's minimum delay (its left truncation point).}
 
 \item{cutoff}{The grid cutoff, either the study observation time or
 \code{max_delay}.}
@@ -36,7 +39,8 @@ otherwise.}
 \item{trunc_design}{0 for a cohort design, 1 for an accrual design.}
 }
 \value{
-A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis}.
+A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and
+\code{skewness}.
 }
 \description{
 Forward models the summaries that a study would converge to given the biases

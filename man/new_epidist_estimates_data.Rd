@@ -24,6 +24,7 @@ Other estimates_data:
 \code{\link{as_epidist_estimates_data}()},
 \code{\link{as_epidist_estimates_data.data.frame}()},
 \code{\link{assert_epidist.epidist_estimates_data}()},
+\code{\link{bootstrap_delay_estimates}()},
 \code{\link{is_epidist_estimates_data}()}
 }
 \concept{estimates_data}

@@ -19,6 +19,20 @@ Allows summary estimates to be passed as the first argument, so that
 \code{as_epidist_meta_model(estimates)} and
 \code{as_epidist_meta_model(estimates = estimates)} are equivalent.
 }
+\examples{
+estimates <- as_epidist_estimates_data(
+  data.frame(
+    study = c("A", "A"),
+    type = c("mean", "sd"),
+    value = c(7.5, 3.6),
+    n = c(120, 120),
+    relative_obs_time = c(20, 20),
+    trunc_adjusted = c(FALSE, FALSE),
+    cens_adjusted = c(0, 0)
+  )
+)
+as_epidist_meta_model(estimates)
+}
 \seealso{
 Other meta_model: 
 \code{\link{as_epidist_meta_model}()},
@@ -28,8 +42,6 @@ Other meta_model:
 \code{\link{assert_epidist.epidist_meta_model}()},
 \code{\link{epidist_family_model.epidist_meta_model}()},
 \code{\link{epidist_formula_model.epidist_meta_model}()},
-\code{\link{epidist_gen_meta_log_lik}()},
-\code{\link{epidist_gen_meta_predict}()},
 \code{\link{epidist_transform_data_model.epidist_meta_model}()},
 \code{\link{is_epidist_meta_model}()},
 \code{\link{new_epidist_meta_model}()}

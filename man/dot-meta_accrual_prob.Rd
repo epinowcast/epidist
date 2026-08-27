@@ -4,7 +4,16 @@
 \alias{.meta_accrual_prob}
 \title{The distribution function of a continuous estimand under an accrual design}
 \usage{
-.meta_accrual_prob(y, dist, args, cutoff, pwindow, cens_adjusted, growth_rate)
+.meta_accrual_prob(
+  y,
+  dist,
+  args,
+  lower = 0,
+  cutoff,
+  pwindow,
+  cens_adjusted,
+  growth_rate
+)
 }
 \arguments{
 \item{y}{The reported quantile value.}
@@ -12,6 +21,8 @@
 \item{dist}{A \code{primarycensored} distribution function name.}
 
 \item{args}{A named list of distribution parameters.}
+
+\item{lower}{The study's minimum delay (its left truncation point).}
 
 \item{cutoff}{The grid cutoff, either the study observation time or
 \code{max_delay}.}
@@ -24,10 +35,7 @@
 A probability.
 }
 \description{
-Builds the accrual weighted distribution function on the quadrature grid and
-interpolates it linearly at the reported value. The weight is offset by half
-a primary window for the uniform single interval approximation, matching
-\code{\link[=.meta_pcens_trunc_moments]{.meta_pcens_trunc_moments()}}, so that the reported quantile and the
-reported moments describe the same estimand.
+Interpolates the accrual weighted distribution function of
+\code{\link[=.meta_accrual_nodes]{.meta_accrual_nodes()}} linearly at the reported value.
 }
 \keyword{internal}

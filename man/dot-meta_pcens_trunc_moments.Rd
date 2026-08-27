@@ -7,6 +7,7 @@
 .meta_pcens_trunc_moments(
   dist,
   args,
+  lower = 0,
   cutoff,
   pwindow,
   growth_rate,
@@ -18,6 +19,8 @@
 
 \item{args}{A named list of distribution parameters.}
 
+\item{lower}{The study's minimum delay (its left truncation point).}
+
 \item{cutoff}{The grid cutoff, either the study observation time or
 \code{max_delay}.}
 
@@ -26,7 +29,8 @@
 \item{accrual}{1 to apply the accrual weight, 0 otherwise.}
 }
 \value{
-A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis}.
+A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and
+\code{skewness}.
 }
 \description{
 The estimand is the delay plus the primary event offset within its window,

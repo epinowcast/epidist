@@ -4,7 +4,13 @@
 \alias{as_epidist_meta_model.epidist_aggregate_data}
 \title{The meta model method for \code{epidist_aggregate_data} objects}
 \usage{
-\method{as_epidist_meta_model}{epidist_aggregate_data}(data, estimates = NULL, obs_time_threshold = 2, ...)
+\method{as_epidist_meta_model}{epidist_aggregate_data}(
+  data,
+  estimates = NULL,
+  obs_time_threshold = 2,
+  delay_min = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{An \code{epidist_aggregate_data} object.}
@@ -17,6 +23,16 @@ relative observation times to Inf. Observation times greater than
 \code{obs_time_threshold} times the maximum delay will be set to Inf to improve
 model efficiency by reducing the number of unique observation times.
 Default is 2.}
+
+\item{delay_min}{Minimum delay (left truncation point). Can be:
+\itemize{
+\item \code{NULL} (default): uses a \code{delay_min} column from the data if present,
+otherwise defaults to 0 (no left truncation).
+\item A numeric scalar: applied to all observations.
+\item A column name string: looks up the named column in the data.
+This is passed as the \code{L} parameter to
+\code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}}.
+}}
 
 \item{...}{Additional arguments passed to methods.}
 }
@@ -44,8 +60,6 @@ Other meta_model:
 \code{\link{assert_epidist.epidist_meta_model}()},
 \code{\link{epidist_family_model.epidist_meta_model}()},
 \code{\link{epidist_formula_model.epidist_meta_model}()},
-\code{\link{epidist_gen_meta_log_lik}()},
-\code{\link{epidist_gen_meta_predict}()},
 \code{\link{epidist_transform_data_model.epidist_meta_model}()},
 \code{\link{is_epidist_meta_model}()},
 \code{\link{new_epidist_meta_model}()}

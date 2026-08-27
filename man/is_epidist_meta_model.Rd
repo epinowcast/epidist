@@ -22,8 +22,6 @@ Other meta_model:
 \code{\link{assert_epidist.epidist_meta_model}()},
 \code{\link{epidist_family_model.epidist_meta_model}()},
 \code{\link{epidist_formula_model.epidist_meta_model}()},
-\code{\link{epidist_gen_meta_log_lik}()},
-\code{\link{epidist_gen_meta_predict}()},
 \code{\link{epidist_transform_data_model.epidist_meta_model}()},
 \code{\link{new_epidist_meta_model}()}
 }

@@ -4,11 +4,13 @@
 \alias{.meta_accrual_reweight}
 \title{Reweight a distribution function for an accrual design}
 \usage{
-.meta_accrual_reweight(cdf, cutoff, growth_rate, weight_offset = 0)
+.meta_accrual_reweight(cdf, lower, cutoff, growth_rate, weight_offset = 0)
 }
 \arguments{
 \item{cdf}{The distribution function at equally spaced nodes running from
-zero to \code{cutoff}.}
+\code{lower} to \code{cutoff}.}
+
+\item{lower}{The study's minimum delay (its left truncation point).}
 
 \item{cutoff}{The length of the collection window.}
 

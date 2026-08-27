@@ -18,6 +18,7 @@ Assert validity of \code{epidist_estimates_data} objects
 Other estimates_data: 
 \code{\link{as_epidist_estimates_data}()},
 \code{\link{as_epidist_estimates_data.data.frame}()},
+\code{\link{bootstrap_delay_estimates}()},
 \code{\link{is_epidist_estimates_data}()},
 \code{\link{new_epidist_estimates_data}()}
 }

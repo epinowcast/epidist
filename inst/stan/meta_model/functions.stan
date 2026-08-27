@@ -10,59 +10,53 @@
   *   reparameterised according to the brms parameterisation for Stan.
   * - 'primary_id' is replaced with the primary distribution identifier used
   *   for individual level rows.
+  * - 'n_quad_default' is replaced with the number of quadrature intervals
+  *   used for truncated continuous moments, which is `.meta_n_quad()` in R.
   *
-  * Summaries are returned as a vector of the mean, the standard deviation and
-  * the kurtosis of the biased estimand. The kurtosis is needed because the
-  * sampling error of a reported standard deviation depends on it.
+  * Summaries are returned as a vector of the mean, the standard deviation,
+  * the kurtosis and the skewness of the biased estimand. The kurtosis is
+  * needed because the sampling error of a reported standard deviation depends
+  * on it, and the skewness because the sampling covariance of a reported mean
+  * and a reported standard deviation from the same study depends on it.
+  *
+  * Every summary is conditioned on the delay exceeding `delay_min`, the
+  * study's left truncation point, which is zero for a study that counted
+  * every delay.
   */
 
-  /**
-    * Package a mean and central moments into a summary vector
-    *
-    * @param delay_mean Mean of the estimand
-    * @param variance Variance of the estimand
-    * @param fourth Fourth central moment of the estimand
-    *
-    * @return Vector of the mean, standard deviation and kurtosis
-    */
-  vector meta_family_moment_vector(real delay_mean, real variance,
+  /** Package a mean and central moments into a summary vector. */
+  vector meta_family_moment_vector(real delay_mean, real variance, real third,
                                    real fourth) {
     real safe_variance = fmax(variance, 1e-10);
     return [delay_mean, sqrt(safe_variance),
-            fmax(fourth / safe_variance ^ 2, 1)]';
+            fmax(fourth / safe_variance ^ 2, 1),
+            third / pow(safe_variance, 1.5)]';
   }
 
-  /**
-    * Convert the first four raw moments into a summary vector
-    *
-    * @param raw Vector of the first four raw moments
-    *
-    * @return Vector of the mean, standard deviation and kurtosis
-    */
+  /** Convert the first four raw moments into a summary vector. */
   vector meta_family_central_from_raw(vector raw) {
     real m1 = raw[1];
     real variance = raw[2] - m1 ^ 2;
+    real third = raw[3] - 3 * m1 * raw[2] + 2 * m1 ^ 3;
     real fourth = raw[4] - 4 * m1 * raw[3] + 6 * m1 ^ 2 * raw[2] - 3 * m1 ^ 4;
-    return meta_family_moment_vector(m1, variance, fourth);
+    return meta_family_moment_vector(m1, variance, third, fourth);
   }
 
-  /**
-    * The log follow up available to a delay under an accrual design
-    *
-    * A study that collected primary events over a window and stopped at its
-    * calendar end could only observe a delay of d for the primary events that
-    * occurred at least d before the stop. With primary events arriving at a
-    * rate proportional to exp(r t) the amount of such follow up is
-    * w(d) = (exp(r (window - d)) - 1) / r, which tends to window - d as r
-    * tends to zero. Working on the log scale keeps the weight finite for a
-    * fast growing epidemic observed over a long window.
-    *
-    * @param d Delay
-    * @param window Length of the collection window
-    * @param r Exponential growth rate of primary events
-    *
-    * @return Log follow up available to the delay
-    */
+  /** Difference of two exponentiated logs, guarded against underflow. */
+  real meta_family_diff_exp(real log_upper, real log_lower) {
+    if (is_inf(log_upper)) {
+      return 0;
+    }
+    if (is_inf(log_lower)) {
+      return exp(log_upper);
+    }
+    if (log_upper <= log_lower) {
+      return 0;
+    }
+    return exp(log_diff_exp(log_upper, log_lower));
+  }
+
+  /** Log follow up available to a delay under an accrual design. */
   real meta_family_log_accrual_weight(data real d, data real window,
                                       data real r) {
     real remaining = fmax(window - d, 0);
@@ -79,43 +73,37 @@
     return log1m_exp(r * remaining) - log(-r);
   }
 
-  /**
-    * Reweight a distribution function for an accrual design
-    *
-    * Weights the probability mass between consecutive quadrature nodes by the
-    * follow up available at the midpoint of the interval, then renormalises,
-    * so that the returned distribution function is that of the delays a study
-    * collecting up to a calendar stop would have seen.
-    *
-    * Where the quantity being weighted already includes the offset of the
-    * primary event within its censoring window, as it does for the uniform
-    * single interval approximation, weight_offset shifts the weight back to
-    * the primary event time. Averaging over the window makes the shift half
-    * its width.
-    *
-    * @param cdf Distribution function at equally spaced nodes running from
-    *   zero to the cutoff
-    * @param cutoff Length of the collection window
-    * @param r Exponential growth rate of primary events
-    * @param weight_offset Amount by which the weighted quantity overstates the
-    *   time from the primary event's censoring window to the secondary event
-    *
-    * @return Distribution function at the same nodes, running from zero to one
-    */
-  vector meta_family_accrual_reweight(vector cdf, data real cutoff,
-                                      data real r,
+  /** Reweight a distribution function for an accrual design. */
+  vector meta_family_accrual_reweight(vector cdf, data real delay_min,
+                                      data real cutoff, data real r,
                                       data real weight_offset) {
     int n_quad = num_elements(cdf) - 1;
-    vector[n_quad] log_weight;
+    vector[n_quad] weight;
     vector[n_quad] mass;
     real total;
-    for (i in 1:n_quad) {
-      log_weight[i] = meta_family_log_accrual_weight(
-        (i - 0.5) * cutoff / n_quad - weight_offset, cutoff, r
-      );
+    if (r == 0) {
+      for (i in 1:n_quad) {
+        weight[i] = fmax(
+          cutoff -
+            (delay_min + (i - 0.5) * (cutoff - delay_min) / n_quad -
+             weight_offset), 0
+        );
+      }
+      if (max(weight) <= 0) {
+        return cdf;
+      }
+      weight = weight / max(weight);
+    } else {
+      vector[n_quad] log_weight;
+      for (i in 1:n_quad) {
+        log_weight[i] = meta_family_log_accrual_weight(
+          delay_min + (i - 0.5) * (cutoff - delay_min) / n_quad -
+            weight_offset, cutoff, r
+        );
+      }
+      weight = exp(log_weight - max(log_weight));
     }
-    mass = (cdf[2:(n_quad + 1)] - cdf[1:n_quad]) .*
-      exp(log_weight - max(log_weight));
+    mass = (cdf[2:(n_quad + 1)] - cdf[1:n_quad]) .* weight;
     total = sum(mass);
     if (total <= 0 || is_nan(total)) {
       return cdf;
@@ -123,22 +111,7 @@
     return append_row(0, cumulative_sum(mass) / total);
   }
 
-  /**
-    * The log primary censored distribution function, guarded against underflow
-    *
-    * Primary distributions without an analytical solution are integrated
-    * numerically, which can return a non positive cumulative probability deep
-    * in the lower tail and so a log of not a number. Those cases carry
-    * negligible probability and are treated as zero.
-    *
-    * @param d Delay
-    * @param params Delay distribution parameters
-    * @param pwindow_width Primary window width
-    * @param prim_id Primary distribution identifier
-    * @param prim_params Primary distribution parameters
-    *
-    * @return Log cumulative probability at the delay
-    */
+  /** Log primary censored distribution function, guarded against underflow. */
   real meta_family_pcens_lcdf(data real d, array[] real params,
                               data real pwindow_width, data int prim_id,
                               array[] real prim_params) {
@@ -156,100 +129,146 @@
     return log_cdf;
   }
 
+  /** Index of the first grid cell a left truncated study could have seen. */
+  int meta_family_grid_first(data real delay_min, data real swindow_width) {
+    return to_int(ceil(delay_min / swindow_width - 1e-9));
+  }
+
   /**
-    * Discrete delay distribution a study using date differences would observe
-    *
-    * The grid runs over delays of 0, swindow_width, 2 * swindow_width and so
-    * on, up to the largest multiple whose upper bound is within the cutoff.
-    * Renormalising the grid conditions on the delay falling within it, which
-    * is how the study's right truncation is applied.
-    *
-    * Under an accrual design the cell masses are additionally weighted by the
-    * follow up available to the delay each cell records, which is the delay at
-    * its lower edge, before renormalising.
-    *
-    * @param params Delay distribution parameters
-    * @param cutoff Grid cutoff (observation time or maximum delay)
-    * @param pwindow_width Primary window width
-    * @param swindow_width Secondary window width and grid spacing
-    * @param prim_id Primary distribution identifier
-    * @param prim_params Primary distribution parameters
-    * @param accrual 1 to apply the accrual weight, 0 otherwise
-    * @param growth_rate Exponential growth rate of primary events
-    *
-    * @return Vector of grid probabilities summing to one
+    * Discrete delay distribution a study using date differences would
+    * observe. Doubly interval censored delay distribution as in
+    * primarycensored, following Park et al. (2024) and Charniga et al.
+    * (2024). See the model guide vignette for the maths. Cells recording a
+    * delay below `delay_min` are dropped and the rest renormalised, which
+    * conditions the grid on the study's left truncation point.
     */
-  vector meta_family_grid_pmf(array[] real params, data real cutoff,
-                              data real pwindow_width,
+  vector meta_family_grid_pmf(array[] real params, data real delay_min,
+                              data real cutoff, data real pwindow_width,
                               data real swindow_width, data int prim_id,
                               array[] real prim_params, data int accrual,
                               data real growth_rate) {
     int n_grid = to_int(floor(cutoff / swindow_width));
-    vector[n_grid + 1] log_cdf;
-    vector[n_grid] log_mass;
-    log_cdf[1] = negative_infinity();
-    for (j in 1:n_grid) {
-      log_cdf[j + 1] = meta_family_pcens_lcdf(
-        j * swindow_width | params, pwindow_width, prim_id, prim_params
-      );
+    int first = meta_family_grid_first(delay_min, swindow_width);
+    int n_cell = n_grid - first;
+    if (n_cell < 1) {
+      reject("meta_family_grid_pmf: the study's grid holds no cells between ",
+             "its minimum delay and its cutoff.");
     }
-    for (j in 1:n_grid) {
-      if (is_inf(log_cdf[j + 1])) {
-        log_mass[j] = negative_infinity();
-      } else if (is_inf(log_cdf[j])) {
-        log_mass[j] = log_cdf[j + 1];
-      } else {
-        log_mass[j] = log_diff_exp(log_cdf[j + 1], log_cdf[j]);
-      }
-      if (accrual == 1) {
-        log_mass[j] += meta_family_log_accrual_weight(
-          (j - 1) * swindow_width, cutoff, growth_rate
+    {
+      vector[n_cell + 1] log_cdf;
+      vector[n_cell] log_mass;
+      for (j in 0:n_cell) {
+        log_cdf[j + 1] = meta_family_pcens_lcdf(
+          (first + j) * swindow_width | params, pwindow_width, prim_id,
+          prim_params
         );
       }
+      for (j in 1:n_cell) {
+        if (is_inf(log_cdf[j + 1])) {
+          log_mass[j] = negative_infinity();
+        } else if (is_inf(log_cdf[j])) {
+          log_mass[j] = log_cdf[j + 1];
+        } else {
+          log_mass[j] = log_diff_exp(log_cdf[j + 1], log_cdf[j]);
+        }
+      }
+      if (accrual == 0) {
+        real total = meta_family_diff_exp(log_cdf[n_cell + 1], log_cdf[1]);
+        if (total <= 0) {
+          reject("meta_family_grid_pmf: every grid cell underflowed to zero ",
+                 "probability; the delay distribution puts no mass within ",
+                 "the study's grid.");
+        }
+        return exp(log_mass - log(total));
+      }
+      for (j in 1:n_cell) {
+        log_mass[j] += meta_family_log_accrual_weight(
+          (first + j - 1) * swindow_width, cutoff, growth_rate
+        );
+      }
+      if (max(log_mass) == negative_infinity()) {
+        reject("meta_family_grid_pmf: every grid cell underflowed to zero ",
+               "probability; the delay distribution puts no mass within the ",
+               "study's grid.");
+      }
+      return softmax(log_mass);
     }
-    return softmax(log_mass);
   }
 
-  /**
-    * Summaries of a discrete delay grid
-    *
-    * @param mass Grid probabilities from meta_family_grid_pmf
-    * @param swindow_width Grid spacing
-    *
-    * @return Vector of the mean, standard deviation and kurtosis
-    */
-  vector meta_family_grid_moments(vector mass, data real swindow_width) {
+  /** Cohort grid distribution function at the two edges of one cell. */
+  vector meta_family_grid_edges(data int cell, array[] real params,
+                                data real delay_min, data real cutoff,
+                                data real pwindow_width,
+                                data real swindow_width, data int prim_id,
+                                array[] real prim_params) {
+    int n_grid = to_int(floor(cutoff / swindow_width));
+    int first = meta_family_grid_first(delay_min, swindow_width);
+    real log_top = meta_family_pcens_lcdf(
+      n_grid * swindow_width | params, pwindow_width, prim_id, prim_params
+    );
+    real log_base = first > 0
+      ? meta_family_pcens_lcdf(
+          first * swindow_width | params, pwindow_width, prim_id, prim_params
+        )
+      : negative_infinity();
+    real total = meta_family_diff_exp(log_top, log_base);
+    real log_lower;
+    real upper_mass;
+    if (total <= 0) {
+      reject("meta_family_grid_edges: the delay distribution puts no mass ",
+             "within the study's grid.");
+    }
+    log_lower = cell > first
+      ? meta_family_pcens_lcdf(
+          cell * swindow_width | params, pwindow_width, prim_id, prim_params
+        )
+      : negative_infinity();
+    upper_mass = cell + 1 >= n_grid
+      ? total
+      : meta_family_diff_exp(
+          meta_family_pcens_lcdf(
+            (cell + 1) * swindow_width | params, pwindow_width, prim_id,
+            prim_params
+          ),
+          log_base
+        );
+    return [meta_family_diff_exp(log_lower, log_base) / total,
+            upper_mass / total]';
+  }
+
+  /** Summaries of a discrete delay grid starting at `first_delay`. */
+  vector meta_family_grid_moments(vector mass, data real first_delay,
+                                  data real swindow_width) {
     int n_grid = num_elements(mass);
-    vector[n_grid] delay = linspaced_vector(n_grid, 0, n_grid - 1) *
-      swindow_width;
+    vector[n_grid] delay = first_delay +
+      linspaced_vector(n_grid, 0, n_grid - 1) * swindow_width;
     real m1 = dot_product(mass, delay);
     vector[n_grid] centred = delay - m1;
     vector[n_grid] squared = centred .* centred;
     real variance = dot_product(mass, squared);
+    real third = dot_product(mass, squared .* centred);
     real fourth = dot_product(mass, squared .* squared);
-    return meta_family_moment_vector(m1, variance, fourth);
+    return meta_family_moment_vector(m1, variance, third, fourth);
   }
 
-  /**
-    * Analytic summaries of the delay distribution
-    *
-    * @param params Delay distribution parameters
-    *
-    * @return Vector of the mean, standard deviation and kurtosis
-    */
+  /** Analytic summaries of the delay distribution. */
   vector meta_family_moments(array[] real params) {
     real delay_mean;
     real variance;
+    real third;
     real fourth;
     if (dist_id == 1) {
       real var_log = params[2] ^ 2;
       delay_mean = exp(params[1] + var_log / 2);
       variance = delay_mean ^ 2 * expm1(var_log);
+      third = (exp(var_log) + 2) * sqrt(expm1(var_log)) *
+        pow(variance, 1.5);
       fourth = (exp(4 * var_log) + 2 * exp(3 * var_log) +
                 3 * exp(2 * var_log) - 3) * variance ^ 2;
     } else if (dist_id == 2) {
       delay_mean = params[1] / params[2];
       variance = params[1] / params[2] ^ 2;
+      third = 2 / sqrt(params[1]) * pow(variance, 1.5);
       fourth = (3 + 6 / params[1]) * variance ^ 2;
     } else if (dist_id == 3) {
       real g1 = tgamma(1 + 1 / params[1]);
@@ -258,34 +277,31 @@
       real g4 = tgamma(1 + 4 / params[1]);
       delay_mean = params[2] * g1;
       variance = params[2] ^ 2 * (g2 - g1 ^ 2);
+      third = params[2] ^ 3 * (g3 - 3 * g1 * g2 + 2 * g1 ^ 3);
       fourth = params[2] ^ 4 *
         (g4 - 4 * g1 * g3 + 6 * g1 ^ 2 * g2 - 3 * g1 ^ 4);
     } else {
       reject("Meta model summary rows support lognormal, gamma and weibull ",
              "delay distributions only.");
     }
-    return meta_family_moment_vector(delay_mean, variance, fourth);
+    return meta_family_moment_vector(delay_mean, variance, third, fourth);
   }
 
   /**
     * Summaries implied by a distribution function evaluated on a grid
-    *
-    * Uses Simpson's rule on the survival integrals
-    * int_0^D k t^(k - 1) (F(D) - F(t)) dt, which are the first four raw
-    * moments of the distribution truncated at the cutoff. The grid must have
-    * an even number of intervals.
-    *
-    * @param cdf Distribution function at n_quad + 1 equally spaced points
-    *   running from zero to the cutoff
-    * @param cutoff Right truncation point
-    *
-    * @return Vector of the mean, standard deviation and kurtosis
+    * running from `delay_min` to `cutoff`, by Simpson's rule on the truncated
+    * survival integrals. Left truncation adds the boundary term
+    * `delay_min ^ k (F(cutoff) - F(delay_min))` to each raw moment, which
+    * vanishes when `delay_min` is zero. The grid must have an even number of
+    * intervals.
     */
-  vector meta_family_survival_moments(vector cdf, data real cutoff) {
+  vector meta_family_survival_moments(vector cdf, data real delay_min,
+                                      data real cutoff) {
     int n_quad = num_elements(cdf) - 1;
-    vector[n_quad + 1] grid = linspaced_vector(n_quad + 1, 0, cutoff);
+    vector[n_quad + 1] grid = linspaced_vector(n_quad + 1, delay_min, cutoff);
     vector[n_quad + 1] weight = rep_vector(2, n_quad + 1);
     vector[n_quad + 1] tail_prob = cdf[n_quad + 1] - cdf;
+    real denom = cdf[n_quad + 1] - cdf[1];
     vector[4] raw;
     weight[1] = 1;
     weight[n_quad + 1] = 1;
@@ -294,61 +310,39 @@
         weight[i] = 4;
       }
     }
+    if (denom <= 0) {
+      reject("meta_family_survival_moments: the truncated distribution ",
+             "function underflowed to zero over the study's delay range.");
+    }
     for (k in 1:4) {
-      raw[k] = dot_product(weight, k * pow(grid, k - 1) .* tail_prob) *
-        cutoff / (3.0 * n_quad * cdf[n_quad + 1]);
+      raw[k] = pow(delay_min, k) +
+        dot_product(weight, k * pow(grid, k - 1) .* tail_prob) *
+        (cutoff - delay_min) / (3.0 * n_quad * denom);
     }
     return meta_family_central_from_raw(raw);
   }
 
-  /**
-    * Summaries of a right truncated delay distribution
-    *
-    * @param params Delay distribution parameters
-    * @param cutoff Right truncation point
-    * @param n_quad Number of quadrature intervals
-    * @param accrual 1 to apply the accrual weight, 0 otherwise
-    * @param growth_rate Exponential growth rate of primary events
-    *
-    * @return Vector of the mean, standard deviation and kurtosis
-    */
-  vector meta_family_trunc_moments(array[] real params, data real cutoff,
-                                   data int n_quad, data int accrual,
-                                   data real growth_rate) {
-    vector[n_quad + 1] grid = linspaced_vector(n_quad + 1, 0, cutoff);
+  /** Summaries of a right truncated delay distribution. */
+  vector meta_family_trunc_moments(array[] real params, data real delay_min,
+                                   data real cutoff, data int n_quad,
+                                   data int accrual, data real growth_rate) {
+    vector[n_quad + 1] grid = linspaced_vector(n_quad + 1, delay_min, cutoff);
     vector[n_quad + 1] cdf;
-    cdf[1] = 0;
-    for (i in 2:(n_quad + 1)) {
-      cdf[i] = exp(dist_lcdf(grid[i] | params, dist_id));
+    for (i in 1:(n_quad + 1)) {
+      cdf[i] = grid[i] <= 0 ? 0 : exp(dist_lcdf(grid[i] | params, dist_id));
     }
     if (accrual == 1) {
       return meta_family_survival_moments(
-        meta_family_accrual_reweight(cdf, cutoff, growth_rate, 0), cutoff
+        meta_family_accrual_reweight(cdf, delay_min, cutoff, growth_rate, 0),
+        delay_min, cutoff
       );
     }
-    return meta_family_survival_moments(cdf, cutoff);
+    return meta_family_survival_moments(cdf, delay_min, cutoff);
   }
 
-  /**
-    * Summaries of a right truncated primary censored delay distribution
-    *
-    * The estimand is the delay plus the primary event offset within its
-    * window, conditioned on falling below the cutoff. Under an accrual design
-    * the accrual weight is offset by half a primary window because the
-    * estimand already includes that offset.
-    *
-    * @param params Delay distribution parameters
-    * @param cutoff Right truncation point
-    * @param pwindow_width Primary window width
-    * @param prim_id Primary distribution identifier
-    * @param prim_params Primary distribution parameters
-    * @param n_quad Number of quadrature intervals
-    * @param accrual 1 to apply the accrual weight, 0 otherwise
-    * @param growth_rate Exponential growth rate of primary events
-    *
-    * @return Vector of the mean, standard deviation and kurtosis
-    */
+  /** Summaries of a right truncated primary censored delay distribution. */
   vector meta_family_pcens_trunc_moments(array[] real params,
+                                         data real delay_min,
                                          data real cutoff,
                                          data real pwindow_width,
                                          data int prim_id,
@@ -356,69 +350,44 @@
                                          data int n_quad, data int accrual,
                                          data real growth_rate) {
     vector[n_quad + 1] cdf;
-    cdf[1] = 0;
-    for (i in 2:(n_quad + 1)) {
+    for (i in 1:(n_quad + 1)) {
       cdf[i] = exp(meta_family_pcens_lcdf(
-        (i - 1) * cutoff / n_quad | params, pwindow_width, prim_id, prim_params
+        delay_min + (i - 1) * (cutoff - delay_min) / n_quad | params,
+        pwindow_width, prim_id, prim_params
       ));
     }
     if (accrual == 1) {
       return meta_family_survival_moments(
         meta_family_accrual_reweight(
-          cdf, cutoff, growth_rate, pwindow_width / 2
+          cdf, delay_min, cutoff, growth_rate, pwindow_width / 2
         ),
-        cutoff
+        delay_min, cutoff
       );
     }
-    return meta_family_survival_moments(cdf, cutoff);
+    return meta_family_survival_moments(cdf, delay_min, cutoff);
   }
 
   /**
-    * Add an independent uniform primary window to a set of summaries
-    *
-    * The uniform single interval approximation leaves the primary interval
-    * uncorrected, so the study effectively summarised the delay plus an
-    * independent uniform draw over the primary window. This convolution is
-    * exact when the study also adjusted for right truncation and the primary
-    * events were uniform within their window.
-    *
-    * @param moments Summary vector to correct
-    * @param pwindow_width Primary window width
-    *
-    * @return Vector of the mean, standard deviation and kurtosis
+    * Add an independent uniform primary window to a set of summaries, exact
+    * when the study also adjusted for right truncation.
     */
   vector meta_family_add_uniform(vector moments, data real pwindow_width) {
     real var_delay = moments[2] ^ 2;
+    real third_delay = moments[4] * pow(var_delay, 1.5);
     real fourth_delay = moments[3] * var_delay ^ 2;
     real var_window = pwindow_width ^ 2 / 12;
     real fourth_window = pwindow_width ^ 4 / 80;
     return meta_family_moment_vector(
       moments[1] + pwindow_width / 2,
       var_delay + var_window,
+      third_delay,
       fourth_delay + 6 * var_delay * var_window + fourth_window
     );
   }
 
-  /**
-    * The summaries a study using a given procedure would report
-    *
-    * Midpoint imputation shifts the naive discrete grid up by half a secondary
-    * window, which moves the mean and leaves every central moment unchanged.
-    *
-    * @param params Delay distribution parameters
-    * @param cutoff Grid cutoff (observation time or maximum delay)
-    * @param pwindow_width Primary window width
-    * @param swindow_width Secondary window width
-    * @param trunc_adj 1 if the study adjusted for right truncation
-    * @param cens_adj Censoring adjustment code (0, 1, 2 or 3)
-    * @param prim_id Primary distribution identifier
-    * @param prim_params Primary distribution parameters
-    * @param accrual 1 to apply the accrual weight, 0 otherwise
-    * @param growth_rate Exponential growth rate of primary events
-    *
-    * @return Vector of the mean, standard deviation and kurtosis
-    */
-  vector meta_family_implied_moments(array[] real params, data real cutoff,
+  /** The summaries a study using a given procedure would report. */
+  vector meta_family_implied_moments(array[] real params, data real delay_min,
+                                     data real cutoff,
                                      data real pwindow_width,
                                      data real swindow_width,
                                      data int trunc_adj, data int cens_adj,
@@ -427,10 +396,12 @@
                                      data int accrual,
                                      data real growth_rate) {
     if (cens_adj == 0 || cens_adj == 3) {
-      vector[3] moments = meta_family_grid_moments(
-        meta_family_grid_pmf(params, cutoff, pwindow_width, swindow_width,
-                             prim_id, prim_params, accrual, growth_rate),
-        swindow_width
+      int first = meta_family_grid_first(delay_min, swindow_width);
+      vector[4] moments = meta_family_grid_moments(
+        meta_family_grid_pmf(params, delay_min, cutoff, pwindow_width,
+                             swindow_width, prim_id, prim_params, accrual,
+                             growth_rate),
+        first * swindow_width, swindow_width
       );
       if (cens_adj == 3) {
         moments[1] += swindow_width / 2;
@@ -438,143 +409,143 @@
       return moments;
     }
     if (cens_adj == 2) {
-      if (trunc_adj == 1 && prim_id == 1) {
+      if (trunc_adj == 1 && prim_id == 1 && delay_min == 0) {
         return meta_family_add_uniform(meta_family_moments(params),
                                        pwindow_width);
       }
       return meta_family_pcens_trunc_moments(
-        params, cutoff, pwindow_width, prim_id, prim_params, 100, accrual,
-        growth_rate
+        params, delay_min, cutoff, pwindow_width, prim_id, prim_params,
+        n_quad_default, accrual, growth_rate
       );
     }
-    if (trunc_adj == 1) {
+    if (trunc_adj == 1 && delay_min == 0) {
       return meta_family_moments(params);
     }
-    return meta_family_trunc_moments(params, cutoff, 100, accrual,
-                                     growth_rate);
+    return meta_family_trunc_moments(params, delay_min, cutoff, n_quad_default,
+                                     accrual, growth_rate);
   }
 
   /**
-    * The continuity corrected distribution function of a discrete delay grid
-    *
-    * The step distribution function of the grid is replaced by the version
-    * that interpolates it linearly through the mid points of its cells. This
-    * removes most of the bias that comes from a reported quantile of day
-    * resolution data landing on a jump of the step function.
-    *
-    * @param y Delay to evaluate the distribution function at
-    * @param params Delay distribution parameters
-    * @param cutoff Grid cutoff (observation time or maximum delay)
-    * @param pwindow_width Primary window width
-    * @param swindow_width Secondary window width
-    * @param prim_id Primary distribution identifier
-    * @param prim_params Primary distribution parameters
-    * @param accrual 1 to apply the accrual weight, 0 otherwise
-    * @param growth_rate Exponential growth rate of primary events
-    *
-    * @return Cumulative probability of the grid at y
+    * Continuity corrected distribution function of a discrete delay grid,
+    * interpolated linearly through the cell mid points.
     */
   real meta_family_grid_prob(data real y, array[] real params,
-                             data real cutoff, data real pwindow_width,
+                             data real delay_min, data real cutoff,
+                             data real pwindow_width,
                              data real swindow_width, data int prim_id,
                              array[] real prim_params, data int accrual,
                              data real growth_rate) {
     int n_grid = to_int(floor(cutoff / swindow_width));
+    int first = meta_family_grid_first(delay_min, swindow_width);
     int cell = to_int(floor(y / swindow_width + 0.5));
     real frac = y / swindow_width + 0.5 - cell;
-    if (cell < 0) {
+    if (cell < first) {
       return 0;
     }
     if (cell >= n_grid) {
       return 1;
     }
-    vector[n_grid + 1] cdf = append_row(0, cumulative_sum(
-      meta_family_grid_pmf(params, cutoff, pwindow_width, swindow_width,
-                           prim_id, prim_params, accrual, growth_rate)
-    ));
-    return cdf[cell + 1] * (1 - frac) + cdf[cell + 2] * frac;
+    if (accrual == 0) {
+      vector[2] edges = meta_family_grid_edges(
+        cell, params, delay_min, cutoff, pwindow_width, swindow_width, prim_id,
+        prim_params
+      );
+      return edges[1] * (1 - frac) + edges[2] * frac;
+    }
+    {
+      vector[n_grid - first + 1] cdf = append_row(0, cumulative_sum(
+        meta_family_grid_pmf(params, delay_min, cutoff, pwindow_width,
+                             swindow_width, prim_id, prim_params, accrual,
+                             growth_rate)
+      ));
+      return cdf[cell - first + 1] * (1 - frac) +
+        cdf[cell - first + 2] * frac;
+    }
   }
 
-  /**
-    * The distribution function of a continuous estimand under an accrual
-    * design
-    *
-    * Builds the accrual weighted distribution function on the quadrature grid
-    * and interpolates it linearly at the reported value. The weight is offset
-    * by half a primary window for the uniform single interval approximation,
-    * matching meta_family_pcens_trunc_moments, so that a reported quantile and
-    * a reported moment describe the same estimand.
-    *
-    * @param y Reported quantile value
-    * @param params Delay distribution parameters
-    * @param cutoff Length of the collection window
-    * @param pwindow_width Primary window width
-    * @param cens_adj Censoring adjustment code
-    * @param prim_id Primary distribution identifier
-    * @param prim_params Primary distribution parameters
-    * @param growth_rate Exponential growth rate of primary events
-    * @param n_quad Number of quadrature intervals
-    *
-    * @return Cumulative probability of the biased estimand at y
-    */
-  real meta_family_accrual_prob(data real y, array[] real params,
-                                data real cutoff, data real pwindow_width,
-                                data int cens_adj, data int prim_id,
-                                array[] real prim_params,
-                                data real growth_rate, data int n_quad) {
+  /** Accrual weighted distribution function on the quadrature grid. */
+  vector meta_family_accrual_nodes(array[] real params, data real delay_min,
+                                 data real cutoff,
+                                 data real pwindow_width, data int cens_adj,
+                                 data int prim_id, array[] real prim_params,
+                                 data real growth_rate, data int n_quad) {
     vector[n_quad + 1] cdf;
-    vector[n_quad + 1] weighted;
-    int lower_node = to_int(floor(y / cutoff * n_quad));
-    real frac = y / cutoff * n_quad - lower_node;
-    if (y >= cutoff) {
-      return 1;
-    }
-    cdf[1] = 0;
-    for (i in 2:(n_quad + 1)) {
+    for (i in 1:(n_quad + 1)) {
       if (cens_adj == 2) {
         cdf[i] = exp(meta_family_pcens_lcdf(
-          (i - 1) * cutoff / n_quad | params, pwindow_width, prim_id,
-          prim_params
+          delay_min + (i - 1) * (cutoff - delay_min) / n_quad | params,
+          pwindow_width, prim_id, prim_params
         ));
+      } else if (delay_min + (i - 1) * (cutoff - delay_min) / n_quad <= 0) {
+        cdf[i] = 0;
       } else {
         cdf[i] = exp(dist_lcdf(
-          (i - 1) * cutoff / n_quad | params, dist_id
+          delay_min + (i - 1) * (cutoff - delay_min) / n_quad | params, dist_id
         ));
       }
     }
-    weighted = meta_family_accrual_reweight(
-      cdf, cutoff, growth_rate, cens_adj == 2 ? pwindow_width / 2 : 0
+    return meta_family_accrual_reweight(
+      cdf, delay_min, cutoff, growth_rate, cens_adj == 2 ? pwindow_width / 2 : 0
     );
-    return weighted[lower_node + 1] * (1 - frac) +
-      weighted[lower_node + 2] * frac;
   }
 
-  /**
-    * The cumulative probability a study using a given procedure would report
-    *
-    * Working on the probability scale avoids inverting the distribution
-    * function, which has no closed form on the discrete grid.
-    *
-    * Midpoint imputation shifted every reported delay up by half a secondary
-    * window, so its distribution function is the naive grid one evaluated half
-    * a window lower.
-    *
-    * @param y Reported quantile value
-    * @param params Delay distribution parameters
-    * @param cutoff Grid cutoff (observation time or maximum delay)
-    * @param pwindow_width Primary window width
-    * @param swindow_width Secondary window width
-    * @param trunc_adj 1 if the study adjusted for right truncation
-    * @param cens_adj Censoring adjustment code (0, 1, 2 or 3)
-    * @param prim_id Primary distribution identifier
-    * @param prim_params Primary distribution parameters
-    * @param accrual 1 to apply the accrual weight, 0 otherwise
-    * @param growth_rate Exponential growth rate of primary events
-    *
-    * @return Cumulative probability of the biased estimand at y
-    */
+  /** Distribution function of a continuous estimand under an accrual design. */
+  real meta_family_accrual_prob(data real y, array[] real params,
+                                data real delay_min, data real cutoff,
+                                data real pwindow_width,
+                                data int cens_adj, data int prim_id,
+                                array[] real prim_params,
+                                data real growth_rate, data int n_quad) {
+    int lower_node = to_int(
+      floor((y - delay_min) / (cutoff - delay_min) * n_quad)
+    );
+    real frac = (y - delay_min) / (cutoff - delay_min) * n_quad - lower_node;
+    if (y >= cutoff) {
+      return 1;
+    }
+    if (y <= delay_min) {
+      return 0;
+    }
+    {
+      vector[n_quad + 1] weighted = meta_family_accrual_nodes(
+        params, delay_min, cutoff, pwindow_width, cens_adj, prim_id,
+        prim_params, growth_rate, n_quad
+      );
+      return weighted[lower_node + 1] * (1 - frac) +
+        weighted[lower_node + 2] * frac;
+    }
+  }
+
+  /** Density of a continuous estimand under an accrual design. */
+  real meta_family_accrual_density(data real y, array[] real params,
+                                   data real delay_min, data real cutoff,
+                                   data real pwindow_width,
+                                   data int cens_adj, data int prim_id,
+                                   array[] real prim_params,
+                                   data real growth_rate, data int n_quad) {
+    int lower_node = to_int(
+      floor((y - delay_min) / (cutoff - delay_min) * n_quad)
+    );
+    if (y >= cutoff || y <= delay_min) {
+      return 0;
+    }
+    {
+      vector[n_quad + 1] weighted = meta_family_accrual_nodes(
+        params, delay_min, cutoff, pwindow_width, cens_adj, prim_id,
+        prim_params, growth_rate, n_quad
+      );
+      return fmax(
+        (weighted[lower_node + 2] - weighted[lower_node + 1]) * n_quad /
+          (cutoff - delay_min),
+        0
+      );
+    }
+  }
+
+  /** Cumulative probability a study using a given procedure would report. */
   real meta_family_implied_prob(data real y, array[] real params,
-                                data real cutoff, data real pwindow_width,
+                                data real delay_min, data real cutoff,
+                                data real pwindow_width,
                                 data real swindow_width, data int trunc_adj,
                                 data int cens_adj, data int prim_id,
                                 array[] real prim_params, data int accrual,
@@ -582,71 +553,92 @@
     if (cens_adj == 0 || cens_adj == 3) {
       // Midpoint imputation shifted every delay up by half a window.
       return meta_family_grid_prob(
-        y - (cens_adj == 3 ? swindow_width / 2 : 0), params, cutoff,
+        y - (cens_adj == 3 ? swindow_width / 2 : 0), params, delay_min, cutoff,
         pwindow_width, swindow_width, prim_id, prim_params, accrual,
         growth_rate
       );
     }
-    if (y <= 0) {
+    if (y <= delay_min) {
       return 0;
     }
     if (accrual == 1) {
       return meta_family_accrual_prob(
-        y, params, cutoff, pwindow_width, cens_adj, prim_id, prim_params,
-        growth_rate, 100
+        y, params, delay_min, cutoff, pwindow_width, cens_adj, prim_id,
+        prim_params, growth_rate, n_quad_default
       );
     }
     if (cens_adj == 2) {
-      real log_cdf_y = meta_family_pcens_lcdf(
+      real log_y = meta_family_pcens_lcdf(
         y | params, pwindow_width, prim_id, prim_params
       );
-      if (is_inf(log_cdf_y)) {
-        return 0;
-      }
+      real log_base = delay_min > 0
+        ? meta_family_pcens_lcdf(
+            delay_min | params, pwindow_width, prim_id, prim_params
+          )
+        : negative_infinity();
+      real base = is_inf(log_base) ? 0 : exp(log_base);
       if (trunc_adj == 1) {
-        return exp(log_cdf_y);
+        if (base >= 1) {
+          reject("meta_family_implied_prob: the distribution function leaves ",
+                 "no mass above the study's minimum delay.");
+        }
+        return fmin(meta_family_diff_exp(log_y, log_base) / (1 - base), 1);
       }
       if (y >= cutoff) {
         return 1;
       }
-      return exp(log_cdf_y - meta_family_pcens_lcdf(
-        cutoff | params, pwindow_width, prim_id, prim_params
-      ));
+      {
+        real total = meta_family_diff_exp(
+          meta_family_pcens_lcdf(
+            cutoff | params, pwindow_width, prim_id, prim_params
+          ),
+          log_base
+        );
+        if (total <= 0) {
+          reject("meta_family_implied_prob: the distribution function ",
+                 "underflowed to zero over the study's delay range.");
+        }
+        return fmin(meta_family_diff_exp(log_y, log_base) / total, 1);
+      }
     }
-    if (trunc_adj == 1) {
-      return exp(dist_lcdf(y | params, dist_id));
+    {
+      real log_base = delay_min > 0
+        ? dist_lcdf(delay_min | params, dist_id) : negative_infinity();
+      real numerator = meta_family_diff_exp(
+        dist_lcdf(y | params, dist_id), log_base
+      );
+      real base = is_inf(log_base) ? 0 : exp(log_base);
+      if (trunc_adj == 1) {
+        if (base >= 1) {
+          reject("meta_family_implied_prob: the distribution function leaves ",
+                 "no mass above the study's minimum delay.");
+        }
+        return fmin(numerator / (1 - base), 1);
+      }
+      if (y >= cutoff) {
+        return 1;
+      }
+      {
+        real total = meta_family_diff_exp(
+          dist_lcdf(cutoff | params, dist_id), log_base
+        );
+        if (total <= 0) {
+          reject("meta_family_implied_prob: the distribution function ",
+                 "underflowed to zero over the study's delay range.");
+        }
+        return fmin(numerator / total, 1);
+      }
     }
-    if (y >= cutoff) {
-      return 1;
-    }
-    return exp(dist_lcdf(y | params, dist_id) -
-               dist_lcdf(cutoff | params, dist_id));
   }
 
   /**
-    * A central difference of the implied distribution function
-    *
-    * The step is taken as an argument rather than computed here because Stan
-    * only treats function arguments declared data, and expressions built from
-    * them, as data only.
-    *
-    * @param y Reported quantile value
-    * @param step Half width of the difference
-    * @param params Delay distribution parameters
-    * @param cutoff Grid cutoff (observation time or maximum delay)
-    * @param pwindow_width Primary window width
-    * @param swindow_width Secondary window width
-    * @param trunc_adj 1 if the study adjusted for right truncation
-    * @param cens_adj Censoring adjustment code (0, 1, 2 or 3)
-    * @param prim_id Primary distribution identifier
-    * @param prim_params Primary distribution parameters
-    * @param accrual 1 to apply the accrual weight, 0 otherwise
-    * @param growth_rate Exponential growth rate of primary events
-    *
-    * @return Slope of the implied distribution function at y
+    * A central difference of the implied distribution function. The step is
+    * an argument because Stan only treats function arguments declared data,
+    * and expressions built from them, as data only.
     */
   real meta_family_central_difference(data real y, data real step,
-                                      array[] real params, data real cutoff,
+                                      array[] real params, data real delay_min,
+                                      data real cutoff,
                                       data real pwindow_width,
                                       data real swindow_width,
                                       data int trunc_adj, data int cens_adj,
@@ -655,127 +647,385 @@
                                       data int accrual,
                                       data real growth_rate) {
     real prob_upper = meta_family_implied_prob(
-      y + step, params, cutoff, pwindow_width, swindow_width, trunc_adj,
-      cens_adj, prim_id, prim_params, accrual, growth_rate
-    );
-    real prob_lower = meta_family_implied_prob(
-      fmax(y - step, 0), params, cutoff, pwindow_width, swindow_width,
+      y + step, params, delay_min, cutoff, pwindow_width, swindow_width,
       trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
     );
+    real prob_lower = meta_family_implied_prob(
+      fmax(y - step, delay_min), params, delay_min, cutoff, pwindow_width,
+      swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
+      growth_rate
+    );
     return fmax(
-      (prob_upper - prob_lower) / (y + step - fmax(y - step, 0)), 0
+      (prob_upper - prob_lower) / (y + step - fmax(y - step, delay_min)), 0
     );
   }
 
+  /** Density of the delay distribution. */
+  real meta_family_density(data real y, array[] real params) {
+    if (y <= 0) {
+      return 0;
+    }
+    if (dist_id == 1) {
+      return exp(lognormal_lpdf(y | params[1], params[2]));
+    }
+    if (dist_id == 2) {
+      return exp(gamma_lpdf(y | params[1], params[2]));
+    }
+    if (dist_id == 3) {
+      return exp(weibull_lpdf(y | params[1], params[2]));
+    }
+    reject("Meta model summary rows support lognormal, gamma and weibull ",
+           "delay distributions only.");
+  }
+
+  /** Density of a delay censored by a uniform primary window. */
+  real meta_family_uniform_pcens_density(data real y, array[] real params,
+                                         data real pwindow_width) {
+    real cdf_upper = exp(dist_lcdf(y | params, dist_id));
+    real cdf_lower = y > pwindow_width
+      ? exp(dist_lcdf(y - pwindow_width | params, dist_id)) : 0;
+    return fmax(cdf_upper - cdf_lower, 0) / pwindow_width;
+  }
+
   /**
-    * The density of the biased estimand at a reported quantile value
-    *
-    * Used to convert a quantile standard error reported on the delay scale to
-    * the cumulative probability scale the model works on, by the delta method.
-    * For a discrete estimand the density is the mass of the grid cell the
-    * value falls in divided by the grid spacing, which is exactly the slope of
-    * the continuity corrected distribution function there. For a continuous
-    * estimand it is a central difference of the implied distribution function.
-    *
-    * @param y Reported quantile value
-    * @param params Delay distribution parameters
-    * @param cutoff Grid cutoff (observation time or maximum delay)
-    * @param pwindow_width Primary window width
-    * @param swindow_width Secondary window width
-    * @param trunc_adj 1 if the study adjusted for right truncation
-    * @param cens_adj Censoring adjustment code (0, 1, 2 or 3)
-    * @param prim_id Primary distribution identifier
-    * @param prim_params Primary distribution parameters
-    * @param accrual 1 to apply the accrual weight, 0 otherwise
-    * @param growth_rate Exponential growth rate of primary events
-    *
-    * @return Density of the biased estimand at y
+    * Density of the biased estimand at a reported quantile value, used to
+    * convert a delay scale quantile standard error to the probability scale
+    * by the delta method. Falls back to a central difference where no closed
+    * form density exists.
     */
   real meta_family_implied_density(data real y, array[] real params,
-                                   data real cutoff, data real pwindow_width,
+                                   data real delay_min, data real cutoff,
+                                   data real pwindow_width,
                                    data real swindow_width, data int trunc_adj,
                                    data int cens_adj, data int prim_id,
                                    array[] real prim_params, data int accrual,
                                    data real growth_rate) {
     if (cens_adj == 0 || cens_adj == 3) {
       int n_grid = to_int(floor(cutoff / swindow_width));
+      int first = meta_family_grid_first(delay_min, swindow_width);
       int cell = to_int(floor(
         (y - (cens_adj == 3 ? swindow_width / 2 : 0)) / swindow_width + 0.5
       ));
-      if (cell < 0 || cell >= n_grid) {
+      if (cell < first || cell >= n_grid) {
         return 0;
       }
-      vector[n_grid] mass = meta_family_grid_pmf(
-        params, cutoff, pwindow_width, swindow_width, prim_id, prim_params,
-        accrual, growth_rate
-      );
-      return mass[cell + 1] / swindow_width;
+      if (accrual == 0) {
+        vector[2] edges = meta_family_grid_edges(
+          cell, params, delay_min, cutoff, pwindow_width, swindow_width,
+          prim_id, prim_params
+        );
+        return (edges[2] - edges[1]) / swindow_width;
+      }
+      {
+        vector[n_grid - first] mass = meta_family_grid_pmf(
+          params, delay_min, cutoff, pwindow_width, swindow_width, prim_id,
+          prim_params, accrual, growth_rate
+        );
+        return mass[cell - first + 1] / swindow_width;
+      }
     }
-    return meta_family_central_difference(
-      y, fmax(1e-6, 1e-4 * y), params, cutoff, pwindow_width, swindow_width,
-      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
-    );
+    if (y <= delay_min || (trunc_adj != 1 && y >= cutoff)) {
+      return 0;
+    }
+    if (accrual == 1) {
+      return meta_family_accrual_density(
+        y, params, delay_min, cutoff, pwindow_width, cens_adj, prim_id,
+        prim_params, growth_rate, n_quad_default
+      );
+    }
+    if (cens_adj == 2 && prim_id != 1) {
+      return meta_family_central_difference(
+        y, fmax(1e-6, 1e-4 * y), params, delay_min, cutoff, pwindow_width,
+        swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
+        growth_rate
+      );
+    }
+    {
+      real density = cens_adj == 2
+        ? meta_family_uniform_pcens_density(y, params, pwindow_width)
+        : meta_family_density(y, params);
+      real log_base = delay_min <= 0
+        ? negative_infinity()
+        : (cens_adj == 2
+             ? meta_family_pcens_lcdf(delay_min | params, pwindow_width,
+                                      prim_id, prim_params)
+             : dist_lcdf(delay_min | params, dist_id));
+      real base = is_inf(log_base) ? 0 : exp(log_base);
+      real norm;
+      if (trunc_adj == 1) {
+        norm = 1 - base;
+      } else {
+        real log_top = cens_adj == 2
+          ? meta_family_pcens_lcdf(cutoff | params, pwindow_width, prim_id,
+                                   prim_params)
+          : dist_lcdf(cutoff | params, dist_id);
+        norm = meta_family_diff_exp(log_top, log_base);
+      }
+      if (norm <= 0) {
+        reject("meta_family_implied_density: the distribution function ",
+               "underflowed to zero over the study's delay range.");
+      }
+      return density / norm;
+    }
   }
 
   /**
-    * The sampling standard error of a reported standard deviation
-    *
-    * The asymptotic standard error of a sample standard deviation is
-    * sigma sqrt((kappa - 1) / (4 n)), where kappa is the kurtosis of the
-    * estimand. The normal theory expression sigma / sqrt(2 (n - 1)) is not
-    * used because it is far too narrow for the skewed distributions that
-    * delays usually follow.
-    *
-    * @param moments Summary vector of the biased estimand
-    * @param study_n Number of delays the standard deviation was computed from
-    *
-    * @return Standard error of the reported standard deviation
+    * Implied distribution function at equally spaced delays, packed as
+    * [origin, spacing, values]. Node `i` sits at `origin + (i - 1) * spacing`.
+    * Used to read off an implied quantile on the delay scale, which the
+    * multivariate normal reporting mode needs and which has no closed form
+    * on the discrete grid.
     */
+  vector meta_family_implied_nodes(array[] real params, data real delay_min,
+                                   data real cutoff, data real pwindow_width,
+                                   data real swindow_width, data int trunc_adj,
+                                   data int cens_adj, data int prim_id,
+                                   array[] real prim_params, data int accrual,
+                                   data real growth_rate) {
+    if (cens_adj == 0 || cens_adj == 3) {
+      int first = meta_family_grid_first(delay_min, swindow_width);
+      vector[to_int(floor(cutoff / swindow_width)) - first] mass =
+        meta_family_grid_pmf(params, delay_min, cutoff, pwindow_width,
+                             swindow_width, prim_id, prim_params, accrual,
+                             growth_rate);
+      real origin = (first - 0.5) * swindow_width +
+        (cens_adj == 3 ? swindow_width / 2 : 0);
+      return append_row([origin, swindow_width]',
+                        append_row(0, cumulative_sum(mass)));
+    }
+    {
+      int n_quad = n_quad_default;
+      vector[n_quad + 1] raw;
+      for (i in 1:(n_quad + 1)) {
+        if (cens_adj == 2) {
+          raw[i] = exp(meta_family_pcens_lcdf(
+            delay_min + (i - 1) * (cutoff - delay_min) / n_quad | params,
+            pwindow_width, prim_id, prim_params
+          ));
+        } else if (delay_min + (i - 1) * (cutoff - delay_min) / n_quad <= 0) {
+          raw[i] = 0;
+        } else {
+          raw[i] = exp(dist_lcdf(
+            delay_min + (i - 1) * (cutoff - delay_min) / n_quad | params,
+            dist_id
+          ));
+        }
+      }
+      if (accrual == 1) {
+        return append_row(
+          [delay_min, (cutoff - delay_min) / n_quad]',
+          meta_family_accrual_reweight(
+            raw, delay_min, cutoff, growth_rate,
+            cens_adj == 2 ? pwindow_width / 2 : 0
+          )
+        );
+      }
+      {
+        real base = raw[1];
+        real top = trunc_adj == 1 ? 1 : raw[n_quad + 1];
+        if (top - base <= 0) {
+          reject("meta_family_implied_nodes: the distribution function ",
+                 "underflowed to zero over the study's delay range.");
+        }
+        return append_row(
+          [delay_min, (cutoff - delay_min) / n_quad]',
+          (raw - base) / (top - base)
+        );
+      }
+    }
+  }
+
+  /**
+    * Delay at which a packed node distribution function reaches `p`, by
+    * inverse linear interpolation between the nodes it brackets.
+    */
+  real meta_family_node_quantile(vector nodes, data real p) {
+    real origin = nodes[1];
+    real spacing = nodes[2];
+    int n = num_elements(nodes) - 2;
+    int j = 1;
+    if (p <= nodes[3]) {
+      return origin;
+    }
+    if (p >= nodes[n + 2]) {
+      return origin + (n - 1) * spacing;
+    }
+    while (j < n - 1 && nodes[j + 3] < p) {
+      j += 1;
+    }
+    {
+      real low = nodes[j + 2];
+      real high = nodes[j + 3];
+      real frac = high > low ? (p - low) / (high - low) : 0;
+      return origin + (j - 1 + frac) * spacing;
+    }
+  }
+
+  /**
+    * The vector of summaries a study would report, one entry per member of a
+    * multivariate normal group. Member types are 1 for a mean, 2 for a
+    * standard deviation and 3 for a quantile at the matching probability.
+    */
+  vector meta_family_implied_summary_vector(data array[] int types,
+                                            data vector probs,
+                                            array[] real params,
+                                            data real delay_min,
+                                            data real cutoff,
+                                            data real pwindow_width,
+                                            data real swindow_width,
+                                            data int trunc_adj,
+                                            data int cens_adj,
+                                            data int prim_id,
+                                            array[] real prim_params,
+                                            data int accrual,
+                                            data real growth_rate) {
+    int k = num_elements(probs);
+    vector[k] implied = rep_vector(0, k);
+    int any_moment = 0;
+    int any_quantile = 0;
+    for (j in 1:k) {
+      if (types[j] == 3) {
+        any_quantile = 1;
+      } else {
+        any_moment = 1;
+      }
+    }
+    if (any_moment == 1) {
+      vector[4] moments = meta_family_implied_moments(
+        params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+        cens_adj, prim_id, prim_params, accrual, growth_rate
+      );
+      for (j in 1:k) {
+        if (types[j] == 1) {
+          implied[j] = moments[1];
+        } else if (types[j] == 2) {
+          implied[j] = moments[2];
+        }
+      }
+    }
+    if (any_quantile == 1) {
+      int n_node = (cens_adj == 0 || cens_adj == 3)
+        ? to_int(floor(cutoff / swindow_width)) -
+          meta_family_grid_first(delay_min, swindow_width) + 1
+        : n_quad_default + 1;
+      vector[2 + n_node] nodes = meta_family_implied_nodes(
+        params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+        cens_adj, prim_id, prim_params, accrual, growth_rate
+      );
+      for (j in 1:k) {
+        if (types[j] == 3) {
+          implied[j] = meta_family_node_quantile(nodes, probs[j]);
+        }
+      }
+    }
+    return implied;
+  }
+
+  /** Sampling standard error of a reported standard deviation. */
   real meta_family_sd_se(vector moments, data int study_n) {
     return moments[2] * sqrt(fmax(moments[3] - 1, 1e-10) / (4.0 * study_n));
   }
 
+  /**
+    * Joint log density of a mean and a standard deviation from one study,
+    * as the asymptotic bivariate normal of the pair.
+    */
+  real meta_family_moment_pair_lpdf(data real y_mean, data real y_sd,
+                                    vector moments, data int study_n) {
+    real se_mean = moments[2] / sqrt(1.0 * study_n);
+    real se_sd = meta_family_sd_se(moments, study_n);
+    // Matches .meta_max_correlation() in R/meta_summaries.R.
+    real limit = 1 - 1e-6;
+    real rho = fmin(fmax(moments[4] / sqrt(fmax(moments[3] - 1, 1e-10)),
+                         -limit), limit);
+    real z_mean = (y_mean - moments[1]) / se_mean;
+    real z_sd = (y_sd - moments[2]) / se_sd;
+    real quadratic = z_mean ^ 2 - 2 * rho * z_mean * z_sd + z_sd ^ 2;
+    return -log(2 * pi()) - log(se_mean) - log(se_sd) -
+      0.5 * log1m(rho ^ 2) - quadratic / (2 * (1 - rho ^ 2));
+  }
+
+  /**
+    * Joint log mass of a set of quantiles from one study, multinomial over
+    * the cells the quantiles cut the delay axis into.
+    */
+  real meta_family_quantile_set_lpmf(data array[] int cum_count, data vector y,
+                                     data int study_n, array[] real params,
+                                     data real delay_min, data real cutoff,
+                                     data real pwindow_width,
+                                     data real swindow_width,
+                                     data int trunc_adj, data int cens_adj,
+                                     data int prim_id,
+                                     array[] real prim_params,
+                                     data int accrual,
+                                     data real growth_rate) {
+    int n_reported = num_elements(y);
+    real lp = lgamma(study_n + 1);
+    real previous_prob = 0;
+    int previous_count = 0;
+    for (j in 1:n_reported) {
+      real prob = meta_family_implied_prob(
+        y[j], params, delay_min, cutoff, pwindow_width, swindow_width,
+        trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
+      );
+      int count = cum_count[j] - previous_count;
+      lp -= lgamma(count + 1);
+      if (count > 0) {
+        real cell = prob - previous_prob;
+        if (is_nan(cell) || cell <= 0) {
+          return negative_infinity();
+        }
+        lp += count * log(cell);
+      }
+      previous_prob = prob;
+      previous_count = cum_count[j];
+    }
+    {
+      int count = study_n - previous_count;
+      real cell = 1 - previous_prob;
+      lp -= lgamma(count + 1);
+      if (count > 0) {
+        if (is_nan(cell) || cell <= 0) {
+          return negative_infinity();
+        }
+        lp += count * log(cell);
+      }
+    }
+    return lp;
+  }
+
 /**
-  * Compute the log probability mass function for the meta model
-  *
+  * Compute the log probability mass function for the meta model.
   * Individual level rows use the marginal likelihood from primarycensored.
   * Summary rows compare the reported value with the summary the study would
   * have converged to given the biases in its estimation procedure.
-  *
-  * @param y Integer delay for individual level rows, 0 for summary rows
-  * @param dpars_A Distribution parameters (replaced via regex)
-  * @param obs_type 1 individual, 2 mean, 3 standard deviation, 4 quantile
-  * @param study_n Study sample size (0 for individual level rows)
-  * @param trunc_adj 1 if the study adjusted for right truncation
-  * @param cens_adj Censoring adjustment code (0, 1, 2 or 3)
-  * @param trunc_design 0 for a cohort design, 1 for an accrual design
-  * @param relative_obs_t Observation time for individual level rows, grid
-  *   cutoff for summary rows
-  * @param pwindow_width Primary window width
-  * @param swindow_width Secondary window width
-  * @param y_upper Upper bound of the delay interval for individual level
-  *   rows, reported value for summary rows
-  * @param report_se Reported standard error (0 to derive it from study_n),
-  *   on the scale of the reported value
-  * @param quantile_p Quantile probability (0 for other rows)
-  * @param growth_rate Exponential growth rate of primary events
-  * @param primary_params Array of parameters for primary distribution
-  *
-  * @return Log probability mass for the meta model
+  * Summaries reported by the same study are fitted jointly, indexed into the
+  * flat group_value, group_count, group_type and group_p arrays by
+  * group_start and group_len. A study that reported a covariance matrix over
+  * its summaries indexes its Cholesky factor into group_chol from chol_start,
+  * which holds group_len * group_len entries in column major order.
   */
   real meta_family_lpmf(data int y, dpars_A, data int obs_type,
                         data int study_n, data int trunc_adj,
                         data int cens_adj, data int trunc_design,
+                        data int group_start, data int group_len,
+                        data int chol_start,
                         data real relative_obs_t,
                         data real pwindow_width, data real swindow_width,
-                        data real y_upper, data real report_se,
+                        data real y_upper, data real delay_min,
+                        data real report_se,
                         data real quantile_p, data real growth_rate,
+                        data vector group_value,
+                        data array[] int group_count,
+                        data array[] int group_type,
+                        data vector group_p,
+                        data vector group_chol,
                         array[] real primary_params) {
 
   if (obs_type == 1) {
     return primarycensored_lpmf(
       y | dist_id, {dpars_B}, pwindow_width, y_upper,
-      0, relative_obs_t, primary_id, primary_params
+      delay_min, relative_obs_t, primary_id, primary_params
     );
   }
 
@@ -784,22 +1034,48 @@
   // The truncation design only matters for a study that did not adjust for
   // right truncation, because a study that did has already removed it.
   int accrual = (trunc_adj != 1 && trunc_design == 1) ? 1 : 0;
+  int last = group_start + group_len - 1;
   if (growth_rate != 0) {
     prim_params[1] = growth_rate;
   }
 
+  if (obs_type == 7) {
+    vector[group_len] implied = meta_family_implied_summary_vector(
+      group_type[group_start:last], group_p[group_start:last], {dpars_B},
+      delay_min, relative_obs_t, pwindow_width, swindow_width, trunc_adj,
+      cens_adj, prim_id, prim_params, accrual, growth_rate
+    );
+    matrix[group_len, group_len] chol = to_matrix(
+      group_chol[chol_start:(chol_start + group_len * group_len - 1)],
+      group_len, group_len
+    );
+    return multi_normal_cholesky_lpdf(
+      group_value[group_start:last] | implied, chol
+    );
+  }
+
+  if (obs_type == 6) {
+    return meta_family_quantile_set_lpmf(
+      group_count[group_start:last] | group_value[group_start:last], study_n,
+      {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
+      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
+    );
+  }
+
   if (obs_type == 4) {
     real implied = meta_family_implied_prob(
-      y_upper, {dpars_B}, relative_obs_t, pwindow_width, swindow_width,
-      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
+      y_upper, {dpars_B}, delay_min, relative_obs_t, pwindow_width,
+      swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
+      growth_rate
     );
     real se;
     if (report_se > 0) {
       // A reported quantile standard error is on the delay scale, so convert
       // it to the probability scale by the delta method.
       real density = meta_family_implied_density(
-        y_upper, {dpars_B}, relative_obs_t, pwindow_width, swindow_width,
-        trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
+        y_upper, {dpars_B}, delay_min, relative_obs_t, pwindow_width,
+        swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
+        growth_rate
       );
       se = fmax(density * report_se, 1e-6);
     } else {
@@ -808,9 +1084,9 @@
     return normal_lpdf(quantile_p | implied, se);
   }
 
-  vector[3] moments = meta_family_implied_moments(
-    {dpars_B}, relative_obs_t, pwindow_width, swindow_width, trunc_adj,
-    cens_adj, prim_id, prim_params, accrual, growth_rate
+  vector[4] moments = meta_family_implied_moments(
+    {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
+    trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
   );
 
   if (obs_type == 2) {
@@ -821,6 +1097,12 @@
     real se = report_se > 0 ? report_se
       : meta_family_sd_se(moments, study_n);
     return normal_lpdf(y_upper | moments[2], se);
+  }
+  if (obs_type == 5) {
+    return meta_family_moment_pair_lpdf(
+      group_value[group_start] | group_value[group_start + 1], moments,
+      study_n
+    );
   }
   reject("Unknown meta model observation type: ", obs_type);
 }

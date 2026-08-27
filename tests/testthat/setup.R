@@ -223,6 +223,101 @@ prep_meta_obs <- suppressMessages(
   as_epidist_meta_model(sim_obs, estimates = sim_estimates)
 )
 
+# Summary estimates covering every observation type, used to check that the R
+# and Stan log likelihoods agree. Studies A, C and E report a mean with a
+# standard deviation, B and D report quantiles, and F reports summaries with
+# their own standard errors so that they stay ungrouped. Studies G to J report
+# a quantile with a standard error under each censoring adjustment and
+# truncation design, so that every branch of the implied density is exercised.
+# Studies M to P counted only delays above a minimum, one per censoring
+# adjustment, and Q and R report a covariance matrix over their summaries.
+lockstep_vcov <- list(
+  Q = matrix(
+    c(0.09, 0.02, 0.01, 0.02, 0.16, 0.03, 0.01, 0.03, 0.25),
+    nrow = 3
+  ),
+  R = matrix(c(0.12, -0.03, -0.03, 0.2), nrow = 2)
+)
+
+lockstep_estimates <- suppressMessages(as_epidist_estimates_data(
+  data.frame(
+    study = c(
+      "A", "A", "B", "B", "B", "C", "C", "D", "E", "E", "F", "F", "F",
+      "G", "H", "I", "J", "K", "K", "L", "L",
+      "M", "M", "N", "N", "O", "O", "P", "P",
+      "Q", "Q", "Q", "R", "R"
+    ),
+    type = c(
+      "mean", "sd", "quantile", "quantile", "quantile", "mean", "sd",
+      "quantile", "mean", "sd", "mean", "sd", "quantile",
+      "quantile", "quantile", "quantile", "quantile", "quantile", "quantile",
+      "quantile", "quantile",
+      "mean", "sd", "mean", "sd", "mean", "sd", "quantile", "quantile",
+      "mean", "sd", "quantile", "quantile", "quantile"
+    ),
+    value = c(
+      7.5, 3.6, 4.2, 6.1, 9.4, 6.4, 3.1, 5.4, 9.1, 5.2, 6.9, 3.3, 6.0,
+      6.2, 5.8, 7.1, 6.6, 4.5, 7.5, 5.1, 8.2,
+      8.1, 3.2, 7.8, 3.4, 8.4, 3.1, 6.3, 9.2,
+      7.2, 3.4, 6.5, 4.8, 8.6
+    ),
+    se = c(
+      rep(NA, 10), 0.4, NA, 0.5, 0.6, 0.4, 0.7, 0.5, NA, NA, NA, NA,
+      rep(NA, 8), rep(NA, 5)
+    ),
+    p = c(
+      NA, NA, 0.25, 0.5, 0.75, NA, NA, 0.5, NA, NA, NA, NA, 0.5,
+      0.5, 0.5, 0.5, 0.5, 0.25, 0.75, 0.25, 0.75,
+      NA, NA, NA, NA, NA, NA, 0.25, 0.75,
+      NA, NA, 0.5, 0.25, 0.75
+    ),
+    n = c(
+      120, 120, 60, 60, 60, 80, 80, 200, 300, 300, 90, 90, 90,
+      70, 70, 70, 70, 150, 150, 150, 150,
+      110, 110, 95, 95, 130, 130, 140, 140,
+      NA, NA, NA, NA, NA
+    ),
+    relative_obs_time = c(
+      20, 20, Inf, Inf, Inf, Inf, Inf, 30, 25, 25, 18, 18, 18,
+      24, 24, 24, 24, 22, 22, 26, 26,
+      28, 28, Inf, Inf, 32, 32, 27, 27,
+      Inf, Inf, Inf, 30, 30
+    ),
+    trunc_adjusted = c(
+      FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE,
+      FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+      FALSE, FALSE,
+      FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE,
+      TRUE, TRUE, TRUE, FALSE, FALSE
+    ),
+    trunc_design = c(
+      rep("cohort", 8), "accrual", "accrual", rep("cohort", 3),
+      "cohort", "cohort", "accrual", "cohort", "accrual", "accrual",
+      "accrual", "accrual",
+      "cohort", "cohort", "cohort", "cohort", "accrual", "accrual",
+      "cohort", "cohort",
+      "cohort", "cohort", "cohort", "accrual", "accrual"
+    ),
+    cens_adjusted = c(
+      0, 0, 1, 1, 1, 3, 3, 2, 0, 0, 0, 0, 0, 1, 2, 1, 2, 0, 0, 0, 0,
+      0, 0, 1, 1, 2, 2, 3, 3,
+      1, 1, 1, 0, 0
+    ),
+    delay_min = c(
+      rep(0, 21),
+      2, 2, 1.5, 1.5, 3, 3, 2, 2,
+      0, 0, 0, 0, 0
+    ),
+    growth_rate = c(
+      rep(0, 8), 0.1, 0.1, 0, 0, 0, 0, 0, 0.15, 0.2, 0.2, 0.2, 0, 0,
+      0, 0, 0, 0, 0.05, 0.05, 0, 0,
+      0, 0, 0, 0.1, 0.1
+    ),
+    stringsAsFactors = FALSE
+  ),
+  vcov = lockstep_vcov
+))
+
 # The shared fits below use the cmdstanr backend, so they are only built
 # when cmdstanr and CmdStan are both available. Tests that use them call
 # `skip_if_no_cmdstanr()`.
@@ -472,6 +567,71 @@ if (not_on_cran() && has_cmdstanr()) {
   prep_meta_mixed <- suppressMessages(as_epidist_meta_model(
     sim_obs,
     estimates = sim_biased_estimates
+  ))
+
+  # Simulated studies used for a simulation and recovery check of the Stan
+  # discrete grid branch. Every study takes integer date differences from a
+  # right truncated cohort, so all of its summaries go through
+  # meta_family_grid_pmf and the cohort grid shortcut. Each reports a mean, a
+  # standard deviation and a few quantiles at varied probability levels.
+  set.seed(3)
+  grid_summaries <- function(size, study_obs_time, probs) {
+    ptime <- stats::runif(size, 0, 1)
+    delay <- stats::rlnorm(size, meanlog, sdlog)
+    obs <- floor(ptime + delay)
+    obs <- obs[obs + 1 <= study_obs_time]
+    return(list(
+      mean = mean(obs), sd = stats::sd(obs), size = length(obs),
+      quantiles = stats::quantile(obs, probs, names = FALSE)
+    ))
+  }
+
+  grid_obs_times <- c(12, 16, 20, 24, 30)
+  grid_probs <- list(
+    c(0.25, 0.5, 0.75), c(0.1, 0.5, 0.9), c(0.5, 0.75),
+    c(0.2, 0.4, 0.6, 0.8), c(0.05, 0.5, 0.95)
+  )
+  grid_draws <- Map(grid_summaries, 4000, grid_obs_times, grid_probs)
+
+  sim_grid_df <- Map(
+    function(study, draw, probs, obs_time) {
+      return(data.frame(
+        study = study,
+        type = c("mean", "sd", rep("quantile", length(probs))),
+        value = c(draw$mean, draw$sd, draw$quantiles),
+        p = c(NA_real_, NA_real_, probs),
+        n = draw$size,
+        relative_obs_time = obs_time,
+        trunc_adjusted = FALSE,
+        trunc_design = "cohort",
+        cens_adjusted = 0,
+        growth_rate = 0,
+        stringsAsFactors = FALSE
+      ))
+    },
+    paste0("grid_", seq_along(grid_obs_times)), grid_draws, grid_probs,
+    grid_obs_times
+  )
+
+  sim_grid_estimates <- suppressMessages(as_epidist_estimates_data(
+    do.call(rbind, sim_grid_df)
+  ))
+  prep_meta_grid <- suppressMessages(
+    as_epidist_meta_model(estimates = sim_grid_estimates)
+  )
+
+  cli::cli_alert_info(
+    "Compiling the meta model with cmdstanr and simulated grid summaries"
+  )
+  fit_meta_grid <- suppressMessages(epidist(
+    data = prep_meta_grid,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
   ))
 
   cli::cli_alert_info(

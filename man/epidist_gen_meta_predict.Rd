@@ -12,7 +12,8 @@ epidist_gen_meta_predict(family)
 be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
-families see \code{\link[=brmsfamily]{brmsfamily()}}. Commonly used, such as \code{\link[=lognormal]{lognormal()}}, are also
+families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
+\code{\link[brms:brmsfamily]{brms::lognormal()}}, are also
 reexported as part of \code{epidist}.}
 }
 \value{
@@ -24,7 +25,9 @@ Individual level rows are predicted as in the marginal model using
 \code{\link[=epidist_gen_posterior_predict]{epidist_gen_posterior_predict()}}. For summary rows the predicted quantity
 is the reported summary itself, that is a simulated reported mean, standard
 deviation, or, for quantile rows, cumulative probability at the reported
-value. Predictions for summary rows are therefore not on the delay scale and
+value. A row that stands for several summaries reported by one study
+predicts the first of them, drawn from its marginal.
+Predictions for summary rows are therefore not on the delay scale and
 should not be compared directly with individual level predictions. They come
 from the normal approximations described in \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}, so a
 predicted cumulative probability for a quantile row can fall outside
@@ -34,18 +37,10 @@ predicted cumulative probability for a quantile row can fall outside
 \code{\link[brms:posterior_predict.brmsfit]{brms::posterior_predict()}} for details on how this is used within
 \code{brms}.
 
-Other meta_model: 
-\code{\link{as_epidist_meta_model}()},
-\code{\link{as_epidist_meta_model.NULL}()},
-\code{\link{as_epidist_meta_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_meta_model.epidist_estimates_data}()},
-\code{\link{as_epidist_meta_model.epidist_linelist_data}()},
-\code{\link{assert_epidist.epidist_meta_model}()},
-\code{\link{epidist_family_model.epidist_meta_model}()},
-\code{\link{epidist_formula_model.epidist_meta_model}()},
+Other gen: 
+\code{\link{epidist_gen_log_lik}()},
 \code{\link{epidist_gen_meta_log_lik}()},
-\code{\link{epidist_transform_data_model.epidist_meta_model}()},
-\code{\link{is_epidist_meta_model}()},
-\code{\link{new_epidist_meta_model}()}
+\code{\link{epidist_gen_posterior_epred}()},
+\code{\link{epidist_gen_posterior_predict}()}
 }
-\concept{meta_model}
+\concept{gen}

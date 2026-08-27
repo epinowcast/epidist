@@ -23,6 +23,9 @@ This enables fitting a single delay distribution to all of the evidence
 available using \code{\link[=epidist]{epidist()}}.
 }
 \details{
+The meta model is experimental.
+Its interface may still change in future releases.
+
 Individual level rows use the same likelihood as the marginal model (see
 \code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}}), imported from the
 \href{https://primarycensored.epinowcast.org/}{primarycensored} package.
@@ -39,18 +42,61 @@ example \code{mu ~ 1 + (1 | study)}, rather than through this function.
 Individual level rows are labelled \code{"individual"} in the \code{study} column so
 that they form their own level of any such term.
 }
+\section{Summaries reported by the same study}{
+Summaries that one study computed from the same delays are correlated, so
+they are fitted jointly rather than as separate terms.
+Two summaries are fitted together when they agree on every column of
+\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} other than the summary itself, that is on the
+study, its metadata, and any covariates supplied.
+Grouping on those columns keeps the model correct for any \code{brms} formula,
+because a linear predictor built from them cannot vary within a group.
+A reported mean and a reported standard deviation are fitted as a bivariate
+normal, and a set of reported quantiles as a multinomial over the delay
+intervals they cut out.
+A study that reported a covariance matrix over its summaries is fitted as a
+multivariate normal with that matrix, which is the recommended format for a
+study that cannot share its delays. See \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} and
+\code{\link[=bootstrap_delay_estimates]{bootstrap_delay_estimates()}}.
+A summary supplied with its own \code{se} is fitted on its own, because that
+standard error replaces the sampling uncertainty the joint likelihood would
+derive.
+
+One observation is therefore a group of summaries rather than a single
+reported value, in the same way that one row of aggregated individual level
+data stands for many delays.
+\code{log_lik()} and \code{\link[loo:loo]{loo::loo()}} work at that level, so their values are per
+group. See \code{vignette("faq")}.
+}
+
 \section{Approximations used for summary rows}{
 \itemize{
-\item Reported means, standard deviations and quantiles are given normal
-sampling distributions. A reported mean uses the implied standard
-deviation over the square root of the sample size, a reported standard
-deviation uses the kurtosis based asymptotic standard error of a sample
-standard deviation, and a reported quantile is fitted on the cumulative
-probability scale with the binomial standard error of an empirical
-distribution function. These approximations degrade for small sample
-sizes.
-\item Several summaries reported by the same study are treated as independent
-given the parameters, which understates their joint uncertainty.
+\item Reported means and standard deviations are given normal sampling
+distributions. A reported mean uses the implied standard deviation over
+the square root of the sample size, and a reported standard deviation uses
+the kurtosis based asymptotic standard error of a sample standard
+deviation. A mean and a standard deviation from the same study use the
+asymptotic bivariate normal of the pair, whose correlation is the skewness
+of the implied estimand over the square root of its excess kurtosis. These
+approximations degrade for small sample sizes.
+\item Reported quantiles are fitted on the cumulative probability scale with the
+multinomial likelihood of the number of delays falling between them, which
+is exact for the implied estimand given the sample size. A single reported
+quantile reduces to the binomial. The counts are recovered by rounding the
+reported probabilities, which loses a fraction of a delay per quantile.
+\item Summaries of different kinds from the same study, such as a mean and a
+median, are still treated as independent given the parameters, which
+understates their joint uncertainty. A study that reports a covariance
+matrix over its summaries avoids this, because the matrix carries the
+correlation between them.
+\item A quantile fitted through a reported covariance matrix is on the delay
+scale, so its implied value is read off the implied distribution function
+by interpolating between the grid or quadrature points either side of it.
+The error in that is the curvature of the distribution function over one
+grid cell.
+\item A study that only counted delays above \code{delay_min} has every implied
+summary conditioned on the delay exceeding it. On the discrete grid the
+cells recording a shorter delay are dropped, so the conditioning point is
+rounded up to the next grid boundary.
 \item The standard errors above are plug in quantities that depend on the
 parameters, so a set of studies that no single distribution can explain
 can be accommodated by inflating the implied standard deviation rather
@@ -59,7 +105,8 @@ Allow for genuine differences between studies with a formula term such as
 \code{mu ~ 1 + (1 | study)} rather than relying on the sampling error alone.
 \item Quantiles read off a fitted distribution rather than the empirical data
 have smaller sampling error than assumed here. Supply a reported \code{se} in
-\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} for those rows. For quantile rows that \code{se}
+\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} for those rows, which also takes them out of
+the joint quantile likelihood. For quantile rows that \code{se}
 is on the scale of the reported delay, as studies report it, and is
 converted to the cumulative probability scale by the delta method, that is
 by multiplying it by the density of the biased estimand at the reported
@@ -86,7 +133,10 @@ long tail needs a larger \code{max_delay} than the default.
 \item Studies that used the uniform single interval approximation and did not
 adjust for right truncation are summarised by quadrature over the
 primary censored delay distribution, which costs a fixed number of
-distribution function evaluations per row.
+distribution function evaluations per row. Set
+\code{options(epidist.meta_n_quad = )} to change that number, which must be
+even. It is substituted into the Stan code when the model is compiled, so
+set it before fitting and leave it alone afterwards.
 }
 }
 
@@ -99,8 +149,6 @@ Other meta_model:
 \code{\link{assert_epidist.epidist_meta_model}()},
 \code{\link{epidist_family_model.epidist_meta_model}()},
 \code{\link{epidist_formula_model.epidist_meta_model}()},
-\code{\link{epidist_gen_meta_log_lik}()},
-\code{\link{epidist_gen_meta_predict}()},
 \code{\link{epidist_transform_data_model.epidist_meta_model}()},
 \code{\link{is_epidist_meta_model}()},
 \code{\link{new_epidist_meta_model}()}

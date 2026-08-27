@@ -8,6 +8,7 @@
   y,
   dist,
   args,
+  lower = 0,
   cutoff,
   pwindow,
   swindow,
@@ -24,6 +25,8 @@
 
 \item{args}{A named list of distribution parameters.}
 
+\item{lower}{The study's minimum delay (its left truncation point).}
+
 \item{cutoff}{The grid cutoff, either the study observation time or
 \code{max_delay}.}
 
@@ -39,7 +42,9 @@ otherwise.}
 \item{trunc_design}{0 for a cohort design, 1 for an accrual design.}
 }
 \value{
-A probability.
+A probability, or \code{Inf} if the distribution function underflows
+to zero at \code{cutoff}, which forces a \code{-Inf} log likelihood rather than a
+\code{NaN} one.
 }
 \description{
 Evaluates the distribution function of the biased estimand at a reported

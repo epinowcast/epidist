@@ -10,7 +10,8 @@
 \item{moments}{A numeric vector of the first four raw moments.}
 }
 \value{
-A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis}.
+A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and
+\code{skewness}.
 }
 \description{
 Summarise a distribution from its first four raw moments

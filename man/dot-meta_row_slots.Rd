@@ -13,9 +13,11 @@
 }
 \value{
 A named list of the observation type, study metadata and reported
-value for row \code{i}.
+values for row \code{i}.
 }
 \description{
-Extract the meta model slots for a single row
+Group rows point into the flat member arrays passed to Stan as data, so the
+reported values and cumulative counts of the group are read back out here
+for the R mirrors of the joint likelihoods.
 }
 \keyword{internal}

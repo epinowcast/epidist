@@ -4,16 +4,20 @@
 \alias{.meta_grid_moments}
 \title{Summaries of a discrete delay grid}
 \usage{
-.meta_grid_moments(mass, swindow)
+.meta_grid_moments(mass, first_delay, swindow)
 }
 \arguments{
-\item{mass}{A vector of grid probabilities from \code{\link[=.meta_grid_pmf]{.meta_grid_pmf()}}.}
+\item{mass}{A vector of grid probabilities from \code{\link[=.meta_grid_pmf]{.meta_grid_pmf()}}, or a
+vector of \code{NA} if the grid mass underflowed to zero.}
+
+\item{first_delay}{The delay the first kept cell records.}
 
 \item{swindow}{The secondary censoring window width, which is also the grid
 spacing.}
 }
 \value{
-A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis}.
+A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and
+\code{skewness}.
 }
 \description{
 Summaries of a discrete delay grid

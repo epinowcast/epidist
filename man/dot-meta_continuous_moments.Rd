@@ -12,7 +12,8 @@
 \item{args}{A named list of distribution parameters.}
 }
 \value{
-A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis}.
+A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and
+\code{skewness}.
 }
 \description{
 The mean and standard deviation mirror the formulas used by \code{\link[=add_mean_sd]{add_mean_sd()}}.

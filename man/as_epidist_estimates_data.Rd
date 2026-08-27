@@ -21,10 +21,15 @@ These objects are the summary data input to \code{\link[=as_epidist_meta_model]{
 See the specific methods for details on supported input formats and usage
 examples.
 }
+\details{
+The meta model these objects feed is experimental.
+Its interface may still change in future releases.
+}
 \seealso{
 Other estimates_data: 
 \code{\link{as_epidist_estimates_data.data.frame}()},
 \code{\link{assert_epidist.epidist_estimates_data}()},
+\code{\link{bootstrap_delay_estimates}()},
 \code{\link{is_epidist_estimates_data}()},
 \code{\link{new_epidist_estimates_data}()}
 }

@@ -9,6 +9,9 @@
 #' See the specific methods for details on supported input formats and usage
 #' examples.
 #'
+#' The meta model these objects feed is experimental.
+#' Its interface may still change in future releases.
+#'
 #' @param data The data to convert
 #'
 #' @param ... Additional arguments passed to methods
@@ -67,6 +70,28 @@ as_epidist_estimates_data <- function(data, ...) {
 #'   from. This sets the sampling uncertainty on the reported value. A reported
 #'   standard error (`se`) may be given instead, and takes precedence when
 #'   supplied.
+#' * **The minimum delay it counted** (`delay_min`), where the study dropped
+#'   delays below some point. Its summaries then describe a left truncated
+#'   delay distribution, and every implied summary is conditioned on the delay
+#'   exceeding `delay_min`. Defaults to 0, meaning the study counted every
+#'   delay.
+#'
+#' # Reporting a covariance matrix
+#'
+#' A study that cannot share its delays should report a vector of summaries
+#' with a covariance matrix over them rather than a standard error for each
+#' one. This is the recommended format, because it keeps the correlation
+#' between the quantities the study reports, which a per summary standard
+#' error throws away. Supply the matrices through `vcov`, named by study. Each
+#' matrix must be symmetric positive definite, and its dimension must match the
+#' number of rows the study has in `data`, in the order those rows appear.
+#' [bootstrap_delay_estimates()] produces both parts from a set of delays.
+#'
+#' Summaries reported this way are fitted with
+#' \eqn{y \sim \text{MVN}(m(\theta), \Sigma)}, where \eqn{m} is the vector of
+#' summaries the study's estimation procedure would converge to and
+#' \eqn{\Sigma} is the supplied matrix. Rows with a covariance matrix need no
+#' `n` and no `se`.
 #'
 #' Only the censoring adjustments above are supported. Anything more exotic
 #' must be approximated by whichever of them is closest, and if you cannot tell
@@ -95,14 +120,22 @@ as_epidist_estimates_data <- function(data, ...) {
 #'
 #' @param se A string giving the column of `data` containing the reported
 #'  standard error of the summary. Optional. When supplied it overrides the
-#'  standard error implied by the sample size. It is always on the scale of the
+#'  standard error implied by the sample size, and takes the row out of the
+#'  joint likelihood [as_epidist_meta_model()] otherwise uses for summaries a
+#'  study computed from the same delays. It is always on the scale of the
 #'  reported `value`, so for rows with `type` of `"quantile"` it is a standard
 #'  error for the reported delay. The model fits quantile rows on the
 #'  cumulative probability scale and converts a supplied `se` to that scale
 #'  internally by the delta method.
 #'
 #' @param n A string giving the column of `data` containing the number of
-#'  delays the summary was computed from. Required unless `se` is supplied.
+#'  delays the summary was computed from. Required unless `se` or a covariance
+#'  matrix is supplied.
+#'
+#' @param vcov A named list of covariance matrices over the summaries each
+#'  study reported, named by study. See the section on reporting a covariance
+#'  matrix. Optional, and studies without an entry are fitted with their `n` or
+#'  `se` as usual.
 #'
 #' @param p A string giving the column of `data` containing the probability of
 #'  a reported quantile. Required for rows with `type` of `"quantile"` and
@@ -136,9 +169,19 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  censoring adjustment code (`0`, `1`, `2`, or `3`, as described above).
 #'  Defaults to 0.
 #'
+#' @param delay_min A string giving the column of `data` containing the
+#'  smallest delay the study counted, its left truncation point. Defaults to 0,
+#'  meaning the study counted every delay. Must be below the grid cutoff, and
+#'  no reported mean or quantile may fall below it.
+#'
 #' @param growth_rate A string giving the column of `data` containing the
 #'  exponential growth rate of primary events during the study period. Defaults
 #'  to 0, which corresponds to a uniform primary event within its window.
+#'  A non-zero growth rate is expensive. The primary censored delay
+#'  distribution then has no analytical solution, so every distribution
+#'  function evaluation is a numerical integration, and there is one of those
+#'  per grid cell or quadrature node. Leave it at 0 unless the study period
+#'  covered enough growth for the dynamical bias to matter.
 #'
 #' @param max_delay A string giving the column of `data` containing the delay
 #'  beyond which the implied summaries are truncated when building the
@@ -147,8 +190,10 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  up, with a minimum of ten. The implied standard deviation is biased
 #'  downwards if the delay distribution has not decayed by the cutoff, so
 #'  increase this for a distribution with a long tail. Lowering it makes
-#'  fitting faster because the grid costs one distribution function evaluation
-#'  per cell.
+#'  fitting faster because a reported mean or standard deviation costs one
+#'  distribution function evaluation per grid cell. Reported quantiles do not
+#'  pay that cost under a cohort design, where three evaluations give the grid
+#'  distribution function at any delay.
 #'
 #' @param ... Not used in this method.
 #'
@@ -185,15 +230,18 @@ as_epidist_estimates_data.data.frame <- function(
   trunc_adjusted = NULL,
   trunc_design = NULL,
   cens_adjusted = NULL,
+  delay_min = NULL,
   growth_rate = NULL,
   max_delay = NULL,
+  vcov = NULL,
   ...
 ) {
   assert_data_frame(data)
 
   supplied <- list(
     study, type, value, se, n, p, pwindow, swindow, relative_obs_time,
-    trunc_adjusted, trunc_design, cens_adjusted, growth_rate, max_delay
+    trunc_adjusted, trunc_design, cens_adjusted, delay_min, growth_rate,
+    max_delay
   )
   valid_inputs <- !vapply(supplied, is.null, logical(1))
   data_tbl <- .rename_columns(
@@ -216,8 +264,134 @@ as_epidist_estimates_data.data.frame <- function(
   ]
 
   data_tbl <- new_epidist_estimates_data(data_tbl)
+  data_tbl <- .estimates_set_vcov(data_tbl, vcov)
   assert_epidist(data_tbl)
   return(data_tbl)
+}
+
+#' The reported covariance matrices of an `epidist_estimates_data` object
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns A named list of covariance matrices, empty when no study reported
+#'  one.
+#'
+#' @keywords internal
+.estimates_vcov <- function(data) {
+  return(attr(data, "estimates_vcov") %||% list())
+}
+
+#' Attach reported covariance matrices to an `epidist_estimates_data` object
+#'
+#' The matrices are held alongside the data rather than in it, because a
+#' covariance matrix spans several rows. Their Cholesky factors are built once
+#' by [as_epidist_meta_model()] and passed to Stan, so the sampler never
+#' decomposes them.
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @param vcov A named list of covariance matrices, or `NULL`.
+#'
+#' @returns The input with the matrices attached.
+#'
+#' @keywords internal
+.estimates_set_vcov <- function(data, vcov) {
+  if (is.null(vcov) || length(vcov) == 0) {
+    return(data)
+  }
+  if (!is.list(vcov) || is.null(names(vcov)) || anyDuplicated(names(vcov))) {
+    cli::cli_abort(
+      "{.var vcov} must be a list of matrices named by study."
+    )
+  }
+  attr(data, "estimates_vcov") <- lapply(vcov, as.matrix)
+  return(data)
+}
+
+#' Which rows of an `epidist_estimates_data` object have a covariance matrix
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns A logical vector, one entry per row.
+#'
+#' @keywords internal
+.estimates_vcov_rows <- function(data) {
+  return(as.character(data$study) %in% names(.estimates_vcov(data)))
+}
+
+#' Check the covariance matrices of an `epidist_estimates_data` object
+#'
+#' Each matrix must cover the rows of its study, be symmetric, and be positive
+#' definite, so that it has a Cholesky factor and defines a proper
+#' multivariate normal.
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns `NULL`, invisibly.
+#'
+#' @keywords internal
+.assert_estimates_vcov <- function(data) {
+  supplied <- .estimates_vcov(data)
+  if (length(supplied) == 0) {
+    return(invisible(NULL))
+  }
+  study <- as.character(data$study)
+  unknown <- setdiff(names(supplied), unique(study))
+  if (length(unknown) > 0) {
+    cli::cli_abort(paste0(
+      "{.var vcov} names {.val {unknown}}, which {?is/are} not among the ",
+      "studies in the data."
+    ))
+  }
+  for (name in names(supplied)) {
+    matrix_i <- supplied[[name]]
+    size <- sum(study == name)
+    if (!is.numeric(matrix_i) || nrow(matrix_i) != ncol(matrix_i)) {
+      cli::cli_abort(
+        "The covariance matrix for {.val {name}} must be square and numeric."
+      )
+    }
+    if (nrow(matrix_i) != size) {
+      cli::cli_abort(paste0(
+        "The covariance matrix for {.val {name}} is {nrow(matrix_i)} by ",
+        "{ncol(matrix_i)} but the study reports {size} summar{?y/ies}."
+      ))
+    }
+    if (!isTRUE(all.equal(matrix_i, t(matrix_i), tolerance = 1e-8))) {
+      cli::cli_abort(
+        "The covariance matrix for {.val {name}} must be symmetric."
+      )
+    }
+    if (inherits(try(chol(matrix_i), silent = TRUE), "try-error")) {
+      cli::cli_abort(paste0(
+        "The covariance matrix for {.val {name}} must be positive definite."
+      ))
+    }
+    # Every summary the matrix covers is fitted as one observation, which
+    # takes its study metadata from the first of them.
+    varies <- vapply(
+      data[study == name, .estimates_metadata_cols(), drop = FALSE],
+      function(column) {
+        return(length(unique(column)) > 1)
+      },
+      logical(1)
+    )
+    if (any(varies)) {
+      cli::cli_abort(paste0(
+        "The summaries {.val {name}} reports with a covariance matrix must ",
+        "share their study metadata, but {.var {names(varies)[varies]}} ",
+        "{?varies/vary} between them."
+      ))
+    }
+  }
+  if (any(!is.na(data$se) & .estimates_vcov_rows(data))) {
+    cli::cli_abort(paste0(
+      "A study reporting a covariance matrix must not also report a ",
+      "{.var se}, because the matrix already gives the uncertainty of every ",
+      "summary it reports."
+    ))
+  }
+  return(invisible(NULL))
 }
 
 #' Fill in the optional columns of an `epidist_estimates_data` object
@@ -245,7 +419,7 @@ as_epidist_estimates_data.data.frame <- function(
     if (!hasName(data, col)) {
       cli::cli_inform(c(
         i = paste0(
-          "No {col} column supplied, assuming a censoring window of 1 ",
+          "No {.var {col}} column supplied, assuming a censoring window of 1 ",
           "(daily reporting) for every study."
         )
       ))
@@ -294,6 +468,12 @@ as_epidist_estimates_data.data.frame <- function(
     ))
     data$cens_adjusted <- 0
   }
+  if (!hasName(data, "delay_min")) {
+    data$delay_min <- 0
+  }
+  # Studies are often stacked from separate tables, so a study that did not
+  # left truncate leaves a gap rather than a zero.
+  data$delay_min[is.na(data$delay_min)] <- 0
   if (!hasName(data, "growth_rate")) {
     data$growth_rate <- 0
   }
@@ -378,6 +558,105 @@ as_epidist_estimates_data.data.frame <- function(
   return(studies[short])
 }
 
+#' Summarise delays for reporting with a covariance matrix
+#'
+#' Turns a set of individual level delays into the summary vector and
+#' covariance matrix [as_epidist_estimates_data()] takes, by resampling the
+#' delays. This is what a site that cannot share its line list can run and
+#' publish instead. The covariance keeps the correlation between the
+#' quantities it reports, which a standard error for each summary throws away,
+#' so a meta analysis of the published numbers loses less than it otherwise
+#' would.
+#'
+#' Report the study metadata alongside the numbers. The reporting table of
+#' Charniga et al. (2024) covers most of it, and passing those fields through
+#' `...` puts them straight onto the returned rows.
+#'
+#' @param delays A numeric vector of observed delays.
+#'
+#' @param study A string naming the study the delays come from.
+#'
+#' @param moments Which moments to report, any of `"mean"` and `"sd"`.
+#'
+#' @param probs A numeric vector of probabilities to report quantiles at.
+#'
+#' @param n_bootstrap The number of resamples used to estimate the covariance.
+#'  Must exceed the number of summaries reported.
+#'
+#' @param ... Further columns to attach to every returned row, such as the
+#'  study metadata documented in [as_epidist_estimates_data()].
+#'
+#' @returns A list with a `data` frame of reported summaries and a `vcov` list
+#'  holding the covariance matrix, both ready to pass to
+#'  [as_epidist_estimates_data()].
+#'
+#' @family estimates_data
+#' @importFrom tibble tibble
+#' @importFrom checkmate assert_numeric assert_string assert_integerish
+#' @export
+#' @examples
+#' set.seed(1)
+#' reported <- bootstrap_delay_estimates(
+#'   rlnorm(200, 1.6, 0.5),
+#'   study = "site A",
+#'   probs = c(0.25, 0.5, 0.75),
+#'   cens_adjusted = 1
+#' )
+#' as_epidist_estimates_data(reported$data, vcov = reported$vcov)
+bootstrap_delay_estimates <- function(
+  delays,
+  study,
+  moments = c("mean", "sd"),
+  probs = numeric(0),
+  n_bootstrap = 1000,
+  ...
+) {
+  assert_numeric(delays, min.len = 2, any.missing = FALSE, finite = TRUE)
+  assert_string(study)
+  assert_subset(moments, c("mean", "sd"), .var.name = "moments")
+  assert_numeric(probs, lower = 0, upper = 1, any.missing = FALSE)
+  assert_integerish(n_bootstrap, lower = 2, len = 1, any.missing = FALSE)
+  if (length(moments) + length(probs) == 0) {
+    cli::cli_abort(
+      "Report at least one of {.var moments} and {.var probs}."
+    )
+  }
+  moments <- intersect(c("mean", "sd"), moments)
+  summarise <- function(x) {
+    return(c(
+      if ("mean" %in% moments) mean(x),
+      if ("sd" %in% moments) stats::sd(x),
+      stats::quantile(x, probs, names = FALSE)
+    ))
+  }
+  observed <- summarise(delays)
+  if (n_bootstrap <= length(observed)) {
+    cli::cli_abort(paste0(
+      "{.var n_bootstrap} must exceed the {length(observed)} summaries ",
+      "reported, or the covariance matrix is singular."
+    ))
+  }
+  draws <- vapply(
+    seq_len(n_bootstrap),
+    function(i) {
+      return(summarise(sample(delays, replace = TRUE)))
+    },
+    numeric(length(observed))
+  )
+  covariance <- stats::cov(t(matrix(draws, nrow = length(observed))))
+  reported <- tibble(
+    study = study,
+    type = c(moments, rep("quantile", length(probs))),
+    value = observed,
+    p = c(rep(NA_real_, length(moments)), probs),
+    n = length(delays),
+    ...
+  )
+  return(list(
+    data = reported, vcov = stats::setNames(list(covariance), study)
+  ))
+}
+
 #' Class constructor for `epidist_estimates_data` objects
 #'
 #' @param data A data.frame to convert
@@ -433,6 +712,10 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     .var.name = "trunc_design"
   )
   assert_subset(data$cens_adjusted, 0:3, .var.name = "cens_adjusted")
+  assert_numeric(
+    data$delay_min,
+    lower = 0, any.missing = FALSE, finite = TRUE
+  )
   assert_numeric(data$growth_rate, any.missing = FALSE, finite = TRUE)
   assert_numeric(
     data$max_delay,
@@ -451,11 +734,29 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     ))
   }
 
-  if (any(is.na(data$n) & is.na(data$se))) {
+  .assert_estimates_vcov(data)
+
+  if (any(is.na(data$n) & is.na(data$se) & !.estimates_vcov_rows(data))) {
     cli::cli_abort(paste0(
-      "Every reported summary needs either a sample size {.var n} or a ",
-      "reported standard error {.var se} so that its sampling uncertainty ",
-      "can be quantified."
+      "Every reported summary needs a sample size {.var n}, a reported ",
+      "standard error {.var se}, or a covariance matrix in {.var vcov}, so ",
+      "that its sampling uncertainty can be quantified."
+    ))
+  }
+
+  cutoff <- .estimates_grid_cutoff(data)
+  if (any(data$delay_min >= cutoff)) {
+    cli::cli_abort(paste0(
+      "{.var delay_min} must be below the grid cutoff (the observation time, ",
+      "or {.var max_delay} where the study adjusted for right truncation)."
+    ))
+  }
+
+  below <- data$type %in% c("mean", "quantile") & data$value < data$delay_min
+  if (any(below)) {
+    cli::cli_abort(paste0(
+      "A study cannot report a summary below the smallest delay it counted. ",
+      "This fails for {.val {unique(as.character(data$study)[below])}}."
     ))
   }
 
@@ -467,7 +768,6 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     ))
   }
 
-  cutoff <- .estimates_grid_cutoff(data)
   if (any(cutoff < data$swindow)) {
     cli::cli_abort(paste0(
       "The grid cutoff (the observation time, or {.var max_delay} where the ",
@@ -546,6 +846,12 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
   ))
 }
 
+.estimates_metadata_cols <- function() {
+  return(setdiff(
+    .estimates_required_cols(), c("study", "type", "value", "se", "p")
+  ))
+}
+
 .estimates_types <- function() {
   return(c("mean", "sd", "quantile"))
 }
@@ -568,6 +874,7 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     "trunc_adjusted",
     "trunc_design",
     "cens_adjusted",
+    "delay_min",
     "growth_rate",
     "max_delay"
   ))

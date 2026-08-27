@@ -8,6 +8,7 @@
   y,
   dist,
   args,
+  lower = 0,
   cutoff,
   pwindow,
   swindow,
@@ -22,6 +23,8 @@
 
 \item{args}{A named list of distribution parameters.}
 
+\item{lower}{The study's minimum delay (its left truncation point).}
+
 \item{cutoff}{The grid cutoff, either the study observation time or
 \code{max_delay}.}
 
@@ -32,7 +35,8 @@
 \item{accrual}{1 to apply the accrual weight, 0 otherwise.}
 }
 \value{
-A probability.
+A probability, or \code{Inf} if the grid mass underflows to zero,
+which forces a \code{-Inf} log likelihood rather than a \code{NaN} one.
 }
 \description{
 The step distribution function of the grid is replaced by the version that
@@ -40,5 +44,10 @@ interpolates it linearly through the mid points of its cells. Without this
 correction a quantile of day resolution data, which must land on a jump of
 the step function, biases the implied probability upwards by several
 sampling standard errors.
+}
+\details{
+A cohort grid only needs the two cell edges the value falls between, so it
+takes the three evaluation shortcut of \code{\link[=.meta_grid_edges]{.meta_grid_edges()}}. An accrual grid
+must be built in full.
 }
 \keyword{internal}

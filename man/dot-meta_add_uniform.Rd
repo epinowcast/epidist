@@ -12,7 +12,8 @@
 \item{pwindow}{The primary censoring window width.}
 }
 \value{
-A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis}.
+A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and
+\code{skewness}.
 }
 \description{
 The uniform single interval approximation leaves the primary interval

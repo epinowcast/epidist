@@ -4,21 +4,26 @@
 \alias{.meta_moment_vector}
 \title{Summarise a distribution from its mean and central moments}
 \usage{
-.meta_moment_vector(mean, variance, fourth)
+.meta_moment_vector(mean, variance, third, fourth)
 }
 \arguments{
 \item{mean}{The mean of the distribution.}
 
 \item{variance}{The variance of the distribution.}
 
+\item{third}{The third central moment of the distribution.}
+
 \item{fourth}{The fourth central moment of the distribution.}
 }
 \value{
-A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis}.
+A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and
+\code{skewness}.
 }
 \description{
 The kurtosis is needed as well as the mean and standard deviation because
 the sampling error of a reported standard deviation depends on it. See
-\code{\link[=.meta_summary_terms]{.meta_summary_terms()}}.
+\code{\link[=.meta_summary_terms]{.meta_summary_terms()}}. The skewness is needed because the sampling
+covariance of a reported mean and a reported standard deviation from the
+same study depends on it. See \code{\link[=.meta_moment_pair_ll]{.meta_moment_pair_ll()}}.
 }
 \keyword{internal}

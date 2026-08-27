@@ -18,8 +18,10 @@
   trunc_adjusted = NULL,
   trunc_design = NULL,
   cens_adjusted = NULL,
+  delay_min = NULL,
   growth_rate = NULL,
   max_delay = NULL,
+  vcov = NULL,
   ...
 )
 }
@@ -40,14 +42,17 @@ is present.}
 
 \item{se}{A string giving the column of \code{data} containing the reported
 standard error of the summary. Optional. When supplied it overrides the
-standard error implied by the sample size. It is always on the scale of the
+standard error implied by the sample size, and takes the row out of the
+joint likelihood \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}} otherwise uses for summaries a
+study computed from the same delays. It is always on the scale of the
 reported \code{value}, so for rows with \code{type} of \code{"quantile"} it is a standard
 error for the reported delay. The model fits quantile rows on the
 cumulative probability scale and converts a supplied \code{se} to that scale
 internally by the delta method.}
 
 \item{n}{A string giving the column of \code{data} containing the number of
-delays the summary was computed from. Required unless \code{se} is supplied.}
+delays the summary was computed from. Required unless \code{se} or a covariance
+matrix is supplied.}
 
 \item{p}{A string giving the column of \code{data} containing the probability of
 a reported quantile. Required for rows with \code{type} of \code{"quantile"} and
@@ -81,9 +86,19 @@ truncation.}
 censoring adjustment code (\code{0}, \code{1}, \code{2}, or \code{3}, as described above).
 Defaults to 0.}
 
+\item{delay_min}{A string giving the column of \code{data} containing the
+smallest delay the study counted, its left truncation point. Defaults to 0,
+meaning the study counted every delay. Must be below the grid cutoff, and
+no reported mean or quantile may fall below it.}
+
 \item{growth_rate}{A string giving the column of \code{data} containing the
 exponential growth rate of primary events during the study period. Defaults
-to 0, which corresponds to a uniform primary event within its window.}
+to 0, which corresponds to a uniform primary event within its window.
+A non-zero growth rate is expensive. The primary censored delay
+distribution then has no analytical solution, so every distribution
+function evaluation is a numerical integration, and there is one of those
+per grid cell or quadrature node. Leave it at 0 unless the study period
+covered enough growth for the dynamical bias to matter.}
 
 \item{max_delay}{A string giving the column of \code{data} containing the delay
 beyond which the implied summaries are truncated when building the
@@ -92,8 +107,15 @@ Defaults to twenty times the largest reported value for the study, rounded
 up, with a minimum of ten. The implied standard deviation is biased
 downwards if the delay distribution has not decayed by the cutoff, so
 increase this for a distribution with a long tail. Lowering it makes
-fitting faster because the grid costs one distribution function evaluation
-per cell.}
+fitting faster because a reported mean or standard deviation costs one
+distribution function evaluation per grid cell. Reported quantiles do not
+pay that cost under a cohort design, where three evaluations give the grid
+distribution function at any delay.}
+
+\item{vcov}{A named list of covariance matrices over the summaries each
+study reported, named by study. See the section on reporting a covariance
+matrix. Optional, and studies without an entry are fitted with their \code{n} or
+\code{se} as usual.}
 
 \item{...}{Not used in this method.}
 }
@@ -145,7 +167,29 @@ reporting gives windows of 1, weekly reporting gives 7.
 from. This sets the sampling uncertainty on the reported value. A reported
 standard error (\code{se}) may be given instead, and takes precedence when
 supplied.
+\item \strong{The minimum delay it counted} (\code{delay_min}), where the study dropped
+delays below some point. Its summaries then describe a left truncated
+delay distribution, and every implied summary is conditioned on the delay
+exceeding \code{delay_min}. Defaults to 0, meaning the study counted every
+delay.
 }
+}
+
+\section{Reporting a covariance matrix}{
+A study that cannot share its delays should report a vector of summaries
+with a covariance matrix over them rather than a standard error for each
+one. This is the recommended format, because it keeps the correlation
+between the quantities the study reports, which a per summary standard
+error throws away. Supply the matrices through \code{vcov}, named by study. Each
+matrix must be symmetric positive definite, and its dimension must match the
+number of rows the study has in \code{data}, in the order those rows appear.
+\code{\link[=bootstrap_delay_estimates]{bootstrap_delay_estimates()}} produces both parts from a set of delays.
+
+Summaries reported this way are fitted with
+\eqn{y \sim \text{MVN}(m(\theta), \Sigma)}, where \eqn{m} is the vector of
+summaries the study's estimation procedure would converge to and
+\eqn{\Sigma} is the supplied matrix. Rows with a covariance matrix need no
+\code{n} and no \code{se}.
 
 Only the censoring adjustments above are supported. Anything more exotic
 must be approximated by whichever of them is closest, and if you cannot tell
@@ -177,6 +221,7 @@ as_epidist_estimates_data(
 Other estimates_data: 
 \code{\link{as_epidist_estimates_data}()},
 \code{\link{assert_epidist.epidist_estimates_data}()},
+\code{\link{bootstrap_delay_estimates}()},
 \code{\link{is_epidist_estimates_data}()},
 \code{\link{new_epidist_estimates_data}()}
 }

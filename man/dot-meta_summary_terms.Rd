@@ -4,7 +4,7 @@
 \alias{.meta_summary_terms}
 \title{The implied summary and its standard error for one summary row and one draw}
 \usage{
-.meta_summary_terms(slots, dist, args)
+.meta_summary_terms(slots, dist, args, moments = NULL)
 }
 \arguments{
 \item{slots}{The output of \code{\link[=.meta_row_slots]{.meta_row_slots()}}.}
@@ -12,6 +12,9 @@
 \item{dist}{A \code{primarycensored} distribution function name.}
 
 \item{args}{A named list of distribution parameters for a single draw.}
+
+\item{moments}{A summary vector from \code{\link[=.meta_implied_moments]{.meta_implied_moments()}} for this row
+and draw, or \code{NULL} to compute it here.}
 }
 \value{
 A named numeric vector with elements \code{observed}, \code{implied} and
@@ -21,5 +24,13 @@ A named numeric vector with elements \code{observed}, \code{implied} and
 A standard error reported for a quantile row is on the scale of the reported
 delay, as studies report it, so it is converted to the cumulative
 probability scale by the delta method using \code{\link[=.meta_implied_density]{.meta_implied_density()}}.
+}
+\details{
+A group row stands for several summaries reported by one study, and this
+returns the marginal of its first member, which is the reported mean of a
+mean and standard deviation pair and the cumulative probability at the
+smallest reported quantile of a quantile set. That marginal is what the
+posterior predictive draws for the row. The joint log likelihood of the
+whole group is \code{\link[=.meta_row_log_lik]{.meta_row_log_lik()}}.
 }
 \keyword{internal}

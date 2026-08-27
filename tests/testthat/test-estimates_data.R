@@ -203,10 +203,10 @@ test_that("the default grid cutoff keeps the implied summaries close to the untr
   est <- suppressMessages(as_epidist_estimates_data(heavy))
   args <- list(meanlog = 1.8, sdlog = 0.8)
   at_default <- .meta_implied_moments(
-    "plnorm", args, .estimates_grid_cutoff(est)[1], 1, 1, 1L, 0L, 0
+    "plnorm", args, 0, .estimates_grid_cutoff(est)[1], 1, 1, 1L, 0L, 0
   )
   at_wide <- .meta_implied_moments(
-    "plnorm", args, 2000, 1, 1, 1L, 0L, 0
+    "plnorm", args, 0, 2000, 1, 1, 1L, 0L, 0
   )
   expect_equal(at_default[["mean"]], at_wide[["mean"]], tolerance = 0.005)
   expect_equal(at_default[["sd"]], at_wide[["sd"]], tolerance = 0.02)
@@ -270,4 +270,129 @@ test_that(".estimates_quantile_limit allows for the midpoint imputation shift", 
     max_delay = rep(100, 3), swindow = rep(2, 3), cens_adjusted = c(0L, 1L, 3L)
   )
   expect_identical(.estimates_quantile_limit(data), c(19, 20, 20))
+})
+
+test_that("as_epidist_estimates_data defaults delay_min to zero and validates it", { # nolint: line_length_linter.
+  base <- data.frame(
+    study = "A", type = c("mean", "sd"), value = c(7.5, 3.6), n = 120,
+    relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 0,
+    stringsAsFactors = FALSE
+  )
+  expect_true(all(
+    suppressMessages(as_epidist_estimates_data(base))$delay_min == 0
+  ))
+  beyond <- base
+  beyond$delay_min <- 20
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(beyond)),
+    "must be below the grid cutoff"
+  )
+  above <- base
+  above$delay_min <- 8
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(above)),
+    "cannot report a summary below"
+  )
+})
+
+test_that("as_epidist_estimates_data checks a reported covariance matrix", {
+  base <- data.frame(
+    study = "A", type = c("mean", "sd"), value = c(7.5, 3.6),
+    relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 0,
+    stringsAsFactors = FALSE
+  )
+  good <- matrix(c(0.4, 0.1, 0.1, 0.25), nrow = 2)
+  expect_no_error(
+    suppressMessages(as_epidist_estimates_data(base, vcov = list(A = good)))
+  )
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(base, vcov = list(B = good))),
+    "not among the studies"
+  )
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(
+      base,
+      vcov = list(A = matrix(1, nrow = 1))
+    )),
+    "reports 2 summaries"
+  )
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(
+      base,
+      vcov = list(A = matrix(c(0.4, 0.1, 0.2, 0.25), nrow = 2))
+    )),
+    "must be symmetric"
+  )
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(
+      base,
+      vcov = list(A = matrix(c(0.4, 0.5, 0.5, 0.25), nrow = 2))
+    )),
+    "positive definite"
+  )
+  with_se <- base
+  with_se$se <- 0.2
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(with_se, vcov = list(A = good))),
+    "must not also report"
+  )
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(base, vcov = list(good))),
+    "named by study"
+  )
+})
+
+test_that("bootstrap_delay_estimates returns summaries with their covariance", {
+  set.seed(11)
+  delays <- rlnorm(300, 1.6, 0.5)
+  reported <- bootstrap_delay_estimates(
+    delays,
+    study = "A", probs = c(0.25, 0.75), n_bootstrap = 400,
+    cens_adjusted = 1
+  )
+  expect_identical(reported$data$type, c("mean", "sd", "quantile", "quantile"))
+  expect_identical(reported$data$p, c(NA, NA, 0.25, 0.75))
+  expect_identical(reported$data$value[1], mean(delays))
+  expect_identical(reported$data$value[2], stats::sd(delays))
+  expect_true(all(reported$data$cens_adjusted == 1))
+  expect_named(reported$vcov, "A")
+  expect_identical(dim(reported$vcov$A), c(4L, 4L))
+  # A sample mean has a variance of about sigma squared over n.
+  expect_equal(
+    reported$vcov$A[1, 1], stats::var(delays) / length(delays),
+    tolerance = 0.25
+  )
+  expect_no_error(suppressMessages(as_epidist_estimates_data(
+    reported$data,
+    vcov = reported$vcov
+  )))
+})
+
+test_that("bootstrap_delay_estimates rejects a bootstrap too small to be full rank", { # nolint: line_length_linter.
+  expect_error(
+    bootstrap_delay_estimates(rlnorm(50), study = "A", n_bootstrap = 2),
+    "must exceed the 2 summaries"
+  )
+  expect_error(
+    bootstrap_delay_estimates(
+      rlnorm(50),
+      study = "A", moments = character(0)
+    ),
+    "at least one of"
+  )
+})
+
+test_that("as_epidist_estimates_data rejects a covariance matrix over summaries with different metadata", { # nolint: line_length_linter.
+  varying <- data.frame(
+    study = "A", type = c("mean", "sd"), value = c(7.5, 3.6),
+    relative_obs_time = c(20, 30), trunc_adjusted = FALSE,
+    cens_adjusted = 0, stringsAsFactors = FALSE
+  )
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(
+      varying,
+      vcov = list(A = matrix(c(0.4, 0.1, 0.1, 0.25), nrow = 2))
+    )),
+    "must share their study metadata"
+  )
 })

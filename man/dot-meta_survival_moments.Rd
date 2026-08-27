@@ -4,21 +4,27 @@
 \alias{.meta_survival_moments}
 \title{Summaries implied by a distribution function evaluated on a grid}
 \usage{
-.meta_survival_moments(cdf, cutoff)
+.meta_survival_moments(cdf, lower = 0, cutoff)
 }
 \arguments{
 \item{cdf}{The distribution function at \code{.meta_n_quad() + 1} equally spaced
-points running from zero to \code{cutoff}.}
+points running from \code{lower} to \code{cutoff}.}
+
+\item{lower}{The study's minimum delay (its left truncation point).}
 
 \item{cutoff}{The right truncation point.}
 }
 \value{
-A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis}.
+A named numeric vector with elements \code{mean}, \code{sd} and \code{kurtosis},
+or \code{\link[=.meta_moment_failure]{.meta_moment_failure()}} if the distribution function holds no mass
+between \code{lower} and \code{cutoff}.
 }
 \description{
 Uses Simpson's rule on the survival integrals
-\eqn{\int_0^D k t^{k - 1} (F(D) - F(t)) dt}, which are the first four raw
-moments of the distribution truncated at the cutoff. Matches the
-implementation in \code{inst/stan/meta_model/functions.stan}.
+\eqn{\int_L^D k t^{k - 1} (F(D) - F(t)) dt}, which with the boundary term
+\eqn{L^k (F(D) - F(L))} give the first four raw moments of the distribution
+truncated to \eqn{(L, D]}. The boundary term vanishes when \eqn{L} is zero,
+recovering the untruncated expression. Matches the implementation in
+\code{inst/stan/meta_model/functions.stan}.
 }
 \keyword{internal}

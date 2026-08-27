@@ -9,6 +9,7 @@
   estimates = NULL,
   obs_time_threshold = 2,
   weight = NULL,
+  delay_min = NULL,
   ...
 )
 }
@@ -32,6 +33,16 @@ rather than repeating identical rows. The marginal model will further
 aggregate these counts based on the formula specification. Default is NULL,
 which assigns a count of 1 to each row. Internally this is used to define
 the 'n' column of the returned object.}
+
+\item{delay_min}{Minimum delay (left truncation point). Can be:
+\itemize{
+\item \code{NULL} (default): uses a \code{delay_min} column from the data if present,
+otherwise defaults to 0 (no left truncation).
+\item A numeric scalar: applied to all observations.
+\item A column name string: looks up the named column in the data.
+This is passed as the \code{L} parameter to
+\code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}}.
+}}
 
 \item{...}{Additional arguments passed to methods.}
 }
@@ -57,8 +68,6 @@ Other meta_model:
 \code{\link{assert_epidist.epidist_meta_model}()},
 \code{\link{epidist_family_model.epidist_meta_model}()},
 \code{\link{epidist_formula_model.epidist_meta_model}()},
-\code{\link{epidist_gen_meta_log_lik}()},
-\code{\link{epidist_gen_meta_predict}()},
 \code{\link{epidist_transform_data_model.epidist_meta_model}()},
 \code{\link{is_epidist_meta_model}()},
 \code{\link{new_epidist_meta_model}()}

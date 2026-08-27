@@ -8,6 +8,7 @@
   y,
   dist,
   args,
+  lower = 0,
   cutoff,
   pwindow,
   swindow,
@@ -24,6 +25,8 @@
 
 \item{args}{A named list of distribution parameters.}
 
+\item{lower}{The study's minimum delay (its left truncation point).}
+
 \item{cutoff}{The grid cutoff, either the study observation time or
 \code{max_delay}.}
 
@@ -39,7 +42,9 @@ otherwise.}
 \item{trunc_design}{0 for a cohort design, 1 for an accrual design.}
 }
 \value{
-A density on the delay scale.
+A density on the delay scale, or \code{Inf} if the grid mass or the
+distribution function underflows to zero, which forces a \code{-Inf} log
+likelihood rather than a \code{NaN} one.
 }
 \description{
 Used to convert a quantile standard error reported on the delay scale to the
@@ -47,7 +52,9 @@ cumulative probability scale the model works on, by the delta method.
 For a discrete estimand the density is the mass of the grid cell the value
 falls in divided by the grid spacing, which is exactly the slope of the
 continuity corrected distribution function there. For a continuous estimand
-it is a central difference of the implied distribution function, which keeps
-the same code path for every censoring adjustment and truncation design.
+it is the closed form density of the estimand over its truncation
+normaliser, or, under an accrual design, the slope of the interpolated
+distribution function. A primary censored delay with a non uniform primary
+event has no closed form density, so it falls back to a central difference.
 }
 \keyword{internal}

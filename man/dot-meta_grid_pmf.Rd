@@ -4,12 +4,23 @@
 \alias{.meta_grid_pmf}
 \title{The discrete delay distribution a naive study would observe}
 \usage{
-.meta_grid_pmf(dist, args, cutoff, pwindow, swindow, growth_rate, accrual = 0L)
+.meta_grid_pmf(
+  dist,
+  args,
+  lower = 0,
+  cutoff,
+  pwindow,
+  swindow,
+  growth_rate,
+  accrual = 0L
+)
 }
 \arguments{
 \item{dist}{A \code{primarycensored} distribution function name.}
 
 \item{args}{A named list of distribution parameters.}
+
+\item{lower}{The study's minimum delay (its left truncation point).}
 
 \item{cutoff}{The grid cutoff, either the study observation time or
 \code{max_delay}.}
@@ -21,7 +32,9 @@
 \item{accrual}{1 to apply the accrual weight, 0 otherwise.}
 }
 \value{
-A numeric vector of probabilities summing to one.
+A numeric vector of probabilities summing to one, one per kept
+cell, or a vector of \code{NA} the same length if the grid mass underflows to
+zero.
 }
 \description{
 Builds the probability mass function of the interval censored delays a study
@@ -33,8 +46,17 @@ renormalisation is what applies the study's right truncation, and it
 discretises the truncation point to the nearest grid boundary.
 }
 \details{
+Cells recording a delay below \code{lower} are dropped before the grid is
+renormalised, which conditions it on the study's left truncation point. The
+normaliser is then the mass of the kept cells, which is
+\eqn{F(D) - F(L)} whenever \code{lower} falls on a grid boundary.
+
 Under an accrual design the cell masses are additionally weighted by the
 follow up available to the delay each cell records, which is the delay at
 its lower edge, before renormalising.
+
+A cohort grid is normalised by the distribution function at its top, which
+is already known. An accrual grid reweights each cell first, so its
+normaliser is not known in advance.
 }
 \keyword{internal}

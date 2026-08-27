@@ -10,9 +10,17 @@
 \item{estimates}{An \code{epidist_estimates_data} object.}
 }
 \value{
-A tibble of summary rows using the meta model slots.
+A list with a tibble of summary \code{rows} using the meta model slots,
+a tibble of their \code{members}, and the flat \code{chol} vector of Cholesky
+factors for the studies that reported a covariance matrix.
 }
 \description{
-Build the summary estimate rows of an \code{epidist_meta_model} object
+One row is built per group from \code{\link[=.meta_assign_groups]{.meta_assign_groups()}}. A group of one is a
+single reported summary, and a larger group is fitted with the joint
+likelihood of its members. The members of a group are held in flat arrays
+that the row indexes with \code{group_start} and \code{group_len}, because a study may
+report any number of quantiles and a row has a fixed number of slots. Row
+order is irrelevant to the index, so aggregating or reordering rows later
+cannot break it.
 }
 \keyword{internal}

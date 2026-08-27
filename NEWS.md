@@ -117,37 +117,59 @@ See #588 and #596.
 
 ## Models
 
-- Added the meta model, for fitting to summarised and potentially biased
-  published estimates, jointly with individual level data. Published
-  estimates are forward modelled from the study's own estimation procedure,
-  so summaries that did not adjust for right truncation or that treated
-  interval censored data as continuous still contribute unbiased
-  information. See `as_epidist_meta_model()`. See #617.
-- Added `as_epidist_estimates_data()` for preparing published summary
-  estimates, with documentation of the study metadata the meta model needs.
-  See #617.
-- The meta model supports studies that stopped collecting at a calendar date
-  through the `trunc_design` field of `as_epidist_estimates_data()`, which
-  weights the estimand by the follow up available to each delay rather than
-  conditioning on a single cohort cutoff. See #617.
-- The meta model supports midpoint imputation, where a study assigned each
-  delay to the centre of the interval it was observed in, as `cens_adjusted`
-  code 3. See #617.
-- A standard error supplied for a quantile row of
-  `as_epidist_estimates_data()` is now interpreted on the delay scale, as
-  studies report it, and converted to the cumulative probability scale by the
-  delta method. See #617.
-- `as_epidist_estimates_data()` now rejects a reported quantile at or beyond
-  the largest delay its study could have seen, which would otherwise
-  contribute a constant to the likelihood rather than information. See #617.
+- Added the meta model, for fitting to summarised and potentially biased published estimates, jointly with individual level data.
+Published estimates are forward modelled from the study's own estimation procedure, so summaries that did not adjust for right truncation or that treated interval censored data as continuous still contribute unbiased information.
+The meta model is experimental and its interface may still change.
+See `as_epidist_meta_model()`.
+See #620.
+- Added `as_epidist_estimates_data()` for preparing published summary estimates, with documentation of the study metadata the meta model needs.
+See #620.
+- The meta model supports studies that stopped collecting at a calendar date through the `trunc_design` field of `as_epidist_estimates_data()`, which weights the estimand by the follow up available to each delay rather than conditioning on a single cohort cutoff.
+See #620.
+- The meta model supports midpoint imputation, where a study assigned each delay to the centre of the interval it was observed in, as `cens_adjusted` code 3.
+See #620.
+- A standard error supplied for a quantile row of `as_epidist_estimates_data()` is now interpreted on the delay scale, as studies report it, and converted to the cumulative probability scale by the delta method.
+See #620.
+- `as_epidist_estimates_data()` now rejects a reported quantile at or beyond the largest delay its study could have seen, which would otherwise contribute a constant to the likelihood rather than information.
+See #620.
+- The meta model now fits the summaries a study computed from the same delays jointly rather than as independent terms.
+A mean with a standard deviation uses the asymptotic bivariate normal of the pair, and a set of quantiles uses the multinomial mass of the delays falling between them.
+This removes the over-weighting of a study reporting a median with an interquartile range.
+One observation is now a group of summaries, so `log_lik()` and `loo()` work at that level.
+See #620.
+- A quantile reported by a study that took integer date differences from a cohort now costs three distribution function evaluations rather than one per grid cell, because the grid is normalised by the distribution function at its top.
+On the `epireview` configuration of the meta vignette this cuts the evaluations its quantile rows need per gradient from 480 to 36.
+The shortcut does not apply to a study that stopped collecting at a calendar date, which reweights each cell before renormalising and so keeps the full grid.
+See #620.
+- The delay scale standard error of a reported quantile is now converted with the closed form density of the biased estimand where one exists, rather than a central difference of its distribution function.
+See #620.
+- The meta model gained several further speed ups.
+Softmax normalisation of the cohort grid mass is replaced by division where the normaliser is already known.
+A zero growth rate accrual design skips its exponential terms.
+R post-processing batches and caches implied summaries across grouped rows sharing a design.
+See #620.
+- The quadrature resolution used for truncated continuous moments is now set by `options(epidist.meta_n_quad = )`, defaulting to 100 intervals.
+The value is substituted into the Stan code when the model is compiled, so the R and Stan implementations always agree.
+See #620.
+- A study can now report a vector of summaries with a covariance matrix over them, through the `vcov` argument of `as_epidist_estimates_data()`, and is then fitted as a multivariate normal.
+This is the format we recommend when a study cannot share its delays, because it keeps the correlation between the quantities it reports.
+`bootstrap_delay_estimates()` produces both parts from a set of delays.
+See #620.
+- The meta model supports left truncation through `delay_min`, on both individual level rows and summary rows.
+A study that only counted delays above a minimum has every implied summary conditioned on the delay exceeding it.
+See #596 and #620.
 
 ## Documentation
 
-- Added a "The meta model" section to the model guide vignette, with the
-  forward model and sampling likelihoods used for published summary
-  estimates. See #617.
-- Added a vignette showcasing the meta model on simulated data and published
-  delay estimates from `epireview`. See #617.
+- Added a "The meta model" section to the model guide vignette, with the forward model and sampling likelihoods used for published summary estimates.
+See #620.
+- Added a vignette showcasing the meta model on simulated data and published delay estimates from `epireview`.
+Its simulated case study builds seven studies, each applying a different estimation procedure to the same line list, so the recovery result tests every bias the model adjusts for.
+See #620.
+- The meta model is now a worked example in the extending vignette, since it adds both a data source and a model type.
+See #616 and #620.
+- The meta vignette is now precomputed from a `.Rmd.orig` source, so it ships with the package.
+See #619 and #620.
 
 ## Bug fixes
 
