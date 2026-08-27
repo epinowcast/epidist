@@ -314,24 +314,22 @@ test_that("epidist.epidist_meta_model recovers known parameters from reported fi
   expect_gt(stats::quantile(pred$sigma, 0.975, names = FALSE), sdlog)
 })
 
-test_that("draws_to_multivariate round trips draws of a fitted model", {
+test_that("as_epidist_multivariate round trips draws of a fitted model", {
   # An analyst publishes draws of the delay mean and standard deviation from
   # a fitted model, and those become a summary row of a downstream meta model.
   skip_on_cran()
   skip_if_no_cmdstanr()
   dpars <- predict_delay_parameters(fit_marginal)
   dpars <- dpars[dpars$index == 1, ]
-  reported <- draws_to_multivariate(
-    dpars[, c("mean", "sd")],
-    study = "round_trip", n = nrow(sim_obs), cens_adjusted = 1
-  )
-  expect_identical(reported$data$type, c("mean", "sd"))
+  reported <- as_epidist_multivariate(dpars, params = c("mean", "sd"))
+  expect_identical(reported$params, c("mean", "sd"))
   expect_equal(
-    reported$data$value[1], mean(dpars$mean), tolerance = 1e-10
+    unname(reported$value[1]), mean(dpars$mean), tolerance = 1e-10
   )
   estimates <- suppressMessages(as_epidist_estimates_data(
-    reported$data, vcov = reported$vcov
+    reported, study = "round_trip", cens_adjusted = 1
   ))
+  expect_identical(estimates$type, c("mean", "sd"))
   prep <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   expect_s3_class(prep, "epidist_meta_model")
   # The two summaries are one multivariate normal observation.
@@ -342,6 +340,6 @@ test_that("draws_to_multivariate round trips draws of a fitted model", {
   # The reported mean must sit close to the truth, because the study that
   # produced these draws adjusted for censoring and truncation.
   expect_equal(
-    reported$data$value[1], exp(meanlog + sdlog^2 / 2), tolerance = 0.1
+    unname(reported$value[1]), exp(meanlog + sdlog^2 / 2), tolerance = 0.1
   )
 })

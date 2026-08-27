@@ -39,10 +39,10 @@ censoring and truncation. The returned function takes a \code{prep} argument fro
 \code{\link[brms:posterior_predict.brmsfit]{brms::posterior_predict()}} for details on how this is used within
 \code{brms}, \code{\link[primarycensored:rprimarycensored]{primarycensored::rpcens()}} for details on the censoring approach
 
-Other gen: 
-\code{\link{epidist_gen_log_lik}()},
-\code{\link{epidist_gen_meta_log_lik}()},
-\code{\link{epidist_gen_meta_predict}()},
-\code{\link{epidist_gen_posterior_epred}()}
+Other gen:
+\code{\link[=epidist_gen_log_lik]{epidist_gen_log_lik()}},
+\code{\link[=epidist_gen_meta_log_lik]{epidist_gen_meta_log_lik()}},
+\code{\link[=epidist_gen_meta_predict]{epidist_gen_meta_predict()}},
+\code{\link[=epidist_gen_posterior_epred]{epidist_gen_posterior_epred()}}
 }
 \concept{gen}

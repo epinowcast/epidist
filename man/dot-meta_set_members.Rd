@@ -12,7 +12,7 @@
 \item{members}{A tibble of member \code{value}, \code{count}, \code{type} and \code{p} columns.}
 
 \item{chol}{A flat numeric vector of Cholesky factor entries, in column
-major order, for the studies that reported a covariance matrix.}
+major order, for the groups covered by a covariance matrix.}
 }
 \value{
 The input with the members attached.

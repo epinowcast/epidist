@@ -53,8 +53,9 @@
 #'   the joint quantile likelihood.
 #' * The normal approximations degrade at small study sample sizes, and
 #'   summaries of different kinds from one study, such as a mean and a median,
-#'   are treated as independent. Reporting a covariance matrix over a study's
-#'   summaries avoids the second.
+#'   are treated as independent. A study that published draws of its parameters
+#'   avoids the second, because [as_epidist_multivariate()] turns them into a
+#'   covariance over the summaries that is fitted jointly.
 #'
 #' Two approximations are worth knowing about before fitting quantiles.
 #'
@@ -326,7 +327,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #' @param members A tibble of member `value`, `count`, `type` and `p` columns.
 #'
 #' @param chol A flat numeric vector of Cholesky factor entries, in column
-#'  major order, for the studies that reported a covariance matrix.
+#'  major order, for the groups covered by a covariance matrix.
 #'
 #' @returns The input with the members attached.
 #'
@@ -354,9 +355,9 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 
 #' The flat Cholesky factors of an `epidist_meta_model` object
 #'
-#' A study that reported a covariance matrix over its summaries has the
-#' Cholesky factor of that matrix stored here, in column major order, and its
-#' row indexes into this vector with `chol_start`. Factoring once here rather
+#' A group covered by a covariance matrix has the Cholesky factor of that
+#' matrix stored here, in column major order, and its row indexes into this
+#' vector with `chol_start`. Factoring once here rather
 #' than inside the likelihood keeps the matrix out of every gradient
 #' evaluation.
 #'
@@ -366,7 +367,11 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #'
 #' @keywords internal
 .meta_chol <- function(data) {
-  return(attr(data, "meta_chol") %||% numeric(0))
+  factors <- attr(data, "meta_chol")
+  if (is.null(factors)) {
+    return(numeric(0))
+  }
+  return(factors)
 }
 
 #' Build the individual level rows of an `epidist_meta_model` object
@@ -422,9 +427,9 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #' that standard error replaces the sampling uncertainty the joint likelihood
 #' would derive.
 #'
-#' A study that reported a covariance matrix over its summaries is one group
-#' holding every summary that matrix covers, whatever their types, because the
-#' matrix is what ties them together.
+#' The summaries covered by one covariance matrix are one group, whatever their
+#' types, because the matrix is what ties them together. They are identified by
+#' their shared `mvn_id`, so one study may contribute more than one such group.
 #'
 #' @param estimates An `epidist_estimates_data` object.
 #'
@@ -454,10 +459,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
   solo <- !is.na(estimates$se)
   key[solo] <- paste("solo", which(solo), sep = separator)
   if (!is.null(mvn) && any(mvn)) {
-    key[mvn] <- paste(
-      "mvn", as.character(estimates$study)[mvn],
-      sep = separator
-    )
+    key[mvn] <- paste("mvn", estimates$mvn_id[mvn], sep = separator)
   }
   return(match(key, unique(key)))
 }
@@ -476,7 +478,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #'
 #' @returns A list with a tibble of summary `rows` using the meta model slots,
 #'  a tibble of their `members`, and the flat `chol` vector of Cholesky
-#'  factors for the studies that reported a covariance matrix.
+#'  factors for the groups covered by a covariance matrix.
 #'
 #' @keywords internal
 #' @importFrom tibble tibble
@@ -488,10 +490,10 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
   index <- split(seq_len(nrow(estimates)), group)
   index <- index[order(vapply(index, min, numeric(1)))]
   built <- lapply(index, function(rows) {
-    study <- as.character(estimates$study)[rows[1]]
+    key <- estimates$mvn_id[rows[1]]
     return(.meta_group_row(
       estimates[rows, , drop = FALSE],
-      if (all(mvn[rows])) supplied[[study]] else NULL
+      if (all(mvn[rows])) supplied[[key]] else NULL
     ))
   })
   members <- lapply(built, "[[", "members")
@@ -505,7 +507,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
   return(list(
     rows = rows,
     members = bind_rows(members),
-    chol = unlist(factors, use.names = FALSE) %||% numeric(0)
+    chol = as.numeric(unlist(factors, use.names = FALSE))
   ))
 }
 
@@ -517,8 +519,8 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #' @param estimates The rows of an `epidist_estimates_data` object making up
 #'  one group.
 #'
-#' @param vcov The covariance matrix the study reported over its summaries, or
-#'  `NULL` where it reported standard errors or a sample size instead.
+#' @param vcov The covariance matrix over the group's summaries, or `NULL`
+#'  where the study reported standard errors or a sample size instead.
 #'
 #' @returns A list with a one row tibble `row`, a tibble of its `members`, and
 #'  the flat `chol` entries of its covariance matrix.
@@ -578,9 +580,9 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #' Build the member table of one joint likelihood group
 #'
 #' The member type and probability are carried alongside the reported value
-#' because a study reporting a covariance matrix may mix means, standard
-#' deviations and quantiles in one group, so the likelihood needs to know
-#' which implied summary each member is.
+#' because a group covered by a covariance matrix may mix means, standard
+#' deviations and quantiles, so the likelihood needs to know which implied
+#' summary each member is.
 #'
 #' @param estimates The rows of an `epidist_estimates_data` object making up
 #'  one group, already ordered.
@@ -608,13 +610,13 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #' in increasing probability, which must also be increasing in the reported
 #' value for the cells of the multinomial to be a partition of the delay axis.
 #'
-#' A group with a reported covariance matrix keeps the order its rows were
-#' given in, because that is the order the matrix is indexed by.
+#' A group covered by a covariance matrix keeps the order its rows were given
+#' in, because that is the order the matrix is indexed by.
 #'
 #' @param estimates The rows of an `epidist_estimates_data` object making up
 #'  one group.
 #'
-#' @param vcov The covariance matrix the study reported, or `NULL`.
+#' @param vcov The covariance matrix over the group's summaries, or `NULL`.
 #'
 #' @returns The input, reordered.
 #'

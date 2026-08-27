@@ -41,14 +41,14 @@ otherwise defaults to 0 (no left truncation).
 \item A numeric scalar: applied to all observations.
 \item A column name string: looks up the named column in the data.
 This is passed as the \code{L} parameter to
-\code{\link[primarycensored:dpcens]{primarycensored::dpcens()}}.
+\code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}}.
 }}
 
 \item{...}{Additional arguments passed to methods.}
 }
 \description{
 Prepares individual level data exactly as
-\code{\link{as_epidist_marginal_model.epidist_linelist_data}()} does and then stacks it
+\code{\link[=as_epidist_marginal_model.epidist_linelist_data]{as_epidist_marginal_model.epidist_linelist_data()}} does and then stacks it
 with any supplied summary estimates.
 }
 \examples{
@@ -60,16 +60,16 @@ sierra_leone_ebola_data |>
   as_epidist_meta_model()
 }
 \seealso{
-Other meta_model: 
-\code{\link{as_epidist_meta_model}()},
-\code{\link{as_epidist_meta_model.NULL}()},
-\code{\link{as_epidist_meta_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_meta_model.epidist_estimates_data}()},
-\code{\link{assert_epidist.epidist_meta_model}()},
-\code{\link{epidist_family_model.epidist_meta_model}()},
-\code{\link{epidist_formula_model.epidist_meta_model}()},
-\code{\link{epidist_transform_data_model.epidist_meta_model}()},
-\code{\link{is_epidist_meta_model}()},
-\code{\link{new_epidist_meta_model}()}
+Other meta_model:
+\code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}},
+\code{\link[=as_epidist_meta_model.NULL]{as_epidist_meta_model.NULL()}},
+\code{\link[=as_epidist_meta_model.epidist_aggregate_data]{as_epidist_meta_model.epidist_aggregate_data()}},
+\code{\link[=as_epidist_meta_model.epidist_estimates_data]{as_epidist_meta_model.epidist_estimates_data()}},
+\code{\link[=assert_epidist.epidist_meta_model]{assert_epidist.epidist_meta_model()}},
+\code{\link[=epidist_family_model.epidist_meta_model]{epidist_family_model.epidist_meta_model()}},
+\code{\link[=epidist_formula_model.epidist_meta_model]{epidist_formula_model.epidist_meta_model()}},
+\code{\link[=epidist_transform_data_model.epidist_meta_model]{epidist_transform_data_model.epidist_meta_model()}},
+\code{\link[=is_epidist_meta_model]{is_epidist_meta_model()}},
+\code{\link[=new_epidist_meta_model]{new_epidist_meta_model()}}
 }
 \concept{meta_model}

@@ -300,50 +300,73 @@ test_that("as_epidist_estimates_data defaults delay_min to zero and validates it
   )
 })
 
-test_that("as_epidist_estimates_data checks a reported covariance matrix", {
-  base <- data.frame(
-    study = "A", type = c("mean", "sd"), value = c(7.5, 3.6),
+test_that("a reported covariance matrix must cover its rows", {
+  base <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = c("mean", "sd"), value = c(7.5, 3.6), n = 120,
     relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 0,
-    stringsAsFactors = FALSE
-  )
+    mvn_id = "A", stringsAsFactors = FALSE
+  )))
   good <- matrix(c(0.4, 0.1, 0.1, 0.25), nrow = 2)
   expect_no_error(
-    suppressMessages(as_epidist_estimates_data(base, vcov = list(A = good)))
+    assert_epidist(.estimates_set_vcov(base, list(A = good)))
   )
   expect_error(
-    suppressMessages(as_epidist_estimates_data(base, vcov = list(B = good))),
-    "not among the studies"
+    assert_epidist(.estimates_set_vcov(base, list(B = good))),
+    "not among the .mvn_id. values"
   )
   expect_error(
-    suppressMessages(as_epidist_estimates_data(
-      base,
-      vcov = list(A = matrix(1, nrow = 1))
-    )),
-    "reports 2 summaries"
+    assert_epidist(
+      .estimates_set_vcov(base, list(A = matrix(1, nrow = 1)))
+    ),
+    "covers 2 summaries"
   )
   expect_error(
-    suppressMessages(as_epidist_estimates_data(
-      base,
-      vcov = list(A = matrix(c(0.4, 0.1, 0.2, 0.25), nrow = 2))
+    assert_epidist(.estimates_set_vcov(
+      base, list(A = matrix(c(0.4, 0.1, 0.2, 0.25), nrow = 2))
     )),
     "must be symmetric"
   )
   expect_error(
-    suppressMessages(as_epidist_estimates_data(
-      base,
-      vcov = list(A = matrix(c(0.4, 0.5, 0.5, 0.25), nrow = 2))
+    assert_epidist(.estimates_set_vcov(
+      base, list(A = matrix(c(0.4, 0.5, 0.5, 0.25), nrow = 2))
     )),
     "positive definite"
+  )
+  expect_error(
+    assert_epidist(.estimates_set_vcov(
+      base, list(A = matrix(0.1, nrow = 2, ncol = 3))
+    )),
+    "square and numeric"
+  )
+  expect_error(
+    assert_epidist(.estimates_set_vcov(
+      base, list(A = matrix("a", nrow = 2, ncol = 2))
+    )),
+    "square and numeric"
+  )
+  expect_error(
+    .estimates_set_vcov(base, list(good)),
+    "named by"
   )
   with_se <- base
   with_se$se <- 0.2
   expect_error(
-    suppressMessages(as_epidist_estimates_data(with_se, vcov = list(A = good))),
+    assert_epidist(.estimates_set_vcov(with_se, list(A = good))),
     "must not also report"
   )
+})
+
+test_that("a reported covariance matrix needs one set of study metadata", {
+  varying <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = c("mean", "sd"), value = c(7.5, 3.6), n = 120,
+    relative_obs_time = c(20, 30), trunc_adjusted = FALSE,
+    cens_adjusted = 0, mvn_id = "A", stringsAsFactors = FALSE
+  )))
   expect_error(
-    suppressMessages(as_epidist_estimates_data(base, vcov = list(good))),
-    "named by study"
+    assert_epidist(.estimates_set_vcov(
+      varying, list(A = matrix(c(0.4, 0.1, 0.1, 0.25), nrow = 2))
+    )),
+    "must share their study metadata"
   )
 })
 
@@ -357,28 +380,6 @@ test_that("as_epidist_estimates_data errors when a required column is missing", 
       as_epidist_estimates_data(complete[setdiff(names(complete), col)]), col
     )
   }
-})
-
-test_that("as_epidist_estimates_data rejects a covariance matrix that is not square", { # nolint: line_length_linter.
-  base <- data.frame(
-    study = "A", type = c("mean", "sd"), value = c(7.5, 3.6),
-    relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 0,
-    stringsAsFactors = FALSE
-  )
-  expect_error(
-    suppressMessages(as_epidist_estimates_data(
-      base,
-      vcov = list(A = matrix(0.1, nrow = 2, ncol = 3))
-    )),
-    "square and numeric"
-  )
-  expect_error(
-    suppressMessages(as_epidist_estimates_data(
-      base,
-      vcov = list(A = matrix("a", nrow = 2, ncol = 2))
-    )),
-    "square and numeric"
-  )
 })
 
 test_that("as_epidist_estimates_data checks the censoring windows against the grid", { # nolint: line_length_linter.
@@ -401,20 +402,5 @@ test_that("as_epidist_estimates_data checks the censoring windows against the gr
   expect_error(
     suppressMessages(as_epidist_estimates_data(wide)),
     "at least as large as"
-  )
-})
-
-test_that("as_epidist_estimates_data rejects a covariance matrix over summaries with different metadata", { # nolint: line_length_linter.
-  varying <- data.frame(
-    study = "A", type = c("mean", "sd"), value = c(7.5, 3.6),
-    relative_obs_time = c(20, 30), trunc_adjusted = FALSE,
-    cens_adjusted = 0, stringsAsFactors = FALSE
-  )
-  expect_error(
-    suppressMessages(as_epidist_estimates_data(
-      varying,
-      vcov = list(A = matrix(c(0.4, 0.1, 0.1, 0.25), nrow = 2))
-    )),
-    "must share their study metadata"
   )
 })

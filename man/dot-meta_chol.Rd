@@ -13,9 +13,9 @@
 A numeric vector of Cholesky factor entries.
 }
 \description{
-A study that reported a covariance matrix over its summaries has the
-Cholesky factor of that matrix stored here, in column major order, and its
-row indexes into this vector with \code{chol_start}. Factoring once here rather
+A group covered by a covariance matrix has the Cholesky factor of that
+matrix stored here, in column major order, and its row indexes into this
+vector with \code{chol_start}. Factoring once here rather
 than inside the likelihood keeps the matrix out of every gradient
 evaluation.
 }

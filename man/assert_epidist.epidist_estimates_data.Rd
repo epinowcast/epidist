@@ -15,13 +15,15 @@
 Assert validity of \code{epidist_estimates_data} objects
 }
 \seealso{
-Other estimates_data: 
-\code{\link{as_epidist_estimates_data}()},
-\code{\link{as_epidist_estimates_data.data.frame}()},
-\code{\link{delays_to_multivariate}()},
-\code{\link{draws_to_multivariate}()},
-\code{\link{is_epidist_estimates_data}()},
-\code{\link{new_epidist_estimates_data}()},
-\code{\link{parameters_to_multivariate}()}
+Other estimates_data:
+\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}},
+\code{\link[=as_epidist_estimates_data.data.frame]{as_epidist_estimates_data.data.frame()}},
+\code{\link[=as_epidist_estimates_data.epidist_estimates_data]{as_epidist_estimates_data.epidist_estimates_data()}},
+\code{\link[=as_epidist_estimates_data.epidist_multivariate]{as_epidist_estimates_data.epidist_multivariate()}},
+\code{\link[=as_epidist_estimates_data.list]{as_epidist_estimates_data.list()}},
+\code{\link[=epidist_estimates_parameters]{epidist_estimates_parameters()}},
+\code{\link[=epidist_estimates_summaries]{epidist_estimates_summaries()}},
+\code{\link[=is_epidist_estimates_data]{is_epidist_estimates_data()}},
+\code{\link[=new_epidist_estimates_data]{new_epidist_estimates_data()}}
 }
 \concept{estimates_data}

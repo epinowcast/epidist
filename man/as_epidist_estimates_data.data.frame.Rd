@@ -21,7 +21,6 @@
   delay_min = NULL,
   growth_rate = NULL,
   max_delay = NULL,
-  vcov = NULL,
   ...
 )
 }
@@ -43,14 +42,13 @@ is present.}
 \item{se}{A string giving the column of \code{data} containing the reported
 standard error of the summary. Optional. When supplied it overrides the
 standard error implied by the sample size, and takes the row out of the
-joint likelihood \code{\link{as_epidist_meta_model}()} otherwise uses for summaries a
+joint likelihood \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}} otherwise uses for summaries a
 study computed from the same delays. It is always on the scale of the
 reported \code{value}, so for a \code{"quantile"} row it is a standard error for the
 reported delay.}
 
 \item{n}{A string giving the column of \code{data} containing the number of
-delays the summary was computed from. Required unless \code{se} or a covariance
-matrix is supplied.}
+delays the summary was computed from. Required unless \code{se} is supplied.}
 
 \item{p}{A string giving the column of \code{data} containing the probability of
 a reported quantile. Required for rows with \code{type} of \code{"quantile"} and
@@ -105,11 +103,6 @@ twenty times the largest reported value for the study, rounded up, with a
 minimum of ten. Raise it for a long tailed delay, whose implied standard
 deviation is biased downwards if the distribution has not decayed by the
 cutoff, and lower it to fit faster.}
-
-\item{vcov}{A named list of covariance matrices over the summaries each
-study reported, named by study. See the section on reporting a covariance
-matrix. Optional, and studies without an entry are fitted with their \code{n} or
-\code{se} as usual.}
 
 \item{...}{Not used in this method.}
 }
@@ -180,23 +173,27 @@ option, since the \code{brms} formula makes it a meta-regression that estimates
 the residual bias rather than correcting it mechanically.
 }
 
-\section{How a study can report its estimate}{
-A study that cannot share its delays should report a vector of summaries
-with a covariance matrix over them rather than a standard error for each
-one. This is the recommended format, because it keeps the correlation
-between the reported quantities. Supply the matrices through \code{vcov}, named
-by study. Each must be symmetric positive definite and match the number of
-rows its study has in \code{data}, in the order they appear. Such rows need no
-\code{n} and no \code{se}.
+\section{What shape a study reported its estimate in}{
+This method takes a long table with one row per reported summary. Two other
+shapes are common enough to have their own entry points, each returning an
+object this one would.
+\itemize{
+\item \code{\link[=epidist_estimates_summaries]{epidist_estimates_summaries()}} takes one study's summaries in wide form.
+\item \code{\link[=epidist_estimates_parameters]{epidist_estimates_parameters()}} takes the parameters of a distribution a
+study fitted, which studies often publish in place of summaries, and
+converts them to the summaries the fitted distribution implies. Reported
+parameters are not a \code{type} here, because the family a study fitted need
+not be the family being fitted to it.
+}
 
-Three helpers build both parts. \code{\link{draws_to_multivariate}()} takes draws of the
-quantities a study reports, such as the posterior draws
-\code{\link{predict_delay_parameters}()} returns. \code{\link{delays_to_multivariate}()} resamples a
-set of delays. \code{\link{parameters_to_multivariate}()} takes the parameters of a
-distribution a study fitted, which studies often publish in place of
-summaries, and converts them to the summaries it implies. Reported
-parameters are not a \code{type} here, because the family a study fitted need not
-be the family being fitted to it.
+A study that published draws of its parameters, rather than point summaries
+of them, can report the correlation between the quantities it reports. Pass
+the draws to \code{\link[=as_epidist_multivariate]{as_epidist_multivariate()}} and the result to
+\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}}, which is the only route by which a covariance
+reaches \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}. Such rows need no \code{n} and no \code{se}.
+
+Contributions from several studies combine by passing them in a list, which
+\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} binds into one object.
 }
 
 \examples{
@@ -214,13 +211,15 @@ as_epidist_estimates_data(
 )
 }
 \seealso{
-Other estimates_data: 
-\code{\link{as_epidist_estimates_data}()},
-\code{\link{assert_epidist.epidist_estimates_data}()},
-\code{\link{delays_to_multivariate}()},
-\code{\link{draws_to_multivariate}()},
-\code{\link{is_epidist_estimates_data}()},
-\code{\link{new_epidist_estimates_data}()},
-\code{\link{parameters_to_multivariate}()}
+Other estimates_data:
+\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}},
+\code{\link[=as_epidist_estimates_data.epidist_estimates_data]{as_epidist_estimates_data.epidist_estimates_data()}},
+\code{\link[=as_epidist_estimates_data.epidist_multivariate]{as_epidist_estimates_data.epidist_multivariate()}},
+\code{\link[=as_epidist_estimates_data.list]{as_epidist_estimates_data.list()}},
+\code{\link[=assert_epidist.epidist_estimates_data]{assert_epidist.epidist_estimates_data()}},
+\code{\link[=epidist_estimates_parameters]{epidist_estimates_parameters()}},
+\code{\link[=epidist_estimates_summaries]{epidist_estimates_summaries()}},
+\code{\link[=is_epidist_estimates_data]{is_epidist_estimates_data()}},
+\code{\link[=new_epidist_estimates_data]{new_epidist_estimates_data()}}
 }
 \concept{estimates_data}

@@ -20,14 +20,14 @@ estimates, or \code{NULL}.}
 Creates an \code{epidist_meta_model} object from individual level data, published
 summary estimates, or a mix of the two.
 This enables fitting a single delay distribution to all of the evidence
-available using \code{\link{epidist}()}.
+available using \code{\link[=epidist]{epidist()}}.
 }
 \details{
 The meta model is experimental.
 Its interface may still change in future releases.
 
 Individual level rows use the same likelihood as the marginal model (see
-\code{\link{as_epidist_marginal_model}()}), imported from the
+\code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}}), imported from the
 \href{https://primarycensored.epinowcast.org/}{primarycensored} package.
 Summary rows are instead forward modelled. Given the delay distribution, the
 model works out what the study's own estimation procedure would have
@@ -42,7 +42,7 @@ analysis.
 and \code{vignette("meta")} works through a simulated and a real example.
 
 At least one of \code{data} and \code{estimates} must be supplied. Study level
-heterogeneity is specified through the \code{brms} formula in \code{\link{epidist}()}, for
+heterogeneity is specified through the \code{brms} formula in \code{\link[=epidist]{epidist()}}, for
 example \code{mu ~ 1 + (1 | study)}, rather than through this function.
 Individual level rows are labelled \code{"individual"} in the \code{study} column so
 that they form their own level of any such term.
@@ -50,7 +50,7 @@ that they form their own level of any such term.
 \section{What this means in practice}{
 Summaries that one study computed from the same delays are correlated, so
 they are fitted jointly. Two are grouped when they agree on every column of
-\code{\link{as_epidist_estimates_data}()} other than the summary itself, and a summary
+\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} other than the summary itself, and a summary
 supplied with its own \code{se} is fitted alone. One observation is therefore a
 group rather than a single reported value, so \code{log_lik()} and \code{\link[loo:loo]{loo::loo()}}
 report per group, and \code{loo} only compares fits to the same studies and the
@@ -66,12 +66,13 @@ differences with a term such as \code{mu ~ 1 + (1 | study)} rather than relying
 on the sampling error alone.
 \item Quantiles read off a fitted distribution rather than the empirical data
 have smaller sampling error than assumed here. Supply a reported \code{se} in
-\code{\link{as_epidist_estimates_data}()} for those rows, which also takes them out of
+\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} for those rows, which also takes them out of
 the joint quantile likelihood.
 \item The normal approximations degrade at small study sample sizes, and
 summaries of different kinds from one study, such as a mean and a median,
-are treated as independent. Reporting a covariance matrix over a study's
-summaries avoids the second.
+are treated as independent. A study that published draws of its parameters
+avoids the second, because \code{\link[=as_epidist_multivariate]{as_epidist_multivariate()}} turns them into a
+covariance over the summaries that is fitted jointly.
 }
 
 Two approximations are worth knowing about before fitting quantiles.
@@ -80,13 +81,16 @@ Two approximations are worth knowing about before fitting quantiles.
 distribution. The model interpolates its grid distribution function
 through the mid points of the cells, but the reported value is itself
 rounded to that grid, and what is left does not shrink with the study
-sample size. XX Refitting the median and
+sample size. It stays under 4\% on the mean and 9\% on the standard
+deviation once the reported quantiles sit twenty five or more cells above
+the smallest delay the study counted, and reaches tens of percent on both
+when they sit within ten. Refitting the median and
 interquartile range of a lognormal delay of mean 5.9 days, on daily
 windows with an observation time of 12 days, recovers a delay mean 27\%
 high and a standard deviation 69\% high. The same study's mean and
 standard deviation recover the truth, so prefer those where a study
 reports them, and check that \code{swindow} is the resolution it worked at.
-\code{\link{as_epidist_estimates_data}()} warns for studies in this range.
+\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} warns for studies in this range.
 \item The accrual weight applied to a study that stopped collecting at a
 calendar date is exact only when \code{pwindow} and \code{swindow} are equal. With a
 weekly primary and a daily secondary window, a collection window of 28
@@ -96,23 +100,23 @@ deviation recovers the standard deviation about 6\% high.
 }
 
 Two settings trade accuracy against speed: \code{max_delay} in
-\code{\link{as_epidist_estimates_data}()}, which sets the grid a study that adjusted for
+\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}}, which sets the grid a study that adjusted for
 right truncation is summarised on and needs raising for a long tailed delay,
 and \code{options(epidist.meta_n_quad = )}, which sets the number of quadrature
 nodes used where a study is summarised by quadrature instead.
 }
 
 \seealso{
-Other meta_model: 
-\code{\link{as_epidist_meta_model.NULL}()},
-\code{\link{as_epidist_meta_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_meta_model.epidist_estimates_data}()},
-\code{\link{as_epidist_meta_model.epidist_linelist_data}()},
-\code{\link{assert_epidist.epidist_meta_model}()},
-\code{\link{epidist_family_model.epidist_meta_model}()},
-\code{\link{epidist_formula_model.epidist_meta_model}()},
-\code{\link{epidist_transform_data_model.epidist_meta_model}()},
-\code{\link{is_epidist_meta_model}()},
-\code{\link{new_epidist_meta_model}()}
+Other meta_model:
+\code{\link[=as_epidist_meta_model.NULL]{as_epidist_meta_model.NULL()}},
+\code{\link[=as_epidist_meta_model.epidist_aggregate_data]{as_epidist_meta_model.epidist_aggregate_data()}},
+\code{\link[=as_epidist_meta_model.epidist_estimates_data]{as_epidist_meta_model.epidist_estimates_data()}},
+\code{\link[=as_epidist_meta_model.epidist_linelist_data]{as_epidist_meta_model.epidist_linelist_data()}},
+\code{\link[=assert_epidist.epidist_meta_model]{assert_epidist.epidist_meta_model()}},
+\code{\link[=epidist_family_model.epidist_meta_model]{epidist_family_model.epidist_meta_model()}},
+\code{\link[=epidist_formula_model.epidist_meta_model]{epidist_formula_model.epidist_meta_model()}},
+\code{\link[=epidist_transform_data_model.epidist_meta_model]{epidist_transform_data_model.epidist_meta_model()}},
+\code{\link[=is_epidist_meta_model]{is_epidist_meta_model()}},
+\code{\link[=new_epidist_meta_model]{new_epidist_meta_model()}}
 }
 \concept{meta_model}

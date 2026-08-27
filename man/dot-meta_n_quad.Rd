@@ -10,11 +10,7 @@
 An integer number of intervals.
 }
 \description{
-Set \code{options(epidist.meta_n_quad = )} to trade accuracy against speed. The
-value must be an even number of at least two, because the quadrature uses
-Simpson's rule. It is substituted into
-\code{inst/stan/meta_model/functions.stan} when the model is compiled, so set it
-before fitting and leave it alone afterwards, or the R post-processing will
-use a different resolution from the model that was fitted.
+Set with \code{options(epidist.meta_n_quad = )}, as an even number of at least
+two. Set it before fitting, since it is compiled into the model.
 }
 \keyword{internal}

@@ -18,8 +18,8 @@ A tibble of member \code{value}, \code{count}, \code{type} and \code{p} columns.
 }
 \description{
 The member type and probability are carried alongside the reported value
-because a study reporting a covariance matrix may mix means, standard
-deviations and quantiles in one group, so the likelihood needs to know
-which implied summary each member is.
+because a group covered by a covariance matrix may mix means, standard
+deviations and quantiles, so the likelihood needs to know which implied
+summary each member is.
 }
 \keyword{internal}

@@ -12,7 +12,7 @@
 \value{
 A list with a tibble of summary \code{rows} using the meta model slots,
 a tibble of their \code{members}, and the flat \code{chol} vector of Cholesky
-factors for the studies that reported a covariance matrix.
+factors for the groups covered by a covariance matrix.
 }
 \description{
 One row is built per group from \code{\link[=.meta_assign_groups]{.meta_assign_groups()}}. A group of one is a

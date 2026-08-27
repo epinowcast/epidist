@@ -43,10 +43,10 @@ by their respective uniform distributions.
 \seealso{
 \code{\link[brms:log_lik.brmsfit]{brms::log_lik()}} for details on the brms log likelihood interface.
 
-Other gen: 
-\code{\link{epidist_gen_meta_log_lik}()},
-\code{\link{epidist_gen_meta_predict}()},
-\code{\link{epidist_gen_posterior_epred}()},
-\code{\link{epidist_gen_posterior_predict}()}
+Other gen:
+\code{\link[=epidist_gen_meta_log_lik]{epidist_gen_meta_log_lik()}},
+\code{\link[=epidist_gen_meta_predict]{epidist_gen_meta_predict()}},
+\code{\link[=epidist_gen_posterior_epred]{epidist_gen_posterior_epred()}},
+\code{\link[=epidist_gen_posterior_predict]{epidist_gen_posterior_predict()}}
 }
 \concept{gen}

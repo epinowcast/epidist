@@ -13,8 +13,8 @@
 \code{NULL}, invisibly.
 }
 \description{
-Each matrix must cover the rows of its study, be symmetric, and be positive
-definite, so that it has a Cholesky factor and defines a proper
+Each matrix must cover the rows sharing its \code{mvn_id}, be symmetric, and be
+positive definite, so that it has a Cholesky factor and defines a proper
 multivariate normal.
 }
 \keyword{internal}

@@ -35,7 +35,7 @@ nodes.
 }
 \description{
 The weight is offset by half a primary window for the uniform single
-interval approximation, matching \code{\link{.meta_pcens_trunc_moments}()}, so that the
+interval approximation, matching \code{\link[=.meta_pcens_trunc_moments]{.meta_pcens_trunc_moments()}}, so that the
 reported quantile and the reported moments describe the same estimand.
 }
 \keyword{internal}

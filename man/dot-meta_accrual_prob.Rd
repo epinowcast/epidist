@@ -37,6 +37,6 @@ A probability.
 }
 \description{
 Interpolates the accrual weighted distribution function of
-\code{\link{.meta_accrual_nodes}()} linearly at the reported value.
+\code{\link[=.meta_accrual_nodes]{.meta_accrual_nodes()}} linearly at the reported value.
 }
 \keyword{internal}

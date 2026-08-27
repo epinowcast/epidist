@@ -231,13 +231,38 @@ prep_meta_obs <- suppressMessages(
 # truncation design, so that every branch of the implied density is exercised.
 # Studies M to P counted only delays above a minimum, one per censoring
 # adjustment, and Q and R report a covariance matrix over their summaries.
-lockstep_vcov <- list(
-  Q = matrix(
-    c(0.09, 0.02, 0.01, 0.02, 0.16, 0.03, 0.01, 0.03, 0.25),
-    nrow = 3
+lockstep_mvn_q <- suppressMessages(as_epidist_estimates_data(
+  new_epidist_multivariate(
+    value = c(mean = 7.2, sd = 3.4, q0.5 = 6.5),
+    vcov = matrix(
+      c(0.09, 0.02, 0.01, 0.02, 0.16, 0.03, 0.01, 0.03, 0.25),
+      nrow = 3
+    ),
+    params = c("mean", "sd", "q0.5")
   ),
-  R = matrix(c(0.12, -0.03, -0.03, 0.2), nrow = 2)
-)
+  study = "Q",
+  relative_obs_time = Inf,
+  trunc_adjusted = TRUE,
+  trunc_design = "cohort",
+  cens_adjusted = 1,
+  delay_min = 0,
+  growth_rate = 0
+))
+
+lockstep_mvn_r <- suppressMessages(as_epidist_estimates_data(
+  new_epidist_multivariate(
+    value = c(q0.25 = 4.8, q0.75 = 8.6),
+    vcov = matrix(c(0.12, -0.03, -0.03, 0.2), nrow = 2),
+    params = c("q0.25", "q0.75")
+  ),
+  study = "R",
+  relative_obs_time = 30,
+  trunc_adjusted = FALSE,
+  trunc_design = "accrual",
+  cens_adjusted = 0,
+  delay_min = 0,
+  growth_rate = 0.1
+))
 
 # Studies S to V use midpoint imputation with a uniform interval
 # (cens_adjusted 4), one per truncation design, so that the R and Stan
@@ -268,82 +293,73 @@ lockstep_base_rows <- data.frame(
   study = c(
     "A", "A", "B", "B", "B", "C", "C", "D", "E", "E", "F", "F", "F",
     "G", "H", "I", "J", "K", "K", "L", "L",
-    "M", "M", "N", "N", "O", "O", "P", "P",
-    "Q", "Q", "Q", "R", "R"
+    "M", "M", "N", "N", "O", "O", "P", "P"
   ),
   type = c(
     "mean", "sd", "quantile", "quantile", "quantile", "mean", "sd",
     "quantile", "mean", "sd", "mean", "sd", "quantile",
     "quantile", "quantile", "quantile", "quantile", "quantile", "quantile",
     "quantile", "quantile",
-    "mean", "sd", "mean", "sd", "mean", "sd", "quantile", "quantile",
-    "mean", "sd", "quantile", "quantile", "quantile"
+    "mean", "sd", "mean", "sd", "mean", "sd", "quantile", "quantile"
   ),
   value = c(
     7.5, 3.6, 4.2, 6.1, 9.4, 6.4, 3.1, 5.4, 9.1, 5.2, 6.9, 3.3, 6.0,
     6.2, 5.8, 7.1, 6.6, 4.5, 7.5, 5.1, 8.2,
-    8.1, 3.2, 7.8, 3.4, 8.4, 3.1, 6.3, 9.2,
-    7.2, 3.4, 6.5, 4.8, 8.6
+    8.1, 3.2, 7.8, 3.4, 8.4, 3.1, 6.3, 9.2
   ),
   se = c(
     rep(NA, 10), 0.4, NA, 0.5, 0.6, 0.4, 0.7, 0.5, NA, NA, NA, NA,
-    rep(NA, 8), rep(NA, 5)
+    rep(NA, 8)
   ),
   p = c(
     NA, NA, 0.25, 0.5, 0.75, NA, NA, 0.5, NA, NA, NA, NA, 0.5,
     0.5, 0.5, 0.5, 0.5, 0.25, 0.75, 0.25, 0.75,
-    NA, NA, NA, NA, NA, NA, 0.25, 0.75,
-    NA, NA, 0.5, 0.25, 0.75
+    NA, NA, NA, NA, NA, NA, 0.25, 0.75
   ),
   n = c(
     120, 120, 60, 60, 60, 80, 80, 200, 300, 300, 90, 90, 90,
     70, 70, 70, 70, 150, 150, 150, 150,
-    110, 110, 95, 95, 130, 130, 140, 140,
-    NA, NA, NA, NA, NA
+    110, 110, 95, 95, 130, 130, 140, 140
   ),
   relative_obs_time = c(
     20, 20, Inf, Inf, Inf, Inf, Inf, 30, 25, 25, 18, 18, 18,
     24, 24, 24, 24, 22, 22, 26, 26,
-    28, 28, Inf, Inf, 32, 32, 27, 27,
-    Inf, Inf, Inf, 30, 30
+    28, 28, Inf, Inf, 32, 32, 27, 27
   ),
   trunc_adjusted = c(
     FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE,
     FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
     FALSE, FALSE,
-    FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE,
-    TRUE, TRUE, TRUE, FALSE, FALSE
+    FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE
   ),
   trunc_design = c(
     rep("cohort", 8), "accrual", "accrual", rep("cohort", 3),
     "cohort", "cohort", "accrual", "cohort", "accrual", "accrual",
     "accrual", "accrual",
     "cohort", "cohort", "cohort", "cohort", "accrual", "accrual",
-    "cohort", "cohort",
-    "cohort", "cohort", "cohort", "accrual", "accrual"
+    "cohort", "cohort"
   ),
   cens_adjusted = c(
     0, 0, 1, 1, 1, 3, 3, 2, 0, 0, 0, 0, 0, 1, 2, 1, 2, 0, 0, 0, 0,
-    0, 0, 1, 1, 2, 2, 3, 3,
-    1, 1, 1, 0, 0
+    0, 0, 1, 1, 2, 2, 3, 3
   ),
   delay_min = c(
     rep(0, 21),
-    2, 2, 1.5, 1.5, 3, 3, 2, 2,
-    0, 0, 0, 0, 0
+    2, 2, 1.5, 1.5, 3, 3, 2, 2
   ),
   growth_rate = c(
     rep(0, 8), 0.1, 0.1, 0, 0, 0, 0, 0, 0.15, 0.2, 0.2, 0.2, 0, 0,
-    0, 0, 0, 0, 0.05, 0.05, 0, 0,
-    0, 0, 0, 0.1, 0.1
+    0, 0, 0, 0, 0.05, 0.05, 0, 0
   ),
   stringsAsFactors = FALSE
 )
 
-lockstep_estimates <- suppressMessages(as_epidist_estimates_data(
-  rbind(lockstep_base_rows, lockstep_midpoint_uniform),
-  vcov = lockstep_vcov
-))
+lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
+  lockstep_base_rows,
+  lockstep_mvn_q,
+  lockstep_mvn_r,
+  lockstep_midpoint_uniform
+)))
 
 # The shared fits below use the cmdstanr backend, so they are only built
 # when cmdstanr and CmdStan are both available. Tests that use them call
@@ -668,9 +684,10 @@ if (not_on_cran() && has_cmdstanr()) {
   parameter_fits <- Map(reported_parameter_fit, 300, parameter_obs_times)
   sim_parameter_rows <- Map(
     function(study, fit, study_obs_time) {
-      return(parameters_to_multivariate(
-        "lognormal", fit$parameters,
-        study = study,
+      return(suppressMessages(epidist_estimates_parameters(
+        study,
+        family = "lognormal",
+        parameters = fit$parameters,
         se = fit$se,
         n = fit$size,
         relative_obs_time = study_obs_time,
@@ -678,7 +695,7 @@ if (not_on_cran() && has_cmdstanr()) {
         trunc_design = "cohort",
         cens_adjusted = 0,
         growth_rate = 0
-      ))
+      )))
     },
     paste0("published_", seq_along(parameter_obs_times)), parameter_fits,
     parameter_obs_times
@@ -689,23 +706,18 @@ if (not_on_cran() && has_cmdstanr()) {
   # the covariance between the two.
   marginal_dpars <- predict_delay_parameters(fit_marginal)
   marginal_dpars <- marginal_dpars[marginal_dpars$index == 1, ]
-  # The metadata columns must match those the parameter studies carry, so that
-  # the rows bind together.
-  sim_draws_rows <- draws_to_multivariate(
-    marginal_dpars[, c("mean", "sd")],
+  sim_draws_rows <- suppressMessages(as_epidist_estimates_data(
+    as_epidist_multivariate(marginal_dpars, params = c("mean", "sd")),
     study = "posterior_draws",
-    n = nrow(sim_obs),
     relative_obs_time = Inf,
     trunc_adjusted = TRUE,
     trunc_design = "cohort",
     cens_adjusted = 1,
     growth_rate = 0
-  )
+  ))
 
-  sim_reported_rows <- c(sim_parameter_rows, list(sim_draws_rows))
   sim_reported_estimates <- suppressMessages(as_epidist_estimates_data(
-    do.call(rbind, lapply(sim_reported_rows, `[[`, "data")),
-    vcov = do.call(c, unname(lapply(sim_reported_rows, `[[`, "vcov")))
+    c(sim_parameter_rows, list(sim_draws_rows))
   ))
   prep_meta_reported <- suppressMessages(
     as_epidist_meta_model(estimates = sim_reported_estimates)

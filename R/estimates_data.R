@@ -87,24 +87,27 @@ as_epidist_estimates_data <- function(data, ...) {
 #' option, since the `brms` formula makes it a meta-regression that estimates
 #' the residual bias rather than correcting it mechanically.
 #'
-#' # How a study can report its estimate
+#' # What shape a study reported its estimate in
 #'
-#' A study that cannot share its delays should report a vector of summaries
-#' with a covariance matrix over them rather than a standard error for each
-#' one. This is the recommended format, because it keeps the correlation
-#' between the reported quantities. Supply the matrices through `vcov`, named
-#' by study. Each must be symmetric positive definite and match the number of
-#' rows its study has in `data`, in the order they appear. Such rows need no
-#' `n` and no `se`.
+#' This method takes a long table with one row per reported summary. Two other
+#' shapes are common enough to have their own entry points, each returning an
+#' object this one would.
 #'
-#' Three helpers build both parts. [draws_to_multivariate()] takes draws of the
-#' quantities a study reports, such as the posterior draws
-#' [predict_delay_parameters()] returns. [delays_to_multivariate()] resamples a
-#' set of delays. [parameters_to_multivariate()] takes the parameters of a
-#' distribution a study fitted, which studies often publish in place of
-#' summaries, and converts them to the summaries it implies. Reported
-#' parameters are not a `type` here, because the family a study fitted need not
-#' be the family being fitted to it.
+#' * [epidist_estimates_summaries()] takes one study's summaries in wide form.
+#' * [epidist_estimates_parameters()] takes the parameters of a distribution a
+#'   study fitted, which studies often publish in place of summaries, and
+#'   converts them to the summaries the fitted distribution implies. Reported
+#'   parameters are not a `type` here, because the family a study fitted need
+#'   not be the family being fitted to it.
+#'
+#' A study that published draws of its parameters, rather than point summaries
+#' of them, can report the correlation between the quantities it reports. Pass
+#' the draws to [as_epidist_multivariate()] and the result to
+#' [as_epidist_estimates_data()], which is the only route by which a covariance
+#' reaches [as_epidist_meta_model()]. Such rows need no `n` and no `se`.
+#'
+#' Contributions from several studies combine by passing them in a list, which
+#' [as_epidist_estimates_data()] binds into one object.
 #'
 #' @param data A `data.frame` of published summary estimates.
 #'
@@ -129,13 +132,7 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  reported delay.
 #'
 #' @param n A string giving the column of `data` containing the number of
-#'  delays the summary was computed from. Required unless `se` or a covariance
-#'  matrix is supplied.
-#'
-#' @param vcov A named list of covariance matrices over the summaries each
-#'  study reported, named by study. See the section on reporting a covariance
-#'  matrix. Optional, and studies without an entry are fitted with their `n` or
-#'  `se` as usual.
+#'  delays the summary was computed from. Required unless `se` is supplied.
 #'
 #' @param p A string giving the column of `data` containing the probability of
 #'  a reported quantile. Required for rows with `type` of `"quantile"` and
@@ -229,20 +226,21 @@ as_epidist_estimates_data.data.frame <- function(
   delay_min = NULL,
   growth_rate = NULL,
   max_delay = NULL,
-  vcov = NULL,
   ...
 ) {
   assert_data_frame(data)
 
   supplied <- list(
-    study, type, value, se, n, p, pwindow, swindow, relative_obs_time,
-    trunc_adjusted, trunc_design, cens_adjusted, delay_min, growth_rate,
-    max_delay
+    study = study, type = type, value = value, se = se, n = n, p = p,
+    pwindow = pwindow, swindow = swindow,
+    relative_obs_time = relative_obs_time, trunc_adjusted = trunc_adjusted,
+    trunc_design = trunc_design, cens_adjusted = cens_adjusted,
+    delay_min = delay_min, growth_rate = growth_rate, max_delay = max_delay
   )
   valid_inputs <- !vapply(supplied, is.null, logical(1))
   data_tbl <- .rename_columns(
     tibble::as_tibble(data),
-    new_names = .estimates_required_cols()[valid_inputs],
+    new_names = names(supplied)[valid_inputs],
     old_names = unlist(supplied)
   )
 
@@ -260,9 +258,276 @@ as_epidist_estimates_data.data.frame <- function(
   ]
 
   data_tbl <- new_epidist_estimates_data(data_tbl)
-  data_tbl <- .estimates_set_vcov(data_tbl, vcov)
+  data_tbl <- .estimates_set_vcov(data_tbl, attr(data, "estimates_vcov"))
   assert_epidist(data_tbl)
   return(data_tbl)
+}
+
+#' Combine `epidist_estimates_data` objects from several studies
+#'
+#' Each element is coerced on its own and the results are bound into one
+#' object. Combining is associative, so contributions can be assembled in any
+#' order and in any grouping.
+#'
+#' @inheritParams as_epidist_estimates_data
+#'
+#' @param ... Passed to the method used for each element.
+#'
+#' @method as_epidist_estimates_data list
+#'
+#' @family estimates_data
+#' @importFrom dplyr bind_rows
+#' @export
+#' @examples
+#' as_epidist_estimates_data(list(
+#'   epidist_estimates_summaries("A", mean = 7.5, sd = 3.6, n = 120),
+#'   epidist_estimates_summaries("B", mean = 6.9, n = 80)
+#' ))
+as_epidist_estimates_data.list <- function(data, ...) {
+  if (length(data) == 0) {
+    cli::cli_abort("{.var data} must hold at least one contribution.")
+  }
+  parts <- lapply(data, as_epidist_estimates_data, ...)
+  return(.estimates_bind(parts))
+}
+
+#' Return an `epidist_estimates_data` object unchanged
+#'
+#' @inheritParams as_epidist_estimates_data
+#'
+#' @param ... Not used in this method.
+#'
+#' @method as_epidist_estimates_data epidist_estimates_data
+#'
+#' @family estimates_data
+#' @export
+#' @examples
+#' estimates <- epidist_estimates_summaries("A", mean = 7.5, n = 120)
+#' identical(as_epidist_estimates_data(estimates), estimates)
+as_epidist_estimates_data.epidist_estimates_data <- function(data, ...) {
+  assert_epidist(data)
+  return(data)
+}
+
+#' Create an `epidist_estimates_data` object from a multivariate representation
+#'
+#' This is the only route by which a covariance between a study's reported
+#' summaries reaches [as_epidist_meta_model()]. The covariance comes from draws
+#' of the study's parameters, so it is one the study could have computed, and
+#' the summaries it covers are fitted with a multivariate normal likelihood
+#' rather than as independent observations.
+#'
+#' Where `family` is given, the draws hold the natural parameters of a
+#' distribution the study fitted. Each draw is pushed through to the summaries
+#' the fitted distribution implies, over the range of delays the study could
+#' have seen, and the covariance is taken over those. This is the exact version
+#' of the delta method [epidist_estimates_parameters()] applies, and it needs
+#' no linearisation.
+#'
+#' Where `family` is `NULL`, the parameters must already be quantities a study
+#' reports. Name them `mean`, `sd`, or `q` followed by a probability, such as
+#' `q0.25`.
+#'
+#' Draws over more than one index point are not yet supported for fitting,
+#' because the linear predictor would have to vary within one likelihood
+#' observation.
+#'
+#' @inheritParams as_epidist_estimates_data
+#'
+#' @param study A string naming the study the draws come from.
+#'
+#' @param family The distribution the study fitted, one of `"lognormal"`,
+#'  `"gamma"` or `"weibull"`, where the draws hold its natural parameters.
+#'  Defaults to `NULL`, meaning the draws already hold reported summaries.
+#'
+#' @param moments Which moments to report, any of `"mean"` and `"sd"`. Only
+#'  used where `family` is given.
+#'
+#' @param probs A numeric vector of probabilities to report quantiles at. Only
+#'  used where `family` is given.
+#'
+#' @param mvn_id A string identifying the covariance matrix. Defaults to
+#'  `study`, and only needs setting where one study contributes more than one
+#'  multivariate object.
+#'
+#' @param ... Study metadata, as documented in
+#'  [as_epidist_estimates_data.data.frame()].
+#'
+#' @method as_epidist_estimates_data epidist_multivariate
+#'
+#' @family estimates_data
+#' @importFrom tibble tibble
+#' @export
+#' @examples
+#' set.seed(1)
+#' draws <- cbind(mean = rnorm(500, 7.5, 0.3), sd = rnorm(500, 3.6, 0.2))
+#' as_epidist_estimates_data(
+#'   as_epidist_multivariate(draws),
+#'   study = "site A"
+#' )
+as_epidist_estimates_data.epidist_multivariate <- function(
+  data,
+  study,
+  family = NULL,
+  moments = c("mean", "sd"),
+  probs = numeric(0),
+  mvn_id = NULL,
+  ...
+) {
+  assert_string(study)
+  assert_epidist(data)
+  if (length(data$index) > 1) {
+    cli::cli_abort(paste0(
+      "A multivariate representation spanning {length(data$index)} index ",
+      "points cannot be fitted, because the linear predictor would have to ",
+      "vary within one likelihood observation. Take a single index point."
+    ))
+  }
+  if (is.null(mvn_id)) {
+    mvn_id <- study
+  }
+  assert_string(mvn_id)
+  if (is.null(family)) {
+    reported <- .estimates_multivariate_types(data$params)
+    value <- unname(data$value)
+    covariance <- data$vcov
+  } else {
+    reported <- .estimates_mvn_summarise(
+      data, family, moments, probs, ...
+    )
+    value <- reported$value
+    covariance <- reported$vcov
+  }
+  rows <- tibble(
+    study = study,
+    type = reported$type,
+    value = value,
+    p = reported$p,
+    mvn_id = mvn_id,
+    ...
+  )
+  attr(rows, "estimates_vcov") <- stats::setNames(list(covariance), mvn_id)
+  return(as_epidist_estimates_data(rows))
+}
+
+#' What each element of a multivariate representation reports
+#'
+#' @param params The parameter names of an `epidist_multivariate` object.
+#'
+#' @returns A list with the `type` and `p` of each element.
+#'
+#' @keywords internal
+.estimates_multivariate_types <- function(params) {
+  type <- rep(NA_character_, length(params))
+  p <- rep(NA_real_, length(params))
+  moment <- params %in% c("mean", "sd")
+  type[moment] <- params[moment]
+  reported <- !moment & grepl("^q0?\\.[0-9]+$", params)
+  type[reported] <- "quantile"
+  p[reported] <- as.numeric(sub("^q", "", params[reported]))
+  if (anyNA(type)) {
+    cli::cli_abort(c(
+      paste0(
+        "{.val {params[is.na(type)]}} {?is/are} not {?a quantity/quantities} ",
+        "a study reports."
+      ),
+      i = paste0(
+        "Name the parameters {.val mean}, {.val sd}, or {.val q} followed by ",
+        "a probability such as {.val q0.25}. Supply {.var family} instead ",
+        "where they are the natural parameters of a fitted distribution."
+      )
+    ))
+  }
+  return(list(type = type, p = p))
+}
+
+#' Summarise draws of a study's fitted parameters
+#'
+#' @param data An `epidist_multivariate` object holding draws of the natural
+#'  parameters of a fitted distribution.
+#'
+#' @param family The distribution the study fitted.
+#'
+#' @param moments Which moments to report.
+#'
+#' @param probs A numeric vector of probabilities to report quantiles at.
+#'
+#' @param ... Study metadata, used for the range the summaries are taken over.
+#'
+#' @returns A list with the `type`, `p`, `value` and `vcov` of the summaries.
+#'
+#' @keywords internal
+.estimates_mvn_summarise <- function(
+  data, family, moments, probs, ...
+) {
+  assert_choice(family, names(.estimates_parameter_sets()))
+  if (is.null(data$draws)) {
+    cli::cli_abort(paste0(
+      "Converting the natural parameters of a fitted distribution needs the ",
+      "draws themselves, but this object was built from a value and a ",
+      "covariance matrix. Use {.fun epidist_estimates_parameters} instead."
+    ))
+  }
+  moments <- .estimates_moments(moments, probs)
+  sorted <- .assert_estimates_parameters(family, data$value)
+  columns <- match(names(sorted), data$params)
+  support <- .estimates_reported_support(...)
+  summaries <- t(apply(data$draws[, columns, drop = FALSE], 1, function(draw) {
+    return(.estimates_parameter_summary(
+      family, stats::setNames(draw, names(sorted)), moments, probs,
+      lower = support$lower, cutoff = support$cutoff
+    ))
+  }))
+  covariance <- stats::cov(summaries)
+  dimnames(covariance) <- NULL
+  .assert_multivariate_definite(covariance)
+  return(list(
+    type = c(moments, rep("quantile", length(probs))),
+    p = c(rep(NA_real_, length(moments)), probs),
+    value = colMeans(summaries),
+    vcov = covariance
+  ))
+}
+
+#' Bind coerced contributions into one `epidist_estimates_data` object
+#'
+#' Covariance matrices are keyed by `mvn_id`, so a key used by two
+#' contributions is renamed before the rows are bound.
+#'
+#' @param parts A list of `epidist_estimates_data` objects.
+#'
+#' @returns An `epidist_estimates_data` object.
+#'
+#' @keywords internal
+#' @importFrom dplyr bind_rows
+.estimates_bind <- function(parts) {
+  if (length(parts) == 1) {
+    return(parts[[1]])
+  }
+  taken <- character(0)
+  matrices <- list()
+  for (i in seq_along(parts)) {
+    supplied <- .estimates_vcov(parts[[i]])
+    for (name in names(supplied)) {
+      unique_name <- name
+      suffix <- 1L
+      while (unique_name %in% taken) {
+        suffix <- suffix + 1L
+        unique_name <- paste0(name, "_", suffix)
+      }
+      taken <- c(taken, unique_name)
+      matrices[[unique_name]] <- supplied[[name]]
+      rows <- !is.na(parts[[i]]$mvn_id) & parts[[i]]$mvn_id == name
+      parts[[i]]$mvn_id[rows] <- unique_name
+    }
+  }
+  bound <- bind_rows(lapply(parts, function(part) {
+    return(tibble::as_tibble(unclass(part)))
+  }))
+  bound <- new_epidist_estimates_data(bound)
+  bound <- .estimates_set_vcov(bound, matrices)
+  assert_epidist(bound)
+  return(bound)
 }
 
 #' The reported covariance matrices of an `epidist_estimates_data` object
@@ -274,15 +539,23 @@ as_epidist_estimates_data.data.frame <- function(
 #'
 #' @keywords internal
 .estimates_vcov <- function(data) {
-  return(attr(data, "estimates_vcov") %||% list())
+  supplied <- attr(data, "estimates_vcov")
+  if (is.null(supplied)) {
+    return(list())
+  }
+  return(supplied)
 }
 
 #' Attach reported covariance matrices to an `epidist_estimates_data` object
 #'
 #' The matrices are held alongside the data rather than in it, because a
-#' covariance matrix spans several rows. Their Cholesky factors are built once
-#' by [as_epidist_meta_model()] and passed to Stan, so the sampler never
+#' covariance matrix spans several rows. They are keyed by the `mvn_id` column,
+#' which names the multivariate object the rows came from, so one study may
+#' contribute more than one. Their Cholesky factors are built once by
+#' [as_epidist_meta_model()] and passed to Stan, so the sampler never
 #' decomposes them.
+#'
+#' Only [as_epidist_estimates_data.epidist_multivariate()] writes to this.
 #'
 #' @param data An `epidist_estimates_data` object.
 #'
@@ -297,7 +570,7 @@ as_epidist_estimates_data.data.frame <- function(
   }
   if (!is.list(vcov) || is.null(names(vcov)) || anyDuplicated(names(vcov))) {
     cli::cli_abort(
-      "{.var vcov} must be a list of matrices named by study."
+      "{.var vcov} must be a list of matrices named by {.var mvn_id}."
     )
   }
   attr(data, "estimates_vcov") <- lapply(vcov, as.matrix)
@@ -312,13 +585,16 @@ as_epidist_estimates_data.data.frame <- function(
 #'
 #' @keywords internal
 .estimates_vcov_rows <- function(data) {
-  return(as.character(data$study) %in% names(.estimates_vcov(data)))
+  if (!hasName(data, "mvn_id")) {
+    return(rep(FALSE, nrow(data)))
+  }
+  return(!is.na(data$mvn_id) & data$mvn_id %in% names(.estimates_vcov(data)))
 }
 
 #' Check the covariance matrices of an `epidist_estimates_data` object
 #'
-#' Each matrix must cover the rows of its study, be symmetric, and be positive
-#' definite, so that it has a Cholesky factor and defines a proper
+#' Each matrix must cover the rows sharing its `mvn_id`, be symmetric, and be
+#' positive definite, so that it has a Cholesky factor and defines a proper
 #' multivariate normal.
 #'
 #' @param data An `epidist_estimates_data` object.
@@ -331,17 +607,18 @@ as_epidist_estimates_data.data.frame <- function(
   if (length(supplied) == 0) {
     return(invisible(NULL))
   }
-  study <- as.character(data$study)
-  unknown <- setdiff(names(supplied), unique(study))
+  group <- if (hasName(data, "mvn_id")) data$mvn_id else NA_character_
+  unknown <- setdiff(names(supplied), unique(stats::na.omit(group)))
   if (length(unknown) > 0) {
     cli::cli_abort(paste0(
-      "{.var vcov} names {.val {unknown}}, which {?is/are} not among the ",
-      "studies in the data."
+      "A covariance matrix is held for {.val {unknown}}, which {?is/are} not ",
+      "among the {.var mvn_id} values in the data."
     ))
   }
   for (name in names(supplied)) {
     matrix_i <- supplied[[name]]
-    size <- sum(study == name)
+    rows <- !is.na(group) & group == name
+    size <- sum(rows)
     if (!is.numeric(matrix_i) || nrow(matrix_i) != ncol(matrix_i)) {
       cli::cli_abort(
         "The covariance matrix for {.val {name}} must be square and numeric."
@@ -350,7 +627,7 @@ as_epidist_estimates_data.data.frame <- function(
     if (nrow(matrix_i) != size) {
       cli::cli_abort(paste0(
         "The covariance matrix for {.val {name}} is {nrow(matrix_i)} by ",
-        "{ncol(matrix_i)} but the study reports {size} summar{?y/ies}."
+        "{ncol(matrix_i)} but it covers {size} summar{?y/ies}."
       ))
     }
     if (!isTRUE(all.equal(matrix_i, t(matrix_i), tolerance = 1e-8))) {
@@ -366,7 +643,7 @@ as_epidist_estimates_data.data.frame <- function(
     # Every summary the matrix covers is fitted as one observation, which
     # takes its study metadata from the first of them.
     varies <- vapply(
-      data[study == name, .estimates_metadata_cols(), drop = FALSE],
+      data[rows, .estimates_metadata_cols(), drop = FALSE],
       function(column) {
         return(length(unique(column)) > 1)
       },
@@ -374,7 +651,7 @@ as_epidist_estimates_data.data.frame <- function(
     )
     if (any(varies)) {
       cli::cli_abort(paste0(
-        "The summaries {.val {name}} reports with a covariance matrix must ",
+        "The summaries covered by the covariance matrix {.val {name}} must ",
         "share their study metadata, but {.var {names(varies)[varies]}} ",
         "{?varies/vary} between them."
       ))
@@ -382,9 +659,8 @@ as_epidist_estimates_data.data.frame <- function(
   }
   if (any(!is.na(data$se) & .estimates_vcov_rows(data))) {
     cli::cli_abort(paste0(
-      "A study reporting a covariance matrix must not also report a ",
-      "{.var se}, because the matrix already gives the uncertainty of every ",
-      "summary it reports."
+      "A summary covered by a covariance matrix must not also report a ",
+      "{.var se}, because the matrix already gives its uncertainty."
     ))
   }
   return(invisible(NULL))
@@ -411,6 +687,10 @@ as_epidist_estimates_data.data.frame <- function(
   if (!hasName(data, "p")) {
     data$p <- NA_real_
   }
+  if (!hasName(data, "mvn_id")) {
+    data$mvn_id <- NA_character_
+  }
+  data$mvn_id <- as.character(data$mvn_id)
   for (col in c("pwindow", "swindow")) {
     if (!hasName(data, col)) {
       cli::cli_inform(c(
@@ -653,6 +933,7 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     data$max_delay,
     lower = 0, any.missing = FALSE, finite = TRUE
   )
+  assert_character(data$mvn_id)
 
   if (any(data$swindow <= 0)) {
     cli::cli_abort("{.var swindow} must be greater than zero.")
@@ -671,8 +952,8 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
   if (any(is.na(data$n) & is.na(data$se) & !.estimates_vcov_rows(data))) {
     cli::cli_abort(paste0(
       "Every reported summary needs a sample size {.var n}, a reported ",
-      "standard error {.var se}, or a covariance matrix in {.var vcov}, so ",
-      "that its sampling uncertainty can be quantified."
+      "standard error {.var se}, or a covariance matrix, so that its ",
+      "sampling uncertainty can be quantified."
     ))
   }
 
@@ -796,7 +1077,8 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
 
 .estimates_metadata_cols <- function() {
   return(setdiff(
-    .estimates_required_cols(), c("study", "type", "value", "se", "p")
+    .estimates_required_cols(),
+    c("study", "type", "value", "se", "p", "mvn_id")
   ))
 }
 
@@ -824,6 +1106,7 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     "cens_adjusted",
     "delay_min",
     "growth_rate",
-    "max_delay"
+    "max_delay",
+    "mvn_id"
   ))
 }

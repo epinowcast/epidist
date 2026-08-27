@@ -10,7 +10,7 @@
 \item{estimates}{The rows of an \code{epidist_estimates_data} object making up
 one group.}
 
-\item{vcov}{The covariance matrix the study reported, or \code{NULL}.}
+\item{vcov}{The covariance matrix over the group's summaries, or \code{NULL}.}
 }
 \value{
 The input, reordered.
@@ -22,7 +22,7 @@ in increasing probability, which must also be increasing in the reported
 value for the cells of the multinomial to be a partition of the delay axis.
 }
 \details{
-A group with a reported covariance matrix keeps the order its rows were
-given in, because that is the order the matrix is indexed by.
+A group covered by a covariance matrix keeps the order its rows were given
+in, because that is the order the matrix is indexed by.
 }
 \keyword{internal}

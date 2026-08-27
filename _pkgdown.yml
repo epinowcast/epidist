@@ -54,6 +54,10 @@ reference:
   desc: Functions for preparing published summary estimates
   contents:
   - has_concept("estimates_data")
+- subtitle: Multivariate representation
+  desc: Functions for representing draws of a set of parameters
+  contents:
+  - has_concept("multivariate")
 - title: Models
 - subtitle: Naive model
   desc: Specific methods for the naive model

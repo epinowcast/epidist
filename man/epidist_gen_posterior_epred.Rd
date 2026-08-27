@@ -32,10 +32,10 @@ values for latent models.
 \code{\link[brms:posterior_epred.brmsfit]{brms::posterior_epred()}} for details on how this is used within
 \code{brms}.
 
-Other gen: 
-\code{\link{epidist_gen_log_lik}()},
-\code{\link{epidist_gen_meta_log_lik}()},
-\code{\link{epidist_gen_meta_predict}()},
-\code{\link{epidist_gen_posterior_predict}()}
+Other gen:
+\code{\link[=epidist_gen_log_lik]{epidist_gen_log_lik()}},
+\code{\link[=epidist_gen_meta_log_lik]{epidist_gen_meta_log_lik()}},
+\code{\link[=epidist_gen_meta_predict]{epidist_gen_meta_predict()}},
+\code{\link[=epidist_gen_posterior_predict]{epidist_gen_posterior_predict()}}
 }
 \concept{gen}

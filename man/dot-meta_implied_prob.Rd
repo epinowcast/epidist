@@ -54,7 +54,7 @@ distribution function, which has no closed form on the discrete grid.
 }
 \details{
 For a naive study (\code{cens_adjusted} of 0) the estimand is discrete, so the
-continuity corrected grid distribution function of \code{\link{.meta_grid_prob}()} is
+continuity corrected grid distribution function of \code{\link[=.meta_grid_prob]{.meta_grid_prob()}} is
 used. Midpoint imputation (\code{cens_adjusted} of 3) uses the same function
 evaluated half a secondary window lower, because the study shifted every
 delay up by that amount.

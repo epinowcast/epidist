@@ -32,8 +32,8 @@ summary with its own reported standard error is left on its own, because
 that standard error replaces the sampling uncertainty the joint likelihood
 would derive.
 
-A study that reported a covariance matrix over its summaries is one group
-holding every summary that matrix covers, whatever their types, because the
-matrix is what ties them together.
+The summaries covered by one covariance matrix are one group, whatever their
+types, because the matrix is what ties them together. They are identified by
+their shared \code{mvn_id}, so one study may contribute more than one such group.
 }
 \keyword{internal}

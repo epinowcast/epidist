@@ -46,7 +46,7 @@ A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and
 \description{
 Forward models the summaries that a study would converge to given the biases
 in its estimation procedure. See
-\code{\link{as_epidist_estimates_data.data.frame}()} for what the adjustment codes mean.
+\code{\link[=as_epidist_estimates_data.data.frame]{as_epidist_estimates_data.data.frame()}} for what the adjustment codes mean.
 }
 \details{
 Under the uniform single interval approximation (\code{cens_adjusted} of 2) the
@@ -66,6 +66,6 @@ Under midpoint imputation with a uniform interval (\code{cens_adjusted} of 4) th
 study placed the primary event at the midpoint of its window instead of at
 its lower edge, so the estimand is that of \code{cens_adjusted} of 2 shifted down
 by \code{pwindow / 2}. Both midpoint codes are evaluated by calling the code they
-shift. See \code{\link{.meta_cens_base}()} and \code{\link{.meta_cens_shift}()}.
+shift. See \code{\link[=.meta_cens_base]{.meta_cens_base()}} and \code{\link[=.meta_cens_shift]{.meta_cens_shift()}}.
 }
 \keyword{internal}

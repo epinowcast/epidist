@@ -13,16 +13,16 @@ is_epidist_meta_model(data)
 Check if data has the \code{epidist_meta_model} class
 }
 \seealso{
-Other meta_model: 
-\code{\link{as_epidist_meta_model}()},
-\code{\link{as_epidist_meta_model.NULL}()},
-\code{\link{as_epidist_meta_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_meta_model.epidist_estimates_data}()},
-\code{\link{as_epidist_meta_model.epidist_linelist_data}()},
-\code{\link{assert_epidist.epidist_meta_model}()},
-\code{\link{epidist_family_model.epidist_meta_model}()},
-\code{\link{epidist_formula_model.epidist_meta_model}()},
-\code{\link{epidist_transform_data_model.epidist_meta_model}()},
-\code{\link{new_epidist_meta_model}()}
+Other meta_model:
+\code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}},
+\code{\link[=as_epidist_meta_model.NULL]{as_epidist_meta_model.NULL()}},
+\code{\link[=as_epidist_meta_model.epidist_aggregate_data]{as_epidist_meta_model.epidist_aggregate_data()}},
+\code{\link[=as_epidist_meta_model.epidist_estimates_data]{as_epidist_meta_model.epidist_estimates_data()}},
+\code{\link[=as_epidist_meta_model.epidist_linelist_data]{as_epidist_meta_model.epidist_linelist_data()}},
+\code{\link[=assert_epidist.epidist_meta_model]{assert_epidist.epidist_meta_model()}},
+\code{\link[=epidist_family_model.epidist_meta_model]{epidist_family_model.epidist_meta_model()}},
+\code{\link[=epidist_formula_model.epidist_meta_model]{epidist_formula_model.epidist_meta_model()}},
+\code{\link[=epidist_transform_data_model.epidist_meta_model]{epidist_transform_data_model.epidist_meta_model()}},
+\code{\link[=new_epidist_meta_model]{new_epidist_meta_model()}}
 }
 \concept{meta_model}

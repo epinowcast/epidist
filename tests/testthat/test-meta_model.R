@@ -1964,12 +1964,15 @@ test_that(".meta_multi_normal_ll matches the multivariate normal density", {
 test_that("as_epidist_meta_model builds a multivariate normal row from a reported covariance", { # nolint: line_length_linter.
   covariance <- matrix(c(0.4, 0.1, 0.1, 0.25), nrow = 2)
   estimates <- suppressMessages(as_epidist_estimates_data(
-    data.frame(
-      study = c("A", "A"), type = c("mean", "sd"), value = c(6.2, 3.1),
-      relative_obs_time = c(30, 30), trunc_adjusted = c(FALSE, FALSE),
-      cens_adjusted = c(0, 0), n = c(NA, NA), stringsAsFactors = FALSE
+    new_epidist_multivariate(
+      value = c(mean = 6.2, sd = 3.1),
+      vcov = covariance,
+      params = c("mean", "sd")
     ),
-    vcov = list(A = covariance)
+    study = "A",
+    relative_obs_time = 30,
+    trunc_adjusted = FALSE,
+    cens_adjusted = 0
   ))
   meta <- suppressMessages(as_epidist_meta_model(estimates))
   expect_identical(meta$obs_type, 7L)
@@ -2070,12 +2073,15 @@ test_that("assert_epidist.epidist_meta_model checks the summary rows", {
 test_that("assert_epidist.epidist_meta_model checks a covariance matrix row", {
   covariance <- matrix(c(0.4, 0.1, 0.1, 0.25), nrow = 2)
   estimates <- suppressMessages(as_epidist_estimates_data(
-    data.frame(
-      study = c("A", "A"), type = c("mean", "sd"), value = c(6.2, 3.1),
-      relative_obs_time = c(30, 30), trunc_adjusted = c(FALSE, FALSE),
-      cens_adjusted = c(0, 0), n = c(NA, NA), stringsAsFactors = FALSE
+    new_epidist_multivariate(
+      value = c(mean = 6.2, sd = 3.1),
+      vcov = covariance,
+      params = c("mean", "sd")
     ),
-    vcov = list(A = covariance)
+    study = "A",
+    relative_obs_time = 30,
+    trunc_adjusted = FALSE,
+    cens_adjusted = 0
   ))
   meta <- suppressMessages(as_epidist_meta_model(estimates))
   empty <- meta

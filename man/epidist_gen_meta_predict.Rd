@@ -37,10 +37,10 @@ predicted cumulative probability for a quantile row can fall outside
 \code{\link[brms:posterior_predict.brmsfit]{brms::posterior_predict()}} for details on how this is used within
 \code{brms}.
 
-Other gen: 
-\code{\link{epidist_gen_log_lik}()},
-\code{\link{epidist_gen_meta_log_lik}()},
-\code{\link{epidist_gen_posterior_epred}()},
-\code{\link{epidist_gen_posterior_predict}()}
+Other gen:
+\code{\link[=epidist_gen_log_lik]{epidist_gen_log_lik()}},
+\code{\link[=epidist_gen_meta_log_lik]{epidist_gen_meta_log_lik()}},
+\code{\link[=epidist_gen_posterior_epred]{epidist_gen_posterior_epred()}},
+\code{\link[=epidist_gen_posterior_predict]{epidist_gen_posterior_predict()}}
 }
 \concept{gen}

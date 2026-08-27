@@ -10,8 +10,8 @@
 \item{estimates}{The rows of an \code{epidist_estimates_data} object making up
 one group.}
 
-\item{vcov}{The covariance matrix the study reported over its summaries, or
-\code{NULL} where it reported standard errors or a sample size instead.}
+\item{vcov}{The covariance matrix over the group's summaries, or \code{NULL}
+where the study reported standard errors or a sample size instead.}
 }
 \value{
 A list with a one row tibble \code{row}, a tibble of its \code{members}, and

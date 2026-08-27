@@ -16,8 +16,13 @@ The input with the matrices attached.
 }
 \description{
 The matrices are held alongside the data rather than in it, because a
-covariance matrix spans several rows. Their Cholesky factors are built once
-by \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}} and passed to Stan, so the sampler never
+covariance matrix spans several rows. They are keyed by the \code{mvn_id} column,
+which names the multivariate object the rows came from, so one study may
+contribute more than one. Their Cholesky factors are built once by
+\code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}} and passed to Stan, so the sampler never
 decomposes them.
+}
+\details{
+Only \code{\link[=as_epidist_estimates_data.epidist_multivariate]{as_epidist_estimates_data.epidist_multivariate()}} writes to this.
 }
 \keyword{internal}
