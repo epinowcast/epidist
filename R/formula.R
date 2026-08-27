@@ -29,7 +29,7 @@ epidist_formula <- function(data, family, formula, ...) {
 #'
 #' @inheritParams epidist
 #'
-#' @rdname epidist_family_model
+#' @rdname epidist_formula_model
 #' @family formula
 #' @returns A `brmsformula` object.
 #'

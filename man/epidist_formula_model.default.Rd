@@ -25,7 +25,7 @@ Default method for defining a model specific formula
 }
 \seealso{
 Other formula:
-\code{\link[=epidist_family_model]{epidist_family_model()}},
-\code{\link[=epidist_formula]{epidist_formula()}}
+\code{\link[=epidist_formula]{epidist_formula()}},
+\code{\link[=epidist_formula_model]{epidist_formula_model()}}
 }
 \concept{formula}
