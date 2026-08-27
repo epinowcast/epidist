@@ -17,17 +17,47 @@ test_that(".replace_prior successfully replaces priors", { # nolint: line_length
   expect_s3_class(prior, "data.frame")
 })
 
-cli::test_that_cli(".replace_prior warns when passed a new prior without a match in old_prior", { # nolint: line_length_linter.
-  old_prior <- brms::prior("normal(0, 10)", class = "Intercept") +
+cli::test_that_cli(".warn_unmatched_prior warns when passed a prior without a match", { # nolint: line_length_linter.
+  known <- brms::prior("normal(0, 10)", class = "Intercept") +
     brms::prior("normal(0, 10)", class = "Intercept", dpar = "sigma")
   new_prior <- brms::prior("normal(0, 5)", class = "Intercept") +
     brms::prior("normal(0, 5)", class = "Intercept", dpar = "sigma") +
     brms::prior("normal(0, 5)", class = "Intercept", dpar = "shape")
 
   expect_warning(
-    .replace_prior(old_prior, new_prior, warn = TRUE),
+    .warn_unmatched_prior(new_prior, known),
     "One or more priors have no match in existing parameters"
   )
+})
+
+test_that(".warn_unmatched_prior names the priors which have no match", {
+  known <- brms::prior("normal(0, 10)", class = "Intercept")
+  new_prior <- brms::prior("normal(0, 5)", class = "b", coef = "sex")
+
+  expect_warning(
+    .warn_unmatched_prior(new_prior, known),
+    "class = b, coef = sex",
+    fixed = TRUE
+  )
+})
+
+test_that(".describe_prior gives the prior and the parameter it applies to", {
+  prior <- brms::prior("normal(0, 5)", class = "Intercept", dpar = "sigma") +
+    brms::prior("mu ~ normal(0, 5)", check = FALSE)
+  expect_identical(
+    .describe_prior(prior),
+    c("normal(0, 5) (class = Intercept, dpar = sigma)", "mu ~ normal(0, 5)")
+  )
+})
+
+test_that(".warn_unmatched_prior is silent when every prior matches", {
+  known <- brms::prior("normal(0, 10)", class = "Intercept") +
+    brms::prior("normal(0, 10)", class = "Intercept", dpar = "sigma")
+  new_prior <- brms::prior("normal(0, 5)", class = "Intercept")
+
+  expect_no_warning(.warn_unmatched_prior(new_prior, known))
+  expect_no_warning(.warn_unmatched_prior(NULL, known))
+  expect_no_warning(.warn_unmatched_prior(new_prior, NULL))
 })
 
 test_that(".replace_prior handles custom ~ priors correctly", {
@@ -43,7 +73,7 @@ test_that(".replace_prior handles custom ~ priors correctly", {
   # Test that only old priors with matching ~ parameter names are removed
   prior <- .replace_prior(old_prior, new_prior, enforce_presence = FALSE)
 
-  # Should keep sigma prior, replace mu prior, remove beta prior, add gamma
+  # Should keep sigma prior, replace mu prior, keep beta prior, add gamma
   # prior
   expect_identical(
     prior$prior,
@@ -55,6 +85,31 @@ test_that(".replace_prior handles custom ~ priors correctly", {
   expect_identical(as.double(nrow(prior)), 4)
   expect_s3_class(prior, "brmsprior")
   expect_s3_class(prior, "data.frame")
+})
+
+test_that(".replace_prior handles priors which are all manual", {
+  old_prior <- brms::prior("mu ~ normal(0, 10)", check = FALSE)
+  new_prior <- brms::prior("mu ~ normal(0, 5)", check = FALSE) +
+    brms::prior("gamma ~ normal(0, 2)", check = FALSE)
+
+  prior <- .replace_prior(old_prior, new_prior)
+  expect_identical(
+    prior$prior,
+    c("mu ~ normal(0, 5)", "gamma ~ normal(0, 2)")
+  )
+  expect_s3_class(prior, "brmsprior")
+})
+
+test_that(".replace_prior handles empty priors", {
+  old_prior <- brms::prior("normal(0, 10)", class = "Intercept")
+
+  expect_identical(as.double(nrow(.replace_prior(
+    old_prior, brms::empty_prior()
+  ))), 0)
+  expect_identical(
+    .replace_prior(brms::empty_prior(), old_prior, enforce_presence = FALSE)$prior, # nolint: line_length_linter.
+    "normal(0, 10)"
+  )
 })
 
 test_that(".add_dpar_info works as expected for the lognormal and gamma families", { # nolint: line_length_linter.

@@ -47,14 +47,21 @@ This function combines model specific prior distributions from
 \code{\link[=epidist_family_prior]{epidist_family_prior()}}, and user provided prior distributions into a single
 set of custom priors. Each element overwrites previous elements, such that
 user provided prior distributions have the highest priority. If a user prior
-distribution is provided which is not included in the model, a warning will
-be shown.
+distribution is provided which is not a parameter of the model, a warning
+will be shown.
 }
 \details{
 Note that the matching of priors is imperfect as it does not use brms'
 internal prior matching functionality. For example, it cannot distinguish
 between a prior for all coefficients (class = "b") and a prior for a
 specific coefficient (class = "b" and coef specified).
+
+Some models add parameters which \code{brms} does not know about, such as the
+event windows of the latent model. Priors for these are written using the
+\code{parameter ~ distribution} syntax of \code{\link[brms:set_prior]{brms::set_prior()}} and are passed to
+Stan unchanged. A prior written this way replaces any existing prior for the
+same parameter and is not checked against the parameters of the model. Note
+that the latent model requires a \code{uniform(0, 1)} prior on its event windows.
 }
 \seealso{
 Other prior:
