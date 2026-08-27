@@ -9,6 +9,11 @@ new_epidist_latent_model(data, primary = c("uniform", "expgrowth"), ...)
 \arguments{
 \item{data}{An object to be set with the class \code{epidist_latent_model}}
 
+\item{primary}{The distribution of the primary event within its censoring
+window. \code{"uniform"}, the default, assumes it is equally likely at any
+point. \code{"expgrowth"} tilts it, with the growth rate estimated as the
+\code{pgrowth} distributional parameter.}
+
 \item{...}{Additional arguments passed to methods.}
 }
 \value{

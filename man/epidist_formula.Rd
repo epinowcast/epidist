@@ -20,9 +20,6 @@ parameters.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
-\value{
-A \code{brmsformula} object.
-}
 \description{
 This function is used within \code{\link[=epidist]{epidist()}} to create the formula object passed
 to \code{brms}. It is unlikely that as a user you will need this function, but we

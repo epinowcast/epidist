@@ -11,6 +11,11 @@
 observations with primary and secondary event times. See
 \code{\link[=as_epidist_linelist_data]{as_epidist_linelist_data()}} for details on creating this object.}
 
+\item{primary}{The distribution of the primary event within its
+censoring window. \code{"uniform"}, the default, assumes it is equally
+likely at any point. \code{"expgrowth"} tilts it, with the growth rate
+estimated as the \code{pgrowth} distributional parameter.}
+
 \item{...}{Not used in this method.}
 }
 \value{

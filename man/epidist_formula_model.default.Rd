@@ -17,9 +17,6 @@ parameters.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
-\value{
-A \code{brmsformula} object.
-}
 \description{
 Default method for defining a model specific formula
 }
