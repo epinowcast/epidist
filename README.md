@@ -209,17 +209,17 @@ Package citation information
 citation("epidist")
 To cite package 'epidist' in publications use:
 
-  Adam Howes, Park S, Sam Abbott (NULL). _epidist: Estimate
-  Epidemiological Delay Distributions With brms_.
+  Adam Howes, Park S, Sam Abbott (2026). _epidist: Estimate
+  Epidemiological Delay Distributions with 'brms'_.
   doi:10.5281/zenodo.14213017
   <https://doi.org/10.5281/zenodo.14213017>.
 
 A BibTeX entry for LaTeX users is
 
   @Manual{,
-    title = {epidist: Estimate Epidemiological Delay Distributions With brms},
+    title = {epidist: Estimate Epidemiological Delay Distributions with 'brms'},
     author = {{Adam Howes} and Sang Woo Park and {Sam Abbott}},
-    year = {NULL},
+    year = {2026},
     doi = {10.5281/zenodo.14213017},
   }
 ```
