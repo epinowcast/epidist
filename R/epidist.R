@@ -62,6 +62,8 @@ epidist <- function(
   ...
 ) {
   assert_epidist(data)
+  compile_env <- .capture_compile_env()
+  on.exit(.restore_compile_env(compile_env), add = TRUE)
   epidist_family <- epidist_family(data, family)
   epidist_formula <- epidist_formula(
     data = data,
