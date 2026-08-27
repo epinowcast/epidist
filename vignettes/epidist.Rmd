@@ -536,6 +536,7 @@ Note that by default `predict_delay_parameters()` gives predictions for every ro
 Here as we only want posterior draws for the summary parameters we filter to the first row or the first data point.
 This prevents repeating the same prediction for each row.
 Another approach to this would be providing `newdata` to `predict_delay_parameters()` representing the data we want to make predictions for.
+`epidist_newdata()` builds that `newdata` for us.
 :::
 
 We can now plot posterior draws for the summary parameters from the two models.
