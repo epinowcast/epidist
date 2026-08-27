@@ -4,9 +4,11 @@
 \alias{.primary_args}
 \title{Primary event arguments for post-processing}
 \usage{
-.primary_args(prep, i, draw = NULL)
+.primary_args(spec, prep, i, draw = NULL)
 }
 \arguments{
+\item{spec}{A registry entry, as returned by \code{\link[=.primary_spec]{.primary_spec()}}.}
+
 \item{prep}{A \code{brms} prep object.}
 
 \item{i}{The observation index.}
@@ -14,7 +16,7 @@
 \item{draw}{The posterior draw index, or \code{NULL} for all draws.}
 }
 \value{
-A list with \code{dprimary} and \code{dprimary_args}.
+A named list of arguments for \code{spec$ddist} and \code{spec$rdist}.
 }
 \description{
 The post-processing functions read distributional parameters by name, so

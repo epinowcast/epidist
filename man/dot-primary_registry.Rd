@@ -7,9 +7,11 @@
 .primary_registry()
 }
 \value{
-A named list, one entry per distribution, giving the
-\code{primarycensored} id, the distributional parameters it adds, their links
-and bounds, and the R density and sampler used in post-processing.
+A named list, one entry per distribution. Each entry gives the
+\code{primarycensored} \code{id} used to dispatch in Stan, the \code{dpars} it adds to the
+family, their \code{links} and \code{bounds}, the R density \code{ddist} and sampler
+\code{rdist} used in post-processing, and the \code{args} of those two functions that
+the \code{dpars} supply.
 }
 \description{
 Supported primary event distributions

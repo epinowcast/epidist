@@ -32,6 +32,9 @@ epidist_gen_log_lik <- function(family) {
   # Get internal brms log_lik function
   log_lik_brms <- .get_brms_fn("log_lik", family)
 
+  # The primary event distribution the family was built with
+  spec <- .primary_spec_from_family(family)
+
   # Get the name of the primary distribution
   primary_dist_name <- tryCatch(
     primarycensored::pcd_dist_name(tolower(family$family)),
@@ -40,7 +43,7 @@ epidist_gen_log_lik <- function(family) {
 
   # Check if family is supported with a analytical solution
   if (primary_dist_name %in% .get_supported_dists()) {
-    .log_lik <- .analytical_gen_log_lik(primary_dist_name)
+    .log_lik <- .analytical_gen_log_lik(primary_dist_name, spec)
   } else {
     cli::cli_inform(
       c(
@@ -53,13 +56,14 @@ epidist_gen_log_lik <- function(family) {
       .frequency = "once",
       .frequency_id = paste0("epidist_gen_log_lik_", primary_dist_name)
     )
-    .log_lik <- .generic_gen_log_lik(log_lik_brms)
+    .log_lik <- .generic_gen_log_lik(log_lik_brms, spec)
   }
 
   return(.log_lik)
 }
 
-.generic_gen_log_lik <- function(log_lik_brms) {
+.generic_gen_log_lik <- function(log_lik_brms,
+                                spec = .primary_spec("uniform")) {
   .log_lik <- function(i, prep) {
     y <- prep$data$Y[i]
     relative_obs_time <- prep$data$vreal1[i]
@@ -120,11 +124,11 @@ epidist_gen_log_lik <- function(family) {
     # [primarycensored::dpcens()] revalidates `pdist` at random points on
     # every call, which would miss the cache once per draw, so integrate with
     # [primarycensored::pcens_cdf()] and form the censored pmf here.
-    primary <- .primary_args(prep, i)
+    primary <- .primary_spec_from_prep(prep, spec)
     pcens_obj <- primarycensored::new_pcens(
       pdist = pdist_draw,
-      dprimary = primary$dprimary,
-      dprimary_args = primary$dprimary_args
+      dprimary = primary$ddist,
+      dprimary_args = .primary_args(primary, prep, i)
     )
     delays <- unique(c(y, y + swindow, relative_obs_time, delay_min))
     delays <- sort(delays[is.finite(delays)])
@@ -153,7 +157,8 @@ epidist_gen_log_lik <- function(family) {
   return(.log_lik)
 }
 
-.analytical_gen_log_lik <- function(dist) {
+.analytical_gen_log_lik <- function(dist,
+                                    spec = .primary_spec("uniform")) {
   .log_lik <- function(i, prep) {
     y <- prep$data$Y[i]
     relative_obs_time <- prep$data$vreal1[i]
@@ -163,6 +168,7 @@ epidist_gen_log_lik <- function(family) {
 
     # Get distribution-specific parameters
     dist_args <- .get_supported_dist_args(dist, prep, i)
+    primary <- .primary_spec_from_prep(prep, spec)
 
     # Calculate density for each draw using primarycensored::dpcens()
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
@@ -177,8 +183,8 @@ epidist_gen_log_lik <- function(family) {
               swindow = swindow,
               L = delay_min,
               D = relative_obs_time,
-              dprimary = .primary_args(prep, i, draw)$dprimary,
-              dprimary_args = .primary_args(prep, i, draw)$dprimary_args,
+              dprimary = primary$ddist,
+              dprimary_args = .primary_args(primary, prep, i, draw),
               log = TRUE
             ),
             dist_args[[draw]]
@@ -257,6 +263,9 @@ epidist_gen_log_lik <- function(family) {
 epidist_gen_posterior_predict <- function(family) {
   dist_fn <- .get_brms_fn("posterior_predict", family)
 
+  # The primary event distribution the family was built with
+  spec <- .primary_spec_from_family(family)
+
   rdist <- function(n, i, prep, ...) {
     prep$ndraws <- n
     result <- do.call(dist_fn, list(i = i, prep = prep))
@@ -269,15 +278,12 @@ epidist_gen_posterior_predict <- function(family) {
     swindow <- prep$data$vreal3[i]
     delay_min <- if (is.null(prep$data$vreal5)) 0 else prep$data$vreal5[i]
 
-    primary <- .primary_args(prep, i)
-    rprimary <- .primary_spec_from_prep(prep)$rdist
-    rprimary_args <- lapply(primary$dprimary_args, mean)
-
+    primary <- .primary_spec_from_prep(prep, spec)
     result <- as.matrix(primarycensored::rpcens(
       n = prep$ndraws,
       rdist = rdist,
-      rprimary = rprimary,
-      rprimary_args = rprimary_args,
+      rprimary = primary$rdist,
+      rprimary_args = lapply(.primary_args(primary, prep, i), mean),
       pwindow = pwindow,
       swindow = swindow,
       L = delay_min,

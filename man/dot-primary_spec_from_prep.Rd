@@ -2,17 +2,21 @@
 % Please edit documentation in R/primary.R
 \name{.primary_spec_from_prep}
 \alias{.primary_spec_from_prep}
-\title{Identify the primary event distribution from a prep object}
+\title{The primary event distribution a fit was made with}
 \usage{
-.primary_spec_from_prep(prep)
+.primary_spec_from_prep(prep, spec)
 }
 \arguments{
 \item{prep}{A \code{brms} prep object.}
+
+\item{spec}{The registry entry of the family the caller supplied.}
 }
 \value{
-The registry entry whose parameters the fit carries.
+A registry entry.
 }
 \description{
-Identify the primary event distribution from a prep object
+The post-processing functions are built from a family, which the caller may
+supply directly rather than taking it from the fit. The fit itself is
+authoritative, so prefer what it carries and fall back on the family.
 }
 \keyword{internal}

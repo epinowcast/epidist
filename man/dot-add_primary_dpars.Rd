@@ -15,6 +15,7 @@
 The family with any primary event parameters added.
 }
 \description{
-Add the distributional parameters a primary event distribution needs
+Also records the distribution on the family so that the post-processing
+functions built from it use the same one.
 }
 \keyword{internal}
