@@ -19,11 +19,11 @@ This function contains \code{brms} prior distributions which are specific to
 particular \code{epidist} models e.g. the \code{latent_lognormal} model.
 }
 \seealso{
-Other prior:
-\code{\link[=epidist_family_prior]{epidist_family_prior()}},
-\code{\link[=epidist_family_prior.default]{epidist_family_prior.default()}},
-\code{\link[=epidist_family_prior.lognormal]{epidist_family_prior.lognormal()}},
-\code{\link[=epidist_model_prior.default]{epidist_model_prior.default()}},
-\code{\link[=epidist_prior]{epidist_prior()}}
+Other prior: 
+\code{\link{epidist_family_prior}()},
+\code{\link{epidist_family_prior.default}()},
+\code{\link{epidist_family_prior.lognormal}()},
+\code{\link{epidist_model_prior.default}()},
+\code{\link{epidist_prior}()}
 }
 \concept{prior}

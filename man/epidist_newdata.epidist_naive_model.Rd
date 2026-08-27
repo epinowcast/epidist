@@ -38,20 +38,20 @@ prep_obs <- sierra_leone_ebola_data |>
 epidist_newdata(prep_obs, sex)
 }
 \seealso{
-Other naive_model:
-\code{\link[=as_epidist_naive_model]{as_epidist_naive_model()}},
-\code{\link[=as_epidist_naive_model.epidist_aggregate_data]{as_epidist_naive_model.epidist_aggregate_data()}},
-\code{\link[=as_epidist_naive_model.epidist_linelist_data]{as_epidist_naive_model.epidist_linelist_data()}},
-\code{\link[=epidist_formula_model.epidist_naive_model]{epidist_formula_model.epidist_naive_model()}},
-\code{\link[=epidist_transform_data_model.epidist_naive_model]{epidist_transform_data_model.epidist_naive_model()}},
-\code{\link[=is_epidist_naive_model]{is_epidist_naive_model()}},
-\code{\link[=new_epidist_naive_model]{new_epidist_naive_model()}}
+Other naive_model: 
+\code{\link{as_epidist_naive_model}()},
+\code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
+\code{\link{as_epidist_naive_model.epidist_linelist_data}()},
+\code{\link{epidist_formula_model.epidist_naive_model}()},
+\code{\link{epidist_transform_data_model.epidist_naive_model}()},
+\code{\link{is_epidist_naive_model}()},
+\code{\link{new_epidist_naive_model}()}
 
-Other newdata:
-\code{\link[=epidist_newdata]{epidist_newdata()}},
-\code{\link[=epidist_newdata.default]{epidist_newdata.default()}},
-\code{\link[=epidist_newdata.epidist_latent_model]{epidist_newdata.epidist_latent_model()}},
-\code{\link[=epidist_newdata.epidist_marginal_model]{epidist_newdata.epidist_marginal_model()}}
+Other newdata: 
+\code{\link{epidist_newdata}()},
+\code{\link{epidist_newdata.default}()},
+\code{\link{epidist_newdata.epidist_latent_model}()},
+\code{\link{epidist_newdata.epidist_marginal_model}()}
 }
 \concept{naive_model}
 \concept{newdata}

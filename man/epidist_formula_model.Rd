@@ -24,8 +24,8 @@ A \code{brmsformula} object.
 The model-specific parts of an \code{epidist_formula()} call
 }
 \seealso{
-Other formula:
-\code{\link[=epidist_formula]{epidist_formula()}},
-\code{\link[=epidist_formula_model.default]{epidist_formula_model.default()}}
+Other formula: 
+\code{\link{epidist_formula}()},
+\code{\link{epidist_formula_model.default}()}
 }
 \concept{formula}

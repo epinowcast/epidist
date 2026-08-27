@@ -519,7 +519,7 @@ epidist_newdata.epidist_marginal_model <- function(
       delay_upr = 0,
       delay_min = delay_min
     ),
-    .supplied = names(match.call())
+    .supplied = intersect(names(match.call()), names(formals()))
   )
   return(newdata)
 }

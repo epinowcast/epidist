@@ -99,6 +99,19 @@ test_that("epidist_newdata errors when a variable is expanded and named", {
     epidist_newdata(prep_obs, pwindow, pwindow = 1),
     "expanded"
   )
+  expect_error(
+    epidist_newdata(prep_marginal_obs, delay_min, delay_min = 1),
+    "expanded"
+  )
+})
+
+test_that("epidist_newdata sets a column given with the tidyr syntax", {
+  expect_identical(epidist_newdata(prep_obs, delay = 5)$delay, 5)
+  expect_identical(epidist_newdata(prep_naive_obs, delay = 5)$delay, 5)
+  expect_identical(
+    epidist_newdata(prep_marginal_obs, delay_lwr = 5)$delay_lwr,
+    5
+  )
 })
 
 test_that("epidist_newdata checks its numeric arguments", {

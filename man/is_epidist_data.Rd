@@ -28,7 +28,7 @@ sierra_leone_ebola_data |>
   is_epidist_data()
 }
 \seealso{
-Other epidist_data:
+Other epidist_data: 
 \code{\link{epidist_data}}
 }
 \concept{epidist_data}

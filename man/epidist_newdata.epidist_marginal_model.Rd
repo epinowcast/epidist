@@ -72,21 +72,21 @@ epidist_newdata(prep_obs, sex)
 epidist_newdata(prep_obs, sex, pwindow = 1, swindow = 1)
 }
 \seealso{
-Other marginal_model:
-\code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}},
-\code{\link[=as_epidist_marginal_model.epidist_aggregate_data]{as_epidist_marginal_model.epidist_aggregate_data()}},
-\code{\link[=as_epidist_marginal_model.epidist_linelist_data]{as_epidist_marginal_model.epidist_linelist_data()}},
-\code{\link[=epidist_family_model.epidist_marginal_model]{epidist_family_model.epidist_marginal_model()}},
-\code{\link[=epidist_formula_model.epidist_marginal_model]{epidist_formula_model.epidist_marginal_model()}},
-\code{\link[=epidist_transform_data_model.epidist_marginal_model]{epidist_transform_data_model.epidist_marginal_model()}},
-\code{\link[=is_epidist_marginal_model]{is_epidist_marginal_model()}},
-\code{\link[=new_epidist_marginal_model]{new_epidist_marginal_model()}}
+Other marginal_model: 
+\code{\link{as_epidist_marginal_model}()},
+\code{\link{as_epidist_marginal_model.epidist_aggregate_data}()},
+\code{\link{as_epidist_marginal_model.epidist_linelist_data}()},
+\code{\link{epidist_family_model.epidist_marginal_model}()},
+\code{\link{epidist_formula_model.epidist_marginal_model}()},
+\code{\link{epidist_transform_data_model.epidist_marginal_model}()},
+\code{\link{is_epidist_marginal_model}()},
+\code{\link{new_epidist_marginal_model}()}
 
-Other newdata:
-\code{\link[=epidist_newdata]{epidist_newdata()}},
-\code{\link[=epidist_newdata.default]{epidist_newdata.default()}},
-\code{\link[=epidist_newdata.epidist_latent_model]{epidist_newdata.epidist_latent_model()}},
-\code{\link[=epidist_newdata.epidist_naive_model]{epidist_newdata.epidist_naive_model()}}
+Other newdata: 
+\code{\link{epidist_newdata}()},
+\code{\link{epidist_newdata.default}()},
+\code{\link{epidist_newdata.epidist_latent_model}()},
+\code{\link{epidist_newdata.epidist_naive_model}()}
 }
 \concept{marginal_model}
 \concept{newdata}

@@ -64,11 +64,11 @@ same parameter and is not checked against the parameters of the model. Note
 that the latent model requires a \code{uniform(0, 1)} prior on its event windows.
 }
 \seealso{
-Other prior:
-\code{\link[=epidist_family_prior]{epidist_family_prior()}},
-\code{\link[=epidist_family_prior.default]{epidist_family_prior.default()}},
-\code{\link[=epidist_family_prior.lognormal]{epidist_family_prior.lognormal()}},
-\code{\link[=epidist_model_prior]{epidist_model_prior()}},
-\code{\link[=epidist_model_prior.default]{epidist_model_prior.default()}}
+Other prior: 
+\code{\link{epidist_family_prior}()},
+\code{\link{epidist_family_prior.default}()},
+\code{\link{epidist_family_prior.lognormal}()},
+\code{\link{epidist_model_prior}()},
+\code{\link{epidist_model_prior.default}()}
 }
 \concept{prior}
