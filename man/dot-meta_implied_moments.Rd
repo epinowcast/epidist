@@ -32,7 +32,8 @@
 \item{trunc_adjusted}{1 if the study adjusted for right truncation, 0
 otherwise.}
 
-\item{cens_adjusted}{The censoring adjustment code, one of 0, 1, 2, or 3.}
+\item{cens_adjusted}{The censoring adjustment code, one of 0, 1, 2, 3, or
+4.}
 
 \item{growth_rate}{The exponential growth rate of primary events.}
 
@@ -45,7 +46,7 @@ A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and
 \description{
 Forward models the summaries that a study would converge to given the biases
 in its estimation procedure. See
-\code{\link[=as_epidist_estimates_data.data.frame]{as_epidist_estimates_data.data.frame()}} for what the adjustment codes mean.
+\code{\link{as_epidist_estimates_data.data.frame}()} for what the adjustment codes mean.
 }
 \details{
 Under the uniform single interval approximation (\code{cens_adjusted} of 2) the
@@ -60,5 +61,11 @@ Under midpoint imputation (\code{cens_adjusted} of 3) the study assigned each
 delay to the centre of the interval it was observed in, so the estimand is
 the naive discrete grid shifted up by \code{swindow / 2}. The shift moves the
 mean and leaves every central moment unchanged.
+
+Under midpoint imputation with a uniform interval (\code{cens_adjusted} of 4) the
+study placed the primary event at the midpoint of its window instead of at
+its lower edge, so the estimand is that of \code{cens_adjusted} of 2 shifted down
+by \code{pwindow / 2}. Both midpoint codes are evaluated by calling the code they
+shift. See \code{\link{.meta_cens_base}()} and \code{\link{.meta_cens_shift}()}.
 }
 \keyword{internal}

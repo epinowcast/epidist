@@ -9,12 +9,8 @@
 
 #' The number of quadrature intervals used for truncated continuous moments
 #'
-#' Set `options(epidist.meta_n_quad = )` to trade accuracy against speed. The
-#' value must be an even number of at least two, because the quadrature uses
-#' Simpson's rule. It is substituted into
-#' `inst/stan/meta_model/functions.stan` when the model is compiled, so set it
-#' before fitting and leave it alone afterwards, or the R post-processing will
-#' use a different resolution from the model that was fitted.
+#' Set with `options(epidist.meta_n_quad = )`, as an even number of at least
+#' two. Set it before fitting, since it is compiled into the model.
 #'
 #' @returns An integer number of intervals.
 #'
@@ -155,6 +151,62 @@
 #' @keywords internal
 .meta_min_prob_se <- function() {
   return(1e-6)
+}
+
+#' The censoring adjustment whose estimand a code is built on
+#'
+#' Two adjustment codes are another code's estimand moved along the delay axis
+#' by a fixed amount, because the study replaced an event time with the
+#' midpoint of its window. Midpoint imputation of the secondary interval
+#' (code 3) moves the naive discrete grid of code 0. Midpoint imputation of the
+#' primary event (code 4) moves the primary censored estimand of code 2. Both
+#' are evaluated by calling the base code and moving the result, so each
+#' estimand is implemented once.
+#'
+#' Matches `meta_family_cens_base` in
+#' `inst/stan/meta_model/functions.stan`.
+#'
+#' @param cens_adjusted The censoring adjustment code, one of 0, 1, 2, 3, or 4.
+#'
+#' @returns The code whose estimand is evaluated.
+#'
+#' @keywords internal
+.meta_cens_base <- function(cens_adjusted) {
+  if (cens_adjusted == 3) {
+    return(0L)
+  }
+  if (cens_adjusted == 4) {
+    return(2L)
+  }
+  return(as.integer(cens_adjusted))
+}
+
+#' The delay a midpoint imputation moves the base estimand by
+#'
+#' Midpoint imputation of the secondary interval (code 3) assigns each delay to
+#' the centre of the interval it was seen in, moving it up by half a secondary
+#' window. Midpoint imputation of the primary event (code 4) anchors the delay
+#' at the centre of the primary window rather than at its lower edge, moving it
+#' down by half a primary window. Every other code leaves its estimand where it
+#' is.
+#'
+#' Matches `meta_family_shift` in `inst/stan/meta_model/functions.stan`.
+#'
+#' @inheritParams .meta_cens_base
+#'
+#' @param pwindow,swindow The primary and secondary censoring window widths.
+#'
+#' @returns A signed delay.
+#'
+#' @keywords internal
+.meta_cens_shift <- function(cens_adjusted, pwindow, swindow) {
+  if (cens_adjusted == 3) {
+    return(swindow / 2)
+  }
+  if (cens_adjusted == 4) {
+    return(-pwindow / 2)
+  }
+  return(0)
 }
 
 #' Whether accrual weighting applies to a summary row
@@ -753,12 +805,19 @@
 #' the naive discrete grid shifted up by `swindow / 2`. The shift moves the
 #' mean and leaves every central moment unchanged.
 #'
+#' Under midpoint imputation with a uniform interval (`cens_adjusted` of 4) the
+#' study placed the primary event at the midpoint of its window instead of at
+#' its lower edge, so the estimand is that of `cens_adjusted` of 2 shifted down
+#' by `pwindow / 2`. Both midpoint codes are evaluated by calling the code they
+#' shift. See [.meta_cens_base()] and [.meta_cens_shift()].
+#'
 #' @inheritParams .meta_grid_pmf
 #'
 #' @param trunc_adjusted 1 if the study adjusted for right truncation, 0
 #'  otherwise.
 #'
-#' @param cens_adjusted The censoring adjustment code, one of 0, 1, 2, or 3.
+#' @param cens_adjusted The censoring adjustment code, one of 0, 1, 2, 3, or
+#'  4.
 #'
 #' @param trunc_design 0 for a cohort design, 1 for an accrual design.
 #'
@@ -778,16 +837,23 @@
   trunc_design = 0L
 ) {
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
-  if (cens_adjusted == 0 || cens_adjusted == 3) {
+  if (cens_adjusted == 3 || cens_adjusted == 4) {
+    # Midpoint imputation moves the base estimand along the delay axis, so its
+    # mean moves and every central moment is unchanged.
+    moments <- .meta_implied_moments(
+      dist, args, lower, cutoff, pwindow, swindow, trunc_adjusted,
+      .meta_cens_base(cens_adjusted), growth_rate, trunc_design
+    )
+    moments[["mean"]] <- moments[["mean"]] +
+      .meta_cens_shift(cens_adjusted, pwindow, swindow)
+    return(moments)
+  }
+  if (cens_adjusted == 0) {
     mass <- .meta_grid_pmf(
       dist, args, lower, cutoff, pwindow, swindow, growth_rate, accrual
     )
     first <- .meta_grid_first(lower, swindow)
-    moments <- .meta_grid_moments(mass, first * swindow, swindow)
-    if (cens_adjusted == 3) {
-      moments[["mean"]] <- moments[["mean"]] + swindow / 2
-    }
-    return(moments)
+    return(.meta_grid_moments(mass, first * swindow, swindow))
   }
   if (cens_adjusted == 2) {
     if (trunc_adjusted == 1 && growth_rate == 0 && lower == 0) {
@@ -988,6 +1054,10 @@
 #' For the uniform single interval approximation (`cens_adjusted` of 2) the
 #' distribution function of the primary censored delay is used, so that it
 #' matches the moments used for reported means and standard deviations.
+#' Midpoint imputation with a uniform interval (`cens_adjusted` of 4) uses that
+#' function evaluated half a primary window higher, because the study anchored
+#' every delay at the centre of the primary window rather than at its lower
+#' edge.
 #'
 #' @param y The reported quantile value.
 #'
@@ -1012,11 +1082,18 @@
   trunc_design = 0L
 ) {
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
-  if (cens_adjusted == 0 || cens_adjusted == 3) {
-    shift <- ifelse(cens_adjusted == 3, swindow / 2, 0)
+  if (cens_adjusted == 3 || cens_adjusted == 4) {
+    # Midpoint imputation moved every delay along the axis, so the base
+    # estimand is evaluated at the reported delay moved back.
+    return(.meta_implied_prob(
+      y - .meta_cens_shift(cens_adjusted, pwindow, swindow), dist, args,
+      lower, cutoff, pwindow, swindow, trunc_adjusted,
+      .meta_cens_base(cens_adjusted), growth_rate, trunc_design
+    ))
+  }
+  if (cens_adjusted == 0) {
     return(.meta_grid_prob(
-      y - shift, dist, args, lower, cutoff, pwindow, swindow, growth_rate,
-      accrual
+      y, dist, args, lower, cutoff, pwindow, swindow, growth_rate, accrual
     ))
   }
   if (y <= lower) {
@@ -1148,11 +1225,17 @@
   trunc_design = 0L
 ) {
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
-  if (cens_adjusted == 0 || cens_adjusted == 3) {
-    shift <- ifelse(cens_adjusted == 3, swindow / 2, 0)
+  if (cens_adjusted == 3 || cens_adjusted == 4) {
+    return(.meta_implied_density(
+      y - .meta_cens_shift(cens_adjusted, pwindow, swindow), dist, args,
+      lower, cutoff, pwindow, swindow, trunc_adjusted,
+      .meta_cens_base(cens_adjusted), growth_rate, trunc_design
+    ))
+  }
+  if (cens_adjusted == 0) {
     n_grid <- floor(cutoff / swindow)
     first <- .meta_grid_first(lower, swindow)
-    cell <- floor((y - shift) / swindow + 0.5)
+    cell <- floor(y / swindow + 0.5)
     if (cell < first || cell >= n_grid) {
       return(0)
     }
@@ -1429,11 +1512,20 @@
 .meta_implied_probs <- function(y, dist, args, slots) {
   accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
   first <- .meta_grid_first(slots$lower, slots$swindow)
-  if (slots$cens_adjusted %in% c(0, 3)) {
-    shift <- ifelse(slots$cens_adjusted == 3, slots$swindow / 2, 0)
+  if (slots$cens_adjusted %in% c(3, 4)) {
+    shifted <- slots
+    shifted$cens_adjusted <- .meta_cens_base(slots$cens_adjusted)
+    return(.meta_implied_probs(
+      y - .meta_cens_shift(
+        slots$cens_adjusted, slots$pwindow, slots$swindow
+      ),
+      dist, args, shifted
+    ))
+  }
+  if (slots$cens_adjusted == 0) {
     if (accrual != 1L) {
       return(.meta_grid_probs(
-        y - shift, dist, args, slots$lower, slots$cutoff, slots$pwindow,
+        y, dist, args, slots$lower, slots$cutoff, slots$pwindow,
         slots$swindow, slots$growth_rate
       ))
     }
@@ -1445,7 +1537,7 @@
       return(rep(Inf, length(y)))
     }
     return(.meta_interpolate(
-      y - shift - (first - 0.5) * slots$swindow, c(0, cumsum(mass)),
+      y - (first - 0.5) * slots$swindow, c(0, cumsum(mass)),
       slots$swindow, 0
     ))
   }
@@ -1491,8 +1583,16 @@
 #' @keywords internal
 .meta_implied_nodes <- function(dist, args, slots) {
   accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
-  if (slots$cens_adjusted %in% c(0, 3)) {
-    shift <- ifelse(slots$cens_adjusted == 3, slots$swindow / 2, 0)
+  if (slots$cens_adjusted %in% c(3, 4)) {
+    # Moving the estimand along the delay axis moves where its nodes start.
+    shifted <- slots
+    shifted$cens_adjusted <- .meta_cens_base(slots$cens_adjusted)
+    nodes <- .meta_implied_nodes(dist, args, shifted)
+    nodes$origin <- nodes$origin +
+      .meta_cens_shift(slots$cens_adjusted, slots$pwindow, slots$swindow)
+    return(nodes)
+  }
+  if (slots$cens_adjusted == 0) {
     first <- .meta_grid_first(slots$lower, slots$swindow)
     mass <- .meta_grid_pmf(
       dist, args, slots$lower, slots$cutoff, slots$pwindow, slots$swindow,
@@ -1500,7 +1600,7 @@
     )
     return(list(
       values = c(0, cumsum(mass)),
-      origin = (first - 0.5) * slots$swindow + shift,
+      origin = (first - 0.5) * slots$swindow,
       spacing = slots$swindow
     ))
   }

@@ -11,12 +11,17 @@
 #' Individual level rows use the same likelihood as the marginal model (see
 #' [as_epidist_marginal_model()]), imported from the
 #' [primarycensored](https://primarycensored.epinowcast.org/) package.
-#' Summary rows instead forward model what the study that reported them would
-#' have converged to given its estimation procedure. The reported value is
-#' fitted to that, with sampling uncertainty derived from the study sample
-#' size. This means published estimates that did not adjust for right
-#' truncation, or that treated interval censored data as continuous, still
-#' contribute unbiased information about the underlying delay distribution.
+#' Summary rows are instead forward modelled. Given the delay distribution, the
+#' model works out what the study's own estimation procedure would have
+#' converged to, and fits the reported value to that. Published estimates that
+#' did not adjust for right truncation, or that treated interval censored data
+#' as continuous, can therefore still contribute unbiased information.
+#' That holds only where the metadata describing what each study did is
+#' correct. It is usually the analyst's judgement rather than something the
+#' study reported, so state it explicitly and vary it in a sensitivity
+#' analysis.
+#' `vignette("model")` gives the forward model and the sampling likelihoods,
+#' and `vignette("meta")` works through a simulated and a real example.
 #'
 #' At least one of `data` and `estimates` must be supplied. Study level
 #' heterogeneity is specified through the `brms` formula in [epidist()], for
@@ -24,101 +29,38 @@
 #' Individual level rows are labelled `"individual"` in the `study` column so
 #' that they form their own level of any such term.
 #'
-#' # Summaries reported by the same study
+#' # What this means in practice
 #'
 #' Summaries that one study computed from the same delays are correlated, so
-#' they are fitted jointly rather than as separate terms.
-#' Two summaries are fitted together when they agree on every column of
-#' [as_epidist_estimates_data()] other than the summary itself, that is on the
-#' study, its metadata, and any covariates supplied.
-#' Grouping on those columns keeps the model correct for any `brms` formula,
-#' because a linear predictor built from them cannot vary within a group.
-#' A reported mean and a reported standard deviation are fitted as a bivariate
-#' normal, and a set of reported quantiles as a multinomial over the delay
-#' intervals they cut out.
-#' A study that reported a covariance matrix over its summaries is fitted as a
-#' multivariate normal with that matrix, which is the recommended format for a
-#' study that cannot share its delays. See [as_epidist_estimates_data()] and
-#' [bootstrap_delay_estimates()].
-#' A summary supplied with its own `se` is fitted on its own, because that
-#' standard error replaces the sampling uncertainty the joint likelihood would
-#' derive.
+#' they are fitted jointly. Two are grouped when they agree on every column of
+#' [as_epidist_estimates_data()] other than the summary itself, and a summary
+#' supplied with its own `se` is fitted alone. One observation is therefore a
+#' group rather than a single reported value, so `log_lik()` and [loo::loo()]
+#' report per group, and `loo` only compares fits to the same studies and the
+#' same mix of individual and summary rows. See `vignette("faq")`.
 #'
-#' One observation is therefore a group of summaries rather than a single
-#' reported value, in the same way that one row of aggregated individual level
-#' data stands for many delays.
-#' `log_lik()` and [loo::loo()] work at that level, so their values are per
-#' group. See `vignette("faq")`.
+#' Three consequences of the sampling likelihoods change what you should do.
 #'
-#' # Approximations used for summary rows
-#'
-#' * Reported means and standard deviations are given normal sampling
-#'   distributions. A reported mean uses the implied standard deviation over
-#'   the square root of the sample size, and a reported standard deviation uses
-#'   the kurtosis based asymptotic standard error of a sample standard
-#'   deviation. A mean and a standard deviation from the same study use the
-#'   asymptotic bivariate normal of the pair, whose correlation is the skewness
-#'   of the implied estimand over the square root of its excess kurtosis. These
-#'   approximations degrade for small sample sizes.
-#' * Reported quantiles are fitted on the cumulative probability scale with the
-#'   multinomial likelihood of the number of delays falling between them, which
-#'   is exact for the implied estimand given the sample size. A single reported
-#'   quantile reduces to the binomial. The counts are recovered by rounding the
-#'   reported probabilities, which loses a fraction of a delay per quantile.
-#' * Summaries of different kinds from the same study, such as a mean and a
-#'   median, are still treated as independent given the parameters, which
-#'   understates their joint uncertainty. A study that reports a covariance
-#'   matrix over its summaries avoids this, because the matrix carries the
-#'   correlation between them.
-#' * A quantile fitted through a reported covariance matrix is on the delay
-#'   scale, so its implied value is read off the implied distribution function
-#'   by interpolating between the grid or quadrature points either side of it.
-#'   The error in that is the curvature of the distribution function over one
-#'   grid cell.
-#' * A study that only counted delays above `delay_min` has every implied
-#'   summary conditioned on the delay exceeding it. On the discrete grid the
-#'   cells recording a shorter delay are dropped, so the conditioning point is
-#'   rounded up to the next grid boundary.
-#' * The standard errors above are plug in quantities that depend on the
-#'   parameters, so a set of studies that no single distribution can explain
-#'   can be accommodated by inflating the implied standard deviation rather
-#'   than by moving the location. Sampling can then become multimodal.
-#'   Allow for genuine differences between studies with a formula term such as
-#'   `mu ~ 1 + (1 | study)` rather than relying on the sampling error alone.
+#' * The standard errors are plug in quantities that depend on the parameters,
+#'   so studies no single distribution can explain may be accommodated by
+#'   inflating the implied standard deviation rather than by moving the
+#'   location, and sampling can become multimodal. Allow for genuine
+#'   differences with a term such as `mu ~ 1 + (1 | study)` rather than relying
+#'   on the sampling error alone.
 #' * Quantiles read off a fitted distribution rather than the empirical data
 #'   have smaller sampling error than assumed here. Supply a reported `se` in
 #'   [as_epidist_estimates_data()] for those rows, which also takes them out of
-#'   the joint quantile likelihood. For quantile rows that `se`
-#'   is on the scale of the reported delay, as studies report it, and is
-#'   converted to the cumulative probability scale by the delta method. That
-#'   is, it is multiplied by the density of the biased estimand at the reported
-#'   value. The converted standard error is held away from zero so that a
-#'   quantile reported far into the tail cannot give a degenerate likelihood.
-#' * A study that took integer date differences reports quantiles of a
-#'   discrete distribution, so the implied cumulative probability is
-#'   continuity corrected by interpolating the grid distribution function
-#'   through the mid points of its cells. A small discretisation bias remains
-#'   that does not shrink with the study sample size.
-#' * A study that stopped collecting at a calendar date (`trunc_design` of
-#'   `"accrual"`) is modelled by weighting the estimand by the length of
-#'   follow up available to each delay. The follow up available to a primary
-#'   event is a step function of its censoring window, and is replaced here by
-#'   its smooth average over that window. This is exact for a study that
-#'   adjusted for censoring, and exact for a naive study whose primary and
-#'   secondary windows are equal and divide the collection window, because
-#'   the calendar stop and the date differencing then discretise together.
-#'   Otherwise it is accurate to the curvature of the delay distribution over
-#'   one censoring window.
-#' * Studies that adjusted for right truncation but not for censoring are
-#'   summarised on a grid running to `max_delay`, so a distribution with a
-#'   long tail needs a larger `max_delay` than the default.
-#' * Studies that used the uniform single interval approximation and did not
-#'   adjust for right truncation are summarised by quadrature over the
-#'   primary censored delay distribution, which costs a fixed number of
-#'   distribution function evaluations per row. Set
-#'   `options(epidist.meta_n_quad = )` to change that number, which must be
-#'   even. It is substituted into the Stan code when the model is compiled, so
-#'   set it before fitting and leave it alone afterwards.
+#'   the joint quantile likelihood.
+#' * The normal approximations degrade at small study sample sizes, and
+#'   summaries of different kinds from one study, such as a mean and a median,
+#'   are treated as independent. Reporting a covariance matrix over a study's
+#'   summaries avoids the second.
+#'
+#' Two settings trade accuracy against speed: `max_delay` in
+#' [as_epidist_estimates_data()], which sets the grid a study that adjusted for
+#' right truncation is summarised on and needs raising for a long tailed delay,
+#' and `options(epidist.meta_n_quad = )`, which sets the number of quadrature
+#' nodes used where a study is summarised by quadrature instead.
 #'
 #' @param data An `epidist_linelist_data` or `epidist_aggregate_data` object of
 #'  individual level observations, an `epidist_estimates_data` object of
@@ -740,7 +682,7 @@ assert_epidist.epidist_meta_model <- function(data, ...) {
   assert_names(names(data), must.include = .meta_required_cols())
   assert_subset(data$obs_type, 1:7, .var.name = "obs_type")
   assert_subset(data$trunc_design, 0:1, .var.name = "trunc_design")
-  assert_subset(data$cens_adjusted, 0:3, .var.name = "cens_adjusted")
+  assert_subset(data$cens_adjusted, 0:4, .var.name = "cens_adjusted")
   assert_integerish(data$delay_lwr)
   assert_numeric(data$n, lower = 0)
   assert_numeric(data$pwindow, lower = 0)

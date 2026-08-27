@@ -36,35 +36,40 @@ as_epidist_estimates_data <- function(data, ...) {
 #' To use them we forward model what the study's estimation procedure would
 #' converge to, which means we need to know how the study handled the biases
 #' we support, along with the data process it saw.
-#' We plan to support further biases, such as right and left censoring, across
-#' all of the models in the package.
+#' `vignette("model")` derives each estimand, and `vignette("meta")` works
+#' through assembling this metadata for simulated and real studies.
 #' For each study we need:
 #'
-#' * **Roughly how it adjusted for censoring** (`cens_adjusted`).
-#'   The codes are a taxonomy of the common mistakes made when summarising
-#'   interval censored delays, and are deliberately limited to a few widely
-#'   used approaches rather than trying to encode every possible method:
+#' * **How it adjusted for censoring** (`cens_adjusted`). A taxonomy of the
+#'   common ways interval censored delays are summarised, deliberately limited
+#'   to a few widely used approaches:
 #'   * `0`: no adjustment. The study took integer date differences (for example
 #'     date of onset subtracted from date of report) and summarised them
 #'     directly. This is the most common case in the literature.
-#'   * `1`: fully adjusted. The study used a method that targets the underlying
-#'     continuous distribution, such as a latent variable or marginal
-#'     (double interval censored) likelihood.
+#'   * `1`: fully adjusted. The study used a method targeting the underlying
+#'     continuous distribution, such as a double interval censored likelihood.
 #'   * `2`: uniform single interval approximation. The study adjusted the
 #'     secondary interval only, assuming a uniform delay within it, and left
 #'     the primary interval uncorrected.
 #'   * `3`: midpoint imputation. The study assigned each delay to the centre of
 #'     the interval it was observed in, which shifts every reported delay up by
 #'     half a secondary window without changing its spread.
+#'   * `4`: midpoint imputation with a uniform interval. The study placed the
+#'     primary event at the midpoint of its window and integrated the secondary
+#'     interval. Common where the primary event has a wide exposure window and
+#'     the secondary date is recorded precisely.
+#'
+#'   Use code `3` for a study that midpointed the secondary interval and left
+#'   the primary alone. Anything more exotic must be approximated by whichever
+#'   code is closest, and if you cannot tell which a study used, state the
+#'   assumption you are making.
 #' * **Whether it adjusted for right truncation** (`trunc_adjusted`) and, if it
 #'   did not, **the observation time** (`relative_obs_time`) and **how
-#'   collection stopped** (`trunc_design`).
-#'   For a cohort design the observation time is the truncation point on the
-#'   delay scale, that is how long after the primary events the data were
-#'   extracted. For an accrual design, where collection stopped at a calendar
-#'   date, it is instead the length of the collection window, which is usually
-#'   easier to read off a paper. Real time estimates made partway through an
-#'   outbreak are right truncated unless the study corrected for it.
+#'   collection stopped** (`trunc_design`). For a cohort the observation time is
+#'   the truncation point on the delay scale. For an accrual design, where
+#'   collection stopped at a calendar date, it is the length of the collection
+#'   window, which is usually easier to read off a paper. Real time estimates
+#'   are right truncated unless the study corrected for it.
 #' * **The censoring windows** (`pwindow`, `swindow`). The width, in the same
 #'   time units as the delay, of the interval each event was observed in. Daily
 #'   reporting gives windows of 1, weekly reporting gives 7.
@@ -74,37 +79,32 @@ as_epidist_estimates_data <- function(data, ...) {
 #'   supplied.
 #' * **The minimum delay it counted** (`delay_min`), where the study dropped
 #'   delays below some point. Its summaries then describe a left truncated
-#'   delay distribution, and every implied summary is conditioned on the delay
-#'   exceeding `delay_min`. Defaults to 0, meaning the study counted every
-#'   delay.
+#'   delay distribution. Defaults to 0, meaning the study counted every delay.
 #'
-#' # Reporting a covariance matrix
+#' Systematic reviews rarely record this metadata, so you must supply your own
+#' assumption and say so alongside any results. Where it is missing entirely, a
+#' covariate for the phase of the outbreak each estimate was made in is another
+#' option, since the `brms` formula makes it a meta-regression that estimates
+#' the residual bias rather than correcting it mechanically.
+#'
+#' # How a study can report its estimate
 #'
 #' A study that cannot share its delays should report a vector of summaries
 #' with a covariance matrix over them rather than a standard error for each
 #' one. This is the recommended format, because it keeps the correlation
-#' between the quantities the study reports, which a per summary standard
-#' error throws away. Supply the matrices through `vcov`, named by study. Each
-#' matrix must be symmetric positive definite, and its dimension must match the
-#' number of rows the study has in `data`, in the order those rows appear.
-#' [bootstrap_delay_estimates()] produces both parts from a set of delays.
-#'
-#' Summaries reported this way are fitted with
-#' \eqn{y \sim \text{MVN}(m(\theta), \Sigma)}, where \eqn{m} is the vector of
-#' summaries the study's estimation procedure would converge to and
-#' \eqn{\Sigma} is the supplied matrix. Rows with a covariance matrix need no
+#' between the reported quantities. Supply the matrices through `vcov`, named
+#' by study. Each must be symmetric positive definite and match the number of
+#' rows its study has in `data`, in the order they appear. Such rows need no
 #' `n` and no `se`.
 #'
-#' Only the censoring adjustments above are supported. Anything more exotic
-#' must be approximated by whichever of them is closest, and if you cannot tell
-#' which a study used you should state the assumption you are making
-#' explicitly. The list is extensible. Each code is a forward model of one
-#' common estimation mistake, so a further mistake can be added as a further
-#' code.
-#'
-#' Systematic reviews rarely record all of this. Where a value is not reported
-#' you must supply your own assumption, and we recommend saying so alongside
-#' any results. Ideally reviews would report this study metadata directly.
+#' Three helpers build both parts. [draws_to_multivariate()] takes draws of the
+#' quantities a study reports, such as the posterior draws
+#' [predict_delay_parameters()] returns. [delays_to_multivariate()] resamples a
+#' set of delays. [parameters_to_multivariate()] takes the parameters of a
+#' distribution a study fitted, which studies often publish in place of
+#' summaries, and converts them to the summaries it implies. Reported
+#' parameters are not a `type` here, because the family a study fitted need not
+#' be the family being fitted to it.
 #'
 #' @param data A `data.frame` of published summary estimates.
 #'
@@ -125,10 +125,8 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  standard error implied by the sample size, and takes the row out of the
 #'  joint likelihood [as_epidist_meta_model()] otherwise uses for summaries a
 #'  study computed from the same delays. It is always on the scale of the
-#'  reported `value`, so for rows with `type` of `"quantile"` it is a standard
-#'  error for the reported delay. The model fits quantile rows on the
-#'  cumulative probability scale and converts a supplied `se` to that scale
-#'  internally by the delta method.
+#'  reported `value`, so for a `"quantile"` row it is a standard error for the
+#'  reported delay.
 #'
 #' @param n A string giving the column of `data` containing the number of
 #'  delays the summary was computed from. Required unless `se` or a covariance
@@ -158,18 +156,15 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  to `TRUE` where no `relative_obs_time` is supplied and `FALSE` otherwise.
 #'
 #' @param trunc_design A string giving the column of `data` containing how the
-#'  study stopped collecting data, either `"cohort"` or `"accrual"`. A cohort
-#'  design followed every primary event for the same `relative_obs_time`, so a
-#'  delay is observed if it is shorter than that time. An accrual design
-#'  collected primary events over a window of length `relative_obs_time` and
-#'  stopped at its calendar end, so a delay of `d` is observed only for the
-#'  primary events that occurred at least `d` before the stop. Defaults to
+#'  study stopped collecting data, either `"cohort"` (it followed every primary
+#'  event for the same `relative_obs_time`) or `"accrual"` (it collected over a
+#'  window of that length and stopped at its calendar end). Defaults to
 #'  `"cohort"`, and is only used for studies that did not adjust for right
 #'  truncation.
 #'
 #' @param cens_adjusted A string giving the column of `data` containing the
-#'  censoring adjustment code (`0`, `1`, `2`, or `3`, as described above).
-#'  Defaults to 0.
+#'  censoring adjustment code (`0`, `1`, `2`, `3`, or `4`, as described
+#'  above). Defaults to 0.
 #'
 #' @param delay_min A string giving the column of `data` containing the
 #'  smallest delay the study counted, its left truncation point. Defaults to 0,
@@ -178,24 +173,19 @@ as_epidist_estimates_data <- function(data, ...) {
 #'
 #' @param growth_rate A string giving the column of `data` containing the
 #'  exponential growth rate of primary events during the study period. Defaults
-#'  to 0, which corresponds to a uniform primary event within its window.
-#'  A non-zero growth rate is expensive. The primary censored delay
-#'  distribution then has no analytical solution, so every distribution
-#'  function evaluation is a numerical integration, and there is one of those
-#'  per grid cell or quadrature node. Leave it at 0 unless the study period
-#'  covered enough growth for the dynamical bias to matter.
+#'  to 0, a uniform primary event within its window. A non-zero rate is
+#'  expensive, because the primary censored delay distribution then has no
+#'  analytical solution and every evaluation becomes a numerical integration.
+#'  Leave it at 0 unless the study period covered enough growth for the
+#'  dynamical bias to matter.
 #'
 #' @param max_delay A string giving the column of `data` containing the delay
-#'  beyond which the implied summaries are truncated when building the
-#'  discrete grid. Only used when the study adjusted for right truncation.
-#'  Defaults to twenty times the largest reported value for the study, rounded
-#'  up, with a minimum of ten. The implied standard deviation is biased
-#'  downwards if the delay distribution has not decayed by the cutoff, so
-#'  increase this for a distribution with a long tail. Lowering it makes
-#'  fitting faster because a reported mean or standard deviation costs one
-#'  distribution function evaluation per grid cell. Reported quantiles do not
-#'  pay that cost under a cohort design, where three evaluations give the grid
-#'  distribution function at any delay.
+#'  beyond which the implied summaries are truncated when building the discrete
+#'  grid. Only used when the study adjusted for right truncation. Defaults to
+#'  twenty times the largest reported value for the study, rounded up, with a
+#'  minimum of ten. Raise it for a long tailed delay, whose implied standard
+#'  deviation is biased downwards if the distribution has not decayed by the
+#'  cutoff, and lower it to fit faster.
 #'
 #' @param ... Not used in this method.
 #'
@@ -534,7 +524,7 @@ as_epidist_estimates_data.data.frame <- function(
 #'
 #' @keywords internal
 .estimates_short_cutoff <- function(data) {
-  quadrature <- data$cens_adjusted == 2 & data$growth_rate != 0
+  quadrature <- data$cens_adjusted %in% c(2L, 4L) & data$growth_rate != 0
   uses_grid <- data$trunc_adjusted &
     (data$cens_adjusted %in% c(0L, 3L) | quadrature)
   if (!any(uses_grid)) {
@@ -558,105 +548,6 @@ as_epidist_estimates_data.data.frame <- function(
     logical(1)
   )
   return(studies[short])
-}
-
-#' Summarise delays for reporting with a covariance matrix
-#'
-#' Turns a set of individual level delays into the summary vector and
-#' covariance matrix [as_epidist_estimates_data()] takes, by resampling the
-#' delays. This is what a site that cannot share its line list can run and
-#' publish instead. The covariance keeps the correlation between the
-#' quantities it reports, which a standard error for each summary throws away,
-#' so a meta analysis of the published numbers loses less than it otherwise
-#' would.
-#'
-#' Report the study metadata alongside the numbers. The reporting table of
-#' Charniga et al. (2024) covers most of it, and passing those fields through
-#' `...` puts them straight onto the returned rows.
-#'
-#' @param delays A numeric vector of observed delays.
-#'
-#' @param study A string naming the study the delays come from.
-#'
-#' @param moments Which moments to report, any of `"mean"` and `"sd"`.
-#'
-#' @param probs A numeric vector of probabilities to report quantiles at.
-#'
-#' @param n_bootstrap The number of resamples used to estimate the covariance.
-#'  Must exceed the number of summaries reported.
-#'
-#' @param ... Further columns to attach to every returned row, such as the
-#'  study metadata documented in [as_epidist_estimates_data()].
-#'
-#' @returns A list with a `data` frame of reported summaries and a `vcov` list
-#'  holding the covariance matrix, both ready to pass to
-#'  [as_epidist_estimates_data()].
-#'
-#' @family estimates_data
-#' @importFrom tibble tibble
-#' @importFrom checkmate assert_numeric assert_string assert_integerish
-#' @export
-#' @examples
-#' set.seed(1)
-#' reported <- bootstrap_delay_estimates(
-#'   rlnorm(200, 1.6, 0.5),
-#'   study = "site A",
-#'   probs = c(0.25, 0.5, 0.75),
-#'   cens_adjusted = 1
-#' )
-#' as_epidist_estimates_data(reported$data, vcov = reported$vcov)
-bootstrap_delay_estimates <- function(
-  delays,
-  study,
-  moments = c("mean", "sd"),
-  probs = numeric(0),
-  n_bootstrap = 1000,
-  ...
-) {
-  assert_numeric(delays, min.len = 2, any.missing = FALSE, finite = TRUE)
-  assert_string(study)
-  assert_subset(moments, c("mean", "sd"), .var.name = "moments")
-  assert_numeric(probs, lower = 0, upper = 1, any.missing = FALSE)
-  assert_integerish(n_bootstrap, lower = 2, len = 1, any.missing = FALSE)
-  if (length(moments) + length(probs) == 0) {
-    cli::cli_abort(
-      "Report at least one of {.var moments} and {.var probs}."
-    )
-  }
-  moments <- intersect(c("mean", "sd"), moments)
-  summarise <- function(x) {
-    return(c(
-      if ("mean" %in% moments) mean(x),
-      if ("sd" %in% moments) stats::sd(x),
-      stats::quantile(x, probs, names = FALSE)
-    ))
-  }
-  observed <- summarise(delays)
-  if (n_bootstrap <= length(observed)) {
-    cli::cli_abort(paste0(
-      "{.var n_bootstrap} must exceed the {length(observed)} summaries ",
-      "reported, or the covariance matrix is singular."
-    ))
-  }
-  draws <- vapply(
-    seq_len(n_bootstrap),
-    function(i) {
-      return(summarise(sample(delays, replace = TRUE)))
-    },
-    numeric(length(observed))
-  )
-  covariance <- stats::cov(t(matrix(draws, nrow = length(observed))))
-  reported <- tibble(
-    study = study,
-    type = c(moments, rep("quantile", length(probs))),
-    value = observed,
-    p = c(rep(NA_real_, length(moments)), probs),
-    n = length(delays),
-    ...
-  )
-  return(list(
-    data = reported, vcov = stats::setNames(list(covariance), study)
-  ))
 }
 
 #' Class constructor for `epidist_estimates_data` objects
@@ -713,7 +604,7 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     data$trunc_design, .estimates_trunc_designs(),
     .var.name = "trunc_design"
   )
-  assert_subset(data$cens_adjusted, 0:3, .var.name = "cens_adjusted")
+  assert_subset(data$cens_adjusted, 0:4, .var.name = "cens_adjusted")
   assert_numeric(
     data$delay_min,
     lower = 0, any.missing = FALSE, finite = TRUE
@@ -844,6 +735,7 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
   return(dplyr::case_when(
     data$cens_adjusted == 0L ~ top - data$swindow / 2,
     data$cens_adjusted == 3L ~ top,
+    data$cens_adjusted == 4L ~ cutoff - data$pwindow / 2,
     .default = cutoff
   ))
 }

@@ -41,14 +41,14 @@ otherwise defaults to 0 (no left truncation).
 \item A numeric scalar: applied to all observations.
 \item A column name string: looks up the named column in the data.
 This is passed as the \code{L} parameter to
-\code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}}.
+\code{\link[primarycensored:dpcens]{primarycensored::dpcens()}}.
 }}
 
 \item{...}{Additional arguments passed to methods.}
 }
 \description{
 Prepares individual level data exactly as
-\code{\link[=as_epidist_marginal_model.epidist_linelist_data]{as_epidist_marginal_model.epidist_linelist_data()}} does and then stacks it
+\code{\link{as_epidist_marginal_model.epidist_linelist_data}()} does and then stacks it
 with any supplied summary estimates.
 }
 \examples{

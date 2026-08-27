@@ -35,7 +35,8 @@
 \item{trunc_adjusted}{1 if the study adjusted for right truncation, 0
 otherwise.}
 
-\item{cens_adjusted}{The censoring adjustment code, one of 0, 1, 2, or 3.}
+\item{cens_adjusted}{The censoring adjustment code, one of 0, 1, 2, 3, or
+4.}
 
 \item{growth_rate}{The exponential growth rate of primary events.}
 

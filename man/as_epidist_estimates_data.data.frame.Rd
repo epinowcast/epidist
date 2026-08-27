@@ -43,12 +43,10 @@ is present.}
 \item{se}{A string giving the column of \code{data} containing the reported
 standard error of the summary. Optional. When supplied it overrides the
 standard error implied by the sample size, and takes the row out of the
-joint likelihood \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}} otherwise uses for summaries a
+joint likelihood \code{\link{as_epidist_meta_model}()} otherwise uses for summaries a
 study computed from the same delays. It is always on the scale of the
-reported \code{value}, so for rows with \code{type} of \code{"quantile"} it is a standard
-error for the reported delay. The model fits quantile rows on the
-cumulative probability scale and converts a supplied \code{se} to that scale
-internally by the delta method.}
+reported \code{value}, so for a \code{"quantile"} row it is a standard error for the
+reported delay.}
 
 \item{n}{A string giving the column of \code{data} containing the number of
 delays the summary was computed from. Required unless \code{se} or a covariance
@@ -73,18 +71,15 @@ logical flag for whether the study corrected for right truncation. Defaults
 to \code{TRUE} where no \code{relative_obs_time} is supplied and \code{FALSE} otherwise.}
 
 \item{trunc_design}{A string giving the column of \code{data} containing how the
-study stopped collecting data, either \code{"cohort"} or \code{"accrual"}. A cohort
-design followed every primary event for the same \code{relative_obs_time}, so a
-delay is observed if it is shorter than that time. An accrual design
-collected primary events over a window of length \code{relative_obs_time} and
-stopped at its calendar end, so a delay of \code{d} is observed only for the
-primary events that occurred at least \code{d} before the stop. Defaults to
+study stopped collecting data, either \code{"cohort"} (it followed every primary
+event for the same \code{relative_obs_time}) or \code{"accrual"} (it collected over a
+window of that length and stopped at its calendar end). Defaults to
 \code{"cohort"}, and is only used for studies that did not adjust for right
 truncation.}
 
 \item{cens_adjusted}{A string giving the column of \code{data} containing the
-censoring adjustment code (\code{0}, \code{1}, \code{2}, or \code{3}, as described above).
-Defaults to 0.}
+censoring adjustment code (\code{0}, \code{1}, \code{2}, \code{3}, or \code{4}, as described
+above). Defaults to 0.}
 
 \item{delay_min}{A string giving the column of \code{data} containing the
 smallest delay the study counted, its left truncation point. Defaults to 0,
@@ -93,24 +88,19 @@ no reported mean or quantile may fall below it.}
 
 \item{growth_rate}{A string giving the column of \code{data} containing the
 exponential growth rate of primary events during the study period. Defaults
-to 0, which corresponds to a uniform primary event within its window.
-A non-zero growth rate is expensive. The primary censored delay
-distribution then has no analytical solution, so every distribution
-function evaluation is a numerical integration, and there is one of those
-per grid cell or quadrature node. Leave it at 0 unless the study period
-covered enough growth for the dynamical bias to matter.}
+to 0, a uniform primary event within its window. A non-zero rate is
+expensive, because the primary censored delay distribution then has no
+analytical solution and every evaluation becomes a numerical integration.
+Leave it at 0 unless the study period covered enough growth for the
+dynamical bias to matter.}
 
 \item{max_delay}{A string giving the column of \code{data} containing the delay
-beyond which the implied summaries are truncated when building the
-discrete grid. Only used when the study adjusted for right truncation.
-Defaults to twenty times the largest reported value for the study, rounded
-up, with a minimum of ten. The implied standard deviation is biased
-downwards if the delay distribution has not decayed by the cutoff, so
-increase this for a distribution with a long tail. Lowering it makes
-fitting faster because a reported mean or standard deviation costs one
-distribution function evaluation per grid cell. Reported quantiles do not
-pay that cost under a cohort design, where three evaluations give the grid
-distribution function at any delay.}
+beyond which the implied summaries are truncated when building the discrete
+grid. Only used when the study adjusted for right truncation. Defaults to
+twenty times the largest reported value for the study, rounded up, with a
+minimum of ten. Raise it for a long tailed delay, whose implied standard
+deviation is biased downwards if the distribution has not decayed by the
+cutoff, and lower it to fit faster.}
 
 \item{vcov}{A named list of covariance matrices over the summaries each
 study reported, named by study. See the section on reporting a covariance
@@ -131,37 +121,42 @@ delay distribution.
 To use them we forward model what the study's estimation procedure would
 converge to, which means we need to know how the study handled the biases
 we support, along with the data process it saw.
-We plan to support further biases, such as right and left censoring, across
-all of the models in the package.
+\code{vignette("model")} derives each estimand, and \code{vignette("meta")} works
+through assembling this metadata for simulated and real studies.
 For each study we need:
 \itemize{
-\item \strong{Roughly how it adjusted for censoring} (\code{cens_adjusted}).
-The codes are a taxonomy of the common mistakes made when summarising
-interval censored delays, and are deliberately limited to a few widely
-used approaches rather than trying to encode every possible method:
+\item \strong{How it adjusted for censoring} (\code{cens_adjusted}). A taxonomy of the
+common ways interval censored delays are summarised, deliberately limited
+to a few widely used approaches:
 \itemize{
 \item \code{0}: no adjustment. The study took integer date differences (for example
 date of onset subtracted from date of report) and summarised them
 directly. This is the most common case in the literature.
-\item \code{1}: fully adjusted. The study used a method that targets the underlying
-continuous distribution, such as a latent variable or marginal
-(double interval censored) likelihood.
+\item \code{1}: fully adjusted. The study used a method targeting the underlying
+continuous distribution, such as a double interval censored likelihood.
 \item \code{2}: uniform single interval approximation. The study adjusted the
 secondary interval only, assuming a uniform delay within it, and left
 the primary interval uncorrected.
 \item \code{3}: midpoint imputation. The study assigned each delay to the centre of
 the interval it was observed in, which shifts every reported delay up by
 half a secondary window without changing its spread.
+\item \code{4}: midpoint imputation with a uniform interval. The study placed the
+primary event at the midpoint of its window and integrated the secondary
+interval. Common where the primary event has a wide exposure window and
+the secondary date is recorded precisely.
 }
+
+Use code \code{3} for a study that midpointed the secondary interval and left
+the primary alone. Anything more exotic must be approximated by whichever
+code is closest, and if you cannot tell which a study used, state the
+assumption you are making.
 \item \strong{Whether it adjusted for right truncation} (\code{trunc_adjusted}) and, if it
 did not, \strong{the observation time} (\code{relative_obs_time}) and \strong{how
-collection stopped} (\code{trunc_design}).
-For a cohort design the observation time is the truncation point on the
-delay scale, that is how long after the primary events the data were
-extracted. For an accrual design, where collection stopped at a calendar
-date, it is instead the length of the collection window, which is usually
-easier to read off a paper. Real time estimates made partway through an
-outbreak are right truncated unless the study corrected for it.
+collection stopped} (\code{trunc_design}). For a cohort the observation time is
+the truncation point on the delay scale. For an accrual design, where
+collection stopped at a calendar date, it is the length of the collection
+window, which is usually easier to read off a paper. Real time estimates
+are right truncated unless the study corrected for it.
 \item \strong{The censoring windows} (\code{pwindow}, \code{swindow}). The width, in the same
 time units as the delay, of the interval each event was observed in. Daily
 reporting gives windows of 1, weekly reporting gives 7.
@@ -171,38 +166,33 @@ standard error (\code{se}) may be given instead, and takes precedence when
 supplied.
 \item \strong{The minimum delay it counted} (\code{delay_min}), where the study dropped
 delays below some point. Its summaries then describe a left truncated
-delay distribution, and every implied summary is conditioned on the delay
-exceeding \code{delay_min}. Defaults to 0, meaning the study counted every
-delay.
-}
+delay distribution. Defaults to 0, meaning the study counted every delay.
 }
 
-\section{Reporting a covariance matrix}{
+Systematic reviews rarely record this metadata, so you must supply your own
+assumption and say so alongside any results. Where it is missing entirely, a
+covariate for the phase of the outbreak each estimate was made in is another
+option, since the \code{brms} formula makes it a meta-regression that estimates
+the residual bias rather than correcting it mechanically.
+}
+
+\section{How a study can report its estimate}{
 A study that cannot share its delays should report a vector of summaries
 with a covariance matrix over them rather than a standard error for each
 one. This is the recommended format, because it keeps the correlation
-between the quantities the study reports, which a per summary standard
-error throws away. Supply the matrices through \code{vcov}, named by study. Each
-matrix must be symmetric positive definite, and its dimension must match the
-number of rows the study has in \code{data}, in the order those rows appear.
-\code{\link[=bootstrap_delay_estimates]{bootstrap_delay_estimates()}} produces both parts from a set of delays.
-
-Summaries reported this way are fitted with
-\eqn{y \sim \text{MVN}(m(\theta), \Sigma)}, where \eqn{m} is the vector of
-summaries the study's estimation procedure would converge to and
-\eqn{\Sigma} is the supplied matrix. Rows with a covariance matrix need no
+between the reported quantities. Supply the matrices through \code{vcov}, named
+by study. Each must be symmetric positive definite and match the number of
+rows its study has in \code{data}, in the order they appear. Such rows need no
 \code{n} and no \code{se}.
 
-Only the censoring adjustments above are supported. Anything more exotic
-must be approximated by whichever of them is closest, and if you cannot tell
-which a study used you should state the assumption you are making
-explicitly. The list is extensible. Each code is a forward model of one
-common estimation mistake, so a further mistake can be added as a further
-code.
-
-Systematic reviews rarely record all of this. Where a value is not reported
-you must supply your own assumption, and we recommend saying so alongside
-any results. Ideally reviews would report this study metadata directly.
+Three helpers build both parts. \code{\link{draws_to_multivariate}()} takes draws of the
+quantities a study reports, such as the posterior draws
+\code{\link{predict_delay_parameters}()} returns. \code{\link{delays_to_multivariate}()} resamples a
+set of delays. \code{\link{parameters_to_multivariate}()} takes the parameters of a
+distribution a study fitted, which studies often publish in place of
+summaries, and converts them to the summaries it implies. Reported
+parameters are not a \code{type} here, because the family a study fitted need not
+be the family being fitted to it.
 }
 
 \examples{
@@ -223,8 +213,10 @@ as_epidist_estimates_data(
 Other estimates_data: 
 \code{\link{as_epidist_estimates_data}()},
 \code{\link{assert_epidist.epidist_estimates_data}()},
-\code{\link{bootstrap_delay_estimates}()},
+\code{\link{delays_to_multivariate}()},
+\code{\link{draws_to_multivariate}()},
 \code{\link{is_epidist_estimates_data}()},
-\code{\link{new_epidist_estimates_data}()}
+\code{\link{new_epidist_estimates_data}()},
+\code{\link{parameters_to_multivariate}()}
 }
 \concept{estimates_data}

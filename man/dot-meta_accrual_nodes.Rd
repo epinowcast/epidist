@@ -24,7 +24,8 @@
 \item{cutoff}{The grid cutoff, either the study observation time or
 \code{max_delay}.}
 
-\item{cens_adjusted}{The censoring adjustment code, one of 0, 1, 2, or 3.}
+\item{cens_adjusted}{The censoring adjustment code, one of 0, 1, 2, 3, or
+4.}
 
 \item{growth_rate}{The exponential growth rate of primary events.}
 }
@@ -34,7 +35,7 @@ nodes.
 }
 \description{
 The weight is offset by half a primary window for the uniform single
-interval approximation, matching \code{\link[=.meta_pcens_trunc_moments]{.meta_pcens_trunc_moments()}}, so that the
+interval approximation, matching \code{\link{.meta_pcens_trunc_moments}()}, so that the
 reported quantile and the reported moments describe the same estimand.
 }
 \keyword{internal}

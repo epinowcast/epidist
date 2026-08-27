@@ -29,8 +29,10 @@ Its interface may still change in future releases.
 Other estimates_data: 
 \code{\link{as_epidist_estimates_data.data.frame}()},
 \code{\link{assert_epidist.epidist_estimates_data}()},
-\code{\link{bootstrap_delay_estimates}()},
+\code{\link{delays_to_multivariate}()},
+\code{\link{draws_to_multivariate}()},
 \code{\link{is_epidist_estimates_data}()},
-\code{\link{new_epidist_estimates_data}()}
+\code{\link{new_epidist_estimates_data}()},
+\code{\link{parameters_to_multivariate}()}
 }
 \concept{estimates_data}

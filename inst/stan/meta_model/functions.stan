@@ -43,6 +43,37 @@
   }
 
   /** Difference of two exponentiated logs, guarded against underflow. */
+  /**
+    * The censoring adjustment whose estimand a code is built on. Midpoint
+    * imputation of the secondary interval (3) shifts the naive discrete grid
+    * of code 0, and midpoint imputation of the primary event (4) shifts the
+    * primary censored estimand of code 2. Mirrors .meta_cens_base() in R.
+    */
+  int meta_family_cens_base(data int cens_adj) {
+    if (cens_adj == 3) {
+      return 0;
+    }
+    if (cens_adj == 4) {
+      return 2;
+    }
+    return cens_adj;
+  }
+
+  /**
+    * The delay a midpoint imputation moves the base estimand by. Mirrors
+    * .meta_cens_shift() in R.
+    */
+  real meta_family_shift(data int cens_adj, data real pwindow_width,
+                         data real swindow_width) {
+    if (cens_adj == 3) {
+      return swindow_width / 2;
+    }
+    if (cens_adj == 4) {
+      return -pwindow_width / 2;
+    }
+    return 0;
+  }
+
   real meta_family_diff_exp(real log_upper, real log_lower) {
     if (is_inf(log_upper)) {
       return 0;
@@ -395,18 +426,25 @@
                                      array[] real prim_params,
                                      data int accrual,
                                      data real growth_rate) {
-    if (cens_adj == 0 || cens_adj == 3) {
+    if (cens_adj == 3 || cens_adj == 4) {
+      // Midpoint imputation moves the base estimand along the delay axis, so
+      // its mean moves and every central moment is unchanged.
+      vector[4] moments = meta_family_implied_moments(
+        params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+        meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
+        growth_rate
+      );
+      moments[1] += meta_family_shift(cens_adj, pwindow_width, swindow_width);
+      return moments;
+    }
+    if (cens_adj == 0) {
       int first = meta_family_grid_first(delay_min, swindow_width);
-      vector[4] moments = meta_family_grid_moments(
+      return meta_family_grid_moments(
         meta_family_grid_pmf(params, delay_min, cutoff, pwindow_width,
                              swindow_width, prim_id, prim_params, accrual,
                              growth_rate),
         first * swindow_width, swindow_width
       );
-      if (cens_adj == 3) {
-        moments[1] += swindow_width / 2;
-      }
-      return moments;
     }
     if (cens_adj == 2) {
       if (trunc_adj == 1 && prim_id == 1 && delay_min == 0) {
@@ -550,12 +588,20 @@
                                 data int cens_adj, data int prim_id,
                                 array[] real prim_params, data int accrual,
                                 data real growth_rate) {
-    if (cens_adj == 0 || cens_adj == 3) {
-      // Midpoint imputation shifted every delay up by half a window.
-      return meta_family_grid_prob(
-        y - (cens_adj == 3 ? swindow_width / 2 : 0), params, delay_min, cutoff,
-        pwindow_width, swindow_width, prim_id, prim_params, accrual,
+    if (cens_adj == 3 || cens_adj == 4) {
+      // Midpoint imputation moved every delay along the axis, so the base
+      // estimand is evaluated at the reported delay moved back.
+      return meta_family_implied_prob(
+        y - meta_family_shift(cens_adj, pwindow_width, swindow_width), params,
+        delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+        meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
         growth_rate
+      );
+    }
+    if (cens_adj == 0) {
+      return meta_family_grid_prob(
+        y, params, delay_min, cutoff, pwindow_width, swindow_width, prim_id,
+        prim_params, accrual, growth_rate
       );
     }
     if (y <= delay_min) {
@@ -700,12 +746,18 @@
                                    data int cens_adj, data int prim_id,
                                    array[] real prim_params, data int accrual,
                                    data real growth_rate) {
-    if (cens_adj == 0 || cens_adj == 3) {
+    if (cens_adj == 3 || cens_adj == 4) {
+      return meta_family_implied_density(
+        y - meta_family_shift(cens_adj, pwindow_width, swindow_width), params,
+        delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+        meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
+        growth_rate
+      );
+    }
+    if (cens_adj == 0) {
       int n_grid = to_int(floor(cutoff / swindow_width));
       int first = meta_family_grid_first(delay_min, swindow_width);
-      int cell = to_int(floor(
-        (y - (cens_adj == 3 ? swindow_width / 2 : 0)) / swindow_width + 0.5
-      ));
+      int cell = to_int(floor(y / swindow_width + 0.5));
       if (cell < first || cell >= n_grid) {
         return 0;
       }
@@ -782,14 +834,28 @@
                                    data int cens_adj, data int prim_id,
                                    array[] real prim_params, data int accrual,
                                    data real growth_rate) {
-    if (cens_adj == 0 || cens_adj == 3) {
+    if (cens_adj == 3 || cens_adj == 4) {
+      // The nodes are packed as [origin, spacing, values], so moving the
+      // estimand along the delay axis moves the origin.
+      vector[2 + (meta_family_cens_base(cens_adj) == 0
+                  ? to_int(floor(cutoff / swindow_width)) -
+                    meta_family_grid_first(delay_min, swindow_width) + 1
+                  : n_quad_default + 1)] nodes =
+        meta_family_implied_nodes(
+          params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+          meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
+          growth_rate
+        );
+      nodes[1] += meta_family_shift(cens_adj, pwindow_width, swindow_width);
+      return nodes;
+    }
+    if (cens_adj == 0) {
       int first = meta_family_grid_first(delay_min, swindow_width);
       vector[to_int(floor(cutoff / swindow_width)) - first] mass =
         meta_family_grid_pmf(params, delay_min, cutoff, pwindow_width,
                              swindow_width, prim_id, prim_params, accrual,
                              growth_rate);
-      real origin = (first - 0.5) * swindow_width +
-        (cens_adj == 3 ? swindow_width / 2 : 0);
+      real origin = (first - 0.5) * swindow_width;
       return append_row([origin, swindow_width]',
                         append_row(0, cumulative_sum(mass)));
     }
@@ -904,7 +970,7 @@
       }
     }
     if (any_quantile == 1) {
-      int n_node = (cens_adj == 0 || cens_adj == 3)
+      int n_node = meta_family_cens_base(cens_adj) == 0
         ? to_int(floor(cutoff / swindow_width)) -
           meta_family_grid_first(delay_min, swindow_width) + 1
         : n_quad_default + 1;
