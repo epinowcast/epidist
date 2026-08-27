@@ -55,7 +55,7 @@ test_that("epidist_prior rejects a non-uniform secondary event window prior", {
     data = data, family = epidist_family, formula = formula
   )
 
-  user_prior <- prior("normal(0, 1)", dpar = "swindow_raw", check = FALSE)
+  user_prior <- prior("swindow_raw ~ normal(0, 1);", check = FALSE)
   expect_error(
     epidist_prior(data, epidist_family, epidist_formula, prior = user_prior),
     "secondary event"

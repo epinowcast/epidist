@@ -264,6 +264,7 @@ epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
 #' @inheritParams epidist_prior
 #'
 #' @method .check_model_prior epidist_latent_model
+#' @exportS3Method
 #'
 #' @returns `NULL`, invisibly, called for the messages it may raise.
 #'
