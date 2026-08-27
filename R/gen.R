@@ -120,10 +120,11 @@ epidist_gen_log_lik <- function(family) {
     # [primarycensored::dpcens()] revalidates `pdist` at random points on
     # every call, which would miss the cache once per draw, so integrate with
     # [primarycensored::pcens_cdf()] and form the censored pmf here.
+    primary <- .primary_args(prep, i)
     pcens_obj <- primarycensored::new_pcens(
       pdist = pdist_draw,
-      dprimary = stats::dunif,
-      dprimary_args = list()
+      dprimary = primary$dprimary,
+      dprimary_args = primary$dprimary_args
     )
     delays <- unique(c(y, y + swindow, relative_obs_time, delay_min))
     delays <- sort(delays[is.finite(delays)])
@@ -176,7 +177,8 @@ epidist_gen_log_lik <- function(family) {
               swindow = swindow,
               L = delay_min,
               D = relative_obs_time,
-              dprimary = stats::dunif,
+              dprimary = .primary_args(prep, i, draw)$dprimary,
+              dprimary_args = .primary_args(prep, i, draw)$dprimary_args,
               log = TRUE
             ),
             dist_args[[draw]]
@@ -267,10 +269,18 @@ epidist_gen_posterior_predict <- function(family) {
     swindow <- prep$data$vreal3[i]
     delay_min <- if (is.null(prep$data$vreal5)) 0 else prep$data$vreal5[i]
 
+    rprimary <- stats::runif
+    rprimary_args <- list()
+    if ("pgrowth" %in% names(prep$dpars)) {
+      rprimary <- primarycensored::rexpgrowth
+      rprimary_args <- list(r = mean(brms::get_dpar(prep, "pgrowth", i = i)))
+    }
+
     result <- as.matrix(primarycensored::rpcens(
       n = prep$ndraws,
       rdist = rdist,
-      rprimary = stats::runif,
+      rprimary = rprimary,
+      rprimary_args = rprimary_args,
       pwindow = pwindow,
       swindow = swindow,
       L = delay_min,
@@ -306,4 +316,33 @@ epidist_gen_posterior_predict <- function(family) {
 epidist_gen_posterior_epred <- function(family) {
   result <- .get_brms_fn("posterior_epred", family)
   return(result)
+}
+
+#' Primary event arguments matching the fitted model
+#'
+#' A model fitted with `primary = "expgrowth"` carries a `pgrowth`
+#' distributional parameter. Without this the post-processing functions would
+#' silently assume a uniform primary event.
+#'
+#' @param prep A `brms` prep object.
+#'
+#' @param i The observation index.
+#'
+#' @param draw The posterior draw index, or `NULL` for all draws.
+#'
+#' @returns A list with `dprimary` and `dprimary_args`.
+#'
+#' @keywords internal
+.primary_args <- function(prep, i, draw = NULL) {
+  if (!("pgrowth" %in% names(prep$dpars))) {
+    return(list(dprimary = stats::dunif, dprimary_args = list()))
+  }
+  r <- brms::get_dpar(prep, "pgrowth", i = i)
+  if (!is.null(draw)) {
+    r <- r[[min(draw, length(r))]]
+  }
+  return(list(
+    dprimary = primarycensored::dexpgrowth,
+    dprimary_args = list(r = r)
+  ))
 }
