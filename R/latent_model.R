@@ -33,6 +33,11 @@ as_epidist_latent_model <- function(data, ...) {
 #'   observations with primary and secondary event times. See
 #'   [as_epidist_linelist_data()] for details on creating this object.
 #'
+#' @param primary The distribution of the primary event within its
+#'  censoring window. `"uniform"`, the default, assumes it is equally
+#'  likely at any point. `"expgrowth"` tilts it, with the growth rate
+#'  estimated as the `pgrowth` distributional parameter.
+#'
 #' @param ... Not used in this method.
 #'
 #' @method as_epidist_latent_model epidist_linelist_data
@@ -92,6 +97,12 @@ as_epidist_latent_model.epidist_linelist_data <- function(
 #' observations before fitting the latent model.
 #'
 #' @param data An `epidist_aggregate_data` object
+#'
+#' @param primary The distribution of the primary event within its censoring
+#'  window. `"uniform"`, the default, assumes it is equally likely at any
+#'  point. `"expgrowth"` tilts it, with the growth rate estimated as the
+#'  `pgrowth` distributional parameter.
+#'
 #' @param ... Not used in this method.
 #' @method as_epidist_latent_model epidist_aggregate_data
 #' @family latent_model
@@ -121,6 +132,12 @@ as_epidist_latent_model.epidist_aggregate_data <- function(
 #' Class constructor for `epidist_latent_model` objects
 #'
 #' @param data An object to be set with the class `epidist_latent_model`
+#'
+#' @param primary The distribution of the primary event within its censoring
+#'  window. `"uniform"`, the default, assumes it is equally likely at any
+#'  point. `"expgrowth"` tilts it, with the growth rate estimated as the
+#'  `pgrowth` distributional parameter.
+#'
 #'
 #' @param ... Additional arguments passed to methods.
 #'
