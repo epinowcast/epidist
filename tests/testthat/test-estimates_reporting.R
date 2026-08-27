@@ -62,7 +62,7 @@ test_that("draws_to_multivariate rejects draws it cannot summarise", {
   )
   expect_error(
     draws_to_multivariate(draws, study = "A", type = c("mean", "median")),
-    "type"
+    "Assertion on 'type' failed"
   )
   expect_error(
     draws_to_multivariate(
@@ -114,6 +114,34 @@ test_that("delays_to_multivariate returns summaries with their covariance", {
     reported$data,
     vcov = reported$vcov
   )))
+})
+
+test_that("delays_to_multivariate round trips to a recoverable meta model", {
+  set.seed(15)
+  meanlog <- 1.6
+  sdlog <- 0.5
+  reported <- delays_to_multivariate(
+    rlnorm(2000, meanlog, sdlog),
+    study = "A", probs = c(0.25, 0.75), n_bootstrap = 500, cens_adjusted = 1
+  )
+  estimates <- suppressMessages(as_epidist_estimates_data(
+    reported$data,
+    vcov = reported$vcov
+  ))
+  prep <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  expect_identical(prep$obs_type, 7L)
+  standata <- suppressMessages(epidist(prep, fn = brms::make_standata))
+  slots <- .meta_row_slots(1, list(data = standata))
+  recovered <- stats::optim(
+    c(1, 0),
+    function(par) {
+      return(-.meta_row_log_lik(
+        slots, "plnorm", list(meanlog = par[1], sdlog = exp(par[2]))
+      ))
+    }
+  )
+  expect_equal(recovered$par[1], meanlog, tolerance = 0.05)
+  expect_equal(exp(recovered$par[2]), sdlog, tolerance = 0.1)
 })
 
 test_that("delays_to_multivariate rejects a rank deficient bootstrap", {

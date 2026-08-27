@@ -184,6 +184,89 @@ test_that("the R and Stan meta model log likelihoods agree for every observation
   expect_equal(stan_log_lik, r_log_lik, tolerance = 1e-6)
 })
 
+test_that("the Stan naive grid stays finite on a grid that runs into the tail", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  # Over a wide grid the primary censored distribution function saturates at
+  # one, so its log stops increasing and differencing it returns NaN. The
+  # default `max_delay` puts a truncation adjusted naive study in this region,
+  # so the numbers Stan returns are checked here rather than the code it was
+  # built from.
+  meanlog <- 1
+  sdlog <- 0.4
+  cutoff <- c(30, 60, 100, 200)
+  accrual <- c(0L, 0L, 0L, 1L)
+  n_case <- length(cutoff)
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = c("mean", "sd"), value = c(20, 12), n = 100,
+    trunc_adjusted = TRUE, cens_adjusted = 0, stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  # The documented default runs the grid far enough into the tail to fail.
+  expect_gte(estimates$max_delay[1], max(cutoff))
+  stanvars <- epidist_stancode(meta)
+  mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(paste0(
+    "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode, "\n}\n",
+    "data {\n  int<lower=1> N;\n  array[N] real cutoff;\n",
+    "  array[N] int accrual;\n  real mu;\n  real sigma;\n}\n",
+    "generated quantities {\n  array[0] real primary_params;\n",
+    "  array[N] vector[4] moments;\n",
+    "  array[N] real mass_min;\n  array[N] real mass_total;\n",
+    "  for (n in 1:N) {\n",
+    "    vector[to_int(floor(cutoff[n]))] mass = meta_lognormal_grid_pmf(\n",
+    "      {mu, sigma}, 0, cutoff[n], 1, 1, 1, primary_params, accrual[n], 0\n",
+    "    );\n",
+    "    mass_min[n] = min(mass);\n    mass_total[n] = sum(mass);\n",
+    "    moments[n] = meta_lognormal_implied_moments(\n",
+    "      {mu, sigma}, 0, cutoff[n], 1, 1, 0, 0, 1, primary_params,\n",
+    "      accrual[n], 0\n",
+    "    );\n  }\n}\n"
+  )))
+  fit <- mod$sample(
+    data = list(
+      N = n_case, cutoff = cutoff, accrual = accrual, mu = meanlog,
+      sigma = sdlog
+    ),
+    fixed_param = TRUE, chains = 1, iter_sampling = 1, iter_warmup = 0,
+    refresh = 0, show_messages = FALSE
+  )
+  draws <- posterior::as_draws_matrix(fit$draws())
+  stan_moments <- vapply(
+    seq_len(n_case),
+    function(n) {
+      return(as.numeric(draws[1, paste0("moments[", n, ",", 1:4, "]")]))
+    },
+    numeric(4)
+  )
+  expect_true(all(is.finite(stan_moments)))
+  # The grid Stan built must still be a probability mass function.
+  expect_gte(
+    min(as.numeric(draws[1, paste0("mass_min[", seq_len(n_case), "]")])), 0
+  )
+  expect_equal(
+    as.numeric(draws[1, paste0("mass_total[", seq_len(n_case), "]")]),
+    rep(1, n_case),
+    tolerance = 1e-9
+  )
+  r_moments <- vapply(
+    seq_len(n_case),
+    function(n) {
+      return(unname(.meta_implied_moments(
+        "plnorm", list(meanlog = meanlog, sdlog = sdlog),
+        cutoff = cutoff[n], pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+        cens_adjusted = 0L, growth_rate = 0, trunc_design = accrual[n]
+      )))
+    },
+    numeric(4)
+  )
+  # The mean and standard deviation are what a study reports. The higher
+  # moments only set the sampling standard errors, and weight the grid tail
+  # heavily enough to see the difference between summing the cells on the log
+  # scale as Stan does and on the delay scale as R does.
+  expect_equal(stan_moments[1:2, ], r_moments[1:2, ], tolerance = 1e-6)
+  expect_equal(stan_moments, r_moments, tolerance = 1e-3)
+})
+
 test_that("epidist.epidist_meta_model recovers known parameters from simulated grid summaries", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   # Every study reports integer date differences from a right truncated

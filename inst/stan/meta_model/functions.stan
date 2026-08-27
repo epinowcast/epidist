@@ -134,7 +134,7 @@
       }
       weight = exp(log_weight - max(log_weight));
     }
-    mass = (cdf[2:(n_quad + 1)] - cdf[1:n_quad]) .* weight;
+    mass = fmax(cdf[2:(n_quad + 1)] - cdf[1:n_quad], 0) .* weight;
     total = sum(mass);
     if (total <= 0 || is_nan(total)) {
       return cdf;
@@ -195,10 +195,11 @@
         );
       }
       for (j in 1:n_cell) {
-        if (is_inf(log_cdf[j + 1])) {
+        // Once the distribution function saturates its log stops increasing,
+        // so the cell holds no mass a double can represent. Taking the
+        // difference anyway would return NaN.
+        if (log_cdf[j + 1] <= log_cdf[j]) {
           log_mass[j] = negative_infinity();
-        } else if (is_inf(log_cdf[j])) {
-          log_mass[j] = log_cdf[j + 1];
         } else {
           log_mass[j] = log_diff_exp(log_cdf[j + 1], log_cdf[j]);
         }

@@ -492,18 +492,22 @@ if (not_on_cran() && has_cmdstanr()) {
   # A study observing up to study_obs_time keeps an integer delay k when
   # k + 1 <= study_obs_time, which is the same conditioning the meta model
   # applies through its grid.
-  set.seed(2)
-  naive_summaries <- function(size, study_obs_time) {
+  naive_delays <- function(size, study_obs_time) {
     ptime <- stats::runif(size, 0, 1)
     delay <- stats::rlnorm(size, meanlog, sdlog)
     obs <- floor(ptime + delay)
-    obs <- obs[obs + 1 <= study_obs_time]
+    return(obs[obs + 1 <= study_obs_time])
+  }
+
+  naive_summaries <- function(size, study_obs_time, probs = 0.9) {
+    obs <- naive_delays(size, study_obs_time)
     return(list(
       mean = mean(obs), sd = stats::sd(obs), size = length(obs),
-      q90 = stats::quantile(obs, 0.9, names = FALSE)
+      quantiles = stats::quantile(obs, probs, names = FALSE)
     ))
   }
 
+  set.seed(2)
   study_obs_times <- c(12, 15, 18, 20, 25, 30)
   naive_draws <- lapply(study_obs_times, naive_summaries, size = 2000)
 
@@ -513,7 +517,7 @@ if (not_on_cran() && has_cmdstanr()) {
     value = as.numeric(rbind(
       vapply(naive_draws, `[[`, numeric(1), "mean"),
       vapply(naive_draws, `[[`, numeric(1), "sd"),
-      vapply(naive_draws, `[[`, numeric(1), "q90")
+      vapply(naive_draws, `[[`, numeric(1), "quantiles")
     )),
     se = NA_real_,
     p = rep(c(NA, NA, 0.9), times = length(study_obs_times)),
@@ -602,23 +606,12 @@ if (not_on_cran() && has_cmdstanr()) {
   # meta_family_grid_pmf and the cohort grid shortcut. Each reports a mean, a
   # standard deviation and a few quantiles at varied probability levels.
   set.seed(3)
-  grid_summaries <- function(size, study_obs_time, probs) {
-    ptime <- stats::runif(size, 0, 1)
-    delay <- stats::rlnorm(size, meanlog, sdlog)
-    obs <- floor(ptime + delay)
-    obs <- obs[obs + 1 <= study_obs_time]
-    return(list(
-      mean = mean(obs), sd = stats::sd(obs), size = length(obs),
-      quantiles = stats::quantile(obs, probs, names = FALSE)
-    ))
-  }
-
   grid_obs_times <- c(12, 16, 20, 24, 30)
   grid_probs <- list(
     c(0.25, 0.5, 0.75), c(0.1, 0.5, 0.9), c(0.5, 0.75),
     c(0.2, 0.4, 0.6, 0.8), c(0.05, 0.5, 0.95)
   )
-  grid_draws <- Map(grid_summaries, 4000, grid_obs_times, grid_probs)
+  grid_draws <- Map(naive_summaries, 4000, grid_obs_times, grid_probs)
 
   sim_grid_df <- Map(
     function(study, draw, probs, obs_time) {
@@ -654,10 +647,9 @@ if (not_on_cran() && has_cmdstanr()) {
   # distribution its procedure converged to.
   set.seed(4)
   reported_parameter_fit <- function(size, study_obs_time) {
-    ptime <- stats::runif(size, 0, 1)
-    delay <- stats::rlnorm(size, meanlog, sdlog)
-    obs <- floor(ptime + delay)
-    obs <- obs[obs + 1 <= study_obs_time & obs > 0]
+    obs <- naive_delays(size, study_obs_time)
+    # A fit on the log scale cannot use a delay of zero.
+    obs <- obs[obs > 0]
     reported <- c(
       meanlog = mean(log(obs)), sdlog = stats::sd(log(obs))
     )

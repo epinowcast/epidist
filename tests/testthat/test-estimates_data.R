@@ -65,7 +65,7 @@ test_that("as_epidist_estimates_data errors on an unsupported summary type", {
   bad$type[1] <- "median"
   expect_error(
     suppressMessages(as_epidist_estimates_data(bad)),
-    "type"
+    "Assertion on 'type' failed"
   )
 })
 
@@ -74,7 +74,7 @@ test_that("as_epidist_estimates_data errors when quantile rows have no probabili
   bad$p[3] <- NA
   expect_error(
     suppressMessages(as_epidist_estimates_data(bad)),
-    "quantile"
+    "must have a probability"
   )
 })
 
@@ -100,7 +100,7 @@ test_that("as_epidist_estimates_data errors when an unadjusted study has no obse
   bad$relative_obs_time <- Inf
   expect_error(
     suppressMessages(as_epidist_estimates_data(bad)),
-    "relative_obs_time"
+    "must have a finite"
   )
 })
 
@@ -109,7 +109,7 @@ test_that("as_epidist_estimates_data errors on an unsupported adjustment code", 
   bad$cens_adjusted[1] <- 5
   expect_error(
     suppressMessages(as_epidist_estimates_data(bad)),
-    "cens_adjusted"
+    "Assertion on 'cens_adjusted' failed"
   )
 })
 
@@ -161,7 +161,7 @@ test_that("as_epidist_estimates_data errors on an unsupported truncation design"
   bad$trunc_design <- "calendar"
   expect_error(
     suppressMessages(as_epidist_estimates_data(bad)),
-    "trunc_design"
+    "Assertion on 'trunc_design' failed"
   )
 })
 

@@ -160,7 +160,11 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  event for the same `relative_obs_time`) or `"accrual"` (it collected over a
 #'  window of that length and stopped at its calendar end). Defaults to
 #'  `"cohort"`, and is only used for studies that did not adjust for right
-#'  truncation.
+#'  truncation. The accrual weight is exact only where `pwindow` and `swindow`
+#'  are equal. With a weekly primary and a daily secondary window, a collection
+#'  window of 28 days and a delay of mean 4.6 days, refitting a reported mean
+#'  and standard deviation recovers the standard deviation about 6% high. See
+#'  `vignette("model")`.
 #'
 #' @param cens_adjusted A string giving the column of `data` containing the
 #'  censoring adjustment code (`0`, `1`, `2`, `3`, or `4`, as described
@@ -550,6 +554,41 @@ as_epidist_estimates_data.data.frame <- function(
   return(studies[short])
 }
 
+#' Studies reporting quantiles on a coarse delay grid
+#'
+#' A study that summarised interval censored delays without adjusting for
+#' censoring (`cens_adjusted` of 0 or 3) reports quantiles of a discrete
+#' distribution, which the model interpolates through the mid points of its
+#' cells. The reported value is still rounded to that grid, and what the
+#' interpolation leaves behind does not shrink with the study sample size. It
+#' is a few percent once the reported quantiles sit a few tens of cells above
+#' the smallest delay the study counted, and tens of percent when they sit
+#' within about ten, which is where this flags them.
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns A character vector of study identifiers reporting quantiles on a
+#'  coarse grid.
+#'
+#' @keywords internal
+.estimates_coarse_quantiles <- function(data) {
+  rows <- data$type == "quantile" & data$cens_adjusted %in% c(0L, 3L)
+  if (!any(rows)) {
+    return(character(0))
+  }
+  cells <- (data$value - data$delay_min) / data$swindow
+  studies <- unique(as.character(data$study)[rows])
+  coarse <- vapply(
+    studies,
+    function(study) {
+      keep <- rows & as.character(data$study) == study
+      return(max(cells[keep]) < 10)
+    },
+    logical(1)
+  )
+  return(studies[coarse])
+}
+
 #' Class constructor for `epidist_estimates_data` objects
 #'
 #' @param data A data.frame to convert
@@ -689,6 +728,21 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
         "reported mean and standard deviation, so the implied summaries for ",
         "{?this study/these studies} will be biased downwards. Increase ",
         "{.var max_delay}."
+      )
+    ))
+  }
+
+  coarse <- .estimates_coarse_quantiles(data)
+  if (length(coarse) > 0) {
+    cli::cli_inform(c(
+      "!" = paste0(
+        "The quantiles reported by {.val {coarse}} sit within ten censoring ",
+        "windows of the smallest delay {?this study/these studies} counted, ",
+        "so the discrete grid barely resolves the delay. A reported quantile ",
+        "is rounded to that grid, which can bias the fit by tens of percent ",
+        "and does not shrink as {.var n} grows. Check that {.var swindow} is ",
+        "the resolution the study worked at, and fit a reported mean and ",
+        "standard deviation in preference where one is available."
       )
     ))
   }

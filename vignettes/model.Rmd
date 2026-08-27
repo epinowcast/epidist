@@ -366,6 +366,14 @@ Equation \@ref(eq:meta-accrual) is the smooth average of the follow up actually 
 It is exact for a study that adjusted for censoring, where $d$ is the underlying delay, and exact on the grid of Equation \@ref(eq:meta-grid) when $w_p = w_s$ and both divide $A$, because the calendar stop and the date differencing then discretise together.
 For Equation \@ref(eq:meta-uniform-moments) the weighted quantity is $\tau^\star + U$ rather than the time from the primary event's window, so $w$ is evaluated at $d - w_p / 2$ to average the primary offset back out.
 
+Where $w_p$ and $w_s$ differ the weight on the grid is not exact, and the residual is not negligible.
+It is applied at the delay a cell records, which sits half a secondary window below the delay the cell holds on average and half a primary window above the time from the primary event itself, so the two only cancel when the windows are equal.
+Take a lognormal delay of mean 4.6 days and standard deviation 2.4, a collection window of $A = 28$ days and a growth rate of $r = 0.05$.
+Refitting the mean and standard deviation such a study would report recovers the delay standard deviation 5.9% high with a weekly primary and a daily secondary window, and the delay mean 4.8% high with the windows the other way round.
+Under a cohort design the same window combinations recover both to within 1%, so this belongs to the accrual weight rather than to the grid.
+Equation \@ref(eq:meta-uniform-moments) carries the same limitation in milder form, because the follow up available to a primary event is only known to within its own window and $w_p / 2$ is the average of it.
+At $w_p = 7$ the recovered standard deviation is 3.1% high, and the estimand degrades sharply as $w_p$ grows towards the length of the collection window.
+
 ## Sampling likelihoods
 
 With study sample size $n$ and reported value $y$, and writing $m_1$, $\sigma$ and $\kappa$ for the mean, standard deviation and kurtosis (the fourth central moment divided by $\sigma^4$) implied by the forward model above, a **reported mean** is given a normal sampling distribution
@@ -396,6 +404,17 @@ For a discrete estimand this is the mass of the grid cell $y$ falls in divided b
 Otherwise it is the derivative of $G$.
 The converted standard error is held away from zero so that a quantile reported far into the tail cannot give a degenerate likelihood.
 For the discretely summarised case $G$ is continuity corrected by interpolating the grid distribution function linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise always lands on a jump of the step function.
+
+The correction removes most of the discretisation bias but not all of it, because the reported value is itself rounded to the grid.
+What is left does not shrink with the study sample size.
+Across a sweep of lognormal shapes it stays under 4% on the mean and 9% on the standard deviation once the reported quantiles sit twenty five or more cells above the smallest delay the study counted, and reaches tens of percent on both when they sit within ten.
+Take a lognormal delay of mean 5.9 days and standard deviation 3.9, daily windows and $D = 12$.
+The quartiles a correctly conducted study would report are 3, 5 and 7 days, and $G$ at the true parameters puts $(0.223, 0.546, 0.777)$ below them rather than $(0.25, 0.50, 0.75)$.
+At $n = 400$ that is up to 1.8 binomial standard errors, so the study looks discrepant when it is not.
+Refitting those three quantiles recovers a delay mean 27% high and a standard deviation 69% high.
+Without the continuity correction the mean is 38% high instead, so the correction helps without rescuing the case.
+The mean and standard deviation of the same study recover the truth exactly, so a coarsely resolved delay is better fitted through those where a study reports them.
+The bias falls away as the grid resolves the distribution, reaching about 1% for the same shape scaled to a mean of 48 days.
 
 ## Summaries from the same study
 

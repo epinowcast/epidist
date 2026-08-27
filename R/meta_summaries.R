@@ -352,7 +352,8 @@
   n_quad <- length(cdf) - 1
   span <- cutoff - lower
   midpoint <- lower + (seq_len(n_quad) - 0.5) * span / n_quad - weight_offset
-  mass <- diff(cdf) * .meta_accrual_weight(midpoint, cutoff, growth_rate)
+  mass <- pmax(diff(cdf), 0) *
+    .meta_accrual_weight(midpoint, cutoff, growth_rate)
   total <- sum(mass)
   if (!is.finite(total) || total <= 0) {
     return(cdf)
@@ -423,7 +424,10 @@
   }
   boundary <- seq(first, n_grid) * swindow
   cdf <- .meta_pcens_cdf(boundary, dist, args, pwindow, growth_rate)
-  mass <- diff(cdf)
+  # Once the distribution function saturates its differences can come back
+  # very slightly negative, which would leave an invalid pmf. Stan builds the
+  # same cells on the log scale and drops them to zero there.
+  mass <- pmax(diff(cdf), 0)
   if (accrual != 1L) {
     total <- cdf[length(cdf)] - cdf[1]
     if (!is.finite(total) || total <= 0) {

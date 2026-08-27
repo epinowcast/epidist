@@ -74,6 +74,27 @@ are treated as independent. Reporting a covariance matrix over a study's
 summaries avoids the second.
 }
 
+Two approximations are worth knowing about before fitting quantiles.
+\itemize{
+\item A study that took integer date differences reports quantiles of a discrete
+distribution. The model interpolates its grid distribution function
+through the mid points of the cells, but the reported value is itself
+rounded to that grid, and what is left does not shrink with the study
+sample size. XX Refitting the median and
+interquartile range of a lognormal delay of mean 5.9 days, on daily
+windows with an observation time of 12 days, recovers a delay mean 27\%
+high and a standard deviation 69\% high. The same study's mean and
+standard deviation recover the truth, so prefer those where a study
+reports them, and check that \code{swindow} is the resolution it worked at.
+\code{\link{as_epidist_estimates_data}()} warns for studies in this range.
+\item The accrual weight applied to a study that stopped collecting at a
+calendar date is exact only when \code{pwindow} and \code{swindow} are equal. With a
+weekly primary and a daily secondary window, a collection window of 28
+days and a delay of mean 4.6 days, refitting a reported mean and standard
+deviation recovers the standard deviation about 6\% high.
+\code{vignette("model")} gives the measurements.
+}
+
 Two settings trade accuracy against speed: \code{max_delay} in
 \code{\link{as_epidist_estimates_data}()}, which sets the grid a study that adjusted for
 right truncation is summarised on and needs raising for a long tailed delay,

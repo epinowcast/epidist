@@ -178,9 +178,9 @@ test_that("epidist_stancode.epidist_meta_model produces valid stanvars", {
 # simulation of the naive estimators they describe. The samples below are
 # shared by every check of the same study design.
 
-sim_naive_obs <- function(n, args, cutoff, pwindow = 1, swindow = 1) {
-  stime <- runif(n, 0, pwindow) + rlnorm(n, args$meanlog, args$sdlog)
-  return(swindow * floor(stime[stime <= floor(cutoff)] / swindow))
+sim_naive_obs <- function(n, args, cutoff) {
+  stime <- runif(n, 0, 1) + rlnorm(n, args$meanlog, args$sdlog)
+  return(floor(stime[stime <= floor(cutoff)]))
 }
 
 sim_moments <- function(obs) {
@@ -439,73 +439,92 @@ test_that(".meta_implied_moments treats an underflowing primary censored CDF as 
 # A normaliser underflowing to exactly zero would turn a 0 / 0 division into
 # NaN. A lognormal far above the grid gives that underflow exactly.
 
-test_that(".meta_grid_pmf returns NA when the grid mass underflows to zero", {
-  args <- list(meanlog = 100, sdlog = 0.1)
+underflow_args <- list(meanlog = 100, sdlog = 0.1)
+
+test_that("the naive grid returns a rejection sentinel when its mass underflows", { # nolint: line_length_linter.
   mass <- .meta_grid_pmf(
-    "plnorm", args,
+    "plnorm", underflow_args,
     cutoff = 5, pwindow = 1, swindow = 1, growth_rate = 0
   )
   expect_length(mass, 5)
   expect_true(all(is.na(mass)))
-})
-
-test_that(".meta_implied_moments returns an infinite sentinel when the grid mass underflows", { # nolint: line_length_linter.
-  args <- list(meanlog = 100, sdlog = 0.1)
   moments <- .meta_implied_moments(
-    "plnorm", args,
+    "plnorm", underflow_args,
     cutoff = 5, pwindow = 1, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0
   )
   expect_false(anyNA(moments))
   expect_true(all(is.infinite(moments[c("mean", "sd", "kurtosis")])))
+  expect_identical(
+    .meta_implied_prob(3, "plnorm", underflow_args, 0, 5, 1, 1, 0L, 0L, 0), Inf
+  )
+  expect_identical(
+    .meta_implied_density(3, "plnorm", underflow_args, 0, 5, 1, 1, 0L, 0L, 0),
+    Inf
+  )
 })
 
-test_that(".meta_implied_moments returns an infinite sentinel when the truncated moment normaliser underflows", { # nolint: line_length_linter.
-  args <- list(meanlog = 100, sdlog = 0.1)
+test_that("a truncated continuous estimand rejects an underflowing normaliser", { # nolint: line_length_linter.
   moments <- .meta_implied_moments(
-    "plnorm", args,
+    "plnorm", underflow_args,
     cutoff = 5, pwindow = 1, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0
   )
   expect_false(anyNA(moments))
   expect_true(all(is.infinite(moments[c("mean", "sd", "kurtosis")])))
-})
-
-test_that(".meta_implied_prob returns Inf when the distribution function underflows at the cutoff", { # nolint: line_length_linter.
-  args <- list(meanlog = 100, sdlog = 0.1)
-  prob <- .meta_implied_prob(
-    3, "plnorm", args,
-    cutoff = 5, pwindow = 1, swindow = 1,
-    trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0
+  expect_identical(
+    .meta_implied_prob(3, "plnorm", underflow_args, 0, 5, 1, 1, 0L, 1L, 0), Inf
   )
-  expect_identical(prob, Inf)
-})
-
-test_that(".meta_implied_density returns Inf when the grid mass underflows", {
-  args <- list(meanlog = 100, sdlog = 0.1)
-  density <- .meta_implied_density(
-    3, "plnorm", args,
-    cutoff = 5, pwindow = 1, swindow = 1,
-    trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0
+  expect_identical(
+    .meta_implied_density(6, "plnorm", underflow_args, 0, 30, 1, 1, 0L, 1L, 0),
+    Inf
   )
-  expect_identical(density, Inf)
 })
 
 test_that(".meta_summary_terms produces a -Inf log likelihood rather than NaN when a normaliser underflows", { # nolint: line_length_linter.
-  args <- list(meanlog = 100, sdlog = 0.1)
   slots <- list(
     lower = 0,
     obs_type = 2L, study_n = 50L, trunc_adjusted = 0L, cens_adjusted = 0L,
     cutoff = 5, pwindow = 1, swindow = 1, value = 3, report_se = 0,
     quantile_p = 0, growth_rate = 0, trunc_design = 0L
   )
-  terms <- .meta_summary_terms(slots, "plnorm", args)
+  terms <- .meta_summary_terms(slots, "plnorm", underflow_args)
   log_lik <- stats::dnorm(
     terms[["observed"]], terms[["implied"]], terms[["se"]],
     log = TRUE
   )
   expect_false(is.nan(log_lik))
   expect_identical(log_lik, -Inf)
+})
+
+# A wide grid runs into the tail, where the distribution function saturates at
+# one and only part of the grid underflows. Differencing it there returns
+# cells of order -1e-13, which the total underflow guard above does not catch.
+
+test_that("the naive grid stays a valid pmf on a grid that runs into the tail", { # nolint: line_length_linter.
+  saturating <- list(
+    list(dist = "plnorm", args = list(meanlog = 1.6, sdlog = 0.6),
+         cutoff = 400, accrual = 0L),
+    list(dist = "plnorm", args = list(meanlog = 1, sdlog = 0.4),
+         cutoff = 100, accrual = 0L),
+    list(dist = "plnorm", args = list(meanlog = 1.6, sdlog = 0.6),
+         cutoff = 400, accrual = 1L),
+    list(dist = "pgamma", args = list(shape = 4, scale = 1),
+         cutoff = 50, accrual = 0L)
+  )
+  for (case in saturating) {
+    mass <- .meta_grid_pmf(
+      case$dist, case$args,
+      cutoff = case$cutoff, pwindow = 1, swindow = 1, growth_rate = 0,
+      accrual = case$accrual
+    )
+    expect_length(mass, case$cutoff)
+    expect_false(anyNA(mass))
+    expect_gte(min(mass), 0)
+    expect_equal(sum(mass), 1, tolerance = 1e-9)
+    # An invalid pmf is not just untidy: sampling from it errors.
+    expect_no_error(sample(seq_along(mass), 1, prob = mass))
+  }
 })
 
 test_that(".meta_implied_prob matches the continuity corrected naive empirical CDF", { # nolint: line_length_linter.
@@ -857,10 +876,10 @@ test_that(".meta_implied_moments accrual weight offsets the primary window only 
   )
   # A positive offset leaves more follow up for long delays, so it shifts the
   # reweighted distribution function down.
-  expect_true(all(
-    .meta_accrual_reweight(cdf, 0, 15, 0, weight_offset = 1)[-1] <=
-      .meta_accrual_reweight(cdf, 0, 15, 0)[-1]
-  ))
+  offset <- .meta_accrual_reweight(cdf, 0, 15, 0, weight_offset = 1)[-1]
+  plain <- .meta_accrual_reweight(cdf, 0, 15, 0)[-1]
+  expect_true(all(offset <= plain))
+  expect_true(any(offset < plain))
   continuous <- .meta_implied_moments(
     "plnorm", args,
     cutoff = 15, pwindow = 2, swindow = 2,
@@ -969,18 +988,13 @@ test_that(".meta_implied_prob matches the accrual truncated empirical CDF", {
 })
 
 test_that(".meta_implied_moments matches Monte Carlo midpoint imputation", {
-  set.seed(124)
-  args <- list(meanlog = 1.6, sdlog = 0.6)
-  cutoff <- 30
   moments <- .meta_implied_moments(
-    "plnorm", args,
-    cutoff = cutoff, pwindow = 1, swindow = 1,
+    "plnorm", naive_args,
+    cutoff = naive_cutoff, pwindow = 1, swindow = 1,
     trunc_adjusted = 0L, cens_adjusted = 3L, growth_rate = 0
   )
-  n_sim <- 5e5
-  ptime <- runif(n_sim, 0, 1)
-  stime <- ptime + rlnorm(n_sim, args$meanlog, args$sdlog)
-  obs <- floor(stime[stime <= floor(cutoff)]) + 0.5
+  # Code 3 assigns each delay to the centre of the interval it was seen in.
+  obs <- naive_obs + 0.5
   expect_equal(moments[["mean"]], mean(obs), tolerance = 0.02)
   expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.02)
 })
@@ -1018,17 +1032,11 @@ test_that(".meta_implied_prob shifts the naive grid CDF for midpoint imputation"
 })
 
 test_that(".meta_implied_prob matches the midpoint imputed empirical CDF", {
-  set.seed(125)
-  args <- list(meanlog = 1.6, sdlog = 0.6)
-  cutoff <- 30
-  n_sim <- 5e5
-  ptime <- runif(n_sim, 0, 1)
-  stime <- ptime + rlnorm(n_sim, args$meanlog, args$sdlog)
-  obs <- floor(stime[stime <= floor(cutoff)]) + 0.5
+  obs <- naive_obs + 0.5
   for (y in c(3.5, 5.5, 8.5)) {
     prob <- .meta_implied_prob(
-      y, "plnorm", args,
-      cutoff = cutoff, pwindow = 1, swindow = 1,
+      y, "plnorm", naive_args,
+      cutoff = naive_cutoff, pwindow = 1, swindow = 1,
       trunc_adjusted = 0L, cens_adjusted = 3L, growth_rate = 0
     )
     expect_equal(
@@ -2255,13 +2263,6 @@ test_that("a meta model without grouped members falls back to an empty table", {
   expect_no_error(assert_epidist(bare))
 })
 
-test_that(".meta_implied_prob returns Inf when the naive grid mass underflows", { # nolint: line_length_linter.
-  args <- list(meanlog = 100, sdlog = 0.1)
-  expect_identical(
-    .meta_implied_prob(3, "plnorm", args, 0, 5, 1, 1, 0L, 0L, 0), Inf
-  )
-})
-
 test_that(".meta_implied_prob rejects a draw holding no mass above delay_min", { # nolint: line_length_linter.
   # A distribution far below the smallest delay counted leaves nothing to
   # condition on, so the draw is rejected rather than dividing by zero.
@@ -2290,13 +2291,6 @@ test_that("the implied estimand holds no mass outside the delays a study saw", {
   )
   expect_identical(
     .meta_implied_density(40, "plnorm", args, 0, 30, 1, 1, 0L, 0L, 0), 0
-  )
-})
-
-test_that(".meta_implied_density returns Inf when its normaliser underflows", {
-  args <- list(meanlog = 100, sdlog = 0.1)
-  expect_identical(
-    .meta_implied_density(6, "plnorm", args, 0, 30, 1, 1, 0L, 1L, 0), Inf
   )
 })
 

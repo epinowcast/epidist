@@ -573,7 +573,18 @@ onset_to_death <- onset_to_death_all |>
 nrow(onset_to_death)
 ```
 
-For these data the hygiene filters remove `r nrow(onset_to_death_all) - nrow(onset_to_death)` rows, but they guard against mis-modelling if the underlying database changes.
+```{r hygiene-dropped, include=FALSE}
+n_dropped <- nrow(onset_to_death_all) - nrow(onset_to_death)
+dropped_text <- if (n_dropped == 0) {
+  "remove no rows"
+} else if (n_dropped == 1) {
+  "remove one row"
+} else {
+  paste("remove", n_dropped, "rows")
+}
+```
+
+For these data the hygiene filters `r dropped_text`, but they guard against mis-modelling if the underlying database changes.
 
 ::: {.alert .alert-primary}
 epireview does not record how, or whether, a study adjusted for censoring or right truncation, so we have to state assumptions explicitly rather than leave them implicit.

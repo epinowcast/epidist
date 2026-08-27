@@ -75,7 +75,11 @@ study stopped collecting data, either \code{"cohort"} (it followed every primary
 event for the same \code{relative_obs_time}) or \code{"accrual"} (it collected over a
 window of that length and stopped at its calendar end). Defaults to
 \code{"cohort"}, and is only used for studies that did not adjust for right
-truncation.}
+truncation. The accrual weight is exact only where \code{pwindow} and \code{swindow}
+are equal. With a weekly primary and a daily secondary window, a collection
+window of 28 days and a delay of mean 4.6 days, refitting a reported mean
+and standard deviation recovers the standard deviation about 6\% high. See
+\code{vignette("model")}.}
 
 \item{cens_adjusted}{A string giving the column of \code{data} containing the
 censoring adjustment code (\code{0}, \code{1}, \code{2}, \code{3}, or \code{4}, as described
