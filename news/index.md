@@ -18,10 +18,13 @@
   See
   [`?epidist_data`](https://epidist.epinowcast.org/reference/epidist_data.md)
   and [\#399](https://github.com/epinowcast/epidist/issues/399).
-- Dropped the checks that ran on objects which had already been checked
-  when they were created. The `as_epidist_*()` and
+- Dropped the checks in
   [`epidist_stancode()`](https://epidist.epinowcast.org/reference/epidist_stancode.md)
-  methods now trust the class they dispatch on. See
+  and in the conversions between linelist and aggregate data, which ran
+  on objects that had already been checked. The conversions from
+  linelist data to a model still check their input, because
+  [`new_epidist_linelist_data()`](https://epidist.epinowcast.org/reference/new_epidist_linelist_data.md)
+  does not. See
   [\#399](https://github.com/epinowcast/epidist/issues/399).
 - [`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md)
   now checks the object it builds for the marginal and naive models.
