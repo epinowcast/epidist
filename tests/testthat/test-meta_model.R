@@ -1973,3 +1973,344 @@ test_that("the meta model individual level slots line up with the marginal model
   }
   expect_identical(slots(meta_form)[1:5], slots(marginal_form)[1:5])
 })
+
+test_that("as_epidist_meta_model errors when summary estimates are supplied twice", { # nolint: line_length_linter.
+  expect_error(
+    as_epidist_meta_model(sim_estimates, estimates = sim_estimates),
+    "supplied twice"
+  )
+})
+
+test_that("assert_epidist.epidist_meta_model checks the individual level rows", { # nolint: line_length_linter.
+  wide <- prep_meta_individual
+  wide$delay_upr[1] <- wide$delay_upr[1] + 1
+  expect_error(assert_epidist(wide), "must equal")
+  early <- prep_meta_individual
+  early$relative_obs_time[1] <- early$delay_upr[1] - 0.5
+  expect_error(
+    assert_epidist(early), "`relative_obs_time` must be greater"
+  )
+  truncated <- prep_meta_individual
+  truncated$delay_min[1] <- truncated$delay_lwr[1] + 1
+  expect_error(assert_epidist(truncated), "`delay_lwr` must be greater")
+})
+
+test_that("assert_epidist.epidist_meta_model checks the summary rows", {
+  small <- prep_meta_estimates
+  small$study_n <- 1L
+  expect_error(assert_epidist(small), "at least 2")
+  unbounded <- prep_meta_estimates
+  unbounded$relative_obs_time[1] <- Inf
+  expect_error(assert_epidist(unbounded), "finite grid cutoff")
+  narrow <- prep_meta_estimates
+  narrow$swindow[1] <- narrow$relative_obs_time[1] + 1
+  expect_error(assert_epidist(narrow), "grid cutoff for summary rows")
+  quantile_row <- which(prep_meta_estimates$obs_type == 6L)[1]
+  flat <- prep_meta_estimates
+  flat$quantile_p[quantile_row] <- 0
+  expect_error(assert_epidist(flat), "strictly between 0 and 1")
+})
+
+test_that("assert_epidist.epidist_meta_model checks a covariance matrix row", {
+  covariance <- matrix(c(0.4, 0.1, 0.1, 0.25), nrow = 2)
+  estimates <- suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = c("A", "A"), type = c("mean", "sd"), value = c(6.2, 3.1),
+      relative_obs_time = c(30, 30), trunc_adjusted = c(FALSE, FALSE),
+      cens_adjusted = c(0, 0), n = c(NA, NA), stringsAsFactors = FALSE
+    ),
+    vcov = list(A = covariance)
+  ))
+  meta <- suppressMessages(as_epidist_meta_model(estimates))
+  empty <- meta
+  empty$group_len <- 0L
+  expect_error(assert_epidist(empty), "at least one grouped summary member")
+  # The factor of a two by two matrix has four entries, so a row starting at
+  # the second of them runs off the end of the flat vector passed to Stan.
+  overrun <- meta
+  overrun$chol_start <- 2L
+  expect_error(assert_epidist(overrun), "full Cholesky factor")
+})
+
+test_that("assert_epidist.epidist_meta_model checks a joint quantile row", {
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = c("quantile", "quantile"), value = c(4, 8),
+    p = c(0.25, 0.75), n = 100, relative_obs_time = 30,
+    trunc_adjusted = FALSE, cens_adjusted = 0, stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  expect_identical(meta$obs_type, 6L)
+  members <- .meta_members(meta)
+  expect_identical(members$count, c(25L, 75L))
+  none <- meta
+  none$group_len <- 0L
+  expect_error(assert_epidist(none), "at least one grouped summary member")
+  falling <- members
+  falling$value <- c(8, 4)
+  expect_error(
+    assert_epidist(.meta_set_members(meta, falling)), "strictly increasing"
+  )
+  dropping <- members
+  dropping$count <- c(75L, 25L)
+  expect_error(
+    assert_epidist(.meta_set_members(meta, dropping)), "cumulative counts"
+  )
+  beyond <- members
+  beyond$count <- c(25L, 500L)
+  expect_error(
+    assert_epidist(.meta_set_members(meta, beyond)), "cumulative counts"
+  )
+})
+
+test_that(".meta_ddist pairs each distribution function with its density", {
+  expect_identical(.meta_ddist("plnorm"), stats::dlnorm)
+  expect_identical(.meta_ddist("pgamma"), stats::dgamma)
+  expect_identical(.meta_ddist("pweibull"), stats::dweibull)
+  # Any other name is taken from stats by dropping the leading p.
+  expect_identical(.meta_ddist("pnorm"), stats::dnorm)
+})
+
+test_that(".meta_log_accrual_weight matches the follow up integral", {
+  d <- c(0, 2, 5, 9)
+  window <- 12
+  for (rate in c(0.25, -0.25)) {
+    expect_equal(
+      .meta_log_accrual_weight(d, window, rate),
+      log(expm1(rate * (window - d)) / rate),
+      tolerance = 1e-10
+    )
+  }
+})
+
+test_that(".meta_accrual_weight is zero once the collection window closes", {
+  # A delay at or beyond the window has no follow up, so every weight is zero
+  # and the relative weighting has nothing to divide by.
+  expect_identical(.meta_accrual_weight(c(12, 15), 12, 0), c(0, 0))
+  expect_true(all(.meta_accrual_weight(c(0, 6, 12), 12, 0) == c(1, 0.5, 0)))
+})
+
+test_that(".meta_accrual_reweight returns the input when the mass underflows", { # nolint: line_length_linter.
+  # A distribution function that is flat over the quadrature holds no mass to
+  # reweight, so the guard returns it rather than dividing by zero.
+  flat <- rep(0, 11)
+  expect_identical(.meta_accrual_reweight(flat, 0, 10, 0), flat)
+})
+
+test_that(".meta_grid_pmf errors when delay_min leaves no grid cells", {
+  expect_error(
+    .meta_grid_pmf(
+      "plnorm", list(meanlog = 1.6, sdlog = 0.6),
+      lower = 10, cutoff = 10, pwindow = 1, swindow = 1, growth_rate = 0
+    ),
+    "holds no cells"
+  )
+})
+
+test_that("an accrual grid guards against an underflowing mass", {
+  args <- list(meanlog = 100, sdlog = 0.1)
+  mass <- .meta_grid_pmf("plnorm", args, 0, 5, 1, 1, 0.1, 1L)
+  expect_length(mass, 5)
+  expect_true(all(is.na(mass)))
+  expect_identical(
+    .meta_grid_prob(3, "plnorm", args, 0, 5, 1, 1, 0.1, 1L), Inf
+  )
+  expect_identical(
+    .meta_implied_density(3, "plnorm", args, 0, 5, 1, 1, 0L, 0L, 0.1, 1L), Inf
+  )
+  slots <- list(
+    lower = 0, cutoff = 5, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, growth_rate = 0.1, trunc_design = 1L
+  )
+  expect_true(
+    all(is.infinite(.meta_implied_probs(c(2, 3), "plnorm", args, slots)))
+  )
+})
+
+test_that(".meta_grid_probs pins delays outside the grid and guards underflow", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  expect_identical(
+    .meta_grid_probs(c(-1, 25), "plnorm", args, 0, 20, 1, 1, 0), c(0, 1)
+  )
+  under <- .meta_grid_probs(
+    c(2, 3), "plnorm", list(meanlog = 100, sdlog = 0.1), 0, 5, 1, 1, 0
+  )
+  expect_true(all(is.infinite(under)))
+})
+
+test_that(".meta_implied_moments rejects an unsupported distribution", {
+  expect_error(
+    .meta_implied_moments(
+      "pnorm", list(mean = 5, sd = 2),
+      cutoff = 20, pwindow = 1, swindow = 1,
+      trunc_adjusted = 1L, cens_adjusted = 1L, growth_rate = 0
+    ),
+    "not supported for"
+  )
+})
+
+test_that("the accrual estimand is pinned outside the delays a study saw", {
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  expect_identical(
+    .meta_accrual_prob(20, "plnorm", args, 2, 20, 1, 1L, 0.1), 1
+  )
+  expect_identical(
+    .meta_accrual_prob(2, "plnorm", args, 2, 20, 1, 1L, 0.1), 0
+  )
+  expect_identical(
+    .meta_accrual_density(20, "plnorm", args, 2, 20, 1, 1L, 0.1), 0
+  )
+  expect_identical(
+    .meta_accrual_density(2, "plnorm", args, 2, 20, 1, 1L, 0.1), 0
+  )
+  # Between the two the distribution function is increasing, so the density
+  # there is positive.
+  expect_gt(.meta_accrual_density(6, "plnorm", args, 2, 20, 1, 1L, 0.1), 0)
+})
+
+test_that(".meta_node_quantile returns NA when the implied nodes underflow", {
+  args <- list(meanlog = 100, sdlog = 0.1)
+  slots <- list(
+    lower = 0, cutoff = 5, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 1L, growth_rate = 0, trunc_design = 0L
+  )
+  nodes <- .meta_implied_nodes("plnorm", args, slots)
+  expect_true(all(is.na(nodes$values)))
+  expect_identical(.meta_node_quantile(nodes, 0.5), NA_real_)
+  # A quantile the model cannot imply rejects the draw rather than returning
+  # a NaN log likelihood.
+  covariance <- diag(2)
+  member_slots <- c(slots, list(
+    obs_type = 7L, group_type = c(3L, 3L), group_p = c(0.25, 0.75),
+    group_value = c(4, 8), group_chol = t(chol(covariance))
+  ))
+  expect_identical(
+    .meta_row_log_lik(member_slots, "plnorm", args), -Inf
+  )
+})
+
+test_that(".meta_node_quantile pins probabilities outside the implied range", { # nolint: line_length_linter.
+  nodes <- list(values = c(0.2, 0.5, 0.7, 0.9), origin = 1, spacing = 2)
+  # Below the first node the estimand has no support, and at or above the last
+  # it has run out, so both are pinned to the ends of the grid.
+  expect_identical(.meta_node_quantile(nodes, 0.1), 1)
+  expect_identical(.meta_node_quantile(nodes, 0.95), 7)
+  # In between the delay is interpolated linearly across the step it falls in.
+  expect_equal(.meta_node_quantile(nodes, 0.35), 2, tolerance = 1e-12)
+})
+
+test_that("a meta model without grouped members falls back to an empty table", { # nolint: line_length_linter.
+  bare <- prep_meta_individual
+  attr(bare, "meta_members") <- NULL
+  attr(bare, "meta_chol") <- NULL
+  expect_identical(nrow(.meta_members(bare)), 0L)
+  expect_identical(.meta_chol(bare), numeric(0))
+  expect_no_error(assert_epidist(bare))
+})
+
+test_that(".meta_implied_prob returns Inf when the naive grid mass underflows", { # nolint: line_length_linter.
+  args <- list(meanlog = 100, sdlog = 0.1)
+  expect_identical(
+    .meta_implied_prob(3, "plnorm", args, 0, 5, 1, 1, 0L, 0L, 0), Inf
+  )
+})
+
+test_that(".meta_implied_prob rejects a draw holding no mass above delay_min", { # nolint: line_length_linter.
+  # A distribution concentrated far below the smallest delay the study counted
+  # leaves nothing to condition on, so the draw is rejected rather than
+  # dividing by zero.
+  args <- list(meanlog = -100, sdlog = 0.1)
+  expect_identical(
+    .meta_implied_prob(6, "plnorm", args, 4, 30, 1, 1, 1L, 1L, 0), Inf
+  )
+})
+
+test_that("the implied estimand holds no mass outside the delays a study saw", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  # Below the smallest delay the study counted.
+  expect_identical(
+    .meta_implied_prob(2, "plnorm", args, 4, 30, 1, 1, 1L, 1L, 0), 0
+  )
+  expect_identical(
+    .meta_implied_density(2, "plnorm", args, 4, 30, 1, 1, 1L, 1L, 0), 0
+  )
+  expect_identical(
+    .meta_implied_density(0, "plnorm", args, 4, 30, 1, 1, 0L, 0L, 0), 0
+  )
+  # Beyond the observation time of a study that did not adjust for right
+  # truncation.
+  expect_identical(
+    .meta_implied_density(35, "plnorm", args, 4, 30, 1, 1, 0L, 1L, 0), 0
+  )
+  expect_identical(
+    .meta_implied_density(40, "plnorm", args, 0, 30, 1, 1, 0L, 0L, 0), 0
+  )
+})
+
+test_that(".meta_implied_density returns Inf when its normaliser underflows", {
+  args <- list(meanlog = 100, sdlog = 0.1)
+  expect_identical(
+    .meta_implied_density(6, "plnorm", args, 0, 30, 1, 1, 0L, 1L, 0), Inf
+  )
+})
+
+test_that(".meta_implied_nodes reweights a continuous estimand for accrual", {
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  slots <- list(
+    lower = 0, cutoff = 20, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 1L, growth_rate = 0.1, trunc_design = 1L
+  )
+  nodes <- .meta_implied_nodes("plnorm", args, slots)
+  expect_identical(nodes$values[1], 0)
+  expect_equal(nodes$values[length(nodes$values)], 1, tolerance = 1e-12)
+  # An accrual design sees fewer of the long delays than a cohort followed for
+  # the same time, so its distribution function sits above the cohort one.
+  cohort <- .meta_implied_nodes(
+    "plnorm", args, modifyList(slots, list(trunc_design = 0L))
+  )
+  inner <- seq(2, length(nodes$values) - 1)
+  expect_true(all(nodes$values[inner] > cohort$values[inner]))
+})
+
+test_that(".meta_quantile_set_ll rejects a draw whose grid mass underflows", {
+  args <- list(meanlog = 100, sdlog = 0.1)
+  slots <- list(
+    lower = 0, cutoff = 5, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, growth_rate = 0, trunc_design = 0L
+  )
+  expect_identical(
+    .meta_quantile_set_ll(c(2, 3), c(20, 60), 100, "plnorm", args, slots),
+    -Inf
+  )
+})
+
+test_that(".meta_summary_terms predicts the first member of a covariance row", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  covariance <- matrix(c(0.4, 0.1, 0.1, 0.25), nrow = 2)
+  slots <- list(
+    lower = 0, cutoff = 60, pwindow = 1, swindow = 1, trunc_adjusted = 1L,
+    cens_adjusted = 1L, growth_rate = 0, trunc_design = 0L, obs_type = 7L,
+    group_type = c(1L, 2L), group_p = c(0, 0), group_value = c(6.2, 3.1),
+    group_chol = t(chol(covariance))
+  )
+  terms <- .meta_summary_terms(slots, "plnorm", args)
+  moments <- .meta_row_moments(slots, "plnorm", args)
+  expect_identical(terms[["observed"]], 6.2)
+  expect_identical(terms[["implied"]], unname(moments[["mean"]]))
+  # The marginal standard deviation of the first member is the leading entry
+  # of the Cholesky factor of the reported covariance matrix.
+  expect_equal(terms[["se"]], sqrt(covariance[1, 1]), tolerance = 1e-12)
+})
+
+test_that("the meta model returns NA for summary rows of an unsupported family", { # nolint: line_length_linter.
+  prep <- list(data = list(vint1 = 2L), ndraws = 4L)
+  log_lik <- NULL
+  messages <- capture_messages({
+    log_lik <- epidist_gen_meta_log_lik(brms::brmsfamily("gaussian"))
+  })
+  expect_true(any(grepl("not supported in R", messages, fixed = TRUE)))
+  expect_identical(log_lik(1, prep), rep(NA_real_, 4))
+  predict_fn <- suppressMessages(
+    epidist_gen_meta_predict(brms::brmsfamily("gaussian"))
+  )
+  expect_identical(predict_fn(1, prep), as.matrix(rep(NA_real_, 4)))
+})

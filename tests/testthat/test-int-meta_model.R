@@ -83,6 +83,28 @@ test_that("epidist.epidist_meta_model log_lik and posterior_predict have the exp
   expect_true(all(is.finite(pred)))
 })
 
+test_that("epidist.epidist_meta_model predicts individual level rows on the delay scale", { # nolint: line_length_linter.
+  skip_on_cran()
+  set.seed(1)
+  prep <- brms::prepare_predictions(fit_meta_mixed)
+  individual <- which(prep$data$vint1 == 1L)
+  expect_gt(length(individual), 0L)
+  expect_gt(sum(prep$data$vint1 != 1L), 0L)
+
+  log_lik <- brms::log_lik(fit_meta_mixed)
+  expect_identical(ncol(log_lik), length(prep$data$vint1))
+  expect_true(all(is.finite(log_lik)))
+
+  pred <- brms::posterior_predict(fit_meta_mixed)
+  expect_identical(ncol(pred), length(prep$data$vint1))
+  expect_true(all(is.finite(pred)))
+  # Individual level rows are handed to the marginal model generators, so
+  # they predict a censored delay rather than a reported summary.
+  delays <- pred[, individual, drop = FALSE]
+  expect_identical(floor(delays), delays)
+  expect_gte(min(delays), 0)
+})
+
 test_that("the R and Stan meta model log likelihoods agree for every observation type", { # nolint: line_length_linter.
   skip_on_cran()
   skip_if_no_cmdstanr()

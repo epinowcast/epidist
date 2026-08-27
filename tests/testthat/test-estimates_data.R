@@ -382,6 +382,63 @@ test_that("bootstrap_delay_estimates rejects a bootstrap too small to be full ra
   )
 })
 
+test_that("as_epidist_estimates_data errors when a required column is missing", { # nolint: line_length_linter.
+  complete <- data.frame(
+    study = "A", type = "mean", value = 7.5, n = 100,
+    stringsAsFactors = FALSE
+  )
+  for (col in c("study", "type", "value")) {
+    expect_error(
+      as_epidist_estimates_data(complete[setdiff(names(complete), col)]), col
+    )
+  }
+})
+
+test_that("as_epidist_estimates_data rejects a covariance matrix that is not square", { # nolint: line_length_linter.
+  base <- data.frame(
+    study = "A", type = c("mean", "sd"), value = c(7.5, 3.6),
+    relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 0,
+    stringsAsFactors = FALSE
+  )
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(
+      base,
+      vcov = list(A = matrix(0.1, nrow = 2, ncol = 3))
+    )),
+    "square and numeric"
+  )
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(
+      base,
+      vcov = list(A = matrix("a", nrow = 2, ncol = 2))
+    )),
+    "square and numeric"
+  )
+})
+
+test_that("as_epidist_estimates_data checks the censoring windows against the grid", { # nolint: line_length_linter.
+  base <- data.frame(
+    study = "A", type = c("mean", "sd"), value = c(2, 1), n = 120,
+    relative_obs_time = 8, trunc_adjusted = FALSE, cens_adjusted = 0,
+    pwindow = 1, swindow = 1, stringsAsFactors = FALSE
+  )
+  expect_no_error(suppressMessages(as_epidist_estimates_data(base)))
+  zero <- base
+  zero$swindow <- 0
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(zero)),
+    "greater than zero"
+  )
+  # A secondary window wider than the observation time leaves the study with
+  # no grid cell it could have recorded a delay in.
+  wide <- base
+  wide$swindow <- 12
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(wide)),
+    "at least as large as"
+  )
+})
+
 test_that("as_epidist_estimates_data rejects a covariance matrix over summaries with different metadata", { # nolint: line_length_linter.
   varying <- data.frame(
     study = "A", type = c("mean", "sd"), value = c(7.5, 3.6),
