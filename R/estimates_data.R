@@ -210,24 +210,23 @@ as_epidist_estimates_data <- function(data, ...) {
 #'   )
 #' )
 as_epidist_estimates_data.data.frame <- function(
-  data,
-  study = NULL,
-  type = NULL,
-  value = NULL,
-  se = NULL,
-  n = NULL,
-  p = NULL,
-  pwindow = NULL,
-  swindow = NULL,
-  relative_obs_time = NULL,
-  trunc_adjusted = NULL,
-  trunc_design = NULL,
-  cens_adjusted = NULL,
-  delay_min = NULL,
-  growth_rate = NULL,
-  max_delay = NULL,
-  ...
-) {
+    data,
+    study = NULL,
+    type = NULL,
+    value = NULL,
+    se = NULL,
+    n = NULL,
+    p = NULL,
+    pwindow = NULL,
+    swindow = NULL,
+    relative_obs_time = NULL,
+    trunc_adjusted = NULL,
+    trunc_design = NULL,
+    cens_adjusted = NULL,
+    delay_min = NULL,
+    growth_rate = NULL,
+    max_delay = NULL,
+    ...) {
   assert_data_frame(data)
 
   supplied <- list(
@@ -368,14 +367,13 @@ as_epidist_estimates_data.epidist_estimates_data <- function(data, ...) {
 #'   study = "site A"
 #' )
 as_epidist_estimates_data.epidist_multivariate <- function(
-  data,
-  study,
-  family = NULL,
-  moments = c("mean", "sd"),
-  probs = numeric(0),
-  mvn_id = NULL,
-  ...
-) {
+    data,
+    study,
+    family = NULL,
+    moments = c("mean", "sd"),
+    probs = numeric(0),
+    mvn_id = NULL,
+    ...) {
   assert_string(study)
   assert_epidist(data)
   if (length(data$index) > 1) {
@@ -460,8 +458,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
 #'
 #' @keywords internal
 .estimates_mvn_summarise <- function(
-  data, family, moments, probs, ...
-) {
+    data, family, moments, probs, ...) {
   assert_choice(family, names(.estimates_parameter_sets()))
   if (is.null(data$draws)) {
     cli::cli_abort(paste0(

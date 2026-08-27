@@ -38,11 +38,10 @@
 #'
 #' @keywords internal
 .family_functions_stanvar <- function(
-  chunk_path,
-  family,
-  family_prefix,
-  extra = character()
-) {
+    chunk_path,
+    family,
+    family_prefix,
+    extra = character()) {
   stanvars_functions <- brms::stanvar(
     block = "functions",
     scode = .stan_chunk(chunk_path)

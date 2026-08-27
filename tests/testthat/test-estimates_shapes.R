@@ -1,7 +1,8 @@
 # fmt: skip file
 test_that("epidist_estimates_summaries builds one study's rows", {
   estimates <- suppressMessages(epidist_estimates_summaries(
-    "A", mean = 7.5, sd = 3.6, quantiles = c(4.2, 9.4),
+    "A",
+    mean = 7.5, sd = 3.6, quantiles = c(4.2, 9.4),
     probs = c(0.25, 0.75), n = 120, cens_adjusted = 1
   ))
   expect_true(is_epidist_estimates_data(estimates))
@@ -14,7 +15,8 @@ test_that("epidist_estimates_summaries builds one study's rows", {
 
 test_that("epidist_estimates_summaries takes a standard error per summary", {
   estimates <- suppressMessages(epidist_estimates_summaries(
-    "A", mean = 7.5, sd = 3.6, se = c(0.4, 0.3)
+    "A",
+    mean = 7.5, sd = 3.6, se = c(0.4, 0.3)
   ))
   expect_identical(estimates$se, c(0.4, 0.3))
   expect_error(
@@ -49,10 +51,12 @@ test_that("epidist_estimates_parameters converts a reported fit", {
 
 test_that("epidist_estimates_parameters accepts both gamma parameterisations", {
   by_scale <- suppressMessages(epidist_estimates_parameters(
-    "A", "gamma", c(shape = 4, scale = 2), n = 100
+    "A", "gamma", c(shape = 4, scale = 2),
+    n = 100
   ))
   by_rate <- suppressMessages(epidist_estimates_parameters(
-    "A", "gamma", c(shape = 4, rate = 0.5), n = 100
+    "A", "gamma", c(shape = 4, rate = 0.5),
+    n = 100
   ))
   expect_equal(by_scale$value, by_rate$value, tolerance = 1e-10)
   expect_equal(by_scale$value, c(8, 4), tolerance = 1e-8)
@@ -66,7 +70,8 @@ test_that("epidist_estimates_parameters reports quantiles of the fit", {
   expect_identical(estimates$type, rep("quantile", 2))
   expect_identical(estimates$p, c(0.5, 0.9))
   expect_equal(
-    estimates$value, stats::qweibull(c(0.5, 0.9), 2, 9), tolerance = 1e-8
+    estimates$value, stats::qweibull(c(0.5, 0.9), 2, 9),
+    tolerance = 1e-8
   )
 })
 
@@ -75,7 +80,8 @@ test_that("epidist_estimates_parameters matches a Monte Carlo delta method", {
   set.seed(12)
   parameter_se <- c(0.03, 0.02)
   estimates <- suppressMessages(epidist_estimates_parameters(
-    "A", "lognormal", c(meanlog = 1.6, sdlog = 0.5), se = parameter_se
+    "A", "lognormal", c(meanlog = 1.6, sdlog = 0.5),
+    se = parameter_se
   ))
   draws <- MASS::mvrnorm(200000, c(1.6, 0.5), diag(parameter_se^2))
   simulated <- cbind(
@@ -83,7 +89,8 @@ test_that("epidist_estimates_parameters matches a Monte Carlo delta method", {
     exp(draws[, 1] + draws[, 2]^2 / 2) * sqrt(expm1(draws[, 2]^2))
   )
   expect_equal(
-    estimates$se, sqrt(diag(stats::cov(simulated))), tolerance = 0.05
+    estimates$se, sqrt(diag(stats::cov(simulated))),
+    tolerance = 0.05
   )
 })
 
@@ -113,13 +120,15 @@ test_that("epidist_estimates_parameters rejects input it cannot convert", {
   )
   expect_error(
     epidist_estimates_parameters(
-      "A", "gamma", c(shape = 4, scale = 2), se = 0.1
+      "A", "gamma", c(shape = 4, scale = 2),
+      se = 0.1
     ),
     "se"
   )
   expect_error(
     epidist_estimates_parameters(
-      "A", "gamma", c(shape = 4, scale = 2), moments = character(0)
+      "A", "gamma", c(shape = 4, scale = 2),
+      moments = character(0)
     ),
     "at least one of"
   )
@@ -144,7 +153,8 @@ test_that("a reported fit implies the summaries its biased procedure gave", {
     meanlog = mean(log(observed)), sdlog = stats::sd(log(observed))
   )
   estimates <- suppressMessages(epidist_estimates_parameters(
-    "A", "lognormal", reported_log, se = c(0.01, 0.01),
+    "A", "lognormal", reported_log,
+    se = c(0.01, 0.01),
     relative_obs_time = obs_time, trunc_adjusted = FALSE, cens_adjusted = 0,
     delay_min = 1
   ))
@@ -154,13 +164,15 @@ test_that("a reported fit implies the summaries its biased procedure gave", {
     trunc_adjusted = 0, cens_adjusted = 0, growth_rate = 0
   )
   expect_equal(
-    estimates$value, c(implied[["mean"]], implied[["sd"]]), tolerance = 0.02
+    estimates$value, c(implied[["mean"]], implied[["sd"]]),
+    tolerance = 0.02
   )
   # Without the conditioning the reported standard deviation carries the tail
   # of a lognormal that runs past the study's observation time, and so
   # overstates the spread of the delays the study saw.
   unconditioned <- suppressMessages(epidist_estimates_parameters(
-    "A", "lognormal", reported_log, se = c(0.01, 0.01)
+    "A", "lognormal", reported_log,
+    se = c(0.01, 0.01)
   ))
   expect_gt(unconditioned$value[2], estimates$value[2])
   expect_gt(
@@ -171,13 +183,16 @@ test_that("a reported fit implies the summaries its biased procedure gave", {
 
 test_that("contributions from several studies combine", {
   first <- suppressMessages(epidist_estimates_summaries(
-    "A", mean = 7.5, sd = 3.6, n = 120
+    "A",
+    mean = 7.5, sd = 3.6, n = 120
   ))
   second <- suppressMessages(epidist_estimates_parameters(
-    "B", "gamma", c(shape = 4, scale = 2), n = 80
+    "B", "gamma", c(shape = 4, scale = 2),
+    n = 80
   ))
   third <- suppressMessages(epidist_estimates_summaries(
-    "A", mean = 6.9, n = 60, relative_obs_time = 20, trunc_adjusted = FALSE
+    "A",
+    mean = 6.9, n = 60, relative_obs_time = 20, trunc_adjusted = FALSE
   ))
   combined <- suppressMessages(
     as_epidist_estimates_data(list(first, second, third))
@@ -194,7 +209,8 @@ test_that("contributions from several studies combine", {
 
 test_that("as_epidist_estimates_data is idempotent", {
   estimates <- suppressMessages(epidist_estimates_summaries(
-    "A", mean = 7.5, n = 120
+    "A",
+    mean = 7.5, n = 120
   ))
   expect_identical(as_epidist_estimates_data(estimates), estimates)
 })

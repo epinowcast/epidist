@@ -329,10 +329,12 @@ test_that("as_epidist_multivariate round trips draws of a fitted model", {
   reported <- as_epidist_multivariate(dpars, params = c("mean", "sd"))
   expect_identical(reported$params, c("mean", "sd"))
   expect_equal(
-    unname(reported$value[1]), mean(dpars$mean), tolerance = 1e-10
+    unname(reported$value[1]), mean(dpars$mean),
+    tolerance = 1e-10
   )
   estimates <- suppressMessages(as_epidist_estimates_data(
-    reported, study = "round_trip", cens_adjusted = 1
+    reported,
+    study = "round_trip", cens_adjusted = 1
   ))
   expect_identical(estimates$type, c("mean", "sd"))
   prep <- suppressMessages(as_epidist_meta_model(estimates = estimates))
@@ -345,6 +347,7 @@ test_that("as_epidist_multivariate round trips draws of a fitted model", {
   # The reported mean must sit close to the truth, because the study that
   # produced these draws adjusted for censoring and truncation.
   expect_equal(
-    unname(reported$value[1]), exp(meanlog + sdlog^2 / 2), tolerance = 0.1
+    unname(reported$value[1]), exp(meanlog + sdlog^2 / 2),
+    tolerance = 0.1
   )
 })

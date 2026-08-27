@@ -208,10 +208,12 @@ test_that(".meta_implied_moments matches the Monte Carlo moments of a naive stud
   expect_equal(moments[["mean"]], simulated[["mean"]], tolerance = 0.02)
   expect_equal(moments[["sd"]], simulated[["sd"]], tolerance = 0.02)
   expect_equal(
-    moments[["kurtosis"]], simulated[["kurtosis"]], tolerance = 0.03
+    moments[["kurtosis"]], simulated[["kurtosis"]],
+    tolerance = 0.03
   )
   expect_equal(
-    moments[["skewness"]], simulated[["skewness"]], tolerance = 0.03
+    moments[["skewness"]], simulated[["skewness"]],
+    tolerance = 0.03
   )
 })
 
@@ -244,7 +246,8 @@ test_that(".meta_implied_moments returns the analytic moments when fully adjuste
   expected_mean <- exp(args$meanlog + s2 / 2)
   expect_equal(moments[["mean"]], expected_mean, tolerance = 1e-8)
   expect_equal(
-    moments[["sd"]], expected_mean * sqrt(expm1(s2)), tolerance = 1e-8
+    moments[["sd"]], expected_mean * sqrt(expm1(s2)),
+    tolerance = 1e-8
   )
   expect_equal(
     moments[["kurtosis"]],
@@ -252,7 +255,8 @@ test_that(".meta_implied_moments returns the analytic moments when fully adjuste
     tolerance = 1e-8
   )
   expect_equal(
-    moments[["skewness"]], (exp(s2) + 2) * sqrt(expm1(s2)), tolerance = 1e-8
+    moments[["skewness"]], (exp(s2) + 2) * sqrt(expm1(s2)),
+    tolerance = 1e-8
   )
 })
 
@@ -270,7 +274,8 @@ test_that(".meta_implied_moments matches Monte Carlo right truncated continuous 
   expect_equal(moments[["mean"]], simulated[["mean"]], tolerance = 0.01)
   expect_equal(moments[["sd"]], simulated[["sd"]], tolerance = 0.02)
   expect_equal(
-    moments[["kurtosis"]], simulated[["kurtosis"]], tolerance = 0.02
+    moments[["kurtosis"]], simulated[["kurtosis"]],
+    tolerance = 0.02
   )
 })
 
@@ -344,7 +349,8 @@ test_that("midpoint imputation of the primary event moves the uniform single int
         .meta_implied_moments, c(shared, list(cens_adjusted = 4L))
       )
       expect_equal(
-        midpoint[["mean"]], uniform[["mean"]] - pwindow / 2, tolerance = 1e-10
+        midpoint[["mean"]], uniform[["mean"]] - pwindow / 2,
+        tolerance = 1e-10
       )
       expect_identical(midpoint[["sd"]], uniform[["sd"]])
       expect_identical(midpoint[["kurtosis"]], uniform[["kurtosis"]])
@@ -503,14 +509,22 @@ test_that(".meta_summary_terms produces a -Inf log likelihood rather than NaN wh
 
 test_that("the naive grid stays a valid pmf on a grid that runs into the tail", { # nolint: line_length_linter.
   saturating <- list(
-    list(dist = "plnorm", args = list(meanlog = 1.6, sdlog = 0.6),
-         cutoff = 400, accrual = 0L),
-    list(dist = "plnorm", args = list(meanlog = 1, sdlog = 0.4),
-         cutoff = 100, accrual = 0L),
-    list(dist = "plnorm", args = list(meanlog = 1.6, sdlog = 0.6),
-         cutoff = 400, accrual = 1L),
-    list(dist = "pgamma", args = list(shape = 4, scale = 1),
-         cutoff = 50, accrual = 0L)
+    list(
+      dist = "plnorm", args = list(meanlog = 1.6, sdlog = 0.6),
+      cutoff = 400, accrual = 0L
+    ),
+    list(
+      dist = "plnorm", args = list(meanlog = 1, sdlog = 0.4),
+      cutoff = 100, accrual = 0L
+    ),
+    list(
+      dist = "plnorm", args = list(meanlog = 1.6, sdlog = 0.6),
+      cutoff = 400, accrual = 1L
+    ),
+    list(
+      dist = "pgamma", args = list(shape = 4, scale = 1),
+      cutoff = 50, accrual = 0L
+    )
   )
   for (case in saturating) {
     mass <- .meta_grid_pmf(
@@ -688,10 +702,12 @@ test_that(".meta_implied_moments matches Monte Carlo weibull summaries", {
   expect_equal(moments[["mean"]], simulated[["mean"]], tolerance = 0.01)
   expect_equal(moments[["sd"]], simulated[["sd"]], tolerance = 0.01)
   expect_equal(
-    moments[["kurtosis"]], simulated[["kurtosis"]], tolerance = 0.05
+    moments[["kurtosis"]], simulated[["kurtosis"]],
+    tolerance = 0.05
   )
   expect_equal(
-    moments[["skewness"]], simulated[["skewness"]], tolerance = 0.02
+    moments[["skewness"]], simulated[["skewness"]],
+    tolerance = 0.02
   )
 })
 

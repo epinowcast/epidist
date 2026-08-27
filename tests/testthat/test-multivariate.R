@@ -47,7 +47,8 @@ test_that("as_epidist_multivariate orders a trajectory index major", {
   expect_named(mvn$value, c("mean[1]", "sd[1]", "mean[2]", "sd[2]"))
   expect_equal(unname(mvn$value[1]), mean(draws$mean[1:200]), tolerance = 1e-10)
   expect_equal(
-    unname(mvn$value[3]), mean(draws$mean[201:400]), tolerance = 1e-10
+    unname(mvn$value[3]), mean(draws$mean[201:400]),
+    tolerance = 1e-10
   )
   expect_identical(dim(vcov(mvn)), c(4L, 4L))
 })
@@ -142,7 +143,8 @@ test_that("as_epidist_estimates_data maps multivariate elements to types", {
     q0.5 = rnorm(500, 6.8, 0.3)
   )
   estimates <- suppressMessages(as_epidist_estimates_data(
-    as_epidist_multivariate(draws), study = "A"
+    as_epidist_multivariate(draws),
+    study = "A"
   ))
   expect_identical(estimates$type, c("mean", "quantile"))
   expect_identical(estimates$p, c(NA, 0.5))
@@ -181,7 +183,8 @@ test_that("the multivariate family path agrees with the delta method", {
     relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 0
   ))
   linearised <- suppressMessages(epidist_estimates_parameters(
-    "A", "gamma", c(shape = 4.1, rate = 0.55), se = c(0.2, 0.03),
+    "A", "gamma", c(shape = 4.1, rate = 0.55),
+    se = c(0.2, 0.03),
     relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 0
   ))
   expect_identical(simulated$type, linearised$type)
@@ -244,7 +247,8 @@ test_that("one study can contribute two multivariate objects", {
   )
   combined <- suppressMessages(as_epidist_estimates_data(list(
     as_epidist_estimates_data(
-      first, study = "A", relative_obs_time = 20, trunc_adjusted = FALSE
+      first,
+      study = "A", relative_obs_time = 20, trunc_adjusted = FALSE
     ),
     as_epidist_estimates_data(second, study = "A")
   )))

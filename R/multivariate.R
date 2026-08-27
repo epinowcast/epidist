@@ -66,12 +66,11 @@ as_epidist_multivariate <- function(draws, ...) {
 #' )
 #' as_epidist_multivariate(draws)
 as_epidist_multivariate.data.frame <- function(
-  draws,
-  params = NULL,
-  index = NULL,
-  draw = NULL,
-  ...
-) {
+    draws,
+    params = NULL,
+    index = NULL,
+    draw = NULL,
+    ...) {
   assert_data_frame(draws, min.rows = 2)
   draws <- tibble::as_tibble(unclass(draws))
   index <- .multivariate_column(index, draws, "index")
@@ -157,13 +156,12 @@ as_epidist_multivariate.matrix <- function(draws, params = NULL, ...) {
 #'   params = c("mean", "sd")
 #' )
 new_epidist_multivariate <- function(
-  value,
-  vcov,
-  params,
-  index = 1,
-  n_draws = NA_integer_,
-  draws = NULL
-) {
+    value,
+    vcov,
+    params,
+    index = 1,
+    n_draws = NA_integer_,
+    draws = NULL) {
   object <- list(
     value = value,
     vcov = vcov,
@@ -212,7 +210,8 @@ assert_epidist.epidist_multivariate <- function(data, ...) {
   )
   assert_matrix(data$vcov, mode = "numeric", nrows = size, ncols = size)
   if (!isTRUE(all.equal(
-    data$vcov, t(data$vcov), tolerance = 1e-8, check.attributes = FALSE
+    data$vcov, t(data$vcov),
+    tolerance = 1e-8, check.attributes = FALSE
   ))) {
     cli::cli_abort("{.var vcov} must be symmetric.")
   }

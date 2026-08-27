@@ -127,13 +127,12 @@ as_epidist_meta_model <- function(data = NULL, estimates = NULL, ...) {
 #'   ) |>
 #'   as_epidist_meta_model()
 as_epidist_meta_model.epidist_linelist_data <- function(
-  data,
-  estimates = NULL,
-  obs_time_threshold = 2,
-  weight = NULL,
-  delay_min = NULL,
-  ...
-) {
+    data,
+    estimates = NULL,
+    obs_time_threshold = 2,
+    weight = NULL,
+    delay_min = NULL,
+    ...) {
   assert_epidist.epidist_linelist_data(data)
   data <- .prepare_marginal_data(
     data,
@@ -169,12 +168,11 @@ as_epidist_meta_model.epidist_linelist_data <- function(
 #'   ) |>
 #'   as_epidist_meta_model()
 as_epidist_meta_model.epidist_aggregate_data <- function(
-  data,
-  estimates = NULL,
-  obs_time_threshold = 2,
-  delay_min = NULL,
-  ...
-) {
+    data,
+    estimates = NULL,
+    obs_time_threshold = 2,
+    delay_min = NULL,
+    ...) {
   return(as_epidist_meta_model.epidist_linelist_data(
     data,
     estimates = estimates,
@@ -213,10 +211,9 @@ as_epidist_meta_model.epidist_aggregate_data <- function(
 #' )
 #' as_epidist_meta_model(estimates)
 as_epidist_meta_model.epidist_estimates_data <- function(
-  data,
-  estimates = NULL,
-  ...
-) {
+    data,
+    estimates = NULL,
+    ...) {
   if (!is.null(estimates)) {
     cli::cli_abort(paste0(
       "Summary estimates were supplied twice. Pass individual level data as ",
@@ -867,10 +864,9 @@ assert_epidist.epidist_meta_model <- function(data, ...) {
 #' @family meta_model
 #' @export
 epidist_family_model.epidist_meta_model <- function(
-  data,
-  family,
-  ...
-) {
+    data,
+    family,
+    ...) {
   custom_family <- brms::custom_family(
     paste0("meta_", family$family),
     dpars = family$dpars,
@@ -914,10 +910,9 @@ epidist_family_model.epidist_meta_model <- function(
 #' @family meta_model
 #' @export
 epidist_formula_model.epidist_meta_model <- function(
-  data,
-  formula,
-  ...
-) {
+    data,
+    formula,
+    ...) {
   # data is only used to dispatch on
   formula <- stats::update(
     formula,
@@ -969,11 +964,10 @@ epidist_formula_model.epidist_meta_model <- function(
 #' @autoglobal
 #' @export
 epidist_transform_data_model.epidist_meta_model <- function(
-  data,
-  family,
-  formula,
-  ...
-) {
+    data,
+    family,
+    formula,
+    ...) {
   required_cols <- .meta_required_cols()
   extra_cols <- intersect("study", names(data))
   plain_data <- tibble::as_tibble(unclass(data))
@@ -1005,11 +999,10 @@ epidist_transform_data_model.epidist_meta_model <- function(
 #' @autoglobal
 #' @export
 epidist_stancode.epidist_meta_model <- function(
-  data,
-  family = epidist_family(data),
-  formula = epidist_formula(data),
-  ...
-) {
+    data,
+    family = epidist_family(data),
+    formula = epidist_formula(data),
+    ...) {
   assert_epidist.epidist_meta_model(data)
 
   stanvars_version <- .version_stanvar()

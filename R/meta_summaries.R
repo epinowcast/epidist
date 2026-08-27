@@ -343,12 +343,11 @@
 #'
 #' @keywords internal
 .meta_accrual_reweight <- function(
-  cdf,
-  lower,
-  cutoff,
-  growth_rate,
-  weight_offset = 0
-) {
+    cdf,
+    lower,
+    cutoff,
+    growth_rate,
+    weight_offset = 0) {
   n_quad <- length(cdf) - 1
   span <- cutoff - lower
   midpoint <- lower + (seq_len(n_quad) - 0.5) * span / n_quad - weight_offset
@@ -405,15 +404,14 @@
 #'
 #' @keywords internal
 .meta_grid_pmf <- function(
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  swindow,
-  growth_rate,
-  accrual = 0L
-) {
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    swindow,
+    growth_rate,
+    accrual = 0L) {
   n_grid <- floor(cutoff / swindow)
   first <- .meta_grid_first(lower, swindow)
   if (n_grid - first < 1) {
@@ -463,15 +461,14 @@
 #'
 #' @keywords internal
 .meta_grid_edges <- function(
-  cell,
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  swindow,
-  growth_rate
-) {
+    cell,
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    swindow,
+    growth_rate) {
   n_grid <- floor(cutoff / swindow)
   first <- .meta_grid_first(lower, swindow)
   edges <- c(cell, min(cell + 1, n_grid), n_grid, first)
@@ -499,15 +496,14 @@
 #'
 #' @keywords internal
 .meta_grid_probs <- function(
-  y,
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  swindow,
-  growth_rate
-) {
+    y,
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    swindow,
+    growth_rate) {
   n_grid <- floor(cutoff / swindow)
   first <- .meta_grid_first(lower, swindow)
   cell <- floor(y / swindow + 0.5)
@@ -716,13 +712,12 @@
 #'
 #' @keywords internal
 .meta_trunc_moments <- function(
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  growth_rate = 0,
-  accrual = 0L
-) {
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    growth_rate = 0,
+    accrual = 0L) {
   quad <- seq(lower, cutoff, length.out = .meta_n_quad() + 1)
   cdf <- do.call(.pdist(dist), c(list(q = quad), args))
   if (accrual == 1L) {
@@ -745,14 +740,13 @@
 #'
 #' @keywords internal
 .meta_pcens_trunc_moments <- function(
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  growth_rate,
-  accrual = 0L
-) {
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    growth_rate,
+    accrual = 0L) {
   quad <- seq(lower, cutoff, length.out = .meta_n_quad() + 1)
   cdf <- .meta_pcens_cdf(quad, dist, args, pwindow, growth_rate)
   if (accrual == 1L) {
@@ -829,17 +823,16 @@
 #'
 #' @keywords internal
 .meta_implied_moments <- function(
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  swindow,
-  trunc_adjusted,
-  cens_adjusted,
-  growth_rate,
-  trunc_design = 0L
-) {
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    swindow,
+    trunc_adjusted,
+    cens_adjusted,
+    growth_rate,
+    trunc_design = 0L) {
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
   if (cens_adjusted == 3 || cens_adjusted == 4) {
     # Midpoint imputation moves the base estimand along the delay axis, so its
@@ -894,16 +887,15 @@
 #'
 #' @keywords internal
 .meta_grid_prob <- function(
-  y,
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  swindow,
-  growth_rate,
-  accrual = 0L
-) {
+    y,
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    swindow,
+    growth_rate,
+    accrual = 0L) {
   n_grid <- floor(cutoff / swindow)
   first <- .meta_grid_first(lower, swindow)
   cell <- floor(y / swindow + 0.5)
@@ -949,14 +941,13 @@
 #'
 #' @keywords internal
 .meta_accrual_nodes <- function(
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  cens_adjusted,
-  growth_rate
-) {
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    cens_adjusted,
+    growth_rate) {
   quad <- seq(lower, cutoff, length.out = .meta_n_quad() + 1)
   if (cens_adjusted == 2) {
     cdf <- .meta_pcens_cdf(quad, dist, args, pwindow, growth_rate)
@@ -983,15 +974,14 @@
 #'
 #' @keywords internal
 .meta_accrual_prob <- function(
-  y,
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  cens_adjusted,
-  growth_rate
-) {
+    y,
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    cens_adjusted,
+    growth_rate) {
   if (y >= cutoff) {
     return(1)
   }
@@ -1021,15 +1011,14 @@
 #'
 #' @keywords internal
 .meta_accrual_density <- function(
-  y,
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  cens_adjusted,
-  growth_rate
-) {
+    y,
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    cens_adjusted,
+    growth_rate) {
   if (y >= cutoff || y <= lower) {
     return(0)
   }
@@ -1073,18 +1062,17 @@
 #'
 #' @keywords internal
 .meta_implied_prob <- function(
-  y,
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  swindow,
-  trunc_adjusted,
-  cens_adjusted,
-  growth_rate,
-  trunc_design = 0L
-) {
+    y,
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    swindow,
+    trunc_adjusted,
+    cens_adjusted,
+    growth_rate,
+    trunc_design = 0L) {
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
   if (cens_adjusted == 3 || cens_adjusted == 4) {
     # Midpoint imputation moved every delay along the axis, so the base
@@ -1168,18 +1156,17 @@
 #'
 #' @keywords internal
 .meta_central_difference <- function(
-  y,
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  swindow,
-  trunc_adjusted,
-  cens_adjusted,
-  growth_rate,
-  trunc_design = 0L
-) {
+    y,
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    swindow,
+    trunc_adjusted,
+    cens_adjusted,
+    growth_rate,
+    trunc_design = 0L) {
   half_width <- max(1e-6, 1e-4 * y)
   step_lwr <- max(y - half_width, lower)
   step_upr <- y + half_width
@@ -1216,18 +1203,17 @@
 #'
 #' @keywords internal
 .meta_implied_density <- function(
-  y,
-  dist,
-  args,
-  lower = 0,
-  cutoff,
-  pwindow,
-  swindow,
-  trunc_adjusted,
-  cens_adjusted,
-  growth_rate,
-  trunc_design = 0L
-) {
+    y,
+    dist,
+    args,
+    lower = 0,
+    cutoff,
+    pwindow,
+    swindow,
+    trunc_adjusted,
+    cens_adjusted,
+    growth_rate,
+    trunc_design = 0L) {
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
   if (cens_adjusted == 3 || cens_adjusted == 4) {
     return(.meta_implied_density(
