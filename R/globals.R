@@ -8,9 +8,6 @@ utils::globalVariables(c(
   ".data", # <as_epidist_linelist_data.epidist_aggregate_data>
   ".data", # <as_epidist_marginal_model.epidist_linelist_data>
   ".data", # <as_epidist_naive_model.epidist_linelist_data>
-  ".data", # <add_mean_sd.lognormal_samples>
-  ".data", # <add_mean_sd.gamma_samples>
-  ".data", # <add_mean_sd.weibull_samples>
   "rlnorm", # <simulate_secondary>
   ".data", # <simulate_secondary>
   ".data", # <simulate_dates>
