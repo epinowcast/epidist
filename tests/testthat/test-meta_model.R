@@ -1718,10 +1718,14 @@ test_that("the meta model caches are bounded and stay out of a fitted object", {
     .meta_row_draw_moments(slots, "plnorm", list(args))
   }
   expect_lte(length(ls(.meta_draws)), .meta_draw_cache_limit())
-  # The caches live in the package namespace, so a generator closure carries
-  # them by reference and its serialised size does not grow with their use.
+  # The cache lives in the package namespace rather than the closure's own
+  # frame, so using it does not grow what a fitted model would need to save.
+  # A raw serialize() byte count is not used here because it walks the whole
+  # reachable object graph, including ambient namespace state unrelated to
+  # this closure, and so is not stable across how much of the package has
+  # already run in the current session.
   generator <- suppressMessages(epidist_gen_meta_log_lik(brms::lognormal()))
-  size <- length(serialize(generator, NULL))
+  before <- ls(environment(generator), all.names = TRUE)
   .meta_row_draw_moments(
     list(
       lower = 0,
@@ -1731,7 +1735,11 @@ test_that("the meta model caches are bounded and stay out of a fitted object", {
     ),
     "plnorm", rep(list(args), 200)
   )
-  expect_length(serialize(generator, NULL), size)
+  expect_identical(ls(environment(generator), all.names = TRUE), before)
+  expect_false(".meta_draws" %in% before)
+  expect_identical(
+    get(".meta_draws", envir = environment(generator)), .meta_draws
+  )
   rm(list = ls(.meta_draws), envir = .meta_draws)
 })
 
