@@ -22,6 +22,14 @@ The message now names `relative_obs_time` and `orig_relative_obs_time`.
 It explains that the impact on accuracy is small because these observation times cause very limited right truncation.
 It also points at `obs_time_threshold` for users who do not want the behaviour.
 See #536.
+- `epidist_prior()` no longer warns about user priors on parameters that are in the model but not in the `epidist` default set.
+The warning now checks user priors against the `brms` default priors for the model as well as the `epidist` ones, so a prior on a regression coefficient no longer looks unmatched.
+See #483.
+- Simplified the internals of prior handling.
+`.replace_prior()` now only merges priors, with the warning about unmatched priors moved to `.warn_unmatched_prior()` and the `merge` argument handled in `epidist_prior()`.
+The latent model checks of the event window priors moved to `R/latent_model.R` and dispatch on the data class, so a model can now state its own prior requirements.
+The returned priors, and the Stan code they produce, are unchanged.
+See #483.
 - Documented the return value of every exported function.
 - Fixed four typos that `inst/WORDLIST` was masking, corrected two moved URLs, title cased the `Title` field, and set `Language: en-GB`.
 - Fixed `inst/CITATION` rendering the year as `NULL`.

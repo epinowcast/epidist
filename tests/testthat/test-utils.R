@@ -17,17 +17,27 @@ test_that(".replace_prior successfully replaces priors", { # nolint: line_length
   expect_s3_class(prior, "data.frame")
 })
 
-cli::test_that_cli(".replace_prior warns when passed a new prior without a match in old_prior", { # nolint: line_length_linter.
-  old_prior <- brms::prior("normal(0, 10)", class = "Intercept") +
+cli::test_that_cli(".warn_unmatched_prior warns when passed a prior without a match", { # nolint: line_length_linter.
+  known <- brms::prior("normal(0, 10)", class = "Intercept") +
     brms::prior("normal(0, 10)", class = "Intercept", dpar = "sigma")
   new_prior <- brms::prior("normal(0, 5)", class = "Intercept") +
     brms::prior("normal(0, 5)", class = "Intercept", dpar = "sigma") +
     brms::prior("normal(0, 5)", class = "Intercept", dpar = "shape")
 
   expect_warning(
-    .replace_prior(old_prior, new_prior, warn = TRUE),
+    .warn_unmatched_prior(new_prior, known),
     "One or more priors have no match in existing parameters"
   )
+})
+
+test_that(".warn_unmatched_prior is silent when every prior matches", {
+  known <- brms::prior("normal(0, 10)", class = "Intercept") +
+    brms::prior("normal(0, 10)", class = "Intercept", dpar = "sigma")
+  new_prior <- brms::prior("normal(0, 5)", class = "Intercept")
+
+  expect_no_warning(.warn_unmatched_prior(new_prior, known))
+  expect_no_warning(.warn_unmatched_prior(NULL, known))
+  expect_no_warning(.warn_unmatched_prior(new_prior, NULL))
 })
 
 test_that(".replace_prior handles custom ~ priors correctly", {

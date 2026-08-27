@@ -253,6 +253,57 @@ epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
   return(priors)
 }
 
+# nolint start: object_length_linter.
+#' Check user supplied prior distributions for latent models
+#'
+#' The latent model reparameterises the event windows so that `pwindow_raw` and
+#' `swindow_raw` are on the unit interval. A non uniform prior on
+#' `swindow_raw` is not supported and a non uniform prior on `pwindow_raw` is
+#' only partially supported.
+#'
+#' @inheritParams epidist_prior
+#'
+#' @method .check_model_prior epidist_latent_model
+#'
+#' @returns `NULL`, invisibly, called for the messages it may raise.
+#'
+#' @keywords internal
+.check_model_prior.epidist_latent_model <- function(data, prior) {
+  if (is.null(prior)) {
+    return(invisible(NULL))
+  }
+  if (.has_non_uniform_window_prior(prior, "swindow_raw")) {
+    cli::cli_abort(
+      "Priors for the secondary event window (swindow_raw) must be uniform(0, 1).", # nolint
+      call = NULL
+    )
+  }
+  if (.has_non_uniform_window_prior(prior, "pwindow_raw")) {
+    cli::cli_warn(
+      "Non-uniform priors for the primary event window (pwindow_raw) are not fully supported and may lead to misleading posterior predictions and log-likelihoods.", # nolint
+      call = NULL
+    )
+  }
+  return(invisible(NULL))
+}
+# nolint end
+
+#' Check for a non uniform prior on a latent model event window
+#'
+#' @inheritParams epidist_prior
+#'
+#' @param parameter The name of the event window parameter to check.
+#'
+#' @returns A logical, `TRUE` if a non uniform prior has been supplied.
+#'
+#' @keywords internal
+.has_non_uniform_window_prior <- function(prior, parameter) {
+  rows <- prior$dpar == parameter |
+    grepl(parameter, prior$prior, fixed = TRUE)
+  supplied <- gsub("\\s+", "", prior$prior[which(rows)])
+  return(!all(grepl("uniform(0,1)", supplied, fixed = TRUE)))
+}
+
 #' @method epidist_stancode epidist_latent_model
 #'
 #' @importFrom brms stanvar

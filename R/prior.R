@@ -5,8 +5,8 @@
 #' [epidist_family_prior()], and user provided prior distributions into a single
 #' set of custom priors. Each element overwrites previous elements, such that
 #' user provided prior distributions have the highest priority. If a user prior
-#' distribution is provided which is not included in the model, a warning will
-#' be shown.
+#' distribution is provided which is not a parameter of the model, a warning
+#' will be shown.
 #'
 #' Note that the matching of priors is imperfect as it does not use brms'
 #' internal prior matching functionality. For example, it cannot distinguish
@@ -44,8 +44,35 @@ epidist_prior <- function(
   enforce_presence = FALSE
 ) {
   assert_epidist(data)
-  .check_latent_priors(data, prior)
+  .check_model_prior(data, prior)
+
+  if (!isTRUE(merge)) {
+    return(prior)
+  }
+
   default <- brms::default_prior(formula, data = data)
+  internal <- .internal_prior(data, family, formula, default)
+  .warn_unmatched_prior(prior, bind_rows(default, internal))
+
+  return(.replace_prior(internal, prior, enforce_presence = enforce_presence))
+}
+
+#' Combine the model and family specific prior distributions
+#'
+#' Model specific priors from [epidist_model_prior()] overwrite family specific
+#' priors from [epidist_family_prior()]. The result is then restricted to the
+#' parameters `brms` recognises, so that priors for parameters which are not in
+#' the model are dropped.
+#'
+#' @inheritParams epidist_prior
+#'
+#' @param default The default prior distributions from
+#'   [brms::default_prior()].
+#'
+#' @returns A `brmsprior` object, or `NULL` when there are no internal priors.
+#'
+#' @keywords internal
+.internal_prior <- function(data, family, formula, default) {
   model <- epidist_model_prior(data, formula)
   if (!is.null(model)) {
     model$source <- "model"
@@ -54,22 +81,61 @@ epidist_prior <- function(
   if (!is.null(family)) {
     family$source <- "family"
   }
-  custom <- .replace_prior(
-    family,
-    model,
-    merge = TRUE,
-    enforce_presence = FALSE
-  )
-  internal <- .replace_prior(default, custom, merge = TRUE)
-  prior <- .replace_prior(
-    internal,
-    prior,
-    warn = TRUE,
-    merge = merge,
-    enforce_presence = enforce_presence
-  )
+  custom <- .replace_prior(family, model, enforce_presence = FALSE)
+  return(.replace_prior(default, custom))
+}
 
-  return(prior)
+#' Warn about user priors which are not parameters of the model
+#'
+#' Manually specified priors are passed to Stan unchanged and so are not
+#' checked here.
+#'
+#' @inheritParams epidist_prior
+#'
+#' @param known One or more prior distributions in the class `brmsprior`
+#'   covering the parameters of the model.
+#'
+#' @returns `NULL`, invisibly, called for the warning it may raise.
+#'
+#' @keywords internal
+.warn_unmatched_prior <- function(prior, known) {
+  if (is.null(prior) || is.null(known)) {
+    return(invisible(NULL))
+  }
+  standard <- prior[!.is_manual_prior(prior), ]
+  if (nrow(standard) == 0) {
+    return(invisible(NULL))
+  }
+  matched <- dplyr::semi_join(standard, known, by = .prior_match_cols())
+  unmatched <- dplyr::anti_join(standard, matched, by = .prior_match_cols())
+  if (nrow(unmatched) > 0) {
+    msg <- c(
+      "!" = "One or more priors have no match in existing parameters:",
+      utils::capture.output(print(as.data.frame(unmatched))),
+      "i" = "To remove this warning consider changing prior specification." # nolint
+    )
+    cli_warn(message = msg)
+  }
+  return(invisible(NULL))
+}
+
+#' Model specific checks of user supplied prior distributions
+#'
+#' Dispatches on the class of `data` so that a model can reject or warn about
+#' prior distributions it does not support. By default no checks are made.
+#'
+#' @inheritParams epidist_prior
+#'
+#' @returns `NULL`, invisibly, called for the messages it may raise.
+#'
+#' @keywords internal
+.check_model_prior <- function(data, prior) {
+  UseMethod(".check_model_prior")
+}
+
+#' @keywords internal
+.check_model_prior.default <- function(data, prior) {
+  return(invisible(NULL))
 }
 
 #' Model specific prior distributions
@@ -143,46 +209,4 @@ epidist_family_prior.lognormal <- function(family, formula, ...) {
   sigma_prior <- prior("normal(-0.7, 0.4)", class = "Intercept", dpar = "sigma")
   prior <- prior + sigma_prior
   return(prior)
-}
-
-.check_latent_priors <- function(data, prior) {
-  if (is_epidist_latent_model(data) && !is.null(prior)) {
-    # Define parameters to check with their severity and messages
-    params <- list(
-      list(
-        name = "swindow_raw",
-        severity = "stop",
-        msg = "Priors for the secondary event window (swindow_raw) must be uniform(0, 1)." # nolint
-      ),
-      list(
-        name = "pwindow_raw",
-        severity = "warning",
-        msg = "Non-uniform priors for the primary event window (pwindow_raw) are not fully supported and may lead to misleading posterior predictions and log-likelihoods." # nolint
-      )
-    )
-
-    for (param in params) {
-      rows <- which(
-        prior$dpar == param$name |
-          grepl(param$name, prior$prior, fixed = TRUE)
-      )
-
-      if (length(rows) > 0) {
-        for (i in rows) {
-          p_str <- prior$prior[i]
-          p_clean <- gsub("\\s+", "", p_str)
-
-          is_uniform <- grepl("uniform(0,1)", p_clean, fixed = TRUE)
-          if (!is_uniform) {
-            if (param$severity == "stop") {
-              cli::cli_abort(param$msg, call = NULL)
-            } else {
-              cli::cli_warn(param$msg, call = NULL)
-            }
-          }
-        }
-      }
-    }
-  }
-  return(invisible(NULL))
 }

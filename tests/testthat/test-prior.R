@@ -80,10 +80,11 @@ test_that("epidist_prior does not warn about user priors on model coefficients",
 
   user_prior <- prior("normal(0, 1)", class = "b")
   expect_no_warning(
-    prior <- epidist_prior(
-      data, epidist_family, epidist_formula,
-      prior = user_prior
-    )
+    epidist_prior(data, epidist_family, epidist_formula, prior = user_prior)
+  )
+  prior <- epidist_prior(
+    data, epidist_family, epidist_formula,
+    prior = user_prior
   )
   expect_true("normal(0, 1)" %in% prior$prior)
 })

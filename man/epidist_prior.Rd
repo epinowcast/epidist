@@ -47,8 +47,8 @@ This function combines model specific prior distributions from
 \code{\link[=epidist_family_prior]{epidist_family_prior()}}, and user provided prior distributions into a single
 set of custom priors. Each element overwrites previous elements, such that
 user provided prior distributions have the highest priority. If a user prior
-distribution is provided which is not included in the model, a warning will
-be shown.
+distribution is provided which is not a parameter of the model, a warning
+will be shown.
 }
 \details{
 Note that the matching of priors is imperfect as it does not use brms'

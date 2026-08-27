@@ -51,55 +51,76 @@
   return(ifelse(f == 0, x, floor(x / f) * f))
 }
 
+#' Identify manually specified `brms` priors
+#'
+#' Manual priors are written using the `parameter ~ distribution` syntax and
+#' are passed through to the Stan model block unchanged. They cannot be
+#' matched on parameter metadata in the way that standard `brms` priors can.
+#'
+#' @param prior One or more prior distributions in the class `brmsprior`.
+#'
+#' @returns A logical vector flagging the manually specified priors.
+#'
+#' @keywords internal
+.is_manual_prior <- function(prior) {
+  return(grepl("~", prior$prior, fixed = TRUE))
+}
+
+#' Extract the parameter name of a manually specified `brms` prior
+#'
+#' @param prior One or more manually specified prior distributions in the
+#'   class `brmsprior`.
+#'
+#' @returns A character vector of parameter names.
+#'
+#' @keywords internal
+.manual_prior_parameter <- function(prior) {
+  return(trimws(sub("~.*$", "", prior$prior)))
+}
+
+#' The columns used to match `brms` prior distributions
+#'
+#' @returns A character vector of column names.
+#'
+#' @keywords internal
+.prior_match_cols <- function() {
+  return(c("class", "coef", "group", "resp", "dpar", "nlpar"))
+}
+
 #' Replace `brms` prior distributions
 #'
 #' This function takes an existing set of prior distributions and updates them
 #' with new prior specifications. It matches priors based on their parameter
 #' class, coefficient, group, response, distributional parameter, and non-linear
-#' parameter. Any new priors that don't match existing ones can optionally
-#' trigger a warning.
+#' parameter.
 #'
 #' Prior distributions can be specified in two ways:
 #' 1. Using the standard `brms` prior specification format. These priors are
 #'    replaced based on matching parameter metadata (class, coefficient, group,
 #'    etc.).
-#' 2. Using custom set priors with the syntax `parameter ~ distribution`. These
-#'    will only remove existing custom priors for the same parameter name but
-#'    will not affect priors set via the standard `brms` specification format.
-#'    Custom priors are excluded from the metadata-based joining process.
+#' 2. Using manually specified priors with the syntax
+#'    `parameter ~ distribution`. These replace existing manual priors for the
+#'    same parameter name and are otherwise left alone. Manual priors are
+#'    excluded from the metadata based matching.
 #'
 #' @param old_prior One or more prior distributions in the class `brmsprior` to
 #'   be updated.
 #'
 #' @param prior One or more prior distributions in the class `brmsprior`
-#'   containing the new specifications. Can include custom set priors using the
-#'   syntax `parameter ~ distribution`
-#'
-#' @param warn If `TRUE` then a warning will be displayed if a prior in `prior`
-#'   has no match in `old_prior`. Defaults to `FALSE`
-#'
-#' @param merge If `TRUE` then merge new priors with existing ones, if `FALSE`
-#'   only use new priors. Defaults to `TRUE`
+#'   containing the new specifications. Can include manually specified priors
+#'   using the syntax `parameter ~ distribution`.
 #'
 #' @param enforce_presence If `TRUE` then only keep rows that have both old and
 #'   new priors. If `FALSE` then keep all rows but use new priors where
 #'   available, otherwise keep old priors. Defaults to `TRUE`.
 #'
+#' @returns A `brmsprior` object containing the updated prior distributions.
+#'
 #' @keywords internal
 #' @importFrom dplyr full_join filter select mutate bind_rows
 #' @importFrom brms as.brmsprior
 #' @autoglobal
-.replace_prior <- function(
-  old_prior,
-  prior,
-  warn = FALSE,
-  merge = TRUE,
-  enforce_presence = TRUE
-) {
-  if (!isTRUE(merge)) {
-    return(prior)
-  }
-
+.replace_prior <- function(old_prior, prior, enforce_presence = TRUE) {
   if (is.null(prior)) {
     return(old_prior)
   }
@@ -108,83 +129,44 @@
     return(prior)
   }
 
-  # Find priors defined with ~ in prior column
-  tilde_priors <- prior[grepl("~", prior$prior, fixed = TRUE), ]
-  if (nrow(tilde_priors) > 0) {
-    # Extract parameter names from left side of ~
-    param_names <- gsub("\\s*~.*$", "", tilde_priors$prior)
+  new_manual <- .is_manual_prior(prior)
+  old_manual <- .is_manual_prior(old_prior)
 
-    # Remove matching parameter priors from old_prior
-    old_prior <- old_prior[
-      !grepl(paste(param_names, collapse = "|"), old_prior$prior),
-    ]
+  # Manual priors replace old manual priors for the same parameter and are
+  # otherwise carried through untouched
+  replaced <- .manual_prior_parameter(old_prior[old_manual, ]) %in%
+    .manual_prior_parameter(prior[new_manual, ])
+  manual <- bind_rows(prior[new_manual, ], old_prior[old_manual, ][!replaced, ])
+
+  standard <- full_join(
+    old_prior[!old_manual, ],
+    prior[!new_manual, ],
+    by = .prior_match_cols(),
+    suffix = c("_old", "_new")
+  )
+
+  # Use the new prior, and its bounds, where one has been supplied
+  standard <- mutate(
+    standard,
+    updated = !is.na(.data$prior_new),
+    lb = ifelse(.data$updated, .data$lb_new, .data$lb_old),
+    ub = ifelse(.data$updated, .data$ub_new, .data$ub_old),
+    prior = ifelse(.data$updated, .data$prior_new, .data$prior_old),
+    source = ifelse(.data$updated, .data$source_new, .data$source_old)
+  )
+
+  if (isTRUE(enforce_presence)) {
+    standard <- filter(standard, !is.na(.data$prior_old), .data$updated)
   }
 
-  # Hold out manual priors
-  hold_prior <- prior[grepl("~", prior$prior, fixed = TRUE), ]
-  hold_prior_old <- old_prior[grepl("~", old_prior$prior, fixed = TRUE), ]
+  standard <- select(
+    standard,
+    prior,
+    dplyr::all_of(c(.prior_match_cols(), "lb", "ub")),
+    source
+  )
 
-  prior <- prior[!grepl("~", prior$prior, fixed = TRUE), ]
-  old_prior <- old_prior[!grepl("~", old_prior$prior, fixed = TRUE), ]
-
-  join_cols <- c("class", "coef", "group", "resp", "dpar", "nlpar")
-  cols <- c(join_cols, "lb", "ub")
-
-  if (nrow(prior) == 0 && nrow(old_prior) == 0) {
-    # If no non-manual priors found, just combine manual priors
-    cli::cli_inform("No non-manual priors found, only combining manual priors")
-    prior <- bind_rows(hold_prior, hold_prior_old)
-  } else {
-    prior <- dplyr::full_join(
-      old_prior,
-      prior,
-      by = join_cols,
-      suffix = c("_old", "_new")
-    )
-
-    if (anyNA(prior$prior_old)) {
-      missing_prior <- utils::capture.output(
-        print(
-          as.data.frame(filter(prior, is.na(.data$prior_old)))
-        )
-      )
-      if (warn) {
-        msg <- c(
-          "!" = "One or more priors have no match in existing parameters:",
-          missing_prior,
-          "i" = "To remove this warning consider changing prior specification." # nolint
-        )
-        cli_warn(message = msg)
-      }
-    }
-
-    # use new lb and ub if prior_new is present
-    prior <- mutate(
-      prior,
-      lb = ifelse(!is.na(.data$prior_new), .data$lb_new, .data$lb_old),
-      ub = ifelse(!is.na(.data$prior_new), .data$ub_new, .data$ub_old),
-      prior = ifelse(
-        !is.na(.data$prior_new),
-        .data$prior_new,
-        .data$prior_old
-      ),
-      source = ifelse(
-        !is.na(.data$prior_new),
-        .data$source_new,
-        .data$source_old
-      )
-    )
-
-    # only keep rows that have both old and new priors
-    if (isTRUE(enforce_presence)) {
-      prior <- filter(prior, !is.na(.data$prior_old), !is.na(.data$prior_new))
-    }
-
-    prior <- prior |>
-      select(prior, dplyr::all_of(cols), source) |>
-      bind_rows(hold_prior, hold_prior_old)
-  }
-  return(as.brmsprior(prior))
+  return(as.brmsprior(bind_rows(standard, manual)))
 }
 
 #' Additional distributional parameter information for `brms` families
