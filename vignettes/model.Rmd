@@ -248,7 +248,9 @@ The naive, latent and marginal models above all fit directly to individual delay
 Published estimates of a delay distribution are usually reported as summary statistics rather than individual observations, and the study's own estimation procedure is itself a source of bias [@charniga2024best; @park2024estimating].
 The meta model lets `epidist` fit a single delay distribution to a mix of individual level data and published summary estimates.
 Individual level rows use the marginal model likelihood of Section \@ref(the-marginal-model) unchanged, applied to `delay_lwr`, `delay_upr`, `pwindow`, `swindow` and `relative_obs_time`.
-Each summary row is instead forward modelled: given the true continuous delay distribution, the model works out what the study's own estimation procedure would have converged to, and fits the reported value to that biased estimand with sampling uncertainty derived from the study sample size.
+Each summary row is instead forward modelled.
+Given the true continuous delay distribution, the model works out what the study's own estimation procedure would have converged to.
+The reported value is then fitted to that biased estimand, with sampling uncertainty derived from the study sample size.
 This means summaries that did not adjust for right truncation, or that treated interval censored data as continuous, still contribute unbiased information about the underlying distribution.
 Study level heterogeneity, for example `mu ~ 1 + (1 | study)`, is specified through the `brms` formula rather than through the likelihood, exactly as for the other models above.
 If using the meta model, please cite `primarycensored` in addition to `epidist`.
@@ -260,7 +262,7 @@ Forward modelling a published estimate requires knowing something about how the 
 We deliberately support only a few common cases rather than trying to encode every possible estimation procedure.
 For each summary we need:
 
-* **Roughly how it adjusted for interval censoring**, one of: no adjustment (it summarised integer date differences directly, the most common case in the literature), full adjustment (it used a latent variable or double interval censored likelihood targeting the continuous distribution), the uniform single interval approximation (it adjusted the secondary interval assuming a uniform delay within it, but left the primary interval uncorrected), or midpoint imputation (it assigned each delay to the centre of the interval it was observed in).
+* **Roughly how it adjusted for interval censoring**, one of no adjustment (it summarised integer date differences directly, the most common case in the literature), full adjustment (it used a latent variable or double interval censored likelihood targeting the continuous distribution), the uniform single interval approximation (it adjusted the secondary interval assuming a uniform delay within it, but left the primary interval uncorrected), or midpoint imputation (it assigned each delay to the centre of the interval it was observed in).
   These codes are a taxonomy of the common mistakes made when summarising interval censored delays rather than a closed set, and each is a forward model of one mistake, so a further mistake can be added as a further code.
 * **Whether it adjusted for right truncation**, and if it did not, **the observation time** and **how collection stopped**.
   A cohort followed every primary event for the same observation time, so the observation time is the truncation point on the delay scale, that is how long after the primary events the data were extracted.
@@ -270,13 +272,15 @@ For each summary we need:
 * **The smallest delay it counted**, where the study dropped delays below some point, so that its summaries describe a left truncated delay distribution.
 
 Systematic reviews rarely record all of this study metadata.
-Where a review does not report how a study adjusted for these biases, an assumption must be made and stated explicitly alongside any results; ideally reviews would report this metadata directly so that this judgement is not left to whoever reuses the estimates.
+Where a review does not report how a study adjusted for these biases, an assumption must be made and stated explicitly alongside any results.
+Ideally reviews would report this metadata directly, so that this judgement is not left to whoever reuses the estimates.
 The reporting checklist of @charniga2024best covers exactly this metadata.
 If studies and systematic reviews adopted it, fitting to published estimates in this way would become easier and more routine.
 
 ## The biased estimand
 
-For a summary row, let $f(\tau; \theta)$ and $F(\tau; \theta)$ be the forward density and distribution function of the delay of Section \@ref(maths), and let $g_p$ be the distribution of a primary event within its censoring window of width $w_p$: uniform when incidence was constant over the study period, or weighted towards more recent times by an exponential growth rate when it was not.
+For a summary row, let $f(\tau; \theta)$ and $F(\tau; \theta)$ be the forward density and distribution function of the delay of Section \@ref(maths), and let $g_p$ be the distribution of a primary event within its censoring window of width $w_p$.
+This is uniform when incidence was constant over the study period, and weighted towards more recent times by an exponential growth rate when it was not.
 Write
 $$
 F_{pc}(\tau; \theta) = \mathbb{P}(\tau^\star + U \le \tau), \quad \tau^\star \sim f(\cdot \, ; \theta), \; U \sim g_p,
@@ -288,7 +292,8 @@ A study with **no censoring adjustment** summarised integer date differences dir
 $$
 q_j = \frac{F_{pc}(j w_s; \theta) - F_{pc}((j-1) w_s; \theta)}{F_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j = 1, \dots, \lfloor D / w_s \rfloor, (\#eq:meta-grid)
 $$
-where $w_s$ is the secondary censoring window and bin $j$ carries the delay value $(j-1) w_s$; the truncation point is discretised to the last full grid boundary $w_s \lfloor D / w_s \rfloor$.
+where $w_s$ is the secondary censoring window and bin $j$ carries the delay value $(j-1) w_s$.
+The truncation point is discretised to the last full grid boundary $w_s \lfloor D / w_s \rfloor$.
 The implied mean, variance and kurtosis follow by summing over this grid.
 
 A study with **full adjustment** reported the moments of $f(\cdot \, ; \theta)$ itself, right truncated at $D$ when it did not separately adjust for truncation:
@@ -325,7 +330,8 @@ $$
 w(d) = \int_0^{A - d} \exp(r t) \, \text{d}t = \frac{\exp(r (A - d)) - 1}{r}, \quad 0 \le d \le A, (\#eq:meta-accrual)
 $$
 which tends to $A - d$ as $r$ tends to zero.
-This is the dynamical bias of @park2024estimating; for a long window and a growing epidemic it approaches an exponential tilt of the delay distribution by $\exp(-r d)$.
+This is the dynamical bias of @park2024estimating.
+For a long window and a growing epidemic it approaches an exponential tilt of the delay distribution by $\exp(-r d)$.
 The estimand is then $f(d; \theta) w(d)$ renormalised over $[0, A]$, with $A$ taken from `relative_obs_time`, so for an accrual study that field is the length of the collection window rather than a cohort cutoff.
 In practice the weight is applied to the cell masses of Equation \@ref(eq:meta-grid) at each bin's delay value, and to the quadrature used for Equations \@ref(eq:meta-trunc-moments) and \@ref(eq:meta-uniform-moments) at each node's midpoint, renormalising in both cases.
 Equation \@ref(eq:meta-accrual) is the smooth average of the follow up actually available, which is a step function of the primary event's censoring window.
@@ -356,7 +362,9 @@ Studies report a quantile's uncertainty on the delay scale, so a standard error 
 $$
 \text{se}_p = g(y) \, \text{se}_y, (\#eq:meta-quantile-se)
 $$
-where $g$ is the density of the biased estimand at the reported value: the mass of the grid cell $y$ falls in divided by $w_s$ for a discrete estimand, which is the slope of the continuity corrected $G$ there, and the derivative of $G$ otherwise.
+where $g$ is the density of the biased estimand at the reported value.
+For a discrete estimand this is the mass of the grid cell $y$ falls in divided by $w_s$, which is the slope of the continuity corrected $G$ there.
+Otherwise it is the derivative of $G$.
 The converted standard error is held away from zero so that a quantile reported far into the tail cannot give a degenerate likelihood.
 For the discretely summarised case $G$ is continuity corrected by interpolating the grid distribution function linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise always lands on a jump of the step function.
 
@@ -436,7 +444,7 @@ Individual level rows pass $L$ to `primarycensored` as their left truncation poi
 ## Meta-analysis standards
 
 The meta model follows some standard meta-analytic practice and departs from other parts of it deliberately.
-Both are stated explicitly here rather than left implicit.
+Both are stated explicitly here.
 
 Sampling uncertainty for every summary type is approximated by a normal distribution, with the standard errors of Equations \@ref(eq:meta-mean-lik) to \@ref(eq:meta-quantile-se) used when a study does not report one directly.
 This is standard inverse variance meta-analysis practice, and it degrades for small study sample sizes, where the normal approximation to a mean, standard deviation or quantile is least accurate.
@@ -454,7 +462,6 @@ What remains approximate is the correlation between summaries of different kinds
 
 Finally, `loo` and other information criteria compare log likelihoods, and what one observation contributes to that sum differs between an individual level row and a summary row.
 An observation is also a group of summaries rather than a single reported value, in the same way that one row of aggregated data stands for many individual delays.
-`loo` is only meaningful for comparing two meta model fits applied to the same mix of individual and summary data.
-Comparing `loo` across fits with different data included, whether different studies or a different mix of individual and summary rows, is not meaningful.
+`loo` is only meaningful for comparing two meta model fits applied to the same data, that is to the same studies and the same mix of individual and summary rows.
 
 ## References {-}

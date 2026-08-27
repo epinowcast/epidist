@@ -30,11 +30,11 @@ Individual level rows use the same likelihood as the marginal model (see
 \code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}}), imported from the
 \href{https://primarycensored.epinowcast.org/}{primarycensored} package.
 Summary rows instead forward model what the study that reported them would
-have converged to given its estimation procedure, and fit the reported value
-to that with sampling uncertainty derived from the study sample size. This
-means published estimates that did not adjust for right truncation, or that
-treated interval censored data as continuous, still contribute unbiased
-information about the underlying delay distribution.
+have converged to given its estimation procedure. The reported value is
+fitted to that, with sampling uncertainty derived from the study sample
+size. This means published estimates that did not adjust for right
+truncation, or that treated interval censored data as continuous, still
+contribute unbiased information about the underlying delay distribution.
 
 At least one of \code{data} and \code{estimates} must be supplied. Study level
 heterogeneity is specified through the \code{brms} formula in \code{\link[=epidist]{epidist()}}, for
@@ -100,7 +100,7 @@ rounded up to the next grid boundary.
 \item The standard errors above are plug in quantities that depend on the
 parameters, so a set of studies that no single distribution can explain
 can be accommodated by inflating the implied standard deviation rather
-than by moving the location, and sampling can then become multimodal.
+than by moving the location. Sampling can then become multimodal.
 Allow for genuine differences between studies with a formula term such as
 \code{mu ~ 1 + (1 | study)} rather than relying on the sampling error alone.
 \item Quantiles read off a fitted distribution rather than the empirical data
@@ -108,8 +108,8 @@ have smaller sampling error than assumed here. Supply a reported \code{se} in
 \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} for those rows, which also takes them out of
 the joint quantile likelihood. For quantile rows that \code{se}
 is on the scale of the reported delay, as studies report it, and is
-converted to the cumulative probability scale by the delta method, that is
-by multiplying it by the density of the biased estimand at the reported
+converted to the cumulative probability scale by the delta method. That
+is, it is multiplied by the density of the biased estimand at the reported
 value. The converted standard error is held away from zero so that a
 quantile reported far into the tail cannot give a degenerate likelihood.
 \item A study that took integer date differences reports quantiles of a

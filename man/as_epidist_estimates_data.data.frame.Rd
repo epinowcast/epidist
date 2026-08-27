@@ -131,7 +131,7 @@ delay distribution.
 To use them we forward model what the study's estimation procedure would
 converge to, which means we need to know how the study handled the two
 biases we support, along with the data process it saw.
-Concretely, for each study we need:
+For each study we need:
 \itemize{
 \item \strong{Roughly how it adjusted for censoring} (\code{cens_adjusted}).
 The codes are a taxonomy of the common mistakes made when summarising
@@ -194,7 +194,7 @@ summaries the study's estimation procedure would converge to and
 Only the censoring adjustments above are supported. Anything more exotic
 must be approximated by whichever of them is closest, and if you cannot tell
 which a study used you should state the assumption you are making
-explicitly. The list is extensible: each code is a forward model of one
+explicitly. The list is extensible. Each code is a forward model of one
 common estimation mistake, so a further mistake can be added as a further
 code.
 

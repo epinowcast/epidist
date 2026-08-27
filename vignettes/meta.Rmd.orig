@@ -36,13 +36,16 @@ Its interface may still change in future releases.
 
 Systematic reviews of epidemiological delays mostly collect published summary values, such as a mean and standard deviation, or a median and interquartile range, rather than individual level data.
 Those summaries are usually biased, because studies often do not adjust for right truncation, treat day rounded delays as if they were continuous, or only partially correct for interval censoring.
-The meta model fits directly to these summarised, and potentially biased, published estimates, jointly with any individual level data we do have, by forward modelling what each study's own estimation procedure would have converged to.
+The meta model fits directly to these summarised, and potentially biased, published estimates, jointly with any individual level data we do have.
+It does this by forward modelling what each study's own estimation procedure would have converged to.
 Jointly synthesising individual level data and published summaries in one hierarchical model overlaps with the federated analysis approach of the [ddsynth](https://github.com/cm401/ddsynth) package.
-The meta model differs in adjusting each summary for the biases of the study's own estimation procedure rather than treating it as an unbiased estimate of the continuous delay, and in building on `brms`, so formulas, families, priors and post-processing all carry over.
+The meta model differs in adjusting each summary for the biases of the study's own estimation procedure rather than treating it as an unbiased estimate of the continuous delay.
+It also builds on `brms`, so formulas, families, priors and post-processing all carry over.
 
 ::: {.alert .alert-primary}
 For a methodological overview of the biases in published delay estimates see @park2024estimating, and for a practical checklist aimed at applied users see @charniga2024best.
-The meta model reuses the likelihood of the marginal model (`vignette("epidist")`), which relies on the [`primarycensored`](https://primarycensored.epinowcast.org/) package [@primarycensored], for individual level rows, adding a forward model of the naive estimator for summary rows, so both kinds of evidence can be combined in one `brms` [@brms] model.
+For individual level rows the meta model reuses the likelihood of the marginal model (`vignette("epidist")`), which relies on the [`primarycensored`](https://primarycensored.epinowcast.org/) package [@primarycensored].
+It adds a forward model of the naive estimator for summary rows, so both kinds of evidence can be combined in one `brms` [@brms] model.
 :::
 
 # What we need from a study {#metadata}
@@ -81,7 +84,8 @@ library(tibble)
 
 # Simulating biased published estimates {#simulate}
 
-We simulate an outbreak exactly as in `vignette("epidist")`: a stochastic epidemic (Figure \@ref(fig:outbreak) shows the case counts) with a lognormal delay between primary (symptom onset) and secondary (case notification) events, both interval censored to a day.
+We simulate an outbreak exactly as in `vignette("epidist")`, a stochastic epidemic with a lognormal delay between primary (symptom onset) and secondary (case notification) events, both interval censored to a day.
+Figure \@ref(fig:outbreak) shows the case counts.
 
 ```{r}
 set.seed(101)
@@ -101,9 +105,9 @@ obs_cens <- obs |>
   ) |>
   mutate(
     ptime_lwr = as.numeric(.data$pdate_lwr - outbreak_start_date),
+    ptime_upr = as.numeric(.data$pdate_upr - outbreak_start_date),
     stime_lwr = as.numeric(.data$sdate_lwr - outbreak_start_date),
-    ptime_upr = .data$ptime_lwr + 1,
-    stime_upr = .data$stime_lwr + 1,
+    stime_upr = as.numeric(.data$sdate_upr - outbreak_start_date),
     delay_daily = .data$stime_lwr - .data$ptime_lwr
   )
 ```
@@ -305,7 +309,6 @@ study_designs |>
 ```
 
 The study reporting a covariance matrix over its summaries could not share its delays, so it published the vector of summaries and the covariance between them from `bootstrap_delay_estimates()` instead.
-That keeps the correlation between the quantities it reports, which a standard error for each one throws away, and is what we recommend when a line list cannot be shared.
 
 ```{r}
 biased_estimates <- as_epidist_estimates_data(
@@ -507,7 +510,8 @@ library(epireview) # nolint: library_call_linter.
 ```
 
 We use the onset to death delay from the Ebola outbreak data.
-Alongside the delay type we filter to the value types we can model (means and medians), to estimates reported in days with no scaling exponent, and to parameters that are not inverse rates, so that other value types cannot silently slip in as medians.
+Alongside the delay type we filter to the value types we can model (means and medians), to estimates reported in days with no scaling exponent, and to parameters that are not inverse rates.
+This stops other value types silently slipping in as medians.
 
 ```{r}
 ebola <- suppressMessages(load_epidata("ebola"))
@@ -532,8 +536,10 @@ For these data the hygiene filters remove `r nrow(onset_to_death_all) - nrow(ons
 ::: {.alert .alert-primary}
 epireview does not record how, or whether, a study adjusted for censoring or right truncation, so we have to state assumptions explicitly rather than leave them implicit.
 We treat a study as `cens_adjusted = 1` if it also reports a fitted distribution (`distribution_type`), on the grounds that fitting a distribution directly is unlikely to have ignored censoring entirely, and `cens_adjusted = 0` otherwise.
-We treat a study as not adjusted for right truncation only if it was conducted during the outbreak (`method_moment_value` of `"Start outbreak"` or `"Mid outbreak"`); all other studies are treated as unaffected by truncation.
-Those early phase studies most likely stopped collecting cases at a calendar date rather than following every case for a common length of time, so we use the `"accrual"` truncation design for them, with a uniform accrual rate (`growth_rate = 0`, the default) since epireview does not report an outbreak growth rate either.
+We treat a study as not adjusted for right truncation only if it was conducted during the outbreak (`method_moment_value` of `"Start outbreak"` or `"Mid outbreak"`).
+All other studies are treated as unaffected by truncation.
+Those early phase studies most likely stopped collecting cases at a calendar date rather than following every case for a common length of time, so we use the `"accrual"` truncation design for them.
+We give them a uniform accrual rate (`growth_rate = 0`, the default), since epireview does not report an outbreak growth rate either.
 For an accrual design `relative_obs_time` is the length of the collection window rather than a cohort cutoff, and we take it as three times the reported value.
 epireview does not record the true collection window, so this is a rough, explicitly stated, placeholder rather than a reported value.
 Ideally reviews would report this study metadata directly, so that assumptions like these were not needed.
@@ -541,7 +547,9 @@ The reporting checklist of @charniga2024best covers exactly this metadata, and i
 For examples of the checklist in use see [andv-linelist-analysis](https://github.com/epiforecasts/andv-linelist-analysis) (the Epuyén Andes virus outbreak) and [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis) (the 2012 Isiro Bundibugyo Ebola outbreak, re-analysing the line list of @rosello2015ebola).
 :::
 
-A small helper maps each row of `onset_to_death` to the long format `as_epidist_estimates_data()` expects: means become `"mean"` rows (with a matching `"sd"` row where a standard deviation, rather than a standard error, is reported), and medians become `"quantile"` rows at `p = 0.5` (with further quantile rows at `p = 0.25` and `p = 0.75` where an interquartile range is reported).
+A small helper maps each row of `onset_to_death` to the long format `as_epidist_estimates_data()` expects.
+Means become `"mean"` rows, with a matching `"sd"` row where a standard deviation, rather than a standard error, is reported.
+Medians become `"quantile"` rows at `p = 0.5`, with further quantile rows at `p = 0.25` and `p = 0.75` where an interquartile range is reported.
 
 <details><summary>Click to expand for the epireview conversion helper</summary>
 
@@ -629,8 +637,10 @@ ebola_estimates <- as_epidist_estimates_data(ebola_estimates_df)
 ```
 
 ::: {.alert .alert-primary}
-`max_delay` is set per study above rather than to one shared value, because a grid short relative to a study's own reported spread biases its implied standard deviation downwards; `as_epidist_estimates_data()` warns if this happens.
-That grid is only used to compute the implied summaries of studies with `cens_adjusted = 0`; the `r length(unique(ebola_estimates_df$study[ebola_estimates_df$cens_adjusted == 1]))` studies that already report a fitted distribution (`cens_adjusted = 1`) use its closed form continuous moments directly and need no grid at all.
+`max_delay` is set per study above rather than to one shared value, because a grid short relative to a study's own reported spread biases its implied standard deviation downwards.
+`as_epidist_estimates_data()` warns if this happens.
+That grid is only used to compute the implied summaries of studies with `cens_adjusted = 0`.
+The `r length(unique(ebola_estimates_df$study[ebola_estimates_df$cens_adjusted == 1]))` studies that already report a fitted distribution (`cens_adjusted = 1`) use its closed form continuous moments directly and need no grid at all.
 :::
 
 Onset to death delays are usually right skewed, so we fit a Gamma rather than a lognormal distribution, with a `(1 | study)` term to allow for genuine differences between studies (see the note on plug in standard errors in `?as_epidist_meta_model`).
@@ -655,15 +665,21 @@ ebola_fit_time <- proc.time() - t
 summary(fit_ebola)
 ```
 
-Sizing each study's grid to what it needs, rather than a single shared value large enough for the widest study, and using the accrual design for the two early phase studies rather than treating every study as a single cohort, cut sampling (2 chains, 500 post warmup iterations each, timed with cmdstan's own per chain clock so that Stan compilation is not counted) from about 984 seconds to about 324 seconds.
+Two changes cut sampling from about 984 seconds to about 324 seconds.
+The first sizes each study's grid to what it needs, rather than to a single shared value large enough for the widest study.
+The second uses the accrual design for the two early phase studies, rather than treating every study as a single cohort.
+Those timings are for 2 chains with 500 post warmup iterations each, measured with cmdstan's own per chain clock so that Stan compilation is not counted.
 Fitting this model here, including the one-off cost of compiling the Stan program, took `r round(ebola_fit_time[["elapsed"]], 0)` seconds.
 Further speed up is possible, for example by vectorising the family or sharing one grid across the summaries of a study, but is not needed for a fit of this size.
 
 ## Checking the fit against the reported estimates
 
 For every row we fitted to, we can compare the reported value to what the model implies, both for that study specifically and for the pooled, population level, delay distribution with the `(1 | study)` term switched off.
-A row is a group of the summaries a study computed from the same delays, and predicts the first of them, so a study reporting a mean with a standard deviation appears at its mean and a study reporting a median with an interquartile range appears at its lower quartile.
-Doing this for every row at once, grouped by summary type, gives a forest style plot that is both a posterior predictive check, since most reported values should fall within their study level interval, and a synthesis summary, since the pooled interval shows what the meta-analysis implies each study should have seen.
+A row is a group of the summaries a study computed from the same delays, and predicts the first of them.
+A study reporting a mean with a standard deviation therefore appears at its mean, and a study reporting a median with an interquartile range appears at its lower quartile.
+Doing this for every row at once, grouped by summary type, gives a forest style plot.
+It is a posterior predictive check, since most reported values should fall within their study level interval.
+It is also a synthesis summary, since the pooled interval shows what the meta-analysis implies each study should have seen.
 
 <details><summary>Click to expand for code to prepare the forest plot</summary>
 
