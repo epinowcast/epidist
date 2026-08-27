@@ -30,6 +30,26 @@ cli::test_that_cli(".warn_unmatched_prior warns when passed a prior without a ma
   )
 })
 
+test_that(".warn_unmatched_prior names the priors which have no match", {
+  known <- brms::prior("normal(0, 10)", class = "Intercept")
+  new_prior <- brms::prior("normal(0, 5)", class = "b", coef = "sex")
+
+  expect_warning(
+    .warn_unmatched_prior(new_prior, known),
+    "class = b, coef = sex",
+    fixed = TRUE
+  )
+})
+
+test_that(".describe_prior gives the prior and the parameter it applies to", {
+  prior <- brms::prior("normal(0, 5)", class = "Intercept", dpar = "sigma") +
+    brms::prior("mu ~ normal(0, 5)", check = FALSE)
+  expect_identical(
+    .describe_prior(prior),
+    c("normal(0, 5) (class = Intercept, dpar = sigma)", "mu ~ normal(0, 5)")
+  )
+})
+
 test_that(".warn_unmatched_prior is silent when every prior matches", {
   known <- brms::prior("normal(0, 10)", class = "Intercept") +
     brms::prior("normal(0, 10)", class = "Intercept", dpar = "sigma")

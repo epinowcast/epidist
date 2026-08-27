@@ -30,6 +30,8 @@ See #483.
 The latent model checks of the event window priors moved to `R/latent_model.R` and dispatch on the data class, so a model can now state its own prior requirements.
 The returned priors, and the Stan code they produce, are unchanged.
 See #483.
+- The warning about unmatched priors now lists each prior with the parameter it applies to, rather than printing the internal join it came from.
+See #483.
 - Documented the return value of every exported function.
 - Fixed four typos that `inst/WORDLIST` was masking, corrected two moved URLs, title cased the `Title` field, and set `Language: en-GB`.
 - Fixed `inst/CITATION` rendering the year as `NULL`.

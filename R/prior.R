@@ -111,12 +111,42 @@ epidist_prior <- function(
   if (nrow(unmatched) > 0) {
     msg <- c(
       "!" = "One or more priors have no match in existing parameters:",
-      utils::capture.output(print(as.data.frame(unmatched))),
+      stats::setNames(.describe_prior(unmatched), rep("*", nrow(unmatched))),
       "i" = "To remove this warning consider changing prior specification." # nolint
     )
     cli_warn(message = msg)
   }
   return(invisible(NULL))
+}
+
+#' Describe prior distributions for use in messages
+#'
+#' Gives each prior as its distribution followed by the parameter it applies
+#' to, dropping the matching columns which are empty. Braces are escaped so
+#' that the result can be passed to `cli`.
+#'
+#' @inheritParams epidist_prior
+#'
+#' @returns A character vector with one entry per prior.
+#'
+#' @keywords internal
+.describe_prior <- function(prior) {
+  cols <- .prior_match_cols()
+  described <- vapply(
+    seq_len(nrow(prior)),
+    function(i) {
+      values <- unlist(prior[i, cols])
+      values <- values[!is.na(values) & nzchar(values)]
+      if (length(values) == 0) {
+        return(prior$prior[i])
+      }
+      parameter <- paste0(names(values), " = ", values, collapse = ", ")
+      return(paste0(prior$prior[i], " (", parameter, ")"))
+    },
+    character(1)
+  )
+  described <- gsub("{", "{{", described, fixed = TRUE)
+  return(gsub("}", "}}", described, fixed = TRUE))
 }
 
 #' Model specific checks of user supplied prior distributions
