@@ -31,6 +31,11 @@ aggregate these counts based on the formula specification. Default is NULL,
 which assigns a count of 1 to each row. Internally this is used to define
 the 'n' column of the returned object.}
 
+\item{primary}{The distribution of the primary event within its censoring
+window. \code{"uniform"}, the default, assumes it is equally likely at any
+point. \code{"expgrowth"} tilts it, with the growth rate estimated as the
+\code{pgrowth} distributional parameter.}
+
 \item{delay_min}{Minimum delay (left truncation point). Can be:
 \itemize{
 \item \code{NULL} (default): uses a \code{delay_min} column from the data if present,

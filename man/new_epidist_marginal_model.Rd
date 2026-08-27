@@ -8,6 +8,9 @@ new_epidist_marginal_model(data, primary = c("uniform", "expgrowth"))
 }
 \arguments{
 \item{data}{A data.frame to convert}
+
+\item{primary}{The primary event distribution, \code{"uniform"} or
+\code{"expgrowth"}.}
 }
 \value{
 An object of class \code{epidist_marginal_model}
