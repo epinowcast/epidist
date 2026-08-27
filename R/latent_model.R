@@ -203,9 +203,6 @@ epidist_family_model.epidist_latent_model <- function(
 ) {
   primary <- .primary_dist(data)
   if (identical(primary, "expgrowth")) {
-    # The growth rate becomes a distributional parameter, so it takes a
-    # formula and a prior like any other. identity link, since it can be
-    # negative during a decline.
     family$dpars <- c(family$dpars, "pgrowth")
     family$other_links <- c(family$other_links, "identity")
     family$other_bounds <- c(family$other_bounds, list(list(lb = NA, ub = NA)))

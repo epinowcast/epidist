@@ -4,7 +4,13 @@
 \alias{as_epidist_marginal_model.epidist_aggregate_data}
 \title{The marginal model method for \code{epidist_aggregate_data} objects}
 \usage{
-\method{as_epidist_marginal_model}{epidist_aggregate_data}(data, obs_time_threshold = 2, delay_min = NULL, ...)
+\method{as_epidist_marginal_model}{epidist_aggregate_data}(
+  data,
+  obs_time_threshold = 2,
+  delay_min = NULL,
+  primary = c("uniform", "expgrowth"),
+  ...
+)
 }
 \arguments{
 \item{data}{An \code{epidist_aggregate_data} object}

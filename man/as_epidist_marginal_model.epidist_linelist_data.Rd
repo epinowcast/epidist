@@ -8,6 +8,7 @@
   data,
   obs_time_threshold = 2,
   weight = NULL,
+  primary = c("uniform", "expgrowth"),
   delay_min = NULL,
   ...
 )
