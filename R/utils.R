@@ -428,15 +428,11 @@
 
 #' Capture the environment variables `rstan` leaks when compiling a model
 #'
-#' The `rstan` backend compiles models with `inline::cxxfunction()`, which sets
-#' `PKG_CPPFLAGS` and `PKG_LIBS` with [Sys.setenv()] and never restores them.
-#' The leaked `PKG_CPPFLAGS` force an include of the `Eigen` headers, so the
-#' next process to inherit them fails `pkgbuild::has_build_tools()`, which
-#' compiles a plain C file. `rstan` reruns that check verbosely when it fails,
-#' printing a spurious `fatal error: cmath: No such file or directory` before
-#' compiling the model successfully. Recording the variables before a fit, and
-#' restoring them with [.restore_compile_env()] afterwards, leaves the session
-#' as it was found. See #532.
+#' The `rstan` backend compiles through `inline::cxxfunction()`, which sets
+#' `PKG_CPPFLAGS` and `PKG_LIBS` and never restores them. The leaked flags make
+#' the next `pkgbuild::has_build_tools()` check fail, which prints a spurious
+#' compiler error before the model compiles and fits successfully. Restore them
+#' with [.restore_compile_env()] after a fit.
 #'
 #' @returns A named character vector of the current values, `NA` where unset.
 #'

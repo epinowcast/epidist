@@ -10,14 +10,10 @@
 A named character vector of the current values, \code{NA} where unset.
 }
 \description{
-The \code{rstan} backend compiles models with \code{inline::cxxfunction()}, which sets
-\code{PKG_CPPFLAGS} and \code{PKG_LIBS} with \code{\link[=Sys.setenv]{Sys.setenv()}} and never restores them.
-The leaked \code{PKG_CPPFLAGS} force an include of the \code{Eigen} headers, so the
-next process to inherit them fails \code{pkgbuild::has_build_tools()}, which
-compiles a plain C file. \code{rstan} reruns that check verbosely when it fails,
-printing a spurious \verb{fatal error: cmath: No such file or directory} before
-compiling the model successfully. Recording the variables before a fit, and
-restoring them with \code{\link[=.restore_compile_env]{.restore_compile_env()}} afterwards, leaves the session
-as it was found. See #532.
+The \code{rstan} backend compiles through \code{inline::cxxfunction()}, which sets
+\code{PKG_CPPFLAGS} and \code{PKG_LIBS} and never restores them. The leaked flags make
+the next \code{pkgbuild::has_build_tools()} check fail, which prints a spurious
+compiler error before the model compiles and fits successfully. Restore them
+with \code{\link[=.restore_compile_env]{.restore_compile_env()}} after a fit.
 }
 \keyword{internal}
