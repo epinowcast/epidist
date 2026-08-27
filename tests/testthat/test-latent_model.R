@@ -141,7 +141,9 @@ test_that("an expgrowth primary event adds a pgrowth parameter", {
   expect_match(code, "b_pgrowth", fixed = TRUE)
   # expgrowth_lpdf normalises, which matters because pgrowth is estimated.
   expect_match(code, "real expgrowth_lpdf", fixed = TRUE)
-  expect_match(code, "dot_expgrowth_raw_lpdf", fixed = TRUE)
+  # The generic primary dispatch is used, selecting expgrowth by its id.
+  expect_match(code, "dot_primary_raw_lpdf", fixed = TRUE)
+  expect_match(code, "real primary_lpdf", fixed = TRUE)
 })
 
 test_that("the growth rate takes a formula", {
