@@ -48,6 +48,8 @@ as_epidist_latent_model <- function(data, ...) {
 #'   ) |>
 #'   as_epidist_latent_model()
 as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
+  assert_epidist.epidist_linelist_data(data)
+
   data <- data |>
     mutate(
       # Time since primary event to observation

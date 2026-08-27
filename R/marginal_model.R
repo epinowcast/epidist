@@ -89,6 +89,8 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   delay_min = NULL,
   ...
 ) {
+  assert_epidist.epidist_linelist_data(data)
+
   data <- mutate(
     data,
     pwindow = .data$ptime_upr - .data$ptime_lwr,

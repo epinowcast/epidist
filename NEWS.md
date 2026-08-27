@@ -8,8 +8,8 @@ These re-check the object and drop any `epidist` class whose requirements it no 
 An object that still carries an `epidist` class is therefore a valid object of that class.
 `dplyr::group_by()` and results with no columns are exceptions, both documented in `?epidist_data`.
 See `?epidist_data` and #399.
-- Dropped the checks that ran on objects which had already been checked when they were created.
-The `as_epidist_*()` and `epidist_stancode()` methods now trust the class they dispatch on.
+- Dropped the checks in `epidist_stancode()` and in the conversions between linelist and aggregate data, which ran on objects that had already been checked.
+The conversions from linelist data to a model still check their input, because `new_epidist_linelist_data()` does not.
 See #399.
 - `epidist_transform_data_model()` now checks the object it builds for the marginal and naive models.
 That object was never checked before, which only showed once the check in `epidist_stancode()` was removed.

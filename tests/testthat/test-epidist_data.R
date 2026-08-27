@@ -174,3 +174,19 @@ test_that(".drop_epidist_class keeps epidist_data while a class remains", {
   expect_true(is_epidist_data(dropped))
   expect_false(is_epidist_data(.drop_epidist_class(prep_marginal_obs)))
 })
+
+test_that("converting a hand built linelist checks it first", {
+  # `new_epidist_linelist_data()` does not check, so an invalid object can
+  # carry the class until something checks it
+  invalid <- new_epidist_linelist_data(tibble::tibble(
+    ptime_lwr = 1,
+    ptime_upr = 1,
+    stime_lwr = 2,
+    stime_upr = 3,
+    obs_time = 4
+  ))
+
+  expect_error(as_epidist_latent_model(invalid))
+  expect_error(as_epidist_marginal_model(invalid))
+  expect_error(as_epidist_naive_model(invalid))
+})
