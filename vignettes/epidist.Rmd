@@ -522,11 +522,12 @@ The `add_summaries()` function then adds the mean and standard deviation of the 
 
 ```{r}
 draw_parameters <- function(fit) {
-  fit |>
+  draws <- fit |>
     epidist_strata() |>
     add_delay_parameter_draws(fit) |>
     add_summaries() |>
     ungroup()
+  return(draws)
 }
 
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
