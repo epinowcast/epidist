@@ -8,12 +8,10 @@
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Replace brms prior distributions — .replace_prior"><meta name="description" content="This function takes an existing set of prior distributions and updates them
 with new prior specifications. It matches priors based on their parameter
 class, coefficient, group, response, distributional parameter, and non-linear
-parameter. Any new priors that don't match existing ones can optionally
-trigger a warning."><meta property="og:description" content="This function takes an existing set of prior distributions and updates them
+parameter."><meta property="og:description" content="This function takes an existing set of prior distributions and updates them
 with new prior specifications. It matches priors based on their parameter
 class, coefficient, group, response, distributional parameter, and non-linear
-parameter. Any new priors that don't match existing ones can optionally
-trigger a warning."><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
+parameter."><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -66,19 +64,12 @@ trigger a warning."><meta property="og:image" content="https://epidist.epinowcas
     <p>This function takes an existing set of prior distributions and updates them
 with new prior specifications. It matches priors based on their parameter
 class, coefficient, group, response, distributional parameter, and non-linear
-parameter. Any new priors that don't match existing ones can optionally
-trigger a warning.</p>
+parameter.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">.replace_prior</span><span class="op">(</span></span>
-<span>  <span class="va">old_prior</span>,</span>
-<span>  <span class="va">prior</span>,</span>
-<span>  warn <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  merge <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  enforce_presence <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">.replace_prior</span><span class="op">(</span><span class="va">old_prior</span>, <span class="va">prior</span>, enforce_presence <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -92,18 +83,8 @@ be updated.</p></dd>
 
 <dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
 <dd><p>One or more prior distributions in the class <code>brmsprior</code>
-containing the new specifications. Can include custom set priors using the
-syntax <code>parameter ~ distribution</code></p></dd>
-
-
-<dt id="arg-warn">warn<a class="anchor" aria-label="anchor" href="#arg-warn"></a></dt>
-<dd><p>If <code>TRUE</code> then a warning will be displayed if a prior in <code>prior</code>
-has no match in <code>old_prior</code>. Defaults to <code>FALSE</code></p></dd>
-
-
-<dt id="arg-merge">merge<a class="anchor" aria-label="anchor" href="#arg-merge"></a></dt>
-<dd><p>If <code>TRUE</code> then merge new priors with existing ones, if <code>FALSE</code>
-only use new priors. Defaults to <code>TRUE</code></p></dd>
+containing the new specifications. Can include manually specified priors
+using the syntax <code>parameter ~ distribution</code>.</p></dd>
 
 
 <dt id="arg-enforce-presence">enforce_presence<a class="anchor" aria-label="anchor" href="#arg-enforce-presence"></a></dt>
@@ -113,14 +94,18 @@ available, otherwise keep old priors. Defaults to <code>TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A <code>brmsprior</code> object containing the updated prior distributions.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Prior distributions can be specified in two ways:</p><ol><li><p>Using the standard <code>brms</code> prior specification format. These priors are
 replaced based on matching parameter metadata (class, coefficient, group,
 etc.).</p></li>
-<li><p>Using custom set priors with the syntax <code>parameter ~ distribution</code>. These
-will only remove existing custom priors for the same parameter name but
-will not affect priors set via the standard <code>brms</code> specification format.
-Custom priors are excluded from the metadata-based joining process.</p></li>
+<li><p>Using manually specified priors with the syntax
+<code>parameter ~ distribution</code>. These replace existing manual priors for the
+same parameter name and are otherwise left alone. Manual priors are
+excluded from the metadata based matching.</p></li>
 </ol></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

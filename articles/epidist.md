@@ -639,19 +639,6 @@ naive_fit <- epidist(
 #> ℹ This should improve model efficiency with no loss of information.
 #> Compiling Stan program...
 #> 
-#> Trying to compile a simple C file
-#> Running /opt/R/4.6.1/lib/R/bin/R CMD SHLIB foo.c
-#> using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0’
-#> gcc -std=gnu2x -I"/opt/R/4.6.1/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/" -DRCPP_PARALLEL_USE_TBB=1 -DTBB_INTERFACE_NEW -I/home/runner/work/_temp/Library/RcppParallel/include -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o
-#> In file included from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Core:19,
-#>                  from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Dense:1,
-#>                  from /home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22,
-#>                  from <command-line>:
-#> /home/runner/work/_temp/Library/RcppEigen/include/Eigen/src/Core/util/Macros.h:679:10: fatal error: cmath: No such file or directory
-#>   679 | #include <cmath>
-#>       |          ^~~~~~~
-#> compilation terminated.
-#> make: *** [/opt/R/4.6.1/lib/R/etc/Makeconf:190: foo.o] Error 1
 #> Start sampling
 ```
 
@@ -690,8 +677,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.49 1.00     3078     2301
-#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3612     2660
+#> Intercept           1.42      0.03     1.35     1.49 1.00     3603     2464
+#> sigma_Intercept    -0.75      0.05    -0.85    -0.65 1.00     3340     2681
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -771,19 +758,6 @@ marginal_fit <- epidist(
 #> ℹ This should improve model efficiency with no loss of information.
 #> Compiling Stan program...
 #> 
-#> Trying to compile a simple C file
-#> Running /opt/R/4.6.1/lib/R/bin/R CMD SHLIB foo.c
-#> using C compiler: ‘gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0’
-#> gcc -std=gnu2x -I"/opt/R/4.6.1/lib/R/include" -DNDEBUG   -I"/home/runner/work/_temp/Library/Rcpp/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/"  -I"/home/runner/work/_temp/Library/RcppEigen/include/unsupported"  -I"/home/runner/work/_temp/Library/BH/include" -I"/home/runner/work/_temp/Library/StanHeaders/include/src/"  -I"/home/runner/work/_temp/Library/StanHeaders/include/"  -I"/home/runner/work/_temp/Library/RcppParallel/include/" -DRCPP_PARALLEL_USE_TBB=1 -DTBB_INTERFACE_NEW -I/home/runner/work/_temp/Library/RcppParallel/include -I"/home/runner/work/_temp/Library/rstan/include" -DEIGEN_NO_DEBUG  -DBOOST_DISABLE_ASSERTS  -DBOOST_PENDING_INTEGER_LOG2_HPP  -DSTAN_THREADS  -DUSE_STANC3 -DSTRICT_R_HEADERS  -DBOOST_PHOENIX_NO_VARIADIC_EXPRESSION  -D_HAS_AUTO_PTR_ETC=0  -include '/home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp'  -D_REENTRANT -DRCPP_PARALLEL_USE_TBB=1   -I/usr/local/include    -fpic  -g -O2  -c foo.c -o foo.o
-#> In file included from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Core:19,
-#>                  from /home/runner/work/_temp/Library/RcppEigen/include/Eigen/Dense:1,
-#>                  from /home/runner/work/_temp/Library/StanHeaders/include/stan/math/prim/fun/Eigen.hpp:22,
-#>                  from <command-line>:
-#> /home/runner/work/_temp/Library/RcppEigen/include/Eigen/src/Core/util/Macros.h:679:10: fatal error: cmath: No such file or directory
-#>   679 | #include <cmath>
-#>       |          ^~~~~~~
-#> compilation terminated.
-#> make: *** [/opt/R/4.6.1/lib/R/etc/Makeconf:190: foo.o] Error 1
 #> Start sampling
 ```
 
@@ -803,8 +777,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.64 1.00     2500     2466
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     2119     2296
+#> Intercept           1.55      0.05     1.46     1.65 1.00     2044     2186
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2165     2006
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -835,12 +809,12 @@ predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
 
 head(predicted_parameters)
 #>      model draw index       mu     sigma     mean       sd
-#> 1 marginal    1     1 1.512402 0.4956950 5.130784 2.707836
-#> 2 marginal    2     1 1.551865 0.4487615 5.220321 2.465726
-#> 3 marginal    3     1 1.568937 0.5138432 5.479172 3.011918
-#> 4 marginal    4     1 1.604531 0.5485542 5.783372 3.426813
-#> 5 marginal    5     1 1.546814 0.5011379 5.324843 2.845126
-#> 6 marginal    6     1 1.534640 0.5257578 5.327330 3.006064
+#> 1 marginal    1     1 1.505007 0.4590620 5.004694 2.423992
+#> 2 marginal    2     1 1.592681 0.4575938 5.459608 2.634951
+#> 3 marginal    3     1 1.489610 0.5449844 5.145457 3.025888
+#> 4 marginal    4     1 1.564919 0.4820841 5.371579 2.747555
+#> 5 marginal    5     1 1.534129 0.4952994 5.242454 2.764281
+#> 6 marginal    6     1 1.515004 0.4926812 5.136499 2.692283
 ```
 
 Note that by default

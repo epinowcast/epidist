@@ -7,8 +7,8 @@ family specific prior distributions from
 and user provided prior distributions into a single set of custom
 priors. Each element overwrites previous elements, such that user
 provided prior distributions have the highest priority. If a user prior
-distribution is provided which is not included in the model, a warning
-will be shown.
+distribution is provided which is not a parameter of the model, a
+warning will be shown.
 
 ## Usage
 
@@ -74,6 +74,15 @@ Note that the matching of priors is imperfect as it does not use brms'
 internal prior matching functionality. For example, it cannot
 distinguish between a prior for all coefficients (class = "b") and a
 prior for a specific coefficient (class = "b" and coef specified).
+
+Some models add parameters which `brms` does not know about, such as the
+event windows of the latent model. Priors for these are written using
+the `parameter ~ distribution` syntax of
+[`brms::set_prior()`](https://paulbuerkner.com/brms/reference/set_prior.html)
+and are passed to Stan unchanged. A prior written this way replaces any
+existing prior for the same parameter and is not checked against the
+parameters of the model. Note that the latent model requires a
+`uniform(0, 1)` prior on its event windows.
 
 ## See also
 

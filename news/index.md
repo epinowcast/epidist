@@ -44,22 +44,48 @@
   observation times cause very limited right truncation. It also points
   at `obs_time_threshold` for users who do not want the behaviour. See
   [\#536](https://github.com/epinowcast/epidist/issues/536).
-
+- [`epidist_prior()`](https://epidist.epinowcast.org/reference/epidist_prior.md)
+  no longer warns about user priors on parameters that are in the model
+  but not in the `epidist` default set. The warning now checks user
+  priors against the `brms` default priors for the model as well as the
+  `epidist` ones, so a prior on a regression coefficient no longer looks
+  unmatched. See
+  [\#483](https://github.com/epinowcast/epidist/issues/483).
+- Simplified the internals of prior handling.
+  [`.replace_prior()`](https://epidist.epinowcast.org/reference/dot-replace_prior.md)
+  now only merges priors, with the warning about unmatched priors moved
+  to
+  [`.warn_unmatched_prior()`](https://epidist.epinowcast.org/reference/dot-warn_unmatched_prior.md)
+  and the `merge` argument handled in
+  [`epidist_prior()`](https://epidist.epinowcast.org/reference/epidist_prior.md).
+  The latent model checks of the event window priors moved to
+  `R/latent_model.R` and dispatch on the data class, so a model can now
+  state its own prior requirements. The returned priors, and the Stan
+  code they produce, are unchanged. See
+  [\#483](https://github.com/epinowcast/epidist/issues/483).
+- The warning about unmatched priors now lists each prior with the
+  parameter it applies to, rather than printing the internal join it
+  came from. See
+  [\#483](https://github.com/epinowcast/epidist/issues/483).
 - Documented the return value of every exported function.
-
 - Declared `scales` in `Suggests`, which the FAQ vignette loads but
   nothing declared.
-
 - Fixed four typos that `inst/WORDLIST` was masking, corrected two moved
   URLs, title cased the `Title` field, and set `Language: en-GB`.
-
 - Fixed `inst/CITATION` rendering the year as `NULL`.
-
+- [`epidist()`](https://epidist.epinowcast.org/reference/epidist.md) now
+  restores the `PKG_CPPFLAGS` and `PKG_LIBS` environment variables it
+  found before fitting. The `rstan` backend sets both while compiling
+  and never restores them. The leaked `PKG_CPPFLAGS` made the next
+  [`pkgbuild::has_build_tools()`](https://pkgbuild.r-lib.org/reference/has_build_tools.html)
+  check fail, which printed a spurious
+  `fatal error: cmath: No such file or directory` before the model
+  compiled and fitted successfully. See
+  [\#532](https://github.com/epinowcast/epidist/issues/532).
 - Added
   [`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md),
   which turns simulated event times into the censored dates an analyst
   would receive.
-
 - Removed the calls to unexported `brms` functions that
   `R CMD check --as-cran` flags. `R/brms-compat.R` now holds small
   internal helpers reproducing the narrow behaviour `epidist` relied on
@@ -73,47 +99,34 @@
   the `brms` authors. See
   [\#420](https://github.com/epinowcast/epidist/issues/420) and
   paul-buerkner/brms#1676.
-
 - Removed the `Remotes` field from `DESCRIPTION` so dependencies resolve
   from CRAN. `cmdstanr` is now found through `Additional_repositories`
   and the development version of `brms` is no longer used. See
   [\#592](https://github.com/epinowcast/epidist/issues/592).
-
 - Turned off evaluation of the approximate inference vignette. It uses
   `pathfinder`, which needs an unreleased `brms` fix. This release
   resolves `brms` from CRAN. See
   [\#579](https://github.com/epinowcast/epidist/issues/579).
-
 - Added a `brms (>= 2.23.0)` floor, the version the compatibility
   helpers were checked against.
-
 - Pointed the CI workflows at the Stan r-universe with
   `extra-repositories`. Dropping `Remotes` means `pak` can no longer
   resolve `cmdstanr`. `pak` does not read `Additional_repositories`.
-
 - Raised the minimum R version to 4.1.0. The package uses the native
   pipe and the lambda shorthand. Both need R 4.1.0.
-
 - Added the copyright holder role to Sam Abbott in `DESCRIPTION`.
-
 - Guarded the shared test fits and the tests that use them so the suite
   runs without `cmdstanr`.
-
 - Wrapped the
   [`epidist()`](https://epidist.epinowcast.org/reference/epidist.md) and
   [`epidist_diagnostics()`](https://epidist.epinowcast.org/reference/epidist_diagnostics.md)
   examples in `\donttest{}`. Both fit a model. They ran for 118 and 110
   seconds against CRAN’s 5 second guidance.
-
 - Anchored the `brms` links in the documentation so `R CMD check` no
   longer reports Rd cross-references with missing package anchors.
-
 - Dropped a stale `fix` entry from the declared global variables.
-
 - Updated the `brms` documentation URL, which had moved.
-
 - Added `cran-comments.md`.
-
 - Rewrote the generic
   [`epidist_gen_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_log_lik.md)
   method so it evaluates the `brms` log likelihood once per delay rather
