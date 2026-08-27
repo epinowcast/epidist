@@ -200,6 +200,13 @@ pp_check(fit, newdata = data_expanded, ndraws = 100)
 
 For more advanced custom visualizations, you can also use `tidybayes::add_predicted_draws()` as demonstrated in the ["Advanced features with Ebola data"](https://epidist.epinowcast.org/articles/ebola.html) vignette.
 
+## What is an observation in the meta model?
+
+`as_epidist_meta_model()` fits the summaries a study computed from the same delays jointly, so one row of the model data is a group of summaries rather than a single reported value.
+This is the same situation as aggregated data, where one row stands for many individual delays.
+`brms::log_lik()` and `loo::loo()` work at the row level, so their values are per group, and `pp_check()` needs the same care as described above.
+Predictions for summary rows are the reported summary itself rather than a delay, so restrict `pp_check()` to the individual level rows of a mixed fit.
+
 ## I'd like to run a simulation study
 
 We recommend use of the [`purrr`](https://purrr.tidyverse.org/) package for running many `epidist` models, for example as a part of a simulation study.

@@ -17,7 +17,17 @@ vignette: >
 bibliography: references.bib
 ---
 
-
+```{r setup, include=FALSE}
+# exclude compile warnings from cmdstanr
+knitr::opts_chunk$set(
+  fig.path = file.path("figures", "meta-"),
+  collapse = TRUE,
+  comment = "#>",
+  message = TRUE,
+  warning = FALSE,
+  error = FALSE
+)
+```
 
 ::: {.alert .alert-warning}
 The meta model is experimental.
@@ -59,29 +69,11 @@ This is the format we recommend, because it keeps the correlation between the qu
 
 # Setup {#setup}
 
-
-``` r
+```{r load-requirements}
 library(epidist)
 library(brms)
-#> Loading required package: Rcpp
-#> Loading 'brms' package (version 2.23.0). Useful instructions
-#> can be found by typing help('brms'). A more detailed introduction
-#> to the package is available through vignette('brms_overview').
-#>
-#> Attaching package: 'brms'
-#> The following object is masked from 'package:stats':
-#>
-#>     ar
 library(ggplot2)
 library(dplyr)
-#>
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#>
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#>
-#>     intersect, setdiff, setequal, union
 library(tidyr)
 library(purrr) # nolint
 library(tibble)
@@ -91,8 +83,7 @@ library(tibble)
 
 We simulate an outbreak exactly as in `vignette("epidist")`: a stochastic epidemic (Figure \@ref(fig:outbreak) shows the case counts) with a lognormal delay between primary (symptom onset) and secondary (case notification) events, both interval censored to a day.
 
-
-``` r
+```{r}
 set.seed(101)
 meanlog <- 1.8
 sdlog <- 0.5
@@ -119,8 +110,7 @@ obs_cens <- obs |>
 
 (ref:outbreak) Case counts over the course of the simulated outbreak (only every 50th case is shown to avoid over-plotting).
 
-
-``` r
+```{r outbreak, fig.cap="(ref:outbreak)"}
 obs_cens |>
   filter(case %% 50 == 0) |>
   ggplot(aes(x = ptime, y = case)) +
@@ -129,13 +119,10 @@ obs_cens |>
   theme_minimal()
 ```
 
-![(ref:outbreak)](figures/meta-outbreak-1.png)
-
 Now imagine several studies each analysing this outbreak at a different point in time, reporting integer date differences with no adjustment for right truncation, that is `cens_adjusted = 0` and `trunc_adjusted = FALSE`.
 We mimic this by taking cases whose delay is less than a study specific cutoff, since a case with a longer delay would not yet have been observed by that study.
 
-
-``` r
+```{r}
 naive_snapshot <- function(cutoff) {
   delays <- obs_cens |>
     filter(.data$delay_daily + 1 <= cutoff) |>
@@ -152,8 +139,7 @@ bias_illustration <- map(c(4, 6, 8, 12, 16, 25), naive_snapshot) |>
 
 (ref:bias) The naive mean delay from a snapshot taken with a given cutoff (points), compared to the true mean delay (dashed line). Studies analysing the outbreak earlier see a more heavily right truncated, and so more biased, sample of delays.
 
-
-``` r
+```{r bias, fig.cap="(ref:bias)"}
 ggplot(bias_illustration, aes(x = cutoff, y = naive_mean)) +
   geom_line(col = "#56B4E9") +
   geom_point(col = "#56B4E9", size = 2) +
@@ -162,8 +148,6 @@ ggplot(bias_illustration, aes(x = cutoff, y = naive_mean)) +
   theme_minimal()
 ```
 
-![(ref:bias)](figures/meta-bias-1.png)
-
 Real reviews collect studies that differ in how they measured delays and in what they chose to report.
 We build seven such studies from the same line list, each applying its own estimation procedure to it.
 Every study measures its delays as its procedure would, rather than being labelled after the fact, so recovering the simulation settings from them is a genuine test of the model.
@@ -171,8 +155,7 @@ The table below sets out what each one did and reports.
 
 <details><summary>Click to expand for code to build the simulated studies</summary>
 
-
-``` r
+```{r}
 set.seed(2)
 
 # The delays each censoring adjustment would have measured.
@@ -295,8 +278,7 @@ biased_vcov <- map(simulated_studies, "vcov") |> list_flatten() |> compact()
 
 (ref:studies) The seven simulated studies, their estimation procedures and what each reports.
 
-
-``` r
+```{r studies}
 study_designs |>
   transmute(
     Study = study,
@@ -322,59 +304,14 @@ study_designs |>
   knitr::kable(caption = "(ref:studies)")
 ```
 
-
-
-Table: (ref:studies)
-
-|Study          |Reports                          |Censoring           |Truncation    | Obs time| Min delay|
-|:--------------|:--------------------------------|:-------------------|:-------------|--------:|---------:|
-|naive cohort   |mean, sd                         |0: date differences |cohort cutoff |       12|         0|
-|naive IQR      |quantiles at p = 0.25, 0.5, 0.75 |0: date differences |cohort cutoff |       16|         0|
-|calendar stop  |quantiles at p = 0.2, 0.5, 0.8   |0: date differences |calendar stop |       20|         0|
-|uniform window |mean, sd                         |2: uniform window   |cohort cutoff |       25|         0|
-|midpoint       |quantiles at p = 0.3, 0.6, 0.9   |3: midpoint         |cohort cutoff |       30|         0|
-|adjusted (MVN) |mean, sd, quantiles + covariance |1: fully adjusted   |adjusted      |      Inf|         0|
-|delays over 2d |mean, sd                         |0: date differences |cohort cutoff |       18|         2|
-
-
-
 The study reporting a covariance matrix over its summaries could not share its delays, so it published the vector of summaries and the covariance between them from `bootstrap_delay_estimates()` instead.
 That keeps the correlation between the quantities it reports, which a standard error for each one throws away, and is what we recommend when a line list cannot be shared.
 
-
-``` r
+```{r}
 biased_estimates <- as_epidist_estimates_data(
   biased_estimates_df, vcov = biased_vcov
 )
-#> ℹ No `pwindow` column supplied, assuming a censoring window of 1 (daily
-#>   reporting) for every study.
-#> ℹ No `swindow` column supplied, assuming a censoring window of 1 (daily
-#>   reporting) for every study.
 biased_estimates
-#> # A tibble: 19 × 15
-#>    study         type  value    se     n     p pwindow swindow relative_obs_time
-#>    <chr>         <chr> <dbl> <dbl> <int> <dbl>   <dbl>   <dbl>             <dbl>
-#>  1 naive cohort  mean   6.14    NA   250 NA          1       1                12
-#>  2 naive cohort  sd     2.49    NA   250 NA          1       1                12
-#>  3 naive IQR     quan…  4       NA   250  0.25       1       1                16
-#>  4 naive IQR     quan…  6       NA   250  0.5        1       1                16
-#>  5 naive IQR     quan…  8       NA   250  0.75       1       1                16
-#>  6 calendar stop quan…  3       NA   250  0.2        1       1                20
-#>  7 calendar stop quan…  5       NA   250  0.5        1       1                20
-#>  8 calendar stop quan…  7       NA   250  0.8        1       1                20
-#>  9 uniform wind… mean   7.20    NA   250 NA          1       1                25
-#> 10 uniform wind… sd     3.35    NA   250 NA          1       1                25
-#> 11 midpoint      quan…  4.5     NA   250  0.3        1       1                30
-#> 12 midpoint      quan…  7.5     NA   250  0.6        1       1                30
-#> 13 midpoint      quan… 11.5     NA   250  0.9        1       1                30
-#> 14 adjusted (MV… mean   7.01    NA   250 NA          1       1               Inf
-#> 15 adjusted (MV… sd     3.64    NA   250 NA          1       1               Inf
-#> 16 adjusted (MV… quan…  4.32    NA   250  0.25       1       1               Inf
-#> 17 adjusted (MV… quan…  8.86    NA   250  0.75       1       1               Inf
-#> 18 delays over … mean   6.45    NA   250 NA          1       1                18
-#> 19 delays over … sd     3.02    NA   250 NA          1       1                18
-#> # ℹ 6 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
-#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>, max_delay <dbl>
 ```
 
 ::: {.alert .alert-primary}
@@ -388,8 +325,7 @@ We set it explicitly here because the default, twenty times the largest reported
 
 We convert the estimates to an `epidist_meta_model` object and fit it, exactly as we would fit any other `epidist` model.
 
-
-``` r
+```{r results='hide', message=FALSE}
 meta_summary_only <- as_epidist_meta_model(estimates = biased_estimates)
 
 fit_meta_summary <- epidist(
@@ -401,36 +337,18 @@ fit_meta_summary <- epidist(
 )
 ```
 
-
-``` r
+```{r}
 summary(fit_meta_summary)
-#>  Family: meta_lognormal
-#>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ 1
-#>          sigma ~ 1
-#>    Data: transformed_data (Number of observations: 7)
-#>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
-#>          total post-warmup draws = 1000
-#>
-#> Regression Coefficients:
-#>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.79      0.01     1.76     1.82 1.01      914      662
-#> sigma_Intercept    -0.67      0.02    -0.72    -0.63 1.01      665      557
-#>
-#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
-#> and Tail_ESS are effective sample size measures, and Rhat is the potential
-#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
-Even though every study is individually biased, the meta model recovers the true delay distribution parameters (a log mean of 1.8 and log standard deviation of 0.5) closely.
+Even though every study is individually biased, the meta model recovers the true delay distribution parameters (a log mean of `r meanlog` and log standard deviation of `r sdlog`) closely.
 
 ## What happens with the wrong metadata
 
 The metadata about how a study adjusted its estimate matters.
 Whether a study corrected for right truncation is the field reviews most often leave out, so we refit the same seven studies with every one of them relabelled as `trunc_adjusted = TRUE`.
 
-
-``` r
+```{r results='hide', message=FALSE}
 wrong_flags_estimates <- biased_estimates_df |>
   mutate(trunc_adjusted = TRUE) |>
   as_epidist_estimates_data(vcov = biased_vcov)
@@ -445,25 +363,8 @@ fit_meta_wrong_flags <- epidist(
 )
 ```
 
-
-``` r
+```{r}
 summary(fit_meta_wrong_flags)
-#>  Family: meta_lognormal
-#>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ 1
-#>          sigma ~ 1
-#>    Data: transformed_data (Number of observations: 7)
-#>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
-#>          total post-warmup draws = 1000
-#>
-#> Regression Coefficients:
-#>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.73      0.01     1.71     1.76 1.00      877      503
-#> sigma_Intercept    -0.70      0.03    -0.75    -0.64 1.00      926      597
-#>
-#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
-#> and Tail_ESS are effective sample size measures, and Rhat is the potential
-#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
 The model has no way to know the metadata is wrong, so it takes each reported summary as an estimate of the untruncated delay and converges confidently on a mean several percent too short.
@@ -476,8 +377,7 @@ The model can only adjust for the biases it is told about.
 Now suppose we also have a small individual level sample, perhaps from one site that shared its line list.
 We add 40 individual records, observed up to day 40, alongside the same seven published summaries.
 
-
-``` r
+```{r results='hide', message=FALSE}
 individual_subsample <- obs_cens |>
   mutate(obs_time = 40) |>
   filter(.data$stime_upr <= .data$obs_time) |>
@@ -505,25 +405,8 @@ fit_meta_mixed <- epidist(
 )
 ```
 
-
-``` r
+```{r}
 summary(fit_meta_mixed)
-#>  Family: meta_lognormal
-#>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ 1
-#>          sigma ~ 1
-#>    Data: transformed_data (Number of observations: 39)
-#>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
-#>          total post-warmup draws = 1000
-#>
-#> Regression Coefficients:
-#>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.79      0.01     1.76     1.81 1.01      689      572
-#> sigma_Intercept    -0.67      0.02    -0.72    -0.63 1.00      735      643
-#>
-#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
-#> and Tail_ESS are effective sample size measures, and Rhat is the potential
-#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
 ## Reference: the marginal model on the full line list
@@ -531,8 +414,7 @@ summary(fit_meta_mixed)
 Finally, as a reference, we fit the marginal model (`vignette("epidist")`) to a larger, effectively untruncated, individual level sample from the same outbreak.
 This is what we would recover if we had access to the underlying data rather than only published summaries.
 
-
-``` r
+```{r results='hide', message=FALSE}
 reference_subsample <- obs_cens |>
   mutate(obs_time = max(.data$stime_upr)) |>
   slice_sample(n = 300)
@@ -558,8 +440,7 @@ fit_reference <- epidist(
 
 <details><summary>Click to expand for code to prepare the comparison plot</summary>
 
-
-``` r
+```{r}
 predicted_parameters <- list(
   "adjusted (summary only)" = fit_meta_summary,
   "truncation ignored" = fit_meta_wrong_flags,
@@ -605,20 +486,16 @@ p_compare <- predicted_parameters |>
 
 (ref:compare) Posterior draws of the delay distribution parameters from the four fits, compared to the true values used in the simulation (dashed lines). The bias-adjusted, mixed, and reference fits agree closely with the truth. The fit told that every study had adjusted for right truncation does not.
 
-
-``` r
+```{r compare, fig.cap="(ref:compare)"}
 p_compare
 ```
-
-![(ref:compare)](figures/meta-compare-1.png)
 
 # Real world estimates from epireview {#epireview}
 
 [epireview](https://github.com/mrc-ide/epireview) [@epireview] collates published parameter estimates gathered by the Pathogen Epidemiology Review Group.
 It is not on CRAN, so install it from GitHub if you do not already have it.
 
-
-``` r
+```{r}
 if (!requireNamespace("epireview", quietly = TRUE)) {
   if (!requireNamespace("remotes", quietly = TRUE)) {
     install.packages("remotes")
@@ -627,15 +504,12 @@ if (!requireNamespace("epireview", quietly = TRUE)) {
   remotes::install_github("mrc-ide/epireview")
 }
 library(epireview) # nolint: library_call_linter.
-#> Loading required package: epitrix
-#> Loading required package: ggforce
 ```
 
 We use the onset to death delay from the Ebola outbreak data.
 Alongside the delay type we filter to the value types we can model (means and medians), to estimates reported in days with no scaling exponent, and to parameters that are not inverse rates, so that other value types cannot silently slip in as medians.
 
-
-``` r
+```{r}
 ebola <- suppressMessages(load_epidata("ebola"))
 onset_to_death_all <- ebola$params |>
   filter(
@@ -651,10 +525,9 @@ onset_to_death <- onset_to_death_all |>
     !.data$inverse_param
   )
 nrow(onset_to_death)
-#> [1] 29
 ```
 
-For these data the hygiene filters remove 0 rows, but they guard against mis-modelling if the underlying database changes.
+For these data the hygiene filters remove `r nrow(onset_to_death_all) - nrow(onset_to_death)` rows, but they guard against mis-modelling if the underlying database changes.
 
 ::: {.alert .alert-primary}
 epireview does not record how, or whether, a study adjusted for censoring or right truncation, so we have to state assumptions explicitly rather than leave them implicit.
@@ -672,8 +545,7 @@ A small helper maps each row of `onset_to_death` to the long format `as_epidist_
 
 <details><summary>Click to expand for the epireview conversion helper</summary>
 
-
-``` r
+```{r}
 row_to_estimates <- function(
   study, n, trunc_adjusted, relative_obs_time, trunc_design, cens_adjusted,
   max_delay, parameter_value_type, parameter_value, ...
@@ -719,8 +591,7 @@ row_to_estimates <- function(
 
 </details>
 
-
-``` r
+```{r}
 ebola_estimates_df <- onset_to_death |>
   mutate(
     early_phase = .data$method_moment_value %in%
@@ -755,21 +626,16 @@ ebola_estimates_df <- onset_to_death |>
   )
 
 ebola_estimates <- as_epidist_estimates_data(ebola_estimates_df)
-#> ℹ No `pwindow` column supplied, assuming a censoring window of 1 (daily
-#>   reporting) for every study.
-#> ℹ No `swindow` column supplied, assuming a censoring window of 1 (daily
-#>   reporting) for every study.
 ```
 
 ::: {.alert .alert-primary}
 `max_delay` is set per study above rather than to one shared value, because a grid short relative to a study's own reported spread biases its implied standard deviation downwards; `as_epidist_estimates_data()` warns if this happens.
-That grid is only used to compute the implied summaries of studies with `cens_adjusted = 0`; the 4 studies that already report a fitted distribution (`cens_adjusted = 1`) use its closed form continuous moments directly and need no grid at all.
+That grid is only used to compute the implied summaries of studies with `cens_adjusted = 0`; the `r length(unique(ebola_estimates_df$study[ebola_estimates_df$cens_adjusted == 1]))` studies that already report a fitted distribution (`cens_adjusted = 1`) use its closed form continuous moments directly and need no grid at all.
 :::
 
 Onset to death delays are usually right skewed, so we fit a Gamma rather than a lognormal distribution, with a `(1 | study)` term to allow for genuine differences between studies (see the note on plug in standard errors in `?as_epidist_meta_model`).
 
-
-``` r
+```{r results='hide', message=FALSE}
 ebola_meta <- as_epidist_meta_model(estimates = ebola_estimates)
 
 t <- proc.time()
@@ -785,34 +651,12 @@ fit_ebola <- epidist(
 ebola_fit_time <- proc.time() - t
 ```
 
-
-``` r
+```{r}
 summary(fit_ebola)
-#>  Family: meta_gamma
-#>   Links: mu = log; shape = log
-#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ (1 | study)
-#>          shape ~ 1
-#>    Data: transformed_data (Number of observations: 29)
-#>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
-#>          total post-warmup draws = 1000
-#>
-#> Multilevel Hyperparameters:
-#> ~study (Number of levels: 29)
-#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)     0.21      0.05     0.14     0.32 1.01      280      564
-#>
-#> Regression Coefficients:
-#>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           2.31      0.05     2.21     2.40 1.01      265      286
-#> shape_Intercept     0.57      0.05     0.48     0.65 1.00     1122      827
-#>
-#> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
-#> and Tail_ESS are effective sample size measures, and Rhat is the potential
-#> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
 Sizing each study's grid to what it needs, rather than a single shared value large enough for the widest study, and using the accrual design for the two early phase studies rather than treating every study as a single cohort, cut sampling (2 chains, 500 post warmup iterations each, timed with cmdstan's own per chain clock so that Stan compilation is not counted) from about 984 seconds to about 324 seconds.
-Fitting this model here, including the one-off cost of compiling the Stan program, took 150 seconds.
+Fitting this model here, including the one-off cost of compiling the Stan program, took `r round(ebola_fit_time[["elapsed"]], 0)` seconds.
 Further speed up is possible, for example by vectorising the family or sharing one grid across the summaries of a study, but is not needed for a fit of this size.
 
 ## Checking the fit against the reported estimates
@@ -823,8 +667,7 @@ Doing this for every row at once, grouped by summary type, gives a forest style 
 
 <details><summary>Click to expand for code to prepare the forest plot</summary>
 
-
-``` r
+```{r}
 population_draws <- predict_delay_parameters(fit_ebola, re_formula = NA) |>
   filter(index == 1)
 
@@ -920,18 +763,13 @@ p_forest <- ggplot(forest_data, aes(y = label)) +
 
 (ref:forest) Reported value with a 95% interval from 1.96 reported, or plug in, standard errors (black) against the 95% posterior predictive interval of the model implied reported quantity, at study level (blue) and pooled across studies with the `(1 | study)` term switched off (orange). Rows are grouped by summary type because a mean or standard deviation is on the delay scale in days while a quantile row is modelled on the cumulative probability scale (`vignette("model")`).
 
-
-``` r
+```{r forest, fig.cap="(ref:forest)", fig.width=10, fig.height=9}
 p_forest
-#> `height` was translated to `width`.
 ```
-
-![(ref:forest)](figures/meta-forest-1.png)
 
 Some of these estimates also report a fitted Gamma distribution, recorded by epireview as a mean and a standard deviation, which we convert to a shape and rate.
 
-
-``` r
+```{r}
 reported_gamma <- onset_to_death |>
   filter(!is.na(.data$distribution_type)) |>
   transmute(
@@ -943,23 +781,15 @@ reported_gamma <- onset_to_death |>
   mutate(shape = (mean / sd)^2, rate = shape / mean)
 
 reported_gamma
-#> # A tibble: 4 × 6
-#>   outbreak study             mean    sd shape  rate
-#>   <chr>    <chr>            <dbl> <dbl> <dbl> <dbl>
-#> 1 Kikwit   Rosello 2015 (1)  9.47  4.44  4.55 0.480
-#> 2 Mweka    Rosello 2015 (2)  7.62  4.44  2.95 0.387
-#> 3 Isiro    Rosello 2015 (3) 11.4   5.41  4.42 0.388
-#> 4 Boende   Rosello 2015 (4)  9.39  5.67  2.74 0.292
 ```
 
-All 4 of them come from the same article [@rosello2015ebola], which fitted a Gamma distribution separately to each of several outbreaks in the Democratic Republic of the Congo, so we label them by outbreak rather than by study.
+All `r nrow(reported_gamma)` of them come from the same article [@rosello2015ebola], which fitted a Gamma distribution separately to each of several outbreaks in the Democratic Republic of the Congo, so we label them by outbreak rather than by study.
 epireview records the mean of each fit as that study's reported estimate, so these four rows are already among the summaries we fitted to above.
 The comparison below therefore shows where the pooled estimate sits relative to these individual fits, rather than being an independent check.
 
 <details><summary>Click to expand for code to prepare the comparison plot</summary>
 
-
-``` r
+```{r}
 delay_grid <- seq(0, 30, by = 0.2)
 
 reported_curves <- reported_gamma |>
@@ -989,14 +819,11 @@ p_ebola <- ggplot() +
 
 </details>
 
-(ref:ebola) The population level onset to death delay implied by the meta model fit to 29 published summaries (blue lines, 200 posterior draws), compared to the 4 Gamma distributions reported by @rosello2015ebola, one for each outbreak in the Democratic Republic of the Congo that it covered (black lines). The means of those fits are themselves among the summaries the model was fitted to.
+(ref:ebola) The population level onset to death delay implied by the meta model fit to `r nrow(onset_to_death)` published summaries (blue lines, 200 posterior draws), compared to the `r nrow(reported_gamma)` Gamma distributions reported by @rosello2015ebola, one for each outbreak in the Democratic Republic of the Congo that it covered (black lines). The means of those fits are themselves among the summaries the model was fitted to.
 
-
-``` r
+```{r ebola, fig.cap="(ref:ebola)"}
 p_ebola
 ```
-
-![(ref:ebola)](figures/meta-ebola-1.png)
 
 # Learning more {#learning-more}
 

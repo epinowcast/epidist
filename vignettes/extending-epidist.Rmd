@@ -159,6 +159,28 @@ Every method it needs is in [`R/cure_model.R`](https://github.com/epiforecasts/c
 `cfrnow` also exports its own frontend.
 Its users call `prepare_cfr_data()`, `fit_cfr()` and `pp_check_cfr()` rather than `epidist()`.
 
+# A worked example inside the package: the meta model
+
+The meta model (`vignette("meta")`) is the same exercise carried out inside `epidist`, so its source is a second worked example alongside `cfrnow`.
+It fits published summary estimates, which need a different likelihood from individual level delays, and it needs a new data class to hold them.
+It is experimental, and its interface may still change.
+
+| Piece | Where | What it does |
+|---|---|---|
+| `as_epidist_estimates_data()` | `R/estimates_data.R` | A new data class for published summaries, with an `assert_epidist()` method |
+| `as_epidist_meta_model()` | `R/meta_model.R` | Sets the model class, from individual data, summaries, or both |
+| `epidist_family_model()` | `R/meta_model.R` | Declares the custom family and its `vars` |
+| `epidist_formula_model()` | `R/meta_model.R` | Adds the `vint()` and `vreal()` terms |
+| `epidist_transform_data_model()` | `R/meta_model.R` | Aggregates individual rows and leaves summary rows alone |
+| `epidist_stancode()` | `R/meta_model.R` | Injects the likelihood and the data arrays it indexes into |
+| `epidist_gen_meta_log_lik()`, `epidist_gen_meta_predict()` | `R/meta_summaries.R` | Post-processing, so `log_lik()` and `posterior_predict()` work |
+
+Three things it does are worth copying if your own likelihood needs them.
+
+- **Two kinds of row in one model.** Individual level rows reuse the marginal model likelihood and summary rows use their own. A slot on each row says which, and the likelihood branches on it.
+- **Data a row cannot carry.** A study may report any number of quantiles, and a row has a fixed number of slots. The reported values are passed to Stan as flat arrays through `brms::stanvar()`, and each row holds a start index and a length into them. Reordering or aggregating rows cannot break that, because the index does not depend on row order.
+- **Keeping the R and Stan likelihoods in step.** Post-processing needs an R mirror of the Stan likelihood. `tests/testthat/test-int-meta_model.R` fits a generated quantities program that calls the Stan function directly and checks it against the R version for every kind of row, so the two cannot drift apart.
+
 # Getting help
 
 If you are building an extension and something in this interface is awkward, please open an issue.

@@ -1,9 +1,9 @@
 # Rebuilds the precomputed vignettes.
 #
-# `ebola`, `faq` and `approx-inference` fit models and need cmdstanr, so they
-# are knitted from a `.Rmd.orig` source into a committed `.Rmd` holding static
-# output. That keeps them in the package without needing cmdstanr, or a long
-# model fit, at build time.
+# `ebola`, `faq`, `approx-inference` and `meta` fit models and need cmdstanr,
+# so they are knitted from a `.Rmd.orig` source into a committed `.Rmd`
+# holding static output. That keeps them in the package without needing
+# cmdstanr, or a long model fit, at build time.
 on:
   push:
     paths:
