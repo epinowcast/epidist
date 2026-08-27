@@ -17,6 +17,9 @@ See #399.
 
 ## Package
 
+- Reworded the message `as_epidist_marginal_model()` gives when it sets relative observation times to `Inf`.
+It now names the variables it changes, says how many values were changed, and gives the reason the effect on accuracy is small.
+See #536.
 - Documented the return value of every exported function.
 - Fixed four typos that `inst/WORDLIST` was masking, corrected two moved URLs, title cased the `Title` field, and set `Language: en-GB`.
 - Fixed `inst/CITATION` rendering the year as `NULL`.
