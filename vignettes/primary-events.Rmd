@@ -80,6 +80,10 @@ growing <- as_epidist_marginal_model(linelist, primary = "expgrowth")
 With `primary = "expgrowth"` the growth rate becomes a distributional parameter called `pgrowth`.
 It takes a formula and a prior in the same way as `mu` and `sigma`.
 
+The delays carry little information about the growth rate, so in practice the prior does the work.
+Epidemic growth is usually estimated separately, from case counts over the same period, and that estimate is passed here as a prior.
+The prior below is centred on the rate used to simulate, with a scale reflecting how well it is typically known.
+
 ```{r fit}
 fit_uniform <- epidist(
   uniform,
@@ -89,12 +93,12 @@ fit_uniform <- epidist(
 fit_growing <- epidist(
   growing,
   formula = bf(mu ~ 1, pgrowth ~ 1),
-  prior = prior(normal(0, 0.5), class = "Intercept", dpar = "pgrowth"),
+  prior = prior(normal(0.5, 0.1), class = "Intercept", dpar = "pgrowth"),
   chains = 2, cores = 2, refresh = 0, silent = 2
 )
 ```
 
-The tilted model recovers the growth rate used to simulate.
+The posterior for the rate stays close to the prior, which is expected.
 
 ```{r growth-estimate}
 summary(fit_growing)$fixed[
@@ -151,12 +155,12 @@ marginal_locations <- as_epidist_marginal_model(
 fit_locations <- epidist(
   marginal_locations,
   formula = bf(mu ~ 1, pgrowth ~ 1 + (1 | location)),
-  prior = prior(normal(0, 0.5), class = "Intercept", dpar = "pgrowth"),
+  prior = prior(normal(0.5, 0.2), class = "Intercept", dpar = "pgrowth"),
   chains = 2, cores = 2, refresh = 0, silent = 2
 )
 ```
 
-The estimated rates track the values used to simulate.
+Here the prior is shared across locations and the random effect lets each depart from it.
 
 ```{r location-estimates}
 newdata <- tibble(location = names(locations))
@@ -180,10 +184,11 @@ The effect grows with the censoring window and with the growth rate.
 With daily windows and a delay of several days it is usually small.
 With weekly reporting during rapid growth it is not.
 
-The rate is also only weakly identified from delays alone at daily resolution.
-In the single rate fit above its interval is wide, so treat a point estimate with caution.
+Treat the growth rate as something you supply rather than something you learn here.
+Delays contain little information about it, so a flat prior leaves the posterior close to flat.
+Take the rate from a separate estimate of epidemic growth and pass it as an informed prior.
 
-The growth rate is estimated here rather than fixed, so its uncertainty propagates into the delay estimate.
-Fixing it is also possible, by supplying a constant prior.
+Because it is a parameter rather than a fixed value, its uncertainty propagates into the delay estimate.
+A point value can still be used, by giving it a prior with a very small scale.
 
 # References
