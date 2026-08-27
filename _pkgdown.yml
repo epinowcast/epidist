@@ -66,6 +66,10 @@ reference:
   desc: Functions for fitting delay distribution models using `brms`
   contents:
   - has_concept("fit")
+- subtitle: Prediction data
+  desc: Functions for building `newdata` to predict from
+  contents:
+  - has_concept("newdata")
 - subtitle: Postprocess
   desc: Functions for postprocessing model output
   contents:
