@@ -48,6 +48,13 @@ They ran for 118 and 110 seconds against CRAN's 5 second guidance.
 - Dropped a stale `fix` entry from the declared global variables.
 - Updated the `brms` documentation URL, which had moved.
 - Added `cran-comments.md`.
+- Rewrote the generic `epidist_gen_log_lik()` method so it evaluates the `brms` log likelihood once per delay rather than once per delay per posterior draw.
+A single `brms` call already returns the cdf for every draw, so the results are cached and reused.
+The method also calls `primarycensored::pcens_cdf()` directly instead of `primarycensored::dpcens()`, which revalidates the distribution function at random points on every call and so would defeat the cache.
+Cost is now linear rather than quadratic in the number of draws.
+For 500 draws this is around 80 times faster, and the log likelihoods are unchanged. The guard that `dpcens()` applied when the delay upper bound exceeds the relative observation time is reproduced explicitly, since this no longer goes through `dpcens()`.
+Left truncation is carried through the rewritten path: the density is normalised over the interval from `delay_min` to the relative observation time.
+See #476.
 
 ## Documentation
 

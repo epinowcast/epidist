@@ -233,3 +233,85 @@ test_that(
     expect_false(isTRUE(all.equal(log_lik_fn(i = i, prep), expected)))
   }
 )
+
+test_that( # nolint: line_length_linter.
+  "epidist_gen_log_lik generic method agrees with the analytical method",
+  {
+    skip_on_cran()
+    skip_if_no_cmdstanr()
+
+    analytical <- epidist_gen_log_lik(lognormal())
+    log_lik_brms <- .get_brms_fn("log_lik", lognormal())
+    generic <- .generic_gen_log_lik(log_lik_brms)
+
+    # The marginal fit is weighted, so this also checks that the observation
+    # weights are applied once rather than folded into the cdf.
+    for (model_fit in list(fit, fit_marginal)) {
+      prep <- brms::prepare_predictions(model_fit)
+      prep$ndraws <- 10
+      for (i in 1:3) {
+        expect_equal(generic(i, prep), analytical(i, prep), tolerance = 1e-5)
+      }
+    }
+  }
+)
+
+test_that( # nolint: line_length_linter.
+  "epidist_gen_log_lik generic method evaluates each delay once for all draws",
+  {
+    skip_on_cran()
+    skip_if_no_cmdstanr()
+
+    prep <- brms::prepare_predictions(fit)
+
+    log_lik_brms <- .get_brms_fn("log_lik", lognormal())
+    counter <- new.env(parent = emptyenv())
+    counter$calls <- 0
+    counting_log_lik <- function(i, prep) {
+      counter$calls <- counter$calls + 1
+      return(log_lik_brms(i, prep))
+    }
+    generic <- .generic_gen_log_lik(counting_log_lik)
+
+    prep$ndraws <- 10
+    generic(1, prep)
+    calls_10 <- counter$calls
+
+    counter$calls <- 0
+    prep$ndraws <- 100
+    generic(1, prep)
+    calls_100 <- counter$calls
+
+    # The number of brms evaluations is set by the quadrature nodes rather
+    # than by the number of draws, so a ten fold increase in draws must not
+    # scale the number of calls.
+    expect_lt(calls_100, 2 * calls_10)
+    expect_lt(calls_100, 100)
+  }
+)
+
+test_that("the generic log likelihood rejects a delay beyond the observation time", { # nolint: line_length_linter.
+  # dpcens() errors on this, and the refactor integrates with pcens_cdf()
+  # instead, so the same guard has to be applied here. Without it the
+  # truncation normalisation can return a density above one.
+  skip_on_cran()
+
+  expect_error(
+    primarycensored::dpcens(
+      x = 5, pdist = stats::plnorm, meanlog = 1.5, sdlog = 0.5,
+      pwindow = 1, swindow = 1, D = 5.5, dprimary = stats::dunif
+    ),
+    "Upper truncation point is greater than D"
+  )
+
+  log_lik <- epidist_gen_log_lik(epidist_family(prep_obs))
+  prep <- list(
+    data = list(Y = 5, vreal1 = 5.5, vreal2 = 1, vreal3 = 1),
+    ndraws = 1,
+    nobs = 1
+  )
+  expect_error(
+    log_lik(1, prep),
+    "greater than the relative observation time"
+  )
+})
