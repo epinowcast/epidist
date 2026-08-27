@@ -45,8 +45,16 @@
 #'
 #' @export
 #' @examples
-#' \dontrun{
-#' # `fit` is a model fitted with `epidist()`
+#' \donttest{
+#' fit <- sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_aggregate_data() |>
+#'   as_epidist_marginal_model() |>
+#'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+#'
 #' fit |>
 #'   epidist_strata() |>
 #'   add_delay_parameter_draws(fit) |>
@@ -180,8 +188,16 @@ add_delay_parameter_draws <- function(newdata, object, ...) {
 #'
 #' @export
 #' @examples
-#' \dontrun{
-#' # `fit` is a model fitted with `epidist()`
+#' \donttest{
+#' fit <- sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_aggregate_data() |>
+#'   as_epidist_marginal_model() |>
+#'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+#'
 #' epidist_strata(fit)
 #' }
 epidist_strata <- function(object, vars = NULL) {
@@ -501,27 +517,7 @@ add_summaries <- function(
   name <- tolower(name)
   # Drop the model prefix `epidist` adds, keeping families whose own name
   # contains an underscore intact
-  candidates <- unique(c(
-    name,
-    sub("^(latent|marginal)_", "", name),
-    sub("^[^_]+_", "", name),
-    sub(".*_", "", name)
-  ))
-  known <- vapply(
-    candidates,
-    function(x) {
-      return(exists(
-        paste0("posterior_predict_", x),
-        envir = asNamespace("brms"),
-        inherits = FALSE
-      ))
-    },
-    logical(1)
-  )
-  name <- candidates[length(candidates)]
-  if (any(known)) {
-    name <- candidates[known][1]
-  }
+  name <- sub("^(latent|marginal)_", "", name)
   return(list(name = name, dpars = family$dpars))
 }
 
@@ -543,12 +539,6 @@ add_summaries <- function(
   recorded <- attr(data, "epidist_family")
   if (!is.null(recorded)) {
     return(recorded)
-  }
-  # `predict_delay_parameters()` recorded the family in the class instead
-  samples_class <- grep("_samples$", class(data), value = TRUE)
-  if (length(samples_class) > 0) {
-    name <- sub("_samples$", "", samples_class[1])
-    return(.delay_family(.validate_family(name)))
   }
   return(cli_abort(c(
     "Could not work out the delay distribution family of {.arg data}.",
