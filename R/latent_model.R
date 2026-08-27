@@ -201,7 +201,6 @@ epidist_family_model.epidist_latent_model <- function(
   family,
   ...
 ) {
-  primary <- .primary_dist(data)
   family <- .add_primary_dpars(family, data)
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
@@ -232,6 +231,7 @@ epidist_family_model.epidist_latent_model <- function(
     posterior_epred = epidist_gen_posterior_epred(family)
   )
   custom_family$reparm <- family$reparm
+  custom_family$primary <- family$primary
   return(custom_family)
 }
 
@@ -395,8 +395,8 @@ epidist_stancode.epidist_latent_model <- function(
     "0"
   } else {
     paste0(
-      "dot_primary_raw_lpdf(pwindow_raw | ", spec$id, ", {",
-      toString(spec$dpars), "}, pbound)"
+      "dot_primary_raw_lpdf(pwindow_raw | ",
+      .primary_stancode_args(spec), ", pbound)"
     )
   }
 

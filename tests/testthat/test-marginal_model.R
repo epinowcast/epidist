@@ -348,3 +348,58 @@ test_that("epidist_transform_data_model.epidist_marginal_model correctly transfo
     "ptime_lwr"
   )
 })
+
+test_that("as_epidist_marginal_model defaults to a uniform primary event", {
+  model <- as_epidist_marginal_model(sim_obs)
+  expect_identical(attr(model, "primary"), "uniform")
+  family <- epidist_family(model)
+  expect_identical(family$primary, "uniform")
+  expect_false("pgrowth" %in% family$dpars)
+
+  code <- as.character(epidist(model, fn = brms::make_stancode))
+  # No parameter to estimate, and the empty parameter array is passed on.
+  expect_no_match(code, "b_pgrowth", fixed = TRUE)
+  expect_match(code, "1, primary_params", fixed = TRUE)
+})
+
+test_that("an expgrowth primary event adds a pgrowth parameter", {
+  model <- as_epidist_marginal_model(sim_obs, primary = "expgrowth")
+  expect_identical(attr(model, "primary"), "expgrowth")
+  family <- epidist_family(model)
+  # The family records the distribution so post-processing uses the same one.
+  expect_identical(family$primary, "expgrowth")
+  expect_true("pgrowth" %in% family$dpars)
+
+  code <- as.character(epidist(model, fn = brms::make_stancode))
+  # The rate has to be estimated, not fixed.
+  expect_match(code, "b_pgrowth", fixed = TRUE)
+  # The registry id selects expgrowth within primarycensored.
+  expect_match(code, "2, {pgrowth}", fixed = TRUE)
+  expect_match(code, "real primary_lpdf", fixed = TRUE)
+})
+
+test_that("the marginal model growth rate takes a formula", {
+  model <- as_epidist_marginal_model(sim_obs_sex, primary = "expgrowth")
+  code <- as.character(epidist(
+    model,
+    formula = brms::bf(mu ~ 1, pgrowth ~ 1 + sex),
+    fn = brms::make_stancode
+  ))
+  # A design matrix for pgrowth means the rate can vary by covariate.
+  expect_match(code, "X_pgrowth", fixed = TRUE)
+})
+
+test_that("the primary event distribution survives the data transform", {
+  model <- as_epidist_marginal_model(sim_obs, primary = "expgrowth")
+  family <- epidist_family(model)
+  formula <- epidist_formula(model, family, brms::bf(mu ~ 1, pgrowth ~ 1))
+  transformed <- suppressMessages(
+    epidist_transform_data(model, family, formula)
+  )
+  expect_identical(attr(transformed, "primary"), "expgrowth")
+})
+
+test_that("the marginal model rejects an unsupported primary event", {
+  expect_error(as_epidist_marginal_model(sim_obs, primary = "gaussian"))
+  expect_error(new_epidist_marginal_model(sim_obs, primary = "gaussian"))
+})

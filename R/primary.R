@@ -2,17 +2,20 @@
 #
 # Each entry describes one distribution from `primarycensored`. Adding a new
 # one here is all that is needed for both models, provided `primarycensored`
-# implements it in `primary_lpdf()` and provides an R density and sampler.
+# implements it in `primary_lpdf()` and provides an R density and sampler
+# that share their parameter names.
 #
-# Distributional parameters are prefixed `p` and named after the `brms`
-# parameter they correspond to, so a bounded normal would use `pmu` and
-# `psigma`, avoiding a clash with the delay distribution's own parameters.
+# Distributional parameters are prefixed `p` and named after the parameter
+# they set, so a bounded normal would use `pmu` and `psigma`, avoiding a clash
+# with the delay distribution's own parameters.
 
 #' Supported primary event distributions
 #'
-#' @returns A named list, one entry per distribution, giving the
-#'  `primarycensored` id, the distributional parameters it adds, their links
-#'  and bounds, and the R density and sampler used in post-processing.
+#' @returns A named list, one entry per distribution. Each entry gives the
+#'  `primarycensored` `id` used to dispatch in Stan, the `dpars` it adds to the
+#'  family, their `links` and `bounds`, the R density `ddist` and sampler
+#'  `rdist` used in post-processing, and the `args` of those two functions that
+#'  the `dpars` supply.
 #'
 #' @keywords internal
 .primary_registry <- function() {
@@ -79,6 +82,9 @@
 
 #' Add the distributional parameters a primary event distribution needs
 #'
+#' Also records the distribution on the family so that the post-processing
+#' functions built from it use the same one.
+#'
 #' @param family A `brms` family object.
 #'
 #' @param data An `epidist` data object.
@@ -87,7 +93,9 @@
 #'
 #' @keywords internal
 .add_primary_dpars <- function(family, data) {
-  spec <- .primary_spec(.primary_dist(data))
+  primary <- .primary_dist(data)
+  spec <- .primary_spec(primary)
+  family$primary <- primary
   if (length(spec$dpars) == 0) {
     return(family)
   }
@@ -97,11 +105,51 @@
   return(family)
 }
 
+#' The primary event distribution of a family
+#'
+#' Families built outside [epidist_family()], and those made before this was
+#' configurable, carry no primary event distribution and were uniform.
+#'
+#' @param family A `brms` family object.
+#'
+#' @returns The registry entry for the family's primary event distribution.
+#'
+#' @keywords internal
+.primary_spec_from_family <- function(family) {
+  primary <- family$primary
+  if (is.null(primary)) {
+    primary <- "uniform"
+  }
+  return(.primary_spec(primary))
+}
+
+#' The primary event distribution a fit was made with
+#'
+#' The post-processing functions are built from a family, which the caller may
+#' supply directly rather than taking it from the fit. The fit itself is
+#' authoritative, so prefer what it carries and fall back on the family.
+#'
+#' @param prep A `brms` prep object.
+#'
+#' @param spec The registry entry of the family the caller supplied.
+#'
+#' @returns A registry entry.
+#'
+#' @keywords internal
+.primary_spec_from_prep <- function(prep, spec) {
+  if (is.null(prep$family$primary)) {
+    return(spec)
+  }
+  return(.primary_spec(prep$family$primary))
+}
+
 #' Primary event arguments for post-processing
 #'
 #' The post-processing functions read distributional parameters by name, so
 #' without this a fit made with a non-uniform primary event would be
 #' post-processed as though it were uniform.
+#'
+#' @param spec A registry entry, as returned by [.primary_spec()].
 #'
 #' @param prep A `brms` prep object.
 #'
@@ -109,14 +157,10 @@
 #'
 #' @param draw The posterior draw index, or `NULL` for all draws.
 #'
-#' @returns A list with `dprimary` and `dprimary_args`.
+#' @returns A named list of arguments for `spec$ddist` and `spec$rdist`.
 #'
 #' @keywords internal
-.primary_args <- function(prep, i, draw = NULL) {
-  spec <- .primary_spec_from_prep(prep)
-  if (length(spec$dpars) == 0) {
-    return(list(dprimary = spec$ddist, dprimary_args = list()))
-  }
+.primary_args <- function(spec, prep, i, draw = NULL) {
   values <- lapply(spec$dpars, function(dpar) {
     value <- brms::get_dpar(prep, dpar, i = i)
     if (!is.null(draw)) {
@@ -125,23 +169,24 @@
     return(value)
   })
   names(values) <- spec$args
-  return(list(dprimary = spec$ddist, dprimary_args = values))
+  return(values)
 }
 
-#' Identify the primary event distribution from a prep object
+#' The primary event distribution arguments for Stan
 #'
-#' @param prep A `brms` prep object.
+#' @param spec A registry entry, as returned by [.primary_spec()].
 #'
-#' @returns The registry entry whose parameters the fit carries.
+#' @param empty The Stan expression to pass when the distribution takes no
+#'  parameters.
+#'
+#' @returns The distribution id and its parameters, as Stan code.
 #'
 #' @keywords internal
-.primary_spec_from_prep <- function(prep) {
-  registry <- .primary_registry()
-  for (name in names(registry)) {
-    spec <- registry[[name]]
-    if (length(spec$dpars) > 0 && all(spec$dpars %in% names(prep$dpars))) {
-      return(spec)
-    }
+.primary_stancode_args <- function(spec, empty = "primary_params") {
+  params <- if (length(spec$dpars) == 0) {
+    empty
+  } else {
+    paste0("{", toString(spec$dpars), "}")
   }
-  return(registry$uniform)
+  return(paste0(spec$id, ", ", params))
 }

@@ -306,6 +306,7 @@ epidist_family_model.epidist_marginal_model <- function(
     posterior_predict = epidist_gen_posterior_predict(family),
     posterior_epred = epidist_gen_posterior_epred(family)
   )
+  custom_family$primary <- family$primary
   return(custom_family)
 }
 
@@ -442,11 +443,7 @@ epidist_stancode.epidist_marginal_model <- function(
 
   stanvars_functions[[1]]$scode <- gsub(
     "primary_id, primary_params",
-    if (length(spec$dpars) == 0) {
-      paste0(spec$id, ", primary_params")
-    } else {
-      paste0(spec$id, ", {", toString(spec$dpars), "}")
-    },
+    .primary_stancode_args(spec),
     stanvars_functions[[1]]$scode,
     fixed = TRUE
   )
