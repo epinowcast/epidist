@@ -18,7 +18,7 @@ A list of \code{stanvars} objects, or \code{NULL} when none are needed.
 Default method for defining model specific Stan code
 }
 \seealso{
-Other stan: 
-\code{\link{epidist_stancode}()}
+Other stan:
+\code{\link[=epidist_stancode]{epidist_stancode()}}
 }
 \concept{stan}

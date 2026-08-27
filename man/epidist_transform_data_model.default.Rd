@@ -23,8 +23,8 @@ The data transformed ready for fitting.
 Default method for transforming data for a model
 }
 \seealso{
-Other transform_data: 
-\code{\link{epidist_transform_data}()},
-\code{\link{epidist_transform_data_model}()}
+Other transform_data:
+\code{\link[=epidist_transform_data]{epidist_transform_data()}},
+\code{\link[=epidist_transform_data_model]{epidist_transform_data_model()}}
 }
 \concept{transform_data}

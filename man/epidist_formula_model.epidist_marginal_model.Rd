@@ -26,13 +26,13 @@ Define the model-specific component of an \code{epidist} custom formula for the
 marginal model
 }
 \seealso{
-Other marginal_model: 
-\code{\link{as_epidist_marginal_model}()},
-\code{\link{as_epidist_marginal_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_marginal_model.epidist_linelist_data}()},
-\code{\link{epidist_family_model.epidist_marginal_model}()},
-\code{\link{epidist_transform_data_model.epidist_marginal_model}()},
-\code{\link{is_epidist_marginal_model}()},
-\code{\link{new_epidist_marginal_model}()}
+Other marginal_model:
+\code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}},
+\code{\link[=as_epidist_marginal_model.epidist_aggregate_data]{as_epidist_marginal_model.epidist_aggregate_data()}},
+\code{\link[=as_epidist_marginal_model.epidist_linelist_data]{as_epidist_marginal_model.epidist_linelist_data()}},
+\code{\link[=epidist_family_model.epidist_marginal_model]{epidist_family_model.epidist_marginal_model()}},
+\code{\link[=epidist_transform_data_model.epidist_marginal_model]{epidist_transform_data_model.epidist_marginal_model()}},
+\code{\link[=is_epidist_marginal_model]{is_epidist_marginal_model()}},
+\code{\link[=new_epidist_marginal_model]{new_epidist_marginal_model()}}
 }
 \concept{marginal_model}

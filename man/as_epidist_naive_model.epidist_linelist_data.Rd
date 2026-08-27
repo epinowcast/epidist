@@ -45,12 +45,12 @@ sierra_leone_ebola_data |>
   as_epidist_naive_model()
 }
 \seealso{
-Other naive_model: 
-\code{\link{as_epidist_naive_model}()},
-\code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
-\code{\link{epidist_formula_model.epidist_naive_model}()},
-\code{\link{epidist_transform_data_model.epidist_naive_model}()},
-\code{\link{is_epidist_naive_model}()},
-\code{\link{new_epidist_naive_model}()}
+Other naive_model:
+\code{\link[=as_epidist_naive_model]{as_epidist_naive_model()}},
+\code{\link[=as_epidist_naive_model.epidist_aggregate_data]{as_epidist_naive_model.epidist_aggregate_data()}},
+\code{\link[=epidist_formula_model.epidist_naive_model]{epidist_formula_model.epidist_naive_model()}},
+\code{\link[=epidist_transform_data_model.epidist_naive_model]{epidist_transform_data_model.epidist_naive_model()}},
+\code{\link[=is_epidist_naive_model]{is_epidist_naive_model()}},
+\code{\link[=new_epidist_naive_model]{new_epidist_naive_model()}}
 }
 \concept{naive_model}
