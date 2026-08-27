@@ -492,11 +492,15 @@ add_summaries <- function(
   known <- vapply(
     candidates,
     function(x) {
-      return(exists(paste0("posterior_predict_", x), asNamespace("brms")))
+      return(exists(
+        paste0("posterior_predict_", x),
+        envir = asNamespace("brms"),
+        inherits = FALSE
+      ))
     },
     logical(1)
   )
-  name <- utils::tail(candidates, 1)
+  name <- candidates[length(candidates)]
   if (any(known)) {
     name <- candidates[known][1]
   }
