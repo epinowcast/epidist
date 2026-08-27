@@ -43,19 +43,18 @@ real latent_family_lpdf(vector y, dpars_A,
   vector[n] pwindow = to_vector(pwindow_width) .* pwindow_raw;
   vector[n] swindow = to_vector(swindow_width) .* swindow_raw;
 
+  // The primary event stays in its own window and precedes the secondary
+  // event, so where the windows overlap the bound is the smaller of the two.
+  vector[n] pbound = to_vector(pwindow_width);
   if (wN) {
-    pwindow[woverlap] = swindow[woverlap] .* pwindow_raw[woverlap];
+    pbound[woverlap] = fmin(
+      to_vector(pwindow_width)[woverlap], y[woverlap] + swindow[woverlap]
+    );
+    pwindow[woverlap] = pbound[woverlap] .* pwindow_raw[woverlap];
   }
   vector[n] d = y - pwindow + swindow;
   vector[n] obs_time = to_vector(relative_obs_t) - pwindow;
-  real log_jacobian = wN ? sum(log(swindow[woverlap])) : 0;
-  // The upper bound of the primary window is the sampled secondary offset
-  // where the windows overlap, and the window width otherwise.
-  // Bounded by the sampled secondary offset where the windows overlap.
-  vector[n] pbound = to_vector(pwindow_width);
-  if (wN) {
-    pbound[woverlap] = swindow[woverlap];
-  }
+  real log_jacobian = wN ? sum(log(pbound[woverlap])) : 0;
   real log_primary = primary_lpdf_term;
   return family_lpdf(d | dpars_B) - family_lcdf(obs_time | dpars_B) +
     log_jacobian + log_primary;
