@@ -12,6 +12,11 @@
 #'
 #' @param data An object to be converted to the class `epidist_marginal_model`
 #'
+#' @param primary The distribution of the primary event within its censoring
+#'  window. `"uniform"`, the default, assumes it is equally likely at any
+#'  point. `"expgrowth"` tilts it, with the growth rate estimated as the
+#'  `pgrowth` distributional parameter.
+#'
 #' @param ... Additional arguments passed to methods.
 #'
 #' @family marginal_model
@@ -70,6 +75,11 @@ as_epidist_marginal_model <- function(data, ...) {
 #'  - A column name string: looks up the named column in the data.
 #'  This is passed as the `L` parameter to
 #'  [primarycensored::dpcens()].
+#'
+#' @param primary The distribution of the primary event within its censoring
+#'  window. `"uniform"`, the default, assumes it is equally likely at any
+#'  point. `"expgrowth"` tilts it, with the growth rate estimated as the
+#'  `pgrowth` distributional parameter.
 #'
 #' @param ... Not used in this method.
 #'
@@ -195,6 +205,8 @@ as_epidist_marginal_model.epidist_aggregate_data <- function(
 #' Class constructor for `epidist_marginal_model` objects
 #'
 #' @param data A data.frame to convert
+#' @param primary The primary event distribution, `"uniform"` or
+#'  `"expgrowth"`.
 #' @returns An object of class `epidist_marginal_model`
 #' @family marginal_model
 #' @export
@@ -347,6 +359,11 @@ epidist_formula_model.epidist_marginal_model <- function(
 #' @param data The data to transform
 #' @param family The epidist family object specifying the distribution
 #' @param formula The model formula
+#' @param primary The distribution of the primary event within its censoring
+#'  window. `"uniform"`, the default, assumes it is equally likely at any
+#'  point. `"expgrowth"` tilts it, with the growth rate estimated as the
+#'  `pgrowth` distributional parameter.
+#'
 #' @param ... Additional arguments passed to methods
 #'
 #' @method epidist_transform_data_model epidist_marginal_model
