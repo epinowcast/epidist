@@ -21,6 +21,11 @@ is_epidist_data(data, ...)
 
   Additional arguments
 
+## Value
+
+A logical, `TRUE` if `data` has the `epidist_data` class and `FALSE`
+otherwise.
+
 ## See also
 
 Other epidist_data:

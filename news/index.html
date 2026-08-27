@@ -67,6 +67,7 @@
 <h3 id="package-0-5-0">Package<a class="anchor" aria-label="anchor" href="#package-0-5-0"></a></h3>
 <ul><li><p>Reworded the message <code><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model()</a></code> gives when it sets relative observation times to <code>Inf</code>. The message now names <code>relative_obs_time</code> and <code>orig_relative_obs_time</code>. It explains that the impact on accuracy is small because these observation times cause very limited right truncation. It also points at <code>obs_time_threshold</code> for users who do not want the behaviour. See <a href="https://github.com/epinowcast/epidist/issues/536" class="external-link">#536</a>.</p></li>
 <li><p>Documented the return value of every exported function.</p></li>
+<li><p>Declared <code>scales</code> in <code>Suggests</code>, which the FAQ vignette loads but nothing declared.</p></li>
 <li><p>Fixed four typos that <code>inst/WORDLIST</code> was masking, corrected two moved URLs, title cased the <code>Title</code> field, and set <code>Language: en-GB</code>.</p></li>
 <li><p>Fixed <code>inst/CITATION</code> rendering the year as <code>NULL</code>.</p></li>
 <li><p>Added <code><a href="../reference/simulate_dates.html">simulate_dates()</a></code>, which turns simulated event times into the censored dates an analyst would receive.</p></li>

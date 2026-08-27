@@ -47,6 +47,9 @@
 
 - Documented the return value of every exported function.
 
+- Declared `scales` in `Suggests`, which the FAQ vignette loads but
+  nothing declared.
+
 - Fixed four typos that `inst/WORDLIST` was masking, corrected two moved
   URLs, title cased the `Title` field, and set `Language: en-GB`.
 
