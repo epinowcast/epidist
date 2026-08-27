@@ -34,13 +34,20 @@ and partially pooled estimates of demographic characteristics.
 To learn more about `epidist` we recommend reading the vignettes in this
 order:
 
-- [Getting started with
-  `epidist`](https://epidist.epinowcast.org/articles/epidist.html)
-- [Using `epidist` to estimate delay between symptom onset and positive
-  test for an Ebola outbreak in Sierra
-  Leone](https://epidist.epinowcast.org/articles/ebola.html)
-- [Approximate Bayesian inference in
-  `epidist`](https://epidist.epinowcast.org/articles/approx-inference.html)
+- To get started, [fitting a delay distribution to individual level
+  data](https://epidist.epinowcast.org/articles/epidist.html).
+- For the models we support and the biases each one corrects, the [model
+  guide](https://epidist.epinowcast.org/articles/model.html).
+- For a worked example on real data, [delays from symptom onset to
+  positive test in an Ebola
+  outbreak](https://epidist.epinowcast.org/articles/ebola.html).
+- For fitting to published estimates, and adjusting them for how each
+  study was estimated, the [meta
+  model](https://epidist.epinowcast.org/articles/meta.html).
+- For faster fits on larger data, [approximate Bayesian
+  inference](https://epidist.epinowcast.org/articles/approx-inference.html).
+- For questions that come up in use, the
+  [FAQ](https://epidist.epinowcast.org/articles/faq.html).
 
 ## Installation
 
