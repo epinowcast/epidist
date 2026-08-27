@@ -134,10 +134,16 @@ test_that(
       suppressMessages()
 
     # Check threshold behaviour with default threshold = 2
-    expect_message(
-      model_default <- as_epidist_marginal_model(test_data), # nolint
-      "Setting"
+    msgs <- capture_messages(
+      model_default <- as_epidist_marginal_model(test_data) # nolint
     )
+    expect_match(msgs, "Setting 2008", all = FALSE)
+    expect_match(msgs, "relative observation time", all = FALSE)
+    expect_match(msgs, "relative_obs_time", all = FALSE)
+    expect_match(msgs, "maximum delay", all = FALSE)
+    expect_match(msgs, "orig_relative_obs_time", all = FALSE)
+    expect_match(msgs, "right[[:space:]]+truncation", all = FALSE)
+    expect_match(msgs, "obs_time_threshold", all = FALSE)
     expect_true(any(is.infinite(model_default$relative_obs_time)))
     expect_identical(sum(is.infinite(model_default$relative_obs_time)), 2008L)
 
