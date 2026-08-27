@@ -172,11 +172,19 @@ For the lognormal family `mu` is the log scale mean and `sigma` is the log scale
 We use `epidist_strata()` to take a single row of the transformed data because there are no covariates here.
 
 ```{r compare-params}
+draw_parameters <- function(fit) {
+  draws <- fit |>
+    epidist_strata() |>
+    add_delay_parameter_draws(fit) |>
+    ungroup()
+  return(draws)
+}
+
 param_draws <- list(
   "No adjustment" = fit_no_trunc,
   "With delay_min" = fit_trunc
 ) |>
-  lapply(\(fit) ungroup(add_delay_parameter_draws(epidist_strata(fit), fit))) |>
+  lapply(draw_parameters) |>
   bind_rows(.id = "model") |>
   pivot_longer(
     cols = c("mu", "sigma"),
