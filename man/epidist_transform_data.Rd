@@ -23,9 +23,9 @@ generic a custom model implements. This wrapper is internal; extensions
 should write a method for \code{\link[=epidist_transform_data_model]{epidist_transform_data_model()}} instead.
 }
 \seealso{
-Other transform_data:
-\code{\link[=epidist_transform_data_model]{epidist_transform_data_model()}},
-\code{\link[=epidist_transform_data_model.default]{epidist_transform_data_model.default()}}
+Other transform_data: 
+\code{\link{epidist_transform_data_model}()},
+\code{\link{epidist_transform_data_model.default}()}
 }
 \concept{transform_data}
 \keyword{internal}

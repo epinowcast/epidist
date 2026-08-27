@@ -86,9 +86,11 @@ epidist_newdata.default <- function(data, ...) {
 #' @param .cols A named list of the variables to add, each of which is crossed
 #'  with the grid.
 #'
-#' @param .supplied Names of the arguments the user gave to the method,
-#'  usually from [match.call()]. A name that was both expanded and supplied is
-#'  an error.
+#' @param .supplied Names of the method's own arguments that the user gave,
+#'  usually `intersect(names(match.call()), names(formals()))`. A name that was
+#'  both expanded and supplied is an error. Names passed through `...` are not
+#'  included, so setting a column with the `tidyr::expand()` syntax, such as
+#'  `pwindow = 1:2`, still works.
 #'
 #' @returns A [tibble::tibble()] of `newdata`.
 #'

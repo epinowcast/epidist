@@ -26,10 +26,10 @@ model data object.
 Default method for building \code{newdata}
 }
 \seealso{
-Other newdata:
-\code{\link[=epidist_newdata]{epidist_newdata()}},
-\code{\link[=epidist_newdata.epidist_latent_model]{epidist_newdata.epidist_latent_model()}},
-\code{\link[=epidist_newdata.epidist_marginal_model]{epidist_newdata.epidist_marginal_model()}},
-\code{\link[=epidist_newdata.epidist_naive_model]{epidist_newdata.epidist_naive_model()}}
+Other newdata: 
+\code{\link{epidist_newdata}()},
+\code{\link{epidist_newdata.epidist_latent_model}()},
+\code{\link{epidist_newdata.epidist_marginal_model}()},
+\code{\link{epidist_newdata.epidist_naive_model}()}
 }
 \concept{newdata}

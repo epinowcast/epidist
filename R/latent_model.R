@@ -449,7 +449,7 @@ epidist_newdata.epidist_latent_model <- function(
       pwindow = pwindow,
       swindow = swindow
     ),
-    .supplied = names(match.call())
+    .supplied = intersect(names(match.call()), names(formals()))
   )
   return(newdata)
 }

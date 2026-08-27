@@ -14,9 +14,11 @@
 \item{.cols}{A named list of the variables to add, each of which is crossed
 with the grid.}
 
-\item{.supplied}{Names of the arguments the user gave to the method,
-usually from \code{\link[=match.call]{match.call()}}. A name that was both expanded and supplied is
-an error.}
+\item{.supplied}{Names of the method's own arguments that the user gave,
+usually \code{intersect(names(match.call()), names(formals()))}. A name that was
+both expanded and supplied is an error. Names passed through \code{...} are not
+included, so setting a column with the \code{tidyr::expand()} syntax, such as
+\code{pwindow = 1:2}, still works.}
 }
 \value{
 A \code{\link[tibble:tibble]{tibble::tibble()}} of \code{newdata}.

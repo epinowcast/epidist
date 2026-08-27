@@ -14,8 +14,8 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{brms}{\code{\link[brms:bf]{bf()}}, \code{\link[brms:lognormal]{lognormal()}}, \code{\link[brms:weibull]{weibull()}}}
+  \item{brms}{\code{\link[brms:brmsformula]{bf}}, \code{\link[brms:brmsfamily]{lognormal}}, \code{\link[brms:brmsfamily]{weibull}}}
 
-  \item{stats}{\code{\link[stats:Gamma]{Gamma()}}}
+  \item{stats}{\code{\link[stats:family]{Gamma}}}
 }}
 
