@@ -80,9 +80,10 @@ growing <- as_epidist_marginal_model(linelist, primary = "expgrowth")
 With `primary = "expgrowth"` the growth rate becomes a distributional parameter called `pgrowth`.
 It takes a formula and a prior in the same way as `mu` and `sigma`.
 
-The delays carry little information about the growth rate, so in practice the prior does the work.
-Epidemic growth is usually estimated separately, from case counts over the same period, and that estimate is passed here as a prior.
-The prior below is centred on the rate used to simulate, with a scale reflecting how well it is typically known.
+The delays carry little information about the growth rate, so the prior does the work.
+Epidemic growth is normally estimated separately, from case counts over the same period.
+That estimate is then passed here as an informative prior centred on it, which is the approach taken in @brand2026scalable.
+The prior below is centred on the rate used to simulate.
 
 ```{r fit}
 fit_uniform <- epidist(
@@ -186,7 +187,7 @@ With weekly reporting during rapid growth it is not.
 
 Treat the growth rate as something you supply rather than something you learn here.
 Delays contain little information about it, so a flat prior leaves the posterior close to flat.
-Take the rate from a separate estimate of epidemic growth and pass it as an informed prior.
+Take the rate from a separate estimate of epidemic growth and pass it as an informative prior centred on that value.
 
 Because it is a parameter rather than a fixed value, its uncertainty propagates into the delay estimate.
 A point value can still be used, by giving it a prior with a very small scale.
