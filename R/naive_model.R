@@ -238,7 +238,12 @@ epidist_transform_data_model.epidist_naive_model <- function(
 #' # A row for each sex
 #' epidist_newdata(prep_obs, sex)
 epidist_newdata.epidist_naive_model <- function(data, ...) {
-  newdata <- .build_newdata(data, ..., .cols = list(delay = NA_real_))
+  newdata <- .build_newdata(
+    data,
+    ...,
+    .cols = list(delay = NA_real_),
+    .supplied = intersect(names(match.call()), names(formals()))
+  )
   return(newdata)
 }
 
