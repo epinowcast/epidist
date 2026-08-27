@@ -43,8 +43,6 @@ real latent_family_lpdf(vector y, dpars_A,
   vector[n] pwindow = to_vector(pwindow_width) .* pwindow_raw;
   vector[n] swindow = to_vector(swindow_width) .* swindow_raw;
 
-  // The primary event stays in its own window and precedes the secondary
-  // event, so where the windows overlap the bound is the smaller of the two.
   vector[n] pbound = to_vector(pwindow_width);
   if (wN) {
     pbound[woverlap] = fmin(

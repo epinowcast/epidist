@@ -23,6 +23,8 @@ navbar:
         href: articles/approx-inference.html
       - text: Adjusting for left truncation
         href: articles/left-truncation.html
+      - text: Primary event distributions
+        href: articles/primary-events.html
       - text: Extending epidist
         href: articles/extending-epidist.html
       - text: Guide to the statistical models implemented in epidist

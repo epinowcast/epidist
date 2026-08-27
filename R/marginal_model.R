@@ -90,6 +90,7 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   data,
   obs_time_threshold = 2,
   weight = NULL,
+  primary = c("uniform", "expgrowth"),
   delay_min = NULL,
   ...
 ) {
@@ -142,7 +143,7 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
     data$relative_obs_time[data$relative_obs_time > threshold] <- Inf
   }
 
-  data <- new_epidist_marginal_model(data)
+  data <- new_epidist_marginal_model(data, primary = match.arg(primary))
   assert_epidist(data)
   return(data)
 }
@@ -178,6 +179,7 @@ as_epidist_marginal_model.epidist_aggregate_data <- function(
   data,
   obs_time_threshold = 2,
   delay_min = NULL,
+  primary = c("uniform", "expgrowth"),
   ...
 ) {
   return(as_epidist_marginal_model.epidist_linelist_data(
@@ -185,6 +187,7 @@ as_epidist_marginal_model.epidist_aggregate_data <- function(
     obs_time_threshold = obs_time_threshold,
     weight = "n",
     delay_min = delay_min,
+    primary = match.arg(primary),
     ...
   ))
 }
@@ -195,7 +198,11 @@ as_epidist_marginal_model.epidist_aggregate_data <- function(
 #' @returns An object of class `epidist_marginal_model`
 #' @family marginal_model
 #' @export
-new_epidist_marginal_model <- function(data) {
+new_epidist_marginal_model <- function(
+  data,
+  primary = c("uniform", "expgrowth")
+) {
+  attr(data, "primary") <- match.arg(primary)
   return(.new_epidist_data(data, "epidist_marginal_model"))
 }
 
@@ -260,6 +267,11 @@ epidist_family_model.epidist_marginal_model <- function(
   family,
   ...
 ) {
+  if (identical(.primary_dist(data), "expgrowth")) {
+    family$dpars <- c(family$dpars, "pgrowth")
+    family$other_links <- c(family$other_links, "identity")
+    family$other_bounds <- c(family$other_bounds, list(list(lb = NA, ub = NA)))
+  }
   custom_family <- brms::custom_family(
     paste0("marginal_", family$family),
     dpars = family$dpars,
@@ -352,7 +364,7 @@ epidist_transform_data_model.epidist_marginal_model <- function(
   required_cols <- .marginal_required_cols()
   trans_data <- data |>
     .summarise_n_by_formula(by = required_cols, formula = formula) |>
-    new_epidist_marginal_model()
+    new_epidist_marginal_model(primary = .primary_dist(data))
   assert_epidist(trans_data)
 
   .inform_data_summarised(data, trans_data, c(required_cols))
@@ -413,9 +425,11 @@ epidist_stancode.epidist_marginal_model <- function(
     fixed = TRUE
   )
 
+  expgrowth <- identical(.primary_dist(data), "expgrowth")
+
   stanvars_functions[[1]]$scode <- gsub(
-    "primary_id",
-    "1",
+    "primary_id, primary_params",
+    if (expgrowth) "2, {pgrowth}" else "1, primary_params",
     stanvars_functions[[1]]$scode,
     fixed = TRUE
   )

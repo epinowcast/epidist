@@ -4,7 +4,7 @@
 \alias{new_epidist_marginal_model}
 \title{Class constructor for \code{epidist_marginal_model} objects}
 \usage{
-new_epidist_marginal_model(data)
+new_epidist_marginal_model(data, primary = c("uniform", "expgrowth"))
 }
 \arguments{
 \item{data}{A data.frame to convert}
