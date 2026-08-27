@@ -281,10 +281,13 @@ add_summaries <- function(
   analytic <- .analytic_delay_summaries(family$name)
   has_analytic <- !is.null(analytic) && all(analytic$dpars %in% names(data))
   if (identical(method, "analytic") && !has_analytic) {
-    cli_abort(c(
-      "No analytic delay summaries are available for {.val {family$name}}.",
-      i = "Use {.code method = \"sample\"} to summarise by simulation."
-    ))
+    if (is.null(analytic)) {
+      cli_abort(c(
+        "No analytic delay summaries are available for {.val {family$name}}.",
+        i = "Use {.code method = \"sample\"} to summarise by simulation."
+      ))
+    }
+    .assert_dpars(data, family$name, analytic$dpars)
   }
   if (has_analytic && !identical(method, "sample")) {
     return(.analytic_summaries(data, analytic, probs))
@@ -320,15 +323,7 @@ add_summaries <- function(
 #'
 #' @keywords internal
 .sample_summaries <- function(data, family, probs = NULL, nsim = 1000) {
-  missing_dpars <- setdiff(family$dpars, names(data))
-  if (length(missing_dpars) > 0) {
-    name <- family$name
-    cli_abort(c(
-      "{.arg data} is missing distributional parameters of the {.val {name}}
-       family: {.val {missing_dpars}}.",
-      i = "{.fn delay_parameter_draws} returns every distributional parameter."
-    ))
-  }
+  .assert_dpars(data, family$name, family$dpars)
   dpars <- as.list(data)[family$dpars]
   samples <- .simulate_delays(family, dpars, nsim)
   data[["mean"]] <- rowMeans(samples)
@@ -343,6 +338,29 @@ add_summaries <- function(
     )
   }
   return(data)
+}
+
+#' Check that the distributional parameters of a family are present
+#'
+#' @inheritParams add_summaries
+#'
+#' @param name The name of a delay distribution family.
+#'
+#' @param dpars The distributional parameters the family needs.
+#'
+#' @return The input, invisibly.
+#'
+#' @keywords internal
+.assert_dpars <- function(data, name, dpars) {
+  missing_dpars <- setdiff(dpars, names(data))
+  if (length(missing_dpars) > 0) {
+    cli_abort(c(
+      "{.arg data} is missing distributional parameters of the {.val {name}}
+       family: {.val {missing_dpars}}.",
+      i = "{.fn delay_parameter_draws} returns every distributional parameter."
+    ))
+  }
+  return(invisible(data))
 }
 
 #' Simulate delays from each draw of the distributional parameters
