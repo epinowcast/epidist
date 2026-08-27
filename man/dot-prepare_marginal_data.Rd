@@ -4,7 +4,12 @@
 \alias{.prepare_marginal_data}
 \title{Prepare linelist data for a marginal likelihood}
 \usage{
-.prepare_marginal_data(data, obs_time_threshold = 2, weight = NULL)
+.prepare_marginal_data(
+  data,
+  obs_time_threshold = 2,
+  weight = NULL,
+  delay_min = NULL
+)
 }
 \arguments{
 \item{data}{An \code{epidist_linelist_data} object}
@@ -23,14 +28,25 @@ rather than repeating identical rows. The marginal model will further
 aggregate these counts based on the formula specification. Default is NULL,
 which assigns a count of 1 to each row. Internally this is used to define
 the 'n' column of the returned object.}
+
+\item{delay_min}{Minimum delay (left truncation point). Can be:
+\itemize{
+\item \code{NULL} (default): uses a \code{delay_min} column from the data if present,
+otherwise defaults to 0 (no left truncation).
+\item A numeric scalar: applied to all observations.
+\item A column name string: looks up the named column in the data.
+This is passed as the \code{L} parameter to
+\code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}}.
+}}
 }
 \value{
 The input data with the marginal likelihood columns added.
 }
 \description{
 Calculates the delay bounds, censoring windows and relative observation
-times required by the marginal likelihood, adds weights, and sets
-observation times far beyond the maximum delay to \code{Inf}. Shared by
-\code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}} and \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}.
+times required by the marginal likelihood, adds weights and the left
+truncation point, and sets observation times far beyond the maximum delay
+to \code{Inf}. Shared by \code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}} and
+\code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}.
 }
 \keyword{internal}

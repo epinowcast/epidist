@@ -14,6 +14,64 @@
   return(paste(readLines(local_path), collapse = "\n"))
 }
 
+#' Build the Stan functions block shared by the marginal and meta models
+#'
+#' Both models read a `functions.stan` chunk with the same placeholders
+#' (`family`, `dist_id`, `dpars_A`, `dpars_B`, `primary_id`), filled in with
+#' the target distribution's details. Used within
+#' [epidist_stancode()] methods for the marginal and meta models, which
+#' differ only in the chunk path, the family name prefix, and any further
+#' placeholders they need substituted.
+#'
+#' @param chunk_path Path within the `stan/` folder to the functions chunk.
+#'
+#' @param family The `epidist` family object.
+#'
+#' @param family_prefix The model specific prefix stripped from
+#'  `family$name`, for example `"marginal_"` or `"meta_"`.
+#'
+#' @param extra A named character vector of further placeholder
+#'  substitutions, applied after the shared ones.
+#'
+#' @returns A `brms` `stanvars` object holding the substituted functions
+#'  chunk.
+#'
+#' @keywords internal
+.family_functions_stanvar <- function(
+  chunk_path,
+  family,
+  family_prefix,
+  extra = character()
+) {
+  stanvars_functions <- brms::stanvar(
+    block = "functions",
+    scode = .stan_chunk(chunk_path)
+  )
+
+  family_name <- gsub(family_prefix, "", family$name, fixed = TRUE)
+  dist_id <- primarycensored::pcd_stan_dist_id(family_name)
+
+  substitutions <- c(
+    family = family_name,
+    dist_id = as.character(dist_id),
+    dpars_A = toString(paste0("real ", family$dpars)),
+    dpars_B = family$param,
+    primary_id = "1",
+    extra
+  )
+
+  for (placeholder in names(substitutions)) {
+    stanvars_functions[[1]]$scode <- gsub(
+      placeholder,
+      substitutions[[placeholder]],
+      stanvars_functions[[1]]$scode,
+      fixed = TRUE
+    )
+  }
+
+  return(stanvars_functions)
+}
+
 #' Label a `epidist` Stan model with a version indicator
 #'
 #' This function is used within [epidist_stancode()] to label the generated Stan

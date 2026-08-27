@@ -98,9 +98,9 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   data <- .prepare_marginal_data(
     data,
     obs_time_threshold = obs_time_threshold,
-    weight = weight
+    weight = weight,
+    delay_min = delay_min
   )
-  data <- .add_delay_min(data, delay_min)
 
   data <- new_epidist_marginal_model(data)
   assert_epidist(data)
@@ -335,49 +335,8 @@ epidist_stancode.epidist_marginal_model <- function(
 ) {
   stanvars_version <- .version_stanvar()
 
-  stanvars_functions <- brms::stanvar(
-    block = "functions",
-    scode = .stan_chunk(file.path("marginal_model", "functions.stan"))
-  )
-
-  family_name <- gsub("marginal_", "", family$name, fixed = TRUE)
-
-  stanvars_functions[[1]]$scode <- gsub(
-    "family",
-    family_name,
-    stanvars_functions[[1]]$scode,
-    fixed = TRUE
-  )
-
-  dist_id <- primarycensored::pcd_stan_dist_id(family_name)
-
-  # Replace the dist_id passed to primarycensored
-  stanvars_functions[[1]]$scode <- gsub(
-    "dist_id",
-    dist_id,
-    stanvars_functions[[1]]$scode,
-    fixed = TRUE
-  )
-
-  stanvars_functions[[1]]$scode <- gsub(
-    "dpars_A",
-    toString(paste0("real ", family$dpars)),
-    stanvars_functions[[1]]$scode,
-    fixed = TRUE
-  )
-
-  stanvars_functions[[1]]$scode <- gsub(
-    "dpars_B",
-    family$param,
-    stanvars_functions[[1]]$scode,
-    fixed = TRUE
-  )
-
-  stanvars_functions[[1]]$scode <- gsub(
-    "primary_id",
-    "1",
-    stanvars_functions[[1]]$scode,
-    fixed = TRUE
+  stanvars_functions <- .family_functions_stanvar(
+    file.path("marginal_model", "functions.stan"), family, "marginal_"
   )
 
   stanvars_parameters <- brms::stanvar(
@@ -488,9 +447,10 @@ epidist_newdata.epidist_marginal_model <- function(
 #' Prepare linelist data for a marginal likelihood
 #'
 #' Calculates the delay bounds, censoring windows and relative observation
-#' times required by the marginal likelihood, adds weights, and sets
-#' observation times far beyond the maximum delay to `Inf`. Shared by
-#' [as_epidist_marginal_model()] and [as_epidist_meta_model()].
+#' times required by the marginal likelihood, adds weights and the left
+#' truncation point, and sets observation times far beyond the maximum delay
+#' to `Inf`. Shared by [as_epidist_marginal_model()] and
+#' [as_epidist_meta_model()].
 #'
 #' @inheritParams as_epidist_marginal_model.epidist_linelist_data
 #'
@@ -501,7 +461,8 @@ epidist_newdata.epidist_marginal_model <- function(
 .prepare_marginal_data <- function(
   data,
   obs_time_threshold = 2,
-  weight = NULL
+  weight = NULL,
+  delay_min = NULL
 ) {
   data <- mutate(
     data,
@@ -514,6 +475,7 @@ epidist_newdata.epidist_marginal_model <- function(
   )
 
   data <- .add_weights(data, weight)
+  data <- .add_delay_min(data, delay_min)
 
   # Calculate maximum delay
   max_delay <- max(data$delay_upr, na.rm = TRUE)

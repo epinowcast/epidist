@@ -33,10 +33,7 @@ epidist_gen_log_lik <- function(family) {
   log_lik_brms <- .get_brms_fn("log_lik", family)
 
   # Get the name of the primary distribution
-  primary_dist_name <- tryCatch(
-    primarycensored::pcd_dist_name(tolower(family$family)),
-    error = function(e) tolower(family$family)
-  )
+  primary_dist_name <- .pcd_family_dist_name(family)
 
   # Check if family is supported with a analytical solution
   if (primary_dist_name %in% .get_supported_dists()) {
@@ -171,7 +168,7 @@ epidist_gen_log_lik <- function(family) {
           c(
             list(
               x = y,
-              pdist = get(dist, envir = asNamespace("stats")),
+              pdist = .pdist(dist),
               pwindow = pwindow,
               swindow = swindow,
               L = delay_min,
@@ -213,6 +210,41 @@ epidist_gen_log_lik <- function(family) {
     }
   )
   return(.transpose_named_list2(dist_params))
+}
+
+#' The `primarycensored` distribution name for a family
+#'
+#' Falls back to the lower cased family name if `primarycensored` does not
+#' recognise it, so the caller can still report a name in a message.
+#'
+#' @inheritParams epidist_family
+#'
+#' @returns A `primarycensored` distribution function name, for example
+#'  `"plnorm"`.
+#'
+#' @keywords internal
+.pcd_family_dist_name <- function(family) {
+  return(tryCatch(
+    primarycensored::pcd_dist_name(tolower(family$family)),
+    error = function(e) tolower(family$family)
+  ))
+}
+
+#' The distribution function used for a `primarycensored` distribution name
+#'
+#' @param dist A `primarycensored` distribution function name, for example
+#'  `"plnorm"`.
+#'
+#' @returns The corresponding function from `stats`.
+#'
+#' @keywords internal
+.pdist <- function(dist) {
+  return(switch(dist,
+    plnorm = stats::plnorm,
+    pgamma = stats::pgamma,
+    pweibull = stats::pweibull,
+    get(dist, envir = asNamespace("stats"))
+  ))
 }
 
 .get_supported_dists <- function() {
