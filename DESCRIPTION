@@ -66,6 +66,7 @@ Suggests:
     RcppEigen (>= 0.3.3.3.0),
     reformulas,
     roxyglobals,
+    scales,
     spelling,
     testthat (>= 3.0.0),
     tidybayes,

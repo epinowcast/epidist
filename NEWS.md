@@ -33,9 +33,13 @@ See #483.
 - The warning about unmatched priors now lists each prior with the parameter it applies to, rather than printing the internal join it came from.
 See #483.
 - Documented the return value of every exported function.
+- Declared `scales` in `Suggests`, which the FAQ vignette loads but nothing declared.
 - Fixed four typos that `inst/WORDLIST` was masking, corrected two moved URLs, title cased the `Title` field, and set `Language: en-GB`.
 - Fixed `inst/CITATION` rendering the year as `NULL`.
-
+- `epidist()` now restores the `PKG_CPPFLAGS` and `PKG_LIBS` environment variables it found before fitting.
+The `rstan` backend sets both while compiling and never restores them.
+The leaked `PKG_CPPFLAGS` made the next `pkgbuild::has_build_tools()` check fail, which printed a spurious `fatal error: cmath: No such file or directory` before the model compiled and fitted successfully.
+See #532.
 - Added `simulate_dates()`, which turns simulated event times into the censored dates an analyst would receive.
 - Removed the calls to unexported `brms` functions that `R CMD check --as-cran` flags.
 `R/brms-compat.R` now holds small internal helpers reproducing the narrow behaviour `epidist` relied on from `brms:::validate_family()`, `brms:::validate_formula()`, `brms:::validate_data()`, `brms:::dpar_bounds()` and `brms:::log_lik_weight()`.

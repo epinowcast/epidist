@@ -287,7 +287,7 @@
 #' @param trans_data The transformed/summarised data
 #'
 #' @param required_cols Character vector of required column names
-#' @return Nothing, called for side effects only
+#' @returns Nothing, called for side effects only
 #'
 #' @keywords internal
 .inform_data_summarised <- function(data, trans_data, required_cols) {
@@ -426,4 +426,38 @@
     )
   }
   return(data)
+}
+
+#' Capture the environment variables `rstan` leaks when compiling a model
+#'
+#' The `rstan` backend compiles through `inline::cxxfunction()`, which sets
+#' `PKG_CPPFLAGS` and `PKG_LIBS` and never restores them. The leaked flags make
+#' the next `pkgbuild::has_build_tools()` check fail, which prints a spurious
+#' compiler error before the model compiles and fits successfully. Restore them
+#' with [.restore_compile_env()] after a fit.
+#'
+#' @returns A named character vector of the current values, `NA` where unset.
+#'
+#' @keywords internal
+.capture_compile_env <- function() {
+  return(Sys.getenv(c("PKG_CPPFLAGS", "PKG_LIBS"), names = TRUE, unset = NA))
+}
+
+#' Restore environment variables captured by [.capture_compile_env()]
+#'
+#' @param vars A named character vector as returned by
+#'  [.capture_compile_env()], with `NA` for variables that were unset.
+#'
+#' @returns Nothing, called for side effects only
+#'
+#' @keywords internal
+.restore_compile_env <- function(vars) {
+  unset <- is.na(vars)
+  if (any(unset)) {
+    Sys.unsetenv(names(vars)[unset])
+  }
+  if (!all(unset)) {
+    do.call(Sys.setenv, as.list(vars[!unset]))
+  }
+  return(invisible(NULL))
 }

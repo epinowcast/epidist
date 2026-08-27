@@ -113,6 +113,9 @@ dplyr_reconstruct.epidist_data <- function(data, template) {
 #'
 #' @param ... Additional arguments
 #'
+#' @returns A logical, `TRUE` if `data` inherits from `epidist_data` and
+#'  `FALSE` otherwise.
+#'
 #' @family epidist_data
 #' @export
 #' @examples

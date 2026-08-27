@@ -11,6 +11,10 @@ is_epidist_data(data, ...)
 
 \item{...}{Additional arguments}
 }
+\value{
+A logical, \code{TRUE} if \code{data} has the \code{epidist_data} class and
+\code{FALSE} otherwise.
+}
 \description{
 All \code{epidist} data objects carry this class in addition to their specific
 class. See \link{epidist_data} for the methods it provides.

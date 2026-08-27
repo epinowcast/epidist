@@ -208,3 +208,33 @@ test_that(".summarise_n_by_formula requires n column in data", {
     "Column `n` not found in `.data`."
   )
 })
+
+test_that(".restore_compile_env restores set and unset variables", { # nolint: line_length_linter.
+  # Leave the session as we found it, whatever the user had set.
+  original <- .capture_compile_env()
+  on.exit(.restore_compile_env(original))
+  Sys.setenv(PKG_CPPFLAGS = "-Ifoo")
+  Sys.unsetenv("PKG_LIBS")
+  captured <- .capture_compile_env()
+  expect_identical(unname(captured[["PKG_CPPFLAGS"]]), "-Ifoo")
+  expect_true(is.na(captured[["PKG_LIBS"]]))
+
+  Sys.setenv(PKG_CPPFLAGS = "-Ibar", PKG_LIBS = "-lbaz")
+  .restore_compile_env(captured)
+  expect_identical(Sys.getenv("PKG_CPPFLAGS"), "-Ifoo")
+  expect_identical(Sys.getenv("PKG_LIBS", unset = NA), NA_character_)
+})
+
+test_that("epidist() does not leak the compilation variables rstan sets", { # nolint: line_length_linter.
+  # Leave the session as we found it, whatever the user had set.
+  original <- .capture_compile_env()
+  on.exit(.restore_compile_env(original))
+  Sys.unsetenv(c("PKG_CPPFLAGS", "PKG_LIBS"))
+  leaky_fn <- function(...) {
+    Sys.setenv(PKG_CPPFLAGS = "-include Eigen.hpp", PKG_LIBS = "-lStanHeaders")
+    return(structure(list(), class = "brmsfit"))
+  }
+  epidist(prep_marginal_obs, fn = leaky_fn)
+  expect_identical(Sys.getenv("PKG_CPPFLAGS", unset = NA), NA_character_)
+  expect_identical(Sys.getenv("PKG_LIBS", unset = NA), NA_character_)
+})
