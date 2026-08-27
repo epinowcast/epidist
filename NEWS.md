@@ -18,7 +18,9 @@ See #399.
 ## Package
 
 - Reworded the message `as_epidist_marginal_model()` gives when it sets relative observation times to `Inf`.
-It now names the variables it changes, says how many values were changed, and gives the reason the effect on accuracy is small.
+The message now names `relative_obs_time` and `orig_relative_obs_time`.
+It explains that the impact on accuracy is small because these observation times cause very limited right truncation.
+It also points at `obs_time_threshold` for users who do not want the behaviour.
 See #536.
 - Documented the return value of every exported function.
 - Fixed four typos that `inst/WORDLIST` was masking, corrected two moved URLs, title cased the `Title` field, and set `Language: en-GB`.

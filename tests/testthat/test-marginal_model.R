@@ -142,7 +142,7 @@ test_that(
     expect_match(msgs, "relative_obs_time", all = FALSE)
     expect_match(msgs, "maximum delay", all = FALSE)
     expect_match(msgs, "orig_relative_obs_time", all = FALSE)
-    expect_match(msgs, "right\\s+truncation", all = FALSE)
+    expect_match(msgs, "right[[:space:]]+truncation", all = FALSE)
     expect_match(msgs, "obs_time_threshold", all = FALSE)
     expect_true(any(is.infinite(model_default$relative_obs_time)))
     expect_identical(sum(is.infinite(model_default$relative_obs_time)), 2008L)
