@@ -138,7 +138,7 @@ This removes the over-weighting of a study reporting a median with an interquart
 One observation is now a group of summaries, so `log_lik()` and `loo()` work at that level.
 See #620.
 - A quantile reported by a study that took integer date differences from a cohort now costs three distribution function evaluations rather than one per grid cell, because the grid is normalised by the distribution function at its top.
-On the `epireview` configuration of the meta vignette this cuts the evaluations its quantile rows need per gradient from 480 to 36.
+On the quantile reporting studies of the meta vignette this cuts the evaluations they need per gradient from 480 to 36.
 The shortcut does not apply to a study that stopped collecting at a calendar date, which reweights each cell before renormalising and so keeps the full grid.
 See #620.
 - The delay scale standard error of a reported quantile is now converted with the closed form density of the biased estimand where one exists, rather than a central difference of its distribution function.
@@ -151,14 +151,16 @@ See #620.
 - The quadrature resolution used for truncated continuous moments is now set by `options(epidist.meta_n_quad = )`, defaulting to 100 intervals.
 The value is substituted into the Stan code when the model is compiled, so the R and Stan implementations always agree.
 See #620.
-- A study can now report a vector of summaries with a covariance matrix over them, through the `vcov` argument of `as_epidist_estimates_data()`, and is then fitted as a multivariate normal.
+- Added `as_epidist_multivariate()`, which summarises draws of a set of parameters by their mean vector and covariance matrix, over an optional trajectory index.
+Passing the result to `as_epidist_estimates_data()` gives a vector of reported summaries with the covariance between them, fitted as a multivariate normal.
 This is the format we recommend when a study cannot share its delays, because it keeps the correlation between the quantities it reports.
-`draws_to_multivariate()` produces both parts from draws of the quantities a study reports, such as the posterior draws of `predict_delay_parameters()`.
-`delays_to_multivariate()` wraps it for a site holding a line list it cannot release, resampling the delays to get the covariance.
+Draws of the natural parameters of a fitted distribution are pushed through to the summaries the distribution implies, so no linearisation is used.
 See #620.
-- `parameters_to_multivariate()` lets a study that published the parameters of a distribution it fitted be used in the meta model.
-The parameters are converted to the summaries the reported distribution implies, and any reported parameter uncertainty is carried onto that scale by the delta method.
+- Added `epidist_estimates_summaries()` and `epidist_estimates_parameters()`, which take one study's contribution in the shape it reported it.
+`epidist_estimates_parameters()` converts the parameters of a distribution a study fitted into the summaries that distribution implies, carrying any reported parameter standard errors onto that scale by the delta method.
 The family a study fitted need not match the family being fitted to it.
+See #620.
+- `as_epidist_estimates_data()` combines contributions passed in a list, so studies reporting in different shapes assemble into one object.
 See #620.
 - The meta model gained a fifth censoring adjustment code, `cens_adjusted = 4`, for a study that placed the primary event at the midpoint of its window and integrated the secondary interval.
 Its estimand is that of `cens_adjusted = 2` moved down the delay axis by half a primary window, so its reported mean loses the half window bias while its spread keeps the primary window's variance.
@@ -171,8 +173,8 @@ See #596 and #620.
 
 - Added a "The meta model" section to the model guide vignette, with the forward model and sampling likelihoods used for published summary estimates.
 See #620.
-- Added a vignette showcasing the meta model on simulated data and published delay estimates from `epireview`.
-Its simulated case study builds seven studies, each applying a different estimation procedure to the same line list, so the recovery result tests every bias the model adjusts for.
+- Added a vignette showcasing the meta model on simulated data.
+Its case study builds nine studies, each applying a different estimation procedure to the same line list, so the recovery result tests every bias the model adjusts for.
 See #620.
 - The meta model is now a worked example in the extending vignette, since it adds both a data source and a model type.
 See #616 and #620.

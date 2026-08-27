@@ -932,6 +932,9 @@
     * The vector of summaries a study would report, one entry per member of a
     * multivariate normal group. Member types are 1 for a mean, 2 for a
     * standard deviation and 3 for a quantile at the matching probability.
+    * Natural parameters of a distribution a study fitted are converted to
+    * these summaries on the R side, because the family a study fitted need
+    * not be the family being fitted to it.
     */
   vector meta_family_implied_summary_vector(data array[] int types,
                                             data vector probs,
@@ -1068,9 +1071,12 @@
   * have converged to given the biases in its estimation procedure.
   * Summaries reported by the same study are fitted jointly, indexed into the
   * flat group_value, group_count, group_type and group_p arrays by
-  * group_start and group_len. A study that reported a covariance matrix over
-  * its summaries indexes its Cholesky factor into group_chol from chol_start,
-  * which holds group_len * group_len entries in column major order.
+  * group_start and group_len. A group whose covariance comes from a
+  * multivariate representation of a study's parameter draws indexes its
+  * Cholesky factor into group_chol from chol_start, which holds
+  * group_len * group_len entries in column major order. R builds that factor
+  * as the lower triangle of chol(vcov) flattened column major, which is the
+  * order to_matrix reads and multi_normal_cholesky_lpdf expects.
   */
   real meta_family_lpmf(data int y, dpars_A, data int obs_type,
                         data int study_n, data int trunc_adj,

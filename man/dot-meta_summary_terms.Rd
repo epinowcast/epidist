@@ -29,8 +29,12 @@ probability scale by the delta method using \code{\link[=.meta_implied_density]{
 A group row stands for several summaries reported by one study, and this
 returns the marginal of its first member, which is the reported mean of a
 mean and standard deviation pair and the cumulative probability at the
-smallest reported quantile of a quantile set. That marginal is what the
-posterior predictive draws for the row. The joint log likelihood of the
-whole group is \code{\link[=.meta_row_log_lik]{.meta_row_log_lik()}}.
+smallest reported quantile of a quantile set. For a group covered by a
+covariance matrix it is the first element of the reported vector, with the
+first diagonal entry of the Cholesky factor as its standard error, so a
+posterior predictive check of such a row describes that element alone and
+not the rest of the group. That marginal is what the posterior predictive
+draws for the row. The joint log likelihood of the whole group is
+\code{\link[=.meta_row_log_lik]{.meta_row_log_lik()}}.
 }
 \keyword{internal}

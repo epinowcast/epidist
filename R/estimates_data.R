@@ -293,6 +293,9 @@ as_epidist_estimates_data.list <- function(data, ...) {
 
 #' Return an `epidist_estimates_data` object unchanged
 #'
+#' An object carrying the class has already been checked, and the `epidist_data`
+#' methods re-check it whenever it is modified, so nothing is done here.
+#'
 #' @inheritParams as_epidist_estimates_data
 #'
 #' @param ... Not used in this method.
@@ -305,7 +308,6 @@ as_epidist_estimates_data.list <- function(data, ...) {
 #' estimates <- epidist_estimates_summaries("A", mean = 7.5, n = 120)
 #' identical(as_epidist_estimates_data(estimates), estimates)
 as_epidist_estimates_data.epidist_estimates_data <- function(data, ...) {
-  assert_epidist(data)
   return(data)
 }
 
@@ -478,6 +480,12 @@ as_epidist_estimates_data.epidist_multivariate <- function(
       lower = support$lower, cutoff = support$cutoff
     ))
   }))
+  if (!all(is.finite(summaries))) {
+    cli::cli_abort(paste0(
+      "Some draws imply a summary that is not finite. Every draw must be a ",
+      "valid set of {.val {family}} parameters."
+    ))
+  }
   covariance <- stats::cov(summaries)
   dimnames(covariance) <- NULL
   .assert_multivariate_definite(covariance)

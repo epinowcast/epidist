@@ -12,7 +12,8 @@
 \item{...}{Not used in this method.}
 }
 \description{
-Return an \code{epidist_estimates_data} object unchanged
+An object carrying the class has already been checked, and the \code{epidist_data}
+methods re-check it whenever it is modified, so nothing is done here.
 }
 \examples{
 estimates <- epidist_estimates_summaries("A", mean = 7.5, n = 120)

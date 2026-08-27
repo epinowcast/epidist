@@ -538,6 +538,8 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
   if (!is.null(vcov)) {
     obs_type <- 7L
     members <- .meta_member_table(estimates, rep(0L, nrow(estimates)))
+    # The lower factor flattened column major, which is the order Stan's
+    # to_matrix reads and multi_normal_cholesky_lpdf expects.
     factor_entries <- as.numeric(t(chol(vcov)))
   } else if (joint && quantiles) {
     obs_type <- 6L

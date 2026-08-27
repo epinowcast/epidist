@@ -452,11 +452,12 @@ A cell whose implied probability is zero while the study saw delays in it gives 
 Summaries of different kinds from the same study, such as a mean and a median, are still treated as independent, which understates their joint uncertainty.
 The normal approximations also degrade for small study sample sizes.
 
-## A reported covariance matrix
+## A covariance over the reported summaries
 
-A study that cannot share its delays can report the vector of summaries it computed together with the covariance matrix between them, which it can estimate from its own delays by bootstrap.
+A study that fitted a distribution to its delays can publish draws of the fitted parameters.
+`as_epidist_multivariate()` summarises those draws by their mean and covariance, and `as_epidist_estimates_data()` pushes each draw through to the summaries the fitted distribution implies, giving a vector of summaries with the covariance between them.
 This is the reporting format we recommend, because it carries the correlation between the reported quantities rather than throwing it away.
-Writing $y$ for the reported vector and $\Sigma$ for the supplied matrix,
+Writing $y$ for the reported vector and $\Sigma$ for the covariance over it,
 $$
 y \sim \text{Normal}\left(m(\theta), \; \Sigma\right), (\#eq:meta-mvn)
 $$
@@ -467,7 +468,9 @@ Here it is supplied instead, so a mixture of summary types need not be treated a
 A quantile reported this way is on the delay scale, so $m$ needs the inverse of $G$, which has no closed form on the discrete grid.
 It is read off by inverse linear interpolation between the two points of $G$ that bracket $p$, on the grid of Equation \@ref(eq:meta-grid) for a discrete estimand and on the quadrature grid otherwise.
 That keeps the implied quantile a differentiable function of $\theta$, which a root search would not, at the cost of the curvature of $G$ over one cell.
-`draws_to_multivariate()` builds the vector and the matrix from draws of the quantities a study reports, and `delays_to_multivariate()` wraps it for a study working from its own delays.
+
+Summaries of a $k$ parameter fit are deterministic functions of $k$ numbers, so at most $k$ of them have a non singular covariance.
+Asking for more is an error rather than a silently degenerate likelihood.
 
 ## Reported distribution parameters
 
@@ -476,7 +479,7 @@ Those parameters describe the distribution its estimation procedure converged to
 Where the procedure was correct, that is the delay distribution itself.
 Where it was biased, it is the biased distribution the procedure targeted, which is what Section \@ref(the-biased-estimand) forward models.
 
-`parameters_to_multivariate()` converts reported parameters into the summaries the reported distribution implies.
+`epidist_estimates_parameters()` converts reported parameters into the summaries the reported distribution implies.
 Those summaries are then fitted like any other reported summary.
 Writing $\hat{F}$ for the reported distribution and $T$ for a summary, the reported value is $T(\hat{F})$ and the model compares it against $T$ of the biased estimand.
 Comparing summaries rather than parameters means the family a study fitted need not match the family being fitted to it.
@@ -492,13 +495,11 @@ Equation \@ref(eq:meta-reported-cond) makes the reported value and the model's i
 A study that adjusted for right truncation has $D = \infty$ and is left unconditioned above.
 A reported quantile at probability $p$ is the value $\hat{F}_{L,D}$ puts $p$ below, so it stays inside the observed range as well.
 
-Reported parameter uncertainty is carried onto the summary scale by the delta method.
-With $\hat{\theta}$ the reported parameters, $V$ their reported covariance, and $J$ the Jacobian of the map from parameters to summaries at $\hat{\theta}$,
-$$
-\Sigma = J V J^\top, (\#eq:meta-reported-delta)
-$$
-which is used as the reported covariance matrix of Equation \@ref(eq:meta-mvn).
-A fit of $k$ parameters carries $k$ degrees of freedom, so at most $k$ summaries can be given a non singular $\Sigma$.
+Reported parameter standard errors are carried onto the summary scale by the delta method.
+With $\hat{\theta}$ the reported parameters, $V$ the diagonal matrix of their squared standard errors, and $J$ the Jacobian of the map from parameters to summaries at $\hat{\theta}$, the standard error of summary $i$ is the square root of the $i$th diagonal entry of $J V J^\top$.
+Each summary is then fitted with its own standard error through Equation \@ref(eq:meta-moment-lik) or \@ref(eq:meta-quantile-lik).
+The correlation the delta method implies between the summaries is not kept, because the joint distribution of more than $k$ of them is degenerate.
+A study that published a full parameter covariance and wants the correlation kept can draw from it and pass the draws to `as_epidist_multivariate()`, which needs no linearisation.
 Where a study reported no parameter uncertainty, its summaries fall back to the sample size likelihoods of Section \@ref(sampling-likelihoods).
 
 This route assumes that summaries of the reported distribution are the summaries of what the study's procedure targeted.
