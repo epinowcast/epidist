@@ -80,6 +80,8 @@ epidist_prior <- function(
 #' @inheritParams epidist
 #' @rdname epidist_model_prior
 #' @family prior
+#' @returns A `brmsprior` object, or `NULL` when the model adds no priors.
+#'
 #' @export
 epidist_model_prior <- function(data, ...) {
   UseMethod("epidist_model_prior")
@@ -91,6 +93,8 @@ epidist_model_prior <- function(data, ...) {
 #'
 #' @inheritParams epidist
 #' @family prior
+#' @returns A `brmsprior` object, or `NULL` when the model adds no priors.
+#'
 #' @export
 epidist_model_prior.default <- function(data, formula, ...) {
   return(NULL)
@@ -104,6 +108,8 @@ epidist_model_prior.default <- function(data, formula, ...) {
 #' @inheritParams epidist
 #' @rdname epidist_family_prior
 #' @family prior
+#' @returns A `brmsprior` object, or `NULL` when the model adds no priors.
+#'
 #' @export
 epidist_family_prior <- function(family, ...) {
   UseMethod("epidist_family_prior")
@@ -115,6 +121,8 @@ epidist_family_prior <- function(family, ...) {
 #'
 #' @inheritParams epidist
 #' @family prior
+#' @returns A `brmsprior` object, or `NULL` when the model adds no priors.
+#'
 #' @export
 epidist_family_prior.default <- function(family, formula, ...) {
   return(NULL)
@@ -127,6 +135,8 @@ epidist_family_prior.default <- function(family, formula, ...) {
 #' @inheritParams epidist
 #' @method epidist_family_prior lognormal
 #' @family prior
+#' @returns A `brmsprior` object, or `NULL` when the model adds no priors.
+#'
 #' @export
 epidist_family_prior.lognormal <- function(family, formula, ...) {
   prior <- prior("normal(1, 1)", class = "Intercept")

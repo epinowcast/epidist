@@ -11,6 +11,9 @@ as_epidist_marginal_model(data, ...)
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_marginal_model}.
+}
 \description{
 Creates an \code{epidist_marginal_model} object from various input formats.
 This enables fitting marginal models for epidemiological delays using
@@ -23,13 +26,13 @@ truncation due to observation times. See the specific methods
 supported input formats and usage examples.
 }
 \seealso{
-Other marginal_model: 
-\code{\link{as_epidist_marginal_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_marginal_model.epidist_linelist_data}()},
-\code{\link{epidist_family_model.epidist_marginal_model}()},
-\code{\link{epidist_formula_model.epidist_marginal_model}()},
-\code{\link{epidist_transform_data_model.epidist_marginal_model}()},
-\code{\link{is_epidist_marginal_model}()},
-\code{\link{new_epidist_marginal_model}()}
+Other marginal_model:
+\code{\link[=as_epidist_marginal_model.epidist_aggregate_data]{as_epidist_marginal_model.epidist_aggregate_data()}},
+\code{\link[=as_epidist_marginal_model.epidist_linelist_data]{as_epidist_marginal_model.epidist_linelist_data()}},
+\code{\link[=epidist_family_model.epidist_marginal_model]{epidist_family_model.epidist_marginal_model()}},
+\code{\link[=epidist_formula_model.epidist_marginal_model]{epidist_formula_model.epidist_marginal_model()}},
+\code{\link[=epidist_transform_data_model.epidist_marginal_model]{epidist_transform_data_model.epidist_marginal_model()}},
+\code{\link[=is_epidist_marginal_model]{is_epidist_marginal_model()}},
+\code{\link[=new_epidist_marginal_model]{new_epidist_marginal_model()}}
 }
 \concept{marginal_model}

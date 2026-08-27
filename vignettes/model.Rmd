@@ -75,7 +75,7 @@ For this reason, our current methodology focuses on biases that affect the estim
 ## Right truncation
 
 One key bias that affects the forward distribution is right truncation.
-Right truncation refers to the bias arising from the inability to observe future events and ocurs when we observe data based on the secondary events.
+Right truncation refers to the bias arising from the inability to observe future events and occurs when we observe data based on the secondary events.
 For example, assume the data are right truncated and we don't observe secondary events past time $T$.
 Then, we will only observe delays whose secondary events occurred before time $T$, causing us to underestimate the mean of the distribution as these delays will on average be shorter.
 

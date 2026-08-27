@@ -8,10 +8,17 @@ if (length(author)) {
     }, aar)
 }
 
+# DESCRIPTION has no Date field, so take the year CRAN stamps on release and
+# fall back to the current year for a development install.
+year <- sub("-.*", "", meta$`Date/Publication`)
+if (!length(year) || !nzchar(year)) {
+  year <- format(Sys.Date(), "%Y")
+}
+
 bibentry(
   bibtype = "Manual",
   title   = paste0(meta$Package, ": ", gsub("[[:space:]]+", " ", meta$Title)),
   author  = author,
-  year    = format(meta$Date, "%Y"),
+  year    = year,
   doi     = "10.5281/zenodo.14213017"
 )

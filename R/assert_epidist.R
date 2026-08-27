@@ -9,6 +9,8 @@ assert_epidist <- function(data, ...) {
   UseMethod("assert_epidist")
 }
 
+#' @returns `NULL`, invisibly. Called for the side effect of validating `data`.
+#'
 #' @export
 #' @family assert
 assert_epidist.default <- function(data, ...) {

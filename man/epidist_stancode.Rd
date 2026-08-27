@@ -11,6 +11,9 @@ epidist_stancode(data, ...)
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+A list of \code{stanvars} objects, or \code{NULL} when none are needed.
+}
 \description{
 This function is used within \code{\link[=epidist]{epidist()}} to create any custom Stan code which
 is injected into \code{brms} via the \code{stanvars} argument. It is unlikely that
@@ -18,7 +21,7 @@ as a user you will need this function, but we export it nonetheless to be
 transparent about what exactly is happening inside of a call to \code{\link[=epidist]{epidist()}}.
 }
 \seealso{
-Other stan: 
-\code{\link{epidist_stancode.default}()}
+Other stan:
+\code{\link[=epidist_stancode.default]{epidist_stancode.default()}}
 }
 \concept{stan}

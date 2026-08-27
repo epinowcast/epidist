@@ -8,6 +8,8 @@
 #' @inheritParams epidist
 #' @rdname epidist_stancode
 #' @family stan
+#' @returns A list of `stanvars` objects, or `NULL` when none are needed.
+#'
 #' @export
 epidist_stancode <- function(data, ...) {
   UseMethod("epidist_stancode")
@@ -17,6 +19,8 @@ epidist_stancode <- function(data, ...) {
 #'
 #' @inheritParams epidist
 #' @family stan
+#' @returns A list of `stanvars` objects, or `NULL` when none are needed.
+#'
 #' @export
 epidist_stancode.default <- function(data, ...) {
   return(NULL)

@@ -12,15 +12,18 @@ model}
 
 \item{...}{Additional arguments for method.}
 }
+\value{
+The input with natural scale \code{mean} and \code{sd} columns added.
+}
 \description{
 Again, \code{mu} and \code{shape} here are the distributional parameters of \code{brms}.
 }
 \seealso{
-Other postprocess: 
-\code{\link{add_mean_sd}()},
-\code{\link{add_mean_sd.default}()},
-\code{\link{add_mean_sd.lognormal_samples}()},
-\code{\link{add_mean_sd.weibull_samples}()},
-\code{\link{predict_delay_parameters}()}
+Other postprocess:
+\code{\link[=add_mean_sd]{add_mean_sd()}},
+\code{\link[=add_mean_sd.default]{add_mean_sd.default()}},
+\code{\link[=add_mean_sd.lognormal_samples]{add_mean_sd.lognormal_samples()}},
+\code{\link[=add_mean_sd.weibull_samples]{add_mean_sd.weibull_samples()}},
+\code{\link[=predict_delay_parameters]{predict_delay_parameters()}}
 }
 \concept{postprocess}

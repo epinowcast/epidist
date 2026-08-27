@@ -21,15 +21,19 @@ within grouping variables are treated as a new level.}
 
 \item{...}{Additional arguments passed to \code{\link[brms:prepare_predictions]{brms::prepare_predictions()}}.}
 }
+\value{
+A \code{data.frame} of posterior draws of the delay distribution
+parameters.
+}
 \description{
 Extract samples of the delay distribution parameters
 }
 \seealso{
-Other postprocess: 
-\code{\link{add_mean_sd}()},
-\code{\link{add_mean_sd.default}()},
-\code{\link{add_mean_sd.gamma_samples}()},
-\code{\link{add_mean_sd.lognormal_samples}()},
-\code{\link{add_mean_sd.weibull_samples}()}
+Other postprocess:
+\code{\link[=add_mean_sd]{add_mean_sd()}},
+\code{\link[=add_mean_sd.default]{add_mean_sd.default()}},
+\code{\link[=add_mean_sd.gamma_samples]{add_mean_sd.gamma_samples()}},
+\code{\link[=add_mean_sd.lognormal_samples]{add_mean_sd.lognormal_samples()}},
+\code{\link[=add_mean_sd.weibull_samples]{add_mean_sd.weibull_samples()}}
 }
 \concept{postprocess}

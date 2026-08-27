@@ -3,7 +3,7 @@
 \docType{package}
 \name{epidist-package}
 \alias{epidist-package}
-\title{epidist: Estimate Epidemiological Delay Distributions With brms}
+\title{epidist: Estimate Epidemiological Delay Distributions with 'brms'}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
@@ -23,6 +23,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Sam Abbott \email{contact@samabbott.co.uk} (\href{https://orcid.org/0000-0001-8057-8037}{ORCID}) [copyright holder]
   \item Adam Howes \email{adamthowes@gmail.com} (\href{https://orcid.org/0000-0003-2386-4031}{ORCID})
   \item Sang Woo Park \email{swp2@princeton.edu} (\href{https://orcid.org/0000-0003-2202-3361}{ORCID})
 }

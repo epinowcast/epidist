@@ -16,12 +16,15 @@ be used in the model created using \code{\link[=epidist_family]{epidist_family()
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+The data transformed ready for fitting.
+}
 \description{
 Default method for transforming data for a model
 }
 \seealso{
-Other transform_data: 
-\code{\link{epidist_transform_data}()},
-\code{\link{epidist_transform_data_model}()}
+Other transform_data:
+\code{\link[=epidist_transform_data]{epidist_transform_data()}},
+\code{\link[=epidist_transform_data_model]{epidist_transform_data_model()}}
 }
 \concept{transform_data}

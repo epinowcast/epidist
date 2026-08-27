@@ -13,6 +13,9 @@ observations with primary and secondary event times. See
 
 \item{...}{Not used in this method.}
 }
+\value{
+An object of class \code{epidist_latent_model}.
+}
 \description{
 This method takes an \code{epidist_linelist_data} object and converts it to a
 format suitable for fitting latent variable models. It calculates key
@@ -30,18 +33,18 @@ sierra_leone_ebola_data |>
 }
 \references{
 \itemize{
-\item \href{https://doi.org/10.1101/2024.01.12.24301247}{Park et al. (2024)}
-\item \href{https://doi.org/10.1371/journal.pcbi.1012520}{Charniga et al. (2024)}
+\item Park et al. (2024) \doi{10.1101/2024.01.12.24301247}
+\item Charniga et al. (2024) \doi{10.1371/journal.pcbi.1012520}
 }
 }
 \seealso{
-Other latent_model: 
-\code{\link{as_epidist_latent_model}()},
-\code{\link{as_epidist_latent_model.epidist_aggregate_data}()},
-\code{\link{epidist_family_model.epidist_latent_model}()},
-\code{\link{epidist_formula_model.epidist_latent_model}()},
-\code{\link{epidist_model_prior.epidist_latent_model}()},
-\code{\link{is_epidist_latent_model}()},
-\code{\link{new_epidist_latent_model}()}
+Other latent_model:
+\code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}},
+\code{\link[=as_epidist_latent_model.epidist_aggregate_data]{as_epidist_latent_model.epidist_aggregate_data()}},
+\code{\link[=epidist_family_model.epidist_latent_model]{epidist_family_model.epidist_latent_model()}},
+\code{\link[=epidist_formula_model.epidist_latent_model]{epidist_formula_model.epidist_latent_model()}},
+\code{\link[=epidist_model_prior.epidist_latent_model]{epidist_model_prior.epidist_latent_model()}},
+\code{\link[=is_epidist_latent_model]{is_epidist_latent_model()}},
+\code{\link[=new_epidist_latent_model]{new_epidist_latent_model()}}
 }
 \concept{latent_model}

@@ -11,6 +11,9 @@
 
 \item{...}{Not used in this method.}
 }
+\value{
+An object of class \code{epidist_latent_model}.
+}
 \description{
 This method converts aggregate data to a latent model format by first
 converting it to linelist format using
@@ -30,13 +33,13 @@ sierra_leone_ebola_data |>
   as_epidist_latent_model()
 }
 \seealso{
-Other latent_model: 
-\code{\link{as_epidist_latent_model}()},
-\code{\link{as_epidist_latent_model.epidist_linelist_data}()},
-\code{\link{epidist_family_model.epidist_latent_model}()},
-\code{\link{epidist_formula_model.epidist_latent_model}()},
-\code{\link{epidist_model_prior.epidist_latent_model}()},
-\code{\link{is_epidist_latent_model}()},
-\code{\link{new_epidist_latent_model}()}
+Other latent_model:
+\code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}},
+\code{\link[=as_epidist_latent_model.epidist_linelist_data]{as_epidist_latent_model.epidist_linelist_data()}},
+\code{\link[=epidist_family_model.epidist_latent_model]{epidist_family_model.epidist_latent_model()}},
+\code{\link[=epidist_formula_model.epidist_latent_model]{epidist_formula_model.epidist_latent_model()}},
+\code{\link[=epidist_model_prior.epidist_latent_model]{epidist_model_prior.epidist_latent_model()}},
+\code{\link[=is_epidist_latent_model]{is_epidist_latent_model()}},
+\code{\link[=new_epidist_latent_model]{new_epidist_latent_model()}}
 }
 \concept{latent_model}

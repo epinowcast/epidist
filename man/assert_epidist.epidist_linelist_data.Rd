@@ -11,16 +11,19 @@
 
 \item{...}{Additional arguments}
 }
+\value{
+\code{NULL}, invisibly. Called for the side effect of validating \code{data}.
+}
 \description{
 Assert validity of \code{epidist_linelist_data} objects
 }
 \seealso{
-Other linelist_data: 
-\code{\link{as_epidist_linelist_data}()},
-\code{\link{as_epidist_linelist_data.data.frame}()},
-\code{\link{as_epidist_linelist_data.default}()},
-\code{\link{as_epidist_linelist_data.epidist_aggregate_data}()},
-\code{\link{is_epidist_linelist_data}()},
-\code{\link{new_epidist_linelist_data}()}
+Other linelist_data:
+\code{\link[=as_epidist_linelist_data]{as_epidist_linelist_data()}},
+\code{\link[=as_epidist_linelist_data.data.frame]{as_epidist_linelist_data.data.frame()}},
+\code{\link[=as_epidist_linelist_data.default]{as_epidist_linelist_data.default()}},
+\code{\link[=as_epidist_linelist_data.epidist_aggregate_data]{as_epidist_linelist_data.epidist_aggregate_data()}},
+\code{\link[=is_epidist_linelist_data]{is_epidist_linelist_data()}},
+\code{\link[=new_epidist_linelist_data]{new_epidist_linelist_data()}}
 }
 \concept{linelist_data}

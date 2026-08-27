@@ -34,7 +34,7 @@ knitr::opts_chunk$set(
 By building on `brms`, `epidist` inherits the ability to work within the broader `brms` ecosystem, allowing users to leverage existing tools for model diagnostics, posterior predictive checks, and model comparison while addressing the specific challenges of delay distribution estimation.
 See the `vignette("faq")` for more details on the tools available in the `brms` ecosystem.
 
-In this vignettte, we will give a quick start guide to using the `epidist` package.
+In this vignette, we will give a quick start guide to using the `epidist` package.
 To get started we will introduce some of the key concepts in delay distribution estimation, and then simulate some data delay data from a stochastic outbreak that includes common biases.
 Using this simulated data we will then show how to use the `epidist` package to estimate a distribution using a simple model and a model that accounts for some of the common issues in delay distribution estimation.
 We will then compare the output of these models to the true delay distribution used to simulate the data again using `epidst` tools.
@@ -107,7 +107,7 @@ obs_time <- 25
 
 <details><summary>Click to expand for simulation details</summary>
 
-First, we use the [Gillepsie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data (Figure \@ref(fig:outbreak)) from a stochastic compartmental model.
+First, we use the [Gillespie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data (Figure \@ref(fig:outbreak)) from a stochastic compartmental model.
 
 ```{r}
 outbreak <- simulate_gillespie(r = growth_rate, seed = 101)
@@ -535,7 +535,7 @@ head(predicted_parameters)
 Note that by default `predict_delay_parameters()` gives predictions for every row in the transformed data.
 Here as we only want posterior draws for the summary parameters we filter to the first row or the first data point.
 This prevents repeating the same prediction for each row.
-Another approach to this would be prodividing `newdata` to `predict_delay_parameters()` representing the data we want to make predictions for.
+Another approach to this would be providing `newdata` to `predict_delay_parameters()` representing the data we want to make predictions for.
 :::
 
 We can now plot posterior draws for the summary parameters from the two models.

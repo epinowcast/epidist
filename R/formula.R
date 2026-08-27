@@ -11,6 +11,8 @@
 #'  be used in the model created using [epidist_family()].
 #'
 #' @family formula
+#' @returns A `brmsformula` object.
+#'
 #' @export
 epidist_formula <- function(data, family, formula, ...) {
   assert_epidist(data)
@@ -27,8 +29,10 @@ epidist_formula <- function(data, family, formula, ...) {
 #'
 #' @inheritParams epidist
 #'
-#' @rdname epidist_family_model
+#' @rdname epidist_formula_model
 #' @family formula
+#' @returns A `brmsformula` object.
+#'
 #' @export
 epidist_formula_model <- function(data, formula, ...) {
   UseMethod("epidist_formula_model")
@@ -39,6 +43,8 @@ epidist_formula_model <- function(data, formula, ...) {
 #' @inheritParams epidist
 #'
 #' @family formula
+#' @returns A `brmsformula` object.
+#'
 #' @export
 epidist_formula_model.default <- function(data, formula, ...) {
   formula <- stats::update(

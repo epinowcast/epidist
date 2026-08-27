@@ -11,16 +11,20 @@ is_epidist_aggregate_data(data, ...)
 
 \item{...}{Additional arguments}
 }
+\value{
+A logical, \code{TRUE} if \code{data} inherits from \code{epidist_aggregate_data}
+and \code{FALSE} otherwise.
+}
 \description{
 Check if data has the \code{epidist_aggregate_data} class
 }
 \seealso{
-Other aggregate_data: 
-\code{\link{as_epidist_aggregate_data}()},
-\code{\link{as_epidist_aggregate_data.data.frame}()},
-\code{\link{as_epidist_aggregate_data.default}()},
-\code{\link{as_epidist_aggregate_data.epidist_linelist_data}()},
-\code{\link{assert_epidist.epidist_aggregate_data}()},
-\code{\link{new_epidist_aggregate_data}()}
+Other aggregate_data:
+\code{\link[=as_epidist_aggregate_data]{as_epidist_aggregate_data()}},
+\code{\link[=as_epidist_aggregate_data.data.frame]{as_epidist_aggregate_data.data.frame()}},
+\code{\link[=as_epidist_aggregate_data.default]{as_epidist_aggregate_data.default()}},
+\code{\link[=as_epidist_aggregate_data.epidist_linelist_data]{as_epidist_aggregate_data.epidist_linelist_data()}},
+\code{\link[=assert_epidist.epidist_aggregate_data]{assert_epidist.epidist_aggregate_data()}},
+\code{\link[=new_epidist_aggregate_data]{new_epidist_aggregate_data()}}
 }
 \concept{aggregate_data}

@@ -11,11 +11,14 @@
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+A list of \code{stanvars} objects, or \code{NULL} when none are needed.
+}
 \description{
 Default method for defining model specific Stan code
 }
 \seealso{
-Other stan: 
-\code{\link{epidist_stancode}()}
+Other stan:
+\code{\link[=epidist_stancode]{epidist_stancode()}}
 }
 \concept{stan}

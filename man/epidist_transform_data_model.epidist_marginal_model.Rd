@@ -15,6 +15,9 @@
 
 \item{...}{Additional arguments passed to methods}
 }
+\value{
+The data transformed ready for fitting.
+}
 \description{
 This method transforms data into the format required by the marginal model
 by:
@@ -29,13 +32,13 @@ any variables in the model formula using \code{\link[=.summarise_n_by_formula]{.
 }
 }
 \seealso{
-Other marginal_model: 
-\code{\link{as_epidist_marginal_model}()},
-\code{\link{as_epidist_marginal_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_marginal_model.epidist_linelist_data}()},
-\code{\link{epidist_family_model.epidist_marginal_model}()},
-\code{\link{epidist_formula_model.epidist_marginal_model}()},
-\code{\link{is_epidist_marginal_model}()},
-\code{\link{new_epidist_marginal_model}()}
+Other marginal_model:
+\code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}},
+\code{\link[=as_epidist_marginal_model.epidist_aggregate_data]{as_epidist_marginal_model.epidist_aggregate_data()}},
+\code{\link[=as_epidist_marginal_model.epidist_linelist_data]{as_epidist_marginal_model.epidist_linelist_data()}},
+\code{\link[=epidist_family_model.epidist_marginal_model]{epidist_family_model.epidist_marginal_model()}},
+\code{\link[=epidist_formula_model.epidist_marginal_model]{epidist_formula_model.epidist_marginal_model()}},
+\code{\link[=is_epidist_marginal_model]{is_epidist_marginal_model()}},
+\code{\link[=new_epidist_marginal_model]{new_epidist_marginal_model()}}
 }
 \concept{marginal_model}

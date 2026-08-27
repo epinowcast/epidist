@@ -14,6 +14,9 @@ required time variables.}
 
 \item{...}{Additional arguments passed to methods}
 }
+\value{
+An object of class \code{epidist_aggregate_data}.
+}
 \description{
 This method takes an \code{epidist_linelist_data} object (see
 \code{\link[=as_epidist_linelist_data]{as_epidist_linelist_data()}}) and aggregates it by counting unique
@@ -41,12 +44,12 @@ sierra_leone_ebola_data |>
   as_epidist_aggregate_data(by = "age")
 }
 \seealso{
-Other aggregate_data: 
-\code{\link{as_epidist_aggregate_data}()},
-\code{\link{as_epidist_aggregate_data.data.frame}()},
-\code{\link{as_epidist_aggregate_data.default}()},
-\code{\link{assert_epidist.epidist_aggregate_data}()},
-\code{\link{is_epidist_aggregate_data}()},
-\code{\link{new_epidist_aggregate_data}()}
+Other aggregate_data:
+\code{\link[=as_epidist_aggregate_data]{as_epidist_aggregate_data()}},
+\code{\link[=as_epidist_aggregate_data.data.frame]{as_epidist_aggregate_data.data.frame()}},
+\code{\link[=as_epidist_aggregate_data.default]{as_epidist_aggregate_data.default()}},
+\code{\link[=assert_epidist.epidist_aggregate_data]{assert_epidist.epidist_aggregate_data()}},
+\code{\link[=is_epidist_aggregate_data]{is_epidist_aggregate_data()}},
+\code{\link[=new_epidist_aggregate_data]{new_epidist_aggregate_data()}}
 }
 \concept{aggregate_data}

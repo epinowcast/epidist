@@ -20,6 +20,8 @@
 #' @param fit A fitted model of class `epidist_fit`
 #' @family diagnostics
 #' @autoglobal
+#' @returns A `data.frame` of summary diagnostics for the fit.
+#'
 #' @export
 #' @examples
 #' \donttest{

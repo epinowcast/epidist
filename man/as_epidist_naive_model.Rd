@@ -11,6 +11,9 @@ as_epidist_naive_model(data, ...)
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_naive_model}.
+}
 \description{
 Creates an \code{epidist_naive_model} object from various input formats.
 This enables fitting naive models for epidemiological delays using
@@ -20,12 +23,12 @@ This is the simplest approach but may lead to biased estimates if there is
 substantial censoring or truncation in the data.
 }
 \seealso{
-Other naive_model: 
-\code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_naive_model.epidist_linelist_data}()},
-\code{\link{epidist_formula_model.epidist_naive_model}()},
-\code{\link{epidist_transform_data_model.epidist_naive_model}()},
-\code{\link{is_epidist_naive_model}()},
-\code{\link{new_epidist_naive_model}()}
+Other naive_model:
+\code{\link[=as_epidist_naive_model.epidist_aggregate_data]{as_epidist_naive_model.epidist_aggregate_data()}},
+\code{\link[=as_epidist_naive_model.epidist_linelist_data]{as_epidist_naive_model.epidist_linelist_data()}},
+\code{\link[=epidist_formula_model.epidist_naive_model]{epidist_formula_model.epidist_naive_model()}},
+\code{\link[=epidist_transform_data_model.epidist_naive_model]{epidist_transform_data_model.epidist_naive_model()}},
+\code{\link[=is_epidist_naive_model]{is_epidist_naive_model()}},
+\code{\link[=new_epidist_naive_model]{new_epidist_naive_model()}}
 }
 \concept{naive_model}

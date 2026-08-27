@@ -17,6 +17,10 @@ See #399.
 
 ## Package
 
+- Documented the return value of every exported function.
+- Fixed four typos that `inst/WORDLIST` was masking, corrected two moved URLs, title cased the `Title` field, and set `Language: en-GB`.
+- Fixed `inst/CITATION` rendering the year as `NULL`.
+
 - Added `simulate_dates()`, which turns simulated event times into the censored dates an analyst would receive.
 - Removed the calls to unexported `brms` functions that `R CMD check --as-cran` flags.
 `R/brms-compat.R` now holds small internal helpers reproducing the narrow behaviour `epidist` relied on from `brms:::validate_family()`, `brms:::validate_formula()`, `brms:::validate_data()`, `brms:::dpar_bounds()` and `brms:::log_lik_weight()`.

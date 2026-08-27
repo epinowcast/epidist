@@ -17,18 +17,21 @@ parameters.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+A \code{brmsprior} object, or \code{NULL} when the model adds no priors.
+}
 \description{
 Defines prior distributions for the latent model parameters \code{pwindow_raw} and
 \code{swindow_raw} which control the width of the observation windows.
 }
 \seealso{
-Other latent_model: 
-\code{\link{as_epidist_latent_model}()},
-\code{\link{as_epidist_latent_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_latent_model.epidist_linelist_data}()},
-\code{\link{epidist_family_model.epidist_latent_model}()},
-\code{\link{epidist_formula_model.epidist_latent_model}()},
-\code{\link{is_epidist_latent_model}()},
-\code{\link{new_epidist_latent_model}()}
+Other latent_model:
+\code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}},
+\code{\link[=as_epidist_latent_model.epidist_aggregate_data]{as_epidist_latent_model.epidist_aggregate_data()}},
+\code{\link[=as_epidist_latent_model.epidist_linelist_data]{as_epidist_latent_model.epidist_linelist_data()}},
+\code{\link[=epidist_family_model.epidist_latent_model]{epidist_family_model.epidist_latent_model()}},
+\code{\link[=epidist_formula_model.epidist_latent_model]{epidist_formula_model.epidist_latent_model()}},
+\code{\link[=is_epidist_latent_model]{is_epidist_latent_model()}},
+\code{\link[=new_epidist_latent_model]{new_epidist_latent_model()}}
 }
 \concept{latent_model}

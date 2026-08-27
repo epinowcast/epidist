@@ -29,6 +29,9 @@ secondary times.}
 
 \item{...}{Additional columns to add to the epidist_linelist_data object.}
 }
+\value{
+An object of class \code{epidist_aggregate_data}.
+}
 \description{
 This method takes vectors of event times (primary/secondary event times and
 observation time) along with counts and creates an \code{epidist_aggregate_data}
@@ -50,12 +53,12 @@ as_epidist_aggregate_data(
 )
 }
 \seealso{
-Other aggregate_data: 
-\code{\link{as_epidist_aggregate_data}()},
-\code{\link{as_epidist_aggregate_data.data.frame}()},
-\code{\link{as_epidist_aggregate_data.epidist_linelist_data}()},
-\code{\link{assert_epidist.epidist_aggregate_data}()},
-\code{\link{is_epidist_aggregate_data}()},
-\code{\link{new_epidist_aggregate_data}()}
+Other aggregate_data:
+\code{\link[=as_epidist_aggregate_data]{as_epidist_aggregate_data()}},
+\code{\link[=as_epidist_aggregate_data.data.frame]{as_epidist_aggregate_data.data.frame()}},
+\code{\link[=as_epidist_aggregate_data.epidist_linelist_data]{as_epidist_aggregate_data.epidist_linelist_data()}},
+\code{\link[=assert_epidist.epidist_aggregate_data]{assert_epidist.epidist_aggregate_data()}},
+\code{\link[=is_epidist_aggregate_data]{is_epidist_aggregate_data()}},
+\code{\link[=new_epidist_aggregate_data]{new_epidist_aggregate_data()}}
 }
 \concept{aggregate_data}

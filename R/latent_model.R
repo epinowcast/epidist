@@ -10,9 +10,11 @@
 #'
 #' @param ... Additional arguments passed to methods.
 #' @references
-#'   - [Park et al. (2024)](https://doi.org/10.1101/2024.01.12.24301247)
-#'   - [Charniga et al. (2024)](https://doi.org/10.1371/journal.pcbi.1012520)
+#'   - Park et al. (2024) \doi{10.1101/2024.01.12.24301247}
+#'   - Charniga et al. (2024) \doi{10.1371/journal.pcbi.1012520}
 #' @family latent_model
+#' @returns An object of class `epidist_latent_model`.
+#'
 #' @export
 as_epidist_latent_model <- function(data, ...) {
   UseMethod("as_epidist_latent_model")
@@ -36,10 +38,12 @@ as_epidist_latent_model <- function(data, ...) {
 #' @method as_epidist_latent_model epidist_linelist_data
 #' @family latent_model
 #' @autoglobal
+#' @returns An object of class `epidist_latent_model`.
+#'
 #' @export
 #' @references
-#'   - [Park et al. (2024)](https://doi.org/10.1101/2024.01.12.24301247)
-#'   - [Charniga et al. (2024)](https://doi.org/10.1371/journal.pcbi.1012520)
+#'   - Park et al. (2024) \doi{10.1101/2024.01.12.24301247}
+#'   - Charniga et al. (2024) \doi{10.1371/journal.pcbi.1012520}
 #' @examples
 #' sierra_leone_ebola_data |>
 #'   as_epidist_linelist_data(
@@ -87,6 +91,8 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
 #' @method as_epidist_latent_model epidist_aggregate_data
 #' @family latent_model
 #' @autoglobal
+#' @returns An object of class `epidist_latent_model`.
+#'
 #' @export
 #' @examples
 #' sierra_leone_ebola_data |>
@@ -121,6 +127,9 @@ new_epidist_latent_model <- function(data, ...) {
 #' @param data An object
 #'
 #' @family latent_model
+#' @returns A logical, `TRUE` if `data` inherits from `epidist_latent_model` and
+#'  `FALSE` otherwise.
+#'
 #' @export
 is_epidist_latent_model <- function(data) {
   return(inherits(data, "epidist_latent_model"))
@@ -129,6 +138,8 @@ is_epidist_latent_model <- function(data) {
 #' @method assert_epidist epidist_latent_model
 #' @family latent_model
 #' @importFrom checkmate assert_names assert_numeric assert_integerish
+#' @returns `NULL`, invisibly. Called for the side effect of validating `data`.
+#'
 #' @export
 assert_epidist.epidist_latent_model <- function(data, ...) {
   assert_names(names(data), must.include = .latent_required_cols())
@@ -150,6 +161,8 @@ assert_epidist.epidist_latent_model <- function(data, ...) {
 #' @method epidist_family_model epidist_latent_model
 #'
 #' @family latent_model
+#' @returns A `brms` custom family object.
+#'
 #' @export
 epidist_family_model.epidist_latent_model <- function(
   data,
@@ -198,6 +211,8 @@ epidist_family_model.epidist_latent_model <- function(
 #' @method epidist_formula_model epidist_latent_model
 #'
 #' @family latent_model
+#' @returns A `brmsformula` object.
+#'
 #' @export
 epidist_formula_model.epidist_latent_model <- function(
   data,
@@ -221,6 +236,8 @@ epidist_formula_model.epidist_latent_model <- function(
 #' @importFrom brms set_prior
 #'
 #' @family latent_model
+#' @returns A `brmsprior` object, or `NULL` when the model adds no priors.
+#'
 #' @export
 epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
   priors <- prior(
@@ -242,6 +259,8 @@ epidist_model_prior.epidist_latent_model <- function(data, formula, ...) {
 #'
 #' @family latent_model
 #' @autoglobal
+#' @returns A list of `stanvars` objects, or `NULL` when none are needed.
+#'
 #' @export
 epidist_stancode.epidist_latent_model <- function(
   data,

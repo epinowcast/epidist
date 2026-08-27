@@ -12,6 +12,8 @@
 #' @param ... Additional arguments passed to methods.
 #'
 #' @family naive_model
+#' @returns An object of class `epidist_naive_model`.
+#'
 #' @export
 as_epidist_naive_model <- function(data, ...) {
   UseMethod("as_epidist_naive_model")
@@ -44,6 +46,8 @@ as_epidist_naive_model <- function(data, ...) {
 #'
 #' @family naive_model
 #' @autoglobal
+#' @returns An object of class `epidist_naive_model`.
+#'
 #' @export
 #' @examples
 #' sierra_leone_ebola_data |>
@@ -83,6 +87,8 @@ as_epidist_naive_model.epidist_linelist_data <- function(
 #'
 #' @family naive_model
 #' @autoglobal
+#' @returns An object of class `epidist_naive_model`.
+#'
 #' @export
 #' @examples
 #' sierra_leone_ebola_data |>
@@ -118,6 +124,9 @@ new_epidist_naive_model <- function(data) {
 #' @param data An object.
 #'
 #' @family naive_model
+#' @returns A logical, `TRUE` if `data` inherits from `epidist_naive_model` and
+#'  `FALSE` otherwise.
+#'
 #' @export
 is_epidist_naive_model <- function(data) {
   return(inherits(data, "epidist_naive_model"))
@@ -125,6 +134,8 @@ is_epidist_naive_model <- function(data) {
 
 #' @method assert_epidist epidist_naive_model
 #' @family naive_model
+#' @returns `NULL`, invisibly. Called for the side effect of validating `data`.
+#'
 #' @export
 assert_epidist.epidist_naive_model <- function(data, ...) {
   assert_data_frame(data)
@@ -143,6 +154,8 @@ assert_epidist.epidist_naive_model <- function(data, ...) {
 #' @method epidist_formula_model epidist_naive_model
 #'
 #' @family naive_model
+#' @returns A `brmsformula` object.
+#'
 #' @export
 epidist_formula_model.epidist_naive_model <- function(
   data,
@@ -180,6 +193,8 @@ epidist_formula_model.epidist_naive_model <- function(
 #' @method epidist_transform_data_model epidist_naive_model
 #' @family naive_model
 #' @importFrom purrr map_chr
+#' @returns The data transformed ready for fitting.
+#'
 #' @export
 epidist_transform_data_model.epidist_naive_model <- function(
   data,

@@ -25,6 +25,9 @@ secondary times.}
 
 \item{...}{Additional columns to add to the epidist_linelist_data object.}
 }
+\value{
+An object of class \code{epidist_linelist_data}.
+}
 \description{
 This method takes vectors of event times (primary/secondary event times and
 observation time) and creates an \code{epidist_linelist_data} object. This format
@@ -41,12 +44,12 @@ as_epidist_linelist_data(
 )
 }
 \seealso{
-Other linelist_data: 
-\code{\link{as_epidist_linelist_data}()},
-\code{\link{as_epidist_linelist_data.data.frame}()},
-\code{\link{as_epidist_linelist_data.epidist_aggregate_data}()},
-\code{\link{assert_epidist.epidist_linelist_data}()},
-\code{\link{is_epidist_linelist_data}()},
-\code{\link{new_epidist_linelist_data}()}
+Other linelist_data:
+\code{\link[=as_epidist_linelist_data]{as_epidist_linelist_data()}},
+\code{\link[=as_epidist_linelist_data.data.frame]{as_epidist_linelist_data.data.frame()}},
+\code{\link[=as_epidist_linelist_data.epidist_aggregate_data]{as_epidist_linelist_data.epidist_aggregate_data()}},
+\code{\link[=assert_epidist.epidist_linelist_data]{assert_epidist.epidist_linelist_data()}},
+\code{\link[=is_epidist_linelist_data]{is_epidist_linelist_data()}},
+\code{\link[=new_epidist_linelist_data]{new_epidist_linelist_data()}}
 }
 \concept{linelist_data}

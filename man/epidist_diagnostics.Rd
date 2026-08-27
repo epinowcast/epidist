@@ -9,6 +9,9 @@ epidist_diagnostics(fit)
 \arguments{
 \item{fit}{A fitted model of class \code{epidist_fit}}
 }
+\value{
+A \code{data.frame} of summary diagnostics for the fit.
+}
 \description{
 This function computes diagnostics to assess the quality of a fitted model.
 When the fitting algorithm used is \code{"sampling"} (HMC) then the output of
