@@ -27,6 +27,7 @@ Other latent_model:
 \code{\link[=as_epidist_latent_model.epidist_linelist_data]{as_epidist_latent_model.epidist_linelist_data()}},
 \code{\link[=epidist_formula_model.epidist_latent_model]{epidist_formula_model.epidist_latent_model()}},
 \code{\link[=epidist_model_prior.epidist_latent_model]{epidist_model_prior.epidist_latent_model()}},
+\code{\link[=epidist_newdata.epidist_latent_model]{epidist_newdata.epidist_latent_model()}},
 \code{\link[=is_epidist_latent_model]{is_epidist_latent_model()}},
 \code{\link[=new_epidist_latent_model]{new_epidist_latent_model()}}
 }
