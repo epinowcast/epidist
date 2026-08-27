@@ -73,7 +73,7 @@ test_that(".replace_prior handles custom ~ priors correctly", {
   # Test that only old priors with matching ~ parameter names are removed
   prior <- .replace_prior(old_prior, new_prior, enforce_presence = FALSE)
 
-  # Should keep sigma prior, replace mu prior, remove beta prior, add gamma
+  # Should keep sigma prior, replace mu prior, keep beta prior, add gamma
   # prior
   expect_identical(
     prior$prior,
