@@ -26,7 +26,7 @@ test_that("epidist.epidist_marginal_model recovers the simulation settings for t
   skip_on_cran()
   skip_if_no_cmdstanr()
   set.seed(1)
-  pred <- predict_delay_parameters(fit_marginal)
+  pred <- delay_parameter_draws(fit_marginal)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
   expect_equal(mean(pred$sigma), sdlog, tolerance = 0.1)
 })
