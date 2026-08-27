@@ -58,7 +58,7 @@ as_epidist_latent_model <- function(data, ...) {
 #'   as_epidist_latent_model()
 as_epidist_latent_model.epidist_linelist_data <- function(
   data,
-  primary = c("uniform", "expgrowth"),
+  primary = .primary_choices(),
   ...
 ) {
   assert_epidist.epidist_linelist_data(data)
@@ -121,7 +121,7 @@ as_epidist_latent_model.epidist_linelist_data <- function(
 #'   as_epidist_latent_model()
 as_epidist_latent_model.epidist_aggregate_data <- function(
   data,
-  primary = c("uniform", "expgrowth"),
+  primary = .primary_choices(),
   ...
 ) {
   primary <- match.arg(primary)
@@ -147,7 +147,7 @@ as_epidist_latent_model.epidist_aggregate_data <- function(
 #' @export
 new_epidist_latent_model <- function(
   data,
-  primary = c("uniform", "expgrowth"),
+  primary = .primary_choices(),
   ...
 ) {
   attr(data, "primary") <- match.arg(primary)
@@ -202,11 +202,7 @@ epidist_family_model.epidist_latent_model <- function(
   ...
 ) {
   primary <- .primary_dist(data)
-  if (identical(primary, "expgrowth")) {
-    family$dpars <- c(family$dpars, "pgrowth")
-    family$other_links <- c(family$other_links, "identity")
-    family$other_bounds <- c(family$other_bounds, list(list(lb = NA, ub = NA)))
-  }
+  family <- .add_primary_dpars(family, data)
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
@@ -394,10 +390,14 @@ epidist_stancode.epidist_latent_model <- function(
   )
 
   # A uniform primary event contributes a constant, which Stan can drop.
-  primary_term <- if (identical(.primary_dist(data), "expgrowth")) {
-    "dot_expgrowth_raw_lpdf(pwindow_raw | pgrowth, pbound)"
-  } else {
+  spec <- .primary_spec(.primary_dist(data))
+  primary_term <- if (length(spec$dpars) == 0) {
     "0"
+  } else {
+    paste0(
+      "dot_primary_raw_lpdf(pwindow_raw | ", spec$id, ", {",
+      toString(spec$dpars), "}, pbound)"
+    )
   }
 
   stanvars_functions[[1]]$scode <- gsub(
@@ -434,14 +434,17 @@ epidist_stancode.epidist_latent_model <- function(
     stanvars_data +
     stanvars_parameters
 
-  if (identical(.primary_dist(data), "expgrowth")) {
+  if (length(spec$dpars) > 0) {
     stanvars_all <- stanvars_all +
       stanvar(
         block = "functions",
         scode = paste0(
-          primarycensored::pcd_load_stan_functions("expgrowth_lpdf"),
+          primarycensored::pcd_load_stan_functions(
+            "primary_lpdf",
+            dependencies = TRUE
+          ),
           "\n",
-          .stan_chunk(file.path("latent_model", "expgrowth.stan"))
+          .stan_chunk(file.path("latent_model", "primary.stan"))
         )
       )
   }

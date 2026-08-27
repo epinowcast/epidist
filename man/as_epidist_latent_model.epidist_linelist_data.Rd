@@ -4,7 +4,7 @@
 \alias{as_epidist_latent_model.epidist_linelist_data}
 \title{The latent model method for \code{epidist_linelist_data} objects}
 \usage{
-\method{as_epidist_latent_model}{epidist_linelist_data}(data, primary = c("uniform", "expgrowth"), ...)
+\method{as_epidist_latent_model}{epidist_linelist_data}(data, primary = .primary_choices(), ...)
 }
 \arguments{
 \item{data}{An \code{epidist_linelist_data} object containing individual-level
