@@ -23,6 +23,7 @@ It explains that the impact on accuracy is small because these observation times
 It also points at `obs_time_threshold` for users who do not want the behaviour.
 See #536.
 - Documented the return value of every exported function.
+- Declared `scales` in `Suggests`, which the FAQ vignette loads but nothing declared.
 - Fixed four typos that `inst/WORDLIST` was masking, corrected two moved URLs, title cased the `Title` field, and set `Language: en-GB`.
 - Fixed `inst/CITATION` rendering the year as `NULL`.
 
