@@ -239,82 +239,109 @@ lockstep_vcov <- list(
   R = matrix(c(0.12, -0.03, -0.03, 0.2), nrow = 2)
 )
 
-lockstep_estimates <- suppressMessages(as_epidist_estimates_data(
-  data.frame(
-    study = c(
-      "A", "A", "B", "B", "B", "C", "C", "D", "E", "E", "F", "F", "F",
-      "G", "H", "I", "J", "K", "K", "L", "L",
-      "M", "M", "N", "N", "O", "O", "P", "P",
-      "Q", "Q", "Q", "R", "R"
-    ),
-    type = c(
-      "mean", "sd", "quantile", "quantile", "quantile", "mean", "sd",
-      "quantile", "mean", "sd", "mean", "sd", "quantile",
-      "quantile", "quantile", "quantile", "quantile", "quantile", "quantile",
-      "quantile", "quantile",
-      "mean", "sd", "mean", "sd", "mean", "sd", "quantile", "quantile",
-      "mean", "sd", "quantile", "quantile", "quantile"
-    ),
-    value = c(
-      7.5, 3.6, 4.2, 6.1, 9.4, 6.4, 3.1, 5.4, 9.1, 5.2, 6.9, 3.3, 6.0,
-      6.2, 5.8, 7.1, 6.6, 4.5, 7.5, 5.1, 8.2,
-      8.1, 3.2, 7.8, 3.4, 8.4, 3.1, 6.3, 9.2,
-      7.2, 3.4, 6.5, 4.8, 8.6
-    ),
-    se = c(
-      rep(NA, 10), 0.4, NA, 0.5, 0.6, 0.4, 0.7, 0.5, NA, NA, NA, NA,
-      rep(NA, 8), rep(NA, 5)
-    ),
-    p = c(
-      NA, NA, 0.25, 0.5, 0.75, NA, NA, 0.5, NA, NA, NA, NA, 0.5,
-      0.5, 0.5, 0.5, 0.5, 0.25, 0.75, 0.25, 0.75,
-      NA, NA, NA, NA, NA, NA, 0.25, 0.75,
-      NA, NA, 0.5, 0.25, 0.75
-    ),
-    n = c(
-      120, 120, 60, 60, 60, 80, 80, 200, 300, 300, 90, 90, 90,
-      70, 70, 70, 70, 150, 150, 150, 150,
-      110, 110, 95, 95, 130, 130, 140, 140,
-      NA, NA, NA, NA, NA
-    ),
-    relative_obs_time = c(
-      20, 20, Inf, Inf, Inf, Inf, Inf, 30, 25, 25, 18, 18, 18,
-      24, 24, 24, 24, 22, 22, 26, 26,
-      28, 28, Inf, Inf, 32, 32, 27, 27,
-      Inf, Inf, Inf, 30, 30
-    ),
-    trunc_adjusted = c(
-      FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE,
-      FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-      FALSE, FALSE,
-      FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE,
-      TRUE, TRUE, TRUE, FALSE, FALSE
-    ),
-    trunc_design = c(
-      rep("cohort", 8), "accrual", "accrual", rep("cohort", 3),
-      "cohort", "cohort", "accrual", "cohort", "accrual", "accrual",
-      "accrual", "accrual",
-      "cohort", "cohort", "cohort", "cohort", "accrual", "accrual",
-      "cohort", "cohort",
-      "cohort", "cohort", "cohort", "accrual", "accrual"
-    ),
-    cens_adjusted = c(
-      0, 0, 1, 1, 1, 3, 3, 2, 0, 0, 0, 0, 0, 1, 2, 1, 2, 0, 0, 0, 0,
-      0, 0, 1, 1, 2, 2, 3, 3,
-      1, 1, 1, 0, 0
-    ),
-    delay_min = c(
-      rep(0, 21),
-      2, 2, 1.5, 1.5, 3, 3, 2, 2,
-      0, 0, 0, 0, 0
-    ),
-    growth_rate = c(
-      rep(0, 8), 0.1, 0.1, 0, 0, 0, 0, 0, 0.15, 0.2, 0.2, 0.2, 0, 0,
-      0, 0, 0, 0, 0.05, 0.05, 0, 0,
-      0, 0, 0, 0.1, 0.1
-    ),
-    stringsAsFactors = FALSE
+# Studies S to V use midpoint imputation with a uniform interval
+# (cens_adjusted 4), one per truncation design, so that the R and Stan
+# implementations of that code are compared on the moment path, the quantile
+# path, the accrual path and with a left truncation.
+lockstep_midpoint_uniform <- data.frame(
+  study = c("S", "S", "T", "T", "U", "U", "V", "V"),
+  type = c(
+    "mean", "sd", "quantile", "quantile", "mean", "sd", "quantile", "quantile"
   ),
+  value = c(7.4, 3.5, 5.6, 8.9, 8.0, 3.3, 6.1, 9.3),
+  se = c(NA, NA, NA, NA, NA, NA, 0.5, 0.6),
+  p = c(NA, NA, 0.25, 0.75, NA, NA, 0.25, 0.75),
+  n = c(115, 115, 135, 135, 100, 100, 125, 125),
+  relative_obs_time = c(26, 26, 24, 24, Inf, Inf, 30, 30),
+  trunc_adjusted = c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE),
+  trunc_design = c(
+    "cohort", "cohort", "accrual", "accrual", "cohort", "cohort",
+    "cohort", "cohort"
+  ),
+  cens_adjusted = 4,
+  delay_min = c(0, 0, 0, 0, 0, 0, 2, 2),
+  growth_rate = c(0, 0, 0.1, 0.1, 0, 0, 0, 0),
+  stringsAsFactors = FALSE
+)
+
+lockstep_base_rows <- data.frame(
+  study = c(
+    "A", "A", "B", "B", "B", "C", "C", "D", "E", "E", "F", "F", "F",
+    "G", "H", "I", "J", "K", "K", "L", "L",
+    "M", "M", "N", "N", "O", "O", "P", "P",
+    "Q", "Q", "Q", "R", "R"
+  ),
+  type = c(
+    "mean", "sd", "quantile", "quantile", "quantile", "mean", "sd",
+    "quantile", "mean", "sd", "mean", "sd", "quantile",
+    "quantile", "quantile", "quantile", "quantile", "quantile", "quantile",
+    "quantile", "quantile",
+    "mean", "sd", "mean", "sd", "mean", "sd", "quantile", "quantile",
+    "mean", "sd", "quantile", "quantile", "quantile"
+  ),
+  value = c(
+    7.5, 3.6, 4.2, 6.1, 9.4, 6.4, 3.1, 5.4, 9.1, 5.2, 6.9, 3.3, 6.0,
+    6.2, 5.8, 7.1, 6.6, 4.5, 7.5, 5.1, 8.2,
+    8.1, 3.2, 7.8, 3.4, 8.4, 3.1, 6.3, 9.2,
+    7.2, 3.4, 6.5, 4.8, 8.6
+  ),
+  se = c(
+    rep(NA, 10), 0.4, NA, 0.5, 0.6, 0.4, 0.7, 0.5, NA, NA, NA, NA,
+    rep(NA, 8), rep(NA, 5)
+  ),
+  p = c(
+    NA, NA, 0.25, 0.5, 0.75, NA, NA, 0.5, NA, NA, NA, NA, 0.5,
+    0.5, 0.5, 0.5, 0.5, 0.25, 0.75, 0.25, 0.75,
+    NA, NA, NA, NA, NA, NA, 0.25, 0.75,
+    NA, NA, 0.5, 0.25, 0.75
+  ),
+  n = c(
+    120, 120, 60, 60, 60, 80, 80, 200, 300, 300, 90, 90, 90,
+    70, 70, 70, 70, 150, 150, 150, 150,
+    110, 110, 95, 95, 130, 130, 140, 140,
+    NA, NA, NA, NA, NA
+  ),
+  relative_obs_time = c(
+    20, 20, Inf, Inf, Inf, Inf, Inf, 30, 25, 25, 18, 18, 18,
+    24, 24, 24, 24, 22, 22, 26, 26,
+    28, 28, Inf, Inf, 32, 32, 27, 27,
+    Inf, Inf, Inf, 30, 30
+  ),
+  trunc_adjusted = c(
+    FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE,
+    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+    FALSE, FALSE,
+    FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE,
+    TRUE, TRUE, TRUE, FALSE, FALSE
+  ),
+  trunc_design = c(
+    rep("cohort", 8), "accrual", "accrual", rep("cohort", 3),
+    "cohort", "cohort", "accrual", "cohort", "accrual", "accrual",
+    "accrual", "accrual",
+    "cohort", "cohort", "cohort", "cohort", "accrual", "accrual",
+    "cohort", "cohort",
+    "cohort", "cohort", "cohort", "accrual", "accrual"
+  ),
+  cens_adjusted = c(
+    0, 0, 1, 1, 1, 3, 3, 2, 0, 0, 0, 0, 0, 1, 2, 1, 2, 0, 0, 0, 0,
+    0, 0, 1, 1, 2, 2, 3, 3,
+    1, 1, 1, 0, 0
+  ),
+  delay_min = c(
+    rep(0, 21),
+    2, 2, 1.5, 1.5, 3, 3, 2, 2,
+    0, 0, 0, 0, 0
+  ),
+  growth_rate = c(
+    rep(0, 8), 0.1, 0.1, 0, 0, 0, 0, 0, 0.15, 0.2, 0.2, 0.2, 0, 0,
+    0, 0, 0, 0, 0.05, 0.05, 0, 0,
+    0, 0, 0, 0.1, 0.1
+  ),
+  stringsAsFactors = FALSE
+)
+
+lockstep_estimates <- suppressMessages(as_epidist_estimates_data(
+  rbind(lockstep_base_rows, lockstep_midpoint_uniform),
   vcov = lockstep_vcov
 ))
 
@@ -619,6 +646,92 @@ if (not_on_cran() && has_cmdstanr()) {
   prep_meta_grid <- suppressMessages(
     as_epidist_meta_model(estimates = sim_grid_estimates)
   )
+
+  # Simulated studies that published the parameters of a distribution they
+  # fitted rather than summaries of their delays. Each takes integer date
+  # differences from a right truncated cohort and fits a lognormal to them by
+  # maximum likelihood, so its reported parameters describe the biased
+  # distribution its procedure converged to.
+  set.seed(4)
+  reported_parameter_fit <- function(size, study_obs_time) {
+    ptime <- stats::runif(size, 0, 1)
+    delay <- stats::rlnorm(size, meanlog, sdlog)
+    obs <- floor(ptime + delay)
+    obs <- obs[obs + 1 <= study_obs_time & obs > 0]
+    reported <- c(
+      meanlog = mean(log(obs)), sdlog = stats::sd(log(obs))
+    )
+    return(list(
+      parameters = reported,
+      # The asymptotic standard errors of a lognormal maximum likelihood fit.
+      se = c(
+        reported[["sdlog"]] / sqrt(length(obs)),
+        reported[["sdlog"]] / sqrt(2 * length(obs))
+      ),
+      size = length(obs)
+    ))
+  }
+
+  parameter_obs_times <- c(18, 22, 26, 30, 36)
+  parameter_fits <- Map(reported_parameter_fit, 300, parameter_obs_times)
+  sim_parameter_rows <- Map(
+    function(study, fit, study_obs_time) {
+      return(parameters_to_multivariate(
+        "lognormal", fit$parameters,
+        study = study,
+        se = fit$se,
+        n = fit$size,
+        relative_obs_time = study_obs_time,
+        trunc_adjusted = FALSE,
+        trunc_design = "cohort",
+        cens_adjusted = 0,
+        growth_rate = 0
+      ))
+    },
+    paste0("published_", seq_along(parameter_obs_times)), parameter_fits,
+    parameter_obs_times
+  )
+
+  # A study that fitted the delays itself and published the posterior draws of
+  # its mean and standard deviation, as a fully adjusted estimate reported with
+  # the covariance between the two.
+  marginal_dpars <- predict_delay_parameters(fit_marginal)
+  marginal_dpars <- marginal_dpars[marginal_dpars$index == 1, ]
+  # The metadata columns must match those the parameter studies carry, so that
+  # the rows bind together.
+  sim_draws_rows <- draws_to_multivariate(
+    marginal_dpars[, c("mean", "sd")],
+    study = "posterior_draws",
+    n = nrow(sim_obs),
+    relative_obs_time = Inf,
+    trunc_adjusted = TRUE,
+    trunc_design = "cohort",
+    cens_adjusted = 1,
+    growth_rate = 0
+  )
+
+  sim_reported_rows <- c(sim_parameter_rows, list(sim_draws_rows))
+  sim_reported_estimates <- suppressMessages(as_epidist_estimates_data(
+    do.call(rbind, lapply(sim_reported_rows, `[[`, "data")),
+    vcov = do.call(c, unname(lapply(sim_reported_rows, `[[`, "vcov")))
+  ))
+  prep_meta_reported <- suppressMessages(
+    as_epidist_meta_model(estimates = sim_reported_estimates)
+  )
+
+  cli::cli_alert_info(
+    "Compiling the meta model with cmdstanr and reported fits and draws"
+  )
+  fit_meta_reported <- suppressMessages(epidist(
+    data = prep_meta_reported,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  ))
 
   cli::cli_alert_info(
     "Compiling the meta model with cmdstanr and simulated grid summaries"

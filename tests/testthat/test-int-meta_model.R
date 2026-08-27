@@ -1,6 +1,7 @@
 # fmt: skip file
 test_that("epidist.epidist_meta_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   stancode <- suppressMessages(epidist(
     data = prep_meta_obs,
     fn = brms::make_stancode
@@ -13,6 +14,7 @@ test_that("epidist.epidist_meta_model Stan code has no syntax errors in the defa
 
 test_that("epidist.epidist_meta_model Stan code has no syntax errors for a gamma delay", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   stancode <- suppressMessages(epidist(
     data = prep_meta_obs,
     family = Gamma(link = "log"),
@@ -26,6 +28,7 @@ test_that("epidist.epidist_meta_model Stan code has no syntax errors for a gamma
 
 test_that("epidist.epidist_meta_model Stan code has no syntax errors for a weibull delay", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   stancode <- suppressMessages(epidist(
     data = prep_meta_obs,
     family = "weibull",
@@ -40,6 +43,7 @@ test_that("epidist.epidist_meta_model Stan code has no syntax errors for a weibu
 test_that("epidist.epidist_meta_model fits and the MCMC converges with summary estimates only", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   expect_s3_class(fit_meta_estimates, "brmsfit")
   expect_s3_class(fit_meta_estimates, "epidist_fit")
   expect_convergence(fit_meta_estimates)
@@ -48,6 +52,7 @@ test_that("epidist.epidist_meta_model fits and the MCMC converges with summary e
 test_that("epidist.epidist_meta_model recovers the simulation settings from biased summary estimates", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   pred <- predict_delay_parameters(fit_meta_estimates)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
@@ -57,6 +62,7 @@ test_that("epidist.epidist_meta_model recovers the simulation settings from bias
 test_that("epidist.epidist_meta_model fits and the MCMC converges with mixed data", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   expect_s3_class(fit_meta_mixed, "brmsfit")
   expect_s3_class(fit_meta_mixed, "epidist_fit")
   expect_convergence(fit_meta_mixed)
@@ -65,6 +71,7 @@ test_that("epidist.epidist_meta_model fits and the MCMC converges with mixed dat
 test_that("epidist.epidist_meta_model recovers the simulation settings from mixed data", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   pred <- predict_delay_parameters(fit_meta_mixed)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
@@ -73,6 +80,7 @@ test_that("epidist.epidist_meta_model recovers the simulation settings from mixe
 
 test_that("epidist.epidist_meta_model log_lik and posterior_predict have the expected shapes", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   log_lik <- brms::log_lik(fit_meta_estimates)
   expect_identical(ncol(log_lik), nrow(prep_meta_biased))
@@ -85,6 +93,7 @@ test_that("epidist.epidist_meta_model log_lik and posterior_predict have the exp
 
 test_that("epidist.epidist_meta_model predicts individual level rows on the delay scale", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   set.seed(1)
   prep <- brms::prepare_predictions(fit_meta_mixed)
   individual <- which(prep$data$vint1 == 1L)
@@ -165,12 +174,10 @@ test_that("the R and Stan meta model log likelihoods agree for every observation
     },
     numeric(1)
   )
-  # Every observation type must be exercised, including the three joint ones,
-  # and every censoring adjustment, both truncation designs, a left truncated
-  # study and a quantile with a reported standard error, so that each branch
-  # of the implied density is covered as well.
+  # Every observation type, censoring adjustment and truncation design must
+  # be exercised, so that no branch is compared vacuously.
   expect_setequal(unique(standata$vint1), 2:7)
-  expect_setequal(unique(standata$vint4), 0:3)
+  expect_setequal(unique(standata$vint4), 0:4)
   expect_setequal(unique(standata$vint5), 0:1)
   expect_true(any(standata$vreal5 > 0))
   expect_true(any(standata$vreal6 > 0))
@@ -179,11 +186,10 @@ test_that("the R and Stan meta model log likelihoods agree for every observation
 
 test_that("epidist.epidist_meta_model recovers known parameters from simulated grid summaries", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
-  # Exercises the Stan discrete grid branch rather than the R mirrors. Every
-  # study reports integer date differences from a right truncated cohort, so
-  # meta_family_grid_pmf and the cohort grid shortcut carry all of the
-  # likelihood.
+  # Every study reports integer date differences from a right truncated
+  # cohort, so the Stan grid branch carries all of the likelihood.
   skip_on_cran()
+  skip_if_no_cmdstanr()
   expect_true(all(prep_meta_grid$cens_adjusted == 0L))
   expect_true(all(prep_meta_grid$trunc_design == 0L))
   expect_true(all(prep_meta_grid$trunc_adjusted == 0L))
@@ -194,13 +200,65 @@ test_that("epidist.epidist_meta_model recovers known parameters from simulated g
 
   set.seed(1)
   pred <- predict_delay_parameters(fit_meta_grid)
-  # The posterior mean must sit within 0.05 of the simulation meanlog and
-  # within 0.1 of its sdlog, and the central 95% of the posterior must cover
-  # both.
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.05)
   expect_equal(mean(pred$sigma), sdlog, tolerance = 0.1)
   expect_lt(stats::quantile(pred$mu, 0.025, names = FALSE), meanlog)
   expect_gt(stats::quantile(pred$mu, 0.975, names = FALSE), meanlog)
   expect_lt(stats::quantile(pred$sigma, 0.025, names = FALSE), sdlog)
   expect_gt(stats::quantile(pred$sigma, 0.975, names = FALSE), sdlog)
+})
+
+test_that("epidist.epidist_meta_model recovers known parameters from reported fits and posterior draws", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  # Five studies published lognormal parameters fitted to their own naive
+  # date differences. A sixth published posterior draws of the delay mean and
+  # standard deviation with the covariance between them.
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  expect_convergence(fit_meta_reported)
+  expect_length(.estimates_vcov(sim_reported_estimates), 6)
+  expect_identical(
+    unique(sim_reported_estimates$type), c("mean", "sd")
+  )
+
+  set.seed(1)
+  pred <- predict_delay_parameters(fit_meta_reported)
+  expect_equal(mean(pred$mu), meanlog, tolerance = 0.05)
+  expect_equal(mean(pred$sigma), sdlog, tolerance = 0.1)
+  expect_lt(stats::quantile(pred$mu, 0.025, names = FALSE), meanlog)
+  expect_gt(stats::quantile(pred$mu, 0.975, names = FALSE), meanlog)
+  expect_lt(stats::quantile(pred$sigma, 0.025, names = FALSE), sdlog)
+  expect_gt(stats::quantile(pred$sigma, 0.975, names = FALSE), sdlog)
+})
+
+test_that("draws_to_multivariate round trips draws of a fitted model", {
+  # An analyst publishes draws of the delay mean and standard deviation from
+  # a fitted model, and those become a summary row of a downstream meta model.
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  dpars <- predict_delay_parameters(fit_marginal)
+  dpars <- dpars[dpars$index == 1, ]
+  reported <- draws_to_multivariate(
+    dpars[, c("mean", "sd")],
+    study = "round_trip", n = nrow(sim_obs), cens_adjusted = 1
+  )
+  expect_identical(reported$data$type, c("mean", "sd"))
+  expect_equal(
+    reported$data$value[1], mean(dpars$mean), tolerance = 1e-10
+  )
+  estimates <- suppressMessages(as_epidist_estimates_data(
+    reported$data, vcov = reported$vcov
+  ))
+  prep <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  expect_s3_class(prep, "epidist_meta_model")
+  # The two summaries are one multivariate normal observation.
+  expect_identical(nrow(prep), 1L)
+  expect_identical(prep$obs_type, 7L)
+  standata <- suppressMessages(epidist(prep, fn = brms::make_standata))
+  expect_length(standata$meta_group_chol, 4L)
+  # The reported mean must sit close to the truth, because the study that
+  # produced these draws adjusted for censoring and truncation.
+  expect_equal(
+    reported$data$value[1], exp(meanlog + sdlog^2 / 2), tolerance = 0.1
+  )
 })

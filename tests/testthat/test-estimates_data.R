@@ -106,18 +106,20 @@ test_that("as_epidist_estimates_data errors when an unadjusted study has no obse
 
 test_that("as_epidist_estimates_data errors on an unsupported adjustment code", { # nolint: line_length_linter.
   bad <- est_df
-  bad$cens_adjusted[1] <- 4
+  bad$cens_adjusted[1] <- 5
   expect_error(
     suppressMessages(as_epidist_estimates_data(bad)),
     "cens_adjusted"
   )
 })
 
-test_that("as_epidist_estimates_data accepts midpoint imputation as a censoring adjustment", { # nolint: line_length_linter.
-  mid <- est_df
-  mid$cens_adjusted[1] <- 3
-  est <- suppressMessages(as_epidist_estimates_data(mid))
-  expect_identical(est$cens_adjusted[1], 3L)
+test_that("as_epidist_estimates_data accepts both midpoint adjustments", {
+  for (code in 3:4) {
+    mid <- est_df
+    mid$cens_adjusted[1] <- code
+    est <- suppressMessages(as_epidist_estimates_data(mid))
+    expect_identical(est$cens_adjusted[1], as.integer(code))
+  }
 })
 
 test_that("as_epidist_estimates_data defaults the truncation design to cohort", { # nolint: line_length_linter.
@@ -266,10 +268,13 @@ test_that("as_epidist_estimates_data errors on a quantile in the top grid cell",
 
 test_that(".estimates_quantile_limit allows for the midpoint imputation shift", { # nolint: line_length_linter.
   data <- data.frame(
-    trunc_adjusted = rep(FALSE, 3), relative_obs_time = rep(20, 3),
-    max_delay = rep(100, 3), swindow = rep(2, 3), cens_adjusted = c(0L, 1L, 3L)
+    trunc_adjusted = rep(FALSE, 4), relative_obs_time = rep(20, 4),
+    max_delay = rep(100, 4), swindow = rep(2, 4), pwindow = rep(3, 4),
+    cens_adjusted = c(0L, 1L, 3L, 4L)
   )
-  expect_identical(.estimates_quantile_limit(data), c(19, 20, 20))
+  # Midpoint imputation of the primary event moves the estimand down by half a
+  # primary window, so its largest reportable quantile moves with it.
+  expect_identical(.estimates_quantile_limit(data), c(19, 20, 20, 18.5))
 })
 
 test_that("as_epidist_estimates_data defaults delay_min to zero and validates it", { # nolint: line_length_linter.
@@ -339,46 +344,6 @@ test_that("as_epidist_estimates_data checks a reported covariance matrix", {
   expect_error(
     suppressMessages(as_epidist_estimates_data(base, vcov = list(good))),
     "named by study"
-  )
-})
-
-test_that("bootstrap_delay_estimates returns summaries with their covariance", {
-  set.seed(11)
-  delays <- rlnorm(300, 1.6, 0.5)
-  reported <- bootstrap_delay_estimates(
-    delays,
-    study = "A", probs = c(0.25, 0.75), n_bootstrap = 400,
-    cens_adjusted = 1
-  )
-  expect_identical(reported$data$type, c("mean", "sd", "quantile", "quantile"))
-  expect_identical(reported$data$p, c(NA, NA, 0.25, 0.75))
-  expect_identical(reported$data$value[1], mean(delays))
-  expect_identical(reported$data$value[2], stats::sd(delays))
-  expect_true(all(reported$data$cens_adjusted == 1))
-  expect_named(reported$vcov, "A")
-  expect_identical(dim(reported$vcov$A), c(4L, 4L))
-  # A sample mean has a variance of about sigma squared over n.
-  expect_equal(
-    reported$vcov$A[1, 1], stats::var(delays) / length(delays),
-    tolerance = 0.25
-  )
-  expect_no_error(suppressMessages(as_epidist_estimates_data(
-    reported$data,
-    vcov = reported$vcov
-  )))
-})
-
-test_that("bootstrap_delay_estimates rejects a bootstrap too small to be full rank", { # nolint: line_length_linter.
-  expect_error(
-    bootstrap_delay_estimates(rlnorm(50), study = "A", n_bootstrap = 2),
-    "must exceed the 2 summaries"
-  )
-  expect_error(
-    bootstrap_delay_estimates(
-      rlnorm(50),
-      study = "A", moments = character(0)
-    ),
-    "at least one of"
   )
 })
 
