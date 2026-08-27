@@ -59,6 +59,13 @@ jobs:
       - name: Render vignettes
         run: |
           setwd("vignettes")
+          # The vignettes use bookdown::html_document2 and cross-reference
+          # figures and tables with \@ref(fig:label). Outside a bookdown
+          # render knitr emits a plain markdown image, which carries no
+          # chunk label, so those references resolve to "??". This makes
+          # knitr emit the labelled figure and caption that bookdown numbers
+          # from, exactly as it would during a bookdown render.
+          knitr::opts_knit$set(bookdown.internal.label = TRUE)
           for (file in list.files(pattern = "[.]Rmd[.]orig$")) {
             message("knitting ", file)
             out <- sub("[.]orig$", "", file)

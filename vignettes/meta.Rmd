@@ -134,7 +134,10 @@ obs_cens |>
   theme_minimal()
 ```
 
-![(ref:outbreak)](figures/meta-outbreak-1.png)
+<div class="figure">
+<img src="figures/meta-outbreak-1.png" alt="(ref:outbreak)"  />
+<p class="caption">(\#fig:outbreak)(ref:outbreak)</p>
+</div>
 
 Now imagine several studies each analysing this outbreak at a different point in time, reporting integer date differences with no adjustment for right truncation, that is `cens_adjusted = 0` and `trunc_adjusted = FALSE`.
 We mimic this by taking cases whose delay is less than a study specific cutoff, since a case with a longer delay would not yet have been observed by that study.
@@ -167,11 +170,13 @@ ggplot(bias_illustration, aes(x = cutoff, y = naive_mean)) +
   theme_minimal()
 ```
 
-![(ref:bias)](figures/meta-bias-1.png)
+<div class="figure">
+<img src="figures/meta-bias-1.png" alt="(ref:bias)"  />
+<p class="caption">(\#fig:bias)(ref:bias)</p>
+</div>
 
 Real reviews collect studies that differ in how they measured delays and in what they chose to report.
 We build seven such studies from the same line list, each applying its own estimation procedure to it.
-Every study measures its delays as its procedure would, rather than being labelled after the fact, so recovering the simulation settings from them is a genuine test of the model.
 The table below sets out what each one did and reports.
 
 <details><summary>Click to expand for code to build the simulated studies</summary>
@@ -329,7 +334,7 @@ study_designs |>
 
 
 
-Table: (ref:studies)
+Table: (\#tab:studies)(ref:studies)
 
 |Study          |Reports                          |Censoring           |Truncation    | Obs time| Min delay|
 |:--------------|:--------------------------------|:-------------------|:-------------|--------:|---------:|
@@ -614,7 +619,10 @@ p_compare <- predicted_parameters |>
 p_compare
 ```
 
-![(ref:compare)](figures/meta-compare-1.png)
+<div class="figure">
+<img src="figures/meta-compare-1.png" alt="(ref:compare)"  />
+<p class="caption">(\#fig:compare)(ref:compare)</p>
+</div>
 
 # Real world estimates from epireview {#epireview}
 
@@ -826,7 +834,7 @@ Two changes cut sampling from about 984 seconds to about 324 seconds.
 The first sizes each study's grid to what it needs, rather than to a single shared value large enough for the widest study.
 The second uses the accrual design for the two early phase studies, rather than treating every study as a single cohort.
 Those timings are for 2 chains with 500 post warmup iterations each, measured with cmdstan's own per chain clock so that Stan compilation is not counted.
-Fitting this model here, including the one-off cost of compiling the Stan program, took 149 seconds.
+Fitting this model here, including the one-off cost of compiling the Stan program, took 148 seconds.
 Further speed up is possible, for example by vectorising the family or sharing one grid across the summaries of a study, but is not needed for a fit of this size.
 
 ## Checking the fit against the reported estimates
@@ -943,7 +951,10 @@ p_forest
 #> `height` was translated to `width`.
 ```
 
-![(ref:forest)](figures/meta-forest-1.png)
+<div class="figure">
+<img src="figures/meta-forest-1.png" alt="(ref:forest)"  />
+<p class="caption">(\#fig:forest)(ref:forest)</p>
+</div>
 
 Some of these estimates also report a fitted Gamma distribution, recorded by epireview as a mean and a standard deviation, which we convert to a shape and rate.
 
@@ -1013,7 +1024,10 @@ p_ebola <- ggplot() +
 p_ebola
 ```
 
-![(ref:ebola)](figures/meta-ebola-1.png)
+<div class="figure">
+<img src="figures/meta-ebola-1.png" alt="(ref:ebola)"  />
+<p class="caption">(\#fig:ebola)(ref:ebola)</p>
+</div>
 
 # Learning more {#learning-more}
 

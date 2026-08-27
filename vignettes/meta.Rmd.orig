@@ -155,7 +155,6 @@ ggplot(bias_illustration, aes(x = cutoff, y = naive_mean)) +
 
 Real reviews collect studies that differ in how they measured delays and in what they chose to report.
 We build seven such studies from the same line list, each applying its own estimation procedure to it.
-Every study measures its delays as its procedure would, rather than being labelled after the fact, so recovering the simulation settings from them is a genuine test of the model.
 The table below sets out what each one did and reports.
 
 <details><summary>Click to expand for code to build the simulated studies</summary>
