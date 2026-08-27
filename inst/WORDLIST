@@ -41,7 +41,6 @@ cli
 cmdstanr
 coef
 damonbayer
-datetime
 dw
 dx
 dy
@@ -80,6 +79,7 @@ primarycensored
 qquad
 reexported
 reparameterisation
+reparameterises
 reparametrisation
 sbfnk
 sd
