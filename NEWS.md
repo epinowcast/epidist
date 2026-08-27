@@ -118,7 +118,7 @@ See #588 and #596.
 ## Models
 
 - Added the meta model, for fitting to summarised and potentially biased published estimates, jointly with individual level data.
-Published estimates are forward modelled from the study's own estimation procedure, so summaries that did not adjust for right truncation or that treated interval censored data as continuous still contribute unbiased information.
+Published estimates are forward modelled from the study's own estimation procedure, so summaries that did not adjust for right truncation or that treated interval censored data as continuous can still contribute unbiased information, given correct metadata describing what each study did.
 The meta model is experimental and its interface may still change.
 See `as_epidist_meta_model()`.
 See #620.
@@ -153,7 +153,15 @@ The value is substituted into the Stan code when the model is compiled, so the R
 See #620.
 - A study can now report a vector of summaries with a covariance matrix over them, through the `vcov` argument of `as_epidist_estimates_data()`, and is then fitted as a multivariate normal.
 This is the format we recommend when a study cannot share its delays, because it keeps the correlation between the quantities it reports.
-`bootstrap_delay_estimates()` produces both parts from a set of delays.
+`draws_to_multivariate()` produces both parts from draws of the quantities a study reports, such as the posterior draws of `predict_delay_parameters()`.
+`delays_to_multivariate()` wraps it for a site holding a line list it cannot release, resampling the delays to get the covariance.
+See #620.
+- `parameters_to_multivariate()` lets a study that published the parameters of a distribution it fitted be used in the meta model.
+The parameters are converted to the summaries the reported distribution implies, and any reported parameter uncertainty is carried onto that scale by the delta method.
+The family a study fitted need not match the family being fitted to it.
+See #620.
+- The meta model gained a fifth censoring adjustment code, `cens_adjusted = 4`, for a study that placed the primary event at the midpoint of its window and integrated the secondary interval.
+Its estimand is that of `cens_adjusted = 2` moved down the delay axis by half a primary window, so its reported mean loses the half window bias while its spread keeps the primary window's variance.
 See #620.
 - The meta model supports left truncation through `delay_min`, on both individual level rows and summary rows.
 A study that only counted delays above a minimum has every implied summary conditioned on the delay exceeding it.
