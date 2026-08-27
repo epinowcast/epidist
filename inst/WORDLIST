@@ -40,6 +40,7 @@ brms
 brms’
 buerkner
 burdon
+cdf
 cfrnow
 cherz
 cli
@@ -80,6 +81,7 @@ mathcal
 meanlog
 medewitt
 modelling
+normalised
 normalising
 nowcasting
 ocurs
@@ -100,6 +102,7 @@ qquad
 renormalises
 reparameterisation
 reparametrisation
+revalidates
 sbfnk
 sd
 seabbs
@@ -109,9 +112,11 @@ summarise
 summarised
 summarises
 th
+tibble
 toolchain
 traceplots
 treedepth
+unclassed
 uncounting
 unnormalised
 unrecognised
