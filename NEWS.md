@@ -2,6 +2,11 @@
 
 ## Features
 
+- Added `epidist_newdata()`, which builds the `newdata` needed to predict from a fitted model.
+It expands the variables you give it into a grid and adds the response and observation process variables the model uses, so you no longer have to know the column names each model expects.
+The defaults give the delay distribution with no censoring and no truncation, and arguments set the censoring windows, the relative observation time and the minimum delay.
+The result works with `brms::posterior_epred()`, `predict_delay_parameters()` and the `tidybayes` draw functions.
+See `?epidist_newdata` and #280.
 - `epidist` data objects now check themselves when they are modified.
 Every object also carries a shared `epidist_data` class with methods for subsetting, replacement, `rbind()` and the `dplyr` verbs.
 These re-check the object and drop any `epidist` class whose requirements it no longer meets, warning about what was dropped and why.
