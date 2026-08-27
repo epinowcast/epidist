@@ -13,6 +13,13 @@
 #' between a prior for all coefficients (class = "b") and a prior for a
 #' specific coefficient (class = "b" and coef specified).
 #'
+#' Some models add parameters which `brms` does not know about, such as the
+#' event windows of the latent model. Priors for these are written using the
+#' `parameter ~ distribution` syntax of [brms::set_prior()] and are passed to
+#' Stan unchanged. A prior written this way replaces any existing prior for the
+#' same parameter and is not checked against the parameters of the model. Note
+#' that the latent model requires a `uniform(0, 1)` prior on its event windows.
+#'
 #' @inheritParams epidist
 #'
 #' @param family A description of the response distribution and link function to

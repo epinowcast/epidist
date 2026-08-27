@@ -55,6 +55,13 @@ Note that the matching of priors is imperfect as it does not use brms'
 internal prior matching functionality. For example, it cannot distinguish
 between a prior for all coefficients (class = "b") and a prior for a
 specific coefficient (class = "b" and coef specified).
+
+Some models add parameters which \code{brms} does not know about, such as the
+event windows of the latent model. Priors for these are written using the
+\code{parameter ~ distribution} syntax of \code{\link[brms:set_prior]{brms::set_prior()}} and are passed to
+Stan unchanged. A prior written this way replaces any existing prior for the
+same parameter and is not checked against the parameters of the model. Note
+that the latent model requires a \code{uniform(0, 1)} prior on its event windows.
 }
 \seealso{
 Other prior:
