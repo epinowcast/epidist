@@ -38,7 +38,6 @@ library(brms)
 library(dplyr)
 library(ggplot2)
 library(tidybayes) # nolint
-library(modelr) # nolint
 library(patchwork) # nolint
 library(cmdstanr) # nolint
 ```
@@ -195,7 +194,7 @@ To prepare the data for use with the marginal model, we define the data as being
 ``` r
 obs_prep <- as_epidist_marginal_model(linelist_data, obs_time_threshold = 1)
 head(obs_prep)
-#> # A tibble: 6 × 21
+#> # A tibble: 6 × 22
 #>   ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr
 #>       <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>
 #> 1         0         1         5         6      259     1 2014-05-18 2014-05-23
@@ -204,10 +203,10 @@ head(obs_prep)
 #> 4         3         4         8         9      259     4 2014-05-21 2014-05-26
 #> 5         3         4         8         9      259     5 2014-05-21 2014-05-26
 #> 6         3         4         8         9      259     6 2014-05-21 2014-05-26
-#> # ℹ 13 more variables: age <dbl>, sex <chr>, district <chr>, pdate_upr <date>,
+#> # ℹ 14 more variables: age <dbl>, sex <chr>, district <chr>, pdate_upr <date>,
 #> #   sdate_upr <date>, obs_date <date>, pwindow <dbl>, swindow <dbl>,
 #> #   relative_obs_time <dbl>, orig_relative_obs_time <dbl>, delay_lwr <dbl>,
-#> #   delay_upr <dbl>, n <dbl>
+#> #   delay_upr <dbl>, n <dbl>, delay_min <dbl>
 ```
 
 Now we are ready to fit the marginal model. Note that here we set `obs_time_threshold` to 1 rather than the default of 2 because we are confident that our data contains the maximum observable delay.
@@ -236,12 +235,12 @@ fit <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 8.3 seconds.
-#> Chain 2 finished in 8.9 seconds.
+#> Chain 2 finished in 5.8 seconds.
+#> Chain 1 finished in 6.0 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 8.6 seconds.
-#> Total execution time: 9.0 seconds.
+#> Mean chain execution time: 5.9 seconds.
+#> Total execution time: 6.0 seconds.
 ```
 
 The `fit` object is a [`brmsfit`](https://paulbuerkner.com/brms/reference/brmsfit-class.html) object, and has the associated range of methods.
@@ -253,7 +252,7 @@ For example, we may use `summary()` to view information about the fitted model, 
 summary(fit)
 #>  Family: marginal_lognormal
 #>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ 1
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min) ~ 1
 #>          sigma ~ 1
 #>    Data: transformed_data (Number of observations: 380)
 #>   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
@@ -261,8 +260,8 @@ summary(fit)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.65      0.01     1.64     1.67 1.00     1855     1143
-#> sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1847     1341
+#> Intercept           1.65      0.01     1.64     1.67 1.00     1935     1157
+#> sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1406     1202
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -287,12 +286,12 @@ fit_sex <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 18.5 seconds.
-#> Chain 2 finished in 19.0 seconds.
+#> Chain 2 finished in 12.2 seconds.
+#> Chain 1 finished in 12.6 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 18.7 seconds.
-#> Total execution time: 19.2 seconds.
+#> Mean chain execution time: 12.4 seconds.
+#> Total execution time: 12.8 seconds.
 ```
 
 A summary of the model shows that males tend to have longer delays (the posterior mean of `sexMale` is 0.04) and greater delay variation (the posterior mean of `sigma_sexMale` is 0.02).
@@ -304,7 +303,7 @@ It is important to note that the estimates represent an average of the observed 
 summary(fit_sex)
 #>  Family: marginal_lognormal
 #>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min) ~ sex
 #>          sigma ~ 1 + sex
 #>    Data: transformed_data (Number of observations: 584)
 #>   Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;
@@ -312,10 +311,10 @@ summary(fit_sex)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.63      0.01     1.61     1.65 1.00     1904     1150
-#> sigma_Intercept    -0.57      0.01    -0.60    -0.55 1.00     2051     1399
-#> sexMale             0.04      0.01     0.01     0.07 1.00     1898     1417
-#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2244     1515
+#> Intercept           1.63      0.01     1.61     1.65 1.00     2375     1418
+#> sigma_Intercept    -0.58      0.01    -0.60    -0.55 1.00     2010     1437
+#> sexMale             0.04      0.01     0.01     0.07 1.00     2401     1451
+#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2289     1570
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -346,12 +345,12 @@ fit_sex_district <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 268.4 seconds.
-#> Chain 2 finished in 281.9 seconds.
+#> Chain 1 finished in 166.5 seconds.
+#> Chain 2 finished in 184.8 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 275.1 seconds.
-#> Total execution time: 282.1 seconds.
+#> Mean chain execution time: 175.6 seconds.
+#> Total execution time: 185.0 seconds.
 ```
 
 **As this is a longer running model (~ 2 minutes) we have reduced the number of iterations but for real world use cases this may not be sufficient.**
@@ -363,7 +362,7 @@ For this model, along with looking at the `summary()`, we may also use the `brms
 summary(fit_sex_district)
 #>  Family: marginal_lognormal
 #>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr) ~ sex + (1 | district)
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min) ~ sex + (1 | district)
 #>          sigma ~ 1 + sex + (1 | district)
 #>    Data: transformed_data (Number of observations: 1296)
 #>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
@@ -372,15 +371,15 @@ summary(fit_sex_district)
 #> Multilevel Hyperparameters:
 #> ~district (Number of levels: 14)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.16      0.04     0.10     0.24 1.00      259      446
-#> sd(sigma_Intercept)     0.20      0.05     0.13     0.32 1.01      254      474
+#> sd(Intercept)           0.16      0.04     0.10     0.26 1.01      243      425
+#> sd(sigma_Intercept)     0.20      0.05     0.13     0.33 1.00      320      544
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.63      0.05     1.53     1.73 1.01      170      282
-#> sigma_Intercept    -0.67      0.06    -0.79    -0.54 1.01      183      330
-#> sexMale             0.04      0.01     0.01     0.07 1.00     1141      686
-#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1205      703
+#> Intercept           1.63      0.05     1.53     1.73 1.01      203      229
+#> sigma_Intercept    -0.66      0.06    -0.78    -0.55 1.00      180      475
+#> sexMale             0.04      0.01     0.02     0.07 1.00     1155      711
+#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1046      717
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -390,44 +389,46 @@ ranef(fit_sex_district)
 #> , , Intercept
 #>
 #>                   Estimate  Est.Error        Q2.5       Q97.5
-#> Bo            -0.006158585 0.06220838 -0.12304219  0.12377490
-#> Bombali        0.254115275 0.05060460  0.15856773  0.36111235
-#> Bonthe        -0.024767442 0.12436464 -0.25897236  0.21558009
-#> Kailahun      -0.004668086 0.05183190 -0.10285680  0.10328736
-#> Kambia        -0.062983727 0.06754188 -0.19255074  0.07834435
-#> Kenema        -0.252068254 0.05518018 -0.34977753 -0.14369848
-#> Koinadugu      0.180704418 0.07559129  0.03982933  0.33461280
-#> Kono          -0.081461066 0.05958411 -0.19768665  0.03808316
-#> Moyamba       -0.012431539 0.06226322 -0.13464909  0.10981984
-#> Port Loko      0.142411745 0.05158247  0.04797036  0.24942303
-#> Pujehun       -0.058408537 0.09686889 -0.25288343  0.13608435
-#> Tonkolili      0.079991588 0.05251091 -0.02180646  0.19440843
-#> Western Rural -0.025285392 0.05154071 -0.12658207  0.08097643
-#> Western Urban -0.154396595 0.05086562 -0.24670189 -0.05030481
+#> Bo            -0.004734519 0.06053815 -0.12442781  0.11376508
+#> Bombali        0.257345374 0.05117867  0.15151442  0.35946819
+#> Bonthe        -0.022324727 0.13050027 -0.27022801  0.23445881
+#> Kailahun      -0.001974225 0.05185061 -0.10456039  0.10976209
+#> Kambia        -0.059364435 0.06267521 -0.18155077  0.06619807
+#> Kenema        -0.249843953 0.05602416 -0.36410389 -0.14078391
+#> Koinadugu      0.181596312 0.07955986  0.03722483  0.34475640
+#> Kono          -0.079611313 0.05983969 -0.19577006  0.04451104
+#> Moyamba       -0.010432806 0.06624814 -0.14170206  0.12703567
+#> Port Loko      0.145291432 0.05196573  0.04169572  0.24574739
+#> Pujehun       -0.053640887 0.09941718 -0.25354477  0.13246247
+#> Tonkolili      0.080918781 0.05311473 -0.01953644  0.18756047
+#> Western Rural -0.022943546 0.05273685 -0.13024891  0.07967034
+#> Western Urban -0.152138721 0.05269011 -0.26340244 -0.03901819
 #>
 #> , , sigma_Intercept
 #>
 #>                  Estimate  Est.Error        Q2.5       Q97.5
-#> Bo             0.18934154 0.07598873  0.03753509  0.34116977
-#> Bombali       -0.22748581 0.06556108 -0.36094037 -0.09106680
-#> Bonthe        -0.13264758 0.22096364 -0.59589669  0.25900935
-#> Kailahun      -0.33669501 0.07051905 -0.47925440 -0.19439993
-#> Kambia         0.05784031 0.08642514 -0.10888867  0.23301059
-#> Kenema         0.11076648 0.07051324 -0.02893602  0.25800634
-#> Koinadugu      0.06914323 0.10147113 -0.11821161  0.28991576
-#> Kono           0.03074981 0.07383101 -0.11334024  0.17313831
-#> Moyamba        0.09764688 0.07673829 -0.04564167  0.25758396
-#> Port Loko     -0.02384964 0.06643858 -0.15344605  0.11486325
-#> Pujehun       -0.09187713 0.13602892 -0.37114994  0.16620781
-#> Tonkolili     -0.15490163 0.07059913 -0.29877070 -0.01713229
-#> Western Rural  0.07162734 0.06633976 -0.05988099  0.20137678
-#> Western Urban  0.27032342 0.06447178  0.13707603  0.40278738
+#> Bo             0.18569262 0.07369534  0.04482826  0.33737619
+#> Bombali       -0.22775131 0.06437477 -0.35554116 -0.11495850
+#> Bonthe        -0.12969344 0.21161946 -0.58030178  0.23547407
+#> Kailahun      -0.33616645 0.06800887 -0.47243605 -0.21498099
+#> Kambia         0.05750006 0.08168920 -0.09891025  0.21946416
+#> Kenema         0.11012150 0.06758485 -0.01744927  0.25279819
+#> Koinadugu      0.06908751 0.09597918 -0.11773948  0.26293122
+#> Kono           0.03001546 0.07544342 -0.12010087  0.18096483
+#> Moyamba        0.09643314 0.07632248 -0.05890960  0.25667593
+#> Port Loko     -0.02593841 0.06372404 -0.15444021  0.09431119
+#> Pujehun       -0.09253076 0.13856786 -0.36327888  0.19085602
+#> Tonkolili     -0.15478393 0.06856191 -0.28870574 -0.02958416
+#> Western Rural  0.07046308 0.06427971 -0.05123806  0.18937480
+#> Western Urban  0.26692945 0.06209873  0.14346072  0.38832898
 ```
 
 ## Posterior expectations {#posterior-expectation}
 
 To go further than summaries of the fitted model, we recommend using the `tidybayes` package.
-For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use the `modelr::data_grid()` function in combination with the `tidybayes::add_epred_draws()` function.
+For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use `epidist_newdata()` in combination with the `tidybayes::add_epred_draws()` function.
+`epidist_newdata()` expands the variables we give it into a grid and adds the response and observation process variables the model uses, which saves us knowing the column names the marginal model expects.
+Its defaults are no censoring and no truncation.
 The `tidybayes::add_epred_draws()` function uses the `epidist_gen_posterior_predict()` function to generate a posterior prediction function for the `lognormal()` distribution.
 
 In Figure \@ref(fig:epred) we show the posterior expectation of the delay distribution for each of the three fitted models.
@@ -437,22 +438,8 @@ Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with wom
 
 
 ``` r
-add_marginal_dummy_vars <- function(data) {
-  return(
-    mutate(
-      data,
-      relative_obs_time = NA,
-      pwindow = NA,
-      delay_upr = NA,
-      swindow = NA,
-      delay_min = 0
-    )
-  )
-}
-
 expectation_draws <- obs_prep |>
-  data_grid(NA) |>
-  add_marginal_dummy_vars() |>
+  epidist_newdata() |>
   add_epred_draws(fit, dpar = TRUE)
 
 epred_base_figure <- expectation_draws |>
@@ -462,8 +449,7 @@ epred_base_figure <- expectation_draws |>
   theme_minimal()
 
 expectation_draws_sex <- obs_prep |>
-  data_grid(sex) |>
-  add_marginal_dummy_vars() |>
+  epidist_newdata(sex) |>
   add_epred_draws(fit_sex, dpar = TRUE)
 
 epred_sex_figure <- expectation_draws_sex |>
@@ -473,8 +459,7 @@ epred_sex_figure <- expectation_draws_sex |>
   theme_minimal()
 
 expectation_draws_sex_district <- obs_prep |>
-  data_grid(sex, district) |>
-  add_marginal_dummy_vars() |>
+  epidist_newdata(sex, district) |>
   add_epred_draws(fit_sex_district, dpar = TRUE)
 
 epred_sex_district_figure <- expectation_draws_sex_district |>
@@ -511,9 +496,7 @@ For example, for the `mu` parameter in the sex-district stratified model (Figure
 
 ``` r
 linpred_draws_sex_district <- obs_prep |>
-  as.data.frame() |>
-  data_grid(sex, district) |>
-  add_marginal_dummy_vars() |>
+  epidist_newdata(sex, district) |>
   add_linpred_draws(fit_sex_district, dpar = TRUE)
 
 p_linpred_sex_district <- linpred_draws_sex_district |>
@@ -544,28 +527,15 @@ In this section, we demonstrate how to produce either a discrete probability mas
 ### Discrete probability mass function
 
 To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
-To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and `relative_obs_time` to `Inf` for no right truncation.
+To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and leave `relative_obs_time` at its default of `Inf` for no right truncation.
 Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure.
 
 <details><summary>Click to expand for code to prepare PMF plots</summary>
 
 
 ``` r
-add_marginal_pmf_vars <- function(data) {
-  return(
-    mutate(
-      data,
-      relative_obs_time = Inf,
-      pwindow = 1,
-      swindow = 1,
-      delay_upr = NA,
-      delay_min = 0
-    )
-  )
-}
-
 draws_pmf <- obs_prep |>
-  add_marginal_pmf_vars() |>
+  epidist_newdata(pwindow = 1, swindow = 1) |>
   add_predicted_draws(fit, ndraws = 1000)
 
 pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
@@ -575,8 +545,7 @@ pmf_base_figure <- ggplot(draws_pmf, aes(x = .prediction)) +
   theme_minimal()
 
 draws_sex_pmf <- obs_prep |>
-  data_grid(sex) |>
-  add_marginal_pmf_vars() |>
+  epidist_newdata(sex, pwindow = 1, swindow = 1) |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pmf_sex_figure <- draws_sex_pmf |>
@@ -590,8 +559,7 @@ pmf_sex_figure <- draws_sex_pmf |>
   theme_minimal()
 
 draws_sex_district_pmf <- obs_prep |>
-  data_grid(sex, district) |>
-  add_marginal_pmf_vars() |>
+  epidist_newdata(sex, district, pwindow = 1, swindow = 1) |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pmf_sex_district_figure <- draws_sex_district_pmf |>
@@ -635,21 +603,8 @@ That is to produce continuous delay times (Figure \@ref(fig:pdf)):
 
 
 ``` r
-add_marginal_pdf_vars <- function(data) {
-  return(
-    mutate(
-      data,
-      relative_obs_time = Inf,
-      pwindow = 0,
-      swindow = 0,
-      delay_upr = NA,
-      delay_min = 0
-    )
-  )
-}
-
 draws_pdf <- obs_prep |>
-  add_marginal_pdf_vars() |>
+  epidist_newdata() |>
   add_predicted_draws(fit, ndraws = 1000)
 
 pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
@@ -659,8 +614,7 @@ pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
   theme_minimal()
 
 draws_sex_pdf <- obs_prep |>
-  data_grid(sex) |>
-  add_marginal_pdf_vars() |>
+  epidist_newdata(sex) |>
   add_predicted_draws(fit_sex, ndraws = 1000)
 
 pdf_sex_figure <- draws_sex_pdf |>
@@ -672,8 +626,7 @@ pdf_sex_figure <- draws_sex_pdf |>
   theme_minimal()
 
 draws_sex_district_pdf <- obs_prep |>
-  data_grid(sex, district) |>
-  add_marginal_pdf_vars() |>
+  epidist_newdata(sex, district) |>
   add_predicted_draws(fit_sex_district, ndraws = 1000)
 
 pdf_sex_district_figure <- draws_sex_district_pdf |>
