@@ -563,8 +563,8 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.42      0.03     1.35     1.48 1.00     3695     2697</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.75      0.05    -0.85    -0.65 1.00     2934     2240</span></span>
+<span><span class="co">#&gt; Intercept           1.42      0.03     1.35     1.48 1.00     3358     2691</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3276     2639</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -634,8 +634,8 @@ Note that because of the different <code>as_epidist_&lt;model&gt;_model()</code>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.55      0.05     1.46     1.65 1.00     1623     1455</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     1678     1806</span></span>
+<span><span class="co">#&gt; Intercept           1.55      0.05     1.46     1.65 1.00     2292     2133</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     1912     2090</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -659,17 +659,18 @@ Internally this function uses can also add the mean and standard deviation param
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">predicted_parameters</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      model draw index       mu     sigma     mean       sd</span></span>
-<span><span class="co">#&gt; 1 marginal    1     1 1.585185 0.4556538 5.414038 2.600688</span></span>
-<span><span class="co">#&gt; 2 marginal    2     1 1.446810 0.4705599 4.747051 2.363325</span></span>
-<span><span class="co">#&gt; 3 marginal    3     1 1.550027 0.4583440 5.233427 2.530381</span></span>
-<span><span class="co">#&gt; 4 marginal    4     1 1.509405 0.5255589 5.194036 2.929581</span></span>
-<span><span class="co">#&gt; 5 marginal    5     1 1.518659 0.5182181 5.222278 2.898560</span></span>
-<span><span class="co">#&gt; 6 marginal    6     1 1.486425 0.5174319 5.054573 2.800625</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 marginal    1     1 1.581332 0.5034752 5.518331 2.964073</span></span>
+<span><span class="co">#&gt; 2 marginal    2     1 1.517898 0.4816239 5.123711 2.617967</span></span>
+<span><span class="co">#&gt; 3 marginal    3     1 1.537670 0.4921824 5.252960 2.750187</span></span>
+<span><span class="co">#&gt; 4 marginal    4     1 1.544098 0.4836067 5.264762 2.702455</span></span>
+<span><span class="co">#&gt; 5 marginal    5     1 1.569780 0.4913041 5.422028 2.832999</span></span>
+<span><span class="co">#&gt; 6 marginal    6     1 1.530226 0.5051768 5.247899 2.829608</span></span></code></pre></div>
 <div class="alert alert-primary">
 <p>Note that by default <code><a href="../reference/predict_delay_parameters.html">predict_delay_parameters()</a></code> gives predictions for every row in the transformed data.
 Here as we only want posterior draws for the summary parameters we filter to the first row or the first data point.
 This prevents repeating the same prediction for each row.
-Another approach to this would be providing <code>newdata</code> to <code><a href="../reference/predict_delay_parameters.html">predict_delay_parameters()</a></code> representing the data we want to make predictions for.</p>
+Another approach to this would be providing <code>newdata</code> to <code><a href="../reference/predict_delay_parameters.html">predict_delay_parameters()</a></code> representing the data we want to make predictions for.
+<code><a href="../reference/epidist_newdata.html">epidist_newdata()</a></code> builds that <code>newdata</code> for us.</p>
 </div>
 <p>We can now plot posterior draws for the summary parameters from the two models.</p>
 <details><summary>

@@ -4,7 +4,7 @@ This function creates a function that calculates the expected value of
 the posterior predictive distribution for a latent model. The returned
 function takes a `prep` argument (from brms) and returns posterior
 expected values. This is used internally by
-[`brms::posterior_epred()`](https://mc-stan.org/rstantools/reference/posterior_epred.html)
+[`brms::posterior_epred()`](https://paulbuerkner.com/brms/reference/posterior_epred.brmsfit.html)
 to calculate expected values for latent models.
 
 ## Usage
@@ -35,7 +35,7 @@ column per observation.
 
 ## See also
 
-[`brms::posterior_epred()`](https://mc-stan.org/rstantools/reference/posterior_epred.html)
+[`brms::posterior_epred()`](https://paulbuerkner.com/brms/reference/posterior_epred.brmsfit.html)
 for details on how this is used within `brms`.
 
 Other gen:

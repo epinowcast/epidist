@@ -677,8 +677,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3695     2697
-#> sigma_Intercept    -0.75      0.05    -0.85    -0.65 1.00     2934     2240
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3358     2691
+#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3276     2639
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -777,8 +777,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.65 1.00     1623     1455
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     1678     1806
+#> Intercept           1.55      0.05     1.46     1.65 1.00     2292     2133
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     1912     2090
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -809,12 +809,12 @@ predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
 
 head(predicted_parameters)
 #>      model draw index       mu     sigma     mean       sd
-#> 1 marginal    1     1 1.585185 0.4556538 5.414038 2.600688
-#> 2 marginal    2     1 1.446810 0.4705599 4.747051 2.363325
-#> 3 marginal    3     1 1.550027 0.4583440 5.233427 2.530381
-#> 4 marginal    4     1 1.509405 0.5255589 5.194036 2.929581
-#> 5 marginal    5     1 1.518659 0.5182181 5.222278 2.898560
-#> 6 marginal    6     1 1.486425 0.5174319 5.054573 2.800625
+#> 1 marginal    1     1 1.581332 0.5034752 5.518331 2.964073
+#> 2 marginal    2     1 1.517898 0.4816239 5.123711 2.617967
+#> 3 marginal    3     1 1.537670 0.4921824 5.252960 2.750187
+#> 4 marginal    4     1 1.544098 0.4836067 5.264762 2.702455
+#> 5 marginal    5     1 1.569780 0.4913041 5.422028 2.832999
+#> 6 marginal    6     1 1.530226 0.5051768 5.247899 2.829608
 ```
 
 Note that by default
@@ -825,6 +825,8 @@ row or the first data point. This prevents repeating the same prediction
 for each row. Another approach to this would be providing `newdata` to
 [`predict_delay_parameters()`](https://epidist.epinowcast.org/reference/predict_delay_parameters.md)
 representing the data we want to make predictions for.
+[`epidist_newdata()`](https://epidist.epinowcast.org/reference/epidist_newdata.md)
+builds that `newdata` for us.
 
 We can now plot posterior draws for the summary parameters from the two
 models.

@@ -43,6 +43,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-add_weights.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_supported_family.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_window.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-build_newdata.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-capture_compile_env.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-check_epidist_class.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-check_model_prior.epidist_latent_model.html</loc></url>
@@ -104,6 +105,11 @@
 <url><loc>https://epidist.epinowcast.org/reference/epidist_model_prior.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_model_prior.epidist_latent_model.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_model_prior.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_newdata.default.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_newdata.epidist_latent_model.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_newdata.epidist_marginal_model.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_newdata.epidist_naive_model.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_newdata.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stancode.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_stancode.html</loc></url>

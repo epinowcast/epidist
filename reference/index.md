@@ -112,6 +112,11 @@ Specific methods for the naive model
   Define the model-specific component of an `epidist` custom formula for
   the naive model
 
+- [`epidist_newdata(`*`<epidist_naive_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_naive_model.md)
+  :
+
+  Build `newdata` for the naive model
+
 - [`epidist_transform_data_model(`*`<epidist_naive_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.epidist_naive_model.md)
   : Transform data for the naive model
 
@@ -158,6 +163,11 @@ Specific methods for the latent model
 - [`epidist_model_prior(`*`<epidist_latent_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_model_prior.epidist_latent_model.md)
   : Model specific prior distributions for latent models
 
+- [`epidist_newdata(`*`<epidist_latent_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_latent_model.md)
+  :
+
+  Build `newdata` for the latent model
+
 - [`is_epidist_latent_model()`](https://epidist.epinowcast.org/reference/is_epidist_latent_model.md)
   :
 
@@ -198,6 +208,11 @@ Specific methods for the marginal model
   Define the model-specific component of an `epidist` custom formula for
   the marginal model
 
+- [`epidist_newdata(`*`<epidist_marginal_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_marginal_model.md)
+  :
+
+  Build `newdata` for the marginal model
+
 - [`epidist_transform_data_model(`*`<epidist_marginal_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.epidist_marginal_model.md)
   : Transform data for the marginal model
 
@@ -220,6 +235,35 @@ Functions for fitting delay distribution models using `brms`
 - [`epidist()`](https://epidist.epinowcast.org/reference/epidist.md) :
 
   Fit epidemiological delay distributions using a `brms` interface
+
+### Prediction data
+
+Functions for building `newdata` to predict from
+
+- [`epidist_newdata()`](https://epidist.epinowcast.org/reference/epidist_newdata.md)
+  :
+
+  Build `newdata` for prediction from an `epidist` data object
+
+- [`epidist_newdata(`*`<default>`*`)`](https://epidist.epinowcast.org/reference/epidist_newdata.default.md)
+  :
+
+  Default method for building `newdata`
+
+- [`epidist_newdata(`*`<epidist_latent_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_latent_model.md)
+  :
+
+  Build `newdata` for the latent model
+
+- [`epidist_newdata(`*`<epidist_marginal_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_marginal_model.md)
+  :
+
+  Build `newdata` for the marginal model
+
+- [`epidist_newdata(`*`<epidist_naive_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_naive_model.md)
+  :
+
+  Build `newdata` for the naive model
 
 ### Postprocess
 

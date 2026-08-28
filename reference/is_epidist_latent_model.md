@@ -28,4 +28,5 @@ Other latent_model:
 [`epidist_family_model.epidist_latent_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.epidist_latent_model.md),
 [`epidist_formula_model.epidist_latent_model()`](https://epidist.epinowcast.org/reference/epidist_formula_model.epidist_latent_model.md),
 [`epidist_model_prior.epidist_latent_model()`](https://epidist.epinowcast.org/reference/epidist_model_prior.epidist_latent_model.md),
+[`epidist_newdata.epidist_latent_model()`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_latent_model.md),
 [`new_epidist_latent_model()`](https://epidist.epinowcast.org/reference/new_epidist_latent_model.md)
