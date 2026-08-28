@@ -164,7 +164,9 @@ fit_locations <- epidist(
 Here the prior is shared across locations and the random effect lets each depart from it.
 
 ```{r location-estimates}
-newdata <- tibble(location = names(locations))
+# epidist_newdata() adds the observation process columns the marginal model
+# needs (pwindow, swindow, relative_obs_time, delay_min) alongside location.
+newdata <- epidist_newdata(marginal_locations, location = names(locations))
 
 epred <- tidybayes::add_epred_draws(newdata, fit_locations, dpar = "pgrowth")
 
