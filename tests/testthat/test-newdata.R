@@ -133,8 +133,8 @@ test_that("epidist_newdata works with brms and tidybayes", {
   )
   expect_identical(nrow(epred), 10L)
   expect_true(all(epred$.epred > 0))
-  pred <- suppressWarnings(predict_delay_parameters(fit_sex, newdata))
-  expect_length(unique(pred$index), 2L)
+  pred <- suppressWarnings(delay_parameter_draws(fit_sex, newdata = newdata))
+  expect_length(unique(pred$.row), 2L)
 })
 
 test_that("epidist_newdata works with the marginal model and tidybayes", {
@@ -150,9 +150,9 @@ test_that("epidist_newdata works with the marginal model and tidybayes", {
   expect_identical(nrow(epred), 10L)
   expect_true(all(epred$.epred > 0))
   pred <- suppressWarnings(
-    predict_delay_parameters(fit_marginal_sex, newdata)
+    delay_parameter_draws(fit_marginal_sex, newdata = newdata)
   )
-  expect_length(unique(pred$index), 2L)
+  expect_length(unique(pred$.row), 2L)
 })
 
 test_that("epidist_newdata works with the naive model and tidybayes", {
