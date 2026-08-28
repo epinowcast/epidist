@@ -39,7 +39,7 @@ for the arguments it takes.
 
 The result is a plain \code{\link[tibble:tibble]{tibble::tibble()}}. Pass it to
 \code{\link[brms:posterior_epred.brmsfit]{brms::posterior_epred()}}, \code{\link[brms:posterior_predict.brmsfit]{brms::posterior_predict()}},
-\code{\link[=predict_delay_parameters]{predict_delay_parameters()}}, or to the \code{tidybayes} functions
+\code{\link[=add_delay_parameter_draws]{add_delay_parameter_draws()}} or \code{\link[=delay_parameter_draws]{delay_parameter_draws()}}, or to the \code{tidybayes} functions
 \code{add_epred_draws()} and \code{add_predicted_draws()}.
 }
 \examples{

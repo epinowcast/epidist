@@ -16,8 +16,8 @@
 #'
 #' The result is a plain [tibble::tibble()]. Pass it to
 #' [brms::posterior_epred()], [brms::posterior_predict()],
-#' [predict_delay_parameters()], or to the `tidybayes` functions
-#' `add_epred_draws()` and `add_predicted_draws()`.
+#' [add_delay_parameter_draws()] or [delay_parameter_draws()], or to the
+#' `tidybayes` functions `add_epred_draws()` and `add_predicted_draws()`.
 #'
 #' @param data An `epidist` data object, such as one returned by
 #'  [as_epidist_marginal_model()], [as_epidist_latent_model()] or
