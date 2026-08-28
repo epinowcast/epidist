@@ -48,6 +48,7 @@ Imports:
     tibble,
     tidyr
 Suggests:
+    MASS,
     bayesplot,
     BH (>= 1.66.0),
     bookdown,
