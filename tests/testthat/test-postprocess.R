@@ -78,6 +78,50 @@ test_that("add_summaries errors when a distributional parameter is missing", {
   )
 })
 
+test_that("add_summaries errors on its input arguments", {
+  draws <- data.frame(mu = 1, sigma = 1)
+  expect_error(
+    add_summaries("not a data.frame", family = "lognormal"),
+    "data.frame"
+  )
+  expect_error(
+    add_summaries(draws, family = "lognormal", probs = c(-0.1)),
+    "not >= 0"
+  )
+  expect_error(
+    add_summaries(draws, family = "lognormal", probs = 1.5),
+    "not <= 1"
+  )
+  expect_error(
+    add_summaries(draws, family = "lognormal", nsim = 0),
+    "not >= 1"
+  )
+  expect_error(
+    add_summaries(draws, family = "lognormal", method = "bogus"),
+    "auto.*analytic.*sample"
+  )
+})
+
+test_that("add_summaries errors for an analytic family missing parameters", {
+  # lognormal has an analytic solution, so this exercises the assert path
+  # inside the analytic branch rather than the no-analytic-solution error.
+  expect_error(
+    add_summaries(
+      data.frame(mu = 1),
+      family = "lognormal",
+      method = "analytic"
+    ),
+    "missing distributional parameters"
+  )
+})
+
+test_that("add_summaries accepts a stats family object", {
+  draws <- data.frame(mu = c(6, 8), shape = c(2, 3))
+  out <- add_summaries(draws, family = Gamma())
+  expect_named(out, c("mu", "shape", "mean", "sd"))
+  expect_identical(out$mean, draws$mu)
+})
+
 test_that("add_summaries simulates in chunks without changing the answer", {
   set.seed(1)
   draws <- data.frame(mu = rep(1.8, 3), sigma = rep(0.5, 3))
@@ -89,6 +133,20 @@ test_that("add_summaries simulates in chunks without changing the answer", {
     nsim = 2e6
   )
   expect_equal(out$mean, rep(exp(1.8 + 0.25 / 2), 3), tolerance = 0.01)
+})
+
+test_that("add_summaries errors when it cannot simulate from a family", {
+  # mu outside the support of the binomial forces the posterior prediction
+  # to fail, exercising the simulation error path.
+  expect_error(
+    add_summaries(
+      data.frame(mu = 2),
+      family = "binomial",
+      method = "sample",
+      nsim = 10
+    ),
+    "Could not simulate delays"
+  )
 })
 
 test_that("the delay family drops the epidist model prefix", {
@@ -139,6 +197,11 @@ test_that("epidist_strata uses the variables it is given", {
   object <- list(formula = brms::bf(y ~ 1), data = data)
   expect_identical(nrow(epidist_strata(object, vars = "z")), 3L)
   expect_error(epidist_strata(object, vars = "missing"), "missing")
+})
+
+test_that("epidist_strata errors when the object has no fitted data", {
+  object <- list(formula = brms::bf(y ~ x), data = NULL)
+  expect_error(epidist_strata(object), "does not contain the data")
 })
 
 test_that("delay_parameter_draws works with NULL newdata and the latent and marginal lognormal model", { # nolint: line_length_linter.
