@@ -87,11 +87,12 @@ as_epidist_marginal_model <- function(data, ...) {
 #'   ) |>
 #'   as_epidist_marginal_model()
 as_epidist_marginal_model.epidist_linelist_data <- function(
-    data,
-    obs_time_threshold = 2,
-    weight = NULL,
-    delay_min = NULL,
-    ...) {
+  data,
+  obs_time_threshold = 2,
+  weight = NULL,
+  delay_min = NULL,
+  ...
+) {
   assert_epidist.epidist_linelist_data(data)
 
   data <- .prepare_marginal_data(
@@ -134,10 +135,11 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
 #'   ) |>
 #'   as_epidist_marginal_model()
 as_epidist_marginal_model.epidist_aggregate_data <- function(
-    data,
-    obs_time_threshold = 2,
-    delay_min = NULL,
-    ...) {
+  data,
+  obs_time_threshold = 2,
+  delay_min = NULL,
+  ...
+) {
   return(as_epidist_marginal_model.epidist_linelist_data(
     data,
     obs_time_threshold = obs_time_threshold,
@@ -214,9 +216,10 @@ is_epidist_marginal_model <- function(data) {
 #'
 #' @export
 epidist_family_model.epidist_marginal_model <- function(
-    data,
-    family,
-    ...) {
+  data,
+  family,
+  ...
+) {
   custom_family <- brms::custom_family(
     paste0("marginal_", family$family),
     dpars = family$dpars,
@@ -259,9 +262,10 @@ epidist_family_model.epidist_marginal_model <- function(
 #'
 #' @export
 epidist_formula_model.epidist_marginal_model <- function(
-    data,
-    formula,
-    ...) {
+  data,
+  formula,
+  ...
+) {
   # data is only used to dispatch on
   formula <- stats::update(
     formula,
@@ -300,10 +304,11 @@ epidist_formula_model.epidist_marginal_model <- function(
 #'
 #' @export
 epidist_transform_data_model.epidist_marginal_model <- function(
-    data,
-    family,
-    formula,
-    ...) {
+  data,
+  family,
+  formula,
+  ...
+) {
   required_cols <- .marginal_required_cols()
   trans_data <- data |>
     .summarise_n_by_formula(by = required_cols, formula = formula) |>
@@ -323,10 +328,11 @@ epidist_transform_data_model.epidist_marginal_model <- function(
 #'
 #' @export
 epidist_stancode.epidist_marginal_model <- function(
-    data,
-    family = epidist_family(data),
-    formula = epidist_formula(data),
-    ...) {
+  data,
+  family = epidist_family(data),
+  formula = epidist_formula(data),
+  ...
+) {
   stanvars_version <- .version_stanvar()
 
   stanvars_functions <- .family_functions_stanvar(
@@ -453,10 +459,11 @@ epidist_newdata.epidist_marginal_model <- function(
 #' @keywords internal
 #' @autoglobal
 .prepare_marginal_data <- function(
-    data,
-    obs_time_threshold = 2,
-    weight = NULL,
-    delay_min = NULL) {
+  data,
+  obs_time_threshold = 2,
+  weight = NULL,
+  delay_min = NULL
+) {
   data <- mutate(
     data,
     pwindow = .data$ptime_upr - .data$ptime_lwr,

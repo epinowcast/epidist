@@ -40,14 +40,15 @@
 #'   relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 0
 #' )
 epidist_estimates_summaries <- function(
-    study,
-    mean = NULL,
-    sd = NULL,
-    quantiles = NULL,
-    probs = NULL,
-    se = NULL,
-    n = NULL,
-    ...) {
+  study,
+  mean = NULL,
+  sd = NULL,
+  quantiles = NULL,
+  probs = NULL,
+  se = NULL,
+  n = NULL,
+  ...
+) {
   assert_string(study)
   assert_numeric(mean, len = 1, null.ok = TRUE, finite = TRUE)
   assert_numeric(sd, len = 1, null.ok = TRUE, finite = TRUE)
@@ -187,14 +188,15 @@ epidist_estimates_summaries <- function(
 #'   cens_adjusted = 0
 #' )
 epidist_estimates_parameters <- function(
-    study,
-    family,
-    parameters,
-    moments = c("mean", "sd"),
-    probs = numeric(0),
-    se = NULL,
-    n = NULL,
-    ...) {
+  study,
+  family,
+  parameters,
+  moments = c("mean", "sd"),
+  probs = numeric(0),
+  se = NULL,
+  n = NULL,
+  ...
+) {
   assert_string(study)
   assert_choice(family, names(.estimates_parameter_sets()))
   parameters <- .assert_estimates_parameters(family, parameters)
@@ -445,12 +447,13 @@ epidist_estimates_parameters <- function(
 #'
 #' @keywords internal
 .estimates_parameter_summary <- function(
-    family,
-    parameters,
-    moments,
-    probs,
-    lower = 0,
-    cutoff = Inf) {
+  family,
+  parameters,
+  moments,
+  probs,
+  lower = 0,
+  cutoff = Inf
+) {
   dist_name <- .estimates_parameter_dist(family)
   dist_args <- as.list(parameters)
   if (identical(family, "gamma") && hasName(dist_args, "rate")) {
