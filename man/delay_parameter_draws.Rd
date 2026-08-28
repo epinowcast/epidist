@@ -64,13 +64,7 @@ fit |>
 \code{\link[=epidist_strata]{epidist_strata()}} to build \code{newdata}.
 
 Other postprocess:
-\code{\link[=add_mean_sd]{add_mean_sd()}},
-\code{\link[=add_mean_sd.default]{add_mean_sd.default()}},
-\code{\link[=add_mean_sd.gamma_samples]{add_mean_sd.gamma_samples()}},
-\code{\link[=add_mean_sd.lognormal_samples]{add_mean_sd.lognormal_samples()}},
-\code{\link[=add_mean_sd.weibull_samples]{add_mean_sd.weibull_samples()}},
 \code{\link[=add_summaries]{add_summaries()}},
-\code{\link[=epidist_strata]{epidist_strata()}},
-\code{\link[=predict_delay_parameters]{predict_delay_parameters()}}
+\code{\link[=epidist_strata]{epidist_strata()}}
 }
 \concept{postprocess}
