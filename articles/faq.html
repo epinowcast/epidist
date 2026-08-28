@@ -273,7 +273,11 @@ Then, pass this expanded data to the <code>newdata</code> argument of <code><a h
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Expand the aggregated data to individual-level data</span></span>
 <span><span class="co"># Note: We must ensure the weight column 'n' is present but set to 1</span></span>
+<span><span class="co"># Drop the model class first: pp_check() only needs the rows, and keeping the</span></span>
+<span><span class="co"># class through uncount() triggers a spurious "Dropping the &lt;epidist_*_model&gt;</span></span>
+<span><span class="co"># class" warning from vctrs as the count column is rebuilt.</span></span>
 <span><span class="va">data_expanded</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/uncount.html" class="external-link">uncount</a></span><span class="op">(</span>weights <span class="op">=</span> <span class="va">n</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>

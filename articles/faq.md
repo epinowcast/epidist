@@ -246,7 +246,11 @@ Then, pass this expanded data to the `newdata` argument of
 
 # Expand the aggregated data to individual-level data
 # Note: We must ensure the weight column 'n' is present but set to 1
+# Drop the model class first: pp_check() only needs the rows, and keeping the
+# class through uncount() triggers a spurious "Dropping the <epidist_*_model>
+# class" warning from vctrs as the count column is rebuilt.
 data_expanded <- data |>
+  tibble::as_tibble() |>
   tidyr::uncount(weights = n) |>
   mutate(n = 1)
 
