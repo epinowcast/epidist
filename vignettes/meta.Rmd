@@ -719,9 +719,16 @@ if (!requireNamespace("epireview", quietly = TRUE)) {
     install.packages("remotes")
   }
   # nolint next: nonportable_path_linter.
-  remotes::install_github("mrc-ide/epireview")
+  try(
+    remotes::install_github("mrc-ide/epireview"),
+    silent = TRUE
+  )
 }
-library(epireview) # nolint: library_call_linter.
+if (requireNamespace("epireview", quietly = TRUE)) {
+  library(epireview) # nolint: library_call_linter.
+}
+# Skip the rest of this section when epireview is not available
+knitr::opts_chunk$set(eval = requireNamespace("epireview", quietly = TRUE))
 #> Loading required package: epitrix
 #> Loading required package: ggforce
 ```
