@@ -63,7 +63,7 @@ epidist_gen_log_lik <- function(family) {
 }
 
 .generic_gen_log_lik <- function(log_lik_brms,
-                                spec = .primary_spec("uniform")) {
+                                 spec = .primary_spec("uniform")) {
   .log_lik <- function(i, prep) {
     y <- prep$data$Y[i]
     relative_obs_time <- prep$data$vreal1[i]
