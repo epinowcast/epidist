@@ -56,7 +56,7 @@ jobs:
           needs: check
 
       - name: Install epireview (vignette dependency, not on CRAN)
-        run: Rscript -e 'remotes::install_github("mrc-ide/epireview", upgrade = "never", quiet = TRUE)'
+        run: Rscript -e 'if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes", repos = "https://cloud.r-project.org"); remotes::install_github("mrc-ide/epireview", upgrade = "never", quiet = TRUE)'
 
       - name: Install cmdstan
         uses: epinowcast/actions/install-cmdstan@v1
