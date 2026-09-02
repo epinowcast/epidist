@@ -217,8 +217,10 @@ epidist_model_prior.default <- function(data, formula, ...) {
 #' where no study reported either the mean of the individual level delays is
 #' used. A model with individual level rows only adds no prior, so the family
 #' or `brms` default applies as it does for the marginal model. The prior is
-#' added where `mu` has a log or identity link, and on the identity link the
-#' median is used as it is.
+#' added where `mu` is on the log scale, which is the lognormal family, whose
+#' `mu` is the log of the median under an identity link, and any family with
+#' a log link, and where `mu` is the delay itself under an identity link, in
+#' which case the median is used as it is.
 #'
 #' The prior on the intercept of the other distributional parameters is left
 #' to the family or to `brms`.
@@ -236,7 +238,8 @@ epidist_model_prior.epidist_meta_model <- function(data, formula, ...) {
   if (is.null(location) || is.null(link)) {
     return(NULL)
   }
-  if (link == "log") {
+  lognormal <- identical(.delay_family(formula$family)$name, "lognormal")
+  if (link == "log" || (lognormal && link == "identity")) {
     centre <- log(location)
   } else if (link == "identity") {
     centre <- location
