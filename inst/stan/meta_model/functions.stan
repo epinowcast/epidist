@@ -211,7 +211,10 @@
     * primarycensored, following Park et al. (2024) and Charniga et al.
     * (2024). See the model guide vignette for the maths. Cells recording a
     * delay below `delay_min` are dropped and the rest renormalised, which
-    * conditions the grid on the study's left truncation point.
+    * conditions the grid on the study's left truncation point. Under an
+    * accrual design each cell is cut at the multiples of the primary window
+    * inside it and every piece is weighted by the follow up available to
+    * the primary window it starts in. Mirrors .meta_grid_pmf() in R.
     */
   vector meta_family_grid_pmf(array[] real params, data real delay_min,
                               data real cutoff, data real pwindow_width,
@@ -254,9 +257,42 @@
         return exp(log_mass - log(total));
       }
       for (j in 1:n_cell) {
-        log_mass[j] += meta_family_log_accrual_weight(
-          (first + j - 1) * swindow_width, cutoff, growth_rate
+        // The pieces run from the cell's lower edge through the multiples of
+        // the primary window strictly inside the cell to its upper edge. The
+        // positions are written out from data arguments and loop indices,
+        // because Stan only treats such expressions as data only.
+        int k_lo = to_int(floor(
+          (first + j - 1) * swindow_width / pwindow_width + 1e-9
+        )) + 1;
+        int k_hi = to_int(ceil(
+          (first + j) * swindow_width / pwindow_width - 1e-9
+        )) - 1;
+        real log_lo = log_cdf[j];
+        real log_weight = meta_family_log_accrual_weight(
+          pwindow_width * floor(
+            (first + j - 1) * swindow_width / pwindow_width + 1e-9
+          ),
+          cutoff, growth_rate
         );
+        real acc = negative_infinity();
+        for (k in k_lo:k_hi) {
+          real log_hi = meta_family_pcens_lcdf(
+            k * pwindow_width | params, pwindow_width, prim_id, prim_params
+          );
+          if (log_hi > log_lo) {
+            acc = log_sum_exp(acc, log_diff_exp(log_hi, log_lo) + log_weight);
+          }
+          log_lo = log_hi;
+          log_weight = meta_family_log_accrual_weight(
+            k * pwindow_width, cutoff, growth_rate
+          );
+        }
+        if (log_cdf[j + 1] > log_lo) {
+          acc = log_sum_exp(
+            acc, log_diff_exp(log_cdf[j + 1], log_lo) + log_weight
+          );
+        }
+        log_mass[j] = acc;
       }
       if (max(log_mass) == negative_infinity()) {
         reject("meta_family_grid_pmf: every grid cell underflowed to zero ",

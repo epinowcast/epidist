@@ -397,13 +397,37 @@ lockstep_base_rows <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Studies AA and AB stopped collecting at a calendar date with windows that
+# differ, so the accrual weight is cut at the primary window inside each
+# reporting cell in both directions. Both keep a daily primary window,
+# because the R and Stan primary censored distribution functions of
+# primarycensored only agree to about 1e-6 for a wider one under growth.
+lockstep_accrual_windows <- data.frame(
+  study = c("AA", "AA", "AA", "AB", "AB"),
+  type = c("mean", "sd", "quantile", "mean", "quantile"),
+  value = c(1.4, 2.9, 0.5, 5.8, 5.5),
+  se = c(NA, NA, 0.4, NA, NA),
+  p = c(NA, NA, 0.75, NA, 0.5),
+  n = c(160, 160, 160, 140, 140),
+  relative_obs_time = 28,
+  trunc_adjusted = FALSE,
+  trunc_design = "accrual",
+  cens_adjusted = 0,
+  pwindow = 1,
+  swindow = c(7, 7, 7, 0.5, 0.5),
+  delay_min = 0,
+  growth_rate = c(0.2, 0.2, 0.2, 0.05, 0.05),
+  stringsAsFactors = FALSE
+)
+
 lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
   lockstep_base_rows,
   lockstep_mvn_q,
   lockstep_mvn_r,
   lockstep_midpoint_uniform,
   lockstep_left_midpoint,
-  lockstep_mvn_z
+  lockstep_mvn_z,
+  lockstep_accrual_windows
 )))
 
 # The shared fits below use the cmdstanr backend, so they are only built
