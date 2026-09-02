@@ -5,7 +5,7 @@ Class constructor for `epidist_marginal_model` objects
 ## Usage
 
 ``` r
-new_epidist_marginal_model(data)
+new_epidist_marginal_model(data, primary = .primary_choices())
 ```
 
 ## Arguments
@@ -13,6 +13,10 @@ new_epidist_marginal_model(data)
 - data:
 
   A data.frame to convert
+
+- primary:
+
+  The primary event distribution, `"uniform"` or `"expgrowth"`.
 
 ## Value
 

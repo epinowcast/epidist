@@ -39,6 +39,7 @@ observations before fitting the latent model."><meta property="og:image" content
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/ebola.html">Advanced features with Ebola data</a></li>
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
     <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
+    <li><a class="dropdown-item" href="../articles/primary-events.html">Primary event distributions</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul></li>
@@ -76,7 +77,7 @@ observations before fitting the latent model.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'epidist_aggregate_data'</span></span>
-<span><span class="fu"><a href="as_epidist_latent_model.html">as_epidist_latent_model</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="as_epidist_latent_model.html">as_epidist_latent_model</a></span><span class="op">(</span><span class="va">data</span>, primary <span class="op">=</span> <span class="fu"><a href="dot-primary_choices.html">.primary_choices</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -85,6 +86,13 @@ observations before fitting the latent model.</p>
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>An <code>epidist_aggregate_data</code> object</p></dd>
+
+
+<dt id="arg-primary">primary<a class="anchor" aria-label="anchor" href="#arg-primary"></a></dt>
+<dd><p>The distribution of the primary event within its censoring
+window. <code>"uniform"</code>, the default, assumes it is equally likely at any
+point. <code>"expgrowth"</code> tilts it, with the growth rate estimated as the
+<code>pgrowth</code> distributional parameter.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

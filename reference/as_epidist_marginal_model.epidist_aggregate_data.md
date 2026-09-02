@@ -10,7 +10,13 @@ weighted by the counts in the aggregate data.
 
 ``` r
 # S3 method for class 'epidist_aggregate_data'
-as_epidist_marginal_model(data, obs_time_threshold = 2, delay_min = NULL, ...)
+as_epidist_marginal_model(
+  data,
+  obs_time_threshold = 2,
+  delay_min = NULL,
+  primary = .primary_choices(),
+  ...
+)
 ```
 
 ## Arguments
@@ -38,6 +44,13 @@ as_epidist_marginal_model(data, obs_time_threshold = 2, delay_min = NULL, ...)
   - A column name string: looks up the named column in the data. This is
     passed as the `L` parameter to
     [`primarycensored::dpcens()`](https://primarycensored.epinowcast.org/reference/dprimarycensored.html).
+
+- primary:
+
+  The distribution of the primary event within its censoring window.
+  `"uniform"`, the default, assumes it is equally likely at any point.
+  `"expgrowth"` tilts it, with the growth rate estimated as the
+  `pgrowth` distributional parameter.
 
 - ...:
 

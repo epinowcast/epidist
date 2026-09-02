@@ -36,3 +36,9 @@
 
 - [Guide to the statistical models implemented in
   epidist](https://epidist.epinowcast.org/articles/model.md):
+
+- [Primary event
+  distributions](https://epidist.epinowcast.org/articles/primary-events.md):
+
+  “How to set the distribution of the primary event within its censoring
+  window, and when it matters.”

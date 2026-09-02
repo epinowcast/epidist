@@ -10,7 +10,7 @@ interval censoring and right truncation in the data.
 
 ``` r
 # S3 method for class 'epidist_linelist_data'
-as_epidist_latent_model(data, ...)
+as_epidist_latent_model(data, primary = .primary_choices(), ...)
 ```
 
 ## Arguments
@@ -21,6 +21,13 @@ as_epidist_latent_model(data, ...)
   observations with primary and secondary event times. See
   [`as_epidist_linelist_data()`](https://epidist.epinowcast.org/reference/as_epidist_linelist_data.md)
   for details on creating this object.
+
+- primary:
+
+  The distribution of the primary event within its censoring window.
+  `"uniform"`, the default, assumes it is equally likely at any point.
+  `"expgrowth"` tilts it, with the growth rate estimated as the
+  `pgrowth` distributional parameter.
 
 - ...:
 

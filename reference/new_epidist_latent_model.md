@@ -5,7 +5,7 @@ Class constructor for `epidist_latent_model` objects
 ## Usage
 
 ``` r
-new_epidist_latent_model(data, ...)
+new_epidist_latent_model(data, primary = .primary_choices(), ...)
 ```
 
 ## Arguments
@@ -13,6 +13,13 @@ new_epidist_latent_model(data, ...)
 - data:
 
   An object to be set with the class `epidist_latent_model`
+
+- primary:
+
+  The distribution of the primary event within its censoring window.
+  `"uniform"`, the default, assumes it is equally likely at any point.
+  `"expgrowth"` tilts it, with the growth rate estimated as the
+  `pgrowth` distributional parameter.
 
 - ...:
 

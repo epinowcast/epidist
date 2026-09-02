@@ -12,7 +12,7 @@ into individual observations before fitting the latent model.
 
 ``` r
 # S3 method for class 'epidist_aggregate_data'
-as_epidist_latent_model(data, ...)
+as_epidist_latent_model(data, primary = .primary_choices(), ...)
 ```
 
 ## Arguments
@@ -20,6 +20,13 @@ as_epidist_latent_model(data, ...)
 - data:
 
   An `epidist_aggregate_data` object
+
+- primary:
+
+  The distribution of the primary event within its censoring window.
+  `"uniform"`, the default, assumes it is equally likely at any point.
+  `"expgrowth"` tilts it, with the growth rate estimated as the
+  `pgrowth` distributional parameter.
 
 - ...:
 

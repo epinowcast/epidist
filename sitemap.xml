@@ -10,6 +10,7 @@
 <url><loc>https://epidist.epinowcast.org/articles/index.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/articles/left-truncation.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/articles/model.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/articles/primary-events.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/authors.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/index.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/news/index.html</loc></url>
@@ -37,6 +38,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/delay_parameter_draws.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-add_delay_min.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-add_dpar_info.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-add_primary_dpars.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-add_weights.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-analytic_delay_summaries.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-analytic_summaries.html</loc></url>
@@ -69,6 +71,14 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-manual_prior_parameter.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-new_epidist_data.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-pick_prior_col.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-primary_args.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-primary_choices.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-primary_dist.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-primary_registry.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-primary_spec.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-primary_spec_from_family.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-primary_spec_from_prep.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-primary_stancode_args.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-prior_match_cols.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-quantile_name.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-rename_columns.html</loc></url>

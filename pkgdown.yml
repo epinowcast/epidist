@@ -9,7 +9,8 @@ articles:
   faq: faq.html
   left-truncation: left-truncation.html
   model: model.html
-last_built: 2026-09-02T13:36Z
+  primary-events: primary-events.html
+last_built: 2026-09-02T16:17Z
 urls:
   reference: https://epidist.epinowcast.org/reference
   article: https://epidist.epinowcast.org/articles

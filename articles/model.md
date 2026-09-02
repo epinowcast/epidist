@@ -216,6 +216,35 @@ so its Jacobian is a constant that cancels. The primary event density is
 used unnormalised here. A constant normalising it over \\\[0, s_i\]\\
 would itself depend on \\s_i\\.
 
+### 3.2 A non-uniform primary event
+
+Incidence is not flat within a reporting window during rapid growth or
+decline. Setting `primary = "expgrowth"` replaces the flat primary event
+with an exponentially tilted one at rate \\r\\.
+
+The tilt is placed on the unit scale offset, with the rate scaled by
+that offset’s bound \\b_i\\, which is \\w\_{P, i}\\ ordinarily and
+\\s_i\\ where the windows overlap. \\ \tilde{p}\_i \sim
+\text{ExpGrowth}(0, 1, r_i b_i). \\ Unlike the flat case, this density
+has to be normalised. Its constant depends on \\r_i\\, which is
+estimated, so dropping it would let the likelihood grow without bound in
+\\r_i\\.
+
+\\r\\ is a distributional parameter, so it takes a formula and a prior
+like any other. This allows the rate to vary by covariate. The delays
+carry little information about \\r\\. It is normally taken from a
+separate estimate of epidemic growth and given an informative prior
+centred on that value, as in Brand et al.
+([2026](#ref-brand2026scalable)), rather than learned from the delays.
+
+``` r
+
+epidist(data, formula = bf(mu ~ 1, pgrowth ~ 1 + region))
+```
+
+This follows the implementation in Brand et al.
+([2026](#ref-brand2026scalable)).
+
 The latent model formulation follows Ward et al.
 ([2022](#ref-ward2022transmission)). The need for this adjustment was
 identified in Funk and Abbott ([2026](#ref-bdbvlinelist)) and derived in

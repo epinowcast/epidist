@@ -49,6 +49,7 @@
 <li><a class="dropdown-item" href="../articles/ebola.html">Advanced features with Ebola data</a></li>
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
     <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
+    <li><a class="dropdown-item" href="../articles/primary-events.html">Primary event distributions</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul>
@@ -274,6 +275,26 @@ The log density of these observations needs it explicitly.
 The non-overlapping case needs no such term because <span class="math inline">\(w_{P, i}\)</span> is data, so its Jacobian is a constant that cancels.
 The primary event density is used unnormalised here.
 A constant normalising it over <span class="math inline">\([0, s_i]\)</span> would itself depend on <span class="math inline">\(s_i\)</span>.</p>
+</div>
+<div class="section level3" number="3.2">
+<h3 id="primary-tilt">
+<span class="header-section-number">3.2</span> A non-uniform primary event<a class="anchor" aria-label="anchor" href="#primary-tilt"></a>
+</h3>
+<p>Incidence is not flat within a reporting window during rapid growth or decline.
+Setting <code>primary = "expgrowth"</code> replaces the flat primary event with an exponentially tilted one at rate <span class="math inline">\(r\)</span>.</p>
+<p>The tilt is placed on the unit scale offset, with the rate scaled by that offset’s bound <span class="math inline">\(b_i\)</span>, which is <span class="math inline">\(w_{P, i}\)</span> ordinarily and <span class="math inline">\(s_i\)</span> where the windows overlap.
+<span class="math display">\[
+\tilde{p}_i \sim \text{ExpGrowth}(0, 1, r_i b_i).
+\]</span>
+Unlike the flat case, this density has to be normalised.
+Its constant depends on <span class="math inline">\(r_i\)</span>, which is estimated, so dropping it would let the likelihood grow without bound in <span class="math inline">\(r_i\)</span>.</p>
+<p><span class="math inline">\(r\)</span> is a distributional parameter, so it takes a formula and a prior like any other.
+This allows the rate to vary by covariate.
+The delays carry little information about <span class="math inline">\(r\)</span>.
+It is normally taken from a separate estimate of epidemic growth and given an informative prior centred on that value, as in <span class="citation">Brand et al. (<a href="#ref-brand2026scalable">2026</a>)</span>, rather than learned from the delays.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span><span class="va">data</span>, formula <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">pgrowth</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">region</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>This follows the implementation in <span class="citation">Brand et al. (<a href="#ref-brand2026scalable">2026</a>)</span>.</p>
 <p>The latent model formulation follows <span class="citation">Ward et al. (<a href="#ref-ward2022transmission">2022</a>)</span>.
 The need for this adjustment was identified in <span class="citation">Funk and Abbott (<a href="#ref-bdbvlinelist">2026</a>)</span> and derived in <span class="citation">Brand et al. (<a href="#ref-brand2026scalable">2026</a>)</span>.</p>
 </div>

@@ -26,7 +26,9 @@ as_epidist_marginal_model(data, ...)
 
 - ...:
 
-  Additional arguments passed to methods.
+  Additional arguments passed to the methods. These set the primary
+  event distribution and other fitting options; see the methods for the
+  arguments they take.
 
 ## Value
 
