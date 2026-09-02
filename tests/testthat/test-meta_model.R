@@ -391,7 +391,7 @@ test_that(".meta_implied_moments recovers a left truncated study that midpoints 
     tolerance = 0.01
   )
   nodes <- .meta_implied_nodes("plnorm", args, slots)
-  expect_equal(nodes$origin, delay_min - swindow / 2)
+  expect_identical(nodes$origin, delay_min - swindow / 2)
   # The nodes start at the kept cell, so a quantile read off them and fed
   # back through the distribution function round trips exactly.
   median <- .meta_node_quantile(nodes, 0.5)
@@ -2055,7 +2055,7 @@ test_that(".meta_implied_moments of a truncation adjusted study conditions on de
   # max_delay, which for a heavy tailed delay cuts the tail the standard
   # deviation and kurtosis live in.
   left_lnorm <- function(args, lower) {
-    raw <- vapply(
+    raw_moment <- vapply(
       seq_len(4),
       function(k) {
         # On the log scale the integrand is a shifted normal density, which
@@ -2072,8 +2072,10 @@ test_that(".meta_implied_moments of a truncation adjusted study conditions on de
       },
       numeric(1)
     )
-    tail <- stats::plnorm(lower, args$meanlog, args$sdlog, lower.tail = FALSE)
-    return(.meta_central_from_raw(raw / tail))
+    tail_mass <- stats::plnorm(
+      lower, args$meanlog, args$sdlog, lower.tail = FALSE
+    )
+    return(.meta_central_from_raw(raw_moment / tail_mass))
   }
   lnorm_args <- function(mean, sd) {
     var_log <- log1p((sd / mean)^2)
