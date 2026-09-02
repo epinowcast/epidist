@@ -267,6 +267,120 @@ test_that("the Stan naive grid stays finite on a grid that runs into the tail", 
   expect_equal(stan_moments, r_moments, tolerance = 1e-3)
 })
 
+test_that("the R and Stan implied quantiles agree for every family and design", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  # The chord inverse is refined exactly through the family quantile function
+  # for a lognormal or weibull delay, by Newton steps with the closed form
+  # primary censored distribution function otherwise, and left alone on the
+  # discrete grid and under an accrual design. Every branch is compared.
+  designs <- data.frame(
+    cens = c(1, 1, 2, 4, 1, 2, 3, 0),
+    trunc_adj = c(1, 0, 1, 0, 0, 0, 0, 0),
+    design = c(0, 0, 0, 0, 1, 0, 0, 0),
+    lower = c(0, 2, 0, 0, 0, 1.5, 0, 0),
+    cutoff = c(80, 30, 60, 25, 30, 40, 20, 24),
+    growth = c(0, 0, 0, 0, 0.1, 0.05, 0, 0)
+  )
+  probs <- c(0.1, 0.5, 0.9)
+  families <- list(
+    lognormal = list(
+      dist = "plnorm", args = list(meanlog = 1.6, sdlog = 0.5)
+    ),
+    gamma = list(dist = "pgamma", args = list(shape = 3, rate = 0.5)),
+    weibull = list(dist = "pweibull", args = list(shape = 2, scale = 7))
+  )
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = c("mean", "sd"), value = c(7, 3), n = 100,
+    trunc_adjusted = TRUE, cens_adjusted = 1, stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  design_slots <- function(i) {
+    return(list(
+      lower = designs$lower[i], cutoff = designs$cutoff[i], pwindow = 1,
+      swindow = 1, trunc_adjusted = designs$trunc_adj[i],
+      cens_adjusted = designs$cens[i], growth_rate = designs$growth[i],
+      trunc_design = designs$design[i]
+    ))
+  }
+  for (family_name in names(families)) {
+    dist <- families[[family_name]]$dist
+    args <- families[[family_name]]$args
+    family <- epidist_family(meta, family = family_name)
+    formula <- epidist_formula(meta, family, formula = bf(mu ~ 1))
+    stanvars <- epidist_stancode(meta, family = family, formula = formula)
+    fn <- function(x) paste0("meta_", family_name, "_", x)
+    mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(paste0(
+      "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode,
+      "\n}\n",
+      "data {\n  int N;\n  array[N] int cens;\n  array[N] int trunc_adj;\n",
+      "  array[N] int design;\n  array[N] real delay_min;\n",
+      "  array[N] real cutoff;\n  array[N] real growth;\n",
+      "  array[N] int n_node;\n  int K;\n  vector[K] probs;\n",
+      "  array[2] real params;\n}\n",
+      "generated quantities {\n  array[N] vector[K] q;\n",
+      "  for (n in 1:N) {\n",
+      "    int prim_id = growth[n] == 0 ? 1 : 2;\n",
+      "    array[growth[n] == 0 ? 0 : 1] real prim_params;\n",
+      "    int accrual = (trunc_adj[n] != 1 && design[n] == 1) ? 1 : 0;\n",
+      "    vector[2 + n_node[n]] nodes;\n",
+      "    if (growth[n] != 0) prim_params[1] = growth[n];\n",
+      "    nodes = ", fn("implied_nodes"), "(params, delay_min[n], ",
+      "cutoff[n], 1, 1, trunc_adj[n], cens[n], prim_id, prim_params, ",
+      "accrual, growth[n]);\n",
+      "    for (k in 1:K) {\n",
+      "      q[n, k] = ", fn("node_quantile"), "(nodes, probs[k], params, ",
+      "delay_min[n], cutoff[n], 1, 1, trunc_adj[n], cens[n], prim_id, ",
+      "prim_params, accrual, growth[n]);\n",
+      "    }\n  }\n}\n"
+    )))
+    n_node <- vapply(
+      seq_len(nrow(designs)),
+      function(i) {
+        return(length(.meta_implied_nodes(dist, args, design_slots(i))$values))
+      },
+      numeric(1)
+    )
+    fit <- mod$sample(
+      data = list(
+        N = nrow(designs), cens = designs$cens,
+        trunc_adj = designs$trunc_adj, design = designs$design,
+        delay_min = designs$lower, cutoff = designs$cutoff,
+        growth = designs$growth, n_node = n_node, K = length(probs),
+        probs = probs, params = unname(unlist(args))
+      ),
+      fixed_param = TRUE, chains = 1, iter_sampling = 1, iter_warmup = 0,
+      sig_figs = 18, refresh = 0, show_messages = FALSE
+    )
+    draws <- posterior::as_draws_matrix(fit$draws("q"))
+    for (i in seq_len(nrow(designs))) {
+      slots <- design_slots(i)
+      nodes <- .meta_implied_nodes(dist, args, slots)
+      r_quantile <- vapply(
+        probs,
+        function(p) .meta_node_quantile(nodes, p, dist, args, slots),
+        numeric(1)
+      )
+      stan_quantile <- as.numeric(
+        draws[1, paste0("q[", i, ",", seq_along(probs), "]")]
+      )
+      # A growing primary event evaluates the primary censored distribution
+      # function differently in R and Stan, which is the chord's own
+      # tolerance; every refined design agrees to machine precision.
+      tolerance <- ifelse(designs$growth[i] == 0, 1e-10, 1e-6)
+      expect_equal(stan_quantile, r_quantile, tolerance = tolerance)
+      chord <- vapply(probs, function(p) .meta_node_quantile(nodes, p),
+        numeric(1))
+      if (designs$cens[i] %in% c(0, 3) || designs$design[i] == 1 ||
+        designs$growth[i] != 0) {
+        expect_identical(r_quantile, chord)
+      } else {
+        expect_gt(max(abs(r_quantile - chord)), 1e-3)
+      }
+    }
+  }
+})
+
 test_that("epidist.epidist_meta_model recovers known parameters from simulated grid summaries", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   # Every study reports integer date differences from a right truncated
