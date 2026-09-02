@@ -157,10 +157,12 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  event for the same `relative_obs_time`) or `"accrual"` (it collected over a
 #'  window of that length and stopped at its calendar end). Defaults to
 #'  `"cohort"`, and is only used for studies that did not adjust for right
-#'  truncation. The accrual weight is exact only where `pwindow` and `swindow`
-#'  are equal. With a weekly primary and a daily secondary window, a collection
-#'  window of 28 days and a delay of mean 4.6 days, refitting a reported mean
-#'  and standard deviation recovers the standard deviation about 6% high. See
+#'  truncation. The accrual weight on the grid of a study that did not adjust
+#'  for censoring is exact whenever `relative_obs_time` is a multiple of
+#'  `pwindow`, for any `swindow`. The weight used for the uniform single
+#'  interval approximation is exact only for a narrow `pwindow`, and puts the
+#'  implied mean about 3% high with a weekly primary window, a collection
+#'  window of 28 days, a delay of mean 4.6 days and a growth rate of 0.2. See
 #'  `vignette("model")`.
 #'
 #' @param cens_adjusted A string giving the column of `data` containing the

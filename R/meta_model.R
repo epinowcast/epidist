@@ -74,10 +74,12 @@
 #'   reports them, and check that `swindow` is the resolution it worked at.
 #'   [as_epidist_estimates_data()] warns for studies in this range.
 #' * The accrual weight applied to a study that stopped collecting at a
-#'   calendar date is exact only when `pwindow` and `swindow` are equal. With a
-#'   weekly primary and a daily secondary window, a collection window of 28
-#'   days and a delay of mean 4.6 days, refitting a reported mean and standard
-#'   deviation recovers the standard deviation about 6% high.
+#'   calendar date treats the last primary window as complete, so it is exact
+#'   on the grid only when `relative_obs_time` is a multiple of `pwindow`,
+#'   and it averages over the primary window for a study that adjusted the
+#'   secondary interval only. With a weekly primary window, a collection
+#'   window of 28 days and a delay of mean 4.6 days the latter puts the
+#'   implied mean 0.8% high at a growth rate of 0.05 and 2.6% high at 0.2.
 #'   `vignette("model")` gives the measurements.
 #'
 #' Two settings trade accuracy against speed: `max_delay` in
