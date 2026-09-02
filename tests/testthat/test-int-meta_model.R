@@ -408,17 +408,20 @@ test_that("epidist.epidist_meta_model recovers known parameters from simulated g
 test_that("epidist.epidist_meta_model recovers known parameters from reported fits and posterior draws", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   # Five studies published lognormal parameters fitted to their own naive
-  # date differences, each summary carrying its own standard error. A sixth
-  # published posterior draws of the delay mean and standard deviation, so
-  # only that study contributes a covariance.
+  # date differences with standard errors, which reach the fit as the delta
+  # method covariance over the mean and standard deviation. A sixth published
+  # posterior draws of the delay mean and standard deviation, so every study
+  # contributes a covariance row.
   skip_on_cran()
   skip_if_no_cmdstanr()
   expect_convergence(fit_meta_reported)
-  expect_named(.estimates_vcov(sim_reported_estimates), "posterior_draws")
-  expect_true(all(
-    !is.na(sim_reported_estimates$se) |
-      sim_reported_estimates$mvn_id == "posterior_draws"
-  ))
+  expect_named(
+    .estimates_vcov(sim_reported_estimates),
+    c(paste0("published_", 1:5), "posterior_draws")
+  )
+  expect_true(all(.estimates_vcov_rows(sim_reported_estimates)))
+  expect_true(all(is.na(sim_reported_estimates$se)))
+  expect_true(all(prep_meta_reported$obs_type == 7L))
   expect_identical(
     unique(sim_reported_estimates$type), c("mean", "sd")
   )
@@ -549,9 +552,10 @@ test_that("epidist.epidist_meta_model with an expgrowth primary event recovers t
   expect_equal(mean(meta_draws$pgrowth), growth_rate, tolerance = 0.2)
 
   # The R log likelihood of the fit uses the fitted growth rate for its
-  # individual level rows.
-  prep <- brms::prepare_predictions(fit_meta_growth, ndraws = 4)
-  log_lik <- brms::log_lik(fit_meta_growth, ndraws = 4)
+  # individual level rows. The same draws are named on both sides, because
+  # `ndraws` alone samples a different subset in each call.
+  prep <- brms::prepare_predictions(fit_meta_growth, draw_ids = 1:4)
+  log_lik <- brms::log_lik(fit_meta_growth, draw_ids = 1:4)
   rows <- seq_len(min(3L, prep$nobs))
   expected <- vapply(
     rows,
