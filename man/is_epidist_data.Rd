@@ -12,7 +12,7 @@ is_epidist_data(data, ...)
 \item{...}{Additional arguments}
 }
 \value{
-A logical, \code{TRUE} if \code{data} has the \code{epidist_data} class and
+A logical, \code{TRUE} if \code{data} inherits from \code{epidist_data} and
 \code{FALSE} otherwise.
 }
 \description{

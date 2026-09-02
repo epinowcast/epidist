@@ -517,21 +517,13 @@ Compared to the naive fit we see good recovery of the true distribution paramete
 # Compare the two models estimated delay parameters {#compare}
 
 We can compare the two models by plotting the estimated parameters from the naive and marginal models.
-One way to do this is to use the `add_delay_parameter_draws()` function to extract the posterior samples and then plot them.
-The `add_summaries()` function then adds the mean and standard deviation of the delay distribution so that it is easier to understand.
+One way to do this is to use the `delay_summary_draws()` function.
+It draws one set of delay distribution parameters for each unique combination of the predictors, and adds the natural scale mean and standard deviation of the delay so that the numbers are easier to read.
+`delay_parameter_draws()`, `add_summaries()` and `epidist_strata()` are the three steps it wraps, and each is available on its own.
 
 ```{r}
-draw_parameters <- function(fit) {
-  draws <- fit |>
-    epidist_strata() |>
-    add_delay_parameter_draws(fit) |>
-    add_summaries() |>
-    ungroup()
-  return(draws)
-}
-
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
-  lapply(draw_parameters) |>
+  lapply(\(fit) ungroup(delay_summary_draws(fit))) |>
   bind_rows(.id = "model") |>
   mutate(model = factor(model, levels = c("naive", "marginal")))
 

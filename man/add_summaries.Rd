@@ -65,8 +65,9 @@ draws <- data.frame(mu = c(1.8, 2.0), sigma = c(0.5, 0.4))
 add_summaries(draws, family = "lognormal", probs = c(0.05, 0.95))
 }
 \seealso{
-Other postprocess:
-\code{\link[=delay_parameter_draws]{delay_parameter_draws()}},
-\code{\link[=epidist_strata]{epidist_strata()}}
+Other postprocess: 
+\code{\link{delay_parameter_draws}()},
+\code{\link{delay_summary_draws}()},
+\code{\link{epidist_strata}()}
 }
 \concept{postprocess}

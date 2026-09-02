@@ -88,6 +88,79 @@ add_delay_parameter_draws <- function(newdata, object, ...) {
   return(delay_parameter_draws(object, newdata = newdata, ...))
 }
 
+#' Posterior draws of the delay distribution, summarised
+#'
+#' @description
+#' The usual last step of a fit. Builds one row per unique combination of the
+#' predictors with [epidist_strata()], draws the delay distribution parameters
+#' for each with [delay_parameter_draws()], and adds the natural scale mean and
+#' standard deviation, and any quantiles asked for, with [add_summaries()].
+#'
+#' Each of those three steps is available on its own where a step needs
+#' different arguments, or where `newdata` is built some other way.
+#'
+#' @inheritParams delay_parameter_draws
+#'
+#' @param newdata A `data.frame` of data to predict for. If `NULL`, the
+#'  default, [epidist_strata()] builds one row per unique combination of the
+#'  predictors the model uses.
+#'
+#' @param vars A character vector of variables to stratify by, passed to
+#'  [epidist_strata()]. Only used when `newdata` is `NULL`.
+#'
+#' @param probs A numeric vector of probabilities to add quantiles of the delay
+#'  distribution for. If `NULL`, the default, no quantiles are added.
+#'
+#' @param method Passed to [add_summaries()]. Either `"auto"`, the default,
+#'  which uses the analytic solution when there is one and simulates
+#'  otherwise, `"analytic"`, or `"sample"`.
+#'
+#' @param nsim The number of delays to simulate per row. Passed to
+#'  [add_summaries()] and only used when simulating.
+#'
+#' @family postprocess
+#' @returns A `tibble` of posterior draws of the delay distribution parameters
+#'  with `mean` and `sd` columns added, and one column per element of `probs`.
+#'  Grouped by the columns of `newdata` and by `.row`, as
+#'  [delay_parameter_draws()] returns it, so that `tidybayes` interval
+#'  functions summarise each stratum. Use [dplyr::ungroup()] to drop that.
+#'
+#' @seealso [delay_parameter_draws()] for the parameters alone,
+#'  [add_summaries()] to summarise draws you already have, and
+#'  [epidist_strata()] to build `newdata`.
+#'
+#' @export
+#' @examples
+#' \donttest{
+#' fit <- sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_aggregate_data() |>
+#'   as_epidist_marginal_model() |>
+#'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+#'
+#' delay_summary_draws(fit, probs = c(0.05, 0.95))
+#' }
+delay_summary_draws <- function(
+  object,
+  newdata = NULL,
+  vars = NULL,
+  probs = NULL,
+  method = c("auto", "analytic", "sample"),
+  nsim = 1000,
+  ...
+) {
+  method <- match.arg(method)
+  if (is.null(newdata)) {
+    newdata <- epidist_strata(object, vars = vars)
+  }
+  draws <- delay_parameter_draws(object, newdata = newdata, ...)
+  out <- add_summaries(draws, probs = probs, method = method, nsim = nsim)
+  return(out)
+}
+
 #' Draws of each distributional parameter in a long `data.frame`
 #'
 #' @inheritParams delay_parameter_draws
