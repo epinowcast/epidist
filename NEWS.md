@@ -185,6 +185,10 @@ See #620.
 - The meta model supports left truncation through `delay_min`, on both individual level rows and summary rows.
 A study that only counted delays above a minimum has every implied summary conditioned on the delay exceeding it.
 See #596 and #620.
+- The meta model takes a `primary` argument for its individual level rows, as the marginal model does.
+With `primary = "expgrowth"` the growth rate of primary events is estimated as the `pgrowth` distributional parameter.
+Summary rows are unchanged and keep the `growth_rate` metadata of their study as a known tilt.
+See #620.
 
 ## Documentation
 

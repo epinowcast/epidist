@@ -45,6 +45,7 @@ It also builds on `brms`, so formulas, families, priors and post-processing all 
 ::: {.alert .alert-primary}
 For a methodological overview of the biases in published delay estimates see @park2024estimating, and for a practical checklist aimed at applied users see @charniga2024best.
 For individual level rows the meta model reuses the likelihood of the marginal model (`vignette("epidist")`), which relies on the [`primarycensored`](https://primarycensored.epinowcast.org/) package [@primarycensored].
+Those rows take the same `primary` argument as the marginal model, so a growing epidemic can be allowed for as in `vignette("primary-events")`.
 It adds a forward model of the naive estimator for summary rows, so both kinds of evidence can be combined in one `brms` [@brms] model.
 :::
 

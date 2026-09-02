@@ -270,6 +270,8 @@ The naive, latent and marginal models above all fit directly to individual delay
 Published estimates of a delay distribution are usually reported as summary statistics rather than individual observations, and the study's own estimation procedure is itself a source of bias [@charniga2024best; @park2024estimating].
 The meta model lets `epidist` fit a single delay distribution to a mix of individual level data and published summary estimates.
 Individual level rows use the marginal model likelihood of Section \@ref(the-marginal-model) unchanged.
+Their primary event distribution is set with `primary`, so the tilted primary event of Section \@ref(primary-tilt) is available to them.
+Summary rows instead take the growth rate reported for each study as a known quantity.
 Each summary row is instead forward modelled.
 Given the true continuous delay distribution, the model works out what the study's own estimation procedure would have converged to.
 The reported value is then fitted to that biased estimand, with sampling uncertainty derived from the study sample size.

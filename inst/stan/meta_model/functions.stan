@@ -8,8 +8,11 @@
   *   "real paramname1, real paramname2, ...".
   * - 'dpars_B' is replaced with the same parameters as dpars_A but
   *   reparameterised according to the brms parameterisation for Stan.
-  * - 'primary_id' is replaced with the primary distribution identifier used
-  *   for individual level rows.
+  * - 'primary_id, primary_params' is replaced with the primarycensored
+  *   identifier and parameters of the primary event distribution used for
+  *   individual level rows, for example '2, {pgrowth}' for exponential
+  *   growth. Summary rows tilt the primary event by their growth_rate slot
+  *   instead, which is data.
   * - 'n_quad_default' is replaced with the number of quadrature intervals
   *   used for truncated continuous moments, which is `.meta_n_quad()` in R.
   *
