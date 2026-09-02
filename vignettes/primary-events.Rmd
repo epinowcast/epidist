@@ -184,17 +184,4 @@ epred |>
   theme_minimal()
 ```
 
-# When it matters
-
-The effect grows with the censoring window and with the growth rate.
-With daily windows and a delay of several days it is usually small.
-With weekly reporting during rapid growth it is not.
-
-Treat the growth rate as something you supply rather than something you learn here.
-Delays contain little information about it, so a flat prior leaves the posterior close to flat.
-Take the rate from a separate estimate of epidemic growth and pass it as an informative prior centred on that value.
-
-Because it is a parameter rather than a fixed value, its uncertainty propagates into the delay estimate.
-A point value can still be used, by giving it a prior with a very small scale.
-
 # References
