@@ -844,6 +844,58 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   return(studies[short])
 }
 
+#' Studies whose quadrature nodes are far apart relative to their delays
+#'
+#' The moments and distribution function of a continuous estimand that is
+#' truncated at the grid cutoff are computed by Simpson's rule on
+#' `.meta_n_quad()` equally spaced intervals running from `delay_min` to the
+#' cutoff, so the node spacing is set by the cutoff and not by the scale of
+#' the delay. This covers a study that did not adjust for right truncation
+#' and used a continuous adjustment (`cens_adjusted` of 1, 2 or 4), a study
+#' that did adjust but whose primary events were not uniform within their
+#' window (`cens_adjusted` of 2 or 4 with a non zero `growth_rate`), and the
+#' quantile members of a covariance matrix group, which are read off the
+#' same nodes. A spacing wider than a quarter of the smallest reported mean
+#' or median leaves the delay distribution poorly resolved, which for a heavy
+#' tailed delay at the default `max_delay` moves the implied mean by several
+#' percent. Since the resolution is compiled into the model this is flagged
+#' here rather than adapted per study.
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns A character vector of study identifiers whose quadrature is
+#'  coarse.
+#'
+#' @keywords internal
+.estimates_coarse_quadrature <- function(data) {
+  continuous <- data$cens_adjusted %in% c(1L, 2L, 4L)
+  quadrature <- continuous & (
+    !data$trunc_adjusted |
+      (data$cens_adjusted != 1L & data$growth_rate != 0) |
+      (data$type == "quantile" & .estimates_vcov_rows(data))
+  )
+  if (!any(quadrature)) {
+    return(character(0))
+  }
+  spacing <- (.estimates_grid_cutoff(data) - data$delay_min) / .meta_n_quad()
+  location <- data$type == "mean" |
+    (data$type == "quantile" & !is.na(data$p) & data$p == 0.5)
+  studies <- unique(as.character(data$study)[quadrature])
+  coarse <- vapply(
+    studies,
+    function(study) {
+      rows <- as.character(data$study) == study
+      reported <- data$value[rows & location]
+      if (length(reported) == 0) {
+        return(FALSE)
+      }
+      return(max(spacing[rows & quadrature]) > min(reported) / 4)
+    },
+    logical(1)
+  )
+  return(studies[coarse])
+}
+
 #' Studies reporting quantiles on a coarse delay grid
 #'
 #' A study that summarised interval censored delays without adjusting for
@@ -1018,6 +1070,22 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
         "The grid cutoff for {.val {short}} is short relative to the ",
         "reported mean and standard deviation, so the implied summaries for ",
         "{?this study/these studies} will be biased downwards. Increase ",
+        "{.var max_delay}."
+      )
+    ))
+  }
+
+  coarse_quadrature <- .estimates_coarse_quadrature(data)
+  if (length(coarse_quadrature) > 0) {
+    cli::cli_inform(c(
+      "!" = paste0(
+        "The quadrature nodes for {.val {coarse_quadrature}} are more than ",
+        "a quarter of the smallest reported mean or median apart, because ",
+        "they span the grid cutoff (the observation time, or ",
+        "{.var max_delay} where the study adjusted for right truncation) on ",
+        "{.code options(epidist.meta_n_quad)} intervals, so the implied ",
+        "summaries for {?this study/these studies} may be inaccurate. Raise ",
+        "{.code options(epidist.meta_n_quad)} before fitting, or lower ",
         "{.var max_delay}."
       )
     ))
