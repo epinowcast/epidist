@@ -865,10 +865,21 @@ Other records in the same dataset do give the parameters directly.
 ```{r}
 ebola_params |>
   filter(.data$distribution_par1_type == "Shape") |>
-  select(
-    "article_label", "parameter_type_short", "distribution_type",
-    "distribution_par1_value", "distribution_par2_value",
-    "parameter_value", "population_sample_size"
+  transmute(
+    study = .data$article_label,
+    delay = .data$parameter_type_short,
+    family = .data$distribution_type,
+    shape = .data$distribution_par1_value,
+    scale = .data$distribution_par2_value,
+    # The mean the reported parameters imply, to compare with the mean the
+    # same record reports as its estimate.
+    implied_mean = ifelse(
+      .data$distribution_type == "Gamma",
+      .data$shape * .data$scale,
+      .data$scale * gamma(1 + 1 / .data$shape)
+    ),
+    reported_mean = .data$parameter_value,
+    n = .data$population_sample_size
   )
 ```
 
@@ -904,13 +915,16 @@ epidist_estimates_parameters(
 )
 ```
 
-Check that a record's reported summary and its reported parameters agree before using either.
-They do here, where the reported mean of `r marziano$parameter_value` days sits close to the `r round(marziano$distribution_par2_value * gamma(1 + 1 / marziano$distribution_par1_value), 2)` days the reported Weibull implies.
-They do not for `Marziano 2023 (1)` in the same article, which records a mean of 12 days against a Weibull implying 9.03, a gap wide enough to fall outside the credible interval reported alongside the mean.
+The `implied_mean` and `reported_mean` columns above are worth comparing before using either.
+`Marziano 2023 (1)` disagrees by 25% of its reported mean, and the 9.03 days its Weibull implies falls below the 10 to 14.2 interval it reports around that mean of 12.
+`Marziano 2023 (2)` disagrees by 8%, and its implied mean sits inside a reported interval of 8.2 to 15.8, which is wide enough that this is a weak test.
+A record where the two disagree is telling you that the summary and the fitted distribution came from different calculations, and you need to know which one you want before fitting either.
+We use `Marziano 2023 (2)`, the closer of the two.
 
 epireview flags whether uncertainty on the distribution parameters was reported but does not store its value, so there is no standard error to pass here and the model falls back to plug in standard errors from `n`.
-It does record an interval on the reported mean, which is why the ordering set out at the start of this vignette puts parameters with their uncertainty above parameters without it.
-Where a review records those standard errors, or records draws that `as_epidist_multivariate()` can turn into a mean vector and a covariance, that uncertainty and the correlation between the parameters reach the model instead.
+Reported parameters without their standard errors sit between the third and fourth rungs of the ordering set out at the start of this vignette.
+They pin down the shape of the distribution the study fitted, but their uncertainty still has to be reconstructed from the sample size.
+Where a review records those standard errors, or records draws that `as_epidist_multivariate()` can turn into a mean vector and a covariance, that uncertainty and the correlation between the parameters reach the model instead of being replaced by a function of the sample size.
 
 ## Comparing with a modern re-analysis of the same line list {#bdbv}
 
@@ -1081,7 +1095,6 @@ p_bdbv <- ggplot() +
 
 </details>
 
-
 (ref:bdbv) The Isiro onset to death delay, four ways. The dashed line is the Gamma reported by @rosello2015ebola. The bands are 95% posterior intervals of the density from the meta model at study level, from the meta model at population level with the `(1 | study)` term switched off, and from the re-analysis of the same line list.
 
 ```{r bdbv, fig.cap="(ref:bdbv)", fig.width=8, fig.height=4.5}
@@ -1090,7 +1103,7 @@ p_bdbv
 
 The study level estimate is centred close to the re-analysis but is more dispersed than either the reported fit or the re-analysis.
 That dispersion comes from the model rather than from the study.
-`shape ~ 1` gives every study one shared shape, estimated across all 29 studies, over half of which report a single summary with no spread at all.
+`shape ~ 1` gives every study one shared shape, estimated across all 29 studies, 15 of which report a single summary with no spread at all.
 The Gamma Rosello fitted to Isiro is much more peaked than that shared shape.
 Putting a term on `shape` as well, such as `shape ~ 1 + (1 | study)`, lets a study's own reported spread inform its own shape, at the cost of a much harder fit.
 
