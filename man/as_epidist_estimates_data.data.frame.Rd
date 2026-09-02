@@ -73,10 +73,12 @@ study stopped collecting data, either \code{"cohort"} (it followed every primary
 event for the same \code{relative_obs_time}) or \code{"accrual"} (it collected over a
 window of that length and stopped at its calendar end). Defaults to
 \code{"cohort"}, and is only used for studies that did not adjust for right
-truncation. The accrual weight is exact only where \code{pwindow} and \code{swindow}
-are equal. With a weekly primary and a daily secondary window, a collection
-window of 28 days and a delay of mean 4.6 days, refitting a reported mean
-and standard deviation recovers the standard deviation about 6\% high. See
+truncation. The accrual weight on the grid of a study that did not adjust
+for censoring is exact whenever \code{relative_obs_time} is a multiple of
+\code{pwindow}, for any \code{swindow}. The weight used for the uniform single
+interval approximation is exact only for a narrow \code{pwindow}, and puts the
+implied mean about 3\% high with a weekly primary window, a collection
+window of 28 days, a delay of mean 4.6 days and a growth rate of 0.2. See
 \code{vignette("model")}.}
 
 \item{cens_adjusted}{A string giving the column of \code{data} containing the
@@ -84,9 +86,11 @@ censoring adjustment code (\code{0}, \code{1}, \code{2}, \code{3}, or \code{4}, 
 above). Defaults to 0.}
 
 \item{delay_min}{A string giving the column of \code{data} containing the
-smallest delay the study counted, its left truncation point. Defaults to 0,
-meaning the study counted every delay. Must be below the grid cutoff, and
-no reported mean or quantile may fall below it.}
+smallest delay the study counted, its left truncation point, on the scale
+the study reported. Defaults to 0, meaning the study counted every delay,
+which for \code{cens_adjusted} code 4 includes any delay reported below zero.
+Must be below the grid cutoff, and no reported mean or quantile may fall
+below it.}
 
 \item{growth_rate}{A string giving the column of \code{data} containing the
 exponential growth rate of primary events during the study period. Defaults
@@ -140,7 +144,9 @@ half a secondary window without changing its spread.
 \item \code{4}: midpoint imputation with a uniform interval. The study placed the
 primary event at the midpoint of its window and integrated the secondary
 interval. Common where the primary event has a wide exposure window and
-the secondary date is recorded precisely.
+the secondary date is recorded precisely. With a wide primary window
+the shortest delays are reported below zero, so the estimand puts mass
+there. Set \code{delay_min} if the study dropped them.
 }
 
 Use code \code{3} for a study that midpointed the secondary interval and left

@@ -92,10 +92,12 @@ standard deviation recover the truth, so prefer those where a study
 reports them, and check that \code{swindow} is the resolution it worked at.
 \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} warns for studies in this range.
 \item The accrual weight applied to a study that stopped collecting at a
-calendar date is exact only when \code{pwindow} and \code{swindow} are equal. With a
-weekly primary and a daily secondary window, a collection window of 28
-days and a delay of mean 4.6 days, refitting a reported mean and standard
-deviation recovers the standard deviation about 6\% high.
+calendar date treats the last primary window as complete, so it is exact
+on the grid only when \code{relative_obs_time} is a multiple of \code{pwindow},
+and it averages over the primary window for a study that adjusted the
+secondary interval only. With a weekly primary window, a collection
+window of 28 days and a delay of mean 4.6 days the latter puts the
+implied mean 0.8\% high at a growth rate of 0.05 and 2.6\% high at 0.2.
 \code{vignette("model")} gives the measurements.
 }
 

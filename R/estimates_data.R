@@ -57,7 +57,9 @@ as_epidist_estimates_data <- function(data, ...) {
 #'   * `4`: midpoint imputation with a uniform interval. The study placed the
 #'     primary event at the midpoint of its window and integrated the secondary
 #'     interval. Common where the primary event has a wide exposure window and
-#'     the secondary date is recorded precisely.
+#'     the secondary date is recorded precisely. With a wide primary window
+#'     the shortest delays are reported below zero, so the estimand puts mass
+#'     there. Set `delay_min` if the study dropped them.
 #'
 #'   Use code `3` for a study that midpointed the secondary interval and left
 #'   the primary alone. Anything more exotic must be approximated by whichever
@@ -170,9 +172,11 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  above). Defaults to 0.
 #'
 #' @param delay_min A string giving the column of `data` containing the
-#'  smallest delay the study counted, its left truncation point. Defaults to 0,
-#'  meaning the study counted every delay. Must be below the grid cutoff, and
-#'  no reported mean or quantile may fall below it.
+#'  smallest delay the study counted, its left truncation point, on the scale
+#'  the study reported. Defaults to 0, meaning the study counted every delay,
+#'  which for `cens_adjusted` code 4 includes any delay reported below zero.
+#'  Must be below the grid cutoff, and no reported mean or quantile may fall
+#'  below it.
 #'
 #' @param growth_rate A string giving the column of `data` containing the
 #'  exponential growth rate of primary events during the study period. Defaults

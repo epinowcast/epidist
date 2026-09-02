@@ -25,4 +25,11 @@ A group row, which stands for several summaries reported by one study, uses
 the joint likelihood of its members: \code{\link[=.meta_moment_pair_ll]{.meta_moment_pair_ll()}} for a mean and
 a standard deviation, and \code{\link[=.meta_quantile_set_ll]{.meta_quantile_set_ll()}} for a set of quantiles.
 }
+\details{
+A draw whose implied moments are not all finite, which an extreme delay
+distribution parameter can produce by overflowing the analytic kurtosis,
+is rejected with a log likelihood of \code{-Inf} rather than \code{NaN}, for every
+row that uses the moments. Matches the guard in \code{meta_family_lpmf} in
+\code{inst/stan/meta_model/functions.stan}.
+}
 \keyword{internal}

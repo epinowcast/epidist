@@ -52,8 +52,16 @@ normaliser is then the mass of the kept cells, which is
 \eqn{F(D) - F(L)} whenever \code{lower} falls on a grid boundary.
 
 Under an accrual design the cell masses are additionally weighted by the
-follow up available to the delay each cell records, which is the delay at
-its lower edge, before renormalising.
+follow up available to the cases each cell holds, before renormalising.
+A case is seen when its primary event fell early enough for its delay to
+complete before the calendar stop, and the primary event is known only to
+its window, so the follow up available to a delay of \eqn{x} from the start
+of that window is the accrual weight at \eqn{w_p \lfloor x / w_p \rfloor},
+a step function of \eqn{x}. Each cell is cut at the multiples of \code{pwindow}
+inside it and every piece is weighted by the follow up at the primary
+window it starts in. This is exact whenever \code{cutoff} is a multiple of
+\code{pwindow}, and reduces to the weight at the cell's lower edge when
+\code{pwindow} and \code{swindow} are equal.
 
 A cohort grid is normalised by the distribution function at its top, which
 is already known. An accrual grid reweights each cell first, so its
