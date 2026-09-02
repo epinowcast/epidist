@@ -269,22 +269,13 @@ Functions for building `newdata` to predict from
 
 Functions for postprocessing model output
 
-- [`add_mean_sd()`](https://epidist.epinowcast.org/reference/add_mean_sd.md)
-  : Add natural scale mean and standard deviation parameters
-- [`add_mean_sd(`*`<default>`*`)`](https://epidist.epinowcast.org/reference/add_mean_sd.default.md)
-  : Default method for add natural scale parameters
-- [`add_mean_sd(`*`<gamma_samples>`*`)`](https://epidist.epinowcast.org/reference/add_mean_sd.gamma_samples.md)
-  : Add natural scale mean and standard deviation parameters for a Gamma
-  model
-- [`add_mean_sd(`*`<lognormal_samples>`*`)`](https://epidist.epinowcast.org/reference/add_mean_sd.lognormal_samples.md)
-  : Add natural scale mean and standard deviation parameters for a
-  lognormal model
-- [`add_mean_sd(`*`<weibull_samples>`*`)`](https://epidist.epinowcast.org/reference/add_mean_sd.weibull_samples.md)
-  : Add natural scale mean and standard deviation parameters for a
-  Weibull model
-- [`predict_delay_parameters()`](https://epidist.epinowcast.org/reference/predict_delay_parameters.md)
-  [`predict_dpar()`](https://epidist.epinowcast.org/reference/predict_delay_parameters.md)
-  : Extract samples of the delay distribution parameters
+- [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
+  : Add natural scale summaries of the delay distribution
+- [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
+  [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
+  : Posterior draws of the delay distribution parameters
+- [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)
+  : Unique combinations of the predictors in a model
 
 ### Diagnostic functions
 

@@ -14,10 +14,41 @@
   arguments set the censoring windows, the relative observation time and
   the minimum delay. The result works with
   [`brms::posterior_epred()`](https://mc-stan.org/rstantools/reference/posterior_epred.html),
-  [`predict_delay_parameters()`](https://epidist.epinowcast.org/reference/predict_delay_parameters.md)
-  and the `tidybayes` draw functions. See
+  `predict_delay_parameters()` and the `tidybayes` draw functions. See
   [`?epidist_newdata`](https://epidist.epinowcast.org/reference/epidist_newdata.md)
   and [\#280](https://github.com/epinowcast/epidist/issues/280).
+- Added
+  [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
+  and
+  [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
+  which return posterior draws of the delay distribution parameters in
+  the long format used by `tidybayes`.
+- Added
+  [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
+  and
+  [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
+  which return posterior draws of the delay distribution parameters in
+  the long format used by `tidybayes`. The draws come back with `.row`,
+  `.chain`, `.iteration` and `.draw` columns alongside the columns of
+  `newdata`. `predict_delay_parameters()` and `predict_dpar()` are
+  removed in their favour. See
+  [\#471](https://github.com/epinowcast/epidist/issues/471).
+- Added
+  [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md),
+  which adds the mean, the standard deviation and quantiles of the delay
+  distribution implied by each draw of its parameters. It uses the
+  analytic solution for the lognormal, gamma and Weibull families, and
+  simulates from any other family, so it works for every family `brms`
+  can predict from. `add_mean_sd()` is removed in its favour. See
+  [\#471](https://github.com/epinowcast/epidist/issues/471).
+- Added
+  [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md),
+  which returns one row of the model data per unique combination of the
+  variables that predict the delay distribution parameters. Passing it
+  to
+  [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
+  draws each set of parameters once rather than once per observation.
+  See [\#471](https://github.com/epinowcast/epidist/issues/471).
 - `epidist` data objects now check themselves when they are modified.
   Every object also carries a shared `epidist_data` class with methods
   for subsetting, replacement,
@@ -361,9 +392,8 @@ likelihood calculations.
 - Fixed a bug where bounds were not set for mu parameters in custom
   families. See
   [\#549](https://github.com/epinowcast/epidist/issues/549).
-- Fixed a bug in
-  [`predict_delay_parameters()`](https://epidist.epinowcast.org/reference/predict_delay_parameters.md)
-  where it couldn’t detect brms families when used directly. See
+- Fixed a bug in `predict_delay_parameters()` where it couldn’t detect
+  brms families when used directly. See
   [\#549](https://github.com/epinowcast/epidist/issues/549).
 
 ## epidist 0.2.0

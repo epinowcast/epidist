@@ -54,7 +54,9 @@ The result is a plain
 Pass it to
 [`brms::posterior_epred()`](https://paulbuerkner.com/brms/reference/posterior_epred.brmsfit.html),
 [`brms::posterior_predict()`](https://paulbuerkner.com/brms/reference/posterior_predict.brmsfit.html),
-[`predict_delay_parameters()`](https://epidist.epinowcast.org/reference/predict_delay_parameters.md),
+[`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
+or
+[`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
 or to the `tidybayes` functions `add_epred_draws()` and
 `add_predicted_draws()`.
 

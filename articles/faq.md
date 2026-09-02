@@ -353,7 +353,10 @@ fit_ppc <- epidist(
 
 ``` r
 
-pred <- predict_delay_parameters(fit_ppc)
+pred <- fit_ppc |>
+  epidist_strata() |>
+  add_delay_parameter_draws(fit_ppc) |>
+  add_summaries()
 
 pred |>
   as.data.frame() |>
@@ -431,10 +434,10 @@ in standard R functions for some common likelihood families.
 
 Note that all families in `brms` are parameterised with some measure of
 centrality `mu` as their first parameter. This parameter does not
-necessarily correspond to the mean: hence the provision of a function
-[`add_mean_sd()`](https://epidist.epinowcast.org/reference/add_mean_sd.md)
-within `epidist` to add columns containing the natural scale mean and
-standard deviation to a `data.frame` of draws.
+necessarily correspond to the mean, hence the provision of a function
+[`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
+within `epidist` to add columns containing the natural scale mean,
+standard deviation and quantiles to a `data.frame` of draws.
 
 ## How can I generate predictions with my fitted `epidist` model?
 

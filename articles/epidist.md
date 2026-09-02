@@ -97,14 +97,13 @@ each event and truncated for the secondary event.
 
 We first assume that the reporting delay is lognormal with a mean log of
 1.6 and a log standard deviation of 0.5. Here we use the
-[`add_mean_sd()`](https://epidist.epinowcast.org/reference/add_mean_sd.md)
+[`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
 function to add the mean and sd to the `data.frame`.
 
 ``` r
 
-secondary_dist <- data.frame(mu = 1.6, sigma = 0.5)
-class(secondary_dist) <- c("lognormal_samples", class(secondary_dist))
-secondary_dist <- add_mean_sd(secondary_dist)
+secondary_dist <- data.frame(mu = 1.6, sigma = 0.5) |>
+  add_summaries(family = "lognormal")
 
 secondary_dist
 #>    mu sigma     mean       sd
@@ -677,8 +676,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     2955     2327
-#> sigma_Intercept    -0.76      0.05    -0.85    -0.65 1.00     3431     2544
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3416     2520
+#> sigma_Intercept    -0.75      0.05    -0.85    -0.65 1.00     2570     2109
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -777,8 +776,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.47     1.65 1.00     1859     1480
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2028     2428
+#> Intercept           1.55      0.05     1.46     1.65 1.00     1829     1763
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     1946     1911
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -793,40 +792,54 @@ on the log scale)) for the log sd.
 
 We can compare the two models by plotting the estimated parameters from
 the naive and marginal models. One way to do this is to use the
-[`predict_delay_parameters()`](https://epidist.epinowcast.org/reference/predict_delay_parameters.md)
-function to extract the posterior samples and then plot them. Internally
-this function uses can also add the mean and standard deviation
-parameters to the output so that it is easier to understand the
-distribution.
+[`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
+function to extract the posterior samples and then plot them. The
+[`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
+function then adds the mean and standard deviation of the delay
+distribution so that it is easier to understand.
 
 ``` r
 
+draw_parameters <- function(fit) {
+  draws <- fit |>
+    epidist_strata() |>
+    add_delay_parameter_draws(fit) |>
+    add_summaries() |>
+    ungroup()
+  return(draws)
+}
+
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
-  lapply(predict_delay_parameters) |>
+  lapply(draw_parameters) |>
   bind_rows(.id = "model") |>
-  mutate(model = factor(model, levels = c("naive", "marginal"))) |>
-  filter(index == 1)
+  mutate(model = factor(model, levels = c("naive", "marginal")))
 
 head(predicted_parameters)
-#>      model draw index       mu     sigma     mean       sd
-#> 1 marginal    1     1 1.515807 0.4625040 5.067067 2.474634
-#> 2 marginal    2     1 1.550165 0.4845111 5.299120 2.725798
-#> 3 marginal    3     1 1.553196 0.4804526 5.304807 2.703116
-#> 4 marginal    4     1 1.560978 0.4746206 5.331380 2.679804
-#> 5 marginal    5     1 1.520817 0.4562361 5.077876 2.442662
-#> 6 marginal    6     1 1.411026 0.4777265 4.595776 2.326956
+#> # A tibble: 6 × 17
+#>   model    delay_lwr relative_obs_time pwindow swindow delay_upr delay_min     n
+#>   <fct>        <dbl>             <dbl>   <dbl>   <dbl>     <dbl>     <dbl> <dbl>
+#> 1 marginal         8                10       1       1         9         0     3
+#> 2 marginal         8                10       1       1         9         0     3
+#> 3 marginal         8                10       1       1         9         0     3
+#> 4 marginal         8                10       1       1         9         0     3
+#> 5 marginal         8                10       1       1         9         0     3
+#> 6 marginal         8                10       1       1         9         0     3
+#> # ℹ 9 more variables: .row <int>, .chain <int>, .iteration <int>, .draw <int>,
+#> #   mu <dbl>, sigma <dbl>, mean <dbl>, sd <dbl>, delay <dbl>
 ```
 
 Note that by default
-[`predict_delay_parameters()`](https://epidist.epinowcast.org/reference/predict_delay_parameters.md)
-gives predictions for every row in the transformed data. Here as we only
-want posterior draws for the summary parameters we filter to the first
-row or the first data point. This prevents repeating the same prediction
-for each row. Another approach to this would be providing `newdata` to
-[`predict_delay_parameters()`](https://epidist.epinowcast.org/reference/predict_delay_parameters.md)
-representing the data we want to make predictions for.
-[`epidist_newdata()`](https://epidist.epinowcast.org/reference/epidist_newdata.md)
-builds that `newdata` for us.
+[`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
+gives draws for every row of the data passed to it. Neither model here
+has covariates, so
+[`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)
+reduces the data to the single row they all share. This prevents
+repeating the same draws for each row.
+
+Another approach to building the data to predict for is
+[`epidist_newdata()`](https://epidist.epinowcast.org/reference/epidist_newdata.md),
+which adds the response and observation process columns the models
+expect.
 
 We can now plot posterior draws for the summary parameters from the two
 models.
@@ -924,7 +937,7 @@ p_fitted_lognormal <- predicted_pmfs |>
   filter(model != "true") |>
   ggplot() +
   geom_line(
-    aes(x = x, y = y, col = model, group = draw),
+    aes(x = x, y = y, col = model, group = draw_id),
     alpha = 0.05, linewidth = 1
   ) +
   geom_line(

@@ -262,7 +262,9 @@ Click to expand for code to extract posterior draws
 <span></span>
 <span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">imap</a></span><span class="op">(</span><span class="va">fits</span>, <span class="kw">function</span><span class="op">(</span><span class="va">fit</span>, <span class="va">name</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">draws</span> <span class="op">&lt;-</span> <span class="va">fit</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="../reference/predict_delay_parameters.html">predict_delay_parameters</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="../reference/epidist_strata.html">epidist_strata</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="../reference/delay_parameter_draws.html">add_delay_parameter_draws</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="../reference/add_summaries.html">add_summaries</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span></span>
 <span>      cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mu"</span>, <span class="st">"sigma"</span>, <span class="st">"mean"</span>, <span class="st">"sd"</span><span class="op">)</span>,</span>

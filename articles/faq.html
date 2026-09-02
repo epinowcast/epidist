@@ -345,7 +345,10 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predict_delay_parameters.html">predict_delay_parameters</a></span><span class="op">(</span><span class="va">fit_ppc</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">fit_ppc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/epidist_strata.html">epidist_strata</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/delay_parameter_draws.html">add_delay_parameter_draws</a></span><span class="op">(</span><span class="va">fit_ppc</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/add_summaries.html">add_summaries</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pred</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -433,7 +436,7 @@ Here, we provide a table giving the correspondence between the distributional pa
 </tbody>
 </table>
 <p>Note that all families in <code>brms</code> are parameterised with some measure of centrality <code>mu</code> as their first parameter.
-This parameter does not necessarily correspond to the mean: hence the provision of a function <code><a href="../reference/add_mean_sd.html">add_mean_sd()</a></code> within <code>epidist</code> to add columns containing the natural scale mean and standard deviation to a <code>data.frame</code> of draws.</p>
+This parameter does not necessarily correspond to the mean, hence the provision of a function <code><a href="../reference/add_summaries.html">add_summaries()</a></code> within <code>epidist</code> to add columns containing the natural scale mean, standard deviation and quantiles to a <code>data.frame</code> of draws.</p>
 </div>
 <div class="section level2">
 <h2 id="how-can-i-generate-predictions-with-my-fitted-epidist-model">How can I generate predictions with my fitted <code>epidist</code> model?<a class="anchor" aria-label="anchor" href="#how-can-i-generate-predictions-with-my-fitted-epidist-model"></a>
