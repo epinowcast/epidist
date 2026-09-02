@@ -40,9 +40,7 @@ such as \code{ndraws} or \code{re_formula}.}
 \value{
 A \code{tibble} of posterior draws of the delay distribution parameters
 with \code{mean} and \code{sd} columns added, and one column per element of \code{probs}.
-Grouped by the columns of \code{newdata} and by \code{.row}, as
-\code{\link[=delay_parameter_draws]{delay_parameter_draws()}} returns it, so that \code{tidybayes} interval
-functions summarise each stratum. Use \code{\link[dplyr:group_by]{dplyr::ungroup()}} to drop that.
+Grouped as \code{\link[=delay_parameter_draws]{delay_parameter_draws()}} returns it.
 }
 \description{
 The usual last step of a fit. Builds one row per unique combination of the

@@ -121,9 +121,7 @@ add_delay_parameter_draws <- function(newdata, object, ...) {
 #' @family postprocess
 #' @returns A `tibble` of posterior draws of the delay distribution parameters
 #'  with `mean` and `sd` columns added, and one column per element of `probs`.
-#'  Grouped by the columns of `newdata` and by `.row`, as
-#'  [delay_parameter_draws()] returns it, so that `tidybayes` interval
-#'  functions summarise each stratum. Use [dplyr::ungroup()] to drop that.
+#'  Grouped as [delay_parameter_draws()] returns it.
 #'
 #' @seealso [delay_parameter_draws()] for the parameters alone,
 #'  [add_summaries()] to summarise draws you already have, and
