@@ -188,8 +188,10 @@ test_that("the multivariate family path agrees with the delta method", {
   ))
   expect_identical(simulated$type, linearised$type)
   expect_equal(simulated$value, linearised$value, tolerance = 0.02)
+  # Both routes report a covariance over the two summaries, one from the
+  # draws and one from the delta method, and fit them the same way.
   expect_equal(
-    sqrt(diag(.estimates_vcov(simulated)[["A"]])), linearised$se,
+    .estimates_vcov(simulated)[["A"]], .estimates_vcov(linearised)[["A"]],
     tolerance = 0.05
   )
 })
