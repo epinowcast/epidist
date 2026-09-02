@@ -12,7 +12,9 @@
 #'
 #' @param data An object to be converted to the class `epidist_marginal_model`
 #'
-#' @param ... Additional arguments passed to methods.
+#' @param ... Additional arguments passed to the methods. These set the
+#'  primary event distribution and other fitting options; see the methods
+#'  for the arguments they take.
 #'
 #' @family marginal_model
 #' @returns An object of class `epidist_marginal_model`.
@@ -71,6 +73,11 @@ as_epidist_marginal_model <- function(data, ...) {
 #'  This is passed as the `L` parameter to
 #'  [primarycensored::dpcens()].
 #'
+#' @param primary The distribution of the primary event within its censoring
+#'  window. `"uniform"`, the default, assumes it is equally likely at any
+#'  point. `"expgrowth"` tilts it, with the growth rate estimated as the
+#'  `pgrowth` distributional parameter.
+#'
 #' @param ... Not used in this method.
 #'
 #' @method as_epidist_marginal_model epidist_linelist_data
@@ -90,6 +97,7 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   data,
   obs_time_threshold = 2,
   weight = NULL,
+  primary = .primary_choices(),
   delay_min = NULL,
   ...
 ) {
@@ -102,7 +110,7 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
     delay_min = delay_min
   )
 
-  data <- new_epidist_marginal_model(data)
+  data <- new_epidist_marginal_model(data, primary = match.arg(primary))
   assert_epidist(data)
   return(data)
 }
@@ -138,6 +146,7 @@ as_epidist_marginal_model.epidist_aggregate_data <- function(
   data,
   obs_time_threshold = 2,
   delay_min = NULL,
+  primary = .primary_choices(),
   ...
 ) {
   return(as_epidist_marginal_model.epidist_linelist_data(
@@ -145,6 +154,7 @@ as_epidist_marginal_model.epidist_aggregate_data <- function(
     obs_time_threshold = obs_time_threshold,
     weight = "n",
     delay_min = delay_min,
+    primary = match.arg(primary),
     ...
   ))
 }
@@ -152,10 +162,16 @@ as_epidist_marginal_model.epidist_aggregate_data <- function(
 #' Class constructor for `epidist_marginal_model` objects
 #'
 #' @param data A data.frame to convert
+#' @param primary The primary event distribution, `"uniform"` or
+#'  `"expgrowth"`.
 #' @returns An object of class `epidist_marginal_model`
 #' @family marginal_model
 #' @export
-new_epidist_marginal_model <- function(data) {
+new_epidist_marginal_model <- function(
+  data,
+  primary = .primary_choices()
+) {
+  attr(data, "primary") <- match.arg(primary)
   return(.new_epidist_data(data, "epidist_marginal_model"))
 }
 
@@ -220,6 +236,7 @@ epidist_family_model.epidist_marginal_model <- function(
   family,
   ...
 ) {
+  family <- .add_primary_dpars(family, data)
   custom_family <- brms::custom_family(
     paste0("marginal_", family$family),
     dpars = family$dpars,
@@ -246,6 +263,7 @@ epidist_family_model.epidist_marginal_model <- function(
     posterior_predict = epidist_gen_posterior_predict(family),
     posterior_epred = epidist_gen_posterior_epred(family)
   )
+  custom_family$primary <- family$primary
   return(custom_family)
 }
 
@@ -295,6 +313,7 @@ epidist_formula_model.epidist_marginal_model <- function(
 #' @param data The data to transform
 #' @param family The epidist family object specifying the distribution
 #' @param formula The model formula
+#'
 #' @param ... Additional arguments passed to methods
 #'
 #' @method epidist_transform_data_model epidist_marginal_model
@@ -312,7 +331,7 @@ epidist_transform_data_model.epidist_marginal_model <- function(
   required_cols <- .marginal_required_cols()
   trans_data <- data |>
     .summarise_n_by_formula(by = required_cols, formula = formula) |>
-    new_epidist_marginal_model()
+    new_epidist_marginal_model(primary = .primary_dist(data))
   assert_epidist(trans_data)
 
   .inform_data_summarised(data, trans_data, c(required_cols))
@@ -336,7 +355,8 @@ epidist_stancode.epidist_marginal_model <- function(
   stanvars_version <- .version_stanvar()
 
   stanvars_functions <- .family_functions_stanvar(
-    file.path("marginal_model", "functions.stan"), family, "marginal_"
+    file.path("marginal_model", "functions.stan"), family, "marginal_",
+    primary = .primary_spec(.primary_dist(data))
   )
 
   stanvars_parameters <- brms::stanvar(

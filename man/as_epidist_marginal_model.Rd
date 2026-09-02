@@ -9,7 +9,9 @@ as_epidist_marginal_model(data, ...)
 \arguments{
 \item{data}{An object to be converted to the class \code{epidist_marginal_model}}
 
-\item{...}{Additional arguments passed to methods.}
+\item{...}{Additional arguments passed to the methods. These set the
+primary event distribution and other fitting options; see the methods
+for the arguments they take.}
 }
 \value{
 An object of class \code{epidist_marginal_model}.

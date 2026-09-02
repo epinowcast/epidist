@@ -4,10 +4,13 @@
 \alias{new_epidist_marginal_model}
 \title{Class constructor for \code{epidist_marginal_model} objects}
 \usage{
-new_epidist_marginal_model(data)
+new_epidist_marginal_model(data, primary = .primary_choices())
 }
 \arguments{
 \item{data}{A data.frame to convert}
+
+\item{primary}{The primary event distribution, \code{"uniform"} or
+\code{"expgrowth"}.}
 }
 \value{
 An object of class \code{epidist_marginal_model}

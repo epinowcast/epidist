@@ -4,10 +4,15 @@
 \alias{new_epidist_latent_model}
 \title{Class constructor for \code{epidist_latent_model} objects}
 \usage{
-new_epidist_latent_model(data, ...)
+new_epidist_latent_model(data, primary = .primary_choices(), ...)
 }
 \arguments{
 \item{data}{An object to be set with the class \code{epidist_latent_model}}
+
+\item{primary}{The distribution of the primary event within its censoring
+window. \code{"uniform"}, the default, assumes it is equally likely at any
+point. \code{"expgrowth"} tilts it, with the growth rate estimated as the
+\code{pgrowth} distributional parameter.}
 
 \item{...}{Additional arguments passed to methods.}
 }

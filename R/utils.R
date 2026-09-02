@@ -17,8 +17,9 @@
 #' Build the Stan functions block shared by the marginal and meta models
 #'
 #' Both models read a `functions.stan` chunk with the same placeholders
-#' (`family`, `dist_id`, `dpars_A`, `dpars_B`, `primary_id`), filled in with
-#' the target distribution's details. Used within
+#' (`family`, `dist_id`, `dpars_A`, `dpars_B`, and the pair
+#' `primary_id, primary_params`), filled in with the target distribution's
+#' details and the primary event distribution. Used within
 #' [epidist_stancode()] methods for the marginal and meta models, which
 #' differ only in the chunk path, the family name prefix, and any further
 #' placeholders they need substituted.
@@ -29,6 +30,9 @@
 #'
 #' @param family_prefix The model specific prefix stripped from
 #'  `family$name`, for example `"marginal_"` or `"meta_"`.
+#'
+#' @param primary A primary event registry entry, as returned by
+#'  [.primary_spec()]. Defaults to the uniform primary event.
 #'
 #' @param extra A named character vector of further placeholder
 #'  substitutions, applied after the shared ones.
@@ -41,6 +45,7 @@
   chunk_path,
   family,
   family_prefix,
+  primary = .primary_spec("uniform"),
   extra = character()
 ) {
   stanvars_functions <- brms::stanvar(
@@ -56,7 +61,7 @@
     dist_id = as.character(dist_id),
     dpars_A = toString(paste0("real ", family$dpars)),
     dpars_B = family$param,
-    primary_id = "1",
+    "primary_id, primary_params" = .primary_stancode_args(primary),
     extra
   )
 
@@ -518,4 +523,22 @@
     do.call(Sys.setenv, as.list(vars[!unset]))
   }
   return(invisible(NULL))
+}
+
+#' The primary event distribution of an `epidist` object
+#'
+#' Returns `"uniform"` when the attribute is absent, so objects created before
+#' this was configurable keep their behaviour.
+#'
+#' @param data An `epidist` data object.
+#'
+#' @returns The primary event distribution as a string.
+#'
+#' @keywords internal
+.primary_dist <- function(data) {
+  primary <- attr(data, "primary")
+  if (is.null(primary)) {
+    return("uniform")
+  }
+  return(primary)
 }

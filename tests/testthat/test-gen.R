@@ -315,3 +315,84 @@ test_that("the generic log likelihood rejects a delay beyond the observation tim
     "greater than the relative observation time"
   )
 })
+
+test_that("the post-processing uses the primary event distribution of the fit", { # nolint: line_length_linter.
+  # A fit made with an exponentially growing primary event would otherwise be
+  # post-processed as though the event were uniform.
+  prep <- structure(
+    list(
+      data = list(
+        Y = 5, vreal1 = 12, vreal2 = 1, vreal3 = 1, vreal4 = 6, vreal5 = 2
+      ),
+      dpars = list(
+        mu = matrix(1.5, nrow = 3, ncol = 1),
+        sigma = matrix(0.5, nrow = 3, ncol = 1),
+        pgrowth = matrix(c(0.2, 0.4, 0.6), nrow = 3, ncol = 1)
+      ),
+      ndraws = 3,
+      nobs = 1,
+      family = list(primary = "expgrowth")
+    ),
+    class = "brmsprep"
+  )
+
+  log_lik <- epidist_gen_log_lik(lognormal())(i = 1, prep)
+
+  expected <- vapply(
+    seq_len(prep$ndraws),
+    function(draw) {
+      return(primarycensored::dpcens(
+        x = 5,
+        pdist = stats::plnorm,
+        pwindow = 1,
+        swindow = 1,
+        L = 2,
+        D = 12,
+        dprimary = primarycensored::dexpgrowth,
+        dprimary_args = list(r = prep$dpars$pgrowth[draw, 1]),
+        log = TRUE,
+        meanlog = 1.5,
+        sdlog = 0.5
+      ))
+    },
+    numeric(1)
+  )
+  expect_equal(log_lik, expected, tolerance = 1e-8)
+
+  # Dropping the primary event distribution from the fit must change the
+  # answer, otherwise this test would pass with it ignored.
+  prep$family <- list()
+  expect_false(isTRUE(all.equal(
+    epidist_gen_log_lik(lognormal())(i = 1, prep),
+    expected
+  )))
+})
+
+test_that("posterior predictions use the primary event distribution", {
+  prep <- structure(
+    list(
+      data = list(
+        Y = 5, vreal1 = 30, vreal2 = 1, vreal3 = 1, vreal4 = 6, vreal5 = 0
+      ),
+      dpars = list(
+        mu = matrix(1.5, nrow = 50, ncol = 1),
+        sigma = matrix(0.5, nrow = 50, ncol = 1),
+        pgrowth = matrix(5, nrow = 50, ncol = 1)
+      ),
+      ndraws = 50,
+      nobs = 1,
+      family = list(primary = "expgrowth")
+    ),
+    class = "brmsprep"
+  )
+
+  # A steep growth rate puts the primary event at the end of its window, so
+  # the sampler must be given it rather than a uniform draw.
+  set.seed(101)
+  predict_fn <- epidist_gen_posterior_predict(lognormal())
+  growing <- predict_fn(i = 1, prep)
+  prep$family <- list()
+  set.seed(101)
+  uniform <- predict_fn(i = 1, prep)
+  expect_false(isTRUE(all.equal(mean(growing), mean(uniform))))
+})

@@ -33,6 +33,11 @@ as_epidist_latent_model <- function(data, ...) {
 #'   observations with primary and secondary event times. See
 #'   [as_epidist_linelist_data()] for details on creating this object.
 #'
+#' @param primary The distribution of the primary event within its
+#'  censoring window. `"uniform"`, the default, assumes it is equally
+#'  likely at any point. `"expgrowth"` tilts it, with the growth rate
+#'  estimated as the `pgrowth` distributional parameter.
+#'
 #' @param ... Not used in this method.
 #'
 #' @method as_epidist_latent_model epidist_linelist_data
@@ -51,8 +56,13 @@ as_epidist_latent_model <- function(data, ...) {
 #'     sdate_lwr = "date_of_sample_tested"
 #'   ) |>
 #'   as_epidist_latent_model()
-as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
+as_epidist_latent_model.epidist_linelist_data <- function(
+  data,
+  primary = .primary_choices(),
+  ...
+) {
   assert_epidist.epidist_linelist_data(data)
+  primary <- match.arg(primary)
 
   data <- data |>
     mutate(
@@ -72,7 +82,7 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
       delay = .data$stime_lwr - .data$ptime_lwr,
       .row_id = dplyr::row_number()
     )
-  data <- new_epidist_latent_model(data)
+  data <- new_epidist_latent_model(data, primary = primary)
   assert_epidist(data)
   return(data)
 }
@@ -87,6 +97,12 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
 #' observations before fitting the latent model.
 #'
 #' @param data An `epidist_aggregate_data` object
+#'
+#' @param primary The distribution of the primary event within its censoring
+#'  window. `"uniform"`, the default, assumes it is equally likely at any
+#'  point. `"expgrowth"` tilts it, with the growth rate estimated as the
+#'  `pgrowth` distributional parameter.
+#'
 #' @param ... Not used in this method.
 #' @method as_epidist_latent_model epidist_aggregate_data
 #' @family latent_model
@@ -103,14 +119,25 @@ as_epidist_latent_model.epidist_linelist_data <- function(data, ...) {
 #'     n = "n"
 #'   ) |>
 #'   as_epidist_latent_model()
-as_epidist_latent_model.epidist_aggregate_data <- function(data, ...) {
+as_epidist_latent_model.epidist_aggregate_data <- function(
+  data,
+  primary = .primary_choices(),
+  ...
+) {
+  primary <- match.arg(primary)
   linelist_data <- as_epidist_linelist_data.epidist_aggregate_data(data)
-  return(as_epidist_latent_model(linelist_data))
+  return(as_epidist_latent_model(linelist_data, primary = primary))
 }
 
 #' Class constructor for `epidist_latent_model` objects
 #'
 #' @param data An object to be set with the class `epidist_latent_model`
+#'
+#' @param primary The distribution of the primary event within its censoring
+#'  window. `"uniform"`, the default, assumes it is equally likely at any
+#'  point. `"expgrowth"` tilts it, with the growth rate estimated as the
+#'  `pgrowth` distributional parameter.
+#'
 #'
 #' @param ... Additional arguments passed to methods.
 #'
@@ -118,7 +145,12 @@ as_epidist_latent_model.epidist_aggregate_data <- function(data, ...) {
 #'
 #' @family latent_model
 #' @export
-new_epidist_latent_model <- function(data, ...) {
+new_epidist_latent_model <- function(
+  data,
+  primary = .primary_choices(),
+  ...
+) {
+  attr(data, "primary") <- match.arg(primary)
   return(.new_epidist_data(data, "epidist_latent_model"))
 }
 
@@ -169,6 +201,7 @@ epidist_family_model.epidist_latent_model <- function(
   family,
   ...
 ) {
+  family <- .add_primary_dpars(family, data)
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
     paste0("latent_", family$family),
@@ -198,6 +231,7 @@ epidist_family_model.epidist_latent_model <- function(
     posterior_epred = epidist_gen_posterior_epred(family)
   )
   custom_family$reparm <- family$reparm
+  custom_family$primary <- family$primary
   return(custom_family)
 }
 
@@ -355,6 +389,24 @@ epidist_stancode.epidist_latent_model <- function(
     fixed = TRUE
   )
 
+  # A uniform primary event contributes a constant, which Stan can drop.
+  spec <- .primary_spec(.primary_dist(data))
+  primary_term <- if (length(spec$dpars) == 0) {
+    "0"
+  } else {
+    paste0(
+      "dot_primary_raw_lpdf(pwindow_raw | ",
+      .primary_stancode_args(spec), ", pbound)"
+    )
+  }
+
+  stanvars_functions[[1]]$scode <- gsub(
+    "primary_lpdf_term",
+    primary_term,
+    stanvars_functions[[1]]$scode,
+    fixed = TRUE
+  )
+
   stanvars_data <- stanvar(
     block = "data",
     scode = "int wN;",
@@ -381,6 +433,21 @@ epidist_stancode.epidist_latent_model <- function(
     stanvars_functions +
     stanvars_data +
     stanvars_parameters
+
+  if (length(spec$dpars) > 0) {
+    stanvars_all <- stanvars_all +
+      stanvar(
+        block = "functions",
+        scode = paste0(
+          primarycensored::pcd_load_stan_functions(
+            "primary_lpdf",
+            dependencies = TRUE
+          ),
+          "\n",
+          .stan_chunk(file.path("latent_model", "primary.stan"))
+        )
+      )
+  }
 
   return(stanvars_all)
 }

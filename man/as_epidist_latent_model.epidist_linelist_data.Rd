@@ -4,12 +4,17 @@
 \alias{as_epidist_latent_model.epidist_linelist_data}
 \title{The latent model method for \code{epidist_linelist_data} objects}
 \usage{
-\method{as_epidist_latent_model}{epidist_linelist_data}(data, ...)
+\method{as_epidist_latent_model}{epidist_linelist_data}(data, primary = .primary_choices(), ...)
 }
 \arguments{
 \item{data}{An \code{epidist_linelist_data} object containing individual-level
 observations with primary and secondary event times. See
 \code{\link[=as_epidist_linelist_data]{as_epidist_linelist_data()}} for details on creating this object.}
+
+\item{primary}{The distribution of the primary event within its
+censoring window. \code{"uniform"}, the default, assumes it is equally
+likely at any point. \code{"expgrowth"} tilts it, with the growth rate
+estimated as the \code{pgrowth} distributional parameter.}
 
 \item{...}{Not used in this method.}
 }
