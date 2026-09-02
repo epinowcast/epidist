@@ -351,3 +351,122 @@ test_that("as_epidist_multivariate round trips draws of a fitted model", {
     tolerance = 0.1
   )
 })
+
+test_that("epidist.epidist_meta_model Stan code has no syntax errors with an expgrowth primary event", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  model <- suppressMessages(as_epidist_meta_model(
+    sim_obs, estimates = sim_estimates, primary = "expgrowth"
+  ))
+  stancode <- suppressMessages(epidist(
+    data = model,
+    formula = bf(mu ~ 1, pgrowth ~ 1),
+    fn = brms::make_stancode
+  ))
+  # The growth rate is passed to the individual level likelihood, and the
+  # summary rows keep their growth_rate slot.
+  expect_match(stancode, "2, {pgrowth}", fixed = TRUE)
+  expect_match(stancode, "pgrowth[n], vint1[n]", fixed = TRUE)
+  mod <- cmdstanr::cmdstan_model(
+    stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
+  )
+  expect_true(mod$check_syntax())
+})
+
+test_that("epidist.epidist_meta_model with an expgrowth primary event recovers the marginal model fit", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  # Individual level rows of the meta model share the marginal likelihood, so
+  # with the same data, prior and seed the two fits should agree on the delay
+  # and on the growth rate.
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  growth_rate <- 0.5
+  obs <- simulate_exponential_cases(
+    r = growth_rate, sample_size = 500, seed = 101
+  ) |>
+    simulate_secondary(meanlog = meanlog, sdlog = sdlog) |>
+    simulate_dates(outbreak_start_date = as.Date("2024-01-01"))
+  linelist <- suppressMessages(as_epidist_linelist_data(obs))
+  growth_prior <- brms::prior(
+    normal(0.5, 0.1), class = "Intercept", dpar = "pgrowth"
+  )
+  fit_meta_growth <- suppressMessages(epidist(
+    data = as_epidist_meta_model(linelist, primary = "expgrowth"),
+    formula = bf(mu ~ 1, pgrowth ~ 1),
+    prior = growth_prior,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  ))
+  fit_marginal_growth <- suppressMessages(epidist(
+    data = as_epidist_marginal_model(linelist, primary = "expgrowth"),
+    formula = bf(mu ~ 1, pgrowth ~ 1),
+    prior = growth_prior,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  ))
+  expect_convergence(fit_meta_growth)
+  expect_true(all(fit_meta_growth$data$obs_type == 1L))
+
+  set.seed(1)
+  meta_draws <- delay_parameter_draws(fit_meta_growth)
+  marginal_draws <- delay_parameter_draws(fit_marginal_growth)
+  expect_true(hasName(meta_draws, "pgrowth"))
+  expect_equal(mean(meta_draws$mu), mean(marginal_draws$mu), tolerance = 0.05)
+  expect_equal(
+    mean(meta_draws$sigma), mean(marginal_draws$sigma),
+    tolerance = 0.05
+  )
+  expect_equal(
+    mean(meta_draws$pgrowth), mean(marginal_draws$pgrowth),
+    tolerance = 0.05
+  )
+  expect_equal(mean(meta_draws$mu), meanlog, tolerance = 0.1)
+  expect_equal(mean(meta_draws$sigma), sdlog, tolerance = 0.15)
+  expect_equal(mean(meta_draws$pgrowth), growth_rate, tolerance = 0.2)
+
+  # The R log likelihood of the fit uses the fitted growth rate for its
+  # individual level rows.
+  prep <- brms::prepare_predictions(fit_meta_growth, ndraws = 4)
+  log_lik <- brms::log_lik(fit_meta_growth, ndraws = 4)
+  rows <- seq_len(min(3L, prep$nobs))
+  expected <- vapply(
+    rows,
+    function(i) {
+      mu <- brms::get_dpar(prep, "mu", i = i)
+      sdlog_draw <- brms::get_dpar(prep, "sigma", i = i)
+      pgrowth <- brms::get_dpar(prep, "pgrowth", i = i)
+      lpdf <- vapply(
+        seq_len(prep$ndraws),
+        function(draw) {
+          return(primarycensored::dpcens(
+            x = prep$data$Y[i],
+            pdist = stats::plnorm,
+            pwindow = prep$data$vreal2[i],
+            swindow = prep$data$vreal3[i],
+            L = prep$data$vreal5[i],
+            D = prep$data$vreal1[i],
+            dprimary = primarycensored::dexpgrowth,
+            dprimary_args = list(r = pgrowth[draw]),
+            log = TRUE,
+            meanlog = mu[draw],
+            sdlog = sdlog_draw[draw]
+          ))
+        },
+        numeric(1)
+      )
+      return(lpdf * prep$data$weights[i])
+    },
+    numeric(4)
+  )
+  expect_equal(unname(log_lik[, rows]), unname(expected), tolerance = 1e-6)
+})
