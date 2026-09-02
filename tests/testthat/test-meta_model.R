@@ -915,6 +915,68 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation with gro
   expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.04)
 })
 
+test_that(".meta_implied_moments matches Monte Carlo accrual truncation with unequal windows", { # nolint: line_length_linter.
+  # The follow up available to a case depends on the primary window it fell
+  # in, so within a reporting cell wider than the primary window the accrual
+  # weight steps down at every multiple of pwindow, and a cell narrower than
+  # the primary window shares one weight with its neighbours. A weekly
+  # reported secondary date against a daily primary date at an outbreak
+  # growth rate is where the lower edge weight fails worst.
+  set.seed(123)
+  mean <- 4.6
+  sd <- 2.4
+  var_log <- log1p((sd / mean)^2)
+  args <- list(meanlog = log(mean) - var_log / 2, sdlog = sqrt(var_log))
+  window <- 28
+  n_sim <- 2e6
+  designs <- expand.grid(
+    growth_rate = c(0.05, 0.2), pwindow = c(1, 7), swindow = c(7, 1)
+  )
+  designs <- designs[designs$pwindow != designs$swindow, ]
+  for (row in seq_len(nrow(designs))) {
+    growth_rate <- designs$growth_rate[row]
+    pwindow <- designs$pwindow[row]
+    swindow <- designs$swindow[row]
+    moments <- .meta_implied_moments(
+      "plnorm", args,
+      cutoff = window, pwindow = pwindow, swindow = swindow,
+      trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = growth_rate,
+      trunc_design = 1L
+    )
+    ptime <- sim_accrual_ptime(n_sim, window, growth_rate)
+    delay <- rlnorm(n_sim, args$meanlog, args$sdlog)
+    keep <- ptime + delay <= window
+    ptime <- ptime[keep]
+    delay <- delay[keep]
+    if (pwindow < swindow) {
+      # Daily date differencing, then reported by week.
+      daily <- floor(ptime + delay) - floor(ptime)
+      obs <- swindow * floor(daily / swindow)
+    } else {
+      # A daily secondary date against the start of the primary week.
+      obs <- floor(ptime + delay) - pwindow * floor(ptime / pwindow)
+    }
+    expect_equal(moments[["mean"]], mean(obs), tolerance = 0.02)
+    expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.02)
+  }
+})
+
+test_that(".meta_grid_pmf reduces to the lower edge accrual weight for equal windows", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  boundary <- seq(0, 20)
+  cdf <- .meta_pcens_cdf(boundary, "plnorm", args, 1, 0.1)
+  expected <- pmax(diff(cdf), 0) *
+    .meta_accrual_weight(boundary[-length(boundary)], 20, 0.1)
+  expect_equal(
+    .meta_grid_pmf(
+      "plnorm", args,
+      cutoff = 20, pwindow = 1, swindow = 1, growth_rate = 0.1, accrual = 1L
+    ),
+    expected / sum(expected),
+    tolerance = 1e-12
+  )
+})
+
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation of a continuous estimand", { # nolint: line_length_linter.
   set.seed(122)
   args <- list(meanlog = 1.6, sdlog = 0.5)
