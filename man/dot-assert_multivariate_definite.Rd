@@ -2,7 +2,7 @@
 % Please edit documentation in R/multivariate.R
 \name{.assert_multivariate_definite}
 \alias{.assert_multivariate_definite}
-\title{Check that a covariance matrix has a Cholesky factor}
+\title{Check that a covariance matrix has a usable Cholesky factor}
 \usage{
 .assert_multivariate_definite(vcov)
 }
@@ -17,6 +17,9 @@ A set of quantities that are deterministic functions of fewer underlying
 parameters has a covariance of the rank of those parameters, not of its own
 dimension. Five summaries of a two parameter fit are the common case. The
 message says so, because the alternative reading, that a column is constant
-or repeated, is usually not what happened.
+or repeated, is usually not what happened. The rank is judged on the
+correlation matrix against \code{\link[=.multivariate_eigen_floor]{.multivariate_eigen_floor()}}, because a
+covariance that is singular only up to the curvature of the map from
+parameters to summaries still has a Cholesky factor.
 }
 \keyword{internal}

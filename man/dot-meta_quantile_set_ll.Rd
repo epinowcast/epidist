@@ -4,10 +4,18 @@
 \alias{.meta_quantile_set_ll}
 \title{The joint log likelihood of a set of quantiles from one study}
 \usage{
-.meta_quantile_set_ll(y, cum_count, study_n, dist, args, slots)
+.meta_quantile_set_ll(
+  y,
+  cum_count,
+  study_n,
+  dist,
+  args,
+  slots,
+  p = slots$group_p
+)
 }
 \arguments{
-\item{y}{A vector of reported quantile values in increasing order.}
+\item{y}{A vector of reported quantile values in non decreasing order.}
 
 \item{cum_count}{A vector of cumulative counts from
 \code{\link[=.meta_quantile_counts]{.meta_quantile_counts()}}.}
@@ -19,24 +27,35 @@
 \item{args}{A named list of distribution parameters.}
 
 \item{slots}{The output of \code{\link[=.meta_row_slots]{.meta_row_slots()}}.}
+
+\item{p}{The probabilities the quantiles were reported at, in the order
+of \code{y}. Only used for a single quantile of integer day delays.}
 }
 \value{
 A log probability mass.
 }
 \description{
 Quantiles reported at probabilities \eqn{p_1 < \dots < p_k} with values
-\eqn{y_1 < \dots < y_k} split the delay axis into the cells
+\eqn{y_1 \le \dots \le y_k} split the delay axis into the cells
 \eqn{(0, y_1], \dots, (y_{k-1}, y_k], (y_k, \infty)}, and the number of
 delays falling in each cell is multinomial with probabilities given by the
 increments of the implied distribution function. This is the joint version
 of the empirical distribution function likelihood used for a single
-quantile, and it reduces to the exact binomial when only one quantile is
-reported. Fitting each quantile separately ignores the positive correlation
-between the empirical distribution function at different points, which
-over weights a study reporting a median with an interquartile range.
+quantile, and it reduces to the exact binomial when only one quantile of a
+continuous estimand is reported. Fitting each quantile separately ignores
+the positive correlation between the empirical distribution function at
+different points, which over weights a study reporting a median with an
+interquartile range.
 }
 \details{
+Two quantiles reported at the same value are two constraints on the
+empirical distribution function at one cell, so they are merged into that
+cell with their combined count. A single quantile of integer day delays
+is fitted by \code{\link[=.meta_grid_crossing_ll]{.meta_grid_crossing_ll()}} instead, because the multinomial
+on the continuity corrected distribution function keeps sharpening with
+the study size while a rounded quantile stops moving.
+
 A cell whose implied probability underflows to zero while the study saw
-delays in it gives a log likelihood of \code{-Inf}, which rejects the draw.
+delays in it is floored at \code{\link[=.meta_cell_floor]{.meta_cell_floor()}}.
 }
 \keyword{internal}

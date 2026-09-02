@@ -185,6 +185,15 @@ See #620.
 - The meta model supports left truncation through `delay_min`, on both individual level rows and summary rows.
 A study that only counted delays above a minimum has every implied summary conditioned on the delay exceeding it.
 See #596 and #620.
+- A single quantile reported by a study that summarised integer day delays is now fitted as the cell in which the empirical distribution function crossed its probability, the exact event a rounded quantile stands for, rather than with a multinomial on the continuity corrected grid whose claimed precision keeps growing with the sample size.
+Two quantiles reported at the same value are accepted and merged into one cell, and `as_epidist_estimates_data()` warns when a large study reports several such quantiles, whose joint likelihood is still overconfident.
+See #620.
+- A multinomial cell that underflows is floored rather than sent to zero, so the R and Stan log likelihoods are both finite for a badly misfitting draw and `loo()` keeps working.
+See #620.
+- `as_epidist_estimates_data()` refuses more summaries from a fitted family than it has parameters, and a covariance over reported summaries that is singular to within a relative eigenvalue of 1e-4, because such a row charges any error in the implied summaries against a vanishing eigenvalue.
+See #620.
+- `as_epidist_estimates_data()` warns when the relative standard error of a reported standard deviation, at the kurtosis its mean and standard deviation imply under a lognormal delay, exceeds a quarter, which is where the normal sampling likelihood of a standard deviation stops being calibrated.
+See #620.
 - The meta model takes a `primary` argument for its individual level rows, as the marginal model does.
 With `primary = "expgrowth"` the growth rate of primary events is estimated as the `pgrowth` distributional parameter.
 Summary rows are unchanged and keep the `growth_rate` metadata of their study as a known tilt.
