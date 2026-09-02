@@ -386,18 +386,26 @@ which tends to $A - d$ as $r$ tends to zero.
 This is the dynamical bias of @park2024estimating.
 For a long window and a growing epidemic it approaches an exponential tilt of the delay distribution by $\exp(-r d)$.
 The estimand is then $f(d; \theta) w(d)$ renormalised over $[0, A]$, where $A$ is the length of the collection window rather than a cohort cutoff.
-The weight multiplies the cell masses of Equation \@ref(eq:meta-grid) at each bin's delay value, and the quadrature used for Equations \@ref(eq:meta-trunc-moments) and \@ref(eq:meta-uniform-moments) at each node's midpoint, renormalising in both cases.
-Equation \@ref(eq:meta-accrual) is the smooth average of the follow up actually available, which is a step function of the primary event's censoring window.
-It is exact for a study that adjusted for censoring, where $d$ is the underlying delay, and exact on the grid of Equation \@ref(eq:meta-grid) when $w_p = w_s$ and both divide $A$, because the calendar stop and the date differencing then discretise together.
+The weight multiplies the quadrature used for Equations \@ref(eq:meta-trunc-moments) and \@ref(eq:meta-uniform-moments) at each node's midpoint and renormalises.
+It is exact for a study that adjusted for censoring, where $d$ is the underlying delay.
 For Equation \@ref(eq:meta-uniform-moments) the weighted quantity is $\tau^\star + U$ rather than the time from the primary event's window, so $w$ is evaluated at $d - w_p / 2$ to average the primary offset back out.
 
-Where $w_p$ and $w_s$ differ the weight on the grid is not exact, and the residual is not negligible.
-It is applied at the delay a cell records, which sits half a secondary window below the delay the cell holds on average and half a primary window above the time from the primary event itself, so the two only cancel when the windows are equal.
-Take a lognormal delay of mean 4.6 days and standard deviation 2.4, a collection window of $A = 28$ days and a growth rate of $r = 0.05$.
-Refitting the mean and standard deviation such a study would report recovers the delay standard deviation 5.9% high with a weekly primary and a daily secondary window, and the delay mean 4.8% high with the windows the other way round.
-Under a cohort design the same window combinations recover both to within 1%, so this belongs to the accrual weight rather than to the grid.
-Equation \@ref(eq:meta-uniform-moments) carries the same limitation in milder form, because the follow up available to a primary event is only known to within its own window and $w_p / 2$ is the average of it.
-At $w_p = 7$ the recovered standard deviation is 3.1% high, and the estimand degrades sharply as $w_p$ grows towards the length of the collection window.
+On the grid of Equation \@ref(eq:meta-grid) the follow up actually available is a step function rather than the smooth Equation \@ref(eq:meta-accrual).
+A case is seen when its primary event fell early enough for its delay to complete before the calendar stop, and the primary event is known only to its window, so a delay of $x$ from the start of that window has follow up $w(w_p \lfloor x / w_p \rfloor)$ whenever $A$ is a multiple of $w_p$.
+Each cell of the grid is therefore cut at the multiples of $w_p$ inside it, every piece is weighted by the follow up at the primary window it starts in, and the pieces are summed back into their cell before renormalising.
+When $w_p = w_s$ this is the weight at the cell's lower edge.
+When $w_s > w_p$, as for a daily primary date reported by week, the weight steps down inside each cell, and when $w_p > w_s$ every cell inside one primary window shares its weight.
+Weighting each cell at its lower edge instead is exact only when the windows are equal.
+Take a lognormal delay of mean 4.6 days and standard deviation 2.4, a collection window of $A = 28$ days, a daily primary and a weekly secondary window.
+Against a simulation of that study the lower edge weight puts the implied mean 12% low at $r = 0.05$ and 36% low at $r = 0.2$, and the piecewise weight recovers both to within 0.2%.
+With the windows the other way round the lower edge weight is 2.7% high on the mean at $r = 0.2$, and the piecewise weight is again within 0.1%.
+
+Two residuals remain.
+The piecewise weight treats the last primary window as complete, so when $A$ is not a multiple of $w_p$ the primary events it cuts short are overweighted.
+With a weekly primary window and $A = 30$ the implied mean is 1% low at $r = 0.05$ and 5% low at $r = 0.2$ for a daily secondary window, and 10% and 34% low for a weekly one, where the grid also stops at the last full week.
+Use a collection window that is a multiple of the primary window where the study allows it.
+Equation \@ref(eq:meta-uniform-moments) keeps the smooth weight, because the follow up available to a primary event is only known to within its own window and $w_p / 2$ is the average of it.
+At $w_p = 7$ its implied mean is 0.8% high at $r = 0.05$ and 2.6% high at $r = 0.2$, and both residuals grow with the growth rate and as $w_p$ grows towards the length of the collection window.
 
 ## Sampling likelihoods
 

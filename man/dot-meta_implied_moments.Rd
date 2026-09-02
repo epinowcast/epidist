@@ -57,6 +57,12 @@ uniform within their window this is the analytic convolution, which adds
 the moments of the primary censored delay, truncated at \code{cutoff}, are used
 directly.
 
+A study that adjusted for right truncation and counted only delays above
+\code{lower} has its analytic moments left truncated by \code{\link[=.meta_left_moments]{.meta_left_moments()}},
+so they do not depend on \code{cutoff}. A study whose primary events were not
+uniform within their window has no analytic moments, so it is truncated
+at \code{cutoff} by quadrature instead.
+
 Under midpoint imputation (\code{cens_adjusted} of 3) the study assigned each
 delay to the centre of the interval it was observed in, so the estimand is
 the naive discrete grid shifted up by \code{swindow / 2}. The shift moves the

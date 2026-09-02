@@ -259,6 +259,71 @@ test_that("as_epidist_estimates_data warns about a short grid cutoff", {
   expect_false(any(grepl("short relative", msgs, fixed = TRUE)))
 })
 
+test_that("as_epidist_estimates_data warns when the quadrature is coarse relative to the delay", { # nolint: line_length_linter.
+  # The quadrature spans delay_min to the grid cutoff on a fixed number of
+  # intervals, so a heavy tailed study whose default max_delay is far above
+  # its mean gets nodes further apart than the delay itself.
+  heavy <- data.frame(
+    study = "A", type = c("mean", "sd"), value = c(24, 40), n = 500,
+    relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 2,
+    growth_rate = 0.1, stringsAsFactors = FALSE
+  )
+  msgs <- capture_messages(as_epidist_estimates_data(heavy))
+  expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
+  expect_true(any(grepl("epidist.meta_n_quad", msgs, fixed = TRUE)))
+  expect_true(any(grepl("max_delay", msgs, fixed = TRUE)))
+  # Raising the resolution clears it.
+  old <- options(epidist.meta_n_quad = 400)
+  on.exit(options(old), add = TRUE)
+  msgs <- capture_messages(as_epidist_estimates_data(heavy))
+  expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
+  options(old)
+  # A study that adjusted for right truncation with a uniform primary event
+  # uses the analytic moments, so its cutoff does not matter.
+  heavy$growth_rate <- 0
+  msgs <- capture_messages(as_epidist_estimates_data(heavy))
+  expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
+  # A truncated continuous study is only flagged when its observation time
+  # is long relative to the delay.
+  truncated <- data.frame(
+    study = "B", type = "mean", value = 5, n = 200,
+    relative_obs_time = 30, trunc_adjusted = FALSE, cens_adjusted = 1,
+    stringsAsFactors = FALSE
+  )
+  msgs <- capture_messages(as_epidist_estimates_data(truncated))
+  expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
+  truncated$relative_obs_time <- 600
+  msgs <- capture_messages(as_epidist_estimates_data(truncated))
+  expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
+  # A study reporting only a median is measured against it, and one on the
+  # discrete grid is never measured, because it uses no quadrature.
+  median <- data.frame(
+    study = "C", type = "quantile", value = 5, p = 0.5, n = 200,
+    relative_obs_time = 600, trunc_adjusted = FALSE, cens_adjusted = 1,
+    stringsAsFactors = FALSE
+  )
+  msgs <- capture_messages(as_epidist_estimates_data(median))
+  expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
+  median$cens_adjusted <- 0
+  msgs <- capture_messages(as_epidist_estimates_data(median))
+  expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
+})
+
+test_that(".estimates_coarse_quadrature names the studies with coarse nodes", {
+  data <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = c("A", "A", "B", "C"),
+    type = c("mean", "sd", "mean", "mean"),
+    value = c(24, 40, 24, 5),
+    n = 500,
+    relative_obs_time = c(Inf, Inf, Inf, 30),
+    trunc_adjusted = c(TRUE, TRUE, TRUE, FALSE),
+    cens_adjusted = c(2, 2, 1, 1),
+    growth_rate = c(0.1, 0.1, 0.1, 0),
+    stringsAsFactors = FALSE
+  )))
+  expect_identical(.estimates_coarse_quadrature(data), "A")
+})
+
 test_that("as_epidist_estimates_data does not warn about a truncated study", {
   truncated <- data.frame(
     study = "A", type = c("mean", "sd"), value = c(8.3, 7.9), n = 500,

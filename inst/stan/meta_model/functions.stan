@@ -77,6 +77,48 @@
     return 0;
   }
 
+  /** Index of the first grid cell a left truncated study could have seen. */
+  int meta_family_grid_first(data real delay_min, data real swindow_width) {
+    return to_int(ceil(delay_min / swindow_width - 1e-9));
+  }
+
+  /**
+    * The left truncation point of the base estimand a midpoint code is built
+    * on. `delay_min` is on the reported scale, so it moves back by the same
+    * shift as the estimand. A `delay_min` of zero is the sentinel for a study
+    * that counted every delay and is left alone. The cutoff is never moved,
+    * because the observation time bounds the underlying event rather than
+    * the midpointed value. Mirrors .meta_cens_lower() in R.
+    */
+  real meta_family_cens_lower(data real delay_min, data int cens_adj,
+                              data real pwindow_width,
+                              data real swindow_width) {
+    if (delay_min <= 0) {
+      return delay_min;
+    }
+    return fmax(
+      delay_min - meta_family_shift(cens_adj, pwindow_width, swindow_width), 0
+    );
+  }
+
+  /**
+    * The number of nodes the packed node vector of a design holds, sized
+    * from the base estimand its censoring code is built on.
+    */
+  int meta_family_node_count(data real delay_min, data real cutoff,
+                             data real pwindow_width,
+                             data real swindow_width, data int cens_adj) {
+    if (meta_family_cens_base(cens_adj) == 0) {
+      return to_int(floor(cutoff / swindow_width)) -
+        meta_family_grid_first(
+          meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                                 swindow_width),
+          swindow_width
+        ) + 1;
+    }
+    return n_quad_default + 1;
+  }
+
   real meta_family_diff_exp(real log_upper, real log_lower) {
     if (is_inf(log_upper)) {
       return 0;
@@ -163,18 +205,16 @@
     return log_cdf;
   }
 
-  /** Index of the first grid cell a left truncated study could have seen. */
-  int meta_family_grid_first(data real delay_min, data real swindow_width) {
-    return to_int(ceil(delay_min / swindow_width - 1e-9));
-  }
-
   /**
     * Discrete delay distribution a study using date differences would
     * observe. Doubly interval censored delay distribution as in
     * primarycensored, following Park et al. (2024) and Charniga et al.
     * (2024). See the model guide vignette for the maths. Cells recording a
     * delay below `delay_min` are dropped and the rest renormalised, which
-    * conditions the grid on the study's left truncation point.
+    * conditions the grid on the study's left truncation point. Under an
+    * accrual design each cell is cut at the multiples of the primary window
+    * inside it and every piece is weighted by the follow up available to
+    * the primary window it starts in. Mirrors .meta_grid_pmf() in R.
     */
   vector meta_family_grid_pmf(array[] real params, data real delay_min,
                               data real cutoff, data real pwindow_width,
@@ -217,9 +257,42 @@
         return exp(log_mass - log(total));
       }
       for (j in 1:n_cell) {
-        log_mass[j] += meta_family_log_accrual_weight(
-          (first + j - 1) * swindow_width, cutoff, growth_rate
+        // The pieces run from the cell's lower edge through the multiples of
+        // the primary window strictly inside the cell to its upper edge. The
+        // positions are written out from data arguments and loop indices,
+        // because Stan only treats such expressions as data only.
+        int k_lo = to_int(floor(
+          (first + j - 1) * swindow_width / pwindow_width + 1e-9
+        )) + 1;
+        int k_hi = to_int(ceil(
+          (first + j) * swindow_width / pwindow_width - 1e-9
+        )) - 1;
+        real log_lo = log_cdf[j];
+        real log_weight = meta_family_log_accrual_weight(
+          pwindow_width * floor(
+            (first + j - 1) * swindow_width / pwindow_width + 1e-9
+          ),
+          cutoff, growth_rate
         );
+        real acc = negative_infinity();
+        for (k in k_lo:k_hi) {
+          real log_hi = meta_family_pcens_lcdf(
+            k * pwindow_width | params, pwindow_width, prim_id, prim_params
+          );
+          if (log_hi > log_lo) {
+            acc = log_sum_exp(acc, log_diff_exp(log_hi, log_lo) + log_weight);
+          }
+          log_lo = log_hi;
+          log_weight = meta_family_log_accrual_weight(
+            k * pwindow_width, cutoff, growth_rate
+          );
+        }
+        if (log_cdf[j + 1] > log_lo) {
+          acc = log_sum_exp(
+            acc, log_diff_exp(log_cdf[j + 1], log_lo) + log_weight
+          );
+        }
+        log_mass[j] = acc;
       }
       if (max(log_mass) == negative_infinity()) {
         reject("meta_family_grid_pmf: every grid cell underflowed to zero ",
@@ -420,6 +493,79 @@
     );
   }
 
+  /** The first four raw moments of a summary vector. */
+  vector meta_family_raw_from_central(vector moments) {
+    real m1 = moments[1];
+    real variance = moments[2] ^ 2;
+    real third = moments[4] * pow(variance, 1.5);
+    real fourth = moments[3] * variance ^ 2;
+    return [m1, variance + m1 ^ 2, third + 3 * m1 * variance + m1 ^ 3,
+            fourth + 4 * m1 * third + 6 * m1 ^ 2 * variance + m1 ^ 4]';
+  }
+
+  /**
+    * Summaries of a distribution left truncated at `delay_min`, from its
+    * untruncated summaries `full` and its distribution function `cdf` at
+    * equally spaced points from zero to `delay_min`. Removes
+    * `E[tau^k 1(tau <= L)] = L^k F(L) - int_0^L k t^(k - 1) F(t) dt` by
+    * Simpson's rule and divides by `1 - F(L)`, so the result does not depend
+    * on the cutoff and matches the distribution function used for the same
+    * study's quantile rows. Mirrors .meta_left_moments() in R.
+    */
+  vector meta_family_left_moments(vector full, vector cdf,
+                                  data real delay_min) {
+    int n_quad = num_elements(cdf) - 1;
+    real tail = 1 - cdf[n_quad + 1];
+    vector[n_quad + 1] grid = linspaced_vector(n_quad + 1, 0, delay_min);
+    vector[n_quad + 1] weight = rep_vector(2, n_quad + 1);
+    vector[4] below;
+    weight[1] = 1;
+    weight[n_quad + 1] = 1;
+    for (i in 2:n_quad) {
+      if (i % 2 == 0) {
+        weight[i] = 4;
+      }
+    }
+    if (tail <= 0 || is_nan(tail)) {
+      reject("meta_family_left_moments: the distribution function leaves no ",
+             "mass above the study's minimum delay.");
+    }
+    for (k in 1:4) {
+      below[k] = pow(delay_min, k) * cdf[n_quad + 1] -
+        dot_product(weight, k * pow(grid, k - 1) .* cdf) * delay_min /
+          (3.0 * n_quad);
+    }
+    return meta_family_central_from_raw(
+      (meta_family_raw_from_central(full) - below) / tail
+    );
+  }
+
+  /**
+    * The distribution function of the delay, or of the primary censored
+    * delay, at equally spaced points from zero to `delay_min`.
+    */
+  vector meta_family_left_nodes(array[] real params, data real delay_min,
+                              data real pwindow_width, data int cens_adj,
+                              data int prim_id, array[] real prim_params,
+                              data int n_quad) {
+    vector[n_quad + 1] cdf;
+    // The node is written out in full, because Stan only treats expressions
+    // built from data arguments as data only.
+    for (i in 1:(n_quad + 1)) {
+      if (cens_adj == 2) {
+        cdf[i] = exp(meta_family_pcens_lcdf(
+          (i - 1) * delay_min / n_quad | params, pwindow_width, prim_id,
+          prim_params
+        ));
+      } else if (i == 1) {
+        cdf[i] = 0;
+      } else {
+        cdf[i] = exp(dist_lcdf((i - 1) * delay_min / n_quad | params, dist_id));
+      }
+    }
+    return cdf;
+  }
+
   /** The summaries a study using a given procedure would report. */
   vector meta_family_implied_moments(array[] real params, data real delay_min,
                                      data real cutoff,
@@ -432,9 +578,13 @@
                                      data real growth_rate) {
     if (cens_adj == 3 || cens_adj == 4) {
       // Midpoint imputation moves the base estimand along the delay axis, so
-      // its mean moves and every central moment is unchanged.
+      // its mean and its left truncation point move and every central moment
+      // is unchanged. The cutoff stays where it is.
       vector[4] moments = meta_family_implied_moments(
-        params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+        params,
+        meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                               swindow_width),
+        cutoff, pwindow_width, swindow_width, trunc_adj,
         meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
         growth_rate
       );
@@ -451,17 +601,35 @@
       );
     }
     if (cens_adj == 2) {
-      if (trunc_adj == 1 && prim_id == 1 && delay_min == 0) {
-        return meta_family_add_uniform(meta_family_moments(params),
-                                       pwindow_width);
+      if (trunc_adj == 1 && prim_id == 1) {
+        vector[4] full = meta_family_add_uniform(meta_family_moments(params),
+                                                pwindow_width);
+        if (delay_min == 0) {
+          return full;
+        }
+        return meta_family_left_moments(
+          full,
+          meta_family_left_nodes(params, delay_min, pwindow_width, cens_adj,
+                               prim_id, prim_params, n_quad_default),
+          delay_min
+        );
       }
       return meta_family_pcens_trunc_moments(
         params, delay_min, cutoff, pwindow_width, prim_id, prim_params,
         n_quad_default, accrual, growth_rate
       );
     }
-    if (trunc_adj == 1 && delay_min == 0) {
-      return meta_family_moments(params);
+    if (trunc_adj == 1) {
+      vector[4] full = meta_family_moments(params);
+      if (delay_min == 0) {
+        return full;
+      }
+      return meta_family_left_moments(
+        full,
+        meta_family_left_nodes(params, delay_min, pwindow_width, cens_adj,
+                             prim_id, prim_params, n_quad_default),
+        delay_min
+      );
     }
     return meta_family_trunc_moments(params, delay_min, cutoff, n_quad_default,
                                      accrual, growth_rate);
@@ -594,10 +762,13 @@
                                 data real growth_rate) {
     if (cens_adj == 3 || cens_adj == 4) {
       // Midpoint imputation moved every delay along the axis, so the base
-      // estimand is evaluated at the reported delay moved back.
+      // estimand is evaluated at the reported delay moved back, and its left
+      // truncation point moves with it.
       return meta_family_implied_prob(
         y - meta_family_shift(cens_adj, pwindow_width, swindow_width), params,
-        delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+        meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                               swindow_width),
+        cutoff, pwindow_width, swindow_width, trunc_adj,
         meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
         growth_rate
       );
@@ -753,7 +924,9 @@
     if (cens_adj == 3 || cens_adj == 4) {
       return meta_family_implied_density(
         y - meta_family_shift(cens_adj, pwindow_width, swindow_width), params,
-        delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+        meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                               swindow_width),
+        cutoff, pwindow_width, swindow_width, trunc_adj,
         meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
         growth_rate
       );
@@ -840,13 +1013,16 @@
                                    data real growth_rate) {
     if (cens_adj == 3 || cens_adj == 4) {
       // The nodes are packed as [origin, spacing, values], so moving the
-      // estimand along the delay axis moves the origin.
-      vector[2 + (meta_family_cens_base(cens_adj) == 0
-                  ? to_int(floor(cutoff / swindow_width)) -
-                    meta_family_grid_first(delay_min, swindow_width) + 1
-                  : n_quad_default + 1)] nodes =
+      // estimand along the delay axis moves the origin. The left truncation
+      // point moves with it, which is why the node count is sized from the
+      // base estimand.
+      vector[2 + meta_family_node_count(delay_min, cutoff, pwindow_width,
+                                        swindow_width, cens_adj)] nodes =
         meta_family_implied_nodes(
-          params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+          params,
+          meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                                 swindow_width),
+          cutoff, pwindow_width, swindow_width, trunc_adj,
           meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
           growth_rate
         );
@@ -977,10 +1153,9 @@
       }
     }
     if (any_quantile == 1) {
-      int n_node = meta_family_cens_base(cens_adj) == 0
-        ? to_int(floor(cutoff / swindow_width)) -
-          meta_family_grid_first(delay_min, swindow_width) + 1
-        : n_quad_default + 1;
+      int n_node = meta_family_node_count(
+        delay_min, cutoff, pwindow_width, swindow_width, cens_adj
+      );
       vector[2 + n_node] nodes = meta_family_implied_nodes(
         params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
         cens_adj, prim_id, prim_params, accrual, growth_rate
@@ -1164,6 +1339,14 @@
     {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
     trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
   );
+  // An extreme draw can overflow the analytic kurtosis, which would turn the
+  // sampling standard error and the log density into NaN. Reject the draw
+  // instead, as .meta_row_log_lik() does in R.
+  for (k in 1:4) {
+    if (is_nan(moments[k]) || is_inf(moments[k])) {
+      return negative_infinity();
+    }
+  }
 
   if (obs_type == 2) {
     real se = report_se > 0 ? report_se : moments[2] / sqrt(study_n);

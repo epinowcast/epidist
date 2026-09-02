@@ -209,6 +209,38 @@
   return(0)
 }
 
+#' The left truncation point of the base estimand a midpoint code is built on
+#'
+#' `delay_min` is the smallest delay a study counted on the scale it reported,
+#' so a midpoint code that moved its estimand along the delay axis dropped the
+#' records whose *moved* delay fell below it. The base estimand is therefore
+#' left truncated at `delay_min` moved back by the same shift. A `delay_min`
+#' of zero means the study counted every delay and is left alone, because it
+#' is the sentinel that selects the untruncated formulas, even for code 4 whose
+#' reported delays can be negative.
+#'
+#' The right truncation point is not moved, because the observation time
+#' bounds the underlying event, not the midpointed value.
+#'
+#' Matches `meta_family_cens_lower` in
+#' `inst/stan/meta_model/functions.stan`.
+#'
+#' @param lower The study's minimum delay (its left truncation point).
+#'
+#' @inheritParams .meta_cens_shift
+#'
+#' @returns The left truncation point of the base estimand.
+#'
+#' @keywords internal
+.meta_cens_lower <- function(lower, cens_adjusted, pwindow, swindow) {
+  if (lower <= 0) {
+    return(lower)
+  }
+  return(max(
+    lower - .meta_cens_shift(cens_adjusted, pwindow, swindow), 0
+  ))
+}
+
 #' Whether accrual weighting applies to a summary row
 #'
 #' The truncation design only matters for a study that did not adjust for right
@@ -377,8 +409,16 @@
 #' \eqn{F(D) - F(L)} whenever `lower` falls on a grid boundary.
 #'
 #' Under an accrual design the cell masses are additionally weighted by the
-#' follow up available to the delay each cell records, which is the delay at
-#' its lower edge, before renormalising.
+#' follow up available to the cases each cell holds, before renormalising.
+#' A case is seen when its primary event fell early enough for its delay to
+#' complete before the calendar stop, and the primary event is known only to
+#' its window, so the follow up available to a delay of \eqn{x} from the start
+#' of that window is the accrual weight at \eqn{w_p \lfloor x / w_p \rfloor},
+#' a step function of \eqn{x}. Each cell is cut at the multiples of `pwindow`
+#' inside it and every piece is weighted by the follow up at the primary
+#' window it starts in. This is exact whenever `cutoff` is a multiple of
+#' `pwindow`, and reduces to the weight at the cell's lower edge when
+#' `pwindow` and `swindow` are equal.
 #'
 #' A cohort grid is normalised by the distribution function at its top, which
 #' is already known. An accrual grid reweights each cell first, so its
@@ -423,20 +463,33 @@
     ))
   }
   boundary <- seq(first, n_grid) * swindow
-  cdf <- .meta_pcens_cdf(boundary, dist, args, pwindow, growth_rate)
-  # Once the distribution function saturates its differences can come back
-  # very slightly negative, which would leave an invalid pmf. Stan builds the
-  # same cells on the log scale and drops them to zero there.
-  mass <- pmax(diff(cdf), 0)
   if (accrual != 1L) {
+    cdf <- .meta_pcens_cdf(boundary, dist, args, pwindow, growth_rate)
+    # Once the distribution function saturates its differences can come back
+    # very slightly negative, which would leave an invalid pmf. Stan builds
+    # the same cells on the log scale and drops them to zero there.
+    mass <- pmax(diff(cdf), 0)
     total <- cdf[length(cdf)] - cdf[1]
     if (!is.finite(total) || total <= 0) {
       return(rep(NA_real_, length(mass)))
     }
     return(mass / total)
   }
-  mass <- mass *
-    .meta_accrual_weight(boundary[-length(boundary)], cutoff, growth_rate)
+  # Cut the cells at the multiples of the primary window inside them, so
+  # that each piece can be weighted by the follow up available to the primary
+  # window it starts in. Matches meta_family_grid_pmf() in Stan.
+  multiple <- pwindow *
+    seq(ceiling(boundary[1] / pwindow), floor(cutoff / pwindow))
+  edge <- sort(c(boundary, multiple[multiple <= boundary[length(boundary)]]))
+  edge <- edge[c(TRUE, diff(edge) > 1e-9 * swindow)]
+  cdf <- .meta_pcens_cdf(edge, dist, args, pwindow, growth_rate)
+  piece_start <- edge[-length(edge)]
+  piece <- pmax(diff(cdf), 0) *
+    .meta_accrual_weight(
+      pwindow * floor(piece_start / pwindow + 1e-9), cutoff, growth_rate
+    )
+  cell <- floor(piece_start / swindow + 1e-9) - first + 1
+  mass <- as.numeric(rowsum(piece, cell))
   total <- sum(mass)
   if (!is.finite(total) || total <= 0) {
     return(rep(NA_real_, length(mass)))
@@ -791,6 +844,76 @@
   ))
 }
 
+#' The first four raw moments of a set of summaries
+#'
+#' Inverts [.meta_central_from_raw()].
+#'
+#' @param moments A summary vector from [.meta_moment_vector()].
+#'
+#' @returns A numeric vector of the first four raw moments.
+#'
+#' @keywords internal
+.meta_raw_from_central <- function(moments) {
+  m1 <- moments[["mean"]]
+  variance <- moments[["sd"]]^2
+  third <- moments[["skewness"]] * variance^1.5
+  fourth <- moments[["kurtosis"]] * variance^2
+  return(c(
+    m1,
+    variance + m1^2,
+    third + 3 * m1 * variance + m1^3,
+    fourth + 4 * m1 * third + 6 * m1^2 * variance + m1^4
+  ))
+}
+
+#' Summaries of a distribution left truncated at `lower`
+#'
+#' A study that adjusted for right truncation and only counted delays above
+#' `lower` reported the moments of the delay conditioned on exceeding it. They
+#' are taken from the untruncated moments by removing the part below `lower`,
+#' \eqn{E[\tau^k 1(\tau \le L)] = L^k F(L) - \int_0^L k t^{k - 1} F(t) dt},
+#' by Simpson's rule on \eqn{[0, L]}, and dividing by \eqn{1 - F(L)}. The
+#' integral is over a bounded interval the quadrature resolves well, so the
+#' result does not depend on `max_delay`, and it matches the distribution
+#' function \eqn{(F(y) - F(L)) / (1 - F(L))} used for the same study's
+#' quantile rows. It applies to any distribution whose untruncated moments and
+#' distribution function are available, which is the delay itself and the
+#' uniform single interval approximation of [.meta_add_uniform()].
+#' Matches `meta_family_left_moments` in
+#' `inst/stan/meta_model/functions.stan`.
+#'
+#' @param full A summary vector from [.meta_moment_vector()] of the
+#'  untruncated distribution.
+#'
+#' @param cdf The distribution function at `.meta_n_quad() + 1` equally spaced
+#'  points running from zero to `lower`.
+#'
+#' @param lower The study's minimum delay (its left truncation point).
+#'
+#' @inherit .meta_moment_vector return
+#'
+#' @keywords internal
+.meta_left_moments <- function(full, cdf, lower) {
+  n_quad <- length(cdf) - 1
+  tail_mass <- 1 - cdf[n_quad + 1]
+  if (!is.finite(tail_mass) || tail_mass <= 0) {
+    return(.meta_moment_failure())
+  }
+  quad <- seq(0, lower, length.out = n_quad + 1)
+  weight <- c(1, rep_len(c(4, 2), n_quad - 1), 1)
+  below <- vapply(
+    seq_len(4),
+    function(k) {
+      integral <- sum(weight * k * quad^(k - 1) * cdf) * lower / (3 * n_quad)
+      return(lower^k * cdf[n_quad + 1] - integral)
+    },
+    numeric(1)
+  )
+  return(
+    .meta_central_from_raw((.meta_raw_from_central(full) - below) / tail_mass)
+  )
+}
+
 #' The summaries a study using a given procedure would report
 #'
 #' Forward models the summaries that a study would converge to given the biases
@@ -804,6 +927,12 @@
 #' `pwindow / 2` to the mean and `pwindow^2 / 12` to the variance. Otherwise
 #' the moments of the primary censored delay, truncated at `cutoff`, are used
 #' directly.
+#'
+#' A study that adjusted for right truncation and counted only delays above
+#' `lower` has its analytic moments left truncated by [.meta_left_moments()],
+#' so they do not depend on `cutoff`. A study whose primary events were not
+#' uniform within their window has no analytic moments, so it is truncated
+#' at `cutoff` by quadrature instead.
 #'
 #' Under midpoint imputation (`cens_adjusted` of 3) the study assigned each
 #' delay to the centre of the interval it was observed in, so the estimand is
@@ -844,9 +973,12 @@
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
   if (cens_adjusted == 3 || cens_adjusted == 4) {
     # Midpoint imputation moves the base estimand along the delay axis, so its
-    # mean moves and every central moment is unchanged.
+    # mean and its left truncation point move and every central moment is
+    # unchanged. The cutoff stays where it is, because the observation time
+    # bounds the underlying event rather than the midpointed value.
     moments <- .meta_implied_moments(
-      dist, args, lower, cutoff, pwindow, swindow, trunc_adjusted,
+      dist, args, .meta_cens_lower(lower, cens_adjusted, pwindow, swindow),
+      cutoff, pwindow, swindow, trunc_adjusted,
       .meta_cens_base(cens_adjusted), growth_rate, trunc_design
     )
     moments[["mean"]] <- moments[["mean"]] +
@@ -861,15 +993,29 @@
     return(.meta_grid_moments(mass, first * swindow, swindow))
   }
   if (cens_adjusted == 2) {
-    if (trunc_adjusted == 1 && growth_rate == 0 && lower == 0) {
-      return(.meta_add_uniform(.meta_continuous_moments(dist, args), pwindow))
+    if (trunc_adjusted == 1 && growth_rate == 0) {
+      full <- .meta_add_uniform(.meta_continuous_moments(dist, args), pwindow)
+      if (lower == 0) {
+        return(full)
+      }
+      quad <- seq(0, lower, length.out = .meta_n_quad() + 1)
+      return(.meta_left_moments(
+        full, .meta_pcens_cdf(quad, dist, args, pwindow, growth_rate), lower
+      ))
     }
     return(.meta_pcens_trunc_moments(
       dist, args, lower, cutoff, pwindow, growth_rate, accrual
     ))
   }
-  if (trunc_adjusted == 1 && lower == 0) {
-    return(.meta_continuous_moments(dist, args))
+  if (trunc_adjusted == 1) {
+    full <- .meta_continuous_moments(dist, args)
+    if (lower == 0) {
+      return(full)
+    }
+    quad <- seq(0, lower, length.out = .meta_n_quad() + 1)
+    return(.meta_left_moments(
+      full, do.call(.pdist(dist), c(list(q = quad), args)), lower
+    ))
   }
   return(.meta_trunc_moments(dist, args, lower, cutoff, growth_rate, accrual))
 }
@@ -1089,11 +1235,14 @@
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
   if (cens_adjusted == 3 || cens_adjusted == 4) {
     # Midpoint imputation moved every delay along the axis, so the base
-    # estimand is evaluated at the reported delay moved back.
+    # estimand is evaluated at the reported delay moved back, and its left
+    # truncation point moves with it. The cutoff does not, see
+    # .meta_cens_lower().
     return(.meta_implied_prob(
       y - .meta_cens_shift(cens_adjusted, pwindow, swindow), dist, args,
-      lower, cutoff, pwindow, swindow, trunc_adjusted,
-      .meta_cens_base(cens_adjusted), growth_rate, trunc_design
+      .meta_cens_lower(lower, cens_adjusted, pwindow, swindow), cutoff,
+      pwindow, swindow, trunc_adjusted, .meta_cens_base(cens_adjusted),
+      growth_rate, trunc_design
     ))
   }
   if (cens_adjusted == 0) {
@@ -1233,8 +1382,9 @@
   if (cens_adjusted == 3 || cens_adjusted == 4) {
     return(.meta_implied_density(
       y - .meta_cens_shift(cens_adjusted, pwindow, swindow), dist, args,
-      lower, cutoff, pwindow, swindow, trunc_adjusted,
-      .meta_cens_base(cens_adjusted), growth_rate, trunc_design
+      .meta_cens_lower(lower, cens_adjusted, pwindow, swindow), cutoff,
+      pwindow, swindow, trunc_adjusted, .meta_cens_base(cens_adjusted),
+      growth_rate, trunc_design
     ))
   }
   if (cens_adjusted == 0) {
@@ -1496,6 +1646,26 @@
   return(prob)
 }
 
+#' The slots of the base estimand a midpoint code is built on
+#'
+#' Replaces the censoring adjustment code by the code it is built on and moves
+#' the left truncation point with it. See [.meta_cens_base()] and
+#' [.meta_cens_lower()].
+#'
+#' @param slots The output of [.meta_row_slots()].
+#'
+#' @returns The slots of the base estimand.
+#'
+#' @keywords internal
+.meta_cens_slots <- function(slots) {
+  shifted <- slots
+  shifted$cens_adjusted <- .meta_cens_base(slots$cens_adjusted)
+  shifted$lower <- .meta_cens_lower(
+    slots$lower, slots$cens_adjusted, slots$pwindow, slots$swindow
+  )
+  return(shifted)
+}
+
 #' The cumulative probabilities a study would report at several quantiles
 #'
 #' The vectorised form of [.meta_implied_prob()], used for the set of quantiles
@@ -1518,8 +1688,7 @@
   accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
   first <- .meta_grid_first(slots$lower, slots$swindow)
   if (slots$cens_adjusted %in% c(3, 4)) {
-    shifted <- slots
-    shifted$cens_adjusted <- .meta_cens_base(slots$cens_adjusted)
+    shifted <- .meta_cens_slots(slots)
     return(.meta_implied_probs(
       y - .meta_cens_shift(
         slots$cens_adjusted, slots$pwindow, slots$swindow
@@ -1590,9 +1759,7 @@
   accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
   if (slots$cens_adjusted %in% c(3, 4)) {
     # Moving the estimand along the delay axis moves where its nodes start.
-    shifted <- slots
-    shifted$cens_adjusted <- .meta_cens_base(slots$cens_adjusted)
-    nodes <- .meta_implied_nodes(dist, args, shifted)
+    nodes <- .meta_implied_nodes(dist, args, .meta_cens_slots(slots))
     nodes$origin <- nodes$origin +
       .meta_cens_shift(slots$cens_adjusted, slots$pwindow, slots$swindow)
     return(nodes)
@@ -1874,6 +2041,12 @@
 #' the joint likelihood of its members: [.meta_moment_pair_ll()] for a mean and
 #' a standard deviation, and [.meta_quantile_set_ll()] for a set of quantiles.
 #'
+#' A draw whose implied moments are not all finite, which an extreme delay
+#' distribution parameter can produce by overflowing the analytic kurtosis,
+#' is rejected with a log likelihood of `-Inf` rather than `NaN`, for every
+#' row that uses the moments. Matches the guard in `meta_family_lpmf` in
+#' `inst/stan/meta_model/functions.stan`.
+#'
 #' @inheritParams .meta_summary_terms
 #'
 #' @returns A log density.
@@ -1887,10 +2060,15 @@
       slots$group_chol
     ))
   }
-  if (slots$obs_type == 5L) {
+  if (slots$obs_type %in% c(2L, 3L, 5L)) {
     if (is.null(moments)) {
       moments <- .meta_row_moments(slots, dist, args)
     }
+    if (!all(is.finite(moments))) {
+      return(-Inf)
+    }
+  }
+  if (slots$obs_type == 5L) {
     return(.meta_moment_pair_ll(
       slots$group_value[1], slots$group_value[2], moments, slots$study_n
     ))

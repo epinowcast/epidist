@@ -289,6 +289,49 @@ lockstep_midpoint_uniform <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Studies W to Z counted only delays above a minimum under the two midpoint
+# codes, with windows that move the base estimand's left truncation point off
+# the grid the reported delays sit on: W and X use code 3 with a secondary
+# window of 2, and Y uses code 4 with a primary window of 3. Z reports its
+# quantiles with a covariance matrix, so the node count of the shifted grid
+# is exercised as well.
+lockstep_left_midpoint <- data.frame(
+  study = c("W", "W", "X", "X", "Y", "Y"),
+  type = c("mean", "sd", "quantile", "quantile", "mean", "sd"),
+  value = c(7.9, 3.4, 5.5, 9.5, 8.6, 3.6),
+  se = c(NA, NA, NA, 0.5, NA, NA),
+  p = c(NA, NA, 0.25, 0.75, NA, NA),
+  n = c(105, 105, 145, 145, 125, 125),
+  relative_obs_time = c(30, 30, 28, 28, Inf, Inf),
+  trunc_adjusted = c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE),
+  trunc_design = c(
+    "cohort", "cohort", "accrual", "accrual", "cohort", "cohort"
+  ),
+  cens_adjusted = c(3, 3, 3, 3, 4, 4),
+  pwindow = c(1, 1, 1, 1, 3, 3),
+  swindow = c(2, 2, 2, 2, 1, 1),
+  delay_min = 3,
+  growth_rate = c(0, 0, 0.1, 0.1, 0, 0),
+  stringsAsFactors = FALSE
+)
+
+lockstep_mvn_z <- suppressMessages(as_epidist_estimates_data(
+  new_epidist_multivariate(
+    value = c(q0.25 = 5.9, q0.5 = 7.6),
+    vcov = matrix(c(0.1, 0.02, 0.02, 0.15), nrow = 2),
+    params = c("q0.25", "q0.5")
+  ),
+  study = "Z",
+  relative_obs_time = 32,
+  trunc_adjusted = FALSE,
+  trunc_design = "cohort",
+  cens_adjusted = 3,
+  pwindow = 1,
+  swindow = 2,
+  delay_min = 3,
+  growth_rate = 0
+))
+
 lockstep_base_rows <- data.frame(
   study = c(
     "A", "A", "B", "B", "B", "C", "C", "D", "E", "E", "F", "F", "F",
@@ -354,11 +397,37 @@ lockstep_base_rows <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Studies AA and AB stopped collecting at a calendar date with windows that
+# differ, so the accrual weight is cut at the primary window inside each
+# reporting cell in both directions. Both keep a daily primary window,
+# because the R and Stan primary censored distribution functions of
+# primarycensored only agree to about 1e-6 for a wider one under growth.
+lockstep_accrual_windows <- data.frame(
+  study = c("AA", "AA", "AA", "AB", "AB"),
+  type = c("mean", "sd", "quantile", "mean", "quantile"),
+  value = c(1.4, 2.9, 0.5, 5.8, 5.5),
+  se = c(NA, NA, 0.4, NA, NA),
+  p = c(NA, NA, 0.75, NA, 0.5),
+  n = c(160, 160, 160, 140, 140),
+  relative_obs_time = 28,
+  trunc_adjusted = FALSE,
+  trunc_design = "accrual",
+  cens_adjusted = 0,
+  pwindow = 1,
+  swindow = c(7, 7, 7, 0.5, 0.5),
+  delay_min = 0,
+  growth_rate = c(0.2, 0.2, 0.2, 0.05, 0.05),
+  stringsAsFactors = FALSE
+)
+
 lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
   lockstep_base_rows,
   lockstep_mvn_q,
   lockstep_mvn_r,
-  lockstep_midpoint_uniform
+  lockstep_midpoint_uniform,
+  lockstep_left_midpoint,
+  lockstep_mvn_z,
+  lockstep_accrual_windows
 )))
 
 # The shared fits below use the cmdstanr backend, so they are only built

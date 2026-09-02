@@ -299,37 +299,107 @@ test_that(".meta_implied_moments applies the uniform single interval correction"
 })
 
 test_that(".meta_implied_moments recovers a study that midpoints the primary and integrates the secondary", { # nolint: line_length_linter.
-  # Code 4 summarises tau + U_p - pwindow / 2.
+  # Code 4 summarises tau + U_p - pwindow / 2. A study that only counted
+  # reported delays of at least delay_min dropped the records whose
+  # midpointed delay fell below it, so the base estimand is left truncated at
+  # delay_min + pwindow / 2 rather than at delay_min.
   set.seed(115)
   args <- list(meanlog = 1.8, sdlog = 0.5)
   n_sim <- 1e6
-  for (pwindow in c(1, 3)) {
-    for (obs_time in c(20, Inf)) {
-      trunc_adjusted <- as.integer(is.infinite(obs_time))
-      cutoff <- if (is.infinite(obs_time)) 80 else obs_time
-      moments <- .meta_implied_moments(
-        "plnorm", args,
-        cutoff = cutoff, pwindow = pwindow, swindow = 1,
+  designs <- expand.grid(
+    pwindow = c(1, 3), obs_time = c(20, Inf), delay_min = c(0, 3)
+  )
+  for (row in seq_len(nrow(designs))) {
+    pwindow <- designs$pwindow[row]
+    obs_time <- designs$obs_time[row]
+    delay_min <- designs$delay_min[row]
+    trunc_adjusted <- as.integer(is.infinite(obs_time))
+    cutoff <- if (is.infinite(obs_time)) 80 else obs_time
+    moments <- .meta_implied_moments(
+      "plnorm", args,
+      lower = delay_min, cutoff = cutoff, pwindow = pwindow, swindow = 1,
+      trunc_adjusted = trunc_adjusted, cens_adjusted = 4L, growth_rate = 0
+    )
+    raw <- stats::runif(n_sim, 0, pwindow) +
+      stats::rlnorm(n_sim, args$meanlog, args$sdlog)
+    observed <- raw[raw <= obs_time] - pwindow / 2
+    observed <- observed[observed >= delay_min]
+    expect_equal(moments[["mean"]], mean(observed), tolerance = 0.01)
+    expect_equal(moments[["sd"]], stats::sd(observed), tolerance = 0.01)
+    # The implied distribution function must agree with the same simulation.
+    reported <- stats::quantile(observed, c(0.25, 0.5, 0.9), names = FALSE)
+    implied <- vapply(
+      reported,
+      .meta_implied_prob,
+      numeric(1),
+      dist = "plnorm", args = args, lower = delay_min, cutoff = cutoff,
+      pwindow = pwindow, swindow = 1, trunc_adjusted = trunc_adjusted,
+      cens_adjusted = 4L, growth_rate = 0
+    )
+    expect_equal(implied, c(0.25, 0.5, 0.9), tolerance = 0.01)
+    if (delay_min > 0) {
+      # Nothing the study reported can sit below the smallest delay it
+      # counted.
+      expect_identical(.meta_implied_prob(
+        delay_min, "plnorm", args,
+        lower = delay_min, cutoff = cutoff, pwindow = pwindow, swindow = 1,
         trunc_adjusted = trunc_adjusted, cens_adjusted = 4L, growth_rate = 0
-      )
-      raw <- stats::runif(n_sim, 0, pwindow) +
-        stats::rlnorm(n_sim, args$meanlog, args$sdlog)
-      observed <- raw[raw <= obs_time] - pwindow / 2
-      expect_equal(moments[["mean"]], mean(observed), tolerance = 0.01)
-      expect_equal(moments[["sd"]], stats::sd(observed), tolerance = 0.01)
-      # The implied distribution function must agree with the same simulation.
-      reported <- stats::quantile(observed, c(0.25, 0.5, 0.9), names = FALSE)
-      implied <- vapply(
-        reported,
-        .meta_implied_prob,
-        numeric(1),
-        dist = "plnorm", args = args, cutoff = cutoff, pwindow = pwindow,
-        swindow = 1, trunc_adjusted = trunc_adjusted, cens_adjusted = 4L,
-        growth_rate = 0
-      )
-      expect_equal(implied, c(0.25, 0.5, 0.9), tolerance = 0.01)
+      ), 0)
     }
   }
+})
+
+test_that(".meta_implied_moments recovers a left truncated study that midpoints a wide secondary window", { # nolint: line_length_linter.
+  # Code 3 reports (j + 1 / 2) * swindow for grid cell j, so a study that
+  # only counted reported delays of at least delay_min kept the cells from
+  # ceiling(delay_min / swindow - 1 / 2), which differs from the untruncated
+  # grid rule whenever delay_min / swindow is not an integer.
+  set.seed(116)
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  swindow <- 2
+  delay_min <- 3
+  cutoff <- 40
+  n_sim <- 1e6
+  raw <- stats::runif(n_sim, 0, 1) +
+    stats::rlnorm(n_sim, args$meanlog, args$sdlog)
+  grid <- swindow * floor(raw / swindow)
+  reported <- grid[grid + swindow <= cutoff] + swindow / 2
+  reported <- reported[reported >= delay_min]
+  shared <- list(
+    dist = "plnorm", args = args, lower = delay_min, cutoff = cutoff,
+    pwindow = 1, swindow = swindow, trunc_adjusted = 0L, cens_adjusted = 3L,
+    growth_rate = 0
+  )
+  moments <- do.call(.meta_implied_moments, shared)
+  expect_equal(moments[["mean"]], mean(reported), tolerance = 0.01)
+  expect_equal(moments[["sd"]], stats::sd(reported), tolerance = 0.01)
+  # Between two support points the continuity corrected distribution function
+  # equals the empirical one at the lower of them.
+  for (y in c(4, 6, 8, 12)) {
+    expect_equal(
+      do.call(.meta_implied_prob, c(list(y = y), shared)),
+      mean(reported <= y - 1),
+      tolerance = 0.01
+    )
+  }
+  # The cell whose reported value equals delay_min is kept, not dropped.
+  expect_gt(do.call(.meta_implied_density, c(list(y = delay_min), shared)), 0)
+  slots <- c(shared[-(1:2)], list(trunc_design = 0L))
+  expect_equal(
+    .meta_implied_probs(c(4, 8), "plnorm", args, slots),
+    c(mean(reported <= 3), mean(reported <= 7)),
+    tolerance = 0.01
+  )
+  nodes <- .meta_implied_nodes("plnorm", args, slots)
+  expect_identical(nodes$origin, delay_min - swindow / 2)
+  # The nodes start at the kept cell, so a quantile read off them and fed
+  # back through the distribution function round trips exactly.
+  median <- .meta_node_quantile(nodes, 0.5)
+  expect_gt(median, delay_min)
+  expect_equal(
+    .meta_implied_probs(median, "plnorm", args, slots), 0.5,
+    tolerance = 1e-12
+  )
 })
 
 test_that("midpoint imputation of the primary event moves the uniform single interval estimand", { # nolint: line_length_linter.
@@ -627,6 +697,33 @@ test_that(".meta_summary_terms uses the kurtosis based standard error for report
   expect_gt(terms[["se"]], terms[["implied"]] / sqrt(2 * (study_n - 1)))
 })
 
+test_that(".meta_row_log_lik rejects a draw whose implied moments overflow", {
+  # A very wide lognormal overflows the analytic kurtosis to NaN. The joint
+  # likelihood of a mean and standard deviation pair already rejects such a
+  # draw, and an ungrouped row must do the same rather than return NaN.
+  args <- list(meanlog = 1.6, sdlog = 15)
+  expect_false(all(is.finite(.meta_continuous_moments("plnorm", args))))
+  slots <- list(
+    lower = 0, obs_type = 3L, study_n = 100L, trunc_adjusted = 1L,
+    cens_adjusted = 1L, cutoff = 60, pwindow = 1, swindow = 1, value = 3.6,
+    report_se = 0, quantile_p = 0, growth_rate = 0, trunc_design = 0L,
+    group_value = c(7.5, 3.6)
+  )
+  expect_identical(.meta_row_log_lik(slots, "plnorm", args), -Inf)
+  slots$obs_type <- 2L
+  expect_identical(.meta_row_log_lik(slots, "plnorm", args), -Inf)
+  slots$report_se <- 0.5
+  expect_identical(.meta_row_log_lik(slots, "plnorm", args), -Inf)
+  slots$obs_type <- 5L
+  expect_identical(.meta_row_log_lik(slots, "plnorm", args), -Inf)
+  # A finite draw is unaffected.
+  finite <- list(meanlog = 1.6, sdlog = 0.6)
+  for (obs_type in c(2L, 3L, 5L)) {
+    slots$obs_type <- obs_type
+    expect_true(is.finite(.meta_row_log_lik(slots, "plnorm", finite)))
+  }
+})
+
 test_that(".meta_summary_terms uses a reported standard error when one is given", { # nolint: line_length_linter.
   args <- list(meanlog = 1.5, sdlog = 0.5)
   slots <- list(
@@ -843,6 +940,68 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation with gro
   obs <- floor(stime[keep]) - floor(ptime[keep])
   expect_equal(moments[["mean"]], mean(obs), tolerance = 0.03)
   expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.04)
+})
+
+test_that(".meta_implied_moments matches Monte Carlo accrual truncation with unequal windows", { # nolint: line_length_linter.
+  # The follow up available to a case depends on the primary window it fell
+  # in, so within a reporting cell wider than the primary window the accrual
+  # weight steps down at every multiple of pwindow, and a cell narrower than
+  # the primary window shares one weight with its neighbours. A weekly
+  # reported secondary date against a daily primary date at an outbreak
+  # growth rate is where the lower edge weight fails worst.
+  set.seed(123)
+  mean <- 4.6
+  sd <- 2.4
+  var_log <- log1p((sd / mean)^2)
+  args <- list(meanlog = log(mean) - var_log / 2, sdlog = sqrt(var_log))
+  window <- 28
+  n_sim <- 2e6
+  designs <- expand.grid(
+    growth_rate = c(0.05, 0.2), pwindow = c(1, 7), swindow = c(7, 1)
+  )
+  designs <- designs[designs$pwindow != designs$swindow, ]
+  for (row in seq_len(nrow(designs))) {
+    growth_rate <- designs$growth_rate[row]
+    pwindow <- designs$pwindow[row]
+    swindow <- designs$swindow[row]
+    moments <- .meta_implied_moments(
+      "plnorm", args,
+      cutoff = window, pwindow = pwindow, swindow = swindow,
+      trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = growth_rate,
+      trunc_design = 1L
+    )
+    ptime <- sim_accrual_ptime(n_sim, window, growth_rate)
+    delay <- rlnorm(n_sim, args$meanlog, args$sdlog)
+    keep <- ptime + delay <= window
+    ptime <- ptime[keep]
+    delay <- delay[keep]
+    if (pwindow < swindow) {
+      # Daily date differencing, then reported by week.
+      daily <- floor(ptime + delay) - floor(ptime)
+      obs <- swindow * floor(daily / swindow)
+    } else {
+      # A daily secondary date against the start of the primary week.
+      obs <- floor(ptime + delay) - pwindow * floor(ptime / pwindow)
+    }
+    expect_equal(moments[["mean"]], mean(obs), tolerance = 0.02)
+    expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.02)
+  }
+})
+
+test_that(".meta_grid_pmf reduces to the lower edge accrual weight for equal windows", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  boundary <- seq(0, 20)
+  cdf <- .meta_pcens_cdf(boundary, "plnorm", args, 1, 0.1)
+  expected <- pmax(diff(cdf), 0) *
+    .meta_accrual_weight(boundary[-length(boundary)], 20, 0.1)
+  expect_equal(
+    .meta_grid_pmf(
+      "plnorm", args,
+      cutoff = 20, pwindow = 1, swindow = 1, growth_rate = 0.1, accrual = 1L
+    ),
+    expected / sum(expected),
+    tolerance = 1e-12
+  )
 })
 
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation of a continuous estimand", { # nolint: line_length_linter.
@@ -1905,6 +2064,110 @@ test_that(".meta_implied_moments conditions a continuous estimand on delay_min",
   obs <- delay[delay > 3 & delay <= cutoff]
   expect_equal(moments[["mean"]], mean(obs), tolerance = 0.005)
   expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.01)
+})
+
+test_that(".meta_implied_moments of a truncation adjusted study conditions on delay_min alone", { # nolint: line_length_linter.
+  # A study that adjusted for right truncation and only counted delays above
+  # delay_min reported the moments of tau | tau > delay_min, which is the
+  # estimand its quantile rows already use. Those moments must not depend on
+  # max_delay, which for a heavy tailed delay cuts the tail the standard
+  # deviation and kurtosis live in.
+  left_lnorm <- function(args, lower) {
+    raw_moment <- vapply(
+      seq_len(4),
+      function(k) {
+        # On the log scale the integrand is a shifted normal density, which
+        # underflows rather than overflows far into the tail.
+        return(stats::integrate(
+          function(z) {
+            return(exp(
+              k * z + stats::dnorm(z, args$meanlog, args$sdlog, log = TRUE)
+            ))
+          },
+          log(lower), Inf,
+          rel.tol = 1e-10
+        )$value)
+      },
+      numeric(1)
+    )
+    tail_mass <- stats::plnorm(
+      lower, args$meanlog, args$sdlog, lower.tail = FALSE
+    )
+    return(.meta_central_from_raw(raw_moment / tail_mass))
+  }
+  lnorm_args <- function(mean, sd) {
+    var_log <- log1p((sd / mean)^2)
+    return(list(meanlog = log(mean) - var_log / 2, sdlog = sqrt(var_log)))
+  }
+  delay_min <- 3
+  for (reported in list(c(24, 40), c(10, 25))) {
+    args <- lnorm_args(reported[1], reported[2])
+    max_delay <- ceiling(20 * max(reported))
+    exact <- left_lnorm(args, delay_min)
+    for (cens_adjusted in c(1L, 4L)) {
+      pwindow <- if (cens_adjusted == 4L) 2 else 1
+      moments <- .meta_implied_moments(
+        "plnorm", args,
+        lower = delay_min, cutoff = max_delay, pwindow = pwindow, swindow = 1,
+        trunc_adjusted = 1L, cens_adjusted = cens_adjusted, growth_rate = 0
+      )
+      if (cens_adjusted == 4L) {
+        # Code 4 is the primary censored delay left truncated at
+        # delay_min + pwindow / 2 and moved down by pwindow / 2, so it is
+        # checked against its own simulation below rather than the delay.
+        next
+      }
+      expect_equal(moments[["mean"]], exact[["mean"]], tolerance = 1e-4)
+      expect_equal(moments[["sd"]], exact[["sd"]], tolerance = 1e-4)
+      expect_equal(
+        moments[["kurtosis"]], exact[["kurtosis"]],
+        tolerance = 1e-3
+      )
+      expect_equal(
+        moments[["skewness"]], exact[["skewness"]],
+        tolerance = 1e-3
+      )
+      # The reported quantiles of the same study describe the same estimand.
+      median <- stats::qlnorm(
+        1 - 0.5 * stats::plnorm(
+          delay_min, args$meanlog, args$sdlog, lower.tail = FALSE
+        ),
+        args$meanlog, args$sdlog
+      )
+      expect_equal(
+        .meta_implied_prob(
+          median, "plnorm", args,
+          lower = delay_min, cutoff = max_delay, pwindow = 1, swindow = 1,
+          trunc_adjusted = 1L, cens_adjusted = 1L, growth_rate = 0
+        ),
+        0.5,
+        tolerance = 1e-8
+      )
+    }
+  }
+  # The uniform single interval approximation has the same identity, with
+  # the primary censored distribution function in place of the delay's.
+  set.seed(205)
+  args <- lnorm_args(10, 25)
+  pwindow <- 2
+  moments <- .meta_implied_moments(
+    "plnorm", args,
+    lower = delay_min, cutoff = 500, pwindow = pwindow, swindow = 1,
+    trunc_adjusted = 1L, cens_adjusted = 2L, growth_rate = 0
+  )
+  n_sim <- 4e6
+  observed <- stats::runif(n_sim, 0, pwindow) +
+    stats::rlnorm(n_sim, args$meanlog, args$sdlog)
+  observed <- observed[observed > delay_min]
+  expect_equal(moments[["mean"]], mean(observed), tolerance = 0.01)
+  # A heavy tail makes the simulated standard deviation noisy, so it is only
+  # asked to sit nearer the untruncated value than the max_delay truncated
+  # one.
+  truncated <- .meta_pcens_trunc_moments(
+    "plnorm", args, delay_min, 500, pwindow, 0
+  )
+  expect_gt(moments[["sd"]], truncated[["sd"]] * 1.1)
+  expect_equal(moments[["sd"]], stats::sd(observed), tolerance = 0.1)
 })
 
 test_that(".meta_implied_prob conditions the naive grid on delay_min", {
