@@ -724,6 +724,61 @@ test_that(".meta_row_log_lik rejects a draw whose implied moments overflow", {
   }
 })
 
+test_that("the distribution functions sever nodes deep in the lower tail", {
+  # primarycensored's Stan lcdf has a finite value with a NaN gradient deep
+  # in the lower tail of a narrow delay, where every grid and quadrature path
+  # evaluates it. Both implementations therefore treat a node whose plain log
+  # distribution function is below -100 as holding no mass, before the
+  # primary censored function is called. Matches meta_family_pcens_lcdf()
+  # and meta_family_dist_cdf() in Stan.
+  args <- list(meanlog = 1.8, sdlog = 0.05)
+  deep <- 2
+  shallow <- 4
+  expect_lt(stats::plnorm(deep, 1.8, 0.05, log.p = TRUE), -100)
+  expect_gt(stats::plnorm(shallow, 1.8, 0.05, log.p = TRUE), -100)
+  expect_gt(stats::plnorm(deep, 1.8, 0.05), 0)
+  expect_identical(.meta_pcens_cdf(deep, "plnorm", args, 1, 0), 0)
+  expect_gt(.meta_pcens_cdf(shallow, "plnorm", args, 1, 0), 0)
+  expect_identical(.meta_pcens_cdf(deep, "plnorm", args, 1, 0.1), 0)
+  expect_identical(.meta_dist_cdf(deep, "plnorm", args), 0)
+  expect_identical(
+    .meta_dist_cdf(shallow, "plnorm", args), stats::plnorm(shallow, 1.8, 0.05)
+  )
+  expect_identical(.meta_dist_cdf(c(-1, 0), "plnorm", args), c(0, 0))
+  # The severed mass is below anything a moment or a probability resolves.
+  full <- .meta_trunc_moments("plnorm", args, 0, 12)
+  expect_equal(
+    full[["mean"]], exp(1.8 + 0.05^2 / 2),
+    tolerance = 1e-8
+  )
+})
+
+test_that(".meta_continuous_moments rejects a draw whose moments overflow", {
+  # An overflowing analytic moment is returned as the failure vector, so the
+  # log likelihood is -Inf and the posterior predictive has an infinite rather
+  # than a NaN standard error. Matches the reject in meta_family_moments().
+  wide <- .meta_continuous_moments("plnorm", list(meanlog = 1.6, sdlog = 15))
+  expect_identical(wide, .meta_moment_failure())
+  narrow_shape <- .meta_continuous_moments(
+    "pweibull", list(shape = 0.01, scale = 5)
+  )
+  expect_identical(narrow_shape, .meta_moment_failure())
+  slots <- list(
+    lower = 0, obs_type = 3L, study_n = 100L, trunc_adjusted = 1L,
+    cens_adjusted = 1L, cutoff = 60, pwindow = 1, swindow = 1, value = 3.6,
+    report_se = 0, quantile_p = 0, growth_rate = 0, trunc_design = 0L
+  )
+  terms <- .meta_summary_terms(slots, "plnorm", list(meanlog = 1.6, sdlog = 15))
+  expect_false(anyNA(terms))
+  expect_identical(unname(terms[c("implied", "se")]), c(Inf, Inf))
+  slots$report_se <- 0.5
+  terms <- .meta_summary_terms(slots, "plnorm", list(meanlog = 1.6, sdlog = 15))
+  expect_identical(unname(terms[c("implied", "se")]), c(Inf, Inf))
+  # A finite draw is unaffected.
+  finite <- .meta_continuous_moments("plnorm", list(meanlog = 1.6, sdlog = 0.6))
+  expect_true(all(is.finite(finite)))
+})
+
 test_that(".meta_summary_terms uses a reported standard error when one is given", { # nolint: line_length_linter.
   args <- list(meanlog = 1.5, sdlog = 0.5)
   slots <- list(
