@@ -75,15 +75,15 @@ test_that("as_epidist_estimates_data warns when it assumes a study adjusted for 
   # which is announced as a message rather than a warning.
   finite <- minimal
   finite$relative_obs_time <- 20
-  expect_no_warning(
-    msgs <- capture_messages(as_epidist_estimates_data(finite))
+  msgs <- capture_messages(
+    expect_no_warning(as_epidist_estimates_data(finite))
   )
   expect_true(any(grepl("did not adjust", msgs, fixed = TRUE)))
   # An explicit column is neither warned about nor messaged.
   explicit <- minimal
   explicit$trunc_adjusted <- TRUE
-  expect_no_warning(
-    msgs <- capture_messages(as_epidist_estimates_data(explicit))
+  msgs <- capture_messages(
+    expect_no_warning(as_epidist_estimates_data(explicit))
   )
   expect_false(any(grepl("trunc_adjusted", msgs, fixed = TRUE)))
 })

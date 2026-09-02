@@ -194,6 +194,10 @@ Without it a Gamma or Weibull fit to summaries alone took the `brms` default, wh
 See #620.
 - Added an `epidist_newdata()` method for the meta model, which builds an individual level row with the same arguments as the marginal model method, so predicting from a meta model fit no longer means copying a summary row out of the model data.
 See #620.
+- `as_epidist_estimates_data()` now rejects a reported mean at or beyond the observation time of a study that did not adjust for right truncation, a standard error of zero, a standard deviation of zero, and a `cens_adjusted` code that is not a whole number from 0 to 4.
+It warns, rather than messages, when no `trunc_adjusted` column is supplied and a study is therefore assumed to have adjusted for right truncation.
+The `growth_rate` documentation now separates its within window tilt from the accrual weight it applies under `trunc_design = "accrual"`, and points to the `primary = "expgrowth"` option of the marginal model for individual level data.
+See #620.
 
 ## Documentation
 

@@ -151,6 +151,10 @@ as_epidist_estimates_data <- function(data, ...) {
 #' @param trunc_adjusted A string giving the column of `data` containing a
 #'  logical flag for whether the study corrected for right truncation. Defaults
 #'  to `TRUE` where no `relative_obs_time` is supplied and `FALSE` otherwise.
+#'  A study assumed to have adjusted is warned about, because real time
+#'  estimates are right truncated unless the study corrected for it and
+#'  reviews rarely record which studies did. Supply the column to say so
+#'  yourself.
 #'
 #' @param trunc_design A string giving the column of `data` containing how the
 #'  study stopped collecting data, either `"cohort"` (it followed every primary
@@ -174,11 +178,18 @@ as_epidist_estimates_data <- function(data, ...) {
 #'
 #' @param growth_rate A string giving the column of `data` containing the
 #'  exponential growth rate of primary events during the study period. Defaults
-#'  to 0, a uniform primary event within its window. A non-zero rate is
+#'  to 0. It plays two roles. Within each primary window it tilts the primary
+#'  event towards the end of the window, which for a daily window is
+#'  negligible. Under `trunc_design = "accrual"` it also weights the follow up
+#'  available to each delay, which is the dynamical bias of a growing epidemic
+#'  and can move the implied mean by a day or more. A non-zero rate is
 #'  expensive, because the primary censored delay distribution then has no
 #'  analytical solution and every evaluation becomes a numerical integration.
-#'  Leave it at 0 unless the study period covered enough growth for the
-#'  dynamical bias to matter.
+#'  Leave it at 0 unless the study accrued cases over a period of growth. It
+#'  is a known quantity here, taken from the study. For individual level data
+#'  the same rate is estimated instead, as the `pgrowth` parameter of
+#'  `primary = "expgrowth"` in [as_epidist_marginal_model()]. See
+#'  `vignette("primary-events")`.
 #'
 #' @param max_delay A string giving the column of `data` containing the delay
 #'  beyond which the implied summaries are truncated when building the discrete
@@ -721,13 +732,30 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   }
   if (!hasName(data, "trunc_adjusted")) {
     data$trunc_adjusted <- is.infinite(data$relative_obs_time)
-    cli::cli_inform(c(
-      i = paste0(
-        "No trunc_adjusted column supplied, assuming studies with a finite ",
-        "relative_obs_time did not adjust for right truncation and that all ",
-        "others did."
-      )
-    ))
+    assumed <- unique(as.character(data$study)[data$trunc_adjusted])
+    if (length(assumed) > 0) {
+      # Taking a study as truncation adjusted is the assumption most likely
+      # to be wrong, so it is a warning rather than a message.
+      cli::cli_warn(c(
+        "!" = paste0(
+          "No trunc_adjusted column supplied, assuming {.val {assumed}} ",
+          "adjusted for right truncation because {?it has/they have} no ",
+          "finite relative_obs_time, and that any other study did not."
+        ),
+        i = paste0(
+          "Real time estimates are right truncated unless the study ",
+          "corrected for it. Supply trunc_adjusted to say which did."
+        )
+      ))
+    } else {
+      cli::cli_inform(c(
+        i = paste0(
+          "No trunc_adjusted column supplied, assuming every study did not ",
+          "adjust for right truncation because each has a finite ",
+          "relative_obs_time."
+        )
+      ))
+    }
   }
   data$trunc_adjusted <- as.logical(data$trunc_adjusted)
   if (!hasName(data, "trunc_design")) {
@@ -765,6 +793,10 @@ as_epidist_estimates_data.epidist_multivariate <- function(
     data <- .add_default_max_delay(data)
   }
   data$trunc_design <- as.character(data$trunc_design)
+  assert_integerish(
+    data$cens_adjusted,
+    lower = 0, upper = 4, any.missing = FALSE, .var.name = "cens_adjusted"
+  )
   data$cens_adjusted <- as.integer(data$cens_adjusted)
   data$p[data$type != "quantile"] <- NA_real_
   return(data)
@@ -981,11 +1013,38 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     ))
   }
 
+  se_zero <- !is.na(data$se) & data$se <= 0
+  if (any(se_zero)) {
+    cli::cli_abort(paste0(
+      "A reported standard error {.var se} must be greater than zero. This ",
+      "fails for {.val {unique(as.character(data$study)[se_zero])}}."
+    ))
+  }
+
+  sd_zero <- data$type == "sd" & data$value <= 0
+  if (any(sd_zero)) {
+    cli::cli_abort(paste0(
+      "A reported standard deviation must be greater than zero. This fails ",
+      "for {.val {unique(as.character(data$study)[sd_zero])}}."
+    ))
+  }
+
   if (any(!data$trunc_adjusted & is.infinite(data$relative_obs_time))) {
     cli::cli_abort(paste0(
       "Studies that did not adjust for right truncation must have a finite ",
       "{.var relative_obs_time} giving the observation time on the delay ",
       "scale."
+    ))
+  }
+
+  beyond_obs <- !data$trunc_adjusted & data$type == "mean" &
+    data$value >= data$relative_obs_time
+  if (any(beyond_obs)) {
+    cli::cli_abort(paste0(
+      "A study that did not adjust for right truncation cannot report a ",
+      "mean at or beyond its observation time, because every delay it saw ",
+      "fell below it. This fails for ",
+      "{.val {unique(as.character(data$study)[beyond_obs])}}."
     ))
   }
 
