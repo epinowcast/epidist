@@ -180,6 +180,10 @@ See #620.
 See #616 and #620.
 - The meta vignette is now precomputed from a `.Rmd.orig` source, so it ships with the package.
 See #619 and #620.
+- The meta vignette now works through the published Ebola onset to death estimates collated by `epireview`.
+It adjusts for the phase of the outbreak each estimate was made in, taking the retrospective studies as the reference so the population level estimate is the one least affected by right truncation, and reports the phase bias as a marginal effect.
+It reports the population level posterior of the Gamma shape and scale alongside the natural mean and standard deviation, and compares the result with a modern re-analysis of one of the same line lists.
+See #620.
 
 ## Bug fixes
 

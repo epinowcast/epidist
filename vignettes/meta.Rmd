@@ -90,6 +90,9 @@ library(brms)
 #> to the package is available through vignette('brms_overview').
 #>
 #> Attaching package: 'brms'
+#> The following object is masked from 'package:rstan':
+#>
+#>     loo
 #> The following object is masked from 'package:stats':
 #>
 #>     ar
@@ -97,9 +100,6 @@ library(ggplot2)
 library(dplyr)
 #>
 #> Attaching package: 'dplyr'
-#> The following object is masked from 'package:testthat':
-#>
-#>     matches
 #> The following objects are masked from 'package:stats':
 #>
 #>     filter, lag
@@ -109,15 +109,10 @@ library(dplyr)
 library(tidyr)
 #>
 #> Attaching package: 'tidyr'
-#> The following object is masked from 'package:testthat':
+#> The following object is masked from 'package:rstan':
 #>
-#>     matches
+#>     extract
 library(purrr) # nolint
-#>
-#> Attaching package: 'purrr'
-#> The following object is masked from 'package:testthat':
-#>
-#>     is_null
 library(tibble)
 ```
 
@@ -512,9 +507,19 @@ summary(fit_meta_summary)
 
 ``` r
 predict_delay_parameters(fit_meta_summary) |>
-  summarise(across(c("mu", "sigma"), mean))
-#>         mu     sigma
-#> 1 1.775981 0.5021095
+  select("mu", "sigma") |>
+  pivot_longer(everything(), names_to = "parameter") |>
+  summarise(
+    median = median(.data$value),
+    q025 = quantile(.data$value, 0.025),
+    q975 = quantile(.data$value, 0.975),
+    .by = "parameter"
+  )
+#> # A tibble: 2 × 4
+#>   parameter median  q025  q975
+#>   <chr>      <dbl> <dbl> <dbl>
+#> 1 mu         1.78  1.75  1.81
+#> 2 sigma      0.502 0.476 0.527
 ```
 
 Even though every study is individually biased, the meta model recovers the simulated log mean of 1.8 and log standard deviation of 0.5 closely.
@@ -710,44 +715,29 @@ p_compare
 # Real world estimates from epireview {#epireview}
 
 [epireview](https://github.com/mrc-ide/epireview) [@epireview] collates published parameter estimates gathered by the Pathogen Epidemiology Review Group.
-It is not on CRAN, so install it from GitHub if you do not already have it.
+It is not on CRAN.
+It is published on [mrc-ide's r-universe](https://mrc-ide.r-universe.dev), and its own [installation instructions](https://mrc-ide.github.io/epireview/) cover that and the other routes.
 
 
 ``` r
-if (!requireNamespace("epireview", quietly = TRUE)) {
-  if (!requireNamespace("remotes", quietly = TRUE)) {
-    install.packages("remotes")
-  }
-  # nolint next: nonportable_path_linter.
-  try(
-    remotes::install_github("mrc-ide/epireview"),
-    silent = TRUE
-  )
-}
-if (requireNamespace("epireview", quietly = TRUE)) {
-  library(epireview) # nolint: library_call_linter.
-}
-# Skip the rest of this section when epireview is not available
-knitr::opts_chunk$set(eval = requireNamespace("epireview", quietly = TRUE))
+library(epireview) # nolint: library_call_linter.
 #> Loading required package: epitrix
 #> Loading required package: ggforce
 ```
 
-We use the onset to death delay from the Ebola outbreak data.
+We use the onset to death delay from the Ebola data.
 Alongside the delay type we filter to the value types we can model (means and medians), to estimates reported in days with no scaling exponent, and to parameters that are not inverse rates.
 This stops other value types silently slipping in as medians.
 
 
 ``` r
-ebola <- suppressMessages(load_epidata("ebola"))
-onset_to_death_all <- ebola$params |>
+ebola_params <- suppressMessages(load_epidata("ebola"))$params
+
+onset_to_death <- ebola_params |>
   filter(
     .data$parameter_type_short == "delay_onset_to_death",
     !is.na(.data$parameter_value),
-    !is.na(.data$population_sample_size)
-  )
-onset_to_death <- onset_to_death_all |>
-  filter(
+    !is.na(.data$population_sample_size),
     .data$parameter_value_type %in% c("Mean", "Median"),
     .data$parameter_unit == "Days",
     .data$exponent == 0,
@@ -757,30 +747,68 @@ nrow(onset_to_death)
 #> [1] 29
 ```
 
-For these data the hygiene filters remove 0 rows, but they guard against mis-modelling if the underlying database changes.
+## Adjusting for the phase of the outbreak {#phase}
+
+An estimate made while an outbreak is still growing is right truncated.
+The long delays have not had time to be observed, so the estimate is biased towards shorter delays.
+An estimate made after the outbreak has ended sees the whole delay distribution and comes closer to the unshortened delay.
+Correcting for this directly needs the observation time of each study, and for a study that stopped collecting at a calendar date it also needs the growth rate of primary events over the collection window.
+epireview records neither.
+It does record the phase of the outbreak an estimate was made in, so we adjust for that instead and let the size of the bias be estimated from the studies.
+
+We make the post outbreak studies the reference level.
+The population level intercept is then the retrospective delay, the one we expect to be closest to unbiased, and each remaining coefficient reads directly as how much the delay is shifted in that group.
+A negative coefficient on the log link is the direction we expect for estimates made during an outbreak.
+Coding it the other way round would leave the intercept describing the biased studies, which is not the quantity we want to report.
+
+
+``` r
+onset_to_death <- onset_to_death |>
+  mutate(
+    phase = case_when(
+      .data$method_moment_value == "Post outbreak" ~ "post outbreak",
+      .data$method_moment_value %in% c("Start outbreak", "Mid outbreak") ~
+        "during outbreak",
+      .default = "unrecorded"
+    ),
+    # The reference level is the retrospective studies.
+    phase = factor(
+      .data$phase,
+      levels = c("post outbreak", "during outbreak", "unrecorded")
+    )
+  )
+count(onset_to_death, phase)
+#> # A tibble: 3 × 2
+#>   phase               n
+#>   <fct>           <int>
+#> 1 post outbreak       7
+#> 2 during outbreak     2
+#> 3 unrecorded         20
+```
+
+::: {.alert .alert-warning}
+Only two of these studies record having been made during an outbreak, so this contrast is weak.
+The remaining studies are split between those recorded as post outbreak and those where the field is unrecorded or explicitly unspecified, and the `unrecorded` group mixes both.
+The term absorbs whatever separates these groups, which need not be truncation alone.
+Reviews reporting the metadata of @charniga2024best would remove the need for it.
+:::
 
 ::: {.alert .alert-primary}
-epireview does not record how, or whether, a study adjusted for censoring or right truncation, so we have to state assumptions explicitly rather than leave them implicit.
-We treat every study as `cens_adjusted = 0`.
+epireview does not record how, or whether, a study adjusted for censoring, so we have to state that assumption explicitly rather than leave it implicit.
+We treat every study as `cens_adjusted = 0`, meaning it took integer date differences and summarised them directly.
 A study that reports a fitted distribution has usually fitted it to integer date differences, so reporting one says nothing about how it handled censoring.
-Estimates that predate the recent literature on these biases rarely adjusted for censoring at all, and rarely say either way, so assuming otherwise would be optimistic.
-We apply no truncation correction at all.
-Correcting for truncation needs the observation time, and for a study that stopped at a calendar date it also needs the growth rate of primary events over the collection window.
-epireview records neither, and `method_moment_value` gives the phase of the outbreak for only nine of the 29 studies here.
-We instead adjust for the phase of the outbreak each estimate was made in, so that the residual truncation bias is estimated from the studies rather than assumed.
-The fitted `phase` term contrasts the studies recorded as post outbreak against every other study.
-Our prior is that estimates made early, while the outbreak was growing, skew towards shorter delays, and that estimates made after the outbreak, or retrospectively, come closer to the unshortened delay.
-The sign of the fitted `phasepost` coefficient (the logged ratio of the post outbreak mean to the rest) tells us whether the data support that direction, and with so few studies recorded the term is a coarse adjustment rather than a rigorous one.
-Because phase is so rarely recorded, that contrast mixes the two known to be from during an outbreak with the twenty that say nothing.
-It absorbs whatever separates those groups, which need not be truncation alone.
-Ideally reviews would report this study metadata directly, so that assumptions like these were not needed.
-The reporting checklist of @charniga2024best covers exactly this metadata, and if studies and systematic reviews reported against it, building estimates data for this model would be straightforward.
-For examples of the checklist in use see [andv-linelist-analysis](https://github.com/epiforecasts/andv-linelist-analysis) (the Epuyén Andes virus outbreak) and [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis) (the 2012 Isiro Bundibugyo Ebola outbreak, re-analysing the line list of @rosello2015ebola).
+Estimates that predate the recent literature on these biases rarely adjusted for censoring, and rarely say either way, so assuming otherwise would be optimistic.
+We apply no explicit truncation correction, setting `trunc_adjusted = TRUE` for every study, because the observation times needed for one are not recorded.
+The `phase` term stands in for it.
+For examples of the @charniga2024best checklist in use see [andv-linelist-analysis](https://github.com/epiforecasts/andv-linelist-analysis) (the Epuyén Andes virus outbreak) and [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis) (the 2012 Isiro Bundibugyo Ebola outbreak, re-analysing the line list of @rosello2015ebola).
 :::
 
 A small helper maps each row of `onset_to_death` to the long format `as_epidist_estimates_data()` expects.
-Means become `"mean"` rows, with a matching `"sd"` row where a standard deviation, rather than a standard error, is reported.
+Means become `"mean"` rows, with a matching `"sd"` row where a standard deviation is reported, either as the study's own spread or as the second parameter of a fitted Gamma.
+A reported standard error becomes an `se` on the mean row instead.
 Medians become `"quantile"` rows at `p = 0.5`, with further quantile rows at `p = 0.25` and `p = 0.75` where an interquartile range is reported.
+A study reporting a spread that does not match its own value type, such as a median alongside a standard deviation, keeps only the matching set.
+Fitting both would treat two summaries of the same delays as independent and understate their joint uncertainty.
 
 <details><summary>Click to expand for the epireview conversion helper</summary>
 
@@ -793,14 +821,21 @@ meta_cols <- c(
   "max_delay", "phase"
 )
 
+# Each study contributes one coherent set of summaries, either a mean with a
+# standard deviation or a set of quantiles, never a mixture. Summaries of
+# different kinds from one study are fitted as though they were independent,
+# which understates their joint uncertainty, so a study reporting both keeps
+# only the set matching the value type the review recorded as its estimate.
 row_to_estimates <- function(row) {
   base <- as_tibble(row[meta_cols])
   spread_type <- row$parameter_uncertainty_singe_type
   spread <- row$parameter_uncertainty_single_value
-  # epireview records a fitted distribution as a mean and an sd.
+  # epireview records a fitted Gamma as a mean and an sd, coding the second
+  # parameter as "Mean sd". A study reporting a shape and a scale instead is
+  # handled separately below.
   reported_sd <- if (identical(spread_type, "Standard Deviation")) {
     spread
-  } else if (identical(row$distribution_par2_type, "sd")) {
+  } else if (identical(row$distribution_par2_type, "Mean sd")) {
     row$distribution_par2_value
   }
   if (identical(row$parameter_value_type, "Mean")) {
@@ -846,9 +881,6 @@ ebola_estimates_df <- onset_to_death |>
     trunc_adjusted = TRUE,
     relative_obs_time = Inf,
     cens_adjusted = 0,
-    phase = ifelse(
-      .data$method_moment_value %in% "Post outbreak", "post", "other"
-    ),
     study = .data$article_label,
     n = .data$population_sample_size,
     max_delay = NA_real_ # replaced below, once rows are in long format
@@ -873,6 +905,13 @@ ebola_estimates <- as_epidist_estimates_data(ebola_estimates_df)
 #>   reporting) for every study.
 #> ℹ No `swindow` column supplied, assuming a censoring window of 1 (daily
 #>   reporting) for every study.
+#> ! The quantiles reported by "Li 2016 (a)", "Khan 1999", "Camacho 2014", "Baron
+#>   1983", "Miglietta 2019", and "Nsio 2019" sit within ten censoring windows of
+#>   the smallest delay these studies counted, so the discrete grid barely
+#>   resolves the delay. A reported quantile is rounded to that grid, which can
+#>   bias the fit by tens of percent and does not shrink as `n` grows. Check that
+#>   `swindow` is the resolution the study worked at, and fit a reported mean and
+#>   standard deviation in preference where one is available.
 ```
 
 ::: {.alert .alert-primary}
@@ -882,13 +921,21 @@ That grid is used to compute the implied summaries of studies with `cens_adjuste
 A study we could treat as fully adjusted would use closed form continuous moments and need no grid.
 :::
 
+The caution printed above is a different one, and it is worth reading rather than skipping.
+Six studies report a quantile that sits within ten censoring windows of the shortest delay they counted, so the daily grid barely resolves it.
+A quantile rounded to that grid can be badly biased, and unlike a sampling error the bias does not shrink as the study gets larger.
+The package suggests fitting a reported mean and standard deviation in preference, which is what we do wherever a study reports one.
+Five of these six record only a median, so the coarse quantile is all we have.
+Nsio 2019 also reports a standard deviation, but alongside its median rather than a mean, and the helper keeps only the set matching the value type the review recorded.
+Fitting both would treat two summaries of the same delays as independent and overstate what that one study contributes.
+A review that reported the mean as well would let the model use the better resolved summary here.
+
 We fit a Gamma, with a `(1 | study)` term to allow for genuine differences between studies (see the note on plug in standard errors in `?as_epidist_meta_model`).
 
 
 ``` r
 ebola_meta <- as_epidist_meta_model(estimates = ebola_estimates)
 
-t <- proc.time()
 fit_ebola <- epidist(
   data = ebola_meta,
   formula = mu ~ 1 + phase + (1 | study),
@@ -898,7 +945,6 @@ fit_ebola <- epidist(
   seed = 1,
   backend = "cmdstanr"
 )
-ebola_fit_time <- proc.time() - t
 ```
 
 
@@ -915,183 +961,105 @@ summary(fit_ebola)
 #> Multilevel Hyperparameters:
 #> ~study (Number of levels: 29)
 #>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)     0.14      0.03     0.09     0.21 1.00      334      691
+#> sd(Intercept)     0.14      0.03     0.09     0.22 1.00      310      523
 #>
 #> Regression Coefficients:
-#>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           2.26      0.04     2.18     2.34 1.01      425      676
-#> shape_Intercept     0.54      0.05     0.44     0.64 1.00     1795      807
-#> phasepost           0.01      0.08    -0.15     0.17 1.01      490      628
+#>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> Intercept               2.27      0.07     2.14     2.40 1.00      380      588
+#> shape_Intercept         0.69      0.04     0.61     0.77 1.00     1078      826
+#> phaseduringoutbreak     0.04      0.14    -0.24     0.31 1.00      426      542
+#> phaseunrecorded        -0.03      0.08    -0.18     0.13 1.00      343      478
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
 #> scale reduction factor on split chains (at convergence, Rhat = 1).
 ```
 
-Fitting this model, including the one-off cost of compiling the Stan program, took 186 seconds.
-Sizing each study's grid to its own reported spread, rather than using one shared value large enough for the widest study, is what keeps that cost down.
+## The population level delay and the size of the phase bias {#population-estimates}
 
-## Checking the fit against the reported estimates
-
-For every row we fitted to, we compare the reported value with what the model implies, both for that study and for the pooled distribution with the `(1 | study)` term switched off.
-Each row predicts the first of the summaries a study computed from the same delays, so a study reporting a mean and a standard deviation appears at its mean.
-Grouped by summary type, this gives a forest style plot in which most reported values should fall within their study level interval.
-
-<details><summary>Click to expand for code to prepare the forest plot</summary>
+Switching the `(1 | study)` term off with `re_formula = NA` gives the population level delay, the one the studies are estimates of rather than any single study's own.
+Reporting only its mean understates the posterior, so we report the Gamma shape and scale alongside the natural mean and standard deviation, each as a median with a 95% credible interval.
+The shape and scale are the parameters of the distribution.
+The mean and standard deviation are the moments they imply.
 
 
 ``` r
-population_draws <- predict_delay_parameters(fit_ebola, re_formula = NA) |>
-  filter(index == 1)
+phase_grid <- as_tibble(ebola_meta)[rep(1, nlevels(ebola_meta$phase)), ] |>
+  mutate(phase = factor(levels(ebola_meta$phase), levels(ebola_meta$phase)))
 
-study_pred <- posterior_predict(fit_ebola)
-pooled_pred <- posterior_predict(fit_ebola, re_formula = NA)
+population_draws <- predict_delay_parameters(
+  fit_ebola, newdata = phase_grid, re_formula = NA
+) |>
+  mutate(phase = levels(ebola_meta$phase)[.data$index])
 
-interval <- function(draws, probs = c(0.025, 0.5, 0.975)) {
-  out <- draws |>
-    apply(2, stats::quantile, probs = probs) |>
-    t() |>
-    as.data.frame() |>
-    setNames(c("lower", "median", "upper"))
-  return(out)
-}
-
-pop_sd <- mean(population_draws$sd)
-pop_kurtosis <- mean(3 + 6 / population_draws$shape)
-
-forest_data <- ebola_meta |>
-  as_tibble() |>
-  mutate(
-    # A row stands for a group of summaries and predicts the first of them.
-    type = case_when(
-      .data$obs_type == 3L ~ "sd",
-      .data$obs_type %in% c(4L, 6L) ~ "quantile",
-      .default = "mean"
-    ),
-    value = .data$delay_upr,
-    p = .data$quantile_p,
-    n = .data$study_n,
-    observed = ifelse(.data$type == "quantile", .data$p, .data$value),
-    # A plug in standard error, matching the defaults documented in
-    # `?as_epidist_meta_model`, is used wherever a study did not report one.
-    plugin_se = case_when(
-      .data$report_se > 0 ~ .data$report_se,
-      .data$type == "mean" ~ pop_sd / sqrt(.data$n),
-      .data$type == "sd" ~ pop_sd * sqrt((pop_kurtosis - 1) / (4 * .data$n)),
-      .data$type == "quantile" ~ sqrt(.data$p * (1 - .data$p) / .data$n)
-    ),
-    label = ifelse(
-      .data$type == "quantile",
-      paste0(.data$study, " (p=", .data$p, ")"), .data$study
-    ),
-    type_label = case_when(
-      .data$type == "mean" ~ "Mean (days)",
-      .data$type == "sd" ~ "Standard deviation (days)",
-      .data$type == "quantile" ~ "Cumulative probability at the quantile"
-    )
-  ) |>
-  bind_cols(rename_with(
-    interval(study_pred), function(x) paste0("study_", x)
-  )) |>
-  bind_cols(rename_with(
-    interval(pooled_pred), function(x) paste0("pooled_", x)
-  )) |>
-  mutate(
-    reported_lower = .data$observed - 1.96 * .data$plugin_se,
-    reported_upper = .data$observed + 1.96 * .data$plugin_se
-  ) |>
-  arrange(.data$type, .data$observed) |>
-  mutate(label = factor(.data$label, levels = unique(.data$label)))
-
-p_forest <- ggplot(forest_data, aes(y = label)) +
-  geom_errorbar(
-    aes(
-      xmin = reported_lower, xmax = reported_upper,
-      colour = "Reported (1.96 se)"
-    ),
-    orientation = "y", height = 0
-  ) +
-  geom_point(aes(x = observed, colour = "Reported (1.96 se)"), size = 1.6) +
-  geom_pointrange(
-    aes(
-      x = pooled_median, xmin = pooled_lower, xmax = pooled_upper,
-      colour = "Population (pooled)"
-    ),
-    position = position_nudge(y = 0.22), fatten = 1.5, linewidth = 0.6
-  ) +
-  geom_pointrange(
-    aes(
-      x = study_median, xmin = study_lower, xmax = study_upper,
-      colour = "Study level"
-    ),
-    position = position_nudge(y = -0.22), fatten = 1.5, linewidth = 0.6
-  ) +
-  facet_wrap(~type_label, ncol = 3, scales = "free") +
-  scale_colour_manual(
-    breaks = c("Reported (1.96 se)", "Study level", "Population (pooled)"),
-    values = c(
-      "Reported (1.96 se)" = "black",
-      "Study level" = "#56B4E9",
-      "Population (pooled)" = "#D55E00"
-    )
-  ) +
-  labs(x = "", y = "", colour = NULL) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-```
-
-</details>
-
-(ref:forest) Reported value with a 95% interval from 1.96 reported, or plug in, standard errors (black) against the 95% posterior predictive interval of the model implied reported quantity, at study level (blue) and pooled across studies with the `(1 | study)` term switched off (orange). Rows are grouped by summary type because a mean or standard deviation is on the delay scale in days while a quantile row is modelled on the cumulative probability scale (`vignette("model")`).
-
-::: {.alert .alert-warning}
-The adjustment metadata behind this fit is assumed, not reported.
-epireview does not record how these studies handled censoring or truncation, so the intervals below show what the model implies under our stated assumptions rather than a corrected estimate of the Ebola onset to death delay.
-Treat it as a demonstration of the workflow.
-:::
-
-
-``` r
-p_forest
-#> `height` was translated to `width`.
-```
-
-<div class="figure">
-<img src="figures/meta-forest-1.png" alt="(ref:forest)"  />
-<p class="caption">(\#fig:forest)(ref:forest)</p>
-</div>
-
-#### Pooled population level estimates {#population-estimates}
-
-A single posterior distribution summarises the pooled, population level delay, the one a prediction with the `(1 | study)` term switched off gives.
-Reporting only its natural scale mean understates the posterior, so here we show the shape and the scale, the natural mean and the natural standard deviation, each with a median and a 95% credible interval computed from the posterior draws.
-
-``` r
 population_summary <- population_draws |>
+  filter(.data$phase == "post outbreak") |>
   transmute(
     shape = .data$shape,
     scale = .data$mean / .data$shape,
     mean = .data$mean,
     sd = .data$sd
   ) |>
-  pivot_longer(dplyr::everything(), names_to = "parameter", values_to = "value") |>
+  pivot_longer(everything(), names_to = "parameter") |>
   summarise(
-    median = stats::median(.data$value),
-    q025 = stats::quantile(.data$value, 0.025),
-    q975 = stats::quantile(.data$value, 0.975),
-    .by = parameter
+    median = median(.data$value),
+    q025 = quantile(.data$value, 0.025),
+    q975 = quantile(.data$value, 0.975),
+    .by = "parameter"
   )
 
 population_summary
+#> # A tibble: 4 × 4
+#>   parameter median  q025  q975
+#>   <chr>      <dbl> <dbl> <dbl>
+#> 1 shape       1.98  1.84  2.16
+#> 2 scale       4.86  4.12  5.69
+#> 3 mean        9.69  8.53 11.1
+#> 4 sd          6.85  5.96  7.85
 ```
 
-Some of these estimates also report a fitted Gamma distribution, which epireview records as a mean and a standard deviation.
-Those are fitted to above, and converted to a shape and rate here only to draw the density.
-They are moments of a fitted distribution rather than summaries of the raw delays, so their sampling error is smaller than the `sd / sqrt(n)` the model assumes when no standard error is reported, and epireview records none for these studies.
+The phase bias is the contrast between each phase and the retrospective reference, holding everything else fixed.
+`marginaleffects` gives it directly, on the scale of the mean delay in days.
 
-Where a study reports the fitted distribution directly, fitting to its shape and scale is the more natural summary of the delay distribution than the mean and standard deviation alone.
-epireview does not record the shape and scale, only the mean and standard deviation of the fitted distribution, so we still convert those moments and fit to them above.
-The pooled shape and scale come out of the posterior draws we reuse below.
+
+``` r
+marginaleffects::avg_comparisons(
+  fit_ebola, variables = "phase", re_formula = NA
+)
+#>
+#>                         Contrast Estimate 2.5 % 97.5 %
+#>  during outbreak - post outbreak    0.415 -2.19   3.29
+#>  unrecorded - post outbreak        -0.226 -1.82   1.18
+#>
+#> Term: phase
+#> Type: response
+```
+
+
+``` r
+population_draws |>
+  select("draw", "phase", "mean") |>
+  pivot_wider(names_from = "phase", values_from = "mean") |>
+  transmute(ratio = .data$`during outbreak` / .data$`post outbreak`) |>
+  summarise(
+    median = median(.data$ratio),
+    q025 = quantile(.data$ratio, 0.025),
+    q975 = quantile(.data$ratio, 0.975)
+  )
+#> # A tibble: 1 × 3
+#>   median  q025  q975
+#>    <dbl> <dbl> <dbl>
+#> 1   1.04 0.789  1.36
+```
+
+With two of the 29 studies recorded as made during an outbreak, this contrast is not resolved by these data.
+The interval spans one in both directions, so the metadata epireview records cannot say whether estimates made during an outbreak were shorter.
+That is a statement about the metadata rather than about the biases, which the simulated example above shows are real and large.
+The population level estimate is the more useful output here, and the phase term's value is that it stops the retrospective studies and the rest being pooled as though they were interchangeable.
+
+## Fitting to a study's own distribution parameters {#natural-parameters}
+
+Four of these studies report a fitted distribution, all of them from @rosello2015ebola, which fitted a Gamma separately to each of several outbreaks in the Democratic Republic of the Congo.
 
 
 ``` r
@@ -1100,73 +1068,323 @@ reported_gamma <- onset_to_death |>
   transmute(
     outbreak = .data$population_location,
     study = .data$article_label,
-    mean = .data$distribution_par1_value,
-    sd = .data$distribution_par2_value
-  ) |>
-  mutate(shape = (mean / sd)^2, rate = shape / mean)
+    family = .data$distribution_type,
+    par1 = .data$distribution_par1_type,
+    par1_value = .data$distribution_par1_value,
+    par2 = .data$distribution_par2_type,
+    par2_value = .data$distribution_par2_value
+  )
 
 reported_gamma
-#> # A tibble: 4 × 6
-#>   outbreak study             mean    sd shape  rate
-#>   <chr>    <chr>            <dbl> <dbl> <dbl> <dbl>
-#> 1 Kikwit   Rosello 2015 (1)  9.47  4.44  4.55 0.480
-#> 2 Mweka    Rosello 2015 (2)  7.62  4.44  2.95 0.387
-#> 3 Isiro    Rosello 2015 (3) 11.4   5.41  4.42 0.388
-#> 4 Boende   Rosello 2015 (4)  9.39  5.67  2.74 0.292
+#> # A tibble: 4 × 7
+#>   outbreak study            family par1  par1_value par2    par2_value
+#>   <chr>    <chr>            <chr>  <chr>      <dbl> <chr>        <dbl>
+#> 1 Kikwit   Rosello 2015 (1) Gamma  Mean        9.47 Mean sd       4.44
+#> 2 Mweka    Rosello 2015 (2) Gamma  Mean        7.62 Mean sd       4.44
+#> 3 Isiro    Rosello 2015 (3) Gamma  Mean       11.4  Mean sd       5.41
+#> 4 Boende   Rosello 2015 (4) Gamma  Mean        9.39 Mean sd       5.67
 ```
 
-All 4 of them come from the same article [@rosello2015ebola], which fitted a Gamma distribution separately to each of several outbreaks in the Democratic Republic of the Congo, so we label them by outbreak rather than by study.
-epireview records the mean of each fit as that study's reported estimate, so these four rows are already among the summaries we fitted to above.
-The comparison below therefore shows where the pooled estimate sits relative to these individual fits, rather than being an independent check.
+epireview records each of these as a mean and a standard deviation, which is what the helper above picks up.
+A Gamma's mean and standard deviation determine its shape and scale exactly, so for a two parameter family the two descriptions carry the same information and nothing is lost by fitting the moments.
+Generating extra quantiles from them would not add information, it would count the same two numbers several times.
+
+No onset to death record in epireview reports a shape and a scale.
+All four that give a distribution are the Rosello Gammas above, recorded as a mean and a standard deviation, so for the delay this vignette models the question does not arise.
+Other records in the same dataset do give the parameters directly.
+
+
+``` r
+ebola_params |>
+  filter(.data$distribution_par1_type == "Shape") |>
+  select(
+    "article_label", "parameter_type_short", "distribution_type",
+    "distribution_par1_value", "distribution_par2_value",
+    "parameter_value", "population_sample_size"
+  )
+#> # A tibble: 4 × 7
+#>   article_label    parameter_type_short distribution_type distribution_par1_va…¹
+#>   <chr>            <chr>                <chr>                              <dbl>
+#> 1 Fallah 2015 (1)  incubation_period    Gamma                               2.86
+#> 2 Fallah 2015 (2)  incubation_period    Gamma                               2.60
+#> 3 Marziano 2023 (… serial_interval      Weibull                             1.76
+#> 4 Marziano 2023 (… serial_interval      Weibull                             1.63
+#> # ℹ abbreviated name: ¹​distribution_par1_value
+#> # ℹ 3 more variables: distribution_par2_value <dbl>, parameter_value <dbl>,
+#> #   population_sample_size <int>
+```
+
+Where a study reports the parameters, they describe the distribution better than two of its moments do, and `epidist_estimates_parameters()` is the route to fitting them.
+It converts the parameters to the summaries that distribution implies over the range of delays the study could have seen, carries any reported parameter standard errors onto the summary scale by the delta method, and passes the study metadata through unchanged.
+Those summaries then go through the same forward model as any other summary row, so the censoring and truncation adjustments still apply.
+Fitting a study's reported parameters is not the same as asserting that the study was unbiased.
+
+The gain is largest when the study fitted a different family from the one we are fitting.
+A study's Weibull shape and scale imply a particular set of summaries, and those summaries are what a Gamma should then be fitted to.
+Its mean alone would discard the shape the study actually reported.
+None of the records above is an onset to death delay, so the call below is on a serial interval and is here to show the API rather than to feed the model we fitted.
+
+
+``` r
+marziano <- filter(
+  ebola_params,
+  .data$article_label == "Marziano 2023 (2)",
+  .data$distribution_par1_type == "Shape"
+)
+
+epidist_estimates_parameters(
+  study = marziano$article_label,
+  family = tolower(marziano$distribution_type),
+  parameters = c(
+    shape = marziano$distribution_par1_value,
+    scale = marziano$distribution_par2_value
+  ),
+  probs = c(0.25, 0.5, 0.75),
+  n = marziano$population_sample_size,
+  relative_obs_time = Inf,
+  trunc_adjusted = TRUE,
+  cens_adjusted = 0
+)
+#> ℹ No `pwindow` column supplied, assuming a censoring window of 1 (daily
+#>   reporting) for every study.
+#> ℹ No `swindow` column supplied, assuming a censoring window of 1 (daily
+#>   reporting) for every study.
+#> ℹ No max_delay column supplied, using twenty times the largest reported value
+#>   for each study (minimum 10) as the grid cutoff. Increase this if the delay
+#>   distribution has a long tail, and lower it to speed up fitting.
+#> # A tibble: 5 × 16
+#>   study          type  value    se     n     p pwindow swindow relative_obs_time
+#>   <chr>          <chr> <dbl> <dbl> <int> <dbl>   <dbl>   <dbl>             <dbl>
+#> 1 Marziano 2023… mean  10.7     NA    12 NA          1       1               Inf
+#> 2 Marziano 2023… sd     6.74    NA    12 NA          1       1               Inf
+#> 3 Marziano 2023… quan…  5.57    NA    12  0.25       1       1               Inf
+#> 4 Marziano 2023… quan…  9.56    NA    12  0.5        1       1               Inf
+#> 5 Marziano 2023… quan… 14.6     NA    12  0.75       1       1               Inf
+#> # ℹ 7 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
+#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>, max_delay <dbl>,
+#> #   mvn_id <chr>
+```
+
+Check that a record's reported summary and its reported parameters agree before using either.
+They do here, where the reported mean of 11.7 days sits close to the 10.71 days the reported Weibull implies.
+They do not for `Marziano 2023 (1)` in the same article, which records a mean of 12 days against a Weibull implying 9.03, a gap wide enough to fall outside the credible interval reported alongside the mean.
+
+epireview flags whether uncertainty on the distribution parameters was reported but does not store its value, so there is no standard error to pass here and the model falls back to plug in standard errors from `n`.
+It does record an interval on the reported mean, which is why the ordering set out at the start of this vignette puts parameters with their uncertainty above parameters without it.
+Where a review records those standard errors, or records draws that `as_epidist_multivariate()` can turn into a mean vector and a covariance, that uncertainty and the correlation between the parameters reach the model instead.
+
+## Comparing with a modern re-analysis of the same line list {#bdbv}
+
+The published summaries are what a reader of the literature sees.
+The question is whether passing them through the meta model moves them towards what the underlying data actually say.
+One of the 29 studies lets us check.
+`Rosello 2015 (3)` is the 2012 Isiro outbreak, and that line list has since been re-analysed in [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis).
+That re-analysis works from the individual records and adjusts for double interval censoring on both event times.
+It applies no truncation correction because it needs none.
+The outbreak closed in 2012 and the line list was published in 2015, so every case has a recorded outcome and the delays are not truncated at all.
+That makes it the closest thing to a ground truth available for any of the studies we fitted to.
+
+It reports onset to death as a Monte Carlo convolution of its fitted onset to admission and admission to death delays, rather than as a fitted distribution, so it publishes moments rather than a shape and a scale.
+We use a Gamma matched to its mean and standard deviation as the reference distribution, and check below that this stands in for the convolution closely enough.
+
+`bdbv-onset-to-death.csv` holds 1000 draws of the convolution's mean, standard deviation, median and 95th percentile, subsampled from the 4000 draw posterior the project releases as `output/posterior_gamma.csv` in its `main-latest` release.
+
+
+``` r
+bdbv <- read.csv("bdbv-onset-to-death.csv") |>
+  mutate(shape = (.data$mean / .data$sd)^2, scale = .data$sd^2 / .data$mean)
+
+isiro_draws <- predict_delay_parameters(
+  fit_ebola,
+  newdata = filter(
+    as_tibble(ebola_meta), .data$study == "Rosello 2015 (3)"
+  )[1, ]
+)
+```
+
+The matched Gamma is not the convolution, so it is worth seeing how far apart they are.
+Its posterior median delay and 95th percentile land within a tenth of a day of the ones the re-analysis reports.
+Draw by draw the gap is larger, and the 95th percentile is the looser of the two, which is what a two moment summary of a convolution should be expected to do.
+
+
+``` r
+bdbv |>
+  mutate(
+    gamma_median = qgamma(0.5, shape = .data$shape, scale = .data$scale),
+    gamma_p95 = qgamma(0.95, shape = .data$shape, scale = .data$scale)
+  ) |>
+  reframe(
+    quantity = c("median", "95th percentile"),
+    reported = c(median(.data$median), median(.data$p95)),
+    matched_gamma = c(median(.data$gamma_median), median(.data$gamma_p95)),
+    per_draw_gap = c(
+      median(abs(.data$gamma_median - .data$median)),
+      median(abs(.data$gamma_p95 - .data$p95))
+    )
+  )
+#>          quantity reported matched_gamma per_draw_gap
+#> 1          median  10.4870      10.50644    0.1267663
+#> 2 95th percentile  24.1385      24.22437    0.4340871
+```
+
+The mean and standard deviation of the delay, four ways.
+
+
+``` r
+# Median with a 95% credible interval, as a string, so the four sources
+# line up in one table.
+interval <- function(draws, source) {
+  out <- draws |>
+    select("mean", "sd") |>
+    pivot_longer(everything(), names_to = "parameter") |>
+    summarise(
+      value = sprintf(
+        "%.2f (%.2f, %.2f)", median(.data$value),
+        quantile(.data$value, 0.025), quantile(.data$value, 0.975)
+      ),
+      .by = "parameter"
+    ) |>
+    mutate(source = source)
+  return(out)
+}
+
+isiro_reported <- reported_gamma |>
+  filter(.data$outbreak == "Isiro") |>
+  transmute(
+    shape = (.data$par1_value / .data$par2_value)^2,
+    scale = .data$par2_value^2 / .data$par1_value,
+    mean = .data$par1_value,
+    sd = .data$par2_value
+  )
+
+bind_rows(
+  tibble(
+    parameter = c("mean", "sd"),
+    # Reported as point estimates, with no uncertainty recorded.
+    value = sprintf("%.2f", c(isiro_reported$mean, isiro_reported$sd)),
+    source = "as reported by Rosello 2015"
+  ),
+  interval(isiro_draws, "meta model, study level"),
+  interval(
+    filter(population_draws, .data$phase == "post outbreak"),
+    "meta model, population level"
+  ),
+  interval(bdbv, "re-analysis of the line list")
+) |>
+  pivot_wider(names_from = "parameter", values_from = "value")
+#> # A tibble: 4 × 3
+#>   source                       mean                sd
+#>   <chr>                        <chr>               <chr>
+#> 1 as reported by Rosello 2015  11.37               5.41
+#> 2 meta model, study level      10.81 (9.07, 13.48) 7.67 (6.42, 9.66)
+#> 3 meta model, population level 9.69 (8.53, 11.08)  6.85 (5.96, 7.85)
+#> 4 re-analysis of the line list 11.76 (9.31, 15.06) 6.57 (4.88, 9.44)
+```
 
 <details><summary>Click to expand for code to prepare the comparison plot</summary>
 
 
 ``` r
-delay_grid <- seq(0, 30, by = 0.2)
+delay_grid <- seq(0, 40, by = 0.25)
 
-reported_curves <- reported_gamma |>
-  reframe(x = delay_grid, y = dgamma(delay_grid, shape, rate), .by = "outbreak")
+density_band <- function(draws, source, n = 200) {
+  out <- draws |>
+    slice_sample(n = min(n, nrow(draws))) |>
+    mutate(.draw = row_number()) |>
+    reframe(
+      x = delay_grid,
+      y = dgamma(delay_grid, shape = .data$shape, scale = .data$scale),
+      .by = ".draw"
+    ) |>
+    summarise(
+      lower = quantile(.data$y, 0.025),
+      median = median(.data$y),
+      upper = quantile(.data$y, 0.975),
+      .by = "x"
+    ) |>
+    mutate(source = source)
+  return(out)
+}
 
-# population_draws was computed above for the forest plot; reuse it here.
-population_curves <- population_draws |>
-  slice_sample(n = 200) |>
-  reframe(
-    x = delay_grid, y = dgamma(delay_grid, shape = shape, rate = shape / mu),
-    .by = "draw"
+comparison_band <- bind_rows(
+  density_band(
+    transmute(
+      isiro_draws, shape = .data$shape, scale = .data$mean / .data$shape
+    ),
+    "meta model, study level"
+  ),
+  density_band(
+    transmute(
+      filter(population_draws, .data$phase == "post outbreak"),
+      shape = .data$shape, scale = .data$mean / .data$shape
+    ),
+    "meta model, population level"
+  ),
+  density_band(bdbv, "re-analysis of the line list")
+)
+
+reported_curve <- tibble(
+  x = delay_grid,
+  y = dgamma(
+    delay_grid, shape = isiro_reported$shape, scale = isiro_reported$scale
   )
+)
 
-p_ebola <- ggplot() +
-  geom_line(
-    data = population_curves, aes(x = x, y = y, group = draw),
-    alpha = 0.05, col = "#56B4E9"
+p_bdbv <- ggplot() +
+  geom_ribbon(
+    data = comparison_band,
+    aes(x = x, ymin = lower, ymax = upper, fill = source), alpha = 0.25
   ) +
   geom_line(
-    data = reported_curves, aes(x = x, y = y, linetype = outbreak),
-    col = "black", linewidth = 0.7
+    data = comparison_band, aes(x = x, y = median, colour = source),
+    linewidth = 0.7
   ) +
-  labs(x = "Onset to death delay (days)", y = "Density", linetype = "") +
+  geom_line(
+    data = reported_curve,
+    aes(x = x, y = y, linetype = "as reported by Rosello 2015"),
+    colour = "black", linewidth = 0.7
+  ) +
+  scale_colour_brewer(palette = "Set2", aesthetics = c("colour", "fill")) +
+  scale_linetype_manual(values = "dashed") +
+  labs(
+    x = "Onset to death delay (days)", y = "Density",
+    colour = NULL, fill = NULL, linetype = NULL
+  ) +
   theme_minimal() +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom", legend.box = "vertical")
 ```
 
 </details>
 
-(ref:ebola) The population level onset to death delay implied by the meta model fit to 29 published summaries (blue lines, 200 posterior draws), compared to the 4 Gamma distributions reported by @rosello2015ebola, one for each outbreak in the Democratic Republic of the Congo that it covered (black lines). The means of those fits are themselves among the summaries the model was fitted to.
+
+(ref:bdbv) The Isiro onset to death delay, four ways. The dashed line is the Gamma reported by @rosello2015ebola. The bands are 95% posterior intervals of the density from the meta model at study level, from the meta model at population level with the `(1 | study)` term switched off, and from the re-analysis of the same line list.
 
 
 ``` r
-p_ebola
+p_bdbv
 ```
 
 <div class="figure">
-<img src="figures/meta-ebola-1.png" alt="(ref:ebola)"  />
-<p class="caption">(\#fig:ebola)(ref:ebola)</p>
+<img src="figures/meta-bdbv-1.png" alt="(ref:bdbv)"  />
+<p class="caption">(\#fig:bdbv)(ref:bdbv)</p>
 </div>
 
-Where a comparable estimate from modern methods that account for censoring and right truncation exists (the Isiro Ebola line list of @rosello2015ebola, re analysed in [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis), is the natural candidate), the pooled posterior from an adjusted meta analysis should sit closer to it than the raw published summaries do.
-The adjustment here is driven by the `phase` term and by the study level weights, and its residual truncation correction is admittedly crude because epireview records neither the observation times nor how each study handled truncation (see the note above), so the comparison is a demonstration of the workflow rather than a definitive corrected estimate.
-Splitting the two serves the workflow: the reported values are what a naive reader sees, the pooled posterior is what an adjusted read of the same summaries points to, and the modern re analysis is the ground truth worth comparing the latter against.
+The study level estimate is centred close to the re-analysis but is more dispersed than either the reported fit or the re-analysis.
+That dispersion comes from the model rather than from the study.
+`shape ~ 1` gives every study one shared shape, estimated across all 29 studies, over half of which report a single summary with no spread at all.
+The Gamma Rosello fitted to Isiro is much more peaked than that shared shape.
+Putting a term on `shape` as well, such as `shape ~ 1 + (1 | study)`, lets a study's own reported spread inform its own shape, at the cost of a much harder fit.
+
+The population level estimate is shorter than the re-analysis, which is what we should expect and is not evidence that the adjustment failed.
+It describes 29 studies spanning several outbreaks and more than one Ebola species, while the re-analysis describes one Bundibugyo virus outbreak.
+The re-analysis also builds onset to death from onset to admission and admission to death, so it conditions on admission and excludes deaths in the community.
+Pooling across outbreaks that genuinely differ is a modelling choice rather than a correction, and where they differ this much a stratifying term would serve better than a single population mean.
+
+The wider point is about the metadata.
+The adjustment the model can make is limited by what the review recorded, and here that is little.
+Observation times, how each study handled censoring and truncation, and the phase of the outbreak are all either missing or recorded for a handful of studies.
+The simulated example earlier in this vignette shows that when the metadata is complete the adjustment recovers the true delay closely, and that the wrong metadata sends it confidently in the wrong direction.
+Reviews reporting against the checklist of @charniga2024best would make this section a corrected estimate rather than a demonstration.
 
 # Learning more {#learning-more}
 
