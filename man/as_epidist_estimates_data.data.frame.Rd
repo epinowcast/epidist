@@ -66,7 +66,11 @@ truncation.}
 
 \item{trunc_adjusted}{A string giving the column of \code{data} containing a
 logical flag for whether the study corrected for right truncation. Defaults
-to \code{TRUE} where no \code{relative_obs_time} is supplied and \code{FALSE} otherwise.}
+to \code{TRUE} where no \code{relative_obs_time} is supplied and \code{FALSE} otherwise.
+A study assumed to have adjusted is warned about, because real time
+estimates are right truncated unless the study corrected for it and
+reviews rarely record which studies did. Supply the column to say so
+yourself.}
 
 \item{trunc_design}{A string giving the column of \code{data} containing how the
 study stopped collecting data, either \code{"cohort"} (it followed every primary
@@ -90,11 +94,18 @@ no reported mean or quantile may fall below it.}
 
 \item{growth_rate}{A string giving the column of \code{data} containing the
 exponential growth rate of primary events during the study period. Defaults
-to 0, a uniform primary event within its window. A non-zero rate is
+to 0. It plays two roles. Within each primary window it tilts the primary
+event towards the end of the window, which for a daily window is
+negligible. Under \code{trunc_design = "accrual"} it also weights the follow up
+available to each delay, which is the dynamical bias of a growing epidemic
+and can move the implied mean by a day or more. A non-zero rate is
 expensive, because the primary censored delay distribution then has no
 analytical solution and every evaluation becomes a numerical integration.
-Leave it at 0 unless the study period covered enough growth for the
-dynamical bias to matter.}
+Leave it at 0 unless the study accrued cases over a period of growth. It
+is a known quantity here, taken from the study. For individual level data
+the same rate is estimated instead, as the \code{pgrowth} parameter of
+\code{primary = "expgrowth"} in \code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}}. See
+\code{vignette("primary-events")}.}
 
 \item{max_delay}{A string giving the column of \code{data} containing the delay
 beyond which the implied summaries are truncated when building the discrete

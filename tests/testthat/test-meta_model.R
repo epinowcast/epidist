@@ -1389,12 +1389,14 @@ test_that("the joint moment likelihood down weights a mean and standard deviatio
 })
 
 test_that("as_epidist_meta_model groups a mean and standard deviation from one study", { # nolint: line_length_linter.
-  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
-    study = c("A", "A"),
-    type = c("sd", "mean"),
-    value = c(3.6, 7.5),
-    n = c(120, 120),
-    stringsAsFactors = FALSE
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = c("A", "A"),
+      type = c("sd", "mean"),
+      value = c(3.6, 7.5),
+      n = c(120, 120),
+      stringsAsFactors = FALSE
+    )
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   expect_identical(nrow(meta), 1L)
@@ -1405,13 +1407,15 @@ test_that("as_epidist_meta_model groups a mean and standard deviation from one s
 })
 
 test_that("as_epidist_meta_model groups the quantiles of one study into a set", { # nolint: line_length_linter.
-  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
-    study = "A",
-    type = "quantile",
-    value = c(9.4, 4.2, 6.1),
-    p = c(0.75, 0.25, 0.5),
-    n = 60,
-    stringsAsFactors = FALSE
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = "A",
+      type = "quantile",
+      value = c(9.4, 4.2, 6.1),
+      p = c(0.75, 0.25, 0.5),
+      n = 60,
+      stringsAsFactors = FALSE
+    )
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   expect_identical(nrow(meta), 1L)
@@ -1422,9 +1426,11 @@ test_that("as_epidist_meta_model groups the quantiles of one study into a set", 
 })
 
 test_that("as_epidist_meta_model keeps a single quantile fittable on its own", {
-  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
-    study = "A", type = "quantile", value = 6.1, p = 0.5, n = 60,
-    stringsAsFactors = FALSE
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = "A", type = "quantile", value = 6.1, p = 0.5, n = 60,
+      stringsAsFactors = FALSE
+    )
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   expect_identical(meta$obs_type, 6L)
@@ -1432,13 +1438,15 @@ test_that("as_epidist_meta_model keeps a single quantile fittable on its own", {
 })
 
 test_that("as_epidist_meta_model leaves a summary with a reported standard error ungrouped", { # nolint: line_length_linter.
-  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
-    study = c("A", "A"),
-    type = c("mean", "sd"),
-    value = c(7.5, 3.6),
-    se = c(0.3, NA),
-    n = c(120, 120),
-    stringsAsFactors = FALSE
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = c("A", "A"),
+      type = c("mean", "sd"),
+      value = c(7.5, 3.6),
+      se = c(0.3, NA),
+      n = c(120, 120),
+      stringsAsFactors = FALSE
+    )
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   expect_identical(meta$obs_type, c(2L, 3L))
@@ -1446,13 +1454,15 @@ test_that("as_epidist_meta_model leaves a summary with a reported standard error
 })
 
 test_that("as_epidist_meta_model does not group summaries that differ in a covariate", { # nolint: line_length_linter.
-  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
-    study = c("A", "A"),
-    type = c("mean", "sd"),
-    value = c(7.5, 3.6),
-    n = c(120, 120),
-    setting = c("hospital", "community"),
-    stringsAsFactors = FALSE
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = c("A", "A"),
+      type = c("mean", "sd"),
+      value = c(7.5, 3.6),
+      n = c(120, 120),
+      setting = c("hospital", "community"),
+      stringsAsFactors = FALSE
+    )
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   expect_identical(meta$obs_type, c(2L, 3L))
@@ -1474,12 +1484,14 @@ test_that("as_epidist_meta_model does not group summaries that differ in their s
 })
 
 test_that("as_epidist_meta_model splits a repeated summary type into its own group", { # nolint: line_length_linter.
-  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
-    study = "A",
-    type = c("mean", "mean", "sd"),
-    value = c(7.5, 8.1, 3.6),
-    n = 120,
-    stringsAsFactors = FALSE
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = "A",
+      type = c("mean", "mean", "sd"),
+      value = c(7.5, 8.1, 3.6),
+      n = 120,
+      stringsAsFactors = FALSE
+    )
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   expect_identical(meta$obs_type, c(5L, 2L))
@@ -1487,13 +1499,15 @@ test_that("as_epidist_meta_model splits a repeated summary type into its own gro
 })
 
 test_that("as_epidist_meta_model errors on quantiles that do not increase with their probability", { # nolint: line_length_linter.
-  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
-    study = "A",
-    type = "quantile",
-    value = c(6.1, 4.2),
-    p = c(0.25, 0.5),
-    n = 60,
-    stringsAsFactors = FALSE
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = "A",
+      type = "quantile",
+      value = c(6.1, 4.2),
+      p = c(0.25, 0.5),
+      n = 60,
+      stringsAsFactors = FALSE
+    )
   )))
   expect_error(
     suppressMessages(as_epidist_meta_model(estimates = estimates)),
@@ -1502,13 +1516,15 @@ test_that("as_epidist_meta_model errors on quantiles that do not increase with t
 })
 
 test_that("as_epidist_meta_model errors on two quantiles at the same probability", { # nolint: line_length_linter.
-  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
-    study = "A",
-    type = "quantile",
-    value = c(4.2, 6.1),
-    p = c(0.5, 0.5),
-    n = 60,
-    stringsAsFactors = FALSE
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = "A",
+      type = "quantile",
+      value = c(4.2, 6.1),
+      p = c(0.5, 0.5),
+      n = 60,
+      stringsAsFactors = FALSE
+    )
   )))
   expect_error(
     suppressMessages(as_epidist_meta_model(estimates = estimates)),
@@ -1517,12 +1533,14 @@ test_that("as_epidist_meta_model errors on two quantiles at the same probability
 })
 
 test_that("assert_epidist.epidist_meta_model checks the grouped summary members", { # nolint: line_length_linter.
-  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
-    study = "A",
-    type = c("mean", "sd"),
-    value = c(7.5, 3.6),
-    n = 120,
-    stringsAsFactors = FALSE
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = "A",
+      type = c("mean", "sd"),
+      value = c(7.5, 3.6),
+      n = 120,
+      stringsAsFactors = FALSE
+    )
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   broken <- meta

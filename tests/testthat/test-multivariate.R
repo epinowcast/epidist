@@ -141,10 +141,10 @@ test_that("as_epidist_estimates_data maps multivariate elements to types", {
     mean = rnorm(500, 7.5, 0.3),
     q0.5 = rnorm(500, 6.8, 0.3)
   )
-  estimates <- suppressMessages(as_epidist_estimates_data(
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
     as_epidist_multivariate(draws),
     study = "A"
-  ))
+  )))
   expect_identical(estimates$type, c("mean", "quantile"))
   expect_identical(estimates$p, c(NA, 0.5))
   expect_identical(estimates$mvn_id, rep("A", 2))
@@ -216,10 +216,10 @@ test_that("a multivariate estimate round trips to a recoverable meta model", {
   parameter_draws <- cbind(
     meanlog = rnorm(500, meanlog, 0.02), sdlog = rnorm(500, sdlog, 0.01)
   )
-  estimates <- suppressMessages(as_epidist_estimates_data(
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
     as_epidist_multivariate(parameter_draws),
     study = "A", family = "lognormal", cens_adjusted = 1
-  ))
+  )))
   prep <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   expect_identical(prep$obs_type, 7L)
   standata <- suppressMessages(epidist(prep, fn = brms::make_standata))
@@ -244,12 +244,14 @@ test_that("one study can contribute two multivariate objects", {
   second <- as_epidist_multivariate(
     cbind(mean = rnorm(500, 6.5, 0.3), sd = rnorm(500, 3.1, 0.2))
   )
-  combined <- suppressMessages(as_epidist_estimates_data(list(
-    as_epidist_estimates_data(
-      first,
-      study = "A", relative_obs_time = 20, trunc_adjusted = FALSE
-    ),
-    as_epidist_estimates_data(second, study = "A")
+  combined <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
+    list(
+      as_epidist_estimates_data(
+        first,
+        study = "A", relative_obs_time = 20, trunc_adjusted = FALSE
+      ),
+      as_epidist_estimates_data(second, study = "A")
+    )
   )))
   expect_length(.estimates_vcov(combined), 2)
   expect_identical(combined$mvn_id, c("A", "A", "A_2", "A_2"))

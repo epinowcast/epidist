@@ -20,8 +20,8 @@
 #' `tidybayes` functions `add_epred_draws()` and `add_predicted_draws()`.
 #'
 #' @param data An `epidist` data object, such as one returned by
-#'  [as_epidist_marginal_model()], [as_epidist_latent_model()] or
-#'  [as_epidist_naive_model()].
+#'  [as_epidist_marginal_model()], [as_epidist_latent_model()],
+#'  [as_epidist_naive_model()] or [as_epidist_meta_model()].
 #'
 #' @param ... Variables to expand into a grid, passed to [tidyr::expand()].
 #'  Supply the variables used in the model formula, such as `sex`. Each
@@ -67,10 +67,94 @@ epidist_newdata.default <- function(data, ...) {
       "No {.fn epidist_newdata} method is available for objects of class
        {.cls {class(data)}}.",
       i = "Convert your data with {.fn as_epidist_latent_model},
-           {.fn as_epidist_marginal_model} or {.fn as_epidist_naive_model}
-           first."
+           {.fn as_epidist_marginal_model}, {.fn as_epidist_naive_model} or
+           {.fn as_epidist_meta_model} first."
     )
   ))
+}
+
+#' Build `newdata` for the meta model
+#'
+#' The meta model holds individual level rows and summary rows in one data
+#' frame, telling them apart by the `obs_type` slot. Prediction is for the
+#' delay distribution itself, so this method builds an individual level row.
+#' It takes the same arguments as [epidist_newdata.epidist_marginal_model()],
+#' and fills the slots a summary row would use with the values an individual
+#' row carries. The result is what [delay_parameter_draws()] and
+#' [add_summaries()] need, so there is no need to copy a summary row out of
+#' the model data and overwrite its covariates.
+#'
+#' A model with a study level term, such as `mu ~ 1 + (1 | study)`, needs
+#' either a `study` column in `newdata` or `re_formula = NA` when predicting.
+#' Expand `study` here to predict for each study, or leave it out and pass
+#' `re_formula = NA` for the population level delay. The primary event
+#' distribution of the individual level rows is a parameter of the model
+#' rather than a column, so it needs nothing here.
+#'
+#' @inheritParams epidist_newdata.epidist_marginal_model
+#'
+#' @method epidist_newdata epidist_meta_model
+#' @family meta_model
+#' @family newdata
+#' @returns A [tibble::tibble()] of `newdata` ready to predict from.
+#'
+#' @export
+#' @examples
+#' estimates <- as_epidist_estimates_data(
+#'   data.frame(
+#'     study = c("A", "A", "B"),
+#'     type = c("mean", "sd", "mean"),
+#'     value = c(7.5, 3.6, 6.4),
+#'     n = c(120, 120, 80),
+#'     relative_obs_time = c(20, 20, Inf),
+#'     trunc_adjusted = c(FALSE, FALSE, TRUE),
+#'     cens_adjusted = c(0, 0, 1)
+#'   )
+#' )
+#' meta <- as_epidist_meta_model(estimates = estimates)
+#'
+#' # The population level delay, with no censoring and no truncation
+#' epidist_newdata(meta)
+#'
+#' # A row for each study, with daily censoring
+#' epidist_newdata(meta, study, pwindow = 1, swindow = 1)
+epidist_newdata.epidist_meta_model <- function(
+  data,
+  ...,
+  pwindow = 0,
+  swindow = 0,
+  relative_obs_time = Inf,
+  delay_min = 0
+) {
+  assert_numeric(pwindow, lower = 0, any.missing = FALSE)
+  assert_numeric(swindow, lower = 0, any.missing = FALSE)
+  assert_numeric(relative_obs_time, lower = 0, any.missing = FALSE)
+  assert_numeric(delay_min, lower = 0, any.missing = FALSE)
+  newdata <- .build_newdata(
+    data,
+    ...,
+    .cols = list(
+      delay_lwr = 0,
+      obs_type = 1L,
+      study_n = 0L,
+      trunc_adjusted = 0L,
+      trunc_design = 0L,
+      cens_adjusted = 0L,
+      group_start = 1L,
+      group_len = 0L,
+      chol_start = 1L,
+      relative_obs_time = relative_obs_time,
+      pwindow = pwindow,
+      swindow = swindow,
+      delay_upr = 0,
+      delay_min = delay_min,
+      report_se = 0,
+      quantile_p = 0,
+      growth_rate = 0
+    ),
+    .supplied = intersect(names(match.call()), names(formals()))
+  )
+  return(newdata)
 }
 
 #' Expand variables into a grid and add the variables a model needs

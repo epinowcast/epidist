@@ -189,6 +189,15 @@ See #596 and #620.
 With `primary = "expgrowth"` the growth rate of primary events is estimated as the `pgrowth` distributional parameter.
 Summary rows are unchanged and keep the `growth_rate` metadata of their study as a known tilt.
 See #620.
+- Added an `epidist_model_prior()` method for the meta model, which centres the intercept prior of `mu` on the log of the median mean the studies reported, with a standard deviation of 1 on the log scale.
+Without it a Gamma or Weibull fit to summaries alone took the `brms` default, which is centred on the response column and so on a delay of zero, because that column is a placeholder on summary rows.
+See #620.
+- Added an `epidist_newdata()` method for the meta model, which builds an individual level row with the same arguments as the marginal model method, so predicting from a meta model fit no longer means copying a summary row out of the model data.
+See #620.
+- `as_epidist_estimates_data()` now rejects a reported mean at or beyond the observation time of a study that did not adjust for right truncation, a standard error of zero, a standard deviation of zero, and a `cens_adjusted` code that is not a whole number from 0 to 4.
+It warns, rather than messages, when no `trunc_adjusted` column is supplied and a study is therefore assumed to have adjusted for right truncation.
+The `growth_rate` documentation now separates its within window tilt from the accrual weight it applies under `trunc_design = "accrual"`, and points to the `primary = "expgrowth"` option of the marginal model for individual level data.
+See #620.
 
 ## Documentation
 
@@ -197,8 +206,6 @@ See #620.
 - Added a vignette showcasing the meta model on simulated data.
 Its case study builds nine studies, each applying a different estimation procedure to the same line list, so the recovery result tests every bias the model adjusts for.
 See #620.
-- The meta model is now a worked example in the extending vignette, since it adds both a data source and a model type.
-See #616 and #620.
 - The meta vignette is now precomputed from a `.Rmd.orig` source, so it ships with the package.
 See #619 and #620.
 - The meta vignette now works through the published Ebola onset to death estimates collated by `epireview`.

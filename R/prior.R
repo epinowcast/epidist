@@ -202,6 +202,99 @@ epidist_model_prior.default <- function(data, formula, ...) {
   return(NULL)
 }
 
+#' Model specific prior distributions for the meta model
+#'
+#' The response column of a meta model is a placeholder on every summary row,
+#' and `brms` centres its default prior for the intercept of `mu` on the
+#' response. For a model fitted to summaries alone that default is centred on
+#' a delay of zero. This method centres it instead on the log of the median
+#' mean the studies reported, with a standard deviation of 1 on the log
+#' scale, which is the scale of the lognormal family prior in
+#' [epidist_family_prior()]. It does this for every family, so a Gamma or
+#' Weibull meta fit gets a prior on the same scale as a lognormal one.
+#'
+#' Where no study reported a mean the median reported quantile is used, and
+#' where no study reported either the mean of the individual level delays is
+#' used. A model with individual level rows only adds no prior, so the family
+#' or `brms` default applies as it does for the marginal model. The prior is
+#' added where `mu` has a log or identity link, and on the identity link the
+#' median is used as it is.
+#'
+#' The prior on the intercept of the other distributional parameters is left
+#' to the family or to `brms`.
+#'
+#' @inheritParams epidist
+#' @method epidist_model_prior epidist_meta_model
+#' @family prior
+#' @family meta_model
+#' @returns A `brmsprior` object, or `NULL` when the model adds no priors.
+#'
+#' @export
+epidist_model_prior.epidist_meta_model <- function(data, formula, ...) {
+  location <- .meta_reported_location(data)
+  link <- formula$family$link
+  if (is.null(location) || is.null(link)) {
+    return(NULL)
+  }
+  if (link == "log") {
+    centre <- log(location)
+  } else if (link == "identity") {
+    centre <- location
+  } else {
+    return(NULL)
+  }
+  return(set_prior(
+    sprintf("normal(%s, 1)", signif(centre, 3)),
+    class = "Intercept"
+  ))
+}
+
+#' The typical delay a meta model's data describe
+#'
+#' Used to centre the intercept prior of [epidist_model_prior()] for the meta
+#' model. Reported means are taken first, then reported quantiles, then the
+#' individual level delays. Joint summary rows carry their reported values in
+#' the grouped members of the model rather than in the row itself, so both are
+#' read.
+#'
+#' @param data An `epidist_meta_model` object.
+#'
+#' @returns A positive number, or `NULL` where the model has no summary rows
+#'  or no summary gives a location.
+#'
+#' @keywords internal
+.meta_reported_location <- function(data) {
+  individual <- data$obs_type == 1L
+  if (all(individual)) {
+    return(NULL)
+  }
+  members <- .meta_members(data)
+  means <- c(
+    data$delay_upr[data$obs_type == 2L],
+    members$value[members$type == 1L]
+  )
+  quantiles <- c(
+    data$delay_upr[data$obs_type == 4L],
+    members$value[members$type == 3L]
+  )
+  if (length(means) > 0) {
+    location <- stats::median(means)
+  } else if (length(quantiles) > 0) {
+    location <- stats::median(quantiles)
+  } else if (any(individual)) {
+    location <- stats::weighted.mean(
+      data$delay_lwr[individual] + data$swindow[individual] / 2,
+      data$n[individual]
+    )
+  } else {
+    return(NULL)
+  }
+  if (!is.finite(location) || location <= 0) {
+    return(NULL)
+  }
+  return(location)
+}
+
 #' Family specific prior distributions
 #'
 #' This function contains `brms` prior distributions which are specific to

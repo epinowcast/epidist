@@ -60,22 +60,14 @@ See `?as_epidist_estimates_data` for the full details.
 Where the underlying delays are available and the cutoff that produced them is known, refitting them with the marginal model (`vignette("epidist")`) is simpler and more reliable than reconstructing what a summary of them means.
 The meta model is for the case where the delays cannot be had.
 
-A study that fitted a distribution to its delays can publish draws of the fitted parameters.
-`as_epidist_multivariate()` turns those draws into a mean vector and a covariance matrix, and `as_epidist_estimates_data()` converts that into the summaries the fitted distribution implies.
-This keeps the correlation between the quantities the study reports.
-It is the only route by which a covariance reaches the model.
-
 ::: {.alert .alert-primary}
 **What to report, best first.**
 The delays themselves, fitted with the marginal model.
-Failing that, draws of the parameters of a fitted distribution, through `as_epidist_multivariate()`.
+Failing that, draws of the parameters of a fitted distribution, through `as_epidist_multivariate()`, which is the only route by which the correlation between a study's summaries reaches the model.
 Failing that, the point estimates of those parameters with their standard errors, through `epidist_estimates_parameters()`.
 Failing that, a mean and a standard deviation, or a set of quantiles, with the sample size, which are fitted jointly.
 A single summary with a standard error is the weakest, since nothing constrains its shape.
-
-Summaries of different kinds from one study, such as a mean and a median, are treated as independent unless they came from one set of draws.
-That understates their joint uncertainty.
-The normal approximations also degrade for small sample sizes.
+See `?as_epidist_meta_model` for the approximations each of these makes.
 :::
 
 # Setup {#setup}
@@ -1191,8 +1183,11 @@ Where a review records those standard errors, or records draws that `as_epidist_
 ## Comparing with a modern re-analysis of the same line list {#bdbv}
 
 The published summaries are what a reader of the literature sees.
-The question is whether passing them through the meta model moves them towards what the underlying data actually say.
-One of the 29 studies lets us check.
+With the metadata `epireview` records, unadjusted daily date differences from studies flagged as adjusted for truncation, the forward model changes nothing visible.
+For a uniform primary event the expected integer date difference equals the continuous mean exactly, and the implied standard deviation only picks up the rounding variance of the two daily windows.
+For the Gamma Rosello reported below that moves a standard deviation of 5.41 to 5.43.
+So the comparison tests the hierarchical pooling of the `(1 | study)` term and the shared shape rather than a bias correction.
+One of the 29 studies lets us check what that pooling does.
 `Rosello 2015 (3)` is the 2012 Isiro outbreak, and that line list has since been re-analysed in [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis).
 That re-analysis works from the individual records and adjusts for double interval censoring on both event times.
 It applies no truncation correction because it needs none.
@@ -1387,7 +1382,8 @@ p_bdbv
 <p class="caption">(\#fig:bdbv)(ref:bdbv)</p>
 </div>
 
-The study level estimate is centred close to the re-analysis but is more dispersed than either the reported fit or the re-analysis.
+The Gamma Rosello reported is already within half a day of the re-analysis on the mean.
+The study level estimate is shrunk away from it, towards the population mean, by the `(1 | study)` term, and is more dispersed than either the reported fit or the re-analysis.
 That dispersion comes from the model rather than from the study.
 `shape ~ 1` gives every study one shared shape, estimated across all 29 studies, 15 of which report a single summary with no spread at all.
 The Gamma Rosello fitted to Isiro is much more peaked than that shared shape.
@@ -1399,7 +1395,7 @@ The re-analysis also builds onset to death from onset to admission and admission
 Pooling across outbreaks that genuinely differ is a modelling choice rather than a correction, and where they differ this much a stratifying term would serve better than a single population mean.
 
 The wider point is about the metadata.
-The adjustment the model can make is limited by what the review recorded, and here that is little.
+The adjustment the model can make is limited by what the review recorded, and here that is too little for it to make any.
 Observation times, how each study handled censoring and truncation, and the phase of the outbreak are all either missing or recorded for a handful of studies.
 The simulated example earlier in this vignette shows that when the metadata is complete the adjustment recovers the true delay closely, and that the wrong metadata sends it confidently in the wrong direction.
 Reviews reporting against the checklist of @charniga2024best would make this section a corrected estimate rather than a demonstration.
