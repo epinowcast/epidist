@@ -35,7 +35,7 @@ natural scale mean and standard deviation of the delay. Use
 \code{\link[=add_summaries]{add_summaries()}} to add those.
 
 \code{add_delay_parameter_draws()} is the same function with \code{newdata} first, for
-use at the start of a pipeline as with \code{\link[tidybayes:add_epred_draws]{tidybayes::add_epred_draws()}}.
+use at the start of a pipeline as with \code{\link[tidybayes:add_predicted_draws]{tidybayes::add_epred_draws()}}.
 }
 \details{
 The returned columns follow the \code{tidybayes} conventions. The columns of
@@ -51,8 +51,16 @@ combinations of predictors. \code{\link[=epidist_strata]{epidist_strata()}} retu
 combination and is usually the better input.
 }
 \examples{
-\dontrun{
-# `fit` is a model fitted with `epidist()`
+\donttest{
+fit <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model() |>
+  epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+
 fit |>
   epidist_strata() |>
   add_delay_parameter_draws(fit) |>
@@ -63,8 +71,8 @@ fit |>
 \code{\link[=add_summaries]{add_summaries()}} to add natural scale summaries of the delay,
 \code{\link[=epidist_strata]{epidist_strata()}} to build \code{newdata}.
 
-Other postprocess:
-\code{\link[=add_summaries]{add_summaries()}},
-\code{\link[=epidist_strata]{epidist_strata()}}
+Other postprocess: 
+\code{\link{add_summaries}()},
+\code{\link{epidist_strata}()}
 }
 \concept{postprocess}

@@ -517,7 +517,7 @@ add_summaries <- function(
   name <- tolower(name)
   # Drop the model prefix `epidist` adds, keeping families whose own name
   # contains an underscore intact
-  name <- sub("^(latent|marginal)_", "", name)
+  name <- sub("^(latent|marginal|meta)_", "", name)
   return(list(name = name, dpars = family$dpars))
 }
 

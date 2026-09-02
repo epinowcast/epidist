@@ -32,9 +32,10 @@ as_epidist_multivariate <- function(draws, ...) {
 
 #' Create an `epidist_multivariate` object from a data frame of draws
 #'
-#' [predict_delay_parameters()] returns exactly this shape, with a `draw`
-#' column, an `index` column and one column per parameter, so its output can be
-#' passed straight in.
+#' [delay_parameter_draws()] returns exactly this shape, with a `.draw`
+#' column, a `.row` column and one column per parameter, so its output can be
+#' passed straight in. Add [add_summaries()] to report the natural scale mean
+#' and standard deviation rather than the distributional parameters.
 #'
 #' @inheritParams as_epidist_multivariate
 #'
@@ -45,11 +46,12 @@ as_epidist_multivariate <- function(draws, ...) {
 #'  covariance.
 #'
 #' @param index A string giving the column that identifies the trajectory
-#'  point. Defaults to `"index"` where such a column exists, and otherwise to
-#'  `NULL`, meaning the draws describe a single point.
+#'  point. Defaults to `".row"` where such a column exists, as
+#'  [delay_parameter_draws()] returns, and otherwise to `NULL`, meaning the
+#'  draws describe a single point.
 #'
 #' @param draw A string giving the column that identifies the draw. Defaults to
-#'  `"draw"` where such a column exists, and otherwise to `NULL`, meaning row
+#'  `".draw"` where such a column exists, and otherwise to `NULL`, meaning row
 #'  order.
 #'
 #' @param ... Not used in this method.
@@ -74,8 +76,8 @@ as_epidist_multivariate.data.frame <- function(
 ) {
   assert_data_frame(draws, min.rows = 2)
   draws <- tibble::as_tibble(unclass(draws))
-  index <- .multivariate_column(index, draws, "index")
-  draw <- .multivariate_column(draw, draws, "draw")
+  index <- .multivariate_column(index, draws, ".row")
+  draw <- .multivariate_column(draw, draws, ".draw")
   params <- .multivariate_params(params, draws, c(index, draw))
   index_values <- if (is.null(index)) {
     1

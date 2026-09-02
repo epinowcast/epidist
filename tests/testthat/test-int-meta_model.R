@@ -54,7 +54,7 @@ test_that("epidist.epidist_meta_model recovers the simulation settings from bias
   skip_on_cran()
   skip_if_no_cmdstanr()
   set.seed(1)
-  pred <- predict_delay_parameters(fit_meta_estimates)
+  pred <- delay_parameter_draws(fit_meta_estimates)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
   expect_equal(mean(pred$sigma), sdlog, tolerance = 0.15)
 })
@@ -73,7 +73,7 @@ test_that("epidist.epidist_meta_model recovers the simulation settings from mixe
   skip_on_cran()
   skip_if_no_cmdstanr()
   set.seed(1)
-  pred <- predict_delay_parameters(fit_meta_mixed)
+  pred <- delay_parameter_draws(fit_meta_mixed)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
   expect_equal(mean(pred$sigma), sdlog, tolerance = 0.1)
 })
@@ -282,7 +282,7 @@ test_that("epidist.epidist_meta_model recovers known parameters from simulated g
   expect_convergence(fit_meta_grid)
 
   set.seed(1)
-  pred <- predict_delay_parameters(fit_meta_grid)
+  pred <- delay_parameter_draws(fit_meta_grid)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.05)
   expect_equal(mean(pred$sigma), sdlog, tolerance = 0.1)
   expect_lt(stats::quantile(pred$mu, 0.025, names = FALSE), meanlog)
@@ -310,7 +310,7 @@ test_that("epidist.epidist_meta_model recovers known parameters from reported fi
   )
 
   set.seed(1)
-  pred <- predict_delay_parameters(fit_meta_reported)
+  pred <- delay_parameter_draws(fit_meta_reported)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.05)
   expect_equal(mean(pred$sigma), sdlog, tolerance = 0.1)
   expect_lt(stats::quantile(pred$mu, 0.025, names = FALSE), meanlog)
@@ -324,8 +324,8 @@ test_that("as_epidist_multivariate round trips draws of a fitted model", {
   # a fitted model, and those become a summary row of a downstream meta model.
   skip_on_cran()
   skip_if_no_cmdstanr()
-  dpars <- predict_delay_parameters(fit_marginal)
-  dpars <- dpars[dpars$index == 1, ]
+  dpars <- dplyr::ungroup(add_summaries(delay_parameter_draws(fit_marginal)))
+  dpars <- dpars[dpars$.row == 1, ]
   reported <- as_epidist_multivariate(dpars, params = c("mean", "sd"))
   expect_identical(reported$params, c("mean", "sd"))
   expect_equal(

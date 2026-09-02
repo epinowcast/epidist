@@ -23,13 +23,13 @@ draws <- cbind(mean = rnorm(500, 7.5, 0.3), sd = rnorm(500, 3.6, 0.2))
 as_epidist_multivariate(draws)
 }
 \seealso{
-Other multivariate:
-\code{\link[=as_epidist_multivariate]{as_epidist_multivariate()}},
-\code{\link[=as_epidist_multivariate.data.frame]{as_epidist_multivariate.data.frame()}},
-\code{\link[=assert_epidist.epidist_multivariate]{assert_epidist.epidist_multivariate()}},
-\code{\link[=is_epidist_multivariate]{is_epidist_multivariate()}},
-\code{\link[=new_epidist_multivariate]{new_epidist_multivariate()}},
-\code{\link[=print.epidist_multivariate]{print.epidist_multivariate()}},
-\code{\link[=vcov.epidist_multivariate]{vcov.epidist_multivariate()}}
+Other multivariate: 
+\code{\link{as_epidist_multivariate}()},
+\code{\link{as_epidist_multivariate.data.frame}()},
+\code{\link{assert_epidist.epidist_multivariate}()},
+\code{\link{is_epidist_multivariate}()},
+\code{\link{new_epidist_multivariate}()},
+\code{\link{print.epidist_multivariate}()},
+\code{\link{vcov.epidist_multivariate}()}
 }
 \concept{multivariate}

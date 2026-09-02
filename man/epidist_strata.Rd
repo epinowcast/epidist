@@ -37,14 +37,22 @@ row. A continuous predictor has as many combinations as it has distinct
 values, so consider passing \code{vars} and a grid of your own instead.
 }
 \examples{
-\dontrun{
-# `fit` is a model fitted with `epidist()`
+\donttest{
+fit <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model() |>
+  epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+
 epidist_strata(fit)
 }
 }
 \seealso{
-Other postprocess:
-\code{\link[=add_summaries]{add_summaries()}},
-\code{\link[=delay_parameter_draws]{delay_parameter_draws()}}
+Other postprocess: 
+\code{\link{add_summaries}()},
+\code{\link{delay_parameter_draws}()}
 }
 \concept{postprocess}

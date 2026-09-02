@@ -199,6 +199,9 @@ See #620.
 
 ## Bug fixes
 
+- `.delay_family()` now strips the `meta_` prefix alongside `latent_` and `marginal_`.
+Without it `add_summaries()` could not find the delay distribution of a meta model fit, because the family is named `meta_gamma` rather than `gamma`.
+See #620.
 - Added a missing Jacobian adjustment to the latent model for observations whose primary and secondary censoring windows overlap.
 Without it the latent model did not target the same likelihood as the marginal model.
 Under daily censoring the affected observations are the zero-delay cases.

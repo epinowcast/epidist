@@ -309,7 +309,7 @@ A study with **full adjustment** reported the moments of $f(\cdot \, ; \theta)$ 
 $$
 \mathbb{E}[\tau^k \mid \tau \le D] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4. (\#eq:meta-trunc-moments)
 $$
-When the study also adjusted for right truncation this reduces to the ordinary family moments used by `add_mean_sd()`.
+When the study also adjusted for right truncation this reduces to the ordinary family moments used by `add_summaries()`.
 
 A study using the **uniform single interval approximation** left the primary interval uncorrected, so it effectively observed $\tau^\star + U$.
 Its implied moments are the raw moments of $F_{pc}$, right truncated at $D$ when the study did not separately adjust for truncation:

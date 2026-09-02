@@ -34,13 +34,13 @@ manufactures a covariance the study never estimated, which is not what this
 represents.
 }
 \seealso{
-Other multivariate:
-\code{\link[=as_epidist_multivariate.data.frame]{as_epidist_multivariate.data.frame()}},
-\code{\link[=as_epidist_multivariate.matrix]{as_epidist_multivariate.matrix()}},
-\code{\link[=assert_epidist.epidist_multivariate]{assert_epidist.epidist_multivariate()}},
-\code{\link[=is_epidist_multivariate]{is_epidist_multivariate()}},
-\code{\link[=new_epidist_multivariate]{new_epidist_multivariate()}},
-\code{\link[=print.epidist_multivariate]{print.epidist_multivariate()}},
-\code{\link[=vcov.epidist_multivariate]{vcov.epidist_multivariate()}}
+Other multivariate: 
+\code{\link{as_epidist_multivariate.data.frame}()},
+\code{\link{as_epidist_multivariate.matrix}()},
+\code{\link{assert_epidist.epidist_multivariate}()},
+\code{\link{is_epidist_multivariate}()},
+\code{\link{new_epidist_multivariate}()},
+\code{\link{print.epidist_multivariate}()},
+\code{\link{vcov.epidist_multivariate}()}
 }
 \concept{multivariate}

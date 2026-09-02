@@ -618,7 +618,8 @@
 
 #' Analytic summaries of a delay distribution
 #'
-#' The mean and standard deviation mirror the formulas used by [add_mean_sd()].
+#' The mean and standard deviation mirror the formulas used by
+#' [add_summaries()].
 #'
 #' @inheritParams .meta_grid_pmf
 #'

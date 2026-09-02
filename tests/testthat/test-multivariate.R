@@ -53,15 +53,14 @@ test_that("as_epidist_multivariate orders a trajectory index major", {
   expect_identical(dim(vcov(mvn)), c(4L, 4L))
 })
 
-test_that("as_epidist_multivariate works on predict_delay_parameters output", {
-  # The shape predict_delay_parameters() returns for a lognormal fit.
+test_that("as_epidist_multivariate works on delay_parameter_draws output", {
+  # The shape delay_parameter_draws() returns for a lognormal fit.
   set.seed(14)
   dpars <- data.frame(
-    draw = seq_len(500), index = 1L,
+    .draw = seq_len(500), .row = 1L,
     mu = rnorm(500, 1.6, 0.03), sigma = rnorm(500, 0.5, 0.02)
   )
-  class(dpars) <- c("lognormal_samples", class(dpars))
-  dpars <- add_mean_sd(dpars)
+  dpars <- add_summaries(dpars, family = "lognormal")
   mvn <- as_epidist_multivariate(dpars, params = c("mean", "sd"))
   expect_identical(mvn$params, c("mean", "sd"))
   expect_equal(

@@ -704,8 +704,10 @@ if (not_on_cran() && has_cmdstanr()) {
   # A study that fitted the delays itself and published the posterior draws of
   # its mean and standard deviation, as a fully adjusted estimate reported with
   # the covariance between the two.
-  marginal_dpars <- predict_delay_parameters(fit_marginal)
-  marginal_dpars <- marginal_dpars[marginal_dpars$index == 1, ]
+  marginal_dpars <- dplyr::ungroup(
+    add_summaries(delay_parameter_draws(fit_marginal))
+  )
+  marginal_dpars <- marginal_dpars[marginal_dpars$.row == 1, ]
   sim_draws_rows <- suppressMessages(as_epidist_estimates_data(
     as_epidist_multivariate(marginal_dpars, params = c("mean", "sd")),
     study = "posterior_draws",

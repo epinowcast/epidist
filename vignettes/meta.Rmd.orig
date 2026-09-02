@@ -400,10 +400,11 @@ summary(fit_meta_summary)
 ```
 
 `summary()` reports `sigma` on its log link scale.
-`predict_delay_parameters()` puts both parameters back on the scale the simulation used.
+`delay_parameter_draws()` puts both parameters back on the scale the simulation used.
 
 ```{r}
-predict_delay_parameters(fit_meta_summary) |>
+delay_parameter_draws(fit_meta_summary) |>
+  ungroup() |>
   select("mu", "sigma") |>
   pivot_longer(everything(), names_to = "parameter") |>
   summarise(
@@ -517,9 +518,9 @@ predicted_parameters <- list(
   mixed = fit_meta_mixed,
   "reference (marginal)" = fit_reference
 ) |>
-  lapply(predict_delay_parameters) |>
+  lapply(\(fit) ungroup(add_summaries(delay_parameter_draws(fit)))) |>
   bind_rows(.id = "model") |>
-  filter(index == 1) |>
+  filter(.data$.row == 1) |>
   mutate(model = factor(
     model,
     levels = c(
@@ -784,10 +785,13 @@ The mean and standard deviation are the moments they imply.
 phase_grid <- as_tibble(ebola_meta)[rep(1, nlevels(ebola_meta$phase)), ] |>
   mutate(phase = factor(levels(ebola_meta$phase), levels(ebola_meta$phase)))
 
-population_draws <- predict_delay_parameters(
+# The columns of `newdata` come back with the draws, so `phase` is already
+# on the result.
+population_draws <- delay_parameter_draws(
   fit_ebola, newdata = phase_grid, re_formula = NA
 ) |>
-  mutate(phase = levels(ebola_meta$phase)[.data$index])
+  add_summaries() |>
+  ungroup()
 
 population_summary <- population_draws |>
   filter(.data$phase == "post outbreak") |>
@@ -819,7 +823,7 @@ marginaleffects::avg_comparisons(
 
 ```{r}
 population_draws |>
-  select("draw", "phase", "mean") |>
+  select(".draw", "phase", "mean") |>
   pivot_wider(names_from = "phase", values_from = "mean") |>
   transmute(ratio = .data$`during outbreak` / .data$`post outbreak`) |>
   summarise(
@@ -946,12 +950,14 @@ We use a Gamma matched to its mean and standard deviation as the reference distr
 bdbv <- read.csv("bdbv-onset-to-death.csv") |>
   mutate(shape = (.data$mean / .data$sd)^2, scale = .data$sd^2 / .data$mean)
 
-isiro_draws <- predict_delay_parameters(
+isiro_draws <- delay_parameter_draws(
   fit_ebola,
   newdata = filter(
     as_tibble(ebola_meta), .data$study == "Rosello 2015 (3)"
   )[1, ]
-)
+) |>
+  add_summaries() |>
+  ungroup()
 ```
 
 The matched Gamma is not the convolution, so it is worth seeing how far apart they are.
@@ -1029,11 +1035,13 @@ delay_grid <- seq(0, 40, by = 0.25)
 density_band <- function(draws, source, n = 200) {
   out <- draws |>
     slice_sample(n = min(n, nrow(draws))) |>
-    mutate(.draw = row_number()) |>
+    # A fresh index for the sampled draws, so this does not depend on the
+    # `.draw` column the posterior carries.
+    mutate(curve = row_number()) |>
     reframe(
       x = delay_grid,
       y = dgamma(delay_grid, shape = .data$shape, scale = .data$scale),
-      .by = ".draw"
+      .by = "curve"
     ) |>
     summarise(
       lower = quantile(.data$y, 0.025),

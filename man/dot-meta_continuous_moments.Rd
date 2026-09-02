@@ -16,6 +16,7 @@ A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and
 \code{skewness}.
 }
 \description{
-The mean and standard deviation mirror the formulas used by \code{\link[=add_mean_sd]{add_mean_sd()}}.
+The mean and standard deviation mirror the formulas used by
+\code{\link[=add_summaries]{add_summaries()}}.
 }
 \keyword{internal}

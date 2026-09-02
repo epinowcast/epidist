@@ -16,19 +16,21 @@ because parameters that are functions of each other have a singular
 covariance.}
 
 \item{index}{A string giving the column that identifies the trajectory
-point. Defaults to \code{"index"} where such a column exists, and otherwise to
-\code{NULL}, meaning the draws describe a single point.}
+point. Defaults to \code{".row"} where such a column exists, as
+\code{\link[=delay_parameter_draws]{delay_parameter_draws()}} returns, and otherwise to \code{NULL}, meaning the
+draws describe a single point.}
 
 \item{draw}{A string giving the column that identifies the draw. Defaults to
-\code{"draw"} where such a column exists, and otherwise to \code{NULL}, meaning row
+\code{".draw"} where such a column exists, and otherwise to \code{NULL}, meaning row
 order.}
 
 \item{...}{Not used in this method.}
 }
 \description{
-\code{\link[=predict_delay_parameters]{predict_delay_parameters()}} returns exactly this shape, with a \code{draw}
-column, an \code{index} column and one column per parameter, so its output can be
-passed straight in.
+\code{\link[=delay_parameter_draws]{delay_parameter_draws()}} returns exactly this shape, with a \code{.draw}
+column, a \code{.row} column and one column per parameter, so its output can be
+passed straight in. Add \code{\link[=add_summaries]{add_summaries()}} to report the natural scale mean
+and standard deviation rather than the distributional parameters.
 }
 \examples{
 set.seed(1)
@@ -38,13 +40,13 @@ draws <- data.frame(
 as_epidist_multivariate(draws)
 }
 \seealso{
-Other multivariate:
-\code{\link[=as_epidist_multivariate]{as_epidist_multivariate()}},
-\code{\link[=as_epidist_multivariate.matrix]{as_epidist_multivariate.matrix()}},
-\code{\link[=assert_epidist.epidist_multivariate]{assert_epidist.epidist_multivariate()}},
-\code{\link[=is_epidist_multivariate]{is_epidist_multivariate()}},
-\code{\link[=new_epidist_multivariate]{new_epidist_multivariate()}},
-\code{\link[=print.epidist_multivariate]{print.epidist_multivariate()}},
-\code{\link[=vcov.epidist_multivariate]{vcov.epidist_multivariate()}}
+Other multivariate: 
+\code{\link{as_epidist_multivariate}()},
+\code{\link{as_epidist_multivariate.matrix}()},
+\code{\link{assert_epidist.epidist_multivariate}()},
+\code{\link{is_epidist_multivariate}()},
+\code{\link{new_epidist_multivariate}()},
+\code{\link{print.epidist_multivariate}()},
+\code{\link{vcov.epidist_multivariate}()}
 }
 \concept{multivariate}
