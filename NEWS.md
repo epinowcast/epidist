@@ -189,6 +189,19 @@ See #596 and #620.
 With `primary = "expgrowth"` the growth rate of primary events is estimated as the `pgrowth` distributional parameter.
 Summary rows are unchanged and keep the `growth_rate` metadata of their study as a known tilt.
 See #620.
+- The midpoint imputation codes of the meta model (`cens_adjusted` 3 and 4) now move `delay_min` with the midpoint shift, so a study that dropped reported delays below a minimum is left truncated at the right point.
+Before this the implied mean was 5 to 15% low for code 4 and up to 24% high for code 3 with a wide secondary window.
+See #620.
+- A study that adjusted for right truncation and counted only delays above `delay_min` now has its moments left truncated analytically, so they describe the same estimand as its quantile rows and no longer depend on `max_delay`.
+For a heavy tailed delay the implied standard deviation was 6 to 17% low before this.
+See #620.
+- The accrual weight on the discrete grid now cuts each reporting cell at the primary windows it spans, so it is exact for unequal censoring windows whenever the collection window is a multiple of `pwindow`.
+Weighting at the cell's lower edge put the implied mean 12 to 36% low for a daily primary and weekly secondary window.
+See #620.
+- `as_epidist_estimates_data()` warns when the quadrature nodes of a study are far apart relative to its reported mean or median, pointing at `options(epidist.meta_n_quad)` and `max_delay`.
+See #620.
+- A draw whose implied moments overflow is rejected on every meta model moment row rather than returning `NaN` for an ungrouped standard deviation.
+See #620.
 
 ## Documentation
 
