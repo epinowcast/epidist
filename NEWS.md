@@ -189,6 +189,9 @@ See #596 and #620.
 With `primary = "expgrowth"` the growth rate of primary events is estimated as the `pgrowth` distributional parameter.
 Summary rows are unchanged and keep the `growth_rate` metadata of their study as a known tilt.
 See #620.
+- Added an `epidist_model_prior()` method for the meta model, which centres the intercept prior of `mu` on the log of the median mean the studies reported, with a standard deviation of 1 on the log scale.
+Without it a Gamma or Weibull fit to summaries alone took the `brms` default, which is centred on the response column and so on a delay of zero, because that column is a placeholder on summary rows.
+See #620.
 
 ## Documentation
 

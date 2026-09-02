@@ -31,6 +31,7 @@ Other meta_model:
 \code{\link{as_epidist_meta_model.epidist_linelist_data}()},
 \code{\link{assert_epidist.epidist_meta_model}()},
 \code{\link{epidist_family_model.epidist_meta_model}()},
+\code{\link{epidist_model_prior.epidist_meta_model}()},
 \code{\link{epidist_transform_data_model.epidist_meta_model}()},
 \code{\link{is_epidist_meta_model}()},
 \code{\link{new_epidist_meta_model}()}

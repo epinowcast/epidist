@@ -210,10 +210,10 @@ test_that("epidist_prior for a Gamma summaries only meta fit is not centred on t
   prior <- suppressWarnings(
     epidist_prior(prep_meta_estimates, family, formula, prior = NULL)
   )
-  intercept <- prior[prior$class == "Intercept" & prior$dpar == "", ]
+  intercept <- prior[prior$class == "Intercept" & !nzchar(prior$dpar), ]
   expect_identical(nrow(intercept), 1L)
   expect_identical(intercept$source, "model")
-  expect_match(intercept$prior, "^normal\\(1\\.9")
+  expect_match(intercept$prior, "normal(1.9", fixed = TRUE)
   expect_false(any(grepl("-2.3", prior$prior, fixed = TRUE)))
 })
 
@@ -231,7 +231,7 @@ test_that("epidist_model_prior for the meta model falls back on quantiles and th
   quantiles_only <- suppressMessages(as_epidist_estimates_data(data.frame(
     study = c("A", "A"), type = "quantile", value = c(5, 9),
     p = c(0.25, 0.75), n = 100, relative_obs_time = Inf,
-    trunc_adjusted = TRUE, cens_adjusted = 1
+    trunc_adjusted = TRUE, cens_adjusted = 1, stringsAsFactors = FALSE
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = quantiles_only))
   family <- epidist_family(meta, Gamma(link = "log"))
@@ -241,7 +241,7 @@ test_that("epidist_model_prior for the meta model falls back on quantiles and th
 
   sd_only <- suppressMessages(as_epidist_estimates_data(data.frame(
     study = "A", type = "sd", value = 3, n = 100, relative_obs_time = Inf,
-    trunc_adjusted = TRUE, cens_adjusted = 1
+    trunc_adjusted = TRUE, cens_adjusted = 1, stringsAsFactors = FALSE
   )))
   mixed <- suppressMessages(
     as_epidist_meta_model(sim_obs, estimates = sd_only)
