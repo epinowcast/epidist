@@ -7,10 +7,14 @@
   return(100L)
 }
 
-#' The number of quadrature intervals used for truncated continuous moments
+#' The smallest number of quadrature intervals used for a summary row
 #'
 #' Set with `options(epidist.meta_n_quad = )`, as an even number of at least
-#' two. Set it before fitting, since it is compiled into the model.
+#' two. Each summary row carries its own number of intervals in its `n_quad`
+#' slot, chosen by [.estimates_n_quad()] from the spread the study reported
+#' so that the quadrature resolves the delay, and this is the floor of that
+#' choice. Set it before building the model data, since the slot is filled
+#' in then. It also lifts the cap of [.meta_n_quad_max()] when set above it.
 #'
 #' @returns An integer number of intervals.
 #'
@@ -29,6 +33,38 @@
     ))
   }
   return(as.integer(n_quad))
+}
+
+#' The largest number of quadrature intervals chosen for a summary row
+#'
+#' Every quadrature node costs a distribution function evaluation on each
+#' gradient, so the number of intervals [.estimates_n_quad()] chooses for a
+#' study is capped here unless `options(epidist.meta_n_quad = )` is set
+#' higher. [as_epidist_estimates_data()] warns about a study the cap leaves
+#' unresolved.
+#'
+#' @returns An integer number of intervals.
+#'
+#' @keywords internal
+.meta_n_quad_max <- function() {
+  return(2000L)
+}
+
+#' The number of quadrature intervals a row's slots ask for
+#'
+#' Rows built by [as_epidist_meta_model()] carry it in their `n_quad` slot.
+#' A slots list assembled by hand without one uses the floor.
+#'
+#' @param slots The output of [.meta_row_slots()].
+#'
+#' @returns An integer number of intervals.
+#'
+#' @keywords internal
+.meta_slots_n_quad <- function(slots) {
+  if (is.null(slots$n_quad)) {
+    return(.meta_n_quad())
+  }
+  return(as.integer(slots$n_quad))
 }
 
 #' Implied summaries shared by meta model rows with the same study design
@@ -721,8 +757,8 @@
 #' recovering the untruncated expression. Matches the implementation in
 #' `inst/stan/meta_model/functions.stan`.
 #'
-#' @param cdf The distribution function at `.meta_n_quad() + 1` equally spaced
-#'  points running from `lower` to `cutoff`.
+#' @param cdf The distribution function at `n_quad + 1` equally spaced points
+#'  running from `lower` to `cutoff`, for an even `n_quad`.
 #'
 #' @param lower The study's minimum delay (its left truncation point).
 #'
@@ -763,6 +799,10 @@
 #'
 #' @inheritParams .meta_grid_pmf
 #'
+#' @param n_quad The number of quadrature intervals, an even number. Rows
+#'  built by [as_epidist_meta_model()] carry the number chosen for their
+#'  study by [.estimates_n_quad()].
+#'
 #' @inherit .meta_moment_vector return
 #'
 #' @keywords internal
@@ -772,9 +812,10 @@
   lower = 0,
   cutoff,
   growth_rate = 0,
-  accrual = 0L
+  accrual = 0L,
+  n_quad = .meta_n_quad()
 ) {
-  quad <- seq(lower, cutoff, length.out = .meta_n_quad() + 1)
+  quad <- seq(lower, cutoff, length.out = n_quad + 1)
   cdf <- do.call(.pdist(dist), c(list(q = quad), args))
   if (accrual == 1L) {
     cdf <- .meta_accrual_reweight(cdf, lower, cutoff, growth_rate)
@@ -791,6 +832,7 @@
 #' event offset. See [.meta_accrual_reweight()].
 #'
 #' @inheritParams .meta_grid_pmf
+#' @inheritParams .meta_trunc_moments
 #'
 #' @inherit .meta_moment_vector return
 #'
@@ -802,9 +844,10 @@
   cutoff,
   pwindow,
   growth_rate,
-  accrual = 0L
+  accrual = 0L,
+  n_quad = .meta_n_quad()
 ) {
-  quad <- seq(lower, cutoff, length.out = .meta_n_quad() + 1)
+  quad <- seq(lower, cutoff, length.out = n_quad + 1)
   cdf <- .meta_pcens_cdf(quad, dist, args, pwindow, growth_rate)
   if (accrual == 1L) {
     cdf <- .meta_accrual_reweight(cdf, lower, cutoff, growth_rate, pwindow / 2)
@@ -882,8 +925,8 @@
 #' @param full A summary vector from [.meta_moment_vector()] of the
 #'  untruncated distribution.
 #'
-#' @param cdf The distribution function at `.meta_n_quad() + 1` equally spaced
-#'  points running from zero to `lower`.
+#' @param cdf The distribution function at `n_quad + 1` equally spaced points
+#'  running from zero to `lower`, for an even `n_quad`.
 #'
 #' @param lower The study's minimum delay (its left truncation point).
 #'
@@ -952,6 +995,8 @@
 #'
 #' @param trunc_design 0 for a cohort design, 1 for an accrual design.
 #'
+#' @inheritParams .meta_trunc_moments
+#'
 #' @inherit .meta_moment_vector return
 #'
 #' @keywords internal
@@ -965,7 +1010,8 @@
   trunc_adjusted,
   cens_adjusted,
   growth_rate,
-  trunc_design = 0L
+  trunc_design = 0L,
+  n_quad = .meta_n_quad()
 ) {
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
   if (cens_adjusted == 3 || cens_adjusted == 4) {
@@ -976,7 +1022,7 @@
     moments <- .meta_implied_moments(
       dist, args, .meta_cens_lower(lower, cens_adjusted, pwindow, swindow),
       cutoff, pwindow, swindow, trunc_adjusted,
-      .meta_cens_base(cens_adjusted), growth_rate, trunc_design
+      .meta_cens_base(cens_adjusted), growth_rate, trunc_design, n_quad
     )
     moments[["mean"]] <- moments[["mean"]] +
       .meta_cens_shift(cens_adjusted, pwindow, swindow)
@@ -995,13 +1041,13 @@
       if (lower == 0) {
         return(full)
       }
-      quad <- seq(0, lower, length.out = .meta_n_quad() + 1)
+      quad <- seq(0, lower, length.out = n_quad + 1)
       return(.meta_left_moments(
         full, .meta_pcens_cdf(quad, dist, args, pwindow, growth_rate), lower
       ))
     }
     return(.meta_pcens_trunc_moments(
-      dist, args, lower, cutoff, pwindow, growth_rate, accrual
+      dist, args, lower, cutoff, pwindow, growth_rate, accrual, n_quad
     ))
   }
   if (trunc_adjusted == 1) {
@@ -1009,12 +1055,14 @@
     if (lower == 0) {
       return(full)
     }
-    quad <- seq(0, lower, length.out = .meta_n_quad() + 1)
+    quad <- seq(0, lower, length.out = n_quad + 1)
     return(.meta_left_moments(
       full, do.call(.pdist(dist), c(list(q = quad), args)), lower
     ))
   }
-  return(.meta_trunc_moments(dist, args, lower, cutoff, growth_rate, accrual))
+  return(.meta_trunc_moments(
+    dist, args, lower, cutoff, growth_rate, accrual, n_quad
+  ))
 }
 
 #' The continuity corrected distribution function of a discrete delay grid
@@ -1088,8 +1136,7 @@
 #'
 #' @inheritParams .meta_implied_moments
 #'
-#' @returns A distribution function at `.meta_n_quad() + 1` equally spaced
-#'  nodes.
+#' @returns A distribution function at `n_quad + 1` equally spaced nodes.
 #'
 #' @keywords internal
 .meta_accrual_nodes <- function(
@@ -1099,9 +1146,10 @@
   cutoff,
   pwindow,
   cens_adjusted,
-  growth_rate
+  growth_rate,
+  n_quad = .meta_n_quad()
 ) {
-  quad <- seq(lower, cutoff, length.out = .meta_n_quad() + 1)
+  quad <- seq(lower, cutoff, length.out = n_quad + 1)
   if (cens_adjusted == 2) {
     cdf <- .meta_pcens_cdf(quad, dist, args, pwindow, growth_rate)
     weight_offset <- pwindow / 2
@@ -1134,7 +1182,8 @@
   cutoff,
   pwindow,
   cens_adjusted,
-  growth_rate
+  growth_rate,
+  n_quad = .meta_n_quad()
 ) {
   if (y >= cutoff) {
     return(1)
@@ -1143,9 +1192,9 @@
     return(0)
   }
   weighted <- .meta_accrual_nodes(
-    dist, args, lower, cutoff, pwindow, cens_adjusted, growth_rate
+    dist, args, lower, cutoff, pwindow, cens_adjusted, growth_rate, n_quad
   )
-  position <- (y - lower) / (cutoff - lower) * .meta_n_quad()
+  position <- (y - lower) / (cutoff - lower) * n_quad
   node <- floor(position)
   frac <- position - node
   return(weighted[node + 1] * (1 - frac) + weighted[node + 2] * frac)
@@ -1172,15 +1221,15 @@
   cutoff,
   pwindow,
   cens_adjusted,
-  growth_rate
+  growth_rate,
+  n_quad = .meta_n_quad()
 ) {
   if (y >= cutoff || y <= lower) {
     return(0)
   }
-  n_quad <- .meta_n_quad()
   span <- cutoff - lower
   weighted <- .meta_accrual_nodes(
-    dist, args, lower, cutoff, pwindow, cens_adjusted, growth_rate
+    dist, args, lower, cutoff, pwindow, cens_adjusted, growth_rate, n_quad
   )
   node <- floor((y - lower) / span * n_quad)
   slope <- (weighted[node + 2] - weighted[node + 1]) * n_quad / span
@@ -1227,7 +1276,8 @@
   trunc_adjusted,
   cens_adjusted,
   growth_rate,
-  trunc_design = 0L
+  trunc_design = 0L,
+  n_quad = .meta_n_quad()
 ) {
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
   if (cens_adjusted == 3 || cens_adjusted == 4) {
@@ -1239,7 +1289,7 @@
       y - .meta_cens_shift(cens_adjusted, pwindow, swindow), dist, args,
       .meta_cens_lower(lower, cens_adjusted, pwindow, swindow), cutoff,
       pwindow, swindow, trunc_adjusted, .meta_cens_base(cens_adjusted),
-      growth_rate, trunc_design
+      growth_rate, trunc_design, n_quad
     ))
   }
   if (cens_adjusted == 0) {
@@ -1252,7 +1302,8 @@
   }
   if (accrual == 1L) {
     return(.meta_accrual_prob(
-      y, dist, args, lower, cutoff, pwindow, cens_adjusted, growth_rate
+      y, dist, args, lower, cutoff, pwindow, cens_adjusted, growth_rate,
+      n_quad
     ))
   }
   if (cens_adjusted == 2) {
@@ -1325,18 +1376,19 @@
   trunc_adjusted,
   cens_adjusted,
   growth_rate,
-  trunc_design = 0L
+  trunc_design = 0L,
+  n_quad = .meta_n_quad()
 ) {
   half_width <- max(1e-6, 1e-4 * y)
   step_lwr <- max(y - half_width, lower)
   step_upr <- y + half_width
   prob_upper <- .meta_implied_prob(
     step_upr, dist, args, lower, cutoff, pwindow, swindow, trunc_adjusted,
-    cens_adjusted, growth_rate, trunc_design
+    cens_adjusted, growth_rate, trunc_design, n_quad
   )
   prob_lower <- .meta_implied_prob(
     step_lwr, dist, args, lower, cutoff, pwindow, swindow, trunc_adjusted,
-    cens_adjusted, growth_rate, trunc_design
+    cens_adjusted, growth_rate, trunc_design, n_quad
   )
   return(max((prob_upper - prob_lower) / (step_upr - step_lwr), 0))
 }
@@ -1373,7 +1425,8 @@
   trunc_adjusted,
   cens_adjusted,
   growth_rate,
-  trunc_design = 0L
+  trunc_design = 0L,
+  n_quad = .meta_n_quad()
 ) {
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
   if (cens_adjusted == 3 || cens_adjusted == 4) {
@@ -1381,7 +1434,7 @@
       y - .meta_cens_shift(cens_adjusted, pwindow, swindow), dist, args,
       .meta_cens_lower(lower, cens_adjusted, pwindow, swindow), cutoff,
       pwindow, swindow, trunc_adjusted, .meta_cens_base(cens_adjusted),
-      growth_rate, trunc_design
+      growth_rate, trunc_design, n_quad
     ))
   }
   if (cens_adjusted == 0) {
@@ -1413,13 +1466,14 @@
   }
   if (accrual == 1L) {
     return(.meta_accrual_density(
-      y, dist, args, lower, cutoff, pwindow, cens_adjusted, growth_rate
+      y, dist, args, lower, cutoff, pwindow, cens_adjusted, growth_rate,
+      n_quad
     ))
   }
   if (cens_adjusted == 2 && growth_rate != 0) {
     return(.meta_central_difference(
       y, dist, args, lower, cutoff, pwindow, swindow, trunc_adjusted,
-      cens_adjusted, growth_rate, trunc_design
+      cens_adjusted, growth_rate, trunc_design, n_quad
     ))
   }
   if (cens_adjusted == 2) {
@@ -1472,6 +1526,7 @@
     trunc_adjusted = prep$data$vint3[i],
     cens_adjusted = prep$data$vint4[i],
     trunc_design = prep$data$vint5[i],
+    n_quad = prep$data$vint9[i],
     cutoff = prep$data$vreal1[i],
     pwindow = prep$data$vreal2[i],
     swindow = prep$data$vreal3[i],
@@ -1712,14 +1767,14 @@
       slots$swindow, 0
     ))
   }
+  n_quad <- .meta_slots_n_quad(slots)
   if (accrual == 1L) {
     nodes <- .meta_accrual_nodes(
       dist, args, slots$lower, slots$cutoff, slots$pwindow,
-      slots$cens_adjusted, slots$growth_rate
+      slots$cens_adjusted, slots$growth_rate, n_quad
     )
     return(.meta_interpolate(
-      y - slots$lower, nodes,
-      (slots$cutoff - slots$lower) / .meta_n_quad(), 0
+      y - slots$lower, nodes, (slots$cutoff - slots$lower) / n_quad, 0
     ))
   }
   return(vapply(
@@ -1730,7 +1785,7 @@
     pwindow = slots$pwindow, swindow = slots$swindow,
     trunc_adjusted = slots$trunc_adjusted,
     cens_adjusted = slots$cens_adjusted, growth_rate = slots$growth_rate,
-    trunc_design = slots$trunc_design
+    trunc_design = slots$trunc_design, n_quad = n_quad
   ))
 }
 
@@ -1773,7 +1828,7 @@
       spacing = slots$swindow
     ))
   }
-  n_quad <- .meta_n_quad()
+  n_quad <- .meta_slots_n_quad(slots)
   span <- slots$cutoff - slots$lower
   quad <- seq(slots$lower, slots$cutoff, length.out = n_quad + 1)
   if (slots$cens_adjusted == 2) {
@@ -1940,16 +1995,17 @@
     return(clamp(exact))
   }
   value <- chord
+  n_quad <- .meta_slots_n_quad(slots)
   for (step in seq_len(.meta_newton_steps())) {
     prob <- .meta_implied_prob(
       value, dist, args, slots$lower, slots$cutoff, slots$pwindow,
       slots$swindow, slots$trunc_adjusted, slots$cens_adjusted,
-      slots$growth_rate, slots$trunc_design
+      slots$growth_rate, slots$trunc_design, n_quad
     )
     slope <- .meta_implied_density(
       value, dist, args, slots$lower, slots$cutoff, slots$pwindow,
       slots$swindow, slots$trunc_adjusted, slots$cens_adjusted,
-      slots$growth_rate, slots$trunc_design
+      slots$growth_rate, slots$trunc_design, n_quad
     )
     if (!is.finite(prob) || !is.finite(slope) || slope <= 0) {
       return(value)
@@ -2266,7 +2322,7 @@
     implied <- .meta_implied_prob(
       slots$value, dist, args, slots$lower, slots$cutoff, slots$pwindow,
       slots$swindow, slots$trunc_adjusted, slots$cens_adjusted,
-      slots$growth_rate, slots$trunc_design
+      slots$growth_rate, slots$trunc_design, .meta_slots_n_quad(slots)
     )
     observed <- slots$quantile_p
     se <- sqrt(slots$quantile_p * (1 - slots$quantile_p) / slots$study_n)
@@ -2352,7 +2408,7 @@
   return(.meta_implied_moments(
     dist, args, slots$lower, slots$cutoff, slots$pwindow, slots$swindow,
     slots$trunc_adjusted, slots$cens_adjusted, slots$growth_rate,
-    slots$trunc_design
+    slots$trunc_design, .meta_slots_n_quad(slots)
   ))
 }
 
@@ -2384,7 +2440,7 @@
   # cannot share a key. The quadrature resolution is part of the key as well,
   # because changing it changes the summaries a design implies.
   key <- paste(
-    dist, length(dist_args), .meta_n_quad(), slots$trunc_adjusted,
+    dist, length(dist_args), .meta_slots_n_quad(slots), slots$trunc_adjusted,
     slots$cens_adjusted, slots$trunc_design,
     sprintf(
       "%.17g|%.17g|%.17g|%.17g|%.17g",

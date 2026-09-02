@@ -260,65 +260,70 @@ test_that("as_epidist_estimates_data warns about a short grid cutoff", {
 })
 
 test_that("as_epidist_estimates_data warns when the quadrature is coarse relative to the delay", { # nolint: line_length_linter.
-  # The quadrature spans delay_min to the grid cutoff on a fixed number of
-  # intervals, so a heavy tailed study whose default max_delay is far above
-  # its mean gets nodes further apart than the delay itself.
+  # The quadrature spans delay_min to the grid cutoff on a number of
+  # intervals chosen from the spread the study reported, so a heavy tailed
+  # study whose default max_delay is far above its mean is resolved without
+  # a warning.
   heavy <- data.frame(
     study = "A", type = c("mean", "sd"), value = c(24, 40), n = 500,
     relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 2,
     growth_rate = 0.1, stringsAsFactors = FALSE
   )
   msgs <- capture_messages(as_epidist_estimates_data(heavy))
+  expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
+  # A very narrow study needs more intervals than the cap allows.
+  narrow <- heavy
+  narrow$value <- c(24, 0.1)
+  msgs <- capture_messages(as_epidist_estimates_data(narrow))
   expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
   expect_true(any(grepl("epidist.meta_n_quad", msgs, fixed = TRUE)))
   expect_true(any(grepl("max_delay", msgs, fixed = TRUE)))
-  # Raising the resolution clears it.
-  old <- options(epidist.meta_n_quad = 400)
+  # Raising the floor above the cap clears it.
+  old <- options(epidist.meta_n_quad = 40000)
   on.exit(options(old), add = TRUE)
-  msgs <- capture_messages(as_epidist_estimates_data(heavy))
+  msgs <- capture_messages(as_epidist_estimates_data(narrow))
   expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
   options(old)
+  # So does a shorter grid.
+  narrow$max_delay <- 30
+  msgs <- capture_messages(as_epidist_estimates_data(narrow))
+  expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
   # A study that adjusted for right truncation with a uniform primary event
   # uses the analytic moments, so its cutoff does not matter.
-  heavy$growth_rate <- 0
-  msgs <- capture_messages(as_epidist_estimates_data(heavy))
+  narrow$max_delay <- NULL
+  narrow$growth_rate <- 0
+  msgs <- capture_messages(as_epidist_estimates_data(narrow))
   expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
-  # A truncated continuous study is only flagged when its observation time
-  # is long relative to the delay.
+  # A truncated continuous study reporting only a location is measured
+  # against a quarter of it, so it is only flagged when its observation time
+  # is very long relative to the delay.
   truncated <- data.frame(
     study = "B", type = "mean", value = 5, n = 200,
-    relative_obs_time = 30, trunc_adjusted = FALSE, cens_adjusted = 1,
-    stringsAsFactors = FALSE
-  )
-  msgs <- capture_messages(as_epidist_estimates_data(truncated))
-  expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
-  truncated$relative_obs_time <- 600
-  msgs <- capture_messages(as_epidist_estimates_data(truncated))
-  expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
-  # A study reporting only a median is measured against it, and one on the
-  # discrete grid is never measured, because it uses no quadrature.
-  median <- data.frame(
-    study = "C", type = "quantile", value = 5, p = 0.5, n = 200,
     relative_obs_time = 600, trunc_adjusted = FALSE, cens_adjusted = 1,
     stringsAsFactors = FALSE
   )
-  msgs <- capture_messages(as_epidist_estimates_data(median))
+  msgs <- capture_messages(as_epidist_estimates_data(truncated))
+  expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
+  truncated$relative_obs_time <- 5000
+  msgs <- capture_messages(as_epidist_estimates_data(truncated))
   expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
-  median$cens_adjusted <- 0
-  msgs <- capture_messages(as_epidist_estimates_data(median))
+  # A study on the discrete grid is never flagged, because it uses no
+  # quadrature.
+  truncated$cens_adjusted <- 0
+  msgs <- capture_messages(as_epidist_estimates_data(truncated))
   expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
 })
 
 test_that(".estimates_coarse_quadrature names the studies with coarse nodes", {
   data <- suppressMessages(as_epidist_estimates_data(data.frame(
-    study = c("A", "A", "B", "C"),
-    type = c("mean", "sd", "mean", "mean"),
-    value = c(24, 40, 24, 5),
+    study = c("A", "A", "B", "B", "C"),
+    type = c("mean", "sd", "mean", "sd", "mean"),
+    value = c(24, 0.05, 24, 0.05, 5),
     n = 500,
-    relative_obs_time = c(Inf, Inf, Inf, 30),
-    trunc_adjusted = c(TRUE, TRUE, TRUE, FALSE),
-    cens_adjusted = c(2, 2, 1, 1),
-    growth_rate = c(0.1, 0.1, 0.1, 0),
+    relative_obs_time = c(Inf, Inf, Inf, Inf, 30),
+    trunc_adjusted = c(TRUE, TRUE, TRUE, TRUE, FALSE),
+    cens_adjusted = c(2, 2, 1, 1, 1),
+    growth_rate = c(0.1, 0.1, 0.1, 0.1, 0),
     stringsAsFactors = FALSE
   )))
   expect_identical(.estimates_coarse_quadrature(data), "A")

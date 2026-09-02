@@ -124,12 +124,12 @@ test_that("the R and Stan meta model log likelihoods agree for every observation
   formula <- epidist_formula(meta, family, formula = bf(mu ~ 1))
   stanvars <- epidist_stancode(meta, family = family, formula = formula)
   standata <- suppressMessages(epidist(meta, fn = brms::make_standata))
-  slots <- c(paste0("vint", 1:8), paste0("vreal", 1:8))
+  slots <- c(paste0("vint", 1:9), paste0("vreal", 1:8))
   mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(paste0(
     "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode, "\n}\n",
     "data {\n  int N;\n  array[N] int Y;\n",
-    paste0("  array[N] int ", slots[1:8], ";\n", collapse = ""),
-    paste0("  array[N] real ", slots[9:16], ";\n", collapse = ""),
+    paste0("  array[N] int ", slots[1:9], ";\n", collapse = ""),
+    paste0("  array[N] real ", slots[10:17], ";\n", collapse = ""),
     "  int<lower=0> N_meta_group;\n",
     "  vector[N_meta_group] meta_group_value;\n",
     "  array[N_meta_group] int meta_group_count;\n",
@@ -147,8 +147,8 @@ test_that("the R and Stan meta model log likelihoods agree for every observation
   )))
   stan_data <- c(
     list(N = length(standata$Y), Y = as.integer(standata$Y)),
-    lapply(standata[slots[1:8]], as.integer),
-    lapply(standata[slots[9:16]], as.numeric),
+    lapply(standata[slots[1:9]], as.integer),
+    lapply(standata[slots[10:17]], as.numeric),
     list(
       N_meta_group = standata$N_meta_group,
       meta_group_value = as.array(standata$meta_group_value),
@@ -219,7 +219,7 @@ test_that("the Stan naive grid stays finite on a grid that runs into the tail", 
     "    mass_min[n] = min(mass);\n    mass_total[n] = sum(mass);\n",
     "    moments[n] = meta_lognormal_implied_moments(\n",
     "      {mu, sigma}, 0, cutoff[n], 1, 1, 0, 0, 1, primary_params,\n",
-    "      accrual[n], 0\n",
+    "      accrual[n], 0, ", .meta_n_quad(), "\n",
     "    );\n  }\n}\n"
   )))
   fit <- mod$sample(
@@ -274,13 +274,15 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
   # for a lognormal or weibull delay, by Newton steps with the closed form
   # primary censored distribution function otherwise, and left alone on the
   # discrete grid and under an accrual design. Every branch is compared.
+  # The last design is a left truncated midpoint code, whose refinement has
+  # to normalise from the moved left truncation point of its base estimand.
   designs <- data.frame(
-    cens = c(1, 1, 2, 4, 1, 2, 3, 0),
-    trunc_adj = c(1, 0, 1, 0, 0, 0, 0, 0),
-    design = c(0, 0, 0, 0, 1, 0, 0, 0),
-    lower = c(0, 2, 0, 0, 0, 1.5, 0, 0),
-    cutoff = c(80, 30, 60, 25, 30, 40, 20, 24),
-    growth = c(0, 0, 0, 0, 0.1, 0.05, 0, 0)
+    cens = c(1, 1, 2, 4, 1, 2, 3, 0, 4),
+    trunc_adj = c(1, 0, 1, 0, 0, 0, 0, 0, 0),
+    design = c(0, 0, 0, 0, 1, 0, 0, 0, 0),
+    lower = c(0, 2, 0, 0, 0, 1.5, 0, 0, 2),
+    cutoff = c(80, 30, 60, 25, 30, 40, 20, 24, 30),
+    growth = c(0, 0, 0, 0, 0.1, 0.05, 0, 0, 0)
   )
   probs <- c(0.1, 0.5, 0.9)
   families <- list(
@@ -317,7 +319,7 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
       "  array[N] int design;\n  array[N] real delay_min;\n",
       "  array[N] real cutoff;\n  array[N] real growth;\n",
       "  array[N] int n_node;\n  int K;\n  vector[K] probs;\n",
-      "  array[2] real params;\n}\n",
+      "  array[2] real params;\n  int n_quad;\n}\n",
       "generated quantities {\n  array[N] vector[K] q;\n",
       "  for (n in 1:N) {\n",
       "    int prim_id = growth[n] == 0 ? 1 : 2;\n",
@@ -327,7 +329,7 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
       "    if (growth[n] != 0) prim_params[1] = growth[n];\n",
       "    nodes = ", fn("implied_nodes"), "(params, delay_min[n], ",
       "cutoff[n], 1, 1, trunc_adj[n], cens[n], prim_id, prim_params, ",
-      "accrual, growth[n]);\n",
+      "accrual, growth[n], n_quad);\n",
       "    for (k in 1:K) {\n",
       "      q[n, k] = ", fn("node_quantile"), "(nodes, probs[k], params, ",
       "delay_min[n], cutoff[n], 1, 1, trunc_adj[n], cens[n], prim_id, ",
@@ -347,7 +349,7 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
         trunc_adj = designs$trunc_adj, design = designs$design,
         delay_min = designs$lower, cutoff = designs$cutoff,
         growth = designs$growth, n_node = n_node, K = length(probs),
-        probs = probs, params = unname(unlist(args))
+        probs = probs, params = unname(unlist(args)), n_quad = .meta_n_quad()
       ),
       fixed_param = TRUE, chains = 1, iter_sampling = 1, iter_warmup = 0,
       sig_figs = 18, refresh = 0, show_messages = FALSE

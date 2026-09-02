@@ -904,22 +904,97 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   return(studies[short])
 }
 
-#' Studies whose quadrature nodes are far apart relative to their delays
+#' The spread each study reported, as a proxy for its delay standard deviation
+#'
+#' The quadrature a summary row uses has to resolve the delay distribution,
+#' whose scale is only known once the model is fitted. The spread the study
+#' itself reported stands in for it. That is its reported standard deviation
+#' where it gave one, the range of its reported quantiles divided by the same
+#' range of a standard normal where it gave two or more, and otherwise a
+#' quarter of the smallest location it reported, which is the coefficient of
+#' variation below which a delay is narrow. The proxy only has to be within a
+#' factor of two or so, because the resolution is chosen well inside where
+#' Simpson's rule converges.
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns A numeric vector of spreads, one per row.
+#'
+#' @keywords internal
+.estimates_spread <- function(data) {
+  studies <- as.character(data$study)
+  spread <- vapply(
+    unique(studies),
+    function(study) {
+      rows <- studies == study
+      sds <- data$value[rows & data$type == "sd"]
+      if (length(sds) > 0) {
+        return(min(sds))
+      }
+      reported <- rows & data$type == "quantile"
+      p <- data$p[reported]
+      value <- data$value[reported]
+      if (sum(reported) >= 2 && max(p) > min(p) && max(value) > min(value)) {
+        return(
+          (max(value) - min(value)) /
+            (stats::qnorm(max(p)) - stats::qnorm(min(p)))
+        )
+      }
+      location <- data$value[rows & data$type %in% c("mean", "quantile")]
+      location <- location[location > 0]
+      if (length(location) == 0) {
+        return(min(data$swindow[rows]))
+      }
+      return(min(location) / 4)
+    },
+    numeric(1)
+  )
+  return(unname(spread[match(studies, names(spread))]))
+}
+
+#' The number of quadrature intervals each summary row is evaluated on
 #'
 #' The moments and distribution function of a continuous estimand that is
-#' truncated at the grid cutoff are computed by Simpson's rule on
-#' `.meta_n_quad()` equally spaced intervals running from `delay_min` to the
-#' cutoff, so the node spacing is set by the cutoff and not by the scale of
-#' the delay. This covers a study that did not adjust for right truncation
-#' and used a continuous adjustment (`cens_adjusted` of 1, 2 or 4), a study
-#' that did adjust but whose primary events were not uniform within their
-#' window (`cens_adjusted` of 2 or 4 with a non zero `growth_rate`), and the
+#' truncated at the grid cutoff are computed by Simpson's rule on equally
+#' spaced intervals running from `delay_min` to the cutoff, so the node
+#' spacing is set by the cutoff and not by the scale of the delay. A fixed
+#' number of intervals leaves a narrow delay unresolved on a wide grid,
+#' which pins its implied kurtosis at its floor and can put its implied
+#' standard deviation out by a factor of two. The number is therefore chosen
+#' per study so that the spacing is at most a quarter of the spread the study
+#' reported, see [.estimates_spread()], with `options(epidist.meta_n_quad)`
+#' as its floor and [.meta_n_quad_max()] as its cap unless the option is set
+#' above it. It is even, because the quadrature uses Simpson's rule.
+#'
+#' Every row gets a number, including rows on the discrete grid, which do
+#' not use it.
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns An integer vector of interval counts, one per row.
+#'
+#' @keywords internal
+.estimates_n_quad <- function(data) {
+  span <- .estimates_grid_cutoff(data) - data$delay_min
+  needed <- 4 * ceiling(span / .estimates_spread(data))
+  floor_n <- .meta_n_quad()
+  cap <- max(.meta_n_quad_max(), floor_n)
+  n_quad <- pmin(pmax(needed, floor_n), cap)
+  n_quad <- n_quad + n_quad %% 2
+  return(as.integer(n_quad))
+}
+
+#' Studies whose quadrature nodes are far apart relative to their delays
+#'
+#' The number of quadrature intervals of [.estimates_n_quad()] is capped, so
+#' a study whose grid cutoff is very long relative to the spread it reported
+#' is left with nodes further apart than a quarter of that spread. This
+#' covers a study that did not adjust for right truncation and used a
+#' continuous adjustment (`cens_adjusted` of 1, 2 or 4), a study that did
+#' adjust but whose primary events were not uniform within their window
+#' (`cens_adjusted` of 2 or 4 with a non zero `growth_rate`), and the
 #' quantile members of a covariance matrix group, which are read off the
-#' same nodes. A spacing wider than a quarter of the smallest reported mean
-#' or median leaves the delay distribution poorly resolved, which for a heavy
-#' tailed delay at the default `max_delay` moves the implied mean by several
-#' percent. Since the resolution is compiled into the model this is flagged
-#' here rather than adapted per study.
+#' same nodes.
 #'
 #' @param data An `epidist_estimates_data` object.
 #'
@@ -937,23 +1012,10 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   if (!any(quadrature)) {
     return(character(0))
   }
-  spacing <- (.estimates_grid_cutoff(data) - data$delay_min) / .meta_n_quad()
-  location <- data$type == "mean" |
-    (data$type == "quantile" & !is.na(data$p) & data$p == 0.5)
-  studies <- unique(as.character(data$study)[quadrature])
-  coarse <- vapply(
-    studies,
-    function(study) {
-      rows <- as.character(data$study) == study
-      reported <- data$value[rows & location]
-      if (length(reported) == 0) {
-        return(FALSE)
-      }
-      return(max(spacing[rows & quadrature]) > min(reported) / 4)
-    },
-    logical(1)
-  )
-  return(studies[coarse])
+  spacing <- (.estimates_grid_cutoff(data) - data$delay_min) /
+    .estimates_n_quad(data)
+  coarse <- quadrature & spacing > .estimates_spread(data) / 4
+  return(unique(as.character(data$study)[coarse]))
 }
 
 #' Studies reporting quantiles on a coarse delay grid
@@ -1244,16 +1306,16 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
 
   coarse_quadrature <- .estimates_coarse_quadrature(data)
   if (length(coarse_quadrature) > 0) {
+    cap <- max(.meta_n_quad_max(), .meta_n_quad())
     cli::cli_inform(c(
       "!" = paste0(
-        "The quadrature nodes for {.val {coarse_quadrature}} are more than ",
-        "a quarter of the smallest reported mean or median apart, because ",
-        "they span the grid cutoff (the observation time, or ",
-        "{.var max_delay} where the study adjusted for right truncation) on ",
-        "{.code options(epidist.meta_n_quad)} intervals, so the implied ",
-        "summaries for {?this study/these studies} may be inaccurate. Raise ",
-        "{.code options(epidist.meta_n_quad)} before fitting, or lower ",
-        "{.var max_delay}."
+        "The quadrature for {.val {coarse_quadrature}} needs more than ",
+        "{cap} intervals to resolve the spread {?it/they} reported over ",
+        "the grid cutoff (the observation time, or {.var max_delay} where ",
+        "the study adjusted for right truncation), so the implied summaries ",
+        "for {?this study/these studies} may be inaccurate. Raise ",
+        "{.code options(epidist.meta_n_quad)} above {cap} before building ",
+        "the model data, or lower {.var max_delay}."
       )
     ))
   }

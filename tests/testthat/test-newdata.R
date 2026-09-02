@@ -186,6 +186,7 @@ test_that("epidist_newdata.epidist_meta_model returns an individual level row", 
   expect_identical(newdata$group_start, 1L)
   expect_identical(newdata$group_len, 0L)
   expect_identical(newdata$chol_start, 1L)
+  expect_identical(newdata$n_quad, .meta_n_quad())
   expect_identical(newdata$report_se, 0)
   expect_identical(newdata$quantile_p, 0)
   expect_identical(newdata$growth_rate, 0)

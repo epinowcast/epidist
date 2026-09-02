@@ -85,8 +85,11 @@
 #' Two settings trade accuracy against speed: `max_delay` in
 #' [as_epidist_estimates_data()], which sets the grid a study that adjusted for
 #' right truncation is summarised on and needs raising for a long tailed delay,
-#' and `options(epidist.meta_n_quad = )`, which sets the number of quadrature
-#' nodes used where a study is summarised by quadrature instead.
+#' and `options(epidist.meta_n_quad = )`, the smallest number of quadrature
+#' intervals used where a study is summarised by quadrature instead. Each
+#' study is given as many intervals as it needs to resolve the spread it
+#' reported, up to a cap of 2000 that the option lifts when set above it, and
+#' the number is held in the `n_quad` column of the model data.
 #'
 #' @param data An `epidist_linelist_data` or `epidist_aggregate_data` object of
 #'  individual level observations, an `epidist_estimates_data` object of
@@ -452,6 +455,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     group_start = 1L,
     group_len = 0L,
     chol_start = 1L,
+    n_quad = .meta_n_quad(),
     relative_obs_time = as.numeric(data$relative_obs_time),
     pwindow = as.numeric(data$pwindow),
     swindow = as.numeric(data$swindow),
@@ -542,13 +546,17 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
   mvn <- .estimates_vcov_rows(estimates)
   estimates <- tibble::as_tibble(unclass(estimates))
   group <- .meta_assign_groups(estimates, mvn)
+  # The quadrature resolution is chosen from everything a study reported, so
+  # it is taken before the study is split into its likelihood groups.
+  n_quad <- .estimates_n_quad(estimates)
   index <- split(seq_len(nrow(estimates)), group)
   index <- index[order(vapply(index, min, numeric(1)))]
   built <- lapply(index, function(rows) {
     key <- estimates$mvn_id[rows[1]]
     return(.meta_group_row(
       estimates[rows, , drop = FALSE],
-      if (all(mvn[rows])) supplied[[key]] else NULL
+      if (all(mvn[rows])) supplied[[key]] else NULL,
+      n_quad = n_quad[rows[1]]
     ))
   })
   members <- lapply(built, "[[", "members")
@@ -577,12 +585,15 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #' @param vcov The covariance matrix over the group's summaries, or `NULL`
 #'  where the study reported standard errors or a sample size instead.
 #'
+#' @param n_quad The number of quadrature intervals the group's study is
+#'  evaluated on, from [.estimates_n_quad()].
+#'
 #' @returns A list with a one row tibble `row`, a tibble of its `members`, and
 #'  the flat `chol` entries of its covariance matrix.
 #'
 #' @keywords internal
 #' @importFrom tibble tibble
-.meta_group_row <- function(estimates, vcov = NULL) {
+.meta_group_row <- function(estimates, vcov = NULL, n_quad = .meta_n_quad()) {
   estimates <- .meta_order_group(estimates, vcov)
   study_n <- as.integer(ifelse(is.na(estimates$n[1]), 0L, estimates$n[1]))
   quantiles <- estimates$type[1] == "quantile"
@@ -616,6 +627,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     group_start = 1L,
     group_len = nrow(members),
     chol_start = 1L,
+    n_quad = as.integer(n_quad),
     relative_obs_time = as.numeric(.estimates_grid_cutoff(estimates)[1]),
     pwindow = as.numeric(estimates$pwindow[1]),
     swindow = as.numeric(estimates$swindow[1]),
@@ -783,6 +795,13 @@ assert_epidist.epidist_meta_model <- function(data, ...) {
   assert_numeric(data$report_se, lower = 0)
   assert_numeric(data$quantile_p, lower = 0, upper = 1)
   assert_numeric(data$growth_rate, finite = TRUE)
+  assert_integerish(data$n_quad, lower = 2, any.missing = FALSE)
+  if (any(data$n_quad %% 2 != 0)) {
+    cli::cli_abort(paste0(
+      "{.var n_quad} must be an even number of intervals, because the ",
+      "quadrature uses Simpson's rule."
+    ))
+  }
 
   individual <- data[data$obs_type == 1L, , drop = FALSE]
   if (nrow(individual) > 0) {
@@ -949,7 +968,7 @@ epidist_family_model.epidist_meta_model <- function(
     ),
     type = "int",
     vars = c(
-      paste0("vint", 1:8, "[n]"),
+      paste0("vint", 1:9, "[n]"),
       paste0("vreal", 1:8, "[n]"),
       "meta_group_value",
       "meta_group_count",
@@ -996,7 +1015,8 @@ epidist_formula_model.epidist_meta_model <- function(
           trunc_design,
           group_start,
           group_len,
-          chol_start
+          chol_start,
+          n_quad
         ) +
         vreal(
           relative_obs_time,
@@ -1082,13 +1102,12 @@ epidist_stancode.epidist_meta_model <- function(
 
   stanvars_version <- .version_stanvar()
 
-  # n_quad_default keeps the Stan quadrature resolution equal to the one R
-  # uses. The primary event distribution only reaches the individual level
-  # rows, since summary rows take their tilt from the growth_rate slot.
+  # The primary event distribution only reaches the individual level rows,
+  # since summary rows take their tilt from the growth_rate slot. The
+  # quadrature resolution of each summary row travels with it as data.
   stanvars_functions <- .family_functions_stanvar(
     file.path("meta_model", "functions.stan"), family, "meta_",
-    primary = .primary_spec(.primary_dist(data)),
-    extra = c(n_quad_default = as.character(.meta_n_quad()))
+    primary = .primary_spec(.primary_dist(data))
   )
 
   stanvars_parameters <- brms::stanvar(
@@ -1192,6 +1211,7 @@ epidist_stancode.epidist_meta_model <- function(
     "group_start",
     "group_len",
     "chol_start",
+    "n_quad",
     "relative_obs_time",
     "pwindow",
     "swindow",

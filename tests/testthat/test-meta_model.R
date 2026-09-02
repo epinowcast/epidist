@@ -115,7 +115,7 @@ test_that("epidist_formula_model.epidist_meta_model binds the required slots", {
   expect_true(grepl(
     paste0(
       "vint(obs_type, study_n, trunc_adjusted, cens_adjusted, ",
-      "trunc_design, group_start, group_len, chol_start)"
+      "trunc_design, group_start, group_len, chol_start, n_quad)"
     ),
     form,
     fixed = TRUE
@@ -2027,30 +2027,70 @@ test_that(".meta_uniform_pcens_density is the derivative of the primary censored
   expect_equal(closed, numeric_density, tolerance = 1e-6)
 })
 
-test_that(".meta_n_quad defaults to the value substituted into the Stan code", {
+test_that(".meta_n_quad is the floor of the n_quad slot passed to Stan", {
+  # The resolution travels with each row as data rather than being compiled
+  # into the Stan code, so the chunk carries no placeholder for it.
   chunk <- .stan_chunk(file.path("meta_model", "functions.stan"))
-  # The Stan chunk carries a placeholder that epidist_stancode() replaces.
-  expect_true(grepl("n_quad_default", chunk, fixed = TRUE))
+  expect_false(grepl("n_quad_default", chunk, fixed = TRUE))
   expect_identical(.meta_n_quad(), .meta_n_quad_default())
-  stanvars <- epidist_stancode(prep_meta_estimates)
-  scode <- stanvars[[2]]$scode
-  expect_false(grepl("n_quad_default", scode, fixed = TRUE))
-  expect_true(
-    grepl(paste0(", ", .meta_n_quad(), ","), scode, fixed = TRUE) ||
-      grepl(paste0(", ", .meta_n_quad(), "\n"), scode, fixed = TRUE)
+  expect_true(all(prep_meta_estimates$n_quad >= .meta_n_quad()))
+  standata <- suppressMessages(
+    epidist(prep_meta_estimates, fn = brms::make_standata)
   )
+  expect_identical(as.integer(standata$vint9), prep_meta_estimates$n_quad)
 })
 
 test_that(".meta_n_quad is configurable and validated", {
   restore <- options(epidist.meta_n_quad = 20L)
   on.exit(options(restore), add = TRUE)
   expect_identical(.meta_n_quad(), 20L)
-  stanvars <- epidist_stancode(prep_meta_estimates)
-  expect_true(grepl(", 20,", stanvars[[2]]$scode, fixed = TRUE))
+  # The floor applies to a study whose spread is resolved by fewer intervals
+  # than it asks for.
+  wide <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = c("mean", "sd"), value = c(7, 5), n = 100,
+    relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 1,
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = wide))
+  expect_identical(meta$n_quad, 20L)
+  # The option also lifts the cap.
+  options(epidist.meta_n_quad = 5000L)
+  meta <- suppressMessages(as_epidist_meta_model(estimates = wide))
+  expect_identical(meta$n_quad, 5000L)
   options(epidist.meta_n_quad = 21L)
   expect_error(.meta_n_quad(), "even number")
   options(epidist.meta_n_quad = 1L)
   expect_error(.meta_n_quad())
+})
+
+test_that(".estimates_n_quad reads the spread from what a study reported", {
+  # A reported standard deviation, the range of two or more quantiles, and a
+  # quarter of a lone location are the spreads a study is resolved to.
+  data <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = c("sd", "sd", "iqr", "iqr", "median"),
+    type = c("mean", "sd", "quantile", "quantile", "quantile"),
+    value = c(8, 0.5, 5, 9, 6),
+    p = c(NA, NA, 0.25, 0.75, 0.5),
+    n = 100, relative_obs_time = 40, trunc_adjusted = FALSE,
+    cens_adjusted = 1, stringsAsFactors = FALSE
+  )))
+  spread <- .estimates_spread(data)
+  expect_identical(spread[1:2], c(0.5, 0.5))
+  expect_identical(spread[3], 4 / (stats::qnorm(0.75) - stats::qnorm(0.25)))
+  expect_identical(spread[5], 1.5)
+  n_quad <- .estimates_n_quad(data)
+  expect_identical(n_quad, as.integer(pmax(
+    4 * ceiling(40 / spread), .meta_n_quad()
+  )))
+  expect_true(all(n_quad %% 2 == 0))
+  expect_true(all(n_quad <= .meta_n_quad_max()))
+  # The cap binds for a very narrow study, which is what the coarse
+  # quadrature warning now reports.
+  narrow <- data
+  narrow$value[2] <- 0.01
+  expect_identical(.estimates_n_quad(narrow)[1], .meta_n_quad_max())
+  expect_identical(.estimates_coarse_quadrature(narrow), "sd")
+  expect_identical(.estimates_coarse_quadrature(data), character(0))
 })
 
 test_that(".meta_n_quad changes the accuracy of the truncated moments", {
@@ -2076,7 +2116,7 @@ test_that("the quadrature resolution of a study follows its reported spread", { 
   cutoff <- 20 * mean_delay
   trunc_lnorm <- function(args, cutoff) {
     z <- (log(cutoff) - args$meanlog) / args$sdlog
-    raw <- vapply(
+    raw_moment <- vapply(
       1:4,
       function(k) {
         return(
@@ -2086,16 +2126,18 @@ test_that("the quadrature resolution of a study follows its reported spread", { 
       },
       numeric(1)
     )
-    return(.meta_central_from_raw(raw))
+    return(.meta_central_from_raw(raw_moment))
   }
   row_slots <- function(meta, study) {
-    row <- meta[meta$study == study, ]
+    study_row <- meta[meta$study == study, ]
     return(list(
-      lower = row$delay_min, cutoff = row$relative_obs_time,
-      pwindow = row$pwindow, swindow = row$swindow,
-      trunc_adjusted = row$trunc_adjusted, cens_adjusted = row$cens_adjusted,
-      growth_rate = row$growth_rate, trunc_design = row$trunc_design,
-      n_quad = row$n_quad
+      lower = study_row$delay_min, cutoff = study_row$relative_obs_time,
+      pwindow = study_row$pwindow, swindow = study_row$swindow,
+      trunc_adjusted = study_row$trunc_adjusted,
+      cens_adjusted = study_row$cens_adjusted,
+      growth_rate = study_row$growth_rate,
+      trunc_design = study_row$trunc_design,
+      n_quad = study_row$n_quad
     ))
   }
   for (cv in c(0.05, 0.1, 0.2, 0.5)) {

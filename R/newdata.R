@@ -143,6 +143,7 @@ epidist_newdata.epidist_meta_model <- function(
       group_start = 1L,
       group_len = 0L,
       chol_start = 1L,
+      n_quad = .meta_n_quad(),
       relative_obs_time = relative_obs_time,
       pwindow = pwindow,
       swindow = swindow,

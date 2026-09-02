@@ -439,6 +439,27 @@ lockstep_grid_quantiles <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Studies AF and AG report a narrow delay, so their rows carry many more
+# quadrature intervals than the floor and the R and Stan quadratures are
+# compared at a resolution chosen from the reported spread. AF is truncated
+# at a long observation time, and AG adjusted for truncation with a growing
+# primary event, so its quantile is read off the chord of its nodes.
+lockstep_narrow <- data.frame(
+  study = c("AF", "AF", "AG", "AG"),
+  type = c("mean", "sd", "mean", "quantile"),
+  value = c(7.1, 0.4, 7.3, 7.6),
+  se = c(NA, NA, NA, 0.1),
+  p = c(NA, NA, NA, 0.75),
+  n = c(150, 150, 120, 120),
+  relative_obs_time = c(60, 60, Inf, Inf),
+  trunc_adjusted = c(FALSE, FALSE, TRUE, TRUE),
+  trunc_design = "cohort",
+  cens_adjusted = c(1, 1, 2, 2),
+  delay_min = 0,
+  growth_rate = c(0, 0, 0.1, 0.1),
+  stringsAsFactors = FALSE
+)
+
 lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
   lockstep_base_rows,
   lockstep_mvn_q,
@@ -447,7 +468,8 @@ lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
   lockstep_left_midpoint,
   lockstep_mvn_z,
   lockstep_accrual_windows,
-  lockstep_grid_quantiles
+  lockstep_grid_quantiles,
+  lockstep_narrow
 )))
 
 # The shared fits below use the cmdstanr backend, so they are only built
