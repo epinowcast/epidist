@@ -25,7 +25,7 @@ test_that("epidist.epidist_latent_model samples from the prior according to marg
     silent = 2, refresh = 0,
     cores = 2
   )
-  pred <- predict_delay_parameters(prior_samples)
+  pred <- delay_parameter_draws(prior_samples)
   family <- lognormal()
   epidist_family <- epidist_family(data = prep_obs, family = family)
   epidist_formula <- epidist_formula(
@@ -102,7 +102,7 @@ test_that("epidist.epidist_latent_model recovers the simulation settings for the
   skip_on_cran()
   skip_if_no_cmdstanr()
   set.seed(1)
-  pred <- predict_delay_parameters(fit)
+  pred <- delay_parameter_draws(fit)
   # Unclear the extent to which we should expect parameter recovery here
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
   expect_equal(mean(pred$sigma), sdlog, tolerance = 0.1)
@@ -205,8 +205,8 @@ test_that("the latent and marginal models agree when censoring windows overlap",
   # which would make the comparison below pass regardless of the adjustment.
   expect_gt(overlap_fraction, 0.2)
 
-  pred_latent <- predict_delay_parameters(fit_overlap)
-  pred_marginal <- predict_delay_parameters(fit_marginal_overlap)
+  pred_latent <- delay_parameter_draws(fit_overlap)
+  pred_marginal <- delay_parameter_draws(fit_marginal_overlap)
 
   # The adjustment shows up in the standard deviation rather than the mean.
   # On this fixture the latent model gives sigma 0.518 against the marginal

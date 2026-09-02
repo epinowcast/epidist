@@ -7,6 +7,18 @@ It expands the variables you give it into a grid and adds the response and obser
 The defaults give the delay distribution with no censoring and no truncation, and arguments set the censoring windows, the relative observation time and the minimum delay.
 The result works with `brms::posterior_epred()`, `predict_delay_parameters()` and the `tidybayes` draw functions.
 See `?epidist_newdata` and #280.
+- Added `delay_parameter_draws()` and `add_delay_parameter_draws()`, which return posterior draws of the delay distribution parameters in the long format used by `tidybayes`.
+- Added `delay_parameter_draws()` and `add_delay_parameter_draws()`, which return posterior draws of the delay distribution parameters in the long format used by `tidybayes`.
+The draws come back with `.row`, `.chain`, `.iteration` and `.draw` columns alongside the columns of `newdata`.
+`predict_delay_parameters()` and `predict_dpar()` are removed in their favour.
+See #471.
+- Added `add_summaries()`, which adds the mean, the standard deviation and quantiles of the delay distribution implied by each draw of its parameters.
+It uses the analytic solution for the lognormal, gamma and Weibull families, and simulates from any other family, so it works for every family `brms` can predict from.
+`add_mean_sd()` is removed in its favour.
+See #471.
+- Added `epidist_strata()`, which returns one row of the model data per unique combination of the variables that predict the delay distribution parameters.
+Passing it to `add_delay_parameter_draws()` draws each set of parameters once rather than once per observation.
+See #471.
 - `epidist` data objects now check themselves when they are modified.
 Every object also carries a shared `epidist_data` class with methods for subsetting, replacement, `rbind()` and the `dplyr` verbs.
 These re-check the object and drop any `epidist` class whose requirements it no longer meets, warning about what was dropped and why.
