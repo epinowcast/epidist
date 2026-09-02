@@ -2041,6 +2041,12 @@
 #' the joint likelihood of its members: [.meta_moment_pair_ll()] for a mean and
 #' a standard deviation, and [.meta_quantile_set_ll()] for a set of quantiles.
 #'
+#' A draw whose implied moments are not all finite, which an extreme delay
+#' distribution parameter can produce by overflowing the analytic kurtosis,
+#' is rejected with a log likelihood of `-Inf` rather than `NaN`, for every
+#' row that uses the moments. Matches the guard in `meta_family_lpmf` in
+#' `inst/stan/meta_model/functions.stan`.
+#'
 #' @inheritParams .meta_summary_terms
 #'
 #' @returns A log density.
@@ -2054,10 +2060,15 @@
       slots$group_chol
     ))
   }
-  if (slots$obs_type == 5L) {
+  if (slots$obs_type %in% c(2L, 3L, 5L)) {
     if (is.null(moments)) {
       moments <- .meta_row_moments(slots, dist, args)
     }
+    if (!all(is.finite(moments))) {
+      return(-Inf)
+    }
+  }
+  if (slots$obs_type == 5L) {
     return(.meta_moment_pair_ll(
       slots$group_value[1], slots$group_value[2], moments, slots$study_n
     ))
