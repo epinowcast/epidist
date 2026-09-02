@@ -927,6 +927,51 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   return(studies[several])
 }
 
+#' Studies whose reported standard deviation has a heavy tailed sampling error
+#'
+#' The sampling standard error of a reported standard deviation is
+#' \eqn{\sigma \sqrt{(\kappa - 1) / (4 n)}}, with \eqn{\kappa} the kurtosis
+#' of the delays. The normal approximation behind it holds while that
+#' relative standard error is below about a quarter. Above it the sampling
+#' distribution of a sample standard deviation is far from normal, the
+#' asymptotic standard error overstates its spread by up to two times, and
+#' the joint likelihood of a mean and standard deviation pair is biased by
+#' about a standard error. The kurtosis is taken from the reported mean and
+#' standard deviation under a lognormal delay, which is a plausible tail for
+#' a delay of that coefficient of variation.
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns A character vector of study identifiers.
+#'
+#' @keywords internal
+.estimates_heavy_tail_sd <- function(data) {
+  sds <- data$type == "sd" & !is.na(data$n) & is.na(data$se) &
+    !.estimates_vcov_rows(data)
+  if (!any(sds)) {
+    return(character(0))
+  }
+  studies <- unique(as.character(data$study)[sds])
+  heavy <- vapply(
+    studies,
+    function(study) {
+      rows <- as.character(data$study) == study
+      reported_mean <- data$value[rows & data$type == "mean"]
+      if (length(reported_mean) == 0) {
+        return(FALSE)
+      }
+      keep <- sds & rows
+      variance_log <- log1p((data$value[keep] / max(reported_mean))^2)
+      kurtosis <- exp(4 * variance_log) + 2 * exp(3 * variance_log) +
+        3 * exp(2 * variance_log) - 3
+      relative_se <- sqrt((kurtosis - 1) / (4 * data$n[keep]))
+      return(any(relative_se > 0.25))
+    },
+    logical(1)
+  )
+  return(studies[heavy])
+}
+
 #' Class constructor for `epidist_estimates_data` objects
 #'
 #' @param data A data.frame to convert
@@ -1097,6 +1142,21 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
         "than a day, which it is here, so {?this study/these studies} will ",
         "be weighted too heavily. Fit a reported mean and standard deviation ",
         "instead where one is available."
+      )
+    ))
+  }
+
+  heavy <- .estimates_heavy_tail_sd(data)
+  if (length(heavy) > 0) {
+    cli::cli_inform(c(
+      "!" = paste0(
+        "The standard deviation reported by {.val {heavy}} has a relative ",
+        "standard error above 0.25 at the kurtosis its mean and standard ",
+        "deviation imply under a lognormal delay. The normal sampling ",
+        "likelihood of a reported standard deviation, and the joint ",
+        "likelihood of a mean and standard deviation pair, cannot be trusted ",
+        "for such a heavy tail at this sample size. Where the study reports ",
+        "quantiles inside the body of the distribution, those are safer."
       )
     ))
   }

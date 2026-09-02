@@ -413,6 +413,10 @@ $$
 This follows from the asymptotic variance of the sample variance, $(\mu_4 - \sigma^4)/n$, by the delta method [@cramer1946].
 The normal theory expression $\sigma / \sqrt{2(n-1)}$ is the special case $\kappa = 3$.
 It is not used because it assumes the estimand itself is normally distributed and is two to four times too narrow for the right skewed distributions delays usually follow.
+Equation \@ref(eq:meta-sd-lik), and the pair likelihood of Equation \@ref(eq:meta-moment-pair) built on it, should not be trusted once the relative standard error $\sqrt{(\kappa - 1) / (4 n)}$ exceeds about a quarter.
+For a lognormal with kurtosis 9 (a log scale standard deviation of 0.5) that is $n$ below about 30, and for kurtosis 114 (a log scale standard deviation of 1) it is $n$ below about 450.
+Beyond that point the sampling distribution of a sample standard deviation is far from normal, the asymptotic standard error overstates its spread by up to two times, and the pair likelihood is biased by about a standard error towards a smaller spread.
+`as_epidist_estimates_data()` warns when a reported mean and standard deviation imply this under a lognormal delay.
 
 A **reported quantile** at probability $p$ is fitted on the cumulative probability scale, which avoids inverting the distribution function of the biased estimand:
 $$
