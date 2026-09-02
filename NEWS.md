@@ -15,7 +15,7 @@ See `?delay_summary_draws` and #667.
 - Added `epidist_newdata()`, which builds the `newdata` needed to predict from a fitted model.
 It expands the variables you give it into a grid and adds the response and observation process variables the model uses, so you no longer have to know the column names each model expects.
 The defaults give the delay distribution with no censoring and no truncation, and arguments set the censoring windows, the relative observation time and the minimum delay.
-The result works with `brms::posterior_epred()`, `predict_delay_parameters()` and the `tidybayes` draw functions.
+The result works with `brms::posterior_epred()`, `delay_summary_draws()` and the `tidybayes` draw functions.
 See `?epidist_newdata` and #280.
 - Added `delay_parameter_draws()` and `add_delay_parameter_draws()`, which return posterior draws of the delay distribution parameters in the long format used by `tidybayes`.
 - Added `delay_parameter_draws()` and `add_delay_parameter_draws()`, which return posterior draws of the delay distribution parameters in the long format used by `tidybayes`.
