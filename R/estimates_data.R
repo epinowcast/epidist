@@ -892,6 +892,41 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   return(studies[coarse])
 }
 
+#' Large studies reporting several quantiles of integer day delays
+#'
+#' A quantile of delays counted in whole censoring windows is a discrete
+#' statistic, and the information it carries about the delay distribution
+#' saturates once the binomial spread of the crossing point of the empirical
+#' distribution function is narrower than a window. A single such quantile is
+#' fitted as the exact crossing event, but several are still fitted with the
+#' multinomial on the continuity corrected distribution function, whose
+#' claimed precision keeps growing with the sample size. It is calibrated at
+#' around thirty delays and overconfident from around a hundred, so studies
+#' above that are flagged.
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns A character vector of study identifiers.
+#'
+#' @keywords internal
+.estimates_overconfident_sets <- function(data) {
+  rows <- data$type == "quantile" & data$cens_adjusted %in% c(0L, 3L) &
+    !is.na(data$n) & data$n > 100 & is.na(data$se) &
+    !.estimates_vcov_rows(data)
+  if (!any(rows)) {
+    return(character(0))
+  }
+  studies <- unique(as.character(data$study)[rows])
+  several <- vapply(
+    studies,
+    function(study) {
+      return(sum(rows & as.character(data$study) == study) >= 2)
+    },
+    logical(1)
+  )
+  return(studies[several])
+}
+
 #' Class constructor for `epidist_estimates_data` objects
 #'
 #' @param data A data.frame to convert
@@ -1047,6 +1082,21 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
         "and does not shrink as {.var n} grows. Check that {.var swindow} is ",
         "the resolution the study worked at, and fit a reported mean and ",
         "standard deviation in preference where one is available."
+      )
+    ))
+  }
+
+  overconfident <- .estimates_overconfident_sets(data)
+  if (length(overconfident) > 0) {
+    cli::cli_inform(c(
+      "!" = paste0(
+        "{.val {overconfident}} report{?s/} several quantiles of integer day ",
+        "delays from more than 100 delays. The joint likelihood of such a ",
+        "quantile set is overconfident once the binomial spread of the ",
+        "crossing point of the empirical distribution function is narrower ",
+        "than a day, which it is here, so {?this study/these studies} will ",
+        "be weighted too heavily. Fit a reported mean and standard deviation ",
+        "instead where one is available."
       )
     ))
   }

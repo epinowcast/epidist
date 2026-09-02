@@ -470,8 +470,22 @@ $$
 with $c_j = \text{round}(n p_j) - \text{round}(n p_{j-1})$ and $c_{k+1} = n - \text{round}(n p_k)$.
 Rounding the cumulative probabilities rather than the increments keeps every count non negative and makes them sum to $n$.
 This is the usual likelihood for data grouped into intervals, with the reported quantiles supplying the cell boundaries.
-A single reported quantile reduces Equation \@ref(eq:meta-quantile-set) to the binomial, of which Equation \@ref(eq:meta-quantile-lik) is the normal approximation, so quantile rows use Equation \@ref(eq:meta-quantile-set) unless the study supplied its own standard error.
-A cell whose implied probability is zero while the study saw delays in it gives a log likelihood of $-\infty$.
+A single reported quantile of a continuous estimand reduces Equation \@ref(eq:meta-quantile-set) to the binomial, of which Equation \@ref(eq:meta-quantile-lik) is the normal approximation, so quantile rows use Equation \@ref(eq:meta-quantile-set) unless the study supplied its own standard error.
+Two quantiles reported at the same value are two constraints on the empirical distribution function at one cell, and are merged into that cell with their combined count.
+A cell whose implied probability underflows to zero while the study saw delays in it has its probability floored at $10^{-300}$, which rejects the draw in practice while leaving `loo()` a finite value.
+
+A quantile of integer day delays, that is of a study with `cens_adjusted` 0 or 3, is a discrete statistic.
+"The median is 5 days" says that the empirical distribution function crossed one half between 4 and 5 days.
+That is read as a type 1 quantile, $N_{\le y - w_s} < \lceil n p \rceil \le N_{\le y}$, with $N_{\le y}$ the number of delays at or below $y$.
+A single such quantile is fitted as the probability of that event,
+$$
+P(N_{\le y} \ge k) - P(N_{\le y - w_s} \ge k), \quad k = \lceil n p \rceil, \quad N_{\le y} \sim \text{Binomial}\left(n, G_0(y)\right), (\#eq:meta-quantile-crossing)
+$$
+where $G_0$ is the uncorrected distribution function of the grid in Equation \@ref(eq:meta-grid).
+Unlike the continuity corrected forms above, the information this carries saturates as $n$ grows.
+Once the binomial spread of the crossing point, about $\sqrt{p(1-p)/n}$ in probability, is narrower than a day, the reported integer stops moving, and the likelihood tends to an indicator of the parameters that put the population quantile in the reported cell.
+Several quantiles from such a study still use Equation \@ref(eq:meta-quantile-set) on the continuity corrected $G$.
+That is calibrated at around thirty delays but overconfident from around a hundred, and at a thousand it claims a standard error five times too small, so `as_epidist_estimates_data()` warns about such studies and the mean and standard deviation should be fitted instead where they are reported.
 
 Summaries of different kinds from the same study, such as a mean and a median, are still treated as independent, which understates their joint uncertainty.
 The normal approximations also degrade for small study sample sizes.

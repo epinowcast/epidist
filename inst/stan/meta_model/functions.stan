@@ -1165,11 +1165,77 @@
   }
 
   /**
+    * Log mass of a single quantile of integer day delays, read as the cell
+    * in which the empirical distribution function crossed p (a type 1
+    * quantile): N_{<= y - w} < ceil(n p) <= N_{<= y}, with the counts
+    * binomial on the uncorrected grid distribution function. Matches
+    * .meta_grid_crossing_ll() in R.
+    */
+  real meta_family_grid_crossing_ll(data real y, data real p,
+                                    data int study_n, array[] real params,
+                                    data real delay_min, data real cutoff,
+                                    data real pwindow_width,
+                                    data real swindow_width,
+                                    data int cens_adj, data int prim_id,
+                                    array[] real prim_params,
+                                    data int accrual,
+                                    data real growth_rate) {
+    int n_grid = to_int(floor(cutoff / swindow_width));
+    int first = meta_family_grid_first(delay_min, swindow_width);
+    // The shift back to the base grid is inlined because to_int needs a
+    // data only expression, which a local variable is not.
+    int cell = to_int(floor(
+      (y - meta_family_shift(cens_adj, pwindow_width, swindow_width)) /
+        swindow_width + 0.5
+    ));
+    int k = to_int(ceil(study_n * p - 1e-9));
+    vector[2] edges;
+    if (cell < first || cell >= n_grid) {
+      return negative_infinity();
+    }
+    if (accrual == 0) {
+      edges = meta_family_grid_edges(
+        cell, params, delay_min, cutoff, pwindow_width, swindow_width,
+        prim_id, prim_params
+      );
+    } else {
+      vector[n_grid - first + 1] cdf = append_row(0, cumulative_sum(
+        meta_family_grid_pmf(params, delay_min, cutoff, pwindow_width,
+                             swindow_width, prim_id, prim_params, accrual,
+                             growth_rate)
+      ));
+      edges = cdf[(cell - first + 1):(cell - first + 2)];
+    }
+    if (is_nan(edges[1]) || is_nan(edges[2])) {
+      return negative_infinity();
+    }
+    {
+      real log_upper = binomial_lccdf(
+        k - 1 | study_n, fmin(fmax(edges[2], 0), 1)
+      );
+      real log_lower = binomial_lccdf(
+        k - 1 | study_n, fmin(fmax(edges[1], 0), 1)
+      );
+      if (is_inf(log_lower)) {
+        return log_upper;
+      }
+      if (is_inf(log_upper) || log_upper <= log_lower) {
+        return negative_infinity();
+      }
+      return log_diff_exp(log_upper, log_lower);
+    }
+  }
+
+  /**
     * Joint log mass of a set of quantiles from one study, multinomial over
-    * the cells the quantiles cut the delay axis into.
+    * the cells the quantiles cut the delay axis into. Coincident values are
+    * merged into one cell, a single quantile of integer day delays is fitted
+    * as its crossing cell, and a cell that underflows is floored at 1e-300,
+    * matching .meta_cell_floor() in R.
     */
   real meta_family_quantile_set_lpmf(data array[] int cum_count, data vector y,
-                                     data int study_n, array[] real params,
+                                     data vector p, data int study_n,
+                                     array[] real params,
                                      data real delay_min, data real cutoff,
                                      data real pwindow_width,
                                      data real swindow_width,
@@ -1182,19 +1248,30 @@
     real lp = lgamma(study_n + 1);
     real previous_prob = 0;
     int previous_count = 0;
+    if (n_reported == 1 && (cens_adj == 0 || cens_adj == 3)) {
+      return meta_family_grid_crossing_ll(
+        y[1], p[1], study_n, params, delay_min, cutoff, pwindow_width,
+        swindow_width, cens_adj, prim_id, prim_params, accrual, growth_rate
+      );
+    }
     for (j in 1:n_reported) {
-      real prob = meta_family_implied_prob(
+      real prob;
+      int count;
+      if (j < n_reported && y[j + 1] == y[j]) {
+        continue;
+      }
+      prob = meta_family_implied_prob(
         y[j], params, delay_min, cutoff, pwindow_width, swindow_width,
         trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
       );
-      int count = cum_count[j] - previous_count;
+      count = cum_count[j] - previous_count;
       lp -= lgamma(count + 1);
       if (count > 0) {
         real cell = prob - previous_prob;
-        if (is_nan(cell) || cell <= 0) {
+        if (is_nan(cell)) {
           return negative_infinity();
         }
-        lp += count * log(cell);
+        lp += count * log(fmax(cell, 1e-300));
       }
       previous_prob = prob;
       previous_count = cum_count[j];
@@ -1204,10 +1281,10 @@
       real cell = 1 - previous_prob;
       lp -= lgamma(count + 1);
       if (count > 0) {
-        if (is_nan(cell) || cell <= 0) {
+        if (is_nan(cell)) {
           return negative_infinity();
         }
-        lp += count * log(cell);
+        lp += count * log(fmax(cell, 1e-300));
       }
     }
     return lp;
@@ -1278,9 +1355,10 @@
 
   if (obs_type == 6) {
     return meta_family_quantile_set_lpmf(
-      group_count[group_start:last] | group_value[group_start:last], study_n,
-      {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
-      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
+      group_count[group_start:last] | group_value[group_start:last],
+      group_p[group_start:last], study_n, {dpars_B}, delay_min,
+      relative_obs_t, pwindow_width, swindow_width, trunc_adj, cens_adj,
+      prim_id, prim_params, accrual, growth_rate
     );
   }
 

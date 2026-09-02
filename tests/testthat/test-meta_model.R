@@ -1293,7 +1293,10 @@ test_that(".meta_quantile_set_ll floors a cell the study saw but the estimand ca
     1e-8, 50L, 100, "plnorm", list(meanlog = 5, sdlog = 0.1), slots
   )
   expect_true(is.finite(unreachable))
-  expect_lt(unreachable, 50 * log(.meta_cell_floor()) + 1)
+  expect_equal(
+    unreachable, lchoose(100, 50) + 50 * log(.meta_cell_floor()),
+    tolerance = 1e-8
+  )
   # A cell the study saw nothing in contributes nothing however small it is.
   expect_true(is.finite(.meta_quantile_set_ll(
     1e-8, 0L, 100, "plnorm", list(meanlog = 5, sdlog = 0.1), slots
@@ -1322,20 +1325,25 @@ test_that(".meta_quantile_set_ll reads a single integer day quantile as its cros
       "plnorm", args, 0, 30, 1, 1, design$growth_rate, accrual
     )
     grid_cdf <- c(0, cumsum(mass))
+    log_tail <- function(k, prob) {
+      return(stats::pbinom(
+        k - 1, n, prob,
+        lower.tail = FALSE, log.p = TRUE
+      ))
+    }
     for (p in c(0.25, 0.5, 0.9)) {
       y <- 5
       k <- ceiling(n * p)
-      expected <- log(
-        stats::pbinom(k - 1, n, grid_cdf[y + 2], lower.tail = FALSE) -
-          stats::pbinom(k - 1, n, grid_cdf[y + 1], lower.tail = FALSE)
+      upper <- log_tail(k, grid_cdf[y + 2])
+      lower <- log_tail(k, grid_cdf[y + 1])
+      expected <- upper + log(-expm1(lower - upper))
+      actual <- .meta_quantile_set_ll(
+        y + shift, round(n * p), n, "plnorm", args, slots, p = p
       )
-      expect_equal(
-        .meta_quantile_set_ll(
-          y + shift, round(n * p), n, "plnorm", args, slots, p = p
-        ),
-        expected,
-        tolerance = 1e-8
-      )
+      expect_equal(actual, expected, tolerance = 1e-8)
+      # The tails are taken on the log scale, so a crossing the estimand
+      # puts far into its tail stays finite.
+      expect_true(is.finite(actual))
     }
     # The event is on the cumulative counts, so a study of any size can put
     # the crossing in the reported cell with a probability that stays below

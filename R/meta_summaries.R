@@ -1865,23 +1865,133 @@
   )
 }
 
+#' The smallest probability a multinomial cell is given
+#'
+#' A cell whose implied probability underflows to zero while the study saw
+#' delays in it would give a log likelihood of `-Inf`. Stan differences log
+#' distribution functions and so keeps a tiny mass in such a cell, where R
+#' differences them on the natural scale and gets exactly zero. Both floor
+#' the cell here, so that a single badly misfitting draw is rejected in
+#' practice but leaves `loo()` a finite value.
+#'
+#' @returns A probability.
+#'
+#' @keywords internal
+.meta_cell_floor <- function() {
+  return(1e-300)
+}
+
+#' The log of a difference of two exponentials
+#'
+#' Matches Stan's `log_diff_exp()`, returning `-Inf` where the difference is
+#' zero or negative rather than `NaN`.
+#'
+#' @param upper,lower Logarithms, with `upper` expected to be the larger.
+#'
+#' @returns `log(exp(upper) - exp(lower))`.
+#'
+#' @keywords internal
+.meta_log_diff_exp <- function(upper, lower) {
+  if (lower == -Inf) {
+    return(upper)
+  }
+  if (upper == -Inf || upper <= lower) {
+    return(-Inf)
+  }
+  return(upper + log(-expm1(lower - upper)))
+}
+
+#' The log likelihood of a single quantile of integer day delays
+#'
+#' A quantile of delays counted in whole censoring windows is a discrete
+#' statistic. "The median is 5 days" says that the empirical distribution
+#' function crossed one half between 4 and 5 days, that is
+#' \eqn{N_{\le y - w_s} < \lceil n p \rceil \le N_{\le y}} with
+#' \eqn{N_{\le y}} the number of delays at or below \eqn{y}, which reads the
+#' reported value as a type 1 quantile. Each count is binomial on the
+#' uncorrected grid distribution function, so the probability of the event
+#' is a difference of two binomial upper tails, computed on the log scale.
+#'
+#' Unlike the continuity corrected forms, the information this carries
+#' saturates as the study grows: once the binomial spread of the crossing is
+#' narrower than a window the reported integer stops moving, and the
+#' likelihood tends to an indicator of the parameters that put the
+#' population quantile in the reported cell.
+#'
+#' Matches `meta_family_grid_crossing_ll()` in Stan.
+#'
+#' @param y The reported quantile value.
+#'
+#' @param p The probability the quantile was reported at.
+#'
+#' @inheritParams .meta_quantile_set_ll
+#'
+#' @returns A log probability mass.
+#'
+#' @keywords internal
+.meta_grid_crossing_ll <- function(y, p, study_n, dist, args, slots) {
+  y <- y - .meta_cens_shift(slots$cens_adjusted, slots$pwindow, slots$swindow)
+  accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
+  n_grid <- floor(slots$cutoff / slots$swindow)
+  first <- .meta_grid_first(slots$lower, slots$swindow)
+  cell <- floor(y / slots$swindow + 0.5)
+  if (cell < first || cell >= n_grid) {
+    return(-Inf)
+  }
+  if (accrual != 1L) {
+    edges <- .meta_grid_edges(
+      cell, dist, args, slots$lower, slots$cutoff, slots$pwindow,
+      slots$swindow, slots$growth_rate
+    )
+  } else {
+    mass <- .meta_grid_pmf(
+      dist, args, slots$lower, slots$cutoff, slots$pwindow, slots$swindow,
+      slots$growth_rate, accrual
+    )
+    if (anyNA(mass)) {
+      return(-Inf)
+    }
+    edges <- c(0, cumsum(mass))[cell - first + 1:2]
+  }
+  if (!all(is.finite(edges))) {
+    return(-Inf)
+  }
+  edges <- pmin(pmax(edges, 0), 1)
+  # Matches the rounding guard of the Stan mirror, so that n p landing on an
+  # integer up to floating point error is not pushed up a count.
+  k <- ceiling(study_n * p - 1e-9)
+  log_tail <- stats::pbinom(
+    k - 1, study_n, edges,
+    lower.tail = FALSE, log.p = TRUE
+  )
+  return(.meta_log_diff_exp(log_tail[2], log_tail[1]))
+}
+
 #' The joint log likelihood of a set of quantiles from one study
 #'
 #' Quantiles reported at probabilities \eqn{p_1 < \dots < p_k} with values
-#' \eqn{y_1 < \dots < y_k} split the delay axis into the cells
+#' \eqn{y_1 \le \dots \le y_k} split the delay axis into the cells
 #' \eqn{(0, y_1], \dots, (y_{k-1}, y_k], (y_k, \infty)}, and the number of
 #' delays falling in each cell is multinomial with probabilities given by the
 #' increments of the implied distribution function. This is the joint version
 #' of the empirical distribution function likelihood used for a single
-#' quantile, and it reduces to the exact binomial when only one quantile is
-#' reported. Fitting each quantile separately ignores the positive correlation
-#' between the empirical distribution function at different points, which
-#' over weights a study reporting a median with an interquartile range.
+#' quantile, and it reduces to the exact binomial when only one quantile of a
+#' continuous estimand is reported. Fitting each quantile separately ignores
+#' the positive correlation between the empirical distribution function at
+#' different points, which over weights a study reporting a median with an
+#' interquartile range.
+#'
+#' Two quantiles reported at the same value are two constraints on the
+#' empirical distribution function at one cell, so they are merged into that
+#' cell with their combined count. A single quantile of integer day delays
+#' is fitted by [.meta_grid_crossing_ll()] instead, because the multinomial
+#' on the continuity corrected distribution function keeps sharpening with
+#' the study size while a rounded quantile stops moving.
 #'
 #' A cell whose implied probability underflows to zero while the study saw
-#' delays in it gives a log likelihood of `-Inf`, which rejects the draw.
+#' delays in it is floored at [.meta_cell_floor()].
 #'
-#' @param y A vector of reported quantile values in increasing order.
+#' @param y A vector of reported quantile values in non decreasing order.
 #'
 #' @param cum_count A vector of cumulative counts from
 #'  [.meta_quantile_counts()].
@@ -1894,19 +2004,34 @@
 #'
 #' @param slots The output of [.meta_row_slots()].
 #'
+#' @param p The probabilities the quantiles were reported at, in the order
+#'  of `y`. Only used for a single quantile of integer day delays.
+#'
 #' @returns A log probability mass.
 #'
 #' @keywords internal
-.meta_quantile_set_ll <- function(y, cum_count, study_n, dist, args, slots) {
+.meta_quantile_set_ll <- function(
+  y,
+  cum_count,
+  study_n,
+  dist,
+  args,
+  slots,
+  p = slots$group_p
+) {
+  if (length(y) == 1 && slots$cens_adjusted %in% c(0, 3)) {
+    return(.meta_grid_crossing_ll(y, p[1], study_n, dist, args, slots))
+  }
+  # Matches the skip over coincident values in the Stan mirror.
+  keep <- !duplicated(y, fromLast = TRUE)
+  y <- y[keep]
+  cum_count <- cum_count[keep]
   prob <- .meta_implied_probs(y, dist, args, slots)
   if (!all(is.finite(prob))) {
     return(-Inf)
   }
-  cell <- diff(c(0, prob, 1))
+  cell <- pmax(diff(c(0, prob, 1)), .meta_cell_floor())
   count <- diff(c(0, cum_count, study_n))
-  if (any(count > 0 & cell <= 0)) {
-    return(-Inf)
-  }
   seen <- count > 0
   return(
     lgamma(study_n + 1) -
@@ -2020,7 +2145,8 @@
   }
   if (slots$obs_type == 6L) {
     return(.meta_quantile_set_ll(
-      slots$group_value, slots$group_count, slots$study_n, dist, args, slots
+      slots$group_value, slots$group_count, slots$study_n, dist, args, slots,
+      p = slots$group_p
     ))
   }
   summaries <- .meta_summary_terms(slots, dist, args, moments)
