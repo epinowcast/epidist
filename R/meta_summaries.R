@@ -209,6 +209,38 @@
   return(0)
 }
 
+#' The left truncation point of the base estimand a midpoint code is built on
+#'
+#' `delay_min` is the smallest delay a study counted on the scale it reported,
+#' so a midpoint code that moved its estimand along the delay axis dropped the
+#' records whose *moved* delay fell below it. The base estimand is therefore
+#' left truncated at `delay_min` moved back by the same shift. A `delay_min`
+#' of zero means the study counted every delay and is left alone, because it
+#' is the sentinel that selects the untruncated formulas, even for code 4 whose
+#' reported delays can be negative.
+#'
+#' The right truncation point is not moved, because the observation time
+#' bounds the underlying event, not the midpointed value.
+#'
+#' Matches `meta_family_cens_lower` in
+#' `inst/stan/meta_model/functions.stan`.
+#'
+#' @param lower The study's minimum delay (its left truncation point).
+#'
+#' @inheritParams .meta_cens_shift
+#'
+#' @returns The left truncation point of the base estimand.
+#'
+#' @keywords internal
+.meta_cens_lower <- function(lower, cens_adjusted, pwindow, swindow) {
+  if (lower <= 0) {
+    return(lower)
+  }
+  return(max(
+    lower - .meta_cens_shift(cens_adjusted, pwindow, swindow), 0
+  ))
+}
+
 #' Whether accrual weighting applies to a summary row
 #'
 #' The truncation design only matters for a study that did not adjust for right
@@ -844,9 +876,12 @@
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
   if (cens_adjusted == 3 || cens_adjusted == 4) {
     # Midpoint imputation moves the base estimand along the delay axis, so its
-    # mean moves and every central moment is unchanged.
+    # mean and its left truncation point move and every central moment is
+    # unchanged. The cutoff stays where it is, because the observation time
+    # bounds the underlying event rather than the midpointed value.
     moments <- .meta_implied_moments(
-      dist, args, lower, cutoff, pwindow, swindow, trunc_adjusted,
+      dist, args, .meta_cens_lower(lower, cens_adjusted, pwindow, swindow),
+      cutoff, pwindow, swindow, trunc_adjusted,
       .meta_cens_base(cens_adjusted), growth_rate, trunc_design
     )
     moments[["mean"]] <- moments[["mean"]] +
@@ -1089,11 +1124,14 @@
   accrual <- .meta_accrual_flag(trunc_adjusted, trunc_design)
   if (cens_adjusted == 3 || cens_adjusted == 4) {
     # Midpoint imputation moved every delay along the axis, so the base
-    # estimand is evaluated at the reported delay moved back.
+    # estimand is evaluated at the reported delay moved back, and its left
+    # truncation point moves with it. The cutoff does not, see
+    # .meta_cens_lower().
     return(.meta_implied_prob(
       y - .meta_cens_shift(cens_adjusted, pwindow, swindow), dist, args,
-      lower, cutoff, pwindow, swindow, trunc_adjusted,
-      .meta_cens_base(cens_adjusted), growth_rate, trunc_design
+      .meta_cens_lower(lower, cens_adjusted, pwindow, swindow), cutoff,
+      pwindow, swindow, trunc_adjusted, .meta_cens_base(cens_adjusted),
+      growth_rate, trunc_design
     ))
   }
   if (cens_adjusted == 0) {
@@ -1233,8 +1271,9 @@
   if (cens_adjusted == 3 || cens_adjusted == 4) {
     return(.meta_implied_density(
       y - .meta_cens_shift(cens_adjusted, pwindow, swindow), dist, args,
-      lower, cutoff, pwindow, swindow, trunc_adjusted,
-      .meta_cens_base(cens_adjusted), growth_rate, trunc_design
+      .meta_cens_lower(lower, cens_adjusted, pwindow, swindow), cutoff,
+      pwindow, swindow, trunc_adjusted, .meta_cens_base(cens_adjusted),
+      growth_rate, trunc_design
     ))
   }
   if (cens_adjusted == 0) {
@@ -1496,6 +1535,26 @@
   return(prob)
 }
 
+#' The slots of the base estimand a midpoint code is built on
+#'
+#' Replaces the censoring adjustment code by the code it is built on and moves
+#' the left truncation point with it. See [.meta_cens_base()] and
+#' [.meta_cens_lower()].
+#'
+#' @param slots The output of [.meta_row_slots()].
+#'
+#' @returns The slots of the base estimand.
+#'
+#' @keywords internal
+.meta_cens_slots <- function(slots) {
+  shifted <- slots
+  shifted$cens_adjusted <- .meta_cens_base(slots$cens_adjusted)
+  shifted$lower <- .meta_cens_lower(
+    slots$lower, slots$cens_adjusted, slots$pwindow, slots$swindow
+  )
+  return(shifted)
+}
+
 #' The cumulative probabilities a study would report at several quantiles
 #'
 #' The vectorised form of [.meta_implied_prob()], used for the set of quantiles
@@ -1518,8 +1577,7 @@
   accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
   first <- .meta_grid_first(slots$lower, slots$swindow)
   if (slots$cens_adjusted %in% c(3, 4)) {
-    shifted <- slots
-    shifted$cens_adjusted <- .meta_cens_base(slots$cens_adjusted)
+    shifted <- .meta_cens_slots(slots)
     return(.meta_implied_probs(
       y - .meta_cens_shift(
         slots$cens_adjusted, slots$pwindow, slots$swindow
@@ -1590,9 +1648,7 @@
   accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
   if (slots$cens_adjusted %in% c(3, 4)) {
     # Moving the estimand along the delay axis moves where its nodes start.
-    shifted <- slots
-    shifted$cens_adjusted <- .meta_cens_base(slots$cens_adjusted)
-    nodes <- .meta_implied_nodes(dist, args, shifted)
+    nodes <- .meta_implied_nodes(dist, args, .meta_cens_slots(slots))
     nodes$origin <- nodes$origin +
       .meta_cens_shift(slots$cens_adjusted, slots$pwindow, slots$swindow)
     return(nodes)

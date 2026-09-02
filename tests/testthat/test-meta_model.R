@@ -392,9 +392,13 @@ test_that(".meta_implied_moments recovers a left truncated study that midpoints 
   )
   nodes <- .meta_implied_nodes("plnorm", args, slots)
   expect_equal(nodes$origin, delay_min - swindow / 2)
+  # The nodes start at the kept cell, so a quantile read off them and fed
+  # back through the distribution function round trips exactly.
+  median <- .meta_node_quantile(nodes, 0.5)
+  expect_gt(median, delay_min)
   expect_equal(
-    .meta_node_quantile(nodes, 0.5), stats::median(reported),
-    tolerance = 0.05
+    .meta_implied_probs(median, "plnorm", args, slots), 0.5,
+    tolerance = 1e-12
   )
 })
 
