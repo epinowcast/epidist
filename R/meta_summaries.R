@@ -409,8 +409,16 @@
 #' \eqn{F(D) - F(L)} whenever `lower` falls on a grid boundary.
 #'
 #' Under an accrual design the cell masses are additionally weighted by the
-#' follow up available to the delay each cell records, which is the delay at
-#' its lower edge, before renormalising.
+#' follow up available to the cases each cell holds, before renormalising.
+#' A case is seen when its primary event fell early enough for its delay to
+#' complete before the calendar stop, and the primary event is known only to
+#' its window, so the follow up available to a delay of \eqn{x} from the start
+#' of that window is the accrual weight at \eqn{w_p \lfloor x / w_p \rfloor},
+#' a step function of \eqn{x}. Each cell is cut at the multiples of `pwindow`
+#' inside it and every piece is weighted by the follow up at the primary
+#' window it starts in. This is exact whenever `cutoff` is a multiple of
+#' `pwindow`, and reduces to the weight at the cell's lower edge when
+#' `pwindow` and `swindow` are equal.
 #'
 #' A cohort grid is normalised by the distribution function at its top, which
 #' is already known. An accrual grid reweights each cell first, so its
@@ -455,20 +463,33 @@
     ))
   }
   boundary <- seq(first, n_grid) * swindow
-  cdf <- .meta_pcens_cdf(boundary, dist, args, pwindow, growth_rate)
-  # Once the distribution function saturates its differences can come back
-  # very slightly negative, which would leave an invalid pmf. Stan builds the
-  # same cells on the log scale and drops them to zero there.
-  mass <- pmax(diff(cdf), 0)
   if (accrual != 1L) {
+    cdf <- .meta_pcens_cdf(boundary, dist, args, pwindow, growth_rate)
+    # Once the distribution function saturates its differences can come back
+    # very slightly negative, which would leave an invalid pmf. Stan builds
+    # the same cells on the log scale and drops them to zero there.
+    mass <- pmax(diff(cdf), 0)
     total <- cdf[length(cdf)] - cdf[1]
     if (!is.finite(total) || total <= 0) {
       return(rep(NA_real_, length(mass)))
     }
     return(mass / total)
   }
-  mass <- mass *
-    .meta_accrual_weight(boundary[-length(boundary)], cutoff, growth_rate)
+  # Cut the cells at the multiples of the primary window inside them, so
+  # that each piece can be weighted by the follow up available to the primary
+  # window it starts in. Matches meta_family_grid_pmf() in Stan.
+  multiple <- pwindow *
+    seq(ceiling(boundary[1] / pwindow), floor(cutoff / pwindow))
+  edge <- sort(c(boundary, multiple[multiple <= boundary[length(boundary)]]))
+  edge <- edge[c(TRUE, diff(edge) > 1e-9 * swindow)]
+  cdf <- .meta_pcens_cdf(edge, dist, args, pwindow, growth_rate)
+  piece_start <- edge[-length(edge)]
+  piece <- pmax(diff(cdf), 0) *
+    .meta_accrual_weight(
+      pwindow * floor(piece_start / pwindow + 1e-9), cutoff, growth_rate
+    )
+  cell <- floor(piece_start / swindow + 1e-9) - first + 1
+  mass <- as.numeric(rowsum(piece, cell))
   total <- sum(mass)
   if (!is.finite(total) || total <= 0) {
     return(rep(NA_real_, length(mass)))
