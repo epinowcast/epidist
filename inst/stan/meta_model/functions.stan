@@ -1339,6 +1339,14 @@
     {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
     trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
   );
+  // An extreme draw can overflow the analytic kurtosis, which would turn the
+  // sampling standard error and the log density into NaN. Reject the draw
+  // instead, as .meta_row_log_lik() does in R.
+  for (k in 1:4) {
+    if (is_nan(moments[k]) || is_inf(moments[k])) {
+      return negative_infinity();
+    }
+  }
 
   if (obs_type == 2) {
     real se = report_se > 0 ? report_se : moments[2] / sqrt(study_n);
