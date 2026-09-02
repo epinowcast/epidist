@@ -217,6 +217,21 @@ test_that("epidist_prior for a Gamma summaries only meta fit is not centred on t
   expect_false(any(grepl("-2.3", prior$prior, fixed = TRUE)))
 })
 
+test_that("epidist_model_prior centres a lognormal meta model on the log scale", { # nolint: line_length_linter.
+  # The lognormal family gives mu an identity link, but mu is meanlog, so
+  # the centre is the log of the reported location as it is for a log link.
+  family <- epidist_family(prep_meta_estimates, lognormal())
+  formula <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))
+  prior <- epidist_model_prior(prep_meta_estimates, formula)
+  centre <- signif(log(stats::median(c(7.5, 6.4))), 3)
+  expect_identical(prior$prior, sprintf("normal(%s, 1)", centre))
+  full <- suppressWarnings(
+    epidist_prior(prep_meta_estimates, family, formula, prior = NULL)
+  )
+  intercept <- full[full$class == "Intercept" & !nzchar(full$dpar), ]
+  expect_identical(intercept$prior, sprintf("normal(%s, 1)", centre))
+})
+
 test_that("epidist_model_prior for the meta model follows the link of mu", {
   family <- epidist_family(prep_meta_estimates, Gamma(link = "identity"))
   formula <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))
