@@ -111,6 +111,15 @@ as_epidist_meta_model <- function(data = NULL, estimates = NULL, ...) {
 #'
 #' @param data An `epidist_linelist_data` object.
 #'
+#' @param primary The distribution of the primary event within its censoring
+#'  window for the individual level rows, as in
+#'  [as_epidist_marginal_model.epidist_linelist_data()]. `"uniform"`, the
+#'  default, assumes it is equally likely at any point. `"expgrowth"` tilts
+#'  it, with the growth rate estimated as the `pgrowth` distributional
+#'  parameter. Summary rows are unaffected. They tilt the primary event by
+#'  the `growth_rate` metadata of their study, which
+#'  [as_epidist_estimates_data()] takes as a known quantity.
+#'
 #' @inheritParams as_epidist_meta_model
 #' @inheritParams as_epidist_marginal_model.epidist_linelist_data
 #'
@@ -132,6 +141,7 @@ as_epidist_meta_model.epidist_linelist_data <- function(
   obs_time_threshold = 2,
   weight = NULL,
   delay_min = NULL,
+  primary = .primary_choices(),
   ...
 ) {
   assert_epidist.epidist_linelist_data(data)
@@ -141,7 +151,10 @@ as_epidist_meta_model.epidist_linelist_data <- function(
     weight = weight,
     delay_min = delay_min
   )
-  return(.new_meta_model_from_parts(data, estimates))
+  return(.new_meta_model_from_parts(
+    data, estimates,
+    primary = match.arg(primary)
+  ))
 }
 
 #' The meta model method for `epidist_aggregate_data` objects
@@ -173,6 +186,7 @@ as_epidist_meta_model.epidist_aggregate_data <- function(
   estimates = NULL,
   obs_time_threshold = 2,
   delay_min = NULL,
+  primary = .primary_choices(),
   ...
 ) {
   return(as_epidist_meta_model.epidist_linelist_data(
@@ -181,6 +195,7 @@ as_epidist_meta_model.epidist_aggregate_data <- function(
     obs_time_threshold = obs_time_threshold,
     weight = "n",
     delay_min = delay_min,
+    primary = match.arg(primary),
     ...
   ))
 }
@@ -190,6 +205,10 @@ as_epidist_meta_model.epidist_aggregate_data <- function(
 #' Allows summary estimates to be passed as the first argument, so that
 #' `as_epidist_meta_model(estimates)` and
 #' `as_epidist_meta_model(estimates = estimates)` are equivalent.
+#'
+#' A model built from summaries alone takes no `primary` argument, because
+#' summary rows tilt the primary event by the `growth_rate` metadata of their
+#' study rather than by an estimated parameter. Passing one is an error.
 #'
 #' @param data An `epidist_estimates_data` object.
 #'
@@ -223,13 +242,16 @@ as_epidist_meta_model.epidist_estimates_data <- function(
       "{.var data} and summary estimates as {.var estimates}."
     ))
   }
+  .assert_no_meta_primary(...)
   return(.new_meta_model_from_parts(NULL, data))
 }
 
 #' The meta model method for summary estimates only
 #'
 #' Used when no individual level data is available and only the `estimates`
-#' argument is supplied.
+#' argument is supplied. It takes no `primary` argument, because summary rows
+#' tilt the primary event by the `growth_rate` metadata of their study rather
+#' than by an estimated parameter. Passing one is an error.
 #'
 #' @param data `NULL`.
 #'
@@ -253,7 +275,35 @@ as_epidist_meta_model.epidist_estimates_data <- function(
 #' )
 #' as_epidist_meta_model(estimates = estimates)
 as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
+  .assert_no_meta_primary(...)
   return(.new_meta_model_from_parts(NULL, estimates))
+}
+
+#' Refuse a primary event distribution for a summaries only meta model
+#'
+#' The summaries only methods of [as_epidist_meta_model()] pass their extra
+#' arguments here. A `primary` among them would be silently ignored otherwise,
+#' since summary rows take their tilt from the `growth_rate` metadata.
+#'
+#' @param ... The extra arguments of a summaries only method.
+#'
+#' @returns `NULL`, invisibly.
+#'
+#' @keywords internal
+.assert_no_meta_primary <- function(...) {
+  if (hasName(list(...), "primary")) {
+    cli::cli_abort(c(
+      paste0(
+        "{.arg primary} sets the primary event distribution of individual ",
+        "level rows, and this meta model has none."
+      ),
+      i = paste0(
+        "Summary rows tilt the primary event by the {.var growth_rate} ",
+        "metadata of their study in {.fn as_epidist_estimates_data}."
+      )
+    ))
+  }
+  return(invisible(NULL))
 }
 
 #' Build an `epidist_meta_model` object from its individual and summary parts
@@ -263,12 +313,15 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #'
 #' @param estimates An `epidist_estimates_data` object, or `NULL`.
 #'
+#' @param primary The primary event distribution of the individual level rows,
+#'  `"uniform"` or `"expgrowth"`.
+#'
 #' @returns An object of class `epidist_meta_model`.
 #'
 #' @keywords internal
 #' @autoglobal
 #' @importFrom dplyr bind_rows
-.new_meta_model_from_parts <- function(data, estimates) {
+.new_meta_model_from_parts <- function(data, estimates, primary = "uniform") {
   if (is.null(data) && is.null(estimates)) {
     cli::cli_abort(paste0(
       "The meta model needs at least one of individual level {.var data} and ",
@@ -294,7 +347,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     meta_data$study <- as.character(meta_data$study)
     meta_data$study[is.na(meta_data$study)] <- "individual"
   }
-  meta_data <- new_epidist_meta_model(meta_data)
+  meta_data <- new_epidist_meta_model(meta_data, primary = primary)
   meta_data <- .meta_set_members(meta_data, members, factors)
   assert_epidist(meta_data)
   return(meta_data)
@@ -675,11 +728,16 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #'
 #' @param data A data.frame to convert
 #'
+#' @param primary The primary event distribution of the individual level
+#'  rows, `"uniform"` or `"expgrowth"`. Summary rows use their `growth_rate`
+#'  metadata instead.
+#'
 #' @returns An object of class `epidist_meta_model`
 #'
 #' @family meta_model
 #' @export
-new_epidist_meta_model <- function(data) {
+new_epidist_meta_model <- function(data, primary = .primary_choices()) {
+  attr(data, "primary") <- match.arg(primary)
   class(data) <- c("epidist_meta_model", class(data))
   return(data)
 }
@@ -871,6 +929,7 @@ epidist_family_model.epidist_meta_model <- function(
   family,
   ...
 ) {
+  family <- .add_primary_dpars(family, data)
   custom_family <- brms::custom_family(
     paste0("meta_", family$family),
     dpars = family$dpars,
@@ -899,6 +958,7 @@ epidist_family_model.epidist_meta_model <- function(
     posterior_predict = epidist_gen_meta_predict(family),
     posterior_epred = epidist_gen_posterior_epred(family)
   )
+  custom_family$primary <- family$primary
   return(custom_family)
 }
 
@@ -989,7 +1049,10 @@ epidist_transform_data_model.epidist_meta_model <- function(
     )
   }
 
-  trans_data <- new_epidist_meta_model(bind_rows(individual, summaries))
+  trans_data <- new_epidist_meta_model(
+    bind_rows(individual, summaries),
+    primary = .primary_dist(data)
+  )
   trans_data <- .meta_set_members(
     trans_data, .meta_members(data), .meta_chol(data)
   )
@@ -1015,9 +1078,11 @@ epidist_stancode.epidist_meta_model <- function(
   stanvars_version <- .version_stanvar()
 
   # n_quad_default keeps the Stan quadrature resolution equal to the one R
-  # uses.
+  # uses. The primary event distribution only reaches the individual level
+  # rows, since summary rows take their tilt from the growth_rate slot.
   stanvars_functions <- .family_functions_stanvar(
     file.path("meta_model", "functions.stan"), family, "meta_",
+    primary = .primary_spec(.primary_dist(data)),
     extra = c(n_quad_default = as.character(.meta_n_quad()))
   )
 

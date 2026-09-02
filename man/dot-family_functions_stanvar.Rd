@@ -8,6 +8,7 @@
   chunk_path,
   family,
   family_prefix,
+  primary = .primary_spec("uniform"),
   extra = character()
 )
 }
@@ -19,6 +20,9 @@
 \item{family_prefix}{The model specific prefix stripped from
 \code{family$name}, for example \code{"marginal_"} or \code{"meta_"}.}
 
+\item{primary}{A primary event registry entry, as returned by
+\code{\link[=.primary_spec]{.primary_spec()}}. Defaults to the uniform primary event.}
+
 \item{extra}{A named character vector of further placeholder
 substitutions, applied after the shared ones.}
 }
@@ -28,8 +32,9 @@ chunk.
 }
 \description{
 Both models read a \code{functions.stan} chunk with the same placeholders
-(\code{family}, \code{dist_id}, \code{dpars_A}, \code{dpars_B}, \code{primary_id}), filled in with
-the target distribution's details. Used within
+(\code{family}, \code{dist_id}, \code{dpars_A}, \code{dpars_B}, and the pair
+\verb{primary_id, primary_params}), filled in with the target distribution's
+details and the primary event distribution. Used within
 \code{\link[=epidist_stancode]{epidist_stancode()}} methods for the marginal and meta models, which
 differ only in the chunk path, the family name prefix, and any further
 placeholders they need substituted.

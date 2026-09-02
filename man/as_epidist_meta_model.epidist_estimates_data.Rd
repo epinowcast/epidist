@@ -19,6 +19,11 @@ Allows summary estimates to be passed as the first argument, so that
 \code{as_epidist_meta_model(estimates)} and
 \code{as_epidist_meta_model(estimates = estimates)} are equivalent.
 }
+\details{
+A model built from summaries alone takes no \code{primary} argument, because
+summary rows tilt the primary event by the \code{growth_rate} metadata of their
+study rather than by an estimated parameter. Passing one is an error.
+}
 \examples{
 estimates <- as_epidist_estimates_data(
   data.frame(

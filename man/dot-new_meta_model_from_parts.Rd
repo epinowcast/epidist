@@ -4,13 +4,16 @@
 \alias{.new_meta_model_from_parts}
 \title{Build an \code{epidist_meta_model} object from its individual and summary parts}
 \usage{
-.new_meta_model_from_parts(data, estimates)
+.new_meta_model_from_parts(data, estimates, primary = "uniform")
 }
 \arguments{
 \item{data}{Individual level data prepared by \code{\link[=.prepare_marginal_data]{.prepare_marginal_data()}}, or
 \code{NULL}.}
 
 \item{estimates}{An \code{epidist_estimates_data} object, or \code{NULL}.}
+
+\item{primary}{The primary event distribution of the individual level rows,
+\code{"uniform"} or \code{"expgrowth"}.}
 }
 \value{
 An object of class \code{epidist_meta_model}.

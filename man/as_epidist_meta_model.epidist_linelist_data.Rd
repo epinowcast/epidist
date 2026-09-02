@@ -10,6 +10,7 @@
   obs_time_threshold = 2,
   weight = NULL,
   delay_min = NULL,
+  primary = .primary_choices(),
   ...
 )
 }
@@ -43,6 +44,15 @@ otherwise defaults to 0 (no left truncation).
 This is passed as the \code{L} parameter to
 \code{\link[primarycensored:dprimarycensored]{primarycensored::dpcens()}}.
 }}
+
+\item{primary}{The distribution of the primary event within its censoring
+window for the individual level rows, as in
+\code{\link[=as_epidist_marginal_model.epidist_linelist_data]{as_epidist_marginal_model.epidist_linelist_data()}}. \code{"uniform"}, the
+default, assumes it is equally likely at any point. \code{"expgrowth"} tilts
+it, with the growth rate estimated as the \code{pgrowth} distributional
+parameter. Summary rows are unaffected. They tilt the primary event by
+the \code{growth_rate} metadata of their study, which
+\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} takes as a known quantity.}
 
 \item{...}{Additional arguments passed to methods.}
 }

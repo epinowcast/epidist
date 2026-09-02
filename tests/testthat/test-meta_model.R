@@ -2525,6 +2525,9 @@ test_that("the meta model posterior predictions use the fitted primary event", {
   )
   set.seed(101)
   growing <- family$posterior_predict(i = 1, prep)
+  # Without a primary event on the prep the family's own is used, so a
+  # uniform family draws a uniform primary event.
+  prep$family <- list()
   set.seed(101)
   uniform <- epidist_family(prep_meta_individual)$posterior_predict(
     i = 1, prep

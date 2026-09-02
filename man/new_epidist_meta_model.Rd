@@ -4,10 +4,14 @@
 \alias{new_epidist_meta_model}
 \title{Class constructor for \code{epidist_meta_model} objects}
 \usage{
-new_epidist_meta_model(data)
+new_epidist_meta_model(data, primary = .primary_choices())
 }
 \arguments{
 \item{data}{A data.frame to convert}
+
+\item{primary}{The primary event distribution of the individual level
+rows, \code{"uniform"} or \code{"expgrowth"}. Summary rows use their \code{growth_rate}
+metadata instead.}
 }
 \value{
 An object of class \code{epidist_meta_model}

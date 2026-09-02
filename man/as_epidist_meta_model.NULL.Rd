@@ -16,7 +16,9 @@ estimates, or \code{NULL}.}
 }
 \description{
 Used when no individual level data is available and only the \code{estimates}
-argument is supplied.
+argument is supplied. It takes no \code{primary} argument, because summary rows
+tilt the primary event by the \code{growth_rate} metadata of their study rather
+than by an estimated parameter. Passing one is an error.
 }
 \examples{
 estimates <- as_epidist_estimates_data(
