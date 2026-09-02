@@ -503,14 +503,13 @@ test_that("as_epidist_estimates_data rejects a code 4 delay_min the primary wind
   base <- data.frame(
     study = "A", type = c("mean", "sd"), value = c(9, 2), n = 120,
     relative_obs_time = 12, trunc_adjusted = FALSE, cens_adjusted = 4,
-    pwindow = 7, swindow = 1, delay_min = 8, stringsAsFactors = FALSE
+    pwindow = 9, swindow = 1, delay_min = 8, stringsAsFactors = FALSE
   )
   expect_error(
     suppressMessages(as_epidist_estimates_data(base)),
-    "pwindow / 2"
+    "half a"
   )
   fine <- base
-  fine$delay_min <- 8
   fine$pwindow <- 3
   expect_s3_class(
     suppressMessages(as_epidist_estimates_data(fine)),
@@ -518,7 +517,7 @@ test_that("as_epidist_estimates_data rejects a code 4 delay_min the primary wind
   )
   # The other codes are only held below the cutoff itself.
   fine$cens_adjusted <- 2
-  fine$pwindow <- 7
+  fine$pwindow <- 9
   expect_s3_class(
     suppressMessages(as_epidist_estimates_data(fine)),
     "epidist_estimates_data"

@@ -391,7 +391,9 @@ as_epidist_estimates_data.epidist_estimates_data <- function(data, ...) {
 #' draws <- cbind(mean = rnorm(500, 7.5, 0.3), sd = rnorm(500, 3.6, 0.2))
 #' as_epidist_estimates_data(
 #'   as_epidist_multivariate(draws),
-#'   study = "site A"
+#'   study = "site A",
+#'   trunc_adjusted = TRUE,
+#'   cens_adjusted = 1
 #' )
 as_epidist_estimates_data.epidist_multivariate <- function(
   data,
@@ -1226,6 +1228,20 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     cli::cli_abort(paste0(
       "{.var delay_min} must be below the grid cutoff (the observation time, ",
       "or {.var max_delay} where the study adjusted for right truncation)."
+    ))
+  }
+  # Code 4 anchors the primary event at the midpoint of its window, so a
+  # study that dropped delays below delay_min left truncated its base
+  # estimand at delay_min + pwindow / 2, which has to sit below the cutoff
+  # as well. See .meta_cens_lower().
+  moved <- data$cens_adjusted == 4L & data$delay_min > 0 &
+    data$delay_min + data$pwindow / 2 >= cutoff
+  if (any(moved)) {
+    cli::cli_abort(paste0(
+      "A study using {.code cens_adjusted = 4} counted delays from half a ",
+      "{.var pwindow} above {.var delay_min} on the underlying scale, which ",
+      "must be below the grid cutoff. This fails for ",
+      "{.val {unique(as.character(data$study)[moved])}}."
     ))
   }
 
