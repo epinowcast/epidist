@@ -354,11 +354,31 @@ lockstep_base_rows <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Studies W to Y report quantiles of integer day delays. W and X report a
+# single quantile, one per truncation design, which is fitted as the crossing
+# cell of the empirical distribution function. Y reports coincident quantiles,
+# which the multinomial merges into one cell.
+lockstep_grid_quantiles <- data.frame(
+  study = c("W", "X", "Y", "Y", "Y"),
+  type = "quantile",
+  value = c(5, 6.5, 4, 5, 5),
+  p = c(0.5, 0.75, 0.25, 0.5, 0.75),
+  n = c(200, 150, 30, 30, 30),
+  relative_obs_time = c(24, 28, 20, 20, 20),
+  trunc_adjusted = FALSE,
+  trunc_design = c("cohort", "accrual", "cohort", "cohort", "cohort"),
+  cens_adjusted = c(0, 3, 0, 0, 0),
+  delay_min = c(0, 1, 0, 0, 0),
+  growth_rate = c(0, 0.1, 0, 0, 0),
+  stringsAsFactors = FALSE
+)
+
 lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
   lockstep_base_rows,
   lockstep_mvn_q,
   lockstep_mvn_r,
-  lockstep_midpoint_uniform
+  lockstep_midpoint_uniform,
+  lockstep_grid_quantiles
 )))
 
 # The shared fits below use the cmdstanr backend, so they are only built

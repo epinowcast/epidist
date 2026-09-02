@@ -1279,18 +1279,134 @@ test_that(".meta_quantile_set_ll is the binomial mass for a single quantile", {
   )
 })
 
-test_that(".meta_quantile_set_ll rejects a cell the study saw but the estimand cannot reach", { # nolint: line_length_linter.
+test_that(".meta_quantile_set_ll floors a cell the study saw but the estimand cannot reach", { # nolint: line_length_linter.
   slots <- list(
     lower = 0,
     cutoff = 60, pwindow = 1, swindow = 1, trunc_adjusted = 1L,
     cens_adjusted = 1L, growth_rate = 0, trunc_design = 0L
   )
-  expect_identical(
-    .meta_quantile_set_ll(
-      1e-8, 50L, 100, "plnorm", list(meanlog = 5, sdlog = 0.1), slots
-    ),
-    -Inf
+  # The cell below the reported median holds no mass a double can represent,
+  # so its probability is floored rather than sent to zero. That keeps the
+  # log likelihood finite, as Stan's log scale differences do, so that a
+  # single badly misfitting draw cannot break loo.
+  unreachable <- .meta_quantile_set_ll(
+    1e-8, 50L, 100, "plnorm", list(meanlog = 5, sdlog = 0.1), slots
   )
+  expect_true(is.finite(unreachable))
+  expect_lt(unreachable, 50 * log(.meta_cell_floor()) + 1)
+  # A cell the study saw nothing in contributes nothing however small it is.
+  expect_true(is.finite(.meta_quantile_set_ll(
+    1e-8, 0L, 100, "plnorm", list(meanlog = 5, sdlog = 0.1), slots
+  )))
+})
+
+test_that(".meta_quantile_set_ll reads a single integer day quantile as its crossing cell", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  n <- 1000
+  for (design in list(
+    list(cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0),
+    list(cens_adjusted = 3L, trunc_design = 0L, growth_rate = 0),
+    list(cens_adjusted = 0L, trunc_design = 1L, growth_rate = 0.1)
+  )) {
+    slots <- c(
+      list(lower = 0, cutoff = 30, pwindow = 1, swindow = 1,
+           trunc_adjusted = 0L),
+      design
+    )
+    shift <- .meta_cens_shift(design$cens_adjusted, 1, 1)
+    # "The median is 5 days" says the empirical distribution function crossed
+    # a half between 4 and 5, so N_{<= 4} < ceiling(n p) <= N_{<= 5}, with the
+    # counts binomial on the uncorrected grid distribution function.
+    accrual <- .meta_accrual_flag(0L, design$trunc_design)
+    mass <- .meta_grid_pmf(
+      "plnorm", args, 0, 30, 1, 1, design$growth_rate, accrual
+    )
+    grid_cdf <- c(0, cumsum(mass))
+    for (p in c(0.25, 0.5, 0.9)) {
+      y <- 5
+      k <- ceiling(n * p)
+      expected <- log(
+        stats::pbinom(k - 1, n, grid_cdf[y + 2], lower.tail = FALSE) -
+          stats::pbinom(k - 1, n, grid_cdf[y + 1], lower.tail = FALSE)
+      )
+      expect_equal(
+        .meta_quantile_set_ll(
+          y + shift, round(n * p), n, "plnorm", args, slots, p = p
+        ),
+        expected,
+        tolerance = 1e-8
+      )
+    }
+    # The event is on the cumulative counts, so a study of any size can put
+    # the crossing in the reported cell with a probability that stays below
+    # one and above zero across a wide range of parameters.
+    profile <- vapply(
+      seq(1.3, 1.9, by = 0.05),
+      function(m) {
+        return(.meta_quantile_set_ll(
+          5 + shift, 500L, n, "plnorm", list(meanlog = m, sdlog = 0.5),
+          slots, p = 0.5
+        ))
+      },
+      numeric(1)
+    )
+    expect_true(all(is.finite(profile)))
+    expect_lte(max(profile), 0)
+  }
+})
+
+test_that("a single integer day quantile carries information that saturates in n", { # nolint: line_length_linter.
+  # The multinomial on the continuity corrected grid claims a curvature that
+  # grows like n, while the crossing event stops sharpening once the binomial
+  # spread of the crossing is narrower than a day.
+  slots <- list(
+    lower = 0, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0
+  )
+  curvature <- function(n) {
+    ll <- function(m) {
+      return(.meta_quantile_set_ll(
+        5, round(n / 2), n, "plnorm", list(meanlog = m, sdlog = 0.5), slots,
+        p = 0.5
+      ))
+    }
+    return(-(ll(1.61) - 2 * ll(1.6) + ll(1.59)) / 0.01^2)
+  }
+  expect_lt(curvature(10000) / curvature(100), 10)
+})
+
+test_that(".meta_quantile_set_ll merges coincident reported quantiles into one cell", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  slots <- list(
+    lower = 0, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0
+  )
+  n <- 30
+  p <- c(0.25, 0.5, 0.75)
+  counts <- .meta_quantile_counts(p, n)
+  # A median and an upper quartile both reported as 5 days are two
+  # constraints on the empirical distribution function at the same cell,
+  # which the multinomial reads as one cell holding both counts.
+  merged <- .meta_quantile_set_ll(
+    c(4, 5, 5), counts, n, "plnorm", args, slots, p = p
+  )
+  direct <- .meta_quantile_set_ll(
+    c(4, 5), counts[c(1, 3)], n, "plnorm", args, slots, p = p[c(1, 3)]
+  )
+  expect_equal(merged, direct, tolerance = 1e-12)
+  expect_true(is.finite(merged))
+})
+
+test_that("as_epidist_meta_model accepts coincident quantiles from an integer day study", { # nolint: line_length_linter.
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = "quantile", value = c(4, 5, 5),
+    p = c(0.25, 0.5, 0.75), n = 30, relative_obs_time = 20,
+    trunc_adjusted = FALSE, cens_adjusted = 0, stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  expect_identical(meta$obs_type, 6L)
+  expect_identical(meta$group_len, 3L)
+  expect_no_error(assert_epidist(meta))
 })
 
 test_that("the joint quantile likelihood agrees with independent normal terms for a large near symmetric study", { # nolint: line_length_linter.
@@ -1497,7 +1613,7 @@ test_that("as_epidist_meta_model errors on quantiles that do not increase with t
   )))
   expect_error(
     suppressMessages(as_epidist_meta_model(estimates = estimates)),
-    "must increase"
+    "must not decrease"
   )
 })
 
@@ -2170,8 +2286,11 @@ test_that("assert_epidist.epidist_meta_model checks a joint quantile row", {
   falling <- members
   falling$value <- c(8, 4)
   expect_error(
-    assert_epidist(.meta_set_members(meta, falling)), "strictly increasing"
+    assert_epidist(.meta_set_members(meta, falling)), "must not decrease"
   )
+  coincident <- members
+  coincident$value <- c(4, 4)
+  expect_no_error(assert_epidist(.meta_set_members(meta, coincident)))
   dropping <- members
   dropping$count <- c(75L, 25L)
   expect_error(

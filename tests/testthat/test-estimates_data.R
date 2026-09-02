@@ -186,6 +186,26 @@ test_that("as_epidist_estimates_data warns about a short grid cutoff", {
   expect_false(any(grepl("short relative", msgs, fixed = TRUE)))
 })
 
+test_that("as_epidist_estimates_data warns about several integer day quantiles from a large study", { # nolint: line_length_linter.
+  quantiles <- data.frame(
+    study = "A", type = "quantile", value = c(3, 5, 8),
+    p = c(0.25, 0.5, 0.75), n = 400, relative_obs_time = 30,
+    trunc_adjusted = FALSE, cens_adjusted = 0, stringsAsFactors = FALSE
+  )
+  msgs <- capture_messages(as_epidist_estimates_data(quantiles))
+  expect_true(any(grepl("overconfident", msgs, fixed = TRUE)))
+  # A small study, a single quantile or a continuous study does not trip it.
+  quantiles$n <- 60
+  msgs <- capture_messages(as_epidist_estimates_data(quantiles))
+  expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
+  quantiles$n <- 400
+  msgs <- capture_messages(as_epidist_estimates_data(quantiles[2, ]))
+  expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
+  quantiles$cens_adjusted <- 1
+  msgs <- capture_messages(as_epidist_estimates_data(quantiles))
+  expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
+})
+
 test_that("as_epidist_estimates_data does not warn about a truncated study", {
   truncated <- data.frame(
     study = "A", type = c("mean", "sd"), value = c(8.3, 7.9), n = 500,
