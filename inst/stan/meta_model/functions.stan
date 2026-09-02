@@ -1452,11 +1452,15 @@
       return negative_infinity();
     }
     {
-      real log_upper = binomial_lccdf(
-        k - 1 | study_n, fmin(fmax(edges[2], 0), 1)
+      // The upper tail P(X >= k) is taken as P(n - X <= n - k), because
+      // binomial_lccdf forms log(1 - P(X <= k - 1)) and loses the tail once
+      // it is near the resolution of a double, where pbinom() in R does
+      // not.
+      real log_upper = binomial_lcdf(
+        study_n - k | study_n, fmin(fmax(1 - edges[2], 0), 1)
       );
-      real log_lower = binomial_lccdf(
-        k - 1 | study_n, fmin(fmax(edges[1], 0), 1)
+      real log_lower = binomial_lcdf(
+        study_n - k | study_n, fmin(fmax(1 - edges[1], 0), 1)
       );
       if (is_inf(log_lower)) {
         return log_upper;
