@@ -358,12 +358,13 @@ A study using **midpoint imputation with a uniform interval** placed the primary
 It therefore observed $\tau^\star + U - w_p / 2$, which is the estimand of Equation \@ref(eq:meta-uniform-moments) moved down the delay axis by half a primary window.
 Its implied mean is that of the uniform single interval approximation less $w_p / 2$, every central moment is unchanged, and its distribution function is that of the uniform single interval approximation evaluated at $y + w_p / 2$.
 
-Replacing an event time by the midpoint of its window and integrating that window move the mean by the same $w / 2$, but only integrating adds the window's variance $w^2 / 12$.
-A study that midpoints one event and integrates the other therefore reports the same mean as a study that integrates both, and a smaller standard deviation.
-That is the difference between this code and the uniform single interval approximation on one side, and between it and full adjustment on the other.
+Placing the primary event at the midpoint of its window removes the mean of the primary offset $U$, so the reported delay $\tau^\star + U - w_p / 2$ has expectation $\mu$ before truncation.
+It does not remove the spread of $U$, which still varies from case to case, so the variance stays at $\sigma^2 + w_p^2 / 12$.
+A study that midpoints the primary event and integrates the secondary interval therefore reports the same mean as a study that adjusted for both events, and the same standard deviation as the uniform single interval approximation.
+It differs from the uniform single interval approximation in location alone, by $w_p / 2$, and from full adjustment in spread alone, by $w_p^2 / 12$.
 
 The reading taken here is that the primary event is midpointed and the secondary interval integrated.
-The mirror reading gives the same implied mean, and a different standard deviation only when $w_p$ and $w_s$ differ.
+The mirror reading, a secondary event at the midpoint of its window and an integrated primary interval, gives the same implied mean and a variance of $\sigma^2 + w_s^2 / 12$, so the two readings differ only when $w_p$ and $w_s$ differ.
 We take this one because it is what the literature reports, where the primary event carries the wide exposure window whose midpoint is taken and the secondary date is recorded precisely.
 A study that midpointed the secondary interval and left the primary alone is midpoint imputation above.
 Each code models the study as integrating the interval it did not midpoint rather than drawing one random position within it, which would add a further $w^2 / 6$ to the variance.
