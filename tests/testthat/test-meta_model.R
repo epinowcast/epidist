@@ -1221,7 +1221,7 @@ test_that(".meta_implied_prob matches the midpoint imputed empirical CDF", {
   }
 })
 
-test_that(".meta_summary_terms converts a delay scale quantile se by the delta method", { # nolint: line_length_linter.
+test_that(".meta_summary_terms fits a quantile with a reported standard error on the delay scale", { # nolint: line_length_linter.
   args <- list(meanlog = 1.5, sdlog = 0.5)
   slots <- list(
     lower = 0,
@@ -1229,15 +1229,24 @@ test_that(".meta_summary_terms converts a delay scale quantile se by the delta m
     cutoff = 60, pwindow = 1, swindow = 1, value = 6, report_se = 0.4,
     quantile_p = 0.75, growth_rate = 0, trunc_design = 0L
   )
+  # A study reports a quantile's standard error on the delay scale, so the
+  # reported value is compared with the implied quantile on that scale, with
+  # the standard error as reported.
   terms <- .meta_summary_terms(slots, "plnorm", args)
+  expect_identical(terms[["observed"]], 6)
   expect_equal(
-    terms[["se"]],
-    stats::dlnorm(6, args$meanlog, args$sdlog) * 0.4,
-    tolerance = 1e-4
+    terms[["implied"]], stats::qlnorm(0.75, args$meanlog, args$sdlog),
+    tolerance = 1e-10
+  )
+  expect_identical(terms[["se"]], 0.4)
+  expect_equal(
+    .meta_row_log_lik(slots, "plnorm", args),
+    stats::dnorm(6, stats::qlnorm(0.75, 1.5, 0.5), 0.4, log = TRUE),
+    tolerance = 1e-10
   )
 })
 
-test_that(".meta_summary_terms uses the grid mass as the density for a naive study", { # nolint: line_length_linter.
+test_that(".meta_summary_terms reads the implied quantile of a naive study off its grid", { # nolint: line_length_linter.
   args <- list(meanlog = 1.5, sdlog = 0.5)
   slots <- list(
     lower = 0,
@@ -1246,57 +1255,79 @@ test_that(".meta_summary_terms uses the grid mass as the density for a naive stu
     quantile_p = 0.6, growth_rate = 0, trunc_design = 0L
   )
   terms <- .meta_summary_terms(slots, "plnorm", args)
-  mass <- .meta_grid_pmf("plnorm", args, 0, 20, 1, 1, 0)
-  expect_equal(terms[["se"]], mass[6] * 0.6, tolerance = 1e-10)
+  nodes <- .meta_implied_nodes("plnorm", args, slots)
+  expect_equal(
+    terms[["implied"]], .meta_node_quantile(nodes, 0.6), tolerance = 1e-12
+  )
+  expect_identical(terms[["se"]], 0.6)
 })
 
-test_that(".meta_summary_terms guards a delay scale quantile se away from zero", { # nolint: line_length_linter.
+test_that(".meta_summary_terms guards a reported quantile se away from zero", { # nolint: line_length_linter.
   args <- list(meanlog = 1.5, sdlog = 0.5)
   slots <- list(
     lower = 0,
     obs_type = 4L, study_n = 250L, trunc_adjusted = 0L, cens_adjusted = 0L,
-    cutoff = 20, pwindow = 1, swindow = 1, value = 19.6, report_se = 0.6,
-    quantile_p = 0.99, growth_rate = 0, trunc_design = 0L
-  )
-  # The reported value sits in the top grid cell, where the density is zero.
-  expect_identical(
-    .meta_implied_density(
-      slots$value, "plnorm", args, 0, slots$cutoff, 1, 1, 0L, 0L, 0
-    ),
-    0
+    cutoff = 20, pwindow = 1, swindow = 1, value = 5, report_se = 1e-9,
+    quantile_p = 0.6, growth_rate = 0, trunc_design = 0L
   )
   terms <- .meta_summary_terms(slots, "plnorm", args)
   expect_identical(terms[["se"]], .meta_min_prob_se())
-  # Inside the grid the delta method is used untouched.
-  slots$value <- 19
-  expect_gt(.meta_summary_terms(slots, "plnorm", args)[["se"]], 1e-4)
 })
 
-test_that(".meta_summary_terms delta method matches a bootstrapped quantile se", { # nolint: line_length_linter.
+test_that("a quantile far into the tail gives a slope on the delay scale rather than a wall", { # nolint: line_length_linter.
+  # A 95th percentile reported as 40 days with a standard error of 2 when the
+  # true one is 11.3 is rejected by both scales, but on the probability scale
+  # the density at the reported value collapses and the converted standard
+  # error hits its floor, giving a log likelihood of order -1e7 whose
+  # gradient is dominated by the floor. On the delay scale it is the normal
+  # density it claims to be, everywhere.
+  slots <- list(
+    lower = 0,
+    obs_type = 4L, study_n = 0L, trunc_adjusted = 1L, cens_adjusted = 1L,
+    cutoff = 800, pwindow = 1, swindow = 1, value = 40, report_se = 2,
+    quantile_p = 0.95, growth_rate = 0, trunc_design = 0L
+  )
+  for (meanlog in c(1.6, 2.0, 2.4)) {
+    expect_equal(
+      .meta_row_log_lik(slots, "plnorm", list(meanlog = meanlog, sdlog = 0.5)),
+      stats::dnorm(40, stats::qlnorm(0.95, meanlog, 0.5), 2, log = TRUE),
+      tolerance = 1e-8
+    )
+  }
+  expect_gt(
+    .meta_row_log_lik(slots, "plnorm", list(meanlog = 1.6, sdlog = 0.5)),
+    -110
+  )
+})
+
+test_that("a delay scale quantile se is calibrated against a bootstrapped median", { # nolint: line_length_linter.
   set.seed(126)
   args <- list(meanlog = 1.5, sdlog = 0.5)
   cutoff <- 20
   study_n <- 200
   pool <- rlnorm(2e5, args$meanlog, args$sdlog)
   pool <- pool[pool <= cutoff]
-  y <- stats::median(pool)
-  boot <- vapply(
+  medians <- vapply(
     seq_len(2000),
     function(i) {
-      draw <- sample(pool, study_n, replace = TRUE)
-      return(c(stats::median(draw), mean(draw <= y)))
+      return(stats::median(sample(pool, study_n, replace = TRUE)))
     },
-    numeric(2)
+    numeric(1)
   )
   slots <- list(
     lower = 0,
     obs_type = 4L, study_n = study_n, trunc_adjusted = 0L, cens_adjusted = 1L,
-    cutoff = cutoff, pwindow = 1, swindow = 1, value = y,
-    report_se = stats::sd(boot[1, ]), quantile_p = 0.5, growth_rate = 0,
+    cutoff = cutoff, pwindow = 1, swindow = 1, value = stats::median(pool),
+    report_se = stats::sd(medians), quantile_p = 0.5, growth_rate = 0,
     trunc_design = 0L
   )
+  # The implied median of the truncated estimand at the truth sits within the
+  # bootstrap spread of the reported one, so the row's standardised residual
+  # is small at the true parameters.
   terms <- .meta_summary_terms(slots, "plnorm", args)
-  expect_equal(terms[["se"]], stats::sd(boot[2, ]), tolerance = 0.1)
+  expect_lt(
+    abs(terms[["observed"]] - terms[["implied"]]) / terms[["se"]], 0.5
+  )
 })
 
 test_that(".meta_summary_terms keeps the binomial se when no quantile se is given", { # nolint: line_length_linter.
@@ -1438,18 +1469,142 @@ test_that(".meta_quantile_set_ll is the binomial mass for a single quantile", {
   )
 })
 
-test_that(".meta_quantile_set_ll rejects a cell the study saw but the estimand cannot reach", { # nolint: line_length_linter.
+test_that(".meta_quantile_set_ll floors a cell the study saw but the estimand cannot reach", { # nolint: line_length_linter.
   slots <- list(
     lower = 0,
     cutoff = 60, pwindow = 1, swindow = 1, trunc_adjusted = 1L,
     cens_adjusted = 1L, growth_rate = 0, trunc_design = 0L
   )
-  expect_identical(
-    .meta_quantile_set_ll(
-      1e-8, 50L, 100, "plnorm", list(meanlog = 5, sdlog = 0.1), slots
-    ),
-    -Inf
+  # The cell below the reported median holds no mass a double can represent,
+  # so its probability is floored rather than sent to zero. That keeps the
+  # log likelihood finite, as Stan's log scale differences do, so that a
+  # single badly misfitting draw cannot break loo.
+  unreachable <- .meta_quantile_set_ll(
+    1e-8, 50L, 100, "plnorm", list(meanlog = 5, sdlog = 0.1), slots
   )
+  expect_true(is.finite(unreachable))
+  expect_equal(
+    unreachable, lchoose(100, 50) + 50 * log(.meta_cell_floor()),
+    tolerance = 1e-8
+  )
+  # A cell the study saw nothing in contributes nothing however small it is.
+  expect_true(is.finite(.meta_quantile_set_ll(
+    1e-8, 0L, 100, "plnorm", list(meanlog = 5, sdlog = 0.1), slots
+  )))
+})
+
+test_that(".meta_quantile_set_ll reads a single integer day quantile as its crossing cell", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  n <- 1000
+  for (design in list(
+    list(cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0),
+    list(cens_adjusted = 3L, trunc_design = 0L, growth_rate = 0),
+    list(cens_adjusted = 0L, trunc_design = 1L, growth_rate = 0.1)
+  )) {
+    slots <- c(
+      list(lower = 0, cutoff = 30, pwindow = 1, swindow = 1,
+           trunc_adjusted = 0L),
+      design
+    )
+    shift <- .meta_cens_shift(design$cens_adjusted, 1, 1)
+    # "The median is 5 days" says the empirical distribution function crossed
+    # a half between 4 and 5, so N_{<= 4} < ceiling(n p) <= N_{<= 5}, with the
+    # counts binomial on the uncorrected grid distribution function.
+    accrual <- .meta_accrual_flag(0L, design$trunc_design)
+    mass <- .meta_grid_pmf(
+      "plnorm", args, 0, 30, 1, 1, design$growth_rate, accrual
+    )
+    grid_cdf <- c(0, cumsum(mass))
+    log_tail <- function(k, prob) {
+      return(stats::pbinom(
+        k - 1, n, prob,
+        lower.tail = FALSE, log.p = TRUE
+      ))
+    }
+    for (p in c(0.25, 0.5, 0.9)) {
+      y <- 5
+      k <- ceiling(n * p)
+      upper <- log_tail(k, grid_cdf[y + 2])
+      lower <- log_tail(k, grid_cdf[y + 1])
+      expected <- upper + log(-expm1(lower - upper))
+      actual <- .meta_quantile_set_ll(
+        y + shift, round(n * p), n, "plnorm", args, slots, p = p
+      )
+      expect_equal(actual, expected, tolerance = 1e-8)
+      # The tails are taken on the log scale, so a crossing the estimand
+      # puts far into its tail stays finite.
+      expect_true(is.finite(actual))
+    }
+    # The event is on the cumulative counts, so a study of any size can put
+    # the crossing in the reported cell with a probability that stays below
+    # one and above zero across a wide range of parameters.
+    profile <- vapply(
+      seq(1.3, 1.9, by = 0.05),
+      function(m) {
+        return(.meta_quantile_set_ll(
+          5 + shift, 500L, n, "plnorm", list(meanlog = m, sdlog = 0.5),
+          slots, p = 0.5
+        ))
+      },
+      numeric(1)
+    )
+    expect_true(all(is.finite(profile)))
+    expect_lte(max(profile), 0)
+  }
+})
+
+test_that("a single integer day quantile carries information that saturates in n", { # nolint: line_length_linter.
+  # The multinomial on the continuity corrected grid claims a curvature that
+  # grows like n, while the crossing event stops sharpening once the binomial
+  # spread of the crossing is narrower than a day.
+  slots <- list(
+    lower = 0, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0
+  )
+  curvature <- function(n) {
+    ll <- function(m) {
+      return(.meta_quantile_set_ll(
+        5, round(n / 2), n, "plnorm", list(meanlog = m, sdlog = 0.5), slots,
+        p = 0.5
+      ))
+    }
+    return(-(ll(1.61) - 2 * ll(1.6) + ll(1.59)) / 0.01^2)
+  }
+  expect_lt(curvature(10000) / curvature(100), 10)
+})
+
+test_that(".meta_quantile_set_ll merges coincident reported quantiles into one cell", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  slots <- list(
+    lower = 0, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0
+  )
+  n <- 30
+  p <- c(0.25, 0.5, 0.75)
+  counts <- .meta_quantile_counts(p, n)
+  # A median and an upper quartile both reported as 5 days are two
+  # constraints on the empirical distribution function at the same cell,
+  # which the multinomial reads as one cell holding both counts.
+  merged <- .meta_quantile_set_ll(
+    c(4, 5, 5), counts, n, "plnorm", args, slots, p = p
+  )
+  direct <- .meta_quantile_set_ll(
+    c(4, 5), counts[c(1, 3)], n, "plnorm", args, slots, p = p[c(1, 3)]
+  )
+  expect_equal(merged, direct, tolerance = 1e-12)
+  expect_true(is.finite(merged))
+})
+
+test_that("as_epidist_meta_model accepts coincident quantiles from an integer day study", { # nolint: line_length_linter.
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = "quantile", value = c(4, 5, 5),
+    p = c(0.25, 0.5, 0.75), n = 30, relative_obs_time = 20,
+    trunc_adjusted = FALSE, cens_adjusted = 0, stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  expect_identical(meta$obs_type, 6L)
+  expect_identical(meta$group_len, 3L)
+  expect_no_error(assert_epidist(meta))
 })
 
 test_that("the joint quantile likelihood agrees with independent normal terms for a large near symmetric study", { # nolint: line_length_linter.
@@ -1670,7 +1825,7 @@ test_that("as_epidist_meta_model errors on quantiles that do not increase with t
   )))
   expect_error(
     suppressMessages(as_epidist_meta_model(estimates = estimates)),
-    "must increase"
+    "must not decrease"
   )
 })
 
@@ -2211,17 +2366,61 @@ test_that(".meta_node_quantile inverts the implied distribution function", {
     )
     nodes <- .meta_implied_nodes("plnorm", args, slots)
     # A discrete estimand is inverted on its own grid, so its round trip is
-    # exact. A continuous one is only as accurate as the interpolation.
+    # exact. A continuous one is inverted through the family quantile
+    # function where one exists, and otherwise refined by Newton steps from
+    # the bracketing chord, so neither is limited by the node spacing.
     for (p in c(0.1, 0.5, 0.9)) {
-      value <- .meta_node_quantile(nodes, p)
+      value <- .meta_node_quantile(nodes, p, "plnorm", args, slots)
       round_trip <- .meta_implied_probs(value, "plnorm", args, slots)
       if (cens_adjusted %in% c(0, 3)) {
         expect_equal(round_trip, p, tolerance = 1e-12)
+      } else if (cens_adjusted == 1) {
+        expect_lt(abs(round_trip - p), 1e-10)
       } else {
-        expect_lt(abs(round_trip - p), 5e-3)
+        expect_lt(abs(round_trip - p), 1e-8)
+      }
+      # The chord alone is only as accurate as the node spacing.
+      chord <- .meta_node_quantile(nodes, p)
+      if (!cens_adjusted %in% c(0, 3)) {
+        expect_gt(
+          abs(.meta_implied_probs(chord, "plnorm", args, slots) - p), 1e-5
+        )
       }
     }
   }
+})
+
+test_that(".meta_node_quantile refines a gamma estimand by Newton steps", {
+  args <- list(shape = 3, scale = 2.5)
+  for (cens_adjusted in c(1, 2)) {
+    slots <- list(
+      lower = 1, cutoff = 60, pwindow = 1, swindow = 1,
+      trunc_adjusted = 0L, cens_adjusted = cens_adjusted, growth_rate = 0,
+      trunc_design = 0L
+    )
+    nodes <- .meta_implied_nodes("pgamma", args, slots)
+    for (p in c(0.1, 0.5, 0.9)) {
+      value <- .meta_node_quantile(nodes, p, "pgamma", args, slots)
+      round_trip <- .meta_implied_probs(value, "pgamma", args, slots)
+      expect_lt(abs(round_trip - p), 1e-8)
+    }
+  }
+})
+
+test_that(".meta_node_quantile leaves an accrual estimand on its chord", {
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  slots <- list(
+    lower = 0, cutoff = 40, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0.1,
+    trunc_design = 1L
+  )
+  nodes <- .meta_implied_nodes("plnorm", args, slots)
+  # The accrual estimand is defined by linear interpolation between its
+  # nodes, so the chord is already its exact inverse.
+  expect_identical(
+    .meta_node_quantile(nodes, 0.5, "plnorm", args, slots),
+    .meta_node_quantile(nodes, 0.5)
+  )
 })
 
 test_that(".meta_node_quantile conditions on delay_min", {
@@ -2407,8 +2606,11 @@ test_that("assert_epidist.epidist_meta_model checks a joint quantile row", {
   falling <- members
   falling$value <- c(8, 4)
   expect_error(
-    assert_epidist(.meta_set_members(meta, falling)), "strictly increasing"
+    assert_epidist(.meta_set_members(meta, falling)), "must not decrease"
   )
+  coincident <- members
+  coincident$value <- c(4, 4)
+  expect_no_error(assert_epidist(.meta_set_members(meta, coincident)))
   dropping <- members
   dropping$count <- c(75L, 25L)
   expect_error(

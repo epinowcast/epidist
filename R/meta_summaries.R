@@ -137,16 +137,13 @@
   return(pmin(cdf, 1))
 }
 
-#' The smallest cumulative probability standard error the model will use
+#' The smallest quantile standard error the model will use
 #'
-#' A quantile standard error supplied on the delay scale is converted to the
-#' cumulative probability scale by multiplying it by the density of the biased
-#' estimand at the reported value. That density is zero beyond the support of a
-#' discrete estimand and vanishingly small far into a tail, either of which
-#' would give a degenerate likelihood, so the converted standard error is held
-#' at or above this value.
+#' A quantile standard error supplied on the delay scale is used as reported,
+#' held at or above this value as a guard against a standard error of zero,
+#' which would give a degenerate likelihood.
 #'
-#' @returns A probability scale standard error.
+#' @returns A delay scale standard error.
 #'
 #' @keywords internal
 .meta_min_prob_se <- function() {
@@ -1805,22 +1802,39 @@
   ))
 }
 
-#' The delay at which an interpolated distribution function reaches `p`
+#' The delay at which an implied distribution function reaches `p`
 #'
 #' Inverts the distribution function of [.meta_implied_nodes()] by linear
-#' interpolation between the two points that bracket `p`. The inverse of the
-#' implied estimand has no closed form on the discrete grid, and the
-#' interpolation keeps it a differentiable function of the delay distribution
-#' parameters, which a root search would not.
+#' interpolation between the two points that bracket `p`. On the discrete
+#' grid that interpolant is the model's own definition of the continuity
+#' corrected quantile, so the chord is exact there. For a continuous estimand
+#' the chord is only as accurate as the node spacing, which for a truncation
+#' adjusted study is about a day, so it is refined by
+#' [.meta_refine_quantile()] when the design is supplied. The result stays a
+#' differentiable function of the delay distribution parameters, which a root
+#' search would not be.
 #'
 #' @param nodes The output of [.meta_implied_nodes()].
 #'
 #' @param p A probability.
 #'
+#' @param dist A `primarycensored` distribution function name, or `NULL` to
+#'  return the chord inverse alone.
+#'
+#' @param args A named list of distribution parameters.
+#'
+#' @param slots The output of [.meta_row_slots()].
+#'
 #' @returns A delay.
 #'
 #' @keywords internal
-.meta_node_quantile <- function(nodes, p) {
+.meta_node_quantile <- function(
+  nodes,
+  p,
+  dist = NULL,
+  args = NULL,
+  slots = NULL
+) {
   values <- nodes$values
   n <- length(values)
   if (anyNA(values)) {
@@ -1836,7 +1850,113 @@
   index <- min(which(values >= p)[1] - 1L, n - 1L)
   span <- values[index + 1] - values[index]
   frac <- ifelse(span > 0, (p - values[index]) / span, 0)
-  return(nodes$origin + (index - 1 + frac) * nodes$spacing)
+  chord <- nodes$origin + (index - 1 + frac) * nodes$spacing
+  if (is.null(slots)) {
+    return(chord)
+  }
+  return(.meta_refine_quantile(
+    chord, p, dist, args, slots,
+    floor = nodes$origin, ceiling = nodes$origin + (n - 1) * nodes$spacing
+  ))
+}
+
+#' The number of Newton steps taken from the chord inverse
+#'
+#' Matches `meta_family_node_quantile()` in Stan. Each step squares the
+#' error of the chord, which is of the order of the node spacing squared, so
+#' two steps leave a residual well below the sampling standard error of any
+#' reported quantile.
+#'
+#' @returns An integer.
+#'
+#' @keywords internal
+.meta_newton_steps <- function() {
+  return(2L)
+}
+
+#' Refine the chord inverse of a continuous implied distribution function
+#'
+#' Where the family quantile function is available, that is for a lognormal
+#' or weibull delay reported by a study that adjusted for censoring and did
+#' not use an accrual design, the implied quantile is
+#' \eqn{Q(F(L) + p (F(D) - F(L)))} exactly. Otherwise Newton steps are taken
+#' from the chord using the implied distribution function and density of
+#' [.meta_implied_prob()] and [.meta_implied_density()], which exist in
+#' closed form for every remaining continuous design with a uniform primary
+#' event. An accrual estimand, or a uniform single interval estimand with a
+#' growing primary event, is defined by linear interpolation between its
+#' nodes, so its chord is left alone, as is a discrete grid.
+#'
+#' The Stan mirror `meta_family_node_quantile()` cannot evaluate the primary
+#' censored distribution function at a parameter dependent delay, so the
+#' cases refined here are exactly those it can refine with closed forms.
+#'
+#' @param chord The chord inverse from [.meta_node_quantile()].
+#'
+#' @inheritParams .meta_node_quantile
+#'
+#' @param floor,ceiling The delays at the first and last node, which the
+#'  refined value is held between.
+#'
+#' @returns A delay.
+#'
+#' @keywords internal
+.meta_refine_quantile <- function(
+  chord,
+  p,
+  dist,
+  args,
+  slots,
+  floor,
+  ceiling
+) {
+  base_code <- .meta_cens_base(slots$cens_adjusted)
+  accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
+  if (base_code == 0L || accrual == 1L) {
+    return(chord)
+  }
+  if (base_code == 2L && slots$growth_rate != 0) {
+    return(chord)
+  }
+  clamp <- function(value) {
+    return(min(max(value, floor), ceiling))
+  }
+  if (base_code == 1L && dist %in% c("plnorm", "pweibull")) {
+    pdist <- .pdist(dist)
+    base <- 0
+    if (slots$lower > 0) {
+      base <- do.call(pdist, c(list(q = slots$lower), args))
+    }
+    top <- 1
+    if (slots$trunc_adjusted != 1) {
+      top <- do.call(pdist, c(list(q = slots$cutoff), args))
+    }
+    exact <- do.call(
+      .estimates_qdist(dist), c(list(p = base + p * (top - base)), args)
+    )
+    if (!is.finite(exact)) {
+      return(chord)
+    }
+    return(clamp(exact))
+  }
+  value <- chord
+  for (step in seq_len(.meta_newton_steps())) {
+    prob <- .meta_implied_prob(
+      value, dist, args, slots$lower, slots$cutoff, slots$pwindow,
+      slots$swindow, slots$trunc_adjusted, slots$cens_adjusted,
+      slots$growth_rate, slots$trunc_design
+    )
+    slope <- .meta_implied_density(
+      value, dist, args, slots$lower, slots$cutoff, slots$pwindow,
+      slots$swindow, slots$trunc_adjusted, slots$cens_adjusted,
+      slots$growth_rate, slots$trunc_design
+    )
+    if (!is.finite(prob) || !is.finite(slope) || slope <= 0) {
+      return(value)
+    }
+    value <- clamp(value + (p - prob) / slope)
+  }
+  return(value)
 }
 
 #' The summaries a study would report, one per multivariate normal member
@@ -1870,7 +1990,7 @@
     implied[types == 3L] <- vapply(
       slots$group_p[types == 3L],
       function(p) {
-        return(.meta_node_quantile(nodes, p))
+        return(.meta_node_quantile(nodes, p, dist, args, slots))
       },
       numeric(1)
     )
@@ -1909,23 +2029,133 @@
   )
 }
 
+#' The smallest probability a multinomial cell is given
+#'
+#' A cell whose implied probability underflows to zero while the study saw
+#' delays in it would give a log likelihood of `-Inf`. Stan differences log
+#' distribution functions and so keeps a tiny mass in such a cell, where R
+#' differences them on the natural scale and gets exactly zero. Both floor
+#' the cell here, so that a single badly misfitting draw is rejected in
+#' practice but leaves `loo()` a finite value.
+#'
+#' @returns A probability.
+#'
+#' @keywords internal
+.meta_cell_floor <- function() {
+  return(1e-300)
+}
+
+#' The log of a difference of two exponentials
+#'
+#' Matches Stan's `log_diff_exp()`, returning `-Inf` where the difference is
+#' zero or negative rather than `NaN`.
+#'
+#' @param upper,lower Logarithms, with `upper` expected to be the larger.
+#'
+#' @returns `log(exp(upper) - exp(lower))`.
+#'
+#' @keywords internal
+.meta_log_diff_exp <- function(upper, lower) {
+  if (lower == -Inf) {
+    return(upper)
+  }
+  if (upper == -Inf || upper <= lower) {
+    return(-Inf)
+  }
+  return(upper + log(-expm1(lower - upper)))
+}
+
+#' The log likelihood of a single quantile of integer day delays
+#'
+#' A quantile of delays counted in whole censoring windows is a discrete
+#' statistic. "The median is 5 days" says that the empirical distribution
+#' function crossed one half between 4 and 5 days, that is
+#' \eqn{N_{\le y - w_s} < \lceil n p \rceil \le N_{\le y}} with
+#' \eqn{N_{\le y}} the number of delays at or below \eqn{y}, which reads the
+#' reported value as a type 1 quantile. Each count is binomial on the
+#' uncorrected grid distribution function, so the probability of the event
+#' is a difference of two binomial upper tails, computed on the log scale.
+#'
+#' Unlike the continuity corrected forms, the information this carries
+#' saturates as the study grows: once the binomial spread of the crossing is
+#' narrower than a window the reported integer stops moving, and the
+#' likelihood tends to an indicator of the parameters that put the
+#' population quantile in the reported cell.
+#'
+#' Matches `meta_family_grid_crossing_ll()` in Stan.
+#'
+#' @param y The reported quantile value.
+#'
+#' @param p The probability the quantile was reported at.
+#'
+#' @inheritParams .meta_quantile_set_ll
+#'
+#' @returns A log probability mass.
+#'
+#' @keywords internal
+.meta_grid_crossing_ll <- function(y, p, study_n, dist, args, slots) {
+  y <- y - .meta_cens_shift(slots$cens_adjusted, slots$pwindow, slots$swindow)
+  accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
+  n_grid <- floor(slots$cutoff / slots$swindow)
+  first <- .meta_grid_first(slots$lower, slots$swindow)
+  cell <- floor(y / slots$swindow + 0.5)
+  if (cell < first || cell >= n_grid) {
+    return(-Inf)
+  }
+  if (accrual != 1L) {
+    edges <- .meta_grid_edges(
+      cell, dist, args, slots$lower, slots$cutoff, slots$pwindow,
+      slots$swindow, slots$growth_rate
+    )
+  } else {
+    mass <- .meta_grid_pmf(
+      dist, args, slots$lower, slots$cutoff, slots$pwindow, slots$swindow,
+      slots$growth_rate, accrual
+    )
+    if (anyNA(mass)) {
+      return(-Inf)
+    }
+    edges <- c(0, cumsum(mass))[cell - first + 1:2]
+  }
+  if (!all(is.finite(edges))) {
+    return(-Inf)
+  }
+  edges <- pmin(pmax(edges, 0), 1)
+  # Matches the rounding guard of the Stan mirror, so that n p landing on an
+  # integer up to floating point error is not pushed up a count.
+  k <- ceiling(study_n * p - 1e-9)
+  log_tail <- stats::pbinom(
+    k - 1, study_n, edges,
+    lower.tail = FALSE, log.p = TRUE
+  )
+  return(.meta_log_diff_exp(log_tail[2], log_tail[1]))
+}
+
 #' The joint log likelihood of a set of quantiles from one study
 #'
 #' Quantiles reported at probabilities \eqn{p_1 < \dots < p_k} with values
-#' \eqn{y_1 < \dots < y_k} split the delay axis into the cells
+#' \eqn{y_1 \le \dots \le y_k} split the delay axis into the cells
 #' \eqn{(0, y_1], \dots, (y_{k-1}, y_k], (y_k, \infty)}, and the number of
 #' delays falling in each cell is multinomial with probabilities given by the
 #' increments of the implied distribution function. This is the joint version
 #' of the empirical distribution function likelihood used for a single
-#' quantile, and it reduces to the exact binomial when only one quantile is
-#' reported. Fitting each quantile separately ignores the positive correlation
-#' between the empirical distribution function at different points, which
-#' over weights a study reporting a median with an interquartile range.
+#' quantile, and it reduces to the exact binomial when only one quantile of a
+#' continuous estimand is reported. Fitting each quantile separately ignores
+#' the positive correlation between the empirical distribution function at
+#' different points, which over weights a study reporting a median with an
+#' interquartile range.
+#'
+#' Two quantiles reported at the same value are two constraints on the
+#' empirical distribution function at one cell, so they are merged into that
+#' cell with their combined count. A single quantile of integer day delays
+#' is fitted by [.meta_grid_crossing_ll()] instead, because the multinomial
+#' on the continuity corrected distribution function keeps sharpening with
+#' the study size while a rounded quantile stops moving.
 #'
 #' A cell whose implied probability underflows to zero while the study saw
-#' delays in it gives a log likelihood of `-Inf`, which rejects the draw.
+#' delays in it is floored at [.meta_cell_floor()].
 #'
-#' @param y A vector of reported quantile values in increasing order.
+#' @param y A vector of reported quantile values in non decreasing order.
 #'
 #' @param cum_count A vector of cumulative counts from
 #'  [.meta_quantile_counts()].
@@ -1938,19 +2168,34 @@
 #'
 #' @param slots The output of [.meta_row_slots()].
 #'
+#' @param p The probabilities the quantiles were reported at, in the order
+#'  of `y`. Only used for a single quantile of integer day delays.
+#'
 #' @returns A log probability mass.
 #'
 #' @keywords internal
-.meta_quantile_set_ll <- function(y, cum_count, study_n, dist, args, slots) {
+.meta_quantile_set_ll <- function(
+  y,
+  cum_count,
+  study_n,
+  dist,
+  args,
+  slots,
+  p = slots$group_p
+) {
+  if (length(y) == 1 && slots$cens_adjusted %in% c(0, 3)) {
+    return(.meta_grid_crossing_ll(y, p[1], study_n, dist, args, slots))
+  }
+  # Matches the skip over coincident values in the Stan mirror.
+  keep <- !duplicated(y, fromLast = TRUE)
+  y <- y[keep]
+  cum_count <- cum_count[keep]
   prob <- .meta_implied_probs(y, dist, args, slots)
   if (!all(is.finite(prob))) {
     return(-Inf)
   }
-  cell <- diff(c(0, prob, 1))
+  cell <- pmax(diff(c(0, prob, 1)), .meta_cell_floor())
   count <- diff(c(0, cum_count, study_n))
-  if (any(count > 0 & cell <= 0)) {
-    return(-Inf)
-  }
   seen <- count > 0
   return(
     lgamma(study_n + 1) -
@@ -1962,8 +2207,10 @@
 #' The implied summary and its standard error for one summary row and one draw
 #'
 #' A standard error reported for a quantile row is on the scale of the reported
-#' delay, as studies report it, so it is converted to the cumulative
-#' probability scale by the delta method using [.meta_implied_density()].
+#' delay, as studies report it, so such a row is fitted on that scale against
+#' the implied quantile of [.meta_node_quantile()]. A quantile row without a
+#' standard error is fitted on the cumulative probability scale, where the
+#' binomial standard error of an empirical distribution function applies.
 #'
 #' A group row stands for several summaries reported by one study, and this
 #' returns the marginal of its first member, which is the reported mean of a
@@ -1998,6 +2245,23 @@
       se = slots$group_chol[1, 1]
     ))
   }
+  if (slots$obs_type == 4L && slots$report_se > 0) {
+    # Studies report a quantile's standard error on the delay scale, so the
+    # reported value is compared with the implied quantile on that scale.
+    # Converting the standard error to the probability scale with the density
+    # at the reported value collapses far from the implied quantile, turning
+    # a discrepant row into a wall rather than a slope.
+    nodes <- .meta_implied_nodes(dist, args, slots)
+    implied <- .meta_node_quantile(nodes, slots$quantile_p, dist, args, slots)
+    if (is.na(implied)) {
+      implied <- Inf
+    }
+    return(c(
+      observed = slots$value,
+      implied = implied,
+      se = max(slots$report_se, .meta_min_prob_se())
+    ))
+  }
   if (slots$obs_type %in% c(4L, 6L)) {
     implied <- .meta_implied_prob(
       slots$value, dist, args, slots$lower, slots$cutoff, slots$pwindow,
@@ -2005,16 +2269,7 @@
       slots$growth_rate, slots$trunc_design
     )
     observed <- slots$quantile_p
-    if (slots$report_se > 0) {
-      implied_density <- .meta_implied_density(
-        slots$value, dist, args, slots$lower, slots$cutoff, slots$pwindow,
-        slots$swindow, slots$trunc_adjusted, slots$cens_adjusted,
-        slots$growth_rate, slots$trunc_design
-      )
-      se <- max(implied_density * slots$report_se, .meta_min_prob_se())
-    } else {
-      se <- sqrt(slots$quantile_p * (1 - slots$quantile_p) / slots$study_n)
-    }
+    se <- sqrt(slots$quantile_p * (1 - slots$quantile_p) / slots$study_n)
   } else {
     if (is.null(moments)) {
       moments <- .meta_row_moments(slots, dist, args)
@@ -2075,7 +2330,8 @@
   }
   if (slots$obs_type == 6L) {
     return(.meta_quantile_set_ll(
-      slots$group_value, slots$group_count, slots$study_n, dist, args, slots
+      slots$group_value, slots$group_count, slots$study_n, dist, args, slots,
+      p = slots$group_p
     ))
   }
   summaries <- .meta_summary_terms(slots, dist, args, moments)

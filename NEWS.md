@@ -145,7 +145,7 @@ See #620.
 See #620.
 - The meta model supports midpoint imputation, where a study assigned each delay to the centre of the interval it was observed in, as `cens_adjusted` code 3.
 See #620.
-- A standard error supplied for a quantile row of `as_epidist_estimates_data()` is now interpreted on the delay scale, as studies report it, and converted to the cumulative probability scale by the delta method.
+- A standard error supplied for a quantile row of `as_epidist_estimates_data()` is now interpreted on the delay scale, as studies report it, and the row is fitted on that scale against the implied quantile.
 See #620.
 - `as_epidist_estimates_data()` now rejects a reported quantile at or beyond the largest delay its study could have seen, which would otherwise contribute a constant to the likelihood rather than information.
 See #620.
@@ -158,7 +158,7 @@ See #620.
 On the quantile reporting studies of the meta vignette this cuts the evaluations they need per gradient from 480 to 36.
 The shortcut does not apply to a study that stopped collecting at a calendar date, which reweights each cell before renormalising and so keeps the full grid.
 See #620.
-- The delay scale standard error of a reported quantile is now converted with the closed form density of the biased estimand where one exists, rather than a central difference of its distribution function.
+- The implied quantile of a continuous estimand is inverted exactly where the family quantile function exists and refined by Newton steps otherwise, so covariance rows with quantile members and quantile rows with a delay scale standard error are no longer limited by the quadrature spacing.
 See #620.
 - The meta model gained several further speed ups.
 Softmax normalisation of the cohort grid mass is replaced by division where the normaliser is already known.
@@ -174,7 +174,7 @@ This is the format we recommend when a study cannot share its delays, because it
 Draws of the natural parameters of a fitted distribution are pushed through to the summaries the distribution implies, so no linearisation is used.
 See #620.
 - Added `epidist_estimates_summaries()` and `epidist_estimates_parameters()`, which take one study's contribution in the shape it reported it.
-`epidist_estimates_parameters()` converts the parameters of a distribution a study fitted into the summaries that distribution implies, carrying any reported parameter standard errors onto that scale by the delta method.
+`epidist_estimates_parameters()` converts the parameters of a distribution a study fitted into the summaries that distribution implies, carrying any reported parameter standard errors onto that scale by the delta method as a covariance over the summaries, which is fitted jointly and carries the study's information about its parameters exactly.
 The family a study fitted need not match the family being fitted to it.
 See #620.
 - `as_epidist_estimates_data()` combines contributions passed in a list, so studies reporting in different shapes assemble into one object.
@@ -185,6 +185,15 @@ See #620.
 - The meta model supports left truncation through `delay_min`, on both individual level rows and summary rows.
 A study that only counted delays above a minimum has every implied summary conditioned on the delay exceeding it.
 See #596 and #620.
+- A single quantile reported by a study that summarised integer day delays is now fitted as the cell in which the empirical distribution function crossed its probability, the exact event a rounded quantile stands for, rather than with a multinomial on the continuity corrected grid whose claimed precision keeps growing with the sample size.
+Two quantiles reported at the same value are accepted and merged into one cell, and `as_epidist_estimates_data()` warns when a large study reports several such quantiles, whose joint likelihood is still overconfident.
+See #620.
+- A multinomial cell that underflows is floored rather than sent to zero, so the R and Stan log likelihoods are both finite for a badly misfitting draw and `loo()` keeps working.
+See #620.
+- `as_epidist_estimates_data()` refuses more summaries from a fitted family than it has parameters, and a covariance over reported summaries that is singular to within a relative eigenvalue of 1e-4, because such a row charges any error in the implied summaries against a vanishing eigenvalue.
+See #620.
+- `as_epidist_estimates_data()` warns when the relative standard error of a reported standard deviation, at the kurtosis its mean and standard deviation imply under a lognormal delay, exceeds a quarter, which is where the normal sampling likelihood of a standard deviation stops being calibrated.
+See #620.
 - The meta model takes a `primary` argument for its individual level rows, as the marginal model does.
 With `primary = "expgrowth"` the growth rate of primary events is estimated as the `pgrowth` distributional parameter.
 Summary rows are unchanged and keep the `growth_rate` metadata of their study as a known tilt.

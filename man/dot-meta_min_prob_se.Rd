@@ -2,19 +2,16 @@
 % Please edit documentation in R/meta_summaries.R
 \name{.meta_min_prob_se}
 \alias{.meta_min_prob_se}
-\title{The smallest cumulative probability standard error the model will use}
+\title{The smallest quantile standard error the model will use}
 \usage{
 .meta_min_prob_se()
 }
 \value{
-A probability scale standard error.
+A delay scale standard error.
 }
 \description{
-A quantile standard error supplied on the delay scale is converted to the
-cumulative probability scale by multiplying it by the density of the biased
-estimand at the reported value. That density is zero beyond the support of a
-discrete estimand and vanishingly small far into a tail, either of which
-would give a degenerate likelihood, so the converted standard error is held
-at or above this value.
+A quantile standard error supplied on the delay scale is used as reported,
+held at or above this value as a guard against a standard error of zero,
+which would give a degenerate likelihood.
 }
 \keyword{internal}

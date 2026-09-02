@@ -188,8 +188,10 @@ test_that("the multivariate family path agrees with the delta method", {
   ))
   expect_identical(simulated$type, linearised$type)
   expect_equal(simulated$value, linearised$value, tolerance = 0.02)
+  # Both routes report a covariance over the two summaries, one from the
+  # draws and one from the delta method, and fit them the same way.
   expect_equal(
-    sqrt(diag(.estimates_vcov(simulated)[["A"]])), linearised$se,
+    .estimates_vcov(simulated)[["A"]], .estimates_vcov(linearised)[["A"]],
     tolerance = 0.05
   )
 })
@@ -258,4 +260,98 @@ test_that("one study can contribute two multivariate objects", {
   prep <- suppressMessages(as_epidist_meta_model(estimates = combined))
   expect_identical(prep$obs_type, c(7L, 7L))
   expect_identical(prep$trunc_adjusted, c(0L, 1L))
+})
+
+test_that("as_epidist_estimates_data refuses more summaries than a family has parameters", { # nolint: line_length_linter.
+  set.seed(11)
+  draws <- cbind(meanlog = rnorm(500, 1.6, 0.03), sdlog = rnorm(500, 0.5, 0.02))
+  mvn <- as_epidist_multivariate(draws)
+  # Three quartiles of a two parameter fit are deterministic functions of
+  # two numbers, so their covariance is singular up to the curvature of the
+  # quantile map and any error in the implied quantiles is charged against a
+  # vanishing eigenvalue.
+  expect_error(
+    as_epidist_estimates_data(
+      mvn,
+      study = "A", family = "lognormal", moments = character(0),
+      probs = c(0.25, 0.5, 0.75), cens_adjusted = 1
+    ),
+    "at most 2"
+  )
+  expect_error(
+    as_epidist_estimates_data(
+      mvn,
+      study = "A", family = "lognormal", probs = 0.5, cens_adjusted = 1
+    ),
+    "at most 2"
+  )
+  two <- suppressMessages(as_epidist_estimates_data(
+    mvn,
+    study = "A", family = "lognormal", moments = character(0),
+    probs = c(0.25, 0.75), cens_adjusted = 1
+  ))
+  expect_identical(nrow(two), 2L)
+})
+
+test_that("a nearly singular covariance over reported summaries is refused", {
+  set.seed(12)
+  meanlog <- rnorm(4000, 1.6, 0.03)
+  sdlog <- rnorm(4000, 0.5, 0.02)
+  # The quartiles of a two parameter fit lie on a two dimensional manifold, so
+  # their covariance has a third eigenvalue that is a millionth of the first,
+  # which is above machine precision but far below anything a likelihood can
+  # use.
+  draws <- cbind(
+    q0.25 = qlnorm(0.25, meanlog, sdlog),
+    q0.5 = qlnorm(0.5, meanlog, sdlog),
+    q0.75 = qlnorm(0.75, meanlog, sdlog)
+  )
+  values <- eigen(cov(draws), only.values = TRUE)$values
+  expect_gt(min(values), sqrt(.Machine$double.eps) * max(values))
+  expect_error(as_epidist_multivariate(draws), "rank 2")
+  # Rescaling a well conditioned covariance does not trip the check.
+  well <- cbind(mean = rnorm(500, 70, 3), sd = rnorm(500, 0.4, 0.01))
+  expect_s3_class(as_epidist_multivariate(well), "epidist_multivariate")
+})
+
+test_that("a covariance row with quartile members recovers a study of n = 1000", { # nolint: line_length_linter.
+  set.seed(16)
+  meanlog <- 1.6
+  sdlog <- 0.5
+  n <- 1000
+  # Posterior draws of a lognormal fitted to n fully adjusted delays, pushed
+  # through to the lower and upper quartiles with their covariance.
+  parameter_draws <- cbind(
+    meanlog = rnorm(4000, meanlog, sdlog / sqrt(n)),
+    sdlog = rnorm(4000, sdlog, sdlog / sqrt(2 * n))
+  )
+  estimates <- suppressMessages(as_epidist_estimates_data(
+    as_epidist_multivariate(parameter_draws),
+    study = "A", family = "lognormal", moments = character(0),
+    probs = c(0.25, 0.75), cens_adjusted = 1, trunc_adjusted = TRUE, n = n
+  ))
+  prep <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  standata <- suppressMessages(epidist(prep, fn = brms::make_standata))
+  slots <- .meta_row_slots(1, list(data = standata))
+  # At the truth the implied quartiles sit well inside the reported standard
+  # errors, and the profile over meanlog at the true sdlog peaks at the truth
+  # within one standard error and is concave throughout.
+  implied <- .meta_implied_summary_vector(
+    "plnorm", list(meanlog = meanlog, sdlog = sdlog), slots
+  )
+  expect_lt(
+    max(abs(implied - slots$group_value) / diag(slots$group_chol)), 0.5
+  )
+  grid <- seq(1.55, 1.65, by = 0.0005)
+  profile <- vapply(
+    grid,
+    function(m) {
+      return(.meta_row_log_lik(
+        slots, "plnorm", list(meanlog = m, sdlog = sdlog)
+      ))
+    },
+    numeric(1)
+  )
+  expect_lt(abs(grid[which.max(profile)] - meanlog), sdlog / sqrt(n))
+  expect_true(all(diff(profile, differences = 2) < 0))
 })

@@ -22,8 +22,10 @@ A named numeric vector with elements \code{observed}, \code{implied} and
 }
 \description{
 A standard error reported for a quantile row is on the scale of the reported
-delay, as studies report it, so it is converted to the cumulative
-probability scale by the delta method using \code{\link[=.meta_implied_density]{.meta_implied_density()}}.
+delay, as studies report it, so such a row is fitted on that scale against
+the implied quantile of \code{\link[=.meta_node_quantile]{.meta_node_quantile()}}. A quantile row without a
+standard error is fitted on the cumulative probability scale, where the
+binomial standard error of an empirical distribution function applies.
 }
 \details{
 A group row stands for several summaries reported by one study, and this

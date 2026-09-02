@@ -45,8 +45,55 @@ test_that("epidist_estimates_parameters converts a reported fit", {
     exp(1.6 + 0.5^2 / 2) * sqrt(expm1(0.5^2)),
     tolerance = 1e-8
   )
-  expect_true(all(estimates$se > 0))
-  expect_length(.estimates_vcov(estimates), 0)
+  # Reported parameter standard errors reach the fit as the delta method
+  # covariance over the summaries, so the rows carry no standard error of
+  # their own and are bound by a covariance matrix instead.
+  expect_true(all(is.na(estimates$se)))
+  expect_identical(estimates$mvn_id, c("A", "A"))
+  covariance <- .estimates_vcov(estimates)[["A"]]
+  expect_identical(dim(covariance), c(2L, 2L))
+  expect_true(all(diag(covariance) > 0))
+  expect_gt(covariance[1, 2], 0)
+})
+
+test_that("epidist_estimates_parameters carries the parameter information exactly", { # nolint: line_length_linter.
+  # A study that fitted the same family as the model and adjusted for both
+  # biases carries the information V^-1 about its parameters. Fitting its k
+  # summaries with the k by k delta method covariance J V J^T gives the
+  # curvature J^T (J V J^T)^-1 J = V^-1 at the reported parameters, so the
+  # Hessian standard errors of the row match the reported standard errors.
+  meanlog <- 1.6
+  sdlog <- 0.5
+  n <- 1000
+  se <- c(sdlog / sqrt(n), sdlog / sqrt(2 * n))
+  estimates <- suppressMessages(epidist_estimates_parameters(
+    "A", "lognormal", c(meanlog = meanlog, sdlog = sdlog),
+    se = se, n = n, cens_adjusted = 1, trunc_adjusted = TRUE
+  ))
+  prep <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  expect_identical(prep$obs_type, 7L)
+  standata <- suppressMessages(epidist(prep, fn = brms::make_standata))
+  slots <- .meta_row_slots(1, list(data = standata))
+  negative_ll <- function(theta) {
+    return(-.meta_row_log_lik(
+      slots, "plnorm", list(meanlog = theta[1], sdlog = theta[2])
+    ))
+  }
+  step <- 1e-4
+  truth <- c(meanlog, sdlog)
+  hessian <- matrix(0, 2, 2)
+  for (i in 1:2) {
+    for (j in 1:2) {
+      e_i <- replace(c(0, 0), i, step)
+      e_j <- replace(c(0, 0), j, step)
+      hessian[i, j] <- (
+        negative_ll(truth + e_i + e_j) - negative_ll(truth + e_i - e_j) -
+          negative_ll(truth - e_i + e_j) + negative_ll(truth - e_i - e_j)
+      ) / (4 * step^2)
+    }
+  }
+  expect_equal(sqrt(diag(solve(hessian))), se, tolerance = 0.02)
+  expect_lt(abs(hessian[1, 2]) / sqrt(hessian[1, 1] * hessian[2, 2]), 0.05)
 })
 
 test_that("epidist_estimates_parameters accepts both gamma parameterisations", {
@@ -89,20 +136,30 @@ test_that("epidist_estimates_parameters matches a Monte Carlo delta method", {
     exp(draws[, 1] + draws[, 2]^2 / 2) * sqrt(expm1(draws[, 2]^2))
   )
   expect_equal(
-    estimates$se, sqrt(diag(stats::cov(simulated))),
+    .estimates_vcov(estimates)[["A"]], stats::cov(simulated),
     tolerance = 0.05
   )
 })
 
-test_that("epidist_estimates_parameters can report more summaries than it has parameters", { # nolint: line_length_linter.
-  # The delta method diagonal is per row, so a two parameter fit can report
-  # five summaries. Only a covariance over them would be rank deficient.
+test_that("epidist_estimates_parameters refuses more summaries with standard errors than it has parameters", { # nolint: line_length_linter.
+  # Five summaries of a two parameter fit are functions of two numbers, so
+  # fitting them all would count the study's information several times over.
+  expect_error(
+    epidist_estimates_parameters(
+      "A", "lognormal", c(meanlog = 1.6, sdlog = 0.5),
+      probs = c(0.25, 0.5, 0.75), se = c(0.03, 0.02)
+    ),
+    "at most 2"
+  )
+  # Without standard errors the summaries fall back to the sample size
+  # likelihoods, which carry no covariance, so any number may be reported.
   estimates <- suppressWarnings(suppressMessages(epidist_estimates_parameters(
     "A", "lognormal", c(meanlog = 1.6, sdlog = 0.5),
-    probs = c(0.25, 0.5, 0.75), se = c(0.03, 0.02)
+    probs = c(0.25, 0.5, 0.75), n = 100
   )))
   expect_identical(nrow(estimates), 5L)
-  expect_true(all(estimates$se > 0))
+  expect_true(all(is.na(estimates$se)))
+  expect_length(.estimates_vcov(estimates), 0)
 })
 
 test_that("epidist_estimates_parameters rejects input it cannot convert", {

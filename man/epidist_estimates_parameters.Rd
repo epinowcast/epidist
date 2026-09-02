@@ -32,8 +32,8 @@ names must be \code{meanlog} and \code{sdlog} for a lognormal, \code{shape} with
 \item{se}{A numeric vector of the reported standard errors of \code{parameters},
 in the same order. Optional.}
 
-\item{n}{The number of delays the study fitted. Optional, and used where no
-\code{se} is given.}
+\item{n}{The number of delays the study fitted. Optional, and used for the
+sampling uncertainty of the summaries where no \code{se} is given.}
 
 \item{...}{Study metadata, as documented in
 \code{\link[=as_epidist_estimates_data.data.frame]{as_epidist_estimates_data.data.frame()}}.}
@@ -96,16 +96,24 @@ standard deviation, which depends on a tail the study never saw.
 \section{Uncertainty}{
 Supply the standard errors the study reported on its parameters through
 \code{se}. They are carried onto the summary scale by the delta method, using a
-numerical Jacobian of the map from parameters to summaries, and each summary
-is reported with its own standard error.
+numerical Jacobian of the map from parameters to summaries, and the
+summaries are reported with the covariance matrix that implies between
+them, so they are fitted jointly as a multivariate normal in the same way
+as the output of \code{\link[=as_epidist_multivariate]{as_epidist_multivariate()}}. For a fit with as many
+summaries as parameters this carries the study's information about its
+parameters exactly, which fitting each summary with its own standard error
+would not.
 
-The correlation the delta method implies between those summaries is not
-kept. Summaries of a two parameter fit are deterministic functions of two
-numbers, so their joint distribution is degenerate and reporting more than
-two of them with a covariance is not possible. A study that published a full
-parameter covariance and wants the correlation kept can draw from it, push
+Summaries of a two parameter fit are deterministic functions of two
+numbers, so at most two of them can carry the reported uncertainty, and
+asking for more with \code{se} is an error. A study that published a full
+parameter covariance rather than standard errors can draw from it, push
 each draw through to the summaries, and use \code{\link[=as_epidist_multivariate]{as_epidist_multivariate()}},
 which needs no linearisation.
+
+Without \code{se} the summaries fall back to the sample size likelihoods, which
+derive their sampling uncertainty from \code{n}, and any number of them may be
+reported.
 }
 
 \examples{

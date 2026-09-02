@@ -2,23 +2,34 @@
 % Please edit documentation in R/meta_summaries.R
 \name{.meta_node_quantile}
 \alias{.meta_node_quantile}
-\title{The delay at which an interpolated distribution function reaches \code{p}}
+\title{The delay at which an implied distribution function reaches \code{p}}
 \usage{
-.meta_node_quantile(nodes, p)
+.meta_node_quantile(nodes, p, dist = NULL, args = NULL, slots = NULL)
 }
 \arguments{
 \item{nodes}{The output of \code{\link[=.meta_implied_nodes]{.meta_implied_nodes()}}.}
 
 \item{p}{A probability.}
+
+\item{dist}{A \code{primarycensored} distribution function name, or \code{NULL} to
+return the chord inverse alone.}
+
+\item{args}{A named list of distribution parameters.}
+
+\item{slots}{The output of \code{\link[=.meta_row_slots]{.meta_row_slots()}}.}
 }
 \value{
 A delay.
 }
 \description{
 Inverts the distribution function of \code{\link[=.meta_implied_nodes]{.meta_implied_nodes()}} by linear
-interpolation between the two points that bracket \code{p}. The inverse of the
-implied estimand has no closed form on the discrete grid, and the
-interpolation keeps it a differentiable function of the delay distribution
-parameters, which a root search would not.
+interpolation between the two points that bracket \code{p}. On the discrete
+grid that interpolant is the model's own definition of the continuity
+corrected quantile, so the chord is exact there. For a continuous estimand
+the chord is only as accurate as the node spacing, which for a truncation
+adjusted study is about a day, so it is refined by
+\code{\link[=.meta_refine_quantile]{.meta_refine_quantile()}} when the design is supplied. The result stays a
+differentiable function of the delay distribution parameters, which a root
+search would not be.
 }
 \keyword{internal}

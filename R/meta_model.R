@@ -664,8 +664,9 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #'
 #' A mean and standard deviation pair is stored with the mean first so that the
 #' bivariate normal knows which member is which. A set of quantiles is stored
-#' in increasing probability, which must also be increasing in the reported
-#' value for the cells of the multinomial to be a partition of the delay axis.
+#' in increasing probability, which must also be non decreasing in the
+#' reported value for the cells of the multinomial to be a partition of the
+#' delay axis. Coincident values are merged into one cell by the likelihood.
 #'
 #' A group covered by a covariance matrix keeps the order its rows were given
 #' in, because that is the order the matrix is indexed by.
@@ -691,10 +692,12 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
         "both describe its delays."
       ))
     }
-    if (any(diff(estimates$value) <= 0)) {
+    # Coincident values are allowed, because two quantiles of integer day
+    # delays landing on the same day are two constraints on one cell.
+    if (any(diff(estimates$value) < 0)) {
       cli::cli_abort(paste0(
-        "The quantiles reported by {.val {estimates$study[1]}} must increase ",
-        "with their probability {.var p}."
+        "The quantiles reported by {.val {estimates$study[1]}} must not ",
+        "decrease with their probability {.var p}."
       ))
     }
     return(estimates)
@@ -900,9 +903,9 @@ assert_epidist.epidist_meta_model <- function(data, ...) {
   }
   for (i in which(data$obs_type == 6L)) {
     member <- seq_len(data$group_len[i]) + data$group_start[i] - 1L
-    if (any(diff(members$value[member]) <= 0)) {
+    if (any(diff(members$value[member]) < 0)) {
       cli::cli_abort(
-        "The quantiles of a joint quantile row must be strictly increasing."
+        "The quantiles of a joint quantile row must not decrease."
       )
     }
     count <- members$count[member]
