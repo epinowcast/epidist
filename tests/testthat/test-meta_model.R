@@ -2377,3 +2377,157 @@ test_that("the meta model returns NA for summary rows of an unsupported family",
   )
   expect_identical(predict_fn(1, prep), as.matrix(rep(NA_real_, 4)))
 })
+
+test_that("as_epidist_meta_model defaults to a uniform primary event", {
+  expect_identical(attr(prep_meta_obs, "primary"), "uniform")
+  family <- epidist_family(prep_meta_obs)
+  expect_identical(family$primary, "uniform")
+  expect_false("pgrowth" %in% family$dpars)
+  code <- suppressMessages(epidist(prep_meta_obs, fn = brms::make_stancode))
+  expect_no_match(code, "b_pgrowth", fixed = TRUE)
+  expect_match(code, "1, primary_params", fixed = TRUE)
+})
+
+test_that("an expgrowth primary event adds a pgrowth parameter to the meta model", { # nolint: line_length_linter.
+  model <- suppressMessages(as_epidist_meta_model(
+    sim_obs, estimates = sim_estimates, primary = "expgrowth"
+  ))
+  expect_identical(attr(model, "primary"), "expgrowth")
+  family <- epidist_family(model)
+  expect_identical(family$primary, "expgrowth")
+  expect_true("pgrowth" %in% family$dpars)
+  code <- suppressMessages(epidist(
+    model, formula = brms::bf(mu ~ 1, pgrowth ~ 1), fn = brms::make_stancode
+  ))
+  expect_match(code, "b_pgrowth", fixed = TRUE)
+  # The registry id selects expgrowth within primarycensored for the
+  # individual level rows, with pgrowth in scope through dpars_A.
+  expect_match(code, "2, {pgrowth}", fixed = TRUE)
+  expect_match(code, "real mu, real sigma, real pgrowth", fixed = TRUE)
+  expect_match(code, "real primary_lpdf", fixed = TRUE)
+})
+
+test_that("the meta model accepts an expgrowth primary event for aggregate data", { # nolint: line_length_linter.
+  model <- suppressMessages(as_epidist_meta_model(
+    agg_sim_obs, primary = "expgrowth"
+  ))
+  expect_identical(attr(model, "primary"), "expgrowth")
+  expect_true("pgrowth" %in% epidist_family(model)$dpars)
+})
+
+test_that("the meta model primary event survives the data transform", {
+  model <- suppressMessages(as_epidist_meta_model(
+    sim_obs, estimates = sim_estimates, primary = "expgrowth"
+  ))
+  family <- epidist_family(model)
+  formula <- epidist_formula(model, family, brms::bf(mu ~ 1, pgrowth ~ 1))
+  transformed <- suppressMessages(
+    epidist_transform_data_model(model, family, formula)
+  )
+  expect_identical(attr(transformed, "primary"), "expgrowth")
+  expect_s3_class(transformed, "epidist_meta_model")
+})
+
+test_that("the meta model rejects an unsupported primary event", {
+  expect_error(as_epidist_meta_model(sim_obs, primary = "gaussian"))
+  expect_error(new_epidist_meta_model(prep_meta_obs, primary = "gaussian"))
+})
+
+test_that("summaries only meta models are uniform and refuse a primary event", { # nolint: line_length_linter.
+  expect_identical(attr(prep_meta_estimates, "primary"), "uniform")
+  expect_false("pgrowth" %in% epidist_family(prep_meta_estimates)$dpars)
+  # Summary rows tilt the primary event with their growth_rate metadata, so
+  # a primary event distribution has nothing to act on.
+  expect_error(
+    as_epidist_meta_model(estimates = sim_estimates, primary = "expgrowth"),
+    "growth_rate"
+  )
+  expect_error(
+    as_epidist_meta_model(sim_estimates, primary = "expgrowth"),
+    "growth_rate"
+  )
+})
+
+test_that("the meta model log likelihood uses the fitted primary event for individual rows", { # nolint: line_length_linter.
+  model <- suppressMessages(as_epidist_meta_model(
+    sim_obs, primary = "expgrowth"
+  ))
+  family <- epidist_family(model)
+  prep <- structure(
+    list(
+      data = list(
+        Y = 5, vint1 = 1L, vreal1 = 12, vreal2 = 1, vreal3 = 1, vreal4 = 6,
+        vreal5 = 2
+      ),
+      dpars = list(
+        mu = matrix(1.5, nrow = 3, ncol = 1),
+        sigma = matrix(0.5, nrow = 3, ncol = 1),
+        pgrowth = matrix(c(0.2, 0.4, 0.6), nrow = 3, ncol = 1)
+      ),
+      ndraws = 3,
+      nobs = 1,
+      family = list(primary = "expgrowth")
+    ),
+    class = "brmsprep"
+  )
+  log_lik <- family$log_lik(i = 1, prep)
+  expected <- vapply(
+    seq_len(prep$ndraws),
+    function(draw) {
+      return(primarycensored::dpcens(
+        x = 5,
+        pdist = stats::plnorm,
+        pwindow = 1,
+        swindow = 1,
+        L = 2,
+        D = 12,
+        dprimary = primarycensored::dexpgrowth,
+        dprimary_args = list(r = prep$dpars$pgrowth[draw, 1]),
+        log = TRUE,
+        meanlog = 1.5,
+        sdlog = 0.5
+      ))
+    },
+    numeric(1)
+  )
+  expect_equal(log_lik, expected, tolerance = 1e-8)
+  # The family built from the model carries the primary event, so a prep
+  # without one still uses it.
+  prep$family <- list()
+  expect_equal(family$log_lik(i = 1, prep), expected, tolerance = 1e-8)
+  # A uniform primary event gives a different answer, so the check above
+  # cannot pass with the primary event ignored.
+  uniform <- epidist_family(prep_meta_individual)
+  expect_false(isTRUE(all.equal(uniform$log_lik(i = 1, prep), expected)))
+})
+
+test_that("the meta model posterior predictions use the fitted primary event", { # nolint: line_length_linter.
+  model <- suppressMessages(as_epidist_meta_model(
+    sim_obs, primary = "expgrowth"
+  ))
+  family <- epidist_family(model)
+  prep <- structure(
+    list(
+      data = list(
+        Y = 5, vint1 = 1L, vreal1 = 30, vreal2 = 1, vreal3 = 1, vreal4 = 6,
+        vreal5 = 0
+      ),
+      dpars = list(
+        mu = matrix(1.5, nrow = 50, ncol = 1),
+        sigma = matrix(0.5, nrow = 50, ncol = 1),
+        pgrowth = matrix(5, nrow = 50, ncol = 1)
+      ),
+      ndraws = 50,
+      nobs = 1,
+      family = list(primary = "expgrowth")
+    ),
+    class = "brmsprep"
+  )
+  set.seed(101)
+  growing <- family$posterior_predict(i = 1, prep)
+  set.seed(101)
+  uniform <- epidist_family(prep_meta_individual)$posterior_predict(
+    i = 1, prep
+  )
+  expect_false(isTRUE(all.equal(mean(growing), mean(uniform))))
+})
