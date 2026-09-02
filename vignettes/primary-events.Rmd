@@ -111,8 +111,12 @@ Both are compared against the delay used to simulate.
 
 ```{r compare}
 draws <- bind_rows(
-  predict_delay_parameters(fit_uniform) |> mutate(model = "Uniform"),
-  predict_delay_parameters(fit_growing) |> mutate(model = "Exponential growth")
+  delay_parameter_draws(fit_uniform) |>
+    ungroup() |>
+    mutate(model = "Uniform"),
+  delay_parameter_draws(fit_growing) |>
+    ungroup() |>
+    mutate(model = "Exponential growth")
 )
 
 draws |>
