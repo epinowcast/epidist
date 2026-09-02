@@ -803,7 +803,7 @@ test_that("as_epidist_multivariate round trips draws of a fitted model", {
   )
   estimates <- suppressMessages(as_epidist_estimates_data(
     reported,
-    study = "round_trip", cens_adjusted = 1
+    study = "round_trip", trunc_adjusted = TRUE, cens_adjusted = 1
   ))
   expect_identical(estimates$type, c("mean", "sd"))
   prep <- suppressMessages(as_epidist_meta_model(estimates = estimates))
