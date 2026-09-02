@@ -229,6 +229,53 @@ test_that("delay_parameter_draws works with NULL newdata and the latent and marg
   test_draws(fit_marginal, expected_rows = 144)
 })
 
+test_that("delay_summary_draws matches the steps it wraps", {
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+
+  expect_identical(
+    delay_summary_draws(fit_marginal_sex, probs = c(0.05, 0.95)),
+    add_summaries(
+      delay_parameter_draws(
+        fit_marginal_sex,
+        newdata = epidist_strata(fit_marginal_sex)
+      ),
+      probs = c(0.05, 0.95)
+    )
+  )
+})
+
+test_that("delay_summary_draws strata by default and keeps the grouping", {
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+
+  draws <- delay_summary_draws(fit_marginal_sex)
+  expect_s3_class(draws, "grouped_df")
+  expect_true(all(c("mean", "sd", "mu", "sigma") %in% names(draws)))
+  expect_identical(utils::tail(dplyr::group_vars(draws), 1), ".row")
+  # One stratum per unique combination of the predictors, not one per row of
+  # the data the model was fitted to.
+  expect_length(
+    unique(draws$.row), nrow(epidist_strata(fit_marginal_sex))
+  )
+  expect_lt(
+    nrow(epidist_strata(fit_marginal_sex)), nrow(fit_marginal_sex$data)
+  )
+})
+
+test_that("delay_summary_draws passes vars, probs and dots on", {
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+
+  draws <- delay_summary_draws(
+    fit_marginal_sex,
+    vars = "sex", probs = c(0.25, 0.75), ndraws = 50
+  )
+  expect_true(all(c("q25", "q75") %in% names(draws)))
+  expect_length(unique(draws$.draw), 50)
+  expect_length(unique(draws$.row), 2)
+})
+
 test_that("delay_parameter_draws matches add_delay_parameter_draws", {
   skip_on_cran()
   skip_if_no_cmdstanr()
