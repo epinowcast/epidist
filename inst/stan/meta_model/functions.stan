@@ -711,7 +711,7 @@
   }
 
   /** Density of the delay distribution. */
-  real meta_family_density(data real y, array[] real params) {
+  real meta_family_density(real y, array[] real params) {
     if (y <= 0) {
       return 0;
     }
@@ -729,12 +729,72 @@
   }
 
   /** Density of a delay censored by a uniform primary window. */
-  real meta_family_uniform_pcens_density(data real y, array[] real params,
+  real meta_family_uniform_pcens_density(real y, array[] real params,
                                          data real pwindow_width) {
     real cdf_upper = exp(dist_lcdf(y | params, dist_id));
     real cdf_lower = y > pwindow_width
       ? exp(dist_lcdf(y - pwindow_width | params, dist_id)) : 0;
     return fmax(cdf_upper - cdf_lower, 0) / pwindow_width;
+  }
+
+  /**
+    * Partial expectation of the delay below `x`, the integral of t f(t) from
+    * zero to x, in closed form for each family.
+    */
+  real meta_family_partial_expectation(real x, array[] real params) {
+    if (x <= 0) {
+      return 0;
+    }
+    if (dist_id == 1) {
+      return exp(params[1] + 0.5 * square(params[2]) +
+                 lognormal_lcdf(x | params[1] + square(params[2]),
+                                params[2]));
+    }
+    if (dist_id == 2) {
+      return params[1] / params[2] * gamma_p(params[1] + 1, params[2] * x);
+    }
+    if (dist_id == 3) {
+      return params[2] * tgamma(1 + 1 / params[1]) *
+        gamma_p(1 + 1 / params[1], pow(x / params[2], params[1]));
+    }
+    reject("Meta model summary rows support lognormal, gamma and weibull ",
+           "delay distributions only.");
+  }
+
+  /**
+    * Distribution function of a delay censored by a uniform primary window
+    * at a delay that may depend on the parameters, which primarycensored_lcdf
+    * does not allow. Integrating the delay distribution function over the
+    * window by parts needs only the distribution function and the partial
+    * expectation at the two ends of the window.
+    */
+  real meta_family_uniform_pcens_prob(real d, array[] real params,
+                                     data real pwindow_width) {
+    real at_d;
+    real at_start = 0;
+    if (d <= 0) {
+      return 0;
+    }
+    at_d = d * exp(dist_lcdf(d | params, dist_id)) -
+      meta_family_partial_expectation(d, params);
+    if (d > pwindow_width) {
+      at_start = (d - pwindow_width) *
+        exp(dist_lcdf(d - pwindow_width | params, dist_id)) -
+        meta_family_partial_expectation(d - pwindow_width, params);
+    }
+    return fmin(fmax((at_d - at_start) / pwindow_width, 0), 1);
+  }
+
+  /** Quantile function of the delay distribution where it has a closed form. */
+  real meta_family_quantile(real p, array[] real params) {
+    if (dist_id == 1) {
+      return exp(params[1] + params[2] * inv_Phi(p));
+    }
+    if (dist_id == 3) {
+      return params[2] * pow(-log1m(p), 1 / params[1]);
+    }
+    reject("meta_family_quantile: this family has no closed form quantile ",
+           "function.");
   }
 
   /**
@@ -907,18 +967,35 @@
 
   /**
     * Delay at which a packed node distribution function reaches `p`, by
-    * inverse linear interpolation between the nodes it brackets.
+    * inverse linear interpolation between the nodes it brackets. On the
+    * discrete grid that chord is the model's own definition of the
+    * continuity corrected quantile. For a continuous estimand it is only as
+    * accurate as the node spacing, so it is refined as in
+    * .meta_refine_quantile() in R: exactly through the family quantile
+    * function where one exists, and otherwise by Newton steps with the
+    * closed form distribution function and density. An accrual estimand, or
+    * a uniform single interval estimand with a growing primary event, is
+    * defined by the interpolation between its nodes and keeps its chord.
     */
-  real meta_family_node_quantile(vector nodes, data real p) {
+  real meta_family_node_quantile(vector nodes, data real p,
+                                 array[] real params, data real delay_min,
+                                 data real cutoff, data real pwindow_width,
+                                 data real swindow_width, data int trunc_adj,
+                                 data int cens_adj, data int prim_id,
+                                 array[] real prim_params, data int accrual,
+                                 data real growth_rate) {
     real origin = nodes[1];
     real spacing = nodes[2];
     int n = num_elements(nodes) - 2;
     int j = 1;
+    real ceiling = origin + (n - 1) * spacing;
+    real chord;
+    int base_code = meta_family_cens_base(cens_adj);
     if (p <= nodes[3]) {
       return origin;
     }
     if (p >= nodes[n + 2]) {
-      return origin + (n - 1) * spacing;
+      return ceiling;
     }
     while (j < n - 1 && nodes[j + 3] < p) {
       j += 1;
@@ -927,7 +1004,72 @@
       real low = nodes[j + 2];
       real high = nodes[j + 3];
       real frac = high > low ? (p - low) / (high - low) : 0;
-      return origin + (j - 1 + frac) * spacing;
+      chord = origin + (j - 1 + frac) * spacing;
+    }
+    if (base_code == 0 || accrual == 1) {
+      return chord;
+    }
+    if (base_code == 2 && growth_rate != 0) {
+      return chord;
+    }
+    if (base_code == 1 && (dist_id == 1 || dist_id == 3)) {
+      real base = delay_min > 0
+        ? exp(dist_lcdf(delay_min | params, dist_id)) : 0;
+      real top = trunc_adj == 1 ? 1 : exp(dist_lcdf(cutoff | params, dist_id));
+      real exact = meta_family_quantile(base + p * (top - base), params);
+      if (is_nan(exact) || is_inf(exact)) {
+        return chord;
+      }
+      return fmin(fmax(exact, origin), ceiling);
+    }
+    {
+      real value = chord;
+      real shift = meta_family_shift(cens_adj, pwindow_width, swindow_width);
+      real base;
+      real norm;
+      if (base_code == 2) {
+        base = delay_min > 0
+          ? meta_family_uniform_pcens_prob(delay_min, params, pwindow_width)
+          : 0;
+        norm = trunc_adj == 1
+          ? 1 - base
+          : meta_family_uniform_pcens_prob(cutoff, params, pwindow_width) -
+            base;
+      } else {
+        base = delay_min > 0
+          ? exp(dist_lcdf(delay_min | params, dist_id)) : 0;
+        norm = trunc_adj == 1
+          ? 1 - base : exp(dist_lcdf(cutoff | params, dist_id)) - base;
+      }
+      if (is_nan(norm) || norm <= 0) {
+        return chord;
+      }
+      // Two steps, matching .meta_newton_steps() in R.
+      for (step in 1:2) {
+        real y = value - shift;
+        real prob;
+        real slope;
+        if (y <= delay_min || (trunc_adj != 1 && y >= cutoff)) {
+          return value;
+        }
+        if (base_code == 2) {
+          prob = fmin(
+            (meta_family_uniform_pcens_prob(y, params, pwindow_width) - base) /
+              norm,
+            1
+          );
+          slope = meta_family_uniform_pcens_density(y, params, pwindow_width) /
+            norm;
+        } else {
+          prob = fmin((exp(dist_lcdf(y | params, dist_id)) - base) / norm, 1);
+          slope = meta_family_density(y, params) / norm;
+        }
+        if (is_nan(prob) || is_nan(slope) || is_inf(slope) || slope <= 0) {
+          return value;
+        }
+        value = fmin(fmax(value + (p - prob) / slope, origin), ceiling);
+      }
+      return value;
     }
   }
 
@@ -987,7 +1129,11 @@
       );
       for (j in 1:k) {
         if (types[j] == 3) {
-          implied[j] = meta_family_node_quantile(nodes, probs[j]);
+          implied[j] = meta_family_node_quantile(
+            nodes, probs[j], params, delay_min, cutoff, pwindow_width,
+            swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
+            growth_rate
+          );
         }
       }
     }
