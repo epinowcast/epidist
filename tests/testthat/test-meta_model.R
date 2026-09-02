@@ -697,6 +697,33 @@ test_that(".meta_summary_terms uses the kurtosis based standard error for report
   expect_gt(terms[["se"]], terms[["implied"]] / sqrt(2 * (study_n - 1)))
 })
 
+test_that(".meta_row_log_lik rejects a draw whose implied moments overflow", {
+  # A very wide lognormal overflows the analytic kurtosis to NaN. The joint
+  # likelihood of a mean and standard deviation pair already rejects such a
+  # draw, and an ungrouped row must do the same rather than return NaN.
+  args <- list(meanlog = 1.6, sdlog = 15)
+  expect_false(all(is.finite(.meta_continuous_moments("plnorm", args))))
+  slots <- list(
+    lower = 0, obs_type = 3L, study_n = 100L, trunc_adjusted = 1L,
+    cens_adjusted = 1L, cutoff = 60, pwindow = 1, swindow = 1, value = 3.6,
+    report_se = 0, quantile_p = 0, growth_rate = 0, trunc_design = 0L,
+    group_value = c(7.5, 3.6)
+  )
+  expect_identical(.meta_row_log_lik(slots, "plnorm", args), -Inf)
+  slots$obs_type <- 2L
+  expect_identical(.meta_row_log_lik(slots, "plnorm", args), -Inf)
+  slots$report_se <- 0.5
+  expect_identical(.meta_row_log_lik(slots, "plnorm", args), -Inf)
+  slots$obs_type <- 5L
+  expect_identical(.meta_row_log_lik(slots, "plnorm", args), -Inf)
+  # A finite draw is unaffected.
+  finite <- list(meanlog = 1.6, sdlog = 0.6)
+  for (obs_type in c(2L, 3L, 5L)) {
+    slots$obs_type <- obs_type
+    expect_true(is.finite(.meta_row_log_lik(slots, "plnorm", finite)))
+  }
+})
+
 test_that(".meta_summary_terms uses a reported standard error when one is given", { # nolint: line_length_linter.
   args <- list(meanlog = 1.5, sdlog = 0.5)
   slots <- list(
