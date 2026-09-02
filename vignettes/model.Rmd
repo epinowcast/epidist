@@ -419,14 +419,13 @@ $$
 p \sim \text{Normal}\left(G(y), \; \text{se}_p\right), (\#eq:meta-quantile-lik)
 $$
 where $G$ is the distribution function implied by the forward model for the row's censoring adjustment, and $\text{se}_p$ is the binomial standard error $\sqrt{p(1-p)/n}$ of an empirical distribution function.
-Studies report a quantile's uncertainty on the delay scale, so a standard error $\text{se}_y$ supplied for a quantile row is taken on that scale and converted by the delta method,
+Studies report a quantile's uncertainty on the delay scale, so a quantile row supplied with a standard error $\text{se}_y$ is fitted on that scale instead,
 $$
-\text{se}_p = g(y) \, \text{se}_y, (\#eq:meta-quantile-se)
+y \sim \text{Normal}\left(Q_p, \; \text{se}_y\right), (\#eq:meta-quantile-se)
 $$
-where $g$ is the density of the biased estimand at the reported value.
-For a discrete estimand this is the mass of the grid cell $y$ falls in divided by $w_s$, which is the slope of the continuity corrected $G$ there.
-Otherwise it is the derivative of $G$.
-The converted standard error is held away from zero so that a quantile reported far into the tail cannot give a degenerate likelihood.
+where $Q_p$ is the implied quantile, the inverse of $G$ at $p$, read off as described in Section \@ref(a-covariance-over-the-reported-summaries).
+Converting $\text{se}_y$ to the probability scale with the density of the biased estimand at the reported value agrees with this near the implied quantile, but far from it that density collapses, so a discrepant row becomes a wall rather than a slope and its gradient is dominated by whatever floor holds the converted standard error away from zero.
+On the delay scale the row is the normal density it claims to be everywhere, and the standard error is only held away from zero as a guard.
 For the discretely summarised case $G$ is continuity corrected by interpolating the grid distribution function linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise always lands on a jump of the step function.
 
 The correction removes most of the discretisation bias but not all of it, because the reported value is itself rounded to the grid.
@@ -505,7 +504,11 @@ Here it is supplied instead, so a mixture of summary types need not be treated a
 
 A quantile reported this way is on the delay scale, so $m$ needs the inverse of $G$, which has no closed form on the discrete grid.
 It is read off by inverse linear interpolation between the two points of $G$ that bracket $p$, on the grid of Equation \@ref(eq:meta-grid) for a discrete estimand and on the quadrature grid otherwise.
-That keeps the implied quantile a differentiable function of $\theta$, which a root search would not, at the cost of the curvature of $G$ over one cell.
+On the discrete grid that interpolant is the definition of the continuity corrected quantile, so it is exact.
+For a continuous estimand the chord is only as accurate as the quadrature spacing, which for a study that adjusted for truncation is about a day, an error that a covariance from a fitted family charges heavily.
+It is therefore refined: exactly through the family quantile function for a lognormal or weibull delay reported by a study that adjusted for censoring, and otherwise by two Newton steps using the closed form distribution function and density of the biased estimand.
+Both keep the implied quantile a differentiable function of $\theta$, which a root search would not.
+An accrual estimand is defined by the interpolation between its nodes and keeps its chord.
 
 Summaries of a $k$ parameter fit are deterministic functions of $k$ numbers, so at most $k$ of them have a non singular covariance.
 Asking for more is an error rather than a silently degenerate likelihood.

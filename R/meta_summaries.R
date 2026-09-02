@@ -137,16 +137,13 @@
   return(pmin(cdf, 1))
 }
 
-#' The smallest cumulative probability standard error the model will use
+#' The smallest quantile standard error the model will use
 #'
-#' A quantile standard error supplied on the delay scale is converted to the
-#' cumulative probability scale by multiplying it by the density of the biased
-#' estimand at the reported value. That density is zero beyond the support of a
-#' discrete estimand and vanishingly small far into a tail, either of which
-#' would give a degenerate likelihood, so the converted standard error is held
-#' at or above this value.
+#' A quantile standard error supplied on the delay scale is used as reported,
+#' held at or above this value as a guard against a standard error of zero,
+#' which would give a degenerate likelihood.
 #'
-#' @returns A probability scale standard error.
+#' @returns A delay scale standard error.
 #'
 #' @keywords internal
 .meta_min_prob_se <- function() {
@@ -2043,8 +2040,10 @@
 #' The implied summary and its standard error for one summary row and one draw
 #'
 #' A standard error reported for a quantile row is on the scale of the reported
-#' delay, as studies report it, so it is converted to the cumulative
-#' probability scale by the delta method using [.meta_implied_density()].
+#' delay, as studies report it, so such a row is fitted on that scale against
+#' the implied quantile of [.meta_node_quantile()]. A quantile row without a
+#' standard error is fitted on the cumulative probability scale, where the
+#' binomial standard error of an empirical distribution function applies.
 #'
 #' A group row stands for several summaries reported by one study, and this
 #' returns the marginal of its first member, which is the reported mean of a
@@ -2079,6 +2078,23 @@
       se = slots$group_chol[1, 1]
     ))
   }
+  if (slots$obs_type == 4L && slots$report_se > 0) {
+    # Studies report a quantile's standard error on the delay scale, so the
+    # reported value is compared with the implied quantile on that scale.
+    # Converting the standard error to the probability scale with the density
+    # at the reported value collapses far from the implied quantile, turning
+    # a discrepant row into a wall rather than a slope.
+    nodes <- .meta_implied_nodes(dist, args, slots)
+    implied <- .meta_node_quantile(nodes, slots$quantile_p, dist, args, slots)
+    if (is.na(implied)) {
+      implied <- Inf
+    }
+    return(c(
+      observed = slots$value,
+      implied = implied,
+      se = max(slots$report_se, .meta_min_prob_se())
+    ))
+  }
   if (slots$obs_type %in% c(4L, 6L)) {
     implied <- .meta_implied_prob(
       slots$value, dist, args, slots$lower, slots$cutoff, slots$pwindow,
@@ -2086,16 +2102,7 @@
       slots$growth_rate, slots$trunc_design
     )
     observed <- slots$quantile_p
-    if (slots$report_se > 0) {
-      implied_density <- .meta_implied_density(
-        slots$value, dist, args, slots$lower, slots$cutoff, slots$pwindow,
-        slots$swindow, slots$trunc_adjusted, slots$cens_adjusted,
-        slots$growth_rate, slots$trunc_design
-      )
-      se <- max(implied_density * slots$report_se, .meta_min_prob_se())
-    } else {
-      se <- sqrt(slots$quantile_p * (1 - slots$quantile_p) / slots$study_n)
-    }
+    se <- sqrt(slots$quantile_p * (1 - slots$quantile_p) / slots$study_n)
   } else {
     if (is.null(moments)) {
       moments <- .meta_row_moments(slots, dist, args)

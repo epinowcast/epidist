@@ -145,7 +145,7 @@ See #620.
 See #620.
 - The meta model supports midpoint imputation, where a study assigned each delay to the centre of the interval it was observed in, as `cens_adjusted` code 3.
 See #620.
-- A standard error supplied for a quantile row of `as_epidist_estimates_data()` is now interpreted on the delay scale, as studies report it, and converted to the cumulative probability scale by the delta method.
+- A standard error supplied for a quantile row of `as_epidist_estimates_data()` is now interpreted on the delay scale, as studies report it, and the row is fitted on that scale against the implied quantile.
 See #620.
 - `as_epidist_estimates_data()` now rejects a reported quantile at or beyond the largest delay its study could have seen, which would otherwise contribute a constant to the likelihood rather than information.
 See #620.
@@ -158,7 +158,7 @@ See #620.
 On the quantile reporting studies of the meta vignette this cuts the evaluations they need per gradient from 480 to 36.
 The shortcut does not apply to a study that stopped collecting at a calendar date, which reweights each cell before renormalising and so keeps the full grid.
 See #620.
-- The delay scale standard error of a reported quantile is now converted with the closed form density of the biased estimand where one exists, rather than a central difference of its distribution function.
+- The implied quantile of a continuous estimand is inverted exactly where the family quantile function exists and refined by Newton steps otherwise, so covariance rows with quantile members and quantile rows with a delay scale standard error are no longer limited by the quadrature spacing.
 See #620.
 - The meta model gained several further speed ups.
 Softmax normalisation of the cohort grid mass is replaced by division where the normaliser is already known.

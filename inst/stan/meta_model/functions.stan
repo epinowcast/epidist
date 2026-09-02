@@ -1362,26 +1362,36 @@
     );
   }
 
+  if (obs_type == 4 && report_se > 0) {
+    // A reported quantile standard error is on the delay scale, so the
+    // reported value is compared with the implied quantile on that scale.
+    // Matches .meta_summary_terms() in R, including the 1e-6 guard of
+    // .meta_min_prob_se().
+    int n_node = meta_family_cens_base(cens_adj) == 0
+      ? to_int(floor(relative_obs_t / swindow_width)) -
+        meta_family_grid_first(delay_min, swindow_width) + 1
+      : n_quad_default + 1;
+    vector[2 + n_node] nodes = meta_family_implied_nodes(
+      {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
+      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
+    );
+    real implied = meta_family_node_quantile(
+      nodes, quantile_p, {dpars_B}, delay_min, relative_obs_t, pwindow_width,
+      swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
+      growth_rate
+    );
+    return normal_lpdf(y_upper | implied, fmax(report_se, 1e-6));
+  }
+
   if (obs_type == 4) {
     real implied = meta_family_implied_prob(
       y_upper, {dpars_B}, delay_min, relative_obs_t, pwindow_width,
       swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
       growth_rate
     );
-    real se;
-    if (report_se > 0) {
-      // A reported quantile standard error is on the delay scale, so convert
-      // it to the probability scale by the delta method.
-      real density = meta_family_implied_density(
-        y_upper, {dpars_B}, delay_min, relative_obs_t, pwindow_width,
-        swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
-        growth_rate
-      );
-      se = fmax(density * report_se, 1e-6);
-    } else {
-      se = sqrt(quantile_p * (1 - quantile_p) / study_n);
-    }
-    return normal_lpdf(quantile_p | implied, se);
+    return normal_lpdf(
+      quantile_p | implied, sqrt(quantile_p * (1 - quantile_p) / study_n)
+    );
   }
 
   vector[4] moments = meta_family_implied_moments(
