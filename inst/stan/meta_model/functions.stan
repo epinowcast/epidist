@@ -457,6 +457,79 @@
     );
   }
 
+  /** The first four raw moments of a summary vector. */
+  vector meta_family_raw_from_central(vector moments) {
+    real m1 = moments[1];
+    real variance = moments[2] ^ 2;
+    real third = moments[4] * pow(variance, 1.5);
+    real fourth = moments[3] * variance ^ 2;
+    return [m1, variance + m1 ^ 2, third + 3 * m1 * variance + m1 ^ 3,
+            fourth + 4 * m1 * third + 6 * m1 ^ 2 * variance + m1 ^ 4]';
+  }
+
+  /**
+    * Summaries of a distribution left truncated at `delay_min`, from its
+    * untruncated summaries `full` and its distribution function `cdf` at
+    * equally spaced points from zero to `delay_min`. Removes
+    * `E[tau^k 1(tau <= L)] = L^k F(L) - int_0^L k t^(k - 1) F(t) dt` by
+    * Simpson's rule and divides by `1 - F(L)`, so the result does not depend
+    * on the cutoff and matches the distribution function used for the same
+    * study's quantile rows. Mirrors .meta_left_moments() in R.
+    */
+  vector meta_family_left_moments(vector full, vector cdf,
+                                  data real delay_min) {
+    int n_quad = num_elements(cdf) - 1;
+    real tail = 1 - cdf[n_quad + 1];
+    vector[n_quad + 1] grid = linspaced_vector(n_quad + 1, 0, delay_min);
+    vector[n_quad + 1] weight = rep_vector(2, n_quad + 1);
+    vector[4] below;
+    weight[1] = 1;
+    weight[n_quad + 1] = 1;
+    for (i in 2:n_quad) {
+      if (i % 2 == 0) {
+        weight[i] = 4;
+      }
+    }
+    if (tail <= 0 || is_nan(tail)) {
+      reject("meta_family_left_moments: the distribution function leaves no ",
+             "mass above the study's minimum delay.");
+    }
+    for (k in 1:4) {
+      below[k] = pow(delay_min, k) * cdf[n_quad + 1] -
+        dot_product(weight, k * pow(grid, k - 1) .* cdf) * delay_min /
+          (3.0 * n_quad);
+    }
+    return meta_family_central_from_raw(
+      (meta_family_raw_from_central(full) - below) / tail
+    );
+  }
+
+  /**
+    * The distribution function of the delay, or of the primary censored
+    * delay, at equally spaced points from zero to `delay_min`.
+    */
+  vector meta_family_left_nodes(array[] real params, data real delay_min,
+                              data real pwindow_width, data int cens_adj,
+                              data int prim_id, array[] real prim_params,
+                              data int n_quad) {
+    vector[n_quad + 1] cdf;
+    // The node is written out in full, because Stan only treats expressions
+    // built from data arguments as data only.
+    for (i in 1:(n_quad + 1)) {
+      if (cens_adj == 2) {
+        cdf[i] = exp(meta_family_pcens_lcdf(
+          (i - 1) * delay_min / n_quad | params, pwindow_width, prim_id,
+          prim_params
+        ));
+      } else if (i == 1) {
+        cdf[i] = 0;
+      } else {
+        cdf[i] = exp(dist_lcdf((i - 1) * delay_min / n_quad | params, dist_id));
+      }
+    }
+    return cdf;
+  }
+
   /** The summaries a study using a given procedure would report. */
   vector meta_family_implied_moments(array[] real params, data real delay_min,
                                      data real cutoff,
@@ -492,17 +565,35 @@
       );
     }
     if (cens_adj == 2) {
-      if (trunc_adj == 1 && prim_id == 1 && delay_min == 0) {
-        return meta_family_add_uniform(meta_family_moments(params),
-                                       pwindow_width);
+      if (trunc_adj == 1 && prim_id == 1) {
+        vector[4] full = meta_family_add_uniform(meta_family_moments(params),
+                                                pwindow_width);
+        if (delay_min == 0) {
+          return full;
+        }
+        return meta_family_left_moments(
+          full,
+          meta_family_left_nodes(params, delay_min, pwindow_width, cens_adj,
+                               prim_id, prim_params, n_quad_default),
+          delay_min
+        );
       }
       return meta_family_pcens_trunc_moments(
         params, delay_min, cutoff, pwindow_width, prim_id, prim_params,
         n_quad_default, accrual, growth_rate
       );
     }
-    if (trunc_adj == 1 && delay_min == 0) {
-      return meta_family_moments(params);
+    if (trunc_adj == 1) {
+      vector[4] full = meta_family_moments(params);
+      if (delay_min == 0) {
+        return full;
+      }
+      return meta_family_left_moments(
+        full,
+        meta_family_left_nodes(params, delay_min, pwindow_width, cens_adj,
+                             prim_id, prim_params, n_quad_default),
+        delay_min
+      );
     }
     return meta_family_trunc_moments(params, delay_min, cutoff, n_quad_default,
                                      accrual, growth_rate);
