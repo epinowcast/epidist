@@ -233,6 +233,12 @@ The Stan crossing cell of a single integer day quantile also takes its binomial 
 See #620.
 - `as_epidist_estimates_data()` rejects a `cens_adjusted = 4` study whose `delay_min` plus half its `pwindow` reaches the grid cutoff.
 See #620.
+- The meta model intercept prior for the lognormal family is now centred on the log of the reported location, as it is for a log link.
+The lognormal `mu` has an identity link but is `meanlog`, so it was centred on the reported mean itself.
+A calibration check of a study reporting a mean with its standard error from 25 delays found it, where the 90% intervals covered the truth about half of the time.
+See #620.
+- Added opt in simulation checks of the meta model: `EPIDIST_META_RECOVERY=true` fits one meta model per censoring adjustment code and truncation design, and `EPIDIST_META_CALIBRATION=true` fits forty replicates of two study designs and checks interval coverage and the rank of the truth.
+See #620.
 
 ## Documentation
 

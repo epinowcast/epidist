@@ -35,8 +35,10 @@ Where no study reported a mean the median reported quantile is used, and
 where no study reported either the mean of the individual level delays is
 used. A model with individual level rows only adds no prior, so the family
 or \code{brms} default applies as it does for the marginal model. The prior is
-added where \code{mu} has a log or identity link, and on the identity link the
-median is used as it is.
+added where \code{mu} is on the log scale, which is the lognormal family, whose
+\code{mu} is the log of the median under an identity link, and any family with
+a log link, and where \code{mu} is the delay itself under an identity link, in
+which case the median is used as it is.
 
 The prior on the intercept of the other distributional parameters is left
 to the family or to \code{brms}.
