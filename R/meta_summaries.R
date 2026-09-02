@@ -823,6 +823,76 @@
   ))
 }
 
+#' The first four raw moments of a set of summaries
+#'
+#' Inverts [.meta_central_from_raw()].
+#'
+#' @param moments A summary vector from [.meta_moment_vector()].
+#'
+#' @returns A numeric vector of the first four raw moments.
+#'
+#' @keywords internal
+.meta_raw_from_central <- function(moments) {
+  m1 <- moments[["mean"]]
+  variance <- moments[["sd"]]^2
+  third <- moments[["skewness"]] * variance^1.5
+  fourth <- moments[["kurtosis"]] * variance^2
+  return(c(
+    m1,
+    variance + m1^2,
+    third + 3 * m1 * variance + m1^3,
+    fourth + 4 * m1 * third + 6 * m1^2 * variance + m1^4
+  ))
+}
+
+#' Summaries of a distribution left truncated at `lower`
+#'
+#' A study that adjusted for right truncation and only counted delays above
+#' `lower` reported the moments of the delay conditioned on exceeding it. They
+#' are taken from the untruncated moments by removing the part below `lower`,
+#' \eqn{E[\tau^k 1(\tau \le L)] = L^k F(L) - \int_0^L k t^{k - 1} F(t) dt},
+#' by Simpson's rule on \eqn{[0, L]}, and dividing by \eqn{1 - F(L)}. The
+#' integral is over a bounded interval the quadrature resolves well, so the
+#' result does not depend on `max_delay`, and it matches the distribution
+#' function \eqn{(F(y) - F(L)) / (1 - F(L))} used for the same study's
+#' quantile rows. It applies to any distribution whose untruncated moments and
+#' distribution function are available, which is the delay itself and the
+#' uniform single interval approximation of [.meta_add_uniform()].
+#' Matches `meta_family_left_moments` in
+#' `inst/stan/meta_model/functions.stan`.
+#'
+#' @param full A summary vector from [.meta_moment_vector()] of the
+#'  untruncated distribution.
+#'
+#' @param cdf The distribution function at `.meta_n_quad() + 1` equally spaced
+#'  points running from zero to `lower`.
+#'
+#' @param lower The study's minimum delay (its left truncation point).
+#'
+#' @inherit .meta_moment_vector return
+#'
+#' @keywords internal
+.meta_left_moments <- function(full, cdf, lower) {
+  n_quad <- length(cdf) - 1
+  tail_mass <- 1 - cdf[n_quad + 1]
+  if (!is.finite(tail_mass) || tail_mass <= 0) {
+    return(.meta_moment_failure())
+  }
+  quad <- seq(0, lower, length.out = n_quad + 1)
+  weight <- c(1, rep_len(c(4, 2), n_quad - 1), 1)
+  below <- vapply(
+    seq_len(4),
+    function(k) {
+      integral <- sum(weight * k * quad^(k - 1) * cdf) * lower / (3 * n_quad)
+      return(lower^k * cdf[n_quad + 1] - integral)
+    },
+    numeric(1)
+  )
+  return(
+    .meta_central_from_raw((.meta_raw_from_central(full) - below) / tail_mass)
+  )
+}
+
 #' The summaries a study using a given procedure would report
 #'
 #' Forward models the summaries that a study would converge to given the biases
@@ -836,6 +906,12 @@
 #' `pwindow / 2` to the mean and `pwindow^2 / 12` to the variance. Otherwise
 #' the moments of the primary censored delay, truncated at `cutoff`, are used
 #' directly.
+#'
+#' A study that adjusted for right truncation and counted only delays above
+#' `lower` has its analytic moments left truncated by [.meta_left_moments()],
+#' so they do not depend on `cutoff`. A study whose primary events were not
+#' uniform within their window has no analytic moments, so it is truncated
+#' at `cutoff` by quadrature instead.
 #'
 #' Under midpoint imputation (`cens_adjusted` of 3) the study assigned each
 #' delay to the centre of the interval it was observed in, so the estimand is
@@ -896,15 +972,29 @@
     return(.meta_grid_moments(mass, first * swindow, swindow))
   }
   if (cens_adjusted == 2) {
-    if (trunc_adjusted == 1 && growth_rate == 0 && lower == 0) {
-      return(.meta_add_uniform(.meta_continuous_moments(dist, args), pwindow))
+    if (trunc_adjusted == 1 && growth_rate == 0) {
+      full <- .meta_add_uniform(.meta_continuous_moments(dist, args), pwindow)
+      if (lower == 0) {
+        return(full)
+      }
+      quad <- seq(0, lower, length.out = .meta_n_quad() + 1)
+      return(.meta_left_moments(
+        full, .meta_pcens_cdf(quad, dist, args, pwindow, growth_rate), lower
+      ))
     }
     return(.meta_pcens_trunc_moments(
       dist, args, lower, cutoff, pwindow, growth_rate, accrual
     ))
   }
-  if (trunc_adjusted == 1 && lower == 0) {
-    return(.meta_continuous_moments(dist, args))
+  if (trunc_adjusted == 1) {
+    full <- .meta_continuous_moments(dist, args)
+    if (lower == 0) {
+      return(full)
+    }
+    quad <- seq(0, lower, length.out = .meta_n_quad() + 1)
+    return(.meta_left_moments(
+      full, do.call(.pdist(dist), c(list(q = quad), args)), lower
+    ))
   }
   return(.meta_trunc_moments(dist, args, lower, cutoff, growth_rate, accrual))
 }
