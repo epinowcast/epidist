@@ -495,6 +495,36 @@ test_that("as_epidist_estimates_data defaults delay_min to zero and validates it
   )
 })
 
+test_that("as_epidist_estimates_data rejects a code 4 delay_min the primary window moves past the cutoff", { # nolint: line_length_linter.
+  # Code 4 places the primary event at the midpoint of its window, so a
+  # study that dropped delays below delay_min left truncated its base
+  # estimand at delay_min + pwindow / 2. That point has to sit below the
+  # grid cutoff as delay_min itself does.
+  base <- data.frame(
+    study = "A", type = c("mean", "sd"), value = c(9, 2), n = 120,
+    relative_obs_time = 12, trunc_adjusted = FALSE, cens_adjusted = 4,
+    pwindow = 7, swindow = 1, delay_min = 8, stringsAsFactors = FALSE
+  )
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(base)),
+    "pwindow / 2"
+  )
+  fine <- base
+  fine$delay_min <- 8
+  fine$pwindow <- 3
+  expect_s3_class(
+    suppressMessages(as_epidist_estimates_data(fine)),
+    "epidist_estimates_data"
+  )
+  # The other codes are only held below the cutoff itself.
+  fine$cens_adjusted <- 2
+  fine$pwindow <- 7
+  expect_s3_class(
+    suppressMessages(as_epidist_estimates_data(fine)),
+    "epidist_estimates_data"
+  )
+})
+
 test_that("a reported covariance matrix must cover its rows", {
   base <- suppressMessages(as_epidist_estimates_data(data.frame(
     study = "A", type = c("mean", "sd"), value = c(7.5, 3.6), n = 120,
