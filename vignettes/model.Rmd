@@ -466,7 +466,7 @@ Both this and Equation \@ref(eq:meta-sd-lik) come from the joint asymptotic norm
 The implied correlation is $\gamma_1 / \sqrt{\kappa - 1}$, with $\gamma_1 = \mu_3 / \sigma^3$ the skewness, and $\kappa \ge \gamma_1^2 + 1$ holds for every distribution, so the covariance matrix is positive definite.
 Moments taken from the grid of Equation \@ref(eq:meta-grid) or from quadrature can sit a little outside that bound, so the correlation is held strictly inside $[-1, 1]$.
 
-**Several quantiles** from one study at probabilities $p_1 < \dots < p_k$ with values $y_1 < \dots < y_k$ cut the delay axis into $k+1$ cells, and the number of delays falling in each is multinomial
+**Several quantiles** from one study at probabilities $p_1 < \dots < p_k$ with values $y_1 \le \dots \le y_k$ cut the delay axis into $k+1$ cells, and the number of delays falling in each is multinomial
 $$
 (c_1, \dots, c_{k+1}) \sim \text{Multinomial}\left(n, \; \left(G(y_1), \; G(y_2) - G(y_1), \; \dots, \; 1 - G(y_k)\right)\right), (\#eq:meta-quantile-set)
 $$

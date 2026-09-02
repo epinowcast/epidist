@@ -662,8 +662,9 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #'
 #' A mean and standard deviation pair is stored with the mean first so that the
 #' bivariate normal knows which member is which. A set of quantiles is stored
-#' in increasing probability, which must also be increasing in the reported
-#' value for the cells of the multinomial to be a partition of the delay axis.
+#' in increasing probability, which must also be non decreasing in the
+#' reported value for the cells of the multinomial to be a partition of the
+#' delay axis. Coincident values are merged into one cell by the likelihood.
 #'
 #' A group covered by a covariance matrix keeps the order its rows were given
 #' in, because that is the order the matrix is indexed by.
