@@ -120,60 +120,8 @@ test_that("the R and Stan meta model log likelihoods agree for every observation
   meta <- suppressMessages(
     as_epidist_meta_model(estimates = lockstep_estimates)
   )
-  family <- epidist_family(meta, family = lognormal())
-  formula <- epidist_formula(meta, family, formula = bf(mu ~ 1))
-  stanvars <- epidist_stancode(meta, family = family, formula = formula)
-  standata <- suppressMessages(epidist(meta, fn = brms::make_standata))
-  slots <- c(paste0("vint", 1:9), paste0("vreal", 1:8))
-  mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(paste0(
-    "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode, "\n}\n",
-    "data {\n  int N;\n  array[N] int Y;\n",
-    paste0("  array[N] int ", slots[1:9], ";\n", collapse = ""),
-    paste0("  array[N] real ", slots[10:17], ";\n", collapse = ""),
-    "  int<lower=0> N_meta_group;\n",
-    "  vector[N_meta_group] meta_group_value;\n",
-    "  array[N_meta_group] int meta_group_count;\n",
-    "  array[N_meta_group] int meta_group_type;\n",
-    "  vector[N_meta_group] meta_group_p;\n",
-    "  int<lower=0> N_meta_chol;\n",
-    "  vector[N_meta_chol] meta_group_chol;\n",
-    "  real mu;\n  real sigma;\n}\n",
-    "generated quantities {\n  array[0] real primary_params;\n",
-    "  vector[N] log_lik;\n  for (n in 1:N) {\n",
-    "    log_lik[n] = meta_lognormal_lpmf(Y[n] | mu, sigma, ",
-    paste0(slots, "[n]", collapse = ", "),
-    ", meta_group_value, meta_group_count, meta_group_type, meta_group_p",
-    ", meta_group_chol, primary_params);\n  }\n}\n"
-  )))
-  stan_data <- c(
-    list(N = length(standata$Y), Y = as.integer(standata$Y)),
-    lapply(standata[slots[1:9]], as.integer),
-    lapply(standata[slots[10:17]], as.numeric),
-    list(
-      N_meta_group = standata$N_meta_group,
-      meta_group_value = as.array(standata$meta_group_value),
-      meta_group_count = as.array(standata$meta_group_count),
-      meta_group_type = as.array(standata$meta_group_type),
-      meta_group_p = as.array(standata$meta_group_p),
-      N_meta_chol = standata$N_meta_chol,
-      meta_group_chol = as.array(standata$meta_group_chol),
-      mu = 1.7, sigma = 0.55
-    )
-  )
-  fit <- mod$sample(
-    data = stan_data, fixed_param = TRUE, chains = 1, iter_sampling = 1,
-    iter_warmup = 0, refresh = 0, show_messages = FALSE
-  )
-  stan_log_lik <- as.numeric(posterior::as_draws_matrix(fit$draws("log_lik")))
-  prep <- list(data = stan_data, ndraws = 1)
-  args <- list(meanlog = stan_data$mu, sdlog = stan_data$sigma)
-  r_log_lik <- vapply(
-    seq_along(stan_log_lik),
-    function(i) {
-      return(.meta_row_log_lik(.meta_row_slots(i, prep), "plnorm", args))
-    },
-    numeric(1)
-  )
+  program <- meta_log_lik_program(meta)
+  standata <- program$standata
   # Every observation type, censoring adjustment and truncation design must
   # be exercised, so that no branch is compared vacuously.
   expect_setequal(unique(standata$vint1), 2:7)
@@ -181,7 +129,222 @@ test_that("the R and Stan meta model log likelihoods agree for every observation
   expect_setequal(unique(standata$vint5), 0:1)
   expect_true(any(standata$vreal5 > 0))
   expect_true(any(standata$vreal6 > 0))
-  expect_equal(stan_log_lik, r_log_lik, tolerance = 1e-6)
+  expect_true(any(standata$vint9 > .meta_n_quad()))
+  # Three parameter points, so that agreement at one is not luck.
+  mu <- c(1.7, 2.0, 1.4)
+  sigma <- c(0.55, 0.4, 0.8)
+  stan_log_lik <- meta_stan_log_lik(program, mu, sigma)
+  r_log_lik <- meta_r_log_lik(program, mu, sigma)
+  expect_true(all(is.finite(stan_log_lik)))
+  expect_true(all(is.finite(r_log_lik)))
+  # A growing primary event has no analytic primary censored distribution
+  # function. Stan integrates it as an ODE and R by adaptive quadrature, and
+  # the two integrators agree to about 1e-4, which is their tolerance rather
+  # than the meta model's. Every other row is the same arithmetic in both
+  # languages.
+  growth <- standata$vreal8 != 0
+  expect_true(any(growth))
+  for (d in seq_along(mu)) {
+    expect_rows_close(stan_log_lik[d, !growth], r_log_lik[d, !growth], 1e-6)
+    expect_rows_close(stan_log_lik[d, growth], r_log_lik[d, growth], 1e-4)
+  }
+})
+
+test_that("a quantile far beyond a narrow fitted delay keeps R and Stan in step", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  # Stan differences log distribution functions and R differences them on
+  # the natural scale, so a cell far into the upper tail used to keep a tiny
+  # mass in one and none in the other, giving a finite log likelihood in
+  # Stan and -Inf in R. Both now floor the cell at the same value. The 0.99
+  # quantile here sits six standard deviations beyond a lognormal with
+  # meanlog 2 and sdlog 0.05, on the grid, the continuous and the accrual
+  # paths.
+  narrow_mean <- exp(2 + 0.05^2 / 2)
+  narrow_sd <- narrow_mean * sqrt(expm1(0.05^2))
+  far <- narrow_mean + 6 * narrow_sd
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = rep(c("grid", "continuous", "accrual"), each = 2),
+    type = "quantile",
+    value = rep(c(narrow_mean, far), 3),
+    p = rep(c(0.5, 0.99), 3),
+    n = 500,
+    relative_obs_time = 30,
+    trunc_adjusted = FALSE,
+    trunc_design = rep(c("cohort", "cohort", "accrual"), each = 2),
+    cens_adjusted = rep(c(0, 1, 0), each = 2),
+    growth_rate = rep(c(0, 0, 0.1), each = 2),
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  program <- meta_log_lik_program(meta)
+  stan_log_lik <- meta_stan_log_lik(program, 2, 0.05)
+  r_log_lik <- meta_r_log_lik(program, 2, 0.05)
+  expect_identical(is.finite(stan_log_lik), is.finite(r_log_lik))
+  expect_true(all(is.finite(r_log_lik)))
+  growth <- program$standata$vreal8 != 0
+  expect_rows_close(stan_log_lik[, !growth], r_log_lik[, !growth], 1e-6)
+  # The two integrators of the primary censored distribution function
+  # under a growing primary event, see the agreement test, are further apart
+  # for a delay this narrow.
+  expect_rows_close(stan_log_lik[, growth], r_log_lik[, growth], 1e-3)
+  # The rows are heavily penalised rather than rejected.
+  expect_true(all(r_log_lik < -30))
+})
+
+test_that("brms::log_lik() matches the Stan log likelihood at posterior draws", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  # Pins the R log likelihood generator to what was sampled rather than to a
+  # hand picked parameter, over the naive cohort and accrual studies of
+  # fit_meta_estimates.
+  ids <- seq(5, 100, by = 5)
+  log_lik <- brms::log_lik(fit_meta_estimates, draw_ids = ids)
+  prep <- brms::prepare_predictions(fit_meta_estimates, draw_ids = ids)
+  mu <- as.numeric(brms::get_dpar(prep, "mu", i = 1))
+  sigma <- as.numeric(brms::get_dpar(prep, "sigma", i = 1))
+  expect_length(mu, length(ids))
+  program <- meta_log_lik_program(prep_meta_biased)
+  stan_log_lik <- meta_stan_log_lik(program, mu, sigma)
+  expect_identical(dim(log_lik), dim(stan_log_lik))
+  growth <- program$standata$vreal8 != 0
+  expect_true(any(growth))
+  expect_rows_close(log_lik[, !growth], stan_log_lik[, !growth], 1e-6)
+  # The accrual study with a growing primary event, see the agreement test.
+  expect_rows_close(log_lik[, growth], stan_log_lik[, growth], 1e-4)
+})
+
+test_that("the Stan grid and truncated moments match independent references", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  # The R and Stan implementations share their discretisation, so agreement
+  # between them cannot catch a shared mistake. The Stan grid is compared
+  # with primarycensored::dpcens(), with and without a left truncation
+  # point, and the Stan truncated continuous moments with the closed form
+  # truncated moments of each family, at a wide, a narrow and a heavy tailed
+  # parameter set.
+  cutoff <- 30
+  n_quad <- 4000L
+  families <- list(
+    lognormal = list(
+      dist = "plnorm", names = c("meanlog", "sdlog"),
+      sets = list(c(1.6, 0.5), c(2, 0.05), c(1, 1.5)),
+      heavy = c(FALSE, FALSE, TRUE),
+      raw = function(k, args, cutoff) {
+        z <- (log(cutoff) - args[1]) / args[2]
+        return(
+          exp(k * args[1] + k^2 * args[2]^2 / 2) * stats::pnorm(z - k * args[2])
+        )
+      }
+    ),
+    gamma = list(
+      dist = "pgamma", names = c("shape", "rate"),
+      sets = list(c(3, 0.5), c(0.5, 0.1), c(400, 80)),
+      heavy = c(FALSE, TRUE, FALSE),
+      raw = function(k, args, cutoff) {
+        return(
+          exp(lgamma(args[1] + k) - lgamma(args[1]) - k * log(args[2])) *
+            stats::pgamma(cutoff, args[1] + k, rate = args[2])
+        )
+      }
+    ),
+    weibull = list(
+      dist = "pweibull", names = c("shape", "scale"),
+      sets = list(c(2, 7), c(0.5, 5), c(25, 8)),
+      heavy = c(FALSE, TRUE, FALSE),
+      raw = function(k, args, cutoff) {
+        return(
+          args[2]^k * gamma(1 + k / args[1]) *
+            stats::pgamma((cutoff / args[2])^args[1], 1 + k / args[1])
+        )
+      }
+    )
+  )
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = c("mean", "sd"), value = c(7, 3), n = 100,
+    trunc_adjusted = TRUE, cens_adjusted = 1, stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  for (family_name in names(families)) {
+    family_spec <- families[[family_name]]
+    family <- epidist_family(meta, family = family_name)
+    formula <- epidist_formula(meta, family, formula = bf(mu ~ 1))
+    stanvars <- epidist_stancode(meta, family = family, formula = formula)
+    fn <- function(x) paste0("meta_", family_name, "_", x)
+    mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(paste0(
+      "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode,
+      "\n}\n",
+      "data {\n  int S;\n  array[S, 2] real params;\n  int n_quad;\n}\n",
+      "generated quantities {\n  array[0] real primary_params;\n",
+      "  array[S] vector[", cutoff, "] pmf0;\n",
+      "  array[S] vector[", cutoff - 2, "] pmf2;\n",
+      "  array[S] vector[4] moments;\n",
+      "  for (s in 1:S) {\n",
+      "    pmf0[s] = ", fn("grid_pmf"), "(params[s], 0, ", cutoff,
+      ", 1, 1, 1, primary_params, 0, 0);\n",
+      "    pmf2[s] = ", fn("grid_pmf"), "(params[s], 2, ", cutoff,
+      ", 1, 1, 1, primary_params, 0, 0);\n",
+      "    moments[s] = ", fn("implied_moments"), "(params[s], 0, ", cutoff,
+      ", 1, 1, 0, 1, 1, primary_params, 0, 0, n_quad);\n",
+      "  }\n}\n"
+    )))
+    fit <- mod$sample(
+      data = list(
+        S = length(family_spec$sets),
+        params = do.call(rbind, family_spec$sets), n_quad = n_quad
+      ),
+      fixed_param = TRUE, chains = 1, iter_sampling = 1, iter_warmup = 0,
+      sig_figs = 18, refresh = 0, show_messages = FALSE
+    )
+    draws <- posterior::as_draws_matrix(fit$draws())
+    for (s in seq_along(family_spec$sets)) {
+      set <- family_spec$sets[[s]]
+      args <- stats::setNames(as.list(set), family_spec$names)
+      pmf0 <- as.numeric(draws[1, paste0("pmf0[", s, ",", 1:cutoff, "]")])
+      pmf2 <- as.numeric(
+        draws[1, paste0("pmf2[", s, ",", seq_len(cutoff - 2), "]")]
+      )
+      reference0 <- do.call(primarycensored::dpcens, c(
+        list(
+          x = 0:(cutoff - 1), pdist = .pdist(family_spec$dist),
+          pwindow = 1, swindow = 1, D = cutoff
+        ),
+        args
+      ))
+      reference2 <- do.call(primarycensored::dpcens, c(
+        list(
+          x = 2:(cutoff - 1), pdist = .pdist(family_spec$dist),
+          pwindow = 1, swindow = 1, L = 2, D = cutoff
+        ),
+        args
+      ))
+      expect_lt(max(abs(pmf0 - reference0)), 1e-12)
+      expect_lt(max(abs(pmf2 - reference2)), 1e-12)
+      moments <- as.numeric(draws[1, paste0("moments[", s, ",", 1:4, "]")])
+      total <- do.call(
+        .pdist(family_spec$dist), c(list(q = cutoff), args)
+      )
+      exact <- .meta_central_from_raw(vapply(
+        1:4, function(k) family_spec$raw(k, set, cutoff) / total, numeric(1)
+      ))
+      # Simpson's rule converges as the fourth power of the spacing on a
+      # smooth integrand, and only as its three halves power on a heavy
+      # tailed one whose distribution function has infinite slope at zero.
+      # The kurtosis and skewness come from cancelling raw moments, which
+      # amplifies the quadrature error by the fourth power of the mean over
+      # the standard deviation.
+      tolerance <- if (family_spec$heavy[s]) 1e-3 else 1e-8
+      shape_tolerance <- if (family_spec$heavy[s]) 1e-3 else 1e-6
+      expect_equal(moments[1], exact[["mean"]], tolerance = tolerance)
+      expect_equal(moments[2], exact[["sd"]], tolerance = tolerance)
+      expect_equal(
+        moments[3], exact[["kurtosis"]], tolerance = shape_tolerance
+      )
+      expect_equal(
+        moments[4], exact[["skewness"]], tolerance = shape_tolerance
+      )
+    }
+  }
 })
 
 test_that("the Stan naive grid stays finite on a grid that runs into the tail", { # nolint: line_length_linter.
@@ -776,4 +939,257 @@ test_that("epidist.epidist_meta_model with an expgrowth primary event recovers t
     numeric(4)
   )
   expect_equal(unname(log_lik[, rows]), unname(expected), tolerance = 1e-6)
+})
+
+# Simulation and recovery checks that take several minutes to run. They are
+# opted into with environment variables so that the ordinary test run stays
+# quick. EPIDIST_META_RECOVERY=true fits one meta model per bias code and
+# EPIDIST_META_CALIBRATION=true fits forty replicates of two designs.
+
+# Delays a study with a given procedure would have summarised, from
+# simulated primary events and lognormal delays at the truth of setup.R.
+recovery_delays <- function(cens, trunc_adjusted, obs_time, trunc_design,
+                            delay_min, growth_rate, size) {
+  draw <- 20 * size
+  if (!trunc_adjusted && trunc_design == "accrual") {
+    u <- stats::runif(draw)
+    ptime <- if (growth_rate == 0) {
+      u * obs_time
+    } else {
+      log1p(u * expm1(growth_rate * obs_time)) / growth_rate
+    }
+  } else {
+    ptime <- stats::runif(draw)
+  }
+  delay <- stats::rlnorm(draw, meanlog, sdlog)
+  stime <- ptime + delay
+  daily <- floor(stime) - floor(ptime)
+  measured <- switch(as.character(cens),
+    "0" = daily,
+    "1" = delay,
+    "2" = stime - floor(ptime),
+    "3" = daily + 0.5,
+    "4" = stime - floor(ptime) - 0.5
+  )
+  seen <- if (trunc_adjusted) {
+    rep(TRUE, draw)
+  } else if (trunc_design == "accrual") {
+    stime <= obs_time
+  } else if (cens %in% c(0, 3)) {
+    daily + 1 <= obs_time
+  } else {
+    measured <= obs_time
+  }
+  seen <- seen & measured >= delay_min
+  return(utils::head(measured[seen], size))
+}
+
+recovery_estimates <- function(design, obs_times, size = 2000) {
+  studies <- lapply(seq_along(obs_times), function(i) {
+    delays <- recovery_delays(
+      design$cens, design$trunc_adjusted, obs_times[i], design$trunc_design,
+      design$delay_min, design$growth_rate, size
+    )
+    metadata <- list(
+      relative_obs_time = obs_times[i], trunc_adjusted = design$trunc_adjusted,
+      trunc_design = design$trunc_design, cens_adjusted = design$cens,
+      delay_min = design$delay_min, growth_rate = design$growth_rate,
+      max_delay = 80
+    )
+    study <- paste0(design$name, "_", i)
+    if (design$report == "quantile_draws") {
+      # The study fitted a lognormal to its own delays and published draws
+      # of two quantiles of the fitted distribution.
+      estimate <- c(mean(log(delays)), stats::sd(log(delays)))
+      se <- estimate[2] / sqrt(c(1, 2) * length(delays))
+      m <- stats::rnorm(1000, estimate[1], se[1])
+      s <- stats::rnorm(1000, estimate[2], se[2])
+      draws <- cbind(q0.5 = exp(m), q0.9 = exp(m + stats::qnorm(0.9) * s))
+      return(do.call(as_epidist_estimates_data, c(
+        list(as_epidist_multivariate(draws), study = study), metadata
+      )))
+    }
+    rows <- data.frame(
+      study = study, type = c("mean", "sd"),
+      value = c(mean(delays), stats::sd(delays)), n = length(delays),
+      stringsAsFactors = FALSE
+    )
+    for (name in names(metadata)) {
+      rows[[name]] <- metadata[[name]]
+    }
+    return(as_epidist_estimates_data(rows))
+  })
+  return(as_epidist_estimates_data(studies))
+}
+
+recovery_design <- function(name, cens, trunc_adjusted, trunc_design,
+                            delay_min = 0, growth_rate = 0,
+                            report = "moments") {
+  return(list(
+    name = name, cens = cens, trunc_adjusted = trunc_adjusted,
+    trunc_design = trunc_design, delay_min = delay_min,
+    growth_rate = growth_rate, report = report
+  ))
+}
+
+recovery_fit <- function(estimates, iter = 1000, seed = 1) {
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  return(suppressMessages(epidist(
+    data = meta, seed = seed, chains = 2, cores = 2, silent = 2,
+    refresh = 0, iter = iter, backend = "cmdstanr"
+  )))
+}
+
+test_that("the meta model recovers the truth from every bias code", {
+  # Note: this test is stochastic. See note at the top of this script
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  skip_if_not(
+    identical(Sys.getenv("EPIDIST_META_RECOVERY"), "true"),
+    "Set EPIDIST_META_RECOVERY=true to run the recovery fits"
+  )
+  designs <- list(
+    recovery_design("cens0_cohort", 0, FALSE, "cohort"),
+    recovery_design("cens0_accrual", 0, FALSE, "accrual", growth_rate = 0.15),
+    recovery_design("cens1_cohort", 1, FALSE, "cohort"),
+    recovery_design("cens1_adjusted", 1, TRUE, "cohort", delay_min = 2),
+    recovery_design("cens2_cohort", 2, FALSE, "cohort"),
+    recovery_design("cens2_accrual", 2, FALSE, "accrual", growth_rate = 0.15),
+    recovery_design("cens3_cohort", 3, FALSE, "cohort"),
+    recovery_design("cens4_cohort", 4, FALSE, "cohort"),
+    recovery_design(
+      "mvn_quantiles", 1, TRUE, "cohort", report = "quantile_draws"
+    )
+  )
+  cohort_times <- c(12, 16, 20, 25, 30)
+  accrual_times <- c(16, 20, 24, 28, 32)
+  results <- lapply(designs, function(design) {
+    set.seed(11)
+    obs_times <- if (design$trunc_adjusted) {
+      rep(Inf, 5)
+    } else if (design$trunc_design == "accrual") {
+      accrual_times
+    } else {
+      cohort_times
+    }
+    fit <- recovery_fit(suppressMessages(
+      recovery_estimates(design, obs_times)
+    ))
+    expect_convergence(fit)
+    pred <- delay_parameter_draws(fit)
+    posterior <- c(
+      mu = mean(pred$mu), mu_sd = stats::sd(pred$mu),
+      mu_lower = stats::quantile(pred$mu, 0.025, names = FALSE),
+      mu_upper = stats::quantile(pred$mu, 0.975, names = FALSE),
+      sigma = mean(pred$sigma), sigma_sd = stats::sd(pred$sigma),
+      sigma_lower = stats::quantile(pred$sigma, 0.025, names = FALSE),
+      sigma_upper = stats::quantile(pred$sigma, 0.975, names = FALSE)
+    )
+    expect_lt(abs(posterior[["mu"]] - meanlog), 2 * posterior[["mu_sd"]])
+    expect_lt(
+      abs(posterior[["sigma"]] - sdlog), 2 * posterior[["sigma_sd"]]
+    )
+    expect_lt(posterior[["mu_lower"]], meanlog)
+    expect_gt(posterior[["mu_upper"]], meanlog)
+    expect_lt(posterior[["sigma_lower"]], sdlog)
+    expect_gt(posterior[["sigma_upper"]], sdlog)
+    return(c(design = design$name, round(posterior, 3)))
+  })
+  message(paste(utils::capture.output(print(
+    do.call(rbind, results), quote = FALSE
+  )), collapse = "\n"))
+})
+
+test_that("the meta model is calibrated over repeated studies", {
+  # Note: this test is stochastic. See note at the top of this script
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  skip_if_not(
+    identical(Sys.getenv("EPIDIST_META_CALIBRATION"), "true"),
+    "Set EPIDIST_META_CALIBRATION=true to run the calibration fits"
+  )
+  n_rep <- 40
+  replicate_study <- function(report, size, obs_time) {
+    delays <- recovery_delays(0, FALSE, obs_time, "cohort", 0, 0, size)
+    rows <- if (report == "moments") {
+      data.frame(
+        study = "A", type = c("mean", "sd"),
+        value = c(mean(delays), stats::sd(delays)), n = length(delays),
+        stringsAsFactors = FALSE
+      )
+    } else {
+      data.frame(
+        study = "A", type = "mean", value = mean(delays),
+        se = stats::sd(delays) / sqrt(length(delays)),
+        stringsAsFactors = FALSE
+      )
+    }
+    rows$relative_obs_time <- obs_time
+    rows$trunc_adjusted <- FALSE
+    rows$cens_adjusted <- 0
+    return(suppressMessages(as_epidist_estimates_data(rows)))
+  }
+  fit_replicate <- function(seed, report, size, obs_time) {
+    set.seed(seed)
+    fit <- recovery_fit(
+      replicate_study(report, size, obs_time), iter = 600, seed = seed
+    )
+    pred <- delay_parameter_draws(fit)
+    return(c(
+      mu_lower = stats::quantile(pred$mu, 0.05, names = FALSE),
+      mu_upper = stats::quantile(pred$mu, 0.95, names = FALSE),
+      mu_rank = mean(pred$mu < meanlog),
+      sigma_lower = stats::quantile(pred$sigma, 0.05, names = FALSE),
+      sigma_upper = stats::quantile(pred$sigma, 0.95, names = FALSE),
+      sigma_rank = mean(pred$sigma < sdlog)
+    ))
+  }
+  decile_uniformity <- function(rank) {
+    counts <- tabulate(findInterval(rank, seq(0.1, 0.9, by = 0.1)) + 1, 10)
+    return(stats::chisq.test(counts)$p.value)
+  }
+  calibration <- function(report, size, obs_time) {
+    # The first fit compiles the model before the rest run in parallel.
+    first <- fit_replicate(1, report, size, obs_time)
+    rest <- parallel::mclapply(
+      seq_len(n_rep)[-1], fit_replicate, report = report, size = size,
+      obs_time = obs_time, mc.cores = 4
+    )
+    return(do.call(rbind, c(list(first), rest)))
+  }
+  covered <- function(results, name, truth) {
+    return(sum(
+      results[, paste0(name, "_lower")] <= truth &
+        results[, paste0(name, "_upper")] >= truth
+    ))
+  }
+  # A naive cohort study reporting a mean and a standard deviation from 500
+  # delays, whose likelihood dominates the prior on both parameters, so the
+  # ranks of the truth among the draws should be uniform.
+  moments <- calibration("moments", 500, 15)
+  expect_gte(covered(moments, "mu", meanlog), 30)
+  expect_gte(covered(moments, "sigma", sdlog), 30)
+  expect_gt(decile_uniformity(moments[, "mu_rank"]), 0.01)
+  expect_gt(decile_uniformity(moments[, "sigma_rank"]), 0.01)
+  # A study reporting a mean with its standard error from 25 delays says
+  # little about the spread, so sigma is prior driven there and only the
+  # coverage of the intervals is asked for.
+  mean_se <- calibration("mean_se", 25, 22)
+  expect_gte(covered(mean_se, "mu", meanlog), 30)
+  expect_gte(covered(mean_se, "sigma", sdlog), 30)
+  message(sprintf(
+    paste0(
+      "mean and sd, n 500: mu covered %d of %d (rank p %.2f), sigma ",
+      "covered %d of %d (rank p %.2f); mean and se, n 25: mu covered %d of ",
+      "%d (rank p %.2f), sigma covered %d of %d (rank p %.2f)"
+    ),
+    covered(moments, "mu", meanlog), n_rep,
+    decile_uniformity(moments[, "mu_rank"]),
+    covered(moments, "sigma", sdlog), n_rep,
+    decile_uniformity(moments[, "sigma_rank"]),
+    covered(mean_se, "mu", meanlog), n_rep,
+    decile_uniformity(mean_se[, "mu_rank"]),
+    covered(mean_se, "sigma", sdlog), n_rep,
+    decile_uniformity(mean_se[, "sigma_rank"])
+  ))
 })
