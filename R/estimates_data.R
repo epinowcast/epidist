@@ -472,6 +472,21 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   }
   moments <- .estimates_moments(moments, probs)
   sorted <- .assert_estimates_parameters(family, data$value)
+  n_summary <- length(moments) + length(probs)
+  if (n_summary > length(sorted)) {
+    cli::cli_abort(c(
+      paste0(
+        "{n_summary} summaries were requested from a {.val {family}} fit ",
+        "with {length(sorted)} parameters, but summaries of a fit are ",
+        "deterministic functions of its parameters, so at most ",
+        "{length(sorted)} of them have a non singular covariance."
+      ),
+      i = paste0(
+        "Report at most {length(sorted)} summaries, for example a mean and a ",
+        "standard deviation, or two quantiles."
+      )
+    ))
+  }
   columns <- match(names(sorted), data$params)
   support <- .estimates_reported_support(...)
   summaries <- t(apply(data$draws[, columns, drop = FALSE], 1, function(draw) {

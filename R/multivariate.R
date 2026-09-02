@@ -442,13 +442,33 @@ vcov.epidist_multivariate <- function(object, ...) {
   ))
 }
 
-#' Check that a covariance matrix has a Cholesky factor
+#' The smallest relative eigenvalue a reported covariance may have
+#'
+#' Applied to the correlation matrix, so that it does not depend on the
+#' scales of the reported quantities. A covariance over summaries that are
+#' functions of fewer parameters is singular up to the curvature of the map
+#' and Monte Carlo error, which leaves an eigenvalue around a millionth of
+#' the largest rather than zero. A likelihood built on such a matrix charges
+#' any error in the implied summaries, of numerical or family origin, against
+#' that eigenvalue, so it is refused.
+#'
+#' @returns A number.
+#'
+#' @keywords internal
+.multivariate_eigen_floor <- function() {
+  return(1e-4)
+}
+
+#' Check that a covariance matrix has a usable Cholesky factor
 #'
 #' A set of quantities that are deterministic functions of fewer underlying
 #' parameters has a covariance of the rank of those parameters, not of its own
 #' dimension. Five summaries of a two parameter fit are the common case. The
 #' message says so, because the alternative reading, that a column is constant
-#' or repeated, is usually not what happened.
+#' or repeated, is usually not what happened. The rank is judged on the
+#' correlation matrix against [.multivariate_eigen_floor()], because a
+#' covariance that is singular only up to the curvature of the map from
+#' parameters to summaries still has a Cholesky factor.
 #'
 #' @param vcov A covariance matrix.
 #'
@@ -458,14 +478,23 @@ vcov.epidist_multivariate <- function(object, ...) {
 .assert_multivariate_definite <- function(vcov) {
   values <- eigen(vcov, symmetric = TRUE, only.values = TRUE)$values
   tolerance <- sqrt(.Machine$double.eps) * max(values)
-  if (min(values) > tolerance) {
-    return(invisible(NULL))
-  }
   size <- sum(values > tolerance)
+  relative_floor <- .multivariate_eigen_floor()
+  if (min(values) > tolerance) {
+    spread <- sqrt(diag(vcov))
+    correlation <- vcov / outer(spread, spread)
+    values <- eigen(correlation, symmetric = TRUE, only.values = TRUE)$values
+    tolerance <- relative_floor * max(values)
+    size <- sum(values > tolerance)
+    if (min(values) > tolerance) {
+      return(invisible(NULL))
+    }
+  }
   return(cli::cli_abort(c(
     paste0(
-      "The covariance over {ncol(vcov)} quantit{?y/ies} has rank {size}, so ",
-      "it has no Cholesky factor and defines no multivariate normal."
+      "The covariance over {ncol(vcov)} quantit{?y/ies} has rank {size} to ",
+      "within a relative eigenvalue of {relative_floor}, so it defines no ",
+      "usable multivariate normal."
     ),
     i = paste0(
       "Quantities that are deterministic functions of fewer underlying ",
