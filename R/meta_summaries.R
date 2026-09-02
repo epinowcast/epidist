@@ -1638,22 +1638,39 @@
   ))
 }
 
-#' The delay at which an interpolated distribution function reaches `p`
+#' The delay at which an implied distribution function reaches `p`
 #'
 #' Inverts the distribution function of [.meta_implied_nodes()] by linear
-#' interpolation between the two points that bracket `p`. The inverse of the
-#' implied estimand has no closed form on the discrete grid, and the
-#' interpolation keeps it a differentiable function of the delay distribution
-#' parameters, which a root search would not.
+#' interpolation between the two points that bracket `p`. On the discrete
+#' grid that interpolant is the model's own definition of the continuity
+#' corrected quantile, so the chord is exact there. For a continuous estimand
+#' the chord is only as accurate as the node spacing, which for a truncation
+#' adjusted study is about a day, so it is refined by
+#' [.meta_refine_quantile()] when the design is supplied. The result stays a
+#' differentiable function of the delay distribution parameters, which a root
+#' search would not be.
 #'
 #' @param nodes The output of [.meta_implied_nodes()].
 #'
 #' @param p A probability.
 #'
+#' @param dist A `primarycensored` distribution function name, or `NULL` to
+#'  return the chord inverse alone.
+#'
+#' @param args A named list of distribution parameters.
+#'
+#' @param slots The output of [.meta_row_slots()].
+#'
 #' @returns A delay.
 #'
 #' @keywords internal
-.meta_node_quantile <- function(nodes, p) {
+.meta_node_quantile <- function(
+  nodes,
+  p,
+  dist = NULL,
+  args = NULL,
+  slots = NULL
+) {
   values <- nodes$values
   n <- length(values)
   if (anyNA(values)) {
@@ -1669,7 +1686,113 @@
   index <- min(which(values >= p)[1] - 1L, n - 1L)
   span <- values[index + 1] - values[index]
   frac <- ifelse(span > 0, (p - values[index]) / span, 0)
-  return(nodes$origin + (index - 1 + frac) * nodes$spacing)
+  chord <- nodes$origin + (index - 1 + frac) * nodes$spacing
+  if (is.null(slots)) {
+    return(chord)
+  }
+  return(.meta_refine_quantile(
+    chord, p, dist, args, slots,
+    floor = nodes$origin, ceiling = nodes$origin + (n - 1) * nodes$spacing
+  ))
+}
+
+#' The number of Newton steps taken from the chord inverse
+#'
+#' Matches `meta_family_node_quantile()` in Stan. Each step squares the
+#' error of the chord, which is of the order of the node spacing squared, so
+#' two steps leave a residual well below the sampling standard error of any
+#' reported quantile.
+#'
+#' @returns An integer.
+#'
+#' @keywords internal
+.meta_newton_steps <- function() {
+  return(2L)
+}
+
+#' Refine the chord inverse of a continuous implied distribution function
+#'
+#' Where the family quantile function is available, that is for a lognormal
+#' or weibull delay reported by a study that adjusted for censoring and did
+#' not use an accrual design, the implied quantile is
+#' \eqn{Q(F(L) + p (F(D) - F(L)))} exactly. Otherwise Newton steps are taken
+#' from the chord using the implied distribution function and density of
+#' [.meta_implied_prob()] and [.meta_implied_density()], which exist in
+#' closed form for every remaining continuous design with a uniform primary
+#' event. An accrual estimand, or a uniform single interval estimand with a
+#' growing primary event, is defined by linear interpolation between its
+#' nodes, so its chord is left alone, as is a discrete grid.
+#'
+#' The Stan mirror `meta_family_node_quantile()` cannot evaluate the primary
+#' censored distribution function at a parameter dependent delay, so the
+#' cases refined here are exactly those it can refine with closed forms.
+#'
+#' @param chord The chord inverse from [.meta_node_quantile()].
+#'
+#' @inheritParams .meta_node_quantile
+#'
+#' @param floor,ceiling The delays at the first and last node, which the
+#'  refined value is held between.
+#'
+#' @returns A delay.
+#'
+#' @keywords internal
+.meta_refine_quantile <- function(
+  chord,
+  p,
+  dist,
+  args,
+  slots,
+  floor,
+  ceiling
+) {
+  base_code <- .meta_cens_base(slots$cens_adjusted)
+  accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
+  if (base_code == 0L || accrual == 1L) {
+    return(chord)
+  }
+  if (base_code == 2L && slots$growth_rate != 0) {
+    return(chord)
+  }
+  clamp <- function(value) {
+    return(min(max(value, floor), ceiling))
+  }
+  if (base_code == 1L && dist %in% c("plnorm", "pweibull")) {
+    pdist <- .pdist(dist)
+    base <- 0
+    if (slots$lower > 0) {
+      base <- do.call(pdist, c(list(q = slots$lower), args))
+    }
+    top <- 1
+    if (slots$trunc_adjusted != 1) {
+      top <- do.call(pdist, c(list(q = slots$cutoff), args))
+    }
+    exact <- do.call(
+      .estimates_qdist(dist), c(list(p = base + p * (top - base)), args)
+    )
+    if (!is.finite(exact)) {
+      return(chord)
+    }
+    return(clamp(exact))
+  }
+  value <- chord
+  for (step in seq_len(.meta_newton_steps())) {
+    prob <- .meta_implied_prob(
+      value, dist, args, slots$lower, slots$cutoff, slots$pwindow,
+      slots$swindow, slots$trunc_adjusted, slots$cens_adjusted,
+      slots$growth_rate, slots$trunc_design
+    )
+    slope <- .meta_implied_density(
+      value, dist, args, slots$lower, slots$cutoff, slots$pwindow,
+      slots$swindow, slots$trunc_adjusted, slots$cens_adjusted,
+      slots$growth_rate, slots$trunc_design
+    )
+    if (!is.finite(prob) || !is.finite(slope) || slope <= 0) {
+      return(value)
+    }
+    value <- clamp(value + (p - prob) / slope)
+  }
+  return(value)
 }
 
 #' The summaries a study would report, one per multivariate normal member
@@ -1703,7 +1826,7 @@
     implied[types == 3L] <- vapply(
       slots$group_p[types == 3L],
       function(p) {
-        return(.meta_node_quantile(nodes, p))
+        return(.meta_node_quantile(nodes, p, dist, args, slots))
       },
       numeric(1)
     )
