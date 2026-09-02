@@ -192,6 +192,8 @@ See #620.
 - Added an `epidist_model_prior()` method for the meta model, which centres the intercept prior of `mu` on the log of the median mean the studies reported, with a standard deviation of 1 on the log scale.
 Without it a Gamma or Weibull fit to summaries alone took the `brms` default, which is centred on the response column and so on a delay of zero, because that column is a placeholder on summary rows.
 See #620.
+- Added an `epidist_newdata()` method for the meta model, which builds an individual level row with the same arguments as the marginal model method, so predicting from a meta model fit no longer means copying a summary row out of the model data.
+See #620.
 
 ## Documentation
 
