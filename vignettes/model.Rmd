@@ -520,11 +520,14 @@ A study that adjusted for right truncation has $D = \infty$ and is left uncondit
 A reported quantile at probability $p$ is the value $\hat{F}_{L,D}$ puts $p$ below, so it stays inside the observed range as well.
 
 Reported parameter standard errors are carried onto the summary scale by the delta method.
-With $\hat{\theta}$ the reported parameters, $V$ the diagonal matrix of their squared standard errors, and $J$ the Jacobian of the map from parameters to summaries at $\hat{\theta}$, the standard error of summary $i$ is the square root of the $i$th diagonal entry of $J V J^\top$.
-Each summary is then fitted with its own standard error through Equation \@ref(eq:meta-moment-lik) or \@ref(eq:meta-quantile-lik).
-The correlation the delta method implies between the summaries is not kept, because the joint distribution of more than $k$ of them is degenerate.
-A study that published a full parameter covariance and wants the correlation kept can draw from it and pass the draws to `as_epidist_multivariate()`, which needs no linearisation.
-Where a study reported no parameter uncertainty, its summaries fall back to the sample size likelihoods of Section \@ref(sampling-likelihoods).
+With $\hat{\theta}$ the reported parameters, $V$ the diagonal matrix of their squared standard errors, and $J$ the Jacobian of the map from parameters to summaries at $\hat{\theta}$, the covariance over the summaries is $J V J^\top$.
+The summaries are fitted jointly with that covariance through Equation \@ref(eq:meta-mvn), exactly as the output of `as_epidist_multivariate()` is.
+Keeping the covariance matters.
+The information a study carries about its parameters is $V^{-1}$, and fitting $k$ summaries of a $k$ parameter fit with $J V J^\top$ gives the curvature $J^\top (J V J^\top)^{-1} J = V^{-1}$, so nothing is lost or invented by the conversion.
+Fitting each summary with its own standard error gives $J^\top \operatorname{diag}(J V J^\top)^{-1} J$ instead, which for a lognormal mean and standard deviation claims standard errors 1.4 to 1.5 times too wide, and for three quartiles 0.6 times too narrow on the location.
+Since the summaries are functions of $k$ numbers, at most $k$ of them can be reported with standard errors, and asking for more is an error.
+A study that published a full parameter covariance rather than standard errors can draw from it and pass the draws to `as_epidist_multivariate()`, which needs no linearisation.
+Where a study reported no parameter uncertainty, its summaries fall back to the sample size likelihoods of Section \@ref(sampling-likelihoods), and any number of them may be reported.
 
 This route assumes that summaries of the reported distribution are the summaries of what the study's procedure targeted.
 That holds exactly when the study reported a distribution of the same shape as its estimand.

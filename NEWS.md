@@ -174,7 +174,7 @@ This is the format we recommend when a study cannot share its delays, because it
 Draws of the natural parameters of a fitted distribution are pushed through to the summaries the distribution implies, so no linearisation is used.
 See #620.
 - Added `epidist_estimates_summaries()` and `epidist_estimates_parameters()`, which take one study's contribution in the shape it reported it.
-`epidist_estimates_parameters()` converts the parameters of a distribution a study fitted into the summaries that distribution implies, carrying any reported parameter standard errors onto that scale by the delta method.
+`epidist_estimates_parameters()` converts the parameters of a distribution a study fitted into the summaries that distribution implies, carrying any reported parameter standard errors onto that scale by the delta method as a covariance over the summaries, which is fitted jointly and carries the study's information about its parameters exactly.
 The family a study fitted need not match the family being fitted to it.
 See #620.
 - `as_epidist_estimates_data()` combines contributions passed in a list, so studies reporting in different shapes assemble into one object.

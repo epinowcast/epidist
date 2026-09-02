@@ -139,16 +139,24 @@ epidist_estimates_summaries <- function(
 #'
 #' Supply the standard errors the study reported on its parameters through
 #' `se`. They are carried onto the summary scale by the delta method, using a
-#' numerical Jacobian of the map from parameters to summaries, and each summary
-#' is reported with its own standard error.
+#' numerical Jacobian of the map from parameters to summaries, and the
+#' summaries are reported with the covariance matrix that implies between
+#' them, so they are fitted jointly as a multivariate normal in the same way
+#' as the output of [as_epidist_multivariate()]. For a fit with as many
+#' summaries as parameters this carries the study's information about its
+#' parameters exactly, which fitting each summary with its own standard error
+#' would not.
 #'
-#' The correlation the delta method implies between those summaries is not
-#' kept. Summaries of a two parameter fit are deterministic functions of two
-#' numbers, so their joint distribution is degenerate and reporting more than
-#' two of them with a covariance is not possible. A study that published a full
-#' parameter covariance and wants the correlation kept can draw from it, push
+#' Summaries of a two parameter fit are deterministic functions of two
+#' numbers, so at most two of them can carry the reported uncertainty, and
+#' asking for more with `se` is an error. A study that published a full
+#' parameter covariance rather than standard errors can draw from it, push
 #' each draw through to the summaries, and use [as_epidist_multivariate()],
 #' which needs no linearisation.
+#'
+#' Without `se` the summaries fall back to the sample size likelihoods, which
+#' derive their sampling uncertainty from `n`, and any number of them may be
+#' reported.
 #'
 #' @param study A string naming the study.
 #'
@@ -166,8 +174,8 @@ epidist_estimates_summaries <- function(
 #' @param se A numeric vector of the reported standard errors of `parameters`,
 #'  in the same order. Optional.
 #'
-#' @param n The number of delays the study fitted. Optional, and used where no
-#'  `se` is given.
+#' @param n The number of delays the study fitted. Optional, and used for the
+#'  sampling uncertainty of the summaries where no `se` is given.
 #'
 #' @param ... Study metadata, as documented in
 #'  [as_epidist_estimates_data.data.frame()].
@@ -208,28 +216,63 @@ epidist_estimates_parameters <- function(
       lower = support$lower, cutoff = support$cutoff
     ))
   }
-  summary_se <- NULL
-  if (!is.null(se)) {
-    assert_numeric(
-      se,
-      lower = 0, len = length(parameters), any.missing = FALSE, finite = TRUE,
-      .var.name = "se"
-    )
-    jacobian <- .estimates_delta_jacobian(
-      summarise, parameters, .estimates_parameter_positive(names(parameters))
-    )
-    summary_se <- sqrt(rowSums((jacobian %*% diag(se^2, length(se))) *
-      jacobian))
+  type <- c(moments, rep("quantile", length(probs)))
+  p <- c(rep(NA_real_, length(moments)), probs)
+  if (is.null(se)) {
+    return(.estimates_from_summaries(
+      study = study,
+      value = summarise(parameters),
+      type = type,
+      p = p,
+      se = NULL,
+      n = n,
+      ...
+    ))
   }
-  return(.estimates_from_summaries(
+  assert_numeric(
+    se,
+    lower = 0, len = length(parameters), any.missing = FALSE, finite = TRUE,
+    .var.name = "se"
+  )
+  assert_numeric(n, lower = 1, len = 1, null.ok = TRUE, .var.name = "n")
+  if (length(type) > length(parameters)) {
+    cli::cli_abort(c(
+      paste0(
+        "{length(type)} summaries were requested with standard errors from a ",
+        "{.val {family}} fit with {length(parameters)} parameters, but ",
+        "summaries of a fit are deterministic functions of its parameters, ",
+        "so at most {length(parameters)} of them carry its uncertainty ",
+        "without counting it more than once."
+      ),
+      i = paste0(
+        "Report at most {length(parameters)} summaries, for example a mean ",
+        "and a standard deviation, or two quantiles."
+      )
+    ))
+  }
+  # The k by k delta method covariance J V J^T over the summaries carries the
+  # study's information about its parameters exactly, because
+  # J^T (J V J^T)^-1 J = V^-1 when J is square and invertible.
+  jacobian <- .estimates_delta_jacobian(
+    summarise, parameters, .estimates_parameter_positive(names(parameters))
+  )
+  covariance <- jacobian %*% diag(se^2, length(se)) %*% t(jacobian)
+  dimnames(covariance) <- NULL
+  .assert_multivariate_definite(covariance)
+  if (is.null(n)) {
+    n <- NA_real_
+  }
+  rows <- tibble(
     study = study,
-    value = summarise(parameters),
-    type = c(moments, rep("quantile", length(probs))),
-    p = c(rep(NA_real_, length(moments)), probs),
-    se = summary_se,
+    type = type,
+    value = unname(summarise(parameters)),
+    p = p,
     n = n,
+    mvn_id = study,
     ...
-  ))
+  )
+  attr(rows, "estimates_vcov") <- stats::setNames(list(covariance), study)
+  return(as_epidist_estimates_data(rows))
 }
 
 #' Build an `epidist_estimates_data` object from one study's summaries
