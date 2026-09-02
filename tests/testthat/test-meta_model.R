@@ -1062,7 +1062,7 @@ test_that(".meta_implied_prob matches the midpoint imputed empirical CDF", {
   }
 })
 
-test_that(".meta_summary_terms converts a delay scale quantile se by the delta method", { # nolint: line_length_linter.
+test_that(".meta_summary_terms fits a quantile with a reported standard error on the delay scale", { # nolint: line_length_linter.
   args <- list(meanlog = 1.5, sdlog = 0.5)
   slots <- list(
     lower = 0,
@@ -1070,15 +1070,24 @@ test_that(".meta_summary_terms converts a delay scale quantile se by the delta m
     cutoff = 60, pwindow = 1, swindow = 1, value = 6, report_se = 0.4,
     quantile_p = 0.75, growth_rate = 0, trunc_design = 0L
   )
+  # A study reports a quantile's standard error on the delay scale, so the
+  # reported value is compared with the implied quantile on that scale, with
+  # the standard error as reported.
   terms <- .meta_summary_terms(slots, "plnorm", args)
+  expect_identical(terms[["observed"]], 6)
   expect_equal(
-    terms[["se"]],
-    stats::dlnorm(6, args$meanlog, args$sdlog) * 0.4,
-    tolerance = 1e-4
+    terms[["implied"]], stats::qlnorm(0.75, args$meanlog, args$sdlog),
+    tolerance = 1e-10
+  )
+  expect_identical(terms[["se"]], 0.4)
+  expect_equal(
+    .meta_row_log_lik(slots, "plnorm", args),
+    stats::dnorm(6, stats::qlnorm(0.75, 1.5, 0.5), 0.4, log = TRUE),
+    tolerance = 1e-10
   )
 })
 
-test_that(".meta_summary_terms uses the grid mass as the density for a naive study", { # nolint: line_length_linter.
+test_that(".meta_summary_terms reads the implied quantile of a naive study off its grid", { # nolint: line_length_linter.
   args <- list(meanlog = 1.5, sdlog = 0.5)
   slots <- list(
     lower = 0,
@@ -1087,57 +1096,79 @@ test_that(".meta_summary_terms uses the grid mass as the density for a naive stu
     quantile_p = 0.6, growth_rate = 0, trunc_design = 0L
   )
   terms <- .meta_summary_terms(slots, "plnorm", args)
-  mass <- .meta_grid_pmf("plnorm", args, 0, 20, 1, 1, 0)
-  expect_equal(terms[["se"]], mass[6] * 0.6, tolerance = 1e-10)
+  nodes <- .meta_implied_nodes("plnorm", args, slots)
+  expect_equal(
+    terms[["implied"]], .meta_node_quantile(nodes, 0.6), tolerance = 1e-12
+  )
+  expect_identical(terms[["se"]], 0.6)
 })
 
-test_that(".meta_summary_terms guards a delay scale quantile se away from zero", { # nolint: line_length_linter.
+test_that(".meta_summary_terms guards a reported quantile se away from zero", { # nolint: line_length_linter.
   args <- list(meanlog = 1.5, sdlog = 0.5)
   slots <- list(
     lower = 0,
     obs_type = 4L, study_n = 250L, trunc_adjusted = 0L, cens_adjusted = 0L,
-    cutoff = 20, pwindow = 1, swindow = 1, value = 19.6, report_se = 0.6,
-    quantile_p = 0.99, growth_rate = 0, trunc_design = 0L
-  )
-  # The reported value sits in the top grid cell, where the density is zero.
-  expect_identical(
-    .meta_implied_density(
-      slots$value, "plnorm", args, 0, slots$cutoff, 1, 1, 0L, 0L, 0
-    ),
-    0
+    cutoff = 20, pwindow = 1, swindow = 1, value = 5, report_se = 1e-9,
+    quantile_p = 0.6, growth_rate = 0, trunc_design = 0L
   )
   terms <- .meta_summary_terms(slots, "plnorm", args)
   expect_identical(terms[["se"]], .meta_min_prob_se())
-  # Inside the grid the delta method is used untouched.
-  slots$value <- 19
-  expect_gt(.meta_summary_terms(slots, "plnorm", args)[["se"]], 1e-4)
 })
 
-test_that(".meta_summary_terms delta method matches a bootstrapped quantile se", { # nolint: line_length_linter.
+test_that("a quantile far into the tail gives a slope on the delay scale rather than a wall", { # nolint: line_length_linter.
+  # A 95th percentile reported as 40 days with a standard error of 2 when the
+  # true one is 11.3 is rejected by both scales, but on the probability scale
+  # the density at the reported value collapses and the converted standard
+  # error hits its floor, giving a log likelihood of order -1e7 whose
+  # gradient is dominated by the floor. On the delay scale it is the normal
+  # density it claims to be, everywhere.
+  slots <- list(
+    lower = 0,
+    obs_type = 4L, study_n = 0L, trunc_adjusted = 1L, cens_adjusted = 1L,
+    cutoff = 800, pwindow = 1, swindow = 1, value = 40, report_se = 2,
+    quantile_p = 0.95, growth_rate = 0, trunc_design = 0L
+  )
+  for (meanlog in c(1.6, 2.0, 2.4)) {
+    expect_equal(
+      .meta_row_log_lik(slots, "plnorm", list(meanlog = meanlog, sdlog = 0.5)),
+      stats::dnorm(40, stats::qlnorm(0.95, meanlog, 0.5), 2, log = TRUE),
+      tolerance = 1e-8
+    )
+  }
+  expect_gt(
+    .meta_row_log_lik(slots, "plnorm", list(meanlog = 1.6, sdlog = 0.5)),
+    -110
+  )
+})
+
+test_that("a delay scale quantile se is calibrated against a bootstrapped median", { # nolint: line_length_linter.
   set.seed(126)
   args <- list(meanlog = 1.5, sdlog = 0.5)
   cutoff <- 20
   study_n <- 200
   pool <- rlnorm(2e5, args$meanlog, args$sdlog)
   pool <- pool[pool <= cutoff]
-  y <- stats::median(pool)
-  boot <- vapply(
+  medians <- vapply(
     seq_len(2000),
     function(i) {
-      draw <- sample(pool, study_n, replace = TRUE)
-      return(c(stats::median(draw), mean(draw <= y)))
+      return(stats::median(sample(pool, study_n, replace = TRUE)))
     },
-    numeric(2)
+    numeric(1)
   )
   slots <- list(
     lower = 0,
     obs_type = 4L, study_n = study_n, trunc_adjusted = 0L, cens_adjusted = 1L,
-    cutoff = cutoff, pwindow = 1, swindow = 1, value = y,
-    report_se = stats::sd(boot[1, ]), quantile_p = 0.5, growth_rate = 0,
+    cutoff = cutoff, pwindow = 1, swindow = 1, value = stats::median(pool),
+    report_se = stats::sd(medians), quantile_p = 0.5, growth_rate = 0,
     trunc_design = 0L
   )
+  # The implied median of the truncated estimand at the truth sits within the
+  # bootstrap spread of the reported one, so the row's standardised residual
+  # is small at the true parameters.
   terms <- .meta_summary_terms(slots, "plnorm", args)
-  expect_equal(terms[["se"]], stats::sd(boot[2, ]), tolerance = 0.1)
+  expect_lt(
+    abs(terms[["observed"]] - terms[["implied"]]) / terms[["se"]], 0.5
+  )
 })
 
 test_that(".meta_summary_terms keeps the binomial se when no quantile se is given", { # nolint: line_length_linter.
