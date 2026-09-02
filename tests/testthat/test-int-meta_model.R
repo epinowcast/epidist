@@ -383,6 +383,193 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
   }
 })
 
+test_that("the meta model log density has finite gradients or rejects at narrow and wide delays", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  # Every grid and quadrature path evaluates the primary censored
+  # distribution function from the study's minimum delay upwards, so a
+  # narrow delay reaches deep into its lower tail, where primarycensored's
+  # Stan function returns a finite value with a non finite gradient. The
+  # meta model severs nodes that cannot matter before calling it, and
+  # rejects a draw whose analytic moments overflow, so that the sampler sees
+  # a rejection rather than a chain that cannot start. The nine designs of
+  # the meta vignette are checked with CmdStan's gradient diagnostic at the
+  # vignette's log mean and at narrow and wide log standard deviations.
+  set.seed(2)
+  n_pool <- 20000
+  ptime <- stats::runif(n_pool, 0, 30)
+  delay <- stats::rlnorm(n_pool, meanlog, sdlog)
+  pool <- data.frame(
+    ptime = ptime, stime = ptime + delay,
+    delay_daily = floor(ptime + delay) - floor(ptime)
+  )
+  measured <- function(data, cens) {
+    return(switch(as.character(cens),
+      "0" = data$delay_daily,
+      "1" = data$stime - data$ptime,
+      "2" = data$stime - floor(data$ptime),
+      "3" = data$delay_daily + 0.5,
+      "4" = data$stime - floor(data$ptime) - 0.5
+    ))
+  }
+  simulate_study <- function(study, report, probs, cens, trunc_adjusted,
+                             obs_time, trunc_design, delay_min,
+                             growth_rate, study_n) {
+    cases <- pool
+    if (!trunc_adjusted && trunc_design == "accrual") {
+      cases <- cases[cases$ptime <= obs_time & cases$stime <= obs_time, ]
+    } else if (!trunc_adjusted) {
+      seen <- if (cens %in% c(0, 3)) {
+        cases$delay_daily + 1 <= obs_time
+      } else {
+        measured(cases, cens) <= obs_time
+      }
+      cases <- cases[seen, ]
+    }
+    cases <- cases[measured(cases, cens) >= delay_min, ]
+    delays <- measured(cases[sample.int(nrow(cases), study_n), ], cens)
+    metadata <- list(
+      pwindow = 1, swindow = 1, cens_adjusted = cens,
+      trunc_adjusted = trunc_adjusted, relative_obs_time = obs_time,
+      trunc_design = trunc_design, delay_min = delay_min,
+      growth_rate = growth_rate, max_delay = 60
+    )
+    if (report == "multivariate") {
+      estimate <- c(mean(log(delays)), stats::sd(log(delays)))
+      se <- estimate[2] / sqrt(c(1, 2) * length(delays))
+      draws <- cbind(
+        meanlog = stats::rnorm(1000, estimate[1], se[1]),
+        sdlog = stats::rnorm(1000, estimate[2], se[2])
+      )
+      return(do.call(as_epidist_estimates_data, c(
+        list(
+          as_epidist_multivariate(draws), study = study, family = "lognormal"
+        ),
+        metadata
+      )))
+    }
+    rows <- if (report == "moments") {
+      data.frame(
+        type = c("mean", "sd"), value = c(mean(delays), stats::sd(delays)),
+        p = NA_real_, n = length(delays), se = NA_real_,
+        stringsAsFactors = FALSE
+      )
+    } else if (report == "mean_se") {
+      data.frame(
+        type = "mean", value = mean(delays), p = NA_real_, n = NA_real_,
+        se = stats::sd(delays) / sqrt(length(delays)),
+        stringsAsFactors = FALSE
+      )
+    } else {
+      data.frame(
+        type = "quantile",
+        value = stats::quantile(delays, probs, names = FALSE), p = probs,
+        n = length(delays), se = NA_real_, stringsAsFactors = FALSE
+      )
+    }
+    rows$study <- study
+    for (name in names(metadata)) {
+      rows[[name]] <- metadata[[name]]
+    }
+    return(as_epidist_estimates_data(rows))
+  }
+  designs <- list(
+    list("naive cohort", "moments", NA, 0, FALSE, 12, "cohort", 0, 0, 180),
+    list(
+      "naive IQR", "quantiles", c(0.25, 0.5, 0.75), 0, FALSE, 16, "cohort",
+      0, 0, 55
+    ),
+    list(
+      "calendar stop", "quantiles", c(0.2, 0.5, 0.8), 0, FALSE, 20,
+      "accrual", 0, 0.14, 240
+    ),
+    list("uniform window", "moments", NA, 2, FALSE, 25, "cohort", 0, 0, 95),
+    list(
+      "midpoint", "quantiles", c(0.3, 0.6, 0.9), 3, FALSE, 30, "cohort",
+      0, 0, 40
+    ),
+    list(
+      "adjusted (MVN)", "multivariate", NA, 1, TRUE, Inf, "cohort", 0, 0,
+      300
+    ),
+    list("delays over 2d", "moments", NA, 0, FALSE, 18, "cohort", 2, 0, 130),
+    list("mean and se", "mean_se", NA, 0, FALSE, 22, "cohort", 0, 0, 25),
+    list("midpoint window", "moments", NA, 4, FALSE, 26, "cohort", 0, 0, 110)
+  )
+  names(designs) <- vapply(designs, `[[`, character(1), 1)
+  studies <- suppressMessages(lapply(designs, function(design) {
+    return(do.call(simulate_study, design))
+  }))
+  models <- lapply(studies, function(study) {
+    return(suppressMessages(as_epidist_meta_model(estimates = study)))
+  })
+  # The Stan program is the same for every design, so it is compiled once.
+  stan_dir <- tempfile("meta_diagnose")
+  dir.create(stan_dir)
+  on.exit(unlink(stan_dir, recursive = TRUE), add = TRUE)
+  mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(
+    suppressMessages(epidist(models[[1]], fn = brms::make_stancode)),
+    dir = stan_dir
+  ))
+  diagnose <- function(standata, mu, sigma) {
+    data_file <- file.path(stan_dir, "data.json")
+    init_file <- file.path(stan_dir, "init.json")
+    cmdstanr::write_stan_json(standata, data_file)
+    cmdstanr::write_stan_json(
+      list(
+        Intercept = mu, Intercept_sigma = log(sigma),
+        primary_params = numeric(0)
+      ),
+      init_file
+    )
+    out <- suppressWarnings(system2(
+      mod$exe_file(),
+      c(
+        "diagnose", "test=gradient", "epsilon=1e-6", "error=1e-2", "data",
+        paste0("file=", data_file), paste0("init=", init_file), "output",
+        paste0("file=", file.path(stan_dir, "diagnose.csv"))
+      ),
+      stdout = TRUE, stderr = TRUE
+    ))
+    if (any(grepl("Log probability=", out, fixed = TRUE))) {
+      rows <- out[grepl("^ *[0-9]+ +-?[0-9.e+-]+ +", out)]
+      gradient <- as.numeric(vapply(
+        strsplit(trimws(rows), " +"), `[`, character(1), 3
+      ))
+      return(if (all(is.finite(gradient))) "ok" else "gradient not finite")
+    }
+    if (any(
+      grepl("meta_lognormal_", out, fixed = TRUE) &
+        grepl("Exception", out, fixed = TRUE)
+    )) {
+      return("reject")
+    }
+    if (any(grepl("not finite", out, fixed = TRUE))) {
+      return("gradient not finite")
+    }
+    return("other")
+  }
+  sigmas <- c(0.03, 0.05, 0.1, 5, 10)
+  outcomes <- character(0)
+  for (design in names(models)) {
+    standata <- suppressMessages(
+      epidist(models[[design]], fn = brms::make_standata)
+    )
+    for (sigma in sigmas) {
+      cell <- paste0(design, ":", sigma)
+      outcomes[cell] <- diagnose(standata, meanlog, sigma)
+      expect_true(outcomes[cell] %in% c("ok", "reject"), label = cell)
+    }
+  }
+  # The narrow and the plausible draws must evaluate on every design, and
+  # the covariance row must reject the overflowing draw rather than carry
+  # its infinite gradient.
+  narrow <- paste0(rep(names(models), each = 3), ":", c(0.03, 0.05, 0.1))
+  expect_true(all(outcomes[narrow] == "ok"))
+  expect_true(all(outcomes[paste0(names(models), ":5")] == "ok"))
+  expect_identical(unname(outcomes["adjusted (MVN):10"]), "reject")
+})
+
 test_that("epidist.epidist_meta_model recovers known parameters from simulated grid summaries", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   # Every study reports integer date differences from a right truncated

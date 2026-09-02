@@ -190,12 +190,64 @@
     return append_row(0, cumulative_sum(mass) / total);
   }
 
-  /** Log primary censored distribution function, guarded against underflow. */
+  /**
+    * Whether a delay is so deep in the lower tail that its log distribution
+    * function is certainly below -100, decided from a closed form bound on
+    * the parameters. The distribution function itself must not be evaluated
+    * to decide this: where it underflows its autodiff partial is 0 / 0, and
+    * Stan's reverse pass chains every node on the stack, so a NaN partial
+    * poisons the gradient even when the value is discarded. Lognormal:
+    * Phi(z) < exp(-100) for z < -14. Gamma: P(a, x) <= x^a / Gamma(a + 1).
+    * Weibull: 1 - exp(-y) <= y. Mirrors .meta_deep_tail() in R.
+    */
+  int meta_family_deep_tail(real d, array[] real params) {
+    if (dist_id == 1) {
+      return (log(d) - params[1]) / params[2] < -14;
+    }
+    if (dist_id == 2) {
+      return params[1] * log(params[2] * d) - lgamma(params[1] + 1) < -100;
+    }
+    if (dist_id == 3) {
+      return params[1] * (log(d) - log(params[2])) < -100;
+    }
+    return 0;
+  }
+
+  /**
+    * Distribution function of the delay, severed deep in its lower tail. A
+    * node whose log distribution function is below -100 holds a probability
+    * no moment or probability the model forms can resolve, and evaluating
+    * the primary censored distribution function there gives a finite value
+    * with a non finite gradient for a narrow delay, so it is returned as a
+    * constant zero without evaluating anything, see meta_family_deep_tail().
+    * Matches .meta_dist_cdf() and .meta_log_cdf_floor() in R.
+    */
+  real meta_family_dist_prob(real d, array[] real params) {
+    real log_cdf;
+    if (d <= 0 || meta_family_deep_tail(d, params)) {
+      return 0;
+    }
+    log_cdf = dist_lcdf(d | params, dist_id);
+    if (is_nan(log_cdf) || log_cdf < -100) {
+      return 0;
+    }
+    return exp(log_cdf);
+  }
+
+  /**
+    * Log primary censored distribution function, guarded against underflow
+    * and severed where the plain distribution function is, see
+    * meta_family_dist_prob(). The primary censored distribution function is
+    * never above the plain one, so the cut loses nothing it would keep.
+    */
   real meta_family_pcens_lcdf(data real d, array[] real params,
                               data real pwindow_width, data int prim_id,
                               array[] real prim_params) {
     real log_cdf;
     if (d <= 0) {
+      return negative_infinity();
+    }
+    if (meta_family_dist_prob(d, params) <= 0) {
       return negative_infinity();
     }
     log_cdf = primarycensored_lcdf(
@@ -395,6 +447,15 @@
       reject("Meta model summary rows support lognormal, gamma and weibull ",
              "delay distributions only.");
     }
+    // A draw wide enough to overflow a moment would leave a finite density
+    // whose gradient carries the infinite intermediate, so it is rejected
+    // here. Matches .meta_continuous_moments() in R.
+    if (is_inf(delay_mean) || is_nan(delay_mean) || is_inf(variance) ||
+        is_nan(variance) || is_inf(third) || is_nan(third) ||
+        is_inf(fourth) || is_nan(fourth)) {
+      reject("meta_family_moments: the analytic moments of the delay ",
+             "distribution overflowed.");
+    }
     return meta_family_moment_vector(delay_mean, variance, third, fourth);
   }
 
@@ -440,7 +501,7 @@
     vector[n_quad + 1] grid = linspaced_vector(n_quad + 1, delay_min, cutoff);
     vector[n_quad + 1] cdf;
     for (i in 1:(n_quad + 1)) {
-      cdf[i] = grid[i] <= 0 ? 0 : exp(dist_lcdf(grid[i] | params, dist_id));
+      cdf[i] = meta_family_dist_prob(grid[i], params);
     }
     if (accrual == 1) {
       return meta_family_survival_moments(
@@ -560,10 +621,8 @@
           (i - 1) * delay_min / n_quad | params, pwindow_width, prim_id,
           prim_params
         ));
-      } else if (i == 1) {
-        cdf[i] = 0;
       } else {
-        cdf[i] = exp(dist_lcdf((i - 1) * delay_min / n_quad | params, dist_id));
+        cdf[i] = meta_family_dist_prob((i - 1) * delay_min / n_quad, params);
       }
     }
     return cdf;
@@ -693,12 +752,10 @@
           delay_min + (i - 1) * (cutoff - delay_min) / n_quad | params,
           pwindow_width, prim_id, prim_params
         ));
-      } else if (delay_min + (i - 1) * (cutoff - delay_min) / n_quad <= 0) {
-        cdf[i] = 0;
       } else {
-        cdf[i] = exp(dist_lcdf(
-          delay_min + (i - 1) * (cutoff - delay_min) / n_quad | params, dist_id
-        ));
+        cdf[i] = meta_family_dist_prob(
+          delay_min + (i - 1) * (cutoff - delay_min) / n_quad, params
+        );
       }
     }
     return meta_family_accrual_reweight(
@@ -1116,13 +1173,10 @@
             delay_min + (i - 1) * (cutoff - delay_min) / n_quad | params,
             pwindow_width, prim_id, prim_params
           ));
-        } else if (delay_min + (i - 1) * (cutoff - delay_min) / n_quad <= 0) {
-          raw[i] = 0;
         } else {
-          raw[i] = exp(dist_lcdf(
-            delay_min + (i - 1) * (cutoff - delay_min) / n_quad | params,
-            dist_id
-          ));
+          raw[i] = meta_family_dist_prob(
+            delay_min + (i - 1) * (cutoff - delay_min) / n_quad, params
+          );
         }
       }
       if (accrual == 1) {

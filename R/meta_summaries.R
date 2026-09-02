@@ -133,13 +133,90 @@
   ))
 }
 
+#' The log distribution function below which a node is severed
+#'
+#' Every grid and quadrature path evaluates the distribution function from
+#' the study's minimum delay upwards, so for a narrow delay it reaches deep
+#' into the lower tail, where the Stan primary censored distribution function
+#' of `primarycensored` returns a finite value with a non finite gradient.
+#' A node whose plain log distribution function is below this value holds a
+#' probability below `exp(-100)`, which no moment or probability the model
+#' forms can resolve, so it is treated as holding no mass before that
+#' function is called. Matches the cut in `meta_family_pcens_lcdf()` and
+#' `meta_family_dist_prob()` in `inst/stan/meta_model/functions.stan`.
+#'
+#' @returns A log probability.
+#'
+#' @keywords internal
+.meta_log_cdf_floor <- function() {
+  return(-100)
+}
+
+#' Whether a delay is certainly below the cut of the distribution function
+#'
+#' Decided from a closed form bound on the parameters rather than from the
+#' distribution function, because in Stan the distribution function must not
+#' be evaluated where it underflows: its autodiff partial is then `0 / 0`,
+#' and Stan's reverse pass chains every node on the stack, so the `NaN`
+#' poisons the gradient even when the value is discarded. The bounds are
+#' `Phi(z) < exp(-100)` for `z < -14` for the lognormal,
+#' `P(a, x) <= x^a / Gamma(a + 1)` for the gamma and `1 - exp(-y) <= y` for
+#' the weibull. Mirrors `meta_family_deep_tail()` in Stan.
+#'
+#' @inheritParams .meta_dist_cdf
+#'
+#' @returns A logical vector.
+#'
+#' @keywords internal
+.meta_deep_tail <- function(q, dist, args) {
+  floor_log <- .meta_log_cdf_floor()
+  # A delay at or below zero is severed by the caller, so it only needs a
+  # finite logarithm here.
+  q <- pmax(q, .Machine$double.xmin)
+  if (identical(dist, "plnorm")) {
+    return((log(q) - args$meanlog) / args$sdlog < -14)
+  }
+  if (identical(dist, "pgamma")) {
+    return(
+      args$shape * log(q / args$scale) - lgamma(args$shape + 1) < floor_log
+    )
+  }
+  if (identical(dist, "pweibull")) {
+    return(args$shape * (log(q) - log(args$scale)) < floor_log)
+  }
+  return(rep(FALSE, length(q)))
+}
+
+#' The distribution function of the delay, severed deep in its lower tail
+#'
+#' @param q A numeric vector of delays.
+#'
+#' @param dist A `primarycensored` distribution function name.
+#'
+#' @param args A named list of distribution parameters.
+#'
+#' @returns A numeric vector of cumulative probabilities, zero at or below a
+#'  delay of zero, where [.meta_deep_tail()] holds, and below the cut of
+#'  [.meta_log_cdf_floor()].
+#'
+#' @keywords internal
+.meta_dist_cdf <- function(q, dist, args) {
+  cdf <- do.call(.pdist(dist), c(list(q = q), args))
+  severed <- q <= 0 | !is.finite(cdf) | cdf < exp(.meta_log_cdf_floor())
+  cdf[severed | .meta_deep_tail(q, dist, args)] <- 0
+  return(cdf)
+}
+
 #' The primary censored distribution function, guarded against underflow
 #'
 #' Primary distributions without an analytical solution are integrated
 #' numerically, which can return a non finite or negative cumulative
 #' probability deep in the lower tail. Those cases carry negligible
 #' probability and are treated as zero, matching the guard in
-#' `inst/stan/meta_model/functions.stan`.
+#' `inst/stan/meta_model/functions.stan`. A delay whose plain distribution
+#' function is below the cut of [.meta_log_cdf_floor()] is severed to zero
+#' before the primary censored function is called, as it is in Stan, since
+#' the primary censored distribution function is never above the plain one.
 #'
 #' @param q A numeric vector of delays.
 #'
@@ -170,6 +247,7 @@
     )
   )
   cdf[!is.finite(cdf) | cdf < 0] <- 0
+  cdf[.meta_dist_cdf(q, dist, args) <= 0] <- 0
   return(pmin(cdf, 1))
 }
 
@@ -705,7 +783,13 @@
 #' Analytic summaries of a delay distribution
 #'
 #' The mean and standard deviation mirror the formulas used by
-#' [add_summaries()].
+#' [add_summaries()]. A draw wide enough to overflow a moment, such as a
+#' lognormal whose `exp(4 * sdlog^2)` is infinite, is returned as
+#' [.meta_moment_failure()] so that the row is rejected rather than carrying
+#' a `NaN` into its standard error. Matches the reject in
+#' `meta_family_moments()` in `inst/stan/meta_model/functions.stan`, where an
+#' infinite intermediate would otherwise leave a finite density with a non
+#' finite gradient.
 #'
 #' @inheritParams .meta_grid_pmf
 #'
@@ -722,30 +806,33 @@
       3 * exp(2 * var_log) -
       3
     skewness <- (exp(var_log) + 2) * sqrt(expm1(var_log))
-    return(.meta_moment_vector(
+    moments <- .meta_moment_vector(
       delay_mean, variance, skewness * variance^1.5, kurtosis * variance^2
-    ))
-  }
-  if (identical(dist, "pgamma")) {
+    )
+  } else if (identical(dist, "pgamma")) {
     variance <- args$shape * args$scale^2
-    return(.meta_moment_vector(
+    moments <- .meta_moment_vector(
       args$shape * args$scale,
       variance,
       2 / sqrt(args$shape) * variance^1.5,
       (3 + 6 / args$shape) * variance^2
-    ))
-  }
-  if (identical(dist, "pweibull")) {
+    )
+  } else if (identical(dist, "pweibull")) {
     g <- gamma(1 + seq_len(4) / args$shape)
     variance <- args$scale^2 * (g[2] - g[1]^2)
     third <- args$scale^3 * (g[3] - 3 * g[1] * g[2] + 2 * g[1]^3)
     fourth <- args$scale^4 *
       (g[4] - 4 * g[1] * g[3] + 6 * g[1]^2 * g[2] - 3 * g[1]^4)
-    return(.meta_moment_vector(args$scale * g[1], variance, third, fourth))
+    moments <- .meta_moment_vector(args$scale * g[1], variance, third, fourth)
+  } else {
+    return(cli::cli_abort(
+      "Summary estimates are not supported for the {.val {dist}} distribution."
+    ))
   }
-  return(cli::cli_abort(
-    "Summary estimates are not supported for the {.val {dist}} distribution."
-  ))
+  if (!all(is.finite(moments))) {
+    return(.meta_moment_failure())
+  }
+  return(moments)
 }
 
 #' Summaries implied by a distribution function evaluated on a grid
@@ -816,7 +903,7 @@
   n_quad = .meta_n_quad()
 ) {
   quad <- seq(lower, cutoff, length.out = n_quad + 1)
-  cdf <- do.call(.pdist(dist), c(list(q = quad), args))
+  cdf <- .meta_dist_cdf(quad, dist, args)
   if (accrual == 1L) {
     cdf <- .meta_accrual_reweight(cdf, lower, cutoff, growth_rate)
   }
@@ -1057,7 +1144,7 @@
     }
     quad <- seq(0, lower, length.out = n_quad + 1)
     return(.meta_left_moments(
-      full, do.call(.pdist(dist), c(list(q = quad), args)), lower
+      full, .meta_dist_cdf(quad, dist, args), lower
     ))
   }
   return(.meta_trunc_moments(
@@ -1154,7 +1241,7 @@
     cdf <- .meta_pcens_cdf(quad, dist, args, pwindow, growth_rate)
     weight_offset <- pwindow / 2
   } else {
-    cdf <- do.call(.pdist(dist), c(list(q = quad), args))
+    cdf <- .meta_dist_cdf(quad, dist, args)
     weight_offset <- 0
   }
   return(
@@ -1836,7 +1923,7 @@
       quad, dist, args, slots$pwindow, slots$growth_rate
     )
   } else {
-    node_cdf <- do.call(.pdist(dist), c(list(q = quad), args))
+    node_cdf <- .meta_dist_cdf(quad, dist, args)
   }
   if (accrual == 1L) {
     values <- .meta_accrual_reweight(
@@ -2331,6 +2418,11 @@
       moments <- .meta_row_moments(slots, dist, args)
     }
     observed <- slots$value
+    if (!all(is.finite(moments))) {
+      # The same rejection as .meta_row_log_lik(), so that a draw whose
+      # moments overflow predicts nothing rather than a NaN standard error.
+      return(c(observed = unname(observed), implied = Inf, se = Inf))
+    }
     if (slots$obs_type == 3L) {
       implied <- moments[["sd"]]
       se <- .meta_sd_se(moments, slots$study_n)
@@ -2580,6 +2672,10 @@ epidist_gen_meta_predict <- function(family) {
       summaries <- .meta_summary_terms(
         slots, dist_name, dist_args[[draw]], moments[[draw]]
       )
+      # A draw the likelihood rejects has no predictive distribution.
+      if (!is.finite(summaries[["se"]])) {
+        return(NA_real_)
+      }
       return(stats::rnorm(1, summaries[["implied"]], summaries[["se"]]))
     })
     return(as.matrix(draws))

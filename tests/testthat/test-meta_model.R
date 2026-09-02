@@ -730,7 +730,7 @@ test_that("the distribution functions sever nodes deep in the lower tail", {
   # evaluates it. Both implementations therefore treat a node whose plain log
   # distribution function is below -100 as holding no mass, before the
   # primary censored function is called. Matches meta_family_pcens_lcdf()
-  # and meta_family_dist_cdf() in Stan.
+  # and meta_family_dist_prob() in Stan.
   args <- list(meanlog = 1.8, sdlog = 0.05)
   deep <- 2
   shallow <- 4
@@ -745,6 +745,28 @@ test_that("the distribution functions sever nodes deep in the lower tail", {
     .meta_dist_cdf(shallow, "plnorm", args), stats::plnorm(shallow, 1.8, 0.05)
   )
   expect_identical(.meta_dist_cdf(c(-1, 0), "plnorm", args), c(0, 0))
+  # The cut is decided from a closed form bound on the parameters for every
+  # family, so that Stan never evaluates the distribution function there.
+  expect_true(.meta_deep_tail(deep, "plnorm", args))
+  expect_false(.meta_deep_tail(shallow, "plnorm", args))
+  gamma_args <- list(shape = 3, scale = 2)
+  expect_true(.meta_deep_tail(1e-15, "pgamma", gamma_args))
+  expect_false(.meta_deep_tail(1, "pgamma", gamma_args))
+  expect_identical(.meta_dist_cdf(1e-15, "pgamma", gamma_args), 0)
+  weibull_args <- list(shape = 2, scale = 7)
+  expect_true(.meta_deep_tail(1e-25, "pweibull", weibull_args))
+  expect_false(.meta_deep_tail(1, "pweibull", weibull_args))
+  expect_identical(.meta_dist_cdf(1e-25, "pweibull", weibull_args), 0)
+  # The bounds only sever what the cut itself would.
+  for (family in list(
+    list("plnorm", args), list("pgamma", gamma_args),
+    list("pweibull", weibull_args)
+  )) {
+    grid <- exp(seq(-40, 3, by = 0.05))
+    bound <- .meta_deep_tail(grid, family[[1]], family[[2]])
+    cdf <- do.call(.pdist(family[[1]]), c(list(q = grid), family[[2]]))
+    expect_true(all(cdf[bound] < exp(.meta_log_cdf_floor())))
+  }
   # The severed mass is below anything a moment or a probability resolves.
   full <- .meta_trunc_moments("plnorm", args, 0, 12)
   expect_equal(
