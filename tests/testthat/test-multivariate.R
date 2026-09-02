@@ -23,7 +23,7 @@ test_that("as_epidist_multivariate accepts a data frame of draws", {
 test_that("as_epidist_multivariate takes named parameter columns", {
   set.seed(11)
   draws <- data.frame(
-    draw = seq_len(50), index = 1L,
+    .draw = seq_len(50), .row = 1L,
     meanlog = rnorm(50, 1.6, 0.03), sdlog = rnorm(50, 0.5, 0.02),
     label = "a", stringsAsFactors = FALSE
   )
@@ -37,8 +37,8 @@ test_that("as_epidist_multivariate takes named parameter columns", {
 test_that("as_epidist_multivariate orders a trajectory index major", {
   set.seed(11)
   draws <- data.frame(
-    draw = rep(seq_len(200), 2),
-    index = rep(c(1L, 2L), each = 200),
+    .draw = rep(seq_len(200), 2),
+    .row = rep(c(1L, 2L), each = 200),
     mean = c(rnorm(200, 7, 0.2), rnorm(200, 9, 0.2)),
     sd = c(rnorm(200, 3, 0.1), rnorm(200, 4, 0.1))
   )
@@ -197,8 +197,8 @@ test_that("the multivariate family path agrees with the delta method", {
 test_that("a multivariate trajectory cannot be fitted", {
   set.seed(11)
   draws <- data.frame(
-    draw = rep(seq_len(200), 2),
-    index = rep(c(1L, 2L), each = 200),
+    .draw = rep(seq_len(200), 2),
+    .row = rep(c(1L, 2L), each = 200),
     mean = c(rnorm(200, 7, 0.2), rnorm(200, 9, 0.2)),
     sd = c(rnorm(200, 3, 0.1), rnorm(200, 4, 0.1))
   )
