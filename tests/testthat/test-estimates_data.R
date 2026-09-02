@@ -206,6 +206,38 @@ test_that("as_epidist_estimates_data warns about several integer day quantiles f
   expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
 })
 
+test_that("as_epidist_estimates_data warns about a heavy tailed standard deviation from a small study", { # nolint: line_length_linter.
+  # A lognormal with sdlog 1 has kurtosis 114, so the relative standard error
+  # of a reported sd, sqrt((kappa - 1) / (4 n)), is 0.53 at n = 100 and the
+  # normal sampling likelihood of the sd cannot be trusted.
+  heavy <- data.frame(
+    study = "A", type = c("mean", "sd"),
+    value = c(exp(1.6 + 0.5), exp(1.6 + 0.5) * sqrt(expm1(1))), n = 100,
+    trunc_adjusted = TRUE, cens_adjusted = 1, stringsAsFactors = FALSE
+  )
+  msgs <- capture_messages(as_epidist_estimates_data(heavy))
+  expect_true(any(grepl("relative standard error", msgs, fixed = TRUE)))
+  # At n = 1000 the relative standard error is 0.17 and the warning is
+  # silent, as it is for a lighter tail at n = 100.
+  heavy$n <- 1000
+  msgs <- capture_messages(as_epidist_estimates_data(heavy))
+  expect_false(any(grepl("relative standard error", msgs, fixed = TRUE)))
+  light <- heavy
+  light$n <- 100
+  light$value <- c(exp(1.6 + 0.125), exp(1.6 + 0.125) * sqrt(expm1(0.25)))
+  msgs <- capture_messages(as_epidist_estimates_data(light))
+  expect_false(any(grepl("relative standard error", msgs, fixed = TRUE)))
+  # A standard deviation reported with its own standard error, or without a
+  # mean to judge the tail by, is left alone.
+  own_se <- heavy
+  own_se$n <- 100
+  own_se$se <- c(NA, 2)
+  msgs <- capture_messages(as_epidist_estimates_data(own_se))
+  expect_false(any(grepl("relative standard error", msgs, fixed = TRUE)))
+  msgs <- capture_messages(as_epidist_estimates_data(heavy[2, ]))
+  expect_false(any(grepl("relative standard error", msgs, fixed = TRUE)))
+})
+
 test_that("as_epidist_estimates_data does not warn about a truncated study", {
   truncated <- data.frame(
     study = "A", type = c("mean", "sd"), value = c(8.3, 7.9), n = 500,
