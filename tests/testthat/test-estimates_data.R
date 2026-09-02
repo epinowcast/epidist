@@ -43,7 +43,9 @@ test_that("as_epidist_estimates_data messages about assumed study metadata", {
     study = "A", type = "mean", value = 7.2, n = 100,
     stringsAsFactors = FALSE
   )
-  msgs <- capture_messages(as_epidist_estimates_data(minimal))
+  msgs <- capture_messages(
+    suppressWarnings(as_epidist_estimates_data(minimal))
+  )
   expect_true(any(grepl("censoring window", msgs, fixed = TRUE)))
   expect_true(any(grepl("right truncation", msgs, fixed = TRUE)))
   expect_true(any(grepl("max_delay", msgs, fixed = TRUE)))
@@ -55,9 +57,80 @@ test_that("as_epidist_estimates_data assumes no truncation when no observation t
     study = "A", type = "mean", value = 7.2, n = 100,
     stringsAsFactors = FALSE
   )
-  est <- suppressMessages(as_epidist_estimates_data(minimal))
+  est <- suppressWarnings(suppressMessages(as_epidist_estimates_data(minimal)))
   expect_true(est$trunc_adjusted)
   expect_identical(est$relative_obs_time, Inf)
+})
+
+test_that("as_epidist_estimates_data warns when it assumes a study adjusted for truncation", { # nolint: line_length_linter.
+  minimal <- data.frame(
+    study = "A", type = "mean", value = 7.2, n = 100,
+    stringsAsFactors = FALSE
+  )
+  expect_warning(
+    suppressMessages(as_epidist_estimates_data(minimal)),
+    "adjusted for right truncation"
+  )
+  # A finite observation time means the study is assumed not to have adjusted,
+  # which is announced as a message rather than a warning.
+  finite <- minimal
+  finite$relative_obs_time <- 20
+  expect_no_warning(
+    msgs <- capture_messages(as_epidist_estimates_data(finite))
+  )
+  expect_true(any(grepl("did not adjust", msgs, fixed = TRUE)))
+  # An explicit column is neither warned about nor messaged.
+  explicit <- minimal
+  explicit$trunc_adjusted <- TRUE
+  expect_no_warning(
+    msgs <- capture_messages(as_epidist_estimates_data(explicit))
+  )
+  expect_false(any(grepl("trunc_adjusted", msgs, fixed = TRUE)))
+})
+
+test_that("as_epidist_estimates_data rejects a mean beyond the observation time of an unadjusted study", { # nolint: line_length_linter.
+  bad <- est_df
+  bad$value[1] <- 25
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(bad)),
+    "at or beyond its observation time"
+  )
+  adjusted <- bad
+  adjusted$trunc_adjusted[1:2] <- TRUE
+  adjusted$relative_obs_time[1:2] <- Inf
+  expect_no_error(suppressMessages(as_epidist_estimates_data(adjusted)))
+})
+
+test_that("as_epidist_estimates_data rejects a standard error of zero", {
+  bad <- est_df
+  bad$se <- c(0.4, 0, NA, NA)
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(bad)),
+    "standard error.*greater than zero"
+  )
+})
+
+test_that("as_epidist_estimates_data rejects a standard deviation of zero", {
+  bad <- est_df
+  bad$value[2] <- 0
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(bad)),
+    "standard deviation.*greater than zero"
+  )
+})
+
+test_that("as_epidist_estimates_data requires a whole number censoring adjustment code", { # nolint: line_length_linter.
+  bad <- est_df
+  bad$cens_adjusted[1] <- 1.5
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(bad)),
+    "Assertion on 'cens_adjusted' failed"
+  )
+  bad$cens_adjusted[1] <- NA
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(bad)),
+    "Assertion on 'cens_adjusted' failed"
+  )
 })
 
 test_that("as_epidist_estimates_data errors on an unsupported summary type", {
