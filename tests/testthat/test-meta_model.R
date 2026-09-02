@@ -1930,17 +1930,61 @@ test_that(".meta_node_quantile inverts the implied distribution function", {
     )
     nodes <- .meta_implied_nodes("plnorm", args, slots)
     # A discrete estimand is inverted on its own grid, so its round trip is
-    # exact. A continuous one is only as accurate as the interpolation.
+    # exact. A continuous one is inverted through the family quantile
+    # function where one exists, and otherwise refined by Newton steps from
+    # the bracketing chord, so neither is limited by the node spacing.
     for (p in c(0.1, 0.5, 0.9)) {
-      value <- .meta_node_quantile(nodes, p)
+      value <- .meta_node_quantile(nodes, p, "plnorm", args, slots)
       round_trip <- .meta_implied_probs(value, "plnorm", args, slots)
       if (cens_adjusted %in% c(0, 3)) {
         expect_equal(round_trip, p, tolerance = 1e-12)
+      } else if (cens_adjusted == 1) {
+        expect_lt(abs(round_trip - p), 1e-10)
       } else {
-        expect_lt(abs(round_trip - p), 5e-3)
+        expect_lt(abs(round_trip - p), 1e-8)
+      }
+      # The chord alone is only as accurate as the node spacing.
+      chord <- .meta_node_quantile(nodes, p)
+      if (!cens_adjusted %in% c(0, 3)) {
+        expect_gt(
+          abs(.meta_implied_probs(chord, "plnorm", args, slots) - p), 1e-5
+        )
       }
     }
   }
+})
+
+test_that(".meta_node_quantile refines a gamma estimand by Newton steps", {
+  args <- list(shape = 3, scale = 2.5)
+  for (cens_adjusted in c(1, 2)) {
+    slots <- list(
+      lower = 1, cutoff = 60, pwindow = 1, swindow = 1,
+      trunc_adjusted = 0L, cens_adjusted = cens_adjusted, growth_rate = 0,
+      trunc_design = 0L
+    )
+    nodes <- .meta_implied_nodes("pgamma", args, slots)
+    for (p in c(0.1, 0.5, 0.9)) {
+      value <- .meta_node_quantile(nodes, p, "pgamma", args, slots)
+      round_trip <- .meta_implied_probs(value, "pgamma", args, slots)
+      expect_lt(abs(round_trip - p), 1e-8)
+    }
+  }
+})
+
+test_that(".meta_node_quantile leaves an accrual estimand on its chord", {
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  slots <- list(
+    lower = 0, cutoff = 40, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 1L, growth_rate = 0.1,
+    trunc_design = 1L
+  )
+  nodes <- .meta_implied_nodes("plnorm", args, slots)
+  # The accrual estimand is defined by linear interpolation between its
+  # nodes, so the chord is already its exact inverse.
+  expect_identical(
+    .meta_node_quantile(nodes, 0.5, "plnorm", args, slots),
+    .meta_node_quantile(nodes, 0.5)
+  )
 })
 
 test_that(".meta_node_quantile conditions on delay_min", {
