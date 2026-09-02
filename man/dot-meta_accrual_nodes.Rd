@@ -11,7 +11,8 @@
   cutoff,
   pwindow,
   cens_adjusted,
-  growth_rate
+  growth_rate,
+  n_quad = .meta_n_quad()
 )
 }
 \arguments{
@@ -28,10 +29,13 @@
 4.}
 
 \item{growth_rate}{The exponential growth rate of primary events.}
+
+\item{n_quad}{The number of quadrature intervals, an even number. Rows
+built by \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}} carry the number chosen for their
+study by \code{\link[=.estimates_n_quad]{.estimates_n_quad()}}.}
 }
 \value{
-A distribution function at \code{.meta_n_quad() + 1} equally spaced
-nodes.
+A distribution function at \code{n_quad + 1} equally spaced nodes.
 }
 \description{
 The weight is offset by half a primary window for the uniform single

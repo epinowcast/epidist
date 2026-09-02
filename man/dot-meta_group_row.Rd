@@ -4,7 +4,7 @@
 \alias{.meta_group_row}
 \title{Build a single meta model row from one group of summary estimates}
 \usage{
-.meta_group_row(estimates, vcov = NULL)
+.meta_group_row(estimates, vcov = NULL, n_quad = .meta_n_quad())
 }
 \arguments{
 \item{estimates}{The rows of an \code{epidist_estimates_data} object making up
@@ -12,6 +12,9 @@ one group.}
 
 \item{vcov}{The covariance matrix over the group's summaries, or \code{NULL}
 where the study reported standard errors or a sample size instead.}
+
+\item{n_quad}{The number of quadrature intervals the group's study is
+evaluated on, from \code{\link[=.estimates_n_quad]{.estimates_n_quad()}}.}
 }
 \value{
 A list with a one row tibble \code{row}, a tibble of its \code{members}, and

@@ -10,8 +10,8 @@
 \item{full}{A summary vector from \code{\link[=.meta_moment_vector]{.meta_moment_vector()}} of the
 untruncated distribution.}
 
-\item{cdf}{The distribution function at \code{.meta_n_quad() + 1} equally spaced
-points running from zero to \code{lower}.}
+\item{cdf}{The distribution function at \code{n_quad + 1} equally spaced points
+running from zero to \code{lower}, for an even \code{n_quad}.}
 
 \item{lower}{The study's minimum delay (its left truncation point).}
 }

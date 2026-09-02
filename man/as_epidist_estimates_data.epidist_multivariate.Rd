@@ -64,7 +64,9 @@ set.seed(1)
 draws <- cbind(mean = rnorm(500, 7.5, 0.3), sd = rnorm(500, 3.6, 0.2))
 as_epidist_estimates_data(
   as_epidist_multivariate(draws),
-  study = "site A"
+  study = "site A",
+  trunc_adjusted = TRUE,
+  cens_adjusted = 1
 )
 }
 \seealso{

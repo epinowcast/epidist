@@ -11,7 +11,8 @@
   cutoff,
   pwindow,
   growth_rate,
-  accrual = 0L
+  accrual = 0L,
+  n_quad = .meta_n_quad()
 )
 }
 \arguments{
@@ -27,6 +28,10 @@
 \item{growth_rate}{The exponential growth rate of primary events.}
 
 \item{accrual}{1 to apply the accrual weight, 0 otherwise.}
+
+\item{n_quad}{The number of quadrature intervals, an even number. Rows
+built by \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}} carry the number chosen for their
+study by \code{\link[=.estimates_n_quad]{.estimates_n_quad()}}.}
 }
 \value{
 A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and

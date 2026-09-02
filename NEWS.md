@@ -166,7 +166,7 @@ A zero growth rate accrual design skips its exponential terms.
 R post-processing batches and caches implied summaries across grouped rows sharing a design.
 See #620.
 - The quadrature resolution used for truncated continuous moments is now set by `options(epidist.meta_n_quad = )`, defaulting to 100 intervals.
-The value is substituted into the Stan code when the model is compiled, so the R and Stan implementations always agree.
+This is the floor of the resolution chosen per study, see below.
 See #620.
 - Added `as_epidist_multivariate()`, which summarises draws of a set of parameters by their mean vector and covariance matrix, over an optional trajectory index.
 Passing the result to `as_epidist_estimates_data()` gives a vector of reported summaries with the covariance between them, fitted as a multivariate normal.
@@ -216,9 +216,22 @@ See #620.
 - The accrual weight on the discrete grid now cuts each reporting cell at the primary windows it spans, so it is exact for unequal censoring windows whenever the collection window is a multiple of `pwindow`.
 Weighting at the cell's lower edge put the implied mean 12 to 36% low for a daily primary and weekly secondary window.
 See #620.
-- `as_epidist_estimates_data()` warns when the quadrature nodes of a study are far apart relative to its reported mean or median, pointing at `options(epidist.meta_n_quad)` and `max_delay`.
+- The meta model now chooses its quadrature resolution per study from the spread the study reported, so that the node spacing is at most a quarter of that spread, with `options(epidist.meta_n_quad)` as the floor and 2000 intervals as a cap the option lifts when set above it.
+The number travels with each summary row as its `n_quad` slot rather than being compiled into the Stan code.
+Before this a fixed 100 intervals over the default `max_delay` put the implied standard deviation of a delay with a coefficient of variation of 0.05 out by a factor of two and pinned its kurtosis at the floor, which made a reported standard deviation almost infinitely precise.
+`as_epidist_estimates_data()` now warns only when the cap leaves a study unresolved.
 See #620.
 - A draw whose implied moments overflow is rejected on every meta model moment row rather than returning `NaN` for an ungrouped standard deviation.
+The analytic moments themselves now reject such a draw in Stan and return the failure vector in R, so a covariance row rejects a very wide draw instead of carrying an infinite gradient, and the posterior predictive of such a draw is `NA` rather than a `NaN` standard error.
+See #620.
+- The meta model no longer evaluates the primary censored distribution function at grid or quadrature nodes deep in the lower tail of a narrow delay, where the Stan function of `primarycensored` has a finite value with a `NaN` gradient.
+A node whose log distribution function is certainly below -100, decided from a closed form bound on the parameters, is treated as holding no mass in both implementations.
+CmdStan's gradient diagnostic now passes on every design of the meta vignette at a log standard deviation of 0.03, where four of them could not start before.
+See #620.
+- Fixed two gaps in the Stan mirror of a left truncated midpoint code: the delay scale quantile path sized its nodes from the unshifted `delay_min`, and the Newton refinement of an implied quantile normalised from `delay_min` rather than the moved left truncation point of a code 4 study.
+The Stan crossing cell of a single integer day quantile also takes its binomial upper tail through the accurate side, which had put it 5e-3 away from R at a poorly fitting draw.
+See #620.
+- `as_epidist_estimates_data()` rejects a `cens_adjusted = 4` study whose `delay_min` plus half its `pwindow` reaches the grid cutoff.
 See #620.
 
 ## Documentation

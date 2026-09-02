@@ -14,19 +14,14 @@ A character vector of study identifiers whose quadrature is
 coarse.
 }
 \description{
-The moments and distribution function of a continuous estimand that is
-truncated at the grid cutoff are computed by Simpson's rule on
-\code{.meta_n_quad()} equally spaced intervals running from \code{delay_min} to the
-cutoff, so the node spacing is set by the cutoff and not by the scale of
-the delay. This covers a study that did not adjust for right truncation
-and used a continuous adjustment (\code{cens_adjusted} of 1, 2 or 4), a study
-that did adjust but whose primary events were not uniform within their
-window (\code{cens_adjusted} of 2 or 4 with a non zero \code{growth_rate}), and the
+The number of quadrature intervals of \code{\link[=.estimates_n_quad]{.estimates_n_quad()}} is capped, so
+a study whose grid cutoff is very long relative to the spread it reported
+is left with nodes further apart than a quarter of that spread. This
+covers a study that did not adjust for right truncation and used a
+continuous adjustment (\code{cens_adjusted} of 1, 2 or 4), a study that did
+adjust but whose primary events were not uniform within their window
+(\code{cens_adjusted} of 2 or 4 with a non zero \code{growth_rate}), and the
 quantile members of a covariance matrix group, which are read off the
-same nodes. A spacing wider than a quarter of the smallest reported mean
-or median leaves the delay distribution poorly resolved, which for a heavy
-tailed delay at the default \code{max_delay} moves the implied mean by several
-percent. Since the resolution is compiled into the model this is flagged
-here rather than adapted per study.
+same nodes.
 }
 \keyword{internal}

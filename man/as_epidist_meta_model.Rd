@@ -104,8 +104,11 @@ implied mean 0.8\% high at a growth rate of 0.05 and 2.6\% high at 0.2.
 Two settings trade accuracy against speed: \code{max_delay} in
 \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}}, which sets the grid a study that adjusted for
 right truncation is summarised on and needs raising for a long tailed delay,
-and \code{options(epidist.meta_n_quad = )}, which sets the number of quadrature
-nodes used where a study is summarised by quadrature instead.
+and \code{options(epidist.meta_n_quad = )}, the smallest number of quadrature
+intervals used where a study is summarised by quadrature instead. Each
+study is given as many intervals as it needs to resolve the spread it
+reported, up to a cap of 2000 that the option lifts when set above it, and
+the number is held in the \code{n_quad} column of the model data.
 }
 
 \seealso{

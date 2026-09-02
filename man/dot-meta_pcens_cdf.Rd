@@ -25,6 +25,9 @@ Primary distributions without an analytical solution are integrated
 numerically, which can return a non finite or negative cumulative
 probability deep in the lower tail. Those cases carry negligible
 probability and are treated as zero, matching the guard in
-\code{inst/stan/meta_model/functions.stan}.
+\code{inst/stan/meta_model/functions.stan}. A delay whose plain distribution
+function is below the cut of \code{\link[=.meta_log_cdf_floor]{.meta_log_cdf_floor()}} is severed to zero
+before the primary censored function is called, as it is in Stan, since
+the primary censored distribution function is never above the plain one.
 }
 \keyword{internal}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/meta_summaries.R
 \name{.meta_n_quad}
 \alias{.meta_n_quad}
-\title{The number of quadrature intervals used for truncated continuous moments}
+\title{The smallest number of quadrature intervals used for a summary row}
 \usage{
 .meta_n_quad()
 }
@@ -11,6 +11,10 @@ An integer number of intervals.
 }
 \description{
 Set with \code{options(epidist.meta_n_quad = )}, as an even number of at least
-two. Set it before fitting, since it is compiled into the model.
+two. Each summary row carries its own number of intervals in its \code{n_quad}
+slot, chosen by \code{\link[=.estimates_n_quad]{.estimates_n_quad()}} from the spread the study reported
+so that the quadrature resolves the delay, and this is the floor of that
+choice. Set it before building the model data, since the slot is filled
+in then. It also lifts the cap of \code{\link[=.meta_n_quad_max]{.meta_n_quad_max()}} when set above it.
 }
 \keyword{internal}

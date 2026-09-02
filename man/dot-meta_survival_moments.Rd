@@ -7,8 +7,8 @@
 .meta_survival_moments(cdf, lower = 0, cutoff)
 }
 \arguments{
-\item{cdf}{The distribution function at \code{.meta_n_quad() + 1} equally spaced
-points running from \code{lower} to \code{cutoff}.}
+\item{cdf}{The distribution function at \code{n_quad + 1} equally spaced points
+running from \code{lower} to \code{cutoff}, for an even \code{n_quad}.}
 
 \item{lower}{The study's minimum delay (its left truncation point).}
 
