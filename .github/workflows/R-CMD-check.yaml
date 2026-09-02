@@ -48,15 +48,13 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
-          extra-repositories: 'https://stan-dev.r-universe.dev'
+          extra-repositories: 'https://stan-dev.r-universe.dev https://mrc-ide.r-universe.dev'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Install epireview (vignette dependency, not on CRAN)
-        run: Rscript -e 'if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes", repos = "https://cloud.r-project.org"); remotes::install_github("mrc-ide/epireview", upgrade = "never", quiet = TRUE)'
 
       - name: Install cmdstan
         uses: epinowcast/actions/install-cmdstan@v1

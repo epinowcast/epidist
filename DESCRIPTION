@@ -54,6 +54,7 @@ Suggests:
     bookdown,
     cmdstanr,
     collapse,
+    epireview,
     ggplot2,
     knitr,
     loo,
@@ -73,7 +74,8 @@ Suggests:
     tidybayes,
     usethis
 Additional_repositories:
-    https://stan-dev.r-universe.dev
+    https://stan-dev.r-universe.dev,
+    https://mrc-ide.r-universe.dev
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
