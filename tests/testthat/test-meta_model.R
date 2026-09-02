@@ -2063,6 +2063,99 @@ test_that(".meta_n_quad changes the accuracy of the truncated moments", {
   expect_equal(fine[["mean"]], coarse[["mean"]], tolerance = 0.05)
 })
 
+test_that("the quadrature resolution of a study follows its reported spread", { # nolint: line_length_linter.
+  # The truncated moments and the nodes of a continuous estimand are Simpson
+  # sums over [delay_min, cutoff], so a fixed number of intervals leaves a
+  # narrow delay unresolved on a wide grid. At the default max_delay of
+  # twenty times the largest reported value that is a spacing of four
+  # standard deviations at a coefficient of variation of 0.05, which pins
+  # the kurtosis at its floor and puts the standard deviation out by more
+  # than a factor of two. The resolution is therefore chosen per study from
+  # its reported spread, and held in the n_quad slot of its rows.
+  mean_delay <- 7
+  cutoff <- 20 * mean_delay
+  trunc_lnorm <- function(args, cutoff) {
+    z <- (log(cutoff) - args$meanlog) / args$sdlog
+    raw <- vapply(
+      1:4,
+      function(k) {
+        return(
+          exp(k * args$meanlog + k^2 * args$sdlog^2 / 2) *
+            stats::pnorm(z - k * args$sdlog) / stats::pnorm(z)
+        )
+      },
+      numeric(1)
+    )
+    return(.meta_central_from_raw(raw))
+  }
+  row_slots <- function(meta, study) {
+    row <- meta[meta$study == study, ]
+    return(list(
+      lower = row$delay_min, cutoff = row$relative_obs_time,
+      pwindow = row$pwindow, swindow = row$swindow,
+      trunc_adjusted = row$trunc_adjusted, cens_adjusted = row$cens_adjusted,
+      growth_rate = row$growth_rate, trunc_design = row$trunc_design,
+      n_quad = row$n_quad
+    ))
+  }
+  for (cv in c(0.05, 0.1, 0.2, 0.5)) {
+    var_log <- log1p(cv^2)
+    args <- list(
+      meanlog = log(mean_delay) - var_log / 2, sdlog = sqrt(var_log)
+    )
+    estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+      study = c("cohort", "cohort", "growth", "growth"),
+      type = c("mean", "sd", "mean", "sd"),
+      value = c(mean_delay, cv * mean_delay, mean_delay, cv * mean_delay),
+      n = 200,
+      relative_obs_time = c(cutoff, cutoff, Inf, Inf),
+      trunc_adjusted = c(FALSE, FALSE, TRUE, TRUE),
+      cens_adjusted = c(1, 1, 2, 2),
+      growth_rate = c(0, 0, 0.1, 0.1),
+      stringsAsFactors = FALSE
+    )))
+    expect_identical(estimates$max_delay[3], cutoff)
+    meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+    expect_true(all(meta$n_quad >= .meta_n_quad()))
+    expect_true(all(meta$n_quad %% 2 == 0))
+    # A truncated continuous study has the closed form truncated lognormal
+    # moments as its reference.
+    cohort <- .meta_row_moments(row_slots(meta, "cohort"), "plnorm", args)
+    exact <- trunc_lnorm(args, cutoff)
+    expect_equal(cohort[["mean"]], exact[["mean"]], tolerance = 1e-4)
+    expect_equal(cohort[["sd"]], exact[["sd"]], tolerance = 1e-2)
+    expect_equal(cohort[["kurtosis"]], exact[["kurtosis"]], tolerance = 1e-2)
+    # A growing primary event has no closed form, so a fine evaluation of the
+    # same quadrature stands in for it, for the moments and for the chord
+    # inverse an implied quantile is read off.
+    slots <- row_slots(meta, "growth")
+    growth <- .meta_row_moments(slots, "plnorm", args)
+    q90 <- .meta_node_quantile(.meta_implied_nodes("plnorm", args, slots), 0.9)
+    slots$n_quad <- 20000L
+    fine <- .meta_row_moments(slots, "plnorm", args)
+    q90_fine <- .meta_node_quantile(
+      .meta_implied_nodes("plnorm", args, slots), 0.9
+    )
+    expect_equal(growth[["mean"]], fine[["mean"]], tolerance = 1e-4)
+    expect_equal(growth[["sd"]], fine[["sd"]], tolerance = 1e-2)
+    expect_equal(growth[["kurtosis"]], fine[["kurtosis"]], tolerance = 1e-2)
+    expect_equal(q90, q90_fine, tolerance = 1e-2)
+  }
+  # A narrow delay needs more intervals than a wide one, and the floor set by
+  # the option still applies.
+  narrow <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = c("narrow", "narrow", "wide", "wide"),
+    type = c("mean", "sd", "mean", "sd"),
+    value = c(7, 0.35, 7, 3.5), n = 200, relative_obs_time = 140,
+    trunc_adjusted = FALSE, cens_adjusted = 1, stringsAsFactors = FALSE
+  )))
+  restore <- options(epidist.meta_n_quad = 200L)
+  on.exit(options(restore), add = TRUE)
+  meta <- suppressMessages(as_epidist_meta_model(estimates = narrow))
+  expect_gt(meta$n_quad[meta$study == "narrow"], 1000)
+  expect_identical(meta$n_quad[meta$study == "wide"], 200L)
+})
+
 test_that(".meta_row_draw_moments caches implied summaries across rows", {
   rm(list = ls(.meta_draws), envir = .meta_draws)
   args <- list(meanlog = 1.6, sdlog = 0.6)
