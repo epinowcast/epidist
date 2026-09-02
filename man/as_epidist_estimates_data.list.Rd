@@ -18,8 +18,14 @@ order and in any grouping.
 }
 \examples{
 as_epidist_estimates_data(list(
-  epidist_estimates_summaries("A", mean = 7.5, sd = 3.6, n = 120),
-  epidist_estimates_summaries("B", mean = 6.9, n = 80)
+  epidist_estimates_summaries(
+    "A",
+    mean = 7.5, sd = 3.6, n = 120, trunc_adjusted = TRUE
+  ),
+  epidist_estimates_summaries(
+    "B",
+    mean = 6.9, n = 80, relative_obs_time = 20, trunc_adjusted = FALSE
+  )
 ))
 }
 \seealso{

@@ -16,7 +16,10 @@ An object carrying the class has already been checked, and the \code{epidist_dat
 methods re-check it whenever it is modified, so nothing is done here.
 }
 \examples{
-estimates <- epidist_estimates_summaries("A", mean = 7.5, n = 120)
+estimates <- epidist_estimates_summaries(
+  "A",
+  mean = 7.5, n = 120, trunc_adjusted = TRUE
+)
 identical(as_epidist_estimates_data(estimates), estimates)
 }
 \seealso{

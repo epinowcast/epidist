@@ -291,8 +291,14 @@ as_epidist_estimates_data.data.frame <- function(
 #' @export
 #' @examples
 #' as_epidist_estimates_data(list(
-#'   epidist_estimates_summaries("A", mean = 7.5, sd = 3.6, n = 120),
-#'   epidist_estimates_summaries("B", mean = 6.9, n = 80)
+#'   epidist_estimates_summaries(
+#'     "A",
+#'     mean = 7.5, sd = 3.6, n = 120, trunc_adjusted = TRUE
+#'   ),
+#'   epidist_estimates_summaries(
+#'     "B",
+#'     mean = 6.9, n = 80, relative_obs_time = 20, trunc_adjusted = FALSE
+#'   )
 #' ))
 as_epidist_estimates_data.list <- function(data, ...) {
   if (length(data) == 0) {
@@ -316,7 +322,10 @@ as_epidist_estimates_data.list <- function(data, ...) {
 #' @family estimates_data
 #' @export
 #' @examples
-#' estimates <- epidist_estimates_summaries("A", mean = 7.5, n = 120)
+#' estimates <- epidist_estimates_summaries(
+#'   "A",
+#'   mean = 7.5, n = 120, trunc_adjusted = TRUE
+#' )
 #' identical(as_epidist_estimates_data(estimates), estimates)
 as_epidist_estimates_data.epidist_estimates_data <- function(data, ...) {
   return(data)
