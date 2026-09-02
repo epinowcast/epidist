@@ -15,7 +15,8 @@ meta_log_lik_program <- function(meta) {
   meta_family <- epidist_family(meta, family = lognormal())
   meta_formula <- epidist_formula(meta, meta_family, formula = bf(mu ~ 1))
   stanvars <- epidist_stancode(
-    meta, family = meta_family, formula = meta_formula
+    meta,
+    family = meta_family, formula = meta_formula
   )
   standata <- suppressMessages(epidist(meta, fn = brms::make_standata))
   slots <- meta_slot_names()

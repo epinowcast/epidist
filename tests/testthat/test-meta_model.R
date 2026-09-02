@@ -1334,7 +1334,8 @@ test_that(".meta_summary_terms reads the implied quantile of a naive study off i
   terms <- .meta_summary_terms(slots, "plnorm", args)
   nodes <- .meta_implied_nodes("plnorm", args, slots)
   expect_equal(
-    terms[["implied"]], .meta_node_quantile(nodes, 0.6), tolerance = 1e-12
+    terms[["implied"]], .meta_node_quantile(nodes, 0.6),
+    tolerance = 1e-12
   )
   expect_identical(terms[["se"]], 0.6)
 })
@@ -1579,8 +1580,10 @@ test_that(".meta_quantile_set_ll reads a single integer day quantile as its cros
     list(cens_adjusted = 0L, trunc_design = 1L, growth_rate = 0.1)
   )) {
     slots <- c(
-      list(lower = 0, cutoff = 30, pwindow = 1, swindow = 1,
-           trunc_adjusted = 0L),
+      list(
+        lower = 0, cutoff = 30, pwindow = 1, swindow = 1,
+        trunc_adjusted = 0L
+      ),
       design
     )
     shift <- .meta_cens_shift(design$cens_adjusted, 1, 1)
@@ -1605,7 +1608,8 @@ test_that(".meta_quantile_set_ll reads a single integer day quantile as its cros
       lower <- log_tail(k, grid_cdf[y + 1])
       expected <- upper + log(-expm1(lower - upper))
       actual <- .meta_quantile_set_ll(
-        y + shift, round(n * p), n, "plnorm", args, slots, p = p
+        y + shift, round(n * p), n, "plnorm", args, slots,
+        p = p
       )
       expect_equal(actual, expected, tolerance = 1e-8)
       # The tails are taken on the log scale, so a crossing the estimand
@@ -1620,7 +1624,8 @@ test_that(".meta_quantile_set_ll reads a single integer day quantile as its cros
       function(m) {
         return(.meta_quantile_set_ll(
           5 + shift, 500L, n, "plnorm", list(meanlog = m, sdlog = 0.5),
-          slots, p = 0.5
+          slots,
+          p = 0.5
         ))
       },
       numeric(1)
@@ -1663,10 +1668,12 @@ test_that(".meta_quantile_set_ll merges coincident reported quantiles into one c
   # constraints on the empirical distribution function at the same cell,
   # which the multinomial reads as one cell holding both counts.
   merged <- .meta_quantile_set_ll(
-    c(4, 5, 5), counts, n, "plnorm", args, slots, p = p
+    c(4, 5, 5), counts, n, "plnorm", args, slots,
+    p = p
   )
   direct <- .meta_quantile_set_ll(
-    c(4, 5), counts[c(1, 3)], n, "plnorm", args, slots, p = p[c(1, 3)]
+    c(4, 5), counts[c(1, 3)], n, "plnorm", args, slots,
+    p = p[c(1, 3)]
   )
   expect_equal(merged, direct, tolerance = 1e-12)
   expect_true(is.finite(merged))
@@ -2458,7 +2465,8 @@ test_that(".meta_implied_moments of a truncation adjusted study conditions on de
       numeric(1)
     )
     tail_mass <- stats::plnorm(
-      lower, args$meanlog, args$sdlog, lower.tail = FALSE
+      lower, args$meanlog, args$sdlog,
+      lower.tail = FALSE
     )
     return(.meta_central_from_raw(raw_moment / tail_mass))
   }
@@ -2497,7 +2505,8 @@ test_that(".meta_implied_moments of a truncation adjusted study conditions on de
       # The reported quantiles of the same study describe the same estimand.
       median <- stats::qlnorm(
         1 - 0.5 * stats::plnorm(
-          delay_min, args$meanlog, args$sdlog, lower.tail = FALSE
+          delay_min, args$meanlog, args$sdlog,
+          lower.tail = FALSE
         ),
         args$meanlog, args$sdlog
       )
@@ -3085,14 +3094,16 @@ test_that("as_epidist_meta_model defaults to a uniform primary event", {
 
 test_that("an expgrowth primary event adds a pgrowth parameter to the meta model", { # nolint: line_length_linter.
   model <- suppressMessages(as_epidist_meta_model(
-    sim_obs, estimates = sim_estimates, primary = "expgrowth"
+    sim_obs,
+    estimates = sim_estimates, primary = "expgrowth"
   ))
   expect_identical(attr(model, "primary"), "expgrowth")
   family <- epidist_family(model)
   expect_identical(family$primary, "expgrowth")
   expect_true("pgrowth" %in% family$dpars)
   code <- suppressMessages(epidist(
-    model, formula = brms::bf(mu ~ 1, pgrowth ~ 1), fn = brms::make_stancode
+    model,
+    formula = brms::bf(mu ~ 1, pgrowth ~ 1), fn = brms::make_stancode
   ))
   expect_match(code, "b_pgrowth", fixed = TRUE)
   # The registry id selects expgrowth within primarycensored for the
@@ -3104,7 +3115,8 @@ test_that("an expgrowth primary event adds a pgrowth parameter to the meta model
 
 test_that("the meta model accepts an expgrowth primary event for aggregate data", { # nolint: line_length_linter.
   model <- suppressMessages(as_epidist_meta_model(
-    agg_sim_obs, primary = "expgrowth"
+    agg_sim_obs,
+    primary = "expgrowth"
   ))
   expect_identical(attr(model, "primary"), "expgrowth")
   expect_true("pgrowth" %in% epidist_family(model)$dpars)
@@ -3112,7 +3124,8 @@ test_that("the meta model accepts an expgrowth primary event for aggregate data"
 
 test_that("the meta model primary event survives the data transform", {
   model <- suppressMessages(as_epidist_meta_model(
-    sim_obs, estimates = sim_estimates, primary = "expgrowth"
+    sim_obs,
+    estimates = sim_estimates, primary = "expgrowth"
   ))
   family <- epidist_family(model)
   formula <- epidist_formula(model, family, brms::bf(mu ~ 1, pgrowth ~ 1))
@@ -3145,7 +3158,8 @@ test_that("summaries only meta models are uniform and refuse a primary event", {
 
 test_that("the meta model log likelihood uses the fitted primary event for individual rows", { # nolint: line_length_linter.
   model <- suppressMessages(as_epidist_meta_model(
-    sim_obs, primary = "expgrowth"
+    sim_obs,
+    primary = "expgrowth"
   ))
   family <- epidist_family(model)
   prep <- structure(
@@ -3198,7 +3212,8 @@ test_that("the meta model log likelihood uses the fitted primary event for indiv
 
 test_that("the meta model posterior predictions use the fitted primary event", { # nolint: line_length_linter.
   model <- suppressMessages(as_epidist_meta_model(
-    sim_obs, primary = "expgrowth"
+    sim_obs,
+    primary = "expgrowth"
   ))
   family <- epidist_family(model)
   prep <- structure(

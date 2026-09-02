@@ -338,10 +338,12 @@ test_that("the Stan grid and truncated moments match independent references", { 
       expect_equal(moments[1], exact[["mean"]], tolerance = tolerance)
       expect_equal(moments[2], exact[["sd"]], tolerance = tolerance)
       expect_equal(
-        moments[3], exact[["kurtosis"]], tolerance = shape_tolerance
+        moments[3], exact[["kurtosis"]],
+        tolerance = shape_tolerance
       )
       expect_equal(
-        moments[4], exact[["skewness"]], tolerance = shape_tolerance
+        moments[4], exact[["skewness"]],
+        tolerance = shape_tolerance
       )
     }
   }
@@ -534,8 +536,10 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
       # tolerance; every refined design agrees to machine precision.
       tolerance <- ifelse(designs$growth[i] == 0, 1e-10, 1e-6)
       expect_equal(stan_quantile, r_quantile, tolerance = tolerance)
-      chord <- vapply(probs, function(p) .meta_node_quantile(nodes, p),
-        numeric(1))
+      chord <- vapply(
+        probs, function(p) .meta_node_quantile(nodes, p),
+        numeric(1)
+      )
       if (designs$cens[i] %in% c(0, 3) || designs$design[i] == 1 ||
         designs$growth[i] != 0) {
         expect_identical(r_quantile, chord)
@@ -606,7 +610,8 @@ test_that("the meta model log density has finite gradients or rejects at narrow 
       )
       return(do.call(as_epidist_estimates_data, c(
         list(
-          as_epidist_multivariate(draws), study = study, family = "lognormal"
+          as_epidist_multivariate(draws),
+          study = study, family = "lognormal"
         ),
         metadata
       )))
@@ -825,7 +830,8 @@ test_that("epidist.epidist_meta_model Stan code has no syntax errors with an exp
   skip_on_cran()
   skip_if_no_cmdstanr()
   model <- suppressMessages(as_epidist_meta_model(
-    sim_obs, estimates = sim_estimates, primary = "expgrowth"
+    sim_obs,
+    estimates = sim_estimates, primary = "expgrowth"
   ))
   stancode <- suppressMessages(epidist(
     data = model,
@@ -857,7 +863,8 @@ test_that("epidist.epidist_meta_model with an expgrowth primary event recovers t
     simulate_dates(outbreak_start_date = as.Date("2024-01-01"))
   linelist <- suppressMessages(as_epidist_linelist_data(obs))
   growth_prior <- brms::prior(
-    normal(0.5, 0.1), class = "Intercept", dpar = "pgrowth"
+    normal(0.5, 0.1),
+    class = "Intercept", dpar = "pgrowth"
   )
   fit_meta_growth <- suppressMessages(epidist(
     data = as_epidist_meta_model(linelist, primary = "expgrowth"),
@@ -1070,7 +1077,8 @@ test_that("the meta model recovers the truth from every bias code", {
     # left truncated at 2 as well, and two chains split between the modes.
     # The study therefore also reports its quartiles, as one would.
     recovery_design(
-      "cens1_adjusted", 1, TRUE, "cohort", delay_min = 2,
+      "cens1_adjusted", 1, TRUE, "cohort",
+      delay_min = 2,
       report = "moments_quartiles"
     ),
     recovery_design("cens2_cohort", 2, FALSE, "cohort"),
@@ -1078,7 +1086,8 @@ test_that("the meta model recovers the truth from every bias code", {
     recovery_design("cens3_cohort", 3, FALSE, "cohort"),
     recovery_design("cens4_cohort", 4, FALSE, "cohort"),
     recovery_design(
-      "mvn_quantiles", 1, TRUE, "cohort", report = "quantile_draws"
+      "mvn_quantiles", 1, TRUE, "cohort",
+      report = "quantile_draws"
     )
   )
   cohort_times <- c(12, 16, 20, 25, 30)
@@ -1121,7 +1130,8 @@ test_that("the meta model recovers the truth from every bias code", {
     return(c(design = design$name, round(posterior, 3)))
   })
   message(paste(utils::capture.output(print(
-    do.call(rbind, results), quote = FALSE
+    do.call(rbind, results),
+    quote = FALSE
   )), collapse = "\n"))
 })
 
@@ -1157,7 +1167,8 @@ test_that("the meta model is calibrated over repeated studies", {
   fit_replicate <- function(seed, report, size, obs_time) {
     set.seed(seed)
     fit <- recovery_fit(
-      replicate_study(report, size, obs_time), iter = 600, seed = seed
+      replicate_study(report, size, obs_time),
+      iter = 600, seed = seed
     )
     pred <- delay_parameter_draws(fit)
     return(c(
@@ -1177,7 +1188,8 @@ test_that("the meta model is calibrated over repeated studies", {
     # The first fit compiles the model before the rest run in parallel.
     first <- fit_replicate(1, report, size, obs_time)
     rest <- parallel::mclapply(
-      seq_len(n_rep)[-1], fit_replicate, report = report, size = size,
+      seq_len(n_rep)[-1], fit_replicate,
+      report = report, size = size,
       obs_time = obs_time, mc.cores = 4
     )
     return(do.call(rbind, c(list(first), rest)))
