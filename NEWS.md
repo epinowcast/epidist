@@ -202,8 +202,6 @@ See #620.
 - Added a vignette showcasing the meta model on simulated data.
 Its case study builds nine studies, each applying a different estimation procedure to the same line list, so the recovery result tests every bias the model adjusts for.
 See #620.
-- The meta model is now a worked example in the extending vignette, since it adds both a data source and a model type.
-See #616 and #620.
 - The meta vignette is now precomputed from a `.Rmd.orig` source, so it ships with the package.
 See #619 and #620.
 - The meta vignette now works through the published Ebola onset to death estimates collated by `epireview`.
