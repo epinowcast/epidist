@@ -1407,6 +1407,46 @@
   }
 
   /**
+    * The log upper tail P(M >= m) of a binomial count, stable far into the
+    * tail. Six standard deviations above the mean, or below a probability
+    * of 1e-12, the tail is summed term by term on the log scale until the
+    * terms fall forty nats below the first, which is exact to that
+    * tolerance and, unlike binomial_lcdf, has finite partial derivatives
+    * there. Stan chains every node on the autodiff stack, so a
+    * distribution function that underflows poisons the gradient even where
+    * its value is discarded, which is why the switch is decided from the
+    * values before anything is evaluated. Matches .meta_log_binom_upper()
+    * in R.
+    */
+  real meta_family_log_binom_upper(data int m, data int size, real prob) {
+    if (m <= 0 || prob >= 1) {
+      return 0;
+    }
+    if (m > size) {
+      return negative_infinity();
+    }
+    if (prob < 1e-12 ||
+        (m - 1 - size * prob > 0 &&
+         (m - 1 - size * prob) ^ 2 > 36 * size * prob * (1 - prob))) {
+      real log_p = log(fmax(prob, 1e-300));
+      real log_q = log1m(prob);
+      real acc = lchoose(size, m) + m * log_p + (size - m) * log_q;
+      real top = acc;
+      for (i in (m + 1):size) {
+        real term = lchoose(size, i) + i * log_p + (size - i) * log_q;
+        if (term < top - 40) {
+          break;
+        }
+        acc = log_sum_exp(acc, term);
+      }
+      return acc;
+    }
+    return binomial_lcdf(size - m | size, 1 - prob);
+  }
+
+
+
+  /**
     * Log mass of a single quantile of integer day delays, read as the cell
     * in which the empirical distribution function crossed p (a type 1
     * quantile): N_{<= y - w} < ceil(n p) <= N_{<= y}, with the counts
@@ -1451,24 +1491,51 @@
     if (is_nan(edges[1]) || is_nan(edges[2])) {
       return negative_infinity();
     }
+    edges[1] = fmin(fmax(edges[1], 0), 1);
+    edges[2] = fmin(fmax(edges[2], 0), 1);
+    if (k < 1) {
+      return negative_infinity();
+    }
     {
-      // The upper tail P(X >= k) is taken as P(n - X <= n - k), because
-      // binomial_lccdf forms log(1 - P(X <= k - 1)) and loses the tail once
-      // it is near the resolution of a double, where pbinom() in R does
-      // not.
-      real log_upper = binomial_lcdf(
-        study_n - k | study_n, fmin(fmax(1 - edges[2], 0), 1)
-      );
-      real log_lower = binomial_lcdf(
-        study_n - k | study_n, fmin(fmax(1 - edges[1], 0), 1)
-      );
-      if (is_inf(log_lower)) {
-        return log_upper;
+      // The crossing N_{<= y - w} < k <= N_{<= y} is the difference of two
+      // binomial tails, taken on the side where both are small so that it
+      // does not cancel: the upper tails when the count the estimand
+      // expects at the cell is below k, the lower tails otherwise. Every
+      // tail goes through meta_family_log_binom_upper(), which stays
+      // finite far out. The difference itself underflows only when the
+      // estimand puts the reported quantile far into its tail, as it does
+      // at a random initial value, and the sum over the count below the
+      // cell then covers it. Matches .meta_grid_crossing_ll() in R.
+      real log_hi;
+      real log_lo;
+      if (k <= study_n * edges[1]) {
+        log_hi = meta_family_log_binom_upper(
+          study_n - k + 1, study_n, 1 - edges[1]
+        );
+        log_lo = meta_family_log_binom_upper(
+          study_n - k + 1, study_n, 1 - edges[2]
+        );
+      } else {
+        log_hi = meta_family_log_binom_upper(k, study_n, edges[2]);
+        log_lo = meta_family_log_binom_upper(k, study_n, edges[1]);
       }
-      if (is_inf(log_upper) || log_upper <= log_lower) {
-        return negative_infinity();
+      if (!is_inf(log_hi) && log_hi - log_lo > 1e-8) {
+        return log_diff_exp(log_hi, log_lo);
       }
-      return log_diff_exp(log_upper, log_lower);
+    }
+    {
+      real log_above = log(fmax(1 - edges[1], 1e-300));
+      real log_cell = log(fmax(edges[1], 1e-300));
+      real cell_mass = fmin(
+        fmax((edges[2] - edges[1]) / fmax(1 - edges[1], 1e-300), 1e-300), 1
+      );
+      vector[k] terms;
+      for (j in 0:(k - 1)) {
+        terms[j + 1] = lchoose(study_n, j) + (study_n - j) * log_above +
+          j * log_cell +
+          meta_family_log_binom_upper(k - j, study_n - j, cell_mass);
+      }
+      return log_sum_exp(terms);
     }
   }
 

@@ -2267,11 +2267,110 @@
   # Matches the rounding guard of the Stan mirror, so that n p landing on an
   # integer up to floating point error is not pushed up a count.
   k <- ceiling(study_n * p - 1e-9)
-  log_tail <- stats::pbinom(
-    k - 1, study_n, edges,
+  if (k < 1) {
+    return(-Inf)
+  }
+  # The crossing N_{<= y - w} < k <= N_{<= y} is the difference of two
+  # binomial tails, taken on the side where both are small so that it does
+  # not cancel: the upper tails when the count the estimand expects at the
+  # cell is below k, the lower tails otherwise. Every tail goes through
+  # .meta_log_binom_upper(), which stays finite far out. The difference
+  # itself underflows only when the estimand puts the reported quantile far
+  # into its tail, as it does at a random initial value, and the sum over
+  # the count below the cell then covers it.
+  if (k <= study_n * edges[1]) {
+    tails <- .meta_log_binom_upper(
+      study_n - k + 1, study_n, 1 - edges
+    )
+    log_hi <- tails[1]
+    log_lo <- tails[2]
+  } else {
+    tails <- .meta_log_binom_upper(k, study_n, edges)
+    log_hi <- tails[2]
+    log_lo <- tails[1]
+  }
+  if (is.finite(log_hi) && log_hi - log_lo > 1e-8) {
+    return(.meta_log_diff_exp(log_hi, log_lo))
+  }
+  log_above <- log(max(1 - edges[1], 1e-300))
+  log_cell <- log(max(edges[1], 1e-300))
+  cell_mass <- min(
+    max((edges[2] - edges[1]) / max(1 - edges[1], 1e-300), 1e-300), 1
+  )
+  j <- seq_len(k) - 1
+  log_count <- lchoose(study_n, j) + (study_n - j) * log_above +
+    j * log_cell
+  log_terms <- log_count +
+    .meta_log_binom_upper(k - j, study_n - j, cell_mass)
+  return(.meta_log_sum_exp(log_terms))
+}
+
+#' The log upper tail of a binomial count, stable far into the tail
+#'
+#' `P(M >= m)` for `M ~ Binomial(size, prob)`. Six standard deviations above
+#' the mean, or below a probability of 1e-12, the tail is summed term by
+#' term on the log scale until the terms fall forty nats below the first,
+#' which is exact to that tolerance and, unlike the distribution function,
+#' has finite partial derivatives there in Stan. Elsewhere it is the
+#' distribution function of the complement. Matches
+#' `meta_family_log_binom_upper()` in Stan.
+#'
+#' @param m The smallest count in the tail, a vector.
+#'
+#' @param size The number of trials, a vector.
+#'
+#' @param prob The success probability, a vector.
+#'
+#' @returns The log tail probabilities, recycled to the longest argument.
+#'
+#' @keywords internal
+.meta_log_binom_upper <- function(m, size, prob) {
+  len <- max(length(m), length(size), length(prob))
+  m <- rep_len(m, len)
+  size <- rep_len(size, len)
+  prob <- rep_len(prob, len)
+  out <- numeric(len)
+  out[m > size & prob < 1] <- -Inf
+  active <- m > 0 & m <= size & prob < 1
+  m <- m[active]
+  size <- size[active]
+  prob <- prob[active]
+  excess <- m - 1 - size * prob
+  far <- prob < 1e-12 |
+    (excess > 0 & excess^2 > 36 * size * prob * (1 - prob))
+  res <- numeric(length(m))
+  res[far] <- vapply(
+    which(far),
+    function(i) {
+      counts <- m[i]:size[i]
+      log_terms <- lchoose(size[i], counts) +
+        counts * log(max(prob[i], 1e-300)) +
+        (size[i] - counts) * log1p(-prob[i])
+      return(.meta_log_sum_exp(log_terms[log_terms >= log_terms[1] - 40]))
+    },
+    numeric(1)
+  )
+  res[!far] <- stats::pbinom(
+    m[!far] - 1, size[!far], prob[!far],
     lower.tail = FALSE, log.p = TRUE
   )
-  return(.meta_log_diff_exp(log_tail[2], log_tail[1]))
+  out[active] <- res
+  return(out)
+}
+
+#' A numerically stable log of a sum of exponentials
+#'
+#' @param x A numeric vector of log values.
+#'
+#' @returns `log(sum(exp(x)))`, or `-Inf` when every element is `-Inf`.
+#'
+#' @keywords internal
+.meta_log_sum_exp <- function(x) {
+  top <- max(x)
+  if (!is.finite(top)) {
+    return(top)
+  }
+  return(top + log(sum(exp(x - top))))
 }
 
 #' The joint log likelihood of a set of quantiles from one study

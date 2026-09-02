@@ -1632,7 +1632,44 @@ test_that(".meta_quantile_set_ll reads a single integer day quantile as its cros
     )
     expect_true(all(is.finite(profile)))
     expect_lte(max(profile), 0)
+    # A reported median far above every delay the estimand allows is a
+    # crossing the model finds very unlikely rather than impossible, so a
+    # random initial value does not give a log likelihood of -Inf.
+    far <- .meta_quantile_set_ll(
+      8 + shift, 158L, 315L, "pgamma", list(shape = 7.4, scale = 0.02),
+      slots,
+      p = 0.5
+    )
+    expect_true(is.finite(far))
+    expect_lt(far, -1e4)
   }
+})
+
+test_that(".meta_log_binom_upper matches pbinom above its switch and is finite below", { # nolint: line_length_linter.
+  m <- c(3L, 10L, 50L)
+  size <- c(20L, 100L, 300L)
+  expect_identical(
+    .meta_log_binom_upper(m, size, 0.2),
+    stats::pbinom(m - 1, size, 0.2, lower.tail = FALSE, log.p = TRUE)
+  )
+  # Below the switch the tail is summed term by term, which agrees with
+  # the distribution function wherever that is representable.
+  expect_equal(
+    .meta_log_binom_upper(m, size, 2e-12),
+    stats::pbinom(m - 1, size, 2e-12, lower.tail = FALSE, log.p = TRUE),
+    tolerance = 1e-10
+  )
+  # Far above the mean the same sum takes over from the distribution
+  # function.
+  expect_equal(
+    .meta_log_binom_upper(c(150L, 190L), 200L, 0.3),
+    stats::pbinom(c(149L, 189L), 200L, 0.3, lower.tail = FALSE, log.p = TRUE),
+    tolerance = 1e-10
+  )
+  tiny <- .meta_log_binom_upper(m, size, 1e-300)
+  expect_true(all(is.finite(tiny)))
+  expect_true(all(tiny < -1000))
+  expect_identical(.meta_log_binom_upper(c(0L, 5L), 10L, c(0.3, 1)), c(0, 0))
 })
 
 test_that("a single integer day quantile carries information that saturates in n", { # nolint: line_length_linter.

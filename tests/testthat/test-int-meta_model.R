@@ -553,6 +553,10 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
 test_that("the meta model log density has finite gradients or rejects at narrow and wide delays", { # nolint: line_length_linter.
   skip_on_cran()
   skip_if_no_cmdstanr()
+  # The diagnostic runs the compiled executable directly, which needs the
+  # library path cmdstanr sets up for itself on Windows, so it is only run
+  # where the executable can be called as it is.
+  skip_on_os("windows")
   # Every grid and quadrature path evaluates the primary censored
   # distribution function from the study's minimum delay upwards, so a
   # narrow delay reaches deep into its lower tail, where primarycensored's

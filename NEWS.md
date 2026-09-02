@@ -231,6 +231,10 @@ See #620.
 - Fixed two gaps in the Stan mirror of a left truncated midpoint code: the delay scale quantile path sized its nodes from the unshifted `delay_min`, and the Newton refinement of an implied quantile normalised from `delay_min` rather than the moved left truncation point of a code 4 study.
 The Stan crossing cell of a single integer day quantile also takes its binomial upper tail through the accurate side, which had put it 5e-3 away from R at a poorly fitting draw.
 See #620.
+- The crossing cell likelihood of a single integer day quantile is now taken as the difference of two binomial tails on the side where both are small, with each tail summed term by term once it is far out, and as a sum over the count below the cell where the difference still underflows, in R and in Stan.
+Before this the difference cancelled or underflowed to `-Inf` when the implied distribution put the reported quantile far into its tail, which stopped chains initialising on the Ebola fit of the meta vignette, and Stan's binomial distribution function had non finite partial derivatives in the same region, which trapped a chain of the shared test fixture in one run in four.
+CmdStan's gradient diagnostic now matches finite differences at every probed point.
+See #620.
 - `as_epidist_estimates_data()` rejects a `cens_adjusted = 4` study whose `delay_min` plus half its `pwindow` reaches the grid cutoff.
 See #620.
 - The meta model intercept prior for the lognormal family is now centred on the log of the reported location, as it is for a log link.
