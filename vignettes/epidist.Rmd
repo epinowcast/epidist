@@ -523,7 +523,7 @@ It draws one set of delay distribution parameters for each unique combination of
 
 ```{r}
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
-  lapply(\(fit) ungroup(delay_summary_draws(fit))) |>
+  lapply(delay_summary_draws) |>
   bind_rows(.id = "model") |>
   mutate(model = factor(model, levels = c("naive", "marginal")))
 

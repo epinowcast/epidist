@@ -110,8 +110,8 @@ summary(fit_growing)$fixed[
 Both are compared against the delay used to simulate.
 
 ```{r compare}
-uniform_draws <- ungroup(delay_parameter_draws(fit_uniform))
-growing_draws <- ungroup(delay_parameter_draws(fit_growing))
+uniform_draws <- delay_parameter_draws(fit_uniform)
+growing_draws <- delay_parameter_draws(fit_growing)
 
 draws <- bind_rows(
   mutate(uniform_draws, model = "Uniform"),
