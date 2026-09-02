@@ -435,9 +435,10 @@ test_that("epidist.epidist_meta_model with an expgrowth primary event recovers t
   expect_equal(mean(meta_draws$pgrowth), growth_rate, tolerance = 0.2)
 
   # The R log likelihood of the fit uses the fitted growth rate for its
-  # individual level rows.
-  prep <- brms::prepare_predictions(fit_meta_growth, ndraws = 4)
-  log_lik <- brms::log_lik(fit_meta_growth, ndraws = 4)
+  # individual level rows. The draws are pinned so that both calls see the
+  # same ones.
+  prep <- brms::prepare_predictions(fit_meta_growth, draw_ids = 1:4)
+  log_lik <- brms::log_lik(fit_meta_growth, draw_ids = 1:4)
   rows <- seq_len(min(3L, prep$nobs))
   expected <- vapply(
     rows,
