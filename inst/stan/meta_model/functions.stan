@@ -77,6 +77,48 @@
     return 0;
   }
 
+  /** Index of the first grid cell a left truncated study could have seen. */
+  int meta_family_grid_first(data real delay_min, data real swindow_width) {
+    return to_int(ceil(delay_min / swindow_width - 1e-9));
+  }
+
+  /**
+    * The left truncation point of the base estimand a midpoint code is built
+    * on. `delay_min` is on the reported scale, so it moves back by the same
+    * shift as the estimand. A `delay_min` of zero is the sentinel for a study
+    * that counted every delay and is left alone. The cutoff is never moved,
+    * because the observation time bounds the underlying event rather than
+    * the midpointed value. Mirrors .meta_cens_lower() in R.
+    */
+  real meta_family_cens_lower(data real delay_min, data int cens_adj,
+                              data real pwindow_width,
+                              data real swindow_width) {
+    if (delay_min <= 0) {
+      return delay_min;
+    }
+    return fmax(
+      delay_min - meta_family_shift(cens_adj, pwindow_width, swindow_width), 0
+    );
+  }
+
+  /**
+    * The number of nodes the packed node vector of a design holds, sized
+    * from the base estimand its censoring code is built on.
+    */
+  int meta_family_node_count(data real delay_min, data real cutoff,
+                             data real pwindow_width,
+                             data real swindow_width, data int cens_adj) {
+    if (meta_family_cens_base(cens_adj) == 0) {
+      return to_int(floor(cutoff / swindow_width)) -
+        meta_family_grid_first(
+          meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                                 swindow_width),
+          swindow_width
+        ) + 1;
+    }
+    return n_quad_default + 1;
+  }
+
   real meta_family_diff_exp(real log_upper, real log_lower) {
     if (is_inf(log_upper)) {
       return 0;
@@ -161,11 +203,6 @@
       return negative_infinity();
     }
     return log_cdf;
-  }
-
-  /** Index of the first grid cell a left truncated study could have seen. */
-  int meta_family_grid_first(data real delay_min, data real swindow_width) {
-    return to_int(ceil(delay_min / swindow_width - 1e-9));
   }
 
   /**
@@ -432,9 +469,13 @@
                                      data real growth_rate) {
     if (cens_adj == 3 || cens_adj == 4) {
       // Midpoint imputation moves the base estimand along the delay axis, so
-      // its mean moves and every central moment is unchanged.
+      // its mean and its left truncation point move and every central moment
+      // is unchanged. The cutoff stays where it is.
       vector[4] moments = meta_family_implied_moments(
-        params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+        params,
+        meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                               swindow_width),
+        cutoff, pwindow_width, swindow_width, trunc_adj,
         meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
         growth_rate
       );
@@ -594,10 +635,13 @@
                                 data real growth_rate) {
     if (cens_adj == 3 || cens_adj == 4) {
       // Midpoint imputation moved every delay along the axis, so the base
-      // estimand is evaluated at the reported delay moved back.
+      // estimand is evaluated at the reported delay moved back, and its left
+      // truncation point moves with it.
       return meta_family_implied_prob(
         y - meta_family_shift(cens_adj, pwindow_width, swindow_width), params,
-        delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+        meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                               swindow_width),
+        cutoff, pwindow_width, swindow_width, trunc_adj,
         meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
         growth_rate
       );
@@ -753,7 +797,9 @@
     if (cens_adj == 3 || cens_adj == 4) {
       return meta_family_implied_density(
         y - meta_family_shift(cens_adj, pwindow_width, swindow_width), params,
-        delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+        meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                               swindow_width),
+        cutoff, pwindow_width, swindow_width, trunc_adj,
         meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
         growth_rate
       );
@@ -840,13 +886,16 @@
                                    data real growth_rate) {
     if (cens_adj == 3 || cens_adj == 4) {
       // The nodes are packed as [origin, spacing, values], so moving the
-      // estimand along the delay axis moves the origin.
-      vector[2 + (meta_family_cens_base(cens_adj) == 0
-                  ? to_int(floor(cutoff / swindow_width)) -
-                    meta_family_grid_first(delay_min, swindow_width) + 1
-                  : n_quad_default + 1)] nodes =
+      // estimand along the delay axis moves the origin. The left truncation
+      // point moves with it, which is why the node count is sized from the
+      // base estimand.
+      vector[2 + meta_family_node_count(delay_min, cutoff, pwindow_width,
+                                        swindow_width, cens_adj)] nodes =
         meta_family_implied_nodes(
-          params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+          params,
+          meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                                 swindow_width),
+          cutoff, pwindow_width, swindow_width, trunc_adj,
           meta_family_cens_base(cens_adj), prim_id, prim_params, accrual,
           growth_rate
         );
@@ -977,10 +1026,9 @@
       }
     }
     if (any_quantile == 1) {
-      int n_node = meta_family_cens_base(cens_adj) == 0
-        ? to_int(floor(cutoff / swindow_width)) -
-          meta_family_grid_first(delay_min, swindow_width) + 1
-        : n_quad_default + 1;
+      int n_node = meta_family_node_count(
+        delay_min, cutoff, pwindow_width, swindow_width, cens_adj
+      );
       vector[2 + n_node] nodes = meta_family_implied_nodes(
         params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
         cens_adj, prim_id, prim_params, accrual, growth_rate
