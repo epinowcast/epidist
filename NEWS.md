@@ -8,10 +8,14 @@ See #489 and #618.
 
 ## Features
 
+- Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
+It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
+Each step is still available on its own.
+See `?delay_summary_draws` and #667.
 - Added `epidist_newdata()`, which builds the `newdata` needed to predict from a fitted model.
 It expands the variables you give it into a grid and adds the response and observation process variables the model uses, so you no longer have to know the column names each model expects.
 The defaults give the delay distribution with no censoring and no truncation, and arguments set the censoring windows, the relative observation time and the minimum delay.
-The result works with `brms::posterior_epred()`, `predict_delay_parameters()` and the `tidybayes` draw functions.
+The result works with `brms::posterior_epred()`, `delay_summary_draws()` and the `tidybayes` draw functions.
 See `?epidist_newdata` and #280.
 - Added `delay_parameter_draws()` and `add_delay_parameter_draws()`, which return posterior draws of the delay distribution parameters in the long format used by `tidybayes`.
 - Added `delay_parameter_draws()` and `add_delay_parameter_draws()`, which return posterior draws of the delay distribution parameters in the long format used by `tidybayes`.

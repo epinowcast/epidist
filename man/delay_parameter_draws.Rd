@@ -73,6 +73,7 @@ fit |>
 
 Other postprocess: 
 \code{\link{add_summaries}()},
+\code{\link{delay_summary_draws}()},
 \code{\link{epidist_strata}()}
 }
 \concept{postprocess}
