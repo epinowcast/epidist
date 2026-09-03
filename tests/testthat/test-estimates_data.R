@@ -257,6 +257,32 @@ test_that("as_epidist_estimates_data warns about a short grid cutoff", {
   short$max_delay <- NULL
   msgs <- capture_messages(as_epidist_estimates_data(short))
   expect_false(any(grepl("short relative", msgs, fixed = TRUE)))
+  # A heavy tailed study is flagged at the default cutoff, where a lognormal
+  # matched to its mean and standard deviation still has a tenth of its
+  # second moment beyond the cutoff and the grid standard deviation is
+  # several percent low.
+  heavy <- short
+  heavy$value <- c(24, 40)
+  msgs <- capture_messages(as_epidist_estimates_data(heavy))
+  short_msg <- msgs[grepl("short relative", msgs, fixed = TRUE)]
+  expect_length(short_msg, 1)
+  expect_true(grepl("max_delay", short_msg, fixed = TRUE))
+  expect_true(grepl("\"A\"", short_msg))
+  expect_identical(
+    .estimates_short_cutoff(suppressMessages(as_epidist_estimates_data(heavy))),
+    "A"
+  )
+  # A study reporting a median and an upper quantile is matched through them.
+  quantiles <- data.frame(
+    study = "B", type = "quantile", value = c(10, 60), p = c(0.5, 0.9),
+    n = 50, relative_obs_time = Inf, trunc_adjusted = TRUE,
+    cens_adjusted = 0, stringsAsFactors = FALSE
+  )
+  msgs <- capture_messages(as_epidist_estimates_data(quantiles))
+  expect_true(any(grepl("short relative", msgs, fixed = TRUE)))
+  # Without a median there is nothing to match, so the study is skipped.
+  msgs <- capture_messages(as_epidist_estimates_data(quantiles[2, ]))
+  expect_false(any(grepl("short relative", msgs, fixed = TRUE)))
 })
 
 test_that("as_epidist_estimates_data warns when the quadrature is coarse relative to the delay", { # nolint: line_length_linter.
