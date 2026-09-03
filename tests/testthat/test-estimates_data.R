@@ -267,7 +267,7 @@ test_that("as_epidist_estimates_data warns about a short grid cutoff", {
   short_msg <- msgs[grepl("short relative", msgs, fixed = TRUE)]
   expect_length(short_msg, 1)
   expect_true(grepl("max_delay", short_msg, fixed = TRUE))
-  expect_true(grepl("\"A\"", short_msg))
+  expect_true(grepl("\"A\"", short_msg, fixed = TRUE))
   expect_identical(
     .estimates_short_cutoff(suppressMessages(as_epidist_estimates_data(heavy))),
     "A"

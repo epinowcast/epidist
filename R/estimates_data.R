@@ -203,7 +203,11 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  twenty times the largest reported value for the study, rounded up, with a
 #'  minimum of ten. Raise it for a long tailed delay, whose implied standard
 #'  deviation is biased downwards if the distribution has not decayed by the
-#'  cutoff, and lower it to fit faster.
+#'  cutoff, and lower it to fit faster. A warning names the studies whose
+#'  cutoff is too short, judged by a lognormal matched to the reported mean
+#'  and standard deviation, or to the median and largest quantile where only
+#'  quantiles are reported, having more than 2% of its second moment beyond
+#'  the cutoff.
 #'
 #' @param ... Not used in this method.
 #'
@@ -866,13 +870,20 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   return(data)
 }
 
-#' Studies whose grid cutoff is short relative to their reported spread
+#' Studies whose grid cutoff is short relative to their reported tail
 #'
 #' The implied summaries of a study that did not adjust for censoring but did
 #' adjust for right truncation are computed on a grid running to `max_delay`.
 #' A cutoff that the delay distribution has not decayed by biases them
-#' downwards. Studies reporting both a mean and a standard deviation allow a
-#' rough check of whether the grid reaches far enough.
+#' downwards, and the standard deviation most, because the tail beyond the
+#' cutoff carries a share of the second moment out of all proportion to its
+#' mass. A lognormal is matched to what each study reported, through its mean
+#' and standard deviation, or its median and largest quantile above the
+#' median where it reported only quantiles, and the study is flagged when
+#' more than 2% of the second moment of that lognormal lies beyond the
+#' cutoff. That is where the standard deviation on the grid falls about 1%
+#' short, and the shortfall grows with the share. Studies reporting neither
+#' pair are not checked.
 #'
 #' @param data An `epidist_estimates_data` object.
 #'
@@ -892,18 +903,60 @@ as_epidist_estimates_data.epidist_multivariate <- function(
     studies,
     function(study) {
       rows <- uses_grid & as.character(data$study) == study
-      reported_mean <- data$value[rows & data$type == "mean"]
-      reported_sd <- data$value[rows & data$type == "sd"]
-      if (length(reported_mean) == 0 || length(reported_sd) == 0) {
+      lnorm <- .estimates_lnorm_match(data, rows)
+      if (is.null(lnorm)) {
         return(FALSE)
       }
-      return(
-        min(cutoff[rows]) < max(reported_mean) + 10 * max(reported_sd)
+      beyond <- stats::pnorm(
+        (log(min(cutoff[rows])) - lnorm$meanlog - 2 * lnorm$sdlog^2) /
+          lnorm$sdlog,
+        lower.tail = FALSE
       )
+      return(beyond > 0.02)
     },
     logical(1)
   )
   return(studies[short])
+}
+
+#' A lognormal matched to the summaries a study reported
+#'
+#' Matches a lognormal to a reported mean and standard deviation by its
+#' moments. Where the study reported only quantiles, its median is the
+#' location and its largest quantile above the median, at the level the
+#' study reported it, sets the scale. A study reporting neither pair, or
+#' one whose quantiles do not increase, gives `NULL`.
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @param rows A logical vector selecting the rows of one study.
+#'
+#' @returns A list with `meanlog` and `sdlog` elements, or `NULL`.
+#'
+#' @keywords internal
+.estimates_lnorm_match <- function(data, rows) {
+  reported_mean <- data$value[rows & data$type == "mean"]
+  reported_sd <- data$value[rows & data$type == "sd"]
+  if (length(reported_mean) > 0 && length(reported_sd) > 0) {
+    variance_log <- log1p((max(reported_sd) / max(reported_mean))^2)
+    return(list(
+      meanlog = log(max(reported_mean)) - variance_log / 2,
+      sdlog = sqrt(variance_log)
+    ))
+  }
+  quantiles <- rows & data$type == "quantile"
+  reported_median <- data$value[quantiles & data$p == 0.5]
+  upper <- quantiles & data$p > 0.5
+  if (length(reported_median) == 0 || !any(upper)) {
+    return(NULL)
+  }
+  largest <- which(upper)[which.max(data$value[upper])]
+  sdlog <- (log(data$value[largest]) - log(max(reported_median))) /
+    stats::qnorm(data$p[largest])
+  if (!is.finite(sdlog) || sdlog <= 0) {
+    return(NULL)
+  }
+  return(list(meanlog = log(max(reported_median)), sdlog = sdlog))
 }
 
 #' The spread each study reported, as a proxy for its delay standard deviation
@@ -1317,10 +1370,12 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
   if (length(short) > 0) {
     cli::cli_inform(c(
       "!" = paste0(
-        "The grid cutoff for {.val {short}} is short relative to the ",
-        "reported mean and standard deviation, so the implied summaries for ",
-        "{?this study/these studies} will be biased downwards. Increase ",
-        "{.var max_delay}."
+        "The grid cutoff {.var max_delay} for {.val {short}} is short ",
+        "relative to the tail of the delay {?this study/these studies} ",
+        "reported. A lognormal matched to the reported summaries has more ",
+        "than 2% of its second moment beyond the cutoff, so the implied ",
+        "standard deviation will be biased downwards. Increase ",
+        "{.var max_delay} for {?this study/these studies}."
       )
     ))
   }
