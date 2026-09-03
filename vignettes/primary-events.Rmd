@@ -93,7 +93,8 @@ growing <- as_epidist_marginal_model(
 With `primary = "expgrowth"` the growth rate becomes a distributional parameter called `pgrowth`.
 It takes a formula and a prior in the same way as `mu` and `sigma`.
 
-The delays carry little information about the growth rate, so the prior does the work.
+One set of delays carries little information about the growth rate, so here the prior does most of the work.
+Fitting several settings together changes that, as the section below shows.
 Epidemic growth is normally estimated separately, from case counts over the same period.
 That estimate is then passed here as an informative prior centred on it, which is the approach taken in @brand2026scalable.
 The prior below is centred on the rate used to simulate.
@@ -212,6 +213,56 @@ epred |>
   theme_minimal()
 ```
 
+## What sharing a delay buys
+
+Fitting the locations together does more than let the rate vary.
+A delay distribution shared across locations cannot absorb a difference in growth between them, so the growth rates are better determined than they are from any one location on its own.
+
+Refitting the same data with a delay per location, so that nothing is shared, shows the size of that.
+A weakly informative prior is used for both so the comparison is about the data rather than the prior.
+
+```{r sharing}
+shared_prior <- prior(normal(0, 1), class = "b", dpar = "pgrowth")
+
+fit_shared <- epidist(
+  marginal_locations,
+  formula = bf(mu ~ 1, pgrowth ~ 0 + location),
+  prior = shared_prior,
+  chains = 2, cores = 2, refresh = 0, silent = 2
+)
+
+fit_split <- epidist(
+  marginal_locations,
+  formula = bf(mu ~ 0 + location, pgrowth ~ 0 + location),
+  prior = shared_prior,
+  chains = 2, cores = 2, refresh = 0, silent = 2
+)
+
+growth_width <- function(fit, delay) {
+  fixed <- summary(fit)$fixed
+  rows <- grep("^pgrowth_location", rownames(fixed), value = TRUE)
+  out <- tibble(
+    delay = delay,
+    location = sub("^pgrowth_location", "", rows),
+    median = fixed[rows, "Estimate"],
+    width = fixed[rows, "u-95% CI"] - fixed[rows, "l-95% CI"]
+  )
+  return(out)
+}
+
+bind_rows(
+  growth_width(fit_shared, "shared"),
+  growth_width(fit_split, "per location")
+) |>
+  mutate(truth = locations[.data$location])
+```
+
+The prior allows a range of `r round(2 * 1.96, 1)` on each rate, and both fits sit well inside it.
+Sharing the delay narrows the interval on every rate, by around a fifth here.
+The gain is real but modest, and the rates are still a long way from pinned down, so an informative prior remains worth having.
+The point is narrower than it might look.
+The delays are not silent about growth once several settings are fitted together, only when one is fitted alone.
+
 # Summary
 
 * The distribution of the primary event within its window matters more the wider that window is, and the further the growth rate is from zero.
@@ -221,8 +272,14 @@ Over three days it is several times larger than it.
 Weekly reporting, or fast growth or decline, is where it is not.
 * Only the uniform and exponential growth distributions are supported.
 Others would make sense, such as a normal, or a mixture of a normal and exponential growth, and are not yet available.
-* The delays carry little information about the growth rate, so take it from a separate estimate of epidemic growth and pass it as an informative prior.
-A flat prior leaves the posterior close to flat.
+* One set of delays carries little information about the growth rate, so take it from a separate estimate of epidemic growth and pass it as an informative prior.
+A flat prior on a single setting leaves the posterior close to flat.
+* Several settings fitted together are a different matter.
+A delay shared across them cannot absorb a difference in growth between them, so the rates are better determined than they are from one setting alone.
+They are still not pinned down, so an informative prior is still worth having.
+* The same argument points at fitting jointly with the data the growth rate would otherwise be estimated from.
+Case counts over the same period carry most of the information about growth, and passing a point estimate as a prior throws away the correlation between the two.
+Fitting them together would let each inform the other, and is not something the package supports today.
 * Other uses of the primary event distribution are possible, such as a point source release where exposure is concentrated in a short window rather than spread across the reporting interval.
 These will usually need an informative prior on the delay distribution as well, since the data alone will not separate the two.
 
