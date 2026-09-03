@@ -802,7 +802,11 @@ assert_epidist.epidist_meta_model <- function(data, ...) {
     ))
   }
 
-  individual <- data[data$obs_type == 1L, , drop = FALSE]
+  # Subset a plain copy: subsetting the object itself would re-check each
+  # subset through the `epidist_data` methods and warn about the classes it
+  # drops, which is not what a check of the whole object should emit.
+  plain <- .drop_epidist_class(data)
+  individual <- plain[plain$obs_type == 1L, , drop = FALSE]
   if (nrow(individual) > 0) {
     if (!all(
       abs(individual$delay_upr - (individual$delay_lwr + individual$swindow)) <
@@ -833,7 +837,7 @@ assert_epidist.epidist_meta_model <- function(data, ...) {
     )
   }
 
-  summaries <- data[data$obs_type != 1L, , drop = FALSE]
+  summaries <- plain[plain$obs_type != 1L, , drop = FALSE]
   if (nrow(summaries) > 0) {
     covariance <- summaries$obs_type == 7L
     if (any(summaries$study_n[!covariance] < 2 &
