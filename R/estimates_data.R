@@ -281,6 +281,7 @@ as_epidist_estimates_data.data.frame <- function(
   data_tbl <- new_epidist_estimates_data(data_tbl)
   data_tbl <- .estimates_set_vcov(data_tbl, attr(data, "estimates_vcov"))
   assert_epidist(data_tbl)
+  .estimates_advise(data_tbl)
   return(data_tbl)
 }
 
@@ -1366,6 +1367,24 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     ))
   }
 
+  return(invisible(NULL))
+}
+
+#' Advise on summary estimates the meta model will fit poorly
+#'
+#' Runs the advisory checks on a freshly built `epidist_estimates_data`
+#' object and messages about each study they flag. They run once, here, when
+#' the object is first built, rather than in [assert_epidist()], so that
+#' passing the finished object on to [as_epidist_meta_model()] does not
+#' repeat them. The checks are described in the Checks section of
+#' [as_epidist_estimates_data.data.frame()].
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns `NULL`, invisibly, called for the messages it may raise.
+#'
+#' @keywords internal
+.estimates_advise <- function(data) {
   short <- .estimates_short_cutoff(data)
   if (length(short) > 0) {
     cli::cli_inform(c(
