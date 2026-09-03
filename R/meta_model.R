@@ -629,8 +629,10 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     chol_start = 1L,
     n_quad = as.integer(n_quad),
     relative_obs_time = as.numeric(.estimates_grid_cutoff(estimates)[1]),
-    pwindow = as.numeric(estimates$pwindow[1]),
-    swindow = as.numeric(estimates$swindow[1]),
+    # A fully adjusted study may leave its windows NA, because none of its
+    # estimands read them, but Stan needs a number in every slot.
+    pwindow = .meta_window_slot(estimates$pwindow[1]),
+    swindow = .meta_window_slot(estimates$swindow[1]),
     delay_upr = as.numeric(estimates$value[1]),
     delay_min = as.numeric(estimates$delay_min[1]),
     report_se = ifelse(is.na(estimates$se[1]), 0, estimates$se[1]),
@@ -644,6 +646,23 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     members = members,
     chol = factor_entries
   ))
+}
+
+#' The censoring window slot of a summary row
+#'
+#' A fully adjusted study (`cens_adjusted` code 1) may leave its windows `NA`
+#' in [as_epidist_estimates_data()], because none of its estimands read them.
+#' The slot still has to hold a number for Stan, so a missing window is
+#' filled with 1, which no code 1 path uses.
+#'
+#' @param window A censoring window width, possibly `NA`.
+#'
+#' @returns A number.
+#'
+#' @keywords internal
+.meta_window_slot <- function(window) {
+  window <- as.numeric(window)
+  return(ifelse(is.na(window), 1, window))
 }
 
 #' Build the member table of one joint likelihood group

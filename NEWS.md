@@ -202,7 +202,8 @@ See #620.
 With `primary = "expgrowth"` the growth rate of primary events is estimated as the `pgrowth` distributional parameter.
 Summary rows are unchanged and keep the `growth_rate` metadata of their study as a known tilt.
 See #620.
-- Added an `epidist_model_prior()` method for the meta model, which centres the intercept prior of `mu` on the log of the median mean the studies reported, with a standard deviation of 1 on the log scale.
+- Added an `epidist_model_prior()` method for the meta model, which puts a `normal(1, 1)` prior on the intercept of `mu` where it is on the log scale, the scale of the lognormal family prior.
+The centre is fixed rather than taken from the reported values, because a prior chosen from the data would put the posterior of a small review where the data already sit.
 The same method puts a half normal prior with a standard deviation of 0.25 on the between study standard deviation of any group level term, where the `brms` default is a half Student t with scale 2.5.
 Closes #683.
 Without it a Gamma or Weibull fit to summaries alone took the `brms` default, which is centred on the response column and so on a delay of zero, because that column is a placeholder on summary rows.
@@ -212,6 +213,11 @@ See #620.
 - `as_epidist_estimates_data()` now rejects a reported mean at or beyond the observation time of a study that did not adjust for right truncation, a standard error of zero, a standard deviation of zero, and a `cens_adjusted` code that is not a whole number from 0 to 4.
 It warns, rather than messages, when no `trunc_adjusted` column is supplied and a study is therefore assumed to have adjusted for right truncation.
 The `growth_rate` documentation now separates its within window tilt from the accrual weight it applies under `trunc_design = "accrual"`, and points to the `primary = "expgrowth"` option of the marginal model for individual level data.
+See #620.
+- `as_epidist_estimates_data()` accepts `NA` censoring windows for a study that fully adjusted for censoring (`cens_adjusted = 1`), since none of its estimands read them, and rejects them with a message naming the study for every other code.
+See #620.
+- The advisory messages of `as_epidist_estimates_data()` are now two short sentences naming the studies, and the input row where a single summary is meant, and point at a new Checks section of its documentation that carries the reasoning.
+They run once, when the estimates are built, rather than again when the object is passed to `as_epidist_meta_model()`.
 See #620.
 - The midpoint imputation codes of the meta model (`cens_adjusted` 3 and 4) now move `delay_min` with the midpoint shift, so a study that dropped reported delays below a minimum is left truncated at the right point.
 Before this the implied mean was 5 to 15% low for code 4 and up to 24% high for code 3 with a wide secondary window.
@@ -243,8 +249,8 @@ CmdStan's gradient diagnostic now matches finite differences at every probed poi
 See #620.
 - `as_epidist_estimates_data()` rejects a `cens_adjusted = 4` study whose `delay_min` plus half its `pwindow` reaches the grid cutoff.
 See #620.
-- The meta model intercept prior for the lognormal family is now centred on the log of the reported location, as it is for a log link.
-The lognormal `mu` has an identity link but is `meanlog`, so it was centred on the reported mean itself.
+- The meta model intercept prior for the lognormal family is now on the log scale, as it is for a log link.
+The lognormal `mu` has an identity link but is `meanlog`, so it was treated as the delay itself.
 A calibration check of a study reporting a mean with its standard error from 25 delays found it, where the 90% intervals covered the truth about half of the time.
 See #620.
 - Added opt in simulation checks of the meta model: `EPIDIST_META_RECOVERY=true` fits one meta model per censoring adjustment code and truncation design, and `EPIDIST_META_CALIBRATION=true` fits forty replicates of two study designs and checks interval coverage and the rank of the truth.

@@ -74,7 +74,8 @@ as_epidist_estimates_data <- function(data, ...) {
 #'   are right truncated unless the study corrected for it.
 #' * **The censoring windows** (`pwindow`, `swindow`). The width, in the same
 #'   time units as the delay, of the interval each event was observed in. Daily
-#'   reporting gives windows of 1, weekly reporting gives 7.
+#'   reporting gives windows of 1, weekly reporting gives 7. A fully adjusted
+#'   study does not use them and may leave them `NA`.
 #' * **The sample size** (`n`), the number of delays the summary was computed
 #'   from. This sets the sampling uncertainty on the reported value. A reported
 #'   standard error (`se`) may be given instead, and takes precedence when
@@ -111,6 +112,89 @@ as_epidist_estimates_data <- function(data, ...) {
 #' Contributions from several studies combine by passing them in a list, which
 #' [as_epidist_estimates_data()] binds into one object.
 #'
+#' # Checks
+#'
+#' Beyond validating its input, this method runs advisory checks on the
+#' summaries and messages about the studies they flag. They run once, when
+#' the object is built, and not again when it is passed to
+#' [as_epidist_meta_model()]. Each message names the studies concerned, and
+#' the row of the input where a single summary is meant, and points here for
+#' the reasoning.
+#'
+#' * **Assumed truncation adjustment.** Where no `trunc_adjusted` column is
+#'   supplied, a study with no finite `relative_obs_time` is taken to have
+#'   adjusted for right truncation and every other study not to have. Real
+#'   time estimates are right truncated unless the study corrected for it,
+#'   and reviews rarely record which did, so this is the assumption most
+#'   likely to be wrong and is a warning rather than a message.
+#' * **Short grid cutoff.** The implied summaries of a study that adjusted
+#'   for right truncation but is evaluated on a grid, which is a study with
+#'   `cens_adjusted` 0 or 3, or 2 or 4 with a non zero `growth_rate`, run to
+#'   `max_delay`. A cutoff the delay distribution has not decayed by biases
+#'   them downwards, and the standard deviation most, because the tail beyond
+#'   the cutoff carries a share of the second moment out of all proportion to
+#'   its mass. A lognormal is matched to what the study reported, through its
+#'   mean and standard deviation, or its median and largest quantile above
+#'   the median where it reported only quantiles, and the study is flagged
+#'   when more than 2% of the second moment of that lognormal lies beyond the
+#'   cutoff. That is where the standard deviation on the grid falls about 1%
+#'   short, and the shortfall grows with the share. Studies reporting neither
+#'   pair are not checked. Raise `max_delay` for the study.
+#' * **Coarse quadrature.** The moments and distribution function of a
+#'   continuous estimand truncated at the grid cutoff are computed by
+#'   Simpson's rule on equally spaced intervals from `delay_min` to the
+#'   cutoff, so the node spacing is set by the cutoff and not by the scale of
+#'   the delay. The number of intervals is chosen per study so that the
+#'   spacing is at most a quarter of the spread the study reported, with
+#'   `options(epidist.meta_n_quad)` as its floor and 2000 as a cap the option
+#'   lifts when set above it. A study whose cutoff is very long relative to
+#'   its spread hits the cap and is left with nodes further apart than that,
+#'   so its implied summaries may be inaccurate. This covers a study that did
+#'   not adjust for right truncation and used a continuous adjustment
+#'   (`cens_adjusted` 1, 2 or 4), a study that did adjust but whose primary
+#'   events were not uniform within their window (`cens_adjusted` 2 or 4 with
+#'   a non zero `growth_rate`), and the quantiles of a study reporting a
+#'   covariance matrix, which are read off the same nodes. Raise the option
+#'   above the cap before building the model data, or lower `max_delay`.
+#' * **Coarse quantiles.** A study that summarised interval censored delays
+#'   without adjusting for censoring (`cens_adjusted` 0 or 3) reports
+#'   quantiles of a discrete distribution, which the model interpolates
+#'   through the mid points of its cells. The reported value is still rounded
+#'   to that grid, and what the interpolation leaves behind does not shrink
+#'   with the study sample size. It is a few percent once a reported quantile
+#'   sits a few tens of cells above the smallest delay the study counted, and
+#'   tens of percent when it sits within about ten. A study is flagged on its
+#'   smallest reported quantile, the one nearest that edge of the grid,
+#'   because the residual on that quantile is what biases the fitted spread
+#'   even when the larger quantiles of the same study sit well up the grid.
+#'   Check that `swindow` is the resolution the study worked at. A reported
+#'   mean and standard deviation of the same delays do not carry this
+#'   residual, so fit them in preference where the study gives them.
+#' * **Several integer day quantiles from a large study.** A quantile of
+#'   delays counted in whole censoring windows is a discrete statistic, and
+#'   the information it carries about the delay distribution saturates once
+#'   the binomial spread of the crossing point of the empirical distribution
+#'   function is narrower than a window. A single such quantile is fitted as
+#'   the exact crossing event, but several are still fitted with the
+#'   multinomial on the continuity corrected distribution function, whose
+#'   claimed precision keeps growing with the sample size. It is calibrated
+#'   at around thirty delays and overconfident from around a hundred, so a
+#'   study reporting two or more such quantiles from more than 100 delays is
+#'   flagged and will be weighted too heavily. Fit a reported mean and
+#'   standard deviation instead where one is available.
+#' * **Heavy tailed standard deviation.** The sampling standard error of a
+#'   reported standard deviation is \eqn{\sigma \sqrt{(\kappa - 1) / (4 n)}},
+#'   with \eqn{\kappa} the kurtosis of the delays. The normal approximation
+#'   behind it holds while that relative standard error is below about a
+#'   quarter. Above it the sampling distribution of a sample standard
+#'   deviation is far from normal, the asymptotic standard error overstates
+#'   its spread by up to two times, and the joint likelihood of a mean and
+#'   standard deviation pair is biased by about a standard error. The
+#'   kurtosis is taken from the reported mean and standard deviation under a
+#'   lognormal delay, which is a plausible tail for a delay of that
+#'   coefficient of variation. Where the study reports quantiles inside the
+#'   body of the distribution, those are safer to fit.
+#'
 #' @param data A `data.frame` of published summary estimates.
 #'
 #' @param study A string giving the column of `data` containing the study
@@ -142,7 +226,10 @@ as_epidist_estimates_data <- function(data, ...) {
 #'
 #' @param pwindow,swindow Strings giving the columns of `data` containing the
 #'  primary and secondary event censoring window widths. Default to 1 (daily
-#'  reporting) when not supplied.
+#'  reporting) when not supplied. A fully adjusted study (`cens_adjusted`
+#'  code 1) does not use them, because its estimand is the continuous delay
+#'  distribution itself, so its rows may leave them `NA`. Every other code
+#'  needs them.
 #'
 #' @param relative_obs_time A string giving the column of `data` containing the
 #'  observation time relative to the primary event, that is the right
@@ -203,11 +290,8 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  twenty times the largest reported value for the study, rounded up, with a
 #'  minimum of ten. Raise it for a long tailed delay, whose implied standard
 #'  deviation is biased downwards if the distribution has not decayed by the
-#'  cutoff, and lower it to fit faster. A warning names the studies whose
-#'  cutoff is too short, judged by a lognormal matched to the reported mean
-#'  and standard deviation, or to the median and largest quantile where only
-#'  quantiles are reported, having more than 2% of its second moment beyond
-#'  the cutoff.
+#'  cutoff, and lower it to fit faster. A message names the studies whose
+#'  cutoff is too short, see the Checks section.
 #'
 #' @param ... Not used in this method.
 #'
@@ -281,6 +365,7 @@ as_epidist_estimates_data.data.frame <- function(
   data_tbl <- new_epidist_estimates_data(data_tbl)
   data_tbl <- .estimates_set_vcov(data_tbl, attr(data, "estimates_vcov"))
   assert_epidist(data_tbl)
+  .estimates_advise(data_tbl)
   return(data_tbl)
 }
 
@@ -774,22 +859,21 @@ as_epidist_estimates_data.epidist_multivariate <- function(
       # to be wrong, so it is a warning rather than a message.
       cli::cli_warn(c(
         "!" = paste0(
-          "No trunc_adjusted column supplied, assuming {.val {assumed}} ",
-          "adjusted for right truncation because {?it has/they have} no ",
-          "finite relative_obs_time, and that any other study did not."
+          "No trunc_adjusted column supplied, so {.val {assumed}} ",
+          "{?is/are} assumed to have adjusted for right truncation, having ",
+          "no finite relative_obs_time, and any other study not to have. ",
+          "Supply trunc_adjusted to say which studies did."
         ),
-        i = paste0(
-          "Real time estimates are right truncated unless the study ",
-          "corrected for it. Supply trunc_adjusted to say which did."
-        )
+        .estimates_checks_pointer()
       ))
     } else {
       cli::cli_inform(c(
         i = paste0(
           "No trunc_adjusted column supplied, assuming every study did not ",
           "adjust for right truncation because each has a finite ",
-          "relative_obs_time."
-        )
+          "relative_obs_time. Supply trunc_adjusted to say which did."
+        ),
+        .estimates_checks_pointer()
       ))
     }
   }
@@ -998,7 +1082,9 @@ as_epidist_estimates_data.epidist_multivariate <- function(
       location <- data$value[rows & data$type %in% c("mean", "quantile")]
       location <- location[location > 0]
       if (length(location) == 0) {
-        return(min(data$swindow[rows]))
+        # A fully adjusted study may leave its windows NA.
+        narrowest <- min(data$swindow[rows], na.rm = TRUE)
+        return(ifelse(is.finite(narrowest), narrowest, 1))
       }
       return(min(location) / 4)
     },
@@ -1073,7 +1159,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   return(unique(as.character(data$study)[coarse]))
 }
 
-#' Studies reporting quantiles on a coarse delay grid
+#' The smallest quantile of each study on a coarse delay grid
 #'
 #' A study that summarised interval censored delays without adjusting for
 #' censoring (`cens_adjusted` of 0 or 3) reports quantiles of a discrete
@@ -1091,26 +1177,36 @@ as_epidist_estimates_data.epidist_multivariate <- function(
 #'
 #' @param data An `epidist_estimates_data` object.
 #'
+#' @returns A logical vector, one entry per row, marking the smallest
+#'  reported quantile of each flagged study.
+#'
+#' @keywords internal
+.estimates_coarse_rows <- function(data) {
+  rows <- data$type == "quantile" & data$cens_adjusted %in% c(0L, 3L)
+  flagged <- rep(FALSE, nrow(data))
+  cells <- (data$value - data$delay_min) / data$swindow
+  studies <- as.character(data$study)
+  for (study in unique(studies[rows])) {
+    keep <- which(rows & studies == study)
+    smallest <- keep[which.min(cells[keep])]
+    flagged[smallest] <- cells[smallest] < 10
+  }
+  return(flagged)
+}
+
+#' Studies reporting quantiles on a coarse delay grid
+#'
+#' The studies flagged by [.estimates_coarse_rows()].
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
 #' @returns A character vector of study identifiers reporting quantiles on a
 #'  coarse grid.
 #'
 #' @keywords internal
 .estimates_coarse_quantiles <- function(data) {
-  rows <- data$type == "quantile" & data$cens_adjusted %in% c(0L, 3L)
-  if (!any(rows)) {
-    return(character(0))
-  }
-  cells <- (data$value - data$delay_min) / data$swindow
-  studies <- unique(as.character(data$study)[rows])
-  coarse <- vapply(
-    studies,
-    function(study) {
-      keep <- rows & as.character(data$study) == study
-      return(min(cells[keep]) < 10)
-    },
-    logical(1)
-  )
-  return(studies[coarse])
+  flagged <- .estimates_coarse_rows(data)
+  return(unique(as.character(data$study)[flagged]))
 }
 
 #' Large studies reporting several quantiles of integer day delays
@@ -1148,7 +1244,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   return(studies[several])
 }
 
-#' Studies whose reported standard deviation has a heavy tailed sampling error
+#' Reported standard deviations with a heavy tailed sampling error
 #'
 #' The sampling standard error of a reported standard deviation is
 #' \eqn{\sigma \sqrt{(\kappa - 1) / (4 n)}}, with \eqn{\kappa} the kurtosis
@@ -1163,34 +1259,43 @@ as_epidist_estimates_data.epidist_multivariate <- function(
 #'
 #' @param data An `epidist_estimates_data` object.
 #'
+#' @returns A logical vector, one entry per row, marking each reported
+#'  standard deviation with a heavy tailed sampling error.
+#'
+#' @keywords internal
+.estimates_heavy_tail_rows <- function(data) {
+  sds <- data$type == "sd" & !is.na(data$n) & is.na(data$se) &
+    !.estimates_vcov_rows(data)
+  flagged <- rep(FALSE, nrow(data))
+  studies <- as.character(data$study)
+  for (study in unique(studies[sds])) {
+    rows <- studies == study
+    reported_mean <- data$value[rows & data$type == "mean"]
+    if (length(reported_mean) == 0) {
+      next
+    }
+    keep <- which(sds & rows)
+    variance_log <- log1p((data$value[keep] / max(reported_mean))^2)
+    kurtosis <- exp(4 * variance_log) + 2 * exp(3 * variance_log) +
+      3 * exp(2 * variance_log) - 3
+    relative_se <- sqrt((kurtosis - 1) / (4 * data$n[keep]))
+    flagged[keep] <- relative_se > 0.25
+  }
+  return(flagged)
+}
+
+#' Studies whose reported standard deviation has a heavy tailed sampling error
+#'
+#' The studies flagged by [.estimates_heavy_tail_rows()].
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
 #' @returns A character vector of study identifiers.
 #'
 #' @keywords internal
 .estimates_heavy_tail_sd <- function(data) {
-  sds <- data$type == "sd" & !is.na(data$n) & is.na(data$se) &
-    !.estimates_vcov_rows(data)
-  if (!any(sds)) {
-    return(character(0))
-  }
-  studies <- unique(as.character(data$study)[sds])
-  heavy <- vapply(
-    studies,
-    function(study) {
-      rows <- as.character(data$study) == study
-      reported_mean <- data$value[rows & data$type == "mean"]
-      if (length(reported_mean) == 0) {
-        return(FALSE)
-      }
-      keep <- sds & rows
-      variance_log <- log1p((data$value[keep] / max(reported_mean))^2)
-      kurtosis <- exp(4 * variance_log) + 2 * exp(3 * variance_log) +
-        3 * exp(2 * variance_log) - 3
-      relative_se <- sqrt((kurtosis - 1) / (4 * data$n[keep]))
-      return(any(relative_se > 0.25))
-    },
-    logical(1)
-  )
-  return(studies[heavy])
+  flagged <- .estimates_heavy_tail_rows(data)
+  return(unique(as.character(data$study)[flagged]))
 }
 
 #' Class constructor for `epidist_estimates_data` objects
@@ -1239,8 +1344,8 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
   assert_numeric(data$value, lower = 0, finite = TRUE, any.missing = FALSE)
   assert_numeric(data$se, lower = 0)
   assert_numeric(data$n, lower = 1)
-  assert_numeric(data$pwindow, lower = 0, any.missing = FALSE)
-  assert_numeric(data$swindow, lower = 0, any.missing = FALSE)
+  assert_numeric(data$pwindow, lower = 0)
+  assert_numeric(data$swindow, lower = 0)
   assert_numeric(data$relative_obs_time, lower = 0, any.missing = FALSE)
   assert_logical(data$trunc_adjusted, any.missing = FALSE)
   assert_subset(
@@ -1259,7 +1364,22 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
   )
   assert_character(data$mvn_id)
 
-  if (any(data$swindow <= 0)) {
+  # No estimand of a fully adjusted study reads the censoring windows, so
+  # they may be left NA there. Every other code uses them.
+  uses_window <- data$cens_adjusted != 1L
+  for (col in c("pwindow", "swindow")) {
+    absent <- uses_window & is.na(data[[col]])
+    if (any(absent)) {
+      cli::cli_abort(paste0(
+        "{.var {col}} is needed for a study with {.var cens_adjusted} code ",
+        "0, 2, 3 or 4, but is missing for ",
+        "{.val {unique(as.character(data$study)[absent])}}. Only a fully ",
+        "adjusted study (code 1) may leave it {.val NA}."
+      ))
+    }
+  }
+
+  if (any(data$swindow <= 0, na.rm = TRUE)) {
     cli::cli_abort("{.var swindow} must be greater than zero.")
   }
 
@@ -1346,7 +1466,7 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     ))
   }
 
-  if (any(cutoff < data$swindow)) {
+  if (any(cutoff < data$swindow, na.rm = TRUE)) {
     cli::cli_abort(paste0(
       "The grid cutoff (the observation time, or {.var max_delay} where the ",
       "study adjusted for right truncation) must be at least as large as ",
@@ -1366,17 +1486,34 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     ))
   }
 
+  return(invisible(NULL))
+}
+
+#' Advise on summary estimates the meta model will fit poorly
+#'
+#' Runs the advisory checks on a freshly built `epidist_estimates_data`
+#' object and messages about each study they flag. They run once, here, when
+#' the object is first built, rather than in [assert_epidist()], so that
+#' passing the finished object on to [as_epidist_meta_model()] does not
+#' repeat them. The checks are described in the Checks section of
+#' [as_epidist_estimates_data.data.frame()].
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @returns `NULL`, invisibly, called for the messages it may raise.
+#'
+#' @keywords internal
+.estimates_advise <- function(data) {
   short <- .estimates_short_cutoff(data)
   if (length(short) > 0) {
     cli::cli_inform(c(
       "!" = paste0(
         "The grid cutoff {.var max_delay} for {.val {short}} is short ",
-        "relative to the tail of the delay {?this study/these studies} ",
-        "reported. A lognormal matched to the reported summaries has more ",
-        "than 2% of its second moment beyond the cutoff, so the implied ",
-        "standard deviation will be biased downwards. Increase ",
-        "{.var max_delay} for {?this study/these studies}."
-      )
+        "relative to the tail {?it/they} reported, so the implied standard ",
+        "deviation will be biased downwards. Raise {.var max_delay} for ",
+        "{?this study/these studies}."
+      ),
+      .estimates_checks_pointer()
     ))
   }
 
@@ -1386,29 +1523,26 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     cli::cli_inform(c(
       "!" = paste0(
         "The quadrature for {.val {coarse_quadrature}} needs more than ",
-        "{cap} intervals to resolve the spread {?it/they} reported over ",
-        "the grid cutoff (the observation time, or {.var max_delay} where ",
-        "the study adjusted for right truncation), so the implied summaries ",
-        "for {?this study/these studies} may be inaccurate. Raise ",
-        "{.code options(epidist.meta_n_quad)} above {cap} before building ",
-        "the model data, or lower {.var max_delay}."
-      )
+        "{cap} intervals to resolve the spread {cli::qty(coarse_quadrature)}",
+        "{?it/they} reported, so the implied summaries may be inaccurate. ",
+        "Raise {.code options(epidist.meta_n_quad)} above {cap} or lower ",
+        "{.var max_delay}."
+      ),
+      .estimates_checks_pointer()
     ))
   }
 
-  coarse <- .estimates_coarse_quantiles(data)
-  if (length(coarse) > 0) {
+  coarse_rows <- .estimates_coarse_rows(data)
+  if (any(coarse_rows)) {
+    flagged <- .estimates_row_labels(data, coarse_rows)
     cli::cli_inform(c(
       "!" = paste0(
-        "The smallest quantile reported by {.val {coarse}} sits within ten ",
-        "censoring windows of the smallest delay {?this study/these ",
-        "studies} counted, so the discrete grid barely resolves the delay. ",
-        "A reported quantile is rounded to that grid, which can bias the ",
-        "fit by tens of percent and does not shrink as {.var n} grows. ",
-        "Check that {.var swindow} is the resolution the study worked at, ",
-        "and fit a reported mean and standard deviation in preference where ",
-        "the study gives them."
-      )
+        "The smallest quantile reported by {flagged} sits within ten ",
+        "censoring windows of the smallest delay counted, so the discrete ",
+        "grid barely resolves it. Check {.var swindow}, and fit a reported ",
+        "mean and standard deviation instead where the study gives them."
+      ),
+      .estimates_checks_pointer()
     ))
   }
 
@@ -1417,32 +1551,57 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     cli::cli_inform(c(
       "!" = paste0(
         "{.val {overconfident}} report{?s/} several quantiles of integer day ",
-        "delays from more than 100 delays. The joint likelihood of such a ",
-        "quantile set is overconfident once the binomial spread of the ",
-        "crossing point of the empirical distribution function is narrower ",
-        "than a day, which it is here, so {?this study/these studies} will ",
-        "be weighted too heavily. Fit a reported mean and standard deviation ",
-        "instead where one is available."
-      )
+        "delays from more than 100 delays, so the joint quantile likelihood ",
+        "is overconfident and weights {?it/them} too heavily. Fit a reported ",
+        "mean and standard deviation instead where one is available."
+      ),
+      .estimates_checks_pointer()
     ))
   }
 
-  heavy <- .estimates_heavy_tail_sd(data)
-  if (length(heavy) > 0) {
+  heavy_rows <- .estimates_heavy_tail_rows(data)
+  if (any(heavy_rows)) {
+    flagged <- .estimates_row_labels(data, heavy_rows)
     cli::cli_inform(c(
       "!" = paste0(
-        "The standard deviation reported by {.val {heavy}} has a relative ",
-        "standard error above 0.25 at the kurtosis its mean and standard ",
-        "deviation imply under a lognormal delay. The normal sampling ",
-        "likelihood of a reported standard deviation, and the joint ",
-        "likelihood of a mean and standard deviation pair, cannot be trusted ",
-        "for such a heavy tail at this sample size. Where the study reports ",
-        "quantiles inside the body of the distribution, those are safer."
-      )
+        "The standard deviation reported by {flagged} has a relative ",
+        "standard error above 0.25 under the lognormal tail its mean ",
+        "implies, so its sampling likelihood cannot be trusted. Fit ",
+        "quantiles from the body of the distribution instead where the ",
+        "study reports them."
+      ),
+      .estimates_checks_pointer()
     ))
   }
 
   return(invisible(NULL))
+}
+
+#' Label flagged summary rows by study and position in the input
+#'
+#' @param data An `epidist_estimates_data` object.
+#'
+#' @param rows A logical vector selecting the rows to label.
+#'
+#' @returns A character vector such as `"A" (row 2)`, one entry per selected
+#'  row.
+#'
+#' @keywords internal
+.estimates_row_labels <- function(data, rows) {
+  return(sprintf(
+    "\"%s\" (row %d)", as.character(data$study)[rows], which(rows)
+  ))
+}
+
+#' The pointer every advisory message ends with
+#'
+#' @returns A named character vector for [cli::cli_inform()].
+#'
+#' @keywords internal
+.estimates_checks_pointer <- function() {
+  return(c(
+    i = "See the Checks section of {.code ?as_epidist_estimates_data}."
+  ))
 }
 
 #' The grid cutoff implied by a set of summary estimates

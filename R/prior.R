@@ -207,20 +207,20 @@ epidist_model_prior.default <- function(data, formula, ...) {
 #' The response column of a meta model is a placeholder on every summary row,
 #' and `brms` centres its default prior for the intercept of `mu` on the
 #' response. For a model fitted to summaries alone that default is centred on
-#' a delay of zero. This method centres it instead on the log of the median
-#' mean the studies reported, with a standard deviation of 1 on the log
-#' scale, which is the scale of the lognormal family prior in
-#' [epidist_family_prior()]. It does this for every family, so a Gamma or
-#' Weibull meta fit gets a prior on the same scale as a lognormal one.
+#' a delay of zero. This method puts a `normal(1, 1)` prior on the intercept
+#' instead, the scale of the lognormal family prior in
+#' [epidist_family_prior()], so that a Gamma or Weibull meta fit gets a prior
+#' on the same scale as a lognormal one. On the log scale it is a median
+#' delay of about 3 days with a 95% range of roughly 0.4 to 20 days.
 #'
-#' Where no study reported a mean the median reported quantile is used, and
-#' where no study reported either the mean of the individual level delays is
-#' used. A model with individual level rows only adds no prior, so the family
-#' or `brms` default applies as it does for the marginal model. The prior is
-#' added where `mu` is on the log scale, which is the lognormal family, whose
-#' `mu` is the log of the median under an identity link, and any family with
-#' a log link, and where `mu` is the delay itself under an identity link, in
-#' which case the median is used as it is.
+#' The centre is fixed rather than taken from the reported values, because a
+#' prior chosen from the data is not a prior. It would put the posterior of a
+#' small review where the data already sit and understate how much the
+#' studies disagree. The prior is added where `mu` is on the log scale, which
+#' is the lognormal family, whose `mu` is the log of the median under an
+#' identity link, and any family with a log link. Nothing is added for other
+#' links, and a model with individual level rows only adds no prior, so the
+#' family or `brms` default applies as it does for the marginal model.
 #'
 #' The between study spread of any group level term, such as `(1 | study)`,
 #' gets a half normal prior with a standard deviation of 0.25 on the scale of
@@ -237,17 +237,12 @@ epidist_model_prior.default <- function(data, formula, ...) {
 #'
 #' @export
 epidist_model_prior.epidist_meta_model <- function(data, formula, ...) {
-  location <- .meta_reported_location(data)
   link <- formula$family$link
-  if (is.null(location) || is.null(link)) {
+  if (all(data$obs_type == 1L) || is.null(link)) {
     return(NULL)
   }
   lognormal <- identical(.delay_family(formula$family)$name, "lognormal")
-  if (link == "log" || (lognormal && link == "identity")) {
-    centre <- log(location)
-  } else if (link == "identity") {
-    centre <- location
-  } else {
+  if (link != "log" && !(lognormal && link == "identity")) {
     return(NULL)
   }
   # Between study spread on the scale of the linear predictor, for every
@@ -259,62 +254,13 @@ epidist_model_prior.epidist_meta_model <- function(data, formula, ...) {
   spread <- c(
     list(set_prior("normal(0, 0.25)", class = "sd")),
     lapply(dpars, function(dpar) {
-      set_prior("normal(0, 0.25)", class = "sd", dpar = dpar)
+      return(set_prior("normal(0, 0.25)", class = "sd", dpar = dpar))
     })
   )
   return(do.call(c, c(
-    list(set_prior(
-      sprintf("normal(%s, 1)", signif(centre, 3)),
-      class = "Intercept"
-    )),
+    list(set_prior("normal(1, 1)", class = "Intercept")),
     spread
   )))
-}
-
-#' The typical delay a meta model's data describe
-#'
-#' Used to centre the intercept prior of [epidist_model_prior()] for the meta
-#' model. Reported means are taken first, then reported quantiles, then the
-#' individual level delays. Joint summary rows carry their reported values in
-#' the grouped members of the model rather than in the row itself, so both are
-#' read.
-#'
-#' @param data An `epidist_meta_model` object.
-#'
-#' @returns A positive number, or `NULL` where the model has no summary rows
-#'  or no summary gives a location.
-#'
-#' @keywords internal
-.meta_reported_location <- function(data) {
-  individual <- data$obs_type == 1L
-  if (all(individual)) {
-    return(NULL)
-  }
-  members <- .meta_members(data)
-  means <- c(
-    data$delay_upr[data$obs_type == 2L],
-    members$value[members$type == 1L]
-  )
-  quantiles <- c(
-    data$delay_upr[data$obs_type == 4L],
-    members$value[members$type == 3L]
-  )
-  if (length(means) > 0) {
-    location <- stats::median(means)
-  } else if (length(quantiles) > 0) {
-    location <- stats::median(quantiles)
-  } else if (any(individual)) {
-    location <- stats::weighted.mean(
-      data$delay_lwr[individual] + data$swindow[individual] / 2,
-      data$n[individual]
-    )
-  } else {
-    return(NULL)
-  }
-  if (!is.finite(location) || location <= 0) {
-    return(NULL)
-  }
-  return(location)
 }
 
 #' Family specific prior distributions

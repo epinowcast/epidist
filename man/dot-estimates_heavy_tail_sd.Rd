@@ -13,15 +13,6 @@
 A character vector of study identifiers.
 }
 \description{
-The sampling standard error of a reported standard deviation is
-\eqn{\sigma \sqrt{(\kappa - 1) / (4 n)}}, with \eqn{\kappa} the kurtosis
-of the delays. The normal approximation behind it holds while that
-relative standard error is below about a quarter. Above it the sampling
-distribution of a sample standard deviation is far from normal, the
-asymptotic standard error overstates its spread by up to two times, and
-the joint likelihood of a mean and standard deviation pair is biased by
-about a standard error. The kurtosis is taken from the reported mean and
-standard deviation under a lognormal delay, which is a plausible tail for
-a delay of that coefficient of variation.
+The studies flagged by \code{\link[=.estimates_heavy_tail_rows]{.estimates_heavy_tail_rows()}}.
 }
 \keyword{internal}
