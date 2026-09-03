@@ -71,6 +71,10 @@ test_that("as_epidist_estimates_data warns when it assumes a study adjusted for 
     suppressMessages(as_epidist_estimates_data(minimal)),
     "adjusted for right truncation"
   )
+  expect_warning(
+    suppressMessages(as_epidist_estimates_data(minimal)),
+    "Checks"
+  )
   # A finite observation time means the study is assumed not to have adjusted,
   # which is announced as a message rather than a warning.
   finite <- minimal
@@ -268,6 +272,7 @@ test_that("as_epidist_estimates_data warns about a short grid cutoff", {
   expect_length(short_msg, 1)
   expect_true(grepl("max_delay", short_msg, fixed = TRUE))
   expect_true(grepl("\"A\"", short_msg, fixed = TRUE))
+  expect_true(grepl("Checks", short_msg, fixed = TRUE))
   expect_identical(
     .estimates_short_cutoff(suppressMessages(as_epidist_estimates_data(heavy))),
     "A"
@@ -304,6 +309,9 @@ test_that("as_epidist_estimates_data warns when the quadrature is coarse relativ
   expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
   expect_true(any(grepl("epidist.meta_n_quad", msgs, fixed = TRUE)))
   expect_true(any(grepl("max_delay", msgs, fixed = TRUE)))
+  quad_msg <- msgs[grepl("quadrature", msgs, fixed = TRUE)]
+  expect_length(quad_msg, 1)
+  expect_true(grepl("Checks", quad_msg, fixed = TRUE))
   # Raising the floor above the cap clears it.
   old <- options(epidist.meta_n_quad = 40000)
   on.exit(options(old), add = TRUE)
@@ -363,6 +371,9 @@ test_that("as_epidist_estimates_data warns about several integer day quantiles f
   )
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
   expect_true(any(grepl("overconfident", msgs, fixed = TRUE)))
+  over_msg <- msgs[grepl("overconfident", msgs, fixed = TRUE)]
+  expect_length(over_msg, 1)
+  expect_true(grepl("Checks", over_msg, fixed = TRUE))
   # A small study, a single quantile or a continuous study does not trip it.
   quantiles$n <- 60
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
@@ -386,6 +397,11 @@ test_that("as_epidist_estimates_data warns about a heavy tailed standard deviati
   )
   msgs <- capture_messages(as_epidist_estimates_data(heavy))
   expect_true(any(grepl("relative standard error", msgs, fixed = TRUE)))
+  # The message names the row of the input and points at the documentation.
+  heavy_msg <- msgs[grepl("relative standard error", msgs, fixed = TRUE)]
+  expect_length(heavy_msg, 1)
+  expect_true(grepl("\"A\" (row 2)", heavy_msg, fixed = TRUE))
+  expect_true(grepl("Checks", heavy_msg, fixed = TRUE))
   # At n = 1000 the relative standard error is 0.17 and the warning is
   # silent, as it is for a lighter tail at n = 100.
   heavy$n <- 1000
@@ -428,6 +444,10 @@ test_that("as_epidist_estimates_data keys the coarse quantile warning on the sma
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
   expect_true(any(grepl("smallest quantile", msgs, fixed = TRUE)))
   expect_true(any(grepl("mean and standard deviation", msgs, fixed = TRUE)))
+  coarse_msg <- msgs[grepl("smallest quantile", msgs, fixed = TRUE)]
+  expect_length(coarse_msg, 1)
+  expect_true(grepl("\"A\" (row 1)", coarse_msg, fixed = TRUE))
+  expect_true(grepl("Checks", coarse_msg, fixed = TRUE))
   expect_identical(
     .estimates_coarse_quantiles(
       suppressMessages(as_epidist_estimates_data(quantiles))
