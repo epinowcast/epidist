@@ -405,13 +405,13 @@ A two parameter fit carries two degrees of freedom, so asking it for a third sum
 
 ``` r
 biased_estimates <- as_epidist_estimates_data(simulated_studies)
-#> ! The quantiles reported by "naive IQR" and "calendar stop" sit within ten
-#>   censoring windows of the smallest delay these studies counted, so the
-#>   discrete grid barely resolves the delay. A reported quantile is rounded to
-#>   that grid, which can bias the fit by tens of percent and does not shrink as
-#>   `n` grows. Check that `swindow` is the resolution the study worked at, and
-#>   fit a reported mean and standard deviation in preference where one is
-#>   available.
+#> ! The smallest quantile reported by "naive IQR", "calendar stop", and
+#>   "midpoint" sits within ten censoring windows of the smallest delay these
+#>   studies counted, so the discrete grid barely resolves the delay. A reported
+#>   quantile is rounded to that grid, which can bias the fit by tens of percent
+#>   and does not shrink as `n` grows. Check that `swindow` is the resolution the
+#>   study worked at, and fit a reported mean and standard deviation in preference
+#>   where the study gives them.
 #> ! "calendar stop" reports several quantiles of integer day delays from more
 #>   than 100 delays. The joint likelihood of such a quantile set is overconfident
 #>   once the binomial spread of the crossing point of the empirical distribution
@@ -655,9 +655,8 @@ predicted_parameters <- list(
   mixed = fit_meta_mixed,
   "reference (marginal)" = fit_reference
 ) |>
-  lapply(\(fit) ungroup(add_summaries(delay_parameter_draws(fit)))) |>
+  lapply(\(fit) ungroup(delay_summary_draws(fit))) |>
   bind_rows(.id = "model") |>
-  filter(.data$.row == 1) |>
   mutate(model = factor(
     model,
     levels = c(
@@ -897,13 +896,19 @@ ebola_estimates <- as_epidist_estimates_data(ebola_estimates_df)
 #>   reporting) for every study.
 #> ℹ No `swindow` column supplied, assuming a censoring window of 1 (daily
 #>   reporting) for every study.
-#> ! The quantiles reported by "Li 2016 (a)", "Khan 1999", "Camacho 2014", "Baron
-#>   1983", "Miglietta 2019", and "Nsio 2019" sit within ten censoring windows of
-#>   the smallest delay these studies counted, so the discrete grid barely
-#>   resolves the delay. A reported quantile is rounded to that grid, which can
-#>   bias the fit by tens of percent and does not shrink as `n` grows. Check that
-#>   `swindow` is the resolution the study worked at, and fit a reported mean and
-#>   standard deviation in preference where one is available.
+#> ! The grid cutoff `max_delay` for "Aylward 2014" is short relative to the tail
+#>   of the delay this study reported. A lognormal matched to the reported
+#>   summaries has more than 2% of its second moment beyond the cutoff, so the
+#>   implied standard deviation will be biased downwards. Increase `max_delay` for
+#>   this study.
+#> ! The smallest quantile reported by "Nanclares 2016", "Li 2016 (a)", "Khan
+#>   1999", "Camacho 2014", "Baron 1983", "Bah 2015", "Miglietta 2019", and "Nsio
+#>   2019" sits within ten censoring windows of the smallest delay these studies
+#>   counted, so the discrete grid barely resolves the delay. A reported quantile
+#>   is rounded to that grid, which can bias the fit by tens of percent and does
+#>   not shrink as `n` grows. Check that `swindow` is the resolution the study
+#>   worked at, and fit a reported mean and standard deviation in preference where
+#>   the study gives them.
 #> ! The standard deviation reported by "Muoghalu 2017", "Rosello 2015 (2)",
 #>   "Maganga 2014", and "Folarin 2016" has a relative standard error above 0.25
 #>   at the kurtosis its mean and standard deviation imply under a lognormal
@@ -929,16 +934,61 @@ Nsio 2019 also reports a standard deviation, but alongside its median rather tha
 Fitting both would treat two summaries of the same delays as independent and overstate what that one study contributes.
 A review that reported the mean as well would let the model use the better resolved summary here.
 
-We fit a Gamma, with a `(1 | study)` term to allow for genuine differences between studies (see the note on plug in standard errors in `?as_epidist_meta_model`).
+We fit a Gamma, with a `(1 | study)` term on both the mean and the shape to allow for genuine differences between studies in either (see the note on plug in standard errors in `?as_epidist_meta_model`).
+The meta model puts no restriction on the `brms` formula, so a study term on the shape is written as it would be for any distributional parameter.
+The meta model centres the prior for the intercept on the log of the median mean the studies report, and puts a half normal prior with a standard deviation of 0.25 on the between study standard deviation of each parameter, which on the log scale allows studies to differ by about a quarter.
+Both are worth seeing before fitting.
 
 
 ``` r
 ebola_meta <- as_epidist_meta_model(estimates = ebola_estimates)
+#> ! The grid cutoff `max_delay` for "Aylward 2014" is short relative to the tail
+#>   of the delay this study reported. A lognormal matched to the reported
+#>   summaries has more than 2% of its second moment beyond the cutoff, so the
+#>   implied standard deviation will be biased downwards. Increase `max_delay` for
+#>   this study.
+#> ! The smallest quantile reported by "Nanclares 2016", "Li 2016 (a)", "Khan
+#>   1999", "Camacho 2014", "Baron 1983", "Bah 2015", "Miglietta 2019", and "Nsio
+#>   2019" sits within ten censoring windows of the smallest delay these studies
+#>   counted, so the discrete grid barely resolves the delay. A reported quantile
+#>   is rounded to that grid, which can bias the fit by tens of percent and does
+#>   not shrink as `n` grows. Check that `swindow` is the resolution the study
+#>   worked at, and fit a reported mean and standard deviation in preference where
+#>   the study gives them.
+#> ! The standard deviation reported by "Muoghalu 2017", "Rosello 2015 (2)",
+#>   "Maganga 2014", and "Folarin 2016" has a relative standard error above 0.25
+#>   at the kurtosis its mean and standard deviation imply under a lognormal
+#>   delay. The normal sampling likelihood of a reported standard deviation, and
+#>   the joint likelihood of a mean and standard deviation pair, cannot be trusted
+#>   for such a heavy tail at this sample size. Where the study reports quantiles
+#>   inside the body of the distribution, those are safer.
+ebola_formula <- bf(mu ~ 1 + phase + (1 | study), shape ~ 1 + (1 | study))
 
+epidist_prior(
+  ebola_meta,
+  family = epidist_family(ebola_meta, family = Gamma(link = "log")),
+  formula = epidist_formula(
+    ebola_meta, epidist_family(ebola_meta, family = Gamma(link = "log")),
+    formula = ebola_formula
+  ),
+  prior = NULL
+)
+#>            prior     class coef group resp  dpar nlpar   lb   ub source  tag
+#>  normal(2.23, 1) Intercept                             <NA> <NA>  model <NA>
+#>  normal(0, 0.25)        sd                             <NA> <NA>  model <NA>
+#>  normal(0, 0.25)        sd                 shape       <NA> <NA>  model <NA>
+```
+
+
+``` r
+# With a study term on both parameters the default initial range of brms
+# lets a study's shape start far outside where the model is finite, so the
+# chains start closer in.
 fit_ebola <- epidist(
   data = ebola_meta,
-  formula = mu ~ 1 + phase + (1 | study),
+  formula = ebola_formula,
   family = Gamma(link = "log"),
+  init = 0.5,
   chains = 2, cores = 2, iter = 1000,
   refresh = ifelse(interactive(), 250, 0),
   seed = 1,
@@ -952,22 +1002,23 @@ summary(fit_ebola)
 #>  Family: meta_gamma
 #>   Links: mu = log; shape = log
 #> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ phase + (1 | study)
-#>          shape ~ 1
+#>          shape ~ 1 + (1 | study)
 #>    Data: transformed_data (Number of observations: 29)
 #>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
 #>          total post-warmup draws = 1000
 #>
 #> Multilevel Hyperparameters:
 #> ~study (Number of levels: 29)
-#>               Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)     0.14      0.04     0.08     0.23 1.01      329      561
+#>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(Intercept)           0.14      0.03     0.08     0.21 1.02      297      530
+#> sd(shape_Intercept)     0.52      0.10     0.36     0.74 1.02      417      776
 #>
 #> Regression Coefficients:
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept               2.27      0.07     2.13     2.40 1.00      436      547
-#> shape_Intercept         0.70      0.04     0.62     0.78 1.00     1179      552
-#> phaseduringoutbreak     0.04      0.14    -0.26     0.30 1.00      492      508
-#> phaseunrecorded        -0.03      0.08    -0.19     0.13 1.00      475      582
+#> Intercept               2.24      0.07     2.11     2.37 1.00      566      656
+#> shape_Intercept         1.32      0.16     1.02     1.62 1.00      482      662
+#> phaseduringoutbreak     0.07      0.13    -0.20     0.34 1.00      770      722
+#> phaseunrecorded        -0.02      0.08    -0.18     0.13 1.00      568      604
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -983,15 +1034,14 @@ The mean and standard deviation are the moments they imply.
 
 
 ``` r
-phase_grid <- as_tibble(ebola_meta)[rep(1, nlevels(ebola_meta$phase)), ] |>
-  mutate(phase = factor(levels(ebola_meta$phase), levels(ebola_meta$phase)))
-
+# One individual level row per phase, with no censoring and no truncation.
 # The columns of `newdata` come back with the draws, so `phase` is already
 # on the result.
-population_draws <- delay_parameter_draws(
+phase_grid <- epidist_newdata(ebola_meta, phase)
+
+population_draws <- delay_summary_draws(
   fit_ebola, newdata = phase_grid, re_formula = NA
 ) |>
-  add_summaries() |>
   ungroup()
 
 population_summary <- population_draws |>
@@ -1014,10 +1064,10 @@ population_summary
 #> # A tibble: 4 × 4
 #>   parameter median  q025  q975
 #>   <chr>      <dbl> <dbl> <dbl>
-#> 1 shape       2.02  1.85  2.18
-#> 2 scale       4.83  4.10  5.72
-#> 3 mean        9.71  8.43 11.1
-#> 4 sd          6.84  5.91  7.87
+#> 1 shape       3.75  2.78  5.08
+#> 2 scale       2.50  1.79  3.47
+#> 3 mean        9.35  8.22 10.7
+#> 4 sd          4.84  3.94  5.99
 ```
 
 The phase bias is the contrast between each phase and the retrospective reference, holding everything else fixed.
@@ -1030,8 +1080,8 @@ marginaleffects::avg_comparisons(
 )
 #>
 #>                         Contrast Estimate 2.5 % 97.5 %
-#>  during outbreak - post outbreak    0.427 -2.32   3.14
-#>  unrecorded - post outbreak        -0.342 -1.94   1.16
+#>  during outbreak - post outbreak    0.627 -1.84   3.60
+#>  unrecorded - post outbreak        -0.141 -1.71   1.18
 #>
 #> Term: phase
 #> Type: response
@@ -1051,7 +1101,7 @@ population_draws |>
 #> # A tibble: 1 × 3
 #>   median  q025  q975
 #>    <dbl> <dbl> <dbl>
-#> 1   1.05 0.774  1.35
+#> 1   1.07 0.819  1.41
 ```
 
 With two of the 29 studies recorded as made during an outbreak, this contrast is not resolved by these data.
@@ -1162,6 +1212,13 @@ epidist_estimates_parameters(
 #> ℹ No max_delay column supplied, using twenty times the largest reported value
 #>   for each study (minimum 10) as the grid cutoff. Increase this if the delay
 #>   distribution has a long tail, and lower it to speed up fitting.
+#> ! The smallest quantile reported by "Marziano 2023 (2)" sits within ten
+#>   censoring windows of the smallest delay this study counted, so the discrete
+#>   grid barely resolves the delay. A reported quantile is rounded to that grid,
+#>   which can bias the fit by tens of percent and does not shrink as `n` grows.
+#>   Check that `swindow` is the resolution the study worked at, and fit a
+#>   reported mean and standard deviation in preference where the study gives
+#>   them.
 #> ! The standard deviation reported by "Marziano 2023 (2)" has a relative
 #>   standard error above 0.25 at the kurtosis its mean and standard deviation
 #>   imply under a lognormal delay. The normal sampling likelihood of a reported
@@ -1198,7 +1255,7 @@ The published summaries are what a reader of the literature sees.
 With the metadata `epireview` records, unadjusted daily date differences from studies flagged as adjusted for truncation, the forward model changes nothing visible.
 For a uniform primary event the expected integer date difference equals the continuous mean exactly, and the implied standard deviation only picks up the rounding variance of the two daily windows.
 For the Gamma Rosello reported below that moves a standard deviation of 5.41 to 5.43.
-So the comparison tests the hierarchical pooling of the `(1 | study)` term and the shared shape rather than a bias correction.
+So the comparison tests the hierarchical pooling of the `(1 | study)` terms rather than a bias correction.
 One of the 29 studies lets us check what that pooling does.
 `Rosello 2015 (3)` is the 2012 Isiro outbreak, and that line list has since been re-analysed in [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis).
 That re-analysis works from the individual records and adjusts for double interval censoring on both event times.
@@ -1216,13 +1273,16 @@ We use a Gamma matched to its mean and standard deviation as the reference distr
 bdbv <- read.csv("bdbv-onset-to-death.csv") |>
   mutate(shape = (.data$mean / .data$sd)^2, scale = .data$sd^2 / .data$mean)
 
-isiro_draws <- delay_parameter_draws(
+isiro_phase <- unique(
+  filter(as_tibble(ebola_meta), .data$study == "Rosello 2015 (3)")$phase
+)
+
+isiro_draws <- delay_summary_draws(
   fit_ebola,
-  newdata = filter(
-    as_tibble(ebola_meta), .data$study == "Rosello 2015 (3)"
-  )[1, ]
+  newdata = epidist_newdata(
+    ebola_meta, study = "Rosello 2015 (3)", phase = isiro_phase
+  )
 ) |>
-  add_summaries() |>
   ungroup()
 ```
 
@@ -1300,8 +1360,8 @@ bind_rows(
 #>   source                       mean                sd
 #>   <chr>                        <chr>               <chr>
 #> 1 as reported by Rosello 2015  11.37               5.41
-#> 2 meta model, study level      10.73 (9.14, 13.26) 7.58 (6.37, 9.33)
-#> 3 meta model, population level 9.71 (8.43, 11.06)  6.84 (5.91, 7.87)
+#> 2 meta model, study level      10.71 (8.86, 14.16) 5.25 (3.96, 7.60)
+#> 3 meta model, population level 9.35 (8.22, 10.72)  4.84 (3.94, 5.99)
 #> 4 re-analysis of the line list 11.76 (9.31, 15.06) 6.57 (4.88, 9.44)
 ```
 
@@ -1395,11 +1455,9 @@ p_bdbv
 </div>
 
 The Gamma Rosello reported is already within half a day of the re-analysis on the mean.
-The study level estimate is shrunk away from it, towards the population mean, by the `(1 | study)` term, and is more dispersed than either the reported fit or the re-analysis.
-That dispersion comes from the model rather than from the study.
-`shape ~ 1` gives every study one shared shape, estimated across all 29 studies, 15 of which report a single summary with no spread at all.
-The Gamma Rosello fitted to Isiro is much more peaked than that shared shape.
-Putting a term on `shape` as well, such as `shape ~ 1 + (1 | study)`, lets a study's own reported spread inform its own shape, at the cost of a much harder fit.
+The study level estimate is shrunk away from it, towards the population mean, by the `(1 | study)` term on the mean.
+Its spread is the study's own, because the `(1 | study)` term on the shape lets a study's reported standard deviation inform its own shape rather than sharing one shape across all 29 studies, 15 of which report a single summary with no spread at all.
+The between study standard deviation of the shape is large, so that sharing would have misdescribed the Isiro study in particular, whose reported Gamma is much more peaked than the population one.
 
 The population level estimate is shorter than the re-analysis, which is what we should expect and is not evidence that the adjustment failed.
 It describes 29 studies spanning several outbreaks and more than one Ebola species, while the re-analysis describes one Bundibugyo virus outbreak.
