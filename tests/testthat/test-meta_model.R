@@ -104,6 +104,23 @@ test_that("as_epidist_meta_model labels individual rows in the study column", {
   expect_true(all(individual_rows$study == "individual"))
 })
 
+test_that("as_epidist_meta_model does not repeat the estimates data checks", { # nolint: line_length_linter.
+  # The advisory checks run once, when the estimates are built, and not
+  # again when the finished object is passed on to the meta model.
+  heavy <- data.frame(
+    study = "A", type = c("mean", "sd"),
+    value = c(exp(2.1), exp(2.1) * sqrt(expm1(1))), n = 100,
+    relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 1,
+    pwindow = 1, swindow = 1, max_delay = 200, stringsAsFactors = FALSE
+  )
+  msgs <- capture_messages(estimates <- as_epidist_estimates_data(heavy))
+  expect_true(any(grepl("relative standard error", msgs, fixed = TRUE)))
+  expect_silent(as_epidist_meta_model(estimates = estimates))
+  expect_silent(as_epidist_meta_model(estimates))
+  expect_silent(as_epidist_meta_model(sim_obs, estimates = estimates))
+  expect_silent(as_epidist_estimates_data(list(estimates, estimates)))
+})
+
 test_that("is_epidist_meta_model returns TRUE for correct input", {
   expect_true(is_epidist_meta_model(prep_meta_obs))
 })
