@@ -755,8 +755,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #' @export
 new_epidist_meta_model <- function(data, primary = .primary_choices()) {
   attr(data, "primary") <- match.arg(primary)
-  class(data) <- c("epidist_meta_model", class(data))
-  return(data)
+  return(.new_epidist_data(data, "epidist_meta_model"))
 }
 
 #' Check if data has the `epidist_meta_model` class

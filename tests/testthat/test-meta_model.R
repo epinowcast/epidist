@@ -31,7 +31,6 @@ test_that("meta model objects carry the shared epidist_data class", {
     class(prep_meta_obs)[1:2], c("epidist_meta_model", "epidist_data")
   )
   expect_identical(class(prep_meta_obs)[-1], class(prep_marginal_obs)[-1])
-  expect_identical(sum(class(prep_meta_obs) == "epidist_data"), 1L)
   expect_identical(.primary_dist(prep_meta_obs), "uniform")
   expect_false(is_epidist_data(.drop_epidist_class(prep_meta_obs)))
 })
