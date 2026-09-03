@@ -74,7 +74,8 @@ as_epidist_estimates_data <- function(data, ...) {
 #'   are right truncated unless the study corrected for it.
 #' * **The censoring windows** (`pwindow`, `swindow`). The width, in the same
 #'   time units as the delay, of the interval each event was observed in. Daily
-#'   reporting gives windows of 1, weekly reporting gives 7.
+#'   reporting gives windows of 1, weekly reporting gives 7. A fully adjusted
+#'   study does not use them and may leave them `NA`.
 #' * **The sample size** (`n`), the number of delays the summary was computed
 #'   from. This sets the sampling uncertainty on the reported value. A reported
 #'   standard error (`se`) may be given instead, and takes precedence when
@@ -225,7 +226,10 @@ as_epidist_estimates_data <- function(data, ...) {
 #'
 #' @param pwindow,swindow Strings giving the columns of `data` containing the
 #'  primary and secondary event censoring window widths. Default to 1 (daily
-#'  reporting) when not supplied.
+#'  reporting) when not supplied. A fully adjusted study (`cens_adjusted`
+#'  code 1) does not use them, because its estimand is the continuous delay
+#'  distribution itself, so its rows may leave them `NA`. Every other code
+#'  needs them.
 #'
 #' @param relative_obs_time A string giving the column of `data` containing the
 #'  observation time relative to the primary event, that is the right
@@ -1078,7 +1082,9 @@ as_epidist_estimates_data.epidist_multivariate <- function(
       location <- data$value[rows & data$type %in% c("mean", "quantile")]
       location <- location[location > 0]
       if (length(location) == 0) {
-        return(min(data$swindow[rows]))
+        # A fully adjusted study may leave its windows NA.
+        narrowest <- min(data$swindow[rows], na.rm = TRUE)
+        return(ifelse(is.finite(narrowest), narrowest, 1))
       }
       return(min(location) / 4)
     },
@@ -1338,8 +1344,8 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
   assert_numeric(data$value, lower = 0, finite = TRUE, any.missing = FALSE)
   assert_numeric(data$se, lower = 0)
   assert_numeric(data$n, lower = 1)
-  assert_numeric(data$pwindow, lower = 0, any.missing = FALSE)
-  assert_numeric(data$swindow, lower = 0, any.missing = FALSE)
+  assert_numeric(data$pwindow, lower = 0)
+  assert_numeric(data$swindow, lower = 0)
   assert_numeric(data$relative_obs_time, lower = 0, any.missing = FALSE)
   assert_logical(data$trunc_adjusted, any.missing = FALSE)
   assert_subset(
@@ -1358,7 +1364,22 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
   )
   assert_character(data$mvn_id)
 
-  if (any(data$swindow <= 0)) {
+  # No estimand of a fully adjusted study reads the censoring windows, so
+  # they may be left NA there. Every other code uses them.
+  uses_window <- data$cens_adjusted != 1L
+  for (col in c("pwindow", "swindow")) {
+    absent <- uses_window & is.na(data[[col]])
+    if (any(absent)) {
+      cli::cli_abort(paste0(
+        "{.var {col}} is needed for a study with {.var cens_adjusted} code ",
+        "0, 2, 3 or 4, but is missing for ",
+        "{.val {unique(as.character(data$study)[absent])}}. Only a fully ",
+        "adjusted study (code 1) may leave it {.val NA}."
+      ))
+    }
+  }
+
+  if (any(data$swindow <= 0, na.rm = TRUE)) {
     cli::cli_abort("{.var swindow} must be greater than zero.")
   }
 
@@ -1445,7 +1466,7 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     ))
   }
 
-  if (any(cutoff < data$swindow)) {
+  if (any(cutoff < data$swindow, na.rm = TRUE)) {
     cli::cli_abort(paste0(
       "The grid cutoff (the observation time, or {.var max_delay} where the ",
       "study adjusted for right truncation) must be at least as large as ",

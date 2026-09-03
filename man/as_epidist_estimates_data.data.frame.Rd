@@ -56,7 +56,10 @@ ignored otherwise.}
 
 \item{pwindow, swindow}{Strings giving the columns of \code{data} containing the
 primary and secondary event censoring window widths. Default to 1 (daily
-reporting) when not supplied.}
+reporting) when not supplied. A fully adjusted study (\code{cens_adjusted}
+code 1) does not use them, because its estimand is the continuous delay
+distribution itself, so its rows may leave them \code{NA}. Every other code
+needs them.}
 
 \item{relative_obs_time}{A string giving the column of \code{data} containing the
 observation time relative to the primary event, that is the right
@@ -174,7 +177,8 @@ window, which is usually easier to read off a paper. Real time estimates
 are right truncated unless the study corrected for it.
 \item \strong{The censoring windows} (\code{pwindow}, \code{swindow}). The width, in the same
 time units as the delay, of the interval each event was observed in. Daily
-reporting gives windows of 1, weekly reporting gives 7.
+reporting gives windows of 1, weekly reporting gives 7. A fully adjusted
+study does not use them and may leave them \code{NA}.
 \item \strong{The sample size} (\code{n}), the number of delays the summary was computed
 from. This sets the sampling uncertainty on the reported value. A reported
 standard error (\code{se}) may be given instead, and takes precedence when

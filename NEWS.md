@@ -213,6 +213,11 @@ See #620.
 It warns, rather than messages, when no `trunc_adjusted` column is supplied and a study is therefore assumed to have adjusted for right truncation.
 The `growth_rate` documentation now separates its within window tilt from the accrual weight it applies under `trunc_design = "accrual"`, and points to the `primary = "expgrowth"` option of the marginal model for individual level data.
 See #620.
+- `as_epidist_estimates_data()` accepts `NA` censoring windows for a study that fully adjusted for censoring (`cens_adjusted = 1`), since none of its estimands read them, and rejects them with a message naming the study for every other code.
+See #620.
+- The advisory messages of `as_epidist_estimates_data()` are now two short sentences naming the studies, and the input row where a single summary is meant, and point at a new Checks section of its documentation that carries the reasoning.
+They run once, when the estimates are built, rather than again when the object is passed to `as_epidist_meta_model()`.
+See #620.
 - The midpoint imputation codes of the meta model (`cens_adjusted` 3 and 4) now move `delay_min` with the midpoint shift, so a study that dropped reported delays below a minimum is left truncated at the right point.
 Before this the implied mean was 5 to 15% low for code 4 and up to 24% high for code 3 with a wide secondary window.
 See #620.
