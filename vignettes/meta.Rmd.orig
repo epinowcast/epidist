@@ -429,7 +429,7 @@ fit_meta_summary_study <- epidist(
 ```
 
 ```{r}
-summary(fit_meta_summary_study)$random
+round(summary(fit_meta_summary_study)$random$study, 2)
 ```
 
 `re_formula = NA` switches the study term off, giving the population level parameters, which we compare with the fit without the term.
