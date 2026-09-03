@@ -543,14 +543,10 @@ fit_meta_summary_study <- epidist(
 
 
 ``` r
-summary(fit_meta_summary_study)$random
-#> $study
-#>                      Estimate  Est.Error   l-95% CI  u-95% CI     Rhat Bulk_ESS
-#> sd(Intercept)       0.1526007 0.06414704 0.06482817 0.3037345 1.000904 352.6856
-#> sd(sigma_Intercept) 0.2616057 0.08490301 0.13203173 0.4488783 1.001890 444.6457
-#>                     Tail_ESS
-#> sd(Intercept)       591.2499
-#> sd(sigma_Intercept) 580.9832
+round(summary(fit_meta_summary_study)$random$study, 2)
+#>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#> sd(Intercept)           0.15      0.06     0.06     0.30    1   352.69   591.25
+#> sd(sigma_Intercept)     0.26      0.08     0.13     0.45    1   444.65   580.98
 ```
 
 `re_formula = NA` switches the study term off, giving the population level parameters, which we compare with the fit without the term.
