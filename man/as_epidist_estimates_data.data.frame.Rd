@@ -117,7 +117,11 @@ grid. Only used when the study adjusted for right truncation. Defaults to
 twenty times the largest reported value for the study, rounded up, with a
 minimum of ten. Raise it for a long tailed delay, whose implied standard
 deviation is biased downwards if the distribution has not decayed by the
-cutoff, and lower it to fit faster.}
+cutoff, and lower it to fit faster. A warning names the studies whose
+cutoff is too short, judged by a lognormal matched to the reported mean
+and standard deviation, or to the median and largest quantile where only
+quantiles are reported, having more than 2\% of its second moment beyond
+the cutoff.}
 
 \item{...}{Not used in this method.}
 }

@@ -4,6 +4,7 @@ test_that("epidist objects carry the epidist_data class", {
   expect_true(is_epidist_data(prep_obs))
   expect_true(is_epidist_data(prep_marginal_obs))
   expect_true(is_epidist_data(prep_naive_obs))
+  expect_true(is_epidist_data(prep_meta_obs))
   expect_false(is_epidist_data(data.frame()))
 })
 
