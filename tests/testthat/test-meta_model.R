@@ -21,6 +21,21 @@ test_that("as_epidist_meta_model works with a mix of individual and summary data
   expect_identical(sum(prep_meta_obs$obs_type == 1L), nrow(sim_obs))
 })
 
+test_that("meta model objects carry the shared epidist_data class", {
+  expect_true(is_epidist_data(prep_meta_individual))
+  expect_true(is_epidist_data(prep_meta_estimates))
+  expect_true(is_epidist_data(prep_meta_obs))
+  # The class order follows the marginal model: the specific class first,
+  # then the shared class, then the underlying data frame classes.
+  expect_identical(
+    class(prep_meta_obs)[1:2], c("epidist_meta_model", "epidist_data")
+  )
+  expect_identical(class(prep_meta_obs)[-1], class(prep_marginal_obs)[-1])
+  expect_identical(sum(class(prep_meta_obs) == "epidist_data"), 1L)
+  expect_identical(.primary_dist(prep_meta_obs), "uniform")
+  expect_false(is_epidist_data(.drop_epidist_class(prep_meta_obs)))
+})
+
 test_that("as_epidist_meta_model errors when no data is supplied", {
   expect_error(as_epidist_meta_model(), "at least one")
   expect_error(as_epidist_meta_model(NULL, NULL), "at least one")
