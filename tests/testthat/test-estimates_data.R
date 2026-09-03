@@ -391,6 +391,34 @@ test_that("as_epidist_estimates_data does not warn about a truncated study", {
   expect_false(any(grepl("short relative", msgs, fixed = TRUE)))
 })
 
+test_that("as_epidist_estimates_data keys the coarse quantile warning on the smallest quantile", { # nolint: line_length_linter.
+  # A study whose smallest quantile sits within ten censoring windows of the
+  # smallest delay it counted is flagged even when its largest does not.
+  quantiles <- data.frame(
+    study = "A", type = "quantile", value = c(5, 30), p = c(0.25, 0.9),
+    n = 50, relative_obs_time = Inf, trunc_adjusted = TRUE,
+    cens_adjusted = 0, stringsAsFactors = FALSE
+  )
+  msgs <- capture_messages(as_epidist_estimates_data(quantiles))
+  expect_true(any(grepl("smallest quantile", msgs, fixed = TRUE)))
+  expect_true(any(grepl("mean and standard deviation", msgs, fixed = TRUE)))
+  expect_identical(
+    .estimates_coarse_quantiles(
+      suppressMessages(as_epidist_estimates_data(quantiles))
+    ),
+    "A"
+  )
+  # Quantiles that all sit at least ten windows up the grid are not flagged.
+  quantiles$value <- c(12, 30)
+  msgs <- capture_messages(as_epidist_estimates_data(quantiles))
+  expect_false(any(grepl("smallest quantile", msgs, fixed = TRUE)))
+  # A study that adjusted for censoring is not on the discrete grid.
+  quantiles$value <- c(5, 30)
+  quantiles$cens_adjusted <- 1
+  msgs <- capture_messages(as_epidist_estimates_data(quantiles))
+  expect_false(any(grepl("smallest quantile", msgs, fixed = TRUE)))
+})
+
 test_that("the default grid cutoff keeps the implied summaries close to the untruncated ones", { # nolint: line_length_linter.
   heavy <- data.frame(
     study = "A", type = c("mean", "sd"), value = c(8.3, 7.9), n = 500,
