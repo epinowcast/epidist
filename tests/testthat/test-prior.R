@@ -196,9 +196,9 @@ test_that("epidist_model_prior centres a summaries only meta model on the report
   formula <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))
   prior <- epidist_model_prior(prep_meta_estimates, formula)
   expect_s3_class(prior, "brmsprior")
-  expect_identical(nrow(prior), 2L)
-  expect_identical(prior$class, c("Intercept", "sd"))
-  expect_identical(prior$dpar, c("", ""))
+  expect_identical(nrow(prior), 3L)
+  expect_identical(prior$class, c("Intercept", "sd", "sd"))
+  expect_identical(prior$dpar, c("", "", "shape"))
   # sim_estimates reports means of 7.5 and 6.4
   centre <- signif(log(stats::median(c(7.5, 6.4))), 3)
   expect_identical(prior$prior[1], sprintf("normal(%s, 1)", centre))
@@ -218,6 +218,20 @@ test_that("epidist_model_prior puts a half normal on the between study spread of
   expect_identical(nrow(spread), 1L)
   expect_identical(spread$prior, "normal(0, 0.25)")
   expect_identical(spread$source, "model")
+  # A group level term on another distributional parameter gets the same.
+  both <- epidist_formula(
+    prep_meta_estimates, family,
+    bf(mu ~ 1 + (1 | study), sigma ~ 1 + (1 | study))
+  )
+  full <- suppressWarnings(
+    epidist_prior(prep_meta_estimates, family, both, prior = NULL)
+  )
+  spread <- full[
+    full$class == "sd" & !nzchar(full$coef) & !nzchar(full$group),
+  ]
+  expect_identical(nrow(spread), 2L)
+  expect_setequal(spread$dpar, c("", "sigma"))
+  expect_true(all(spread$prior == "normal(0, 0.25)"))
   # Without a group level term the prior is dropped rather than warned about.
   flat <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))
   full <- suppressWarnings(

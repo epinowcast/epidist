@@ -250,18 +250,25 @@ epidist_model_prior.epidist_meta_model <- function(data, formula, ...) {
   } else {
     return(NULL)
   }
-  return(c(
-    set_prior(
+  # Between study spread on the scale of the linear predictor, for every
+  # distributional parameter. A study random effect on the log of a delay
+  # mean rarely spreads by more than a quarter, and the brms default of a
+  # half Student t with scale 2.5 lets a small review fit that spread from
+  # almost nothing. Dropped where the formula has no group level terms.
+  dpars <- setdiff(formula$family$dpars, "mu")
+  spread <- c(
+    list(set_prior("normal(0, 0.25)", class = "sd")),
+    lapply(dpars, function(dpar) {
+      set_prior("normal(0, 0.25)", class = "sd", dpar = dpar)
+    })
+  )
+  return(do.call(c, c(
+    list(set_prior(
       sprintf("normal(%s, 1)", signif(centre, 3)),
       class = "Intercept"
-    ),
-    # Between study spread on the scale of the linear predictor. A study
-    # random effect on the log of a delay mean rarely spreads by more than a
-    # quarter, and the brms default of a half Student t with scale 2.5 lets
-    # a small review fit that spread from almost nothing. Dropped where the
-    # formula has no group level terms.
-    set_prior("normal(0, 0.25)", class = "sd")
-  ))
+    )),
+    spread
+  )))
 }
 
 #' The typical delay a meta model's data describe
