@@ -117,11 +117,8 @@ grid. Only used when the study adjusted for right truncation. Defaults to
 twenty times the largest reported value for the study, rounded up, with a
 minimum of ten. Raise it for a long tailed delay, whose implied standard
 deviation is biased downwards if the distribution has not decayed by the
-cutoff, and lower it to fit faster. A warning names the studies whose
-cutoff is too short, judged by a lognormal matched to the reported mean
-and standard deviation, or to the median and largest quantile where only
-quantiles are reported, having more than 2\% of its second moment beyond
-the cutoff.}
+cutoff, and lower it to fit faster. A message names the studies whose
+cutoff is too short, see the Checks section.}
 
 \item{...}{Not used in this method.}
 }
@@ -215,6 +212,90 @@ reaches \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}. Such rows
 
 Contributions from several studies combine by passing them in a list, which
 \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} binds into one object.
+}
+
+\section{Checks}{
+Beyond validating its input, this method runs advisory checks on the
+summaries and messages about the studies they flag. They run once, when
+the object is built, and not again when it is passed to
+\code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}. Each message names the studies concerned, and
+the row of the input where a single summary is meant, and points here for
+the reasoning.
+\itemize{
+\item \strong{Assumed truncation adjustment.} Where no \code{trunc_adjusted} column is
+supplied, a study with no finite \code{relative_obs_time} is taken to have
+adjusted for right truncation and every other study not to have. Real
+time estimates are right truncated unless the study corrected for it,
+and reviews rarely record which did, so this is the assumption most
+likely to be wrong and is a warning rather than a message.
+\item \strong{Short grid cutoff.} The implied summaries of a study that adjusted
+for right truncation but is evaluated on a grid, which is a study with
+\code{cens_adjusted} 0 or 3, or 2 or 4 with a non zero \code{growth_rate}, run to
+\code{max_delay}. A cutoff the delay distribution has not decayed by biases
+them downwards, and the standard deviation most, because the tail beyond
+the cutoff carries a share of the second moment out of all proportion to
+its mass. A lognormal is matched to what the study reported, through its
+mean and standard deviation, or its median and largest quantile above
+the median where it reported only quantiles, and the study is flagged
+when more than 2\% of the second moment of that lognormal lies beyond the
+cutoff. That is where the standard deviation on the grid falls about 1\%
+short, and the shortfall grows with the share. Studies reporting neither
+pair are not checked. Raise \code{max_delay} for the study.
+\item \strong{Coarse quadrature.} The moments and distribution function of a
+continuous estimand truncated at the grid cutoff are computed by
+Simpson's rule on equally spaced intervals from \code{delay_min} to the
+cutoff, so the node spacing is set by the cutoff and not by the scale of
+the delay. The number of intervals is chosen per study so that the
+spacing is at most a quarter of the spread the study reported, with
+\code{options(epidist.meta_n_quad)} as its floor and 2000 as a cap the option
+lifts when set above it. A study whose cutoff is very long relative to
+its spread hits the cap and is left with nodes further apart than that,
+so its implied summaries may be inaccurate. This covers a study that did
+not adjust for right truncation and used a continuous adjustment
+(\code{cens_adjusted} 1, 2 or 4), a study that did adjust but whose primary
+events were not uniform within their window (\code{cens_adjusted} 2 or 4 with
+a non zero \code{growth_rate}), and the quantiles of a study reporting a
+covariance matrix, which are read off the same nodes. Raise the option
+above the cap before building the model data, or lower \code{max_delay}.
+\item \strong{Coarse quantiles.} A study that summarised interval censored delays
+without adjusting for censoring (\code{cens_adjusted} 0 or 3) reports
+quantiles of a discrete distribution, which the model interpolates
+through the mid points of its cells. The reported value is still rounded
+to that grid, and what the interpolation leaves behind does not shrink
+with the study sample size. It is a few percent once a reported quantile
+sits a few tens of cells above the smallest delay the study counted, and
+tens of percent when it sits within about ten. A study is flagged on its
+smallest reported quantile, the one nearest that edge of the grid,
+because the residual on that quantile is what biases the fitted spread
+even when the larger quantiles of the same study sit well up the grid.
+Check that \code{swindow} is the resolution the study worked at. A reported
+mean and standard deviation of the same delays do not carry this
+residual, so fit them in preference where the study gives them.
+\item \strong{Several integer day quantiles from a large study.} A quantile of
+delays counted in whole censoring windows is a discrete statistic, and
+the information it carries about the delay distribution saturates once
+the binomial spread of the crossing point of the empirical distribution
+function is narrower than a window. A single such quantile is fitted as
+the exact crossing event, but several are still fitted with the
+multinomial on the continuity corrected distribution function, whose
+claimed precision keeps growing with the sample size. It is calibrated
+at around thirty delays and overconfident from around a hundred, so a
+study reporting two or more such quantiles from more than 100 delays is
+flagged and will be weighted too heavily. Fit a reported mean and
+standard deviation instead where one is available.
+\item \strong{Heavy tailed standard deviation.} The sampling standard error of a
+reported standard deviation is \eqn{\sigma \sqrt{(\kappa - 1) / (4 n)}},
+with \eqn{\kappa} the kurtosis of the delays. The normal approximation
+behind it holds while that relative standard error is below about a
+quarter. Above it the sampling distribution of a sample standard
+deviation is far from normal, the asymptotic standard error overstates
+its spread by up to two times, and the joint likelihood of a mean and
+standard deviation pair is biased by about a standard error. The
+kurtosis is taken from the reported mean and standard deviation under a
+lognormal delay, which is a plausible tail for a delay of that
+coefficient of variation. Where the study reports quantiles inside the
+body of the distribution, those are safer to fit.
+}
 }
 
 \examples{
