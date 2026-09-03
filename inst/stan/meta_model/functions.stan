@@ -1408,11 +1408,11 @@
 
   /**
     * The log upper tail P(M >= m) of a binomial count, stable far into the
-    * tail. Six standard deviations above the mean, or below a probability
+    * tail. Nine standard deviations above the mean, or below a probability
     * of 1e-12, the tail is summed term by term on the log scale until the
-    * terms fall forty nats below the first, which is exact to that
-    * tolerance and, unlike binomial_lcdf, has finite partial derivatives
-    * there. Stan chains every node on the autodiff stack, so a
+    * terms fall forty nats below the first, or two hundred terms in with a
+    * geometric bound on the rest, which is exact to that tolerance and,
+    * unlike binomial_lcdf, has finite partial derivatives there. Stan chains every node on the autodiff stack, so a
     * distribution function that underflows poisons the gradient even where
     * its value is discarded, which is why the switch is decided from the
     * values before anything is evaluated. Matches .meta_log_binom_upper()
@@ -1427,17 +1427,25 @@
     }
     if (prob < 1e-12 ||
         (m - 1 - size * prob > 0 &&
-         (m - 1 - size * prob) ^ 2 > 36 * size * prob * (1 - prob))) {
+         (m - 1 - size * prob) ^ 2 > 81 * size * prob * (1 - prob))) {
       real log_p = log(fmax(prob, 1e-300));
       real log_q = log1m(prob);
       real acc = lchoose(size, m) + m * log_p + (size - m) * log_q;
       real top = acc;
-      for (i in (m + 1):size) {
-        real term = lchoose(size, i) + i * log_p + (size - i) * log_q;
+      real term = acc;
+      int last = min(size, m + 200);
+      for (i in (m + 1):last) {
+        term = lchoose(size, i) + i * log_p + (size - i) * log_q;
         if (term < top - 40) {
-          break;
+          return acc;
         }
         acc = log_sum_exp(acc, term);
+      }
+      if (last < size) {
+        // The remaining terms fall at least as fast as the last ratio, so
+        // their sum is bounded by a geometric series in it.
+        real ratio = (size - last) * prob / ((last + 1) * (1 - prob));
+        acc = log_sum_exp(acc, term + log(ratio) - log1m(fmin(ratio, 0.999)));
       }
       return acc;
     }

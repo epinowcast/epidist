@@ -40,8 +40,12 @@ added where \code{mu} is on the log scale, which is the lognormal family, whose
 a log link, and where \code{mu} is the delay itself under an identity link, in
 which case the median is used as it is.
 
-The prior on the intercept of the other distributional parameters is left
-to the family or to \code{brms}.
+The between study spread of any group level term, such as \code{(1 | study)},
+gets a half normal prior with a standard deviation of 0.25 on the scale of
+the linear predictor, so that a small review cannot fit that spread from
+almost nothing under the wide \code{brms} default. It is dropped where the
+formula has no group level term. The prior on the intercept of the other
+distributional parameters is left to the family or to \code{brms}.
 }
 \seealso{
 Other prior: 

@@ -203,6 +203,8 @@ With `primary = "expgrowth"` the growth rate of primary events is estimated as t
 Summary rows are unchanged and keep the `growth_rate` metadata of their study as a known tilt.
 See #620.
 - Added an `epidist_model_prior()` method for the meta model, which centres the intercept prior of `mu` on the log of the median mean the studies reported, with a standard deviation of 1 on the log scale.
+The same method puts a half normal prior with a standard deviation of 0.25 on the between study standard deviation of any group level term, where the `brms` default is a half Student t with scale 2.5.
+Closes #683.
 Without it a Gamma or Weibull fit to summaries alone took the `brms` default, which is centred on the response column and so on a delay of zero, because that column is a placeholder on summary rows.
 See #620.
 - Added an `epidist_newdata()` method for the meta model, which builds an individual level row with the same arguments as the marginal model method, so predicting from a meta model fit no longer means copying a summary row out of the model data.

@@ -511,9 +511,8 @@ predicted_parameters <- list(
   mixed = fit_meta_mixed,
   "reference (marginal)" = fit_reference
 ) |>
-  lapply(\(fit) ungroup(add_summaries(delay_parameter_draws(fit)))) |>
+  lapply(\(fit) ungroup(delay_summary_draws(fit))) |>
   bind_rows(.id = "model") |>
-  filter(.data$.row == 1) |>
   mutate(model = factor(
     model,
     levels = c(
@@ -748,13 +747,28 @@ Fitting both would treat two summaries of the same delays as independent and ove
 A review that reported the mean as well would let the model use the better resolved summary here.
 
 We fit a Gamma, with a `(1 | study)` term to allow for genuine differences between studies (see the note on plug in standard errors in `?as_epidist_meta_model`).
+The meta model centres the prior for the intercept on the log of the median mean the studies report, and puts a half normal prior with a standard deviation of 0.25 on the between study standard deviation, which on the log scale allows study means to differ by about a quarter.
+Both are worth seeing before fitting.
+
+```{r}
+ebola_meta <- as_epidist_meta_model(estimates = ebola_estimates)
+ebola_formula <- mu ~ 1 + phase + (1 | study)
+
+epidist_prior(
+  ebola_meta,
+  family = epidist_family(ebola_meta, family = Gamma(link = "log")),
+  formula = epidist_formula(
+    ebola_meta, epidist_family(ebola_meta, family = Gamma(link = "log")),
+    formula = ebola_formula
+  ),
+  prior = NULL
+)
+```
 
 ```{r results='hide', message=FALSE}
-ebola_meta <- as_epidist_meta_model(estimates = ebola_estimates)
-
 fit_ebola <- epidist(
   data = ebola_meta,
-  formula = mu ~ 1 + phase + (1 | study),
+  formula = ebola_formula,
   family = Gamma(link = "log"),
   chains = 2, cores = 2, iter = 1000,
   refresh = ifelse(interactive(), 250, 0),
@@ -775,15 +789,14 @@ The shape and scale are the parameters of the distribution.
 The mean and standard deviation are the moments they imply.
 
 ```{r}
-phase_grid <- as_tibble(ebola_meta)[rep(1, nlevels(ebola_meta$phase)), ] |>
-  mutate(phase = factor(levels(ebola_meta$phase), levels(ebola_meta$phase)))
-
+# One individual level row per phase, with no censoring and no truncation.
 # The columns of `newdata` come back with the draws, so `phase` is already
 # on the result.
-population_draws <- delay_parameter_draws(
+phase_grid <- epidist_newdata(ebola_meta, phase)
+
+population_draws <- delay_summary_draws(
   fit_ebola, newdata = phase_grid, re_formula = NA
 ) |>
-  add_summaries() |>
   ungroup()
 
 population_summary <- population_draws |>
@@ -946,13 +959,16 @@ We use a Gamma matched to its mean and standard deviation as the reference distr
 bdbv <- read.csv("bdbv-onset-to-death.csv") |>
   mutate(shape = (.data$mean / .data$sd)^2, scale = .data$sd^2 / .data$mean)
 
-isiro_draws <- delay_parameter_draws(
+isiro_phase <- unique(
+  filter(as_tibble(ebola_meta), .data$study == "Rosello 2015 (3)")$phase
+)
+
+isiro_draws <- delay_summary_draws(
   fit_ebola,
-  newdata = filter(
-    as_tibble(ebola_meta), .data$study == "Rosello 2015 (3)"
-  )[1, ]
+  newdata = epidist_newdata(
+    ebola_meta, study = "Rosello 2015 (3)", phase = isiro_phase
+  )
 ) |>
-  add_summaries() |>
   ungroup()
 ```
 

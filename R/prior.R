@@ -222,8 +222,12 @@ epidist_model_prior.default <- function(data, formula, ...) {
 #' a log link, and where `mu` is the delay itself under an identity link, in
 #' which case the median is used as it is.
 #'
-#' The prior on the intercept of the other distributional parameters is left
-#' to the family or to `brms`.
+#' The between study spread of any group level term, such as `(1 | study)`,
+#' gets a half normal prior with a standard deviation of 0.25 on the scale of
+#' the linear predictor, so that a small review cannot fit that spread from
+#' almost nothing under the wide `brms` default. It is dropped where the
+#' formula has no group level term. The prior on the intercept of the other
+#' distributional parameters is left to the family or to `brms`.
 #'
 #' @inheritParams epidist
 #' @method epidist_model_prior epidist_meta_model
@@ -246,9 +250,17 @@ epidist_model_prior.epidist_meta_model <- function(data, formula, ...) {
   } else {
     return(NULL)
   }
-  return(set_prior(
-    sprintf("normal(%s, 1)", signif(centre, 3)),
-    class = "Intercept"
+  return(c(
+    set_prior(
+      sprintf("normal(%s, 1)", signif(centre, 3)),
+      class = "Intercept"
+    ),
+    # Between study spread on the scale of the linear predictor. A study
+    # random effect on the log of a delay mean rarely spreads by more than a
+    # quarter, and the brms default of a half Student t with scale 2.5 lets
+    # a small review fit that spread from almost nothing. Dropped where the
+    # formula has no group level terms.
+    set_prior("normal(0, 0.25)", class = "sd")
   ))
 }
 

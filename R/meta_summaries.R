@@ -2307,11 +2307,12 @@
 
 #' The log upper tail of a binomial count, stable far into the tail
 #'
-#' `P(M >= m)` for `M ~ Binomial(size, prob)`. Six standard deviations above
-#' the mean, or below a probability of 1e-12, the tail is summed term by
-#' term on the log scale until the terms fall forty nats below the first,
-#' which is exact to that tolerance and, unlike the distribution function,
-#' has finite partial derivatives there in Stan. Elsewhere it is the
+#' `P(M >= m)` for `M ~ Binomial(size, prob)`. Nine standard deviations
+#' above the mean, or below a probability of 1e-12, the tail is summed term
+#' by term on the log scale until the terms fall forty nats below the first,
+#' or two hundred terms in with a geometric bound on the rest, which is exact
+#' to that tolerance and, unlike the distribution function, has finite
+#' partial derivatives there in Stan. Elsewhere it is the
 #' distribution function of the complement. Matches
 #' `meta_family_log_binom_upper()` in Stan.
 #'
@@ -2337,16 +2338,29 @@
   prob <- prob[active]
   excess <- m - 1 - size * prob
   far <- prob < 1e-12 |
-    (excess > 0 & excess^2 > 36 * size * prob * (1 - prob))
+    (excess > 0 & excess^2 > 81 * size * prob * (1 - prob))
   res <- numeric(length(m))
   res[far] <- vapply(
     which(far),
     function(i) {
-      counts <- m[i]:size[i]
+      last <- min(size[i], m[i] + 200)
+      counts <- m[i]:last
       log_terms <- lchoose(size[i], counts) +
         counts * log(max(prob[i], 1e-300)) +
         (size[i] - counts) * log1p(-prob[i])
-      return(.meta_log_sum_exp(log_terms[log_terms >= log_terms[1] - 40]))
+      keep <- log_terms >= log_terms[1] - 40
+      if (all(keep) && last < size[i]) {
+        # The remaining terms fall at least as fast as the last ratio, so
+        # their sum is bounded by a geometric series in it.
+        ratio <- (size[i] - last) * prob[i] / ((last + 1) * (1 - prob[i]))
+        log_terms <- c(
+          log_terms,
+          log_terms[length(log_terms)] + log(ratio) -
+            log1p(-min(ratio, 0.999))
+        )
+        keep <- c(keep, TRUE)
+      }
+      return(.meta_log_sum_exp(log_terms[keep]))
     },
     numeric(1)
   )
