@@ -680,6 +680,46 @@ test_that("as_epidist_estimates_data errors when a required column is missing", 
   }
 })
 
+test_that("as_epidist_estimates_data allows NA censoring windows for a fully adjusted study", { # nolint: line_length_linter.
+  # No estimand of a study that fully adjusted for censoring reads the
+  # windows, so a review that did not record them can leave them NA.
+  adjusted <- data.frame(
+    study = c("A", "A", "B", "C"), type = c("mean", "sd", "mean", "sd"),
+    value = c(7.5, 3.6, 6.4, 2), n = 100,
+    relative_obs_time = c(Inf, Inf, 20, 25),
+    trunc_adjusted = c(TRUE, TRUE, FALSE, FALSE),
+    cens_adjusted = c(1, 1, 0, 1),
+    pwindow = c(NA, NA, 1, NA), swindow = c(NA, NA, 1, NA),
+    stringsAsFactors = FALSE
+  )
+  est <- suppressMessages(as_epidist_estimates_data(adjusted))
+  expect_identical(est$pwindow, c(NA, NA, 1, NA))
+  expect_identical(est$swindow, c(NA, NA, 1, NA))
+  expect_true(all(is.finite(.estimates_n_quad(est))))
+  # The meta model rows carry a harmless 1 in place of the missing window,
+  # because Stan needs a number in every slot.
+  meta <- suppressMessages(as_epidist_meta_model(estimates = est))
+  expect_identical(meta$pwindow, rep(1, 3))
+  expect_identical(meta$swindow, rep(1, 3))
+  expect_no_error(assert_epidist(meta))
+  # Every other code uses the window, so it must be supplied.
+  for (code in c(0, 2, 3, 4)) {
+    needed <- adjusted
+    needed$cens_adjusted[3] <- code
+    needed$swindow[3] <- NA
+    expect_error(
+      suppressMessages(as_epidist_estimates_data(needed)),
+      "swindow.*needed"
+    )
+    needed$swindow[3] <- 1
+    needed$pwindow[3] <- NA
+    expect_error(
+      suppressMessages(as_epidist_estimates_data(needed)),
+      "pwindow.*needed"
+    )
+  }
+})
+
 test_that("as_epidist_estimates_data checks the censoring windows against the grid", { # nolint: line_length_linter.
   base <- data.frame(
     study = "A", type = c("mean", "sd"), value = c(2, 1), n = 120,
