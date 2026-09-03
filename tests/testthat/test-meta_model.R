@@ -1,4 +1,14 @@
 # fmt: skip file
+
+# Modifying a meta model object re-checks it and drops the class with a
+# warning when the change breaks it, which the epidist_data tests cover. The
+# assertion message is checked on the reclassed object.
+expect_meta_assert_error <- function(data, pattern) {
+  expect_false(is_epidist_meta_model(data))
+  return(expect_error(
+    assert_epidist(.new_epidist_data(data, "epidist_meta_model")), pattern
+  ))
+}
 test_that("as_epidist_meta_model works with individual level data only", {
   expect_s3_class(prep_meta_individual, "data.frame")
   expect_s3_class(prep_meta_individual, "epidist_meta_model")
@@ -25,12 +35,20 @@ test_that("meta model objects carry the shared epidist_data class", {
   expect_true(is_epidist_data(prep_meta_individual))
   expect_true(is_epidist_data(prep_meta_estimates))
   expect_true(is_epidist_data(prep_meta_obs))
-  # The class order follows the marginal model: the specific class first,
-  # then the shared class, then the underlying data frame classes.
+  # The class order follows the marginal model: the specific classes first,
+  # then the shared class once, then the underlying data frame classes.
   expect_identical(
     class(prep_meta_obs)[1:2], c("epidist_meta_model", "epidist_data")
   )
-  expect_identical(class(prep_meta_obs)[-1], class(prep_marginal_obs)[-1])
+  expect_s3_class(prep_meta_obs, "tbl_df")
+  expect_identical(
+    match("epidist_data", class(prep_meta_obs)),
+    length(.epidist_classes(prep_meta_obs)) + 1L
+  )
+  expect_identical(
+    match("epidist_data", class(prep_marginal_obs)),
+    length(.epidist_classes(prep_marginal_obs)) + 1L
+  )
   expect_identical(.primary_dist(prep_meta_obs), "uniform")
   expect_false(is_epidist_data(.drop_epidist_class(prep_meta_obs)))
 })
@@ -1993,11 +2011,15 @@ test_that("assert_epidist.epidist_meta_model checks the grouped summary members"
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   broken <- meta
-  broken$group_len <- 1L
-  expect_error(assert_epidist(broken), "exactly two")
+  suppressWarnings({
+    broken$group_len <- 1L
+  })
+  expect_meta_assert_error(broken, "exactly two")
   overrun <- meta
-  overrun$group_start <- 2L
-  expect_error(assert_epidist(overrun), "index within")
+  suppressWarnings({
+    overrun$group_start <- 2L
+  })
+  expect_meta_assert_error(overrun, "index within")
   empty <- meta
   empty <- .meta_set_members(empty, .meta_empty_members())
   expect_error(assert_epidist(empty), "index within")
@@ -2772,8 +2794,10 @@ test_that("as_epidist_meta_model passes delay_min through from linelist data", {
 
 test_that("assert_epidist.epidist_meta_model rejects an out of range delay_min", { # nolint: line_length_linter.
   meta <- suppressMessages(as_epidist_meta_model(estimates = sim_estimates))
-  meta$delay_min <- meta$relative_obs_time
-  expect_error(assert_epidist(meta), "must be below")
+  suppressWarnings({
+    meta$delay_min <- meta$relative_obs_time
+  })
+  expect_meta_assert_error(meta, "must be below")
 })
 
 test_that("the meta model individual level slots line up with the marginal model", { # nolint: line_length_linter.
@@ -2810,32 +2834,44 @@ test_that("as_epidist_meta_model errors when summary estimates are supplied twic
 
 test_that("assert_epidist.epidist_meta_model checks the individual level rows", { # nolint: line_length_linter.
   wide <- prep_meta_individual
-  wide$delay_upr[1] <- wide$delay_upr[1] + 1
-  expect_error(assert_epidist(wide), "must equal")
+  suppressWarnings({
+    wide$delay_upr[1] <- wide$delay_upr[1] + 1
+  })
+  expect_meta_assert_error(wide, "must equal")
   early <- prep_meta_individual
-  early$relative_obs_time[1] <- early$delay_upr[1] - 0.5
-  expect_error(
-    assert_epidist(early), "`relative_obs_time` must be greater"
-  )
+  suppressWarnings({
+    early$relative_obs_time[1] <- early$delay_upr[1] - 0.5
+  })
+  expect_meta_assert_error(early, "`relative_obs_time` must be greater")
   truncated <- prep_meta_individual
-  truncated$delay_min[1] <- truncated$delay_lwr[1] + 1
-  expect_error(assert_epidist(truncated), "`delay_lwr` must be greater")
+  suppressWarnings({
+    truncated$delay_min[1] <- truncated$delay_lwr[1] + 1
+  })
+  expect_meta_assert_error(truncated, "`delay_lwr` must be greater")
 })
 
 test_that("assert_epidist.epidist_meta_model checks the summary rows", {
   small <- prep_meta_estimates
-  small$study_n <- 1L
-  expect_error(assert_epidist(small), "at least 2")
+  suppressWarnings({
+    small$study_n <- 1L
+  })
+  expect_meta_assert_error(small, "at least 2")
   unbounded <- prep_meta_estimates
-  unbounded$relative_obs_time[1] <- Inf
-  expect_error(assert_epidist(unbounded), "finite grid cutoff")
+  suppressWarnings({
+    unbounded$relative_obs_time[1] <- Inf
+  })
+  expect_meta_assert_error(unbounded, "finite grid cutoff")
   narrow <- prep_meta_estimates
-  narrow$swindow[1] <- narrow$relative_obs_time[1] + 1
-  expect_error(assert_epidist(narrow), "grid cutoff for summary rows")
+  suppressWarnings({
+    narrow$swindow[1] <- narrow$relative_obs_time[1] + 1
+  })
+  expect_meta_assert_error(narrow, "grid cutoff for summary rows")
   quantile_row <- which(prep_meta_estimates$obs_type == 6L)[1]
   flat <- prep_meta_estimates
-  flat$quantile_p[quantile_row] <- 0
-  expect_error(assert_epidist(flat), "strictly between 0 and 1")
+  suppressWarnings({
+    flat$quantile_p[quantile_row] <- 0
+  })
+  expect_meta_assert_error(flat, "strictly between 0 and 1")
 })
 
 test_that("assert_epidist.epidist_meta_model checks a covariance matrix row", {
@@ -2853,13 +2889,17 @@ test_that("assert_epidist.epidist_meta_model checks a covariance matrix row", {
   ))
   meta <- suppressMessages(as_epidist_meta_model(estimates))
   empty <- meta
-  empty$group_len <- 0L
-  expect_error(assert_epidist(empty), "at least one grouped summary member")
+  suppressWarnings({
+    empty$group_len <- 0L
+  })
+  expect_meta_assert_error(empty, "at least one grouped summary member")
   # The factor of a two by two matrix has four entries, so a row starting at
   # the second of them runs off the end of the flat vector passed to Stan.
   overrun <- meta
-  overrun$chol_start <- 2L
-  expect_error(assert_epidist(overrun), "full Cholesky factor")
+  suppressWarnings({
+    overrun$chol_start <- 2L
+  })
+  expect_meta_assert_error(overrun, "full Cholesky factor")
 })
 
 test_that("assert_epidist.epidist_meta_model checks a joint quantile row", {
@@ -2873,8 +2913,10 @@ test_that("assert_epidist.epidist_meta_model checks a joint quantile row", {
   members <- .meta_members(meta)
   expect_identical(members$count, c(25L, 75L))
   none <- meta
-  none$group_len <- 0L
-  expect_error(assert_epidist(none), "at least one grouped summary member")
+  suppressWarnings({
+    none$group_len <- 0L
+  })
+  expect_meta_assert_error(none, "at least one grouped summary member")
   falling <- members
   falling$value <- c(8, 4)
   expect_error(
