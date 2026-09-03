@@ -267,6 +267,13 @@ See #620.
 - `.delay_family()` now strips the `meta_` prefix alongside `latent_` and `marginal_`.
 Without it `add_summaries()` could not find the delay distribution of a meta model fit, because the family is named `meta_gamma` rather than `gamma`.
 See #620.
+- Meta model objects now carry the shared `epidist_data` class, as the latent and marginal model objects do, so they are re-checked when modified and the helpers that dispatch on that class no longer skip them.
+Closes #684.
+- The coarse quantile warning of `as_epidist_estimates_data()` now keys on the smallest quantile a study reported rather than the largest, because that is the one nearest the edge of the discrete grid and it biased the fitted spread of a midpoint study that escaped the warning.
+Closes #682.
+- The short grid cutoff warning of `as_epidist_estimates_data()` now judges `max_delay` by a lognormal matched to the reported mean and standard deviation, or to the median and largest quantile where only quantiles are reported, and fires when more than 2% of its second moment lies beyond the cutoff.
+The previous `mean + 10 sd` yardstick missed a heavy tailed study whose implied standard deviation was 6.5% low at the default cutoff.
+Closes #681.
 - Added a missing Jacobian adjustment to the latent model for observations whose primary and secondary censoring windows overlap.
 Without it the latent model did not target the same likelihood as the marginal model.
 Under daily censoring the affected observations are the zero-delay cases.

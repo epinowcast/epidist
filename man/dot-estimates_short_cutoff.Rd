@@ -2,7 +2,7 @@
 % Please edit documentation in R/estimates_data.R
 \name{.estimates_short_cutoff}
 \alias{.estimates_short_cutoff}
-\title{Studies whose grid cutoff is short relative to their reported spread}
+\title{Studies whose grid cutoff is short relative to their reported tail}
 \usage{
 .estimates_short_cutoff(data)
 }
@@ -16,7 +16,14 @@ A character vector of study identifiers with a short cutoff.
 The implied summaries of a study that did not adjust for censoring but did
 adjust for right truncation are computed on a grid running to \code{max_delay}.
 A cutoff that the delay distribution has not decayed by biases them
-downwards. Studies reporting both a mean and a standard deviation allow a
-rough check of whether the grid reaches far enough.
+downwards, and the standard deviation most, because the tail beyond the
+cutoff carries a share of the second moment out of all proportion to its
+mass. A lognormal is matched to what each study reported, through its mean
+and standard deviation, or its median and largest quantile above the
+median where it reported only quantiles, and the study is flagged when
+more than 2\% of the second moment of that lognormal lies beyond the
+cutoff. That is where the standard deviation on the grid falls about 1\%
+short, and the shortfall grows with the share. Studies reporting neither
+pair are not checked.
 }
 \keyword{internal}
