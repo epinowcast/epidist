@@ -120,10 +120,15 @@ test_that("assert_epidist.epidist_meta_model does not error for correct input", 
 })
 
 test_that("assert_epidist.epidist_meta_model errors for incorrect input", {
-  expect_error(assert_epidist(prep_meta_obs[, 1]))
+  expect_error(assert_epidist(suppressWarnings(prep_meta_obs[, 1])))
   bad <- prep_meta_obs
-  bad$obs_type[1] <- 7L
-  expect_error(assert_epidist(bad))
+  expect_warning(
+    {
+      bad$obs_type[1] <- 7L
+    },
+    "Dropping"
+  )
+  expect_meta_assert_error(bad, NULL)
 })
 
 test_that("epidist_family_model.epidist_meta_model returns a meta custom family", { # nolint: line_length_linter.
