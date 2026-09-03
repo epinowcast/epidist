@@ -82,6 +82,7 @@ if it is slow.
 
 Other postprocess:
 [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
+[`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md),
 [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)
 
 ## Examples

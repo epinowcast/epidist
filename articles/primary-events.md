@@ -93,15 +93,15 @@ summary(fit_growing)$fixed[
   "pgrowth_Intercept", c("Estimate", "l-95% CI", "u-95% CI")
 ]
 #>                    Estimate  l-95% CI  u-95% CI
-#> pgrowth_Intercept 0.5043456 0.3130026 0.7013424
+#> pgrowth_Intercept 0.5034364 0.3061002 0.6997107
 ```
 
 Both are compared against the delay used to simulate.
 
 ``` r
 
-uniform_draws <- ungroup(delay_parameter_draws(fit_uniform))
-growing_draws <- ungroup(delay_parameter_draws(fit_growing))
+uniform_draws <- delay_parameter_draws(fit_uniform)
+growing_draws <- delay_parameter_draws(fit_growing)
 
 draws <- bind_rows(
   mutate(uniform_draws, model = "Uniform"),

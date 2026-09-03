@@ -14,6 +14,20 @@
 ### Features
 
 - Added
+  [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md),
+  which wraps the three usual post-processing steps into one call. It
+  builds one row per unique combination of the predictors with
+  [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md),
+  draws the delay distribution parameters for each with
+  [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
+  and adds the natural scale mean and standard deviation, and any
+  quantiles asked for, with
+  [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md).
+  Each step is still available on its own. See
+  [`?delay_summary_draws`](https://epidist.epinowcast.org/reference/delay_summary_draws.md)
+  and [\#667](https://github.com/epinowcast/epidist/issues/667).
+
+- Added
   [`epidist_newdata()`](https://epidist.epinowcast.org/reference/epidist_newdata.md),
   which builds the `newdata` needed to predict from a fitted model. It
   expands the variables you give it into a grid and adds the response
@@ -23,7 +37,8 @@
   arguments set the censoring windows, the relative observation time and
   the minimum delay. The result works with
   [`brms::posterior_epred()`](https://mc-stan.org/rstantools/reference/posterior_epred.html),
-  `predict_delay_parameters()` and the `tidybayes` draw functions. See
+  [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md)
+  and the `tidybayes` draw functions. See
   [`?epidist_newdata`](https://epidist.epinowcast.org/reference/epidist_newdata.md)
   and [\#280](https://github.com/epinowcast/epidist/issues/280).
 

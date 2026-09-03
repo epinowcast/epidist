@@ -676,8 +676,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3328     2717
-#> sigma_Intercept    -0.76      0.05    -0.85    -0.65 1.00     3111     1960
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3190     2276
+#> sigma_Intercept    -0.76      0.05    -0.85    -0.65 1.00     3131     2432
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -776,8 +776,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.65 1.00     2115     2153
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     2407     2751
+#> Intercept           1.55      0.05     1.46     1.64 1.00     2074     1944
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     2120     2446
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -792,30 +792,28 @@ on the log scale)) for the log sd.
 
 We can compare the two models by plotting the estimated parameters from
 the naive and marginal models. One way to do this is to use the
-[`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
-function to extract the posterior samples and then plot them. The
+[`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md)
+function. It draws one set of delay distribution parameters for each
+unique combination of the predictors, and adds the natural scale mean
+and standard deviation of the delay so that the numbers are easier to
+read.
+[`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
 [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
-function then adds the mean and standard deviation of the delay
-distribution so that it is easier to understand.
+and
+[`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)
+are the three steps it wraps, and each is available on its own.
 
 ``` r
 
-draw_parameters <- function(fit) {
-  draws <- fit |>
-    epidist_strata() |>
-    add_delay_parameter_draws(fit) |>
-    add_summaries() |>
-    ungroup()
-  return(draws)
-}
-
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
-  lapply(draw_parameters) |>
+  lapply(delay_summary_draws) |>
   bind_rows(.id = "model") |>
   mutate(model = factor(model, levels = c("naive", "marginal")))
 
 head(predicted_parameters)
 #> # A tibble: 6 × 17
+#> # Groups:   delay_lwr, relative_obs_time, pwindow, swindow, delay_upr,
+#> #   delay_min, n, .row [1]
 #>   model    delay_lwr relative_obs_time pwindow swindow delay_upr delay_min     n
 #>   <fct>        <dbl>             <dbl>   <dbl>   <dbl>     <dbl>     <dbl> <dbl>
 #> 1 marginal         8                10       1       1         9         0     3

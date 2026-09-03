@@ -109,15 +109,49 @@ values, so consider passing <code>vars</code> and a grid of your own instead.</p
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other postprocess:
 <code><a href="add_summaries.html">add_summaries()</a></code>,
-<code><a href="delay_parameter_draws.html">delay_parameter_draws()</a></code></p></div>
+<code><a href="delay_parameter_draws.html">delay_parameter_draws()</a></code>,
+<code><a href="delay_summary_draws.html">delay_summary_draws()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># `fit` is a model fitted with `epidist()`</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="as_epidist_linelist_data.html">as_epidist_linelist_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    pdate_lwr <span class="op">=</span> <span class="st">"date_of_symptom_onset"</span>,</span></span>
+<span class="r-in"><span>    sdate_lwr <span class="op">=</span> <span class="st">"date_of_sample_tested"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="as_epidist_aggregate_data.html">as_epidist_aggregate_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="epidist.html">epidist</a></span><span class="op">(</span>chains <span class="op">=</span> <span class="fl">2</span>, cores <span class="op">=</span> <span class="fl">2</span>, refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">250</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No primary event upper bound provided, using the primary event lower bound + 1 day as the assumed upper bound.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No secondary event upper bound provided, using the secondary event lower bound + 1 day as the assumed upper bound.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No observation time column provided, using 2015-09-14 as the observation date (the maximum of the secondary event upper bound).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Setting 2394 relative observation times (`relative_obs_time`) greater than 98</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   (2x the maximum delay) to <span style="color: #0000BB;">Inf</span>.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> This improves model efficiency by reducing the number of unique observation</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   times in the data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The impact on model accuracy should be negligible because these relative</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   observation times are high enough to cause very limited right truncation.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The original relative observation times are available in</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   `orig_relative_obs_time`.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Raise `obs_time_threshold` to avoid this behaviour.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Found infinite values in the data, which may cause issues for Stan.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Data summarised by unique combinations of:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> * Model variables: delay bounds, observation time, and primary censoring window</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Reduced from 2453 to 272 rows.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> This should improve model efficiency with no loss of information.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Found infinite values in the data, which may cause issues for Stan.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Found infinite values in the data, which may cause issues for Stan.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Compiling Stan program...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Start sampling</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">epidist_strata</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   delay_lwr relative_obs_time pwindow swindow delay_upr delay_min     n</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>         5               <span style="color: #BB0000;">Inf</span>       1       1         6         0    50</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

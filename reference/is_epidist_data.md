@@ -23,7 +23,7 @@ is_epidist_data(data, ...)
 
 ## Value
 
-A logical, `TRUE` if `data` has the `epidist_data` class and `FALSE`
+A logical, `TRUE` if `data` inherits from `epidist_data` and `FALSE`
 otherwise.
 
 ## See also

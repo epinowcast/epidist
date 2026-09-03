@@ -188,19 +188,11 @@ covariates here.
 
 ``` r
 
-draw_parameters <- function(fit) {
-  draws <- fit |>
-    epidist_strata() |>
-    add_delay_parameter_draws(fit) |>
-    ungroup()
-  return(draws)
-}
-
 param_draws <- list(
   "No adjustment" = fit_no_trunc,
   "With delay_min" = fit_trunc
 ) |>
-  lapply(draw_parameters) |>
+  lapply(\(fit) delay_parameter_draws(fit, newdata = epidist_strata(fit))) |>
   bind_rows(.id = "model") |>
   pivot_longer(
     cols = c("mu", "sigma"),
