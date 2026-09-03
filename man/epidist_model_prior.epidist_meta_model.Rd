@@ -24,21 +24,21 @@ A \code{brmsprior} object, or \code{NULL} when the model adds no priors.
 The response column of a meta model is a placeholder on every summary row,
 and \code{brms} centres its default prior for the intercept of \code{mu} on the
 response. For a model fitted to summaries alone that default is centred on
-a delay of zero. This method centres it instead on the log of the median
-mean the studies reported, with a standard deviation of 1 on the log
-scale, which is the scale of the lognormal family prior in
-\code{\link[=epidist_family_prior]{epidist_family_prior()}}. It does this for every family, so a Gamma or
-Weibull meta fit gets a prior on the same scale as a lognormal one.
+a delay of zero. This method puts a \code{normal(1, 1)} prior on the intercept
+instead, the scale of the lognormal family prior in
+\code{\link[=epidist_family_prior]{epidist_family_prior()}}, so that a Gamma or Weibull meta fit gets a prior
+on the same scale as a lognormal one. On the log scale it is a median
+delay of about 3 days with a 95\% range of roughly 0.4 to 20 days.
 }
 \details{
-Where no study reported a mean the median reported quantile is used, and
-where no study reported either the mean of the individual level delays is
-used. A model with individual level rows only adds no prior, so the family
-or \code{brms} default applies as it does for the marginal model. The prior is
-added where \code{mu} is on the log scale, which is the lognormal family, whose
-\code{mu} is the log of the median under an identity link, and any family with
-a log link, and where \code{mu} is the delay itself under an identity link, in
-which case the median is used as it is.
+The centre is fixed rather than taken from the reported values, because a
+prior chosen from the data is not a prior. It would put the posterior of a
+small review where the data already sit and understate how much the
+studies disagree. The prior is added where \code{mu} is on the log scale, which
+is the lognormal family, whose \code{mu} is the log of the median under an
+identity link, and any family with a log link. Nothing is added for other
+links, and a model with individual level rows only adds no prior, so the
+family or \code{brms} default applies as it does for the marginal model.
 
 The between study spread of any group level term, such as \code{(1 | study)},
 gets a half normal prior with a standard deviation of 0.25 on the scale of
