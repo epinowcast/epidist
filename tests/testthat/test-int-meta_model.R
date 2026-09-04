@@ -353,10 +353,10 @@ test_that("the Stan naive grid stays finite on a grid that runs into the tail", 
   skip_on_cran()
   skip_if_no_cmdstanr()
   # Over a wide grid the primary censored distribution function saturates at
-  # one, so its log stops increasing and differencing it returns NaN. The
-  # default `max_delay` puts a truncation adjusted naive study in this region,
-  # so the numbers Stan returns are checked here rather than the code it was
-  # built from.
+  # one, so its log stops increasing and differencing it returns NaN. A
+  # generous `max_delay` puts a truncation adjusted naive study in this
+  # region, so the numbers Stan returns are checked here rather than the code
+  # it was built from.
   meanlog <- 1
   sdlog <- 0.4
   cutoff <- c(30, 60, 100, 200)
@@ -364,11 +364,10 @@ test_that("the Stan naive grid stays finite on a grid that runs into the tail", 
   n_case <- length(cutoff)
   estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
     study = "A", type = c("mean", "sd"), value = c(20, 12), n = 100,
-    trunc_adjusted = TRUE, cens_adjusted = 0, stringsAsFactors = FALSE
+    trunc_adjusted = TRUE, cens_adjusted = 0, max_delay = 400,
+    stringsAsFactors = FALSE
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
-  # The documented default runs the grid far enough into the tail to fail.
-  expect_gte(estimates$max_delay[1], max(cutoff))
   stanvars <- epidist_stancode(meta)
   mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(paste0(
     "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode, "\n}\n",
