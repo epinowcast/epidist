@@ -184,9 +184,8 @@ fit_locations <- epidist(
 
 Here the prior is shared across locations and the random effect lets each depart from it.
 
-The second prior, on the standard deviation between locations, is doing real work with only three of them.
-The likelihood is flat for strongly negative rates, because once the growth rate is low enough the primary event sits at the start of its window whatever its exact value.
-The default `brms` prior on that standard deviation is wide enough to let a location wander into that flat region, which produces a posterior with a sensible peak and a long tail running to implausible rates.
+The prior on the standard deviation between locations is tight because three locations cannot tell you how much they vary.
+Settings within one outbreak rarely differ in growth by more than a couple of tenths per day, which is the range `normal(0, 0.3)` allows.
 
 ```{r location-estimates}
 newdata <- epidist_newdata(marginal_locations, location = names(locations))
@@ -208,52 +207,9 @@ epred |>
 
 ## Identifying the growth rate
 
-Fitting the locations together does more than let the rate vary.
-A delay distribution shared across locations cannot absorb a difference in growth between them, so the growth rates are better determined than they are from any one location on its own.
-
-Refitting the same data with a delay per location highlights this.
-
-```{r sharing}
-shared_prior <- prior(normal(0, 1), class = "b", dpar = "pgrowth")
-
-fit_shared <- epidist(
-  marginal_locations,
-  formula = bf(mu ~ 1, pgrowth ~ 0 + location),
-  prior = shared_prior,
-  chains = 2, cores = 2, refresh = 0, silent = 2
-)
-
-fit_split <- epidist(
-  marginal_locations,
-  formula = bf(mu ~ 0 + location, pgrowth ~ 0 + location),
-  prior = shared_prior,
-  chains = 2, cores = 2, refresh = 0, silent = 2
-)
-
-growth_width <- function(fit, delay) {
-  fixed <- summary(fit)$fixed
-  rows <- grep("^pgrowth_location", rownames(fixed), value = TRUE)
-  out <- tibble(
-    delay = delay,
-    location = sub("^pgrowth_location", "", rows),
-    mean = fixed[rows, "Estimate"],
-    width = fixed[rows, "u-95% CI"] - fixed[rows, "l-95% CI"]
-  )
-  return(out)
-}
-
-bind_rows(
-  growth_width(fit_shared, "shared"),
-  growth_width(fit_split, "per location")
-) |>
-  mutate(truth = locations[.data$location])
-```
-
-The prior allows a range of `r round(2 * 1.96, 1)` on each rate, and both fits sit well inside it.
-Sharing the delay narrows the interval on every rate, by around a fifth here.
-The gain is real but modest, and the rates are still a long way from pinned down, so an informative prior remains worth having.
-The point is narrower than it might look.
-The delays are not silent about growth once several settings are fitted together, only when one is fitted alone.
+A delay shared across locations cannot absorb a difference in growth between them, so the rates are better determined than they are from any one location alone.
+Refitting these data with a delay per location widens the interval on every rate by about a fifth.
+They are still far from pinned down, so an informative prior remains worth having.
 
 # Summary
 
@@ -266,7 +222,7 @@ Others that are on the roadmap are a normal distribution, or a mixture of a norm
 A flat prior on a single setting leaves the posterior close to flat.
 * Several settings fitted together are a different matter.
 A delay shared across them cannot absorb a difference in growth between them, so the rates are better determined than they are from one setting alone.
-* The same argument points at fitting jointly with the data the growth rate would otherwise be estimated from.
+* It would usually make sense to fit jointly with the case counts the growth rate would otherwise be estimated from, rather than passing a point estimate as a prior, but at the moment this requires a custom extension.
 * Other uses of the primary event distribution are possible, such as a point source release where exposure is concentrated in a short window rather than spread across the reporting interval.
 These will usually need an informative prior on the delay distribution as well, since the data alone will not separate the two.
 
