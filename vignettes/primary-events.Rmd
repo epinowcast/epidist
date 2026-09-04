@@ -219,7 +219,6 @@ Weekly reporting, or fast growth or decline, is where it is not.
 * Only the uniform and exponential growth distributions are supported.
 Others that are on the roadmap are a normal distribution, or a mixture of a normal distribution and a bounded exponential growth distribution.
 * One set of delays carries little information about the growth rate, so take it from a separate estimate of epidemic growth and pass it as an informative prior.
-A flat prior on a single setting leaves the posterior close to flat.
 * Several settings fitted together are a different matter.
 A delay shared across them cannot absorb a difference in growth between them, so the rates are better determined than they are from one setting alone.
 * It would usually make sense to fit jointly with the case counts the growth rate would otherwise be estimated from, rather than passing a point estimate as a prior, but at the moment this requires a custom extension.
