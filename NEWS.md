@@ -285,6 +285,10 @@ Closes #682.
 - The short grid cutoff warning of `as_epidist_estimates_data()` now judges `max_delay` by a lognormal matched to the reported mean and standard deviation, or to the median and largest quantile where only quantiles are reported, and fires when more than 2% of its second moment lies beyond the cutoff.
 The previous `mean + 10 sd` yardstick missed a heavy tailed study whose implied standard deviation was 6.5% low at the default cutoff.
 Closes #681.
+- The default `max_delay` of `as_epidist_estimates_data()` is now the delay beyond which one percent of the second moment of a lognormal matched to the study's summaries lies, rounded up to a whole number of secondary windows with a floor of ten, in place of twenty times the largest reported value.
+This is the yardstick of the short cutoff check, so the default never trips it, and it gives a delay of mean 7 and standard deviation 3.6 a cutoff of 31 days rather than 140.
+A study reporting a single quantile or a mean with a standard error, where nothing can be matched, gets five times its largest reported value.
+See #620.
 - Added a missing Jacobian adjustment to the latent model for observations whose primary and secondary censoring windows overlap.
 Without it the latent model did not target the same likelihood as the marginal model.
 Under daily censoring the affected observations are the zero-delay cases.

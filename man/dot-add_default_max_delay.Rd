@@ -7,7 +7,8 @@
 .add_default_max_delay(data)
 }
 \arguments{
-\item{data}{A \code{data.frame} containing \code{study} and \code{value} columns.}
+\item{data}{A \code{data.frame} containing \code{study}, \code{type}, \code{value}, \code{p} and
+\code{swindow} columns.}
 }
 \value{
 The input with an added \code{max_delay} column.
@@ -16,8 +17,15 @@ The input with an added \code{max_delay} column.
 The grid used to compute the implied summaries of an unbiased estimand must
 be finite. Where the study adjusted for right truncation there is no
 observation time to use, so a cutoff is derived from the reported values.
-The multiplier is deliberately generous because a cutoff the delay
-distribution has not decayed by biases the implied standard deviation
-downwards, by tens of percent for a heavy tailed delay.
+A lognormal is matched to what each study reported by
+\code{\link[=.estimates_lnorm_match]{.estimates_lnorm_match()}}, and the cutoff is the delay beyond which one
+percent of its second moment lies, which for parameters \code{meanlog} and
+\code{sdlog} is \code{exp(meanlog + 2 * sdlog^2 + sdlog * qnorm(0.99))}. This is
+the same yardstick as the short cutoff check of
+\code{\link[=.estimates_short_cutoff]{.estimates_short_cutoff()}}, which fires at two percent, so the default
+never trips it. The cutoff is rounded up to a whole number of secondary
+windows with a floor of ten. Where nothing can be matched, which is a
+study reporting a single quantile or a mean with a standard error, the
+cutoff is five times the largest reported value.
 }
 \keyword{internal}

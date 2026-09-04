@@ -287,8 +287,14 @@ as_epidist_estimates_data <- function(data, ...) {
 #' @param max_delay A string giving the column of `data` containing the delay
 #'  beyond which the implied summaries are truncated when building the discrete
 #'  grid. Only used when the study adjusted for right truncation. Defaults to
-#'  twenty times the largest reported value for the study, rounded up, with a
-#'  minimum of ten. Raise it for a long tailed delay, whose implied standard
+#'  the delay beyond which one percent of the second moment of a lognormal
+#'  matched to the study's summaries lies, through its mean and standard
+#'  deviation, or its median and largest quantile above the median where it
+#'  reported only quantiles. That is the yardstick of the short cutoff check
+#'  in the Checks section, so the default never trips it. It is rounded up
+#'  to a whole number of secondary windows, with a minimum of ten, and is
+#'  five times the largest reported value where nothing can be matched. Raise
+#'  it for a delay with a longer tail than a lognormal, whose implied standard
 #'  deviation is biased downwards if the distribution has not decayed by the
 #'  cutoff, and lower it to fit faster. A message names the studies whose
 #'  cutoff is too short, see the Checks section.
@@ -927,28 +933,55 @@ as_epidist_estimates_data.epidist_multivariate <- function(
 #' The grid used to compute the implied summaries of an unbiased estimand must
 #' be finite. Where the study adjusted for right truncation there is no
 #' observation time to use, so a cutoff is derived from the reported values.
-#' The multiplier is deliberately generous because a cutoff the delay
-#' distribution has not decayed by biases the implied standard deviation
-#' downwards, by tens of percent for a heavy tailed delay.
+#' A lognormal is matched to what each study reported by
+#' [.estimates_lnorm_match()], and the cutoff is the delay beyond which one
+#' percent of its second moment lies, which for parameters `meanlog` and
+#' `sdlog` is `exp(meanlog + 2 * sdlog^2 + sdlog * qnorm(0.99))`. This is
+#' the same yardstick as the short cutoff check of
+#' [.estimates_short_cutoff()], which fires at two percent, so the default
+#' never trips it. The cutoff is rounded up to a whole number of secondary
+#' windows with a floor of ten. Where nothing can be matched, which is a
+#' study reporting a single quantile or a mean with a standard error, the
+#' cutoff is five times the largest reported value.
 #'
-#' @param data A `data.frame` containing `study` and `value` columns.
+#' @param data A `data.frame` containing `study`, `type`, `value`, `p` and
+#'  `swindow` columns.
 #'
 #' @returns The input with an added `max_delay` column.
 #'
 #' @keywords internal
-#' @autoglobal
 .add_default_max_delay <- function(data) {
-  data <- data |>
-    mutate(
-      max_delay = pmax(10, ceiling(20 * max(.data$value))),
-      .by = "study"
-    )
+  studies <- as.character(data$study)
+  cutoff <- vapply(
+    unique(studies),
+    function(study) {
+      rows <- studies == study
+      lnorm <- .estimates_lnorm_match(data, rows)
+      if (is.null(lnorm)) {
+        delay <- 5 * max(data$value[rows])
+      } else {
+        delay <- exp(
+          lnorm$meanlog + 2 * lnorm$sdlog^2 + lnorm$sdlog * stats::qnorm(0.99)
+        )
+      }
+      # A fully adjusted study may leave its windows NA, and an invalid
+      # window is left for the checks to report.
+      swindow <- data$swindow[rows]
+      swindow <- swindow[is.finite(swindow) & swindow > 0]
+      swindow <- ifelse(length(swindow) > 0, max(swindow), 1)
+      return(ceiling(max(delay, 10) / swindow) * swindow)
+    },
+    numeric(1)
+  )
+  data$max_delay <- unname(cutoff[match(studies, names(cutoff))])
   cli::cli_inform(c(
     i = paste0(
-      "No max_delay column supplied, using twenty times the largest reported ",
-      "value for each study (minimum 10) as the grid cutoff. Increase this ",
-      "if the delay distribution has a long tail, and lower it to speed up ",
-      "fitting."
+      "No max_delay column supplied, using the delay beyond which 1% of the ",
+      "second moment of a lognormal matched to each study's summaries lies ",
+      "(minimum 10, in whole secondary windows) as the grid cutoff, or five ",
+      "times the largest reported value where nothing can be matched. ",
+      "Raise it if the delay has a longer tail than that, and lower it to ",
+      "speed up fitting."
     )
   ))
   return(data)
@@ -1028,7 +1061,9 @@ as_epidist_estimates_data.epidist_multivariate <- function(
       sdlog = sqrt(variance_log)
     ))
   }
-  quantiles <- rows & data$type == "quantile"
+  # The match runs before the quantile probabilities are validated, so a
+  # missing one is treated as no quantile.
+  quantiles <- rows & data$type == "quantile" & !is.na(data$p)
   reported_median <- data$value[quantiles & data$p == 0.5]
   upper <- quantiles & data$p > 0.5
   if (length(reported_median) == 0 || !any(upper)) {

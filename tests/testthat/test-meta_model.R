@@ -113,8 +113,9 @@ test_that("as_epidist_meta_model does not repeat the estimates data checks", { #
     relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 1,
     pwindow = 1, swindow = 1, max_delay = 200, stringsAsFactors = FALSE
   )
-  msgs <- capture_messages(estimates <- as_epidist_estimates_data(heavy))
+  msgs <- capture_messages(as_epidist_estimates_data(heavy))
   expect_true(any(grepl("relative standard error", msgs, fixed = TRUE)))
+  estimates <- suppressMessages(as_epidist_estimates_data(heavy))
   expect_silent(as_epidist_meta_model(estimates = estimates))
   expect_silent(as_epidist_meta_model(estimates))
   expect_silent(as_epidist_meta_model(sim_obs, estimates = estimates))

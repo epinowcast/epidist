@@ -308,7 +308,7 @@ test_that("the default max_delay is where 1% of the second moment lies beyond", 
     stringsAsFactors = FALSE
   )
   est <- suppressMessages(as_epidist_estimates_data(mean_se))
-  expect_identical(est$max_delay, 37.5)
+  expect_identical(est$max_delay, 38)
   # The message names the cutoff.
   msgs <- capture_messages(as_epidist_estimates_data(moments))
   expect_true(any(grepl("second moment", msgs, fixed = TRUE)))
@@ -423,7 +423,7 @@ test_that(".estimates_coarse_quadrature names the studies with coarse nodes", {
   data <- suppressMessages(as_epidist_estimates_data(data.frame(
     study = c("A", "A", "B", "B", "C"),
     type = c("mean", "sd", "mean", "sd", "mean"),
-    value = c(24, 0.05, 24, 0.05, 5),
+    value = c(24, 0.02, 24, 0.02, 5),
     n = 500,
     relative_obs_time = c(Inf, Inf, Inf, Inf, 30),
     trunc_adjusted = c(TRUE, TRUE, TRUE, TRUE, FALSE),
