@@ -45,8 +45,6 @@ It also builds on `brms`, so formulas, families, priors and post-processing all 
 ::: {.alert .alert-primary}
 For a methodological overview of the biases in published delay estimates see @park2024estimating, and for a practical checklist aimed at applied users see @charniga2024best.
 For individual level rows the meta model reuses the likelihood of the marginal model (`vignette("epidist")`), which relies on the [`primarycensored`](https://primarycensored.epinowcast.org/) package [@primarycensored].
-Those rows take the same `primary` argument as the marginal model, so a growing epidemic can be allowed for as in `vignette("primary-events")`.
-It adds a forward model of the naive estimator for summary rows, so both kinds of evidence can be combined in one `brms` [@brms] model.
 :::
 
 # What we need from a study {#metadata}
@@ -71,19 +69,9 @@ See `?as_epidist_estimates_data` for the full details.
 Where the underlying delays are available and the cutoff that produced them is known, refitting them with the marginal model (`vignette("epidist")`) is simpler and more reliable than reconstructing what a summary of them means.
 The meta model is for the case where the delays cannot be had.
 
-::: {.alert .alert-primary}
-**What to report, best first.**
-The delays themselves, fitted with the marginal model.
-Failing that, draws of the parameters of a fitted distribution, through `as_epidist_multivariate()`, which is the only route by which the correlation between a study's summaries reaches the model.
-Failing that, the point estimates of those parameters with their standard errors, through `epidist_estimates_parameters()`.
-Failing that, a mean and a standard deviation, or a set of quantiles, with the sample size, which are fitted jointly.
-A single summary with a standard error is the weakest, since nothing constrains its shape.
-See `?as_epidist_meta_model` for the approximations each of these makes.
-:::
-
 # Setup {#setup}
 
-```{r load-requirements}
+```{r load-requirements, message = FALSE, warning = FALSE}
 library(epidist)
 library(brms)
 library(ggplot2)
@@ -584,10 +572,9 @@ p_compare
 # Real world estimates from epireview {#epireview}
 
 [epireview](https://github.com/mrc-ide/epireview) [@epireview] collates published parameter estimates gathered by the Pathogen Epidemiology Review Group.
-It is not on CRAN.
-It is published on [mrc-ide's r-universe](https://mrc-ide.r-universe.dev).
+It is not on CRAN, and so we install it from the [mrc-ide r-universe](https://mrc-ide.r-universe.dev).
 
-```{r}
+```{r load-epireview, message = FALSE, warning = FALSE}
 library(epireview) # nolint: library_call_linter.
 ```
 
