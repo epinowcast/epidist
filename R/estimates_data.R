@@ -294,8 +294,9 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  later, because the family is not known when the data are built and, for
 #'  the same mean and standard deviation, its tail is heavier than the
 #'  gamma's or the Weibull's, so the cutoff is far enough for those families
-#'  and only longer than they need. That is the yardstick of the short cutoff check
-#'  in the Checks section, so the default never trips it where it binds. It
+#'  and only longer than they need. That is the yardstick of the short
+#'  cutoff check in the Checks section, so the default never trips it where
+#'  it binds. It
 #'  is rounded up to a whole number of secondary windows, with a minimum of
 #'  ten and a maximum of twenty times the largest reported value, because for
 #'  a heavy tail one percent of the second moment lies thousands of delays
