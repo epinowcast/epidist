@@ -266,199 +266,63 @@ For the mathematical details of primary event censored distributions, including 
 
 # The meta model
 
-The naive, latent and marginal models above all fit directly to individual delay observations.
-Published estimates of a delay distribution are usually reported as summary statistics rather than individual observations, and the study's own estimation procedure is itself a source of bias [@charniga2024best; @park2024estimating].
-The meta model lets `epidist` fit a single delay distribution to a mix of individual level data and published summary estimates.
-Individual level rows use the marginal model likelihood of Section \@ref(the-marginal-model) unchanged.
-Their primary event distribution is set with `primary`, so the tilted primary event of Section \@ref(primary-tilt) is available to them.
-Summary rows instead take the growth rate reported for each study as a known quantity.
-Each summary row is instead forward modelled.
-Given the true continuous delay distribution, the model works out what the study's own estimation procedure would have converged to.
-The reported value is then fitted to that biased estimand, with sampling uncertainty derived from the study sample size.
-This means summaries that did not adjust for right truncation, or that treated interval censored data as continuous, can still contribute unbiased information about the underlying distribution.
+Published estimates are usually summary statistics rather than the individual delays the models above fit to, and the study's own estimation procedure is itself a source of bias [@charniga2024best; @park2024estimating].
+The meta model fits one delay distribution to a mix of individual level data and published summaries.
+Each summary is fitted to what the study's own estimation procedure would have converged to given the delay distribution, with sampling uncertainty from the study sample size.
 That holds only where the metadata describing what the study did is correct.
 The metadata is usually the analyst's judgement rather than something the study reported, so it should be stated explicitly and varied in a sensitivity analysis.
-Study level heterogeneity, for example `mu ~ 1 + (1 | study)`, is specified through the `brms` formula rather than through the likelihood, exactly as for the other models above.
+Study level heterogeneity, for example `mu ~ 1 + (1 | study)`, is specified through the `brms` formula, as for the other models above.
 If using the meta model, please cite `primarycensored` in addition to `epidist`.
 The meta model is experimental and its interface may still change.
 
-## What we need from each study
+## Sampling likelihoods {#sampling-likelihoods}
 
-Forward modelling a published estimate requires knowing something about how the study produced it.
-For each summary we need:
+Let $f(\tau; \theta)$ and $F(\tau; \theta)$ be the forward density and distribution function of the delay of Section \@ref(maths).
+Write $m_1$, $\sigma$, $\mu_3$ and $\mu_4$ for its mean, standard deviation, and third and fourth central moments, $\kappa = \mu_4 / \sigma^4$ for its kurtosis, $G$ for its distribution function and $Q_p$ for its quantile at probability $p$.
+For a study that estimated the delay without bias these are the moments, distribution function and quantiles of $f(\cdot \, ; \theta)$ itself.
+Section \@ref(the-biased-estimands) replaces them with those of the distribution the study's procedure targeted, and the likelihoods below are unchanged.
+Each summary row reports a value $y$ and the sample size $n$ it was computed from.
 
-* **How it adjusted for interval censoring**, one of no adjustment (it summarised integer date differences directly, the most common case in the literature), full adjustment (it used a double interval censored likelihood targeting the continuous distribution), the uniform single interval approximation (it adjusted the secondary interval assuming a uniform delay within it, but left the primary interval uncorrected), midpoint imputation (it assigned each delay to the centre of the interval it was observed in), or midpoint imputation with a uniform interval (it placed the primary event at the midpoint of its window and integrated the secondary interval).
-* **Whether the reported estimate was corrected for right truncation**, and if it was not, **the observation time**, **how collection stopped**, and **the growth rate of primary events** over the study period.
-  A cohort followed every primary event for the same observation time, so the observation time is the truncation point on the delay scale, that is how long after the primary events the data were extracted.
-  A study that accrued primary events and stopped at a calendar date instead observed a given delay only for the primary events that occurred at least that long before the stop, and its observation time is the length of the collection window, which is usually easier to read off a paper.
-  The accrual correction weights by the follow up available to each delay, which depends on how incidence grew over the window, so it is only as good as the growth rate supplied.
-  Both corrections assume the study sampled a cohort of primary events, and so target the forward distribution of Section \@ref(forwards-and-backwards-distributions).
-  A study that instead sampled on the secondary event, for example every death reported up to some date, reports a backward distribution, which is not represented here.
-* **The censoring windows**, the width of the interval each event was observed in, for example 1 for daily reporting or 7 for weekly reporting.
-* **The sample size**, the number of delays the summary was computed from, or a reported standard error in its place, or a covariance matrix over the summaries it reported.
-  A study that published the parameters of a distribution it fitted supplies the reported uncertainty on those parameters instead, as covered in Section \@ref(reported-distribution-parameters).
-* **The smallest delay it counted**, where the study dropped delays below some point, so that its summaries describe a left truncated delay distribution.
+### A reported mean
 
-Systematic reviews rarely record this metadata, so an assumption must be made and stated explicitly alongside any results.
-The reporting checklist of @charniga2024best covers it, and adopting that checklist would make fitting to published estimates routine.
-Where the metadata is missing entirely, a covariate for the phase of the outbreak each estimate was made in is another option, since the `brms` formula makes it a meta-regression, estimating the residual bias rather than correcting it mechanically.
-
-## The biased estimand
-
-For a summary row, let $f(\tau; \theta)$ and $F(\tau; \theta)$ be the forward density and distribution function of the delay of Section \@ref(maths), and let $g_p$ be the distribution of a primary event within its censoring window of width $w_p$.
-This is uniform when incidence was constant over the study period, and weighted towards more recent times by an exponential growth rate when it was not.
-Write
-$$
-F_{pc}(\tau; \theta) = \mathbb{P}(\tau^\star + U \le \tau), \quad \tau^\star \sim f(\cdot \, ; \theta), \; U \sim g_p,
-$$
-for the distribution function of the delay plus an independent primary event offset, which `primarycensored` provides.
-The approach in each case is the same.
-We write down the distribution the study's own data generating process would have produced, given $\theta$, and take the summaries it reports from that distribution rather than from $f$ itself.
-One such estimand is used per censoring adjustment code.
-Each is right truncated at the study's observation time $D$, unless the study adjusted for right truncation itself.
-
-A study with **no censoring adjustment** summarised integer date differences directly, so its estimand is discrete.
-Writing $q_j$ for the probability it puts on the $j$th day, or more generally the $j$th secondary window,
-$$
-q_j = \frac{F_{pc}(j w_s; \theta) - F_{pc}((j-1) w_s; \theta)}{F_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j = 1, \dots, \lfloor D / w_s \rfloor, (\#eq:meta-grid)
-$$
-where $w_s$ is the secondary censoring window and bin $j$ carries the delay value $(j-1) w_s$.
-The truncation point is discretised to the last full grid boundary $w_s \lfloor D / w_s \rfloor$.
-This is the doubly interval censored, right truncated probability mass function of @primarycensored, the same one the marginal model of Section \@ref(the-marginal-model) uses for individual observations.
-A naive study and an individual level record are therefore described by one construction, differing only in whether the model sees the delays or a summary of them.
-Summing over this grid gives the first four moments of the estimand.
-Four are needed throughout: the mean and standard deviation are what a study reports, the kurtosis sets the sampling error of a reported standard deviation, and the skewness sets its correlation with a reported mean.
-
-A study with **full adjustment** reported the moments of $f(\cdot \, ; \theta)$ itself, right truncated at $D$ when it did not separately adjust for truncation:
-$$
-\mathbb{E}[\tau^k \mid \tau \le D] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4. (\#eq:meta-trunc-moments)
-$$
-When the study also adjusted for right truncation this reduces to the ordinary family moments used by `add_summaries()`.
-
-A study using the **uniform single interval approximation** left the primary interval uncorrected, so it effectively observed $\tau^\star + U$.
-Its implied moments are the raw moments of $F_{pc}$, right truncated at $D$ when the study did not separately adjust for truncation:
-$$
-\mathbb{E}[(\tau^\star + U)^k \mid \tau^\star + U \le D] =
-\frac{\int_0^D k t^{k-1} \left(F_{pc}(D; \theta) - F_{pc}(t; \theta)\right) \text{d}t}{F_{pc}(D; \theta)},
-\quad k = 1, \dots, 4. (\#eq:meta-uniform-moments)
-$$
-Equation \@ref(eq:meta-trunc-moments) is evaluated by Simpson's rule over the delay distribution function, and Equation \@ref(eq:meta-uniform-moments) by Simpson's rule over $F_{pc}$.
-Where the study also adjusted for right truncation and the primary event distribution is uniform, the convolution is instead exact:
-$$
-\mu_{pc} = \mu + \frac{w_p}{2}, \quad
-\sigma_{pc}^2 = \sigma^2 + \frac{w_p^2}{12}, \quad
-\mu_{4,pc} = \mu_4 + 6 \sigma^2 \frac{w_p^2}{12} + \frac{w_p^4}{80}, (\#eq:meta-uniform-exact)
-$$
-where $\mu$, $\sigma^2$ and $\mu_4$ are the mean, variance and fourth central moment of $f(\cdot \, ; \theta)$.
-
-A study using **midpoint imputation** assigned each delay to the centre of the interval it was observed in, so it summarised the grid of Equation \@ref(eq:meta-grid) with bin $j$ carrying the delay value $(j - 1/2) w_s$ rather than $(j-1) w_s$.
-Its implied mean is therefore the grid mean plus $w_s / 2$, every central moment is unchanged, and its distribution function is the grid one evaluated at $y - w_s / 2$.
-
-A study using **midpoint imputation with a uniform interval** placed the primary event at the midpoint of its window and integrated the secondary interval.
-It therefore observed $\tau^\star + U - w_p / 2$, which is the estimand of Equation \@ref(eq:meta-uniform-moments) moved down the delay axis by half a primary window.
-Its implied mean is that of the uniform single interval approximation less $w_p / 2$, every central moment is unchanged, and its distribution function is that of the uniform single interval approximation evaluated at $y + w_p / 2$.
-
-Placing the primary event at the midpoint of its window removes the mean of the primary offset $U$, so the reported delay $\tau^\star + U - w_p / 2$ has expectation $\mu$ before truncation.
-It does not remove the spread of $U$, which still varies from case to case, so the variance stays at $\sigma^2 + w_p^2 / 12$.
-A study that midpoints the primary event and integrates the secondary interval therefore reports the same mean as a study that adjusted for both events, and the same standard deviation as the uniform single interval approximation.
-It differs from the uniform single interval approximation in location alone, by $w_p / 2$, and from full adjustment in spread alone, by $w_p^2 / 12$.
-
-The reading taken here is that the primary event is midpointed and the secondary interval integrated.
-The mirror reading, a secondary event at the midpoint of its window and an integrated primary interval, gives the same implied mean and a variance of $\sigma^2 + w_s^2 / 12$, so the two readings differ only when $w_p$ and $w_s$ differ.
-We take this one because it is what the literature reports, where the primary event carries the wide exposure window whose midpoint is taken and the secondary date is recorded precisely.
-A study that midpointed the secondary interval and left the primary alone is midpoint imputation above.
-Each code models the study as integrating the interval it did not midpoint rather than drawing one random position within it, which would add a further $w^2 / 6$ to the variance.
-
-## Accrual truncation
-
-The truncation above conditions on the delay falling below a single cutoff, which is what a cohort followed for a common observation time gives.
-This is truncation rather than right censoring.
-A truncated case is absent from the study altogether, so its estimand is renormalised by the probability of being observed, as in the denominators above.
-A right censored case is known to exist with its secondary event still to come, and contributes a survival term with no such denominator.
-Applying both at once double counts, so a study is one or the other.
-The meta model covers truncation, and right censoring is not yet supported.
-A study that accrued primary events over a window and stopped collecting at its calendar end instead saw a delay of $d$ only for the primary events that occurred at least $d$ before the stop.
-With primary events arriving at a rate proportional to $\exp(r t)$ over a window of length $A$, the amount of such follow up is
-$$
-w(d) = \int_0^{A - d} \exp(r t) \, \text{d}t = \frac{\exp(r (A - d)) - 1}{r}, \quad 0 \le d \le A, (\#eq:meta-accrual)
-$$
-which tends to $A - d$ as $r$ tends to zero.
-This is the dynamical bias of @park2024estimating.
-For a long window and a growing epidemic it approaches an exponential tilt of the delay distribution by $\exp(-r d)$.
-The estimand is then $f(d; \theta) w(d)$ renormalised over $[0, A]$, where $A$ is the length of the collection window rather than a cohort cutoff.
-The weight multiplies the quadrature used for Equations \@ref(eq:meta-trunc-moments) and \@ref(eq:meta-uniform-moments) at each node's midpoint and renormalises.
-It is exact for a study that adjusted for censoring, where $d$ is the underlying delay.
-For Equation \@ref(eq:meta-uniform-moments) the weighted quantity is $\tau^\star + U$ rather than the time from the primary event's window, so $w$ is evaluated at $d - w_p / 2$ to average the primary offset back out.
-
-On the grid of Equation \@ref(eq:meta-grid) the follow up actually available is a step function rather than the smooth Equation \@ref(eq:meta-accrual).
-A case is seen when its primary event fell early enough for its delay to complete before the calendar stop, and the primary event is known only to its window, so a delay of $x$ from the start of that window has follow up $w(w_p \lfloor x / w_p \rfloor)$ whenever $A$ is a multiple of $w_p$.
-Each cell of the grid is therefore cut at the multiples of $w_p$ inside it, every piece is weighted by the follow up at the primary window it starts in, and the pieces are summed back into their cell before renormalising.
-When $w_p = w_s$ this is the weight at the cell's lower edge.
-When $w_s > w_p$, as for a daily primary date reported by week, the weight steps down inside each cell, and when $w_p > w_s$ every cell inside one primary window shares its weight.
-Weighting each cell at its lower edge instead is exact only when the windows are equal.
-Take a lognormal delay of mean 4.6 days and standard deviation 2.4, a collection window of $A = 28$ days, a daily primary and a weekly secondary window.
-Against a simulation of that study the lower edge weight puts the implied mean 12% low at $r = 0.05$ and 36% low at $r = 0.2$, and the piecewise weight recovers both to within 0.2%.
-With the windows the other way round the lower edge weight is 2.7% high on the mean at $r = 0.2$, and the piecewise weight is again within 0.1%.
-
-Two residuals remain.
-The piecewise weight treats the last primary window as complete, so when $A$ is not a multiple of $w_p$ the primary events it cuts short are overweighted.
-With a weekly primary window and $A = 30$ the implied mean is 1% low at $r = 0.05$ and 5% low at $r = 0.2$ for a daily secondary window, and 10% and 34% low for a weekly one, where the grid also stops at the last full week.
-Use a collection window that is a multiple of the primary window where the study allows it.
-Equation \@ref(eq:meta-uniform-moments) keeps the smooth weight, because the follow up available to a primary event is only known to within its own window and $w_p / 2$ is the average of it.
-At $w_p = 7$ its implied mean is 0.8% high at $r = 0.05$ and 2.6% high at $r = 0.2$, and both residuals grow with the growth rate and as $w_p$ grows towards the length of the collection window.
-
-## Sampling likelihoods
-
-With study sample size $n$ and reported value $y$, and writing $m_1$, $\sigma$ and $\kappa$ for the mean, standard deviation and kurtosis (the fourth central moment divided by $\sigma^4$) implied by the forward model above, a **reported mean** is given a normal sampling distribution
+A reported mean is given a normal sampling distribution
 $$
 y \sim \text{Normal}\left(m_1, \; \text{se}_{m_1} \right), (\#eq:meta-mean-lik)
 $$
 where $\text{se}_{m_1}$ is the standard error reported by the study when one was given, and $\sigma / \sqrt{n}$ otherwise.
-A **reported standard deviation** is likewise given a normal sampling distribution, using the kurtosis based asymptotic standard error of a sample standard deviation
+
+### A reported standard deviation
+
+A reported standard deviation is given a normal sampling distribution with the kurtosis based asymptotic standard error of a sample standard deviation
 $$
 y \sim \text{Normal}\left(\sigma, \; \text{se}_\sigma \right), \quad
 \text{se}_\sigma = \sigma \sqrt{\frac{\kappa - 1}{4 n}}. (\#eq:meta-sd-lik)
 $$
 This follows from the asymptotic variance of the sample variance, $(\mu_4 - \sigma^4)/n$, by the delta method [@cramer1946].
-The normal theory expression $\sigma / \sqrt{2(n-1)}$ is the special case $\kappa = 3$.
-It is not used because it assumes the estimand itself is normally distributed and is two to four times too narrow for the right skewed distributions delays usually follow.
+The normal theory expression $\sigma / \sqrt{2(n-1)}$ is the special case $\kappa = 3$, and is two to four times too narrow for the right skewed distributions delays usually follow.
 Equation \@ref(eq:meta-sd-lik), and the pair likelihood of Equation \@ref(eq:meta-moment-pair) built on it, should not be trusted once the relative standard error $\sqrt{(\kappa - 1) / (4 n)}$ exceeds about a quarter.
-For a lognormal with kurtosis 9 (a log scale standard deviation of 0.5) that is $n$ below about 30, and for kurtosis 114 (a log scale standard deviation of 1) it is $n$ below about 450.
-Beyond that point the sampling distribution of a sample standard deviation is far from normal, the asymptotic standard error overstates its spread by up to two times, and the pair likelihood is biased by about a standard error towards a smaller spread.
+For a lognormal with a log scale standard deviation of 0.5 that is $n$ below about 30.
 `as_epidist_estimates_data()` warns when a reported mean and standard deviation imply this under a lognormal delay.
 
-A **reported quantile** at probability $p$ is fitted on the cumulative probability scale, which avoids inverting the distribution function of the biased estimand:
+### A reported quantile
+
+A reported quantile at probability $p$ is fitted on the cumulative probability scale, which avoids inverting $G$:
 $$
 p \sim \text{Normal}\left(G(y), \; \text{se}_p\right), (\#eq:meta-quantile-lik)
 $$
-where $G$ is the distribution function implied by the forward model for the row's censoring adjustment, and $\text{se}_p$ is the binomial standard error $\sqrt{p(1-p)/n}$ of an empirical distribution function.
-Studies report a quantile's uncertainty on the delay scale, so a quantile row supplied with a standard error $\text{se}_y$ is fitted on that scale instead,
+where $\text{se}_p = \sqrt{p(1-p)/n}$ is the binomial standard error of an empirical distribution function.
+A quantile row supplied with a standard error $\text{se}_y$ on the delay scale is fitted on that scale instead,
 $$
-y \sim \text{Normal}\left(Q_p, \; \text{se}_y\right), (\#eq:meta-quantile-se)
+y \sim \text{Normal}\left(Q_p, \; \text{se}_y\right). (\#eq:meta-quantile-se)
 $$
-where $Q_p$ is the implied quantile, the inverse of $G$ at $p$, read off as described in Section \@ref(a-covariance-over-the-reported-summaries).
-Converting $\text{se}_y$ to the probability scale with the density of the biased estimand at the reported value agrees with this near the implied quantile, but far from it that density collapses, so a discrepant row becomes a wall rather than a slope and its gradient is dominated by whatever floor holds the converted standard error away from zero.
-On the delay scale the row is the normal density it claims to be everywhere, and the standard error is only held away from zero as a guard.
-For the discretely summarised case $G$ is continuity corrected by interpolating the grid distribution function linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise always lands on a jump of the step function.
 
-The correction removes most of the discretisation bias but not all of it, because the reported value is itself rounded to the grid.
-What is left does not shrink with the study sample size.
-Across a sweep of lognormal shapes it stays under 4% on the mean and 9% on the standard deviation once the reported quantiles sit twenty five or more cells above the smallest delay the study counted, and reaches tens of percent on both when they sit within ten.
-Take a lognormal delay of mean 5.9 days and standard deviation 3.9, daily windows and $D = 12$.
-The quartiles a correctly conducted study would report are 3, 5 and 7 days, and $G$ at the true parameters puts $(0.223, 0.546, 0.777)$ below them rather than $(0.25, 0.50, 0.75)$.
-At $n = 400$ that is up to 1.8 binomial standard errors, so the study looks discrepant when it is not.
-Refitting those three quantiles recovers a delay mean 27% high and a standard deviation 69% high.
-Without the continuity correction the mean is 38% high instead, so the correction helps without rescuing the case.
-The mean and standard deviation of the same study recover the truth exactly, so a coarsely resolved delay is better fitted through those where a study reports them.
-The bias falls away as the grid resolves the distribution, reaching about 1% for the same shape scaled to a mean of 48 days.
-
-## Summaries from the same study
+### Summaries from the same study
 
 Summaries that one study computed from the same delays are correlated, so they are fitted jointly.
-Two summaries are fitted together when they agree on every field other than the summary itself, that is on the study, its metadata, and any covariates supplied, so a linear predictor built from those fields cannot vary within a group.
-A summary supplied with its own standard error is fitted on its own, because that standard error replaces the sampling uncertainty the joint likelihood would derive.
+Two summaries are fitted together when they agree on every field other than the summary itself, that is on the study, its metadata, and any covariates supplied.
+A summary supplied with its own standard error is fitted on its own.
 
-A **mean and a standard deviation** from one study are given the asymptotic bivariate normal of the pair
+A mean and a standard deviation from one study are given the asymptotic bivariate normal of the pair
 $$
 \begin{pmatrix} y_{m} \\ y_{\sigma} \end{pmatrix} \sim
 \text{Normal}\left(
@@ -467,110 +331,181 @@ $$
 \sigma^2 & \mu_3 / (2 \sigma) \\
 \mu_3 / (2 \sigma) & \sigma^2 (\kappa - 1) / 4
 \end{pmatrix}
-\right), (\#eq:meta-moment-pair)
+\right). (\#eq:meta-moment-pair)
 $$
-where $\mu_3$ is the third central moment of the implied estimand.
-The off diagonal is $\text{Cov}(\bar{x}, s^2) = \mu_3 / n$ carried onto the standard deviation scale by the delta method.
-Both this and Equation \@ref(eq:meta-sd-lik) come from the joint asymptotic normality of sample moments [@cramer1946].
+The off diagonal is $\text{Cov}(\bar{x}, s^2) = \mu_3 / n$ carried onto the standard deviation scale by the delta method [@cramer1946].
 The implied correlation is $\gamma_1 / \sqrt{\kappa - 1}$, with $\gamma_1 = \mu_3 / \sigma^3$ the skewness, and $\kappa \ge \gamma_1^2 + 1$ holds for every distribution, so the covariance matrix is positive definite.
-Moments taken from the grid of Equation \@ref(eq:meta-grid) or from quadrature can sit a little outside that bound, so the correlation is held strictly inside $[-1, 1]$.
+Moments computed numerically can sit a little outside that bound, so the correlation is held strictly inside $[-1, 1]$.
 
-**Several quantiles** from one study at probabilities $p_1 < \dots < p_k$ with values $y_1 \le \dots \le y_k$ cut the delay axis into $k+1$ cells, and the number of delays falling in each is multinomial
+Several quantiles from one study at probabilities $p_1 < \dots < p_k$ with values $y_1 \le \dots \le y_k$ cut the delay axis into $k+1$ cells, and the number of delays in each is multinomial
 $$
 (c_1, \dots, c_{k+1}) \sim \text{Multinomial}\left(n, \; \left(G(y_1), \; G(y_2) - G(y_1), \; \dots, \; 1 - G(y_k)\right)\right), (\#eq:meta-quantile-set)
 $$
 with $c_j = \text{round}(n p_j) - \text{round}(n p_{j-1})$ and $c_{k+1} = n - \text{round}(n p_k)$.
-Rounding the cumulative probabilities rather than the increments keeps every count non negative and makes them sum to $n$.
-This is the usual likelihood for data grouped into intervals, with the reported quantiles supplying the cell boundaries.
-A single reported quantile of a continuous estimand reduces Equation \@ref(eq:meta-quantile-set) to the binomial, of which Equation \@ref(eq:meta-quantile-lik) is the normal approximation, so quantile rows use Equation \@ref(eq:meta-quantile-set) unless the study supplied its own standard error.
-Two quantiles reported at the same value are two constraints on the empirical distribution function at one cell, and are merged into that cell with their combined count.
-A cell whose implied probability underflows to zero while the study saw delays in it has its probability floored at $10^{-300}$, which rejects the draw in practice while leaving `loo()` a finite value.
+A single quantile reduces Equation \@ref(eq:meta-quantile-set) to the binomial, of which Equation \@ref(eq:meta-quantile-lik) is the normal approximation, so quantile rows use Equation \@ref(eq:meta-quantile-set) unless the study supplied its own standard error.
+Two quantiles reported at the same value are merged into one cell with their combined count.
+A cell whose implied probability underflows to zero while the study saw delays in it has its probability floored at $10^{-300}$.
 
-A quantile of integer day delays, that is of a study with `cens_adjusted` 0 or 3, is a discrete statistic.
-"The median is 5 days" says that the empirical distribution function crossed one half between 4 and 5 days.
-That is read as a type 1 quantile, $N_{\le y - w_s} < \lceil n p \rceil \le N_{\le y}$, with $N_{\le y}$ the number of delays at or below $y$.
-A single such quantile is fitted as the probability of that event,
-$$
-P(N_{\le y} \ge k) - P(N_{\le y - w_s} \ge k), \quad k = \lceil n p \rceil, \quad N_{\le y} \sim \text{Binomial}\left(n, G_0(y)\right), (\#eq:meta-quantile-crossing)
-$$
-where $G_0$ is the uncorrected distribution function of the grid in Equation \@ref(eq:meta-grid).
-Unlike the continuity corrected forms above, the information this carries saturates as $n$ grows.
-Once the binomial spread of the crossing point, about $\sqrt{p(1-p)/n}$ in probability, is narrower than a day, the reported integer stops moving, and the likelihood tends to an indicator of the parameters that put the population quantile in the reported cell.
-Several quantiles from such a study still use Equation \@ref(eq:meta-quantile-set) on the continuity corrected $G$.
-That is calibrated at around thirty delays but overconfident from around a hundred, and at a thousand it claims a standard error five times too small, so `as_epidist_estimates_data()` warns about such studies and the mean and standard deviation should be fitted instead where they are reported.
+Summaries of different kinds from the same study, such as a mean and a median, are treated as independent, which understates their joint uncertainty.
+The normal approximations degrade for small study sample sizes.
 
-Summaries of different kinds from the same study, such as a mean and a median, are still treated as independent, which understates their joint uncertainty.
-The normal approximations also degrade for small study sample sizes.
+### A vector of summaries with a covariance
 
-## A covariance over the reported summaries
-
-A study that fitted a distribution to its delays can publish draws of the fitted parameters.
-`as_epidist_multivariate()` summarises those draws by their mean and covariance, and `as_epidist_estimates_data()` pushes each draw through to the summaries the fitted distribution implies, giving a vector of summaries with the covariance between them.
-This is the reporting format we recommend, because it carries the correlation between the reported quantities rather than throwing it away.
+A study that fitted a distribution to its delays can publish draws of the fitted parameters, which `as_epidist_multivariate()` summarises by their mean and covariance and `as_epidist_estimates_data()` pushes through to the summaries the fitted distribution implies.
+This is the reporting format we recommend, because it keeps the correlation between the reported quantities.
 Writing $y$ for the reported vector and $\Sigma$ for the covariance over it,
 $$
 y \sim \text{Normal}\left(m(\theta), \; \Sigma\right), (\#eq:meta-mvn)
 $$
-where $m(\theta)$ holds the implied summary for each reported quantity, that is $m_1$ for a mean, $\sigma$ for a standard deviation, and the implied quantile at $p$ for a quantile.
-This generalises Equations \@ref(eq:meta-moment-pair) and \@ref(eq:meta-quantile-set), which derive the covariance from the sample size and the implied moments.
-Here it is supplied instead, so a mixture of summary types need not be treated as independent.
+where $m(\theta)$ holds the implied summary for each reported quantity, $m_1$ for a mean, $\sigma$ for a standard deviation and $Q_p$ for a quantile.
+The covariance is supplied rather than derived from $n$, so a mixture of summary types need not be treated as independent.
+Summaries of a $k$ parameter fit are functions of $k$ numbers, so at most $k$ of them have a non singular covariance, and asking for more is an error.
 
-A quantile reported this way is on the delay scale, so $m$ needs the inverse of $G$, which has no closed form on the discrete grid.
-It is read off by inverse linear interpolation between the two points of $G$ that bracket $p$, on the grid of Equation \@ref(eq:meta-grid) for a discrete estimand and on the quadrature grid otherwise.
-On the discrete grid that interpolant is the definition of the continuity corrected quantile, so it is exact.
-For a continuous estimand the chord is only as accurate as the quadrature spacing, which for a study that adjusted for truncation is about a day, an error that a covariance from a fitted family charges heavily.
-It is therefore refined: exactly through the family quantile function for a lognormal or weibull delay reported by a study that adjusted for censoring, and otherwise by two Newton steps using the closed form distribution function and density of the biased estimand.
-Both keep the implied quantile a differentiable function of $\theta$, which a root search would not.
-An accrual estimand is defined by the interpolation between its nodes and keeps its chord.
-
-Summaries of a $k$ parameter fit are deterministic functions of $k$ numbers, so at most $k$ of them have a non singular covariance.
-Asking for more is an error rather than a silently degenerate likelihood.
-
-## Reported distribution parameters
+### Reported distribution parameters {#reported-distribution-parameters}
 
 A study often publishes the parameters of a distribution it fitted rather than summaries of its delays.
-Those parameters describe the distribution its estimation procedure converged to.
-Where the procedure was correct, that is the delay distribution itself.
-Where it was biased, it is the biased distribution the procedure targeted, which is what Section \@ref(the-biased-estimand) forward models.
-
-`epidist_estimates_parameters()` converts reported parameters into the summaries the reported distribution implies.
-Those summaries are then fitted like any other reported summary.
-Writing $\hat{F}$ for the reported distribution and $T$ for a summary, the reported value is $T(\hat{F})$ and the model compares it against $T$ of the biased estimand.
+`epidist_estimates_parameters()` converts them into the summaries the reported distribution implies, which are then fitted like any other reported summary.
+Writing $\hat{F}$ for the reported distribution and $T$ for a summary, the reported value is $T(\hat{F})$ and the model compares it against $T$ of the distribution the study's procedure targeted.
 Comparing summaries rather than parameters means the family a study fitted need not match the family being fitted to it.
-For a two parameter family the map from parameters to a mean and a standard deviation is one to one, so a study that fitted correctly loses nothing by being converted.
-
-The summaries are taken over the range of delays the study could have seen, conditioning $\hat{F}$ on $(L, D]$,
-$$
-\hat{F}_{L,D}(y) = \frac{\hat{F}(y) - \hat{F}(L)}{\hat{F}(D) - \hat{F}(L)}, \quad L < y \le D. (\#eq:meta-reported-cond)
-$$
-A study that did not correct for right truncation fitted a family whose tail runs past the point its data stop.
-Summarising $\hat{F}$ over its whole support would charge it with spread its data never had, which for a short observation time can reach tens of percent on a standard deviation.
-Equation \@ref(eq:meta-reported-cond) makes the reported value and the model's implied value the same functional of the two distributions.
-A study that adjusted for right truncation has $D = \infty$ and is left unconditioned above.
-A reported quantile at probability $p$ is the value $\hat{F}_{L,D}$ puts $p$ below, so it stays inside the observed range as well.
 
 Reported parameter standard errors are carried onto the summary scale by the delta method.
-With $\hat{\theta}$ the reported parameters, $V$ the diagonal matrix of their squared standard errors, and $J$ the Jacobian of the map from parameters to summaries at $\hat{\theta}$, the covariance over the summaries is $J V J^\top$.
-The summaries are fitted jointly with that covariance through Equation \@ref(eq:meta-mvn), exactly as the output of `as_epidist_multivariate()` is.
-Keeping the covariance matters.
-The information a study carries about its parameters is $V^{-1}$, and fitting $k$ summaries of a $k$ parameter fit with $J V J^\top$ gives the curvature $J^\top (J V J^\top)^{-1} J = V^{-1}$, so nothing is lost or invented by the conversion.
-Fitting each summary with its own standard error gives $J^\top \operatorname{diag}(J V J^\top)^{-1} J$ instead, which for a lognormal mean and standard deviation claims standard errors 1.4 to 1.5 times too wide, and for three quartiles 0.6 times too narrow on the location.
-Since the summaries are functions of $k$ numbers, at most $k$ of them can be reported with standard errors, and asking for more is an error.
-A study that published a full parameter covariance rather than standard errors can draw from it and pass the draws to `as_epidist_multivariate()`, which needs no linearisation.
-Where a study reported no parameter uncertainty, its summaries fall back to the sample size likelihoods of Section \@ref(sampling-likelihoods), and any number of them may be reported.
+With $\hat{\theta}$ the reported parameters, $V$ the diagonal matrix of their squared standard errors, and $J$ the Jacobian of the map from parameters to summaries at $\hat{\theta}$, the covariance over the summaries is $J V J^\top$, and the summaries are fitted jointly with it through Equation \@ref(eq:meta-mvn).
+Fitting $k$ summaries of a $k$ parameter fit this way gives the curvature $J^\top (J V J^\top)^{-1} J = V^{-1}$, so nothing is lost or invented by the conversion.
+At most $k$ summaries can be reported with standard errors, and asking for more is an error.
+A study that published a full parameter covariance can draw from it and pass the draws to `as_epidist_multivariate()`.
+Where a study reported no parameter uncertainty, its summaries use the sample size likelihoods above, and any number of them may be reported.
 
-This route assumes that summaries of the reported distribution are the summaries of what the study's procedure targeted.
-That holds exactly when the study reported a distribution of the same shape as its estimand.
-It holds approximately otherwise, for example where a study fitted a continuous distribution to integer date differences.
-Where the study fitted a family that cannot represent its own estimand, quantiles inside the body of the reported distribution are more reliable than a standard deviation, which depends on a tail the study never saw.
+This route assumes the summaries of the reported distribution are the summaries of what the study's procedure targeted, which holds only approximately where the study fitted a family of a different shape to its estimand, for example a continuous distribution to integer date differences.
+Where the family cannot represent its own estimand, quantiles inside the body of the reported distribution are more reliable than a standard deviation, which depends on a tail the study never saw.
 
-## Left truncation
+### Individual level records
 
-A study that only counted delays of at least $L$ reported summaries of a left truncated estimand, so every quantity above is conditioned on $\tau > L$.
-Left truncation in this sense is standard in survival analysis [@klein2003], and enters the individual level likelihood as the lower bound `primarycensored` already takes [@primarycensored].
-This generalises the expressions rather than replacing them, and each reduces to the form already given when $L = 0$.
+Individual level rows use the marginal model likelihood of Section \@ref(the-marginal-model) unchanged, with $\theta$ shared with the summary rows.
+Their primary event distribution is set with `primary`, so the tilted primary event of Section \@ref(primary-tilt) is available to them.
+Summary rows take the growth rate given for each study as a known quantity rather than the estimated `pgrowth`, a limitation tracked in [epinowcast/epidist#678](https://github.com/epinowcast/epidist/issues/678).
+The likelihood of the data is the product of the marginal model likelihood over the individual rows and of the sampling likelihoods above over the summary rows.
 
-On the grid of Equation \@ref(eq:meta-grid), the cells recording a delay below $L$ are dropped and the rest renormalised by the mass they hold, which is $F_{pc}(D) - F_{pc}(L)$ whenever $L$ falls on a grid boundary.
+## What we need from each study
+
+Forward modelling a published estimate needs to know how the study produced it.
+For each summary we need:
+
+* How it adjusted for interval censoring, one of no adjustment (it summarised integer date differences directly, the most common case), full adjustment (a double interval censored likelihood targeting the continuous distribution), the uniform single interval approximation (it adjusted the secondary interval assuming a uniform delay within it, and left the primary interval uncorrected), midpoint imputation (it assigned each delay to the centre of the interval it was observed in), or midpoint imputation with a uniform interval (it placed the primary event at the midpoint of its window and integrated the secondary interval).
+* Whether the reported estimate was corrected for right truncation, and if it was not, the observation time, how collection stopped, and the growth rate of primary events over the study period.
+  A cohort followed every primary event for the same observation time, which is the truncation point on the delay scale.
+  A study that accrued primary events and stopped at a calendar date observed a given delay only for the primary events that occurred at least that long before the stop, and its observation time is the length of the collection window.
+  Both corrections assume the study sampled a cohort of primary events, and so target the forward distribution of Section \@ref(forwards-and-backwards-distributions).
+  A study that sampled on the secondary event, for example every death reported up to some date, reports a backward distribution, which is not represented here.
+* The censoring windows, the width of the interval each event was observed in, for example 1 for daily reporting or 7 for weekly reporting.
+* The sample size, or a reported standard error in its place, or a covariance matrix over the summaries it reported.
+* The smallest delay it counted, where the study dropped delays below some point, so that its summaries describe a left truncated delay distribution.
+
+Systematic reviews rarely record this metadata, so an assumption must be made and stated alongside any results.
+The reporting checklist of @charniga2024best covers it.
+Where the metadata is missing entirely, a covariate for the phase of the outbreak each estimate was made in makes the `brms` formula a meta-regression, estimating the residual bias rather than correcting it.
+
+## The biased estimands {#the-biased-estimands}
+
+For each setting of the metadata the study's procedure targeted a distribution other than $f(\cdot \, ; \theta)$.
+The moments, distribution function $G$ and quantiles $Q_p$ of that distribution replace those of the delay in the likelihoods of Section \@ref(sampling-likelihoods).
+The first four moments are needed, since those likelihoods use the mean, standard deviation, skewness and kurtosis.
+Let $g_p$ be the distribution of a primary event within its censoring window of width $w_p$, uniform when incidence was constant over the study period and exponentially tilted towards more recent times when it was not.
+Write
+$$
+F_{pc}(\tau; \theta) = \mathbb{P}(\tau^\star + U \le \tau), \quad \tau^\star \sim f(\cdot \, ; \theta), \; U \sim g_p,
+$$
+for the distribution function of the delay plus an independent primary event offset, which `primarycensored` provides.
+Each estimand is right truncated at the study's observation time $D$, with $D = \infty$ for a study that adjusted for right truncation itself.
+
+### Censoring adjustment
+
+A study with no censoring adjustment summarised integer date differences directly, so its estimand is discrete.
+Writing $q_j$ for the probability it puts on the $j$th secondary window,
+$$
+q_j = \frac{F_{pc}(j w_s; \theta) - F_{pc}((j-1) w_s; \theta)}{F_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j = 1, \dots, \lfloor D / w_s \rfloor, (\#eq:meta-grid)
+$$
+where $w_s$ is the secondary censoring window, bin $j$ carries the delay value $(j-1) w_s$, and the truncation point is discretised to the last full grid boundary.
+This is the doubly interval censored, right truncated probability mass function of @primarycensored that the marginal model of Section \@ref(the-marginal-model) uses for individual observations.
+Summing over the grid gives the moments, and its cumulative sum gives $G$.
+For quantile rows $G$ is continuity corrected by interpolating the grid distribution function linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise always lands on a jump of the step function.
+The reported value is itself rounded to the grid, so a bias remains that does not shrink with the sample size.
+It stays under 4% on the mean and 9% on the standard deviation once the reported quantiles sit twenty five or more cells above the smallest delay the study counted, and reaches tens of percent on both when they sit within ten, so a coarsely resolved delay is better fitted through its mean and standard deviation where a study reports them.
+
+A single quantile of integer day delays is a discrete statistic.
+"The median is 5 days" says that the empirical distribution function crossed one half between 4 and 5 days, that is $N_{\le y - w_s} < \lceil n p \rceil \le N_{\le y}$ with $N_{\le y}$ the number of delays at or below $y$.
+It is fitted as the probability of that event,
+$$
+P(N_{\le y} \ge k) - P(N_{\le y - w_s} \ge k), \quad k = \lceil n p \rceil, \quad N_{\le y} \sim \text{Binomial}\left(n, G_0(y)\right), (\#eq:meta-quantile-crossing)
+$$
+where $G_0$ is the uncorrected distribution function of the grid.
+The information this carries saturates as $n$ grows.
+Several quantiles from such a study use Equation \@ref(eq:meta-quantile-set) on the continuity corrected $G$, which is calibrated at around thirty delays but claims a standard error five times too small at a thousand, so `as_epidist_estimates_data()` warns about such studies.
+
+A study with full adjustment reported the moments of $f(\cdot \, ; \theta)$ itself, right truncated at $D$:
+$$
+\mathbb{E}[\tau^k \mid \tau \le D] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4, (\#eq:meta-trunc-moments)
+$$
+which reduces to the ordinary family moments when $D = \infty$.
+Its distribution function is $F(y; \theta) / F(D; \theta)$.
+
+A study using the uniform single interval approximation left the primary interval uncorrected, so it observed $\tau^\star + U$, and its moments are those of $F_{pc}$ right truncated at $D$:
+$$
+\mathbb{E}[(\tau^\star + U)^k \mid \tau^\star + U \le D] =
+\frac{\int_0^D k t^{k-1} \left(F_{pc}(D; \theta) - F_{pc}(t; \theta)\right) \text{d}t}{F_{pc}(D; \theta)},
+\quad k = 1, \dots, 4. (\#eq:meta-uniform-moments)
+$$
+Its distribution function is $F_{pc}(y; \theta) / F_{pc}(D; \theta)$.
+Equations \@ref(eq:meta-trunc-moments) and \@ref(eq:meta-uniform-moments) are evaluated by Simpson's rule.
+Where $D = \infty$ and the primary event distribution is uniform the convolution is exact:
+$$
+\mu_{pc} = \mu + \frac{w_p}{2}, \quad
+\sigma_{pc}^2 = \sigma^2 + \frac{w_p^2}{12}, \quad
+\mu_{4,pc} = \mu_4 + 6 \sigma^2 \frac{w_p^2}{12} + \frac{w_p^4}{80}, (\#eq:meta-uniform-exact)
+$$
+where $\mu$, $\sigma^2$ and $\mu_4$ are the mean, variance and fourth central moment of $f(\cdot \, ; \theta)$.
+
+A study using midpoint imputation summarised the grid of Equation \@ref(eq:meta-grid) with bin $j$ carrying the delay value $(j - 1/2) w_s$ rather than $(j-1) w_s$.
+Its mean is the grid mean plus $w_s / 2$, its central moments are unchanged, and its distribution function is the grid one evaluated at $y - w_s / 2$.
+A single reported quantile uses Equation \@ref(eq:meta-quantile-crossing), as for no adjustment.
+
+A study using midpoint imputation with a uniform interval placed the primary event at the midpoint of its window and integrated the secondary interval, so it observed $\tau^\star + U - w_p / 2$.
+Its mean is that of Equation \@ref(eq:meta-uniform-moments) less $w_p / 2$, its central moments are unchanged, and its distribution function is that of the uniform single interval approximation evaluated at $y + w_p / 2$.
+A study that midpointed the secondary interval and left the primary alone is midpoint imputation above.
+Each code models the study as integrating the interval it did not midpoint rather than drawing one position within it, which would add $w^2 / 6$ to the variance.
+
+### Right truncation
+
+The truncation above conditions on the delay falling below a single cutoff, which is what a cohort followed for a common observation time gives.
+This is truncation rather than right censoring, where a case is known to exist and contributes a survival term rather than being absent from the study.
+Right censoring is not yet supported.
+
+A study that accrued primary events over a window of length $A$ and stopped at its calendar end saw a delay of $d$ only for the primary events that occurred at least $d$ before the stop.
+With primary events arriving at a rate proportional to $\exp(r t)$, the follow up available to such a delay is
+$$
+w(d) = \int_0^{A - d} \exp(r t) \, \text{d}t = \frac{\exp(r (A - d)) - 1}{r}, \quad 0 \le d \le A, (\#eq:meta-accrual)
+$$
+which tends to $A - d$ as $r$ tends to zero, and for a long window and a growing epidemic approaches an exponential tilt by $\exp(-r d)$.
+This is the dynamical bias of @park2024estimating.
+The estimand is $f(d; \theta) w(d)$ renormalised over $[0, A]$, with $A$ in place of the cohort cutoff $D$.
+The weight multiplies the quadrature for Equations \@ref(eq:meta-trunc-moments) and \@ref(eq:meta-uniform-moments) at each node and renormalises.
+For Equation \@ref(eq:meta-uniform-moments) it is evaluated at $d - w_p / 2$, to average the primary offset back out.
+The correction is only as good as the growth rate supplied.
+
+On the grid of Equation \@ref(eq:meta-grid) the follow up is a step function, $w(w_p \lfloor x / w_p \rfloor)$ for a delay of $x$ from the start of the primary window, whenever $A$ is a multiple of $w_p$.
+Each cell of the grid is cut at the multiples of $w_p$ inside it, each piece is weighted by the follow up at the primary window it starts in, and the pieces are summed back into their cell before renormalising.
+Weighting each cell at its lower edge instead is exact only when the windows are equal, and for a daily primary and weekly secondary window puts the implied mean 36% low at $r = 0.2$ where the piecewise weight is within 0.2%.
+
+Two residuals remain.
+The piecewise weight treats the last primary window as complete, so when $A$ is not a multiple of $w_p$ the primary events it cuts short are overweighted, by 5% on the mean for a weekly primary and daily secondary window with $A = 30$ at $r = 0.2$.
+Use a collection window that is a multiple of the primary window where the study allows it.
+Equation \@ref(eq:meta-uniform-moments) keeps the smooth weight, because the follow up available to a primary event is only known to within its window, and at $w_p = 7$ its implied mean is 2.6% high at $r = 0.2$.
+Both residuals grow with the growth rate and as $w_p$ grows towards the length of the collection window.
+
+### Left truncation
+
+A study that only counted delays of at least $L$ reported summaries of a left truncated estimand, so every quantity above is conditioned on $\tau > L$ [@klein2003].
+Each expression reduces to the form already given when $L = 0$.
+On the grid of Equation \@ref(eq:meta-grid) the cells recording a delay below $L$ are dropped and the rest renormalised by the mass they hold, which is $F_{pc}(D) - F_{pc}(L)$ whenever $L$ falls on a grid boundary.
 The truncated moments of Equation \@ref(eq:meta-trunc-moments) pick up a boundary term,
 $$
 \mathbb{E}[\tau^k \mid L < \tau \le D] =
@@ -579,12 +514,28 @@ $$
 {F(D; \theta) - F(L; \theta)}, \quad k = 1, \dots, 4, (\#eq:meta-left-moments)
 $$
 and the same applies to Equation \@ref(eq:meta-uniform-moments) with $F_{pc}$ in place of $F$.
-The distribution function used for quantile rows becomes
+The distribution function becomes
 $$
 G(y) = \frac{F(y; \theta) - F(L; \theta)}{F(D; \theta) - F(L; \theta)}, \quad L < y \le D, (\#eq:meta-left-cdf)
 $$
-zero at or below $L$ and one above $D$, with $F(D; \theta)$ replaced by one for a study that adjusted for right truncation itself.
-The accrual weight of Equation \@ref(eq:meta-accrual) is unchanged, because it multiplies the same cells and nodes, which now start at $L$.
-Individual level rows pass $L$ to `primarycensored` as their left truncation point, exactly as the marginal model does.
+zero at or below $L$ and one above $D$.
+The accrual weight of Equation \@ref(eq:meta-accrual) is unchanged.
+Individual level rows pass $L$ to `primarycensored` as their left truncation point, as the marginal model does.
+
+### Quantiles of the estimands
+
+The quantile $Q_p$ of an estimand is read off by inverse linear interpolation between the two points of $G$ that bracket $p$.
+On the grid of Equation \@ref(eq:meta-grid) that interpolant is the continuity corrected quantile, so it is exact.
+For a continuous estimand the chord is refined, exactly through the family quantile function for a lognormal or weibull delay reported by a study that adjusted for censoring, and otherwise by two Newton steps using the closed form distribution function and density of the estimand.
+An accrual estimand is defined by the interpolation between its nodes and keeps its chord.
+
+### Summaries of a reported distribution
+
+The summaries of a reported distribution $\hat{F}$ (Section \@ref(reported-distribution-parameters)) are taken over the range of delays the study could have seen, conditioning on $(L, D]$,
+$$
+\hat{F}_{L,D}(y) = \frac{\hat{F}(y) - \hat{F}(L)}{\hat{F}(D) - \hat{F}(L)}, \quad L < y \le D. (\#eq:meta-reported-cond)
+$$
+Summarising $\hat{F}$ over its whole support would charge a study that did not correct for right truncation with spread its data never had, which for a short observation time can reach tens of percent on a standard deviation.
+A reported quantile at probability $p$ is the value $\hat{F}_{L,D}$ puts $p$ below.
 
 ## References {-}
