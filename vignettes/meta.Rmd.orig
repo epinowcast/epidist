@@ -87,6 +87,7 @@ library(tidybayes) # nolint
 We simulate an outbreak exactly as in `vignette("epidist")`, a stochastic epidemic with a lognormal delay between primary (symptom onset) and secondary (case notification) events, both interval censored to a day.
 `as_epidist_linelist_data()` converts the dates to times in days from the first primary event.
 We keep the simulated times as well, to work out what each study would have measured.
+`as_epidist_marginal_model()` adds the censoring windows and the bounds of each delay.
 Figure \@ref(fig:outbreak) shows the case counts.
 
 ```{r}
@@ -106,9 +107,9 @@ obs_cens <- simulate_dates(
   outbreak_start_date = outbreak_start_date, keep_times = TRUE
 )
 
-linelist <- as_epidist_linelist_data(obs_cens) |>
-  mutate(delay_daily = .data$stime_lwr - .data$ptime_lwr)
-head(linelist)
+linelist <- as_epidist_linelist_data(obs_cens)
+delays <- as_epidist_marginal_model(linelist)
+head(delays)
 ```
 
 (ref:outbreak) Case counts over the course of the simulated outbreak (only every 50th case is shown to avoid over-plotting).
@@ -127,12 +128,10 @@ We mimic this by taking cases whose delay is less than a study specific cutoff, 
 
 ```{r}
 naive_snapshot <- function(cutoff) {
-  delays <- linelist |>
-    filter(.data$delay_daily + 1 <= cutoff) |>
-    pull(delay_daily)
-  return(
-    tibble(cutoff = cutoff, naive_mean = mean(delays), n = length(delays))
-  )
+  seen <- delays |>
+    filter(.data$delay_upr <= cutoff) |>
+    pull(delay_lwr)
+  return(tibble(cutoff = cutoff, naive_mean = mean(seen), n = length(seen)))
 }
 
 true_mean <- exp(meanlog + sdlog^2 / 2)
@@ -508,7 +507,7 @@ The marginal model groups identical rows, so the whole line list costs little mo
 
 ```{r results='hide', message=FALSE}
 fit_reference <- epidist(
-  data = as_epidist_marginal_model(linelist),
+  data = delays,
   chains = 2, cores = 2, iter = 1000,
   refresh = ifelse(interactive(), 250, 0),
   seed = 1,
