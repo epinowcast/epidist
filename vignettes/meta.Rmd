@@ -41,8 +41,7 @@ For individual level rows the meta model reuses the likelihood of the marginal m
 
 Reviews rarely record exactly how a study estimated its delay.
 To use a reported summary we need to know how the study handled the common biases, along with the data process it saw.
-The meta model supports only a few common approaches, encoded as follows.
-We plan to support further biases, such as right and left censoring, across all of the models in the package.
+The meta model supports the following approaches.
 
 * **How the study adjusted for censoring** (`cens_adjusted`), one of `0` if it took integer date differences and summarised them directly (the most common case), `1` if it used a double interval censored likelihood targeting the continuous delay, `2` if it adjusted only the secondary interval assuming a uniform delay within it, `3` if it assigned each delay to the centre of the interval it was observed in, or `4` if it took the midpoint of the primary event's window and integrated the secondary interval.
 * **Whether it adjusted for right truncation** (`trunc_adjusted`), and if not, **the observation time** (`relative_obs_time`) and **how collection stopped** (`trunc_design`).
@@ -53,7 +52,7 @@ We plan to support further biases, such as right and left censoring, across all 
 * **The smallest delay it counted** (`delay_min`), where the study dropped shorter delays, so that its summaries describe a left truncated delay distribution.
   Defaults to 0, meaning it counted every delay.
 
-If you cannot tell which of these a study used, state the assumption you are making explicitly, and note it alongside any results.
+If you cannot tell which of these a study used, state the assumption you are making alongside any results.
 See `?as_epidist_estimates_data` for the full details.
 
 Where the underlying delays are available and the cutoff that produced them is known, refitting them with the marginal model (`vignette("epidist")`) is simpler and more reliable than reconstructing what a summary of them means.
@@ -291,25 +290,13 @@ The same pattern works for a review, with one function that converts a row of th
 biased_estimates <- study_designs |>
   pmap(simulate_study, data = linelist, max_delay = 60) |>
   as_epidist_estimates_data()
-#> ! The smallest quantile reported by "naive IQR" (row 1) sits within ten
-#>   censoring windows of the smallest delay counted, so the discrete grid barely
-#>   resolves it. Check `swindow`, and fit a reported mean and standard deviation
-#>   instead where the study gives them.
-#> ℹ See the Checks section of `?as_epidist_estimates_data`.
-#> ! The smallest quantile reported by "calendar stop" (row 1) sits within ten
-#>   censoring windows of the smallest delay counted, so the discrete grid barely
-#>   resolves it. Check `swindow`, and fit a reported mean and standard deviation
-#>   instead where the study gives them.
-#> ℹ See the Checks section of `?as_epidist_estimates_data`.
-#> ! "calendar stop" reports several quantiles of integer day delays from more
-#>   than 100 delays, so the joint quantile likelihood is overconfident and
-#>   weights it too heavily. Fit a reported mean and standard deviation instead
-#>   where one is available.
-#> ℹ See the Checks section of `?as_epidist_estimates_data`.
-#> ! The smallest quantile reported by "midpoint" (row 1) sits within ten
-#>   censoring windows of the smallest delay counted, so the discrete grid barely
-#>   resolves it. Check `swindow`, and fit a reported mean and standard deviation
-#>   instead where the study gives them.
+#> ! "naive IQR" (row 3), "calendar stop" (row 6), and "midpoint" (row 11) report
+#>   quantiles less than ten days above their smallest counted delay. Quantiles
+#>   rounded to whole days that close to the origin carry a bias that a larger
+#>   sample does not shrink.
+#> ! "calendar stop" reports several quantiles of delays counted in whole days
+#>   from more than 100 delays. The joint quantile likelihood is overconfident at
+#>   that sample size and weights it too heavily.
 #> ℹ See the Checks section of `?as_epidist_estimates_data`.
 biased_estimates
 #> # A tibble: 22 × 16
@@ -524,7 +511,6 @@ The term widens the band, which is the price of allowing for differences between
 
 ## What happens with the wrong metadata
 
-The metadata about how a study adjusted its estimate matters.
 Whether a study corrected for right truncation is the field reviews most often leave out, so we refit the same ten studies with every one of them relabelled as `trunc_adjusted = TRUE`.
 
 
@@ -621,8 +607,8 @@ summary(fit_meta_mixed)
 
 ## Reference: the marginal model on the full line list
 
-Finally, as a reference, we fit the marginal model (`vignette("epidist")`) to the whole, effectively untruncated, line list.
-This is what we would recover with access to every underlying delay rather than to published summaries, so it is the most precise fit here.
+As a reference, we fit the marginal model (`vignette("epidist")`) to the whole, effectively untruncated, line list.
+This is what we would recover with access to every underlying delay rather than to published summaries.
 The marginal model groups identical rows, so the whole line list costs little more to fit than a sample of it.
 
 
@@ -824,7 +810,7 @@ Means become `"mean"` rows, with a matching `"sd"` row where a standard deviatio
 A reported standard error becomes an `se` on the mean row instead.
 Medians become `"quantile"` rows at `p = 0.5`, with further quantile rows at `p = 0.25` and `p = 0.75` where an interquartile range is reported.
 A study reporting a spread that does not match its own value type, such as a median alongside a standard deviation, keeps only the matching set, because summaries of different kinds from one study are fitted as though they were independent.
-A study that reports the parameters of a distribution it fitted can be fitted through `epidist_estimates_parameters()` (see `?epidist_estimates_parameters`).
+A study that reports the parameters of a distribution it fitted can be fitted through `epidist_estimates_parameters()`.
 The fitted distributions here are Gammas that epireview records as a mean and a standard deviation, which the helper picks up as moments.
 
 <details><summary>Click to expand for the epireview conversion helper</summary>
@@ -904,30 +890,26 @@ ebola_estimates <- as_epidist_estimates_data(ebola_estimates_df)
 #>   as the grid cutoff, or five times the largest reported value where nothing
 #>   can be matched. Raise it if the delay has a longer tail than that, and lower
 #>   it to speed up fitting.
-#> ! The smallest quantile reported by "Nanclares 2016" (row 7), "Li 2016 (a)"
-#>   (row 14), "Khan 1999" (row 27), "Camacho 2014" (row 35), "Baron 1983" (row
-#>   36), "Bah 2015" (row 38), "Miglietta 2019" (row 43), and "Nsio 2019" (row 44)
-#>   sits within ten censoring windows of the smallest delay counted, so the
-#>   discrete grid barely resolves it. Check `swindow`, and fit a reported mean
-#>   and standard deviation instead where the study gives them.
-#> ℹ See the Checks section of `?as_epidist_estimates_data`.
-#> ! The standard deviation reported by "Muoghalu 2017" (row 13), "Rosello 2015
-#>   (2)" (row 18), "Maganga 2014" (row 24), and "Folarin 2016" (row 30) has a
-#>   relative standard error above 0.25 under the lognormal tail its mean implies,
-#>   so its sampling likelihood cannot be trusted. Fit quantiles from the body of
-#>   the distribution instead where the study reports them.
+#> ! "Nanclares 2016" (row 7), "Li 2016 (a)" (row 14), "Khan 1999" (row 27),
+#>   "Camacho 2014" (row 35), "Baron 1983" (row 36), "Bah 2015" (row 38),
+#>   "Miglietta 2019" (row 43), and "Nsio 2019" (row 44) report quantiles less
+#>   than ten days above their smallest counted delay. Quantiles rounded to whole
+#>   days that close to the origin carry a bias that a larger sample does not
+#>   shrink.
+#> ! "Muoghalu 2017" (row 13), "Rosello 2015 (2)" (row 18), "Maganga 2014" (row
+#>   24), and "Folarin 2016" (row 30) report a standard deviation whose relative
+#>   standard error is above 0.25 under the lognormal tail their mean implies. A
+#>   sampling error that large is far from normal, so the likelihood of the
+#>   standard deviation cannot be trusted.
 #> ℹ See the Checks section of `?as_epidist_estimates_data`.
 ```
 
-The checks fire because several studies report only a median, which sits within ten days of zero on a daily grid and so is resolved poorly, and because a few report a standard deviation that implies a heavier tail than their sample size can pin down.
-We fit a reported mean and standard deviation in preference where a study gives them, and take the median where it is all a study reports.
-
 We fit a Gamma, which is the family most of these studies fitted, with a `(1 | study)` term on both the mean and the shape.
-The term allows for real heterogeneity across outbreaks and Ebola species, and for studies whose metadata we have got wrong, which the model cannot tell apart.
+The term allows for real heterogeneity across outbreaks and Ebola species, and for studies whose metadata we have got wrong.
 
 Ebola onset to death is thought to take roughly 7 to 14 days, so the intercept prior is centred on ten days with a standard deviation of 0.5 on the log link.
 A Gamma shape between about 1 and 5 covers the spreads reported, so the shape intercept gets `normal(log(2), 0.5)` on its log link.
-With the biases that go unrecorded, studies may differ by a quarter or so on the log scale, so both between study standard deviations get `normal(0, 0.25)`.
+We assume that studies may differ by about a quarter on the log scale, so both between study standard deviations get `normal(0, 0.25)`.
 The phase coefficients get `normal(0, 0.5)`, so that two studies cannot move the contrast without limit.
 `epidist_prior()` shows the priors the model will use.
 
@@ -963,7 +945,7 @@ epidist_prior(
 #>  <NA>
 ```
 
-`init = 0.5` is passed for the same reason as above, since the default initial range lets a study's shape start far outside where the model is finite.
+`init = 0.5` is passed for the same reason as above.
 
 
 ``` r
