@@ -248,7 +248,7 @@ biased_estimates
 `max_delay` sets how far the grid used to work out the implied naive summaries extends.
 By default it is the point beyond which one percent of the second moment of a lognormal matched to the study's summaries lies, or five times the largest reported value where no lognormal can be matched.
 Raise it for a delay with a longer tail than that, and lower it to fit faster.
-`simulate_study()` passes it through to `as_epidist_estimates_data()`, and we set it rather than take the default for each study in turn.
+`simulate_study()` passes it through to `as_epidist_estimates_data()`, and we set it here rather than take the default.
 :::
 
 # Fitting and comparing models {#fit}
