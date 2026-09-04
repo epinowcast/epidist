@@ -54,9 +54,6 @@ library(brms)
 Here we use a rate of 0.5 and a lognormal delay.
 
 Both events are censored to three day windows rather than daily ones.
-The width of the window is what makes the primary event distribution matter.
-Over a single day at this growth rate the event sits 0.54 of the way through its window rather than 0.5, which shifts the delay by 0.04 days and is smaller than the Monte Carlo error on 500 samples.
-Over three days it sits at 1.86 rather than 1.5, a shift of 0.36 days, which is large enough to see.
 
 ```{r simulate}
 set.seed(101)
@@ -79,9 +76,6 @@ linelist <- as_epidist_linelist_data(obs)
 
 The marginal model takes the primary event distribution when the data are converted.
 
-Nothing here is right truncated.
-Every simulated case is kept whatever its delay, so `obs_time_threshold = 0` sets the observation times to infinity and leaves the truncation correction out.
-Without it the model would correct for a truncation the simulation never applied, and that bias would sit on top of the one we are trying to see.
 
 ```{r models}
 uniform <- as_epidist_marginal_model(linelist, obs_time_threshold = 0)
@@ -95,7 +89,6 @@ With `primary = "expgrowth"` the growth rate becomes a distributional parameter 
 It takes a formula and a prior in the same way as `mu` and `sigma`.
 
 One set of delays carries little information about the growth rate, so here the prior does most of the work.
-Fitting several settings together changes that, as the section below shows.
 Epidemic growth is normally estimated separately, from case counts over the same period.
 That estimate is then passed here as an informative prior centred on it, which is the approach taken in @brand2026scalable.
 The prior below is centred on the rate used to simulate.
@@ -194,7 +187,6 @@ Here the prior is shared across locations and the random effect lets each depart
 The second prior, on the standard deviation between locations, is doing real work with only three of them.
 The likelihood is flat for strongly negative rates, because once the growth rate is low enough the primary event sits at the start of its window whatever its exact value.
 The default `brms` prior on that standard deviation is wide enough to let a location wander into that flat region, which produces a posterior with a sensible peak and a long tail running to implausible rates.
-Three groups cannot tell you how much locations vary, so that has to be said in the prior.
 
 ```{r location-estimates}
 newdata <- epidist_newdata(marginal_locations, location = names(locations))
@@ -214,13 +206,12 @@ epred |>
   theme_minimal()
 ```
 
-## What sharing a delay buys
+## Identifying the growth rate
 
 Fitting the locations together does more than let the rate vary.
 A delay distribution shared across locations cannot absorb a difference in growth between them, so the growth rates are better determined than they are from any one location on its own.
 
-Refitting the same data with a delay per location, so that nothing is shared, shows the size of that.
-A weakly informative prior is used for both so the comparison is about the data rather than the prior.
+Refitting the same data with a delay per location highlights this.
 
 ```{r sharing}
 shared_prior <- prior(normal(0, 1), class = "b", dpar = "pgrowth")
@@ -267,20 +258,15 @@ The delays are not silent about growth once several settings are fitted together
 # Summary
 
 * The distribution of the primary event within its window matters more the wider that window is, and the further the growth rate is from zero.
-Over a single day at the growth rate used here the correction is smaller than the Monte Carlo error on 500 samples.
-Over three days it is several times larger than it.
 * Where the window is a day and the delay is several days, the default uniform assumption is usually enough.
 Weekly reporting, or fast growth or decline, is where it is not.
 * Only the uniform and exponential growth distributions are supported.
-Others would make sense, such as a normal, or a mixture of a normal and exponential growth, and are not yet available.
+Others that are on the roadmap are a normal distribution, or a mixture of a normal distribution and a bounded exponential growth distribution.
 * One set of delays carries little information about the growth rate, so take it from a separate estimate of epidemic growth and pass it as an informative prior.
 A flat prior on a single setting leaves the posterior close to flat.
 * Several settings fitted together are a different matter.
 A delay shared across them cannot absorb a difference in growth between them, so the rates are better determined than they are from one setting alone.
-They are still not pinned down, so an informative prior is still worth having.
 * The same argument points at fitting jointly with the data the growth rate would otherwise be estimated from.
-Case counts over the same period carry most of the information about growth, and passing a point estimate as a prior throws away the correlation between the two.
-Fitting them together would let each inform the other, and is not something the package supports today.
 * Other uses of the primary event distribution are possible, such as a point source release where exposure is concentrated in a short window rather than spread across the reporting interval.
 These will usually need an informative prior on the delay distribution as well, since the data alone will not separate the two.
 
