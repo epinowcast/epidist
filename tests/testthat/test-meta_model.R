@@ -2285,12 +2285,12 @@ test_that(".meta_n_quad changes the accuracy of the truncated moments", {
 test_that("the quadrature resolution of a study follows its reported spread", { # nolint: line_length_linter.
   # The truncated moments and the nodes of a continuous estimand are Simpson
   # sums over [delay_min, cutoff], so a fixed number of intervals leaves a
-  # narrow delay unresolved on a wide grid. At the default max_delay of
-  # twenty times the largest reported value that is a spacing of four
-  # standard deviations at a coefficient of variation of 0.05, which pins
-  # the kurtosis at its floor and puts the standard deviation out by more
-  # than a factor of two. The resolution is therefore chosen per study from
-  # its reported spread, and held in the n_quad slot of its rows.
+  # narrow delay unresolved on a wide grid. On a grid of twenty times the
+  # largest reported value that is a spacing of four standard deviations at
+  # a coefficient of variation of 0.05, which pins the kurtosis at its floor
+  # and puts the standard deviation out by more than a factor of two. The
+  # resolution is therefore chosen per study from its reported spread, and
+  # held in the n_quad slot of its rows.
   mean_delay <- 7
   cutoff <- 20 * mean_delay
   trunc_lnorm <- function(args, cutoff) {
@@ -2335,7 +2335,6 @@ test_that("the quadrature resolution of a study follows its reported spread", { 
       growth_rate = c(0, 0, 0.1, 0.1),
       stringsAsFactors = FALSE
     )))
-    expect_identical(estimates$max_delay[3], cutoff)
     meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
     expect_true(all(meta$n_quad >= .meta_n_quad()))
     expect_true(all(meta$n_quad %% 2 == 0))
