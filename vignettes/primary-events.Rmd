@@ -86,7 +86,8 @@ Without it the model would correct for a truncation the simulation never applied
 ```{r models}
 uniform <- as_epidist_marginal_model(linelist, obs_time_threshold = 0)
 growing <- as_epidist_marginal_model(
-  linelist, primary = "expgrowth", obs_time_threshold = 0
+  linelist,
+  primary = "expgrowth", obs_time_threshold = 0
 )
 ```
 
@@ -244,7 +245,7 @@ growth_width <- function(fit, delay) {
   out <- tibble(
     delay = delay,
     location = sub("^pgrowth_location", "", rows),
-    median = fixed[rows, "Estimate"],
+    mean = fixed[rows, "Estimate"],
     width = fixed[rows, "u-95% CI"] - fixed[rows, "l-95% CI"]
   )
   return(out)
