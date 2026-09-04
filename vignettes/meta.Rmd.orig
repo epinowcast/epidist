@@ -523,20 +523,15 @@ We use the onset to death delay from the Ebola data.
 
 ```{r}
 ebola_params <- as_tibble(suppressMessages(load_epidata("ebola"))$params)
-head(ebola_params)
+ebola_params
 ```
 
-The meta model fits means, standard deviations, quantiles, the parameters of a fitted distribution, and vectors of summaries with a covariance.
 epireview records one value per estimate with its type, so we keep the means and medians reported in days with no scaling exponent, and drop inverse rates.
-The rows kept and the rows dropped are shown below.
 
 ```{r}
-all_onset_to_death <- filter(
-  ebola_params, .data$parameter_type_short == "delay_onset_to_death"
-)
-
-onset_to_death <- all_onset_to_death |>
+onset_to_death <- ebola_params |>
   filter(
+    .data$parameter_type_short == "delay_onset_to_death",
     !is.na(.data$parameter_value),
     !is.na(.data$population_sample_size),
     .data$parameter_value_type %in% c("Mean", "Median"),
@@ -549,8 +544,7 @@ shown <- c(
   "article_label", "parameter_value_type", "parameter_value",
   "parameter_unit", "exponent", "inverse_param", "population_sample_size"
 )
-head(select(onset_to_death, all_of(shown)))
-head(select(setdiff(all_onset_to_death, onset_to_death), all_of(shown)))
+select(onset_to_death, all_of(shown))
 ```
 
 ## Adjusting for the phase of the outbreak {#phase}
@@ -590,7 +584,6 @@ See @charniga2024best for suggested reporting metadata for future estimation stu
 epireview does not record how, or whether, a study adjusted for censoring.
 Studies rarely adjusted correctly, the common mistakes being to discretise the secondary interval or to shift by the midpoint, so we treat every study as `cens_adjusted = 0`, integer date differences summarised directly.
 Observation times are not recorded either, so every study gets `trunc_adjusted = TRUE` and the `phase` term stands in.
-Where epireview does record something usable, as it does for the phase, it can be used as a proxy in this way.
 :::
 
 A small helper maps each row of `onset_to_death` to the long format `as_epidist_estimates_data()` expects.
@@ -663,24 +656,12 @@ ebola_estimates_df <- onset_to_death |>
     n = .data$population_sample_size
   ) |>
   pmap(\(...) row_to_estimates(list(...))) |>
-  list_rbind() |>
-  mutate(
-    max_delay = if (any(.data$type == "sd")) {
-      ceiling(
-        max(.data$value[.data$type == "mean"]) +
-          15 * max(.data$value[.data$type == "sd"])
-      )
-    } else {
-      60
-    },
-    .by = "study"
-  )
+  list_rbind()
 
 ebola_estimates <- as_epidist_estimates_data(ebola_estimates_df)
 ```
 
-`max_delay` is set per study because a grid short relative to a study's own reported spread biases its implied standard deviation downwards, and `as_epidist_estimates_data()` warns where that happens.
-The other checks fire because several studies report only a median, which sits within ten days of zero on a daily grid and so is resolved poorly, and because a few report a standard deviation that implies a heavier tail than their sample size can pin down.
+The checks fire because several studies report only a median, which sits within ten days of zero on a daily grid and so is resolved poorly, and because a few report a standard deviation that implies a heavier tail than their sample size can pin down.
 We fit a reported mean and standard deviation in preference where a study gives them, and take the median where it is all a study reports.
 
 We fit a Gamma, which is the family most of these studies fitted, with a `(1 | study)` term on both the mean and the shape.
@@ -730,6 +711,12 @@ fit_ebola <- epidist(
 ```{r}
 summary(fit_ebola)
 ```
+
+::: {.alert .alert-warning}
+These estimates should not be used as they stand.
+The estimation approach of every study was assumed rather than checked against the paper.
+A publication quality meta analysis would have to do that for each study.
+:::
 
 ## The population level delay and the size of the phase bias {#population-estimates}
 
