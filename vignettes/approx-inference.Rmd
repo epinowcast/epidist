@@ -248,7 +248,7 @@ pars
 #> # A tibble: 4 × 3
 #>   method        mu sigma
 #>   <fct>      <dbl> <dbl>
-#> 1 HMC         1.75 0.459
+#> 1 HMC         1.75 0.460
 #> 2 Laplace     1.74 0.455
 #> 3 ADVI        1.79 0.540
 #> 4 Pathfinder  1.74 0.456
@@ -332,19 +332,19 @@ times <- list(
 times
 #> $HMC
 #>    user  system elapsed
-#>  10.495   0.279  10.847
+#>   8.569   0.214   8.801
 #>
 #> $Laplace
 #>    user  system elapsed
-#>   1.042   0.107   1.261
+#>   0.952   0.103   1.228
 #>
 #> $ADVI
 #>    user  system elapsed
-#>   1.387   0.060   1.518
+#>   1.129   0.073   1.246
 #>
 #> $Pathfinder
 #>    user  system elapsed
-#>   0.475   0.075   0.607
+#>   0.670   0.119   0.872
 ```
 
 # Conclusion
