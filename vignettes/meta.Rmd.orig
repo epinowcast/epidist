@@ -256,9 +256,11 @@ Raise it for a delay with a longer tail than that, and lower it to fit faster.
 
 We convert the estimates to an `epidist_meta_model` object and fit it, exactly as we would fit any other `epidist` model.
 
-```{r results='hide', message=FALSE}
+```{r}
 meta_summary_only <- as_epidist_meta_model(estimates = biased_estimates)
+```
 
+```{r results='hide', message=FALSE}
 fit_meta_summary <- epidist(
   data = meta_summary_only,
   chains = 2, cores = 2, iter = 1000,
@@ -287,13 +289,11 @@ Even though every study is individually biased, the meta model recovers the simu
 
 ## Allowing studies to differ
 
-These nine studies measured one outbreak, so a single `mu` and `sigma` is the right model for them.
+These ten studies measured one outbreak, so a single `mu` and `sigma` is the right model for them.
 A real review pools studies of different outbreaks, and some of its metadata will be wrong.
-A study that is genuinely different and a study whose metadata we have misread look the same to the model.
-A study level random effect on both parameters, `(1 | study)`, lets each study depart from the population value, so the population estimate is the centre the studies share rather than a value every study must agree with.
+A study level random effect on both parameters, `(1 | study)`, lets each study depart from the population value.
 The meta model puts no restriction on the `brms` formula, so the term is written as it would be for any distributional parameter.
-We refit the same summaries with that term to see what it costs when the studies do agree.
-Studies rarely differ by more than a quarter on the log scale, so the between study standard deviations get `normal(0, 0.25)` priors rather than the wide `brms` default.
+The between study standard deviations get `normal(0, 0.25)` priors rather than the wide `brms` default.
 `init = 0.5` narrows the range the chains start from, because the default lets a study's `sigma` start far outside where the model is finite.
 
 ```{r results='hide', message=FALSE}
@@ -311,44 +311,85 @@ fit_meta_summary_study <- epidist(
 ```
 
 ```{r}
-round(summary(fit_meta_summary_study)$random$study, 2)
+fit_meta_summary_study
 ```
 
-`re_formula = NA` switches the study term off, giving the population level parameters, which we compare with the fit without the term.
-`epidist_newdata()` builds the row to predict for, with no censoring and no truncation.
+`re_formula = NA` switches the study term off, giving the population level delay, which we compare with the fit without the term.
+Figure \@ref(fig:study-term) shows the delay distribution each fit implies.
+
+<details><summary>Click to expand for code to prepare the study term plot</summary>
 
 ```{r}
 population <- epidist_newdata(meta_summary_only)
+delay_grid <- seq(0, 40, by = 0.25)
 
-list(
+lognormal_band <- function(fit, n = 200) {
+  draws <- delay_parameter_draws(
+    fit, newdata = population, re_formula = NA
+  ) |>
+    ungroup()
+  out <- draws |>
+    slice_sample(n = min(n, nrow(draws))) |>
+    mutate(curve = row_number()) |>
+    reframe(
+      x = delay_grid,
+      y = dlnorm(delay_grid, meanlog = .data$mu, sdlog = .data$sigma),
+      .by = "curve"
+    ) |>
+    group_by(.data$x) |>
+    median_qi(y, .width = 0.9)
+  return(out)
+}
+
+study_term_band <- list(
   "mu ~ 1" = fit_meta_summary,
   "mu ~ 1 + (1 | study)" = fit_meta_summary_study
 ) |>
-  map(\(fit) {
-    draws <- delay_parameter_draws(
-      fit, newdata = population, re_formula = NA
-    )
-    return(ungroup(draws))
-  }) |>
-  list_rbind(names_to = "model") |>
-  pivot_longer(c("mu", "sigma"), names_to = "parameter") |>
-  group_by(.data$model, .data$parameter) |>
-  median_qi(value)
+  map(lognormal_band) |>
+  list_rbind(names_to = "model")
+
+true_curve <- tibble(
+  x = delay_grid, y = dlnorm(delay_grid, meanlog = meanlog, sdlog = sdlog)
+)
+
+p_study_term <- ggplot() +
+  geom_ribbon(
+    data = study_term_band,
+    aes(x = x, ymin = .lower, ymax = .upper, fill = model), alpha = 0.25
+  ) +
+  geom_line(
+    data = study_term_band, aes(x = x, y = y, colour = model),
+    linewidth = 0.7
+  ) +
+  geom_line(data = true_curve, aes(x = x, y = y), linetype = "dashed") +
+  scale_colour_brewer(palette = "Set2", aesthetics = c("colour", "fill")) +
+  labs(x = "Delay (days)", y = "Density", colour = NULL, fill = NULL) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
-The term widens the population interval, which is the price of allowing for differences between studies that here do not exist.
-The between study spread it finds comes from the approximations each summary type makes, since every study measured the same delay.
+</details>
+
+(ref:study-term) The delay distribution implied by the fits with and without a study term. Lines are the posterior median density and bands the 90% interval. The dashed line is the simulated lognormal.
+
+```{r study-term, fig.cap="(ref:study-term)"}
+p_study_term
+```
+
+The term widens the band, which is the price of allowing for differences between studies that here do not exist.
 
 ## What happens with the wrong metadata
 
 The metadata about how a study adjusted its estimate matters.
-Whether a study corrected for right truncation is the field reviews most often leave out, so we refit the same nine studies with every one of them relabelled as `trunc_adjusted = TRUE`.
+Whether a study corrected for right truncation is the field reviews most often leave out, so we refit the same ten studies with every one of them relabelled as `trunc_adjusted = TRUE`.
 
-```{r results='hide', message=FALSE}
+```{r}
 wrong_flags_estimates <- biased_estimates
 wrong_flags_estimates$trunc_adjusted <- TRUE
 meta_wrong_flags <- as_epidist_meta_model(estimates = wrong_flags_estimates)
+```
 
+```{r results='hide', message=FALSE}
 fit_meta_wrong_flags <- epidist(
   data = meta_wrong_flags,
   chains = 2, cores = 2, iter = 1000,
@@ -367,10 +408,10 @@ The model has no way to know the metadata is wrong, so it takes each reported su
 ## A mixed fit: summaries plus individual records
 
 Now suppose one site also shared its line list.
-We add 300 individual records, observed up to day 40, alongside the same nine published summaries.
+We add 300 individual records, observed up to day 40, alongside the same ten published summaries.
 Individual records keep any `study` column they arrive with, and are labelled `"individual"` when they have none, so the study term above extends to line lists from several sites.
 
-```{r results='hide', message=FALSE}
+```{r}
 individual_data <- linelist |>
   filter(.data$stime_upr <= 40) |>
   mutate(obs_time = 40) |>
@@ -380,7 +421,9 @@ meta_mixed <- as_epidist_meta_model(
   individual_data,
   estimates = biased_estimates
 )
+```
 
+```{r results='hide', message=FALSE}
 fit_meta_mixed <- epidist(
   data = meta_mixed,
   chains = 2, cores = 2, iter = 1000,
@@ -410,24 +453,28 @@ fit_reference <- epidist(
 )
 ```
 
-## Comparing the four fits
+## Comparing the fits
 
 <details><summary>Click to expand for code to prepare the comparison plot</summary>
 
 ```{r}
 predicted_parameters <- list(
   "adjusted (summary only)" = fit_meta_summary,
+  "adjusted (study term)" = fit_meta_summary_study,
   "truncation ignored" = fit_meta_wrong_flags,
-  mixed = fit_meta_mixed,
-  "reference (marginal)" = fit_reference
+  mixed = fit_meta_mixed
 ) |>
-  lapply(\(fit) ungroup(delay_summary_draws(fit))) |>
-  bind_rows(.id = "model") |>
+  map(\(fit) {
+    delay_summary_draws(fit, newdata = population, re_formula = NA)
+  }) |>
+  c(list("reference (marginal)" = delay_summary_draws(fit_reference))) |>
+  map(ungroup) |>
+  list_rbind(names_to = "model") |>
   mutate(model = factor(
     model,
     levels = c(
-      "truncation ignored", "adjusted (summary only)", "mixed",
-      "reference (marginal)"
+      "truncation ignored", "adjusted (summary only)",
+      "adjusted (study term)", "mixed", "reference (marginal)"
     )
   ))
 
@@ -457,7 +504,7 @@ p_compare <- predicted_parameters |>
 
 </details>
 
-(ref:compare) Posterior draws of the delay distribution parameters from the four fits, compared to the true values used in the simulation (dashed lines). The bias-adjusted, mixed, and reference fits agree closely with the truth. The fit told that every study had adjusted for right truncation does not.
+(ref:compare) Posterior draws of the delay distribution parameters from the five fits, compared to the true values used in the simulation (dashed lines). The bias-adjusted, mixed, and reference fits agree closely with the truth. The fit told that every study had adjusted for right truncation does not.
 
 ```{r compare, fig.cap="(ref:compare)"}
 p_compare
@@ -784,8 +831,6 @@ bind_rows(
 <details><summary>Click to expand for code to prepare the comparison plot</summary>
 
 ```{r}
-delay_grid <- seq(0, 40, by = 0.25)
-
 density_band <- function(draws, source, n = 200) {
   out <- draws |>
     slice_sample(n = min(n, nrow(draws))) |>
