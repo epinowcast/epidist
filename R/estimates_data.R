@@ -291,9 +291,12 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  matched to the study's summaries lies, through its mean and standard
 #'  deviation, or its median and largest quantile above the median where it
 #'  reported only quantiles. That is the yardstick of the short cutoff check
-#'  in the Checks section, so the default never trips it. It is rounded up
-#'  to a whole number of secondary windows, with a minimum of ten, and is
-#'  five times the largest reported value where nothing can be matched. Raise
+#'  in the Checks section, so the default never trips it where it binds. It
+#'  is rounded up to a whole number of secondary windows, with a minimum of
+#'  ten and a maximum of twenty times the largest reported value, because for
+#'  a heavy tail one percent of the second moment lies thousands of delays
+#'  out, and is five times the largest reported value where nothing can be
+#'  matched. Raise
 #'  it for a delay with a longer tail than a lognormal, whose implied standard
 #'  deviation is biased downwards if the distribution has not decayed by the
 #'  cutoff, and lower it to fit faster. A message names the studies whose
@@ -960,8 +963,15 @@ as_epidist_estimates_data.epidist_multivariate <- function(
       if (is.null(lnorm)) {
         delay <- 5 * max(data$value[rows])
       } else {
-        delay <- exp(
-          lnorm$meanlog + 2 * lnorm$sdlog^2 + lnorm$sdlog * stats::qnorm(0.99)
+        # For a heavy tail one percent of the second moment lies thousands
+        # of delays out, so the grid is capped at twenty times the largest
+        # reported value.
+        delay <- min(
+          exp(
+            lnorm$meanlog + 2 * lnorm$sdlog^2 +
+              lnorm$sdlog * stats::qnorm(0.99)
+          ),
+          20 * max(data$value[rows])
         )
       }
       # A fully adjusted study may leave its windows NA, and an invalid
@@ -978,8 +988,9 @@ as_epidist_estimates_data.epidist_multivariate <- function(
     i = paste0(
       "No max_delay column supplied, using the delay beyond which 1% of the ",
       "second moment of a lognormal matched to each study's summaries lies ",
-      "(minimum 10, in whole secondary windows) as the grid cutoff, or five ",
-      "times the largest reported value where nothing can be matched. ",
+      "(at least 10 and at most twenty times the largest reported value, ",
+      "in whole secondary windows) as the grid cutoff, or five times the ",
+      "largest reported value where nothing can be matched. ",
       "Raise it if the delay has a longer tail than that, and lower it to ",
       "speed up fitting."
     )

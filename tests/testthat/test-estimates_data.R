@@ -269,11 +269,13 @@ test_that("the default max_delay is where 1% of the second moment lies beyond", 
   # The same match is used by the short cutoff check, which therefore never
   # fires on the default, even for a heavy tail.
   expect_identical(.estimates_short_cutoff(est), character(0))
+  # For a heavy tail the default is capped at twenty times the largest
+  # reported value, and the short cutoff check then says so.
   heavy <- moments
   heavy$value <- c(24, 40)
   est <- suppressMessages(as_epidist_estimates_data(heavy))
-  expect_identical(.estimates_short_cutoff(est), character(0))
-  expect_gt(est$max_delay[1], 20 * 40)
+  expect_identical(est$max_delay, rep(20 * 40, 2))
+  expect_identical(.estimates_short_cutoff(est), "A")
   # A study reporting only quantiles is matched through its median and its
   # largest quantile above the median.
   quantiles <- data.frame(

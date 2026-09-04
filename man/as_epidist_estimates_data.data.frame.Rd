@@ -121,9 +121,12 @@ the delay beyond which one percent of the second moment of a lognormal
 matched to the study's summaries lies, through its mean and standard
 deviation, or its median and largest quantile above the median where it
 reported only quantiles. That is the yardstick of the short cutoff check
-in the Checks section, so the default never trips it. It is rounded up
-to a whole number of secondary windows, with a minimum of ten, and is
-five times the largest reported value where nothing can be matched. Raise
+in the Checks section, so the default never trips it where it binds. It
+is rounded up to a whole number of secondary windows, with a minimum of
+ten and a maximum of twenty times the largest reported value, because for
+a heavy tail one percent of the second moment lies thousands of delays
+out, and is five times the largest reported value where nothing can be
+matched. Raise
 it for a delay with a longer tail than a lognormal, whose implied standard
 deviation is biased downwards if the distribution has not decayed by the
 cutoff, and lower it to fit faster. A message names the studies whose
