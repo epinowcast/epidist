@@ -248,7 +248,7 @@ pars
 #> # A tibble: 4 × 3
 #>   method        mu sigma
 #>   <fct>      <dbl> <dbl>
-#> 1 HMC         1.75 0.459
+#> 1 HMC         1.75 0.460
 #> 2 Laplace     1.74 0.455
 #> 3 ADVI        1.79 0.540
 #> 4 Pathfinder  1.74 0.456
@@ -280,7 +280,10 @@ p_posterior <- draws |>
 p_posterior
 ```
 
-![(ref:posterior)](figures/approx-inference-posterior-1.png)
+<div class="figure">
+<img src="figures/approx-inference-posterior-1.png" alt="(ref:posterior)"  />
+<p class="caption">(\#fig:posterior)(ref:posterior)</p>
+</div>
 
 ## Comparison of resulting delay distributions
 
@@ -313,7 +316,10 @@ p_delay_pdf <- pmap_df(
 p_delay_pdf
 ```
 
-![(ref:delay-pdf)](figures/approx-inference-delay-pdf-1.png)
+<div class="figure">
+<img src="figures/approx-inference-delay-pdf-1.png" alt="(ref:delay-pdf)"  />
+<p class="caption">(\#fig:delay-pdf)(ref:delay-pdf)</p>
+</div>
 
 ## Comparison of time taken
 
@@ -332,19 +338,19 @@ times <- list(
 times
 #> $HMC
 #>    user  system elapsed
-#>  10.495   0.279  10.847
+#>   6.620   0.171   6.856
 #>
 #> $Laplace
 #>    user  system elapsed
-#>   1.042   0.107   1.261
+#>   0.712   0.084   0.899
 #>
 #> $ADVI
 #>    user  system elapsed
-#>   1.387   0.060   1.518
+#>   0.880   0.061   0.955
 #>
 #> $Pathfinder
 #>    user  system elapsed
-#>   0.475   0.075   0.607
+#>   0.288   0.060   0.352
 ```
 
 # Conclusion
