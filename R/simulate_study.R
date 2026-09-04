@@ -262,8 +262,7 @@ simulate_study <- function(
 #' @keywords internal
 .study_measured_delay <- function(cases, cens_adjusted, pwindow, swindow) {
   date_diff <- cases$stime_lwr - cases$ptime_lwr
-  return(switch(
-    as.character(cens_adjusted),
+  return(switch(as.character(cens_adjusted),
     "0" = date_diff,
     "1" = cases$stime - cases$ptime,
     "2" = cases$stime - cases$ptime_lwr,
@@ -302,8 +301,7 @@ simulate_study <- function(
   if (trunc_design == "accrual") {
     return(cases$stime <= relative_obs_time)
   }
-  underlying <- switch(
-    as.character(cens_adjusted),
+  underlying <- switch(as.character(cens_adjusted),
     "0" = measured + swindow,
     "3" = measured + swindow / 2,
     "4" = cases$stime - cases$ptime_lwr,

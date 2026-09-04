@@ -328,7 +328,8 @@ test_that("simulate_study reproduces the accrual fixture", {
     ))
     expect_within(
       median$value, median(reference),
-      1.2533 * sd(reference) / sqrt(n), slack = as.numeric(cens != 2)
+      1.2533 * sd(reference) / sqrt(n),
+      slack = as.numeric(cens != 2)
     )
   }
 })
