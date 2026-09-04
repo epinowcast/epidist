@@ -41,8 +41,7 @@ For individual level rows the meta model reuses the likelihood of the marginal m
 
 Reviews rarely record exactly how a study estimated its delay.
 To use a reported summary we need to know how the study handled the common biases, along with the data process it saw.
-The meta model supports only a few common approaches, encoded as follows.
-We plan to support further biases, such as right and left censoring, across all of the models in the package.
+The meta model supports the following approaches.
 
 * **How the study adjusted for censoring** (`cens_adjusted`), one of `0` if it took integer date differences and summarised them directly (the most common case), `1` if it used a double interval censored likelihood targeting the continuous delay, `2` if it adjusted only the secondary interval assuming a uniform delay within it, `3` if it assigned each delay to the centre of the interval it was observed in, or `4` if it took the midpoint of the primary event's window and integrated the secondary interval.
 * **Whether it adjusted for right truncation** (`trunc_adjusted`), and if not, **the observation time** (`relative_obs_time`) and **how collection stopped** (`trunc_design`).
@@ -53,7 +52,7 @@ We plan to support further biases, such as right and left censoring, across all 
 * **The smallest delay it counted** (`delay_min`), where the study dropped shorter delays, so that its summaries describe a left truncated delay distribution.
   Defaults to 0, meaning it counted every delay.
 
-If you cannot tell which of these a study used, state the assumption you are making explicitly, and note it alongside any results.
+If you cannot tell which of these a study used, state the assumption you are making alongside any results.
 See `?as_epidist_estimates_data` for the full details.
 
 Where the underlying delays are available and the cutoff that produced them is known, refitting them with the marginal model (`vignette("epidist")`) is simpler and more reliable than reconstructing what a summary of them means.
@@ -291,25 +290,13 @@ The same pattern works for a review, with one function that converts a row of th
 biased_estimates <- study_designs |>
   pmap(simulate_study, data = linelist, max_delay = 60) |>
   as_epidist_estimates_data()
-#> ! The smallest quantile reported by "naive IQR" (row 1) sits within ten
-#>   censoring windows of the smallest delay counted, so the discrete grid barely
-#>   resolves it. Check `swindow`, and fit a reported mean and standard deviation
-#>   instead where the study gives them.
-#> ℹ See the Checks section of `?as_epidist_estimates_data`.
-#> ! The smallest quantile reported by "calendar stop" (row 1) sits within ten
-#>   censoring windows of the smallest delay counted, so the discrete grid barely
-#>   resolves it. Check `swindow`, and fit a reported mean and standard deviation
-#>   instead where the study gives them.
-#> ℹ See the Checks section of `?as_epidist_estimates_data`.
-#> ! "calendar stop" reports several quantiles of integer day delays from more
-#>   than 100 delays, so the joint quantile likelihood is overconfident and
-#>   weights it too heavily. Fit a reported mean and standard deviation instead
-#>   where one is available.
-#> ℹ See the Checks section of `?as_epidist_estimates_data`.
-#> ! The smallest quantile reported by "midpoint" (row 1) sits within ten
-#>   censoring windows of the smallest delay counted, so the discrete grid barely
-#>   resolves it. Check `swindow`, and fit a reported mean and standard deviation
-#>   instead where the study gives them.
+#> ! "naive IQR" (row 3), "calendar stop" (row 6), and "midpoint" (row 11) report
+#>   quantiles less than ten days above their smallest counted delay. Quantiles
+#>   rounded to whole days that close to the origin carry a bias that a larger
+#>   sample does not shrink.
+#> ! "calendar stop" reports several quantiles of delays counted in whole days
+#>   from more than 100 delays. The joint quantile likelihood is overconfident at
+#>   that sample size and weights it too heavily.
 #> ℹ See the Checks section of `?as_epidist_estimates_data`.
 biased_estimates
 #> # A tibble: 22 × 16
@@ -373,8 +360,8 @@ summary(fit_meta_summary)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.81      0.01     1.78     1.84 1.00      917      634
-#> sigma_Intercept    -0.73      0.02    -0.77    -0.69 1.00      768      649
+#> Intercept           1.81      0.01     1.78     1.84 1.00     1018      825
+#> sigma_Intercept    -0.73      0.02    -0.77    -0.69 1.00      801      645
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -395,7 +382,7 @@ delay_parameter_draws(fit_meta_summary) |>
 #>   parameter value .lower .upper .width .point .interval
 #>   <chr>     <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>
 #> 1 mu        1.81   1.78   1.84    0.95 median qi
-#> 2 sigma     0.484  0.463  0.503   0.95 median qi
+#> 2 sigma     0.484  0.463  0.502   0.95 median qi
 ```
 
 Even though every study is individually biased, the meta model recovers the simulated log mean of 1.8 and log standard deviation of 0.5 closely.
@@ -438,13 +425,13 @@ fit_meta_summary_study
 #> Multilevel Hyperparameters:
 #> ~study (Number of levels: 10)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.03      0.02     0.00     0.09 1.00      376      543
-#> sd(sigma_Intercept)     0.11      0.06     0.02     0.23 1.00      360      421
+#> sd(Intercept)           0.03      0.03     0.00     0.10 1.01      272      405
+#> sd(sigma_Intercept)     0.10      0.06     0.01     0.24 1.01      266      339
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.82      0.02     1.78     1.86 1.00      555      625
-#> sigma_Intercept    -0.70      0.05    -0.80    -0.61 1.00      512      568
+#> Intercept           1.82      0.02     1.77     1.86 1.00      425      406
+#> sigma_Intercept    -0.70      0.05    -0.81    -0.59 1.01      357      373
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -524,7 +511,6 @@ The term widens the band, which is the price of allowing for differences between
 
 ## What happens with the wrong metadata
 
-The metadata about how a study adjusted its estimate matters.
 Whether a study corrected for right truncation is the field reviews most often leave out, so we refit the same ten studies with every one of them relabelled as `trunc_adjusted = TRUE`.
 
 
@@ -558,8 +544,8 @@ summary(fit_meta_wrong_flags)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.75      0.01     1.72     1.77 1.00      840      771
-#> sigma_Intercept    -0.81      0.02    -0.85    -0.77 1.00      556      641
+#> Intercept           1.75      0.01     1.72     1.77 1.00      779      672
+#> sigma_Intercept    -0.81      0.02    -0.85    -0.77 1.00      644      541
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -585,6 +571,15 @@ meta_mixed <- as_epidist_meta_model(
   individual_data,
   estimates = biased_estimates
 )
+#> ! Setting 3 relative observation times (`relative_obs_time`) greater than 38
+#>   (2x the maximum delay) to Inf.
+#> ℹ This improves model efficiency by reducing the number of unique observation
+#>   times in the data.
+#> ℹ The impact on model accuracy should be negligible because these relative
+#>   observation times are high enough to cause very limited right truncation.
+#> ℹ The original relative observation times are available in
+#>   `orig_relative_obs_time`.
+#> ℹ Raise `obs_time_threshold` to avoid this behaviour.
 ```
 
 
@@ -605,14 +600,14 @@ summary(fit_meta_mixed)
 #>   Links: mu = identity; sigma = log
 #> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ 1
 #>          sigma ~ 1
-#>    Data: transformed_data (Number of observations: 198)
+#>    Data: transformed_data (Number of observations: 192)
 #>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
 #>          total post-warmup draws = 1000
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.80      0.01     1.78     1.83 1.00      911      647
-#> sigma_Intercept    -0.72      0.02    -0.76    -0.69 1.01      669      628
+#> Intercept           1.81      0.01     1.79     1.84 1.00      889      699
+#> sigma_Intercept    -0.72      0.02    -0.76    -0.68 1.00      603      430
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -621,8 +616,8 @@ summary(fit_meta_mixed)
 
 ## Reference: the marginal model on the full line list
 
-Finally, as a reference, we fit the marginal model (`vignette("epidist")`) to the whole, effectively untruncated, line list.
-This is what we would recover with access to every underlying delay rather than to published summaries, so it is the most precise fit here.
+As a reference, we fit the marginal model (`vignette("epidist")`) to the whole, effectively untruncated, line list.
+This is what we would recover with access to every underlying delay rather than to published summaries.
 The marginal model groups identical rows, so the whole line list costs little more to fit than a sample of it.
 
 
@@ -824,7 +819,7 @@ Means become `"mean"` rows, with a matching `"sd"` row where a standard deviatio
 A reported standard error becomes an `se` on the mean row instead.
 Medians become `"quantile"` rows at `p = 0.5`, with further quantile rows at `p = 0.25` and `p = 0.75` where an interquartile range is reported.
 A study reporting a spread that does not match its own value type, such as a median alongside a standard deviation, keeps only the matching set, because summaries of different kinds from one study are fitted as though they were independent.
-A study that reports the parameters of a distribution it fitted can be fitted through `epidist_estimates_parameters()` (see `?epidist_estimates_parameters`).
+A study that reports the parameters of a distribution it fitted can be fitted through `epidist_estimates_parameters()`.
 The fitted distributions here are Gammas that epireview records as a mean and a standard deviation, which the helper picks up as moments.
 
 <details><summary>Click to expand for the epireview conversion helper</summary>
@@ -904,30 +899,26 @@ ebola_estimates <- as_epidist_estimates_data(ebola_estimates_df)
 #>   as the grid cutoff, or five times the largest reported value where nothing
 #>   can be matched. Raise it if the delay has a longer tail than that, and lower
 #>   it to speed up fitting.
-#> ! The smallest quantile reported by "Nanclares 2016" (row 7), "Li 2016 (a)"
-#>   (row 14), "Khan 1999" (row 27), "Camacho 2014" (row 35), "Baron 1983" (row
-#>   36), "Bah 2015" (row 38), "Miglietta 2019" (row 43), and "Nsio 2019" (row 44)
-#>   sits within ten censoring windows of the smallest delay counted, so the
-#>   discrete grid barely resolves it. Check `swindow`, and fit a reported mean
-#>   and standard deviation instead where the study gives them.
-#> ℹ See the Checks section of `?as_epidist_estimates_data`.
-#> ! The standard deviation reported by "Muoghalu 2017" (row 13), "Rosello 2015
-#>   (2)" (row 18), "Maganga 2014" (row 24), and "Folarin 2016" (row 30) has a
-#>   relative standard error above 0.25 under the lognormal tail its mean implies,
-#>   so its sampling likelihood cannot be trusted. Fit quantiles from the body of
-#>   the distribution instead where the study reports them.
+#> ! "Nanclares 2016" (row 7), "Li 2016 (a)" (row 14), "Khan 1999" (row 27),
+#>   "Camacho 2014" (row 35), "Baron 1983" (row 36), "Bah 2015" (row 38),
+#>   "Miglietta 2019" (row 43), and "Nsio 2019" (row 44) report quantiles less
+#>   than ten days above their smallest counted delay. Quantiles rounded to whole
+#>   days that close to the origin carry a bias that a larger sample does not
+#>   shrink.
+#> ! "Muoghalu 2017" (row 13), "Rosello 2015 (2)" (row 18), "Maganga 2014" (row
+#>   24), and "Folarin 2016" (row 30) report a standard deviation whose relative
+#>   standard error is above 0.25 under the lognormal tail their mean implies. A
+#>   sampling error that large is far from normal, so the likelihood of the
+#>   standard deviation cannot be trusted.
 #> ℹ See the Checks section of `?as_epidist_estimates_data`.
 ```
 
-The checks fire because several studies report only a median, which sits within ten days of zero on a daily grid and so is resolved poorly, and because a few report a standard deviation that implies a heavier tail than their sample size can pin down.
-We fit a reported mean and standard deviation in preference where a study gives them, and take the median where it is all a study reports.
-
 We fit a Gamma, which is the family most of these studies fitted, with a `(1 | study)` term on both the mean and the shape.
-The term allows for real heterogeneity across outbreaks and Ebola species, and for studies whose metadata we have got wrong, which the model cannot tell apart.
+The term allows for real heterogeneity across outbreaks and Ebola species, and for studies whose metadata we have got wrong.
 
 Ebola onset to death is thought to take roughly 7 to 14 days, so the intercept prior is centred on ten days with a standard deviation of 0.5 on the log link.
 A Gamma shape between about 1 and 5 covers the spreads reported, so the shape intercept gets `normal(log(2), 0.5)` on its log link.
-With the biases that go unrecorded, studies may differ by a quarter or so on the log scale, so both between study standard deviations get `normal(0, 0.25)`.
+We assume that studies may differ by about a quarter on the log scale, so both between study standard deviations get `normal(0, 0.25)`.
 The phase coefficients get `normal(0, 0.5)`, so that two studies cannot move the contrast without limit.
 `epidist_prior()` shows the priors the model will use.
 
@@ -963,7 +954,7 @@ epidist_prior(
 #>  <NA>
 ```
 
-`init = 0.5` is passed for the same reason as above, since the default initial range lets a study's shape start far outside where the model is finite.
+`init = 0.5` is passed for the same reason as above.
 
 
 ``` r
@@ -994,15 +985,15 @@ summary(fit_ebola)
 #> Multilevel Hyperparameters:
 #> ~study (Number of levels: 29)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.14      0.03     0.08     0.22 1.00      327      565
-#> sd(shape_Intercept)     0.53      0.10     0.35     0.76 1.00      455      736
+#> sd(Intercept)           0.14      0.03     0.08     0.21 1.00      299      473
+#> sd(shape_Intercept)     0.51      0.10     0.35     0.72 1.00      491      692
 #>
 #> Regression Coefficients:
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept               2.24      0.06     2.12     2.36 1.00      464      397
-#> shape_Intercept         1.28      0.15     0.98     1.57 1.01      432      559
-#> phaseduringoutbreak     0.06      0.12    -0.19     0.30 1.00      646      644
-#> phaseunrecorded        -0.01      0.08    -0.18     0.12 1.00      562      584
+#> Intercept               2.23      0.06     2.11     2.35 1.01      434      694
+#> shape_Intercept         1.25      0.14     0.96     1.53 1.00      389      520
+#> phaseduringoutbreak     0.06      0.13    -0.19     0.32 1.00      734      627
+#> phaseunrecorded        -0.01      0.07    -0.15     0.14 1.01      405      521
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -1038,10 +1029,10 @@ population_draws |>
 #> # A tibble: 4 × 7
 #>   parameter value .lower .upper .width .point .interval
 #>   <chr>     <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>
-#> 1 mean       9.35   8.32  10.6    0.95 median qi
-#> 2 scale      2.62   1.87   3.67   0.95 median qi
-#> 3 sd         4.95   4.01   6.05   0.95 median qi
-#> 4 shape      3.60   2.67   4.80   0.95 median qi
+#> 1 mean       9.32   8.21  10.4    0.95 median qi
+#> 2 scale      2.66   1.99   3.69   0.95 median qi
+#> 3 sd         4.99   4.14   5.99   0.95 median qi
+#> 4 shape      3.51   2.61   4.63   0.95 median qi
 ```
 
 The phase bias is the contrast between each phase and the retrospective reference.
@@ -1059,8 +1050,8 @@ phase_ratio <- marginaleffects::comparisons(
 phase_ratio
 #>
 #>                         Contrast Estimate 2.5 % 97.5 %
-#>  during outbreak / post outbreak    1.061 0.827   1.35
-#>  unrecorded / post outbreak         0.988 0.838   1.13
+#>  during outbreak / post outbreak    1.067 0.830   1.38
+#>  unrecorded / post outbreak         0.994 0.862   1.15
 #>
 #> Term: phase
 #> Type: response
@@ -1072,8 +1063,8 @@ marginaleffects::get_draws(phase_ratio) |>
     .by = "contrast"
   )
 #>                          contrast P(shorter) P(shorter by over 10%)
-#> 1 during outbreak / post outbreak      0.314                  0.081
-#> 2      unrecorded / post outbreak      0.545                  0.112
+#> 1 during outbreak / post outbreak      0.300                  0.085
+#> 2      unrecorded / post outbreak      0.538                  0.074
 ```
 
 ## Comparing with a modern re-analysis of the same line list {#bdbv}
@@ -1135,8 +1126,8 @@ bind_rows(
 #>   source                          mean                sd
 #>   <chr>                           <chr>               <chr>
 #> 1 as reported by Rosello 2015 (3) 11.37               5.41
-#> 2 Rosello 2015 (3), study level   10.62 (9.26, 12.43) 5.19 (4.07, 6.99)
-#> 3 meta model, population level    9.35 (8.32, 10.63)  4.95 (4.01, 6.05)
+#> 2 Rosello 2015 (3), study level   10.67 (9.22, 12.58) 5.19 (4.12, 6.98)
+#> 3 meta model, population level    9.32 (8.21, 10.44)  4.99 (4.14, 5.99)
 #> 4 re-analysis of the line list    11.76 (9.31, 15.06) 6.57 (4.88, 9.44)
 ```
 
