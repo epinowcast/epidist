@@ -665,7 +665,7 @@ The term allows for real heterogeneity across outbreaks and Ebola species, and f
 
 Ebola onset to death is thought to take roughly 7 to 14 days, so the intercept prior is centred on ten days with a standard deviation of 0.5 on the log link.
 A Gamma shape between about 1 and 5 covers the spreads reported, so the shape intercept gets `normal(log(2), 0.5)` on its log link.
-With the biases that go unrecorded, studies may differ by a quarter or so on the log scale, so both between study standard deviations get `normal(0, 0.25)`.
+We assume that studies may differ by about a quarter on the log scale, so both between study standard deviations get `normal(0, 0.25)`.
 The phase coefficients get `normal(0, 0.5)`, so that two studies cannot move the contrast without limit.
 `epidist_prior()` shows the priors the model will use.
 
