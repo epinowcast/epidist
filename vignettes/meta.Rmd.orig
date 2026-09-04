@@ -465,9 +465,7 @@ predicted_parameters <- list(
   "truncation ignored" = fit_meta_wrong_flags,
   mixed = fit_meta_mixed
 ) |>
-  map(\(fit) {
-    delay_summary_draws(fit, newdata = population, re_formula = NA)
-  }) |>
+  map(delay_summary_draws, newdata = population, re_formula = NA) |>
   c(list("reference (marginal)" = delay_summary_draws(fit_reference))) |>
   map(ungroup) |>
   list_rbind(names_to = "model") |>
