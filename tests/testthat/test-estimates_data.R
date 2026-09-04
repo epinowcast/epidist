@@ -446,6 +446,8 @@ test_that("as_epidist_estimates_data warns about several integer day quantiles f
   expect_true(any(grepl("overconfident", msgs, fixed = TRUE)))
   over_msg <- msgs[grepl("overconfident", msgs, fixed = TRUE)]
   expect_length(over_msg, 1)
+  expect_true(grepl("\"A\"", over_msg, fixed = TRUE))
+  expect_false(grepl("mean and standard deviation", over_msg, fixed = TRUE))
   expect_true(grepl("Checks", over_msg, fixed = TRUE))
   # A small study, a single quantile or a continuous study does not trip it.
   quantiles$n <- 60
@@ -474,6 +476,7 @@ test_that("as_epidist_estimates_data warns about a heavy tailed standard deviati
   heavy_msg <- msgs[grepl("relative standard error", msgs, fixed = TRUE)]
   expect_length(heavy_msg, 1)
   expect_true(grepl("\"A\" (row 2)", heavy_msg, fixed = TRUE))
+  expect_false(grepl("Fit quantiles", heavy_msg, fixed = TRUE))
   expect_true(grepl("Checks", heavy_msg, fixed = TRUE))
   # At n = 1000 the relative standard error is 0.17 and the warning is
   # silent, as it is for a lighter tail at n = 100.
@@ -515,12 +518,23 @@ test_that("as_epidist_estimates_data keys the coarse quantile warning on the sma
     cens_adjusted = 0, stringsAsFactors = FALSE
   )
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
-  expect_true(any(grepl("smallest quantile", msgs, fixed = TRUE)))
-  expect_true(any(grepl("mean and standard deviation", msgs, fixed = TRUE)))
-  coarse_msg <- msgs[grepl("smallest quantile", msgs, fixed = TRUE)]
+  expect_true(any(grepl("smallest counted delay", msgs, fixed = TRUE)))
+  # The message says what the problem is in plain language, in the unit of
+  # the study's window, and no longer recommends fitting other summaries.
+  expect_false(any(grepl("mean and standard deviation", msgs, fixed = TRUE)))
+  coarse_msg <- msgs[grepl("smallest counted delay", msgs, fixed = TRUE)]
   expect_length(coarse_msg, 1)
   expect_true(grepl("\"A\" (row 1)", coarse_msg, fixed = TRUE))
+  expect_true(grepl("ten days", coarse_msg, fixed = TRUE))
+  expect_true(grepl("whole days", coarse_msg, fixed = TRUE))
   expect_true(grepl("Checks", coarse_msg, fixed = TRUE))
+  weekly <- quantiles
+  weekly$value <- c(35, 210)
+  weekly$swindow <- 7
+  msgs <- capture_messages(as_epidist_estimates_data(weekly))
+  coarse_msg <- msgs[grepl("smallest counted delay", msgs, fixed = TRUE)]
+  expect_length(coarse_msg, 1)
+  expect_true(grepl("ten weeks", coarse_msg, fixed = TRUE))
   expect_identical(
     .estimates_coarse_quantiles(
       suppressMessages(as_epidist_estimates_data(quantiles))
@@ -530,12 +544,12 @@ test_that("as_epidist_estimates_data keys the coarse quantile warning on the sma
   # Quantiles that all sit at least ten windows up the grid are not flagged.
   quantiles$value <- c(12, 30)
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
-  expect_false(any(grepl("smallest quantile", msgs, fixed = TRUE)))
+  expect_false(any(grepl("smallest counted delay", msgs, fixed = TRUE)))
   # A study that adjusted for censoring is not on the discrete grid.
   quantiles$value <- c(5, 30)
   quantiles$cens_adjusted <- 1
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
-  expect_false(any(grepl("smallest quantile", msgs, fixed = TRUE)))
+  expect_false(any(grepl("smallest counted delay", msgs, fixed = TRUE)))
 })
 
 test_that("the default grid cutoff keeps the implied summaries close to the untruncated ones", { # nolint: line_length_linter.
