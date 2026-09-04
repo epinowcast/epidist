@@ -51,6 +51,7 @@
     <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/primary-events.html">Primary event distributions</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
+    <li><a class="dropdown-item" href="../articles/meta.html">Fitting to published estimates</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul>
 </li>
@@ -288,6 +289,14 @@ Then, pass this expanded data to the <code>newdata</code> argument of <code><a h
 <img src="figures/faq-unnamed-chunk-6-1.png" alt="plot of chunk unnamed-chunk-6"><div class="figcaption">plot of chunk unnamed-chunk-6</div>
 </div>
 <p>For more advanced custom visualizations, you can also use <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_predicted_draws()</a></code> as demonstrated in the <a href="https://epidist.epinowcast.org/articles/ebola.html">“Advanced features with Ebola data”</a> vignette.</p>
+</div>
+<div class="section level3">
+<h3 id="what-is-an-observation-in-the-meta-model">What is an observation in the meta model?<a class="anchor" aria-label="anchor" href="#what-is-an-observation-in-the-meta-model"></a>
+</h3>
+<p><code><a href="../reference/as_epidist_meta_model.html">as_epidist_meta_model()</a></code> fits the summaries a study computed from the same delays jointly, so one row of the model data is a group of summaries rather than a single reported value.
+This is the same situation as aggregated data, where one row stands for many individual delays.
+<code><a href="https://mc-stan.org/rstantools/reference/log_lik.html" class="external-link">brms::log_lik()</a></code> and <code><a href="https://mc-stan.org/loo/reference/loo.html" class="external-link">loo::loo()</a></code> work at the row level, so their values are per group, and <code><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">pp_check()</a></code> needs the same care as described above.
+Predictions for summary rows are the reported summary itself rather than a delay, so restrict <code><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">pp_check()</a></code> to the individual level rows of a mixed fit.</p>
 </div>
 <div class="section level3">
 <h3 id="id-like-to-run-a-simulation-study">I’d like to run a simulation study<a class="anchor" aria-label="anchor" href="#id-like-to-run-a-simulation-study"></a>

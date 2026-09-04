@@ -85,6 +85,102 @@ Methods that keep modified objects in their `epidist` class
 
   Check if data has the `epidist_data` class
 
+### Estimates data
+
+Functions for preparing published summary estimates
+
+- [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  :
+
+  Create an `epidist_estimates_data` object
+
+- [`as_epidist_estimates_data(`*`<data.frame>`*`)`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.data.frame.md)
+  :
+
+  Create an `epidist_estimates_data` object from a data frame
+
+- [`as_epidist_estimates_data(`*`<epidist_estimates_data>`*`)`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.epidist_estimates_data.md)
+  :
+
+  Return an `epidist_estimates_data` object unchanged
+
+- [`as_epidist_estimates_data(`*`<epidist_multivariate>`*`)`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.epidist_multivariate.md)
+  :
+
+  Create an `epidist_estimates_data` object from a multivariate
+  representation
+
+- [`as_epidist_estimates_data(`*`<list>`*`)`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.list.md)
+  :
+
+  Combine `epidist_estimates_data` objects from several studies
+
+- [`assert_epidist(`*`<epidist_estimates_data>`*`)`](https://epidist.epinowcast.org/reference/assert_epidist.epidist_estimates_data.md)
+  :
+
+  Assert validity of `epidist_estimates_data` objects
+
+- [`epidist_estimates_parameters()`](https://epidist.epinowcast.org/reference/epidist_estimates_parameters.md)
+  : Report a study that published the parameters of a distribution it
+  fitted
+
+- [`epidist_estimates_summaries()`](https://epidist.epinowcast.org/reference/epidist_estimates_summaries.md)
+  : Report a study that published summaries of its delays
+
+- [`is_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/is_epidist_estimates_data.md)
+  :
+
+  Check if data has the `epidist_estimates_data` class
+
+- [`new_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/new_epidist_estimates_data.md)
+  :
+
+  Class constructor for `epidist_estimates_data` objects
+
+### Multivariate representation
+
+Functions for representing draws of a set of parameters
+
+- [`as_epidist_multivariate()`](https://epidist.epinowcast.org/reference/as_epidist_multivariate.md)
+  :
+
+  Create an `epidist_multivariate` object
+
+- [`as_epidist_multivariate(`*`<data.frame>`*`)`](https://epidist.epinowcast.org/reference/as_epidist_multivariate.data.frame.md)
+  :
+
+  Create an `epidist_multivariate` object from a data frame of draws
+
+- [`as_epidist_multivariate(`*`<matrix>`*`)`](https://epidist.epinowcast.org/reference/as_epidist_multivariate.matrix.md)
+  :
+
+  Create an `epidist_multivariate` object from a matrix of draws
+
+- [`assert_epidist(`*`<epidist_multivariate>`*`)`](https://epidist.epinowcast.org/reference/assert_epidist.epidist_multivariate.md)
+  :
+
+  Assert validity of `epidist_multivariate` objects
+
+- [`is_epidist_multivariate()`](https://epidist.epinowcast.org/reference/is_epidist_multivariate.md)
+  :
+
+  Check if an object has the `epidist_multivariate` class
+
+- [`new_epidist_multivariate()`](https://epidist.epinowcast.org/reference/new_epidist_multivariate.md)
+  :
+
+  Class constructor for `epidist_multivariate` objects
+
+- [`print(`*`<epidist_multivariate>`*`)`](https://epidist.epinowcast.org/reference/print.epidist_multivariate.md)
+  :
+
+  Print an `epidist_multivariate` object
+
+- [`vcov(`*`<epidist_multivariate>`*`)`](https://epidist.epinowcast.org/reference/vcov.epidist_multivariate.md)
+  :
+
+  The covariance matrix of an `epidist_multivariate` object
+
 ## Models
 
 ### Naive model
@@ -226,6 +322,70 @@ Specific methods for the marginal model
 
   Class constructor for `epidist_marginal_model` objects
 
+### Meta model
+
+Specific methods for the meta model
+
+- [`as_epidist_meta_model(`*`<NULL>`*`)`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.NULL.md)
+  : The meta model method for summary estimates only
+
+- [`as_epidist_meta_model()`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.md)
+  :
+
+  Convert an object to an `epidist_meta_model` object
+
+- [`as_epidist_meta_model(`*`<epidist_aggregate_data>`*`)`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.epidist_aggregate_data.md)
+  :
+
+  The meta model method for `epidist_aggregate_data` objects
+
+- [`as_epidist_meta_model(`*`<epidist_estimates_data>`*`)`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.epidist_estimates_data.md)
+  :
+
+  The meta model method for `epidist_estimates_data` objects
+
+- [`as_epidist_meta_model(`*`<epidist_linelist_data>`*`)`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.epidist_linelist_data.md)
+  :
+
+  The meta model method for `epidist_linelist_data` objects
+
+- [`assert_epidist(`*`<epidist_meta_model>`*`)`](https://epidist.epinowcast.org/reference/assert_epidist.epidist_meta_model.md)
+  :
+
+  Assert validity of `epidist_meta_model` objects
+
+- [`epidist_family_model(`*`<epidist_meta_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_family_model.epidist_meta_model.md)
+  :
+
+  Create the model-specific component of an `epidist` custom family
+
+- [`epidist_formula_model(`*`<epidist_meta_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_formula_model.epidist_meta_model.md)
+  :
+
+  Define the model-specific component of an `epidist` custom formula for
+  the meta model
+
+- [`epidist_model_prior(`*`<epidist_meta_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_model_prior.epidist_meta_model.md)
+  : Model specific prior distributions for the meta model
+
+- [`epidist_newdata(`*`<epidist_meta_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_meta_model.md)
+  :
+
+  Build `newdata` for the meta model
+
+- [`epidist_transform_data_model(`*`<epidist_meta_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.epidist_meta_model.md)
+  : Transform data for the meta model
+
+- [`is_epidist_meta_model()`](https://epidist.epinowcast.org/reference/is_epidist_meta_model.md)
+  :
+
+  Check if data has the `epidist_meta_model` class
+
+- [`new_epidist_meta_model()`](https://epidist.epinowcast.org/reference/new_epidist_meta_model.md)
+  :
+
+  Class constructor for `epidist_meta_model` objects
+
 ## Model fitting
 
 ### Model fitting
@@ -259,6 +419,11 @@ Functions for building `newdata` to predict from
   :
 
   Build `newdata` for the marginal model
+
+- [`epidist_newdata(`*`<epidist_meta_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_meta_model.md)
+  :
+
+  Build `newdata` for the meta model
 
 - [`epidist_newdata(`*`<epidist_naive_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_naive_model.md)
   :
@@ -342,6 +507,8 @@ Functions for specifying prior distributions
   : Model specific prior distributions
 - [`epidist_model_prior(`*`<default>`*`)`](https://epidist.epinowcast.org/reference/epidist_model_prior.default.md)
   : Default model specific prior distributions
+- [`epidist_model_prior(`*`<epidist_meta_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_model_prior.epidist_meta_model.md)
+  : Model specific prior distributions for the meta model
 - [`epidist_prior()`](https://epidist.epinowcast.org/reference/epidist_prior.md)
   : Define custom prior distributions for epidist models
 
@@ -377,6 +544,11 @@ Generator functions for creating family specific model utilities.
 - [`epidist_gen_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_log_lik.md)
   : Create a function to calculate the marginalised log likelihood for
   double censored and truncated delay distributions
+- [`epidist_gen_meta_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_meta_log_lik.md)
+  : Create a function to calculate the meta model log likelihood
+- [`epidist_gen_meta_predict()`](https://epidist.epinowcast.org/reference/epidist_gen_meta_predict.md)
+  : Create a function to draw from the meta model posterior predictive
+  distribution
 - [`epidist_gen_posterior_epred()`](https://epidist.epinowcast.org/reference/epidist_gen_posterior_epred.md)
   : Create a function to draw from the expected value of the posterior
   predictive distribution for a model
@@ -405,6 +577,8 @@ Tools for simulating datasets
   : Simulate cases from a stochastic SIR model
 - [`simulate_secondary()`](https://epidist.epinowcast.org/reference/simulate_secondary.md)
   : Simulate secondary events based on a delay distribution
+- [`simulate_study()`](https://epidist.epinowcast.org/reference/simulate_study.md)
+  : Simulate the summaries a published study would have reported
 - [`simulate_uniform_cases()`](https://epidist.epinowcast.org/reference/simulate_uniform_cases.md)
   : Simulate cases from a uniform distribution
 

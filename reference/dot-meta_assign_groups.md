@@ -1,0 +1,45 @@
+# Assign summary estimates to joint likelihood groups
+
+Summaries reported by the same study are fitted jointly, so they must be
+collected into groups before the model rows are built. Two summaries
+share a group only when they agree on every column other than the
+summary itself, that is on the study, its metadata, and any covariates
+the user supplied. This keeps the grouping correct for any `brms`
+formula, because a linear predictor built from those columns cannot vary
+within a group.
+
+## Usage
+
+``` r
+.meta_assign_groups(estimates, mvn = NULL)
+```
+
+## Arguments
+
+- estimates:
+
+  An `epidist_estimates_data` object.
+
+- mvn:
+
+  A logical vector marking the rows covered by a reported covariance
+  matrix.
+
+## Value
+
+An integer vector of group identifiers, one per row.
+
+## Details
+
+Means and standard deviations group together, and quantiles group
+together, but the two are not mixed because their joint likelihoods
+differ. A study reporting more than one mean, or more than one standard
+deviation, with otherwise identical metadata has the repeats split into
+further groups. A summary with its own reported standard error is left
+on its own, because that standard error replaces the sampling
+uncertainty the joint likelihood would derive.
+
+The summaries covered by one covariance matrix are one group, whatever
+their types, because the matrix is what ties them together. They are
+identified by their shared `mvn_id`, so one study may contribute more
+than one such group.

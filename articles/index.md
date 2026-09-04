@@ -34,6 +34,12 @@
   “How to use the delay_min argument to account for delays that are only
   observed above a minimum value.”
 
+- [Fitting to published estimates with the meta
+  model](https://epidist.epinowcast.org/articles/meta.md):
+
+  Fitting to summarised, potentially biased, published estimates jointly
+  with individual level data
+
 - [Guide to the statistical models implemented in
   epidist](https://epidist.epinowcast.org/articles/model.md):
 

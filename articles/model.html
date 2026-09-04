@@ -51,6 +51,7 @@
     <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/primary-events.html">Primary event distributions</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
+    <li><a class="dropdown-item" href="../articles/meta.html">Fitting to published estimates</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul>
 </li>
@@ -320,6 +321,287 @@ For other combinations, numerical integration is used.</p>
 In addition, identical observations can be aggregated and the likelihood computed once per unique combination of delay, censoring windows, and covariates.
 Together these make the marginal model substantially more efficient than the latent model, particularly for larger datasets with daily-censored data where many observations share the same structure.</p>
 <p>For the mathematical details of primary event censored distributions, including the survival function derivation and closed-form solutions for specific distributions, see <code><a href="https://primarycensored.epinowcast.org/articles/why-it-works.html" class="external-link">vignette("why-it-works", package = "primarycensored")</a></code> and <code><a href="https://primarycensored.epinowcast.org/articles/analytic-solutions.html" class="external-link">vignette("analytic-solutions", package = "primarycensored")</a></code>.</p>
+</div>
+<div class="section level2" number="5">
+<h2 id="the-meta-model">
+<span class="header-section-number">5</span> The meta model<a class="anchor" aria-label="anchor" href="#the-meta-model"></a>
+</h2>
+<p>Published delay estimates are usually summary statistics, and the estimation procedure behind them is itself a source of bias <span class="citation">(<a href="#ref-charniga2024best">Charniga et al. 2024</a>; <a href="#ref-park2024estimating">Park et al. 2024</a>)</span>.
+The meta model fits one delay distribution to a mix of individual level data and published summaries.
+Each summary is fitted to what the study’s own procedure would have converged to given the delay distribution, with sampling uncertainty from the study sample size.
+Section <a href="#sampling-likelihoods">5.1</a> gives the likelihood of each kind of summary in terms of the moments, distribution function and quantiles of a delay distribution.
+Section <a href="#the-biased-estimands">5.3</a> says which distribution those are taken from for each study.
+Study level heterogeneity, for example <code>mu ~ 1 + (1 | study)</code>, is specified through the <code>brms</code> formula as for the other models.
+If using the meta model, please cite <code>primarycensored</code> in addition to <code>epidist</code>.
+The meta model is experimental and its interface may still change.</p>
+<div class="section level3" number="5.1">
+<h3 id="sampling-likelihoods">
+<span class="header-section-number">5.1</span> Sampling likelihoods<a class="anchor" aria-label="anchor" href="#sampling-likelihoods"></a>
+</h3>
+<p>Write <span class="math inline">\(m_1\)</span>, <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(\mu_3\)</span> and <span class="math inline">\(\mu_4\)</span> for the mean, standard deviation and third and fourth central moments of a delay distribution, <span class="math inline">\(\kappa = \mu_4 / \sigma^4\)</span> for its kurtosis, <span class="math inline">\(G\)</span> for its distribution function and <span class="math inline">\(Q_p\)</span> for its quantile at probability <span class="math inline">\(p\)</span>.
+For a study that estimated the delay without bias these are those of the forward delay distribution of Section <a href="#maths">1</a>.
+Section <a href="#the-biased-estimands">5.3</a> replaces them with those of the distribution the study’s procedure targeted, and the likelihoods below are unchanged.
+A study reports a value <span class="math inline">\(y\)</span> computed from <span class="math inline">\(n\)</span> delays.</p>
+<div class="section level4" number="5.1.1">
+<h4 id="a-reported-mean">
+<span class="header-section-number">5.1.1</span> A reported mean<a class="anchor" aria-label="anchor" href="#a-reported-mean"></a>
+</h4>
+<p>A reported mean is normal,
+<span class="math display" id="eq:meta-mean-lik">\[
+y \sim \text{Normal}\left(m_1, \; \text{se}_{m_1} \right), \tag{5.1}
+\]</span>
+with <span class="math inline">\(\text{se}_{m_1}\)</span> the reported standard error where given and <span class="math inline">\(\sigma / \sqrt{n}\)</span> otherwise.</p>
+</div>
+<div class="section level4" number="5.1.2">
+<h4 id="a-reported-standard-deviation">
+<span class="header-section-number">5.1.2</span> A reported standard deviation<a class="anchor" aria-label="anchor" href="#a-reported-standard-deviation"></a>
+</h4>
+<p>A reported standard deviation is normal with the kurtosis based standard error of a sample standard deviation,
+<span class="math display" id="eq:meta-sd-lik">\[
+y \sim \text{Normal}\left(\sigma, \; \text{se}_\sigma \right), \quad
+\text{se}_\sigma = \sigma \sqrt{\frac{\kappa - 1}{4 n}}, \tag{5.2}
+\]</span>
+which follows from the asymptotic variance <span class="math inline">\((\mu_4 - \sigma^4)/n\)</span> of the sample variance by the delta method <span class="citation">(<a href="#ref-cramer1946">Cramér 1946</a>)</span>.
+The normal theory expression <span class="math inline">\(\sigma / \sqrt{2(n-1)}\)</span> is the case <span class="math inline">\(\kappa = 3\)</span> and is two to four times too narrow for the right skewed distributions delays follow.
+Equation <a href="#eq:meta-sd-lik">(5.2)</a>, and Equation <a href="#eq:meta-moment-pair">(5.5)</a> built on it, should not be trusted once <span class="math inline">\(\sqrt{(\kappa - 1) / (4 n)}\)</span> exceeds about a quarter.
+For a lognormal with kurtosis 9 that is <span class="math inline">\(n\)</span> below about 30.
+<code><a href="../reference/as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> warns when a reported mean and standard deviation imply this under a lognormal delay.</p>
+</div>
+<div class="section level4" number="5.1.3">
+<h4 id="a-reported-quantile">
+<span class="header-section-number">5.1.3</span> A reported quantile<a class="anchor" aria-label="anchor" href="#a-reported-quantile"></a>
+</h4>
+<p>A reported quantile at probability <span class="math inline">\(p\)</span> is fitted on the probability scale, which avoids inverting <span class="math inline">\(G\)</span>,
+<span class="math display" id="eq:meta-quantile-lik">\[
+p \sim \text{Normal}\left(G(y), \; \text{se}_p\right), \tag{5.3}
+\]</span>
+with <span class="math inline">\(\text{se}_p = \sqrt{p(1-p)/n}\)</span> the binomial standard error of an empirical distribution function.
+A quantile supplied with a standard error <span class="math inline">\(\text{se}_y\)</span> on the delay scale is fitted on that scale instead,
+<span class="math display" id="eq:meta-quantile-se">\[
+y \sim \text{Normal}\left(Q_p, \; \text{se}_y\right), \tag{5.4}
+\]</span>
+since the density that would carry <span class="math inline">\(\text{se}_y\)</span> onto the probability scale vanishes far from the implied quantile.</p>
+</div>
+<div class="section level4" number="5.1.4">
+<h4 id="summaries-from-the-same-study">
+<span class="header-section-number">5.1.4</span> Summaries from the same study<a class="anchor" aria-label="anchor" href="#summaries-from-the-same-study"></a>
+</h4>
+<p>Summaries that one study computed from the same delays are correlated, so they are fitted jointly.
+Two summaries are fitted together when they agree on every field other than the summary itself, so a linear predictor cannot vary within the group.
+A summary supplied with its own standard error is fitted on its own.</p>
+<p>A mean and a standard deviation from one study are given the asymptotic bivariate normal of the pair,
+<span class="math display" id="eq:meta-moment-pair">\[
+\begin{pmatrix} y_{m} \\ y_{\sigma} \end{pmatrix} \sim
+\text{Normal}\left(
+\begin{pmatrix} m_1 \\ \sigma \end{pmatrix}, \;
+\frac{1}{n}\begin{pmatrix}
+\sigma^2 &amp; \mu_3 / (2 \sigma) \\
+\mu_3 / (2 \sigma) &amp; \sigma^2 (\kappa - 1) / 4
+\end{pmatrix}
+\right), \tag{5.5}
+\]</span>
+whose off diagonal is <span class="math inline">\(\text{Cov}(\bar{x}, s^2) = \mu_3 / n\)</span> carried onto the standard deviation scale by the delta method <span class="citation">(<a href="#ref-cramer1946">Cramér 1946</a>)</span>.
+The correlation is <span class="math inline">\(\gamma_1 / \sqrt{\kappa - 1}\)</span> with <span class="math inline">\(\gamma_1 = \mu_3 / \sigma^3\)</span> the skewness, which every distribution keeps inside <span class="math inline">\([-1, 1]\)</span>.
+Moments taken from a grid or quadrature can sit just outside, so the correlation is clipped.</p>
+<p>Several quantiles from one study at probabilities <span class="math inline">\(p_1 &lt; \dots &lt; p_k\)</span> with values <span class="math inline">\(y_1 \le \dots \le y_k\)</span> cut the delay axis into <span class="math inline">\(k + 1\)</span> cells, and the counts in them are multinomial,
+<span class="math display" id="eq:meta-quantile-set">\[
+(c_1, \dots, c_{k+1}) \sim \text{Multinomial}\left(n, \; \left(G(y_1), \; G(y_2) - G(y_1), \; \dots, \; 1 - G(y_k)\right)\right), \tag{5.6}
+\]</span>
+with <span class="math inline">\(c_j = \text{round}(n p_j) - \text{round}(n p_{j-1})\)</span> and <span class="math inline">\(c_{k+1} = n - \text{round}(n p_k)\)</span>.
+A single quantile reduces this to the binomial of which Equation <a href="#eq:meta-quantile-lik">(5.3)</a> is the normal approximation, so quantile rows of a continuous estimand use Equation <a href="#eq:meta-quantile-set">(5.6)</a> unless a standard error is supplied.
+Two quantiles reported at the same value are merged into one cell.
+A cell whose probability underflows to zero while the study saw delays in it is floored at <span class="math inline">\(10^{-300}\)</span>.</p>
+<p>A single quantile of integer day delays is a discrete statistic.
+“The median is 5 days” says that the empirical distribution function crossed one half between 4 and 5 days, that is <span class="math inline">\(N_{\le y - w_s} &lt; \lceil n p \rceil \le N_{\le y}\)</span> with <span class="math inline">\(N_{\le y}\)</span> the number of delays at or below <span class="math inline">\(y\)</span>.
+It is fitted as the probability of that event,
+<span class="math display" id="eq:meta-quantile-crossing">\[
+P(N_{\le y} \ge k) - P(N_{\le y - w_s} \ge k), \quad k = \lceil n p \rceil, \quad N_{\le y} \sim \text{Binomial}\left(n, G_0(y)\right), \tag{5.7}
+\]</span>
+where <span class="math inline">\(w_s\)</span> is the reporting resolution and <span class="math inline">\(G_0\)</span> the step distribution function of the discrete estimand of Section <a href="#the-biased-estimands">5.3</a>, before continuity correction.
+The information this carries saturates as <span class="math inline">\(n\)</span> grows.
+Several quantiles of integer day delays use Equation <a href="#eq:meta-quantile-set">(5.6)</a> on the continuity corrected <span class="math inline">\(G\)</span>, which is calibrated at around thirty delays but claims a standard error five times too small at a thousand, so <code><a href="../reference/as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> warns about such studies.</p>
+<p>Summaries of different kinds from one study, such as a mean and a median, are treated as independent, which understates their joint uncertainty.
+The normal approximations degrade for small study sample sizes.</p>
+</div>
+<div class="section level4" number="5.1.5">
+<h4 id="a-vector-of-summaries-with-a-covariance">
+<span class="header-section-number">5.1.5</span> A vector of summaries with a covariance<a class="anchor" aria-label="anchor" href="#a-vector-of-summaries-with-a-covariance"></a>
+</h4>
+<p>A study that fitted a distribution to its delays can publish draws of the fitted parameters, which <code><a href="../reference/as_epidist_multivariate.html">as_epidist_multivariate()</a></code> summarises by their mean and covariance and <code><a href="../reference/as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> pushes through to the summaries the fitted distribution implies.
+This is the reporting format we recommend, because it keeps the correlation between the reported quantities.
+With <span class="math inline">\(y\)</span> the reported vector and <span class="math inline">\(\Sigma\)</span> the covariance over it,
+<span class="math display" id="eq:meta-mvn">\[
+y \sim \text{Normal}\left(m(\theta), \; \Sigma\right), \tag{5.8}
+\]</span>
+where <span class="math inline">\(m(\theta)\)</span> holds <span class="math inline">\(m_1\)</span> for a mean, <span class="math inline">\(\sigma\)</span> for a standard deviation and <span class="math inline">\(Q_p\)</span> for a quantile.
+Summaries of a <span class="math inline">\(k\)</span> parameter fit are functions of <span class="math inline">\(k\)</span> numbers, so at most <span class="math inline">\(k\)</span> may be reported with a covariance or standard errors, and asking for more is an error.</p>
+</div>
+<div class="section level4" number="5.1.6">
+<h4 id="reported-distribution-parameters">
+<span class="header-section-number">5.1.6</span> Reported distribution parameters<a class="anchor" aria-label="anchor" href="#reported-distribution-parameters"></a>
+</h4>
+<p>A study that published the parameters of a fitted distribution <span class="math inline">\(\hat{F}\)</span> has them converted to summaries by <code><a href="../reference/epidist_estimates_parameters.html">epidist_estimates_parameters()</a></code>, so the family it fitted need not match the family fitted to it.
+The summaries are taken over the range of delays the study could have seen, conditioning <span class="math inline">\(\hat{F}\)</span> on <span class="math inline">\((L, D]\)</span>,
+<span class="math display" id="eq:meta-reported-cond">\[
+\hat{F}_{L,D}(y) = \frac{\hat{F}(y) - \hat{F}(L)}{\hat{F}(D) - \hat{F}(L)}, \quad L &lt; y \le D, \tag{5.9}
+\]</span>
+with <span class="math inline">\(L\)</span> the smallest delay it counted and <span class="math inline">\(D\)</span> its observation time, or <span class="math inline">\(D = \infty\)</span> for a study that adjusted for right truncation.
+Without this a study that did not correct for right truncation is charged with tail spread its data never had, which can reach tens of percent on a standard deviation.
+Reported parameter standard errors are carried onto the summaries by the delta method, as <span class="math inline">\(J V J^\top\)</span> with <span class="math inline">\(V\)</span> the diagonal matrix of squared standard errors and <span class="math inline">\(J\)</span> the Jacobian of the map from parameters to summaries, and fitted jointly through Equation <a href="#eq:meta-mvn">(5.8)</a>.
+For <span class="math inline">\(k\)</span> summaries of a <span class="math inline">\(k\)</span> parameter fit this gives back the curvature <span class="math inline">\(V^{-1}\)</span>, where fitting each with its own standard error would claim standard errors 1.4 to 1.5 times too wide for a lognormal mean and standard deviation.
+A full parameter covariance is better passed as draws to <code><a href="../reference/as_epidist_multivariate.html">as_epidist_multivariate()</a></code>.
+A study with no parameter uncertainty falls back to the sample size likelihoods above, and any number of its summaries may be reported.
+This route assumes the reported distribution has the shape of the study’s estimand, which holds only approximately where a continuous family was fitted to integer date differences.
+There, quantiles in the body of the distribution are more reliable than a standard deviation, which depends on a tail the study never saw.</p>
+</div>
+<div class="section level4" number="5.1.7">
+<h4 id="individual-level-records">
+<span class="header-section-number">5.1.7</span> Individual level records<a class="anchor" aria-label="anchor" href="#individual-level-records"></a>
+</h4>
+<p>Individual level rows use the marginal model likelihood of Section <a href="#the-marginal-model">4</a> unchanged, with <span class="math inline">\(\theta\)</span> shared with the summary rows.
+Their primary event distribution is set with <code>primary</code>, so the tilted primary event of Section <a href="#primary-tilt">3.2</a> is available to them.
+Summary rows take the growth rate given for each study as a known quantity rather than the estimated <code>pgrowth</code>, a limitation tracked in <a href="https://github.com/epinowcast/epidist/issues/678" class="external-link">epinowcast/epidist#678</a>.
+The joint likelihood is the product of the sampling likelihoods above over the summary rows and the marginal model likelihood over the individual level rows.</p>
+</div>
+</div>
+<div class="section level3" number="5.2">
+<h3 id="what-we-need-from-each-study">
+<span class="header-section-number">5.2</span> What we need from each study<a class="anchor" aria-label="anchor" href="#what-we-need-from-each-study"></a>
+</h3>
+<p><code><a href="../reference/as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> takes, for each summary:</p>
+<ul>
+<li>how the study adjusted for interval censoring, a code from 0 to 4 defined in Section <a href="#the-biased-estimands">5.3</a>,</li>
+<li>whether it adjusted for right truncation, and if not its observation time, how collection stopped and the growth rate of primary events over the study period,</li>
+<li>its censoring windows <span class="math inline">\(w_p\)</span> and <span class="math inline">\(w_s\)</span>, the widths of the intervals its primary and secondary events were observed in,</li>
+<li>its sample size, or a standard error or covariance in its place,</li>
+<li>the smallest delay it counted.</li>
+</ul>
+<p>Both truncation designs assume the study sampled a cohort of primary events, so a study that sampled on the secondary event reports a backward distribution of Section <a href="#forwards-and-backwards-distributions">1.1</a>, which is not represented here.
+Systematic reviews rarely record this metadata, so it is usually the analyst’s judgement and should be stated and varied in a sensitivity analysis.
+The checklist of <span class="citation">Charniga et al. (<a href="#ref-charniga2024best">2024</a>)</span> covers it.
+Where it is missing entirely, a covariate for the phase of the outbreak makes the <code>brms</code> formula a meta-regression that estimates the residual bias instead.</p>
+</div>
+<div class="section level3" number="5.3">
+<h3 id="the-biased-estimands">
+<span class="header-section-number">5.3</span> The biased estimands<a class="anchor" aria-label="anchor" href="#the-biased-estimands"></a>
+</h3>
+<p>Let <span class="math inline">\(f(\tau; \theta)\)</span> and <span class="math inline">\(F(\tau; \theta)\)</span> be the forward density and distribution function of Section <a href="#maths">1</a>, and <span class="math inline">\(g_p\)</span> the distribution of a primary event within its window of width <span class="math inline">\(w_p\)</span>, uniform under constant incidence and exponentially tilted towards more recent times otherwise.
+Write
+<span class="math display">\[
+F_{pc}(\tau; \theta) = \mathbb{P}(\tau^\star + U \le \tau), \quad \tau^\star \sim f(\cdot \, ; \theta), \; U \sim g_p,
+\]</span>
+for the primary event censored distribution function of <code>primarycensored</code> <span class="citation">(<a href="#ref-primarycensored">Abbott et al. 2025</a>)</span>.
+Each censoring code below defines a distribution, right truncated at the observation time <span class="math inline">\(D\)</span>, with <span class="math inline">\(D = \infty\)</span> for a study that adjusted for right truncation itself.
+Its moments, distribution function <span class="math inline">\(G\)</span> and quantiles <span class="math inline">\(Q_p\)</span> replace those of the delay in the likelihoods of Section <a href="#sampling-likelihoods">5.1</a>.
+Four moments are needed, because the kurtosis sets the sampling error of a reported standard deviation and the skewness its correlation with a reported mean.</p>
+<div class="section level4" number="5.3.1">
+<h4 id="censoring-adjustment">
+<span class="header-section-number">5.3.1</span> Censoring adjustment<a class="anchor" aria-label="anchor" href="#censoring-adjustment"></a>
+</h4>
+<p>Code 0, no adjustment, summarised integer date differences directly, so its estimand is discrete.
+With <span class="math inline">\(q_j\)</span> the probability on the <span class="math inline">\(j\)</span>th secondary window,
+<span class="math display" id="eq:meta-grid">\[
+q_j = \frac{F_{pc}(j w_s; \theta) - F_{pc}((j-1) w_s; \theta)}{F_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j = 1, \dots, \lfloor D / w_s \rfloor, \tag{5.10}
+\]</span>
+where bin <span class="math inline">\(j\)</span> carries the delay <span class="math inline">\((j-1) w_s\)</span> and the truncation point is discretised to the last full grid boundary.
+This is the doubly interval censored, right truncated probability mass function the marginal model of Section <a href="#the-marginal-model">4</a> uses for individual observations.
+Summing over the grid gives the moments, and its cumulative sum gives <span class="math inline">\(G_0\)</span>.
+For quantile rows <span class="math inline">\(G\)</span> is continuity corrected by interpolating <span class="math inline">\(G_0\)</span> linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise lands on a jump.
+A single reported quantile uses Equation <a href="#eq:meta-quantile-crossing">(5.7)</a> on <span class="math inline">\(G_0\)</span>.
+The reported value is itself rounded to the grid, so a bias remains that does not shrink with <span class="math inline">\(n\)</span>.
+It stays under 4% on the mean and 9% on the standard deviation once the reported quantiles sit twenty five or more cells above the smallest delay counted, and reaches tens of percent on both within ten, so a coarsely resolved delay is better fitted through its mean and standard deviation where reported.</p>
+<p>Code 1, full adjustment, reported the moments of <span class="math inline">\(f(\cdot \, ; \theta)\)</span> itself, right truncated at <span class="math inline">\(D\)</span>,
+<span class="math display" id="eq:meta-trunc-moments">\[
+\mathbb{E}[\tau^k \mid \tau \le D] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4, \tag{5.11}
+\]</span>
+which reduces to the family moments when <span class="math inline">\(D = \infty\)</span>.
+Its distribution function is <span class="math inline">\(F(y; \theta) / F(D; \theta)\)</span>.</p>
+<p>Code 2, the uniform single interval approximation, left the primary interval uncorrected and so observed <span class="math inline">\(\tau^\star + U\)</span>, with the moments of <span class="math inline">\(F_{pc}\)</span> right truncated at <span class="math inline">\(D\)</span>,
+<span class="math display" id="eq:meta-uniform-moments">\[
+\mathbb{E}[(\tau^\star + U)^k \mid \tau^\star + U \le D] =
+\frac{\int_0^D k t^{k-1} \left(F_{pc}(D; \theta) - F_{pc}(t; \theta)\right) \text{d}t}{F_{pc}(D; \theta)},
+\quad k = 1, \dots, 4. \tag{5.12}
+\]</span>
+Its distribution function is <span class="math inline">\(F_{pc}(y; \theta) / F_{pc}(D; \theta)\)</span>.
+Equations <a href="#eq:meta-trunc-moments">(5.11)</a> and <a href="#eq:meta-uniform-moments">(5.12)</a> are evaluated by Simpson’s rule.
+Where <span class="math inline">\(D = \infty\)</span> and the primary event is uniform the convolution is exact,
+<span class="math display" id="eq:meta-uniform-exact">\[
+\mu_{pc} = \mu + \frac{w_p}{2}, \quad
+\sigma_{pc}^2 = \sigma^2 + \frac{w_p^2}{12}, \quad
+\mu_{4,pc} = \mu_4 + 6 \sigma^2 \frac{w_p^2}{12} + \frac{w_p^4}{80}, \tag{5.13}
+\]</span>
+with <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\sigma^2\)</span> and <span class="math inline">\(\mu_4\)</span> the mean, variance and fourth central moment of <span class="math inline">\(f(\cdot \, ; \theta)\)</span>.</p>
+<p>Code 3, midpoint imputation, assigned each delay to the centre of its interval, so its estimand is the grid of Equation <a href="#eq:meta-grid">(5.10)</a> moved up by <span class="math inline">\(w_s / 2\)</span>.
+A single reported quantile uses Equation <a href="#eq:meta-quantile-crossing">(5.7)</a>, as for code 0.
+Code 4, midpoint imputation with a uniform interval, placed the primary event at the midpoint of its window and integrated the secondary interval, so its estimand is that of code 2 moved down by <span class="math inline">\(w_p / 2\)</span>.
+A shift changes the mean alone and moves the distribution function and quantiles with it.
+Code 4 therefore has the mean of code 1 and the variance of code 2 before truncation, because midpointing removes the mean of <span class="math inline">\(U\)</span> but not its spread.
+The mirror reading, a midpointed secondary event and an integrated primary interval, has variance <span class="math inline">\(\sigma^2 + w_s^2 / 12\)</span> and is not used, because the literature midpoints the wide exposure window of the primary event.
+A study that midpointed the secondary interval and left the primary alone is code 3.
+Each code integrates the interval it did not midpoint rather than drawing a random position in it, which would add <span class="math inline">\(w^2 / 6\)</span> to the variance.</p>
+</div>
+<div class="section level4" number="5.3.2">
+<h4 id="right-truncation-1">
+<span class="header-section-number">5.3.2</span> Right truncation<a class="anchor" aria-label="anchor" href="#right-truncation-1"></a>
+</h4>
+<p>The truncation above conditions on the delay falling below one cutoff, which is what a cohort followed for a common observation time gives.
+This is truncation rather than right censoring, where a case is known to exist and contributes a survival term rather than being absent from the study.
+Right censoring is not yet supported.</p>
+<p>A study that accrued primary events over a window of length <span class="math inline">\(A\)</span> and stopped at its calendar end saw a delay <span class="math inline">\(d\)</span> only for primary events at least <span class="math inline">\(d\)</span> before the stop.
+With primary events arriving at a rate proportional to <span class="math inline">\(\exp(r t)\)</span> the follow up available is
+<span class="math display" id="eq:meta-accrual">\[
+w(d) = \int_0^{A - d} \exp(r t) \, \text{d}t = \frac{\exp(r (A - d)) - 1}{r}, \quad 0 \le d \le A, \tag{5.14}
+\]</span>
+which tends to <span class="math inline">\(A - d\)</span> as <span class="math inline">\(r\)</span> tends to zero and, for a long window and a growing epidemic, to an exponential tilt by <span class="math inline">\(\exp(-r d)\)</span>.
+This is the dynamical bias of <span class="citation">Park et al. (<a href="#ref-park2024estimating">2024</a>)</span>.
+The estimand is <span class="math inline">\(f(d; \theta) w(d)\)</span> renormalised over <span class="math inline">\([0, A]\)</span>, so <span class="math inline">\(A\)</span> replaces the cohort cutoff <span class="math inline">\(D\)</span>.
+Applying both at once double counts, so a study is one or the other.
+The weight multiplies the quadrature for Equations <a href="#eq:meta-trunc-moments">(5.11)</a> and <a href="#eq:meta-uniform-moments">(5.12)</a> at each node and renormalises.
+For Equation <a href="#eq:meta-uniform-moments">(5.12)</a> it is evaluated at <span class="math inline">\(d - w_p / 2\)</span>, to average the primary offset back out.
+The correction is only as good as the growth rate supplied.</p>
+<p>On the grid of Equation <a href="#eq:meta-grid">(5.10)</a> the follow up is a step function, <span class="math inline">\(w(w_p \lfloor x / w_p \rfloor)\)</span> for a delay of <span class="math inline">\(x\)</span> from the start of the primary window, because the primary event is known only to its window.
+Each cell of the grid is cut at the multiples of <span class="math inline">\(w_p\)</span> inside it, each piece is weighted by the follow up at the primary window it starts in, and the pieces are summed back before renormalising.
+Weighting each cell at its lower edge instead is exact only when <span class="math inline">\(w_p = w_s\)</span>, and for a daily primary and weekly secondary window puts the mean 36% low at <span class="math inline">\(r = 0.2\)</span> where the piecewise weight is within 0.2%.</p>
+<p>Two residuals remain.
+The piecewise weight treats the last primary window as complete, so when <span class="math inline">\(A\)</span> is not a multiple of <span class="math inline">\(w_p\)</span> the primary events it cuts short are overweighted, by 5% on the mean for a weekly primary and daily secondary window with <span class="math inline">\(A = 30\)</span> at <span class="math inline">\(r = 0.2\)</span>.
+Use a collection window that is a multiple of <span class="math inline">\(w_p\)</span> where the study allows it.
+Equation <a href="#eq:meta-uniform-moments">(5.12)</a> keeps the smooth weight, because the follow up available to a primary event is only known to within its window, and at <span class="math inline">\(w_p = 7\)</span> its mean is 2.6% high at <span class="math inline">\(r = 0.2\)</span>.
+Both residuals grow with <span class="math inline">\(r\)</span> and as <span class="math inline">\(w_p\)</span> grows towards <span class="math inline">\(A\)</span>.</p>
+</div>
+<div class="section level4" number="5.3.3">
+<h4 id="left-truncation">
+<span class="header-section-number">5.3.3</span> Left truncation<a class="anchor" aria-label="anchor" href="#left-truncation"></a>
+</h4>
+<p>A study that only counted delays of at least <span class="math inline">\(L\)</span> reported summaries conditioned on <span class="math inline">\(\tau &gt; L\)</span>, the left truncation of survival analysis <span class="citation">(<a href="#ref-klein2003">Klein and Moeschberger 2003</a>)</span>.
+Each expression above reduces to its earlier form when <span class="math inline">\(L = 0\)</span>.
+On the grid of Equation <a href="#eq:meta-grid">(5.10)</a> the cells below <span class="math inline">\(L\)</span> are dropped and the rest renormalised by their mass, which is <span class="math inline">\(F_{pc}(D) - F_{pc}(L)\)</span> when <span class="math inline">\(L\)</span> falls on a grid boundary.
+The truncated moments of Equation <a href="#eq:meta-trunc-moments">(5.11)</a> pick up a boundary term,
+<span class="math display" id="eq:meta-left-moments">\[
+\mathbb{E}[\tau^k \mid L &lt; \tau \le D] =
+\frac{L^k \left(F(D; \theta) - F(L; \theta)\right) +
+\int_L^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}
+{F(D; \theta) - F(L; \theta)}, \quad k = 1, \dots, 4, \tag{5.15}
+\]</span>
+and Equation <a href="#eq:meta-uniform-moments">(5.12)</a> likewise with <span class="math inline">\(F_{pc}\)</span> in place of <span class="math inline">\(F\)</span>.
+The distribution function becomes
+<span class="math display" id="eq:meta-left-cdf">\[
+G(y) = \frac{F(y; \theta) - F(L; \theta)}{F(D; \theta) - F(L; \theta)}, \quad L &lt; y \le D, \tag{5.16}
+\]</span>
+zero at or below <span class="math inline">\(L\)</span> and one above <span class="math inline">\(D\)</span>.
+The accrual weight of Equation <a href="#eq:meta-accrual">(5.14)</a> is unchanged, since the cells and nodes it multiplies now start at <span class="math inline">\(L\)</span>.
+Individual level rows pass <span class="math inline">\(L\)</span> to <code>primarycensored</code> as their left truncation point, as the marginal model does.</p>
+</div>
+<div class="section level4" number="5.3.4">
+<h4 id="quantiles-of-the-estimands">
+<span class="header-section-number">5.3.4</span> Quantiles of the estimands<a class="anchor" aria-label="anchor" href="#quantiles-of-the-estimands"></a>
+</h4>
+<p>The quantile <span class="math inline">\(Q_p\)</span> of an estimand is read off by inverse linear interpolation between the two points of <span class="math inline">\(G\)</span> that bracket <span class="math inline">\(p\)</span>.
+On the grid of Equation <a href="#eq:meta-grid">(5.10)</a> that interpolant is the continuity corrected quantile, so it is exact.
+For a continuous estimand the chord is refined, exactly through the family quantile function for a lognormal or weibull delay under code 1, and otherwise by two Newton steps using the closed form distribution function and density of the estimand.
+An accrual estimand is defined by the interpolation between its nodes and keeps its chord.
+Both keep <span class="math inline">\(Q_p\)</span> differentiable in <span class="math inline">\(\theta\)</span>.</p>
+</div>
+</div>
 <div class="section level3">
 <h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
@@ -330,8 +612,17 @@ Abbott, Sam, Sam Brand, James Mba Azam, Carl Pearson, Sebastian Funk, and Kelly 
 <div id="ref-brand2026scalable" class="csl-entry">
 Brand, Samuel P. C., Barbora Nemcova, Carl A. B. Pearson, et al. 2026. <span>“A Scalable Marginalisation Approach for Double Interval Censored Epidemiological Delays.”</span> Unpublished manuscript.
 </div>
+<div id="ref-charniga2024best" class="csl-entry">
+Charniga, Kelly, Sang Woo Park, Andrei R. Akhmetzhanov, et al. 2024. <span>“Best Practices for Estimating and Reporting Epidemiological Delay Distributions of Infectious Diseases.”</span> <em>PLOS Computational Biology</em> 20 (10): 1–21. <a href="https://doi.org/10.1371/journal.pcbi.1012520" class="external-link">https://doi.org/10.1371/journal.pcbi.1012520</a>.
+</div>
+<div id="ref-cramer1946" class="csl-entry">
+Cramér, Harald. 1946. <em>Mathematical Methods of Statistics</em>. Vol. 9. Princeton Mathematical Series. Princeton University Press.
+</div>
 <div id="ref-bdbvlinelist" class="csl-entry">
 Funk, Sebastian, and Sam Abbott. 2026. <em>Bayesian Re-Analysis of the 2012 Isiro Bundibugyo Ebola Virus Line List</em>. GitHub repository. <a href="https://github.com/epiforecasts/bdbv-linelist-analysis" class="external-link">https://github.com/epiforecasts/bdbv-linelist-analysis</a>.
+</div>
+<div id="ref-klein2003" class="csl-entry">
+Klein, John P., and Melvin L. Moeschberger. 2003. <em>Survival Analysis: Techniques for Censored and Truncated Data</em>. 2nd ed. Springer. <a href="https://doi.org/10.1007/b97377" class="external-link">https://doi.org/10.1007/b97377</a>.
 </div>
 <div id="ref-park2024estimating" class="csl-entry">
 Park, Sang Woo, Andrei R. Akhmetzhanov, Kelly Charniga, et al. 2024. <span>“Estimating Epidemiological Delay Distributions for Infectious Diseases.”</span> <em>medRxiv</em>, ahead of print. <a href="https://doi.org/10.1101/2024.01.12.24301247" class="external-link">https://doi.org/10.1101/2024.01.12.24301247</a>.

@@ -31,6 +31,7 @@
     <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/primary-events.html">Primary event distributions</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
+    <li><a class="dropdown-item" href="../articles/meta.html">Fitting to published estimates</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -197,6 +198,150 @@
 
         </dt>
         <dd>Check if data has the <code>epidist_data</code> class</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="estimates-data">Estimates data<a class="anchor" aria-label="anchor" href="#estimates-data"></a></h3>
+      <div class="section-desc"><p>Functions for preparing published summary estimates</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code>
+
+        </dt>
+        <dd>Create an <code>epidist_estimates_data</code> object</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_estimates_data.data.frame.html">as_epidist_estimates_data(<i>&lt;data.frame&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Create an <code>epidist_estimates_data</code> object from a data frame</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_estimates_data.epidist_estimates_data.html">as_epidist_estimates_data(<i>&lt;epidist_estimates_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Return an <code>epidist_estimates_data</code> object unchanged</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_estimates_data.epidist_multivariate.html">as_epidist_estimates_data(<i>&lt;epidist_multivariate&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Create an <code>epidist_estimates_data</code> object from a multivariate representation</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_estimates_data.list.html">as_epidist_estimates_data(<i>&lt;list&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Combine <code>epidist_estimates_data</code> objects from several studies</dd>
+
+        <dt>
+
+          <code><a href="assert_epidist.epidist_estimates_data.html">assert_epidist(<i>&lt;epidist_estimates_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Assert validity of <code>epidist_estimates_data</code> objects</dd>
+
+        <dt>
+
+          <code><a href="epidist_estimates_parameters.html">epidist_estimates_parameters()</a></code>
+
+        </dt>
+        <dd>Report a study that published the parameters of a distribution it fitted</dd>
+
+        <dt>
+
+          <code><a href="epidist_estimates_summaries.html">epidist_estimates_summaries()</a></code>
+
+        </dt>
+        <dd>Report a study that published summaries of its delays</dd>
+
+        <dt>
+
+          <code><a href="is_epidist_estimates_data.html">is_epidist_estimates_data()</a></code>
+
+        </dt>
+        <dd>Check if data has the <code>epidist_estimates_data</code> class</dd>
+
+        <dt>
+
+          <code><a href="new_epidist_estimates_data.html">new_epidist_estimates_data()</a></code>
+
+        </dt>
+        <dd>Class constructor for <code>epidist_estimates_data</code> objects</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="multivariate-representation">Multivariate representation<a class="anchor" aria-label="anchor" href="#multivariate-representation"></a></h3>
+      <div class="section-desc"><p>Functions for representing draws of a set of parameters</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as_epidist_multivariate.html">as_epidist_multivariate()</a></code>
+
+        </dt>
+        <dd>Create an <code>epidist_multivariate</code> object</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_multivariate.data.frame.html">as_epidist_multivariate(<i>&lt;data.frame&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Create an <code>epidist_multivariate</code> object from a data frame of draws</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_multivariate.matrix.html">as_epidist_multivariate(<i>&lt;matrix&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Create an <code>epidist_multivariate</code> object from a matrix of draws</dd>
+
+        <dt>
+
+          <code><a href="assert_epidist.epidist_multivariate.html">assert_epidist(<i>&lt;epidist_multivariate&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Assert validity of <code>epidist_multivariate</code> objects</dd>
+
+        <dt>
+
+          <code><a href="is_epidist_multivariate.html">is_epidist_multivariate()</a></code>
+
+        </dt>
+        <dd>Check if an object has the <code>epidist_multivariate</code> class</dd>
+
+        <dt>
+
+          <code><a href="new_epidist_multivariate.html">new_epidist_multivariate()</a></code>
+
+        </dt>
+        <dd>Class constructor for <code>epidist_multivariate</code> objects</dd>
+
+        <dt>
+
+          <code><a href="print.epidist_multivariate.html">print(<i>&lt;epidist_multivariate&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print an <code>epidist_multivariate</code> object</dd>
+
+        <dt>
+
+          <code><a href="vcov.epidist_multivariate.html">vcov(<i>&lt;epidist_multivariate&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The covariance matrix of an <code>epidist_multivariate</code> object</dd>
       </dl></div><div class="section level2">
       <h2 id="models">Models<a class="anchor" aria-label="anchor" href="#models"></a></h2>
 
@@ -412,6 +557,106 @@
         </dt>
         <dd>Class constructor for <code>epidist_marginal_model</code> objects</dd>
       </dl></div><div class="section level2">
+
+      <h3 id="meta-model">Meta model<a class="anchor" aria-label="anchor" href="#meta-model"></a></h3>
+      <div class="section-desc"><p>Specific methods for the meta model</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as_epidist_meta_model.NULL.html">as_epidist_meta_model(<i>&lt;NULL&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The meta model method for summary estimates only</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_meta_model.html">as_epidist_meta_model()</a></code>
+
+        </dt>
+        <dd>Convert an object to an <code>epidist_meta_model</code> object</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_meta_model.epidist_aggregate_data.html">as_epidist_meta_model(<i>&lt;epidist_aggregate_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The meta model method for <code>epidist_aggregate_data</code> objects</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_meta_model.epidist_estimates_data.html">as_epidist_meta_model(<i>&lt;epidist_estimates_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The meta model method for <code>epidist_estimates_data</code> objects</dd>
+
+        <dt>
+
+          <code><a href="as_epidist_meta_model.epidist_linelist_data.html">as_epidist_meta_model(<i>&lt;epidist_linelist_data&gt;</i>)</a></code>
+
+        </dt>
+        <dd>The meta model method for <code>epidist_linelist_data</code> objects</dd>
+
+        <dt>
+
+          <code><a href="assert_epidist.epidist_meta_model.html">assert_epidist(<i>&lt;epidist_meta_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Assert validity of <code>epidist_meta_model</code> objects</dd>
+
+        <dt>
+
+          <code><a href="epidist_family_model.epidist_meta_model.html">epidist_family_model(<i>&lt;epidist_meta_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Create the model-specific component of an <code>epidist</code> custom family</dd>
+
+        <dt>
+
+          <code><a href="epidist_formula_model.epidist_meta_model.html">epidist_formula_model(<i>&lt;epidist_meta_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Define the model-specific component of an <code>epidist</code> custom formula for the meta model</dd>
+
+        <dt>
+
+          <code><a href="epidist_model_prior.epidist_meta_model.html">epidist_model_prior(<i>&lt;epidist_meta_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Model specific prior distributions for the meta model</dd>
+
+        <dt>
+
+          <code><a href="epidist_newdata.epidist_meta_model.html">epidist_newdata(<i>&lt;epidist_meta_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Build <code>newdata</code> for the meta model</dd>
+
+        <dt>
+
+          <code><a href="epidist_transform_data_model.epidist_meta_model.html">epidist_transform_data_model(<i>&lt;epidist_meta_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Transform data for the meta model</dd>
+
+        <dt>
+
+          <code><a href="is_epidist_meta_model.html">is_epidist_meta_model()</a></code>
+
+        </dt>
+        <dd>Check if data has the <code>epidist_meta_model</code> class</dd>
+
+        <dt>
+
+          <code><a href="new_epidist_meta_model.html">new_epidist_meta_model()</a></code>
+
+        </dt>
+        <dd>Class constructor for <code>epidist_meta_model</code> objects</dd>
+      </dl></div><div class="section level2">
       <h2 id="model-fitting">Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a></h2>
 
 
@@ -469,6 +714,13 @@
 
         </dt>
         <dd>Build <code>newdata</code> for the marginal model</dd>
+
+        <dt>
+
+          <code><a href="epidist_newdata.epidist_meta_model.html">epidist_newdata(<i>&lt;epidist_meta_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Build <code>newdata</code> for the meta model</dd>
 
         <dt>
 
@@ -648,6 +900,13 @@
 
         <dt>
 
+          <code><a href="epidist_model_prior.epidist_meta_model.html">epidist_model_prior(<i>&lt;epidist_meta_model&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Model specific prior distributions for the meta model</dd>
+
+        <dt>
+
           <code><a href="epidist_prior.html">epidist_prior()</a></code>
 
         </dt>
@@ -722,6 +981,20 @@
 
         <dt>
 
+          <code><a href="epidist_gen_meta_log_lik.html">epidist_gen_meta_log_lik()</a></code>
+
+        </dt>
+        <dd>Create a function to calculate the meta model log likelihood</dd>
+
+        <dt>
+
+          <code><a href="epidist_gen_meta_predict.html">epidist_gen_meta_predict()</a></code>
+
+        </dt>
+        <dd>Create a function to draw from the meta model posterior predictive distribution</dd>
+
+        <dt>
+
           <code><a href="epidist_gen_posterior_epred.html">epidist_gen_posterior_epred()</a></code>
 
         </dt>
@@ -791,6 +1064,13 @@
 
         </dt>
         <dd>Simulate secondary events based on a delay distribution</dd>
+
+        <dt>
+
+          <code><a href="simulate_study.html">simulate_study()</a></code>
+
+        </dt>
+        <dd>Simulate the summaries a published study would have reported</dd>
 
         <dt>
 

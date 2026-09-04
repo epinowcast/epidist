@@ -295,8 +295,373 @@
 - Added a `render-vignettes` workflow that rebuilds the precomputed
   vignettes and opens a pull request with the result.
 
+### Models
+
+- Added the meta model, for fitting to summarised and potentially biased
+  published estimates, jointly with individual level data. Published
+  estimates are forward modelled from the study’s own estimation
+  procedure, so summaries that did not adjust for right truncation or
+  that treated interval censored data as continuous can still contribute
+  unbiased information, given correct metadata describing what each
+  study did. The meta model is experimental and its interface may still
+  change. See
+  [`as_epidist_meta_model()`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.md).
+  See [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Added
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  for preparing published summary estimates, with documentation of the
+  study metadata the meta model needs. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta model supports studies that stopped collecting at a calendar
+  date through the `trunc_design` field of
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md),
+  which weights the estimand by the follow up available to each delay
+  rather than conditioning on a single cohort cutoff. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta model supports midpoint imputation, where a study assigned
+  each delay to the centre of the interval it was observed in, as
+  `cens_adjusted` code 3. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- A standard error supplied for a quantile row of
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  is now interpreted on the delay scale, as studies report it, and the
+  row is fitted on that scale against the implied quantile. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  now rejects a reported quantile at or beyond the largest delay its
+  study could have seen, which would otherwise contribute a constant to
+  the likelihood rather than information. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta model now fits the summaries a study computed from the same
+  delays jointly rather than as independent terms. A mean with a
+  standard deviation uses the asymptotic bivariate normal of the pair,
+  and a set of quantiles uses the multinomial mass of the delays falling
+  between them. This removes the over-weighting of a study reporting a
+  median with an interquartile range. One observation is now a group of
+  summaries, so
+  [`log_lik()`](https://mc-stan.org/rstantools/reference/log_lik.html)
+  and [`loo()`](https://mc-stan.org/loo/reference/loo.html) work at that
+  level. See [\#620](https://github.com/epinowcast/epidist/issues/620).
+- A quantile reported by a study that took integer date differences from
+  a cohort now costs three distribution function evaluations rather than
+  one per grid cell, because the grid is normalised by the distribution
+  function at its top. On the quantile reporting studies of the meta
+  vignette this cuts the evaluations they need per gradient from 480
+  to 36. The shortcut does not apply to a study that stopped collecting
+  at a calendar date, which reweights each cell before renormalising and
+  so keeps the full grid. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The implied quantile of a continuous estimand is inverted exactly
+  where the family quantile function exists and refined by Newton steps
+  otherwise, so covariance rows with quantile members and quantile rows
+  with a delay scale standard error are no longer limited by the
+  quadrature spacing. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta model gained several further speed ups. Softmax normalisation
+  of the cohort grid mass is replaced by division where the normaliser
+  is already known. A zero growth rate accrual design skips its
+  exponential terms. R post-processing batches and caches implied
+  summaries across grouped rows sharing a design. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The quadrature resolution used for truncated continuous moments is now
+  set by `options(epidist.meta_n_quad = )`, defaulting to 100 intervals.
+  This is the floor of the resolution chosen per study, see below. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Added
+  [`as_epidist_multivariate()`](https://epidist.epinowcast.org/reference/as_epidist_multivariate.md),
+  which summarises draws of a set of parameters by their mean vector and
+  covariance matrix, over an optional trajectory index. Passing the
+  result to
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  gives a vector of reported summaries with the covariance between them,
+  fitted as a multivariate normal. This is the format we recommend when
+  a study cannot share its delays, because it keeps the correlation
+  between the quantities it reports. Draws of the natural parameters of
+  a fitted distribution are pushed through to the summaries the
+  distribution implies, so no linearisation is used. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Added
+  [`epidist_estimates_summaries()`](https://epidist.epinowcast.org/reference/epidist_estimates_summaries.md)
+  and
+  [`epidist_estimates_parameters()`](https://epidist.epinowcast.org/reference/epidist_estimates_parameters.md),
+  which take one study’s contribution in the shape it reported it.
+  [`epidist_estimates_parameters()`](https://epidist.epinowcast.org/reference/epidist_estimates_parameters.md)
+  converts the parameters of a distribution a study fitted into the
+  summaries that distribution implies, carrying any reported parameter
+  standard errors onto that scale by the delta method as a covariance
+  over the summaries, which is fitted jointly and carries the study’s
+  information about its parameters exactly. The family a study fitted
+  need not match the family being fitted to it. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  combines contributions passed in a list, so studies reporting in
+  different shapes assemble into one object. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta model gained a fifth censoring adjustment code,
+  `cens_adjusted = 4`, for a study that placed the primary event at the
+  midpoint of its window and integrated the secondary interval. Its
+  estimand is that of `cens_adjusted = 2` moved down the delay axis by
+  half a primary window, so its reported mean loses the half window bias
+  while its spread keeps the primary window’s variance. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta model supports left truncation through `delay_min`, on both
+  individual level rows and summary rows. A study that only counted
+  delays above a minimum has every implied summary conditioned on the
+  delay exceeding it. See
+  [\#596](https://github.com/epinowcast/epidist/issues/596) and
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- A single quantile reported by a study that summarised integer day
+  delays is now fitted as the cell in which the empirical distribution
+  function crossed its probability, the exact event a rounded quantile
+  stands for, rather than with a multinomial on the continuity corrected
+  grid whose claimed precision keeps growing with the sample size. Two
+  quantiles reported at the same value are accepted and merged into one
+  cell, and
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  warns when a large study reports several such quantiles, whose joint
+  likelihood is still overconfident. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- A multinomial cell that underflows is floored rather than sent to
+  zero, so the R and Stan log likelihoods are both finite for a badly
+  misfitting draw and
+  [`loo()`](https://mc-stan.org/loo/reference/loo.html) keeps working.
+  See [\#620](https://github.com/epinowcast/epidist/issues/620).
+- [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  refuses more summaries from a fitted family than it has parameters,
+  and a covariance over reported summaries that is singular to within a
+  relative eigenvalue of 1e-4, because such a row charges any error in
+  the implied summaries against a vanishing eigenvalue. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  warns when the relative standard error of a reported standard
+  deviation, at the kurtosis its mean and standard deviation imply under
+  a lognormal delay, exceeds a quarter, which is where the normal
+  sampling likelihood of a standard deviation stops being calibrated.
+  See [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta model takes a `primary` argument for its individual level
+  rows, as the marginal model does. With `primary = "expgrowth"` the
+  growth rate of primary events is estimated as the `pgrowth`
+  distributional parameter. Summary rows are unchanged and keep the
+  `growth_rate` metadata of their study as a known tilt. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Added an
+  [`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md)
+  method for the meta model, which puts a `normal(1, 1)` prior on the
+  intercept of `mu` where it is on the log scale, the scale of the
+  lognormal family prior. The centre is fixed rather than taken from the
+  reported values, because a prior chosen from the data would put the
+  posterior of a small review where the data already sit. The same
+  method puts a half normal prior with a standard deviation of 0.25 on
+  the between study standard deviation of any group level term, where
+  the `brms` default is a half Student t with scale 2.5. Closes
+  [\#683](https://github.com/epinowcast/epidist/issues/683). Without it
+  a Gamma or Weibull fit to summaries alone took the `brms` default,
+  which is centred on the response column and so on a delay of zero,
+  because that column is a placeholder on summary rows. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Added an
+  [`epidist_newdata()`](https://epidist.epinowcast.org/reference/epidist_newdata.md)
+  method for the meta model, which builds an individual level row with
+  the same arguments as the marginal model method, so predicting from a
+  meta model fit no longer means copying a summary row out of the model
+  data. See [\#620](https://github.com/epinowcast/epidist/issues/620).
+- [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  now rejects a reported mean at or beyond the observation time of a
+  study that did not adjust for right truncation, a standard error of
+  zero, a standard deviation of zero, and a `cens_adjusted` code that is
+  not a whole number from 0 to 4. It warns, rather than messages, when
+  no `trunc_adjusted` column is supplied and a study is therefore
+  assumed to have adjusted for right truncation. The `growth_rate`
+  documentation now separates its within window tilt from the accrual
+  weight it applies under `trunc_design = "accrual"`, and points to the
+  `primary = "expgrowth"` option of the marginal model for individual
+  level data. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  accepts `NA` censoring windows for a study that fully adjusted for
+  censoring (`cens_adjusted = 1`), since none of its estimands read
+  them, and rejects them with a message naming the study for every other
+  code. See [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The advisory messages of
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  are now two short sentences naming the studies, and the input row
+  where a single summary is meant, and point at a new Checks section of
+  its documentation that carries the reasoning. They run once, when the
+  estimates are built, rather than again when the object is passed to
+  [`as_epidist_meta_model()`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.md).
+  See [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The advisory messages of
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  now say what each problem is in plain language, run once on the
+  studies combined in a list rather than once per study, and are
+  followed by a single pointer to the Checks section, with
+  [`simulate_study()`](https://epidist.epinowcast.org/reference/simulate_study.md)
+  leaving them to the combined object and `advise = FALSE` skipping
+  them. See [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The midpoint imputation codes of the meta model (`cens_adjusted` 3
+  and 4) now move `delay_min` with the midpoint shift, so a study that
+  dropped reported delays below a minimum is left truncated at the right
+  point. Before this the implied mean was 5 to 15% low for code 4 and up
+  to 24% high for code 3 with a wide secondary window. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- A study that adjusted for right truncation and counted only delays
+  above `delay_min` now has its moments left truncated analytically, so
+  they describe the same estimand as its quantile rows and no longer
+  depend on `max_delay`. For a heavy tailed delay the implied standard
+  deviation was 6 to 17% low before this. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The accrual weight on the discrete grid now cuts each reporting cell
+  at the primary windows it spans, so it is exact for unequal censoring
+  windows whenever the collection window is a multiple of `pwindow`.
+  Weighting at the cell’s lower edge put the implied mean 12 to 36% low
+  for a daily primary and weekly secondary window. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta model now chooses its quadrature resolution per study from
+  the spread the study reported, so that the node spacing is at most a
+  quarter of that spread, with `options(epidist.meta_n_quad)` as the
+  floor and 2000 intervals as a cap the option lifts when set above it.
+  The number travels with each summary row as its `n_quad` slot rather
+  than being compiled into the Stan code. Before this a fixed 100
+  intervals over the default `max_delay` put the implied standard
+  deviation of a delay with a coefficient of variation of 0.05 out by a
+  factor of two and pinned its kurtosis at the floor, which made a
+  reported standard deviation almost infinitely precise.
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  now warns only when the cap leaves a study unresolved. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- A draw whose implied moments overflow is rejected on every meta model
+  moment row rather than returning `NaN` for an ungrouped standard
+  deviation. The analytic moments themselves now reject such a draw in
+  Stan and return the failure vector in R, so a covariance row rejects a
+  very wide draw instead of carrying an infinite gradient, and the
+  posterior predictive of such a draw is `NA` rather than a `NaN`
+  standard error. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta model no longer evaluates the primary censored distribution
+  function at grid or quadrature nodes deep in the lower tail of a
+  narrow delay, where the Stan function of `primarycensored` has a
+  finite value with a `NaN` gradient. A node whose log distribution
+  function is certainly below -100, decided from a closed form bound on
+  the parameters, is treated as holding no mass in both implementations.
+  CmdStan’s gradient diagnostic now passes on every design of the meta
+  vignette at a log standard deviation of 0.03, where four of them could
+  not start before. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Fixed two gaps in the Stan mirror of a left truncated midpoint code:
+  the delay scale quantile path sized its nodes from the unshifted
+  `delay_min`, and the Newton refinement of an implied quantile
+  normalised from `delay_min` rather than the moved left truncation
+  point of a code 4 study. The Stan crossing cell of a single integer
+  day quantile also takes its binomial upper tail through the accurate
+  side, which had put it 5e-3 away from R at a poorly fitting draw. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The crossing cell likelihood of a single integer day quantile is now
+  taken as the difference of two binomial tails on the side where both
+  are small, with each tail summed term by term once it is far out, and
+  as a sum over the count below the cell where the difference still
+  underflows, in R and in Stan. Before this the difference cancelled or
+  underflowed to `-Inf` when the implied distribution put the reported
+  quantile far into its tail, which stopped chains initialising on the
+  Ebola fit of the meta vignette, and Stan’s binomial distribution
+  function had non finite partial derivatives in the same region, which
+  trapped a chain of the shared test fixture in one run in four.
+  CmdStan’s gradient diagnostic now matches finite differences at every
+  probed point. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  rejects a `cens_adjusted = 4` study whose `delay_min` plus half its
+  `pwindow` reaches the grid cutoff. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta model intercept prior for the lognormal family is now on the
+  log scale, as it is for a log link. The lognormal `mu` has an identity
+  link but is `meanlog`, so it was treated as the delay itself. A
+  calibration check of a study reporting a mean with its standard error
+  from 25 delays found it, where the 90% intervals covered the truth
+  about half of the time. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Added opt in simulation checks of the meta model:
+  `EPIDIST_META_RECOVERY=true` fits one meta model per censoring
+  adjustment code and truncation design, and
+  `EPIDIST_META_CALIBRATION=true` fits forty replicates of two study
+  designs and checks interval coverage and the rank of the truth. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Added
+  [`simulate_study()`](https://epidist.epinowcast.org/reference/simulate_study.md),
+  which applies the observation and estimation procedure of one
+  published study to a simulated line list and returns the summaries
+  that study would have reported as an `epidist_estimates_data` object.
+  It covers every censoring adjustment code, both truncation designs, a
+  minimum delay and a subsample, and reports a mean and standard
+  deviation, quantiles, a mean with a standard error, or a multivariate
+  mean and standard deviation with their bootstrap covariance. Closes
+  [\#672](https://github.com/epinowcast/epidist/issues/672).
+
+### Documentation
+
+- Added a “The meta model” section to the model guide vignette, with the
+  forward model and sampling likelihoods used for published summary
+  estimates. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Added a vignette showcasing the meta model on simulated data. Its case
+  study builds nine studies, each applying a different estimation
+  procedure to the same line list, so the recovery result tests every
+  bias the model adjusts for. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta vignette is now precomputed from a `.Rmd.orig` source, so it
+  ships with the package. See
+  [\#619](https://github.com/epinowcast/epidist/issues/619) and
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- The meta vignette now works through the published Ebola onset to death
+  estimates collated by `epireview`. It adjusts for the phase of the
+  outbreak each estimate was made in, taking the retrospective studies
+  as the reference so the population level estimate is the one least
+  affected by right truncation, and reports the phase bias as a marginal
+  effect. It reports the population level posterior of the Gamma shape
+  and scale alongside the natural mean and standard deviation, and
+  compares the result with a modern re-analysis of one of the same line
+  lists. See [\#620](https://github.com/epinowcast/epidist/issues/620).
+
 ### Bug fixes
 
+- [`.delay_family()`](https://epidist.epinowcast.org/reference/dot-delay_family.md)
+  now strips the `meta_` prefix alongside `latent_` and `marginal_`.
+  Without it
+  [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
+  could not find the delay distribution of a meta model fit, because the
+  family is named `meta_gamma` rather than `gamma`. See
+  [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Meta model objects now carry the shared `epidist_data` class, as the
+  latent and marginal model objects do, so they are re-checked when
+  modified and the helpers that dispatch on that class no longer skip
+  them. Closes
+  [\#684](https://github.com/epinowcast/epidist/issues/684).
+- The coarse quantile warning of
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  now keys on the smallest quantile a study reported rather than the
+  largest, because that is the one nearest the edge of the discrete grid
+  and it biased the fitted spread of a midpoint study that escaped the
+  warning. Closes
+  [\#682](https://github.com/epinowcast/epidist/issues/682).
+- The short grid cutoff warning of
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  now judges `max_delay` by a lognormal matched to the reported mean and
+  standard deviation, or to the median and largest quantile where only
+  quantiles are reported, and fires when more than 2% of its second
+  moment lies beyond the cutoff. The previous `mean + 10 sd` yardstick
+  missed a heavy tailed study whose implied standard deviation was 6.5%
+  low at the default cutoff. Closes
+  [\#681](https://github.com/epinowcast/epidist/issues/681).
+- The default `max_delay` of
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  is now the delay beyond which one percent of the second moment of a
+  lognormal matched to the study’s summaries lies, rounded up to a whole
+  number of secondary windows with a floor of ten, in place of twenty
+  times the largest reported value. This is the yardstick of the short
+  cutoff check, so the default never trips it, and it gives a delay of
+  mean 7 and standard deviation 3.6 a cutoff of 31 days rather than 140.
+  A study reporting a single quantile or a mean with a standard error,
+  where nothing can be matched, gets five times its largest reported
+  value. See [\#620](https://github.com/epinowcast/epidist/issues/620).
 - Added a missing Jacobian adjustment to the latent model for
   observations whose primary and secondary censoring windows overlap.
   Without it the latent model did not target the same likelihood as the

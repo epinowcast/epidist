@@ -36,4 +36,5 @@ Other simulate:
 [`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md),
 [`simulate_exponential_cases()`](https://epidist.epinowcast.org/reference/simulate_exponential_cases.md),
 [`simulate_gillespie()`](https://epidist.epinowcast.org/reference/simulate_gillespie.md),
+[`simulate_study()`](https://epidist.epinowcast.org/reference/simulate_study.md),
 [`simulate_uniform_cases()`](https://epidist.epinowcast.org/reference/simulate_uniform_cases.md)

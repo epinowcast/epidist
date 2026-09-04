@@ -267,6 +267,22 @@ For more advanced custom visualizations, you can also use
 as demonstrated in the [“Advanced features with Ebola
 data”](https://epidist.epinowcast.org/articles/ebola.html) vignette.
 
+### What is an observation in the meta model?
+
+[`as_epidist_meta_model()`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.md)
+fits the summaries a study computed from the same delays jointly, so one
+row of the model data is a group of summaries rather than a single
+reported value. This is the same situation as aggregated data, where one
+row stands for many individual delays.
+[`brms::log_lik()`](https://mc-stan.org/rstantools/reference/log_lik.html)
+and [`loo::loo()`](https://mc-stan.org/loo/reference/loo.html) work at
+the row level, so their values are per group, and
+[`pp_check()`](https://mc-stan.org/bayesplot/reference/pp_check.html)
+needs the same care as described above. Predictions for summary rows are
+the reported summary itself rather than a delay, so restrict
+[`pp_check()`](https://mc-stan.org/bayesplot/reference/pp_check.html) to
+the individual level rows of a mixed fit.
+
 ### I’d like to run a simulation study
 
 We recommend use of the [`purrr`](https://purrr.tidyverse.org/) package

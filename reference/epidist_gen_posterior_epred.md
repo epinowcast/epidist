@@ -40,4 +40,6 @@ for details on how this is used within `brms`.
 
 Other gen:
 [`epidist_gen_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_log_lik.md),
+[`epidist_gen_meta_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_meta_log_lik.md),
+[`epidist_gen_meta_predict()`](https://epidist.epinowcast.org/reference/epidist_gen_meta_predict.md),
 [`epidist_gen_posterior_predict()`](https://epidist.epinowcast.org/reference/epidist_gen_posterior_predict.md)
