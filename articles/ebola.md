@@ -80,9 +80,9 @@ fraction <- 5
 ndistrict <- length(unique(sierra_leone_ebola_data$district))
 ```
 
-Figure [**??**](#fig:ebola-outbreak) shows the dates of symptom onset
-and sample testing for cases across in each district. (In this figure,
-we filter down to every 5th case in order to avoid overplotting.) We can
+Figure [2.1](#fig:ebola-outbreak) shows the dates of symptom onset and
+sample testing for cases across in each district. (In this figure, we
+filter down to every 5th case in order to avoid overplotting.) We can
 see that the start time and course of the epidemic varies across
 districts.
 
@@ -115,8 +115,8 @@ p_outbreak
 ![Primary and secondary event times for every 5th case, over the 14
 districts of Sierra Leone.](figures/ebola-ebola-outbreak-1.png)
 
-Primary and secondary event times for every 5th case, over the 14
-districts of Sierra Leone.
+Figure 2.1: Primary and secondary event times for every 5th case, over
+the 14 districts of Sierra Leone.
 
 ## 3 Fitting sex-district stratified delay distributions
 
@@ -257,12 +257,12 @@ fit <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 7.3 seconds.
-#> Chain 1 finished in 7.6 seconds.
+#> Chain 2 finished in 5.7 seconds.
+#> Chain 1 finished in 6.0 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 7.4 seconds.
-#> Total execution time: 7.7 seconds.
+#> Mean chain execution time: 5.8 seconds.
+#> Total execution time: 6.0 seconds.
 ```
 
 The `fit` object is a
@@ -314,12 +314,12 @@ fit_sex <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 15.4 seconds.
-#> Chain 2 finished in 15.6 seconds.
+#> Chain 2 finished in 12.3 seconds.
+#> Chain 1 finished in 12.4 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 15.5 seconds.
-#> Total execution time: 15.8 seconds.
+#> Mean chain execution time: 12.3 seconds.
+#> Total execution time: 12.5 seconds.
 ```
 
 A summary of the model shows that males tend to have longer delays (the
@@ -380,12 +380,12 @@ fit_sex_district <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 212.0 seconds.
-#> Chain 2 finished in 234.9 seconds.
+#> Chain 1 finished in 165.5 seconds.
+#> Chain 2 finished in 183.8 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 223.5 seconds.
-#> Total execution time: 235.0 seconds.
+#> Mean chain execution time: 174.6 seconds.
+#> Total execution time: 184.0 seconds.
 ```
 
 **As this is a longer running model (~ 2 minutes) we have reduced the
@@ -484,10 +484,10 @@ function to generate a posterior prediction function for the
 [`lognormal()`](https://paulbuerkner.com/brms/reference/brmsfamily.html)
 distribution.
 
-In Figure [**??**](#fig:epred) we show the posterior expectation of the
+In Figure [3.1](#fig:epred) we show the posterior expectation of the
 delay distribution for each of the three fitted models. Figure
-[**??**](#fig:epred)B illustrates the higher mean of men as compared
-with women.
+[3.1](#fig:epred)B illustrates the higher mean of men as compared with
+women.
 
 Click to expand for code to the posterior expectation plots
 
@@ -538,8 +538,8 @@ epred_base_figure / epred_sex_figure / epred_sex_district_figure +
 ![The fitted posterior expectations of the delay distribution for each
 model.](figures/ebola-epred-1.png)
 
-The fitted posterior expectations of the delay distribution for each
-model.
+Figure 3.1: The fitted posterior expectations of the delay distribution
+for each model.
 
 ### 3.4 Linear predictor posteriors
 
@@ -547,7 +547,7 @@ The `tidybayes` package also allows users to generate draws of the
 linear predictors for all distributional parameters using
 [`tidybayes::add_linpred_draws()`](https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html).
 For example, for the `mu` parameter in the sex-district stratified model
-(Figure [**??**](#fig:linpred-sex-district)):
+(Figure [3.2](#fig:linpred-sex-district)):
 
 Click to expand for code to prepare linear predictor plot
 
@@ -577,11 +577,11 @@ Section 3.3 are a function of both the mu linear predictor posterior
 distribution and sigma linear predictor posterior
 distribution.](figures/ebola-linpred-sex-district-1.png)
 
-The posterior distribution of the linear predictor of `mu` parameter
-within the sex-district stratified model. The posterior expectations in
-Section [3.3](#posterior-expectation) are a function of both the `mu`
-linear predictor posterior distribution and `sigma` linear predictor
-posterior distribution.
+Figure 3.2: The posterior distribution of the linear predictor of `mu`
+parameter within the sex-district stratified model. The posterior
+expectations in Section [3.3](#posterior-expectation) are a function of
+both the `mu` linear predictor posterior distribution and `sigma` linear
+predictor posterior distribution.
 
 ### 3.5 Delay posterior distributions
 
@@ -597,9 +597,8 @@ To generate a discrete probability mass function (PMF) we predict the
 delay distribution that would be observed with daily censoring and no
 right truncation. To do this, we set each of `pwindow` and `swindow` to
 1 for daily censoring, and leave `relative_obs_time` at its default of
-`Inf` for no right truncation. Figure [**??**](#fig:pmf) shows the
-result, where the few delays greater than 30 are omitted from the
-figure.
+`Inf` for no right truncation. Figure [3.3](#fig:pmf) shows the result,
+where the few delays greater than 30 are omitted from the figure.
 
 Click to expand for code to prepare PMF plots
 
@@ -662,14 +661,14 @@ pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
 ![Posterior predictions of the discrete probability mass function for
 each of the fitted models.](figures/ebola-pmf-1.png)
 
-Posterior predictions of the discrete probability mass function for each
-of the fitted models.
+Figure 3.3: Posterior predictions of the discrete probability mass
+function for each of the fitted models.
 
 #### 3.5.2 Continuous probability density function
 
 The posterior predictive distribution under no truncation and no
 censoring. That is to produce continuous delay times (Figure
-[**??**](#fig:pdf)):
+[3.4](#fig:pdf)):
 
 Click to expand for code to prepare PDF plots
 
@@ -730,8 +729,8 @@ pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
 ![Posterior predictions of the continuous probability density function
 for each of the fitted models.](figures/ebola-pdf-1.png)
 
-Posterior predictions of the continuous probability density function for
-each of the fitted models.
+Figure 3.4: Posterior predictions of the continuous probability density
+function for each of the fitted models.
 
 ## 4 Conclusion
 

@@ -202,7 +202,7 @@ mcmc_trace(fit, pars = c("Intercept", "Intercept_sigma"))
 
 ![plot of chunk unnamed-chunk-4](figures/faq-unnamed-chunk-4-1.png)
 
-plot of chunk unnamed-chunk-4
+Figure 1: plot of chunk unnamed-chunk-4
 
 We also provide a function
 [`epidist_diagnostics()`](https://epidist.epinowcast.org/reference/epidist_diagnostics.md)
@@ -217,7 +217,7 @@ epidist_diagnostics(fit)
     ## # A tibble: 1 × 8
     ##    time samples max_rhat divergent_transitions per_divergent_transitions
     ##   <dbl>   <dbl>    <dbl>                 <dbl>                     <dbl>
-    ## 1  2.80    1000     1.00                     0                         0
+    ## 1  2.18    1000     1.00                     0                         0
     ## # ℹ 3 more variables: max_treedepth <dbl>, no_at_max_treedepth <int>,
     ## #   per_at_max_treedepth <dbl>
 
@@ -266,7 +266,7 @@ pp_check(fit, newdata = data_expanded, ndraws = 100)
 
 ![plot of chunk unnamed-chunk-6](figures/faq-unnamed-chunk-6-1.png)
 
-plot of chunk unnamed-chunk-6
+Figure 2: plot of chunk unnamed-chunk-6
 
 For more advanced custom visualizations, you can also use
 [`tidybayes::add_predicted_draws()`](https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html)
@@ -400,7 +400,7 @@ pred |>
 
 ![plot of chunk unnamed-chunk-9](figures/faq-unnamed-chunk-9-1.png)
 
-plot of chunk unnamed-chunk-9
+Figure 3: plot of chunk unnamed-chunk-9
 
 ``` r
 
@@ -435,7 +435,7 @@ powerscale_plot_dens(fit, variable = c("Intercept", "Intercept_sigma")) +
 
 ![plot of chunk unnamed-chunk-10](figures/faq-unnamed-chunk-10-1.png)
 
-plot of chunk unnamed-chunk-10
+Figure 4: plot of chunk unnamed-chunk-10
 
 ## What do the parameters in my model output correspond to?
 
@@ -516,7 +516,7 @@ ggplot(draws_pmf, aes(x = .prediction)) +
 
 ![plot of chunk unnamed-chunk-11](figures/faq-unnamed-chunk-11-1.png)
 
-plot of chunk unnamed-chunk-11
+Figure 5: plot of chunk unnamed-chunk-11
 
 Importantly, this functionality is only available for `epidist` models
 using `brms` families that have a `log_lik_censor` method implemented
@@ -549,6 +549,11 @@ avg_comparisons(
   variables = list(location = c(0, 1))
 )
 ```
+
+    ## Warning: The training data could not be extracted reliably from the model object. Column types, factor levels, or values may have been coerced or altered. It is safer to use `set_modeldata(model, data)` to attach the training data explicitly. Original warning from `insight::get_data()`: Could not recover model data from environment. Please make sure your
+    ##   data is available in your workspace.
+    ##   Trying to retrieve data from the model frame now. Original warning from `insight::get_data()`: Following potential variables could not be found in the data: n) +
+    ##   vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min This warning appears once per session.
 
     ##
     ##  Estimate 2.5 % 97.5 %

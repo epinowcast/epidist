@@ -251,8 +251,11 @@ For example, the function <code><a href="https://mc-stan.org/bayesplot/reference
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mc-stan.org/bayesplot/" class="external-link">bayesplot</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/MCMC-traces.html" class="external-link">mcmc_trace</a></span><span class="op">(</span><span class="va">fit</span>, pars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Intercept"</span>, <span class="st">"Intercept_sigma"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="figures/faq-unnamed-chunk-4-1.png" alt="plot of chunk unnamed-chunk-4"><div class="figcaption">plot of chunk unnamed-chunk-4</div>
+<div class="figure">
+<span style="display:block;" id="fig:unnamed-chunk-4"></span>
+<img src="figures/faq-unnamed-chunk-4-1.png" alt="plot of chunk unnamed-chunk-4"><p class="caption">
+Figure 1: plot of chunk unnamed-chunk-4
+</p>
 </div>
 <p>We also provide a function <code><a href="../reference/epidist_diagnostics.html">epidist_diagnostics()</a></code> which can be used to obtain common diagnostics used to assess the quality of a fitted model.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -260,7 +263,7 @@ For example, the function <code><a href="https://mc-stan.org/bayesplot/reference
 <pre><code><span><span class="co">## # A tibble: 1 × 8</span></span>
 <span><span class="co">##    time samples max_rhat divergent_transitions per_divergent_transitions</span></span>
 <span><span class="co">##   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;                 &lt;dbl&gt;                     &lt;dbl&gt;</span></span>
-<span><span class="co">## 1  2.80    1000     1.00                     0                         0</span></span>
+<span><span class="co">## 1  2.18    1000     1.00                     0                         0</span></span>
 <span><span class="co">## # ℹ 3 more variables: max_treedepth &lt;dbl&gt;, no_at_max_treedepth &lt;int&gt;,</span></span>
 <span><span class="co">## #   per_at_max_treedepth &lt;dbl&gt;</span></span></code></pre>
 </div>
@@ -287,8 +290,11 @@ Then, pass this expanded data to the <code>newdata</code> argument of <code><a h
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run pp_check with the expanded data</span></span>
 <span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">pp_check</a></span><span class="op">(</span><span class="va">fit</span>, newdata <span class="op">=</span> <span class="va">data_expanded</span>, ndraws <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="figures/faq-unnamed-chunk-6-1.png" alt="plot of chunk unnamed-chunk-6"><div class="figcaption">plot of chunk unnamed-chunk-6</div>
+<div class="figure">
+<span style="display:block;" id="fig:unnamed-chunk-6"></span>
+<img src="figures/faq-unnamed-chunk-6-1.png" alt="plot of chunk unnamed-chunk-6"><p class="caption">
+Figure 2: plot of chunk unnamed-chunk-6
+</p>
 </div>
 <p>For more advanced custom visualizations, you can also use <code><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">tidybayes::add_predicted_draws()</a></code> as demonstrated in the <a href="https://epidist.epinowcast.org/articles/ebola.html">“Advanced features with Ebola data”</a> vignette.</p>
 </div>
@@ -377,8 +383,11 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_log10</a></span><span class="op">(</span>labels <span class="op">=</span> <span class="va">comma</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.</span></span></code></pre>
-<div class="float">
-<img src="figures/faq-unnamed-chunk-9-1.png" alt="plot of chunk unnamed-chunk-9"><div class="figcaption">plot of chunk unnamed-chunk-9</div>
+<div class="figure">
+<span style="display:block;" id="fig:unnamed-chunk-9"></span>
+<img src="figures/faq-unnamed-chunk-9-1.png" alt="plot of chunk unnamed-chunk-9"><p class="caption">
+Figure 3: plot of chunk unnamed-chunk-9
+</p>
 </div>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">mean</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.99</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -397,8 +406,11 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/n-kall/priorsense" class="external-link">priorsense</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://n-kall.github.io/priorsense/reference/powerscale_plots.html" class="external-link">powerscale_plot_dens</a></span><span class="op">(</span><span class="va">fit</span>, variable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Intercept"</span>, <span class="st">"Intercept_sigma"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="float">
-<img src="figures/faq-unnamed-chunk-10-1.png" alt="plot of chunk unnamed-chunk-10"><div class="figcaption">plot of chunk unnamed-chunk-10</div>
+<div class="figure">
+<span style="display:block;" id="fig:unnamed-chunk-10"></span>
+<img src="figures/faq-unnamed-chunk-10-1.png" alt="plot of chunk unnamed-chunk-10"><p class="caption">
+Figure 4: plot of chunk unnamed-chunk-10
+</p>
 </div>
 </div>
 <div class="section level2">
@@ -485,8 +497,11 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 <span><span class="co">## (`stat_count()`).</span></span></code></pre>
 <pre><code><span><span class="co">## Warning: Removed 2 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_bar()`).</span></span></code></pre>
-<div class="float">
-<img src="figures/faq-unnamed-chunk-11-1.png" alt="plot of chunk unnamed-chunk-11"><div class="figcaption">plot of chunk unnamed-chunk-11</div>
+<div class="figure">
+<span style="display:block;" id="fig:unnamed-chunk-11"></span>
+<img src="figures/faq-unnamed-chunk-11-1.png" alt="plot of chunk unnamed-chunk-11"><p class="caption">
+Figure 5: plot of chunk unnamed-chunk-11
+</p>
 </div>
 <p>Importantly, this functionality is only available for <code>epidist</code> models using <code>brms</code> families that have a <code>log_lik_censor</code> method implemented internally in <code>brms</code>. If you are using another family, consider <a href="https://github.com/epinowcast/epidist/pulls" class="external-link">submitting a pull request</a> to implement these methods!</p>
 <div class="section level3">
@@ -506,6 +521,10 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 <span>  <span class="va">fit_location</span>,</span>
 <span>  variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>location <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: The training data could not be extracted reliably from the model object. Column types, factor levels, or values may have been coerced or altered. It is safer to use `set_modeldata(model, data)` to attach the training data explicitly. Original warning from `insight::get_data()`: Could not recover model data from environment. Please make sure your</span></span>
+<span><span class="co">##   data is available in your workspace.</span></span>
+<span><span class="co">##   Trying to retrieve data from the model frame now. Original warning from `insight::get_data()`: Following potential variables could not be found in the data: n) +</span></span>
+<span><span class="co">##   vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min This warning appears once per session.</span></span></code></pre>
 <pre><code><span><span class="co">##</span></span>
 <span><span class="co">##  Estimate 2.5 % 97.5 %</span></span>
 <span><span class="co">##      5.66  2.22   29.9</span></span>
@@ -520,7 +539,7 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 </h3>
 <p>The <code>cmdstanr</code> backend is typically more performant than the default <code>rstan</code> backend.
 To use the <code>cmdstanr</code> backend, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "2.39.0"</span></span></code></pre>
 </div>

@@ -283,7 +283,7 @@ pars
 ```
 
 More comprehensively, the estimated posterior distributions are shown in
-Figure [**??**](#fig:posterior).
+Figure [3.1](#fig:posterior).
 
 Click to expand for code to create posterior distribution plot
 
@@ -309,13 +309,13 @@ p_posterior
 using each inference method, shown using
 tidybayes::stat_slabinterval().](figures/approx-inference-posterior-1.png)
 
-Estimated posterior distributions for the `mu` and `sigma` parameters
-using each inference method, shown using
+Figure 3.1: Estimated posterior distributions for the `mu` and `sigma`
+parameters using each inference method, shown using
 [`tidybayes::stat_slabinterval()`](https://mjskay.github.io/ggdist/reference/stat_slabinterval.html).
 
 ### 3.2 Comparison of resulting delay distributions
 
-Figure [**??**](#fig:delay-pdf) shows how the different `mu` and `sigma`
+Figure [3.2](#fig:delay-pdf) shows how the different `mu` and `sigma`
 posterior mean estimates from each inference method alter an estimated
 delay distribution.
 
@@ -346,8 +346,8 @@ p_delay_pdf
 mean estimated mu and sigma
 parameters.](figures/approx-inference-delay-pdf-1.png)
 
-Delay probability density functions obtained based on the posterior mean
-estimated `mu` and `sigma` parameters.
+Figure 3.2: Delay probability density functions obtained based on the
+posterior mean estimated `mu` and `sigma` parameters.
 
 ### 3.3 Comparison of time taken
 
@@ -367,19 +367,19 @@ times <- list(
 times
 #> $HMC
 #>    user  system elapsed
-#>   8.569   0.214   8.801
+#>   6.620   0.171   6.856
 #>
 #> $Laplace
 #>    user  system elapsed
-#>   0.952   0.103   1.228
+#>   0.712   0.084   0.899
 #>
 #> $ADVI
 #>    user  system elapsed
-#>   1.129   0.073   1.246
+#>   0.880   0.061   0.955
 #>
 #> $Pathfinder
 #>    user  system elapsed
-#>   0.670   0.119   0.872
+#>   0.288   0.060   0.352
 ```
 
 ## 4 Conclusion
