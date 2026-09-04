@@ -79,6 +79,35 @@ test_that("simulate_study returns a multivariate mean and sd", {
   expect_equal(sqrt(vcov[1, 1]), est$value[2] / sqrt(500), tolerance = 0.15)
 })
 
+test_that("simulate_study leaves the advisory checks to the combined object", { # nolint: line_length_linter.
+  # Three quantile studies on the daily grid each trip the coarse quantile
+  # and the overconfident checks. Built on their own they print nothing.
+  # Combined in a list each check prints once, naming every study, and the
+  # pointer to the documentation prints once after them.
+  studies <- lapply(c("A", "B", "C"), function(study) {
+    return(expect_silent(simulate_study(
+      study_obs, study,
+      report = "quantiles", trunc_adjusted = TRUE, max_delay = 60
+    )))
+  })
+  expect_silent(simulate_study(
+    study_obs, "D",
+    report = "multivariate", n = 200, trunc_adjusted = TRUE, max_delay = 60
+  ))
+  msgs <- capture_messages(as_epidist_estimates_data(studies))
+  coarse <- msgs[grepl("smallest counted delay", msgs, fixed = TRUE)]
+  expect_length(coarse, 1)
+  expect_true(grepl("\"A\" (row 1)", coarse, fixed = TRUE))
+  expect_true(grepl("\"B\" (row 4)", coarse, fixed = TRUE))
+  expect_true(grepl("\"C\" (row 7)", coarse, fixed = TRUE))
+  over <- msgs[grepl("overconfident", msgs, fixed = TRUE)]
+  expect_length(over, 1)
+  expect_true(grepl("\"A\", \"B\", and \"C\"", over, fixed = TRUE))
+  pointer <- msgs[grepl("Checks section", msgs, fixed = TRUE)]
+  expect_length(pointer, 1)
+  expect_identical(pointer, msgs[length(msgs)])
+})
+
 test_that("simulate_study passes the study metadata through", {
   est <- suppressMessages(simulate_study(
     study_obs, "E",

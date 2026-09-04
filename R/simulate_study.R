@@ -34,6 +34,10 @@
 #' at a calendar date `relative_obs_time` after the start of the line list,
 #' and keeps every case whose secondary event fell before it.
 #'
+#' The advisory checks of [as_epidist_estimates_data()] do not run on the
+#' result. They run once on the combined object when several studies are
+#' passed to [as_epidist_estimates_data()] in a list.
+#'
 #' @param data An `epidist_linelist_data` object built from simulated event
 #'  times, with the exact `ptime` and `stime` columns kept by
 #'  [simulate_dates()] when `keep_times = TRUE`. Every case must use the
@@ -184,12 +188,12 @@ simulate_study <- function(
   if (report == "multivariate") {
     return(do.call(
       as_epidist_estimates_data,
-      c(list(.study_bootstrap(delays), study = study), metadata)
+      c(list(.study_bootstrap(delays), study = study, advise = FALSE), metadata)
     ))
   }
   rows <- .study_rows(delays, report, probs)
   rows <- do.call(mutate, c(list(rows, study = study), metadata))
-  return(as_epidist_estimates_data(rows))
+  return(as_epidist_estimates_data(rows, advise = FALSE))
 }
 
 #' The cases of a simulated line list with their exact event times

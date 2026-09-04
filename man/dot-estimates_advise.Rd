@@ -17,7 +17,8 @@ Runs the advisory checks on a freshly built \code{epidist_estimates_data}
 object and messages about each study they flag. They run once, here, when
 the object is first built, rather than in \code{\link[=assert_epidist]{assert_epidist()}}, so that
 passing the finished object on to \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}} does not
-repeat them. The checks are described in the Checks section of
-\code{\link[=as_epidist_estimates_data.data.frame]{as_epidist_estimates_data.data.frame()}}.
+repeat them. The pointer to the Checks section of
+\code{\link[=as_epidist_estimates_data.data.frame]{as_epidist_estimates_data.data.frame()}}, which describes the checks,
+prints once after the messages when at least one check fired.
 }
 \keyword{internal}

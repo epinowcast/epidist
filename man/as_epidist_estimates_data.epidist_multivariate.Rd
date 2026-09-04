@@ -11,6 +11,7 @@
   moments = c("mean", "sd"),
   probs = numeric(0),
   mvn_id = NULL,
+  advise = TRUE,
   ...
 )
 }
@@ -32,6 +33,11 @@ used where \code{family} is given.}
 \item{mvn_id}{A string identifying the covariance matrix. Defaults to
 \code{study}, and only needs setting where one study contributes more than one
 multivariate object.}
+
+\item{advise}{Whether to run the advisory checks of the Checks section and
+message about the studies they flag. Defaults to \code{TRUE}. The list method
+sets it to \code{FALSE} for each element and runs the checks once on the
+combined object.}
 
 \item{...}{Study metadata, as documented in
 \code{\link[=as_epidist_estimates_data.data.frame]{as_epidist_estimates_data.data.frame()}}.}

@@ -118,8 +118,10 @@ as_epidist_estimates_data <- function(data, ...) {
 #' summaries and messages about the studies they flag. They run once, when
 #' the object is built, and not again when it is passed to
 #' [as_epidist_meta_model()]. Each message names the studies concerned, and
-#' the row of the input where a single summary is meant, and points here for
-#' the reasoning.
+#' the row of the input where a single summary is meant, and a pointer here
+#' follows the messages of a call. Studies combined in a list are checked
+#' once, together, and [simulate_study()] leaves the checks to that combined
+#' object. Set `advise = FALSE` to skip them.
 #'
 #' * **Assumed truncation adjustment.** Where no `trunc_adjusted` column is
 #'   supplied, a study with no finite `relative_obs_time` is taken to have
@@ -307,6 +309,11 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  cutoff, and lower it to fit faster. A message names the studies whose
 #'  cutoff is too short, see the Checks section.
 #'
+#' @param advise Whether to run the advisory checks of the Checks section and
+#'  message about the studies they flag. Defaults to `TRUE`. The list method
+#'  sets it to `FALSE` for each element and runs the checks once on the
+#'  combined object.
+#'
 #' @param ... Not used in this method.
 #'
 #' @method as_epidist_estimates_data data.frame
@@ -345,9 +352,11 @@ as_epidist_estimates_data.data.frame <- function(
   delay_min = NULL,
   growth_rate = NULL,
   max_delay = NULL,
+  advise = TRUE,
   ...
 ) {
   assert_data_frame(data)
+  assert_flag(advise)
 
   supplied <- list(
     study = study, type = type, value = value, se = se, n = n, p = p,
@@ -379,7 +388,9 @@ as_epidist_estimates_data.data.frame <- function(
   data_tbl <- new_epidist_estimates_data(data_tbl)
   data_tbl <- .estimates_set_vcov(data_tbl, attr(data, "estimates_vcov"))
   assert_epidist(data_tbl)
-  .estimates_advise(data_tbl)
+  if (advise) {
+    .estimates_advise(data_tbl)
+  }
   return(data_tbl)
 }
 
@@ -387,9 +398,13 @@ as_epidist_estimates_data.data.frame <- function(
 #'
 #' Each element is coerced on its own and the results are bound into one
 #' object. Combining is associative, so contributions can be assembled in any
-#' order and in any grouping.
+#' order and in any grouping. The advisory checks of the Checks section of
+#' [as_epidist_estimates_data.data.frame()] run once, on the combined object,
+#' so each message names every study it applies to.
 #'
 #' @inheritParams as_epidist_estimates_data
+#'
+#' @inheritParams as_epidist_estimates_data.data.frame
 #'
 #' @param ... Passed to the method used for each element.
 #'
@@ -409,12 +424,17 @@ as_epidist_estimates_data.data.frame <- function(
 #'     mean = 6.9, n = 80, relative_obs_time = 20, trunc_adjusted = FALSE
 #'   )
 #' ))
-as_epidist_estimates_data.list <- function(data, ...) {
+as_epidist_estimates_data.list <- function(data, advise = TRUE, ...) {
   if (length(data) == 0) {
     cli::cli_abort("{.var data} must hold at least one contribution.")
   }
-  parts <- lapply(data, as_epidist_estimates_data, ...)
-  return(.estimates_bind(parts))
+  assert_flag(advise)
+  parts <- lapply(data, as_epidist_estimates_data, ..., advise = FALSE)
+  bound <- .estimates_bind(parts)
+  if (advise) {
+    .estimates_advise(bound)
+  }
+  return(bound)
 }
 
 #' Return an `epidist_estimates_data` object unchanged
@@ -481,6 +501,8 @@ as_epidist_estimates_data.epidist_estimates_data <- function(data, ...) {
 #'  `study`, and only needs setting where one study contributes more than one
 #'  multivariate object.
 #'
+#' @inheritParams as_epidist_estimates_data.data.frame
+#'
 #' @param ... Study metadata, as documented in
 #'  [as_epidist_estimates_data.data.frame()].
 #'
@@ -505,9 +527,11 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   moments = c("mean", "sd"),
   probs = numeric(0),
   mvn_id = NULL,
+  advise = TRUE,
   ...
 ) {
   assert_string(study)
+  assert_flag(advise)
   assert_epidist(data)
   if (length(data$index) > 1) {
     cli::cli_abort(paste0(
@@ -540,7 +564,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
     ...
   )
   attr(rows, "estimates_vcov") <- stats::setNames(list(covariance), mvn_id)
-  return(as_epidist_estimates_data(rows))
+  return(as_epidist_estimates_data(rows, advise = advise))
 }
 
 #' What each element of a multivariate representation reports
@@ -1546,8 +1570,9 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
 #' object and messages about each study they flag. They run once, here, when
 #' the object is first built, rather than in [assert_epidist()], so that
 #' passing the finished object on to [as_epidist_meta_model()] does not
-#' repeat them. The checks are described in the Checks section of
-#' [as_epidist_estimates_data.data.frame()].
+#' repeat them. The pointer to the Checks section of
+#' [as_epidist_estimates_data.data.frame()], which describes the checks,
+#' prints once after the messages when at least one check fired.
 #'
 #' @param data An `epidist_estimates_data` object.
 #'
@@ -1555,17 +1580,17 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
 #'
 #' @keywords internal
 .estimates_advise <- function(data) {
+  fired <- FALSE
   short <- .estimates_short_cutoff(data)
   if (length(short) > 0) {
     cli::cli_inform(c(
       "!" = paste0(
-        "The grid cutoff {.var max_delay} for {.val {short}} is short ",
-        "relative to the tail {?it/they} reported, so the implied standard ",
-        "deviation will be biased downwards. Raise {.var max_delay} for ",
-        "{?this study/these studies}."
-      ),
-      .estimates_checks_pointer()
+        "The grid cutoff {.var max_delay} of {.val {short}} is short ",
+        "relative to the tail {?it/they} reported. The implied standard ",
+        "deviation is biased downwards until {.var max_delay} is raised."
+      )
     ))
+    fired <- TRUE
   }
 
   coarse_quadrature <- .estimates_coarse_quadrature(data)
@@ -1573,41 +1598,46 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     cap <- max(.meta_n_quad_max(), .meta_n_quad())
     cli::cli_inform(c(
       "!" = paste0(
-        "The quadrature for {.val {coarse_quadrature}} needs more than ",
-        "{cap} intervals to resolve the spread {cli::qty(coarse_quadrature)}",
-        "{?it/they} reported, so the implied summaries may be inaccurate. ",
-        "Raise {.code options(epidist.meta_n_quad)} above {cap} or lower ",
-        "{.var max_delay}."
-      ),
-      .estimates_checks_pointer()
+        "The grid cutoff of {.val {coarse_quadrature}} is too long for ",
+        "{cap} quadrature intervals to resolve the spread ",
+        "{cli::qty(coarse_quadrature)}{?it/they} reported. The implied ",
+        "summaries may be inaccurate until ",
+        "{.code options(epidist.meta_n_quad)} is raised above {cap} or ",
+        "{.var max_delay} is lowered."
+      )
     ))
+    fired <- TRUE
   }
 
   coarse_rows <- .estimates_coarse_rows(data)
   if (any(coarse_rows)) {
     flagged <- .estimates_row_labels(data, coarse_rows)
+    unit <- .estimates_window_unit(data$swindow[coarse_rows])
     cli::cli_inform(c(
       "!" = paste0(
-        "The smallest quantile reported by {flagged} sits within ten ",
-        "censoring windows of the smallest delay counted, so the discrete ",
-        "grid barely resolves it. Check {.var swindow}, and fit a reported ",
-        "mean and standard deviation instead where the study gives them."
-      ),
-      .estimates_checks_pointer()
+        "{flagged} report{?s/} {?a quantile/quantiles} less than ten ",
+        "{unit} above {cli::qty(flagged)}{?its/their} smallest counted ",
+        "delay. Quantiles rounded to whole {unit} that close to the origin ",
+        "carry a bias that a larger sample does not shrink."
+      )
     ))
+    fired <- TRUE
   }
 
   overconfident <- .estimates_overconfident_sets(data)
   if (length(overconfident) > 0) {
+    over_rows <- data$type == "quantile" &
+      as.character(data$study) %in% overconfident
+    unit <- .estimates_window_unit(data$swindow[over_rows])
     cli::cli_inform(c(
       "!" = paste0(
-        "{.val {overconfident}} report{?s/} several quantiles of integer day ",
-        "delays from more than 100 delays, so the joint quantile likelihood ",
-        "is overconfident and weights {?it/them} too heavily. Fit a reported ",
-        "mean and standard deviation instead where one is available."
-      ),
-      .estimates_checks_pointer()
+        "{.val {overconfident}} report{?s/} several quantiles of delays ",
+        "counted in whole {unit} from more than 100 delays. The joint ",
+        "quantile likelihood is overconfident at that sample size and ",
+        "weights {cli::qty(overconfident)}{?it/them} too heavily."
+      )
     ))
+    fired <- TRUE
   }
 
   heavy_rows <- .estimates_heavy_tail_rows(data)
@@ -1615,17 +1645,38 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     flagged <- .estimates_row_labels(data, heavy_rows)
     cli::cli_inform(c(
       "!" = paste0(
-        "The standard deviation reported by {flagged} has a relative ",
-        "standard error above 0.25 under the lognormal tail its mean ",
-        "implies, so its sampling likelihood cannot be trusted. Fit ",
-        "quantiles from the body of the distribution instead where the ",
-        "study reports them."
-      ),
-      .estimates_checks_pointer()
+        "{flagged} report{?s/} a standard deviation whose relative ",
+        "standard error is above 0.25 under the lognormal tail {?its/their} ",
+        "mean implies. A sampling error that large is far from normal, so ",
+        "the likelihood of the standard deviation cannot be trusted."
+      )
     ))
+    fired <- TRUE
   }
 
+  if (fired) {
+    cli::cli_inform(.estimates_checks_pointer())
+  }
   return(invisible(NULL))
+}
+
+#' The unit the advisory messages count a study's censoring windows in
+#'
+#' @param swindow The secondary censoring windows of the flagged rows.
+#'
+#' @returns `"days"` for daily windows, `"weeks"` for weekly ones, and
+#'  `"censoring windows"` otherwise.
+#'
+#' @keywords internal
+.estimates_window_unit <- function(swindow) {
+  widths <- unique(swindow)
+  if (length(widths) == 1 && isTRUE(widths == 1)) {
+    return("days")
+  }
+  if (length(widths) == 1 && isTRUE(widths == 7)) {
+    return("weeks")
+  }
+  return("censoring windows")
 }
 
 #' Label flagged summary rows by study and position in the input
@@ -1644,7 +1695,7 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
   ))
 }
 
-#' The pointer every advisory message ends with
+#' The pointer that follows the advisory messages
 #'
 #' @returns A named character vector for [cli::cli_inform()].
 #'
