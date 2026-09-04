@@ -55,18 +55,23 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      # `rstan` and `StanHeaders` must be built against each other. CRAN
-      # currently carries StanHeaders 2.39.1 with rstan 2.32.7, while the
-      # stan-dev r-universe carries 2.39.0.9000 of both, so resolving each
-      # package to its highest version pairs rstan 2.39.0.9000 with
-      # StanHeaders 2.39.1 and no Stan model will compile. Take the matched
-      # pair from one source. See #688.
-      - name: Install a matched rstan and StanHeaders
+      # `rstan` and `StanHeaders` have to be built against each other. The
+      # stan-dev r-universe is in the repositories above so that `cmdstanr`
+      # resolves, but it also carries an rstan newer than CRAN's, and
+      # resolution takes the highest version of each package independently.
+      # That pairs the r-universe rstan with the CRAN StanHeaders, which were
+      # never built together, and no Stan model compiles. Take both from CRAN,
+      # which is the pair users get and the one a submission is checked
+      # against. See #688.
+      - name: Install rstan and StanHeaders from CRAN
         run: |
-          install.packages(
-            c("StanHeaders", "rstan"),
-            repos = "https://stan-dev.r-universe.dev"
-          )
+          repos <- getOption("repos")
+          cran <- if ("CRAN" %in% names(repos)) {
+            repos[["CRAN"]]
+          } else {
+            "https://cloud.r-project.org"
+          }
+          install.packages(c("StanHeaders", "rstan"), repos = cran)
         shell: Rscript {0}
 
       - name: Install cmdstan
