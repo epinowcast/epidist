@@ -12,7 +12,9 @@ set.seed(11)
 study_obs <- study_linelist(2000)
 
 test_that("simulate_study returns the rows a moments study reports", {
-  est <- suppressMessages(simulate_study(study_obs, "A"))
+  est <- suppressMessages(
+    simulate_study(study_obs, "A", relative_obs_time = 30)
+  )
   expect_s3_class(est, "epidist_estimates_data")
   expect_identical(est$study, c("A", "A"))
   expect_identical(est$type, c("mean", "sd"))
@@ -25,7 +27,7 @@ test_that("simulate_study returns the rows a moments study reports", {
   expect_identical(est$cens_adjusted, c(0L, 0L))
   expect_identical(est$trunc_adjusted, c(FALSE, FALSE))
   expect_identical(est$trunc_design, c("cohort", "cohort"))
-  expect_identical(est$relative_obs_time, c(Inf, Inf))
+  expect_identical(est$relative_obs_time, c(30, 30))
   expect_identical(est$delay_min, c(0, 0))
   expect_identical(est$growth_rate, c(0, 0))
 })
@@ -33,7 +35,10 @@ test_that("simulate_study returns the rows a moments study reports", {
 test_that("simulate_study returns the rows a quantile study reports", {
   probs <- c(0.1, 0.5, 0.9)
   est <- suppressMessages(
-    simulate_study(study_obs, "B", report = "quantiles", probs = probs)
+    simulate_study(
+      study_obs, "B",
+      report = "quantiles", probs = probs, trunc_adjusted = TRUE
+    )
   )
   expect_identical(est$type, rep("quantile", 3))
   expect_identical(est$p, probs)
@@ -44,7 +49,10 @@ test_that("simulate_study returns the rows a quantile study reports", {
 
 test_that("simulate_study returns a mean with a standard error", {
   est <- suppressMessages(
-    simulate_study(study_obs, "C", report = "mean_se", n = 100)
+    simulate_study(
+      study_obs, "C",
+      report = "mean_se", n = 100, relative_obs_time = 30
+    )
   )
   expect_identical(nrow(est), 1L)
   expect_identical(est$type, "mean")
@@ -55,7 +63,10 @@ test_that("simulate_study returns a mean with a standard error", {
 
 test_that("simulate_study returns a multivariate mean and sd", {
   est <- suppressMessages(
-    simulate_study(study_obs, "D", report = "multivariate", n = 500)
+    simulate_study(
+      study_obs, "D",
+      report = "multivariate", n = 500, trunc_adjusted = TRUE
+    )
   )
   expect_identical(est$type, c("mean", "sd"))
   expect_identical(est$mvn_id, c("D", "D"))
@@ -83,34 +94,42 @@ test_that("simulate_study passes the study metadata through", {
   expect_identical(est$max_delay, c(45, 45))
   expect_identical(est$site, c("north", "north"))
   # A subsample of the available cases, and never more than there are.
-  est <- suppressMessages(simulate_study(study_obs, "F", n = 50))
+  est <- suppressMessages(
+    simulate_study(study_obs, "F", n = 50, trunc_adjusted = TRUE)
+  )
   expect_identical(est$n, c(50, 50))
-  est <- suppressMessages(simulate_study(study_obs, "G", n = 1e6))
+  est <- suppressMessages(
+    simulate_study(study_obs, "G", n = 1e6, trunc_adjusted = TRUE)
+  )
   expect_identical(est$n, c(2000, 2000))
 })
 
 test_that("simulate_study needs the exact event times", {
-  no_times <- suppressMessages(as_epidist_linelist_data(
-    simulate_exponential_cases(r = 0, sample_size = 50, t = 10) |>
-      simulate_secondary(dist = rlnorm, meanlog = 1.8, sdlog = 0.5) |>
-      simulate_dates()
-  ))
+  no_times <- simulate_exponential_cases(r = 0, sample_size = 50, t = 10) |>
+    simulate_secondary(dist = rlnorm, meanlog = 1.8, sdlog = 0.5) |>
+    simulate_dates() |>
+    as_epidist_linelist_data() |>
+    suppressMessages()
   expect_error(
     simulate_study(no_times, "A"),
     "keep_times = TRUE"
   )
   expect_error(simulate_study(data.frame(x = 1), "A"), "linelist")
+  expect_error(simulate_study(study_obs, "A"), "finite")
   expect_error(simulate_study(study_obs, "A", cens_adjusted = 5))
   expect_error(simulate_study(study_obs, "A", report = "median"))
   expect_error(
-    simulate_study(study_obs, "A", report = "quantiles", probs = c(0, 0.5)),
+    simulate_study(
+      study_obs, "A",
+      report = "quantiles", probs = c(0, 0.5), trunc_adjusted = TRUE
+    ),
     "strictly between"
   )
 })
 
 test_that("simulate_study errors when no case is observed", {
   expect_error(
-    simulate_study(study_obs, "A", delay_min = 1000),
+    simulate_study(study_obs, "A", trunc_adjusted = TRUE, delay_min = 1000),
     "No case"
   )
 })

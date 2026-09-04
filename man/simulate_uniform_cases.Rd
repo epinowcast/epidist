@@ -25,6 +25,7 @@ Other simulate:
 \code{\link{simulate_dates}()},
 \code{\link{simulate_exponential_cases}()},
 \code{\link{simulate_gillespie}()},
-\code{\link{simulate_secondary}()}
+\code{\link{simulate_secondary}()},
+\code{\link{simulate_study}()}
 }
 \concept{simulate}

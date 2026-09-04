@@ -255,6 +255,9 @@ A calibration check of a study reporting a mean with its standard error from 25 
 See #620.
 - Added opt in simulation checks of the meta model: `EPIDIST_META_RECOVERY=true` fits one meta model per censoring adjustment code and truncation design, and `EPIDIST_META_CALIBRATION=true` fits forty replicates of two study designs and checks interval coverage and the rank of the truth.
 See #620.
+- Added `simulate_study()`, which applies the observation and estimation procedure of one published study to a simulated line list and returns the summaries that study would have reported as an `epidist_estimates_data` object.
+It covers every censoring adjustment code, both truncation designs, a minimum delay and a subsample, and reports a mean and standard deviation, quantiles, a mean with a standard error, or a multivariate mean and standard deviation with their bootstrap covariance.
+Closes #672.
 
 ## Documentation
 
