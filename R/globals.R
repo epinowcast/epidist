@@ -6,7 +6,7 @@ utils::globalVariables(c(
   ".data", # <as_epidist_latent_model.epidist_linelist_data>
   "woverlap", # <epidist_stancode.epidist_latent_model>
   ".data", # <as_epidist_linelist_data.epidist_aggregate_data>
-  ".data", # <as_epidist_marginal_model.epidist_linelist_data>
+  ".data", # <.prepare_marginal_data>
   ".data", # <as_epidist_naive_model.epidist_linelist_data>
   "rlnorm", # <simulate_secondary>
   ".data", # <simulate_secondary>

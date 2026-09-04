@@ -48,12 +48,13 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
-          extra-repositories: 'https://stan-dev.r-universe.dev'
+          extra-repositories: 'https://stan-dev.r-universe.dev https://mrc-ide.r-universe.dev'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
+
 
       - name: Install cmdstan
         uses: epinowcast/actions/install-cmdstan@v1

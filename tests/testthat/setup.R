@@ -197,6 +197,281 @@ prep_marginal_obs_gamma <- as_epidist_marginal_model(sim_obs_gamma)
 prep_marginal_obs_sex <- as_epidist_marginal_model(sim_obs_sex)
 prep_marginal_obs_weibull <- as_epidist_marginal_model(sim_obs_weibull)
 
+# Published summary estimates for the meta model. Study A reports naive
+# daily discretised summaries from a right truncated snapshot, study B a
+# fully adjusted mean and quantile, and study C a quantile from a study
+# that only corrected the secondary interval.
+sim_estimates <- suppressMessages(as_epidist_estimates_data(
+  data.frame(
+    study = c("A", "A", "B", "B", "C"),
+    type = c("mean", "sd", "mean", "quantile", "quantile"),
+    value = c(7.5, 3.6, 6.4, 11.2, 5.4),
+    p = c(NA, NA, NA, 0.9, 0.5),
+    n = c(120, 120, 80, 80, 200),
+    relative_obs_time = c(20, 20, Inf, Inf, 30),
+    trunc_adjusted = c(FALSE, FALSE, TRUE, TRUE, FALSE),
+    cens_adjusted = c(0, 0, 1, 1, 2),
+    stringsAsFactors = FALSE
+  )
+))
+
+prep_meta_individual <- suppressMessages(as_epidist_meta_model(sim_obs))
+prep_meta_estimates <- suppressMessages(
+  as_epidist_meta_model(estimates = sim_estimates)
+)
+prep_meta_obs <- suppressMessages(
+  as_epidist_meta_model(sim_obs, estimates = sim_estimates)
+)
+
+# Summary estimates covering every observation type, used to check that the R
+# and Stan log likelihoods agree. Studies A, C and E report a mean with a
+# standard deviation, B and D report quantiles, and F reports summaries with
+# their own standard errors so that they stay ungrouped. Studies G to J report
+# a quantile with a standard error under each censoring adjustment and
+# truncation design, so that every branch of the implied density is exercised.
+# Studies M to P counted only delays above a minimum, one per censoring
+# adjustment, and Q and R report a covariance matrix over their summaries.
+lockstep_mvn_q <- suppressMessages(as_epidist_estimates_data(
+  new_epidist_multivariate(
+    value = c(mean = 7.2, sd = 3.4, q0.5 = 6.5),
+    vcov = matrix(
+      c(0.09, 0.02, 0.01, 0.02, 0.16, 0.03, 0.01, 0.03, 0.25),
+      nrow = 3
+    ),
+    params = c("mean", "sd", "q0.5")
+  ),
+  study = "Q",
+  relative_obs_time = Inf,
+  trunc_adjusted = TRUE,
+  trunc_design = "cohort",
+  cens_adjusted = 1,
+  delay_min = 0,
+  growth_rate = 0
+))
+
+lockstep_mvn_r <- suppressMessages(as_epidist_estimates_data(
+  new_epidist_multivariate(
+    value = c(q0.25 = 4.8, q0.75 = 8.6),
+    vcov = matrix(c(0.12, -0.03, -0.03, 0.2), nrow = 2),
+    params = c("q0.25", "q0.75")
+  ),
+  study = "R",
+  relative_obs_time = 30,
+  trunc_adjusted = FALSE,
+  trunc_design = "accrual",
+  cens_adjusted = 0,
+  delay_min = 0,
+  growth_rate = 0.1
+))
+
+# Studies S to V use midpoint imputation with a uniform interval
+# (cens_adjusted 4), one per truncation design, so that the R and Stan
+# implementations of that code are compared on the moment path, the quantile
+# path, the accrual path and with a left truncation.
+lockstep_midpoint_uniform <- data.frame(
+  study = c("S", "S", "T", "T", "U", "U", "V", "V"),
+  type = c(
+    "mean", "sd", "quantile", "quantile", "mean", "sd", "quantile", "quantile"
+  ),
+  value = c(7.4, 3.5, 5.6, 8.9, 8.0, 3.3, 6.1, 9.3),
+  se = c(NA, NA, NA, NA, NA, NA, 0.5, 0.6),
+  p = c(NA, NA, 0.25, 0.75, NA, NA, 0.25, 0.75),
+  n = c(115, 115, 135, 135, 100, 100, 125, 125),
+  relative_obs_time = c(26, 26, 24, 24, Inf, Inf, 30, 30),
+  trunc_adjusted = c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE),
+  trunc_design = c(
+    "cohort", "cohort", "accrual", "accrual", "cohort", "cohort",
+    "cohort", "cohort"
+  ),
+  cens_adjusted = 4,
+  delay_min = c(0, 0, 0, 0, 0, 0, 2, 2),
+  growth_rate = c(0, 0, 0.1, 0.1, 0, 0, 0, 0),
+  stringsAsFactors = FALSE
+)
+
+# Studies W to Z counted only delays above a minimum under the two midpoint
+# codes, with windows that move the base estimand's left truncation point off
+# the grid the reported delays sit on: W and X use code 3 with a secondary
+# window of 2, and Y uses code 4 with a primary window of 3. Z reports its
+# quantiles with a covariance matrix, so the node count of the shifted grid
+# is exercised as well.
+lockstep_left_midpoint <- data.frame(
+  study = c("W", "W", "X", "X", "Y", "Y"),
+  type = c("mean", "sd", "quantile", "quantile", "mean", "sd"),
+  value = c(7.9, 3.4, 5.5, 9.5, 8.6, 3.6),
+  se = c(NA, NA, NA, 0.5, NA, NA),
+  p = c(NA, NA, 0.25, 0.75, NA, NA),
+  n = c(105, 105, 145, 145, 125, 125),
+  relative_obs_time = c(30, 30, 28, 28, Inf, Inf),
+  trunc_adjusted = c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE),
+  trunc_design = c(
+    "cohort", "cohort", "accrual", "accrual", "cohort", "cohort"
+  ),
+  cens_adjusted = c(3, 3, 3, 3, 4, 4),
+  pwindow = c(1, 1, 1, 1, 3, 3),
+  swindow = c(2, 2, 2, 2, 1, 1),
+  delay_min = 3,
+  growth_rate = c(0, 0, 0.1, 0.1, 0, 0),
+  stringsAsFactors = FALSE
+)
+
+lockstep_mvn_z <- suppressMessages(as_epidist_estimates_data(
+  new_epidist_multivariate(
+    value = c(q0.25 = 5.9, q0.5 = 7.6),
+    vcov = matrix(c(0.1, 0.02, 0.02, 0.15), nrow = 2),
+    params = c("q0.25", "q0.5")
+  ),
+  study = "Z",
+  relative_obs_time = 32,
+  trunc_adjusted = FALSE,
+  trunc_design = "cohort",
+  cens_adjusted = 3,
+  pwindow = 1,
+  swindow = 2,
+  delay_min = 3,
+  growth_rate = 0
+))
+
+lockstep_base_rows <- data.frame(
+  study = c(
+    "A", "A", "B", "B", "B", "C", "C", "D", "E", "E", "F", "F", "F",
+    "G", "H", "I", "J", "K", "K", "L", "L",
+    "M", "M", "N", "N", "O", "O", "P", "P"
+  ),
+  type = c(
+    "mean", "sd", "quantile", "quantile", "quantile", "mean", "sd",
+    "quantile", "mean", "sd", "mean", "sd", "quantile",
+    "quantile", "quantile", "quantile", "quantile", "quantile", "quantile",
+    "quantile", "quantile",
+    "mean", "sd", "mean", "sd", "mean", "sd", "quantile", "quantile"
+  ),
+  value = c(
+    7.5, 3.6, 4.2, 6.1, 9.4, 6.4, 3.1, 5.4, 9.1, 5.2, 6.9, 3.3, 6.0,
+    6.2, 5.8, 7.1, 6.6, 4.5, 7.5, 5.1, 8.2,
+    8.1, 3.2, 7.8, 3.4, 8.4, 3.1, 6.3, 9.2
+  ),
+  se = c(
+    rep(NA, 10), 0.4, NA, 0.5, 0.6, 0.4, 0.7, 0.5, NA, NA, NA, NA,
+    rep(NA, 8)
+  ),
+  p = c(
+    NA, NA, 0.25, 0.5, 0.75, NA, NA, 0.5, NA, NA, NA, NA, 0.5,
+    0.5, 0.5, 0.5, 0.5, 0.25, 0.75, 0.25, 0.75,
+    NA, NA, NA, NA, NA, NA, 0.25, 0.75
+  ),
+  n = c(
+    120, 120, 60, 60, 60, 80, 80, 200, 300, 300, 90, 90, 90,
+    70, 70, 70, 70, 150, 150, 150, 150,
+    110, 110, 95, 95, 130, 130, 140, 140
+  ),
+  relative_obs_time = c(
+    20, 20, Inf, Inf, Inf, Inf, Inf, 30, 25, 25, 18, 18, 18,
+    24, 24, 24, 24, 22, 22, 26, 26,
+    28, 28, Inf, Inf, 32, 32, 27, 27
+  ),
+  trunc_adjusted = c(
+    FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE,
+    FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+    FALSE, FALSE,
+    FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE
+  ),
+  trunc_design = c(
+    rep("cohort", 8), "accrual", "accrual", rep("cohort", 3),
+    "cohort", "cohort", "accrual", "cohort", "accrual", "accrual",
+    "accrual", "accrual",
+    "cohort", "cohort", "cohort", "cohort", "accrual", "accrual",
+    "cohort", "cohort"
+  ),
+  cens_adjusted = c(
+    0, 0, 1, 1, 1, 3, 3, 2, 0, 0, 0, 0, 0, 1, 2, 1, 2, 0, 0, 0, 0,
+    0, 0, 1, 1, 2, 2, 3, 3
+  ),
+  delay_min = c(
+    rep(0, 21),
+    2, 2, 1.5, 1.5, 3, 3, 2, 2
+  ),
+  growth_rate = c(
+    rep(0, 8), 0.1, 0.1, 0, 0, 0, 0, 0, 0.15, 0.2, 0.2, 0.2, 0, 0,
+    0, 0, 0, 0, 0.05, 0.05, 0, 0
+  ),
+  stringsAsFactors = FALSE
+)
+
+# Studies AA and AB stopped collecting at a calendar date with windows that
+# differ, so the accrual weight is cut at the primary window inside each
+# reporting cell in both directions. Both keep a daily primary window,
+# because the R and Stan primary censored distribution functions of
+# primarycensored only agree to about 1e-6 for a wider one under growth.
+lockstep_accrual_windows <- data.frame(
+  study = c("AA", "AA", "AA", "AB", "AB"),
+  type = c("mean", "sd", "quantile", "mean", "quantile"),
+  value = c(1.4, 2.9, 0.5, 5.8, 5.5),
+  se = c(NA, NA, 0.4, NA, NA),
+  p = c(NA, NA, 0.75, NA, 0.5),
+  n = c(160, 160, 160, 140, 140),
+  relative_obs_time = 28,
+  trunc_adjusted = FALSE,
+  trunc_design = "accrual",
+  cens_adjusted = 0,
+  pwindow = 1,
+  swindow = c(7, 7, 7, 0.5, 0.5),
+  delay_min = 0,
+  growth_rate = c(0.2, 0.2, 0.2, 0.05, 0.05),
+  stringsAsFactors = FALSE
+)
+
+# Studies AC to AE report quantiles of integer day delays. AC and AD report a
+# single quantile, one per truncation design, which is fitted as the crossing
+# cell of the empirical distribution function. AE reports coincident quantiles,
+# which the multinomial merges into one cell.
+lockstep_grid_quantiles <- data.frame(
+  study = c("AC", "AD", "AE", "AE", "AE"),
+  type = "quantile",
+  value = c(5, 6.5, 4, 5, 5),
+  p = c(0.5, 0.75, 0.25, 0.5, 0.75),
+  n = c(200, 150, 30, 30, 30),
+  relative_obs_time = c(24, 28, 20, 20, 20),
+  trunc_adjusted = FALSE,
+  trunc_design = c("cohort", "accrual", "cohort", "cohort", "cohort"),
+  cens_adjusted = c(0, 3, 0, 0, 0),
+  delay_min = c(0, 1, 0, 0, 0),
+  growth_rate = c(0, 0.1, 0, 0, 0),
+  stringsAsFactors = FALSE
+)
+
+# Studies AF and AG report a narrow delay, so their rows carry many more
+# quadrature intervals than the floor and the R and Stan quadratures are
+# compared at a resolution chosen from the reported spread. AF is truncated
+# at a long observation time, and AG adjusted for truncation with a growing
+# primary event, so its quantile is read off the chord of its nodes.
+lockstep_narrow <- data.frame(
+  study = c("AF", "AF", "AG", "AG"),
+  type = c("mean", "sd", "mean", "quantile"),
+  value = c(7.1, 0.4, 7.3, 7.6),
+  se = c(NA, NA, NA, 0.1),
+  p = c(NA, NA, NA, 0.75),
+  n = c(150, 150, 120, 120),
+  relative_obs_time = c(60, 60, Inf, Inf),
+  trunc_adjusted = c(FALSE, FALSE, TRUE, TRUE),
+  trunc_design = "cohort",
+  cens_adjusted = c(1, 1, 2, 2),
+  delay_min = 0,
+  growth_rate = c(0, 0, 0.1, 0.1),
+  stringsAsFactors = FALSE
+)
+
+lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
+  lockstep_base_rows,
+  lockstep_mvn_q,
+  lockstep_mvn_r,
+  lockstep_midpoint_uniform,
+  lockstep_left_midpoint,
+  lockstep_mvn_z,
+  lockstep_accrual_windows,
+  lockstep_grid_quantiles,
+  lockstep_narrow
+)))
+
 # The shared fits below use the cmdstanr backend, so they are only built
 # when cmdstanr and CmdStan are both available. Tests that use them call
 # `skip_if_no_cmdstanr()`.
@@ -335,6 +610,285 @@ if (not_on_cran() && has_cmdstanr()) {
     iter = 1000,
     cores = 2,
     chains = 2,
+    backend = "cmdstanr"
+  ))
+
+  # Synthetic "published" estimates produced by applying naive estimators
+  # (integer date differences, no right truncation adjustment) to samples
+  # from the same lognormal delay distribution used above.
+  # A study observing up to study_obs_time keeps an integer delay k when
+  # k + 1 <= study_obs_time, which is the same conditioning the meta model
+  # applies through its grid.
+  naive_delays <- function(size, study_obs_time) {
+    ptime <- stats::runif(size, 0, 1)
+    delay <- stats::rlnorm(size, meanlog, sdlog)
+    obs <- floor(ptime + delay)
+    return(obs[obs + 1 <= study_obs_time])
+  }
+
+  naive_summaries <- function(size, study_obs_time, probs = 0.9) {
+    obs <- naive_delays(size, study_obs_time)
+    return(list(
+      mean = mean(obs), sd = stats::sd(obs), size = length(obs),
+      quantiles = stats::quantile(obs, probs, names = FALSE)
+    ))
+  }
+
+  set.seed(2)
+  study_obs_times <- c(12, 15, 18, 20, 25, 30)
+  naive_draws <- lapply(study_obs_times, naive_summaries, size = 2000)
+
+  sim_biased_cohort <- data.frame(
+    study = rep(paste0("study_", seq_along(study_obs_times)), each = 3),
+    type = rep(c("mean", "sd", "quantile"), times = length(study_obs_times)),
+    value = as.numeric(rbind(
+      vapply(naive_draws, `[[`, numeric(1), "mean"),
+      vapply(naive_draws, `[[`, numeric(1), "sd"),
+      vapply(naive_draws, `[[`, numeric(1), "quantiles")
+    )),
+    se = NA_real_,
+    p = rep(c(NA, NA, 0.9), times = length(study_obs_times)),
+    n = rep(vapply(naive_draws, `[[`, numeric(1), "size"), each = 3),
+    relative_obs_time = rep(study_obs_times, each = 3),
+    trunc_adjusted = FALSE,
+    trunc_design = "cohort",
+    cens_adjusted = 0,
+    growth_rate = 0,
+    stringsAsFactors = FALSE
+  )
+
+  # Three further studies that stopped collecting at a calendar date, so their
+  # primary events accrued over the window and the longer delays were less
+  # likely to be seen. One reported integer date differences, one imputed the
+  # midpoint of each interval, and one adjusted the secondary interval only.
+  # All three reported a median with a standard error on the delay scale.
+  # Together these exercise the accrual, midpoint imputation and delta method
+  # branches of the Stan code.
+  accrual_summaries <- function(size, window, growth_rate, cens) {
+    u <- stats::runif(size)
+    ptime <- if (growth_rate == 0) {
+      u * window
+    } else {
+      log1p(u * expm1(growth_rate * window)) / growth_rate
+    }
+    delay <- stats::rlnorm(size, meanlog, sdlog)
+    keep <- ptime + delay <= window
+    ptime <- ptime[keep]
+    delay <- delay[keep]
+    obs <- switch(as.character(cens),
+      "0" = floor(ptime + delay) - floor(ptime),
+      "2" = ptime - floor(ptime) + delay,
+      "3" = floor(ptime + delay) - floor(ptime) + 0.5
+    )
+    return(list(
+      mean = mean(obs), sd = stats::sd(obs), size = length(obs),
+      med = stats::median(obs),
+      med_se = 1.2533 * stats::sd(obs) / sqrt(length(obs))
+    ))
+  }
+
+  accrual_windows <- c(16, 24, 20)
+  accrual_rates <- c(0, 0.15, 0)
+  accrual_cens <- c(0, 3, 2)
+  accrual_draws <- Map(
+    accrual_summaries, 3000, accrual_windows, accrual_rates, accrual_cens
+  )
+
+  sim_accrual_estimates <- data.frame(
+    study = rep(paste0("accrual_", seq_along(accrual_windows)), each = 3),
+    type = rep(c("mean", "sd", "quantile"), times = length(accrual_windows)),
+    value = as.numeric(rbind(
+      vapply(accrual_draws, `[[`, numeric(1), "mean"),
+      vapply(accrual_draws, `[[`, numeric(1), "sd"),
+      vapply(accrual_draws, `[[`, numeric(1), "med")
+    )),
+    se = as.numeric(rbind(
+      NA, NA, vapply(accrual_draws, `[[`, numeric(1), "med_se")
+    )),
+    p = rep(c(NA, NA, 0.5), times = length(accrual_windows)),
+    n = rep(vapply(accrual_draws, `[[`, numeric(1), "size"), each = 3),
+    relative_obs_time = rep(accrual_windows, each = 3),
+    trunc_adjusted = FALSE,
+    trunc_design = "accrual",
+    cens_adjusted = rep(accrual_cens, each = 3),
+    growth_rate = rep(accrual_rates, each = 3),
+    stringsAsFactors = FALSE
+  )
+
+  sim_biased_estimates <- suppressMessages(as_epidist_estimates_data(
+    rbind(sim_biased_cohort, sim_accrual_estimates)
+  ))
+
+  prep_meta_biased <- suppressMessages(
+    as_epidist_meta_model(estimates = sim_biased_estimates)
+  )
+  prep_meta_mixed <- suppressMessages(as_epidist_meta_model(
+    sim_obs,
+    estimates = sim_biased_estimates
+  ))
+
+  # Simulated studies used for a simulation and recovery check of the Stan
+  # discrete grid branch. Every study takes integer date differences from a
+  # right truncated cohort, so all of its summaries go through
+  # meta_family_grid_pmf and the cohort grid shortcut. Each reports a mean, a
+  # standard deviation and a few quantiles at varied probability levels.
+  set.seed(3)
+  grid_obs_times <- c(12, 16, 20, 24, 30)
+  grid_probs <- list(
+    c(0.25, 0.5, 0.75), c(0.1, 0.5, 0.9), c(0.5, 0.75),
+    c(0.2, 0.4, 0.6, 0.8), c(0.05, 0.5, 0.95)
+  )
+  grid_draws <- Map(naive_summaries, 4000, grid_obs_times, grid_probs)
+
+  sim_grid_df <- Map(
+    function(study, draw, probs, obs_time) {
+      return(data.frame(
+        study = study,
+        type = c("mean", "sd", rep("quantile", length(probs))),
+        value = c(draw$mean, draw$sd, draw$quantiles),
+        p = c(NA_real_, NA_real_, probs),
+        n = draw$size,
+        relative_obs_time = obs_time,
+        trunc_adjusted = FALSE,
+        trunc_design = "cohort",
+        cens_adjusted = 0,
+        growth_rate = 0,
+        stringsAsFactors = FALSE
+      ))
+    },
+    paste0("grid_", seq_along(grid_obs_times)), grid_draws, grid_probs,
+    grid_obs_times
+  )
+
+  sim_grid_estimates <- suppressMessages(as_epidist_estimates_data(
+    do.call(rbind, sim_grid_df)
+  ))
+  prep_meta_grid <- suppressMessages(
+    as_epidist_meta_model(estimates = sim_grid_estimates)
+  )
+
+  # Simulated studies that published the parameters of a distribution they
+  # fitted rather than summaries of their delays. Each takes integer date
+  # differences from a right truncated cohort and fits a lognormal to them by
+  # maximum likelihood, so its reported parameters describe the biased
+  # distribution its procedure converged to.
+  set.seed(4)
+  reported_parameter_fit <- function(size, study_obs_time) {
+    obs <- naive_delays(size, study_obs_time)
+    # A fit on the log scale cannot use a delay of zero.
+    obs <- obs[obs > 0]
+    reported <- c(
+      meanlog = mean(log(obs)), sdlog = stats::sd(log(obs))
+    )
+    return(list(
+      parameters = reported,
+      # The asymptotic standard errors of a lognormal maximum likelihood fit.
+      se = c(
+        reported[["sdlog"]] / sqrt(length(obs)),
+        reported[["sdlog"]] / sqrt(2 * length(obs))
+      ),
+      size = length(obs)
+    ))
+  }
+
+  parameter_obs_times <- c(18, 22, 26, 30, 36)
+  parameter_fits <- Map(reported_parameter_fit, 300, parameter_obs_times)
+  sim_parameter_rows <- Map(
+    function(study, fit, study_obs_time) {
+      return(suppressMessages(epidist_estimates_parameters(
+        study,
+        family = "lognormal",
+        parameters = fit$parameters,
+        se = fit$se,
+        n = fit$size,
+        relative_obs_time = study_obs_time,
+        trunc_adjusted = FALSE,
+        trunc_design = "cohort",
+        cens_adjusted = 0,
+        growth_rate = 0
+      )))
+    },
+    paste0("published_", seq_along(parameter_obs_times)), parameter_fits,
+    parameter_obs_times
+  )
+
+  # A study that fitted the delays itself and published the posterior draws of
+  # its mean and standard deviation, as a fully adjusted estimate reported with
+  # the covariance between the two.
+  marginal_dpars <- dplyr::ungroup(
+    add_summaries(delay_parameter_draws(fit_marginal))
+  )
+  marginal_dpars <- marginal_dpars[marginal_dpars$.row == 1, ]
+  sim_draws_rows <- suppressMessages(as_epidist_estimates_data(
+    as_epidist_multivariate(marginal_dpars, params = c("mean", "sd")),
+    study = "posterior_draws",
+    relative_obs_time = Inf,
+    trunc_adjusted = TRUE,
+    trunc_design = "cohort",
+    cens_adjusted = 1,
+    growth_rate = 0
+  ))
+
+  sim_reported_estimates <- suppressMessages(as_epidist_estimates_data(
+    c(sim_parameter_rows, list(sim_draws_rows))
+  ))
+  prep_meta_reported <- suppressMessages(
+    as_epidist_meta_model(estimates = sim_reported_estimates)
+  )
+
+  cli::cli_alert_info(
+    "Compiling the meta model with cmdstanr and reported fits and draws"
+  )
+  fit_meta_reported <- suppressMessages(epidist(
+    data = prep_meta_reported,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  ))
+
+  cli::cli_alert_info(
+    "Compiling the meta model with cmdstanr and simulated grid summaries"
+  )
+  fit_meta_grid <- suppressMessages(epidist(
+    data = prep_meta_grid,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  ))
+
+  cli::cli_alert_info(
+    "Compiling the meta model with cmdstanr and summary estimates only"
+  )
+  fit_meta_estimates <- suppressMessages(epidist(
+    data = prep_meta_biased,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  ))
+
+  cli::cli_alert_info(
+    "Compiling the meta model with cmdstanr and mixed data"
+  )
+  fit_meta_mixed <- suppressMessages(epidist(
+    data = prep_meta_mixed,
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
     backend = "cmdstanr"
   ))
 }

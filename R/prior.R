@@ -202,6 +202,67 @@ epidist_model_prior.default <- function(data, formula, ...) {
   return(NULL)
 }
 
+#' Model specific prior distributions for the meta model
+#'
+#' The response column of a meta model is a placeholder on every summary row,
+#' and `brms` centres its default prior for the intercept of `mu` on the
+#' response. For a model fitted to summaries alone that default is centred on
+#' a delay of zero. This method puts a `normal(1, 1)` prior on the intercept
+#' instead, the scale of the lognormal family prior in
+#' [epidist_family_prior()], so that a Gamma or Weibull meta fit gets a prior
+#' on the same scale as a lognormal one. On the log scale it is a median
+#' delay of about 3 days with a 95% range of roughly 0.4 to 20 days.
+#'
+#' The centre is fixed rather than taken from the reported values, because a
+#' prior chosen from the data is not a prior. It would put the posterior of a
+#' small review where the data already sit and understate how much the
+#' studies disagree. The prior is added where `mu` is on the log scale, which
+#' is the lognormal family, whose `mu` is the log of the median under an
+#' identity link, and any family with a log link. Nothing is added for other
+#' links, and a model with individual level rows only adds no prior, so the
+#' family or `brms` default applies as it does for the marginal model.
+#'
+#' The between study spread of any group level term, such as `(1 | study)`,
+#' gets a half normal prior with a standard deviation of 0.25 on the scale of
+#' the linear predictor, so that a small review cannot fit that spread from
+#' almost nothing under the wide `brms` default. It is dropped where the
+#' formula has no group level term. The prior on the intercept of the other
+#' distributional parameters is left to the family or to `brms`.
+#'
+#' @inheritParams epidist
+#' @method epidist_model_prior epidist_meta_model
+#' @family prior
+#' @family meta_model
+#' @returns A `brmsprior` object, or `NULL` when the model adds no priors.
+#'
+#' @export
+epidist_model_prior.epidist_meta_model <- function(data, formula, ...) {
+  link <- formula$family$link
+  if (all(data$obs_type == 1L) || is.null(link)) {
+    return(NULL)
+  }
+  lognormal <- identical(.delay_family(formula$family)$name, "lognormal")
+  if (link != "log" && !(lognormal && link == "identity")) {
+    return(NULL)
+  }
+  # Between study spread on the scale of the linear predictor, for every
+  # distributional parameter. A study random effect on the log of a delay
+  # mean rarely spreads by more than a quarter, and the brms default of a
+  # half Student t with scale 2.5 lets a small review fit that spread from
+  # almost nothing. Dropped where the formula has no group level terms.
+  dpars <- setdiff(formula$family$dpars, "mu")
+  spread <- c(
+    list(set_prior("normal(0, 0.25)", class = "sd")),
+    lapply(dpars, function(dpar) {
+      return(set_prior("normal(0, 0.25)", class = "sd", dpar = dpar))
+    })
+  )
+  return(do.call(c, c(
+    list(set_prior("normal(1, 1)", class = "Intercept")),
+    spread
+  )))
+}
+
 #' Family specific prior distributions
 #'
 #' This function contains `brms` prior distributions which are specific to

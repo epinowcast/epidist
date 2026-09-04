@@ -190,3 +190,122 @@ test_that("epidist_prior lets user manual priors replace model manual priors", {
   )
   expect_identical(prior$source, c("family", "family", "user", "model"))
 })
+
+test_that("epidist_model_prior puts a fixed prior on the intercept of a summaries only meta model", { # nolint: line_length_linter.
+  family <- epidist_family(prep_meta_estimates, Gamma(link = "log"))
+  formula <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))
+  prior <- epidist_model_prior(prep_meta_estimates, formula)
+  expect_s3_class(prior, "brmsprior")
+  expect_identical(nrow(prior), 3L)
+  expect_identical(prior$class, c("Intercept", "sd", "sd"))
+  expect_identical(prior$dpar, c("", "", "shape"))
+  # The centre is not taken from the reported values (sim_estimates reports
+  # means of 7.5 and 6.4), but is the scale of the lognormal family prior.
+  expect_identical(prior$prior[1], "normal(1, 1)")
+})
+
+test_that("epidist_model_prior puts a half normal on the between study spread of a meta model", { # nolint: line_length_linter.
+  family <- epidist_family(prep_meta_estimates, lognormal())
+  grouped <- epidist_formula(
+    prep_meta_estimates, family, bf(mu ~ 1 + (1 | study))
+  )
+  full <- suppressWarnings(
+    epidist_prior(prep_meta_estimates, family, grouped, prior = NULL)
+  )
+  spread <- full[
+    full$class == "sd" & !nzchar(full$coef) & !nzchar(full$group),
+  ]
+  expect_identical(nrow(spread), 1L)
+  expect_identical(spread$prior, "normal(0, 0.25)")
+  expect_identical(spread$source, "model")
+  # A group level term on another distributional parameter gets the same.
+  both <- epidist_formula(
+    prep_meta_estimates, family,
+    bf(mu ~ 1 + (1 | study), sigma ~ 1 + (1 | study))
+  )
+  full <- suppressWarnings(
+    epidist_prior(prep_meta_estimates, family, both, prior = NULL)
+  )
+  spread <- full[
+    full$class == "sd" & !nzchar(full$coef) & !nzchar(full$group),
+  ]
+  expect_identical(nrow(spread), 2L)
+  expect_setequal(spread$dpar, c("", "sigma"))
+  expect_true(all(spread$prior == "normal(0, 0.25)"))
+  # Without a group level term the prior is dropped rather than warned about.
+  flat <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))
+  full <- suppressWarnings(
+    epidist_prior(prep_meta_estimates, family, flat, prior = NULL)
+  )
+  expect_false(any(full$class == "sd"))
+})
+
+test_that("epidist_prior for a Gamma summaries only meta fit is not centred on the placeholder response", { # nolint: line_length_linter.
+  family <- epidist_family(prep_meta_estimates, Gamma(link = "log"))
+  formula <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))
+  prior <- suppressWarnings(
+    epidist_prior(prep_meta_estimates, family, formula, prior = NULL)
+  )
+  intercept <- prior[prior$class == "Intercept" & !nzchar(prior$dpar), ]
+  expect_identical(nrow(intercept), 1L)
+  expect_identical(intercept$source, "model")
+  expect_identical(intercept$prior, "normal(1, 1)")
+  expect_false(any(grepl("-2.3", prior$prior, fixed = TRUE)))
+})
+
+test_that("epidist_model_prior puts the lognormal family scale on a lognormal meta model", { # nolint: line_length_linter.
+  # The lognormal family gives mu an identity link, but mu is meanlog, so
+  # the prior is on the log scale as it is for a log link.
+  family <- epidist_family(prep_meta_estimates, lognormal())
+  formula <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))
+  prior <- epidist_model_prior(prep_meta_estimates, formula)
+  expect_identical(prior$prior[1], "normal(1, 1)")
+  full <- suppressWarnings(
+    epidist_prior(prep_meta_estimates, family, formula, prior = NULL)
+  )
+  intercept <- full[full$class == "Intercept" & !nzchar(full$dpar), ]
+  expect_identical(intercept$prior, "normal(1, 1)")
+})
+
+test_that("epidist_model_prior for the meta model adds nothing for other links", { # nolint: line_length_linter.
+  # The fixed centre is on the log scale, so a family whose mu is the delay
+  # itself, or its inverse, is left to the family or brms default.
+  family <- epidist_family(prep_meta_estimates, Gamma(link = "identity"))
+  formula <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))
+  expect_null(epidist_model_prior(prep_meta_estimates, formula))
+  family <- epidist_family(prep_meta_estimates, Gamma(link = "inverse"))
+  formula <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))
+  expect_null(epidist_model_prior(prep_meta_estimates, formula))
+})
+
+test_that("epidist_model_prior for the meta model does not depend on the reported values", { # nolint: line_length_linter.
+  # A prior chosen from the data would put the posterior of a small review
+  # where the data already sit, so the centre is the same whatever the
+  # studies reported and whether individual level delays are present.
+  quantiles_only <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = c("A", "A"), type = "quantile", value = c(50, 90),
+    p = c(0.25, 0.75), n = 100, relative_obs_time = Inf,
+    trunc_adjusted = TRUE, cens_adjusted = 1, stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = quantiles_only))
+  family <- epidist_family(meta, Gamma(link = "log"))
+  formula <- epidist_formula(meta, family, bf(mu ~ 1))
+  prior <- epidist_model_prior(meta, formula)
+  expect_identical(prior$prior[1], "normal(1, 1)")
+
+  sd_only <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = "sd", value = 3, n = 100, relative_obs_time = Inf,
+    trunc_adjusted = TRUE, cens_adjusted = 1, stringsAsFactors = FALSE
+  )))
+  mixed <- suppressMessages(
+    as_epidist_meta_model(sim_obs, estimates = sd_only)
+  )
+  prior <- epidist_model_prior(mixed, formula)
+  expect_identical(prior$prior[1], "normal(1, 1)")
+})
+
+test_that("epidist_model_prior adds nothing to a meta model of individual rows only", { # nolint: line_length_linter.
+  family <- epidist_family(prep_meta_individual, Gamma(link = "log"))
+  formula <- epidist_formula(prep_meta_individual, family, bf(mu ~ 1))
+  expect_null(epidist_model_prior(prep_meta_individual, formula))
+})

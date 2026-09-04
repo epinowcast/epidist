@@ -17,3 +17,4 @@
 ^\.lintr$
 ^cran-comments\.md$
 ^vignettes/.*\.Rmd\.orig$
+^design$

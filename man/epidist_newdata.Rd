@@ -8,8 +8,8 @@ epidist_newdata(data, ...)
 }
 \arguments{
 \item{data}{An \code{epidist} data object, such as one returned by
-\code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}}, \code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}} or
-\code{\link[=as_epidist_naive_model]{as_epidist_naive_model()}}.}
+\code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}}, \code{\link[=as_epidist_latent_model]{as_epidist_latent_model()}},
+\code{\link[=as_epidist_naive_model]{as_epidist_naive_model()}} or \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}.}
 
 \item{...}{Variables to expand into a grid, passed to \code{\link[tidyr:expand]{tidyr::expand()}}.
 Supply the variables used in the model formula, such as \code{sex}. Each
@@ -61,6 +61,7 @@ Other newdata:
 \code{\link{epidist_newdata.default}()},
 \code{\link{epidist_newdata.epidist_latent_model}()},
 \code{\link{epidist_newdata.epidist_marginal_model}()},
+\code{\link{epidist_newdata.epidist_meta_model}()},
 \code{\link{epidist_newdata.epidist_naive_model}()}
 }
 \concept{newdata}

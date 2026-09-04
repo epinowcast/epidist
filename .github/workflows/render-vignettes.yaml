@@ -1,9 +1,9 @@
 # Rebuilds the precomputed vignettes.
 #
-# `ebola`, `faq` and `approx-inference` fit models and need cmdstanr, so they
-# are knitted from a `.Rmd.orig` source into a committed `.Rmd` holding static
-# output. That keeps them in the package without needing cmdstanr, or a long
-# model fit, at build time.
+# `ebola`, `faq`, `approx-inference` and `meta` fit models and need cmdstanr,
+# so they are knitted from a `.Rmd.orig` source into a committed `.Rmd`
+# holding static output. That keeps them in the package without needing
+# cmdstanr, or a long model fit, at build time.
 on:
   push:
     paths:
@@ -30,7 +30,7 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
-          extra-repositories: 'https://stan-dev.r-universe.dev'
+          extra-repositories: 'https://stan-dev.r-universe.dev https://mrc-ide.r-universe.dev'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
@@ -59,6 +59,13 @@ jobs:
       - name: Render vignettes
         run: |
           setwd("vignettes")
+          # The vignettes use bookdown::html_document2 and cross-reference
+          # figures and tables with \@ref(fig:label). Outside a bookdown
+          # render knitr emits a plain markdown image, which carries no
+          # chunk label, so those references resolve to "??". This makes
+          # knitr emit the labelled figure and caption that bookdown numbers
+          # from, exactly as it would during a bookdown render.
+          knitr::opts_knit$set(bookdown.internal.label = TRUE)
           for (file in list.files(pattern = "[.]Rmd[.]orig$")) {
             message("knitting ", file)
             out <- sub("[.]orig$", "", file)
