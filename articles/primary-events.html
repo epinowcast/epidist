@@ -118,18 +118,21 @@ The event is then more likely towards one end of the window, and ignoring that b
 <span class="header-section-number">2</span> Simulating from a growing epidemic<a class="anchor" aria-label="anchor" href="#simulating-from-a-growing-epidemic"></a>
 </h2>
 <p><code><a href="../reference/simulate_exponential_cases.html">simulate_exponential_cases()</a></code> draws primary events from an exponentially growing epidemic at rate <code>r</code>.
-Here we use a rate of 0.5 and a lognormal delay.
-Both events are then censored to daily windows.</p>
+Here we use a rate of 0.5 and a lognormal delay.</p>
+<p>Both events are censored to three day windows rather than daily ones.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">101</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">meanlog</span> <span class="op">&lt;-</span> <span class="fl">1.6</span></span>
 <span><span class="va">sdlog</span> <span class="op">&lt;-</span> <span class="fl">0.4</span></span>
 <span><span class="va">growth_rate</span> <span class="op">&lt;-</span> <span class="fl">0.5</span></span>
+<span><span class="va">window</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
 <span></span>
 <span><span class="va">obs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_exponential_cases.html">simulate_exponential_cases</a></span><span class="op">(</span>r <span class="op">=</span> <span class="va">growth_rate</span>, sample_size <span class="op">=</span> <span class="fl">500</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/simulate_secondary.html">simulate_secondary</a></span><span class="op">(</span>meanlog <span class="op">=</span> <span class="va">meanlog</span>, sdlog <span class="op">=</span> <span class="va">sdlog</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/simulate_dates.html">simulate_dates</a></span><span class="op">(</span>outbreak_start_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-01-01"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/simulate_dates.html">simulate_dates</a></span><span class="op">(</span></span>
+<span>    outbreak_start_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-01-01"</span><span class="op">)</span>, primary_window <span class="op">=</span> <span class="va">window</span></span>
+<span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="va">linelist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_linelist_data.html">as_epidist_linelist_data</a></span><span class="op">(</span><span class="va">obs</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -139,11 +142,14 @@ Both events are then censored to daily windows.</p>
 </h2>
 <p>The marginal model takes the primary event distribution when the data are converted.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">uniform</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">linelist</span><span class="op">)</span></span>
-<span><span class="va">growing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">linelist</span>, primary <span class="op">=</span> <span class="st">"expgrowth"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">uniform</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="va">linelist</span>, obs_time_threshold <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">growing</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span></span>
+<span>  <span class="va">linelist</span>,</span>
+<span>  primary <span class="op">=</span> <span class="st">"expgrowth"</span>, obs_time_threshold <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>With <code>primary = "expgrowth"</code> the growth rate becomes a distributional parameter called <code>pgrowth</code>.
 It takes a formula and a prior in the same way as <code>mu</code> and <code>sigma</code>.</p>
-<p>The delays carry little information about the growth rate, so the prior does the work.
+<p>One set of delays carries little information about the growth rate, so here the prior does most of the work.
 Epidemic growth is normally estimated separately, from case counts over the same period.
 That estimate is then passed here as an informative prior centred on it, which is the approach taken in <span class="citation">Brand et al. (<a href="#ref-brand2026scalable">2026</a>)</span>.
 The prior below is centred on the rate used to simulate.</p>
@@ -165,21 +171,27 @@ The prior below is centred on the rate used to simulate.</p>
 <span>  <span class="st">"pgrowth_Intercept"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Estimate"</span>, <span class="st">"l-95% CI"</span>, <span class="st">"u-95% CI"</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>
 <span><span class="co">#&gt;                    Estimate  l-95% CI  u-95% CI</span></span>
-<span><span class="co">#&gt; pgrowth_Intercept 0.5034364 0.3061002 0.6997107</span></span></code></pre></div>
+<span><span class="co">#&gt; pgrowth_Intercept 0.4992281 0.3028898 0.6958845</span></span></code></pre></div>
 <p>Both are compared against the delay used to simulate.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">uniform_draws</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/delay_parameter_draws.html">delay_parameter_draws</a></span><span class="op">(</span><span class="va">fit_uniform</span><span class="op">)</span></span>
 <span><span class="va">growing_draws</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/delay_parameter_draws.html">delay_parameter_draws</a></span><span class="op">(</span><span class="va">fit_growing</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">uniform_draws</span>, model <span class="op">=</span> <span class="st">"Uniform"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">growing_draws</span>, model <span class="op">=</span> <span class="st">"Exponential growth"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<span>  Uniform <span class="op">=</span> <span class="va">uniform_draws</span>,</span>
+<span>  `Exponential growth` <span class="op">=</span> <span class="va">growing_draws</span>,</span>
+<span>  .id <span class="op">=</span> <span class="st">"model"</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">model</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Uniform"</span>, <span class="st">"Exponential growth"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">draws</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">mu</span>, fill <span class="op">=</span> <span class="va">model</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density.html" class="external-link">geom_density</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density.html" class="external-link">geom_density</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.6</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">meanlog</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    Uniform <span class="op">=</span> <span class="st">"#56B4E9"</span>,</span>
+<span>    `Exponential growth` <span class="op">=</span> <span class="st">"#D55E00"</span></span>
+<span>  <span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"meanlog"</span>, y <span class="op">=</span> <span class="st">"Density"</span>, fill <span class="op">=</span> <span class="st">"Primary event"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
@@ -197,7 +209,9 @@ Here each location has its own rate, drawn around the shared value.</p>
 <span><span class="va">by_location</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">imap</a></span><span class="op">(</span><span class="va">locations</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r</span>, <span class="va">location</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_exponential_cases.html">simulate_exponential_cases</a></span><span class="op">(</span>r <span class="op">=</span> <span class="va">r</span>, sample_size <span class="op">=</span> <span class="fl">300</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="../reference/simulate_secondary.html">simulate_secondary</a></span><span class="op">(</span>meanlog <span class="op">=</span> <span class="va">meanlog</span>, sdlog <span class="op">=</span> <span class="va">sdlog</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="../reference/simulate_dates.html">simulate_dates</a></span><span class="op">(</span>outbreak_start_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-01-01"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="../reference/simulate_dates.html">simulate_dates</a></span><span class="op">(</span></span>
+<span>      outbreak_start_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2024-01-01"</span><span class="op">)</span>, primary_window <span class="op">=</span> <span class="va">window</span></span>
+<span>    <span class="op">)</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">sim</span>, location <span class="op">=</span> <span class="va">location</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="va">by_location</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">by_location</span><span class="op">)</span></span>
@@ -209,33 +223,63 @@ The latent model samples an event time per observation and would be slow at this
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">marginal_locations</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span></span>
 <span>  <span class="va">linelist_locations</span>,</span>
-<span>  primary <span class="op">=</span> <span class="st">"expgrowth"</span></span>
+<span>  primary <span class="op">=</span> <span class="st">"expgrowth"</span>,</span>
+<span>  obs_time_threshold <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fit_locations</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  <span class="va">marginal_locations</span>,</span>
 <span>  formula <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsformula.html" class="external-link">bf</a></span><span class="op">(</span><span class="va">mu</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">pgrowth</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">location</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  prior <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/set_prior.html" class="external-link">prior</a></span><span class="op">(</span><span class="fu">normal</span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.2</span><span class="op">)</span>, class <span class="op">=</span> <span class="st">"Intercept"</span>, dpar <span class="op">=</span> <span class="st">"pgrowth"</span><span class="op">)</span>,</span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/set_prior.html" class="external-link">prior</a></span><span class="op">(</span><span class="fu">normal</span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.2</span><span class="op">)</span>, class <span class="op">=</span> <span class="st">"Intercept"</span>, dpar <span class="op">=</span> <span class="st">"pgrowth"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://paulbuerkner.com/brms/reference/set_prior.html" class="external-link">prior</a></span><span class="op">(</span><span class="fu">normal</span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.3</span><span class="op">)</span>, class <span class="op">=</span> <span class="st">"sd"</span>, dpar <span class="op">=</span> <span class="st">"pgrowth"</span><span class="op">)</span>,</span>
 <span>  chains <span class="op">=</span> <span class="fl">2</span>, cores <span class="op">=</span> <span class="fl">2</span>, refresh <span class="op">=</span> <span class="fl">0</span>, silent <span class="op">=</span> <span class="fl">2</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Here the prior is shared across locations and the random effect lets each depart from it.</p>
+<p>The prior on the standard deviation between locations is tight because three locations cannot tell you how much they vary.
+Settings within one outbreak rarely differ in growth by more than a couple of tenths per day, which is the range <code>normal(0, 0.3)</code> allows.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># epidist_newdata() adds the observation process columns the marginal model</span></span>
-<span><span class="co"># needs (pwindow, swindow, relative_obs_time, delay_min) alongside location.</span></span>
-<span><span class="va">newdata</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_newdata.html">epidist_newdata</a></span><span class="op">(</span><span class="va">marginal_locations</span>, location <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">locations</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">newdata</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_newdata.html">epidist_newdata</a></span><span class="op">(</span><span class="va">marginal_locations</span>, location <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">locations</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred</span> <span class="op">&lt;-</span> <span class="fu">tidybayes</span><span class="fu">::</span><span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_epred_draws</a></span><span class="op">(</span><span class="va">newdata</span>, <span class="va">fit_locations</span>, dpar <span class="op">=</span> <span class="st">"pgrowth"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">epred</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pgrowth</span>, y <span class="op">=</span> <span class="va">location</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">tidybayes</span><span class="fu">::</span><span class="fu"><a href="https://mjskay.github.io/ggdist/reference/stat_halfeye.html" class="external-link">stat_halfeye</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">tidybayes</span><span class="fu">::</span><span class="fu"><a href="https://mjskay.github.io/ggdist/reference/stat_halfeye.html" class="external-link">stat_halfeye</a></span><span class="op">(</span></span>
+<span>    fill <span class="op">=</span> <span class="st">"#56B4E9"</span>, colour <span class="op">=</span> <span class="st">"#2A5674"</span>, .width <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.95</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>location <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">locations</span><span class="op">)</span>, pgrowth <span class="op">=</span> <span class="va">locations</span><span class="op">)</span>,</span>
-<span>    colour <span class="op">=</span> <span class="st">"red"</span>, size <span class="op">=</span> <span class="fl">3</span></span>
+<span>    colour <span class="op">=</span> <span class="st">"#D55E00"</span>, size <span class="op">=</span> <span class="fl">3</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Growth rate"</span>, y <span class="op">=</span> <span class="st">"Location"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="figures/primary-events-location-estimates-1.png" alt="" width="672"></p>
+<div class="section level3" number="4.1">
+<h3 id="identifying-the-growth-rate">
+<span class="header-section-number">4.1</span> Identifying the growth rate<a class="anchor" aria-label="anchor" href="#identifying-the-growth-rate"></a>
+</h3>
+<p>A delay shared across locations cannot absorb a difference in growth between them, so the rates are better determined than they are from any one location alone.
+Refitting these data with a delay per location widens the interval on every rate by about a fifth.
+They are still far from pinned down, so an informative prior remains worth having.</p>
+</div>
+</div>
+<div class="section level2" number="5">
+<h2 id="summary">
+<span class="header-section-number">5</span> Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
+</h2>
+<ul>
+<li>The distribution of the primary event within its window matters more the wider that window is, and the further the growth rate is from zero.</li>
+<li>Where the window is a day and the delay is several days, the default uniform assumption is usually enough.
+Weekly reporting, or fast growth or decline, is where it is not.</li>
+<li>Only the uniform and exponential growth distributions are supported.
+Others that are on the roadmap are a normal distribution, or a mixture of a normal distribution and a bounded exponential growth distribution.</li>
+<li>One set of delays carries little information about the growth rate, so take it from a separate estimate of epidemic growth and pass it as an informative prior.</li>
+<li>Several settings fitted together are a different matter.
+A delay shared across them cannot absorb a difference in growth between them, so the rates are better determined than they are from one setting alone.</li>
+<li>It would usually make sense to fit jointly with the case counts the growth rate would otherwise be estimated from, rather than passing a point estimate as a prior, but at the moment this requires a custom extension.</li>
+<li>Other uses of the primary event distribution are possible, such as a point source release where exposure is concentrated in a short window rather than spread across the reporting interval.
+These will usually need an informative prior on the delay distribution as well, since the data alone will not separate the two.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

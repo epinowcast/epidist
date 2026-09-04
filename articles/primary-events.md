@@ -30,8 +30,9 @@ library(brms)
 
 [`simulate_exponential_cases()`](https://epidist.epinowcast.org/reference/simulate_exponential_cases.md)
 draws primary events from an exponentially growing epidemic at rate `r`.
-Here we use a rate of 0.5 and a lognormal delay. Both events are then
-censored to daily windows.
+Here we use a rate of 0.5 and a lognormal delay.
+
+Both events are censored to three day windows rather than daily ones.
 
 ``` r
 
@@ -40,10 +41,13 @@ set.seed(101)
 meanlog <- 1.6
 sdlog <- 0.4
 growth_rate <- 0.5
+window <- 3
 
 obs <- simulate_exponential_cases(r = growth_rate, sample_size = 500) |>
   simulate_secondary(meanlog = meanlog, sdlog = sdlog) |>
-  simulate_dates(outbreak_start_date = as.Date("2024-01-01"))
+  simulate_dates(
+    outbreak_start_date = as.Date("2024-01-01"), primary_window = window
+  )
 
 linelist <- as_epidist_linelist_data(obs)
 ```
@@ -55,20 +59,24 @@ are converted.
 
 ``` r
 
-uniform <- as_epidist_marginal_model(linelist)
-growing <- as_epidist_marginal_model(linelist, primary = "expgrowth")
+uniform <- as_epidist_marginal_model(linelist, obs_time_threshold = 0)
+growing <- as_epidist_marginal_model(
+  linelist,
+  primary = "expgrowth", obs_time_threshold = 0
+)
 ```
 
 With `primary = "expgrowth"` the growth rate becomes a distributional
 parameter called `pgrowth`. It takes a formula and a prior in the same
 way as `mu` and `sigma`.
 
-The delays carry little information about the growth rate, so the prior
-does the work. Epidemic growth is normally estimated separately, from
-case counts over the same period. That estimate is then passed here as
-an informative prior centred on it, which is the approach taken in Brand
-et al. ([2026](#ref-brand2026scalable)). The prior below is centred on
-the rate used to simulate.
+One set of delays carries little information about the growth rate, so
+here the prior does most of the work. Epidemic growth is normally
+estimated separately, from case counts over the same period. That
+estimate is then passed here as an informative prior centred on it,
+which is the approach taken in Brand et al.
+([2026](#ref-brand2026scalable)). The prior below is centred on the rate
+used to simulate.
 
 ``` r
 
@@ -93,7 +101,7 @@ summary(fit_growing)$fixed[
   "pgrowth_Intercept", c("Estimate", "l-95% CI", "u-95% CI")
 ]
 #>                    Estimate  l-95% CI  u-95% CI
-#> pgrowth_Intercept 0.5034364 0.3061002 0.6997107
+#> pgrowth_Intercept 0.4992281 0.3028898 0.6958845
 ```
 
 Both are compared against the delay used to simulate.
@@ -104,14 +112,20 @@ uniform_draws <- delay_parameter_draws(fit_uniform)
 growing_draws <- delay_parameter_draws(fit_growing)
 
 draws <- bind_rows(
-  mutate(uniform_draws, model = "Uniform"),
-  mutate(growing_draws, model = "Exponential growth")
-)
+  Uniform = uniform_draws,
+  `Exponential growth` = growing_draws,
+  .id = "model"
+) |>
+  mutate(model = factor(model, levels = c("Uniform", "Exponential growth")))
 
 draws |>
   ggplot(aes(x = mu, fill = model)) +
-  geom_density(alpha = 0.5) +
+  geom_density(alpha = 0.6, colour = NA) +
   geom_vline(xintercept = meanlog, linetype = "dashed") +
+  scale_fill_manual(values = c(
+    Uniform = "#56B4E9",
+    `Exponential growth` = "#D55E00"
+  )) +
   labs(x = "meanlog", y = "Density", fill = "Primary event") +
   theme_minimal() +
   theme(legend.position = "bottom")
@@ -131,7 +145,9 @@ locations <- c(a = 0.2, b = 0.5, c = 0.8)
 by_location <- purrr::imap(locations, function(r, location) {
   sim <- simulate_exponential_cases(r = r, sample_size = 300, seed = 1) |>
     simulate_secondary(meanlog = meanlog, sdlog = sdlog) |>
-    simulate_dates(outbreak_start_date = as.Date("2024-01-01"))
+    simulate_dates(
+      outbreak_start_date = as.Date("2024-01-01"), primary_window = window
+    )
   return(mutate(sim, location = location))
 })
 by_location <- bind_rows(by_location)
@@ -148,13 +164,15 @@ this size.
 
 marginal_locations <- as_epidist_marginal_model(
   linelist_locations,
-  primary = "expgrowth"
+  primary = "expgrowth",
+  obs_time_threshold = 0
 )
 
 fit_locations <- epidist(
   marginal_locations,
   formula = bf(mu ~ 1, pgrowth ~ 1 + (1 | location)),
-  prior = prior(normal(0.5, 0.2), class = "Intercept", dpar = "pgrowth"),
+  prior = prior(normal(0.5, 0.2), class = "Intercept", dpar = "pgrowth") +
+    prior(normal(0, 0.3), class = "sd", dpar = "pgrowth"),
   chains = 2, cores = 2, refresh = 0, silent = 2
 )
 ```
@@ -162,26 +180,68 @@ fit_locations <- epidist(
 Here the prior is shared across locations and the random effect lets
 each depart from it.
 
+The prior on the standard deviation between locations is tight because
+three locations cannot tell you how much they vary. Settings within one
+outbreak rarely differ in growth by more than a couple of tenths per
+day, which is the range `normal(0, 0.3)` allows.
+
 ``` r
 
-# epidist_newdata() adds the observation process columns the marginal model
-# needs (pwindow, swindow, relative_obs_time, delay_min) alongside location.
 newdata <- epidist_newdata(marginal_locations, location = names(locations))
 
 epred <- tidybayes::add_epred_draws(newdata, fit_locations, dpar = "pgrowth")
 
 epred |>
   ggplot(aes(x = pgrowth, y = location)) +
-  tidybayes::stat_halfeye() +
+  tidybayes::stat_halfeye(
+    fill = "#56B4E9", colour = "#2A5674", .width = c(0.5, 0.95)
+  ) +
   geom_point(
     data = tibble(location = names(locations), pgrowth = locations),
-    colour = "red", size = 3
+    colour = "#D55E00", size = 3
   ) +
   labs(x = "Growth rate", y = "Location") +
   theme_minimal()
 ```
 
 ![](figures/primary-events-location-estimates-1.png)
+
+### 4.1 Identifying the growth rate
+
+A delay shared across locations cannot absorb a difference in growth
+between them, so the rates are better determined than they are from any
+one location alone. Refitting these data with a delay per location
+widens the interval on every rate by about a fifth. They are still far
+from pinned down, so an informative prior remains worth having.
+
+## 5 Summary
+
+- The distribution of the primary event within its window matters more
+  the wider that window is, and the further the growth rate is from
+  zero.
+- Where the window is a day and the delay is several days, the default
+  uniform assumption is usually enough. Weekly reporting, or fast growth
+  or decline, is where it is not.
+- Only the uniform and exponential growth distributions are supported.
+  Others that are on the roadmap are a normal distribution, or a mixture
+  of a normal distribution and a bounded exponential growth
+  distribution.
+- One set of delays carries little information about the growth rate, so
+  take it from a separate estimate of epidemic growth and pass it as an
+  informative prior.
+- Several settings fitted together are a different matter. A delay
+  shared across them cannot absorb a difference in growth between them,
+  so the rates are better determined than they are from one setting
+  alone.
+- It would usually make sense to fit jointly with the case counts the
+  growth rate would otherwise be estimated from, rather than passing a
+  point estimate as a prior, but at the moment this requires a custom
+  extension.
+- Other uses of the primary event distribution are possible, such as a
+  point source release where exposure is concentrated in a short window
+  rather than spread across the reporting interval. These will usually
+  need an informative prior on the delay distribution as well, since the
+  data alone will not separate the two.
 
 ## References
 
