@@ -30,6 +30,7 @@ Other simulate:
 \code{\link{simulate_dates}()},
 \code{\link{simulate_gillespie}()},
 \code{\link{simulate_secondary}()},
+\code{\link{simulate_study}()},
 \code{\link{simulate_uniform_cases}()}
 }
 \concept{simulate}

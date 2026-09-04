@@ -249,6 +249,73 @@ test_that("as_epidist_estimates_data respects a user supplied max_delay", {
   expect_identical(est$max_delay, rep(45, 4))
 })
 
+test_that("the default max_delay is where 1% of the second moment lies beyond", { # nolint: line_length_linter.
+  # A lognormal is matched to what the study reported, and the cutoff is the
+  # delay beyond which one percent of its second moment lies, rounded up to
+  # a whole number of secondary windows with a floor of ten.
+  lnorm_cutoff <- function(meanlog, sdlog) {
+    return(exp(meanlog + 2 * sdlog^2 + sdlog * qnorm(0.99)))
+  }
+  moments <- data.frame(
+    study = c("A", "A"), type = c("mean", "sd"), value = c(7, 3.6), n = 100,
+    relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 0,
+    stringsAsFactors = FALSE
+  )
+  est <- suppressMessages(as_epidist_estimates_data(moments))
+  var_log <- log1p((3.6 / 7)^2)
+  expected <- ceiling(lnorm_cutoff(log(7) - var_log / 2, sqrt(var_log)))
+  expect_identical(est$max_delay, rep(expected, 2))
+  expect_lt(expected, 40)
+  # The same match is used by the short cutoff check, which therefore never
+  # fires on the default, even for a heavy tail.
+  expect_identical(.estimates_short_cutoff(est), character(0))
+  # For a heavy tail the default is capped at twenty times the largest
+  # reported value, and the short cutoff check then says so.
+  heavy <- moments
+  heavy$value <- c(24, 40)
+  est <- suppressMessages(as_epidist_estimates_data(heavy))
+  expect_identical(est$max_delay, rep(20 * 40, 2))
+  expect_identical(.estimates_short_cutoff(est), "A")
+  # A study reporting only quantiles is matched through its median and its
+  # largest quantile above the median.
+  quantiles <- data.frame(
+    study = "B", type = "quantile", value = c(6, 12), p = c(0.5, 0.9),
+    n = 50, relative_obs_time = Inf, trunc_adjusted = TRUE,
+    cens_adjusted = 0, stringsAsFactors = FALSE
+  )
+  est <- suppressMessages(as_epidist_estimates_data(quantiles))
+  sdlog <- (log(12) - log(6)) / qnorm(0.9)
+  expect_identical(
+    est$max_delay, rep(ceiling(lnorm_cutoff(log(6), sdlog)), 2)
+  )
+  # The cutoff is a whole number of secondary windows.
+  weekly <- moments
+  weekly$swindow <- 7
+  weekly$pwindow <- 7
+  est <- suppressMessages(as_epidist_estimates_data(weekly))
+  expect_identical(est$max_delay, rep(7 * ceiling(expected / 7), 2))
+  # A narrow delay gets the floor of ten.
+  narrow <- moments
+  narrow$value <- c(3, 0.2)
+  est <- suppressMessages(as_epidist_estimates_data(narrow))
+  expect_identical(est$max_delay, rep(10, 2))
+  # Where nothing can be matched the cutoff is five times the largest
+  # reported value: a single quantile, or a mean with a standard error.
+  single <- quantiles[2, ]
+  est <- suppressMessages(as_epidist_estimates_data(single))
+  expect_identical(est$max_delay, 60)
+  mean_se <- data.frame(
+    study = "C", type = "mean", value = 7.5, se = 0.4,
+    relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 1,
+    stringsAsFactors = FALSE
+  )
+  est <- suppressMessages(as_epidist_estimates_data(mean_se))
+  expect_identical(est$max_delay, 38)
+  # The message names the cutoff.
+  msgs <- capture_messages(as_epidist_estimates_data(moments))
+  expect_true(any(grepl("second moment", msgs, fixed = TRUE)))
+})
+
 test_that("as_epidist_estimates_data warns about a short grid cutoff", {
   short <- data.frame(
     study = "A", type = c("mean", "sd"), value = c(8.3, 7.9), n = 500,
@@ -261,12 +328,13 @@ test_that("as_epidist_estimates_data warns about a short grid cutoff", {
   short$max_delay <- NULL
   msgs <- capture_messages(as_epidist_estimates_data(short))
   expect_false(any(grepl("short relative", msgs, fixed = TRUE)))
-  # A heavy tailed study is flagged at the default cutoff, where a lognormal
-  # matched to its mean and standard deviation still has a tenth of its
-  # second moment beyond the cutoff and the grid standard deviation is
-  # several percent low.
+  # A heavy tailed study is flagged at twenty times its largest reported
+  # value, where a lognormal matched to its mean and standard deviation
+  # still has a tenth of its second moment beyond the cutoff and the grid
+  # standard deviation is several percent low.
   heavy <- short
   heavy$value <- c(24, 40)
+  heavy$max_delay <- 800
   msgs <- capture_messages(as_epidist_estimates_data(heavy))
   short_msg <- msgs[grepl("short relative", msgs, fixed = TRUE)]
   expect_length(short_msg, 1)
@@ -281,7 +349,7 @@ test_that("as_epidist_estimates_data warns about a short grid cutoff", {
   quantiles <- data.frame(
     study = "B", type = "quantile", value = c(10, 60), p = c(0.5, 0.9),
     n = 50, relative_obs_time = Inf, trunc_adjusted = TRUE,
-    cens_adjusted = 0, stringsAsFactors = FALSE
+    cens_adjusted = 0, max_delay = 300, stringsAsFactors = FALSE
   )
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
   expect_true(any(grepl("short relative", msgs, fixed = TRUE)))
@@ -302,9 +370,14 @@ test_that("as_epidist_estimates_data warns when the quadrature is coarse relativ
   )
   msgs <- capture_messages(as_epidist_estimates_data(heavy))
   expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
-  # A very narrow study needs more intervals than the cap allows.
+  # A very narrow study is resolved on its default grid, which ends just
+  # above its mean, but needs more intervals than the cap allows on a long
+  # one.
   narrow <- heavy
   narrow$value <- c(24, 0.1)
+  msgs <- capture_messages(as_epidist_estimates_data(narrow))
+  expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
+  narrow$max_delay <- 100
   msgs <- capture_messages(as_epidist_estimates_data(narrow))
   expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
   expect_true(any(grepl("epidist.meta_n_quad", msgs, fixed = TRUE)))
@@ -352,7 +425,7 @@ test_that(".estimates_coarse_quadrature names the studies with coarse nodes", {
   data <- suppressMessages(as_epidist_estimates_data(data.frame(
     study = c("A", "A", "B", "B", "C"),
     type = c("mean", "sd", "mean", "sd", "mean"),
-    value = c(24, 0.05, 24, 0.05, 5),
+    value = c(24, 0.02, 24, 0.02, 5),
     n = 500,
     relative_obs_time = c(Inf, Inf, Inf, Inf, 30),
     trunc_adjusted = c(TRUE, TRUE, TRUE, TRUE, FALSE),
