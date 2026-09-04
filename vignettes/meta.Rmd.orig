@@ -660,11 +660,8 @@ ebola_estimates_df <- onset_to_death |>
 ebola_estimates <- as_epidist_estimates_data(ebola_estimates_df)
 ```
 
-The checks fire because several studies report only a median, which sits within ten days of zero on a daily grid and so is resolved poorly, and because a few report a standard deviation that implies a heavier tail than their sample size can pin down.
-We fit a reported mean and standard deviation in preference where a study gives them, and take the median where it is all a study reports.
-
 We fit a Gamma, which is the family most of these studies fitted, with a `(1 | study)` term on both the mean and the shape.
-The term allows for real heterogeneity across outbreaks and Ebola species, and for studies whose metadata we have got wrong, which the model cannot tell apart.
+The term allows for real heterogeneity across outbreaks and Ebola species, and for studies whose metadata we have got wrong.
 
 Ebola onset to death is thought to take roughly 7 to 14 days, so the intercept prior is centred on ten days with a standard deviation of 0.5 on the log link.
 A Gamma shape between about 1 and 5 covers the spreads reported, so the shape intercept gets `normal(log(2), 0.5)` on its log link.
