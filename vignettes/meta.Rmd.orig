@@ -151,162 +151,60 @@ ggplot(bias_illustration, aes(x = cutoff, y = naive_mean)) +
 ```
 
 Real reviews collect studies that differ in how they measured delays and in what they chose to report.
-We build nine such studies from the same line list, each applying its own estimation procedure to it.
-The helpers below work out which cases a study would have seen and what it would have measured from them.
+We build ten such studies from the same line list with `simulate_study()`, which works out which cases a study would have seen and what it would have measured from them.
+Each row of the design below is one study.
+Two of them report a mean and standard deviation with the covariance between the two, one adjusted for both biases and one adjusted for neither.
 
-<details><summary>Click to expand for the helpers that simulate a study</summary>
+<details><summary>Click to expand for the study designs and the code to build the table</summary>
 
 ```{r}
 set.seed(2)
-
-measured_delay <- function(data, cens_adjusted) {
-  return(switch(
-    as.character(cens_adjusted),
-    "0" = data$delay_daily,
-    "1" = data$stime - data$ptime,
-    "2" = data$stime - data$ptime_lwr,
-    "3" = data$delay_daily + 0.5,
-    "4" = data$stime - data$ptime_lwr - 0.5
-  ))
-}
 
 # A study that stopped at a calendar date needs the growth rate of primary
 # events over its collection window. The simulated outbreak grows more slowly
 # than its rate parameter once it starts to deplete susceptibles, so we take
 # the realised rate rather than the one we simulated with.
-window_growth_rate <- function(window) {
-  counts <- as_tibble(linelist) |>
-    filter(.data$ptime_lwr < window) |>
-    count(day = .data$ptime_lwr)
-  return(unname(coef(glm(n ~ day, family = poisson, data = counts))[2]))
-}
+primary_counts <- as_tibble(delays) |>
+  filter(.data$ptime_lwr < 20) |>
+  count(day = .data$ptime_lwr)
+accrual_growth_rate <- coef(
+  glm(n ~ day, family = poisson, data = primary_counts)
+)[["day"]]
 
-accrual_growth_rate <- window_growth_rate(20)
-
-# A study working from a discrete grid sees a case only if the whole day its
-# delay falls in is below the cutoff.
-observed_by <- function(data, cens_adjusted, obs_time) {
-  if (cens_adjusted %in% c(0, 3)) {
-    return(data$delay_daily + 1 <= obs_time)
-  }
-  return(measured_delay(data, cens_adjusted) <= obs_time)
-}
-
-available_cases <- function(cens_adjusted, trunc_adjusted, obs_time,
-                            trunc_design, delay_min) {
-  cases <- linelist
-  if (!trunc_adjusted && trunc_design == "accrual") {
-    cases <- filter(cases, .data$stime_upr <= obs_time)
-  } else if (!trunc_adjusted) {
-    cases <- filter(cases, observed_by(cases, cens_adjusted, obs_time))
-  }
-  return(filter(cases, measured_delay(cases, cens_adjusted) >= delay_min))
-}
-
-simulate_study <- function(study, report, probs, cens_adjusted,
-                           trunc_adjusted, relative_obs_time,
-                           trunc_design = "cohort", delay_min = 0,
-                           study_growth_rate = 0, study_n = 250) {
-  cases <- available_cases(
-    cens_adjusted, trunc_adjusted, relative_obs_time, trunc_design, delay_min
-  )
-  delays <- measured_delay(
-    slice_sample(cases, n = min(study_n, nrow(cases))), cens_adjusted
-  )
-  metadata <- list(
-    pwindow = 1, swindow = 1,
-    cens_adjusted = cens_adjusted, trunc_adjusted = trunc_adjusted,
-    relative_obs_time = relative_obs_time, trunc_design = trunc_design,
-    delay_min = delay_min, growth_rate = study_growth_rate, max_delay = 60
-  )
-  if (report == "multivariate") {
-    # Draws of the two lognormal parameters from the asymptotic sampling
-    # distribution of the maximum likelihood fit.
-    mle <- c(meanlog = mean(log(delays)), sdlog = stats::sd(log(delays)))
-    parameter_se <- c(
-      mle[["sdlog"]] / sqrt(length(delays)),
-      mle[["sdlog"]] / sqrt(2 * length(delays))
-    )
-    parameter_draws <- cbind(
-      meanlog = rnorm(1000, mle[["meanlog"]], parameter_se[1]),
-      sdlog = rnorm(1000, mle[["sdlog"]], parameter_se[2])
-    )
-    return(do.call(as_epidist_estimates_data, c(
-      list(
-        as_epidist_multivariate(parameter_draws),
-        study = study, family = "lognormal"
-      ),
-      metadata
-    )))
-  }
-  rows <- if (report == "moments") {
-    tibble(
-      type = c("mean", "sd"),
-      value = c(mean(delays), stats::sd(delays)), p = NA_real_,
-      n = length(delays), se = NA_real_
-    )
-  } else if (report == "mean_se") {
-    tibble(
-      type = "mean", value = mean(delays), p = NA_real_,
-      n = NA_real_, se = stats::sd(delays) / sqrt(length(delays))
-    )
-  } else {
-    tibble(
-      type = "quantile",
-      value = stats::quantile(delays, probs, names = FALSE), p = probs,
-      n = length(delays), se = NA_real_
-    )
-  }
-  rows <- mutate(rows, study = study)
-  return(as_epidist_estimates_data(do.call(mutate, c(list(rows), metadata))))
-}
-```
-
-</details>
-
-Each row of the design below is one study.
-The table that follows sets out what each one did and reports.
-
-```{r}
 study_designs <- tribble(
-  ~study,           ~report,      ~probs,             ~cens_adjusted,
-  "naive cohort",   "moments",    NA,                 0,
-  "naive IQR",      "quantiles",  c(0.25, 0.5, 0.75), 0,
-  "calendar stop",  "quantiles",  c(0.2, 0.5, 0.8),   0,
-  "uniform window", "moments",    NA,                 2,
-  "midpoint",       "quantiles",  c(0.3, 0.6, 0.9),   3,
-  "adjusted (MVN)", "multivariate", NA,               1,
-  "delays over 2d", "moments",    NA,                 0,
-  "mean and se",    "mean_se",    NA,                 0,
-  "midpoint window", "moments",   NA,                 4
+  ~study,            ~report,        ~probs,             ~cens_adjusted,
+  "naive cohort",    "moments",      NA,                 0,
+  "naive IQR",       "quantiles",    c(0.25, 0.5, 0.75), 0,
+  "calendar stop",   "quantiles",    c(0.2, 0.5, 0.8),   0,
+  "uniform window",  "moments",      NA,                 2,
+  "midpoint",        "quantiles",    c(0.3, 0.6, 0.9),   3,
+  "adjusted (MVN)",  "multivariate", NA,                 1,
+  "naive (MVN)",     "multivariate", NA,                 0,
+  "delays over 2d",  "moments",      NA,                 0,
+  "mean and se",     "mean_se",      NA,                 0,
+  "midpoint window", "moments",      NA,                 4
 ) |>
   mutate(
     trunc_adjusted = c(
-      FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE
+      FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE
     ),
-    relative_obs_time = c(12, 16, 20, 25, 30, Inf, 18, 22, 26),
+    relative_obs_time = c(12, 16, 20, 25, 30, Inf, 14, 18, 22, 26),
     trunc_design = c(
       "cohort", "cohort", "accrual", "cohort", "cohort", "cohort",
-      "cohort", "cohort", "cohort"
+      "cohort", "cohort", "cohort", "cohort"
     ),
-    delay_min = c(0, 0, 0, 0, 0, 0, 2, 0, 0),
-    study_growth_rate = c(
-      0, 0, accrual_growth_rate, 0, 0, 0, 0, 0, 0
-    ),
-    study_n = c(180, 55, 240, 95, 40, 300, 130, 25, 110)
+    delay_min = c(0, 0, 0, 0, 0, 0, 0, 2, 0, 0),
+    growth_rate = c(0, 0, accrual_growth_rate, 0, 0, 0, 0, 0, 0, 0),
+    n = c(180, 55, 240, 95, 40, 300, 150, 130, 25, 110)
   )
-```
 
-<details><summary>Click to expand for code to build the table of studies</summary>
-
-```{r}
 studies_table <- study_designs |>
   transmute(
     Study = study,
     Reports = case_when(
       report == "moments" ~ "mean, sd",
       report == "mean_se" ~ "mean with a standard error",
-      report == "multivariate" ~ "lognormal parameter draws",
+      report == "multivariate" ~ "mean, sd with their covariance",
       .default = paste0("quantiles at p = ", map_chr(probs, toString))
     ),
     Censoring = case_when(
@@ -323,36 +221,33 @@ studies_table <- study_designs |>
     ),
     `Obs time` = relative_obs_time,
     `Min delay` = delay_min,
-    N = study_n
+    N = n
   )
 ```
 
 </details>
 
-(ref:studies) The nine simulated studies, their estimation procedures and what each reports.
+(ref:studies) The ten simulated studies, their estimation procedures and what each reports.
 
 ```{r studies}
 knitr::kable(studies_table, caption = "(ref:studies)")
 ```
 
-We build the studies one at a time from their design rows and combine them with `as_epidist_estimates_data()`, which takes a list of contributions.
+`simulate_study()` takes the line list and the design of one study, so `purrr::pmap()` builds them one at a time from the rows of the design.
+`as_epidist_estimates_data()` takes the list and combines them.
 The same pattern works for a review, with one function that converts a row of the review to the summaries and metadata of a study.
 
 ```{r}
 biased_estimates <- study_designs |>
-  pmap(simulate_study) |>
-  suppressMessages() |>
+  pmap(simulate_study, data = linelist) |>
   as_epidist_estimates_data()
 biased_estimates
 ```
 
-The study labelled MVN could not share its delays, so it published draws of the two parameters of the lognormal it fitted to them.
-`as_epidist_estimates_data()` converts those draws to a mean and a standard deviation with the covariance between the two.
-A two parameter fit carries two degrees of freedom, so asking it for a third summary as well gives a singular covariance and an error.
-
 ::: {.alert .alert-primary}
 `max_delay` sets how far the grid used to work out the implied naive summaries extends.
-We set it explicitly here because the default, twenty times the largest reported value, would make the grid unnecessarily large for this simulated example and slow fitting down.
+By default it is the point beyond which one percent of the second moment of a lognormal matched to the study's summaries lies, or five times the largest reported value where no lognormal can be matched.
+Raise it for a delay with a longer tail than that, and lower it to fit faster.
 :::
 
 # Fitting and comparing models {#fit}
