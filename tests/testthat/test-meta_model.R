@@ -124,8 +124,10 @@ test_that("as_epidist_meta_model does not repeat the estimates data checks", { #
   msgs <- capture_messages(
     as_epidist_estimates_data(list(estimates, estimates))
   )
-  expect_identical(sum(grepl("relative standard error", msgs)), 1L)
-  expect_identical(sum(grepl("Checks section", msgs)), 1L)
+  expect_identical(
+    sum(grepl("relative standard error", msgs, fixed = TRUE)), 1L
+  )
+  expect_identical(sum(grepl("Checks section", msgs, fixed = TRUE)), 1L)
 })
 
 test_that("is_epidist_meta_model returns TRUE for correct input", {

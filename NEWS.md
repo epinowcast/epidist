@@ -219,6 +219,8 @@ See #620.
 - The advisory messages of `as_epidist_estimates_data()` are now two short sentences naming the studies, and the input row where a single summary is meant, and point at a new Checks section of its documentation that carries the reasoning.
 They run once, when the estimates are built, rather than again when the object is passed to `as_epidist_meta_model()`.
 See #620.
+- The advisory messages of `as_epidist_estimates_data()` now say what each problem is in plain language, run once on the studies combined in a list rather than once per study, and are followed by a single pointer to the Checks section, with `simulate_study()` leaving them to the combined object and `advise = FALSE` skipping them.
+See #620.
 - The midpoint imputation codes of the meta model (`cens_adjusted` 3 and 4) now move `delay_min` with the midpoint shift, so a study that dropped reported delays below a minimum is left truncated at the right point.
 Before this the implied mean was 5 to 15% low for code 4 and up to 24% high for code 3 with a wide secondary window.
 See #620.

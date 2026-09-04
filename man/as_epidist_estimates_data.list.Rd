@@ -4,17 +4,24 @@
 \alias{as_epidist_estimates_data.list}
 \title{Combine \code{epidist_estimates_data} objects from several studies}
 \usage{
-\method{as_epidist_estimates_data}{list}(data, ...)
+\method{as_epidist_estimates_data}{list}(data, advise = TRUE, ...)
 }
 \arguments{
 \item{data}{The data to convert}
+
+\item{advise}{Whether to run the advisory checks of the Checks section and
+message about the studies they flag. Defaults to \code{TRUE}. The list method
+sets it to \code{FALSE} for each element and runs the checks once on the
+combined object.}
 
 \item{...}{Passed to the method used for each element.}
 }
 \description{
 Each element is coerced on its own and the results are bound into one
 object. Combining is associative, so contributions can be assembled in any
-order and in any grouping.
+order and in any grouping. The advisory checks of the Checks section of
+\code{\link[=as_epidist_estimates_data.data.frame]{as_epidist_estimates_data.data.frame()}} run once, on the combined object,
+so each message names every study it applies to.
 }
 \examples{
 as_epidist_estimates_data(list(

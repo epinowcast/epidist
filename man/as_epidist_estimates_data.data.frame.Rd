@@ -21,6 +21,7 @@
   delay_min = NULL,
   growth_rate = NULL,
   max_delay = NULL,
+  advise = TRUE,
   ...
 )
 }
@@ -137,6 +138,11 @@ deviation is biased downwards if the distribution has not decayed by the
 cutoff, and lower it to fit faster. A message names the studies whose
 cutoff is too short, see the Checks section.}
 
+\item{advise}{Whether to run the advisory checks of the Checks section and
+message about the studies they flag. Defaults to \code{TRUE}. The list method
+sets it to \code{FALSE} for each element and runs the checks once on the
+combined object.}
+
 \item{...}{Not used in this method.}
 }
 \description{
@@ -237,8 +243,10 @@ Beyond validating its input, this method runs advisory checks on the
 summaries and messages about the studies they flag. They run once, when
 the object is built, and not again when it is passed to
 \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}. Each message names the studies concerned, and
-the row of the input where a single summary is meant, and points here for
-the reasoning.
+the row of the input where a single summary is meant, and a pointer here
+follows the messages of a call. Studies combined in a list are checked
+once, together, and \code{\link[=simulate_study]{simulate_study()}} leaves the checks to that combined
+object. Set \code{advise = FALSE} to skip them.
 \itemize{
 \item \strong{Assumed truncation adjustment.} Where no \code{trunc_adjusted} column is
 supplied, a study with no finite \code{relative_obs_time} is taken to have

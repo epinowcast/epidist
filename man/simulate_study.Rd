@@ -109,6 +109,10 @@ delay fell in is below \code{relative_obs_time}, and a code 4 study keeps a
 case if its code 2 delay is. Under an \code{"accrual"} design the study stopped
 at a calendar date \code{relative_obs_time} after the start of the line list,
 and keeps every case whose secondary event fell before it.
+
+The advisory checks of \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} do not run on the
+result. They run once on the combined object when several studies are
+passed to \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} in a list.
 }
 \examples{
 linelist <- simulate_gillespie(seed = 1) |>

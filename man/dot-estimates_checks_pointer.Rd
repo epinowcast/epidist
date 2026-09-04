@@ -2,7 +2,7 @@
 % Please edit documentation in R/estimates_data.R
 \name{.estimates_checks_pointer}
 \alias{.estimates_checks_pointer}
-\title{The pointer every advisory message ends with}
+\title{The pointer that follows the advisory messages}
 \usage{
 .estimates_checks_pointer()
 }
@@ -10,6 +10,6 @@
 A named character vector for \code{\link[cli:cli_abort]{cli::cli_inform()}}.
 }
 \description{
-The pointer every advisory message ends with
+The pointer that follows the advisory messages
 }
 \keyword{internal}
