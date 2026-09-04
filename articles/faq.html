@@ -193,12 +193,12 @@ We recommend use of the <a href="https://mc-stan.org/posterior/" class="external
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## # A draws_df: 6 iterations, 1 chains, and 2 variables</span></span>
 <span><span class="co">##   Intercept Intercept_sigma</span></span>
-<span><span class="co">## 1       1.9           -0.46</span></span>
-<span><span class="co">## 2       1.9           -0.39</span></span>
-<span><span class="co">## 3       1.8           -0.44</span></span>
-<span><span class="co">## 4       1.8           -0.53</span></span>
-<span><span class="co">## 5       1.8           -0.50</span></span>
-<span><span class="co">## 6       1.8           -0.54</span></span>
+<span><span class="co">## 1       1.7           -0.59</span></span>
+<span><span class="co">## 2       1.8           -0.57</span></span>
+<span><span class="co">## 3       1.8           -0.58</span></span>
+<span><span class="co">## 4       1.7           -0.56</span></span>
+<span><span class="co">## 5       1.8           -0.53</span></span>
+<span><span class="co">## 6       1.7           -0.60</span></span>
 <span><span class="co">## # ... hidden reserved variables {'.chain', '.iteration', '.draw'}</span></span></code></pre>
 </div>
 <div class="section level4">
@@ -214,7 +214,7 @@ This approach allows you to perform mathematical operations directly with poster
 <span><span class="co"># Look at the intercept in rvar form</span></span>
 <span><span class="va">rv</span><span class="op">$</span><span class="va">b_Intercept</span></span></code></pre></div>
 <pre><code><span><span class="co">## rvar&lt;500,2&gt;[1] mean ± sd:</span></span>
-<span><span class="co">## [1] 1.6 ± 0.069</span></span></code></pre>
+<span><span class="co">## [1] 1.6 ± 0.064</span></span></code></pre>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Calculate the mean delay (on natural scale) for each location</span></span>
 <span><span class="va">mean_delay_loc0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">rv</span><span class="op">$</span><span class="va">b_Intercept</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">rv</span><span class="op">$</span><span class="va">b_sigma_Intercept</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
@@ -226,19 +226,19 @@ This approach allows you to perform mathematical operations directly with poster
 <pre><code><span><span class="co">## # A tibble: 1 × 10</span></span>
 <span><span class="co">##   variable         mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail</span></span>
 <span><span class="co">##   &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;</span></span>
-<span><span class="co">## 1 mean_delay_loc0  5.54   5.51 0.469 0.447  4.87  6.34  1.00     702.     430.</span></span></code></pre>
+<span><span class="co">## 1 mean_delay_loc0  5.54   5.47 0.441 0.396  4.94  6.30  1.00     891.     658.</span></span></code></pre>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">mean_delay_loc1</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## # A tibble: 1 × 10</span></span>
 <span><span class="co">##   variable         mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail</span></span>
 <span><span class="co">##   &lt;chr&gt;           &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;</span></span>
-<span><span class="co">## 1 mean_delay_loc1  12.6   10.9  6.61  2.64  8.17  21.0  1.01     221.     195.</span></span></code></pre>
+<span><span class="co">## 1 mean_delay_loc1  13.3   11.2  7.23  2.76  8.27  25.9  1.02     140.     133.</span></span></code></pre>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Calculate the difference between locations</span></span>
 <span><span class="va">delay_diff</span> <span class="op">&lt;-</span> <span class="va">mean_delay_loc1</span> <span class="op">-</span> <span class="va">mean_delay_loc0</span></span>
 <span><span class="va">delay_diff</span></span></code></pre></div>
 <pre><code><span><span class="co">## rvar&lt;500,2&gt;[1] mean ± sd:</span></span>
-<span><span class="co">## [1] 7.1 ± 6.7</span></span></code></pre>
+<span><span class="co">## [1] 7.7 ± 7.3</span></span></code></pre>
 <p>For more details, see the <a href="https://mc-stan.org/posterior/articles/rvar.html" class="external-link"><code>posterior</code> package documentation</a>.</p>
 </div>
 </div>
@@ -260,7 +260,7 @@ For example, the function <code><a href="https://mc-stan.org/bayesplot/reference
 <pre><code><span><span class="co">## # A tibble: 1 × 8</span></span>
 <span><span class="co">##    time samples max_rhat divergent_transitions per_divergent_transitions</span></span>
 <span><span class="co">##   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;                 &lt;dbl&gt;                     &lt;dbl&gt;</span></span>
-<span><span class="co">## 1  3.10    1000    0.999                     0                         0</span></span>
+<span><span class="co">## 1  2.80    1000     1.00                     0                         0</span></span>
 <span><span class="co">## # ℹ 3 more variables: max_treedepth &lt;dbl&gt;, no_at_max_treedepth &lt;int&gt;,</span></span>
 <span><span class="co">## #   per_at_max_treedepth &lt;dbl&gt;</span></span></code></pre>
 </div>
@@ -275,15 +275,17 @@ Then, pass this expanded data to the <code>newdata</code> argument of <code><a h
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Expand the aggregated data to individual-level data</span></span>
 <span><span class="co"># Note: We must ensure the weight column 'n' is present but set to 1</span></span>
-<span><span class="co"># Drop the model class first: pp_check() only needs the rows, and keeping the</span></span>
-<span><span class="co"># class through uncount() triggers a spurious "Dropping the &lt;epidist_*_model&gt;</span></span>
-<span><span class="co"># class" warning from vctrs as the count column is rebuilt.</span></span>
 <span><span class="va">data_expanded</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/uncount.html" class="external-link">uncount</a></span><span class="op">(</span>weights <span class="op">=</span> <span class="va">n</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Run pp_check with the expanded data</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Warning: ! Dropping the &lt;epidist_marginal_model&gt; class because the object no longer</span></span>
+<span><span class="co">##   meets its requirements:</span></span>
+<span><span class="co">## ✖ Assertion on 'names(data)' failed: Names must include the elements</span></span>
+<span><span class="co">##   {'delay_lwr','delay_upr','delay_min','relative_obs_time','pwindow','swindow','n'},</span></span>
+<span><span class="co">##   but is missing elements {'n'}.</span></span>
+<span><span class="co">## ℹ Use the matching `as_epidist_*()` function to recreate the object.</span></span></code></pre>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Run pp_check with the expanded data</span></span>
 <span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">pp_check</a></span><span class="op">(</span><span class="va">fit</span>, newdata <span class="op">=</span> <span class="va">data_expanded</span>, ndraws <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
 <img src="figures/faq-unnamed-chunk-6-1.png" alt="plot of chunk unnamed-chunk-6"><div class="figcaption">plot of chunk unnamed-chunk-6</div>
@@ -319,7 +321,7 @@ We particularly highlight two functions which might be useful:</p>
 However, some of those priors do not make sense in the context of our application.
 Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html" class="external-link">prior predictive checking</a> to set <code>epidist</code>-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.</p>
 <p>For example, for the <code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">brms::lognormal()</a></code> latent individual model, we suggest the following prior distributions for the <code>brms</code> <code>mu</code> and <code>sigma</code> intercept parameters:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Note that we export lognormal() as part of epidist hence no need for brms::</span></span>
 <span><span class="va">family</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -344,7 +346,7 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <span><span class="co">##  student_t(3, 0, 2.5) Intercept                 sigma                 default</span></span></code></pre>
 <p>(Note that the functions <code><a href="../reference/epidist_family.html">epidist_family()</a></code> and <code><a href="../reference/epidist_prior.html">epidist_prior()</a></code> are mostly for internal use!)</p>
 <p>Here are the distributions on the delay distribution mean and standard deviation parameters that these prior distributions imply:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">fit_ppc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">data</span>,</span>
@@ -354,7 +356,7 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="va">fit_ppc</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/epidist_strata.html">epidist_strata</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/delay_parameter_draws.html">add_delay_parameter_draws</a></span><span class="op">(</span><span class="va">fit_ppc</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -378,11 +380,11 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <div class="float">
 <img src="figures/faq-unnamed-chunk-9-1.png" alt="plot of chunk unnamed-chunk-9"><div class="figcaption">plot of chunk unnamed-chunk-9</div>
 </div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">mean</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.99</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         1%        10%        25%        50%        75%        90%        99%</span></span>
 <span><span class="co">##  0.3172760  0.8667011  1.6163277  3.2461963  6.6291746 12.0852973 34.0415723</span></span></code></pre>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">pred</span><span class="op">$</span><span class="va">sd</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.99</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         1%        10%        25%        50%        75%        90%        99%</span></span>
 <span><span class="co">##  0.1335500  0.3950604  0.7687361  1.7107506  3.9206460  8.1670947 33.4423697</span></span></code></pre>
@@ -391,7 +393,7 @@ Instead, we used <a href="https://mc-stan.org/docs/stan-users-guide/posterior-pr
 <h3 id="how-can-i-assess-how-sensitive-the-fitted-posterior-distribution-is-to-the-prior-distribution-used">How can I assess how sensitive the fitted posterior distribution is to the prior distribution used?<a class="anchor" aria-label="anchor" href="#how-can-i-assess-how-sensitive-the-fitted-posterior-distribution-is-to-the-prior-distribution-used"></a>
 </h3>
 <p>We recommend use of the <a href="https://github.com/n-kall/priorsense" class="external-link"><code>priorsense</code></a> package <span class="citation">(<a href="#ref-kallioinen2024detecting">Kallioinen et al. 2024</a>)</span> to check how sensitive the posterior distribution is to perturbations of the prior distribution and likelihood using power-scaling analysis:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/n-kall/priorsense" class="external-link">priorsense</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://n-kall.github.io/priorsense/reference/powerscale_plots.html" class="external-link">powerscale_plot_dens</a></span><span class="op">(</span><span class="va">fit</span>, variable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Intercept"</span>, <span class="st">"Intercept_sigma"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -464,29 +466,24 @@ In particular, following functions may be useful:</p>
 </ol>
 <p>To see these functions demonstrated in a vignette, see <a href="https://epidist.epinowcast.org/articles/ebola.html">“Advanced features with Ebola data”</a>.
 As a short example, to generate 4000 predictions (equal to the number of draws) of the delay that would be observed with a double censored observation process (in which the primary and secondary censoring windows are both one) then:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mjskay.github.io/tidybayes/" class="external-link">tidybayes</a></span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##</span></span>
-<span><span class="co">## Attaching package: 'tidybayes'</span></span></code></pre>
-<pre><code><span><span class="co">## The following objects are masked from 'package:brms':</span></span>
-<span><span class="co">##</span></span>
-<span><span class="co">##     dstudent_t, pstudent_t, qstudent_t, rstudent_t</span></span></code></pre>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">draws_pmf</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
-<span>  relative_obs_time <span class="op">=</span> <span class="cn">Inf</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  delay_upr <span class="op">=</span> <span class="cn">NA</span>, delay_min <span class="op">=</span> <span class="fl">0</span></span>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mjskay.github.io/tidybayes/" class="external-link">tidybayes</a></span><span class="op">)</span></span>
+<span><span class="va">draws_pmf</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>  relative_obs_time <span class="op">=</span> <span class="cn">Inf</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span>, delay_upr <span class="op">=</span> <span class="cn">NA</span></span>
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html" class="external-link">add_predicted_draws</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Found infinite values in the data, which may cause issues for Stan.</span></span></code></pre>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<pre><code><span><span class="co">## Error in `validate_data()`:</span></span>
+<span><span class="co">## ! The following variables can neither be found in 'data' nor in 'data2':</span></span>
+<span><span class="co">## 'delay_min'</span></span></code></pre>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">draws_pmf</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">.prediction</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes_eval.html" class="external-link">after_stat</a></span><span class="op">(</span><span class="va">count</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">count</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Delay"</span>, y <span class="op">=</span> <span class="st">"PMF"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning: Removed 7 rows containing non-finite outside the scale range</span></span>
+<pre><code><span><span class="co">## Warning: Removed 1 row containing non-finite outside the scale range</span></span>
 <span><span class="co">## (`stat_count()`).</span></span></code></pre>
-<pre><code><span><span class="co">## Warning: Removed 1 row containing missing values or values outside the scale range</span></span>
+<pre><code><span><span class="co">## Warning: Removed 2 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">## (`geom_bar()`).</span></span></code></pre>
 <div class="float">
 <img src="figures/faq-unnamed-chunk-11-1.png" alt="plot of chunk unnamed-chunk-11"><div class="figcaption">plot of chunk unnamed-chunk-11</div>
@@ -501,7 +498,7 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 - Make comparisons between different covariate values
 - Visualise model predictions across the range of covariates</p>
 <p>Here’s a simple example using a model that includes location as a covariate:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://marginaleffects.com/" class="external-link">marginaleffects</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Compare outcomes between location categories (0 and 1)</span></span>
@@ -511,7 +508,7 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 <span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##</span></span>
 <span><span class="co">##  Estimate 2.5 % 97.5 %</span></span>
-<span><span class="co">##      5.42  2.08   22.8</span></span>
+<span><span class="co">##      5.66  2.22   29.9</span></span>
 <span><span class="co">##</span></span>
 <span><span class="co">## Term: location</span></span>
 <span><span class="co">## Type: response</span></span>
@@ -523,7 +520,7 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 </h3>
 <p>The <code>cmdstanr</code> backend is typically more performant than the default <code>rstan</code> backend.
 To use the <code>cmdstanr</code> backend, we first need to install CmdStan (see the README for more details). We can check we have everything we need as follows:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "2.39.0"</span></span></code></pre>
 </div>

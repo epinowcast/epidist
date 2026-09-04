@@ -118,12 +118,12 @@ head(draws)
 
     ## # A draws_df: 6 iterations, 1 chains, and 2 variables
     ##   Intercept Intercept_sigma
-    ## 1       1.9           -0.46
-    ## 2       1.9           -0.39
-    ## 3       1.8           -0.44
-    ## 4       1.8           -0.53
-    ## 5       1.8           -0.50
-    ## 6       1.8           -0.54
+    ## 1       1.7           -0.59
+    ## 2       1.8           -0.57
+    ## 3       1.8           -0.58
+    ## 4       1.7           -0.56
+    ## 5       1.8           -0.53
+    ## 6       1.7           -0.60
     ## # ... hidden reserved variables {'.chain', '.iteration', '.draw'}
 
 #### Using random variables (`rvars`) for uncertainty propagation
@@ -144,7 +144,7 @@ rv$b_Intercept
 ```
 
     ## rvar<500,2>[1] mean ± sd:
-    ## [1] 1.6 ± 0.069
+    ## [1] 1.6 ± 0.064
 
 ``` r
 
@@ -160,7 +160,7 @@ summary(mean_delay_loc0)
     ## # A tibble: 1 × 10
     ##   variable         mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail
     ##   <chr>           <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-    ## 1 mean_delay_loc0  5.54   5.51 0.469 0.447  4.87  6.34  1.00     702.     430.
+    ## 1 mean_delay_loc0  5.54   5.47 0.441 0.396  4.94  6.30  1.00     891.     658.
 
 ``` r
 
@@ -170,7 +170,7 @@ summary(mean_delay_loc1)
     ## # A tibble: 1 × 10
     ##   variable         mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail
     ##   <chr>           <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
-    ## 1 mean_delay_loc1  12.6   10.9  6.61  2.64  8.17  21.0  1.01     221.     195.
+    ## 1 mean_delay_loc1  13.3   11.2  7.23  2.76  8.27  25.9  1.02     140.     133.
 
 ``` r
 
@@ -180,7 +180,7 @@ delay_diff
 ```
 
     ## rvar<500,2>[1] mean ± sd:
-    ## [1] 7.1 ± 6.7
+    ## [1] 7.7 ± 7.3
 
 For more details, see the [`posterior` package
 documentation](https://mc-stan.org/posterior/articles/rvar.html).
@@ -217,7 +217,7 @@ epidist_diagnostics(fit)
     ## # A tibble: 1 × 8
     ##    time samples max_rhat divergent_transitions per_divergent_transitions
     ##   <dbl>   <dbl>    <dbl>                 <dbl>                     <dbl>
-    ## 1  3.10    1000    0.999                     0                         0
+    ## 1  2.80    1000     1.00                     0                         0
     ## # ℹ 3 more variables: max_treedepth <dbl>, no_at_max_treedepth <int>,
     ## #   per_at_max_treedepth <dbl>
 
@@ -246,13 +246,19 @@ Then, pass this expanded data to the `newdata` argument of
 
 # Expand the aggregated data to individual-level data
 # Note: We must ensure the weight column 'n' is present but set to 1
-# Drop the model class first: pp_check() only needs the rows, and keeping the
-# class through uncount() triggers a spurious "Dropping the <epidist_*_model>
-# class" warning from vctrs as the count column is rebuilt.
 data_expanded <- data |>
-  tibble::as_tibble() |>
   tidyr::uncount(weights = n) |>
   mutate(n = 1)
+```
+
+    ## Warning: ! Dropping the <epidist_marginal_model> class because the object no longer
+    ##   meets its requirements:
+    ## ✖ Assertion on 'names(data)' failed: Names must include the elements
+    ##   {'delay_lwr','delay_upr','delay_min','relative_obs_time','pwindow','swindow','n'},
+    ##   but is missing elements {'n'}.
+    ## ℹ Use the matching `as_epidist_*()` function to recreate the object.
+
+``` r
 
 # Run pp_check with the expanded data
 pp_check(fit, newdata = data_expanded, ndraws = 100)
@@ -483,25 +489,15 @@ one) then:
 ``` r
 
 library(tidybayes)
-```
-
-    ##
-    ## Attaching package: 'tidybayes'
-
-    ## The following objects are masked from 'package:brms':
-    ##
-    ##     dstudent_t, pstudent_t, qstudent_t, rstudent_t
-
-``` r
-
 draws_pmf <- tibble::tibble(
-  relative_obs_time = Inf, pwindow = 1, swindow = 1,
-  delay_upr = NA, delay_min = 0
+  relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
 ) |>
   add_predicted_draws(fit)
 ```
 
-    ## Warning: Found infinite values in the data, which may cause issues for Stan.
+    ## Error in `validate_data()`:
+    ## ! The following variables can neither be found in 'data' nor in 'data2':
+    ## 'delay_min'
 
 ``` r
 
@@ -512,10 +508,10 @@ ggplot(draws_pmf, aes(x = .prediction)) +
   theme_minimal()
 ```
 
-    ## Warning: Removed 7 rows containing non-finite outside the scale range
+    ## Warning: Removed 1 row containing non-finite outside the scale range
     ## (`stat_count()`).
 
-    ## Warning: Removed 1 row containing missing values or values outside the scale range
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
     ## (`geom_bar()`).
 
 ![plot of chunk unnamed-chunk-11](figures/faq-unnamed-chunk-11-1.png)
@@ -556,7 +552,7 @@ avg_comparisons(
 
     ##
     ##  Estimate 2.5 % 97.5 %
-    ##      5.42  2.08   22.8
+    ##      5.66  2.22   29.9
     ##
     ## Term: location
     ## Type: response
