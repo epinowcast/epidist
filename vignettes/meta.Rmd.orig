@@ -239,7 +239,7 @@ The same pattern works for a review, with one function that converts a row of th
 
 ```{r}
 biased_estimates <- study_designs |>
-  pmap(simulate_study, data = linelist) |>
+  pmap(simulate_study, data = linelist, max_delay = 60) |>
   as_epidist_estimates_data()
 biased_estimates
 ```
@@ -248,6 +248,7 @@ biased_estimates
 `max_delay` sets how far the grid used to work out the implied naive summaries extends.
 By default it is the point beyond which one percent of the second moment of a lognormal matched to the study's summaries lies, or five times the largest reported value where no lognormal can be matched.
 Raise it for a delay with a longer tail than that, and lower it to fit faster.
+`simulate_study()` passes it through to `as_epidist_estimates_data()`, and we set it rather than take the default for each study in turn.
 :::
 
 # Fitting and comparing models {#fit}
