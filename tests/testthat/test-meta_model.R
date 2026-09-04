@@ -119,7 +119,13 @@ test_that("as_epidist_meta_model does not repeat the estimates data checks", { #
   expect_silent(as_epidist_meta_model(estimates = estimates))
   expect_silent(as_epidist_meta_model(estimates))
   expect_silent(as_epidist_meta_model(sim_obs, estimates = estimates))
-  expect_silent(as_epidist_estimates_data(list(estimates, estimates)))
+  # Combining finished objects checks the combined object once, so each
+  # check and the pointer to the documentation print once.
+  msgs <- capture_messages(
+    as_epidist_estimates_data(list(estimates, estimates))
+  )
+  expect_identical(sum(grepl("relative standard error", msgs)), 1L)
+  expect_identical(sum(grepl("Checks section", msgs)), 1L)
 })
 
 test_that("is_epidist_meta_model returns TRUE for correct input", {
