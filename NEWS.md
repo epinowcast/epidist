@@ -8,6 +8,10 @@ See #489 and #618.
 
 ## Features
 
+- Added `plot_events()`, which plots the primary and secondary event windows of each case in an `epidist_linelist_data` object, ordered by primary event time.
+It can mark the observation time and colour the cases by a column of the data.
+The vignettes drew this plot by hand.
+Closes #689.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
 It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
 Each step is still available on its own.
