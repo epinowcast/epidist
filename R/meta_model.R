@@ -34,10 +34,13 @@
 #' Summaries that one study computed from the same delays are correlated, so
 #' they are fitted jointly. Two are grouped when they agree on every column of
 #' [as_epidist_estimates_data()] other than the summary itself, and a summary
-#' supplied with its own `se` is fitted alone. One observation is therefore a
-#' group rather than a single reported value, so `log_lik()` and [loo::loo()]
-#' report per group, and `loo` only compares fits to the same studies and the
-#' same mix of individual and summary rows. See `vignette("faq")`.
+#' supplied with its own `se` is fitted alone. A study that reported integer
+#' date differences (`cens_adjusted` 0 or 3) is the exception: its mean and
+#' standard deviation form one group and its quantiles another. One
+#' observation is therefore a group rather than a single reported value, so
+#' `log_lik()` and [loo::loo()] report per group, and `loo` only compares
+#' fits to the same studies and the same mix of individual and summary rows.
+#' See `vignette("faq")`.
 #'
 #' Three consequences of the sampling likelihoods change what you should do.
 #'
@@ -51,11 +54,15 @@
 #'   have smaller sampling error than assumed here. Supply a reported `se` in
 #'   [as_epidist_estimates_data()] for those rows, which also takes them out of
 #'   the joint quantile likelihood.
-#' * The normal approximations degrade at small study sample sizes, and
-#'   summaries of different kinds from one study, such as a mean and a median,
-#'   are treated as independent. A study that published draws of its parameters
-#'   avoids the second, because [as_epidist_multivariate()] turns them into a
-#'   covariance over the summaries that is fitted jointly.
+#' * The normal approximations degrade at small study sample sizes. A study
+#'   that reported integer date differences has its mean and standard
+#'   deviation fitted separately from its quantiles, as if they came from
+#'   different delays, which counts such a study about twice for the location
+#'   where it reports both kinds, so keep its mean and standard deviation
+#'   and drop its quantiles. A study with a continuous estimand has every kind
+#'   fitted jointly. A study that published draws of its parameters avoids
+#'   both, because [as_epidist_multivariate()] turns them into a covariance
+#'   over the summaries that is fitted jointly.
 #'
 #' Two approximations are worth knowing about before fitting quantiles.
 #'
@@ -478,13 +485,18 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #' This keeps the grouping correct for any `brms` formula, because a linear
 #' predictor built from those columns cannot vary within a group.
 #'
-#' Means and standard deviations group together, and quantiles group together,
-#' but the two are not mixed because their joint likelihoods differ. A study
-#' reporting more than one mean, or more than one standard deviation, with
-#' otherwise identical metadata has the repeats split into further groups. A
-#' summary with its own reported standard error is left on its own, because
-#' that standard error replaces the sampling uncertainty the joint likelihood
-#' would derive.
+#' A study with a continuous estimand (`cens_adjusted` 1, 2 or 4) has every
+#' kind of summary in one group, because the sampling covariance of its mean,
+#' standard deviation and quantiles is available from the implied
+#' distribution. See [.meta_joint_covariance()]. On the discrete grid
+#' (`cens_adjusted` 0 or 3) the mean and standard deviation group together
+#' and the quantiles group together, but the two are not mixed because the
+#' quantiles are fitted as discrete statistics, so such a study is counted
+#' twice where it reports both kinds. A study reporting more than one mean,
+#' or more than one standard deviation, with otherwise identical metadata has
+#' the repeats split into further groups. A summary with its own reported
+#' standard error is left on its own, because that standard error replaces
+#' the sampling uncertainty the joint likelihood would derive.
 #'
 #' The summaries covered by one covariance matrix are one group, whatever their
 #' types, because the matrix is what ties them together. They are identified by
@@ -503,11 +515,12 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
   key_cols <- setdiff(names(estimates), c("type", "value", "se", "p"))
   parts <- lapply(estimates[key_cols], as.character)
   kind <- ifelse(estimates$type == "quantile", "quantile", "moment")
+  kind[estimates$cens_adjusted %in% c(1, 2, 4)] <- "joint"
   key <- do.call(paste, c(unname(parts), list(kind), list(sep = separator)))
   # A study reporting two means, or two standard deviations, with otherwise
   # identical metadata has the repeats split into further groups. Several
   # quantiles are instead members of one set.
-  moment <- kind == "moment"
+  moment <- estimates$type != "quantile"
   repeats <- rep(1L, length(key))
   repeats[moment] <- stats::ave(
     seq_len(sum(moment)),
@@ -596,8 +609,8 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 .meta_group_row <- function(estimates, vcov = NULL, n_quad = .meta_n_quad()) {
   estimates <- .meta_order_group(estimates, vcov)
   study_n <- as.integer(ifelse(is.na(estimates$n[1]), 0L, estimates$n[1]))
-  quantiles <- estimates$type[1] == "quantile"
-  joint <- nrow(estimates) > 1 || (quantiles && is.na(estimates$se[1]))
+  quantiles <- estimates$type == "quantile"
+  joint <- nrow(estimates) > 1 || (quantiles[1] && is.na(estimates$se[1]))
   members <- .meta_empty_members()
   factor_entries <- numeric(0)
   obs_type <- .meta_obs_type(estimates$type[1])
@@ -607,7 +620,12 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     # The lower factor flattened column major, which is the order Stan's
     # to_matrix reads and multi_normal_cholesky_lpdf expects.
     factor_entries <- as.numeric(t(chol(vcov)))
-  } else if (joint && quantiles) {
+  } else if (any(quantiles) && !all(quantiles)) {
+    # A continuous estimand reporting both kinds, whose covariance is derived
+    # from the implied distribution in the likelihood.
+    obs_type <- 8L
+    members <- .meta_member_table(estimates, rep(0L, nrow(estimates)))
+  } else if (joint && all(quantiles)) {
     obs_type <- 6L
     members <- .meta_member_table(
       estimates, .meta_quantile_counts(estimates$p, study_n)
@@ -693,11 +711,12 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 
 #' Order the summaries within a joint likelihood group
 #'
-#' A mean and standard deviation pair is stored with the mean first so that the
-#' bivariate normal knows which member is which. A set of quantiles is stored
-#' in increasing probability, which must also be non decreasing in the
-#' reported value for the cells of the multinomial to be a partition of the
-#' delay axis. Coincident values are merged into one cell by the likelihood.
+#' Members are stored as the mean, then the standard deviation, then the
+#' quantiles in increasing probability, so that the bivariate normal knows
+#' which member is which and a joint study group is laid out as its
+#' covariance is built. The quantiles must be non decreasing in the reported
+#' value for the cells of the multinomial to be a partition of the delay
+#' axis. Coincident values are merged into one cell by the likelihood.
 #'
 #' A group covered by a covariance matrix keeps the order its rows were given
 #' in, because that is the order the matrix is indexed by.
@@ -714,27 +733,27 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
   if (nrow(estimates) == 1 || !is.null(vcov)) {
     return(estimates)
   }
-  if (estimates$type[1] == "quantile") {
-    estimates <- estimates[order(estimates$p), , drop = FALSE]
-    if (any(diff(estimates$p) <= 0)) {
-      cli::cli_abort(paste0(
-        "{.val {estimates$study[1]}} reports two quantiles at the same ",
-        "probability {.var p} with the same study metadata, so they cannot ",
-        "both describe its delays."
-      ))
-    }
-    # Coincident values are allowed, because two quantiles of integer day
-    # delays landing on the same day are two constraints on one cell.
-    if (any(diff(estimates$value) < 0)) {
-      cli::cli_abort(paste0(
-        "The quantiles reported by {.val {estimates$study[1]}} must not ",
-        "decrease with their probability {.var p}."
-      ))
-    }
-    return(estimates)
+  member_order <- order(
+    match(estimates$type, .estimates_types()), estimates$p
+  )
+  estimates <- estimates[member_order, , drop = FALSE]
+  quantiles <- estimates[estimates$type == "quantile", , drop = FALSE]
+  if (any(diff(quantiles$p) <= 0)) {
+    cli::cli_abort(paste0(
+      "{.val {estimates$study[1]}} reports two quantiles at the same ",
+      "probability {.var p} with the same study metadata, so they cannot ",
+      "both describe its delays."
+    ))
   }
-  member_order <- order(match(estimates$type, c("mean", "sd")))
-  return(estimates[member_order, , drop = FALSE])
+  # Coincident values are allowed, because two quantiles of integer day
+  # delays landing on the same day are two constraints on one cell.
+  if (any(diff(quantiles$value) < 0)) {
+    cli::cli_abort(paste0(
+      "The quantiles reported by {.val {estimates$study[1]}} must not ",
+      "decrease with their probability {.var p}."
+    ))
+  }
+  return(estimates)
 }
 
 #' Map truncation designs to their slot codes
@@ -800,7 +819,7 @@ is_epidist_meta_model <- function(data) {
 assert_epidist.epidist_meta_model <- function(data, ...) {
   assert_data_frame(data)
   assert_names(names(data), must.include = .meta_required_cols())
-  assert_subset(data$obs_type, 1:7, .var.name = "obs_type")
+  assert_subset(data$obs_type, 1:8, .var.name = "obs_type")
   assert_subset(data$trunc_design, 0:1, .var.name = "trunc_design")
   assert_subset(data$cens_adjusted, 0:4, .var.name = "cens_adjusted")
   assert_integerish(data$delay_lwr)
@@ -955,6 +974,27 @@ assert_epidist.epidist_meta_model <- function(data, ...) {
         "The cumulative counts of a joint quantile row must be non ",
         "decreasing and no larger than the study sample size."
       ))
+    }
+  }
+  for (i in which(data$obs_type == 8L)) {
+    member <- seq_len(data$group_len[i]) + data$group_start[i] - 1L
+    type <- members$type[member]
+    if (!any(type == 3L) || all(type == 3L)) {
+      cli::cli_abort(paste0(
+        "A joint study row must hold a mean or a standard deviation and at ",
+        "least one quantile."
+      ))
+    }
+    if (!data$cens_adjusted[i] %in% c(1L, 2L, 4L)) {
+      cli::cli_abort(paste0(
+        "A joint study row must describe a continuous estimand, with a ",
+        "{.var cens_adjusted} of 1, 2 or 4."
+      ))
+    }
+    if (any(diff(members$value[member][type == 3L]) < 0)) {
+      cli::cli_abort(
+        "The quantiles of a joint study row must not decrease."
+      )
     }
   }
   return(invisible(NULL))

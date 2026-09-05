@@ -24,13 +24,18 @@ This keeps the grouping correct for any \code{brms} formula, because a linear
 predictor built from those columns cannot vary within a group.
 }
 \details{
-Means and standard deviations group together, and quantiles group together,
-but the two are not mixed because their joint likelihoods differ. A study
-reporting more than one mean, or more than one standard deviation, with
-otherwise identical metadata has the repeats split into further groups. A
-summary with its own reported standard error is left on its own, because
-that standard error replaces the sampling uncertainty the joint likelihood
-would derive.
+A study with a continuous estimand (\code{cens_adjusted} 1, 2 or 4) has every
+kind of summary in one group, because the sampling covariance of its mean,
+standard deviation and quantiles is available from the implied
+distribution. See \code{\link[=.meta_joint_covariance]{.meta_joint_covariance()}}. On the discrete grid
+(\code{cens_adjusted} 0 or 3) the mean and standard deviation group together
+and the quantiles group together, but the two are not mixed because the
+quantiles are fitted as discrete statistics, so such a study is counted
+twice where it reports both kinds. A study reporting more than one mean,
+or more than one standard deviation, with otherwise identical metadata has
+the repeats split into further groups. A summary with its own reported
+standard error is left on its own, because that standard error replaces
+the sampling uncertainty the joint likelihood would derive.
 
 The summaries covered by one covariance matrix are one group, whatever their
 types, because the matrix is what ties them together. They are identified by
