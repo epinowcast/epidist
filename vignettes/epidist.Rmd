@@ -27,6 +27,14 @@ knitr::opts_chunk$set(
   warning = FALSE,
   error = FALSE
 )
+# Fit with cmdstanr where CmdStan is installed and fall back to rstan
+# otherwise, so the vignette builds wherever the package does.
+if (
+  requireNamespace("cmdstanr", quietly = TRUE) &&
+    !is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE))
+) {
+  options(brms.backend = "cmdstanr")
+}
 ```
 
 `epidist` is a toolkit for flexibly estimating epidemiological delays built on top of `brms` (Bayesian Regression Models using Stan).
@@ -453,8 +461,9 @@ naive_fit <- epidist(
 ```
 
 ::: {.alert .alert-primary}
-Note that here we use the default `rstan` backend but we generally recommend using the `cmdstanr` backend for faster sampling and additional features.
-This can be set using `backend = "cmdstanr"` after following the installing CmdStan instructions in the README.
+This vignette fits with the `cmdstanr` backend where CmdStan is installed and with the default `rstan` backend otherwise.
+We generally recommend the `cmdstanr` backend for faster sampling and additional features.
+It can be set for a single fit using `backend = "cmdstanr"`, or for a session using `options(brms.backend = "cmdstanr")`, after following the installing CmdStan instructions in the README.
 :::
 
 ::: {.alert .alert-primary}

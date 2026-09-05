@@ -27,6 +27,14 @@ knitr::opts_chunk$set(
   warning = FALSE,
   error = FALSE
 )
+# Fit with cmdstanr where CmdStan is installed and fall back to rstan
+# otherwise, so the vignette builds wherever the package does.
+if (
+  requireNamespace("cmdstanr", quietly = TRUE) &&
+    !is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE))
+) {
+  options(brms.backend = "cmdstanr")
+}
 ```
 
 Some delays are only ever recorded above a minimum value.

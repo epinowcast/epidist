@@ -36,20 +36,6 @@ jobs:
         with:
           extra-packages: local::.
 
-      # rstan and StanHeaders must be built against each other. The stan-dev
-      # r-universe is in extra-repositories only so that cmdstanr resolves,
-      # but each package is taken at its highest version wherever it lives,
-      # which paired the r-universe rstan with the CRAN StanHeaders and no
-      # model would compile. Reinstall the pair from CRAN, the source a CRAN
-      # user gets and the one the checks should exercise. See #687 and #688.
-      - name: Install rstan and StanHeaders from CRAN
-        run: |
-          install.packages(
-            c("StanHeaders", "rstan"),
-            repos = getOption("repos")[["CRAN"]]
-          )
-        shell: Rscript {0}
-
       - name: Install cmdstan
         uses: epinowcast/actions/install-cmdstan@v1
         with:

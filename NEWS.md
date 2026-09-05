@@ -135,10 +135,10 @@ See #588 and #596.
 ## CI
 
 - Added a `render-vignettes` workflow that rebuilds the precomputed vignettes and opens a pull request with the result.
-- The workflows that compile Stan models now reinstall `rstan` and `StanHeaders` from CRAN after the dependencies are resolved.
-The stan-dev r-universe is in `extra-repositories` so that `cmdstanr` resolves, but each package was taken at its highest version wherever it lived, which paired the r-universe `rstan` with the CRAN `StanHeaders` once CRAN released StanHeaders 2.39.1.
-The two must be built against each other, so no model compiled and the macOS and Windows checks failed at the vignettes.
-Taking the pair from CRAN keeps the checks on what a CRAN user installs.
+- The vignettes that fit models when the package is built (`epidist`, `left-truncation` and `primary-events`) now use the `cmdstanr` backend where CmdStan is installed and fall back to `rstan` otherwise.
+The macOS and Windows checks compiled those fits through `rstan`, and broke once CRAN released StanHeaders 2.39.1, because the stan-dev r-universe in `extra-repositories` supplied a newer `rstan` that was not built against it.
+The CRAN pair of `rstan` 2.32.7 and `StanHeaders` 2.39.1 does not compile a model on Windows either, so no choice of source fixes the checks, and pinning one source would stop them exercising what CRAN users install.
+Taking the `rstan` compile off the check path avoids the skew altogether, and the test suite already uses `cmdstanr`.
 See #687 and #688.
 
 ## Models
