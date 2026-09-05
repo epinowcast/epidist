@@ -135,6 +135,11 @@ See #588 and #596.
 ## CI
 
 - Added a `render-vignettes` workflow that rebuilds the precomputed vignettes and opens a pull request with the result.
+- The workflows that compile Stan models now reinstall `rstan` and `StanHeaders` from CRAN after the dependencies are resolved.
+The stan-dev r-universe is in `extra-repositories` so that `cmdstanr` resolves, but each package was taken at its highest version wherever it lived, which paired the r-universe `rstan` with the CRAN `StanHeaders` once CRAN released StanHeaders 2.39.1.
+The two must be built against each other, so no model compiled and the macOS and Windows checks failed at the vignettes.
+Taking the pair from CRAN keeps the checks on what a CRAN user installs.
+See #687 and #688.
 
 ## Models
 
