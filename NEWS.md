@@ -5,6 +5,10 @@
 - Added an exponentially growing primary event distribution to the latent model.
 `as_epidist_latent_model(primary = "expgrowth")` makes the growth rate a distributional parameter, so it takes a `brms` formula and prior and can vary by covariate.
 See #489 and #618.
+- The meta model now fits every summary a study with a continuous estimand reports as one multivariate normal, with the sampling covariance of its mean, standard deviation and quantiles derived from the implied distribution.
+Before, the mean and standard deviation of a study were fitted separately from its quantiles, which counted a study reporting a mean, a standard deviation and quartiles about twice for the location, and a mean with a median 1.5 times at a study size of 100.
+A study that reported integer date differences still has the two kinds fitted separately, because its quantiles are discrete statistics, so report its mean and standard deviation and drop its quantiles.
+Closes #676.
 
 ## Features
 
