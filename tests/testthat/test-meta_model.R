@@ -58,6 +58,36 @@ test_that("as_epidist_meta_model errors when no data is supplied", {
   expect_error(as_epidist_meta_model(NULL, NULL), "at least one")
 })
 
+test_that("a summaries only meta model refuses a primary event distribution", { # nolint: line_length_linter.
+  expect_error(
+    as_epidist_meta_model(estimates = sim_estimates, primary = "expgrowth"),
+    "primary"
+  )
+  expect_error(
+    as_epidist_meta_model(sim_estimates, primary = "uniform"),
+    "primary"
+  )
+  expect_error(
+    as_epidist_meta_model(sim_estimates, estimates = sim_estimates),
+    "supplied twice"
+  )
+})
+
+test_that("as_epidist_meta_model refuses individual delays that are not whole numbers", { # nolint: line_length_linter.
+  fractional <- as_epidist_linelist_data(
+    data = c(0, 1),
+    ptime_upr = c(1, 2),
+    stime_lwr = c(2.5, 3),
+    stime_upr = c(3.5, 4),
+    obs_time = c(10, 10)
+  )
+  expect_error(
+    suppressMessages(as_epidist_meta_model(fractional)),
+    "delay_lwr"
+  )
+  expect_false(is_epidist_meta_model(fractional))
+})
+
 test_that("as_epidist_meta_model errors when passed incorrect inputs", {
   expect_error(as_epidist_meta_model(list()))
   expect_error(as_epidist_meta_model(sim_obs, estimates = list()))
