@@ -253,9 +253,9 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  window of that length and stopped at its calendar end). Defaults to
 #'  `"cohort"`, and is only used for studies that did not adjust for right
 #'  truncation. The accrual weight on the grid of a study that did not adjust
-#'  for censoring is exact whenever `relative_obs_time` is a multiple of
-#'  `pwindow`, for any `swindow`. The weight used for the uniform single
-#'  interval approximation is exact only for a narrow `pwindow`, and puts the
+#'  for censoring is exact for any `relative_obs_time`, `pwindow` and
+#'  `swindow`. The weight used for the uniform single interval approximation
+#'  is exact only for a narrow `pwindow`, and puts the
 #'  implied mean about 3% high with a weekly primary window, a collection
 #'  window of 28 days, a delay of mean 4.6 days and a growth rate of 0.2. See
 #'  `vignette("model")`.

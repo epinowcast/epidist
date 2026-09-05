@@ -147,6 +147,9 @@ See #620.
 See #620.
 - The meta model supports studies that stopped collecting at a calendar date through the `trunc_design` field of `as_epidist_estimates_data()`, which weights the estimand by the follow up available to each delay rather than conditioning on a single cohort cutoff.
 See #620.
+- The accrual weight on the grid of a study that stopped collecting at a calendar date now treats a partial last primary window explicitly, weighting the cases it holds by the follow up available over the part of the window inside the collection period.
+It was exact only when `relative_obs_time` was a multiple of `pwindow`, and put the implied mean 27% low for weekly primary and secondary windows with a collection window of 30 days at a growth rate of 0.2.
+Closes #680.
 - The meta model supports midpoint imputation, where a study assigned each delay to the centre of the interval it was observed in, as `cens_adjusted` code 3.
 See #620.
 - A standard error supplied for a quantile row of `as_epidist_estimates_data()` is now interpreted on the delay scale, as studies report it, and the row is fitted on that scale against the implied quantile.

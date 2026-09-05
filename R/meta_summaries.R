@@ -523,13 +523,20 @@
 #' follow up available to the cases each cell holds, before renormalising.
 #' A case is seen when its primary event fell early enough for its delay to
 #' complete before the calendar stop, and the primary event is known only to
-#' its window, so the follow up available to a delay of \eqn{x} from the start
-#' of that window is the accrual weight at \eqn{w_p \lfloor x / w_p \rfloor},
-#' a step function of \eqn{x}. Each cell is cut at the multiples of `pwindow`
-#' inside it and every piece is weighted by the follow up at the primary
-#' window it starts in. This is exact whenever `cutoff` is a multiple of
-#' `pwindow`, and reduces to the weight at the cell's lower edge when
-#' `pwindow` and `swindow` are equal.
+#' its window. A complete primary window starting at \eqn{k w_p} holds a
+#' delay of \eqn{x} from its start when \eqn{k w_p + x \le A}, so the growth
+#' weighted mass of the complete windows eligible for \eqn{x} is a step
+#' function of \eqn{x} that steps down at \eqn{A - j w_p}. Each cell is cut
+#' at those points and every piece is weighted by that mass. When `cutoff`
+#' is not a multiple of `pwindow` the last primary window is partial, of
+#' length \eqn{l = A - w_p \lfloor A / w_p \rfloor}. It only holds delays up
+#' to \eqn{l}, and the offset of its primary events runs over \eqn{l} rather
+#' than \eqn{w_p}, so its cases follow the primary censored distribution
+#' function with a window of \eqn{l}, weighted by the growth weighted length
+#' of the window, and are added to the cells below \eqn{l}. This is exact
+#' for any `cutoff`, `pwindow` and `swindow`, and reduces to the weight at
+#' the cell's lower edge when `pwindow` and `swindow` are equal and `cutoff`
+#' is a multiple of both.
 #'
 #' A cohort grid is normalised by the distribution function at its top, which
 #' is already known. An accrual grid reweights each cell first, so its
@@ -586,21 +593,50 @@
     }
     return(mass / total)
   }
-  # Cut the cells at the multiples of the primary window inside them, so
-  # that each piece can be weighted by the follow up available to the primary
-  # window it starts in. Matches meta_family_grid_pmf() in Stan.
-  multiple <- pwindow *
-    seq(ceiling(boundary[1] / pwindow), floor(cutoff / pwindow))
-  edge <- sort(c(boundary, multiple[multiple <= boundary[length(boundary)]]))
+  # The collection window holds n_full complete primary windows and, unless
+  # it is a multiple of pwindow, a partial last one of length `partial`.
+  # Matches meta_family_grid_pmf() in Stan.
+  n_full <- floor(cutoff / pwindow + 1e-9)
+  partial <- cutoff - pwindow * n_full
+  has_partial <- partial > 1e-9 * pwindow
+  # A complete window k is eligible for a delay of x from its start when
+  # k * pwindow + x <= cutoff, so the number eligible steps down at
+  # cutoff - j * pwindow. Cut the cells at those points and weight each piece
+  # by the growth weighted mass of the complete windows eligible inside it.
+  top <- boundary[length(boundary)]
+  eligible_step <- cutoff -
+    pwindow * seq_len(floor((cutoff - boundary[1]) / pwindow + 1e-9))
+  edge <- sort(c(boundary, eligible_step[eligible_step <= top]))
   edge <- edge[c(TRUE, diff(edge) > 1e-9 * swindow)]
   cdf <- .meta_pcens_cdf(edge, dist, args, pwindow, growth_rate)
   piece_start <- edge[-length(edge)]
-  piece <- pmax(diff(cdf), 0) *
-    .meta_accrual_weight(
-      pwindow * floor(piece_start / pwindow + 1e-9), cutoff, growth_rate
-    )
+  n_eligible <- pmin(
+    ceiling((cutoff - piece_start) / pwindow - 1e-9), n_full
+  )
+  log_weight <- .meta_log_accrual_weight(
+    cutoff - pwindow * n_eligible, cutoff, growth_rate
+  )
   cell <- floor(piece_start / swindow + 1e-9) - first + 1
-  mass <- as.numeric(rowsum(piece, cell))
+  peak <- max(log_weight)
+  extra <- 0
+  if (has_partial && boundary[1] < partial) {
+    # The partial window is eligible for delays up to its own length, and
+    # the offset of its primary events runs over that length rather than
+    # over pwindow, so its delays follow the primary censored distribution
+    # function with a window of `partial`. Its mass is the growth weighted
+    # length of the window.
+    log_partial <- growth_rate * n_full * pwindow +
+      .meta_log_accrual_weight(n_full * pwindow, cutoff, growth_rate)
+    peak <- max(peak, log_partial)
+    q_partial <- pmin(boundary, partial)
+    q_unique <- unique(q_partial)
+    cdf_partial <- .meta_pcens_cdf(
+      q_unique, dist, args, partial, growth_rate
+    )[match(q_partial, q_unique)]
+    extra <- pmax(diff(cdf_partial), 0) * exp(log_partial - peak)
+  }
+  piece <- pmax(diff(cdf), 0) * exp(log_weight - peak)
+  mass <- as.numeric(rowsum(piece, cell)) + extra
   total <- sum(mass)
   if (!is.finite(total) || total <= 0) {
     return(rep(NA_real_, length(mass)))

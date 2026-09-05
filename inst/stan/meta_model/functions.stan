@@ -267,9 +267,12 @@
     * (2024). See the model guide vignette for the maths. Cells recording a
     * delay below `delay_min` are dropped and the rest renormalised, which
     * conditions the grid on the study's left truncation point. Under an
-    * accrual design each cell is cut at the multiples of the primary window
-    * inside it and every piece is weighted by the follow up available to
-    * the primary window it starts in. Mirrors .meta_grid_pmf() in R.
+    * accrual design each cell is cut where a complete primary window stops
+    * being eligible for it and every piece is weighted by the growth
+    * weighted mass of the complete windows eligible inside it, and the
+    * partial last primary window of a collection window that is not a
+    * multiple of the primary window is added separately. Mirrors
+    * .meta_grid_pmf() in R.
     */
   vector meta_family_grid_pmf(array[] real params, data real delay_min,
                               data real cutoff, data real pwindow_width,
@@ -286,6 +289,16 @@
     {
       vector[n_cell + 1] log_cdf;
       vector[n_cell] log_mass;
+      // The collection window holds n_full complete primary windows and,
+      // unless it is a multiple of the primary window, a partial last one
+      // of length cutoff - pwindow_width * n_full. That length is written
+      // out wherever it is used, because Stan only treats expressions built
+      // from data arguments and integers as data only.
+      int n_full = to_int(floor(cutoff / pwindow_width + 1e-9));
+      int partial = (cutoff - pwindow_width * n_full > 1e-9 * pwindow_width)
+        ? 1 : 0;
+      real log_partial = negative_infinity();
+      real log_lo_partial = negative_infinity();
       for (j in 0:n_cell) {
         log_cdf[j + 1] = meta_family_pcens_lcdf(
           (first + j) * swindow_width | params, pwindow_width, prim_id,
@@ -311,41 +324,70 @@
         }
         return exp(log_mass - log(total));
       }
+      // The partial window only holds delays up to its own length, and the
+      // offset of its primary events runs over that length, so its cases
+      // follow the primary censored distribution function with that window,
+      // weighted by the growth weighted length of the window.
+      if (partial == 1) {
+        log_partial = growth_rate * n_full * pwindow_width +
+          meta_family_log_accrual_weight(
+            n_full * pwindow_width, cutoff, growth_rate
+          );
+        log_lo_partial = meta_family_pcens_lcdf(
+          fmin(first * swindow_width, cutoff - pwindow_width * n_full) |
+          params, cutoff - pwindow_width * n_full, prim_id, prim_params
+        );
+      }
       for (j in 1:n_cell) {
-        // The pieces run from the cell's lower edge through the multiples of
-        // the primary window strictly inside the cell to its upper edge. The
-        // positions are written out from data arguments and loop indices,
-        // because Stan only treats such expressions as data only.
-        int k_lo = to_int(floor(
-          (first + j - 1) * swindow_width / pwindow_width + 1e-9
+        // A complete window k holds a delay of x from its start when
+        // k * pwindow_width + x <= cutoff, so the number of complete windows
+        // eligible steps down at cutoff - i * pwindow_width. The pieces run
+        // from the cell's lower edge through those points strictly inside
+        // the cell to its upper edge, each weighted by the growth weighted
+        // mass of the complete windows eligible inside it.
+        int i_lo = to_int(floor(
+          (cutoff - (first + j) * swindow_width) / pwindow_width + 1e-9
         )) + 1;
-        int k_hi = to_int(ceil(
-          (first + j) * swindow_width / pwindow_width - 1e-9
+        int i_hi = to_int(ceil(
+          (cutoff - (first + j - 1) * swindow_width) / pwindow_width - 1e-9
         )) - 1;
         real log_lo = log_cdf[j];
         real log_weight = meta_family_log_accrual_weight(
-          pwindow_width * floor(
-            (first + j - 1) * swindow_width / pwindow_width + 1e-9
-          ),
-          cutoff, growth_rate
+          cutoff - pwindow_width * min(i_hi + 1, n_full), cutoff, growth_rate
         );
         real acc = negative_infinity();
-        for (k in k_lo:k_hi) {
+        for (i in 0:(i_hi - i_lo)) {
+          int cut = i_hi - i;
           real log_hi = meta_family_pcens_lcdf(
-            k * pwindow_width | params, pwindow_width, prim_id, prim_params
+            cutoff - cut * pwindow_width | params, pwindow_width, prim_id,
+            prim_params
           );
           if (log_hi > log_lo) {
             acc = log_sum_exp(acc, log_diff_exp(log_hi, log_lo) + log_weight);
           }
           log_lo = log_hi;
           log_weight = meta_family_log_accrual_weight(
-            k * pwindow_width, cutoff, growth_rate
+            cutoff - pwindow_width * min(cut, n_full), cutoff, growth_rate
           );
         }
         if (log_cdf[j + 1] > log_lo) {
           acc = log_sum_exp(
             acc, log_diff_exp(log_cdf[j + 1], log_lo) + log_weight
           );
+        }
+        if (partial == 1 &&
+            (first + j - 1) * swindow_width < cutoff - pwindow_width * n_full) {
+          real log_hi_partial = meta_family_pcens_lcdf(
+            fmin((first + j) * swindow_width, cutoff - pwindow_width * n_full) |
+            params, cutoff - pwindow_width * n_full, prim_id, prim_params
+          );
+          if (log_hi_partial > log_lo_partial) {
+            acc = log_sum_exp(
+              acc,
+              log_diff_exp(log_hi_partial, log_lo_partial) + log_partial
+            );
+          }
+          log_lo_partial = log_hi_partial;
         }
         log_mass[j] = acc;
       }

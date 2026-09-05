@@ -420,6 +420,29 @@ lockstep_accrual_windows <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Studies AH and AI stopped collecting at a calendar date that is not a
+# multiple of their weekly primary window, so the partial last primary window
+# is weighted on its own and the complete windows stop being eligible off the
+# multiples of the window. AH grows and reports by week, AI does not grow and
+# reports by day.
+lockstep_partial_window <- data.frame(
+  study = c("AH", "AH", "AI", "AI"),
+  type = c("mean", "sd", "mean", "quantile"),
+  value = c(4.7, 3.7, 8.1, 8.0),
+  se = NA,
+  p = c(NA, NA, NA, 0.5),
+  n = c(150, 150, 130, 130),
+  relative_obs_time = 30,
+  trunc_adjusted = FALSE,
+  trunc_design = "accrual",
+  cens_adjusted = 0,
+  pwindow = 7,
+  swindow = c(7, 7, 1, 1),
+  delay_min = 0,
+  growth_rate = c(0.2, 0.2, 0, 0),
+  stringsAsFactors = FALSE
+)
+
 # Studies AC to AE report quantiles of integer day delays. AC and AD report a
 # single quantile, one per truncation design, which is fitted as the crossing
 # cell of the empirical distribution function. AE reports coincident quantiles,
@@ -468,6 +491,7 @@ lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
   lockstep_left_midpoint,
   lockstep_mvn_z,
   lockstep_accrual_windows,
+  lockstep_partial_window,
   lockstep_grid_quantiles,
   lockstep_narrow
 )))
