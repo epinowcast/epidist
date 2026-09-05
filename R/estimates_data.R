@@ -17,6 +17,8 @@
 #' @param ... Additional arguments passed to methods
 #'
 #' @family estimates_data
+#' @returns An object of class `epidist_estimates_data`.
+#'
 #' @export
 as_epidist_estimates_data <- function(data, ...) {
   UseMethod("as_epidist_estimates_data")
@@ -241,9 +243,10 @@ as_epidist_estimates_data <- function(data, ...) {
 #'
 #' @param trunc_adjusted A string giving the column of `data` containing a
 #'  logical flag for whether the study corrected for right truncation. Defaults
-#'  to `TRUE` where no `relative_obs_time` is supplied and `FALSE` otherwise.
-#'  A study assumed to have adjusted is warned about, because real time
-#'  estimates are right truncated unless the study corrected for it and
+#'  to `TRUE` for a study with no finite `relative_obs_time`, which includes
+#'  every study where no `relative_obs_time` column is supplied, and `FALSE`
+#'  otherwise. A study assumed to have adjusted is warned about, because real
+#'  time estimates are right truncated unless the study corrected for it and
 #'  reviews rarely record which studies did. Supply the column to say so
 #'  yourself.
 #'
@@ -319,6 +322,8 @@ as_epidist_estimates_data <- function(data, ...) {
 #' @method as_epidist_estimates_data data.frame
 #'
 #' @family estimates_data
+#' @returns An object of class `epidist_estimates_data`.
+#'
 #' @autoglobal
 #' @importFrom checkmate assert_data_frame assert_subset assert_logical
 #' @export
@@ -411,6 +416,9 @@ as_epidist_estimates_data.data.frame <- function(
 #' @method as_epidist_estimates_data list
 #'
 #' @family estimates_data
+#' @returns An object of class `epidist_estimates_data` holding the rows of
+#'  every element.
+#'
 #' @importFrom dplyr bind_rows
 #' @export
 #' @examples
@@ -449,6 +457,8 @@ as_epidist_estimates_data.list <- function(data, advise = TRUE, ...) {
 #' @method as_epidist_estimates_data epidist_estimates_data
 #'
 #' @family estimates_data
+#' @returns The input, unchanged.
+#'
 #' @export
 #' @examples
 #' estimates <- epidist_estimates_summaries(
@@ -509,6 +519,9 @@ as_epidist_estimates_data.epidist_estimates_data <- function(data, ...) {
 #' @method as_epidist_estimates_data epidist_multivariate
 #'
 #' @family estimates_data
+#' @returns An object of class `epidist_estimates_data` with one row per
+#'  reported summary and the covariance matrix attached.
+#'
 #' @importFrom tibble tibble
 #' @export
 #' @examples
@@ -1396,7 +1409,12 @@ new_epidist_estimates_data <- function(data) {
 #' @param ... Additional arguments
 #'
 #' @family estimates_data
+#' @returns A logical, `TRUE` if `data` inherits from `epidist_estimates_data`
+#'  and `FALSE` otherwise.
+#'
 #' @export
+#' @examples
+#' is_epidist_estimates_data(data.frame())
 is_epidist_estimates_data <- function(data, ...) {
   return(inherits(data, "epidist_estimates_data"))
 }
@@ -1410,6 +1428,8 @@ is_epidist_estimates_data <- function(data, ...) {
 #' @method assert_epidist epidist_estimates_data
 #'
 #' @family estimates_data
+#' @returns `NULL`, invisibly. Called for the side effect of validating `data`.
+#'
 #' @autoglobal
 #' @export
 assert_epidist.epidist_estimates_data <- function(data, ...) {

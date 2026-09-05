@@ -11,8 +11,15 @@ is_epidist_estimates_data(data, ...)
 
 \item{...}{Additional arguments}
 }
+\value{
+A logical, \code{TRUE} if \code{data} inherits from \code{epidist_estimates_data}
+and \code{FALSE} otherwise.
+}
 \description{
 Check if data has the \code{epidist_estimates_data} class
+}
+\examples{
+is_epidist_estimates_data(data.frame())
 }
 \seealso{
 Other estimates_data: 

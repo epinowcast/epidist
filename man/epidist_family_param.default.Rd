@@ -13,8 +13,8 @@ specifying the distribution family name.}
 \item{...}{Additional arguments passed to methods (not used)}
 }
 \value{
-The input family object with an additional \code{param} element containing
-the Stan parameter ordering as a string
+The input family object with an additional \code{param} element
+containing the Stan parameter ordering as a string
 }
 \description{
 This function extracts the Stan parameterisation for a given brms family by

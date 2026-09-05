@@ -11,6 +11,9 @@
 
 \item{...}{Not used in this method.}
 }
+\value{
+The input, unchanged.
+}
 \description{
 An object carrying the class has already been checked, and the \code{epidist_data}
 methods re-check it whenever it is modified, so nothing is done here.
