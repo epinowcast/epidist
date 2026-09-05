@@ -162,3 +162,372 @@ plot_events <- function(data, obs_time = NULL, by = NULL, n = 200) {
   }
   return(invisible(NULL))
 }
+
+#' Plot posterior draws of the delay distribution
+#'
+#' @description
+#' Plots the draws returned by [delay_parameter_draws()],
+#' [delay_summary_draws()] and [add_summaries()]. The default,
+#' `type = "parameters"`, draws the posterior density of each distributional
+#' parameter, and of any summary column [add_summaries()] added, in its own
+#' panel. `type = "delay"` draws the delay distribution the draws imply over a
+#' grid of delays, as the posterior median density with a ribbon between two
+#' quantiles, or as one line per draw when `ndraws` is given.
+#'
+#' @details
+#' The strata of the draws are coloured. By default they are the unique
+#' combinations of the variables in the distributional parameter formulas,
+#' which [delay_parameter_draws()] records, and each `.row` when the draws
+#' have several rows of `newdata` but no such variables. Pass `by` to
+#' stratify by other columns of the draws. The columns in `by` are kept in the
+#' plot data, so the plot can be faceted by them.
+#'
+#' The delay distribution is evaluated with the density of the family for the
+#' lognormal, gamma and Weibull families. For any other family, delays are
+#' simulated from each draw as in [add_summaries()] and their density is
+#' estimated with [stats::density()]. Either way the density is evaluated at
+#' every draw, so thin the draws with the `ndraws` argument of
+#' [delay_parameter_draws()], or build `newdata` with [epidist_strata()],
+#' when there are many.
+#'
+#' `plot()` and `autoplot()` are the same function. Both need `ggplot2`.
+#'
+#' @param x,object An `epidist_delay_draws` object, as returned by
+#'  [delay_parameter_draws()], [delay_summary_draws()] or [add_summaries()].
+#'
+#' @param type Either `"parameters"`, the default, to plot the posterior
+#'  density of each parameter, or `"delay"` to plot the delay distribution the
+#'  draws imply.
+#'
+#' @param by A character vector of columns of `object` that define the strata
+#'  to colour by. If `NULL`, the default, the variables recorded on `object`
+#'  are used. See the details.
+#'
+#' @param pars A character vector of the columns to plot when
+#'  `type = "parameters"`. If `NULL`, the default, the distributional
+#'  parameters of the family are plotted, along with the `mean`, `sd` and
+#'  quantile columns present.
+#'
+#' @param true_values A named numeric vector of true parameter values to mark
+#'  with dashed vertical lines when `type = "parameters"`. The names must be
+#'  among the parameters plotted.
+#'
+#' @param ndraws The number of draws per stratum to plot the delay
+#'  distribution of when `type = "delay"`, one line each, sampled at random.
+#'  If `NULL`, the default, the posterior median density is drawn with a
+#'  ribbon between the `probs` quantiles instead.
+#'
+#' @param probs A numeric vector of two probabilities giving the quantiles the
+#'  ribbon spans when `type = "delay"`. Defaults to `c(0.05, 0.95)`.
+#'
+#' @param max_delay The largest delay to evaluate the delay distribution at
+#'  when `type = "delay"`. If `NULL`, the default, the posterior median of the
+#'  99% quantile of the delay distribution is used.
+#'
+#' @param family A model fit with [epidist::epidist()], a `brms` family, or
+#'  the name of one, giving the delay distribution. If `NULL`, the default,
+#'  the family recorded on `object` is used.
+#'
+#' @param ... Passed from `plot()` to `autoplot()`. Unused otherwise.
+#'
+#' @family plot
+#' @returns A `ggplot` object.
+#'
+#' @seealso [delay_parameter_draws()] and [delay_summary_draws()] for the
+#'  draws, and [plot_events()] to plot the data.
+#'
+#' @method plot epidist_delay_draws
+#' @autoglobal
+#' @export
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
+#' draws <- data.frame(
+#'   mu = rnorm(200, 1.8, 0.05),
+#'   sigma = exp(rnorm(200, log(0.5), 0.05))
+#' ) |>
+#'   add_summaries(family = "lognormal", probs = 0.5)
+#' plot(draws, true_values = c(mu = 1.8, sigma = 0.5))
+#' plot(draws, type = "delay")
+#' plot(draws, type = "delay", ndraws = 50)
+plot.epidist_delay_draws <- function(x, ...) {
+  .check_ggplot2()
+  return(ggplot2::autoplot(x, ...))
+}
+
+#' @rdname plot.epidist_delay_draws
+#' @exportS3Method ggplot2::autoplot
+autoplot.epidist_delay_draws <- function(
+  object,
+  type = c("parameters", "delay"),
+  by = NULL,
+  pars = NULL,
+  true_values = NULL,
+  ndraws = NULL,
+  probs = c(0.05, 0.95),
+  max_delay = NULL,
+  family = NULL,
+  ...
+) {
+  .check_ggplot2()
+  type <- match.arg(type)
+  family <- .resolve_delay_family(object, family)
+  strata <- .draw_strata(object, by)
+  if (identical(type, "parameters")) {
+    return(.plot_parameter_draws(strata, family, pars, true_values))
+  }
+  return(.plot_delay_draws(strata, family, ndraws, probs, max_delay))
+}
+
+#' Label the strata of a `data.frame` of draws
+#'
+#' @inheritParams plot.epidist_delay_draws
+#'
+#' @return A list with `data`, an ungrouped `tibble` of the draws with a
+#'  `.stratum` factor column, `by`, the columns the strata are defined by or
+#'  `NULL` when there is a single stratum, and `legend`, a legend title.
+#'
+#' @keywords internal
+.draw_strata <- function(object, by = NULL) {
+  assert_character(by, any.missing = FALSE, null.ok = TRUE)
+  draws <- tibble::as_tibble(dplyr::ungroup(object))
+  if (is.null(by)) {
+    by <- intersect(attr(object, "epidist_vars"), names(draws))
+    if (length(by) == 0 && length(unique(draws[[".row"]])) > 1) {
+      by <- ".row"
+    }
+    if (length(by) == 0 || nrow(unique(draws[by])) <= 1) {
+      by <- NULL
+    }
+  } else {
+    assert_names(names(draws), must.include = by)
+  }
+  if (is.null(by)) {
+    draws$.stratum <- factor("all")
+    return(list(data = draws, by = NULL, legend = NULL))
+  }
+  draws$.stratum <- factor(do.call(paste, c(draws[by], sep = ", ")))
+  return(list(data = draws, by = by, legend = toString(by)))
+}
+
+#' Plot the posterior density of each parameter
+#'
+#' @inheritParams plot.epidist_delay_draws
+#'
+#' @param strata A list as returned by `.draw_strata()`.
+#'
+#' @param family A list with the delay distribution `name` and its
+#'  distributional parameters `dpars`, as returned by `.delay_family()`.
+#'
+#' @return A `ggplot` object.
+#'
+#' @autoglobal
+#' @keywords internal
+.plot_parameter_draws <- function(strata, family, pars = NULL,
+                                  true_values = NULL) {
+  draws <- strata$data
+  if (is.null(pars)) {
+    quantile_cols <- grep("^q[0-9.]+$", names(draws), value = TRUE)
+    pars <- intersect(
+      c(family$dpars, "mean", "sd", quantile_cols),
+      names(draws)
+    )
+    if (length(pars) == 0) {
+      cli_abort(
+        "{.arg object} has none of the parameters of the {.val {family$name}}
+         family: {.val {family$dpars}}."
+      )
+    }
+  } else {
+    assert_character(pars, any.missing = FALSE, min.len = 1)
+    assert_names(names(draws), must.include = pars)
+  }
+  if (!is.null(true_values)) {
+    assert_numeric(true_values, any.missing = FALSE, names = "unique")
+    assert_names(names(true_values), subset.of = pars)
+  }
+  long <- tidyr::pivot_longer(
+    draws[c(strata$by, ".stratum", pars)],
+    cols = dplyr::all_of(pars),
+    names_to = "parameter",
+    values_to = "value"
+  )
+  long$parameter <- factor(long$parameter, levels = pars)
+
+  p <- ggplot2::ggplot(long, ggplot2::aes(x = .data$value))
+  if (is.null(strata$by)) {
+    p <- p + ggplot2::geom_density(fill = "#56B4E9", alpha = 0.5)
+  } else {
+    p <- p +
+      ggplot2::geom_density(ggplot2::aes(fill = .data$.stratum), alpha = 0.5) +
+      ggplot2::labs(fill = strata$legend)
+  }
+  if (!is.null(true_values)) {
+    true_data <- tibble::tibble(
+      parameter = factor(names(true_values), levels = pars),
+      value = unname(true_values)
+    )
+    p <- p +
+      ggplot2::geom_vline(
+        data = true_data,
+        ggplot2::aes(xintercept = .data$value),
+        linetype = "dashed"
+      )
+  }
+  p <- p +
+    ggplot2::facet_wrap(ggplot2::vars(.data$parameter), scales = "free") +
+    ggplot2::labs(x = NULL, y = "Posterior density")
+  return(p)
+}
+
+#' Plot the delay distribution the draws imply
+#'
+#' @inheritParams .plot_parameter_draws
+#'
+#' @return A `ggplot` object.
+#'
+#' @autoglobal
+#' @keywords internal
+.plot_delay_draws <- function(strata, family, ndraws = NULL,
+                              probs = c(0.05, 0.95), max_delay = NULL) {
+  assert_count(ndraws, positive = TRUE, null.ok = TRUE)
+  assert_numeric(
+    probs,
+    lower = 0,
+    upper = 1,
+    len = 2,
+    any.missing = FALSE,
+    sorted = TRUE
+  )
+  assert_number(max_delay, lower = 0, null.ok = TRUE)
+  draws <- strata$data
+  .assert_dpars(draws, family$name, family$dpars)
+  dens <- .delay_density_grid(
+    family,
+    as.list(draws)[family$dpars],
+    max_delay = max_delay
+  )
+  draw_id <- draws[[".draw"]]
+  if (is.null(draw_id)) {
+    draw_id <- seq_len(nrow(draws))
+  }
+  keep_cols <- c(strata$by, ".stratum")
+  plot_data <- purrr::map(
+    split(seq_len(nrow(draws)), draws$.stratum),
+    function(rows) {
+      if (is.null(ndraws)) {
+        values <- dens$density[rows, , drop = FALSE]
+        out <- tibble::tibble(
+          delay = dens$delays,
+          density = apply(values, 2, stats::median),
+          lower = apply(values, 2, stats::quantile, probs[1], names = FALSE),
+          upper = apply(values, 2, stats::quantile, probs[2], names = FALSE)
+        )
+      } else {
+        rows <- rows[sample.int(length(rows), min(ndraws, length(rows)))]
+        values <- dens$density[rows, , drop = FALSE]
+        out <- tibble::tibble(
+          .draw = rep(draw_id[rows], times = ncol(values)),
+          delay = rep(dens$delays, each = nrow(values)),
+          density = as.vector(values)
+        )
+      }
+      return(dplyr::bind_cols(
+        out,
+        draws[rep(rows[1], nrow(out)), keep_cols, drop = FALSE]
+      ))
+    }
+  ) |>
+    purrr::list_rbind()
+
+  p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = .data$delay))
+  if (is.null(ndraws) && is.null(strata$by)) {
+    p <- p +
+      ggplot2::geom_ribbon(
+        ggplot2::aes(ymin = .data$lower, ymax = .data$upper),
+        fill = "#56B4E9",
+        alpha = 0.3
+      ) +
+      ggplot2::geom_line(ggplot2::aes(y = .data$density), colour = "#56B4E9")
+  } else if (is.null(ndraws)) {
+    p <- p +
+      ggplot2::geom_ribbon(
+        ggplot2::aes(
+          ymin = .data$lower,
+          ymax = .data$upper,
+          fill = .data$.stratum
+        ),
+        alpha = 0.3
+      ) +
+      ggplot2::geom_line(
+        ggplot2::aes(y = .data$density, colour = .data$.stratum)
+      ) +
+      ggplot2::labs(colour = strata$legend, fill = strata$legend)
+  } else if (is.null(strata$by)) {
+    p <- p +
+      ggplot2::geom_line(
+        ggplot2::aes(y = .data$density, group = .data$.draw),
+        colour = "#56B4E9",
+        alpha = 0.2
+      )
+  } else {
+    p <- p +
+      ggplot2::geom_line(
+        ggplot2::aes(
+          y = .data$density,
+          group = interaction(.data$.draw, .data$.stratum),
+          colour = .data$.stratum
+        ),
+        alpha = 0.2
+      ) +
+      ggplot2::guides(
+        colour = ggplot2::guide_legend(override.aes = list(alpha = 1))
+      ) +
+      ggplot2::labs(colour = strata$legend)
+  }
+  p <- p + ggplot2::labs(x = "Delay", y = "Density")
+  return(p)
+}
+
+#' Evaluate the density of the delay distribution at each draw
+#'
+#' Uses the density of the family when there is an analytic solution, and
+#' otherwise simulates delays from each draw with `.simulate_delays()` and
+#' estimates their density with [stats::density()].
+#'
+#' @inheritParams .simulate_delays
+#' @inheritParams plot.epidist_delay_draws
+#'
+#' @param n_grid The number of delays to evaluate the density at.
+#'
+#' @return A list with `delays`, the delays the density is evaluated at, and
+#'  `density`, a matrix with one row per draw and one column per delay.
+#'
+#' @keywords internal
+.delay_density_grid <- function(family, dpars, max_delay = NULL, n_grid = 101,
+                                nsim = 1000) {
+  n <- length(dpars[[1]])
+  analytic <- .analytic_delay_summaries(family$name)
+  if (!is.null(analytic) && all(analytic$dpars %in% names(dpars))) {
+    if (is.null(max_delay)) {
+      max_delay <- stats::median(analytic$quantile(dpars, 0.99))
+    }
+    delays <- seq(0, max_delay, length.out = n_grid)
+    values <- vapply(
+      delays,
+      function(x) {
+        return(analytic$density(dpars, x))
+      },
+      numeric(n)
+    )
+  } else {
+    samples <- .simulate_delays(family, dpars, nsim)
+    if (is.null(max_delay)) {
+      max_delay <- stats::quantile(samples, 0.99, names = FALSE)
+    }
+    delays <- seq(0, max_delay, length.out = n_grid)
+    values <- apply(samples, 1, function(x) {
+      return(stats::density(x, from = 0, to = max_delay, n = n_grid)$y)
+    })
+    values <- t(values)
+  }
+  return(list(delays = delays, density = matrix(values, nrow = n)))
+}

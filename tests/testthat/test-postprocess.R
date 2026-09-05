@@ -115,6 +115,31 @@ test_that("add_summaries errors for an analytic family missing parameters", {
   )
 })
 
+test_that("add_summaries returns an epidist_delay_draws object", {
+  draws <- data.frame(mu = c(1.8, 2.0), sigma = c(0.5, 0.4))
+  out <- add_summaries(draws, family = "lognormal")
+  expect_s3_class(out, "epidist_delay_draws")
+  expect_s3_class(out, "data.frame")
+  expect_identical(attr(out, "epidist_family")$name, "lognormal")
+  # A grouped tibble keeps its grouping and what the class records
+  grouped <- dplyr::group_by(tibble::as_tibble(draws), mu)
+  grouped <- .new_delay_draws(grouped, .delay_family(brms::lognormal()), "mu")
+  out <- add_summaries(grouped)
+  expect_s3_class(out, "epidist_delay_draws")
+  expect_s3_class(out, "grouped_df")
+  expect_identical(dplyr::group_vars(out), "mu")
+  expect_identical(attr(out, "epidist_vars"), "mu")
+  # dplyr verbs and subsetting still work on the class
+  expect_identical(dplyr::filter(out, mu > 1.9)$mu, 2.0)
+  expect_s3_class(dplyr::mutate(out, x = 1), "grouped_df")
+  expect_identical(nrow(dplyr::ungroup(out)), 2L)
+  expect_identical(nrow(out[1, ]), 1L)
+  expect_named(
+    dplyr::summarise(out, mean = mean(mean), .groups = "drop"),
+    c("mu", "mean")
+  )
+})
+
 test_that("add_summaries accepts a stats family object", {
   draws <- data.frame(mu = c(6, 8), shape = c(2, 3))
   out <- add_summaries(draws, family = Gamma())
@@ -210,7 +235,9 @@ test_that("delay_parameter_draws works with NULL newdata and the latent and marg
 
   test_draws <- function(fit, expected_rows = nrow(prep_obs)) {
     draws <- delay_parameter_draws(fit)
+    expect_s3_class(draws, "epidist_delay_draws")
     expect_s3_class(draws, "grouped_df")
+    expect_identical(attr(draws, "epidist_family")$name, "lognormal")
     expect_true(
       all(
         c(".row", ".chain", ".iteration", ".draw", "mu", "sigma") %in%
@@ -250,6 +277,7 @@ test_that("delay_summary_draws strata by default and keeps the grouping", {
   skip_if_no_cmdstanr()
 
   draws <- delay_summary_draws(fit_marginal_sex)
+  expect_s3_class(draws, "epidist_delay_draws")
   expect_s3_class(draws, "grouped_df")
   expect_true(all(c("mean", "sd", "mu", "sigma") %in% names(draws)))
   expect_identical(utils::tail(dplyr::group_vars(draws), 1), ".row")
@@ -294,6 +322,7 @@ test_that("delay_parameter_draws keeps the columns of newdata", {
   strata <- epidist_strata(fit_sex)
   draws <- delay_parameter_draws(fit_sex, newdata = strata)
   expect_true(all(names(strata) %in% names(draws)))
+  expect_identical(attr(draws, "epidist_vars"), "sex")
   expect_identical(
     nrow(draws),
     as.integer(nrow(strata) * summary(fit_sex)$total_ndraws)

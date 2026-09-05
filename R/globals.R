@@ -9,6 +9,8 @@ utils::globalVariables(c(
   ".data", # <.prepare_marginal_data>
   ".data", # <as_epidist_naive_model.epidist_linelist_data>
   ".data", # <plot_events>
+  ".data", # <.plot_parameter_draws>
+  ".data", # <.plot_delay_draws>
   "rlnorm", # <simulate_secondary>
   ".data", # <simulate_secondary>
   ".data", # <simulate_dates>

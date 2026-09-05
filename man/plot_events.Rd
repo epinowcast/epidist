@@ -52,4 +52,8 @@ plot_events(linelist, n = 100)
 plot_events(linelist, obs_time = as.Date("2014-10-01"), by = "district")
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+Other plot: 
+\code{\link{plot.epidist_delay_draws}()}
+}
 \concept{plot}
