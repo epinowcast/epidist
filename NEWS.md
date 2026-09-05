@@ -8,6 +8,11 @@ See #489 and #618.
 
 ## Features
 
+- Added `epidist_leave_one_out()`, which refits a meta model once per study with that study held out and compares the delay mean and standard deviation of each refit with the full fit.
+It reports the posterior median and interval of both, a shift standardised by the full fit's posterior standard deviation, and flags a study whose removal moves the estimate outside the full fit's interval.
+Individual level rows are held out together as the `"individual"` study.
+`vignette("meta")` uses it on the Ebola estimates.
+Closes #642.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
 It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
 Each step is still available on its own.

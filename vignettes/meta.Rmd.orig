@@ -754,6 +754,74 @@ marginaleffects::get_draws(phase_ratio) |>
   )
 ```
 
+## Does any one study drive the estimate? {#leave-one-out}
+
+A pooled estimate should not rest on a single study.
+`epidist_leave_one_out()` asks that question directly.
+It refits the model once per study with that study's rows removed, and compares the delay mean and standard deviation from each refit with the full fit.
+The refits reuse the compiled model, so each costs one round of sampling, and the formula, priors and sampler settings are carried over from `fit_ebola`.
+We compare the population level delay at the retrospective reference level, so `newdata` is the post outbreak row of `phase_grid`, and the default `re_formula = NA` switches the study term off as above.
+Had the fit included individual level records, they would be held out together as the `"individual"` study.
+
+```{r results='hide', message=FALSE}
+ebola_leave_one_out <- epidist_leave_one_out(
+  fit_ebola,
+  newdata = filter(phase_grid, .data$phase == "post outbreak"),
+  refresh = ifelse(interactive(), 250, 0)
+)
+```
+
+Each row gives the posterior median and 95% interval of one summary with one study held out, next to the same quantities from the full fit.
+`shift` is the change in the median in units of the full fit's posterior standard deviation, and `influential` marks a study whose removal moves the median outside the full fit's interval, that is by more than the pooled estimate's own uncertainty.
+
+```{r}
+ebola_leave_one_out |>
+  select(-".row", -"phase") |>
+  arrange(desc(abs(.data$shift)))
+```
+
+Figure \@ref(fig:leave-one-out) shows the same comparison as a plot.
+
+<details><summary>Click to expand for code to prepare the leave one out plot</summary>
+
+```{r}
+full_fit_band <- distinct(
+  ebola_leave_one_out,
+  .data$summary, .data$full_estimate, .data$full_lower, .data$full_upper
+)
+
+p_leave_one_out <- ggplot(ebola_leave_one_out) +
+  geom_rect(
+    data = full_fit_band,
+    aes(xmin = full_lower, xmax = full_upper, ymin = -Inf, ymax = Inf),
+    fill = "grey85", alpha = 0.5
+  ) +
+  geom_vline(
+    data = full_fit_band, aes(xintercept = full_estimate), linetype = "dashed"
+  ) +
+  geom_pointrange(
+    aes(x = estimate, xmin = lower, xmax = upper, y = study, colour = influential)
+  ) +
+  facet_wrap(vars(summary), scales = "free_x") +
+  scale_colour_manual(values = c(`FALSE` = "grey30", `TRUE` = "firebrick")) +
+  labs(x = "Onset to death delay (days)", y = "Study held out", colour = "Influential") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+</details>
+
+(ref:leave-one-out) The population level delay mean and standard deviation with each study held out. Points and lines are the posterior median and 95% interval of each refit. The dashed line and grey band are the median and 95% interval of the full fit.
+
+```{r leave-one-out, fig.cap="(ref:leave-one-out)", fig.width=8, fig.height=5}
+p_leave_one_out
+```
+
+The `(1 | study)` term already limits how far any one study can pull the population level estimate, because a study that disagrees with the rest is shrunk towards them rather than moving the intercept.
+A study that still moves the estimate beyond the full fit's uncertainty is worth a second look at its metadata before it is allowed to weigh on the pooled estimate.
+A refit loses one study's evidence, so its interval is wider than the full fit's.
+The flag compares the refit's median with the full fit's interval, so that widening does not trigger it.
+
 ## Comparing with a modern re-analysis of the same line list {#bdbv}
 
 `Rosello 2015 (3)` is the 2012 Isiro outbreak, and that line list has since been re-analysed in [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis) from the individual records, adjusting for double interval censoring.
