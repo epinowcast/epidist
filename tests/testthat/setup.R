@@ -420,22 +420,27 @@ lockstep_accrual_windows <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# Studies AC to AE report quantiles of integer day delays. AC and AD report a
+# Studies AC to AH report quantiles of integer day delays. AC and AD report a
 # single quantile, one per truncation design, which is fitted as the crossing
-# cell of the empirical distribution function. AE reports coincident quantiles,
-# which the multinomial merges into one cell.
+# cell of the empirical distribution function. AE reports coincident quantiles
+# and AH three quartiles from a thousand delays, both fitted as the joint
+# probability of their crossings by the forward pass on the cohort grid, and
+# AI two quantiles of midpointed delays above a minimum on the accrual grid.
 lockstep_grid_quantiles <- data.frame(
-  study = c("AC", "AD", "AE", "AE", "AE"),
+  study = c("AC", "AD", "AE", "AE", "AE", "AH", "AH", "AH", "AI", "AI"),
   type = "quantile",
-  value = c(5, 6.5, 4, 5, 5),
-  p = c(0.5, 0.75, 0.25, 0.5, 0.75),
-  n = c(200, 150, 30, 30, 30),
-  relative_obs_time = c(24, 28, 20, 20, 20),
+  value = c(5, 6.5, 4, 5, 5, 4, 6, 9, 5.5, 8.5),
+  p = c(0.5, 0.75, 0.25, 0.5, 0.75, 0.25, 0.5, 0.75, 0.25, 0.75),
+  n = c(200, 150, 30, 30, 30, 1000, 1000, 1000, 400, 400),
+  relative_obs_time = c(24, 28, 20, 20, 20, 30, 30, 30, 26, 26),
   trunc_adjusted = FALSE,
-  trunc_design = c("cohort", "accrual", "cohort", "cohort", "cohort"),
-  cens_adjusted = c(0, 3, 0, 0, 0),
-  delay_min = c(0, 1, 0, 0, 0),
-  growth_rate = c(0, 0.1, 0, 0, 0),
+  trunc_design = c(
+    "cohort", "accrual", "cohort", "cohort", "cohort", "cohort", "cohort",
+    "cohort", "accrual", "accrual"
+  ),
+  cens_adjusted = c(0, 3, 0, 0, 0, 0, 0, 0, 3, 3),
+  delay_min = c(0, 1, 0, 0, 0, 0, 0, 0, 2, 2),
+  growth_rate = c(0, 0.1, 0, 0, 0, 0, 0, 0, 0.1, 0.1),
   stringsAsFactors = FALSE
 )
 

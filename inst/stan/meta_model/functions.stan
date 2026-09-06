@@ -1548,13 +1548,329 @@
   }
 
   /**
+    * The stride of the coarse grid of counts the forward pass centres on,
+    * about half a binomial standard deviation. Matches .meta_box_stride()
+    * in R.
+    */
+  int meta_family_box_stride(data int study_n) {
+    return max(1, to_int(ceil(sqrt(study_n) / 2)));
+  }
+
+  /**
+    * Half width of the band of counts the forward pass keeps around the
+    * most likely path: six standard deviations, eight counts and the
+    * stride of the grid the path was found on. Matches
+    * .meta_band_half_width() in R.
+    */
+  int meta_family_band_half_width(data real variance, data int stride) {
+    return to_int(ceil(6 * sqrt(fmax(variance, 0)))) + 8 + stride;
+  }
+
+  /**
+    * The probability of a step of the chain of cumulative counts: the
+    * delays beyond one edge fall at or below the next with this
+    * probability. Matches .meta_step_prob() in R.
+    */
+  real meta_family_step_prob(real from, real to) {
+    if (1 - from <= 0) {
+      return 0;
+    }
+    return fmin(fmax((to - from) / (1 - from), 0), 1);
+  }
+
+  /**
+    * The most likely path of the constrained chain of cumulative counts,
+    * found by a Viterbi pass over a coarse grid of the box boundaries and
+    * every multiple of the stride between them. Centring the forward pass
+    * on the counts the boxes pull the chain to keeps it accurate where a
+    * later quantile forces an earlier count far from its mean. Returns -1
+    * throughout when no path satisfies every box. Matches
+    * .meta_box_mode_path() in R.
+    */
+  array[] int meta_family_box_mode_path(data int study_n, vector cdf,
+                                        data array[] int box_lower,
+                                        data array[] int box_upper,
+                                        data int stride) {
+    int n_edge = num_elements(cdf);
+    int max_state = study_n %/% stride + 3;
+    array[n_edge, max_state] int state;
+    array[n_edge] int n_state;
+    array[n_edge, max_state] int back;
+    array[n_edge] int path;
+    vector[max_state] value = rep_vector(negative_infinity(), max_state);
+    for (i in 1:n_edge) {
+      int c = 1;
+      int k_first = (box_lower[i] + stride - 1) %/% stride;
+      int k_last = box_upper[i] %/% stride;
+      state[i, 1] = box_lower[i];
+      for (k in k_first:k_last) {
+        if (k * stride > state[i, c]) {
+          c += 1;
+          state[i, c] = k * stride;
+        }
+      }
+      if (box_upper[i] > state[i, c]) {
+        c += 1;
+        state[i, c] = box_upper[i];
+      }
+      n_state[i] = c;
+    }
+    {
+      real log_g = log(fmax(cdf[1], 1e-300));
+      real log_1mg = log(fmax(1 - cdf[1], 1e-300));
+      for (j in 1:n_state[1]) {
+        value[j] = lchoose(study_n, state[1, j]) + state[1, j] * log_g +
+          (study_n - state[1, j]) * log_1mg;
+      }
+    }
+    for (i in 2:n_edge) {
+      real r = meta_family_step_prob(cdf[i - 1], cdf[i]);
+      real log_r = log(fmax(r, 1e-300));
+      real log_1mr = log(fmax(1 - r, 1e-300));
+      vector[max_state] next_value = rep_vector(
+        negative_infinity(), max_state
+      );
+      for (j in 1:n_state[i]) {
+        int t = state[i, j];
+        back[i, j] = 1;
+        for (k in 1:n_state[i - 1]) {
+          int s = state[i - 1, k];
+          if (s <= t) {
+            real candidate = value[k] + lchoose(study_n - s, t - s) +
+              (t - s) * log_r + (study_n - t) * log_1mr;
+            if (candidate > next_value[j]) {
+              next_value[j] = candidate;
+              back[i, j] = k;
+            }
+          }
+        }
+      }
+      value = next_value;
+    }
+    {
+      int j = 1;
+      for (k in 2:n_state[n_edge]) {
+        if (value[k] > value[j]) {
+          j = k;
+        }
+      }
+      if (is_inf(value[j])) {
+        return rep_array(-1, n_edge);
+      }
+      for (step in 1:n_edge) {
+        int i = n_edge - step + 1;
+        path[i] = state[i, j];
+        if (i > 1) {
+          j = back[i, j];
+        }
+      }
+    }
+    return path;
+  }
+
+  /**
+    * Joint log mass of several quantiles of integer day delays, read as
+    * the crossings of the empirical distribution function they stand for:
+    * N_{<= y - w} <= upper and N_{<= y} >= lower for each reported day y.
+    * The counts at the edges form a Markov chain of binomial steps on the
+    * uncorrected grid distribution function, and the mass of the box is a
+    * forward pass over the counts on the log scale, kept to a band around
+    * the most likely path. Matches .meta_grid_box_ll() in R.
+    */
+  real meta_family_grid_box_ll(data vector y, data array[] int upper_count,
+                               data array[] int lower_count, data int study_n,
+                               array[] real params, data real delay_min,
+                               data real cutoff, data real pwindow_width,
+                               data real swindow_width, data int cens_adj,
+                               data int prim_id, array[] real prim_params,
+                               data int accrual, data real growth_rate) {
+    int n_reported = num_elements(y);
+    int n_grid = to_int(floor(cutoff / swindow_width));
+    int first = meta_family_grid_first(delay_min, swindow_width);
+    array[2 * n_reported] int cand_edge;
+    array[2 * n_reported] int cand_lower;
+    array[2 * n_reported] int cand_upper;
+    array[2 * n_reported] int sorted;
+    array[2 * n_reported] int edge;
+    array[2 * n_reported] int box_lower;
+    array[2 * n_reported] int box_upper;
+    int n_edge = 0;
+    for (j in 1:n_reported) {
+      // The shift back to the base grid is inlined because to_int needs a
+      // data only expression, which a local variable is not.
+      int cell = to_int(floor(
+        (y[j] - meta_family_shift(cens_adj, pwindow_width, swindow_width)) /
+          swindow_width + 0.5
+      ));
+      if (cell < first || cell >= n_grid) {
+        return negative_infinity();
+      }
+      // Every reported day names two edges, the day below it with an upper
+      // bound and the day itself with a lower bound.
+      cand_edge[2 * j - 1] = cell - 1;
+      cand_lower[2 * j - 1] = 0;
+      cand_upper[2 * j - 1] = upper_count[j];
+      cand_edge[2 * j] = cell;
+      cand_lower[2 * j] = lower_count[j];
+      cand_upper[2 * j] = study_n;
+    }
+    sorted = sort_asc(cand_edge);
+    for (k in 1:(2 * n_reported)) {
+      // An edge below the first cell holds no delays, so its bound is met
+      // whenever it is not negative. Coincident edges merge their boxes.
+      if (sorted[k] < first) {
+        for (c in 1:(2 * n_reported)) {
+          if (cand_edge[c] == sorted[k] && cand_upper[c] < 0) {
+            return negative_infinity();
+          }
+        }
+        continue;
+      }
+      if (n_edge > 0 && sorted[k] == edge[n_edge]) {
+        continue;
+      }
+      n_edge += 1;
+      edge[n_edge] = sorted[k];
+      box_lower[n_edge] = 0;
+      box_upper[n_edge] = study_n;
+      for (c in 1:(2 * n_reported)) {
+        if (cand_edge[c] == sorted[k]) {
+          box_lower[n_edge] = max(box_lower[n_edge], cand_lower[c]);
+          box_upper[n_edge] = min(box_upper[n_edge], cand_upper[c]);
+        }
+      }
+      if (box_lower[n_edge] > box_upper[n_edge]) {
+        return negative_infinity();
+      }
+    }
+    {
+      vector[n_edge] cdf;
+      vector[study_n + 1] lg;
+      vector[study_n + 1] alpha = rep_vector(negative_infinity(), study_n + 1);
+      int stride = meta_family_box_stride(study_n);
+      array[n_edge] int path;
+      array[n_edge] int band_lower;
+      array[n_edge] int band_upper;
+      if (accrual == 0) {
+        real log_top = meta_family_pcens_lcdf(
+          n_grid * swindow_width | params, pwindow_width, prim_id, prim_params
+        );
+        real log_base = first > 0
+          ? meta_family_pcens_lcdf(
+              first * swindow_width | params, pwindow_width, prim_id,
+              prim_params
+            )
+          : negative_infinity();
+        real total = meta_family_diff_exp(log_top, log_base);
+        if (total <= 0) {
+          return negative_infinity();
+        }
+        for (i in 1:n_edge) {
+          cdf[i] = edge[i] + 1 >= n_grid
+            ? 1
+            : meta_family_diff_exp(
+                meta_family_pcens_lcdf(
+                  (edge[i] + 1) * swindow_width | params, pwindow_width,
+                  prim_id, prim_params
+                ),
+                log_base
+              ) / total;
+        }
+      } else {
+        vector[n_grid - first + 1] full = append_row(0, cumulative_sum(
+          meta_family_grid_pmf(params, delay_min, cutoff, pwindow_width,
+                               swindow_width, prim_id, prim_params, accrual,
+                               growth_rate)
+        ));
+        for (i in 1:n_edge) {
+          cdf[i] = full[edge[i] - first + 2];
+        }
+      }
+      for (i in 1:n_edge) {
+        if (is_nan(cdf[i])) {
+          return negative_infinity();
+        }
+        cdf[i] = fmin(fmax(cdf[i], 0), 1);
+        if (i > 1) {
+          cdf[i] = fmax(cdf[i], cdf[i - 1]);
+        }
+      }
+      path = meta_family_box_mode_path(
+        study_n, cdf, box_lower[1:n_edge], box_upper[1:n_edge], stride
+      );
+      if (path[1] < 0) {
+        return negative_infinity();
+      }
+      for (i in 1:n_edge) {
+        int h = meta_family_band_half_width(
+          path[i] * (1 - 1.0 * path[i] / study_n), stride
+        );
+        band_lower[i] = max(box_lower[i], path[i] - h);
+        band_upper[i] = min(box_upper[i], path[i] + h);
+      }
+      // lg[d + 1] is log d!, so that the binomial coefficients of every
+      // step are a lookup rather than a special function call.
+      for (d in 0:study_n) {
+        lg[d + 1] = lgamma(d + 1);
+      }
+      {
+        int a = band_lower[1];
+        int b = band_upper[1];
+        vector[b - a + 1] state = linspaced_vector(b - a + 1, a, b);
+        alpha[(a + 1):(b + 1)] = lg[study_n + 1] - lg[(a + 1):(b + 1)] -
+          reverse(lg[(study_n - b + 1):(study_n - a + 1)]) +
+          state * log(fmax(cdf[1], 1e-300)) +
+          (study_n - state) * log(fmax(1 - cdf[1], 1e-300));
+      }
+      for (i in 2:n_edge) {
+        int a = band_lower[i - 1];
+        int b = band_upper[i - 1];
+        int a_next = band_lower[i];
+        int b_next = band_upper[i];
+        real r = meta_family_step_prob(cdf[i - 1], cdf[i]);
+        real log_r = log(fmax(r, 1e-300));
+        real log_1mr = log(fmax(1 - r, 1e-300));
+        // The step from s to t is Binomial(n - s, r) at t - s. Its
+        // coefficient splits into a part in s, folded into alpha, a part in
+        // t - s, u, and a part in t, so each target count is one log sum
+        // over the sources at or below it.
+        vector[b - a + 1] beta = alpha[(a + 1):(b + 1)] +
+          reverse(lg[(study_n - b + 1):(study_n - a + 1)]);
+        vector[max(b_next - a + 1, 1)] u = linspaced_vector(
+          max(b_next - a + 1, 1), 0, max(b_next - a, 0)
+        ) * log_r - lg[1:max(b_next - a + 1, 1)];
+        vector[b_next - a_next + 1] next_alpha;
+        for (t in a_next:b_next) {
+          int s_max = min(b, t);
+          if (s_max < a) {
+            next_alpha[t - a_next + 1] = negative_infinity();
+          } else {
+            int m = s_max - a + 1;
+            next_alpha[t - a_next + 1] = log_sum_exp(
+              beta[1:m] + reverse(u[(t - s_max + 1):(t - a + 1)])
+            ) + (study_n - t) * log_1mr - lg[study_n - t + 1];
+          }
+        }
+        alpha[(a_next + 1):(b_next + 1)] = next_alpha;
+      }
+      return log_sum_exp(
+        alpha[(band_lower[n_edge] + 1):(band_upper[n_edge] + 1)]
+      );
+    }
+  }
+
+  /**
     * Joint log mass of a set of quantiles from one study, multinomial over
     * the cells the quantiles cut the delay axis into. Coincident values are
-    * merged into one cell, a single quantile of integer day delays is fitted
-    * as its crossing cell, and a cell that underflows is floored at 1e-300,
-    * matching .meta_cell_floor() in R.
+    * merged into one cell, and a cell that underflows is floored at 1e-300,
+    * matching .meta_cell_floor() in R. Quantiles of integer day delays are
+    * fitted instead as the crossing cells of the empirical distribution
+    * function, one by meta_family_grid_crossing_ll() and several jointly by
+    * meta_family_grid_box_ll(), where cum_count and lower are the box each
+    * crossing puts on the counts below and at the reported day.
     */
   real meta_family_quantile_set_lpmf(data array[] int cum_count, data vector y,
+                                     data array[] int lower_count,
                                      data vector p, data int study_n,
                                      array[] real params,
                                      data real delay_min, data real cutoff,
@@ -1570,10 +1886,17 @@
     real lp = lgamma(study_n + 1);
     real previous_prob = 0;
     int previous_count = 0;
-    if (n_reported == 1 && (cens_adj == 0 || cens_adj == 3)) {
-      return meta_family_grid_crossing_ll(
-        y[1], p[1], study_n, params, delay_min, cutoff, pwindow_width,
-        swindow_width, cens_adj, prim_id, prim_params, accrual, growth_rate
+    if (cens_adj == 0 || cens_adj == 3) {
+      if (n_reported == 1) {
+        return meta_family_grid_crossing_ll(
+          y[1], p[1], study_n, params, delay_min, cutoff, pwindow_width,
+          swindow_width, cens_adj, prim_id, prim_params, accrual, growth_rate
+        );
+      }
+      return meta_family_grid_box_ll(
+        y, cum_count, lower_count, study_n, params, delay_min, cutoff,
+        pwindow_width, swindow_width, cens_adj, prim_id, prim_params, accrual,
+        growth_rate
       );
     }
     for (j in 1:n_reported) {
@@ -1619,8 +1942,8 @@
   * Summary rows compare the reported value with the summary the study would
   * have converged to given the biases in its estimation procedure.
   * Summaries reported by the same study are fitted jointly, indexed into the
-  * flat group_value, group_count, group_type and group_p arrays by
-  * group_start and group_len. A group whose covariance comes from a
+  * flat group_value, group_count, group_lower, group_type and group_p arrays
+  * by group_start and group_len. A group whose covariance comes from a
   * multivariate representation of a study's parameter draws indexes its
   * Cholesky factor into group_chol from chol_start, which holds
   * group_len * group_len entries in column major order. R builds that factor
@@ -1640,6 +1963,7 @@
                         data real quantile_p, data real growth_rate,
                         data vector group_value,
                         data array[] int group_count,
+                        data array[] int group_lower,
                         data array[] int group_type,
                         data vector group_p,
                         data vector group_chol,
@@ -1680,7 +2004,8 @@
   if (obs_type == 6) {
     return meta_family_quantile_set_lpmf(
       group_count[group_start:last] | group_value[group_start:last],
-      group_p[group_start:last], study_n, {dpars_B}, delay_min,
+      group_lower[group_start:last], group_p[group_start:last], study_n,
+      {dpars_B}, delay_min,
       relative_obs_t, pwindow_width, swindow_width, trunc_adj, cens_adj,
       prim_id, prim_params, accrual, growth_rate, n_quad
     );

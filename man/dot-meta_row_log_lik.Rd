@@ -23,7 +23,9 @@ A log density.
 Ungrouped rows use the normal approximations of \code{\link[=.meta_summary_terms]{.meta_summary_terms()}}.
 A group row, which stands for several summaries reported by one study, uses
 the joint likelihood of its members: \code{\link[=.meta_moment_pair_ll]{.meta_moment_pair_ll()}} for a mean and
-a standard deviation, and \code{\link[=.meta_quantile_set_ll]{.meta_quantile_set_ll()}} for a set of quantiles.
+a standard deviation, and \code{\link[=.meta_quantile_set_ll]{.meta_quantile_set_ll()}} for a set of quantiles,
+which hands quantiles of integer day delays to \code{\link[=.meta_grid_crossing_ll]{.meta_grid_crossing_ll()}}
+or \code{\link[=.meta_grid_box_ll]{.meta_grid_box_ll()}}.
 }
 \details{
 A draw whose implied moments are not all finite, which an extreme delay
