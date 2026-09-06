@@ -180,7 +180,7 @@ Dropped `modelr` and `usethis` from `Suggests`, which nothing used, and split th
 Added `tests/spelling.R` so the spelling check runs with the tests, and corrected the spellings that `inst/WORDLIST` was masking in the README and the vignette sources.
 The `check-cmdstan` workflow now checks the meta model Stan program as well as the latent and marginal ones.
 Consolidated the duplicated section headings and a repeated entry in this file.
-See #696.
+See #702.
 
 - Reworded the message `as_epidist_marginal_model()` gives when it sets relative observation times to `Inf`.
 The message now names `relative_obs_time` and `orig_relative_obs_time`.
