@@ -1579,19 +1579,49 @@
   }
 
   /**
+    * The integer part of 2^20 times a real, found by bisection on
+    * comparisons because to_int only takes data. It carries the value of a
+    * parameter dependent scaling into a data only kernel, where the scaling
+    * need only be close and the result does not depend on it. The range
+    * of 2^29 either side keeps the bisection inside a 32 bit integer.
+    * Matches .meta_fixed_point() in R.
+    */
+  int meta_family_fixed_point(real x) {
+    int lo = -536870912;
+    int hi = 536870912;
+    if (x <= lo / 1048576.0) {
+      return lo;
+    }
+    if (x >= hi / 1048576.0) {
+      return hi;
+    }
+    while (hi - lo > 1) {
+      int mid = lo + (hi - lo) %/% 2;
+      if (mid / 1048576.0 <= x) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return lo;
+  }
+
+  /**
     * The most likely path of the constrained chain of cumulative counts,
     * found by a Viterbi pass over a coarse grid of the box boundaries and
     * every multiple of the stride between them. Centring the forward pass
     * on the counts the boxes pull the chain to keeps it accurate where a
-    * later quantile forces an earlier count far from its mean. Returns -1
-    * throughout when no path satisfies every box. Matches
+    * later quantile forces an earlier count far from its mean. The
+    * distribution function arrives as fixed point integers, so that every
+    * argument is data and the search costs nothing on the autodiff stack.
+    * Returns -1 throughout when no path satisfies every box. Matches
     * .meta_box_mode_path() in R.
     */
-  array[] int meta_family_box_mode_path(data int study_n, vector cdf,
-                                        data array[] int box_lower,
-                                        data array[] int box_upper,
-                                        data int stride) {
-    int n_edge = num_elements(cdf);
+  array[] int meta_family_box_mode_path(int study_n, array[] int cdf_scaled,
+                                        array[] int box_lower,
+                                        array[] int box_upper, int stride) {
+    int n_edge = num_elements(cdf_scaled);
+    vector[n_edge] cdf = to_vector(cdf_scaled) / 1048576.0;
     int max_state = study_n %/% stride + 3;
     array[n_edge, max_state] int state;
     array[n_edge] int n_state;
@@ -1669,33 +1699,6 @@
   }
 
   /**
-    * The integer part of 2^20 times a real, found by bisection on
-    * comparisons because to_int only takes data. It carries the value of a
-    * parameter dependent scaling into a data only kernel, where the scaling
-    * need only be close and the result does not depend on it. Matches
-    * .meta_fixed_point() in R.
-    */
-  int meta_family_fixed_point(real x) {
-    int lo = -1073741824;
-    int hi = 1073741824;
-    if (x <= lo / 1048576.0) {
-      return lo;
-    }
-    if (x >= hi / 1048576.0) {
-      return hi;
-    }
-    while (hi - lo > 1) {
-      int mid = lo + (hi - lo) %/% 2;
-      if (mid / 1048576.0 <= x) {
-        lo = mid;
-      } else {
-        hi = mid;
-      }
-    }
-    return lo;
-  }
-
-  /**
     * The log kernel of a forward pass step at its expected size, which the
     * kernel is divided by so that no entry exceeds one. Matches
     * .meta_step_kernel_top() in R.
@@ -1759,8 +1762,9 @@
   vector meta_family_box_step(vector alpha, int a, int b, int a2, int b2,
                               real r, data int study_n, int m_prev, int m,
                               vector lg) {
-    real log_r = log(fmax(r, 1e-300));
-    real log_1mr = log(fmax(1 - r, 1e-300));
+    // The floor keeps the log expected step inside the fixed point range.
+    real log_r = log(fmax(r, 1e-200));
+    real log_1mr = log(fmax(1 - r, 1e-200));
     int lambda_scaled = meta_family_fixed_point(
       log_r + log(study_n - m_prev)
     );
@@ -1941,9 +1945,16 @@
           cdf[i] = fmax(cdf[i], cdf[i - 1]);
         }
       }
-      path = meta_family_box_mode_path(
-        study_n, cdf, box_lower[1:n_edge], box_upper[1:n_edge], stride
-      );
+      {
+        array[n_edge] int cdf_scaled;
+        for (i in 1:n_edge) {
+          cdf_scaled[i] = meta_family_fixed_point(cdf[i]);
+        }
+        path = meta_family_box_mode_path(
+          study_n, cdf_scaled, box_lower[1:n_edge], box_upper[1:n_edge],
+          stride
+        );
+      }
       if (path[1] < 0) {
         return negative_infinity();
       }

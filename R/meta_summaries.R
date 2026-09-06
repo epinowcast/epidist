@@ -2564,8 +2564,10 @@
 #' is then kept to a band around them. Centring on the counts the boxes
 #' pull the chain to, rather than on the counts the parameters expect at
 #' each edge, is what keeps the pass accurate where a later quantile forces
-#' an earlier count far from its mean. Matches
-#' `meta_family_box_mode_path()` in Stan.
+#' an earlier count far from its mean. The distribution function is rounded
+#' to \eqn{2^{-20}} by [.meta_fixed_point()] first, as Stan must to keep the
+#' search off the autodiff stack. Matches `meta_family_box_mode_path()` in
+#' Stan.
 #'
 #' @param study_n The number of delays the quantiles were computed from.
 #'
@@ -2581,6 +2583,7 @@
 #' @keywords internal
 .meta_box_mode_path <- function(study_n, cdf, lower, upper, stride) {
   n_edge <- length(cdf)
+  cdf <- .meta_fixed_point(cdf) / 2^20
   counts <- Map(.meta_box_grid, lower, upper, stride = stride)
   value <- .meta_log_binom(counts[[1]], study_n, cdf[1])
   back <- vector("list", n_edge)
@@ -2630,19 +2633,20 @@
 #' A number as a multiple of a power of two, for a data only scaling
 #'
 #' The forward pass scales each step around the expected size of the step,
-#' which depends on the parameters. Stan can only build a data matrix from
-#' integers, so the scaling is carried as the integer part of \eqn{2^{20}}
-#' times the log expected step, found there by bisection on comparisons.
-#' Being a scaling it only has to be close, and the result of the step does
-#' not depend on it. Matches `meta_family_fixed_point()` in Stan.
+#' and centres its bands on the most likely path, both of which depend on
+#' the parameters. Stan can only build data from integers, so each is
+#' carried as the integer part of \eqn{2^{20}} times the number, found
+#' there by bisection on comparisons. Neither has to be exact: the result
+#' of a step does not depend on its scaling, and the bands are wide. Matches
+#' `meta_family_fixed_point()` in Stan.
 #'
 #' @param x A number.
 #'
-#' @returns An integer within \eqn{\pm 2^{30}}.
+#' @returns An integer vector within \eqn{\pm 2^{29}}.
 #'
 #' @keywords internal
 .meta_fixed_point <- function(x) {
-  return(as.integer(min(max(floor(x * 2^20), -2^30), 2^30)))
+  return(as.integer(pmin(pmax(floor(x * 2^20), -2^29), 2^29)))
 }
 
 #' The log kernel of a forward pass step at its expected size
@@ -2719,10 +2723,10 @@
     numeric(0)
   }
   d <- outer(a2:b2, a:b, "-")
-  weights <- matrix(0, length(a2:b2), length(a:b))
+  step_matrix <- matrix(0, length(a2:b2), length(a:b))
   reachable <- d >= 0
-  weights[reachable] <- kernel_at[d[reachable] - d_min + 1]
-  return(weights)
+  step_matrix[reachable] <- kernel_at[d[reachable] - d_min + 1]
+  return(step_matrix)
 }
 
 #' One step of the forward pass over the cumulative counts
@@ -2757,8 +2761,9 @@
   n <- study_n
   state <- a:b
   target <- a2:b2
-  log_r <- log(max(r, 1e-300))
-  log_1mr <- log(max(1 - r, 1e-300))
+  # The floor keeps the log expected step inside the fixed point range.
+  log_r <- log(max(r, 1e-200))
+  log_1mr <- log(max(1 - r, 1e-200))
   lambda_scaled <- .meta_fixed_point(log_r + log(n - m_prev))
   if (.meta_step_kernel_alive(m - m_prev, lambda_scaled)) {
     lambda <- lambda_scaled / 2^20

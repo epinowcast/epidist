@@ -10,14 +10,15 @@
 \item{x}{A number.}
 }
 \value{
-An integer within \eqn{\pm 2^{30}}.
+An integer vector within \eqn{\pm 2^{29}}.
 }
 \description{
 The forward pass scales each step around the expected size of the step,
-which depends on the parameters. Stan can only build a data matrix from
-integers, so the scaling is carried as the integer part of \eqn{2^{20}}
-times the log expected step, found there by bisection on comparisons.
-Being a scaling it only has to be close, and the result of the step does
-not depend on it. Matches \code{meta_family_fixed_point()} in Stan.
+and centres its bands on the most likely path, both of which depend on
+the parameters. Stan can only build data from integers, so each is
+carried as the integer part of \eqn{2^{20}} times the number, found
+there by bisection on comparisons. Neither has to be exact: the result
+of a step does not depend on its scaling, and the bands are wide. Matches
+\code{meta_family_fixed_point()} in Stan.
 }
 \keyword{internal}

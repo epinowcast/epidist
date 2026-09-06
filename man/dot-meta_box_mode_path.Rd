@@ -26,7 +26,9 @@ every box, to within a stride. The forward pass of \code{\link[=.meta_grid_box_l
 is then kept to a band around them. Centring on the counts the boxes
 pull the chain to, rather than on the counts the parameters expect at
 each edge, is what keeps the pass accurate where a later quantile forces
-an earlier count far from its mean. Matches
-\code{meta_family_box_mode_path()} in Stan.
+an earlier count far from its mean. The distribution function is rounded
+to \eqn{2^{-20}} by \code{\link[=.meta_fixed_point]{.meta_fixed_point()}} first, as Stan must to keep the
+search off the autodiff stack. Matches \code{meta_family_box_mode_path()} in
+Stan.
 }
 \keyword{internal}
