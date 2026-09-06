@@ -1277,7 +1277,7 @@ test_that("epidist_leave_one_out refits a meta model without each study in turn"
   expect_named(fits, studies)
   expect_s3_class(fits[[1]], "brmsfit")
   expect_s3_class(fits[[1]], "epidist_fit")
-  expect_identical(brms::nchains(fits[[1]]), 1L)
+  expect_identical(as.integer(brms::nchains(fits[[1]])), 1L)
   expect_identical(
     nrow(fits[[1]]$data),
     nrow(fit_meta_grid$data) - sum(prep_meta_grid$study == studies[1])
