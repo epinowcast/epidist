@@ -222,3 +222,29 @@ test_that("the latent and marginal models agree when censoring windows overlap",
     tolerance = 0.1
   )
 })
+
+test_that("epidist.epidist_latent_model fits the gengamma family and recovers a gamma delay", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  skip_if_not_installed("flexsurv")
+  set.seed(1)
+  fit <- epidist(
+    data = prep_obs_gamma,
+    family = gengamma(),
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  )
+  expect_s3_class(fit, "epidist_fit")
+  expect_convergence(fit)
+  draws <- add_summaries(delay_parameter_draws(fit))
+  expect_equal(mean(draws$mean), shape / rate, tolerance = 0.1)
+  expect_equal(mean(draws$sd), sqrt(shape) / rate, tolerance = 0.15)
+  log_lik <- brms::log_lik(fit, draw_ids = 1:5)
+  expect_true(all(is.finite(log_lik)))
+})

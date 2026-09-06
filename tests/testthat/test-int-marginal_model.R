@@ -81,3 +81,35 @@ test_that("epidist.epidist_marginal_model fits and recovers a sex effect", { # n
     tolerance = 0.3
   )
 })
+
+test_that("epidist.epidist_marginal_model fits the gengamma family and recovers a gamma delay", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  skip_if_not_installed("flexsurv")
+  set.seed(1)
+  fit <- suppressMessages(epidist(
+    data = prep_marginal_obs_gamma,
+    family = gengamma(),
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  ))
+  expect_s3_class(fit, "epidist_fit")
+  expect_convergence(fit)
+  # The data are gamma with shape 2 and scale 3, the shape = 1 special case,
+  # so the delay mean and standard deviation are recovered even though the
+  # two shape parameters trade off against each other
+  draws <- add_summaries(delay_parameter_draws(fit))
+  expect_equal(mean(draws$mean), shape / rate, tolerance = 0.1)
+  expect_equal(mean(draws$sd), sqrt(shape) / rate, tolerance = 0.15)
+  log_lik <- brms::log_lik(fit, draw_ids = 1:5)
+  expect_true(all(is.finite(log_lik)))
+  pred <- brms::posterior_predict(fit, draw_ids = 1:5)
+  expect_identical(dim(pred), c(5L, nrow(fit$data)))
+  expect_true(all(pred >= 0))
+})
