@@ -41,7 +41,7 @@ Imports:
     cli,
     dplyr,
     lubridate,
-    primarycensored (>= 1.4.0),
+    primarycensored (>= 1.5.1.1000),
     purrr,
     rstan (>= 2.26.0),
     stats,
@@ -55,6 +55,7 @@ Suggests:
     cmdstanr,
     collapse,
     epireview,
+    flexsurv,
     ggplot2,
     knitr,
     loo,
@@ -76,6 +77,8 @@ Suggests:
 Additional_repositories:
     https://stan-dev.r-universe.dev,
     https://mrc-ide.r-universe.dev
+Remotes:
+    epinowcast/primarycensored@claude/gengamma-support
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme
