@@ -204,7 +204,7 @@ epidist_family_model.epidist_latent_model <- function(
   family <- .add_primary_dpars(family, data)
   # Really the name and vars are the "model-specific" parts here
   custom_family <- brms::custom_family(
-    paste0("latent_", family$family),
+    paste0("latent_", .family_name(family)),
     dpars = family$dpars,
     links = c(family$link, family$other_links),
     lb = c(
@@ -433,6 +433,11 @@ epidist_stancode.epidist_latent_model <- function(
     stanvars_functions +
     stanvars_data +
     stanvars_parameters
+
+  family_stanvars <- .family_stanvars(family)
+  if (!is.null(family_stanvars)) {
+    stanvars_all <- stanvars_all + family_stanvars
+  }
 
   if (length(spec$dpars) > 0) {
     stanvars_all <- stanvars_all +

@@ -14,7 +14,8 @@
 #'  If not specified, default links are used. For details of all supported
 #'  families see [brms::brmsfamily()]. Commonly used, such as
 #'  [brms::lognormal()], are also
-#'  reexported as part of `epidist`.
+#'  reexported as part of `epidist`. The generalised gamma family
+#'  [gengamma()] is defined by `epidist` itself.
 #'
 #' @param prior One or more `brmsprior` objects created by [brms::set_prior()]
 #'  or related functions. These priors are passed to [epidist_prior()] in the

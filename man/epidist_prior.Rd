@@ -67,6 +67,7 @@ that the latent model requires a \code{uniform(0, 1)} prior on its event windows
 Other prior: 
 \code{\link{epidist_family_prior}()},
 \code{\link{epidist_family_prior.default}()},
+\code{\link{epidist_family_prior.gengamma}()},
 \code{\link{epidist_family_prior.lognormal}()},
 \code{\link{epidist_model_prior}()},
 \code{\link{epidist_model_prior.default}()},

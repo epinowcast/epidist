@@ -16,6 +16,8 @@ A list of solutions, or \code{NULL} when the family has none.
 Each element gives the distributional parameters the solution needs and
 functions of them returning the mean, the standard deviation and the
 quantile function of the delay distribution. The parameters are the \code{brms}
-parameters of the family.
+parameters of the family. The generalised gamma moments follow from
+\eqn{E[T^r] = \mu^r \Gamma(k + r / a) / \Gamma(k)}, with \eqn{a} the
+\code{shape}.
 }
 \keyword{internal}

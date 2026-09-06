@@ -9,15 +9,17 @@
 \arguments{
 \item{dpar}{A character string naming a distributional parameter.}
 
-\item{family}{Unused. Kept so that the signature matches the \code{brms}
-internal this helper replaces.}
+\item{family}{A \code{brmsfamily} object, whose bounds are used when it is a
+custom family. Otherwise unused and kept so that the signature matches
+the \code{brms} internal this helper replaces.}
 }
 \description{
-Replaces \code{brms:::dpar_bounds()} for the non-mixture, non-custom families
-that \code{epidist} supports. Guarantees a list with character elements \code{lb}
-and \code{ub} giving the lower and upper bound of \code{dpar} on the natural
-scale, where \code{""} means unbounded. Unlike the \code{brms} internal, an
-unrecognised parameter is an error rather than \code{NULL}, because \code{epidist}
-cannot generate Stan code without a bound.
+Replaces \code{brms:::dpar_bounds()} for the non-mixture families that
+\code{epidist} supports. Guarantees a list with character elements \code{lb} and
+\code{ub} giving the lower and upper bound of \code{dpar} on the natural scale,
+where \code{""} means unbounded. A custom family, such as \code{\link[=gengamma]{gengamma()}},
+records its own bounds, which are returned as \code{brms} does. Unlike the
+\code{brms} internal, an unrecognised parameter is an error rather than
+\code{NULL}, because \code{epidist} cannot generate Stan code without a bound.
 }
 \keyword{internal}

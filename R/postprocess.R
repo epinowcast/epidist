@@ -323,7 +323,8 @@ epidist_strata <- function(object, vars = NULL) {
 #' @param data A `data.frame` of draws of the distributional parameters, as
 #'  returned by [delay_parameter_draws()].
 #'
-#' @param family A model fit with [epidist::epidist()], a `brms` family, or
+#' @param family A model fit with [epidist::epidist()], a `brms` family, an
+#'  `epidist` family such as [gengamma()], or
 #'  the name of one, giving the delay distribution. If `NULL`, the default,
 #'  the family is taken from `data`, which [delay_parameter_draws()] records
 #'  on it. Some `dplyr` verbs drop that record, so pass the fit or the family
@@ -501,7 +502,9 @@ add_summaries <- function(
 #' Each element gives the distributional parameters the solution needs and
 #' functions of them returning the mean, the standard deviation and the
 #' quantile function of the delay distribution. The parameters are the `brms`
-#' parameters of the family.
+#' parameters of the family. The generalised gamma moments follow from
+#' \eqn{E[T^r] = \mu^r \Gamma(k + r / a) / \Gamma(k)}, with \eqn{a} the
+#' `shape`.
 #'
 #' @param name The name of a delay distribution family.
 #'
@@ -549,6 +552,22 @@ add_summaries <- function(
           p,
           shape = d$shape,
           scale = d$mu / gamma(1 + 1 / d$shape)
+        ))
+      }
+    ),
+    gengamma = list(
+      dpars = c("mu", "shape", "k"),
+      mean = function(d) {
+        return(.gengamma_mean(d$mu, d$shape, d$k))
+      },
+      sd = function(d) {
+        return(.gengamma_sd(d$mu, d$shape, d$k))
+      },
+      quantile = function(d, p) {
+        .require_flexsurv()
+        return(flexsurv::qgengamma.orig(
+          p,
+          shape = d$shape, scale = d$mu, k = d$k
         ))
       }
     ),

@@ -25,6 +25,8 @@ Other family:
 \code{\link{epidist_family}()},
 \code{\link{epidist_family_model.default}()},
 \code{\link{epidist_family_param}()},
-\code{\link{epidist_family_param.default}()}
+\code{\link{epidist_family_param.default}()},
+\code{\link{epidist_family_param.gengamma}()},
+\code{\link{gengamma}()}
 }
 \concept{family}

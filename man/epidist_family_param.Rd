@@ -13,7 +13,8 @@ users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
 families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
 \code{\link[brms:brmsfamily]{brms::lognormal()}}, are also
-reexported as part of \code{epidist}.}
+reexported as part of \code{epidist}. The generalised gamma family
+\code{\link[=gengamma]{gengamma()}} is defined by \code{epidist} itself.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
@@ -26,7 +27,9 @@ Other family:
 \code{\link{epidist_family}()},
 \code{\link{epidist_family_model}()},
 \code{\link{epidist_family_model.default}()},
-\code{\link{epidist_family_param.default}()}
+\code{\link{epidist_family_param.default}()},
+\code{\link{epidist_family_param.gengamma}()},
+\code{\link{gengamma}()}
 }
 \concept{family}
 \keyword{internal}

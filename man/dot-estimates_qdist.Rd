@@ -11,7 +11,8 @@
 \code{"plnorm"}.}
 }
 \value{
-The corresponding function from \code{stats}.
+The corresponding function from \code{stats}, or from \code{flexsurv} for
+the generalised gamma.
 }
 \description{
 Shares the distribution function lookup with \code{\link[=.pdist]{.pdist()}} in \code{R/gen.R}; only

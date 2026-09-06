@@ -215,14 +215,17 @@ epidist_gen_log_lik <- function(family) {
         shape = shape,
         scale = brms::get_dpar(prep, "mu", i = i) / gamma(1 + 1 / shape)
       )
-    }
+    },
+    pgengamma.orig = .gengamma_dpars(prep, i)
   )
   return(.transpose_named_list2(dist_params))
 }
 
 #' The `primarycensored` distribution name for a family
 #'
-#' Falls back to the lower cased family name if `primarycensored` does not
+#' The generalised gamma distribution function lives in `flexsurv`, so
+#' `primarycensored` records no name for it and the name is given here. Falls
+#' back to the lower cased family name if `primarycensored` does not
 #' recognise it, so the caller can still report a name in a message.
 #'
 #' @inheritParams epidist_family
@@ -232,9 +235,13 @@ epidist_gen_log_lik <- function(family) {
 #'
 #' @keywords internal
 .pcd_family_dist_name <- function(family) {
+  name <- tolower(.family_name(family))
+  if (identical(name, "gengamma")) {
+    return("pgengamma.orig")
+  }
   return(tryCatch(
-    primarycensored::pcd_dist_name(tolower(family$family)),
-    error = function(e) tolower(family$family)
+    primarycensored::pcd_dist_name(name),
+    error = function(e) name
   ))
 }
 
@@ -243,10 +250,15 @@ epidist_gen_log_lik <- function(family) {
 #' @param dist A `primarycensored` distribution function name, for example
 #'  `"plnorm"`.
 #'
-#' @returns The corresponding function from `stats`.
+#' @returns The corresponding function from `stats`, or from `flexsurv` for
+#'  the generalised gamma.
 #'
 #' @keywords internal
 .pdist <- function(dist) {
+  if (identical(dist, "pgengamma.orig")) {
+    .require_flexsurv()
+    return(flexsurv::pgengamma.orig)
+  }
   return(switch(dist,
     plnorm = stats::plnorm,
     pgamma = stats::pgamma,
@@ -256,7 +268,7 @@ epidist_gen_log_lik <- function(family) {
 }
 
 .get_supported_dists <- function() {
-  return(c("plnorm", "pgamma", "pweibull"))
+  return(c("plnorm", "pgamma", "pweibull", "pgengamma.orig"))
 }
 
 .transpose_named_list2 <- function(lst) {

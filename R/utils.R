@@ -19,7 +19,9 @@
 #' Both models read a `functions.stan` chunk with the same placeholders
 #' (`family`, `dist_id`, `dpars_A`, `dpars_B`, and the pair
 #' `primary_id, primary_params`), filled in with the target distribution's
-#' details and the primary event distribution. Used within
+#' details and the primary event distribution. `dpars_B` is the parameter
+#' order of `primarycensored`, which a family may record as `pcd_param`
+#' where it differs from the order of its Stan density. Used within
 #' [epidist_stancode()] methods for the marginal and meta models, which
 #' differ only in the chunk path, the family name prefix, and any further
 #' placeholders they need substituted.
@@ -55,12 +57,16 @@
 
   family_name <- gsub(family_prefix, "", family$name, fixed = TRUE)
   dist_id <- primarycensored::pcd_stan_dist_id(family_name)
+  pcd_param <- family$pcd_param
+  if (is.null(pcd_param)) {
+    pcd_param <- family$param
+  }
 
   substitutions <- c(
     family = family_name,
     dist_id = as.character(dist_id),
     dpars_A = toString(paste0("real ", family$dpars)),
-    dpars_B = family$param,
+    dpars_B = pcd_param,
     "primary_id, primary_params" = .primary_stancode_args(primary),
     extra
   )
@@ -262,12 +268,11 @@
 #'
 #' @keywords internal
 .add_dpar_info <- function(family) {
-  other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]] # nolint
-  other_bounds <- lapply(
-    family$dpars[-1],
-    .dpar_bounds,
-    family = family$family
-  )
+  other_dpars <- setdiff(family$dpars, "mu")
+  other_links <- unlist(lapply(other_dpars, function(dpar) {
+    return(family[[paste0("link_", dpar)]])
+  }))
+  other_bounds <- lapply(other_dpars, .dpar_bounds, family = family)
   family$other_links <- other_links
   family$other_bounds <- other_bounds
   return(family)
@@ -419,7 +424,8 @@
 #'
 #' Helper function to get internal brms functions by constructing their name
 #' from a prefix and family. Used to get functions like `log_lik_*`,
-#' `posterior_predict_*` etc.
+#' `posterior_predict_*` etc. A family `epidist` defines itself, such as
+#' [gengamma()], carries these functions, so they are taken from it.
 #'
 #' @param prefix Character string prefix of the brms function to get (e.g.
 #'  "log_lik")
@@ -430,10 +436,12 @@
 #'
 #' @keywords internal
 .get_brms_fn <- function(prefix, family) {
-  return(get(
-    paste0(prefix, "_", tolower(family$family)),
-    asNamespace("brms")
-  ))
+  name <- tolower(.family_name(family))
+  constructor <- .epidist_families()[[name]]
+  if (!is.null(constructor)) {
+    return(constructor()[[prefix]])
+  }
+  return(get(paste0(prefix, "_", name), asNamespace("brms")))
 }
 
 #' Add weights to a data frame
