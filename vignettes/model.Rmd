@@ -354,7 +354,23 @@ P(N_{\le y} \ge k) - P(N_{\le y - w_s} \ge k), \quad k = \lceil n p \rceil, \qua
 $$
 where $w_s$ is the reporting resolution and $G_0$ the step distribution function of the discrete estimand of Section \@ref(the-biased-estimands), before continuity correction.
 The information this carries saturates as $n$ grows.
-Several quantiles of integer day delays use Equation \@ref(eq:meta-quantile-set) on the continuity corrected $G$, which is calibrated at around thirty delays but claims a standard error five times too small at a thousand, so `as_epidist_estimates_data()` warns about such studies.
+
+Several quantiles of integer day delays from one study are fitted as the joint probability of the crossings they stand for.
+The counts $N_{e_1} \le N_{e_2} \le \dots \le N_{e_m}$ at the integer edges the reported quantiles name, the day below each and the day itself, form a Markov chain of binomial steps,
+$$
+N_{e_1} \sim \text{Binomial}\left(n, \; G_0(e_1)\right), \quad
+N_{e_{i+1}} \mid N_{e_i} \sim N_{e_i} + \text{Binomial}\left(n - N_{e_i}, \; \frac{G_0(e_{i+1}) - G_0(e_i)}{1 - G_0(e_i)}\right), (\#eq:meta-quantile-chain)
+$$
+and a quantile reported at $p$ landing on day $y$ puts the box $N_{\le y - w_s} \le \lceil n p \rceil - 1$ and $N_{\le y} \ge \lceil n p \rceil$ on two of them.
+The likelihood is the probability that every count fell in its box,
+$$
+P\left(l_i \le N_{e_i} \le u_i, \; i = 1, \dots, m\right), (\#eq:meta-quantile-box)
+$$
+computed by a forward pass over the counts $0, \dots, n$ on the log scale, one binomial step per edge.
+The pass is kept to a band of counts around the most likely path of the constrained chain, six standard deviations and a few counts wide, so its cost grows like $m n^{3/2}$ rather than $m n^2$ and it is exact to well within a millionth.
+Two quantiles reported at the same value are two constraints at one edge, and a single quantile reduces Equation \@ref(eq:meta-quantile-box) to Equation \@ref(eq:meta-quantile-crossing).
+The multinomial of Equation \@ref(eq:meta-quantile-set) on the continuity corrected $G$ treats each reported quantile as a continuous cut point, so its curvature grows like $n$ and it claims a standard error five times too small at a thousand delays, where Equation \@ref(eq:meta-quantile-box) is close to an indicator of the parameters that put the population quantiles in the reported cells.
+That is a box rather than a peak, so the posterior of such a study is described by its bounds rather than a standard error, and the sampler explores the box.
 
 Summaries of different kinds from one study, such as a mean and a median, are treated as independent, which understates their joint uncertainty.
 The normal approximations degrade for small study sample sizes.
@@ -431,7 +447,7 @@ where bin $j$ carries the delay $(j-1) w_s$ and the truncation point is discreti
 This is the doubly interval censored, right truncated probability mass function the marginal model of Section \@ref(the-marginal-model) uses for individual observations.
 Summing over the grid gives the moments, and its cumulative sum gives $G_0$.
 For quantile rows $G$ is continuity corrected by interpolating $G_0$ linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise lands on a jump.
-A single reported quantile uses Equation \@ref(eq:meta-quantile-crossing) on $G_0$.
+Reported quantiles without a standard error use Equation \@ref(eq:meta-quantile-crossing) or \@ref(eq:meta-quantile-box) on $G_0$ instead.
 The reported value is itself rounded to the grid, so a bias remains that does not shrink with $n$.
 It stays under 4% on the mean and 9% on the standard deviation once the reported quantiles sit twenty five or more cells above the smallest delay counted, and reaches tens of percent on both within ten, so a coarsely resolved delay is better fitted through its mean and standard deviation where reported.
 
@@ -459,7 +475,7 @@ $$
 with $\mu$, $\sigma^2$ and $\mu_4$ the mean, variance and fourth central moment of $f(\cdot \, ; \theta)$.
 
 Code 3, midpoint imputation, assigned each delay to the centre of its interval, so its estimand is the grid of Equation \@ref(eq:meta-grid) moved up by $w_s / 2$.
-A single reported quantile uses Equation \@ref(eq:meta-quantile-crossing), as for code 0.
+Reported quantiles use Equations \@ref(eq:meta-quantile-crossing) and \@ref(eq:meta-quantile-box), as for code 0.
 Code 4, midpoint imputation with a uniform interval, placed the primary event at the midpoint of its window and integrated the secondary interval, so its estimand is that of code 2 moved down by $w_p / 2$.
 A shift changes the mean alone and moves the distribution function and quantiles with it.
 Code 4 therefore has the mean of code 1 and the variance of code 2 before truncation, because midpointing removes the mean of $U$ but not its spread.
