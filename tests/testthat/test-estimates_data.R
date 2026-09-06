@@ -859,3 +859,104 @@ test_that("as_epidist_estimates_data checks the censoring windows against the gr
     "at least as large as"
   )
 })
+
+test_that("as_epidist_estimates_data accepts an unknown growth rate and a growth rate standard deviation", { # nolint: line_length_linter.
+  est <- suppressMessages(as_epidist_estimates_data(est_df))
+  expect_true("growth_rate_sd" %in% .estimates_required_cols())
+  expect_identical(est$growth_rate_sd, rep(NA_real_, 4))
+  expect_false(any(.estimates_growth_estimated(est)))
+  expect_false(any(.estimates_growth_tilted(est)))
+  uncertain <- est_df
+  uncertain$growth_rate <- c(NA, NA, 0.1, 0.05)
+  uncertain$growth_rate_sd <- c(NA, NA, 0.02, 0)
+  est <- suppressMessages(as_epidist_estimates_data(uncertain))
+  expect_identical(est$growth_rate, c(NA, NA, 0.1, 0.05))
+  expect_identical(est$growth_rate_sd, c(NA, NA, 0.02, 0))
+  # An NA rate, or a positive standard deviation, is estimated. A standard
+  # deviation of zero is a known rate.
+  expect_identical(.estimates_growth_estimated(est), c(TRUE, TRUE, TRUE, FALSE))
+  expect_identical(.estimates_growth_tilted(est), c(TRUE, TRUE, TRUE, TRUE))
+  est$growth_rate[4] <- 0
+  expect_identical(.estimates_growth_tilted(est), c(TRUE, TRUE, TRUE, FALSE))
+  # The column can be renamed like any other.
+  renamed <- uncertain
+  names(renamed)[names(renamed) == "growth_rate_sd"] <- "rate_sd"
+  est <- suppressMessages(
+    as_epidist_estimates_data(renamed, growth_rate_sd = "rate_sd")
+  )
+  expect_identical(est$growth_rate_sd, c(NA, NA, 0.02, 0))
+})
+
+test_that("as_epidist_estimates_data checks the growth rate standard deviation", { # nolint: line_length_linter.
+  uncentred <- est_df
+  uncentred$growth_rate <- NA
+  uncentred$growth_rate_sd <- 0.02
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(uncentred)),
+    "centre"
+  )
+  negative <- est_df
+  negative$growth_rate_sd <- -0.1
+  expect_error(suppressMessages(as_epidist_estimates_data(negative)))
+  infinite <- est_df
+  infinite$growth_rate_sd <- Inf
+  expect_error(suppressMessages(as_epidist_estimates_data(infinite)))
+  infinite$growth_rate_sd <- NA
+  infinite$growth_rate <- Inf
+  expect_error(suppressMessages(as_epidist_estimates_data(infinite)))
+})
+
+test_that("the quadrature checks treat an estimated growth rate as a tilted primary event", { # nolint: line_length_linter.
+  # A study that adjusted for right truncation uses the analytic moments
+  # only with a uniform primary event, so an estimated rate puts it on the
+  # quadrature like a known non zero rate does.
+  narrow <- data.frame(
+    study = "A", type = c("mean", "sd"), value = c(24, 0.02), n = 500,
+    relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 2,
+    max_delay = 100, stringsAsFactors = FALSE
+  )
+  msgs <- capture_messages(as_epidist_estimates_data(narrow))
+  expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
+  narrow$growth_rate <- NA
+  msgs <- capture_messages(as_epidist_estimates_data(narrow))
+  expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
+  narrow$growth_rate <- 0
+  narrow$growth_rate_sd <- 0.01
+  msgs <- capture_messages(as_epidist_estimates_data(narrow))
+  expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
+  data <- suppressMessages(as_epidist_estimates_data(narrow))
+  expect_identical(.estimates_coarse_quadrature(data), "A")
+  # The same holds for the grid cutoff, which only matters on the
+  # quadrature. This study's tail runs well beyond its cutoff.
+  heavy <- data.frame(
+    study = "B", type = c("mean", "sd"), value = c(8, 6), n = 100,
+    relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 2,
+    max_delay = 20, growth_rate = 0, stringsAsFactors = FALSE
+  )
+  data <- suppressMessages(as_epidist_estimates_data(heavy))
+  expect_identical(.estimates_short_cutoff(data), character(0))
+  heavy$growth_rate <- NA
+  data <- suppressMessages(as_epidist_estimates_data(heavy))
+  expect_identical(.estimates_short_cutoff(data), "B")
+})
+
+test_that("simulate_study passes an unknown growth rate through", {
+  linelist <- simulate_gillespie(seed = 1) |>
+    simulate_secondary(meanlog = 1.8, sdlog = 0.5) |>
+    simulate_dates(keep_times = TRUE) |>
+    as_epidist_linelist_data()
+  est <- simulate_study(
+    linelist, "calendar stop",
+    cens_adjusted = 0, trunc_adjusted = FALSE, trunc_design = "accrual",
+    relative_obs_time = 20, growth_rate = NA
+  )
+  expect_identical(est$growth_rate, c(NA_real_, NA_real_))
+  expect_true(all(.estimates_growth_estimated(est)))
+  reported <- simulate_study(
+    linelist, "calendar stop",
+    cens_adjusted = 0, trunc_adjusted = FALSE, trunc_design = "accrual",
+    relative_obs_time = 20, growth_rate = 0.1, growth_rate_sd = 0.02
+  )
+  expect_identical(reported$growth_rate_sd, c(0.02, 0.02))
+  expect_true(all(.estimates_growth_estimated(reported)))
+})
