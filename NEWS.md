@@ -176,7 +176,7 @@ Every exported function and method now documents its return value, including the
 `simulate_gillespie()` and `simulate_exponential_cases()` take `seed = NULL` by default instead of a missing argument, which does not change what they return.
 `simulate_study()` documents that it uses the random number generator.
 The `trunc_adjusted` default of `as_epidist_estimates_data()` is described as it behaves.
-Dropped `modelr` and `usethis` from `Suggests`, which nothing used, and split the author names in `DESCRIPTION` into given and family names.
+Dropped `modelr` from `Suggests`, which nothing used, and split the author names in `DESCRIPTION` into given and family names.
 Added `tests/spelling.R` so the spelling check runs with the tests, and corrected the spellings that `inst/WORDLIST` was masking in the README and the vignette sources.
 The `check-cmdstan` workflow now checks the meta model Stan program as well as the latent and marginal ones.
 Consolidated the duplicated section headings and a repeated entry in this file.
