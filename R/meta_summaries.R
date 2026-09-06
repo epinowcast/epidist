@@ -100,10 +100,15 @@
 #'
 #' @inheritParams .pdist
 #'
-#' @returns The corresponding function from `stats`.
+#' @returns The corresponding function from `stats`, or from `flexsurv` for
+#'  the generalised gamma.
 #'
 #' @keywords internal
 .meta_ddist <- function(dist) {
+  if (identical(dist, "pgengamma.orig")) {
+    .require_flexsurv()
+    return(flexsurv::dgengamma.orig)
+  }
   return(switch(dist,
     plnorm = stats::dlnorm,
     pgamma = stats::dgamma,
@@ -161,7 +166,9 @@
 #' poisons the gradient even when the value is discarded. The bounds are
 #' `Phi(z) < exp(-100)` for `z < -14` for the lognormal,
 #' `P(a, x) <= x^a / Gamma(a + 1)` for the gamma and `1 - exp(-y) <= y` for
-#' the weibull. Mirrors `meta_family_deep_tail()` in Stan.
+#' the weibull. The generalised gamma uses the gamma bound at
+#' `x = (q / scale)^shape` with `a = k`. Mirrors `meta_family_deep_tail()`
+#' in Stan.
 #'
 #' @inheritParams .meta_dist_cdf
 #'
@@ -183,6 +190,12 @@
   }
   if (identical(dist, "pweibull")) {
     return(args$shape * (log(q) - log(args$scale)) < floor_log)
+  }
+  if (identical(dist, "pgengamma.orig")) {
+    return(
+      args$shape * args$k * log(q / args$scale) - lgamma(args$k + 1) <
+        floor_log
+    )
   }
   return(rep(FALSE, length(q)))
 }
@@ -783,10 +796,13 @@
 #' Analytic summaries of a delay distribution
 #'
 #' The mean and standard deviation mirror the formulas used by
-#' [add_summaries()]. A draw wide enough to overflow a moment, such as a
-#' lognormal whose `exp(4 * sdlog^2)` is infinite, is returned as
-#' [.meta_moment_failure()] so that the row is rejected rather than carrying
-#' a `NaN` into its standard error. Matches the reject in
+#' [add_summaries()]. The generalised gamma follows the weibull, which is its
+#' `k = 1` case, with the raw moments
+#' \eqn{E[T^r] = \theta^r \Gamma(k + r / a) / \Gamma(k)} for `scale`
+#' \eqn{\theta} and `shape` \eqn{a}. A draw wide enough to overflow a
+#' moment, such as a lognormal whose `exp(4 * sdlog^2)` is infinite, is
+#' returned as [.meta_moment_failure()] so that the row is rejected rather
+#' than carrying a `NaN` into its standard error. Matches the reject in
 #' `meta_family_moments()` in `inst/stan/meta_model/functions.stan`, where an
 #' infinite intermediate would otherwise leave a finite density with a non
 #' finite gradient.
@@ -819,6 +835,13 @@
     )
   } else if (identical(dist, "pweibull")) {
     g <- gamma(1 + seq_len(4) / args$shape)
+    variance <- args$scale^2 * (g[2] - g[1]^2)
+    third <- args$scale^3 * (g[3] - 3 * g[1] * g[2] + 2 * g[1]^3)
+    fourth <- args$scale^4 *
+      (g[4] - 4 * g[1] * g[3] + 6 * g[1]^2 * g[2] - 3 * g[1]^4)
+    moments <- .meta_moment_vector(args$scale * g[1], variance, third, fourth)
+  } else if (identical(dist, "pgengamma.orig")) {
+    g <- exp(lgamma(args$k + seq_len(4) / args$shape) - lgamma(args$k))
     variance <- args$scale^2 * (g[2] - g[1]^2)
     third <- args$scale^3 * (g[3] - 3 * g[1] * g[2] + 2 * g[1]^3)
     fourth <- args$scale^4 *
