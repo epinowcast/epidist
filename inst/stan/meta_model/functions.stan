@@ -1669,13 +1669,159 @@
   }
 
   /**
+    * The integer part of 2^20 times a real, found by bisection on
+    * comparisons because to_int only takes data. It carries the value of a
+    * parameter dependent scaling into a data only kernel, where the scaling
+    * need only be close and the result does not depend on it. Matches
+    * .meta_fixed_point() in R.
+    */
+  int meta_family_fixed_point(real x) {
+    int lo = -1073741824;
+    int hi = 1073741824;
+    if (x <= lo / 1048576.0) {
+      return lo;
+    }
+    if (x >= hi / 1048576.0) {
+      return hi;
+    }
+    while (hi - lo > 1) {
+      int mid = lo + (hi - lo) %/% 2;
+      if (mid / 1048576.0 <= x) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return lo;
+  }
+
+  /**
+    * The log kernel of a forward pass step at its expected size, which the
+    * kernel is divided by so that no entry exceeds one. Matches
+    * .meta_step_kernel_top() in R.
+    */
+  real meta_family_step_kernel_top(int lambda_scaled) {
+    int expected = to_int(floor(fmin(exp(lambda_scaled / 1048576.0), 1e9)));
+    return expected * (lambda_scaled / 1048576.0) - lgamma(expected + 1);
+  }
+
+  /**
+    * Whether the kernel of a step is in range at the step of the most
+    * likely path, which fails only where the boxes force a step hundreds of
+    * nats from the expected one. Matches .meta_step_kernel_alive() in R.
+    */
+  int meta_family_step_kernel_alive(int d_star, int lambda_scaled) {
+    return d_star * (lambda_scaled / 1048576.0) - lgamma(d_star + 1) -
+      meta_family_step_kernel_top(lambda_scaled) > -400;
+  }
+
+  /**
+    * The kernel of a forward pass step as a data matrix over the target and
+    * source counts: exp((t - s) lambda - lgamma(t - s + 1)) scaled by its
+    * value at the expected step, and zero where t < s. Every argument is an
+    * integer, so the matrix is double and the step costs one matrix product
+    * on the autodiff stack. Matches .meta_step_kernel() in R.
+    */
+  matrix meta_family_step_kernel(int a, int b, int a2, int b2,
+                                 int lambda_scaled) {
+    real lambda = lambda_scaled / 1048576.0;
+    real top = meta_family_step_kernel_top(lambda_scaled);
+    int d_min = max(0, a2 - b);
+    int d_max = b2 - a;
+    matrix[b2 - a2 + 1, b - a + 1] kernel = rep_matrix(
+      0, b2 - a2 + 1, b - a + 1
+    );
+    if (d_max >= d_min) {
+      vector[d_max - d_min + 1] kernel_at;
+      for (d in d_min:d_max) {
+        kernel_at[d - d_min + 1] = exp(d * lambda - lgamma(d + 1) - top);
+      }
+      for (t in a2:b2) {
+        for (s in a:min(b, t)) {
+          kernel[t - a2 + 1, s - a + 1] = kernel_at[t - s - d_min + 1];
+        }
+      }
+    }
+    return kernel;
+  }
+
+  /**
+    * One step of the forward pass over the cumulative counts, from the log
+    * probabilities of the source counts a:b to those of the target counts
+    * a2:b2 through the binomial step of the chain. The binomial coefficient
+    * splits into a part in s, folded into the source vector, a part in
+    * t - s, the kernel, and a part in t, so the step is the data kernel
+    * times the exponentiated source vector, each scaled so that the
+    * arithmetic stays in range. Where the kernel would underflow at the
+    * most likely step the pass sums on the log scale over every pair of
+    * counts instead. Matches .meta_box_step() in R.
+    */
+  vector meta_family_box_step(vector alpha, int a, int b, int a2, int b2,
+                              real r, data int study_n, int m_prev, int m,
+                              vector lg) {
+    real log_r = log(fmax(r, 1e-300));
+    real log_1mr = log(fmax(1 - r, 1e-300));
+    int lambda_scaled = meta_family_fixed_point(
+      log_r + log(study_n - m_prev)
+    );
+    vector[b2 - a2 + 1] next_alpha;
+    if (meta_family_step_kernel_alive(m - m_prev, lambda_scaled)) {
+      real lambda = lambda_scaled / 1048576.0;
+      vector[b - a + 1] state = linspaced_vector(b - a + 1, a, b);
+      vector[b - a + 1] log_v = alpha +
+        reverse(lg[(study_n - b + 1):(study_n - a + 1)]) -
+        state * (log_r - lambda);
+      real kappa = max(log_v);
+      if (is_inf(kappa)) {
+        return rep_vector(negative_infinity(), b2 - a2 + 1);
+      }
+      {
+        vector[b2 - a2 + 1] reached = meta_family_step_kernel(
+          a, b, a2, b2, lambda_scaled
+        ) * exp(log_v - kappa);
+        vector[b2 - a2 + 1] count = linspaced_vector(b2 - a2 + 1, a2, b2);
+        vector[b2 - a2 + 1] row = count * (log_r - lambda) -
+          reverse(lg[(study_n - b2 + 1):(study_n - a2 + 1)]) +
+          (study_n - count) * log_1mr +
+          meta_family_step_kernel_top(lambda_scaled);
+        for (t in 1:(b2 - a2 + 1)) {
+          next_alpha[t] = reached[t] >= 1e-300
+            ? log(reached[t]) + kappa + row[t]
+            : negative_infinity();
+        }
+      }
+      return next_alpha;
+    }
+    {
+      vector[b - a + 1] folded = alpha +
+        reverse(lg[(study_n - b + 1):(study_n - a + 1)]);
+      vector[max(b2 - a + 1, 1)] u = linspaced_vector(
+        max(b2 - a + 1, 1), 0, max(b2 - a, 0)
+      ) * log_r - lg[1:max(b2 - a + 1, 1)];
+      for (t in a2:b2) {
+        int s_max = min(b, t);
+        if (s_max < a) {
+          next_alpha[t - a2 + 1] = negative_infinity();
+        } else {
+          int width = s_max - a + 1;
+          next_alpha[t - a2 + 1] = log_sum_exp(
+            folded[1:width] + reverse(u[(t - s_max + 1):(t - a + 1)])
+          ) + (study_n - t) * log_1mr - lg[study_n - t + 1];
+        }
+      }
+    }
+    return next_alpha;
+  }
+
+  /**
     * Joint log mass of several quantiles of integer day delays, read as
     * the crossings of the empirical distribution function they stand for:
     * N_{<= y - w} <= upper and N_{<= y} >= lower for each reported day y.
     * The counts at the edges form a Markov chain of binomial steps on the
     * uncorrected grid distribution function, and the mass of the box is a
-    * forward pass over the counts on the log scale, kept to a band around
-    * the most likely path. Matches .meta_grid_box_ll() in R.
+    * forward pass over the counts, one meta_family_box_step() per edge,
+    * kept to a band around the most likely path. Matches
+    * .meta_grid_box_ll() in R.
     */
   real meta_family_grid_box_ll(data vector y, data array[] int upper_count,
                                data array[] int lower_count, data int study_n,
@@ -1823,35 +1969,12 @@
           (study_n - state) * log(fmax(1 - cdf[1], 1e-300));
       }
       for (i in 2:n_edge) {
-        int a = band_lower[i - 1];
-        int b = band_upper[i - 1];
-        int a_next = band_lower[i];
-        int b_next = band_upper[i];
-        real r = meta_family_step_prob(cdf[i - 1], cdf[i]);
-        real log_r = log(fmax(r, 1e-300));
-        real log_1mr = log(fmax(1 - r, 1e-300));
-        // The step from s to t is Binomial(n - s, r) at t - s. Its
-        // coefficient splits into a part in s, folded into alpha, a part in
-        // t - s, u, and a part in t, so each target count is one log sum
-        // over the sources at or below it.
-        vector[b - a + 1] beta = alpha[(a + 1):(b + 1)] +
-          reverse(lg[(study_n - b + 1):(study_n - a + 1)]);
-        vector[max(b_next - a + 1, 1)] u = linspaced_vector(
-          max(b_next - a + 1, 1), 0, max(b_next - a, 0)
-        ) * log_r - lg[1:max(b_next - a + 1, 1)];
-        vector[b_next - a_next + 1] next_alpha;
-        for (t in a_next:b_next) {
-          int s_max = min(b, t);
-          if (s_max < a) {
-            next_alpha[t - a_next + 1] = negative_infinity();
-          } else {
-            int m = s_max - a + 1;
-            next_alpha[t - a_next + 1] = log_sum_exp(
-              beta[1:m] + reverse(u[(t - s_max + 1):(t - a + 1)])
-            ) + (study_n - t) * log_1mr - lg[study_n - t + 1];
-          }
-        }
-        alpha[(a_next + 1):(b_next + 1)] = next_alpha;
+        alpha[(band_lower[i] + 1):(band_upper[i] + 1)] = meta_family_box_step(
+          alpha[(band_lower[i - 1] + 1):(band_upper[i - 1] + 1)],
+          band_lower[i - 1], band_upper[i - 1], band_lower[i], band_upper[i],
+          meta_family_step_prob(cdf[i - 1], cdf[i]), study_n, path[i - 1],
+          path[i], lg
+        );
       }
       return log_sum_exp(
         alpha[(band_lower[n_edge] + 1):(band_upper[n_edge] + 1)]

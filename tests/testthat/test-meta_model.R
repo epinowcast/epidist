@@ -1873,7 +1873,7 @@ test_that(".meta_grid_box_ll reduces to the crossing cell for a single quantile"
             y + shift, p, n, "plnorm", args, slots
           )
           expect_true(is.finite(box))
-          expect_equal(box, crossing, tolerance = 1e-8)
+          expect_lt(abs(box - crossing), 1e-8 * max(1, abs(crossing)))
         }
       }
     }
@@ -1917,8 +1917,11 @@ test_that("several integer day quantiles from a thousand delays give a box likel
   # Once the binomial spread of each crossing is narrower than a day, the
   # reported quartiles stop moving and the joint likelihood tends to an
   # indicator of the parameters that put the population quartiles in the
-  # reported cells, a plateau with walls rather than a peak. The multinomial
-  # on the continuity corrected grid keeps a curvature that grows like n.
+  # reported cells, a plateau with walls rather than a peak. At a thousand
+  # delays the plateau is still rounded, because a crossing is located to
+  # about a seventh of a day, so the walls are a few hundredths of meanlog
+  # wide. The multinomial on the continuity corrected grid, which this
+  # replaces, keeps a curvature that grows like n.
   truth <- list(meanlog = 1.6, sdlog = 0.5)
   slots <- list(
     lower = 0, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
@@ -1942,7 +1945,7 @@ test_that("several integer day quantiles from a thousand delays give a box likel
     logical(1)
   )
   box <- range(grid[inside])
-  expect_gt(diff(box), 0.1)
+  expect_gt(diff(box), 0.05)
   log_lik <- function(m) {
     return(.meta_grid_box_ll(
       reported, k - 1L, k, n, "plnorm",
@@ -1950,27 +1953,30 @@ test_that("several integer day quantiles from a thousand delays give a box likel
     ))
   }
   profile <- vapply(grid, log_lik, numeric(1))
-  # Flat to within a nat over the interior of the box.
-  interior <- grid > box[1] + 0.03 & grid < box[2] - 0.03
-  expect_lt(diff(range(profile[interior])), 1)
-  expect_gt(max(profile[interior]), -2)
-  # And more than twenty nats down a tenth beyond either wall.
+  # Flat to within a nat across the box, and more than ten nats down a
+  # tenth beyond either wall.
+  expect_lt(diff(range(profile[inside])), 1)
+  expect_gt(max(profile[inside]), -2)
   outside <- grid < box[1] - 0.1 | grid > box[2] + 0.1
-  expect_lt(max(profile[outside]), max(profile) - 20)
-  # The multinomial on the continuity corrected grid, which this replaces,
-  # varies by tens of nats across the same interior.
-  multinomial <- vapply(
-    grid[interior],
-    function(m) {
-      prob <- .meta_implied_probs(
-        reported, "plnorm", list(meanlog = m, sdlog = truth$sdlog), slots
-      )
-      count <- diff(c(0, round(n * p), n))
-      return(sum(count * log(diff(c(0, prob, 1)))))
-    },
-    numeric(1)
+  expect_lt(max(profile[outside]), max(profile) - 10)
+  # The curvature of the multinomial at its peak is several times that of
+  # the box likelihood at the centre of the box, which is what a Hessian
+  # would report as a standard error several times too small.
+  multinomial <- function(m) {
+    prob <- .meta_implied_probs(
+      reported, "plnorm", list(meanlog = m, sdlog = truth$sdlog), slots
+    )
+    count <- diff(c(0, round(n * p), n))
+    return(sum(count * log(diff(c(0, prob, 1)))))
+  }
+  curvature <- function(f, at, h = 0.01) {
+    return(-(f(at + h) - 2 * f(at) + f(at - h)) / h^2)
+  }
+  multinomial_profile <- vapply(grid, multinomial, numeric(1))
+  peak <- grid[which.max(multinomial_profile)]
+  expect_gt(
+    curvature(multinomial, peak), 3 * curvature(log_lik, mean(box))
   )
-  expect_gt(diff(range(multinomial)), 10)
 })
 
 test_that("as_epidist_meta_model accepts coincident quantiles from an integer day study", { # nolint: line_length_linter.

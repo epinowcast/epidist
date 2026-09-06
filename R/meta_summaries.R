@@ -2719,10 +2719,10 @@
     numeric(0)
   }
   d <- outer(a2:b2, a:b, "-")
-  kernel <- matrix(0, length(a2:b2), length(a:b))
+  weights <- matrix(0, length(a2:b2), length(a:b))
   reachable <- d >= 0
-  kernel[reachable] <- kernel_at[d[reachable] - d_min + 1]
-  return(kernel)
+  weights[reachable] <- kernel_at[d[reachable] - d_min + 1]
+  return(weights)
 }
 
 #' One step of the forward pass over the cumulative counts
@@ -2763,16 +2763,18 @@
   if (.meta_step_kernel_alive(m - m_prev, lambda_scaled)) {
     lambda <- lambda_scaled / 2^20
     log_v <- alpha + lg[n - state + 1] - state * (log_r - lambda)
-    kappa <- max(log_v)
-    if (!is.finite(kappa)) {
+    shift <- max(log_v)
+    if (!is.finite(shift)) {
       return(rep(-Inf, length(target)))
     }
     reached <- as.numeric(
-      .meta_step_kernel(a, b, a2, b2, lambda_scaled) %*% exp(log_v - kappa)
+      .meta_step_kernel(a, b, a2, b2, lambda_scaled) %*% exp(log_v - shift)
     )
-    row <- target * (log_r - lambda) - lg[n - target + 1] +
+    per_target <- target * (log_r - lambda) - lg[n - target + 1] +
       (n - target) * log_1mr + .meta_step_kernel_top(lambda_scaled)
-    return(ifelse(reached >= 1e-300, log(reached) + kappa + row, -Inf))
+    return(ifelse(
+      reached >= 1e-300, log(reached) + shift + per_target, -Inf
+    ))
   }
   # The coefficient of the step splits into a part in s, folded into alpha,
   # a part in t - s and a part in t, so each target count is one log sum

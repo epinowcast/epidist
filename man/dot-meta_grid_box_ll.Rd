@@ -35,13 +35,13 @@ the reported quantiles name form a Markov chain,
 N_{e_i}, \frac{G_0(e_{i+1}) - G_0(e_i)}{1 - G_0(e_i)}\right),}
 with \eqn{G_0} the uncorrected grid distribution function, and the
 likelihood is the probability that every count fell in its box. It is a
-forward pass over the counts on the log scale, one transition per edge,
-kept to a band of \code{\link[=.meta_band_half_width]{.meta_band_half_width()}} counts around the most likely
-path of \code{\link[=.meta_box_mode_path]{.meta_box_mode_path()}}, so its cost grows like the number of
-edges times the sample size to the power one and a half rather than
-squared. Two quantiles reported at the same value are two constraints at
-one edge, and reporting the same count at two values is a box no chain
-can satisfy, which gives \code{-Inf}.
+forward pass over the counts on the log scale, one step of
+\code{\link[=.meta_box_step]{.meta_box_step()}} per edge, kept to a band of \code{\link[=.meta_band_half_width]{.meta_band_half_width()}}
+counts around the most likely path of \code{\link[=.meta_box_mode_path]{.meta_box_mode_path()}}, so its
+cost grows like the number of edges times the sample size to the power
+one and a half rather than squared. Two quantiles reported at the same
+value are two constraints at one edge, and reporting the same count at
+two values is a box no chain can satisfy, which gives \code{-Inf}.
 }
 \details{
 This is the joint form of \code{\link[=.meta_grid_crossing_ll]{.meta_grid_crossing_ll()}}, which it reduces
