@@ -54,6 +54,7 @@ Suggests:
     bookdown,
     cmdstanr,
     collapse,
+    distspec (>= 0.2.0),
     epireview,
     ggplot2,
     knitr,
