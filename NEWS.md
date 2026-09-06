@@ -8,6 +8,12 @@ See #489 and #618.
 
 ## Features
 
+- Added `epidist_estimates_epireview()`, which maps a table of delay estimates from the `epireview` package to an `epidist_estimates_data` object, one contribution per record.
+Reported means, medians, standard deviations, standard errors and interquartile ranges become the rows `as_epidist_estimates_data()` takes, and the natural parameters of a fitted gamma, Weibull or lognormal are converted as `epidist_estimates_parameters()` converts them.
+The study metadata `epireview` does not record is given for every record through `...`, or per study through a `metadata` table, and anything left out is assumed with the same messages as `as_epidist_estimates_data()`.
+The Ebola section of `vignette("meta")` uses it in place of a vignette local helper.
+`epidist_estimates_data` objects now also carry the shared `epidist_data` class, so an object edited after it is built is checked again, as the other data objects are.
+Closes #674.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
 It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
 Each step is still available on its own.

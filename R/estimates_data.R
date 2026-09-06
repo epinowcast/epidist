@@ -821,7 +821,10 @@ as_epidist_estimates_data.epidist_multivariate <- function(
     # Every summary the matrix covers is fitted as one observation, which
     # takes its study metadata from the first of them.
     varies <- vapply(
-      data[rows, .estimates_metadata_cols(), drop = FALSE],
+      .drop_epidist_class(data)[
+        rows, .estimates_metadata_cols(),
+        drop = FALSE
+      ],
       function(column) {
         return(length(unique(column)) > 1)
       },
@@ -1385,8 +1388,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
 #' df <- new_epidist_estimates_data(data.frame())
 #' class(df)
 new_epidist_estimates_data <- function(data) {
-  class(data) <- c("epidist_estimates_data", class(data))
-  return(data)
+  return(.new_epidist_data(data, "epidist_estimates_data"))
 }
 
 #' Check if data has the `epidist_estimates_data` class
