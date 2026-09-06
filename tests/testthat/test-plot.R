@@ -59,6 +59,18 @@ test_that("plot_events errors on bad input", {
   expect_error(plot_events(sim_obs, obs_time = "a"), "obs_time")
 })
 
+test_that("plot functions error when ggplot2 is not installed", {
+  with_mocked_bindings(
+    requireNamespace = function(...) FALSE,
+    .package = "base",
+    {
+      expect_error(.check_ggplot2(), "ggplot2.*needed to plot")
+      expect_error(plot_events(sim_obs), "install.packages")
+    }
+  )
+  expect_null(.check_ggplot2())
+})
+
 # Draws of a lognormal delay with an optional second stratum, built as
 # delay_parameter_draws() builds them
 fake_delay_draws <- function(n = 100, strata = FALSE) {
@@ -215,4 +227,89 @@ test_that("plot.epidist_delay_draws errors on bad arguments", {
   expect_error(plot(draws, type = "delay", probs = c(0.9, 0.1)), "sorted")
   expect_error(plot(draws, type = "delay", ndraws = 0), ">= 1")
   expect_error(plot(draws, type = "delay", max_delay = -1), "not >= 0")
+})
+
+test_that("plot.epidist_delay_draws colours the delay density by stratum", {
+  skip_if_not_installed("ggplot2")
+  draws <- fake_delay_draws(strata = TRUE)
+  p <- plot(draws, type = "delay")
+  expect_no_error(ggplot2::ggplot_build(p))
+  expect_length(p$layers, 2)
+  expect_s3_class(p$layers[[1]]$geom, "GeomRibbon")
+  expect_s3_class(p$layers[[2]]$geom, "GeomLine")
+  expect_identical(nrow(p$data), 202L)
+  expect_identical(levels(p$data$.stratum), c("0", "1"))
+  expect_identical(p$labels$colour, "sex")
+  expect_identical(p$labels$fill, "sex")
+  expect_true(all(p$data$lower <= p$data$density))
+  expect_true(all(p$data$density <= p$data$upper))
+  # Both strata share the delay grid and the second has longer delays
+  expect_identical(p$data$delay[p$data$sex == 0], p$data$delay[p$data$sex == 1])
+  peak <- function(sex) {
+    stratum <- p$data[p$data$sex == sex, ]
+    return(stratum$delay[which.max(stratum$density)])
+  }
+  expect_lt(peak(0), peak(1))
+})
+
+test_that("plot.epidist_delay_draws draws one line per draw of one stratum", {
+  skip_if_not_installed("ggplot2")
+  draws <- fake_delay_draws()
+  p <- plot(draws, type = "delay", ndraws = 10)
+  expect_no_error(ggplot2::ggplot_build(p))
+  expect_length(p$layers, 1)
+  expect_s3_class(p$layers[[1]]$geom, "GeomLine")
+  expect_identical(nrow(p$data), 1010L)
+  expect_length(unique(p$data$.draw), 10)
+  expect_true(all(p$data$.draw %in% draws$.draw))
+  expect_identical(levels(p$data$.stratum), "all")
+  expect_null(p$labels$colour)
+  expect_false("lower" %in% names(p$data))
+})
+
+test_that("plot.epidist_delay_draws uses the gamma and Weibull densities", {
+  skip_if_not_installed("ggplot2")
+  # Identical draws make the median density the density of the family
+  draws <- data.frame(mu = rep(6, 5), shape = rep(2, 5))
+  gamma_draws <- .new_delay_draws(
+    draws,
+    .delay_family(brms::brmsfamily("gamma"))
+  )
+  p <- plot(gamma_draws, type = "delay")
+  expect_s3_class(p, "ggplot")
+  expect_identical(nrow(p$data), 101L)
+  expect_identical(
+    p$data$density,
+    stats::dgamma(p$data$delay, shape = 2, rate = 2 / 6)
+  )
+  expect_equal(
+    max(p$data$delay),
+    stats::qgamma(0.99, shape = 2, rate = 2 / 6),
+    tolerance = 1e-8
+  )
+  weibull_draws <- .new_delay_draws(draws, .delay_family(brms::weibull()))
+  p <- plot(weibull_draws, type = "delay")
+  expect_s3_class(p, "ggplot")
+  scale <- 6 / gamma(1 + 1 / 2)
+  expect_identical(
+    p$data$density,
+    stats::dweibull(p$data$delay, shape = 2, scale = scale)
+  )
+  expect_equal(
+    max(p$data$delay),
+    stats::qweibull(0.99, shape = 2, scale = scale),
+    tolerance = 1e-8
+  )
+})
+
+test_that("plot.epidist_delay_draws errors when no parameter can be plotted", {
+  skip_if_not_installed("ggplot2")
+  draws <- .new_delay_draws(
+    data.frame(.draw = 1:10, x = rnorm(10)),
+    .delay_family(brms::lognormal())
+  )
+  expect_error(plot(draws), "none of the parameters")
+  expect_error(plot(draws), "lognormal")
+  expect_error(plot(draws), "mu")
+  expect_s3_class(plot(draws, pars = "x"), "ggplot")
 })

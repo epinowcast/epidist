@@ -140,6 +140,51 @@ test_that("add_summaries returns an epidist_delay_draws object", {
   )
 })
 
+test_that(".analytic_delay_summaries gives the quantile and density", {
+  d <- list(mu = c(6, 8), shape = c(2, 3), sigma = c(0.5, 0.4))
+  lognormal <- .analytic_delay_summaries("lognormal")
+  expect_identical(lognormal$dpars, c("mu", "sigma"))
+  expect_identical(
+    lognormal$quantile(d, 0.5),
+    stats::qlnorm(0.5, meanlog = d$mu, sdlog = d$sigma)
+  )
+  expect_identical(
+    lognormal$density(d, 3),
+    stats::dlnorm(3, meanlog = d$mu, sdlog = d$sigma)
+  )
+  gamma <- .analytic_delay_summaries("gamma")
+  expect_identical(gamma$dpars, c("mu", "shape"))
+  expect_identical(
+    gamma$quantile(d, 0.5),
+    stats::qgamma(0.5, shape = d$shape, rate = d$shape / d$mu)
+  )
+  expect_identical(
+    gamma$density(d, 3),
+    stats::dgamma(3, shape = d$shape, rate = d$shape / d$mu)
+  )
+  weibull <- .analytic_delay_summaries("weibull")
+  expect_identical(weibull$dpars, c("mu", "shape"))
+  scale <- d$mu / gamma(1 + 1 / d$shape)
+  expect_identical(
+    weibull$quantile(d, 0.5),
+    stats::qweibull(0.5, shape = d$shape, scale = scale)
+  )
+  expect_identical(
+    weibull$density(d, 3),
+    stats::dweibull(3, shape = d$shape, scale = scale)
+  )
+  # The density of each family integrates to one
+  for (family in list(lognormal, gamma, weibull)) {
+    total <- stats::integrate(
+      function(x) family$density(list(mu = 6, shape = 2, sigma = 0.5), x),
+      0,
+      Inf
+    )$value
+    expect_equal(total, 1, tolerance = 1e-6)
+  }
+  expect_null(.analytic_delay_summaries("exponential"))
+})
+
 test_that("add_summaries accepts a stats family object", {
   draws <- data.frame(mu = c(6, 8), shape = c(2, 3))
   out <- add_summaries(draws, family = Gamma())
