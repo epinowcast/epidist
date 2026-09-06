@@ -1,3 +1,21 @@
+# Stand in for distspec::MultiNormal(), which distspec 0.2.0 does not provide.
+# It records the arguments it is called with in the returned environment and
+# gives back an uncertain parameter the distspec constructors accept.
+local_stub_multi_normal <- function(env = parent.frame()) {
+  seen <- new.env()
+  stub <- function(mean, sigma) {
+    seen$mean <- mean
+    seen$sigma <- sigma
+    return(distspec::Normal(mean = mean[[1]], sd = sqrt(sigma[[1, 1]])))
+  }
+  local_mocked_bindings(
+    .has_multi_normal = function() TRUE,
+    .multi_normal = function() stub,
+    .env = env
+  )
+  return(seen)
+}
+
 test_that(".dist_spec_family maps the lognormal family to LogNormal", {
   family <- .dist_spec_family("lognormal")
   expect_identical(family$name, "lognormal")
@@ -107,26 +125,61 @@ test_that(".dist_spec_from_draws needs at least two draws", {
   )
 })
 
-test_that(".dist_spec_from_draws uses or refuses the joint representation", {
+test_that(".dist_spec_from_draws refuses the joint representation without MultiNormal", { # nolint: line_length_linter.
   skip_if_not_installed("distspec")
+  skip_if(.has_multi_normal(), "distspec provides MultiNormal")
   draws <- data.frame(mu = c(1.7, 1.8, 1.9, 2.0), sigma = c(0.4, 0.5, 0.6, 0.5))
-  family <- .dist_spec_family("lognormal")
-  if (!.has_multi_normal()) {
-    expect_error(
-      .dist_spec_from_draws(draws, family, representation = "joint"),
-      "MultiNormal"
-    )
-    return(invisible(NULL))
-  }
-  dist <- .dist_spec_from_draws(draws, family, representation = "joint")
+  expect_error(
+    .dist_spec_from_draws(
+      draws,
+      .dist_spec_family("lognormal"),
+      representation = "joint"
+    ),
+    "MultiNormal"
+  )
+})
+
+test_that(".dist_spec_from_draws gives the joint prior to each parameter", {
+  skip_if_not_installed("distspec")
+  seen <- local_stub_multi_normal()
+  draws <- data.frame(mu = c(1.7, 1.8, 1.9, 2.0), sigma = c(0.4, 0.5, 0.6, 0.5))
+  dist <- .dist_spec_from_draws(
+    draws,
+    .dist_spec_family("lognormal"),
+    representation = "joint",
+    max = 30
+  )
   expect_s3_class(dist, "dist_spec")
   expect_true(distspec::has_uncertainty(dist))
   params <- distspec::get_parameters(dist)
   expect_named(params, c("meanlog", "sdlog"))
   expect_identical(params$meanlog, params$sdlog)
+  expect_identical(
+    seen$mean,
+    c(meanlog = mean(draws$mu), sdlog = mean(draws$sigma))
+  )
+  expect_identical(attr(dist, "max"), 30)
 })
 
 test_that(".joint_prior builds one MultiNormal from the mean and covariance", {
+  skip_if_not_installed("distspec")
+  seen <- local_stub_multi_normal()
+  natural <- list(
+    meanlog = c(1.7, 1.8, 1.9, 2.0),
+    sdlog = c(0.4, 0.5, 0.6, 0.5)
+  )
+  params <- .joint_prior(natural)
+  expect_named(params, c("meanlog", "sdlog"))
+  expect_identical(params$meanlog, params$sdlog)
+  expect_s3_class(params$meanlog, "dist_spec")
+  expect_identical(
+    seen$mean,
+    c(meanlog = mean(natural$meanlog), sdlog = mean(natural$sdlog))
+  )
+  expect_identical(seen$sigma, stats::cov(do.call(cbind, natural)))
+})
+
+test_that(".joint_prior uses the MultiNormal of distspec when it has one", {
   skip_if_not_installed("distspec")
   skip_if_not(.has_multi_normal(), "distspec does not provide MultiNormal")
   natural <- list(
@@ -142,6 +195,19 @@ test_that(".joint_prior builds one MultiNormal from the mean and covariance", {
     c(meanlog = mean(natural$meanlog), sdlog = mean(natural$sdlog))
   )
   expect_identical(joint$sigma, stats::cov(do.call(cbind, natural)))
+})
+
+test_that(".check_distspec errors when distspec is not installed", {
+  local_mocked_bindings(.has_distspec = function() FALSE)
+  expect_error(.check_distspec(), "distspec.*package is needed")
+  expect_error(epidist_dist_spec(NULL), "install.packages")
+})
+
+test_that(".check_distspec passes when distspec is installed", {
+  skip_if_not_installed("distspec")
+  expect_true(.has_distspec())
+  expect_invisible(.check_distspec())
+  expect_true(.check_distspec())
 })
 
 test_that("epidist_dist_spec exports a latent lognormal fit", {
@@ -275,21 +341,84 @@ test_that("epidist_dist_spec errors for an unsupported family", {
   )
 })
 
-test_that("epidist_dist_spec uses or refuses the joint representation", {
+test_that("epidist_dist_spec refuses the joint representation without MultiNormal", { # nolint: line_length_linter.
+  skip_if_not_installed("distspec")
+  skip_if(.has_multi_normal(), "distspec provides MultiNormal")
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  expect_error(
+    epidist_dist_spec(fit, representation = "joint"),
+    "MultiNormal"
+  )
+  expect_error(
+    epidist_dist_spec(fit, representation = "joint"),
+    "representation = \"independent\""
+  )
+})
+
+test_that("epidist_dist_spec exports the joint representation", {
   skip_if_not_installed("distspec")
   skip_on_cran()
   skip_if_no_cmdstanr()
-  if (!.has_multi_normal()) {
-    expect_error(
-      epidist_dist_spec(fit, representation = "joint"),
-      "MultiNormal"
-    )
-    return(invisible(NULL))
-  }
-  dist <- epidist_dist_spec(fit, representation = "joint")
+  seen <- local_stub_multi_normal()
+  dist <- epidist_dist_spec(fit, representation = "joint", cdf_max = 0.99)
   expect_s3_class(dist, "dist_spec")
+  expect_true(distspec::has_uncertainty(dist))
   params <- distspec::get_parameters(dist)
+  expect_named(params, c("meanlog", "sdlog"))
   expect_identical(params$meanlog, params$sdlog)
+  expect_identical(attr(dist, "cdf_max"), 0.99)
+  draws <- delay_parameter_draws(fit, newdata = epidist_newdata(prep_obs))
+  expect_equal(
+    seen$mean,
+    c(meanlog = mean(draws$mu), sdlog = mean(draws$sigma)),
+    tolerance = 1e-8
+  )
+  expect_equal(
+    seen$sigma,
+    stats::cov(cbind(meanlog = draws$mu, sdlog = draws$sigma)),
+    tolerance = 1e-8
+  )
+})
+
+test_that(".fit_newdata restores the model class of the fitted data", {
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  expect_identical(.fit_newdata(fit), epidist_newdata(prep_obs))
+  expect_identical(.fit_newdata(fit_sex), epidist_newdata(prep_obs_sex, sex))
+  expect_identical(
+    .fit_newdata(fit_marginal),
+    epidist_newdata(prep_marginal_obs)
+  )
+  expect_identical(.fit_newdata(fit_naive), epidist_newdata(prep_naive_obs))
+  expect_identical(
+    .fit_newdata(fit_meta_estimates),
+    epidist_newdata(prep_meta_biased)
+  )
+})
+
+test_that("epidist_dist_spec exports naive and meta fits", {
+  skip_if_not_installed("distspec")
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  dist <- epidist_dist_spec(fit_naive)
+  expect_s3_class(dist, "dist_spec")
+  expect_identical(distspec::get_distribution(dist), "lognormal")
+  draws <- delay_parameter_draws(fit_naive)
+  params <- distspec::get_parameters(dist)
+  expect_equal(mean(params$meanlog), mean(draws$mu), tolerance = 1e-8)
+  expect_equal(mean(params$sdlog), mean(draws$sigma), tolerance = 1e-8)
+
+  dist <- suppressWarnings(epidist_dist_spec(fit_meta_estimates))
+  expect_s3_class(dist, "dist_spec")
+  expect_identical(distspec::get_distribution(dist), "lognormal")
+  draws <- suppressWarnings(delay_parameter_draws(
+    fit_meta_estimates,
+    newdata = epidist_newdata(prep_meta_biased)
+  ))
+  params <- distspec::get_parameters(dist)
+  expect_equal(mean(params$meanlog), mean(draws$mu), tolerance = 1e-8)
+  expect_equal(mean(params$sdlog), mean(draws$sigma), tolerance = 1e-8)
 })
 
 test_that("epidist_dist_spec only accepts a fitted model", {

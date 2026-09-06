@@ -246,11 +246,20 @@ as_dist_spec.epidist_fit <- function(x, ...) {
 #' @keywords internal
 .joint_prior <- function(natural) {
   draws <- do.call(cbind, natural)
-  multi_normal <- get("MultiNormal", envir = asNamespace("distspec"))
+  multi_normal <- .multi_normal()
   joint <- multi_normal(mean = colMeans(draws), sigma = stats::cov(draws))
   params <- rep(list(joint), length(natural))
   names(params) <- names(natural)
   return(params)
+}
+
+#' The `MultiNormal()` constructor of the installed `distspec`
+#'
+#' @return The `distspec::MultiNormal()` function.
+#'
+#' @keywords internal
+.multi_normal <- function() {
+  return(get("MultiNormal", envir = asNamespace("distspec")))
 }
 
 #' Whether the installed `distspec` provides `MultiNormal()`
@@ -262,13 +271,22 @@ as_dist_spec.epidist_fit <- function(x, ...) {
   return(exists("MultiNormal", envir = asNamespace("distspec")))
 }
 
+#' Whether `distspec` is installed
+#'
+#' @return A logical scalar.
+#'
+#' @keywords internal
+.has_distspec <- function() {
+  return(requireNamespace("distspec", quietly = TRUE))
+}
+
 #' Error unless `distspec` is installed
 #'
 #' @return `TRUE`, invisibly.
 #'
 #' @keywords internal
 .check_distspec <- function() {
-  if (!requireNamespace("distspec", quietly = TRUE)) {
+  if (!.has_distspec()) {
     cli_abort(c(
       "The {.pkg distspec} package is needed to export a delay distribution.",
       i = "Install it with {.code install.packages(\"distspec\")}."
