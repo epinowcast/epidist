@@ -94,8 +94,8 @@ test_that(".dist_spec_from_draws passes the bounds on", {
     max = 30,
     cdf_max = 0.999
   )
-  fixed <- distspec::fix_parameters(dist, strategy = "mean")
-  expect_identical(as.numeric(max(fixed)), 30)
+  expect_identical(attr(dist, "max"), 30)
+  expect_identical(attr(dist, "cdf_max"), 0.999)
 })
 
 test_that(".dist_spec_from_draws needs at least two draws", {
@@ -218,8 +218,7 @@ test_that("epidist_dist_spec exports a marginal weibull fit", {
   expect_equal(mean(params$shape), mean(draws$shape), tolerance = 1e-8)
   expect_equal(mean(params$scale), mean(scale), tolerance = 1e-8)
   expect_equal(distspec::sd(params$scale), stats::sd(scale), tolerance = 1e-8)
-  fixed <- distspec::fix_parameters(dist, strategy = "mean")
-  expect_identical(as.numeric(max(fixed)), 50)
+  expect_identical(attr(dist, "max"), 50)
 })
 
 test_that("epidist_dist_spec returns a named list for several strata", {
