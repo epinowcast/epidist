@@ -47,6 +47,32 @@ example \code{mu ~ 1 + (1 | study)}, rather than through this function.
 Individual level rows are labelled \code{"individual"} in the \code{study} column so
 that they form their own level of any such term.
 }
+\section{The growth rate of a summary row}{
+A summary row tilts the primary event within its window, and weights the
+follow up of an accrual design, by the \code{growth_rate} of its study. A
+number given in \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} is used as it is. A study
+whose rate is \code{NA}, or whose rate was given with a \code{growth_rate_sd},
+estimates it instead as the \code{pgrowth} distributional parameter, the same
+parameter that \code{primary = "expgrowth"} estimates from individual level
+rows. The model then adds \code{pgrowth ~ 0 + study} to the formula unless a
+\code{pgrowth} formula is given, so that every study has its own rate, or
+\code{pgrowth ~ 1} where the data hold a single study, and
+\code{\link[=epidist_model_prior]{epidist_model_prior()}} gives each study that reported a rate and a
+standard deviation a normal prior with that centre and spread. Every
+other coefficient of \code{pgrowth}, including that of a study whose rate is
+unknown, gets a \code{normal(0, 0.25)} prior, which is weakly informative for
+a delay measured in days. Summaries carry little information about the
+rate, so give a study whose rate is unknown an informative prior, or
+share its coefficient with rows that do inform it. For example
+\code{pgrowth ~ 1} fits one rate to a line list from the same outbreak, given
+with \code{primary = "expgrowth"}, and to a summary row whose rate is \code{NA}, and
+\code{pgrowth ~ 0 + outbreak} does the same per outbreak. A formula given for
+\code{pgrowth} is used as it is, and the reported rates then only reach the
+model through priors on its coefficients where they exist, so set them
+yourself. A fit with a \code{study} term in \code{pgrowth} needs a \code{study} column
+in any \code{newdata} it predicts from.
+}
+
 \section{What this means in practice}{
 Summaries that one study computed from the same delays are correlated, so
 they are fitted jointly. Two are grouped when they agree on every column of

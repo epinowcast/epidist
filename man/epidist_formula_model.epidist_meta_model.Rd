@@ -19,8 +19,14 @@ parameters.}
 \item{...}{Additional arguments passed to method.}
 }
 \description{
-Define the model-specific component of an \code{epidist} custom formula for the
-meta model
+Adds the response and the slots of the meta model to the formula. Where a
+summary row estimates its growth rate as the \code{pgrowth} distributional
+parameter, see \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}, and the formula has no term for
+\code{pgrowth}, \code{pgrowth ~ 0 + study} is added so that each study has its own
+rate and the priors \code{\link[=epidist_model_prior]{epidist_model_prior()}} builds from the reported
+rates have a coefficient to act on. Data holding a single study get
+\code{pgrowth ~ 1} instead, because \code{brms} cannot code a factor with one
+level. A \code{pgrowth} formula given by the user is kept as it is.
 }
 \seealso{
 Other meta_model: 

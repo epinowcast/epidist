@@ -75,7 +75,9 @@
 #'
 #' @param growth_rate The growth rate the study is described by. Passed
 #'  through as metadata and not used to select cases, so it should be the
-#'  rate the line list was simulated with.
+#'  rate the line list was simulated with, or `NA` for a study that
+#'  estimates it, see [as_epidist_estimates_data()]. A `growth_rate_sd`
+#'  passes through `...`.
 #'
 #' @param n The number of cases the study sampled from those it could have
 #'  seen. Defaults to `NULL`, meaning all of them.
@@ -134,7 +136,7 @@ simulate_study <- function(
     ))
   }
   assert_number(delay_min, lower = 0, finite = TRUE)
-  assert_number(growth_rate, finite = TRUE)
+  assert_number(growth_rate, finite = TRUE, na.ok = TRUE)
   if (!is.null(n)) {
     assert_count(n, positive = TRUE)
   }

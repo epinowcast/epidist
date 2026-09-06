@@ -131,17 +131,18 @@ as_epidist_estimates_data <- function(data, ...) {
 #'   likely to be wrong and is a warning rather than a message.
 #' * **Short grid cutoff.** The implied summaries of a study that adjusted
 #'   for right truncation but is evaluated on a grid, which is a study with
-#'   `cens_adjusted` 0 or 3, or 2 or 4 with a non zero `growth_rate`, run to
-#'   `max_delay`. A cutoff the delay distribution has not decayed by biases
-#'   them downwards, and the standard deviation most, because the tail beyond
-#'   the cutoff carries a share of the second moment out of all proportion to
-#'   its mass. A lognormal is matched to what the study reported, through its
-#'   mean and standard deviation, or its median and largest quantile above
-#'   the median where it reported only quantiles, and the study is flagged
-#'   when more than 2% of the second moment of that lognormal lies beyond the
-#'   cutoff. That is where the standard deviation on the grid falls about 1%
-#'   short, and the shortfall grows with the share. Studies reporting neither
-#'   pair are not checked. Raise `max_delay` for the study.
+#'   `cens_adjusted` 0 or 3, or 2 or 4 with a non zero or estimated
+#'   `growth_rate`, run to `max_delay`. A cutoff the delay distribution has
+#'   not decayed by biases them downwards, and the standard deviation most,
+#'   because the tail beyond the cutoff carries a share of the second moment
+#'   out of all proportion to its mass. A lognormal is matched to what the
+#'   study reported, through its mean and standard deviation, or its median
+#'   and largest quantile above the median where it reported only quantiles,
+#'   and the study is flagged when more than 2% of the second moment of that
+#'   lognormal lies beyond the cutoff. That is where the standard deviation
+#'   on the grid falls about 1% short, and the shortfall grows with the
+#'   share. Studies reporting neither pair are not checked. Raise
+#'   `max_delay` for the study.
 #' * **Coarse quadrature.** The moments and distribution function of a
 #'   continuous estimand truncated at the grid cutoff are computed by
 #'   Simpson's rule on equally spaced intervals from `delay_min` to the
@@ -155,9 +156,10 @@ as_epidist_estimates_data <- function(data, ...) {
 #'   not adjust for right truncation and used a continuous adjustment
 #'   (`cens_adjusted` 1, 2 or 4), a study that did adjust but whose primary
 #'   events were not uniform within their window (`cens_adjusted` 2 or 4 with
-#'   a non zero `growth_rate`), and the quantiles of a study reporting a
-#'   covariance matrix, which are read off the same nodes. Raise the option
-#'   above the cap before building the model data, or lower `max_delay`.
+#'   a non zero or estimated `growth_rate`), and the quantiles of a study
+#'   reporting a covariance matrix, which are read off the same nodes. Raise
+#'   the option above the cap before building the model data, or lower
+#'   `max_delay`.
 #' * **Coarse quantiles.** A study that summarised interval censored delays
 #'   without adjusting for censoring (`cens_adjusted` 0 or 3) reports
 #'   quantiles of a discrete distribution, which the model interpolates
@@ -280,11 +282,24 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  and can move the implied mean by a day or more. A non-zero rate is
 #'  expensive, because the primary censored delay distribution then has no
 #'  analytical solution and every evaluation becomes a numerical integration.
-#'  Leave it at 0 unless the study accrued cases over a period of growth. It
-#'  is a known quantity here, taken from the study. For individual level data
-#'  the same rate is estimated instead, as the `pgrowth` parameter of
-#'  `primary = "expgrowth"` in [as_epidist_marginal_model()]. See
-#'  `vignette("primary-events")`.
+#'  Leave it at 0 unless the study accrued cases over a period of growth.
+#'  A number is taken as known. `NA` means the rate is unknown, and the
+#'  study then uses the `pgrowth` distributional parameter of the meta
+#'  model, the same parameter that `primary = "expgrowth"` estimates from
+#'  individual level data in [as_epidist_marginal_model()]. Give
+#'  `growth_rate_sd` as well to treat a reported rate as an informative
+#'  prior on that parameter rather than as a fixed number. See
+#'  [as_epidist_meta_model()] and `vignette("primary-events")`.
+#'
+#' @param growth_rate_sd A string giving the column of `data` containing the
+#'  standard deviation of `growth_rate`, where the study reported the rate
+#'  with uncertainty. Defaults to `NA`, meaning the rate is known exactly. A
+#'  positive value makes the study estimate its rate as the `pgrowth`
+#'  distributional parameter, with a normal prior centred on `growth_rate`
+#'  with this standard deviation. That prior is set up by
+#'  [as_epidist_meta_model()], see there for the formula it uses. A value of
+#'  0 is the same as `NA`, and a value with an `NA` `growth_rate` is an
+#'  error, because the prior has no centre.
 #'
 #' @param max_delay A string giving the column of `data` containing the delay
 #'  beyond which the implied summaries are truncated when building the discrete
@@ -351,6 +366,7 @@ as_epidist_estimates_data.data.frame <- function(
   cens_adjusted = NULL,
   delay_min = NULL,
   growth_rate = NULL,
+  growth_rate_sd = NULL,
   max_delay = NULL,
   advise = TRUE,
   ...
@@ -363,7 +379,8 @@ as_epidist_estimates_data.data.frame <- function(
     pwindow = pwindow, swindow = swindow,
     relative_obs_time = relative_obs_time, trunc_adjusted = trunc_adjusted,
     trunc_design = trunc_design, cens_adjusted = cens_adjusted,
-    delay_min = delay_min, growth_rate = growth_rate, max_delay = max_delay
+    delay_min = delay_min, growth_rate = growth_rate,
+    growth_rate_sd = growth_rate_sd, max_delay = max_delay
   )
   valid_inputs <- !vapply(supplied, is.null, logical(1))
   data_tbl <- .rename_columns(
@@ -947,6 +964,12 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   if (!hasName(data, "growth_rate")) {
     data$growth_rate <- 0
   }
+  if (!hasName(data, "growth_rate_sd")) {
+    data$growth_rate_sd <- NA_real_
+  }
+  # A column of NA alone arrives as logical.
+  data$growth_rate <- as.numeric(data$growth_rate)
+  data$growth_rate_sd <- as.numeric(data$growth_rate_sd)
   if (!hasName(data, "max_delay")) {
     data <- .add_default_max_delay(data)
   }
@@ -1048,7 +1071,8 @@ as_epidist_estimates_data.epidist_multivariate <- function(
 #'
 #' @keywords internal
 .estimates_short_cutoff <- function(data) {
-  quadrature <- data$cens_adjusted %in% c(2L, 4L) & data$growth_rate != 0
+  quadrature <- data$cens_adjusted %in% c(2L, 4L) &
+    .estimates_growth_tilted(data)
   uses_grid <- data$trunc_adjusted &
     (data$cens_adjusted %in% c(0L, 3L) | quadrature)
   if (!any(uses_grid)) {
@@ -1208,9 +1232,9 @@ as_epidist_estimates_data.epidist_multivariate <- function(
 #' covers a study that did not adjust for right truncation and used a
 #' continuous adjustment (`cens_adjusted` of 1, 2 or 4), a study that did
 #' adjust but whose primary events were not uniform within their window
-#' (`cens_adjusted` of 2 or 4 with a non zero `growth_rate`), and the
-#' quantile members of a covariance matrix group, which are read off the
-#' same nodes.
+#' (`cens_adjusted` of 2 or 4 with a non zero or estimated `growth_rate`),
+#' and the quantile members of a covariance matrix group, which are read off
+#' the same nodes.
 #'
 #' @param data An `epidist_estimates_data` object.
 #'
@@ -1222,7 +1246,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   continuous <- data$cens_adjusted %in% c(1L, 2L, 4L)
   quadrature <- continuous & (
     !data$trunc_adjusted |
-      (data$cens_adjusted != 1L & data$growth_rate != 0) |
+      (data$cens_adjusted != 1L & .estimates_growth_tilted(data)) |
       (data$type == "quantile" & .estimates_vcov_rows(data))
   )
   if (!any(quadrature)) {
@@ -1432,7 +1456,17 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     data$delay_min,
     lower = 0, any.missing = FALSE, finite = TRUE
   )
-  assert_numeric(data$growth_rate, any.missing = FALSE, finite = TRUE)
+  assert_numeric(data$growth_rate, finite = TRUE)
+  assert_numeric(data$growth_rate_sd, lower = 0, finite = TRUE)
+  uncentred <- is.na(data$growth_rate) & !is.na(data$growth_rate_sd) &
+    data$growth_rate_sd > 0
+  if (any(uncentred)) {
+    cli::cli_abort(paste0(
+      "{.var growth_rate_sd} needs a {.var growth_rate} to centre its ",
+      "prior on, but {.val {unique(as.character(data$study)[uncentred])}} ",
+      "{?has/have} a {.var growth_rate} of {.val NA}."
+    ))
+  }
   assert_numeric(
     data$max_delay,
     lower = 0, any.missing = FALSE, finite = TRUE
@@ -1781,7 +1815,45 @@ assert_epidist.epidist_estimates_data <- function(data, ...) {
     "cens_adjusted",
     "delay_min",
     "growth_rate",
+    "growth_rate_sd",
     "max_delay",
     "mvn_id"
   ))
+}
+
+#' Which summary estimates estimate their growth rate
+#'
+#' A study whose `growth_rate` is `NA`, or which reported it with a positive
+#' `growth_rate_sd`, takes its rate from the `pgrowth` distributional
+#' parameter of the meta model rather than from a number. See
+#' [as_epidist_estimates_data()].
+#'
+#' @param data An `epidist_estimates_data` object, or a data frame with its
+#'  `growth_rate` and `growth_rate_sd` columns.
+#'
+#' @returns A logical vector, one entry per row.
+#'
+#' @keywords internal
+.estimates_growth_estimated <- function(data) {
+  return(
+    is.na(data$growth_rate) |
+      (!is.na(data$growth_rate_sd) & data$growth_rate_sd > 0)
+  )
+}
+
+#' Which summary estimates have a tilted primary event
+#'
+#' The primary event is uniform within its window only for a known growth
+#' rate of zero. A non zero rate tilts it, and an estimated rate is taken to
+#' tilt it whatever value the parameter holds, so that the choice of path
+#' does not depend on a parameter.
+#'
+#' @inheritParams .estimates_growth_estimated
+#'
+#' @returns A logical vector, one entry per row.
+#'
+#' @keywords internal
+.estimates_growth_tilted <- function(data) {
+  estimated <- .estimates_growth_estimated(data)
+  return(estimated | (!is.na(data$growth_rate) & data$growth_rate != 0))
 }
