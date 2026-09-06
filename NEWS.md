@@ -33,8 +33,12 @@ See #471.
 Every object also carries a shared `epidist_data` class with methods for subsetting, replacement, `rbind()` and the `dplyr` verbs.
 These re-check the object and drop any `epidist` class whose requirements it no longer meets, warning about what was dropped and why.
 An object that still carries an `epidist` class is therefore a valid object of that class.
-`dplyr::group_by()` and results with no columns are exceptions, both documented in `?epidist_data`.
+Results with no columns are an exception, documented in `?epidist_data`.
 See `?epidist_data` and #399.
+- `dplyr::group_by()` and `dplyr::ungroup()` now keep the `epidist` classes.
+A grouped object carries them ahead of the `grouped_df` class, the `dplyr` verbs keep both, and `dplyr::ungroup()` returns an object of the original class.
+`dplyr::summarise()` builds a new object from the groups, so its result does not carry the classes.
+Closes #629.
 - Dropped the checks in `epidist_stancode()` and in the conversions between linelist and aggregate data, which ran on objects that had already been checked.
 The conversions from linelist data to a model still check their input, because `new_epidist_linelist_data()` does not.
 See #399.
