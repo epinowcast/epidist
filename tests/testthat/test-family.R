@@ -82,6 +82,17 @@ test_that("epidist_family builds the gengamma family for every model", {
 test_that("the gengamma family is looked up by name where brms would be", {
   skip_if_not_installed("flexsurv")
   expect_identical(.validate_family("gengamma")$name, "gengamma")
+  expect_identical(.validate_family("gengamma")$link, "log")
+  expect_identical(
+    .validate_family(c("gengamma", "identity"))$link, "identity"
+  )
+  expect_identical(
+    .validate_family("gengamma", link = "identity")$link, "identity"
+  )
+  expect_identical(
+    epidist_family(prep_obs, family = c("gengamma", "identity"))$link,
+    "identity"
+  )
   expect_identical(.pcd_family_dist_name(gengamma()), "pgengamma.orig")
   expect_identical(
     .get_brms_fn("posterior_predict", list(family = "gengamma")),

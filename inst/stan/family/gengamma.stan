@@ -12,7 +12,10 @@
   * brms evaluates the naive model density one observation at a time, and the
   * latent model calls the density and the distribution function on vectors
   * whose parameters are vectors where they have a model and reals otherwise,
-  * so each function is provided in every form the models need.
+  * so each function is provided in every form the models need. There is no
+  * scalar gengamma_lcdf(), because no model calls one and primarycensored
+  * defines gengamma_lcdf(real y, real shape, real scale, real k) with the
+  * parameters in its own order.
   *
   * @param y Delay (y > 0)
   * @param mu Scale parameter

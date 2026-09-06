@@ -459,6 +459,10 @@ add_summaries <- function(
 #'
 #' @inheritParams add_summaries
 #'
+#' @param family A delay distribution family as returned by
+#'  [.resolve_delay_family()], a list with the family `name` and its
+#'  distributional parameters `dpars`.
+#'
 #' @param dpars A named list of distributional parameter vectors.
 #'
 #' @return A matrix with one row per element of the vectors in `dpars` and

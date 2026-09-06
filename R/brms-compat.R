@@ -68,7 +68,10 @@
   }
   constructor <- .epidist_families()[[family[1]]]
   if (!is.null(constructor)) {
-    return(constructor())
+    if (is.null(link) || is.na(link)) {
+      return(constructor())
+    }
+    return(constructor(link = link))
   }
   out <- brms::brmsfamily(family[1], link = link)
   # `brms::brmsfamily()` always records the default link of every
