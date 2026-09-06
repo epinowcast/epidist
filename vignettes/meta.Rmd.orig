@@ -436,6 +436,40 @@ fit_meta_mixed <- epidist(
 summary(fit_meta_mixed)
 ```
 
+## Estimating a study's growth rate
+
+The calendar stop study was given the growth rate we measured from the line list as a known number.
+A review rarely has that.
+Setting `growth_rate = NA` makes a study estimate its rate as the `pgrowth` distributional parameter, and giving `growth_rate_sd` as well turns a reported rate into a normal prior on that parameter, so its uncertainty reaches the delay.
+The meta model adds `pgrowth ~ 0 + study` to the formula, one rate per study, and the prior of each study that reported a rate, so nothing else changes.
+A study whose rate is unknown gets a weakly informative `normal(0, 0.25)` prior, and can share its coefficient with a line list from the same outbreak through a formula such as `pgrowth ~ 1`.
+See `vignette("model")` for the details.
+
+```{r}
+uncertain_estimates <- biased_estimates |>
+  mutate(
+    growth_rate_sd = if_else(.data$study == "calendar stop", 0.02, NA_real_)
+  )
+meta_uncertain_growth <- as_epidist_meta_model(estimates = uncertain_estimates)
+```
+
+```{r results='hide', message=FALSE}
+fit_meta_uncertain_growth <- epidist(
+  data = meta_uncertain_growth,
+  chains = 2, cores = 2, iter = 1000,
+  refresh = ifelse(interactive(), 250, 0),
+  seed = 1,
+  backend = "cmdstanr"
+)
+```
+
+```{r}
+summary(fit_meta_uncertain_growth)
+```
+
+The `pgrowth` coefficient of the calendar stop study sits at its prior, which is what its summaries add nothing to, and the delay parameters widen a little for the uncertainty in the rate.
+The coefficients of the other studies are not read, because their rates are known, and return their weakly informative prior.
+
 ## Reference: the marginal model on the full line list
 
 As a reference, we fit the marginal model (`vignette("epidist")`) to the whole, effectively untruncated, line list.

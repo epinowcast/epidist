@@ -5,6 +5,13 @@
 - Added an exponentially growing primary event distribution to the latent model.
 `as_epidist_latent_model(primary = "expgrowth")` makes the growth rate a distributional parameter, so it takes a `brms` formula and prior and can vary by covariate.
 See #489 and #618.
+- Summary rows of the meta model can now estimate their growth rate.
+An `NA` `growth_rate` in `as_epidist_estimates_data()` makes the study use the `pgrowth` distributional parameter, the parameter that `primary = "expgrowth"` estimates from individual level data, so a line list from the same outbreak can inform the rate a published summary is corrected with.
+A new `growth_rate_sd` column treats a reported rate as a normal prior on that parameter rather than as a fixed number.
+The meta model adds `pgrowth ~ 0 + study` to the formula where a study estimates its rate, unless a `pgrowth` formula is given, and `epidist_model_prior()` sets the per study priors and a `normal(0, 0.25)` default for the rest.
+The R and Stan implementations read the rate of each posterior draw.
+`epidist_formula()` now lets a model add its own formulas before the remaining distributional parameters are given an intercept.
+Closes #678.
 
 ## Features
 
