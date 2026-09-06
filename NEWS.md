@@ -197,6 +197,7 @@ The cumulative counts at the days the quantiles name form a Markov chain of bino
 Coincident quantiles are two constraints at one edge.
 The multinomial on the continuity corrected grid that fitted such a set before claimed a standard error five times too small at a thousand delays, where the exact likelihood is a box of parameters rather than a peak.
 The warning of `as_epidist_estimates_data()` about several integer day quantiles from more than 100 delays is removed, and the model data carries a `meta_group_lower` array with the lower bounds of the boxes.
+`EPIDIST_META_CALIBRATION=true` now also fits forty replicates of a study reporting its quartiles at thirty and at a hundred delays, where the 90% intervals covered the truth 34 to 35 times in 40.
 Closes #675.
 - A multinomial cell that underflows is floored rather than sent to zero, so the R and Stan log likelihoods are both finite for a badly misfitting draw and `loo()` keeps working.
 See #620.
