@@ -1034,11 +1034,16 @@ test_that("a summary row with an unknown growth rate is corrected with the pgrow
   obs <- simulate_exponential_cases(
     r = growth_rate, sample_size = 500, seed = 101
   ) |>
-    simulate_secondary(meanlog = meanlog, sdlog = sdlog) |>
-    simulate_dates(
-      outbreak_start_date = as.Date("2024-01-01"), keep_times = TRUE
-    )
-  linelist <- suppressMessages(as_epidist_linelist_data(obs))
+    simulate_secondary(meanlog = meanlog, sdlog = sdlog)
+  # The windows are built on the simulation clock, so that the exact times
+  # simulate_study() works from sit inside them.
+  linelist <- as_epidist_linelist_data(
+    floor(obs$ptime), floor(obs$ptime) + 1,
+    floor(obs$stime), floor(obs$stime) + 1,
+    obs_time = ceiling(max(obs$stime)) + 1
+  )
+  linelist$ptime <- obs$ptime
+  linelist$stime <- obs$stime
   set.seed(101)
   study <- simulate_study(
     linelist, "calendar stop",
