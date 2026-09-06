@@ -235,13 +235,12 @@ epidist_gen_log_lik <- function(family) {
 #'
 #' @keywords internal
 .pcd_family_dist_name <- function(family) {
-  name <- tolower(.family_name(family))
-  if (identical(name, "gengamma")) {
+  if (identical(.delay_family(family)$name, "gengamma")) {
     return("pgengamma.orig")
   }
   return(tryCatch(
-    primarycensored::pcd_dist_name(name),
-    error = function(e) name
+    primarycensored::pcd_dist_name(tolower(family$family)),
+    error = function(e) tolower(family$family)
   ))
 }
 

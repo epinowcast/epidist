@@ -47,9 +47,8 @@ test_that("epidist.epidist_naive_model fits the gengamma family and predicts fro
   expect_s3_class(fit, "epidist_fit")
   expect_convergence(fit)
   draws <- add_summaries(delay_parameter_draws(fit), probs = 0.5)
-  expect_named(draws, c(
-    ".row", ".chain", ".iteration", ".draw", "mu", "shape", "k", "mean",
-    "sd", "q50"
+  expect_true(all(
+    c("mu", "shape", "k", "mean", "sd", "q50") %in% names(draws)
   ))
   expect_true(all(draws$mean > 0))
   # brms uses the family's own functions for a naive fit

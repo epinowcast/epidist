@@ -26,6 +26,7 @@ The requested brms function
 Helper function to get internal brms functions by constructing their name
 from a prefix and family. Used to get functions like \verb{log_lik_*},
 \verb{posterior_predict_*} etc. A family \code{epidist} defines itself, such as
-\code{\link[=gengamma]{gengamma()}}, carries these functions, so they are taken from it.
+\code{\link[=gengamma]{gengamma()}}, carries these functions, so they are taken from it, whether
+it is given as the family or as a model family built on it.
 }
 \keyword{internal}

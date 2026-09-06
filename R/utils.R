@@ -425,7 +425,8 @@
 #' Helper function to get internal brms functions by constructing their name
 #' from a prefix and family. Used to get functions like `log_lik_*`,
 #' `posterior_predict_*` etc. A family `epidist` defines itself, such as
-#' [gengamma()], carries these functions, so they are taken from it.
+#' [gengamma()], carries these functions, so they are taken from it, whether
+#' it is given as the family or as a model family built on it.
 #'
 #' @param prefix Character string prefix of the brms function to get (e.g.
 #'  "log_lik")
@@ -436,12 +437,14 @@
 #'
 #' @keywords internal
 .get_brms_fn <- function(prefix, family) {
-  name <- tolower(.family_name(family))
-  constructor <- .epidist_families()[[name]]
+  constructor <- .epidist_families()[[.delay_family(family)$name]]
   if (!is.null(constructor)) {
     return(constructor()[[prefix]])
   }
-  return(get(paste0(prefix, "_", name), asNamespace("brms")))
+  return(get(
+    paste0(prefix, "_", tolower(family$family)),
+    asNamespace("brms")
+  ))
 }
 
 #' Add weights to a data frame
