@@ -18,6 +18,7 @@ Check if data has the \code{epidist_meta_model} class
 }
 \examples{
 is_epidist_meta_model(data.frame())
+is_epidist_meta_model(new_epidist_meta_model(data.frame()))
 }
 \seealso{
 Other meta_model: 

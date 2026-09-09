@@ -801,6 +801,7 @@ new_epidist_meta_model <- function(data, primary = .primary_choices()) {
 #' @export
 #' @examples
 #' is_epidist_meta_model(data.frame())
+#' is_epidist_meta_model(new_epidist_meta_model(data.frame()))
 is_epidist_meta_model <- function(data) {
   return(inherits(data, "epidist_meta_model"))
 }

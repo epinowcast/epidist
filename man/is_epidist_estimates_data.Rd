@@ -20,6 +20,7 @@ Check if data has the \code{epidist_estimates_data} class
 }
 \examples{
 is_epidist_estimates_data(data.frame())
+is_epidist_estimates_data(new_epidist_estimates_data(data.frame()))
 }
 \seealso{
 Other estimates_data: 

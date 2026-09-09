@@ -1415,6 +1415,7 @@ new_epidist_estimates_data <- function(data) {
 #' @export
 #' @examples
 #' is_epidist_estimates_data(data.frame())
+#' is_epidist_estimates_data(new_epidist_estimates_data(data.frame()))
 is_epidist_estimates_data <- function(data, ...) {
   return(inherits(data, "epidist_estimates_data"))
 }
