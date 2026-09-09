@@ -25,6 +25,7 @@ test_that("epidist_diagnostics", { # nolint: line_length_linter.
 test_that("epidist_diagnostics gives the same results for cmdstanr and rstan", {
   skip_on_cran()
   skip_if_no_cmdstanr()
+  skip_if(is.null(fit_rstan), "rstan backend not available on this platform")
   set.seed(1)
   diag_cmdstanr <- epidist_diagnostics(fit)
   diag_rstan <- epidist_diagnostics(fit_rstan)

@@ -489,16 +489,25 @@ if (not_on_cran() && has_cmdstanr()) {
     backend = "cmdstanr"
   )
 
-  cli::cli_alert_info("Compiling the latent model with rstan")
-  fit_rstan <- epidist(
-    data = prep_obs,
-    seed = 1,
-    chains = 2,
-    cores = 2,
-    silent = 2,
-    refresh = 0,
-    iter = 1000
-  )
+  # rstan and StanHeaders must be built against each other, and the CRAN
+  # pair does not currently compile a model on Windows or macOS. Restrict
+  # this rstan-backend fit to Linux, where the pair compiles, so the rest
+  # of the suite is unaffected by that skew. Tests that use `fit_rstan`
+  # call `skip_if(is.null(fit_rstan), ...)`.
+  fit_rstan <- if (has_working_rstan()) {
+    cli::cli_alert_info("Compiling the latent model with rstan")
+    epidist(
+      data = prep_obs,
+      seed = 1,
+      chains = 2,
+      cores = 2,
+      silent = 2,
+      refresh = 0,
+      iter = 1000
+    )
+  } else {
+    NULL
+  }
 
   cli::cli_alert_info("Compiling the marginal model with cmdstanr")
   fit_marginal <- suppressMessages(epidist(

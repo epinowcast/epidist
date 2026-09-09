@@ -31,6 +31,10 @@ skip_on_local <- function() {
   return(testthat::skip("Not on CI"))
 }
 
+has_working_rstan <- function() {
+  return(identical(Sys.info()[["sysname"]], "Linux"))
+}
+
 as_string_formula <- function(formula) {
   form <- deparse1(formula, collapse = " ")
   form <- gsub("\\s+", " ", form, perl = FALSE)

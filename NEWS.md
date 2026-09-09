@@ -135,10 +135,11 @@ See #588 and #596.
 ## CI
 
 - Added a `render-vignettes` workflow that rebuilds the precomputed vignettes and opens a pull request with the result.
-- The vignettes that fit models when the package is built (`epidist`, `left-truncation` and `primary-events`) now use the `cmdstanr` backend where CmdStan is installed and fall back to `rstan` otherwise.
+- The vignettes that fit models when the package is built (`epidist`, `left-truncation` and `primary-events`) and the `\donttest{}` examples for `epidist()` and `epidist_diagnostics()` now use the `cmdstanr` backend where CmdStan is installed and fall back to `rstan` otherwise.
 The macOS and Windows checks compiled those fits through `rstan`, and broke once CRAN released StanHeaders 2.39.1, because the stan-dev r-universe in `extra-repositories` supplied a newer `rstan` that was not built against it.
 The CRAN pair of `rstan` 2.32.7 and `StanHeaders` 2.39.1 does not compile a model on Windows either, so no choice of source fixes the checks, and pinning one source would stop them exercising what CRAN users install.
-Taking the `rstan` compile off the check path avoids the skew altogether, and the test suite already uses `cmdstanr`.
+Taking the `rstan` compile off the check path avoids the skew altogether.
+The test suite's shared `rstan`-backend fit, used only to check that `rstan` and `cmdstanr` agree, now builds on Linux only, where the pair compiles; the tests that use it skip elsewhere.
 See #687 and #688.
 
 ## Models

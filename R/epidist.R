@@ -41,6 +41,14 @@
 #' @export
 #' @examples
 #' \donttest{
+#' # Fit with cmdstanr where CmdStan is installed and fall back to rstan
+#' # otherwise, so the example runs wherever the package does.
+#' if (
+#'   requireNamespace("cmdstanr", quietly = TRUE) &&
+#'     !is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE))
+#' ) {
+#'   options(brms.backend = "cmdstanr")
+#' }
 #' fit <- sierra_leone_ebola_data |>
 #'   as_epidist_linelist_data(
 #'     pdate_lwr = "date_of_symptom_onset",
