@@ -204,6 +204,13 @@ test_that("plot.epidist_delay_draws simulates for a family with no density", {
   expect_true(all(p$data$density >= 0))
   # The exponential density is largest at short delays
   expect_gt(p$data$density[2], p$data$density[101])
+  # The default max_delay is the posterior median of the per-draw 99%
+  # quantile, as documented, not the pooled 99% quantile across all draws
+  expect_equal(
+    max(p$data$delay),
+    stats::median(stats::qexp(0.99, rate = 1 / draws$mu)),
+    tolerance = 0.05
+  )
 })
 
 test_that("plot.epidist_delay_draws takes the family from its argument", {

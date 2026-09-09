@@ -521,7 +521,8 @@ autoplot.epidist_delay_draws <- function(
   } else {
     samples <- .simulate_delays(family, dpars, nsim)
     if (is.null(max_delay)) {
-      max_delay <- stats::quantile(samples, 0.99, names = FALSE)
+      per_draw_q99 <- apply(samples, 1, stats::quantile, probs = 0.99)
+      max_delay <- stats::median(per_draw_q99)
     }
     delays <- seq(0, max_delay, length.out = n_grid)
     values <- apply(samples, 1, function(x) {
