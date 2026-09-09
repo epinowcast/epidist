@@ -23,7 +23,8 @@ test_that("epidist.epidist_latent_model samples from the prior according to marg
     sample_prior = "only",
     seed = 1,
     silent = 2, refresh = 0,
-    cores = 2
+    cores = 2,
+    backend = "cmdstanr"
   )
   pred <- delay_parameter_draws(prior_samples)
   family <- lognormal()
@@ -70,7 +71,8 @@ test_that("epidist.epidist_latent_model fits, the MCMC converges, and the draws 
     seed = 1,
     silent = 2, refresh = 0,
     cores = 2,
-    chains = 2
+    chains = 2,
+    backend = "cmdstanr"
   )
   expect_s3_class(fit_constant, "brmsfit")
   expect_s3_class(fit_constant, "epidist_fit")
