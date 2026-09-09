@@ -3427,6 +3427,21 @@ test_that(".meta_quantile_set_ll rejects a draw whose grid mass underflows", {
   )
 })
 
+test_that(".meta_quantile_set_ll rejects a draw whose accrual grid mass underflows", { # nolint: line_length_linter.
+  args <- list(meanlog = 100, sdlog = 0.1)
+  slots <- list(
+    lower = 0, cutoff = 5, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, growth_rate = 0.1, trunc_design = 1L
+  )
+  expect_identical(
+    .meta_quantile_set_ll(
+      c(2, 3), c(20, 60), 100, "plnorm", args, slots,
+      lower = c(21, 61)
+    ),
+    -Inf
+  )
+})
+
 test_that(".meta_summary_terms predicts the first member of a covariance row", { # nolint: line_length_linter.
   args <- list(meanlog = 1.6, sdlog = 0.6)
   covariance <- matrix(c(0.4, 0.1, 0.1, 0.25), nrow = 2)
