@@ -7,17 +7,14 @@
 .meta_growth_prior(data, formula, default = NULL)
 }
 \arguments{
-\item{data}{An object with class corresponding to an implemented model.}
+\item{data}{An \code{epidist_meta_model} object, optionally holding a \code{study}
+and a \code{growth_rate_sd} column.}
 
-\item{formula}{An object of class \link[stats:formula]{stats::formula} or \link[brms:brmsformula]{brms::brmsformula}
-(or one that can be coerced to those classes). A symbolic description of
-the model to be fitted. A formula must be provided for the distributional
-parameter \code{mu}, and may optionally be provided for other distributional
-parameters.}
+\item{formula}{A \code{brmsformula} object whose \code{family$dpars} say whether
+the model estimates \code{pgrowth}.}
 
-\item{default}{The default prior distributions from
-\code{\link[brms:default_prior]{brms::default_prior()}}, which \code{\link[=epidist_prior]{epidist_prior()}} passes so that they are
-not built twice. Built here where missing.}
+\item{default}{The result of \code{brms::default_prior()} on \code{data} and
+\code{formula}, or \code{NULL} to compute it here.}
 }
 \value{
 A \code{brmsprior} object, or \code{NULL} where no summary row estimates

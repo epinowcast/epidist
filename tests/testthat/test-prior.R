@@ -421,6 +421,36 @@ test_that("epidist_model_prior warns where a reported growth rate has no coeffic
   expect_identical(intercept$prior, "normal(0.1, 0.02)")
 })
 
+test_that("epidist_model_prior matches a study id brms mangles by substitution", { # nolint: line_length_linter.
+  # brms turns a hyphen into "M" rather than stripping it, so "site-2"
+  # becomes "studysiteM2". Matching the reported rate positionally against
+  # the levels of the study factor, rather than re-deriving the mangling,
+  # finds that coefficient without a warning.
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = c("A", "A", "site-2", "site-2"),
+    type = c("mean", "sd", "mean", "sd"),
+    value = c(7.5, 3.6, 6.4, 3.0),
+    n = 120,
+    relative_obs_time = c(20, 20, 25, 25),
+    trunc_adjusted = FALSE,
+    trunc_design = "accrual",
+    cens_adjusted = 0,
+    growth_rate = c(NA, NA, 0.1, 0.1),
+    growth_rate_sd = c(NA, NA, 0.02, 0.02),
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  family <- epidist_family(meta, lognormal())
+  formula <- epidist_formula(meta, family, bf(mu ~ 1))
+  prior <- epidist_model_prior(meta, formula)
+  expect_no_warning(epidist_model_prior(meta, formula))
+  growth <- prior[prior$dpar == "pgrowth" & prior$class == "b", ]
+  expect_true("studysiteM2" %in% growth$coef)
+  expect_identical(
+    growth$prior[growth$coef == "studysiteM2"], "normal(0.1, 0.02)"
+  )
+})
+
 test_that("epidist_model_prior adds no growth prior where every rate is known", { # nolint: line_length_linter.
   family <- epidist_family(prep_meta_estimates, lognormal())
   formula <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))

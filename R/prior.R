@@ -289,7 +289,14 @@ epidist_model_prior.epidist_meta_model <- function(
 #'
 #' See [epidist_model_prior.epidist_meta_model()].
 #'
-#' @inheritParams epidist_model_prior.epidist_meta_model
+#' @param data An `epidist_meta_model` object, optionally holding a `study`
+#'  and a `growth_rate_sd` column.
+#'
+#' @param formula A `brmsformula` object whose `family$dpars` say whether
+#'  the model estimates `pgrowth`.
+#'
+#' @param default The result of `brms::default_prior()` on `data` and
+#'  `formula`, or `NULL` to compute it here.
 #'
 #' @returns A `brmsprior` object, or `NULL` where no summary row estimates
 #'  its growth rate.
@@ -321,14 +328,17 @@ epidist_model_prior.epidist_meta_model <- function(
     default <- brms::default_prior(formula, data = data)
   }
   growth <- default[default$dpar == "pgrowth", , drop = FALSE]
-  coefs <- growth$coef[growth$class == "b"]
-  # brms strips the characters below from a level to name its coefficient.
-  level <- as.character(reported$study)
-  for (symbol in c(" ", "(", ")", "[", "]", ",", "\"", "'", "?")) {
-    level <- gsub(symbol, "", level, fixed = TRUE)
+  coefs <- growth$coef[growth$class == "b" & nzchar(growth$coef)]
+  # `0 + study` orders its `b` coefficients by the levels of the study
+  # factor, whatever punctuation `brms` mangles into each coefficient name,
+  # so pair them up by position rather than re-deriving the mangling.
+  study_levels <- levels(factor(plain$study))
+  coef_lookup <- character(0)
+  if (length(coefs) == length(study_levels)) {
+    coef_lookup <- stats::setNames(coefs, study_levels)
   }
-  coef_name <- paste0("study", level)
-  matched <- coef_name %in% coefs
+  coef_name <- unname(coef_lookup[as.character(reported$study)])
+  matched <- !is.na(coef_name)
   # The only study of a model has the intercept to itself.
   if (
     nrow(reported) == 1 && length(unique(plain$study)) == 1 &&
