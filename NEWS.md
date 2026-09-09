@@ -5,7 +5,7 @@
 - Added the generalised gamma delay distribution as the `gengamma()` family.
 It has three distributional parameters, `mu` for the scale and `shape` and `k` for the two shape parameters of the Stacy parameterisation, so the gamma and Weibull families are special cases.
 It works with the naive, latent, marginal and meta models, with every primary event distribution, and with `add_summaries()`, which uses its closed form mean, standard deviation and quantiles.
-It needs the `flexsurv` package and the development version of `primarycensored`, which adds the distribution to its Stan functions, so the pull request is not merged until that reaches CRAN.
+It needs the `flexsurv` package and the version of `primarycensored` that adds the distribution to its Stan functions.
 See #644 and epinowcast/primarycensored#334.
 - Added an exponentially growing primary event distribution to the latent model.
 `as_epidist_latent_model(primary = "expgrowth")` makes the growth rate a distributional parameter, so it takes a `brms` formula and prior and can vary by covariate.

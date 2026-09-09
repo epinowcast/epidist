@@ -25,5 +25,10 @@ The generalised gamma distribution function lives in \code{flexsurv}, so
 \code{primarycensored} records no name for it and the name is given here. Falls
 back to the lower cased family name if \code{primarycensored} does not
 recognise it, so the caller can still report a name in a message.
+Uses \code{\link[=.delay_family]{.delay_family()}} rather than \code{family$family} directly, so this
+resolves correctly whether \code{family} is a plain \code{brms} family, a custom
+family such as \code{\link[=gengamma]{gengamma()}}, or a model family such as \code{meta_lognormal}
+wrapped by \code{\link[brms:custom_family]{brms::custom_family()}}, which records its own name as
+\code{"custom"}.
 }
 \keyword{internal}

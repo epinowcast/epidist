@@ -227,6 +227,11 @@ epidist_gen_log_lik <- function(family) {
 #' `primarycensored` records no name for it and the name is given here. Falls
 #' back to the lower cased family name if `primarycensored` does not
 #' recognise it, so the caller can still report a name in a message.
+#' Uses [.delay_family()] rather than `family$family` directly, so this
+#' resolves correctly whether `family` is a plain `brms` family, a custom
+#' family such as [gengamma()], or a model family such as `meta_lognormal`
+#' wrapped by [brms::custom_family()], which records its own name as
+#' `"custom"`.
 #'
 #' @inheritParams epidist_family
 #'
@@ -235,12 +240,13 @@ epidist_gen_log_lik <- function(family) {
 #'
 #' @keywords internal
 .pcd_family_dist_name <- function(family) {
-  if (identical(.delay_family(family)$name, "gengamma")) {
+  name <- .delay_family(family)$name
+  if (identical(name, "gengamma")) {
     return("pgengamma.orig")
   }
   return(tryCatch(
-    primarycensored::pcd_dist_name(tolower(family$family)),
-    error = function(e) tolower(family$family)
+    primarycensored::pcd_dist_name(name),
+    error = function(e) name
   ))
 }
 

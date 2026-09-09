@@ -79,6 +79,15 @@ test_that("epidist_family builds the gengamma family for every model", {
   expect_identical(.delay_family(naive)$name, "gengamma")
 })
 
+test_that(".pcd_family_dist_name resolves a model-wrapped meta family", { # nolint: line_length_linter.
+  # `epidist_family()` returns the family already wrapped by
+  # `brms::custom_family()`, so `family$family` is `"custom"` and only
+  # `.delay_family()` recovers the underlying distribution name.
+  meta <- epidist_family(prep_meta_obs, family = lognormal())
+  expect_identical(meta$family, "custom")
+  expect_identical(.pcd_family_dist_name(meta), "plnorm")
+})
+
 test_that("the gengamma family is looked up by name where brms would be", {
   skip_if_not_installed("flexsurv")
   expect_identical(.validate_family("gengamma")$name, "gengamma")
