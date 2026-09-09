@@ -312,6 +312,9 @@ epidist_estimates_epireview <- function(
 
 #' The default `as_epidist_estimates_data()` assumes for a metadata column
 #'
+#' Reads from [.estimates_default_values] so the fallback matches
+#' [.fill_estimates_defaults()] without restating each value here.
+#'
 #' @param col The column.
 #'
 #' @param meta The metadata of each record, as built by
@@ -328,16 +331,7 @@ epidist_estimates_epireview <- function(
     }
     return(is.infinite(obs_time))
   }
-  default <- switch(col,
-    pwindow = 1,
-    swindow = 1,
-    relative_obs_time = Inf,
-    trunc_design = "cohort",
-    cens_adjusted = 0,
-    delay_min = 0,
-    growth_rate = 0
-  )
-  return(rep(default, nrow(meta)))
+  return(rep(.estimates_default_values[[col]], nrow(meta)))
 }
 
 #' Message about the studies a metadata column left blank

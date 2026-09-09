@@ -16,6 +16,7 @@
 A vector with one default per record.
 }
 \description{
-The default \code{as_epidist_estimates_data()} assumes for a metadata column
+Reads from \link{.estimates_default_values} so the fallback matches
+\code{\link[=.fill_estimates_defaults]{.fill_estimates_defaults()}} without restating each value here.
 }
 \keyword{internal}

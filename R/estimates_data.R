@@ -847,6 +847,22 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   return(invisible(NULL))
 }
 
+#' Default values `as_epidist_estimates_data()` assumes for metadata columns
+#'
+#' Shared by [.fill_estimates_defaults()] and
+#' [.epireview_default()] so the two stay in step.
+#'
+#' @keywords internal
+.estimates_default_values <- list(
+  pwindow = 1,
+  swindow = 1,
+  relative_obs_time = Inf,
+  trunc_design = "cohort",
+  cens_adjusted = 0,
+  delay_min = 0,
+  growth_rate = 0
+)
+
 #' Fill in the optional columns of an `epidist_estimates_data` object
 #'
 #' Applies the documented defaults for study metadata that was not supplied,
@@ -880,7 +896,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
           "(daily reporting) for every study."
         )
       ))
-      data[[col]] <- 1
+      data[[col]] <- .estimates_default_values[[col]]
     }
   }
   if (!hasName(data, "relative_obs_time")) {
@@ -890,7 +906,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
         "limit (no right truncation) for every study."
       )
     ))
-    data$relative_obs_time <- Inf
+    data$relative_obs_time <- .estimates_default_values$relative_obs_time
   }
   if (!hasName(data, "trunc_adjusted")) {
     data$trunc_adjusted <- is.infinite(data$relative_obs_time)
@@ -930,7 +946,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
         )
       ))
     }
-    data$trunc_design <- "cohort"
+    data$trunc_design <- .estimates_default_values$trunc_design
   }
   if (!hasName(data, "cens_adjusted")) {
     cli::cli_inform(c(
@@ -939,16 +955,16 @@ as_epidist_estimates_data.epidist_multivariate <- function(
         "integer date differences without a censoring adjustment."
       )
     ))
-    data$cens_adjusted <- 0
+    data$cens_adjusted <- .estimates_default_values$cens_adjusted
   }
   if (!hasName(data, "delay_min")) {
-    data$delay_min <- 0
+    data$delay_min <- .estimates_default_values$delay_min
   }
   # Studies are often stacked from separate tables, so a study that did not
   # left truncate leaves a gap rather than a zero.
-  data$delay_min[is.na(data$delay_min)] <- 0
+  data$delay_min[is.na(data$delay_min)] <- .estimates_default_values$delay_min
   if (!hasName(data, "growth_rate")) {
-    data$growth_rate <- 0
+    data$growth_rate <- .estimates_default_values$growth_rate
   }
   if (!hasName(data, "max_delay")) {
     data <- .add_default_max_delay(data)
