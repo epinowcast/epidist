@@ -108,7 +108,8 @@
 #' )
 #' meta <- as_epidist_meta_model(estimates = estimates)
 #' fit <- epidist(
-#'   meta, chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0)
+#'   meta,
+#'   chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0)
 #' )
 #'
 #' # The formula does not use study, so pass the model data
