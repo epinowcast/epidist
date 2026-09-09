@@ -38,6 +38,7 @@ See `?epidist_data` and #399.
 - `dplyr::group_by()` and `dplyr::ungroup()` now keep the `epidist` classes.
 A grouped object carries them ahead of the `grouped_df` class, the `dplyr` verbs keep both, and `dplyr::ungroup()` returns an object of the original class.
 `dplyr::summarise()` builds a new object from the groups, so its result does not carry the classes.
+Converting a grouped `epidist_linelist_data` object to a model now errors, asking for `dplyr::ungroup()` first, because the model constructors number rows in a way that a grouped input would silently get wrong.
 Closes #629.
 - Dropped the checks in `epidist_stancode()` and in the conversions between linelist and aggregate data, which ran on objects that had already been checked.
 The conversions from linelist data to a model still check their input, because `new_epidist_linelist_data()` does not.

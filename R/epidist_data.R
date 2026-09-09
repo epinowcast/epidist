@@ -117,9 +117,11 @@ dplyr_reconstruct.epidist_data <- function(data, template) {
   return(.revalidate_epidist(out, template))
 }
 
-# The `data.frame` methods for `dplyr_row_slice()` and `dplyr_col_modify()`
-# already call `dplyr_reconstruct()`, so these call the generic on the object
-# without its `epidist` classes and check the result once.
+# The built-in `dplyr` methods for `data.frame` and `grouped_df` already
+# reconstruct the object, calling `dplyr_reconstruct()` directly or, for a
+# grouped object, rebuilding the grouping structure themselves, so these call
+# the generic on the object without its `epidist` classes and check the
+# result once.
 
 #' @rdname epidist_data
 #' @method dplyr_row_slice epidist_data

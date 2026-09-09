@@ -182,6 +182,30 @@ test_that("dplyr::group_by() keeps the class ahead of grouped_df", {
   )
 })
 
+test_that("converting a grouped linelist object to a model errors", {
+  grouped <- dplyr::group_by(sim_obs, obs_time)
+  expect_error(
+    as_epidist_latent_model(grouped),
+    "must not be grouped"
+  )
+  expect_error(
+    as_epidist_naive_model(grouped),
+    "must not be grouped"
+  )
+  expect_error(
+    as_epidist_marginal_model(grouped),
+    "must not be grouped"
+  )
+  expect_error(
+    as_epidist_aggregate_data(grouped),
+    "must not be grouped"
+  )
+  expect_error(
+    as_epidist_latent_model(dplyr::ungroup(grouped)),
+    NA
+  )
+})
+
 test_that("dplyr::ungroup() returns an object of the original class", {
   ungrouped <- sim_obs |>
     dplyr::group_by(obs_time) |>
