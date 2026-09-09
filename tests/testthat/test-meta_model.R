@@ -3442,6 +3442,75 @@ test_that(".meta_quantile_set_ll rejects a draw whose accrual grid mass underflo
   )
 })
 
+test_that(".meta_step_prob is zero once the distribution function reaches one", { # nolint: line_length_linter.
+  expect_identical(.meta_step_prob(1, 1), 0)
+  expect_identical(.meta_step_prob(1, 1.2), 0)
+})
+
+test_that(".meta_step_kernel is zero where no target count follows a source", { # nolint: line_length_linter.
+  # A target band entirely below the source band, as if counts could fall,
+  # holds no reachable step.
+  kernel <- .meta_step_kernel(10, 10, 0, 5, 1000L)
+  expect_true(all(kernel == 0))
+})
+
+test_that(".meta_box_step gives -Inf when every source count is impossible", { # nolint: line_length_linter.
+  n <- 100
+  lg <- lgamma(seq_len(n + 1))
+  alpha <- rep(-Inf, 5)
+  step <- .meta_box_step(alpha, 10, 14, 15, 20, 0.5, n, 12, 17, lg)
+  expect_true(all(is.infinite(step)))
+})
+
+test_that(".meta_grid_box_ll rejects a negative count below the first cell", { # nolint: line_length_linter.
+  # The grid starts at day 5, so a reported day 5 puts an upper bound on
+  # the edge below it, at day 4, which is impossible when negative.
+  slots <- list(
+    lower = 5, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0
+  )
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  expect_identical(
+    .meta_grid_box_ll(5, -1L, 0L, 100L, "plnorm", args, slots),
+    -Inf
+  )
+})
+
+test_that(".meta_grid_box_ll rejects boxes no non decreasing chain can satisfy", { # nolint: line_length_linter.
+  # The count at day 2 is boxed to at least 60 and the count at day 5 to at
+  # most 40, which no non decreasing chain of counts can cross.
+  slots <- list(
+    lower = 0, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0
+  )
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  expect_identical(
+    .meta_grid_box_ll(
+      c(2, 5), c(100L, 40L), c(60L, 0L), 100L, "plnorm", args, slots
+    ),
+    -Inf
+  )
+})
+
+test_that(".meta_row_slots reads the group arrays for a Stan row", {
+  prep <- list(data = list(
+    vint1 = 1L, vint2 = 100L, vint3 = 0L, vint4 = 0L, vint5 = 0L,
+    vint6 = 1L, vint7 = 2L, vint8 = 1L, vint9 = 1L,
+    vreal1 = 30, vreal2 = 1, vreal3 = 1, vreal4 = 0, vreal5 = 0,
+    vreal6 = 0, vreal7 = 0, vreal8 = 0,
+    meta_group_value = c(1.5, 2.5),
+    meta_group_count = c(10L, 20L),
+    meta_group_lower = c(11L, 21L),
+    meta_group_type = c(1L, 1L),
+    meta_group_p = c(0.25, 0.5),
+    meta_group_chol = c(1, 0, 0, 1)
+  ))
+  slots <- .meta_row_slots(1, prep)
+  expect_identical(slots$group_lower, c(11, 21))
+  expect_identical(slots$group_value, c(1.5, 2.5))
+  expect_identical(slots$group_chol, matrix(c(1, 0, 0, 1), 2, 2))
+})
+
 test_that(".meta_summary_terms predicts the first member of a covariance row", { # nolint: line_length_linter.
   args <- list(meanlog = 1.6, sdlog = 0.6)
   covariance <- matrix(c(0.4, 0.1, 0.1, 0.25), nrow = 2)
