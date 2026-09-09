@@ -2381,7 +2381,7 @@
 #' @inheritParams .meta_implied_summary_vector
 #'
 #' @returns A list with the `implied` summary vector and the covariance
-#'  matrix `covariance`, or `NULL` where the implied moments are not finite, the
+#'  matrix `sigma`, or `NULL` where the implied moments are not finite, the
 #'  nodes underflow or a quantile sits where the estimand has no density,
 #'  which the caller rejects.
 #'

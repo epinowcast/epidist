@@ -18,7 +18,7 @@ and draw, or \code{NULL} to compute it here.}
 }
 \value{
 A list with the \code{implied} summary vector and the covariance
-matrix \code{covariance}, or \code{NULL} where the implied moments are not finite, the
+matrix \code{sigma}, or \code{NULL} where the implied moments are not finite, the
 nodes underflow or a quantile sits where the estimand has no density,
 which the caller rejects.
 }
