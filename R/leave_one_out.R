@@ -81,9 +81,12 @@
 #' @returns A `tibble` with one row per held out study, row of `newdata` and
 #'  summary.
 #'  The columns are `study`, `.row`, any predictors of the model present in
-#'  `newdata`, `summary` (`"mean"` or `"sd"`), `estimate`, `lower` and `upper`
-#'  from the held out fit, `full_estimate`, `full_lower` and `full_upper` from
-#'  the full fit, `shift` and `influential`.
+#'  `newdata` other than `study` itself, `summary` (`"mean"` or `"sd"`),
+#'  `estimate`, `lower` and `upper` from the held out fit, `full_estimate`,
+#'  `full_lower` and `full_upper` from the full fit, `shift` and
+#'  `influential`.
+#'  `study` always names the held out study, even when `newdata` also has a
+#'  `study` column, such as one built with `epidist_newdata(meta, study)`.
 #'  The `width` attribute records the interval width.
 #'
 #' @seealso [delay_summary_draws()] for the summaries the comparison uses and
@@ -105,8 +108,7 @@
 #' )
 #' meta <- as_epidist_meta_model(estimates = estimates)
 #' fit <- epidist(
-#'   meta,
-#'   chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0)
+#'   meta, chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0)
 #' )
 #'
 #' # The formula does not use study, so pass the model data
@@ -139,13 +141,7 @@ epidist_leave_one_out <- function(
   held <- lapply(refits, .leave_one_out_summaries, newdata, re_formula, width)
   held <- bind_rows(held, .id = "study")
   out <- .leave_one_out_compare(held, full)
-  predictors <- intersect(.extract_dpar_terms(fit$formula), names(newdata))
-  newdata <- tibble::as_tibble(newdata)
-  out <- bind_cols(
-    out[c("study", ".row")],
-    newdata[out$.row, predictors, drop = FALSE],
-    out[setdiff(names(out), c("study", ".row"))]
-  )
+  out <- .leave_one_out_bind_predictors(out, newdata, fit$formula)
   attr(out, "width") <- width
   if (keep_fits) {
     attr(out, "fits") <- refits
@@ -321,6 +317,10 @@ epidist_leave_one_out <- function(
 #'
 #' @inheritParams epidist_leave_one_out
 #'
+#' @param newdata A `data.frame` of data to predict the delay for, passed to
+#'  [delay_summary_draws()].
+#'  Always an already resolved `data.frame`, never `NULL`.
+#'
 #' @returns A `tibble` with one row per row of `newdata` and summary, with
 #'  columns `.row`, `summary`, `estimate` (the posterior median), `lower`,
 #'  `upper` and `posterior_sd`.
@@ -380,4 +380,32 @@ epidist_leave_one_out <- function(
     "full_estimate", "full_lower", "full_upper", "shift", "influential"
   )]
   return(tibble::as_tibble(out))
+}
+
+#' Attach the model's predictors from `newdata` to a comparison
+#'
+#' `study` in `out` already names the held out study, so a `study` predictor
+#' in `newdata`, such as one built with `epidist_newdata(meta, study)`, is
+#' excluded to avoid a second column of the same name.
+#'
+#' @param out The comparison, as returned by [.leave_one_out_compare()], with
+#'  `study` and `.row` columns.
+#'
+#' @param newdata The `newdata` the comparison was built from.
+#'
+#' @param formula The `brms` formula of the fit, used to find its predictors.
+#'
+#' @returns `out` with any predictors of `formula` present in `newdata`,
+#'  other than `study`, added after `.row`.
+#'
+#' @keywords internal
+.leave_one_out_bind_predictors <- function(out, newdata, formula) {
+  predictors <- intersect(.extract_dpar_terms(formula), names(newdata))
+  predictors <- setdiff(predictors, "study")
+  newdata <- tibble::as_tibble(newdata)
+  return(bind_cols(
+    out[c("study", ".row")],
+    newdata[out$.row, predictors, drop = FALSE],
+    out[setdiff(names(out), c("study", ".row"))]
+  ))
 }

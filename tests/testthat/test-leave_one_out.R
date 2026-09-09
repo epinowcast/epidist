@@ -127,3 +127,37 @@ test_that(".leave_one_out_compare flags held out medians outside the interval", 
   expect_identical(out$shift, c(1, 0.5, 4, -0.5))
   expect_identical(out$influential, c(FALSE, FALSE, TRUE, FALSE))
 })
+
+test_that(".leave_one_out_bind_predictors attaches predictors present in newdata", { # nolint: line_length_linter.
+  formula <- mu ~ 1 + phase
+  out <- tibble::tibble(
+    study = c("A", "B"), .row = c(1L, 2L), summary = c("mean", "mean"),
+    estimate = c(1, 2)
+  )
+  newdata <- tibble::tibble(phase = c("pre", "post"), .row = c(1L, 2L))
+  bound <- .leave_one_out_bind_predictors(out, newdata, formula)
+  expect_named(
+    bound, c("study", ".row", "phase", "summary", "estimate")
+  )
+  expect_identical(bound$phase, newdata$phase)
+})
+
+test_that(".leave_one_out_bind_predictors keeps study as the held out label", { # nolint: line_length_linter.
+  # A study level term such as (1 | study) makes "study" a term of the
+  # formula, and newdata built with epidist_newdata(meta, study) carries a
+  # "study" column of its own; the held out label must not be overwritten
+  # or duplicated by it.
+  formula <- mu ~ 1 + phase + (1 | study)
+  out <- tibble::tibble(
+    study = c("A", "B"), .row = c(1L, 2L), summary = c("mean", "mean"),
+    estimate = c(1, 2)
+  )
+  newdata <- tibble::tibble(
+    phase = c("pre", "post"), study = c("X", "Y"), .row = c(1L, 2L)
+  )
+  bound <- .leave_one_out_bind_predictors(out, newdata, formula)
+  expect_named(
+    bound, c("study", ".row", "phase", "summary", "estimate")
+  )
+  expect_identical(bound$study, out$study)
+})

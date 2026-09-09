@@ -12,8 +12,7 @@ object.}
 
 \item{newdata}{A \code{data.frame} of data to predict the delay for, passed to
 \code{\link[=delay_summary_draws]{delay_summary_draws()}}.
-If \code{NULL}, the default, a single row giving the population level delay
-with no censoring and no truncation is built with \code{\link[=epidist_newdata]{epidist_newdata()}}.}
+Always an already resolved \code{data.frame}, never \code{NULL}.}
 
 \item{re_formula}{Passed to \code{\link[brms:prepare_predictions]{brms::prepare_predictions()}} through
 \code{\link[=delay_summary_draws]{delay_summary_draws()}}.

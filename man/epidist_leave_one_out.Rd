@@ -49,9 +49,12 @@ to \code{\link[brms:brm]{brms::brm()}}, such as \code{cores}, \code{chains}, \co
 A \code{tibble} with one row per held out study, row of \code{newdata} and
 summary.
 The columns are \code{study}, \code{.row}, any predictors of the model present in
-\code{newdata}, \code{summary} (\code{"mean"} or \code{"sd"}), \code{estimate}, \code{lower} and \code{upper}
-from the held out fit, \code{full_estimate}, \code{full_lower} and \code{full_upper} from
-the full fit, \code{shift} and \code{influential}.
+\code{newdata} other than \code{study} itself, \code{summary} (\code{"mean"} or \code{"sd"}),
+\code{estimate}, \code{lower} and \code{upper} from the held out fit, \code{full_estimate},
+\code{full_lower} and \code{full_upper} from the full fit, \code{shift} and
+\code{influential}.
+\code{study} always names the held out study, even when \code{newdata} also has a
+\code{study} column, such as one built with \code{epidist_newdata(meta, study)}.
 The \code{width} attribute records the interval width.
 }
 \description{
