@@ -1174,6 +1174,130 @@ test_that(".meta_grid_pmf reduces to the lower edge accrual weight for equal win
   )
 })
 
+test_that(".meta_implied_moments matches Monte Carlo accrual truncation with a partial last primary window", { # nolint: line_length_linter.
+  # A collection window of 30 days holds four complete weekly primary windows
+  # and a partial fifth of two days. Cases from the partial window only reach
+  # the cells below two days, and the complete windows stop being eligible
+  # for a delay at 30 - 7k rather than at the multiples of seven. Treating
+  # the partial window as complete put the implied mean 27% low here.
+  set.seed(124)
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  window <- 30
+  growth_rate <- 0.2
+  moments <- .meta_implied_moments(
+    "plnorm", args,
+    cutoff = window, pwindow = 7, swindow = 7,
+    trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = growth_rate,
+    trunc_design = 1L
+  )
+  n_sim <- 2e6
+  ptime <- sim_accrual_ptime(n_sim, window, growth_rate)
+  delay <- rlnorm(n_sim, args$meanlog, args$sdlog)
+  keep <- ptime + delay <= window
+  ptime <- ptime[keep]
+  delay <- delay[keep]
+  obs <- 7 * (floor((ptime + delay) / 7) - floor(ptime / 7))
+  expect_equal(moments[["mean"]], mean(obs), tolerance = 0.02)
+  expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.02)
+})
+
+test_that(".meta_implied_moments matches Monte Carlo accrual truncation with a partial last primary window under every window pairing", { # nolint: line_length_linter.
+  set.seed(125)
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  window <- 30
+  n_sim <- 2e6
+  designs <- data.frame(
+    growth_rate = c(0, 0.2, 0.2, 0, 0),
+    pwindow = c(7, 7, 1, 7, 1),
+    swindow = c(7, 1, 7, 1, 7)
+  )
+  for (row in seq_len(nrow(designs))) {
+    growth_rate <- designs$growth_rate[row]
+    pwindow <- designs$pwindow[row]
+    swindow <- designs$swindow[row]
+    moments <- .meta_implied_moments(
+      "plnorm", args,
+      cutoff = window, pwindow = pwindow, swindow = swindow,
+      trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = growth_rate,
+      trunc_design = 1L
+    )
+    ptime <- sim_accrual_ptime(n_sim, window, growth_rate)
+    delay <- rlnorm(n_sim, args$meanlog, args$sdlog)
+    keep <- ptime + delay <= window
+    ptime <- ptime[keep]
+    delay <- delay[keep]
+    if (pwindow == swindow) {
+      obs <- swindow *
+        (floor((ptime + delay) / swindow) - floor(ptime / pwindow))
+    } else if (pwindow < swindow) {
+      daily <- floor(ptime + delay) - floor(ptime)
+      obs <- swindow * floor(daily / swindow)
+    } else {
+      obs <- floor(ptime + delay) - pwindow * floor(ptime / pwindow)
+    }
+    expect_equal(moments[["mean"]], mean(obs), tolerance = 0.02)
+    expect_equal(moments[["sd"]], stats::sd(obs), tolerance = 0.02)
+  }
+})
+
+test_that(".meta_grid_pmf keeps the piecewise weight when the cutoff is a multiple of pwindow", { # nolint: line_length_linter.
+  # With no partial primary window the complete windows stop being eligible
+  # at the multiples of pwindow, so the grid reduces to the cells cut at
+  # those multiples with each piece weighted by the follow up at the primary
+  # window it starts in.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  piecewise <- function(cutoff, pwindow, swindow, growth_rate) {
+    boundary <- seq(0, floor(cutoff / swindow)) * swindow
+    multiple <- pwindow * seq(0, floor(cutoff / pwindow))
+    edge <- sort(unique(c(boundary, multiple)))
+    cdf <- .meta_pcens_cdf(edge, "plnorm", args, pwindow, growth_rate)
+    piece_start <- edge[-length(edge)]
+    piece <- pmax(diff(cdf), 0) *
+      .meta_accrual_weight(
+        pwindow * floor(piece_start / pwindow), cutoff, growth_rate
+      )
+    mass <- as.numeric(rowsum(piece, floor(piece_start / swindow)))
+    return(mass / sum(mass))
+  }
+  designs <- data.frame(pwindow = c(7, 7, 1), swindow = c(7, 1, 7))
+  for (row in seq_len(nrow(designs))) {
+    pwindow <- designs$pwindow[row]
+    swindow <- designs$swindow[row]
+    expect_equal(
+      .meta_grid_pmf(
+        "plnorm", args,
+        cutoff = 28, pwindow = pwindow, swindow = swindow, growth_rate = 0.2,
+        accrual = 1L
+      ),
+      piecewise(28, pwindow, swindow, 0.2),
+      tolerance = 1e-12
+    )
+  }
+})
+
+test_that(".meta_grid_pmf with a partial last primary window drops the cells below the minimum delay", { # nolint: line_length_linter.
+  # A minimum delay below the length of the partial window keeps some of the
+  # cells it reaches, so the left truncated grid must be the full grid with
+  # its lowest cells dropped and renormalised.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  full <- .meta_grid_pmf(
+    "plnorm", args,
+    cutoff = 30, pwindow = 7, swindow = 1, growth_rate = 0.1, accrual = 1L
+  )
+  for (lower in c(1, 3)) {
+    kept <- full[-seq_len(lower)]
+    expect_equal(
+      .meta_grid_pmf(
+        "plnorm", args,
+        lower = lower, cutoff = 30, pwindow = 7, swindow = 1,
+        growth_rate = 0.1, accrual = 1L
+      ),
+      kept / sum(kept),
+      tolerance = 1e-12
+    )
+  }
+})
+
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation of a continuous estimand", { # nolint: line_length_linter.
   set.seed(122)
   args <- list(meanlog = 1.6, sdlog = 0.5)
