@@ -3804,19 +3804,23 @@ test_that("the meta model log likelihood uses the fitted primary event for indiv
   expected <- vapply(
     seq_len(prep$ndraws),
     function(draw) {
-      return(primarycensored::dpcens(
-        x = 5,
-        pdist = stats::plnorm,
-        pwindow = 1,
-        swindow = 1,
-        L = 2,
-        D = 12,
-        dprimary = primarycensored::dexpgrowth,
-        dprimary_args = list(r = prep$dpars$pgrowth[draw, 1]),
-        log = TRUE,
-        meanlog = 1.5,
-        sdlog = 0.5
-      ))
+      return(do.call(primarycensored::dpcens, c(
+        list(
+          x = 5,
+          pdist = stats::plnorm,
+          pwindow = 1,
+          swindow = 1,
+          L = 2,
+          D = 12,
+          dprimary = primarycensored::dexpgrowth,
+          log = TRUE,
+          meanlog = 1.5,
+          sdlog = 0.5
+        ),
+        stats::setNames(
+          list(list(r = prep$dpars$pgrowth[draw, 1])), .primary_args_name()
+        )
+      )))
     },
     numeric(1)
   )

@@ -292,18 +292,26 @@ test_that( # nolint: line_length_linter.
 )
 
 test_that("the generic log likelihood rejects a delay beyond the observation time", { # nolint: line_length_linter.
-  # dpcens() errors on this, and the refactor integrates with pcens_cdf()
-  # instead, so the same guard has to be applied here. Without it the
-  # truncation normalisation can return a density above one.
+  # `dpcens()` will not give a usable answer for an upper bound beyond D, and
+  # the refactor integrates with `pcens_cdf()` instead, so the same guard has
+  # to be applied here. Without it the truncation normalisation can return a
+  # density above one.
   skip_on_cran()
 
-  expect_error(
-    primarycensored::dpcens(
+  upper_beyond_d <- function() {
+    return(primarycensored::dpcens(
       x = 5, pdist = stats::plnorm, meanlog = 1.5, sdlog = 0.5,
       pwindow = 1, swindow = 1, D = 5.5, dprimary = stats::dunif
-    ),
-    "Upper truncation point is greater than D"
-  )
+    ))
+  }
+  # primarycensored errored on this until 1.5.2, which clips the interval at
+  # D and returns a density instead. Either way it refuses to answer the
+  # question as asked, which is what the guard below is for.
+  if (package_version(getNamespaceVersion("primarycensored")) < "1.5.2") {
+    expect_error(upper_beyond_d(), "Upper truncation point is greater than D")
+  } else {
+    expect_message(upper_beyond_d(), "clipping the upper end")
+  }
 
   log_lik <- epidist_gen_log_lik(epidist_family(prep_obs))
   prep <- list(
@@ -342,19 +350,23 @@ test_that("the post-processing uses the primary event distribution of the fit", 
   expected <- vapply(
     seq_len(prep$ndraws),
     function(draw) {
-      return(primarycensored::dpcens(
-        x = 5,
-        pdist = stats::plnorm,
-        pwindow = 1,
-        swindow = 1,
-        L = 2,
-        D = 12,
-        dprimary = primarycensored::dexpgrowth,
-        dprimary_args = list(r = prep$dpars$pgrowth[draw, 1]),
-        log = TRUE,
-        meanlog = 1.5,
-        sdlog = 0.5
-      ))
+      return(do.call(primarycensored::dpcens, c(
+        list(
+          x = 5,
+          pdist = stats::plnorm,
+          pwindow = 1,
+          swindow = 1,
+          L = 2,
+          D = 12,
+          dprimary = primarycensored::dexpgrowth,
+          log = TRUE,
+          meanlog = 1.5,
+          sdlog = 0.5
+        ),
+        stats::setNames(
+          list(list(r = prep$dpars$pgrowth[draw, 1])), .primary_args_name()
+        )
+      )))
     },
     numeric(1)
   )

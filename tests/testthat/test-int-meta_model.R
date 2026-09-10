@@ -920,19 +920,21 @@ test_that("epidist.epidist_meta_model with an expgrowth primary event recovers t
       lpdf <- vapply(
         seq_len(prep$ndraws),
         function(draw) {
-          return(primarycensored::dpcens(
-            x = prep$data$Y[i],
-            pdist = stats::plnorm,
-            pwindow = prep$data$vreal2[i],
-            swindow = prep$data$vreal3[i],
-            L = prep$data$vreal5[i],
-            D = prep$data$vreal1[i],
-            dprimary = primarycensored::dexpgrowth,
-            dprimary_args = list(r = pgrowth[draw]),
-            log = TRUE,
-            meanlog = mu[draw],
-            sdlog = sdlog_draw[draw]
-          ))
+          return(do.call(primarycensored::dpcens, c(
+            list(
+              x = prep$data$Y[i],
+              pdist = stats::plnorm,
+              pwindow = prep$data$vreal2[i],
+              swindow = prep$data$vreal3[i],
+              L = prep$data$vreal5[i],
+              D = prep$data$vreal1[i],
+              dprimary = primarycensored::dexpgrowth,
+              log = TRUE,
+              meanlog = mu[draw],
+              sdlog = sdlog_draw[draw]
+            ),
+            stats::setNames(list(list(r = pgrowth[draw])), .primary_args_name())
+          )))
         },
         numeric(1)
       )
