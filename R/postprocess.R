@@ -179,13 +179,14 @@ add_delay_parameter_draws <- function(newdata, object, ...) {
 #' delay_summary_draws(fit, probs = c(0.05, 0.95))
 #' }
 delay_summary_draws <- function(
-    object,
-    newdata = NULL,
-    vars = NULL,
-    probs = NULL,
-    method = c("auto", "analytic", "sample"),
-    nsim = 1000,
-    ...) {
+  object,
+  newdata = NULL,
+  vars = NULL,
+  probs = NULL,
+  method = c("auto", "analytic", "sample"),
+  nsim = 1000,
+  ...
+) {
   method <- match.arg(method)
   if (is.null(newdata)) {
     newdata <- epidist_strata(object, vars = vars)
@@ -385,11 +386,12 @@ epidist_strata <- function(object, vars = NULL) {
 #' draws <- data.frame(mu = c(1.8, 2.0), sigma = c(0.5, 0.4))
 #' add_summaries(draws, family = "lognormal", probs = c(0.05, 0.95))
 add_summaries <- function(
-    data,
-    family = NULL,
-    probs = NULL,
-    method = c("auto", "analytic", "sample"),
-    nsim = 1000) {
+  data,
+  family = NULL,
+  probs = NULL,
+  method = c("auto", "analytic", "sample"),
+  nsim = 1000
+) {
   method <- match.arg(method)
   assert_data_frame(data)
   assert_numeric(

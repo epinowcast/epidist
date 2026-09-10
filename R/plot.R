@@ -336,16 +336,17 @@ plot.epidist_delay_draws <- function(x, ...) {
 #' @rdname plot.epidist_delay_draws
 #' @exportS3Method ggplot2::autoplot
 autoplot.epidist_delay_draws <- function(
-    object,
-    type = c("parameters", "delay"),
-    by = NULL,
-    pars = NULL,
-    true_values = NULL,
-    ndraws = NULL,
-    probs = c(0.05, 0.95),
-    max_delay = NULL,
-    family = NULL,
-    ...) {
+  object,
+  type = c("parameters", "delay"),
+  by = NULL,
+  pars = NULL,
+  true_values = NULL,
+  ndraws = NULL,
+  probs = c(0.05, 0.95),
+  max_delay = NULL,
+  family = NULL,
+  ...
+) {
   .check_ggplot2()
   type <- match.arg(type)
   family <- .resolve_delay_family(object, family)
