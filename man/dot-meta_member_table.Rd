@@ -4,22 +4,33 @@
 \alias{.meta_member_table}
 \title{Build the member table of one joint likelihood group}
 \usage{
-.meta_member_table(estimates, count)
+.meta_member_table(estimates, count, lower = 0L)
 }
 \arguments{
 \item{estimates}{The rows of an \code{epidist_estimates_data} object making up
 one group, already ordered.}
 
 \item{count}{The cumulative counts the multinomial quantile likelihood
-uses, or zeros for a group that does not use it.}
+uses, the largest counts below each reported day for quantiles of
+integer day delays, or zeros for a group that uses neither.}
+
+\item{lower}{The smallest counts at or below each reported day for
+quantiles of integer day delays, or zeros otherwise.}
 }
 \value{
-A tibble of member \code{value}, \code{count}, \code{type} and \code{p} columns.
+A tibble of member \code{value}, \code{count}, \code{lower}, \code{type} and \code{p}
+columns.
 }
 \description{
 The member type and probability are carried alongside the reported value
 because a group covered by a covariance matrix may mix means, standard
 deviations and quantiles, so the likelihood needs to know which implied
 summary each member is.
+}
+\details{
+A set of quantiles of integer day delays carries the box each reported
+day puts on the study's cumulative counts: \code{count} is the largest number
+of delays the study can have seen below the day and \code{lower} the smallest
+at or below it. See \code{\link[=.meta_grid_box_ll]{.meta_grid_box_ll()}}.
 }
 \keyword{internal}
