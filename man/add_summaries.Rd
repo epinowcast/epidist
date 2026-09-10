@@ -66,9 +66,9 @@ add_summaries(draws, family = "lognormal", probs = c(0.05, 0.95))
 }
 \seealso{
 Other postprocess: 
+\code{\link{as_dist_spec.epidist_fit}()},
 \code{\link{delay_parameter_draws}()},
 \code{\link{delay_summary_draws}()},
-\code{\link{epidist_dist_spec}()},
 \code{\link{epidist_strata}()}
 }
 \concept{postprocess}

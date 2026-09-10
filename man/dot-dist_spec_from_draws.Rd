@@ -4,13 +4,7 @@
 \alias{.dist_spec_from_draws}
 \title{Summarise draws of the delay parameters into a \verb{<dist_spec>}}
 \usage{
-.dist_spec_from_draws(
-  draws,
-  family,
-  representation = c("independent", "joint"),
-  max = Inf,
-  cdf_max = 1
-)
+.dist_spec_from_draws(draws, family, max = Inf, cdf_max = 1)
 }
 \arguments{
 \item{draws}{A \code{data.frame} of draws of the \code{brms} parameters of the
@@ -19,10 +13,6 @@ result of \code{\link[=delay_parameter_draws]{delay_parameter_draws()}}.}
 
 \item{family}{A list describing the family, as returned by
 \code{.dist_spec_family()}.}
-
-\item{representation}{Either \code{"independent"}, the default, which gives
-each natural parameter its own \code{\link[distspec:Normal]{distspec::Normal()}} prior, or \code{"joint"},
-which gives them a single \code{MultiNormal()} prior. See the details.}
 
 \item{max}{The maximum of the delay distribution, passed to
 \code{\link[distspec:bound_dist]{distspec::bound_dist()}}. Defaults to \code{Inf}, which is no maximum.}

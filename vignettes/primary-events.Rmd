@@ -64,7 +64,7 @@ growth_rate <- 0.5
 window <- 3
 
 obs <- simulate_exponential_cases(r = growth_rate, sample_size = 500) |>
-  simulate_secondary(meanlog = meanlog, sdlog = sdlog) |>
+  simulate_secondary(distspec::LogNormal(meanlog, sdlog)) |>
   simulate_dates(
     outbreak_start_date = as.Date("2024-01-01"), primary_window = window
   )
@@ -151,7 +151,7 @@ locations <- c(a = 0.2, b = 0.5, c = 0.8)
 
 by_location <- purrr::imap(locations, function(r, location) {
   sim <- simulate_exponential_cases(r = r, sample_size = 300, seed = 1) |>
-    simulate_secondary(meanlog = meanlog, sdlog = sdlog) |>
+    simulate_secondary(distspec::LogNormal(meanlog, sdlog)) |>
     simulate_dates(
       outbreak_start_date = as.Date("2024-01-01"), primary_window = window
     )

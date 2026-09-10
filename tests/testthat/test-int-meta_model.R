@@ -862,7 +862,7 @@ test_that("epidist.epidist_meta_model with an expgrowth primary event recovers t
   obs <- simulate_exponential_cases(
     r = growth_rate, sample_size = 500, seed = 101
   ) |>
-    simulate_secondary(meanlog = meanlog, sdlog = sdlog) |>
+    simulate_secondary(distspec::LogNormal(meanlog, sdlog)) |>
     simulate_dates(outbreak_start_date = as.Date("2024-01-01"))
   linelist <- suppressMessages(as_epidist_linelist_data(obs))
   growth_prior <- brms::prior(

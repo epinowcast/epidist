@@ -8,11 +8,14 @@ See #489 and #618.
 
 ## Features
 
-- Added `epidist_dist_spec()`, which exports a fitted delay distribution as an uncertain `<dist_spec>` from the `distspec` package.
-The natural parameters of the delay distribution are computed for each posterior draw and summarised into a `Normal()` prior on each, or into a single `MultiNormal()` prior on all of them with `representation = "joint"` when the installed `distspec` provides it.
-It is also registered as the `distspec::as_dist_spec()` method for fitted models.
-`distspec` is a suggested package, so it is only needed to use this.
-See `?epidist_dist_spec` and epiforecasts/distspec#140.
+- Added a `distspec::as_dist_spec()` method for fitted models, which exports a fitted delay distribution as an uncertain `<dist_spec>`.
+The natural parameters of the delay distribution are computed for each posterior draw and summarised into a `Normal()` prior on each.
+The generic is re-exported, so `as_dist_spec(fit)` works with `epidist` alone.
+See `?as_dist_spec.epidist_fit` and epiforecasts/distspec#140.
+- `simulate_secondary()` now takes its delay distribution as a `<dist_spec>` rather than a random number generator, so `simulate_secondary(dist = rlnorm, meanlog = 1.8, sdlog = 0.5)` becomes `simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5))`.
+A `<dist_spec>` with uncertain parameters, such as one exported from a fit with `as_dist_spec()`, has its parameters resolved once per row, so the simulated delays carry the parameter uncertainty.
+`distspec` is now an imported package.
+This is a breaking change.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
 It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
 Each step is still available on its own.

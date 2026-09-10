@@ -53,8 +53,8 @@ epidist_strata(fit)
 \seealso{
 Other postprocess: 
 \code{\link{add_summaries}()},
+\code{\link{as_dist_spec.epidist_fit}()},
 \code{\link{delay_parameter_draws}()},
-\code{\link{delay_summary_draws}()},
-\code{\link{epidist_dist_spec}()}
+\code{\link{delay_summary_draws}()}
 }
 \concept{postprocess}

@@ -136,9 +136,10 @@ To generate secondary events, we will use a lognormal distribution (Figure \@ref
 ```{r}
 obs <- simulate_secondary(
   outbreak,
-  dist = rlnorm,
-  meanlog = secondary_dist[["mu"]],
-  sdlog = secondary_dist[["sigma"]]
+  distspec::LogNormal(
+    meanlog = secondary_dist[["mu"]],
+    sdlog = secondary_dist[["sigma"]]
+  )
 )
 ```
 

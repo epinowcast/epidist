@@ -125,15 +125,28 @@ simulate_gillespie <- function(
 
 #' Simulate secondary events based on a delay distribution
 #'
-#' This function simulates secondary events based on a given delay
-#' distribution. The input dataset should have the primary event times in a
-#' column named `ptime`.
+#' This function simulates secondary events from a delay distribution given as
+#' a `<dist_spec>` from the `distspec` package. The input dataset should have
+#' the primary event times in a column named `ptime`.
+#'
+#' @details
+#' Delays are drawn with [distspec::sample_dist()]. When `dist` has uncertain
+#' parameters, as returned by [as_dist_spec.epidist_fit()], the parameters are
+#' resolved once per row with [distspec::fix_parameters()] before the delay is
+#' drawn. The simulated delays then carry the parameter uncertainty as well as
+#' the spread of the delay distribution itself.
+#'
+#' Bounds set with `max` or `cdf_max` are not applied when sampling, so a
+#' bounded `dist` gives the same delays as an unbounded one.
+#'
+#' `distspec` supports a fixed set of distributions. Open an issue at
+#' <https://github.com/epiforecasts/distspec/issues> to ask for another one.
 #'
 #' @param data A data frame with the primary event times.
 #'
-#' @param dist The delay distribution to be used. Defaults to [rlnorm()].
-#'
-#' @param ... Arguments to be passed to the delay distribution function.
+#' @param dist The delay distribution to be used, as a `<dist_spec>` built with
+#'  a `distspec` constructor such as [distspec::LogNormal()], or returned by
+#'  [as_dist_spec.epidist_fit()].
 #'
 #' @return A `data.frame` that augments `data` with two new columns: `delay`
 #'  (secondary event latency) and `stime` (the time of the secondary event).
@@ -141,14 +154,75 @@ simulate_gillespie <- function(
 #' @family simulate
 #' @autoglobal
 #' @importFrom dplyr mutate
+#' @importFrom checkmate assert_class
 #' @export
-simulate_secondary <- function(data, dist = rlnorm, ...) {
+#' @examples
+#' simulate_gillespie(seed = 1) |>
+#'   simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
+#'   head()
+#'
+#' # An uncertain delay distribution, such as one exported from a fit with
+#' # as_dist_spec(), is resolved once per row
+#' simulate_gillespie(seed = 1) |>
+#'   simulate_secondary(
+#'     distspec::LogNormal(
+#'       meanlog = distspec::Normal(mean = 1.8, sd = 0.1),
+#'       sdlog = 0.5
+#'     )
+#'   ) |>
+#'   head()
+simulate_secondary <- function(data, dist) {
+  if (is.function(dist)) {
+    cli::cli_abort(c(
+      "{.arg dist} must be a {.cls dist_spec}, not a function.",
+      i = "Build one with a {.pkg distspec} constructor, so
+           {.code distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)} in place of
+           {.code dist = rlnorm, meanlog = 1.8, sdlog = 0.5}."
+    ))
+  }
+  assert_class(dist, "dist_spec")
+  if (distspec::ndist(dist) != 1) {
+    cli::cli_abort(
+      "{.arg dist} must be a single delay distribution, not
+       {distspec::ndist(dist)}."
+    )
+  }
   sim_data <- data |>
     mutate(
-      delay = dist(dplyr::n(), ...),
+      delay = .sample_delays(dist, dplyr::n()),
       stime = .data$ptime + .data$delay
     )
   return(sim_data)
+}
+
+#' Draw delays from a `<dist_spec>`
+#'
+#' Draws `n` delays from `dist`. An uncertain `dist` has its parameters
+#' resolved once per delay, so the draws carry the parameter uncertainty.
+#'
+#' @inheritParams simulate_secondary
+#'
+#' @param n The number of delays to draw.
+#'
+#' @return A numeric vector of length `n`.
+#'
+#' @keywords internal
+.sample_delays <- function(dist, n) {
+  if (n == 0) {
+    return(numeric(0))
+  }
+  if (!distspec::has_uncertainty(dist)) {
+    return(as.numeric(distspec::sample_dist(dist, n)))
+  }
+  delays <- vapply(
+    seq_len(n),
+    function(i) {
+      fixed <- distspec::fix_parameters(dist, strategy = "sample")
+      return(as.numeric(distspec::sample_dist(fixed, 1)))
+    },
+    numeric(1)
+  )
+  return(delays)
 }
 
 #' Convert simulated event times to dates
@@ -196,7 +270,7 @@ simulate_secondary <- function(data, dist = rlnorm, ...) {
 #' @export
 #' @examples
 #' simulate_gillespie(seed = 1) |>
-#'   simulate_secondary(meanlog = 1.8, sdlog = 0.5) |>
+#'   simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
 #'   simulate_dates(outbreak_start_date = as.Date("2024-02-01")) |>
 #'   head()
 simulate_dates <- function(

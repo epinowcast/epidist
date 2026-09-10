@@ -3,19 +3,15 @@
 #' @description
 #' Summarises the posterior of a fitted delay distribution into an uncertain
 #' `<dist_spec>` from the `distspec` package, for use in packages that take
-#' their delay distributions in that form. The natural parameters of the
-#' delay distribution are computed for each posterior draw and summarised
-#' into a prior on each of them. The `distspec` package is not required to
-#' install `epidist`, so install it separately to use this.
-#'
-#' `epidist_dist_spec()` is also registered as the `distspec::as_dist_spec()`
-#' method for fitted models, so `as_dist_spec(fit)` gives the same result
-#' once `distspec` is loaded.
+#' their delay distributions in that form. The natural parameters of the delay
+#' distribution are computed for each posterior draw and summarised into a
+#' prior on each of them.
 #'
 #' @details
-#' The lognormal, gamma and Weibull families are supported. Their `brms`
-#' parameters are mapped to the natural parameters of the matching `distspec`
-#' constructor for every draw before summarising:
+#' The lognormal, gamma and Weibull families are supported, as those are the
+#' delay distributions `distspec` has. Their `brms` parameters are mapped to
+#' the natural parameters of the matching `distspec` constructor for every
+#' draw before summarising:
 #'
 #' * lognormal: `mu` is `meanlog` and `sigma` is `sdlog` of
 #'   [distspec::LogNormal()].
@@ -24,18 +20,13 @@
 #' * Weibull: `shape` is `shape` and `mu / gamma(1 + 1 / shape)` is `scale`
 #'   of [distspec::Weibull()].
 #'
-#' With `representation = "independent"`, the default, each natural
-#' parameter gets a [distspec::Normal()] prior with the mean and standard
-#' deviation of its marginal posterior. The posterior correlation between the
-#' parameters is not represented, so sampling from the result gives a wider
-#' range of delay distributions than the posterior does.
+#' Open an issue at <https://github.com/epiforecasts/distspec/issues> to ask
+#' `distspec` for another distribution.
 #'
-#' With `representation = "joint"`, the natural parameters get a single
-#' `MultiNormal()` prior built from the posterior mean vector and covariance
-#' matrix, which keeps the correlation. This needs a version of `distspec`
-#' that provides `MultiNormal()`, which `distspec` 0.2.0 does not. The
-#' function errors when it is not available rather than falling back, so the
-#' representation of a result is always the one asked for.
+#' Each natural parameter gets a [distspec::Normal()] prior with the mean and
+#' standard deviation of its marginal posterior. The posterior correlation
+#' between the parameters is not represented, so sampling from the result
+#' gives a wider range of delay distributions than the posterior does.
 #'
 #' The default `newdata` is built with [epidist_newdata()] by expanding the
 #' variables in the model formula into a grid, so it has one row per unique
@@ -46,16 +37,12 @@
 #'
 #' @inheritParams delay_parameter_draws
 #'
-#' @param object A model fit with [epidist()].
+#' @param x A model fit with [epidist()].
 #'
 #' @param newdata A `data.frame` of data to predict for, with one row per
 #'  delay distribution wanted. If `NULL`, the default, [epidist_newdata()]
 #'  builds one row per unique combination of the predictors, with no
 #'  censoring and no truncation. See the details.
-#'
-#' @param representation Either `"independent"`, the default, which gives
-#'  each natural parameter its own [distspec::Normal()] prior, or `"joint"`,
-#'  which gives them a single `MultiNormal()` prior. See the details.
 #'
 #' @param max The maximum of the delay distribution, passed to
 #'  [distspec::bound_dist()]. Defaults to `Inf`, which is no maximum.
@@ -70,11 +57,12 @@
 #'  of the columns of `newdata` that differ between rows, such as `"sex=0"`,
 #'  and are the row numbers when no column differs.
 #'
-#' @seealso [delay_parameter_draws()] for the draws this summarises, and
-#'  [epidist_newdata()] to build `newdata`.
+#' @seealso [delay_parameter_draws()] for the draws this summarises,
+#'  [epidist_newdata()] to build `newdata`, and [simulate_secondary()] to
+#'  simulate delays from the result.
 #'
-#' @export
-#' @examplesIf requireNamespace("distspec", quietly = TRUE)
+#' @exportS3Method distspec::as_dist_spec
+#' @examples
 #' \donttest{
 #' fit <- sierra_leone_ebola_data |>
 #'   as_epidist_linelist_data(
@@ -85,45 +73,34 @@
 #'   as_epidist_marginal_model() |>
 #'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
 #'
-#' dist <- epidist_dist_spec(fit, max = 60)
+#' dist <- as_dist_spec(fit, max = 60)
 #' dist
 #'
 #' # The delay distribution at the posterior mean of its parameters
 #' distspec::fix_parameters(dist, strategy = "mean")
 #'
-#' # The same through the distspec generic
-#' distspec::as_dist_spec(fit)
+#' # Simulate delays that carry the posterior uncertainty
+#' simulate_gillespie(seed = 1) |>
+#'   simulate_secondary(dist) |>
+#'   head()
 #' }
-epidist_dist_spec <- function(
-  object,
+as_dist_spec.epidist_fit <- function(
+  x,
   newdata = NULL,
-  representation = c("independent", "joint"),
   max = Inf,
   cdf_max = 1,
   ...
 ) {
-  .check_distspec()
-  assert_class(object, "epidist_fit")
-  representation <- match.arg(representation)
-  if (identical(representation, "joint") && !.has_multi_normal()) {
-    cli_abort(c(
-      "The joint representation needs {.fn distspec::MultiNormal}, which
-       {.pkg distspec} {utils::packageVersion('distspec')} does not provide.",
-      i = "Install a newer {.pkg distspec}, or use
-           {.code representation = \"independent\"}."
-    ))
-  }
   if (is.null(newdata)) {
-    newdata <- .fit_newdata(object)
+    newdata <- .fit_newdata(x)
   }
-  spec_family <- .dist_spec_family(.delay_family(object$family)$name)
-  draws <- delay_parameter_draws(object, newdata = newdata, ...)
+  spec_family <- .dist_spec_family(.delay_family(x$family)$name)
+  draws <- delay_parameter_draws(x, newdata = newdata, ...)
   draws <- dplyr::ungroup(draws)
   dists <- lapply(
     split(draws, draws$.row),
     .dist_spec_from_draws,
     family = spec_family,
-    representation = representation,
     max = max,
     cdf_max = cdf_max
   )
@@ -132,15 +109,6 @@ epidist_dist_spec <- function(
   }
   names(dists) <- .stratum_names(newdata)
   return(dists)
-}
-
-#' @rdname epidist_dist_spec
-#'
-#' @param x A model fit with [epidist()].
-#'
-#' @exportS3Method distspec::as_dist_spec
-as_dist_spec.epidist_fit <- function(x, ...) {
-  return(epidist_dist_spec(x, ...))
 }
 
 #' The `distspec` constructor and natural parameters of a delay family
@@ -185,7 +153,9 @@ as_dist_spec.epidist_fit <- function(x, ...) {
   if (!name %in% names(families)) {
     cli_abort(c(
       "The {.val {name}} family cannot be exported as a {.cls dist_spec}.",
-      i = "The supported families are {.val {names(families)}}."
+      i = "The supported families are {.val {names(families)}}.",
+      "*" = "Ask {.pkg distspec} for {.val {name}} at
+             {.url https://github.com/epiforecasts/distspec/issues}."
     ))
   }
   return(c(list(name = name), families[[name]]))
@@ -193,7 +163,7 @@ as_dist_spec.epidist_fit <- function(x, ...) {
 
 #' Summarise draws of the delay parameters into a `<dist_spec>`
 #'
-#' @inheritParams epidist_dist_spec
+#' @inheritParams as_dist_spec.epidist_fit
 #'
 #' @param draws A `data.frame` of draws of the `brms` parameters of the
 #'  delay distribution for a single row of `newdata`, as one group of the
@@ -205,14 +175,7 @@ as_dist_spec.epidist_fit <- function(x, ...) {
 #' @return A `<dist_spec>`.
 #'
 #' @keywords internal
-.dist_spec_from_draws <- function(
-  draws,
-  family,
-  representation = c("independent", "joint"),
-  max = Inf,
-  cdf_max = 1
-) {
-  representation <- match.arg(representation)
+.dist_spec_from_draws <- function(draws, family, max = Inf, cdf_max = 1) {
   .assert_dpars(draws, family$name, family$dpars)
   if (nrow(draws) < 2) {
     cli_abort(
@@ -221,78 +184,14 @@ as_dist_spec.epidist_fit <- function(x, ...) {
     )
   }
   natural <- family$natural(as.list(draws)[family$dpars])
-  if (identical(representation, "joint")) {
-    params <- .joint_prior(natural)
-  } else {
-    params <- lapply(natural, function(p) {
-      return(distspec::Normal(mean = mean(p), sd = stats::sd(p)))
-    })
-  }
+  # Each parameter gets its own prior, so the posterior correlation between
+  # them is lost. A joint prior needs a multivariate normal, which distspec
+  # does not have yet: see epiforecasts/distspec#140.
+  params <- lapply(natural, function(p) {
+    return(distspec::Normal(mean = mean(p), sd = stats::sd(p)))
+  })
   constructor <- get(family$constructor, envir = asNamespace("distspec"))
   return(do.call(constructor, c(params, list(max = max, cdf_max = cdf_max))))
-}
-
-#' A joint prior on the natural parameters from their draws
-#'
-#' Builds a `distspec::MultiNormal()` from the posterior mean vector and
-#' covariance matrix of the natural parameters, and returns it once per
-#' parameter so that the constructor receives the same object for each.
-#'
-#' @param natural A named list of draws of the natural parameters.
-#'
-#' @return A named list with one element per natural parameter, each the
-#'  same `MultiNormal()` object.
-#'
-#' @keywords internal
-.joint_prior <- function(natural) {
-  draws <- do.call(cbind, natural)
-  multi_normal <- .multi_normal()
-  joint <- multi_normal(mean = colMeans(draws), sigma = stats::cov(draws))
-  params <- rep(list(joint), length(natural))
-  names(params) <- names(natural)
-  return(params)
-}
-
-#' The `MultiNormal()` constructor of the installed `distspec`
-#'
-#' @return The `distspec::MultiNormal()` function.
-#'
-#' @keywords internal
-.multi_normal <- function() {
-  return(get("MultiNormal", envir = asNamespace("distspec")))
-}
-
-#' Whether the installed `distspec` provides `MultiNormal()`
-#'
-#' @return A logical scalar.
-#'
-#' @keywords internal
-.has_multi_normal <- function() {
-  return(exists("MultiNormal", envir = asNamespace("distspec")))
-}
-
-#' Whether `distspec` is installed
-#'
-#' @return A logical scalar.
-#'
-#' @keywords internal
-.has_distspec <- function() {
-  return(requireNamespace("distspec", quietly = TRUE))
-}
-
-#' Error unless `distspec` is installed
-#'
-#' @return `TRUE`, invisibly.
-#'
-#' @keywords internal
-.check_distspec <- function() {
-  if (!.has_distspec()) {
-    cli_abort(c(
-      "The {.pkg distspec} package is needed to export a delay distribution.",
-      i = "Install it with {.code install.packages(\"distspec\")}."
-    ))
-  }
-  return(invisible(TRUE))
 }
 
 #' Default `newdata` for a fitted model
@@ -303,7 +202,7 @@ as_dist_spec.epidist_fit <- function(x, ...) {
 #' a model was fitted to as a plain `data.frame`, so the `epidist` class is
 #' restored from the family name first.
 #'
-#' @inheritParams epidist_dist_spec
+#' @param object A model fit with [epidist()].
 #'
 #' @return A [tibble::tibble()] of `newdata`.
 #'
@@ -328,7 +227,7 @@ as_dist_spec.epidist_fit <- function(x, ...) {
 
 #' Name the rows of `newdata` by the columns that differ between them
 #'
-#' @inheritParams epidist_dist_spec
+#' @inheritParams as_dist_spec.epidist_fit
 #'
 #' @return A character vector with one element per row of `newdata`.
 #'
