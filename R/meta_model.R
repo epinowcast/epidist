@@ -384,6 +384,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
   return(tibble(
     value = numeric(0),
     count = integer(0),
+    lower = integer(0),
     type = integer(0),
     p = numeric(0)
   ))
@@ -398,7 +399,8 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #'
 #' @param data An `epidist_meta_model` object.
 #'
-#' @param members A tibble of member `value`, `count`, `type` and `p` columns.
+#' @param members A tibble of member `value`, `count`, `lower`, `type` and
+#'  `p` columns.
 #'
 #' @param chol A flat numeric vector of Cholesky factor entries, in column
 #'  major order, for the groups covered by a covariance matrix.
@@ -416,7 +418,8 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #'
 #' @param data An `epidist_meta_model` object.
 #'
-#' @returns A tibble of member `value`, `count`, `type` and `p` columns.
+#' @returns A tibble of member `value`, `count`, `lower`, `type` and `p`
+#'  columns.
 #'
 #' @keywords internal
 .meta_members <- function(data) {
@@ -637,6 +640,12 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     # from the implied distribution in the likelihood.
     obs_type <- 8L
     members <- .meta_member_table(estimates, rep(0L, nrow(estimates)))
+  } else if (
+    joint && all(quantiles) && estimates$cens_adjusted[1] %in% c(0, 3)
+  ) {
+    obs_type <- 6L
+    crossing <- .meta_crossing_box(estimates, study_n)
+    members <- .meta_member_table(estimates, crossing$count, crossing$lower)
   } else if (joint && all(quantiles)) {
     obs_type <- 6L
     members <- .meta_member_table(
@@ -704,23 +713,70 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #' deviations and quantiles, so the likelihood needs to know which implied
 #' summary each member is.
 #'
+#' A set of quantiles of integer day delays carries the box each reported
+#' day puts on the study's cumulative counts: `count` is the largest number
+#' of delays the study can have seen below the day and `lower` the smallest
+#' at or below it. See [.meta_grid_box_ll()].
+#'
 #' @param estimates The rows of an `epidist_estimates_data` object making up
 #'  one group, already ordered.
 #'
 #' @param count The cumulative counts the multinomial quantile likelihood
-#'  uses, or zeros for a group that does not use it.
+#'  uses, the largest counts below each reported day for quantiles of
+#'  integer day delays, or zeros for a group that uses neither.
 #'
-#' @returns A tibble of member `value`, `count`, `type` and `p` columns.
+#' @param lower The smallest counts at or below each reported day for
+#'  quantiles of integer day delays, or zeros otherwise.
+#'
+#' @returns A tibble of member `value`, `count`, `lower`, `type` and `p`
+#'  columns.
 #'
 #' @keywords internal
 #' @importFrom tibble tibble
-.meta_member_table <- function(estimates, count) {
+.meta_member_table <- function(estimates, count, lower = 0L) {
   return(tibble(
     value = as.numeric(estimates$value),
     count = as.integer(count),
+    lower = rep_len(as.integer(lower), nrow(estimates)),
     type = as.integer(match(estimates$type, .estimates_types())),
     p = ifelse(is.na(estimates$p), 0, as.numeric(estimates$p))
   ))
+}
+
+#' The box constraints a set of integer day quantiles puts on a study
+#'
+#' A type 1 quantile at probability \eqn{p} of \eqn{n} delays is their
+#' \eqn{\lceil n p \rceil}th smallest, so two reported at probabilities that
+#' name the same order statistic cannot land on different days. Such a
+#' group would give every parameter a log likelihood of `-Inf`, so it is
+#' refused here with a message that says why.
+#'
+#' @param estimates The quantile rows of an `epidist_estimates_data` object
+#'  making up one group, in increasing probability.
+#'
+#' @param study_n The number of delays the quantiles were computed from.
+#'
+#' @returns A list of the `count` and `lower` member columns of
+#'  [.meta_member_table()].
+#'
+#' @keywords internal
+.meta_crossing_box <- function(estimates, study_n) {
+  k <- .meta_crossing_counts(estimates$p, study_n)
+  shift <- .meta_cens_shift(
+    estimates$cens_adjusted[1], .meta_window_slot(estimates$pwindow[1]),
+    .meta_window_slot(estimates$swindow[1])
+  )
+  cell <- floor(
+    (estimates$value - shift) / .meta_window_slot(estimates$swindow[1]) + 0.5
+  )
+  if (any(diff(k) == 0 & diff(cell) > 0)) {
+    cli::cli_abort(paste0(
+      "{.val {estimates$study[1]}} reports quantiles at probabilities ",
+      "{.var p} that are the same order statistic of its {study_n} delays ",
+      "but on different days, so they cannot both describe its delays."
+    ))
+  }
+  return(list(count = k - 1L, lower = k))
 }
 
 #' Order the summaries within a joint likelihood group
@@ -997,6 +1053,13 @@ assert_epidist.epidist_meta_model <- function(data, ...) {
         "decreasing and no larger than the study sample size."
       ))
     }
+    lower <- members$lower[member]
+    if (any(diff(c(0L, lower)) < 0) || any(lower > data$study_n[i])) {
+      cli::cli_abort(paste0(
+        "The lower counts of a joint quantile row must be non decreasing ",
+        "and no larger than the study sample size."
+      ))
+    }
   }
   for (i in which(data$obs_type == 8L)) {
     member <- seq_len(data$group_len[i]) + data$group_start[i] - 1L
@@ -1058,6 +1121,7 @@ epidist_family_model.epidist_meta_model <- function(
       paste0("vreal", 1:8, "[n]"),
       "meta_group_value",
       "meta_group_count",
+      "meta_group_lower",
       "meta_group_type",
       "meta_group_p",
       "meta_group_chol",
@@ -1265,6 +1329,12 @@ epidist_stancode.epidist_meta_model <- function(
     scode = "array[N_meta_group] int meta_group_count;",
     block = "data"
   )
+  lower <- brms::stanvar(
+    x = as.array(as.integer(members$lower)),
+    name = "meta_group_lower",
+    scode = "array[N_meta_group] int meta_group_lower;",
+    block = "data"
+  )
   type <- brms::stanvar(
     x = as.array(as.integer(members$type)),
     name = "meta_group_type",
@@ -1289,7 +1359,9 @@ epidist_stancode.epidist_meta_model <- function(
     scode = "vector[N_meta_chol] meta_group_chol;",
     block = "data"
   )
-  return(size + value + count + type + prob + chol_size + chol_entries)
+  return(
+    size + value + count + lower + type + prob + chol_size + chol_entries
+  )
 }
 
 .meta_required_cols <- function() {
