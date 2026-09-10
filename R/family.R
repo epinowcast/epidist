@@ -60,6 +60,9 @@ epidist_family_model.default <- function(data, family, ...) {
 #' @inheritParams epidist_family
 #' @rdname epidist_family_param
 #' @family family
+#' @returns The family with a `param` element giving the Stan parameter
+#'  ordering.
+#'
 #' @keywords internal
 epidist_family_param <- function(family, ...) {
   UseMethod("epidist_family_param")
@@ -86,8 +89,8 @@ epidist_family_param <- function(family, ...) {
 #' 4. Parsing out the parameter ordering used in Stan
 #' 5. Adding this as the `param` element to the family object
 #'
-#' @return The input family object with an additional `param` element containing
-#' the Stan parameter ordering as a string
+#' @returns The input family object with an additional `param` element
+#'  containing the Stan parameter ordering as a string
 #'
 #' @family family
 #' @importFrom brms make_stancode
@@ -354,6 +357,9 @@ gengamma <- function(link = "log", link_shape = "log", link_k = "log") {
 #'
 #' @inheritParams epidist_family_param
 #' @family family
+#' @returns The family with a `param` element giving the Stan parameter
+#'  ordering and a `pcd_param` element giving the `primarycensored` one.
+#'
 #' @export
 epidist_family_param.gengamma <- function(family, ...) {
   family$param <- "mu, shape, k"

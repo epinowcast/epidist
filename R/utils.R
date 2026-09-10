@@ -6,7 +6,7 @@
 #' @param path The path within the `stan/` folder of the installed `epidist`
 #'  package to the Stan code chunk of interest.
 #'
-#' @return A character string containing the Stan code chunk of interest.
+#' @returns A character string containing the Stan code chunk of interest.
 #'
 #' @keywords internal
 .stan_chunk <- function(path) {
@@ -89,7 +89,7 @@
 #' code with the version of `epidist` used. To view the full Stan code for any
 #' particular `epidist` model, we recommend use of [brms::make_stancode()].
 #'
-#' @return A `brms` Stan chunk containing the `epidist` package version used to
+#' @returns A `brms` Stan chunk containing the `epidist` package version used to
 #'  build the Stan code.
 #'
 #' @keywords internal
@@ -113,6 +113,8 @@
 #' @param x A number to be rounded down.
 #'
 #' @param f A positive number specifying the multiple to be rounded down to
+#'
+#' @returns `x` rounded down to the nearest multiple of `f`.
 #'
 #' @keywords internal
 .floor_mult <- function(x, f = 1) {
@@ -266,6 +268,8 @@
 #'
 #' @inheritParams epidist_family
 #'
+#' @returns The family with `other_links` and `other_bounds` elements added.
+#'
 #' @keywords internal
 .add_dpar_info <- function(family) {
   other_dpars <- setdiff(family$dpars, "mu")
@@ -285,6 +289,9 @@
 #' them i.e. `~ 1`.
 #'
 #' @param formula A `brms` formula object.
+#'
+#' @returns The formula with an explicit intercept for every distributional
+#'  parameter that had none.
 #'
 #' @keywords internal
 .make_intercepts_explicit <- function(formula) {
@@ -306,7 +313,7 @@
 #'
 #' @param formula A `brms` formula object.
 #'
-#' @return A character vector of unique terms.
+#' @returns A character vector of unique terms.
 #'
 #' @keywords internal
 .extract_dpar_terms <- function(formula) {
@@ -327,7 +334,7 @@
 #' @param formula Optional `brms` formula object to extract additional grouping
 #'  terms from.
 #'
-#' @return A `data.frame` summarised by the grouping variables with counts.
+#' @returns A `data.frame` summarised by the grouping variables with counts.
 #'
 #' @keywords internal
 #' @importFrom dplyr group_by summarise across
@@ -395,6 +402,8 @@
 #'
 #' @param old_names A character vector of old column names.
 #'
+#' @returns The `data.frame` with its columns renamed.
+#'
 #' @keywords internal
 #' @importFrom stats setNames
 .rename_columns <- function(data, new_names, old_names) {
@@ -433,7 +442,7 @@
 #'
 #' @inheritParams epidist_family
 #'
-#' @return The requested brms function
+#' @returns The requested brms function
 #'
 #' @keywords internal
 .get_brms_fn <- function(prefix, family) {
@@ -458,7 +467,7 @@
 #'  to 1. Internally this is used to define the 'n' column of the returned
 #'  object.
 #'
-#' @return The data frame with an added 'n' column containing the weights
+#' @returns The data frame with an added 'n' column containing the weights
 #'
 #' @keywords internal
 .add_weights <- function(data, weight = NULL) {
@@ -480,7 +489,7 @@
 #'
 #' @param data A data frame
 #' @param delay_min NULL, a numeric scalar, or a column name string
-#' @return The data frame with a `delay_min` column
+#' @returns The data frame with a `delay_min` column
 #' @keywords internal
 .add_delay_min <- function(data, delay_min = NULL) {
   if (is.null(delay_min)) {

@@ -18,6 +18,10 @@ reexported as part of \code{epidist}. The generalised gamma family
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+The family with a \code{param} element giving the Stan parameter
+ordering and a \code{pcd_param} element giving the \code{primarycensored} one.
+}
 \description{
 \code{brms} calls the Stan density of a custom family with its distributional
 parameters in the order they are declared, which is the \code{param} the

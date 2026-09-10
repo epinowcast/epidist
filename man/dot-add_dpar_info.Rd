@@ -16,6 +16,9 @@ families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, s
 reexported as part of \code{epidist}. The generalised gamma family
 \code{\link[=gengamma]{gengamma()}} is defined by \code{epidist} itself.}
 }
+\value{
+The family with \code{other_links} and \code{other_bounds} elements added.
+}
 \description{
 Includes additional information (link functions and parameter bound) about
 the distributional parameters of a \code{brms} family which are not the

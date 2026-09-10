@@ -13,6 +13,9 @@ object, or a character string naming a \code{brms} or \code{epidist} family.}
 \item{link}{Optional character string giving the link function. Only used
 when \code{family} is a character string without a second element.}
 }
+\value{
+A \code{brmsfamily} object.
+}
 \description{
 Replaces \code{brms:::validate_family()}. Guarantees that a family given as a
 family function, a \code{brms} family object, a \code{stats} family object or a

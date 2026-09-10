@@ -16,6 +16,9 @@ be used in the model created using \code{\link[=epidist_family]{epidist_family()
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+The data transformed ready for fitting.
+}
 \description{
 This function is used within \code{\link[=epidist]{epidist()}} to transform data before passing to
 \code{brms}. It dispatches to \code{\link[=epidist_transform_data_model]{epidist_transform_data_model()}}, which is the

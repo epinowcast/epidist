@@ -55,13 +55,20 @@ Under an accrual design the cell masses are additionally weighted by the
 follow up available to the cases each cell holds, before renormalising.
 A case is seen when its primary event fell early enough for its delay to
 complete before the calendar stop, and the primary event is known only to
-its window, so the follow up available to a delay of \eqn{x} from the start
-of that window is the accrual weight at \eqn{w_p \lfloor x / w_p \rfloor},
-a step function of \eqn{x}. Each cell is cut at the multiples of \code{pwindow}
-inside it and every piece is weighted by the follow up at the primary
-window it starts in. This is exact whenever \code{cutoff} is a multiple of
-\code{pwindow}, and reduces to the weight at the cell's lower edge when
-\code{pwindow} and \code{swindow} are equal.
+its window. A complete primary window starting at \eqn{k w_p} holds a
+delay of \eqn{x} from its start when \eqn{k w_p + x \le A}, so the growth
+weighted mass of the complete windows eligible for \eqn{x} is a step
+function of \eqn{x} that steps down at \eqn{A - j w_p}. Each cell is cut
+at those points and every piece is weighted by that mass. When \code{cutoff}
+is not a multiple of \code{pwindow} the last primary window is partial, of
+length \eqn{l = A - w_p \lfloor A / w_p \rfloor}. It only holds delays up
+to \eqn{l}, and the offset of its primary events runs over \eqn{l} rather
+than \eqn{w_p}, so its cases follow the primary censored distribution
+function with a window of \eqn{l}, weighted by the growth weighted length
+of the window, and are added to the cells below \eqn{l}. This is exact
+for any \code{cutoff}, \code{pwindow} and \code{swindow}, and reduces to the weight at
+the cell's lower edge when \code{pwindow} and \code{swindow} are equal and \code{cutoff}
+is a multiple of both.
 
 A cohort grid is normalised by the distribution function at its top, which
 is already known. An accrual grid reweights each cell first, so its

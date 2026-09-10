@@ -9,6 +9,10 @@
 \arguments{
 \item{formula}{A \code{brms} formula object.}
 }
+\value{
+The formula with an explicit intercept for every distributional
+parameter that had none.
+}
 \description{
 This function detects the distributional parameters in a \code{brms} formula
 object, and alters to formula to include explicit intercept parameters for

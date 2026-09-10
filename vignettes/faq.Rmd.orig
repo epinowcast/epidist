@@ -164,7 +164,7 @@ For more details, see the [`posterior` package documentation](https://mc-stan.or
 ## How can I assess whether sampling has converged?
 
 The output of a call to `epidist` is compatible with typical Stan workflows.
-We recommend use of the [`bayesplot`](http://mc-stan.org/bayesplot/) package for sampling diagnostic plots.
+We recommend use of the [`bayesplot`](https://mc-stan.org/bayesplot/) package for sampling diagnostic plots.
 For example, the function `bayesplot::mcmc_trace()` can be used to produce traceplots for specified parameters.
 
 ```{r message = FALSE}
@@ -220,7 +220,7 @@ For an example use of these functions, have a look at the [`epidist-paper`](http
 
 ## How are the default priors for `epidist` chosen?
 
-[`brms`](http://paulbuerkner.com/brms/) provides default priors for all parameters.
+[`brms`](https://paulbuerkner.com/brms/) provides default priors for all parameters.
 However, some of those priors do not make sense in the context of our application.
 Instead, we used [prior predictive checking](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html) to set `epidist`-specific default priors which produce epidemiological delay distribution mean and standard deviation parameters in a reasonable range.
 
@@ -301,7 +301,7 @@ powerscale_plot_dens(fit, variable = c("Intercept", "Intercept_sigma")) +
 
 # What do the parameters in my model output correspond to?
 
-The `epidist` package uses [`brms`](http://paulbuerkner.com/brms/) to fit models.
+The `epidist` package uses [`brms`](https://paulbuerkner.com/brms/) to fit models.
 This means that the model output will include `brms`-style names for parameters.
 Here, we provide a table giving the correspondence between the distributional parameter names used in `brms` and those used in standard R functions for some common likelihood families.
 

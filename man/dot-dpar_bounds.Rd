@@ -13,6 +13,9 @@
 custom family. Otherwise unused and kept so that the signature matches
 the \code{brms} internal this helper replaces.}
 }
+\value{
+A list with character elements \code{lb} and \code{ub}.
+}
 \description{
 Replaces \code{brms:::dpar_bounds()} for the non-mixture families that
 \code{epidist} supports. Guarantees a list with character elements \code{lb} and

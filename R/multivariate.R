@@ -25,6 +25,8 @@
 #' @param ... Additional arguments passed to methods.
 #'
 #' @family multivariate
+#' @returns An object of class `epidist_multivariate`.
+#'
 #' @export
 as_epidist_multivariate <- function(draws, ...) {
   UseMethod("as_epidist_multivariate")
@@ -59,6 +61,8 @@ as_epidist_multivariate <- function(draws, ...) {
 #' @method as_epidist_multivariate data.frame
 #'
 #' @family multivariate
+#' @returns An object of class `epidist_multivariate`.
+#'
 #' @importFrom checkmate assert_data_frame assert_string assert_character
 #' @export
 #' @examples
@@ -102,6 +106,8 @@ as_epidist_multivariate.data.frame <- function(
 #' @method as_epidist_multivariate matrix
 #'
 #' @family multivariate
+#' @returns An object of class `epidist_multivariate`.
+#'
 #' @importFrom checkmate assert_matrix
 #' @export
 #' @examples
@@ -202,6 +208,8 @@ is_epidist_multivariate <- function(x) {
 #' @method assert_epidist epidist_multivariate
 #'
 #' @family multivariate
+#' @returns `NULL`, invisibly. Called for the side effect of validating `data`.
+#'
 #' @importFrom checkmate assert_numeric assert_matrix
 #' @export
 assert_epidist.epidist_multivariate <- function(data, ...) {

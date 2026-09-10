@@ -24,6 +24,8 @@
 #' `brms` that the helpers in this file deliberately do not reproduce.
 #' Mixture families are tracked in epidist issue 617.
 #'
+#' @returns A character vector of family names.
+#'
 #' @keywords internal
 .unsupported_families <- function() {
   return(c(
@@ -47,6 +49,8 @@
 #'
 #' @param link Optional character string giving the link function. Only used
 #'  when `family` is a character string without a second element.
+#'
+#' @returns A `brmsfamily` object.
 #'
 #' @keywords internal
 .validate_family <- function(family, link = NULL) {
@@ -86,6 +90,8 @@
 #'
 #' @param family A `brmsfamily` object.
 #'
+#' @returns The family, invisibly. Errors when the family is not supported.
+#'
 #' @keywords internal
 .assert_supported_family <- function(family) {
   unsupported <- inherits(family, "mixfamily") ||
@@ -108,6 +114,8 @@
 #' @param formula A formula object.
 #'
 #' @param data A `data.frame` used to expand `.`.
+#'
+#' @returns The expanded formula.
 #'
 #' @keywords internal
 .expand_dot_formula <- function(formula, data = NULL) {
@@ -140,6 +148,8 @@
 #'
 #' @param data A `data.frame` used to expand `.` in the formula.
 #'
+#' @returns A `brmsformula` object.
+#'
 #' @keywords internal
 .validate_formula <- function(formula, family = NULL, data = NULL) {
   out <- brms::bf(formula)
@@ -171,6 +181,8 @@
 #' @param data A `data.frame` containing the model data.
 #'
 #' @param bterms An object returned by [brms::brmsterms()].
+#'
+#' @returns `data`, invisibly.
 #'
 #' @keywords internal
 .validate_data <- function(data, bterms) {
@@ -230,6 +242,8 @@
 #'  custom family. Otherwise unused and kept so that the signature matches
 #'  the `brms` internal this helper replaces.
 #'
+#' @returns A list with character elements `lb` and `ub`.
+#'
 #' @keywords internal
 .dpar_bounds <- function(dpar, family = NULL) {
   if (inherits(family, "customfamily")) {
@@ -274,6 +288,8 @@
 #' @param i The index of the observation.
 #'
 #' @param prep A `brms` prepared predictions object.
+#'
+#' @returns The weighted log likelihood values.
 #'
 #' @keywords internal
 .log_lik_weight <- function(x, i, prep) {

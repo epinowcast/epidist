@@ -181,6 +181,8 @@ as_epidist_aggregate_data.epidist_linelist_data <- function(
   by = NULL,
   ...
 ) {
+  .assert_ungrouped(data)
+
   # Required variables for epidist objects
   group_vars <- .linelist_required_cols()
 

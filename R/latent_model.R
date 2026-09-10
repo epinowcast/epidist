@@ -61,6 +61,7 @@ as_epidist_latent_model.epidist_linelist_data <- function(
   primary = .primary_choices(),
   ...
 ) {
+  .assert_ungrouped(data)
   assert_epidist.epidist_linelist_data(data)
   primary <- match.arg(primary)
 

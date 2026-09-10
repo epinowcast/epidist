@@ -101,6 +101,7 @@ as_epidist_marginal_model.epidist_linelist_data <- function(
   delay_min = NULL,
   ...
 ) {
+  .assert_ungrouped(data)
   assert_epidist.epidist_linelist_data(data)
 
   data <- .prepare_marginal_data(

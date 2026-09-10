@@ -6,6 +6,9 @@
 \usage{
 .unsupported_families()
 }
+\value{
+A character vector of family names.
+}
 \description{
 Ordinal, categorical, mixture and Cox families need extra handling in
 \code{brms} that the helpers in this file deliberately do not reproduce.
