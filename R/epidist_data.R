@@ -10,17 +10,27 @@
 #' Methods are provided for base subsetting and replacement, and for
 #' [dplyr::dplyr_reconstruct()], which `dplyr` verbs such as [dplyr::mutate()],
 #' [dplyr::filter()] and [dplyr::select()] use to restore the class of their
-#' input. [dplyr::group_by()] is an exception, as it builds a grouped tibble
-#' rather than restoring the class of its input. See epidist issue 629.
+#' input. [dplyr::group_by()] and [dplyr::ungroup()] build a new tibble rather
+#' than restoring the class of their input, as do the `grouped_df` methods for
+#' [dplyr::dplyr_row_slice()] and [dplyr::dplyr_col_modify()], so each has a
+#' method of its own that puts the classes back. A grouped object keeps the
+#' `grouped_df` class after the `epidist` classes, and the `dplyr` verbs keep
+#' both. [dplyr::summarise()] builds a new object from the groups rather than
+#' modifying its input, so its result does not carry the `epidist` classes.
 #'
 #' A result with no columns is unclassed without a warning. Such a result is
 #' almost always the prototype `vctrs` takes internally, in [dplyr::bind_cols()]
 #' for example, rather than something the user asked for, and it cannot be told
 #' apart from a deliberate empty selection.
 #'
-#' @param x An object with the `epidist_data` class.
+#' @param x,.data An object with the `epidist_data` class.
 #'
 #' @param data,template Passed to [dplyr::dplyr_reconstruct()].
+#'
+#' @param i,cols Passed to [dplyr::dplyr_row_slice()] and
+#'  [dplyr::dplyr_col_modify()].
+#'
+#' @param .add,.drop Passed to [dplyr::group_by()].
 #'
 #' @param value A replacement value.
 #'
@@ -45,6 +55,9 @@
 #'
 #' # Dropping a required column drops the class
 #' class(dplyr::select(linelist_data, -"obs_time"))
+#'
+#' # Grouping keeps the class alongside the grouped_df class
+#' class(dplyr::group_by(linelist_data, obs_time))
 NULL
 
 #' @rdname epidist_data
@@ -104,6 +117,53 @@ dplyr_reconstruct.epidist_data <- function(data, template) {
   return(.revalidate_epidist(out, template))
 }
 
+# The built-in `dplyr` methods for `data.frame` and `grouped_df` already
+# reconstruct the object, calling `dplyr_reconstruct()` directly or, for a
+# grouped object, rebuilding the grouping structure themselves, so these call
+# the generic on the object without its `epidist` classes and check the
+# result once.
+
+#' @rdname epidist_data
+#' @method dplyr_row_slice epidist_data
+#' @importFrom dplyr dplyr_row_slice
+#' @export
+dplyr_row_slice.epidist_data <- function(data, i, ...) {
+  out <- dplyr_row_slice(.drop_epidist_class(data), i, ...)
+  return(.revalidate_epidist(out, data))
+}
+
+#' @rdname epidist_data
+#' @method dplyr_col_modify epidist_data
+#' @importFrom dplyr dplyr_col_modify
+#' @export
+dplyr_col_modify.epidist_data <- function(data, cols) {
+  out <- dplyr_col_modify(.drop_epidist_class(data), cols)
+  return(.revalidate_epidist(out, data))
+}
+
+#' @rdname epidist_data
+#' @method group_by epidist_data
+#' @importFrom dplyr group_by
+#' @export
+group_by.epidist_data <- function(
+  .data,
+  ...,
+  .add = FALSE,
+  .drop = dplyr::group_by_drop_default(.data)
+) {
+  out <- NextMethod()
+  return(.revalidate_epidist(out, .data))
+}
+
+#' @rdname epidist_data
+#' @method ungroup epidist_data
+#' @importFrom dplyr ungroup
+#' @export
+ungroup.epidist_data <- function(x, ...) {
+  out <- NextMethod()
+  return(.revalidate_epidist(out, x))
+}
+
 #' Check if data has the `epidist_data` class
 #'
 #' All `epidist` data objects carry this class in addition to their specific
@@ -147,6 +207,36 @@ is_epidist_data <- function(data, ...) {
   epidist_classes <- which(startsWith(classes, "epidist_"))
   classes <- append(classes, "epidist_data", after = max(epidist_classes))
   class(data) <- classes
+  return(data)
+}
+
+#' Put the `epidist` classes of a template back on an object
+#'
+#' `dplyr` builds a new grouped tibble rather than keeping the class of its
+#' input, so the `epidist` classes are lost whenever a grouped object is
+#' modified. This puts them back, in front of the classes `data` already has,
+#' so that a grouped result carries the `epidist` classes followed by
+#' `grouped_df`. The result still needs checking, which
+#' [.revalidate_epidist()] does after calling this.
+#'
+#' @param data A `data.frame` to add the classes to.
+#'
+#' @param template The object whose `epidist` classes to add.
+#'
+#' @returns `data` with the `epidist` classes of `template`, or `data`
+#'  unchanged if it is not a `data.frame` or `template` has none.
+#'
+#' @keywords internal
+.restore_epidist_class <- function(data, template) {
+  classes <- .epidist_classes(template)
+  if (!is.data.frame(data) || length(classes) == 0) {
+    return(data)
+  }
+  class(data) <- c(
+    classes,
+    "epidist_data",
+    setdiff(class(data), c(classes, "epidist_data"))
+  )
   return(data)
 }
 
@@ -214,7 +304,8 @@ is_epidist_data <- function(data, ...) {
 
 #' Re-check a modified `epidist` object and drop any classes it fails
 #'
-#' Checks `data` against each of its `epidist` classes using
+#' Puts the `epidist` classes of `original` back on `data` with
+#' [.restore_epidist_class()], then checks `data` against each of them using
 #' [.check_epidist_class()] and drops those it no longer meets the
 #' requirements of. Modifications that leave the object unchanged are not
 #' checked. Used by the methods documented in [epidist_data].
@@ -243,6 +334,7 @@ is_epidist_data <- function(data, ...) {
   if (ncol(data) == 0) {
     return(.drop_epidist_class(data))
   }
+  data <- .restore_epidist_class(data, original)
   classes <- .epidist_classes(data)
   problems <- lapply(classes, .check_epidist_class, data = data)
   names(problems) <- classes
