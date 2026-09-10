@@ -72,9 +72,6 @@ To run this vignette yourself, as well as the `epidist` package, you will need t
 library(epidist)
 library(ggplot2)
 library(dplyr)
-library(tidyr)
-library(purrr) # nolint
-library(tibble)
 ```
 
 # Simulating data {#data}
@@ -391,7 +388,7 @@ obs_data <- obs_cens_trunc_samp |>
 
 </details>
 
-The resulting simulated data `obs_data` has 4 columns: `id`, `symptom_onset`, `case_notification`, and `obs_time`.
+The resulting simulated data `obs_data` has 4 columns: `id`, `symptom_onset`, `case_notification`, and `obs_date`.
 Where `symptom_onset` and `case_notification` are dates and `obs_date` is the date of the last observation based on case notification.
 
 ```{r}
@@ -416,6 +413,15 @@ linelist_data <- as_epidist_linelist_data(
 )
 
 head(linelist_data)
+```
+
+`plot_events()` draws the event windows of a linelist (Figure \@ref(fig:linelist)).
+It gives the same view as Figure \@ref(fig:trunc), for the data we will fit to.
+
+(ref:linelist) The primary and secondary event windows of each observed case, ordered by the date of symptom onset. The dashed line is the observation date, after which no secondary event is seen.
+
+```{r linelist, fig.cap="(ref:linelist)"}
+plot_events(linelist_data, obs_time = max(obs_data$obs_date))
 ```
 
 Here you can see that `epidist` has assumed that the events are both daily censored as upper bounds have not been provided.
@@ -458,7 +464,7 @@ This can be set using `backend = "cmdstanr"` after following the installing CmdS
 :::
 
 ::: {.alert .alert-primary}
-One of the progress messages output here is "Reduced from 200 to 91 rows".
+The progress output reports how many unique rows remain after aggregation.
 What this is indicating is that non-unique rows (based on the user formula) have been aggregated.
 This is done in several of the `epidist` models for efficiency and should have no impact on accuracy.
 If you want to explore this see the documentation for the `epidist_transform_data_model()`.
@@ -519,13 +525,15 @@ Compared to the naive fit we see good recovery of the true distribution paramete
 We can compare the two models by plotting the estimated parameters from the naive and marginal models.
 One way to do this is to use the `delay_summary_draws()` function.
 It draws one set of delay distribution parameters for each unique combination of the predictors, and adds the natural scale mean and standard deviation of the delay so that the numbers are easier to read.
-`delay_parameter_draws()`, `add_summaries()` and `epidist_strata()` are the three steps it wraps, and each is available on its own.
+`epidist_strata()`, `delay_parameter_draws()` and `add_summaries()` are the three steps it wraps, and each is available on its own.
+Here we take them separately, so that the draws from both models can be combined before the summaries are added.
 
 ```{r}
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
-  lapply(delay_summary_draws) |>
+  lapply(\(fit) delay_parameter_draws(fit, newdata = epidist_strata(fit))) |>
   bind_rows(.id = "model") |>
-  mutate(model = factor(model, levels = c("naive", "marginal")))
+  mutate(model = factor(model, levels = c("naive", "marginal"))) |>
+  add_summaries(family = marginal_fit)
 
 head(predicted_parameters)
 ```
@@ -539,45 +547,18 @@ Another approach to building the data to predict for is `epidist_newdata()`, whi
 :::
 
 We can now plot posterior draws for the summary parameters from the two models.
-
-<details><summary>Click to expand for parameter comparison plot code</summary>
+`plot()` draws the posterior density of each parameter in its own panel, coloured by a stratum of our choosing, and marks the true values.
 
 ```{r}
-# Create a data frame with true parameter values
-true_params <- secondary_dist |>
-  mutate(model = "true") |>
-  pivot_longer(
-    cols = c("mu", "sigma", "mean", "sd"),
-    names_to = "parameter",
-    values_to = "value"
-  )
+true_values <- unlist(secondary_dist[c("mu", "sigma", "mean", "sd")])
 
-# Plot with true values as vertical lines
-p_pp_params <- predicted_parameters |>
-  tidyr::pivot_longer(
-    cols = c("mu", "sigma", "mean", "sd"),
-    names_to = "parameter",
-    values_to = "value"
-  ) |>
-  ggplot() +
-  geom_density(
-    aes(x = value, fill = model, group = model),
-    alpha = 0.5
-  ) +
-  geom_vline(
-    data = true_params,
-    aes(xintercept = value),
-    linetype = "dashed",
-    linewidth = 1, col = "black"
-  ) +
-  facet_wrap(~parameter, scales = "free") +
-  theme_minimal() +
-  labs(title = "Parameter estimates compared to true values") +
-  scale_fill_brewer(palette = "Set2") +
-  theme(legend.position = "bottom")
+p_pp_params <- plot(
+  predicted_parameters,
+  by = "model",
+  true_values = true_values
+) +
+  labs(title = "Parameter estimates compared to true values")
 ```
-
-</details>
 
 (ref:pp-params) The density of posterior draws from the marginal and naive models compared to the true underlying delay distribution (vertical dashed black line).
 
@@ -593,54 +574,34 @@ However, it is important to note that the marginal model doesn't perfectly recov
 As a final step we can visualise the posterior predictions of the delay distribution.
 This tells us how good a fit the estimated delay distribution is to the true delay distribution.
 
-<details><summary>Click to expand for code to create fitted distribution plot</summary>
+`type = "delay"` draws the delay distribution the parameters imply, one line per draw when `ndraws` is given.
 
 ```{r}
 set.seed(123)
 
-predicted_pmfs <- predicted_parameters |>
-  group_by(model) |>
-  slice_sample(n = 100) |>
-  bind_rows(mutate(secondary_dist, model = "true")) |>
-  group_by(model) |>
-  mutate(
-    draw_id = row_number(),
-    predictions = purrr::map2(
-      mu, sigma,
-      ~ tibble(
-        x = seq(0, 15, by = 0.1),
-        y = dlnorm(x, meanlog = .x, sdlog = .y)
-      )
-    )
-  ) |>
-  unnest(predictions) |>
-  ungroup() |>
-  mutate(model = factor(model, levels = c("naive", "marginal", "true")))
-
-p_fitted_lognormal <- predicted_pmfs |>
-  filter(model != "true") |>
-  ggplot() +
-  geom_line(
-    aes(x = x, y = y, col = model, group = draw_id),
-    alpha = 0.05, linewidth = 1
-  ) +
-  geom_line(
-    data = select(filter(predicted_pmfs, model == "true"), -model),
-    aes(x = x, y = y),
+p_fitted_lognormal <- plot(
+  predicted_parameters,
+  type = "delay",
+  by = "model",
+  ndraws = 100,
+  max_delay = 15
+) +
+  geom_function(
+    fun = dlnorm,
+    args = list(
+      meanlog = secondary_dist[["mu"]],
+      sdlog = secondary_dist[["sigma"]]
+    ),
     linewidth = 1.5,
     col = "black"
   ) +
+  facet_wrap(~model, nrow = 2) +
   labs(
     x = "Delay between primary and secondary event (days)",
     y = "Probability density"
   ) +
-  theme_minimal() +
-  facet_wrap(~model, scales = "free", nrow = 2) +
-  scale_color_brewer(palette = "Set2") +
   theme(legend.position = "none")
 ```
-
-</details>
 
 (ref:fitted-lognormal) The posterior draws from the marginal and naive models (coloured lines, 100 draws from each posterior) compared to the true underlying delay distribution (black line). Each coloured line represents one possible delay distribution based on the estimated model parameters. The naive model shows substantial bias whilst the marginal model better recovers the true distribution.
 

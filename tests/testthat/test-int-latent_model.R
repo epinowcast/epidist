@@ -1,7 +1,6 @@
 # fmt: skip file
 test_that("epidist.epidist_latent_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_fits()
   stancode <- epidist(
     data = prep_obs,
     fn = brms::make_stancode
@@ -79,7 +78,6 @@ test_that("epidist.epidist_latent_model fits, the MCMC converges, and the draws 
 test_that("epidist.epidist_latent_model Stan code has no syntax errors", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  skip_if_no_fits()
   set.seed(1)
   stancode_string <- epidist(
     data = prep_obs,
@@ -104,7 +102,6 @@ test_that("epidist.epidist_latent_model recovers the simulation settings for the
 
 test_that("epidist.epidist_latent_model Stan code has no syntax errors in the gamma delay case", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_fits()
   stancode_gamma <- epidist(
     data = prep_obs_gamma,
     family = Gamma(link = "log"),
@@ -145,7 +142,6 @@ test_that("epidist.epidist_latent_model recovers the simulation settings for the
 
 test_that("epidist.epidist_latent_model Stan code has no syntax errors for an alternative formula", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_fits()
   stancode_sex <- epidist(
     data = prep_obs_sex,
     formula = bf(mu ~ 1 + sex, sigma ~ 1 + sex),

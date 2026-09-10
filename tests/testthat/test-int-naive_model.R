@@ -1,6 +1,5 @@
 test_that("epidist.epidist_naive_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_fits()
   stancode <- epidist(
     data = prep_naive_obs,
     fn = brms::make_stancode

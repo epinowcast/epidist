@@ -1,7 +1,6 @@
 # fmt: skip file
 test_that("epidist.epidist_marginal_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_fits()
   stancode <- suppressMessages(epidist(
     data = prep_marginal_obs,
     fn = brms::make_stancode

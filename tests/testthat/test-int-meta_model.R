@@ -1,7 +1,6 @@
 # fmt: skip file
 test_that("epidist.epidist_meta_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_fits()
   stancode <- suppressMessages(epidist(
     data = prep_meta_obs,
     fn = brms::make_stancode
@@ -11,7 +10,6 @@ test_that("epidist.epidist_meta_model Stan code has no syntax errors in the defa
 
 test_that("epidist.epidist_meta_model Stan code has no syntax errors for a gamma delay", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_fits()
   stancode <- suppressMessages(epidist(
     data = prep_meta_obs,
     family = Gamma(link = "log"),
@@ -22,7 +20,6 @@ test_that("epidist.epidist_meta_model Stan code has no syntax errors for a gamma
 
 test_that("epidist.epidist_meta_model Stan code has no syntax errors for a weibull delay", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_fits()
   stancode <- suppressMessages(epidist(
     data = prep_meta_obs,
     family = "weibull",
@@ -832,7 +829,6 @@ test_that("as_epidist_multivariate round trips draws of a fitted model", {
 
 test_that("epidist.epidist_meta_model Stan code has no syntax errors with an expgrowth primary event", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_fits()
   model <- suppressMessages(as_epidist_meta_model(
     sim_obs,
     estimates = sim_estimates, primary = "expgrowth"
