@@ -523,13 +523,20 @@
 #' follow up available to the cases each cell holds, before renormalising.
 #' A case is seen when its primary event fell early enough for its delay to
 #' complete before the calendar stop, and the primary event is known only to
-#' its window, so the follow up available to a delay of \eqn{x} from the start
-#' of that window is the accrual weight at \eqn{w_p \lfloor x / w_p \rfloor},
-#' a step function of \eqn{x}. Each cell is cut at the multiples of `pwindow`
-#' inside it and every piece is weighted by the follow up at the primary
-#' window it starts in. This is exact whenever `cutoff` is a multiple of
-#' `pwindow`, and reduces to the weight at the cell's lower edge when
-#' `pwindow` and `swindow` are equal.
+#' its window. A complete primary window starting at \eqn{k w_p} holds a
+#' delay of \eqn{x} from its start when \eqn{k w_p + x \le A}, so the growth
+#' weighted mass of the complete windows eligible for \eqn{x} is a step
+#' function of \eqn{x} that steps down at \eqn{A - j w_p}. Each cell is cut
+#' at those points and every piece is weighted by that mass. When `cutoff`
+#' is not a multiple of `pwindow` the last primary window is partial, of
+#' length \eqn{l = A - w_p \lfloor A / w_p \rfloor}. It only holds delays up
+#' to \eqn{l}, and the offset of its primary events runs over \eqn{l} rather
+#' than \eqn{w_p}, so its cases follow the primary censored distribution
+#' function with a window of \eqn{l}, weighted by the growth weighted length
+#' of the window, and are added to the cells below \eqn{l}. This is exact
+#' for any `cutoff`, `pwindow` and `swindow`, and reduces to the weight at
+#' the cell's lower edge when `pwindow` and `swindow` are equal and `cutoff`
+#' is a multiple of both.
 #'
 #' A cohort grid is normalised by the distribution function at its top, which
 #' is already known. An accrual grid reweights each cell first, so its
@@ -586,21 +593,50 @@
     }
     return(mass / total)
   }
-  # Cut the cells at the multiples of the primary window inside them, so
-  # that each piece can be weighted by the follow up available to the primary
-  # window it starts in. Matches meta_family_grid_pmf() in Stan.
-  multiple <- pwindow *
-    seq(ceiling(boundary[1] / pwindow), floor(cutoff / pwindow))
-  edge <- sort(c(boundary, multiple[multiple <= boundary[length(boundary)]]))
+  # The collection window holds n_full complete primary windows and, unless
+  # it is a multiple of pwindow, a partial last one of length `partial`.
+  # Matches meta_family_grid_pmf() in Stan.
+  n_full <- floor(cutoff / pwindow + 1e-9)
+  partial <- cutoff - pwindow * n_full
+  has_partial <- partial > 1e-9 * pwindow
+  # A complete window k is eligible for a delay of x from its start when
+  # k * pwindow + x <= cutoff, so the number eligible steps down at
+  # cutoff - j * pwindow. Cut the cells at those points and weight each piece
+  # by the growth weighted mass of the complete windows eligible inside it.
+  top <- boundary[length(boundary)]
+  eligible_step <- cutoff -
+    pwindow * seq_len(floor((cutoff - boundary[1]) / pwindow + 1e-9))
+  edge <- sort(c(boundary, eligible_step[eligible_step <= top]))
   edge <- edge[c(TRUE, diff(edge) > 1e-9 * swindow)]
   cdf <- .meta_pcens_cdf(edge, dist, args, pwindow, growth_rate)
   piece_start <- edge[-length(edge)]
-  piece <- pmax(diff(cdf), 0) *
-    .meta_accrual_weight(
-      pwindow * floor(piece_start / pwindow + 1e-9), cutoff, growth_rate
-    )
+  n_eligible <- pmin(
+    ceiling((cutoff - piece_start) / pwindow - 1e-9), n_full
+  )
+  log_weight <- .meta_log_accrual_weight(
+    cutoff - pwindow * n_eligible, cutoff, growth_rate
+  )
   cell <- floor(piece_start / swindow + 1e-9) - first + 1
-  mass <- as.numeric(rowsum(piece, cell))
+  peak <- max(log_weight)
+  extra <- 0
+  if (has_partial && boundary[1] < partial) {
+    # The partial window is eligible for delays up to its own length, and
+    # the offset of its primary events runs over that length rather than
+    # over pwindow, so its delays follow the primary censored distribution
+    # function with a window of `partial`. Its mass is the growth weighted
+    # length of the window.
+    log_partial <- growth_rate * n_full * pwindow +
+      .meta_log_accrual_weight(n_full * pwindow, cutoff, growth_rate)
+    peak <- max(peak, log_partial)
+    q_partial <- pmin(boundary, partial)
+    q_unique <- unique(q_partial)
+    cdf_partial <- .meta_pcens_cdf(
+      q_unique, dist, args, partial, growth_rate
+    )[match(q_partial, q_unique)]
+    extra <- pmax(diff(cdf_partial), 0) * exp(log_partial - peak)
+  }
+  piece <- pmax(diff(cdf), 0) * exp(log_weight - peak)
+  mass <- as.numeric(rowsum(piece, cell)) + extra
   total <- sum(mass)
   if (!is.finite(total) || total <= 0) {
     return(rep(NA_real_, length(mass)))
@@ -2052,14 +2088,10 @@
   floor,
   ceiling
 ) {
+  if (.meta_quantile_on_chord(slots)) {
+    return(chord)
+  }
   base_code <- .meta_cens_base(slots$cens_adjusted)
-  accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
-  if (base_code == 0L || accrual == 1L) {
-    return(chord)
-  }
-  if (base_code == 2L && slots$growth_rate != 0) {
-    return(chord)
-  }
   clamp <- function(value) {
     return(min(max(value, floor), ceiling))
   }
@@ -2170,6 +2202,296 @@
       sum(log(diag(chol))) -
       0.5 * sum(residual^2)
   )
+}
+
+#' Whether the implied quantile of a design is left on its chord
+#'
+#' The chord inverse of [.meta_node_quantile()] is refined only where the
+#' implied distribution function and density exist in closed form. A discrete
+#' grid, an accrual estimand and a uniform single interval estimand with a
+#' growing primary event are defined by the interpolation between their
+#' nodes, so their chord is the implied quantile and the slope of the interval
+#' holding it is the implied density. See [.meta_refine_quantile()]. Matches
+#' the early returns of `meta_family_node_quantile()` in Stan.
+#'
+#' @param slots The output of [.meta_row_slots()].
+#'
+#' @returns A logical scalar.
+#'
+#' @keywords internal
+.meta_quantile_on_chord <- function(slots) {
+  base_code <- .meta_cens_base(slots$cens_adjusted)
+  accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
+  return(
+    base_code == 0L || accrual == 1L ||
+      (base_code == 2L && slots$growth_rate != 0)
+  )
+}
+
+#' The index of the node interval holding a delay
+#'
+#' Interval `i` runs from node `i` to node `i + 1`. It is found by stepping
+#' through the nodes rather than by rounding, because in Stan the delay is a
+#' parameter and cannot be converted to an integer. Matches
+#' `meta_family_node_interval()` in Stan.
+#'
+#' @inheritParams .meta_node_quantile
+#'
+#' @param q A delay between the first and last node.
+#'
+#' @returns An integer between 1 and the number of intervals.
+#'
+#' @keywords internal
+.meta_node_interval <- function(nodes, q) {
+  n_interval <- length(nodes$values) - 1L
+  index <- 1L
+  while (index < n_interval && nodes$origin + index * nodes$spacing <= q) {
+    index <- index + 1L
+  }
+  return(index)
+}
+
+#' The density of a continuous estimand at its implied quantile
+#'
+#' Where the quantile is left on its chord, see [.meta_quantile_on_chord()],
+#' the estimand is the linear interpolant of its nodes and its density is the
+#' slope of the interval holding the quantile. Otherwise it is the closed
+#' form density of [.meta_implied_density()]. Matches
+#' `meta_family_quantile_density()` in Stan.
+#'
+#' @param q The implied quantile from [.meta_node_quantile()].
+#'
+#' @param index The node interval holding `q`, from [.meta_node_interval()].
+#'
+#' @inheritParams .meta_node_quantile
+#'
+#' @returns A density on the delay scale.
+#'
+#' @keywords internal
+.meta_quantile_density <- function(q, index, nodes, dist, args, slots) {
+  if (.meta_quantile_on_chord(slots)) {
+    return((nodes$values[index + 1] - nodes$values[index]) / nodes$spacing)
+  }
+  return(.meta_implied_density(
+    q, dist, args, slots$lower, slots$cutoff, slots$pwindow, slots$swindow,
+    slots$trunc_adjusted, slots$cens_adjusted, slots$growth_rate,
+    slots$trunc_design, .meta_slots_n_quad(slots)
+  ))
+}
+
+#' The centred partial moments of an estimand below its implied quantile
+#'
+#' The sampling covariance of a reported mean or standard deviation with a
+#' reported quantile depends on \eqn{\int_L^{q} (x - \mu)^k \text{d}G(x)} for
+#' \eqn{k = 1, 2}, with \eqn{G} the implied distribution function, \eqn{\mu}
+#' the implied mean and \eqn{L} the smallest delay the study counted.
+#' Integrating by parts gives
+#' \eqn{(q - \mu)^k p - \int_L^{q} k (x - \mu)^{k - 1} G(x) \text{d}x}, and
+#' the remaining integral is taken by the trapezoid rule over the linear
+#' interpolant of the nodes, which reaches `p` at `q`. Its error is of the
+#' order of the node spacing squared, which [.estimates_n_quad()] holds to a
+#' quarter of the reported spread. Matches `meta_family_quantile_partials()`
+#' in Stan.
+#'
+#' @inheritParams .meta_quantile_density
+#'
+#' @param p The probability of the quantile.
+#'
+#' @param centre The implied mean of the estimand.
+#'
+#' @returns A numeric vector of the first and second centred partial moments.
+#'
+#' @keywords internal
+.meta_quantile_partials <- function(nodes, q, p, index, centre) {
+  kept <- seq_len(index)
+  x <- nodes$origin + (kept - 1) * nodes$spacing - centre
+  g <- nodes$values[kept]
+  first <- x * g
+  spacing <- nodes$spacing
+  top <- q - centre
+  remainder <- q - (nodes$origin + (index - 1) * nodes$spacing)
+  int_g <- sum((g[-1] + g[-index]) / 2) * spacing +
+    (g[index] + p) / 2 * remainder
+  int_first <- sum((first[-1] + first[-index]) / 2) * spacing +
+    (first[index] + top * p) / 2 * remainder
+  return(c(top * p - int_g, top^2 * p - 2 * int_first))
+}
+
+#' The sampling covariance of the summaries one study reports
+#'
+#' The asymptotic covariance of a sample mean, a sample standard deviation
+#' and sample quantiles computed from the same `study_n` delays. The mean and
+#' standard deviation block is that of [.meta_moment_pair_ll()]. By the
+#' Bahadur representation a sample quantile at probability \eqn{p} is
+#' \eqn{Q_p - (\hat{G}(Q_p) - p) / f(Q_p)} up to a smaller order term, so
+#' with \eqn{f_i = f(Q_{p_i})} the implied density at each implied quantile
+#' \deqn{\text{Cov}(q_i, q_j) = \frac{p_i (1 - p_j)}{n f_i f_j}, \quad
+#' p_i \le p_j,}
+#' \deqn{\text{Cov}(\bar{x}, q_i) = -\frac{1}{n f_i}
+#' \int_L^{Q_{p_i}} (x - \mu) \text{d}G(x),}
+#' \deqn{\text{Cov}(s, q_i) = -\frac{1}{2 \sigma n f_i}
+#' \int_L^{Q_{p_i}} \left((x - \mu)^2 - \sigma^2\right) \text{d}G(x),}
+#' the last carried from the sample variance to the standard deviation by
+#' the delta method. The integrals are the centred partial moments of
+#' [.meta_quantile_partials()]. Matches `meta_family_joint_covariance()` in
+#' Stan.
+#'
+#' @param types Member types, 1 for a mean, 2 for a standard deviation and 3
+#'  for a quantile.
+#'
+#' @param probs Member probabilities, zero for a mean or standard deviation.
+#'
+#' @param moments A summary vector from [.meta_moment_vector()].
+#'
+#' @param density The implied density at each implied quantile, one per
+#'  quantile member in order.
+#'
+#' @param partial A two row matrix of centred partial moments from
+#'  [.meta_quantile_partials()], one column per quantile member in order.
+#'
+#' @param study_n The number of delays the summaries were computed from.
+#'
+#' @returns A covariance matrix over the members.
+#'
+#' @keywords internal
+.meta_joint_covariance <- function(
+  types,
+  probs,
+  moments,
+  density,
+  partial,
+  study_n
+) {
+  k <- length(types)
+  spread <- moments[["sd"]]
+  se_mean <- spread / sqrt(study_n)
+  se_sd <- .meta_sd_se(moments, study_n)
+  rho <- .meta_moment_correlation(moments)
+  position <- cumsum(types == 3L)
+  entry <- function(i, j) {
+    if (types[i] == 3L && types[j] == 3L) {
+      return(
+        min(probs[i], probs[j]) * (1 - max(probs[i], probs[j])) /
+          (study_n * density[position[i]] * density[position[j]])
+      )
+    }
+    if (types[i] == 3L) {
+      return(entry(j, i))
+    }
+    if (types[j] == 3L) {
+      m <- position[j]
+      if (types[i] == 1L) {
+        return(-partial[1, m] / (study_n * density[m]))
+      }
+      return(
+        -(partial[2, m] - spread^2 * probs[j]) /
+          (2 * spread * study_n * density[m])
+      )
+    }
+    if (types[i] != types[j]) {
+      return(rho * se_mean * se_sd)
+    }
+    if (types[i] == 1L) {
+      return(se_mean^2)
+    }
+    return(se_sd^2)
+  }
+  covariance <- matrix(0, k, k)
+  for (i in seq_len(k)) {
+    for (j in seq_len(k)) {
+      covariance[i, j] <- entry(i, j)
+    }
+  }
+  return(covariance)
+}
+
+#' The implied summaries of a joint study group and their sampling covariance
+#'
+#' A continuous estimand reporting a mean or a standard deviation alongside
+#' quantiles has every summary fitted jointly, with the covariance of
+#' [.meta_joint_covariance()] derived from the implied distribution rather
+#' than supplied. The quantiles are read off the implied nodes as for a
+#' covariance matrix group, see [.meta_implied_summary_vector()], and the
+#' density and centred partial moments at each are taken from the same nodes.
+#'
+#' @inheritParams .meta_implied_summary_vector
+#'
+#' @returns A list with the `implied` summary vector and the covariance
+#'  matrix `sigma`, or `NULL` where the implied moments are not finite, the
+#'  nodes underflow or a quantile sits where the estimand has no density,
+#'  which the caller rejects.
+#'
+#' @keywords internal
+.meta_joint_study_terms <- function(dist, args, slots, moments = NULL) {
+  types <- slots$group_type
+  if (is.null(moments)) {
+    moments <- .meta_row_moments(slots, dist, args)
+  }
+  if (!all(is.finite(moments))) {
+    return(NULL)
+  }
+  implied <- rep(NA_real_, length(types))
+  implied[types == 1L] <- moments[["mean"]]
+  implied[types == 2L] <- moments[["sd"]]
+  quantile_at <- which(types == 3L)
+  densities <- numeric(length(quantile_at))
+  partial <- matrix(0, 2, length(quantile_at))
+  if (length(quantile_at) > 0) {
+    nodes <- .meta_implied_nodes(dist, args, slots)
+    if (anyNA(nodes$values)) {
+      return(NULL)
+    }
+    for (m in seq_along(quantile_at)) {
+      p <- slots$group_p[quantile_at[m]]
+      implied_q <- .meta_node_quantile(nodes, p, dist, args, slots)
+      index <- .meta_node_interval(nodes, implied_q)
+      f <- .meta_quantile_density(implied_q, index, nodes, dist, args, slots)
+      if (!is.finite(f) || f <= 0) {
+        return(NULL)
+      }
+      implied[quantile_at[m]] <- implied_q
+      densities[m] <- f
+      partial[, m] <- .meta_quantile_partials(
+        nodes, implied_q, p, index, moments[["mean"]]
+      )
+    }
+  }
+  covariance <- .meta_joint_covariance(
+    types, slots$group_p, moments, densities, partial, slots$study_n
+  )
+  return(list(implied = implied, sigma = covariance))
+}
+
+#' The joint log likelihood of the summaries of one continuous study
+#'
+#' The multivariate normal of [.meta_joint_study_terms()]. A covariance that
+#' is not positive definite, which quadrature error can produce for a draw
+#' far from the reported summaries, is rejected with a log likelihood of
+#' `-Inf`, as are the failures listed there. Matches
+#' `meta_family_joint_study_lpdf()` in Stan.
+#'
+#' @param y A numeric vector of reported summaries in member order.
+#'
+#' @inheritParams .meta_joint_study_terms
+#'
+#' @returns A log density.
+#'
+#' @keywords internal
+.meta_joint_study_ll <- function(y, dist, args, slots, moments = NULL) {
+  pieces <- .meta_joint_study_terms(dist, args, slots, moments)
+  if (is.null(pieces)) {
+    return(-Inf)
+  }
+  chol_lower <- tryCatch(
+    t(chol(pieces$sigma)),
+    error = function(e) {
+      return(NULL)
+    }
+  )
+  if (is.null(chol_lower)) {
+    return(-Inf)
+  }
+  return(.meta_multi_normal_ll(y, pieces$implied, chol_lower))
 }
 
 #' The smallest probability a multinomial cell is given
@@ -2501,6 +2823,17 @@
       se = slots$group_chol[1, 1]
     ))
   }
+  if (slots$obs_type == 8L) {
+    pieces <- .meta_joint_study_terms(dist, args, slots, moments)
+    if (is.null(pieces)) {
+      return(c(observed = slots$group_value[1], implied = Inf, se = Inf))
+    }
+    return(c(
+      observed = slots$group_value[1],
+      implied = unname(pieces$implied[1]),
+      se = sqrt(pieces$sigma[1, 1])
+    ))
+  }
   if (slots$obs_type == 4L && slots$report_se > 0) {
     # Studies report a quantile's standard error on the delay scale, so the
     # reported value is compared with the implied quantile on that scale.
@@ -2555,7 +2888,8 @@
 #' Ungrouped rows use the normal approximations of [.meta_summary_terms()].
 #' A group row, which stands for several summaries reported by one study, uses
 #' the joint likelihood of its members: [.meta_moment_pair_ll()] for a mean and
-#' a standard deviation, and [.meta_quantile_set_ll()] for a set of quantiles.
+#' a standard deviation, [.meta_quantile_set_ll()] for a set of quantiles, and
+#' [.meta_joint_study_ll()] for a continuous estimand reporting both kinds.
 #'
 #' A draw whose implied moments are not all finite, which an extreme delay
 #' distribution parameter can produce by overflowing the analytic kurtosis,
@@ -2574,6 +2908,11 @@
       slots$group_value,
       .meta_implied_summary_vector(dist, args, slots, moments),
       slots$group_chol
+    ))
+  }
+  if (slots$obs_type == 8L) {
+    return(.meta_joint_study_ll(
+      slots$group_value, dist, args, slots, moments
     ))
   }
   if (slots$obs_type %in% c(2L, 3L, 5L)) {
@@ -2636,7 +2975,7 @@
 #'
 #' @keywords internal
 .meta_row_draw_moments <- function(slots, dist, dist_args) {
-  needs_moments <- slots$obs_type %in% c(2L, 3L, 5L) ||
+  needs_moments <- slots$obs_type %in% c(2L, 3L, 5L, 8L) ||
     (slots$obs_type == 7L && any(slots$group_type != 3L))
   if (!needs_moments) {
     return(vector("list", length(dist_args)))

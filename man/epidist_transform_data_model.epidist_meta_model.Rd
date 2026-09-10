@@ -15,6 +15,10 @@
 
 \item{...}{Additional arguments passed to methods}
 }
+\value{
+An \code{epidist_meta_model} object with the individual level rows
+summarised and the summary rows unchanged.
+}
 \description{
 Individual level rows are summarised by counting unique combinations of the
 meta model columns and any variables in the model formula, exactly as

@@ -4,14 +4,15 @@
 \alias{simulate_exponential_cases}
 \title{Simulate exponential cases}
 \usage{
-simulate_exponential_cases(r = 0.2, sample_size = 10000, seed, t = 30)
+simulate_exponential_cases(r = 0.2, sample_size = 10000, seed = NULL, t = 30)
 }
 \arguments{
 \item{r}{The exponential growth rate parameter. Defaults to 0.2.}
 
 \item{sample_size}{The number of cases to simulate. Defaults to 10000.}
 
-\item{seed}{The random seed to be used in the simulation process.}
+\item{seed}{The random seed to be used in the simulation process. Defaults
+to \code{NULL}, which leaves the random number generator as it is.}
 
 \item{t}{Upper bound of the survival time. Defaults to 30.}
 }

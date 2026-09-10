@@ -56,6 +56,9 @@ the \code{growth_rate} metadata of their study, which
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_meta_model}.
+}
 \description{
 Prepares individual level data exactly as
 \code{\link[=as_epidist_marginal_model.epidist_linelist_data]{as_epidist_marginal_model.epidist_linelist_data()}} does and then stacks it

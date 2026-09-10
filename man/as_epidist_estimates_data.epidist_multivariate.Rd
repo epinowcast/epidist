@@ -42,6 +42,10 @@ combined object.}
 \item{...}{Study metadata, as documented in
 \code{\link[=as_epidist_estimates_data.data.frame]{as_epidist_estimates_data.data.frame()}}.}
 }
+\value{
+An object of class \code{epidist_estimates_data} with one row per
+reported summary and the covariance matrix attached.
+}
 \description{
 This is the only route by which a covariance between a study's reported
 summaries reaches \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}. The covariance comes from draws
@@ -82,6 +86,7 @@ Other estimates_data:
 \code{\link{as_epidist_estimates_data.epidist_estimates_data}()},
 \code{\link{as_epidist_estimates_data.list}()},
 \code{\link{assert_epidist.epidist_estimates_data}()},
+\code{\link{epidist_estimates_epireview}()},
 \code{\link{epidist_estimates_parameters}()},
 \code{\link{epidist_estimates_summaries}()},
 \code{\link{is_epidist_estimates_data}()},

@@ -15,6 +15,9 @@ families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, s
 \code{\link[brms:brmsfamily]{brms::lognormal()}}, are also
 reexported as part of \code{epidist}.}
 }
+\value{
+The family with \code{other_links} and \code{other_bounds} elements added.
+}
 \description{
 Includes additional information (link functions and parameter bound) about
 the distributional parameters of a \code{brms} family which are not the
