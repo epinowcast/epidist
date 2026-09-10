@@ -523,7 +523,6 @@ The residual grows with $r$ and as $w_p$ grows towards $A$.
 ### An estimated growth rate {#estimated-growth}
 
 The rate $r_j$ of study $j$ sets the tilt of $g_p$ in every code above and the weight of Equation \@ref(eq:meta-accrual).
-It is the number the study is given where it has one.
 Where the study's `growth_rate` is `NA`, or is given with a `growth_rate_sd`, it is instead the distributional parameter `pgrowth` evaluated on the row, the parameter of Section \@ref(primary-tilt), so it takes a `brms` formula and a prior and can be shared with individual level rows from the same outbreak.
 Unless a formula is given for `pgrowth` the model uses `pgrowth ~ 0 + study`, one rate per study.
 A study that reported a rate $\hat{r}_j$ with a standard deviation $s_j$ then gets
@@ -532,8 +531,6 @@ r_j \sim \text{Normal}(\hat{r}_j, s_j^2), (\#eq:meta-growth-prior)
 $$
 so the reported rate is a prior rather than a constant and its uncertainty reaches the delay.
 Every other coefficient of `pgrowth` gets $\text{Normal}(0, 0.25^2)$, which is weakly informative for a delay measured in days.
-The summaries carry little information about $r_j$ on their own, so a study whose rate is unknown needs either such a prior or a coefficient shared with rows that inform it, for example `pgrowth ~ 1` with a line list given `primary = "expgrowth"`.
-A row that estimates its rate always uses the tilted primary event, whatever value the parameter takes, so that the likelihood does not switch between its uniform and tilted forms as $r_j$ passes through zero.
 
 ### Left truncation
 
