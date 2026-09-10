@@ -587,7 +587,7 @@ Observation times are not recorded either, so every study gets `trunc_adjusted =
 Means become `"mean"` rows, with a matching `"sd"` row where a standard deviation is reported, either as the study's own spread or as the second parameter of a fitted Gamma.
 A reported standard error becomes an `se` on the mean row instead.
 Medians become `"quantile"` rows at `p = 0.5`, with further quantile rows at `p = 0.25` and `p = 0.75` where an interquartile range is reported.
-A study reporting a spread that does not match its own value type, such as a median alongside a standard deviation, keeps only the matching set, because summaries of different kinds from one study are fitted as though they were independent.
+A study reporting a spread that does not match its own value type, such as a median alongside a standard deviation, keeps only the matching set, because the two kinds of summary from a study that reported integer date differences are fitted as though they were independent.
 A study that reports the natural parameters of a distribution it fitted is converted as `epidist_estimates_parameters()` would convert it.
 The fitted distributions here are Gammas that epireview records as a mean and a standard deviation, which the function picks up as moments.
 

@@ -20,13 +20,13 @@ test_that("as_epidist_meta_model works with estimates data only", {
   expect_s3_class(prep_meta_estimates, "epidist_meta_model")
   expect_false(any(prep_meta_estimates$obs_type == 1L))
   # Study A reports a mean and a standard deviation, which share one row.
-  expect_identical(nrow(prep_meta_estimates), nrow(sim_estimates) - 1L)
+  expect_identical(nrow(prep_meta_estimates), nrow(sim_estimates) - 2L)
 })
 
 test_that("as_epidist_meta_model works with a mix of individual and summary data", { # nolint: line_length_linter.
   expect_s3_class(prep_meta_obs, "epidist_meta_model")
   expect_identical(
-    nrow(prep_meta_obs), nrow(sim_obs) + nrow(sim_estimates) - 1L
+    nrow(prep_meta_obs), nrow(sim_obs) + nrow(sim_estimates) - 2L
   )
   expect_identical(sum(prep_meta_obs$obs_type == 1L), nrow(sim_obs))
 })
@@ -104,13 +104,15 @@ test_that("as_epidist_meta_model uses the design slot layout", {
     prep_meta_obs[, .meta_required_cols()], .meta_required_cols()
   )
   summary_rows <- prep_meta_obs[prep_meta_obs$obs_type != 1L, ]
+  # Study A is a mean and standard deviation pair, study B a mean with a
+  # quantile of a continuous estimand fitted jointly, and study C a quantile.
   expect_identical(
     summary_rows$obs_type,
-    c(5L, 2L, 6L, 6L)
+    c(5L, 8L, 6L)
   )
   expect_true(all(summary_rows$delay_lwr == 0L))
   expect_true(all(summary_rows$n == 1))
-  expect_identical(summary_rows$delay_upr, sim_estimates$value[-2])
+  expect_identical(summary_rows$delay_upr, sim_estimates$value[-c(2, 4)])
   individual_rows <- prep_meta_obs[prep_meta_obs$obs_type == 1L, ]
   expect_true(all(individual_rows$study_n == 0L))
   expect_true(all(individual_rows$report_se == 0))
@@ -125,7 +127,7 @@ test_that("as_epidist_meta_model sets the grid cutoff from the truncation flag",
     sim_estimates$max_delay,
     sim_estimates$relative_obs_time
   )
-  expect_identical(summary_rows$relative_obs_time, expected[-2])
+  expect_identical(summary_rows$relative_obs_time, expected[-c(2, 4)])
 })
 
 test_that("as_epidist_meta_model labels individual rows in the study column", {
@@ -234,7 +236,7 @@ test_that("epidist_transform_data_model.epidist_meta_model aggregates only indiv
   )
   expect_s3_class(trans, "epidist_meta_model")
   expect_identical(
-    sum(trans$obs_type != 1L), nrow(sim_estimates) - 1L
+    sum(trans$obs_type != 1L), nrow(sim_estimates) - 2L
   )
   expect_lt(sum(trans$obs_type == 1L), nrow(sim_obs))
   expect_identical(sum(trans$n), sum(prep_meta_obs$n))
@@ -2233,6 +2235,9 @@ test_that("epidist_stancode.epidist_meta_model passes the grouped members to Sta
   expect_true(
     grepl("meta_lognormal_moment_pair_lpdf", scode, fixed = TRUE)
   )
+  expect_true(
+    grepl("meta_lognormal_joint_study_lpdf", scode, fixed = TRUE)
+  )
 })
 
 test_that(".meta_row_log_lik dispatches on the observation type", {
@@ -3520,4 +3525,333 @@ test_that("the meta model posterior predictions use the fitted primary event", {
     i = 1, prep
   )
   expect_false(isTRUE(all.equal(mean(growing), mean(uniform))))
+})
+
+# The slots of a joint study row, a continuous estimand reporting a mean or a
+# standard deviation alongside quantiles, fully adjusted unless overridden.
+joint_study_slots <- function(types, probs, values, study_n = 200, ...) {
+  slots <- list(
+    obs_type = 8L, study_n = study_n, lower = 0, cutoff = 60, pwindow = 1,
+    swindow = 1, trunc_adjusted = 1L, cens_adjusted = 1L, growth_rate = 0,
+    trunc_design = 0L, report_se = 0, quantile_p = 0, value = values[1],
+    group_value = values, group_type = types, group_p = probs,
+    group_count = rep(0L, length(types))
+  )
+  return(utils::modifyList(slots, list(...)))
+}
+
+test_that(".meta_quantile_on_chord names the designs that keep the chord", {
+  base <- list(
+    cens_adjusted = 1L, trunc_adjusted = 1L, trunc_design = 0L,
+    growth_rate = 0
+  )
+  expect_false(.meta_quantile_on_chord(base))
+  expect_false(
+    .meta_quantile_on_chord(utils::modifyList(base, list(cens_adjusted = 4L)))
+  )
+  expect_true(
+    .meta_quantile_on_chord(utils::modifyList(base, list(cens_adjusted = 0L)))
+  )
+  expect_true(.meta_quantile_on_chord(
+    utils::modifyList(base, list(trunc_adjusted = 0L, trunc_design = 1L))
+  ))
+  expect_true(.meta_quantile_on_chord(
+    utils::modifyList(base, list(cens_adjusted = 2L, growth_rate = 0.1))
+  ))
+})
+
+test_that(".meta_node_interval finds the node interval holding a delay", {
+  nodes <- list(values = c(0, 0.2, 0.5, 0.8, 1), origin = 2, spacing = 0.5)
+  expect_identical(.meta_node_interval(nodes, 2), 1L)
+  expect_identical(.meta_node_interval(nodes, 2.4), 1L)
+  expect_identical(.meta_node_interval(nodes, 2.5), 2L)
+  expect_identical(.meta_node_interval(nodes, 3.2), 3L)
+  # A delay at or beyond the last node stays in the last interval.
+  expect_identical(.meta_node_interval(nodes, 4), 4L)
+  expect_identical(.meta_node_interval(nodes, 9), 4L)
+})
+
+test_that(".meta_quantile_density is the node slope on the chord and the closed form density otherwise", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  chord <- joint_study_slots(
+    3L, 0.5, 5,
+    study_n = 60, trunc_adjusted = 0L, trunc_design = 1L,
+    cutoff = 30, growth_rate = 0.1
+  )
+  nodes <- .meta_implied_nodes("plnorm", args, chord)
+  q <- .meta_node_quantile(nodes, 0.5, "plnorm", args, chord)
+  index <- .meta_node_interval(nodes, q)
+  expect_identical(
+    .meta_quantile_density(q, index, nodes, "plnorm", args, chord),
+    (nodes$values[index + 1] - nodes$values[index]) / nodes$spacing
+  )
+  refined <- joint_study_slots(3L, 0.5, 5, study_n = 60)
+  nodes <- .meta_implied_nodes("plnorm", args, refined)
+  q <- .meta_node_quantile(nodes, 0.5, "plnorm", args, refined)
+  expect_equal(
+    .meta_quantile_density(
+      q, .meta_node_interval(nodes, q), nodes, "plnorm", args, refined
+    ),
+    stats::dlnorm(q, 1.6, 0.6),
+    tolerance = 1e-10
+  )
+})
+
+test_that(".meta_joint_study_terms matches the asymptotic covariance of a lognormal study", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.8, sdlog = 0.5)
+  probs <- c(0.25, 0.5, 0.75)
+  slots <- joint_study_slots(
+    c(1L, 2L, 3L, 3L, 3L), c(0, 0, probs), c(7, 3.5, 4.5, 6, 8)
+  )
+  terms <- .meta_joint_study_terms("plnorm", args, slots)
+  moments <- .meta_continuous_moments("plnorm", args)
+  q <- stats::qlnorm(probs, 1.8, 0.5)
+  f <- stats::dlnorm(q, 1.8, 0.5)
+  expect_equal(
+    terms$implied, c(moments[["mean"]], moments[["sd"]], q),
+    tolerance = 1e-8
+  )
+  n <- slots$study_n
+  mu <- moments[["mean"]]
+  sigma <- moments[["sd"]]
+  partial <- function(k, upper) {
+    return(stats::integrate(
+      function(x) (x - mu)^k * stats::dlnorm(x, 1.8, 0.5), 0, upper
+    )$value)
+  }
+  expected <- matrix(0, 5, 5)
+  expected[1, 1] <- sigma^2 / n
+  expected[2, 2] <- .meta_sd_se(moments, n)^2
+  expected[1, 2] <- moments[["skewness"]] * sigma^2 / (2 * n)
+  expected[2, 1] <- expected[1, 2]
+  for (i in 1:3) {
+    for (j in 1:3) {
+      expected[2 + i, 2 + j] <- min(probs[i], probs[j]) *
+        (1 - max(probs[i], probs[j])) / (n * f[i] * f[j])
+    }
+    expected[1, 2 + i] <- -partial(1, q[i]) / (n * f[i])
+    expected[2 + i, 1] <- expected[1, 2 + i]
+    expected[2, 2 + i] <- -(partial(2, q[i]) - sigma^2 * probs[i]) /
+      (2 * sigma * n * f[i])
+    expected[2 + i, 2] <- expected[2, 2 + i]
+  }
+  # The partial moments are trapezoid sums over the nodes, so they carry an
+  # error of the order of the node spacing squared, which is 0.6 days here.
+  expect_equal(
+    sqrt(diag(terms$sigma)), sqrt(diag(expected)),
+    tolerance = 1e-3
+  )
+  expect_lt(
+    max(abs(stats::cov2cor(terms$sigma) - stats::cov2cor(expected))), 5e-3
+  )
+  expect_true(all(eigen(terms$sigma, only.values = TRUE)$values > 0))
+})
+
+test_that("the joint study covariance matches the sampling covariance of simulated studies", { # nolint: line_length_linter.
+  set.seed(676)
+  args <- list(meanlog = 1.8, sdlog = 0.5)
+  probs <- c(0.25, 0.5, 0.75)
+  n <- 200
+  types <- c(1L, 2L, 3L, 3L, 3L)
+  values <- c(7, 3.5, 4.5, 6, 8)
+  summarise <- function(x) {
+    return(c(
+      mean(x), stats::sd(x), stats::quantile(x, probs, names = FALSE)
+    ))
+  }
+  check <- function(slots, simulate) {
+    pieces <- .meta_joint_study_terms("plnorm", args, slots)
+    empirical <- stats::cov(t(replicate(2000, summarise(simulate()))))
+    expect_lt(
+      max(abs(sqrt(diag(pieces$sigma)) / sqrt(diag(empirical)) - 1)), 0.08
+    )
+    return(expect_lt(
+      max(abs(stats::cov2cor(pieces$sigma) - stats::cov2cor(empirical))), 0.05
+    ))
+  }
+  # A fully adjusted study.
+  check(
+    joint_study_slots(types, c(0, 0, probs), values, study_n = n),
+    function() stats::rlnorm(n, 1.8, 0.5)
+  )
+  # A study that did not adjust for truncation at 20 days.
+  check(
+    joint_study_slots(
+      types, c(0, 0, probs), values,
+      study_n = n, trunc_adjusted = 0L,
+      cutoff = 20
+    ),
+    function() {
+      x <- stats::rlnorm(4 * n, 1.8, 0.5)
+      return(x[x <= 20][seq_len(n)])
+    }
+  )
+  # The uniform single interval approximation with a daily primary window.
+  check(
+    joint_study_slots(
+      types, c(0, 0, probs), values,
+      study_n = n, cens_adjusted = 2L
+    ),
+    function() stats::rlnorm(n, 1.8, 0.5) + stats::runif(n)
+  )
+})
+
+test_that(".meta_joint_study_ll is the moment pair likelihood without quantiles", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  slots <- joint_study_slots(c(1L, 2L), c(0, 0), c(5.5, 3.4), study_n = 60)
+  moments <- .meta_row_moments(slots, "plnorm", args)
+  expect_equal(
+    .meta_joint_study_ll(c(5.5, 3.4), "plnorm", args, slots),
+    .meta_moment_pair_ll(5.5, 3.4, moments, 60),
+    tolerance = 1e-10
+  )
+})
+
+test_that(".meta_joint_study_ll is the delta method normal for one quantile", {
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  slots <- joint_study_slots(3L, 0.5, 5.2, study_n = 60)
+  q <- stats::qlnorm(0.5, 1.6, 0.6)
+  se <- sqrt(0.25 / 60) / stats::dlnorm(q, 1.6, 0.6)
+  expect_equal(
+    .meta_joint_study_ll(5.2, "plnorm", args, slots),
+    stats::dnorm(5.2, q, se, log = TRUE),
+    tolerance = 1e-8
+  )
+})
+
+test_that("the joint study likelihood down weights a mean with a median from a small study", { # nolint: line_length_linter.
+  args_a <- list(meanlog = 1.6, sdlog = 0.6)
+  args_b <- list(meanlog = 1.75, sdlog = 0.6)
+  study_n <- 30
+  mean_a <- .meta_continuous_moments("plnorm", args_a)[["mean"]]
+  median_a <- stats::qlnorm(0.5, 1.6, 0.6)
+  y <- c(mean_a, median_a)
+  slots <- joint_study_slots(c(1L, 3L), c(0, 0.5), y, study_n = study_n)
+  joint_drop <- .meta_joint_study_ll(y, "plnorm", args_a, slots) -
+    .meta_joint_study_ll(y, "plnorm", args_b, slots)
+  # The mean as a normal and the median as the binomial of the quantile set,
+  # which is how the two were fitted before they shared a covariance.
+  independent_ll <- function(args) {
+    moments <- .meta_row_moments(slots, "plnorm", args)
+    mean_row <- utils::modifyList(slots, list(obs_type = 2L, value = mean_a))
+    median_row <- utils::modifyList(slots, list(
+      obs_type = 6L, group_value = median_a, group_p = 0.5, group_count = 15L
+    ))
+    return(
+      .meta_row_log_lik(mean_row, "plnorm", args, moments) +
+        .meta_row_log_lik(median_row, "plnorm", args, moments)
+    )
+  }
+  independent_drop <- independent_ll(args_a) - independent_ll(args_b)
+  expect_lt(joint_drop, independent_drop)
+  # The mean and the median are correlated at about 0.7, so fitting them as
+  # independent claims well over half as much information again.
+  expect_gt(independent_drop / joint_drop, 1.3)
+})
+
+test_that("as_epidist_meta_model fits every summary of a continuous study jointly", { # nolint: line_length_linter.
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A",
+    type = c("quantile", "sd", "quantile", "mean"),
+    value = c(9.4, 3.6, 4.2, 7.5),
+    p = c(0.75, NA, 0.25, NA),
+    n = 60,
+    trunc_adjusted = TRUE,
+    cens_adjusted = 1,
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  expect_identical(nrow(meta), 1L)
+  expect_identical(meta$obs_type, 8L)
+  expect_identical(meta$group_len, 4L)
+  # The mean, then the standard deviation, then the quantiles by probability.
+  members <- .meta_members(meta)
+  expect_identical(members$type, c(1L, 2L, 3L, 3L))
+  expect_identical(members$value, c(7.5, 3.6, 4.2, 9.4))
+  expect_identical(members$p, c(0, 0, 0.25, 0.75))
+  expect_identical(members$count, rep(0L, 4))
+})
+
+test_that("as_epidist_meta_model keeps the two kinds of an integer day study apart", { # nolint: line_length_linter.
+  estimates <- suppressWarnings(suppressMessages(as_epidist_estimates_data(
+    data.frame(
+      study = "A",
+      type = c("quantile", "sd", "quantile", "mean"),
+      value = c(9.4, 3.6, 4.2, 7.5),
+      p = c(0.75, NA, 0.25, NA),
+      n = 60,
+      relative_obs_time = 30,
+      trunc_adjusted = FALSE,
+      cens_adjusted = 0,
+      stringsAsFactors = FALSE
+    )
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  # Groups are laid out in the order of their first row, so the quantile set
+  # comes before the mean and standard deviation pair here.
+  expect_identical(meta$obs_type, c(6L, 5L))
+  expect_identical(meta$group_len, c(2L, 2L))
+})
+
+test_that(".meta_row_log_lik dispatches a joint study row", {
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  slots <- joint_study_slots(c(1L, 3L), c(0, 0.5), c(6, 5), study_n = 60)
+  log_lik <- .meta_row_log_lik(slots, "plnorm", args)
+  expect_true(is.finite(log_lik))
+  expect_equal(
+    log_lik, .meta_joint_study_ll(c(6, 5), "plnorm", args, slots),
+    tolerance = 1e-10
+  )
+})
+
+test_that(".meta_summary_terms describes the first member of a joint study row", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  slots <- joint_study_slots(c(1L, 3L), c(0, 0.5), c(6, 5), study_n = 60)
+  terms <- .meta_summary_terms(slots, "plnorm", args)
+  moments <- .meta_row_moments(slots, "plnorm", args)
+  expect_identical(terms[["observed"]], 6)
+  expect_equal(terms[["implied"]], moments[["mean"]], tolerance = 1e-10)
+  expect_equal(
+    terms[["se"]], moments[["sd"]] / sqrt(60),
+    tolerance = 1e-10
+  )
+})
+
+test_that(".meta_joint_study_ll rejects a draw whose implied moments overflow", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 40)
+  slots <- joint_study_slots(c(1L, 3L), c(0, 0.5), c(6, 5), study_n = 60)
+  expect_identical(.meta_joint_study_ll(c(6, 5), "plnorm", args, slots), -Inf)
+  terms <- .meta_summary_terms(slots, "plnorm", args)
+  expect_identical(terms[["se"]], Inf)
+})
+
+test_that("assert_epidist.epidist_meta_model checks a joint study row", {
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A",
+    type = c("mean", "quantile", "quantile"),
+    value = c(7.5, 4.2, 9.4),
+    p = c(NA, 0.25, 0.75),
+    n = 60,
+    trunc_adjusted = TRUE,
+    cens_adjusted = 1,
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  expect_identical(meta$obs_type, 8L)
+  grid <- meta
+  suppressWarnings({
+    grid$cens_adjusted <- 0L
+  })
+  expect_meta_assert_error(grid, "continuous estimand")
+  members <- .meta_members(meta)
+  one_kind <- members
+  one_kind$type <- c(3L, 3L, 3L)
+  expect_error(
+    assert_epidist(.meta_set_members(meta, one_kind)), "at least one quantile"
+  )
+  falling <- members
+  falling$value <- c(7.5, 9.4, 4.2)
+  expect_error(
+    assert_epidist(.meta_set_members(meta, falling)), "must not decrease"
+  )
 })
