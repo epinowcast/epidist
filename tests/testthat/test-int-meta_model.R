@@ -115,7 +115,7 @@ test_that("the R and Stan meta model log likelihoods agree for every observation
   standata <- program$standata
   # Every observation type, censoring adjustment and truncation design must
   # be exercised, so that no branch is compared vacuously.
-  expect_setequal(unique(standata$vint1), 2:7)
+  expect_setequal(unique(standata$vint1), 2:8)
   expect_setequal(unique(standata$vint4), 0:4)
   expect_setequal(unique(standata$vint5), 0:1)
   expect_true(any(standata$vreal5 > 0))

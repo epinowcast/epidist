@@ -134,6 +134,10 @@ See #620.
 - Added `simulate_study()`, which applies the observation and estimation procedure of one published study to a simulated line list and returns the summaries that study would have reported as an `epidist_estimates_data` object.
 It covers every censoring adjustment code, both truncation designs, a minimum delay and a subsample, and reports a mean and standard deviation, quantiles, a mean with a standard error, or a multivariate mean and standard deviation with their bootstrap covariance.
 Closes #672.
+- The meta model now fits every summary a study with a continuous estimand reports as one multivariate normal, with the sampling covariance of its mean, standard deviation and quantiles derived from the implied distribution.
+Before, the mean and standard deviation of a study were fitted separately from its quantiles, which counted a study reporting a mean, a standard deviation and quartiles about twice for the location, and a mean with a median 1.5 times at a study size of 100.
+A study that reported integer date differences still has the two kinds fitted separately, because its quantiles are discrete statistics, so report its mean and standard deviation and drop its quantiles.
+Closes #676.
 
 ## Features
 

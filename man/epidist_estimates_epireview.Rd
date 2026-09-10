@@ -88,9 +88,9 @@ their sampling uncertainty from the sample size.
 A range is the smallest and largest delay a study saw rather than a summary
 of the distribution, and is not used.
 A spread that does not match the value type, such as a standard deviation
-reported alongside a median, is not used either, because summaries of
-different kinds from one study would be fitted as though they were
-independent.
+reported alongside a median, is not used either, because the two kinds of
+summary from a study that reported integer date differences are fitted as
+though they were independent.
 
 Records that cannot be mapped are dropped with a message naming them.
 These are records reporting an inverse rate, units other than days, a value

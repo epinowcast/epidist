@@ -356,7 +356,28 @@ where $w_s$ is the reporting resolution and $G_0$ the step distribution function
 The information this carries saturates as $n$ grows.
 Several quantiles of integer day delays use Equation \@ref(eq:meta-quantile-set) on the continuity corrected $G$, which is calibrated at around thirty delays but claims a standard error five times too small at a thousand, so `as_epidist_estimates_data()` warns about such studies.
 
-Summaries of different kinds from one study, such as a mean and a median, are treated as independent, which understates their joint uncertainty.
+A study with a continuous estimand, codes 1, 2 and 4 of Section \@ref(the-biased-estimands), that reports a mean or a standard deviation alongside quantiles has all of them fitted as one multivariate normal,
+$$
+\begin{pmatrix} y_m \\ y_\sigma \\ y_{p_1} \\ \vdots \\ y_{p_k} \end{pmatrix} \sim
+\text{Normal}\left(
+\begin{pmatrix} m_1 \\ \sigma \\ Q_{p_1} \\ \vdots \\ Q_{p_k} \end{pmatrix}, \;
+\frac{1}{n} \Sigma
+\right), (\#eq:meta-joint-study)
+$$
+whose mean and standard deviation block is that of Equation \@ref(eq:meta-moment-pair).
+The rest follows from the Bahadur representation of a sample quantile, $\hat{Q}_p - Q_p \approx -(\hat{G}(Q_p) - p) / g(Q_p)$ with $g$ the density of $G$ [@bahadur1966],
+$$
+\Sigma_{q_i q_j} = \frac{p_i (1 - p_j)}{g(Q_{p_i}) \, g(Q_{p_j})}, \quad p_i \le p_j, \qquad
+\Sigma_{m q_i} = -\frac{\int_L^{Q_{p_i}} (x - m_1) \, \text{d}G(x)}{g(Q_{p_i})}, \qquad
+\Sigma_{\sigma q_i} = -\frac{\int_L^{Q_{p_i}} \left((x - m_1)^2 - \sigma^2\right) \text{d}G(x)}{2 \sigma \, g(Q_{p_i})}, (\#eq:meta-joint-cov)
+$$
+with $L$ the smallest delay the study counted, and the last entry carried from the sample variance to the standard deviation by the delta method.
+The partial moments are integrated by parts over the nodes on which $G$ is evaluated, and $g(Q_p)$ is the closed form density of the estimand where its quantile is refined and the slope of $G$ between the bracketing nodes where it is not, see Section \@ref(quantiles-of-the-estimands).
+Against 4000 simulated lognormal studies of 200 delays the derived standard errors are within 3% and the correlations within 0.02 of their sampling values.
+Fitting the two kinds separately counts a study reporting a mean, a standard deviation and quartiles about twice for the location and 1.4 times for the spread, and a mean with a median 1.5 times at $n = 100$ and 3 times at $n = 30$.
+A continuous estimand reporting only a mean and a standard deviation, or only quantiles, keeps Equation \@ref(eq:meta-moment-pair) or \@ref(eq:meta-quantile-set), which the joint normal reduces to and which is exact for a single quantile.
+On the grid of codes 0 and 3 the quantiles are discrete statistics fitted by Equations \@ref(eq:meta-quantile-crossing) and \@ref(eq:meta-quantile-set), so the mean and standard deviation of such a study are fitted separately from its quantiles, and a study reporting both kinds is over weighted in the same way.
+Keep its mean and standard deviation and drop its quantiles.
 The normal approximations degrade for small study sample sizes.
 
 ### A vector of summaries with a covariance
@@ -520,7 +541,7 @@ zero at or below $L$ and one above $D$.
 The accrual weight of Equation \@ref(eq:meta-accrual) is unchanged, since the cells and nodes it multiplies now start at $L$.
 Individual level rows pass $L$ to `primarycensored` as their left truncation point, as the marginal model does.
 
-### Quantiles of the estimands
+### Quantiles of the estimands {#quantiles-of-the-estimands}
 
 The quantile $Q_p$ of an estimand is read off by inverse linear interpolation between the two points of $G$ that bracket $p$.
 On the grid of Equation \@ref(eq:meta-grid) that interpolant is the continuity corrected quantile, so it is exact.
