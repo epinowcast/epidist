@@ -19,7 +19,8 @@ the modification left the object unchanged.}
 meets removed.
 }
 \description{
-Checks \code{data} against each of its \code{epidist} classes using
+Puts the \code{epidist} classes of \code{original} back on \code{data} with
+\code{\link[=.restore_epidist_class]{.restore_epidist_class()}}, then checks \code{data} against each of them using
 \code{\link[=.check_epidist_class]{.check_epidist_class()}} and drops those it no longer meets the
 requirements of. Modifications that leave the object unchanged are not
 checked. Used by the methods documented in \link{epidist_data}.

@@ -16,6 +16,10 @@ combined object.}
 
 \item{...}{Passed to the method used for each element.}
 }
+\value{
+An object of class \code{epidist_estimates_data} holding the rows of
+every element.
+}
 \description{
 Each element is coerced on its own and the results are bound into one
 object. Combining is associative, so contributions can be assembled in any

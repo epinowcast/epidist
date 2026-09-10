@@ -13,6 +13,9 @@
 
 \item{old_names}{A character vector of old column names.}
 }
+\value{
+The \code{data.frame} with its columns renamed.
+}
 \description{
 Rename the columns of a \code{data.frame}
 }

@@ -5,147 +5,10 @@
 - Added an exponentially growing primary event distribution to the latent model.
 `as_epidist_latent_model(primary = "expgrowth")` makes the growth rate a distributional parameter, so it takes a `brms` formula and prior and can vary by covariate.
 See #489 and #618.
-
-## Features
-
-- Added a `distspec::as_dist_spec()` method for fitted models, which exports a fitted delay distribution as an uncertain `<dist_spec>`.
-The natural parameters of the delay distribution are computed for each posterior draw and summarised into a `Normal()` prior on each.
-The generic is re-exported, so `as_dist_spec(fit)` works with `epidist` alone.
-See `?as_dist_spec.epidist_fit` and epiforecasts/distspec#140.
-- `simulate_secondary()` now takes its delay distribution as a `<dist_spec>` rather than a random number generator, so `simulate_secondary(dist = rlnorm, meanlog = 1.8, sdlog = 0.5)` becomes `simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5))`.
-A `<dist_spec>` with uncertain parameters, such as one exported from a fit with `as_dist_spec()`, has its parameters resolved once per row, so the simulated delays carry the parameter uncertainty.
-`distspec` is now an imported package.
-This is a breaking change.
-- Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
-It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
-Each step is still available on its own.
-See `?delay_summary_draws` and #667.
-- Added `epidist_newdata()`, which builds the `newdata` needed to predict from a fitted model.
-It expands the variables you give it into a grid and adds the response and observation process variables the model uses, so you no longer have to know the column names each model expects.
-The defaults give the delay distribution with no censoring and no truncation, and arguments set the censoring windows, the relative observation time and the minimum delay.
-The result works with `brms::posterior_epred()`, `delay_summary_draws()` and the `tidybayes` draw functions.
-See `?epidist_newdata` and #280.
-- Added `delay_parameter_draws()` and `add_delay_parameter_draws()`, which return posterior draws of the delay distribution parameters in the long format used by `tidybayes`.
-- Added `delay_parameter_draws()` and `add_delay_parameter_draws()`, which return posterior draws of the delay distribution parameters in the long format used by `tidybayes`.
-The draws come back with `.row`, `.chain`, `.iteration` and `.draw` columns alongside the columns of `newdata`.
-`predict_delay_parameters()` and `predict_dpar()` are removed in their favour.
-See #471.
-- Added `add_summaries()`, which adds the mean, the standard deviation and quantiles of the delay distribution implied by each draw of its parameters.
-It uses the analytic solution for the lognormal, gamma and Weibull families, and simulates from any other family, so it works for every family `brms` can predict from.
-`add_mean_sd()` is removed in its favour.
-See #471.
-- Added `epidist_strata()`, which returns one row of the model data per unique combination of the variables that predict the delay distribution parameters.
-Passing it to `add_delay_parameter_draws()` draws each set of parameters once rather than once per observation.
-See #471.
-- `epidist` data objects now check themselves when they are modified.
-Every object also carries a shared `epidist_data` class with methods for subsetting, replacement, `rbind()` and the `dplyr` verbs.
-These re-check the object and drop any `epidist` class whose requirements it no longer meets, warning about what was dropped and why.
-An object that still carries an `epidist` class is therefore a valid object of that class.
-`dplyr::group_by()` and results with no columns are exceptions, both documented in `?epidist_data`.
-See `?epidist_data` and #399.
-- Dropped the checks in `epidist_stancode()` and in the conversions between linelist and aggregate data, which ran on objects that had already been checked.
-The conversions from linelist data to a model still check their input, because `new_epidist_linelist_data()` does not.
-See #399.
-- `epidist_transform_data_model()` now checks the object it builds for the marginal and naive models.
-That object was never checked before, which only showed once the check in `epidist_stancode()` was removed.
-See #399.
-## Package
-
-- Reworded the message `as_epidist_marginal_model()` gives when it sets relative observation times to `Inf`.
-The message now names `relative_obs_time` and `orig_relative_obs_time`.
-It explains that the impact on accuracy is small because these observation times cause very limited right truncation.
-It also points at `obs_time_threshold` for users who do not want the behaviour.
-See #536.
-- `epidist_prior()` no longer warns about user priors on parameters that are in the model but not in the `epidist` default set.
-The warning now checks user priors against the `brms` default priors for the model as well as the `epidist` ones, so a prior on a regression coefficient no longer looks unmatched.
-See #483.
-- Simplified the internals of prior handling.
-`.replace_prior()` now only merges priors, with the warning about unmatched priors moved to `.warn_unmatched_prior()` and the `merge` argument handled in `epidist_prior()`.
-The latent model checks of the event window priors moved to `R/latent_model.R` and dispatch on the data class, so a model can now state its own prior requirements.
-The returned priors, and the Stan code they produce, are unchanged.
-See #483.
-- The warning about unmatched priors now lists each prior with the parameter it applies to, rather than printing the internal join it came from.
-See #483.
-- Documented the return value of every exported function.
-- Declared `scales` in `Suggests`, which the FAQ vignette loads but nothing declared.
-- Fixed four typos that `inst/WORDLIST` was masking, corrected two moved URLs, title cased the `Title` field, and set `Language: en-GB`.
-- Fixed `inst/CITATION` rendering the year as `NULL`.
-- `epidist()` now restores the `PKG_CPPFLAGS` and `PKG_LIBS` environment variables it found before fitting.
-The `rstan` backend sets both while compiling and never restores them.
-The leaked `PKG_CPPFLAGS` made the next `pkgbuild::has_build_tools()` check fail, which printed a spurious `fatal error: cmath: No such file or directory` before the model compiled and fitted successfully.
-See #532.
-- Added `simulate_dates()`, which turns simulated event times into the censored dates an analyst would receive.
-- Removed the calls to unexported `brms` functions that `R CMD check --as-cran` flags.
-`R/brms-compat.R` now holds small internal helpers reproducing the narrow behaviour `epidist` relied on from `brms:::validate_family()`, `brms:::validate_formula()`, `brms:::validate_data()`, `brms:::dpar_bounds()` and `brms:::log_lik_weight()`.
-The helpers are written against the public `brms` interface rather than copied from `brms`.
-`tests/testthat/test-brms-compat.R` checks each one against the `brms` internal it replaces.
-Those checks are skipped on CRAN, since they reach into `brms` internals.
-Credit for the original behaviour goes to the `brms` authors.
-See #420 and paul-buerkner/brms#1676.
-- Removed the `Remotes` field from `DESCRIPTION` so dependencies resolve from CRAN.
-`cmdstanr` is now found through `Additional_repositories` and the development version of `brms` is no longer used.
-See #592.
-- Turned off evaluation of the approximate inference vignette.
-It uses `pathfinder`, which needs an unreleased `brms` fix.
-This release resolves `brms` from CRAN.
-See #579.
-- Added a `brms (>= 2.23.0)` floor, the version the compatibility helpers were checked against.
-- Pointed the CI workflows at the Stan r-universe with `extra-repositories`.
-Dropping `Remotes` means `pak` can no longer resolve `cmdstanr`.
-`pak` does not read `Additional_repositories`.
-- Raised the minimum R version to 4.1.0.
-The package uses the native pipe and the lambda shorthand.
-Both need R 4.1.0.
-- Added the copyright holder role to Sam Abbott in `DESCRIPTION`.
-- Guarded the shared test fits and the tests that use them so the suite runs without `cmdstanr`.
-- Wrapped the `epidist()` and `epidist_diagnostics()` examples in `\donttest{}`.
-Both fit a model.
-They ran for 118 and 110 seconds against CRAN's 5 second guidance.
-- Anchored the `brms` links in the documentation so `R CMD check` no longer reports Rd cross-references with missing package anchors.
-- Dropped a stale `fix` entry from the declared global variables.
-- Updated the `brms` documentation URL, which had moved.
-- Added `cran-comments.md`.
-- Rewrote the generic `epidist_gen_log_lik()` method so it evaluates the `brms` log likelihood once per delay rather than once per delay per posterior draw.
-A single `brms` call already returns the cdf for every draw, so the results are cached and reused.
-The method also calls `primarycensored::pcens_cdf()` directly instead of `primarycensored::dpcens()`, which revalidates the distribution function at random points on every call and so would defeat the cache.
-Cost is now linear rather than quadratic in the number of draws.
-For 500 draws this is around 80 times faster, and the log likelihoods are unchanged. The guard that `dpcens()` applied when the delay upper bound exceeds the relative observation time is reproduced explicitly, since this no longer goes through `dpcens()`.
-Left truncation is carried through the rewritten path: the density is normalised over the interval from `delay_min` to the relative observation time.
-See #476.
-
-## Documentation
-
-- Added an `extending-epidist` vignette covering why you might build your own model type, the six generics a model type implements, a worked example, and a table of the packages that already extend `epidist`.
-- Precomputed the `ebola`, `faq` and `approx-inference` vignettes.
-All three fit models and need `cmdstanr`, so they were excluded from the build by `.Rbuildignore` and never reached anyone who installed the package.
-They are now knitted from a `.Rmd.orig` source into a committed `.Rmd` holding static output, so they ship without needing `cmdstanr` or a model fit at build time.
-- Gave each precomputed vignette its own figure prefix.
-`ebola` and `approx-inference` both wrote to `figures/epidist-`, which would collide once more than one is precomputed.
-
-## Package
-
-- Made `epidist_family_param()` internal.
-It is reached through `epidist_family()`, and a custom model supplies its family through `epidist_family_model()` instead.
-See #79.
-- Exported `epidist_gen_log_lik()`, which was the only one of the three post-processing generators not exported.
-See #79.
-- Made `epidist_transform_data()` internal.
-It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
-See #79.
-
-## Models
-
 - Added left truncation support via a `delay_min` parameter in `as_epidist_marginal_model()`.
 This passes the `L` (left truncation) argument through to the `primarycensored` likelihood.
 The default of 0 reproduces the previous behaviour.
 See #588 and #596.
-
-## CI
-
-- Added a `render-vignettes` workflow that rebuilds the precomputed vignettes and opens a pull request with the result.
-
-## Models
-
 - Added the meta model, for fitting to summarised and potentially biased published estimates, jointly with individual level data.
 Published estimates are forward modelled from the study's own estimation procedure, so summaries that did not adjust for right truncation or that treated interval censored data as continuous can still contribute unbiased information, given correct metadata describing what each study did.
 The meta model is experimental and its interface may still change.
@@ -269,8 +132,142 @@ See #620.
 It covers every censoring adjustment code, both truncation designs, a minimum delay and a subsample, and reports a mean and standard deviation, quantiles, a mean with a standard error, or a multivariate mean and standard deviation with their bootstrap covariance.
 Closes #672.
 
+## Features
+
+- Added a `distspec::as_dist_spec()` method for fitted models, which exports a fitted delay distribution as an uncertain `<dist_spec>`.
+The natural parameters of the delay distribution are computed for each posterior draw and summarised into a `Normal()` prior on each.
+The generic is re-exported, so `as_dist_spec(fit)` works with `epidist` alone.
+See `?as_dist_spec.epidist_fit` and epiforecasts/distspec#140.
+- `simulate_secondary()` now takes its delay distribution as a `<dist_spec>` rather than a random number generator, so `simulate_secondary(dist = rlnorm, meanlog = 1.8, sdlog = 0.5)` becomes `simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5))`.
+A `<dist_spec>` with uncertain parameters, such as one exported from a fit with `as_dist_spec()`, has its parameters resolved once per row, so the simulated delays carry the parameter uncertainty.
+`distspec` is now an imported package.
+This is a breaking change.
+- Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
+It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
+Each step is still available on its own.
+See `?delay_summary_draws` and #667.
+- Added `epidist_newdata()`, which builds the `newdata` needed to predict from a fitted model.
+It expands the variables you give it into a grid and adds the response and observation process variables the model uses, so you no longer have to know the column names each model expects.
+The defaults give the delay distribution with no censoring and no truncation, and arguments set the censoring windows, the relative observation time and the minimum delay.
+The result works with `brms::posterior_epred()`, `delay_summary_draws()` and the `tidybayes` draw functions.
+See `?epidist_newdata` and #280.
+- Added `delay_parameter_draws()` and `add_delay_parameter_draws()`, which return posterior draws of the delay distribution parameters in the long format used by `tidybayes`.
+The draws come back with `.row`, `.chain`, `.iteration` and `.draw` columns alongside the columns of `newdata`.
+`predict_delay_parameters()` and `predict_dpar()` are removed in their favour.
+See #471.
+- Added `add_summaries()`, which adds the mean, the standard deviation and quantiles of the delay distribution implied by each draw of its parameters.
+It uses the analytic solution for the lognormal, gamma and Weibull families, and simulates from any other family, so it works for every family `brms` can predict from.
+`add_mean_sd()` is removed in its favour.
+See #471.
+- Added `epidist_strata()`, which returns one row of the model data per unique combination of the variables that predict the delay distribution parameters.
+Passing it to `add_delay_parameter_draws()` draws each set of parameters once rather than once per observation.
+See #471.
+- `epidist` data objects now check themselves when they are modified.
+Every object also carries a shared `epidist_data` class with methods for subsetting, replacement, `rbind()` and the `dplyr` verbs.
+These re-check the object and drop any `epidist` class whose requirements it no longer meets, warning about what was dropped and why.
+An object that still carries an `epidist` class is therefore a valid object of that class.
+`dplyr::group_by()` and results with no columns are exceptions, both documented in `?epidist_data`.
+See `?epidist_data` and #399.
+- Dropped the checks in `epidist_stancode()` and in the conversions between linelist and aggregate data, which ran on objects that had already been checked.
+The conversions from linelist data to a model still check their input, because `new_epidist_linelist_data()` does not.
+See #399.
+- `epidist_transform_data_model()` now checks the object it builds for the marginal and naive models.
+That object was never checked before, which only showed once the check in `epidist_stancode()` was removed.
+See #399.
+
+## Package
+
+- Acted on a software review of the package.
+Every exported function and method now documents its return value, including the meta model, estimates data and multivariate functions added in this release.
+`is_epidist_meta_model()` and `is_epidist_estimates_data()` gained examples.
+`as_epidist_meta_model()` now refuses individual level delays that are not whole numbers rather than truncating them.
+`simulate_gillespie()` and `simulate_exponential_cases()` take `seed = NULL` by default instead of a missing argument, which does not change what they return.
+`simulate_study()` documents that it uses the random number generator.
+The `trunc_adjusted` default of `as_epidist_estimates_data()` is described as it behaves.
+Dropped `modelr` from `Suggests`, which nothing used, and split the author names in `DESCRIPTION` into given and family names.
+Added `tests/spelling.R` so the spelling check runs with the tests, and corrected the spellings that `inst/WORDLIST` was masking in the README and the vignette sources.
+The `check-cmdstan` workflow now checks the meta model Stan program as well as the latent and marginal ones.
+Consolidated the duplicated section headings and a repeated entry in this file.
+See #702.
+
+- Reworded the message `as_epidist_marginal_model()` gives when it sets relative observation times to `Inf`.
+The message now names `relative_obs_time` and `orig_relative_obs_time`.
+It explains that the impact on accuracy is small because these observation times cause very limited right truncation.
+It also points at `obs_time_threshold` for users who do not want the behaviour.
+See #536.
+- `epidist_prior()` no longer warns about user priors on parameters that are in the model but not in the `epidist` default set.
+The warning now checks user priors against the `brms` default priors for the model as well as the `epidist` ones, so a prior on a regression coefficient no longer looks unmatched.
+See #483.
+- Simplified the internals of prior handling.
+`.replace_prior()` now only merges priors, with the warning about unmatched priors moved to `.warn_unmatched_prior()` and the `merge` argument handled in `epidist_prior()`.
+The latent model checks of the event window priors moved to `R/latent_model.R` and dispatch on the data class, so a model can now state its own prior requirements.
+The returned priors, and the Stan code they produce, are unchanged.
+See #483.
+- The warning about unmatched priors now lists each prior with the parameter it applies to, rather than printing the internal join it came from.
+See #483.
+- Documented the return value of every exported function.
+- Declared `scales` in `Suggests`, which the FAQ vignette loads but nothing declared.
+- Fixed four typos that `inst/WORDLIST` was masking, corrected two moved URLs, title cased the `Title` field, and set `Language: en-GB`.
+- Fixed `inst/CITATION` rendering the year as `NULL`.
+- `epidist()` now restores the `PKG_CPPFLAGS` and `PKG_LIBS` environment variables it found before fitting.
+The `rstan` backend sets both while compiling and never restores them.
+The leaked `PKG_CPPFLAGS` made the next `pkgbuild::has_build_tools()` check fail, which printed a spurious `fatal error: cmath: No such file or directory` before the model compiled and fitted successfully.
+See #532.
+- Added `simulate_dates()`, which turns simulated event times into the censored dates an analyst would receive.
+- Removed the calls to unexported `brms` functions that `R CMD check --as-cran` flags.
+`R/brms-compat.R` now holds small internal helpers reproducing the narrow behaviour `epidist` relied on from `brms:::validate_family()`, `brms:::validate_formula()`, `brms:::validate_data()`, `brms:::dpar_bounds()` and `brms:::log_lik_weight()`.
+The helpers are written against the public `brms` interface rather than copied from `brms`.
+`tests/testthat/test-brms-compat.R` checks each one against the `brms` internal it replaces.
+Those checks are skipped on CRAN, since they reach into `brms` internals.
+Credit for the original behaviour goes to the `brms` authors.
+See #420 and paul-buerkner/brms#1676.
+- Removed the `Remotes` field from `DESCRIPTION` so dependencies resolve from CRAN.
+`cmdstanr` is now found through `Additional_repositories` and the development version of `brms` is no longer used.
+See #592.
+- Turned off evaluation of the approximate inference vignette.
+It uses `pathfinder`, which needs an unreleased `brms` fix.
+This release resolves `brms` from CRAN.
+See #579.
+- Added a `brms (>= 2.23.0)` floor, the version the compatibility helpers were checked against.
+- Pointed the CI workflows at the Stan r-universe with `extra-repositories`.
+Dropping `Remotes` means `pak` can no longer resolve `cmdstanr`.
+`pak` does not read `Additional_repositories`.
+- Raised the minimum R version to 4.1.0.
+The package uses the native pipe and the lambda shorthand.
+Both need R 4.1.0.
+- Added the copyright holder role to Sam Abbott in `DESCRIPTION`.
+- Guarded the shared test fits and the tests that use them so the suite runs without `cmdstanr`.
+- Wrapped the `epidist()` and `epidist_diagnostics()` examples in `\donttest{}`.
+Both fit a model.
+They ran for 118 and 110 seconds against CRAN's 5 second guidance.
+- Anchored the `brms` links in the documentation so `R CMD check` no longer reports Rd cross-references with missing package anchors.
+- Dropped a stale `fix` entry from the declared global variables.
+- Updated the `brms` documentation URL, which had moved.
+- Added `cran-comments.md`.
+- Rewrote the generic `epidist_gen_log_lik()` method so it evaluates the `brms` log likelihood once per delay rather than once per delay per posterior draw.
+A single `brms` call already returns the cdf for every draw, so the results are cached and reused.
+The method also calls `primarycensored::pcens_cdf()` directly instead of `primarycensored::dpcens()`, which revalidates the distribution function at random points on every call and so would defeat the cache.
+Cost is now linear rather than quadratic in the number of draws.
+For 500 draws this is around 80 times faster, and the log likelihoods are unchanged. The guard that `dpcens()` applied when the delay upper bound exceeds the relative observation time is reproduced explicitly, since this no longer goes through `dpcens()`.
+Left truncation is carried through the rewritten path: the density is normalised over the interval from `delay_min` to the relative observation time.
+See #476.
+- Made `epidist_family_param()` internal.
+It is reached through `epidist_family()`, and a custom model supplies its family through `epidist_family_model()` instead.
+See #79.
+- Exported `epidist_gen_log_lik()`, which was the only one of the three post-processing generators not exported.
+See #79.
+- Made `epidist_transform_data()` internal.
+It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
+See #79.
+
 ## Documentation
 
+- Added an `extending-epidist` vignette covering why you might build your own model type, the six generics a model type implements, a worked example, and a table of the packages that already extend `epidist`.
+- Precomputed the `ebola`, `faq` and `approx-inference` vignettes.
+All three fit models and need `cmdstanr`, so they were excluded from the build by `.Rbuildignore` and never reached anyone who installed the package.
+They are now knitted from a `.Rmd.orig` source into a committed `.Rmd` holding static output, so they ship without needing `cmdstanr` or a model fit at build time.
+- Gave each precomputed vignette its own figure prefix.
+`ebola` and `approx-inference` both wrote to `figures/epidist-`, which would collide once more than one is precomputed.
 - Added a "The meta model" section to the model guide vignette, with the forward model and sampling likelihoods used for published summary estimates.
 See #620.
 - Added a vignette showcasing the meta model on simulated data.
@@ -282,6 +279,19 @@ See #619 and #620.
 It adjusts for the phase of the outbreak each estimate was made in, taking the retrospective studies as the reference so the population level estimate is the one least affected by right truncation, and reports the phase bias as a marginal effect.
 It reports the population level posterior of the Gamma shape and scale alongside the natural mean and standard deviation, and compares the result with a modern re-analysis of one of the same line lists.
 See #620.
+- Added a `left-truncation` vignette showing how to use `delay_min`.
+See #596.
+- Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
+
+## CI
+
+- Added a `render-vignettes` workflow that rebuilds the precomputed vignettes and opens a pull request with the result.
+- Passed the coverage report to `codecov/codecov-action` through `files` rather than `file`.
+`file` is not an input the action accepts, so with `disable_search` set it found no report and the `test-coverage` job failed on `main`.
+- Pinned the `precommit` hooks to a revision whose lockfile uses `digest` 0.6.39.
+The tagged v0.4.3 lockfile pins `digest` 0.6.36, which calls `Calloc` and `Free`.
+Those were removed from the R API in R 4.5, so the hook environment failed to build and the `pre-commit` job failed on every pull request.
+See #578.
 
 ## Bug fixes
 
@@ -306,24 +316,6 @@ See #606.
 - Declared `reformulas` in `Suggests` and skipped the `marginaleffects` integration test when it is absent.
 `insight` needs `reformulas` to read the formula of a `brmsfit`, but only suggests it, so the test failed on a clean library.
 See #601.
-
-## Documentation
-
-- Added a `left-truncation` vignette showing how to use `delay_min`.
-See #596.
-
-## CI
-
-- Passed the coverage report to `codecov/codecov-action` through `files` rather than `file`.
-`file` is not an input the action accepts, so with `disable_search` set it found no report and the `test-coverage` job failed on `main`.
-- Pinned the `precommit` hooks to a revision whose lockfile uses `digest` 0.6.39.
-The tagged v0.4.3 lockfile pins `digest` 0.6.36, which calls `Calloc` and `Free`.
-Those were removed from the R API in R 4.5, so the hook environment failed to build and the `pre-commit` job failed on every pull request.
-See #578.
-
-## Documentation
-
-- Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
 
 # epidist 0.4.1
 

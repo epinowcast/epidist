@@ -163,7 +163,7 @@ delay_summary_draws <- function(
 #'
 #' @inheritParams delay_parameter_draws
 #'
-#' @return A `data.frame` with columns `.row`, `.chain`, `.iteration`, `.draw`
+#' @returns A `data.frame` with columns `.row`, `.chain`, `.iteration`, `.draw`
 #'  and one column per distributional parameter.
 #'
 #' @keywords internal
@@ -203,7 +203,7 @@ delay_summary_draws <- function(
 #'
 #' @param pp A `brmsprep` object from [brms::prepare_predictions()].
 #'
-#' @return A list with `chain` and `iteration` elements.
+#' @returns A list with `chain` and `iteration` elements.
 #'
 #' @keywords internal
 .draw_chain_iteration <- function(object, pp) {
@@ -389,7 +389,7 @@ add_summaries <- function(
 #' @param analytic A list of analytic solutions, as returned by
 #'  `.analytic_delay_summaries()`.
 #'
-#' @return The input with summary columns added.
+#' @returns The input with summary columns added.
 #'
 #' @keywords internal
 .analytic_summaries <- function(data, analytic, probs = NULL) {
@@ -406,7 +406,7 @@ add_summaries <- function(
 #'
 #' @inheritParams add_summaries
 #'
-#' @return The input with summary columns added.
+#' @returns The input with summary columns added.
 #'
 #' @keywords internal
 .sample_summaries <- function(data, family, probs = NULL, nsim = 1000) {
@@ -435,7 +435,7 @@ add_summaries <- function(
 #'
 #' @param dpars The distributional parameters the family needs.
 #'
-#' @return The input, invisibly.
+#' @returns The input, invisibly.
 #'
 #' @keywords internal
 .assert_dpars <- function(data, name, dpars) {
@@ -460,7 +460,7 @@ add_summaries <- function(
 #'
 #' @param dpars A named list of distributional parameter vectors.
 #'
-#' @return A matrix with one row per element of the vectors in `dpars` and
+#' @returns A matrix with one row per element of the vectors in `dpars` and
 #'  `nsim` columns.
 #'
 #' @keywords internal
@@ -505,7 +505,7 @@ add_summaries <- function(
 #'
 #' @param name The name of a delay distribution family.
 #'
-#' @return A list of solutions, or `NULL` when the family has none.
+#' @returns A list of solutions, or `NULL` when the family has none.
 #'
 #' @keywords internal
 .analytic_delay_summaries <- function(name) {
@@ -560,7 +560,7 @@ add_summaries <- function(
 #'
 #' @param prob A probability.
 #'
-#' @return A column name.
+#' @returns A column name.
 #'
 #' @keywords internal
 .quantile_name <- function(prob) {
@@ -576,7 +576,7 @@ add_summaries <- function(
 #'
 #' @param family A `brms` family.
 #'
-#' @return A list with the delay distribution `name` and its distributional
+#' @returns A list with the delay distribution `name` and its distributional
 #'  parameters `dpars`.
 #'
 #' @keywords internal
@@ -596,7 +596,7 @@ add_summaries <- function(
 #'
 #' @inheritParams add_summaries
 #'
-#' @return A list with the delay distribution `name` and its distributional
+#' @returns A list with the delay distribution `name` and its distributional
 #'  parameters `dpars`.
 #'
 #' @keywords internal

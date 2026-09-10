@@ -11,6 +11,9 @@ as_epidist_multivariate(draws, ...)
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_multivariate}.
+}
 \description{
 Summarises draws of a set of parameters by their mean vector and covariance
 matrix. The result is a multivariate normal approximation to whatever the
