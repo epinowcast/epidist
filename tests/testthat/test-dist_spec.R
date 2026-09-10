@@ -105,7 +105,7 @@ test_that(".dist_spec_from_draws needs at least two draws", {
 
 test_that("as_dist_spec exports a latent lognormal fit", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   dist <- as_dist_spec(fit)
   expect_s3_class(dist, "dist_spec")
   expect_identical(distspec::get_distribution(dist), "lognormal")
@@ -128,7 +128,7 @@ test_that("as_dist_spec exports a latent lognormal fit", {
 
 test_that("as_dist_spec converts the gamma rate per draw", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   dist <- as_dist_spec(fit_gamma)
   expect_identical(distspec::get_distribution(dist), "gamma")
   draws <- delay_parameter_draws(
@@ -151,7 +151,7 @@ test_that("as_dist_spec converts the gamma rate per draw", {
 
 test_that("as_dist_spec exports a marginal weibull fit", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   dist <- as_dist_spec(fit_marginal_weibull, max = 50)
   expect_identical(distspec::get_distribution(dist), "weibull")
   draws <- delay_parameter_draws(
@@ -168,7 +168,7 @@ test_that("as_dist_spec exports a marginal weibull fit", {
 
 test_that("as_dist_spec returns a named list for several strata", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   dists <- as_dist_spec(fit_sex)
   expect_type(dists, "list")
   expect_named(dists, c("sex=0", "sex=1"))
@@ -190,7 +190,7 @@ test_that("as_dist_spec returns a named list for several strata", {
 
 test_that("as_dist_spec passes arguments on to delay_parameter_draws", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   dist <- as_dist_spec(fit_marginal, draw_ids = 1:100)
   draws <- delay_parameter_draws(
     fit_marginal,
@@ -208,7 +208,7 @@ test_that("as_dist_spec passes arguments on to delay_parameter_draws", {
 
 test_that("as_dist_spec errors for an unsupported family", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   fit_beta <- fit
   fit_beta$family$name <- "latent_beta"
   expect_error(
@@ -219,7 +219,7 @@ test_that("as_dist_spec errors for an unsupported family", {
 
 test_that(".fit_newdata restores the model class of the fitted data", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   expect_identical(.fit_newdata(fit), epidist_newdata(prep_obs))
   expect_identical(.fit_newdata(fit_sex), epidist_newdata(prep_obs_sex, sex))
   expect_identical(
@@ -235,7 +235,7 @@ test_that(".fit_newdata restores the model class of the fitted data", {
 
 test_that("as_dist_spec exports naive and meta fits", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   dist <- as_dist_spec(fit_naive)
   expect_s3_class(dist, "dist_spec")
   expect_identical(distspec::get_distribution(dist), "lognormal")
