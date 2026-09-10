@@ -240,9 +240,9 @@
         q = q,
         pdist = .pdist(dist),
         pwindow = pwindow,
-        dprimary = primary$dprimary,
-        dprimary_args = primary$dprimary_args
+        dprimary = primary$dprimary
       ),
+      stats::setNames(list(primary$dprimary_args), .primary_args_name()),
       args
     )
   )
