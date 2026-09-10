@@ -705,6 +705,18 @@ Functions for postprocessing model output
 
   Diagnostics for `epidist_fit` models
 
+## Plotting
+
+### Plotting
+
+Functions for plotting data and posterior draws
+
+- [`plot(`*`<epidist_delay_draws>`*`)`](https://epidist.epinowcast.org/reference/plot.epidist_delay_draws.md)
+  [`autoplot(`*`<epidist_delay_draws>`*`)`](https://epidist.epinowcast.org/reference/plot.epidist_delay_draws.md)
+  : Plot posterior draws of the delay distribution
+- [`plot_events()`](https://epidist.epinowcast.org/reference/plot_events.md)
+  : Plot the primary and secondary event windows of each case
+
 ## Model specification
 
 ### Family

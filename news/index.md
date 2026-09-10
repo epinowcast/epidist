@@ -339,6 +339,33 @@
 ### Features
 
 - Added
+  [`plot_events()`](https://epidist.epinowcast.org/reference/plot_events.md),
+  which plots the primary and secondary event windows of each case in an
+  `epidist_linelist_data` object, ordered by primary event time. It can
+  mark the observation time and colour the cases by a column of the
+  data. The vignettes drew this plot by hand and now use it. Closes
+  [\#689](https://github.com/epinowcast/epidist/issues/689).
+- Added a [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+  method for the draws returned by
+  [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
+  [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md)
+  and
+  [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md).
+  The default draws the posterior density of each parameter in its own
+  panel, coloured by stratum, with true values as dashed lines when
+  given. `type = "delay"` draws the delay distribution the draws imply,
+  as the posterior median with a ribbon or as one line per draw. The
+  draws now carry the `epidist_delay_draws` class, which records the
+  family and the stratum variables the plot needs.
+  [`ggplot2::autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  works too. The vignettes now use it in place of the plots they drew by
+  hand. Closes
+  [\#670](https://github.com/epinowcast/epidist/issues/670).
+- Both plot functions use
+  [`ggplot2::theme_minimal()`](https://ggplot2.tidyverse.org/reference/ggtheme.html)
+  and a colour blind friendly palette, so that their output matches the
+  plots in the package documentation.
+- Added
   [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md),
   which wraps the three usual post-processing steps into one call. It
   builds one row per unique combination of the predictors with

@@ -1,9 +1,9 @@
 # Analytic delay summaries for the families that have them
 
 Each element gives the distributional parameters the solution needs and
-functions of them returning the mean, the standard deviation and the
-quantile function of the delay distribution. The parameters are the
-`brms` parameters of the family.
+functions of them returning the mean, the standard deviation, the
+quantile function and the density of the delay distribution. The
+parameters are the `brms` parameters of the family.
 
 ## Usage
 

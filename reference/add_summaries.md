@@ -55,7 +55,10 @@ add_summaries(
 ## Value
 
 The input with `mean` and `sd` columns added, and one column per element
-of `probs`.
+of `probs`. It has the `epidist_delay_draws` class, which records the
+family used and gives it a
+[plot()](https://epidist.epinowcast.org/reference/plot.epidist_delay_draws.md)
+method.
 
 ## Details
 

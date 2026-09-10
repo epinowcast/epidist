@@ -48,7 +48,11 @@ add_delay_parameter_draws(newdata, object, ...)
 ## Value
 
 A `tibble` of posterior draws of the delay distribution parameters,
-grouped by the columns of `newdata` and by `.row`.
+grouped by the columns of `newdata` and by `.row`. It has the
+`epidist_delay_draws` class, which records the delay distribution family
+and gives it a
+[plot()](https://epidist.epinowcast.org/reference/plot.epidist_delay_draws.md)
+method.
 
 ## Details
 
@@ -70,7 +74,9 @@ returns one row per unique combination and is usually the better input.
 [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
 to add natural scale summaries of the delay,
 [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)
-to build `newdata`.
+to build `newdata`, and
+[`plot.epidist_delay_draws()`](https://epidist.epinowcast.org/reference/plot.epidist_delay_draws.md)
+to plot the draws.
 
 Other postprocess:
 [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md),

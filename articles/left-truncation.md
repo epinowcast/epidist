@@ -35,7 +35,6 @@ than on the underlying continuous delay.
 library(epidist)
 library(ggplot2)
 library(dplyr)
-library(tidyr)
 library(tidybayes)
 ```
 
@@ -185,6 +184,9 @@ standard deviation. We use
 [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)
 to take a single row of the transformed data because there are no
 covariates here.
+[`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
+adds the natural scale mean and standard deviation, and records the
+family so that the draws can be plotted.
 
 ``` r
 
@@ -194,43 +196,26 @@ param_draws <- list(
 ) |>
   lapply(\(fit) delay_parameter_draws(fit, newdata = epidist_strata(fit))) |>
   bind_rows(.id = "model") |>
-  pivot_longer(
-    cols = c("mu", "sigma"),
-    names_to = "parameter",
-    values_to = "value"
-  )
+  add_summaries(family = fit_trunc)
 
-true_params <- data.frame(
-  parameter = c("mu", "sigma"),
-  value = c(true_meanlog, true_sdlog),
-  stringsAsFactors = FALSE
-)
+true_values <- data.frame(mu = true_meanlog, sigma = true_sdlog) |>
+  add_summaries(family = "lognormal") |>
+  unlist()
 ```
 
 ``` r
 
-ggplot(param_draws, aes(x = value, fill = model)) +
-  geom_density(alpha = 0.6, colour = NA) +
-  geom_vline(
-    data = true_params, aes(xintercept = value), linetype = "dashed"
-  ) +
-  facet_wrap(~parameter, scales = "free") +
-  scale_fill_manual(values = c(
-    "No adjustment" = "#56B4E9",
-    "With delay_min" = "#E69F00"
-  )) +
-  labs(x = "Estimate", y = "Density", fill = "") +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+plot(param_draws, by = "model", true_values = true_values)
 ```
 
-![Posterior draws of the lognormal parameters. Dashed lines are the
-simulation values. The unadjusted model is biased away from
+![Posterior draws of the lognormal parameters, and of the natural scale
+mean and standard deviation. Dashed lines are the simulation values. The
+unadjusted model is biased away from
 them.](figures/left-truncation-params-plot-1.png)
 
-Figure 4.1: Posterior draws of the lognormal parameters. Dashed lines
-are the simulation values. The unadjusted model is biased away from
-them.
+Figure 4.1: Posterior draws of the lognormal parameters, and of the
+natural scale mean and standard deviation. Dashed lines are the
+simulation values. The unadjusted model is biased away from them.
 
 The unadjusted model shifts the distribution to the right and
 understates its spread. The adjusted model recovers the simulation

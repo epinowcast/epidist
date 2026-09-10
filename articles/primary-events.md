@@ -52,6 +52,22 @@ obs <- simulate_exponential_cases(r = growth_rate, sample_size = 500) |>
 linelist <- as_epidist_linelist_data(obs)
 ```
 
+[`plot_events()`](https://epidist.epinowcast.org/reference/plot_events.md)
+shows the windows each event is reported in.
+
+``` r
+
+plot_events(linelist, n = 100)
+```
+
+![The event windows of 100 of the 500 simulated cases, ordered by
+primary event time. The primary windows are three days wide and the
+secondary windows one day.](figures/primary-events-windows-1.png)
+
+Figure 2.1: The event windows of 100 of the 500 simulated cases, ordered
+by primary event time. The primary windows are three days wide and the
+secondary windows one day.
+
 ## 3 Uniform against exponential growth
 
 The marginal model takes the primary event distribution when the data
@@ -100,8 +116,8 @@ The posterior for the rate stays close to the prior, which is expected.
 summary(fit_growing)$fixed[
   "pgrowth_Intercept", c("Estimate", "l-95% CI", "u-95% CI")
 ]
-#>                    Estimate l-95% CI  u-95% CI
-#> pgrowth_Intercept 0.4952524 0.295458 0.6922113
+#>                    Estimate  l-95% CI  u-95% CI
+#> pgrowth_Intercept 0.4957126 0.2962507 0.6937253
 ```
 
 Both are compared against the delay used to simulate.
@@ -116,19 +132,11 @@ draws <- bind_rows(
   `Exponential growth` = growing_draws,
   .id = "model"
 ) |>
-  mutate(model = factor(model, levels = c("Uniform", "Exponential growth")))
+  mutate(model = factor(model, levels = c("Uniform", "Exponential growth"))) |>
+  add_summaries(family = fit_uniform)
 
-draws |>
-  ggplot(aes(x = mu, fill = model)) +
-  geom_density(alpha = 0.6, colour = NA) +
-  geom_vline(xintercept = meanlog, linetype = "dashed") +
-  scale_fill_manual(values = c(
-    Uniform = "#56B4E9",
-    `Exponential growth` = "#D55E00"
-  )) +
-  labs(x = "meanlog", y = "Density", fill = "Primary event") +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+plot(draws, by = "model", pars = "mu", true_values = c(mu = meanlog)) +
+  labs(fill = "Primary event", colour = "Primary event")
 ```
 
 ![](figures/primary-events-compare-1.png)

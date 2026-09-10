@@ -78,9 +78,6 @@ library(dplyr)
 #> The following objects are masked from 'package:base':
 #> 
 #>     intersect, setdiff, setequal, union
-library(tidyr)
-library(purrr) # nolint
-library(tibble)
 ```
 
 ## 3 Simulating data
@@ -569,6 +566,24 @@ head(linelist_data)
 #> # ℹ 3 more variables: obs_date <date>, pdate_upr <date>, sdate_upr <date>
 ```
 
+[`plot_events()`](https://epidist.epinowcast.org/reference/plot_events.md)
+draws the event windows of a linelist (Figure [4.1](#fig:linelist)). It
+gives the same view as Figure [3.5](#fig:trunc), for the data we will
+fit to.
+
+``` r
+
+plot_events(linelist_data, obs_time = max(obs_data$obs_date))
+```
+
+![The primary and secondary event windows of each observed case, ordered
+by the date of symptom onset. The dashed line is the observation date,
+after which no secondary event is seen.](figures/epidist-linelist-1.png)
+
+Figure 4.1: The primary and secondary event windows of each observed
+case, ordered by the date of symptom onset. The dashed line is the
+observation date, after which no secondary event is seen.
+
 Here you can see that `epidist` has assumed that the events are both
 daily censored as upper bounds have not been provided. If your data was
 not daily censored, you can provide the upper bounds (`pdate_upr` and
@@ -676,8 +691,8 @@ summary(naive_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3268     2453
-#> sigma_Intercept    -0.75      0.05    -0.85    -0.66 1.00     2918     2675
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3279     2548
+#> sigma_Intercept    -0.75      0.05    -0.86    -0.65 1.00     2903     2566
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -776,8 +791,8 @@ summary(marginal_fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.65 1.00     2119     1887
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     2101     2260
+#> Intercept           1.55      0.05     1.46     1.65 1.00     1897     2077
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.01     1879     1949
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -797,18 +812,21 @@ function. It draws one set of delay distribution parameters for each
 unique combination of the predictors, and adds the natural scale mean
 and standard deviation of the delay so that the numbers are easier to
 read.
-[`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
-[`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
+[`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md),
+[`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
 and
-[`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)
-are the three steps it wraps, and each is available on its own.
+[`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
+are the three steps it wraps, and each is available on its own. Here we
+take them separately, so that the draws from both models can be combined
+before the summaries are added.
 
 ``` r
 
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
-  lapply(delay_summary_draws) |>
+  lapply(\(fit) delay_parameter_draws(fit, newdata = epidist_strata(fit))) |>
   bind_rows(.id = "model") |>
-  mutate(model = factor(model, levels = c("naive", "marginal")))
+  mutate(model = factor(model, levels = c("naive", "marginal"))) |>
+  add_summaries(family = marginal_fit)
 
 head(predicted_parameters)
 #> # A tibble: 6 × 17
@@ -823,7 +841,7 @@ head(predicted_parameters)
 #> 5 marginal         8                10       1       1         9         0     3
 #> 6 marginal         8                10       1       1         9         0     3
 #> # ℹ 9 more variables: .row <int>, .chain <int>, .iteration <int>, .draw <int>,
-#> #   mu <dbl>, sigma <dbl>, mean <dbl>, sd <dbl>, delay <dbl>
+#> #   mu <dbl>, sigma <dbl>, delay <dbl>, mean <dbl>, sd <dbl>
 ```
 
 Note that by default
@@ -840,44 +858,20 @@ which adds the response and observation process columns the models
 expect.
 
 We can now plot posterior draws for the summary parameters from the two
-models.
-
-Click to expand for parameter comparison plot code
+models. [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws
+the posterior density of each parameter in its own panel, coloured by a
+stratum of our choosing, and marks the true values.
 
 ``` r
 
-# Create a data frame with true parameter values
-true_params <- secondary_dist |>
-  mutate(model = "true") |>
-  pivot_longer(
-    cols = c("mu", "sigma", "mean", "sd"),
-    names_to = "parameter",
-    values_to = "value"
-  )
+true_values <- unlist(secondary_dist[c("mu", "sigma", "mean", "sd")])
 
-# Plot with true values as vertical lines
-p_pp_params <- predicted_parameters |>
-  tidyr::pivot_longer(
-    cols = c("mu", "sigma", "mean", "sd"),
-    names_to = "parameter",
-    values_to = "value"
-  ) |>
-  ggplot() +
-  geom_density(
-    aes(x = value, fill = model, group = model),
-    alpha = 0.5
-  ) +
-  geom_vline(
-    data = true_params,
-    aes(xintercept = value),
-    linetype = "dashed",
-    linewidth = 1, col = "black"
-  ) +
-  facet_wrap(~parameter, scales = "free") +
-  theme_minimal() +
-  labs(title = "Parameter estimates compared to true values") +
-  scale_fill_brewer(palette = "Set2") +
-  theme(legend.position = "bottom")
+p_pp_params <- plot(
+  predicted_parameters,
+  by = "model",
+  true_values = true_values
+) +
+  labs(title = "Parameter estimates compared to true values")
 ```
 
 ``` r
@@ -906,51 +900,34 @@ As a final step we can visualise the posterior predictions of the delay
 distribution. This tells us how good a fit the estimated delay
 distribution is to the true delay distribution.
 
-Click to expand for code to create fitted distribution plot
+`type = "delay"` draws the delay distribution the parameters imply, one
+line per draw when `ndraws` is given.
 
 ``` r
 
 set.seed(123)
 
-predicted_pmfs <- predicted_parameters |>
-  group_by(model) |>
-  slice_sample(n = 100) |>
-  bind_rows(mutate(secondary_dist, model = "true")) |>
-  group_by(model) |>
-  mutate(
-    draw_id = row_number(),
-    predictions = purrr::map2(
-      mu, sigma,
-      ~ tibble(
-        x = seq(0, 15, by = 0.1),
-        y = dlnorm(x, meanlog = .x, sdlog = .y)
-      )
-    )
-  ) |>
-  unnest(predictions) |>
-  ungroup() |>
-  mutate(model = factor(model, levels = c("naive", "marginal", "true")))
-
-p_fitted_lognormal <- predicted_pmfs |>
-  filter(model != "true") |>
-  ggplot() +
-  geom_line(
-    aes(x = x, y = y, col = model, group = draw_id),
-    alpha = 0.05, linewidth = 1
-  ) +
-  geom_line(
-    data = select(filter(predicted_pmfs, model == "true"), -model),
-    aes(x = x, y = y),
+p_fitted_lognormal <- plot(
+  predicted_parameters,
+  type = "delay",
+  by = "model",
+  ndraws = 100,
+  max_delay = 15
+) +
+  geom_function(
+    fun = dlnorm,
+    args = list(
+      meanlog = secondary_dist[["mu"]],
+      sdlog = secondary_dist[["sigma"]]
+    ),
     linewidth = 1.5,
     col = "black"
   ) +
+  facet_wrap(~model, nrow = 2) +
   labs(
     x = "Delay between primary and secondary event (days)",
     y = "Probability density"
   ) +
-  theme_minimal() +
-  facet_wrap(~model, scales = "free", nrow = 2) +
-  scale_color_brewer(palette = "Set2") +
   theme(legend.position = "none")
 ```
 

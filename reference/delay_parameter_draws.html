@@ -117,7 +117,9 @@ such as <code>ndraws</code> or <code>re_formula</code>.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>tibble</code> of posterior draws of the delay distribution parameters,
-grouped by the columns of <code>newdata</code> and by <code>.row</code>.</p>
+grouped by the columns of <code>newdata</code> and by <code>.row</code>. It has the
+<code>epidist_delay_draws</code> class, which records the delay distribution family
+and gives it a <a href="plot.epidist_delay_draws.html">plot()</a> method.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -135,7 +137,8 @@ combination and is usually the better input.</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="add_summaries.html">add_summaries()</a></code> to add natural scale summaries of the delay,
-<code><a href="epidist_strata.html">epidist_strata()</a></code> to build <code>newdata</code>.</p>
+<code><a href="epidist_strata.html">epidist_strata()</a></code> to build <code>newdata</code>, and <code><a href="plot.epidist_delay_draws.html">plot.epidist_delay_draws()</a></code>
+to plot the draws.</p>
 <p>Other postprocess:
 <code><a href="add_summaries.html">add_summaries()</a></code>,
 <code><a href="delay_summary_draws.html">delay_summary_draws()</a></code>,
