@@ -47,6 +47,9 @@ the \code{growth_rate} metadata of their study, or estimate it as the same
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_meta_model}.
+}
 \description{
 This method converts aggregate data to a meta model format by passing it to
 \code{\link[=as_epidist_meta_model.epidist_linelist_data]{as_epidist_meta_model.epidist_linelist_data()}} with the \code{n} column used as

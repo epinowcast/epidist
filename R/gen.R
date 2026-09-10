@@ -16,7 +16,7 @@
 #'
 #' @inheritParams epidist_family
 #'
-#' @return A function that calculates the marginal log likelihood for a single
+#' @returns A function that calculates the marginal log likelihood for a single
 #' observation. The prep object must have the following variables:
 #' * `vreal1`: relative observation time
 #' * `vreal2`: primary event window
@@ -278,7 +278,7 @@ epidist_gen_log_lik <- function(family) {
 #'
 #' @inheritParams epidist_family
 #'
-#' @return A function that takes a `prep` argument from brms and returns a
+#' @returns A function that takes a `prep` argument from brms and returns a
 #' matrix of posterior predictions, with one row per posterior draw and one
 #' column per observation. The `prep` object must have the following variables:
 #' * `vreal1`: relative observation time
@@ -339,7 +339,7 @@ epidist_gen_posterior_predict <- function(family) {
 #'
 #' @inheritParams epidist_family
 #'
-#' @return A function that takes a prep argument from brms and returns a matrix
+#' @returns A function that takes a prep argument from brms and returns a matrix
 #' of posterior expected values, with one row per posterior draw and one column
 #' per observation.
 #'

@@ -112,6 +112,9 @@ case if its code 2 delay is. Under an \code{"accrual"} design the study stopped
 at a calendar date \code{relative_obs_time} after the start of the line list,
 and keeps every case whose secondary event fell before it.
 
+Sampling \code{n} cases and the bootstrap behind \code{report = "multivariate"} use
+the random number generator, so set a seed for a reproducible study.
+
 The advisory checks of \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} do not run on the
 result. They run once on the combined object when several studies are
 passed to \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} in a list.

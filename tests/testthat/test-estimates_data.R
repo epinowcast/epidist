@@ -960,3 +960,17 @@ test_that("simulate_study passes an unknown growth rate through", {
   expect_identical(reported$growth_rate_sd, c(0.02, 0.02))
   expect_true(all(.estimates_growth_estimated(reported)))
 })
+
+test_that("the advisory messages count windows in days, weeks or windows", {
+  expect_identical(.estimates_window_unit(c(1, 1)), "days")
+  expect_identical(.estimates_window_unit(7), "weeks")
+  expect_identical(.estimates_window_unit(c(1, 7)), "censoring windows")
+  expect_identical(.estimates_window_unit(2), "censoring windows")
+})
+
+test_that("is_epidist_estimates_data does not need a second argument", {
+  expect_false(is_epidist_estimates_data(data.frame()))
+  expect_true(is_epidist_estimates_data(new_epidist_estimates_data(
+    data.frame()
+  )))
+})

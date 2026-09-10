@@ -9,6 +9,10 @@
 \alias{names<-.epidist_data}
 \alias{rbind.epidist_data}
 \alias{dplyr_reconstruct.epidist_data}
+\alias{dplyr_row_slice.epidist_data}
+\alias{dplyr_col_modify.epidist_data}
+\alias{group_by.epidist_data}
+\alias{ungroup.epidist_data}
 \title{Keep \code{epidist} objects in their class}
 \usage{
 \method{[}{epidist_data}(x, ...)
@@ -24,9 +28,17 @@
 \method{rbind}{epidist_data}(..., deparse.level = 1)
 
 \method{dplyr_reconstruct}{epidist_data}(data, template)
+
+\method{dplyr_row_slice}{epidist_data}(data, i, ...)
+
+\method{dplyr_col_modify}{epidist_data}(data, cols)
+
+\method{group_by}{epidist_data}(.data, ..., .add = FALSE, .drop = dplyr::group_by_drop_default(.data))
+
+\method{ungroup}{epidist_data}(x, ...)
 }
 \arguments{
-\item{x}{An object with the \code{epidist_data} class.}
+\item{x, .data}{An object with the \code{epidist_data} class.}
 
 \item{...}{Passed to the underlying method.}
 
@@ -35,6 +47,11 @@
 \item{deparse.level}{Passed to \code{\link[base:cbind]{base::rbind()}}.}
 
 \item{data, template}{Passed to \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_reconstruct()}}.}
+
+\item{i, cols}{Passed to \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_row_slice()}} and
+\code{\link[dplyr:dplyr_extending]{dplyr::dplyr_col_modify()}}.}
+
+\item{.add, .drop}{Passed to \code{\link[dplyr:group_by]{dplyr::group_by()}}.}
 }
 \value{
 The modified object with any \code{epidist} class whose requirements it
@@ -52,8 +69,13 @@ which accept one do not need to re-check it.
 Methods are provided for base subsetting and replacement, and for
 \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_reconstruct()}}, which \code{dplyr} verbs such as \code{\link[dplyr:mutate]{dplyr::mutate()}},
 \code{\link[dplyr:filter]{dplyr::filter()}} and \code{\link[dplyr:select]{dplyr::select()}} use to restore the class of their
-input. \code{\link[dplyr:group_by]{dplyr::group_by()}} is an exception, as it builds a grouped tibble
-rather than restoring the class of its input. See epidist issue 629.
+input. \code{\link[dplyr:group_by]{dplyr::group_by()}} and \code{\link[dplyr:group_by]{dplyr::ungroup()}} build a new tibble rather
+than restoring the class of their input, as do the \code{grouped_df} methods for
+\code{\link[dplyr:dplyr_extending]{dplyr::dplyr_row_slice()}} and \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_col_modify()}}, so each has a
+method of its own that puts the classes back. A grouped object keeps the
+\code{grouped_df} class after the \code{epidist} classes, and the \code{dplyr} verbs keep
+both. \code{\link[dplyr:summarise]{dplyr::summarise()}} builds a new object from the groups rather than
+modifying its input, so its result does not carry the \code{epidist} classes.
 
 A result with no columns is unclassed without a warning. Such a result is
 almost always the prototype \code{vctrs} takes internally, in \code{\link[dplyr:bind_cols]{dplyr::bind_cols()}}
@@ -72,6 +94,9 @@ class(linelist_data[1:10, ])
 
 # Dropping a required column drops the class
 class(dplyr::select(linelist_data, -"obs_time"))
+
+# Grouping keeps the class alongside the grouped_df class
+class(dplyr::group_by(linelist_data, obs_time))
 }
 \seealso{
 Other epidist_data: 

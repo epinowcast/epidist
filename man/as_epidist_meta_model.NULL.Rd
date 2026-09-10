@@ -14,6 +14,9 @@ estimates, or \code{NULL}.}
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_meta_model}.
+}
 \description{
 Used when no individual level data is available and only the \code{estimates}
 argument is supplied. It takes no \code{primary} argument, because summary rows

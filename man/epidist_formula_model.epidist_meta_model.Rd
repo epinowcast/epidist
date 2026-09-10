@@ -18,6 +18,9 @@ parameters.}
 
 \item{...}{Additional arguments passed to method.}
 }
+\value{
+A \code{brmsformula} object.
+}
 \description{
 Adds the response and the slots of the meta model to the formula. Where a
 summary row estimates its growth rate as the \code{pgrowth} distributional

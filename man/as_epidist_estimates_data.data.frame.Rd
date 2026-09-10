@@ -71,9 +71,10 @@ truncation.}
 
 \item{trunc_adjusted}{A string giving the column of \code{data} containing a
 logical flag for whether the study corrected for right truncation. Defaults
-to \code{TRUE} where no \code{relative_obs_time} is supplied and \code{FALSE} otherwise.
-A study assumed to have adjusted is warned about, because real time
-estimates are right truncated unless the study corrected for it and
+to \code{TRUE} for a study with no finite \code{relative_obs_time}, which includes
+every study where no \code{relative_obs_time} column is supplied, and \code{FALSE}
+otherwise. A study assumed to have adjusted is warned about, because real
+time estimates are right truncated unless the study corrected for it and
 reviews rarely record which studies did. Supply the column to say so
 yourself.}
 
@@ -158,6 +159,9 @@ sets it to \code{FALSE} for each element and runs the checks once on the
 combined object.}
 
 \item{...}{Not used in this method.}
+}
+\value{
+An object of class \code{epidist_estimates_data}.
 }
 \description{
 This method takes a \code{data.frame} of published summary estimates and creates
@@ -361,6 +365,7 @@ Other estimates_data:
 \code{\link{as_epidist_estimates_data.epidist_multivariate}()},
 \code{\link{as_epidist_estimates_data.list}()},
 \code{\link{assert_epidist.epidist_estimates_data}()},
+\code{\link{epidist_estimates_epireview}()},
 \code{\link{epidist_estimates_parameters}()},
 \code{\link{epidist_estimates_summaries}()},
 \code{\link{is_epidist_estimates_data}()},
