@@ -46,10 +46,12 @@
 #'
 #' @param max The maximum of the delay distribution, passed to
 #'  [distspec::bound_dist()]. Defaults to `Inf`, which is no maximum.
+#'  [simulate_secondary()] does not apply this bound when drawing delays, and
+#'  warns when given a bounded distribution.
 #'
 #' @param cdf_max The cumulative probability to keep the delay distribution
 #'  up to, passed to [distspec::bound_dist()]. Defaults to 1, which keeps the
-#'  whole distribution.
+#'  whole distribution. Not applied by [simulate_secondary()] either.
 #'
 #' @family postprocess
 #' @returns A `<dist_spec>` when `newdata` has one row. A named list of them,
@@ -73,7 +75,7 @@
 #'   as_epidist_marginal_model() |>
 #'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
 #'
-#' dist <- as_dist_spec(fit, max = 60)
+#' dist <- as_dist_spec(fit)
 #' dist
 #'
 #' # The delay distribution at the posterior mean of its parameters
@@ -83,6 +85,9 @@
 #' simulate_gillespie(seed = 1) |>
 #'   simulate_secondary(dist) |>
 #'   head()
+#'
+#' # Bound the delay distribution at 60 days for a package that takes bounds
+#' as_dist_spec(fit, max = 60)
 #' }
 as_dist_spec.epidist_fit <- function(
   x,

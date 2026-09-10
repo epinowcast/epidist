@@ -29,8 +29,10 @@ resolved once per row with \code{\link[distspec:fix_parameters]{distspec::fix_pa
 drawn. The simulated delays then carry the parameter uncertainty as well as
 the spread of the delay distribution itself.
 
-Bounds set with \code{max} or \code{cdf_max} are not applied when sampling, so a
-bounded \code{dist} gives the same delays as an unbounded one.
+\code{\link[distspec:sample_dist]{distspec::sample_dist()}} does not apply the bounds set with \code{max} or
+\code{cdf_max}, so a bounded \code{dist} gives the same delays as an unbounded one.
+Passing a bounded \code{dist} warns for that reason. See
+epiforecasts/distspec#168.
 
 \code{distspec} supports a fixed set of distributions. Open an issue at
 \url{https://github.com/epiforecasts/distspec/issues} to ask for another one.

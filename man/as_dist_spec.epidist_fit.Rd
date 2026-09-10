@@ -15,11 +15,13 @@ builds one row per unique combination of the predictors, with no
 censoring and no truncation. See the details.}
 
 \item{max}{The maximum of the delay distribution, passed to
-\code{\link[distspec:bound_dist]{distspec::bound_dist()}}. Defaults to \code{Inf}, which is no maximum.}
+\code{\link[distspec:bound_dist]{distspec::bound_dist()}}. Defaults to \code{Inf}, which is no maximum.
+\code{\link[=simulate_secondary]{simulate_secondary()}} does not apply this bound when drawing delays, and
+warns when given a bounded distribution.}
 
 \item{cdf_max}{The cumulative probability to keep the delay distribution
 up to, passed to \code{\link[distspec:bound_dist]{distspec::bound_dist()}}. Defaults to 1, which keeps the
-whole distribution.}
+whole distribution. Not applied by \code{\link[=simulate_secondary]{simulate_secondary()}} either.}
 
 \item{...}{Additional arguments passed to \code{\link[brms:prepare_predictions]{brms::prepare_predictions()}},
 such as \code{ndraws} or \code{re_formula}.}
@@ -77,7 +79,7 @@ fit <- sierra_leone_ebola_data |>
   as_epidist_marginal_model() |>
   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
 
-dist <- as_dist_spec(fit, max = 60)
+dist <- as_dist_spec(fit)
 dist
 
 # The delay distribution at the posterior mean of its parameters
@@ -87,6 +89,9 @@ distspec::fix_parameters(dist, strategy = "mean")
 simulate_gillespie(seed = 1) |>
   simulate_secondary(dist) |>
   head()
+
+# Bound the delay distribution at 60 days for a package that takes bounds
+as_dist_spec(fit, max = 60)
 }
 }
 \seealso{

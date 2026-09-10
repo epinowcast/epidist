@@ -107,3 +107,19 @@ test_that("simulate_secondary only accepts a single dist_spec", {
     "single delay distribution, not 2"
   )
 })
+
+test_that("simulate_secondary warns that bounds are not applied", {
+  data <- data.frame(ptime = rep(0, 10))
+
+  expect_warning(
+    simulate_secondary(data, distspec::LogNormal(1.8, 0.5, max = 5)),
+    "bounds of `dist` are not applied"
+  )
+  expect_warning(
+    simulate_secondary(data, distspec::LogNormal(1.8, 0.5, cdf_max = 0.99)),
+    "bounds of `dist` are not applied"
+  )
+  expect_no_warning(
+    simulate_secondary(data, distspec::LogNormal(1.8, 0.5))
+  )
+})

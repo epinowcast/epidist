@@ -138,8 +138,10 @@ simulate_gillespie <- function(
 #' drawn. The simulated delays then carry the parameter uncertainty as well as
 #' the spread of the delay distribution itself.
 #'
-#' Bounds set with `max` or `cdf_max` are not applied when sampling, so a
-#' bounded `dist` gives the same delays as an unbounded one.
+#' [distspec::sample_dist()] does not apply the bounds set with `max` or
+#' `cdf_max`, so a bounded `dist` gives the same delays as an unbounded one.
+#' Passing a bounded `dist` warns for that reason. See
+#' epiforecasts/distspec#168.
 #'
 #' `distspec` supports a fixed set of distributions. Open an issue at
 #' <https://github.com/epiforecasts/distspec/issues> to ask for another one.
@@ -189,12 +191,41 @@ simulate_secondary <- function(data, dist) {
        {distspec::ndist(dist)}."
     )
   }
+  .warn_ignored_bounds(dist)
   sim_data <- data |>
     mutate(
       delay = .sample_delays(dist, dplyr::n()),
       stime = .data$ptime + .data$delay
     )
   return(sim_data)
+}
+
+#' Warn that the bounds of a `<dist_spec>` are not applied when sampling
+#'
+#' [distspec::sample_dist()] ignores the `max` and `cdf_max` bounds of a
+#' `<dist_spec>`, so delays drawn from a bounded distribution can fall outside
+#' its bounds. See epiforecasts/distspec#168.
+#'
+#' @inheritParams simulate_secondary
+#'
+#' @return `dist`, invisibly.
+#'
+#' @keywords internal
+.warn_ignored_bounds <- function(dist) {
+  dist_max <- attr(dist, "max")
+  dist_cdf_max <- attr(dist, "cdf_max")
+  bounded <- (!is.null(dist_max) && any(is.finite(dist_max))) ||
+    (!is.null(dist_cdf_max) && any(dist_cdf_max < 1))
+  if (bounded) {
+    cli_warn(c(
+      "The bounds of {.arg dist} are not applied when drawing delays, so some
+       delays will fall outside them.",
+      i = "{.fn distspec::sample_dist} ignores {.arg max} and {.arg cdf_max}:
+           see epiforecasts/distspec#168.",
+      "*" = "Drop the bounds, or discard the delays outside them yourself."
+    ))
+  }
+  return(invisible(dist))
 }
 
 #' Draw delays from a `<dist_spec>`

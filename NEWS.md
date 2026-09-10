@@ -140,6 +140,8 @@ The generic is re-exported, so `as_dist_spec(fit)` works with `epidist` alone.
 See `?as_dist_spec.epidist_fit` and epiforecasts/distspec#140.
 - `simulate_secondary()` now takes its delay distribution as a `<dist_spec>` rather than a random number generator, so `simulate_secondary(dist = rlnorm, meanlog = 1.8, sdlog = 0.5)` becomes `simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5))`.
 A `<dist_spec>` with uncertain parameters, such as one exported from a fit with `as_dist_spec()`, has its parameters resolved once per row, so the simulated delays carry the parameter uncertainty.
+`distspec::sample_dist()` ignores the `max` and `cdf_max` bounds of a `<dist_spec>`, so `simulate_secondary()` warns when given a bounded distribution.
+See epiforecasts/distspec#168.
 `distspec` is now an imported package.
 This is a breaking change.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
