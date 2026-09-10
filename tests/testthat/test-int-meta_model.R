@@ -943,6 +943,153 @@ test_that("epidist.epidist_meta_model with an expgrowth primary event recovers t
   expect_equal(unname(log_lik[, rows]), unname(expected), tolerance = 1e-6)
 })
 
+test_that("the R and Stan meta model log likelihoods agree for summary rows that estimate their growth rate", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_fits()
+  # Every path the growth rate takes: the accrual grid of a naive study
+  # (GA, GB), the quadrature of a study that adjusted for truncation but not
+  # for its growing primary event (GC), the density of a continuous
+  # estimand with a reported standard error (GD), midpoint imputation under
+  # accrual (GE) and a single quantile on the accrual grid (GF). GA, GC and
+  # GE give no rate, and the others a rate with a standard deviation.
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = c(
+      "GA", "GA", "GB", "GB", "GC", "GC", "GD", "GE", "GE", "GF"
+    ),
+    type = c(
+      "mean", "sd", "quantile", "quantile", "mean", "sd", "quantile",
+      "mean", "sd", "quantile"
+    ),
+    value = c(7.5, 3.6, 4.8, 8.6, 7.9, 3.4, 6.2, 7.4, 3.5, 5.8),
+    se = c(NA, NA, NA, NA, NA, NA, 0.5, NA, NA, NA),
+    p = c(NA, NA, 0.25, 0.75, NA, NA, 0.5, NA, NA, 0.5),
+    n = c(120, 120, 60, 60, 80, 80, 70, 115, 115, 140),
+    relative_obs_time = c(20, 20, 30, 30, Inf, Inf, 24, 26, 26, 28),
+    trunc_adjusted = c(
+      FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE
+    ),
+    trunc_design = c(
+      "accrual", "accrual", "accrual", "accrual", "cohort", "cohort",
+      "cohort", "accrual", "accrual", "accrual"
+    ),
+    cens_adjusted = c(0, 0, 0, 0, 2, 2, 2, 4, 4, 3),
+    growth_rate = c(NA, NA, 0.1, 0.1, NA, NA, 0.05, NA, NA, 0.1),
+    growth_rate_sd = c(NA, NA, 0.02, 0.02, NA, NA, 0.01, NA, NA, 0.03),
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  expect_true(all(meta$growth_known == 0L))
+  program <- meta_log_lik_program(meta)
+  expect_true(program$growth)
+  expect_setequal(unique(program$standata$vint1), c(4L, 5L, 6L))
+  mu <- c(1.7, 2.0, 1.4)
+  sigma <- c(0.55, 0.4, 0.8)
+  pgrowth <- c(0.08, 0.15, 0.03)
+  stan_log_lik <- meta_stan_log_lik(program, mu, sigma, pgrowth)
+  r_log_lik <- meta_r_log_lik(program, mu, sigma, pgrowth)
+  expect_true(all(is.finite(stan_log_lik)))
+  expect_true(all(is.finite(r_log_lik)))
+  # The two integrators of the primary censored distribution function, see
+  # the agreement test above.
+  for (d in seq_along(mu)) {
+    expect_rows_close(stan_log_lik[d, ], r_log_lik[d, ], 1e-4)
+  }
+  # The rate in the slot is not what is used. Every row moves with pgrowth,
+  # and at the rate a known study holds the two are the same arithmetic.
+  moved <- meta_stan_log_lik(program, mu, sigma, pgrowth + 0.1)
+  expect_true(all(abs(moved - stan_log_lik) > 1e-6))
+  known_estimates <- estimates
+  known_estimates$growth_rate <- pgrowth[1]
+  known_estimates$growth_rate_sd <- NA
+  known <- suppressMessages(
+    as_epidist_meta_model(estimates = known_estimates)
+  )
+  expect_true(all(known$growth_known == 1L))
+  known_program <- meta_log_lik_program(known)
+  expect_false(known_program$growth)
+  known_log_lik <- meta_stan_log_lik(known_program, mu[1], sigma[1])
+  expect_rows_close(known_log_lik, stan_log_lik[1, , drop = FALSE], 1e-10)
+  expect_rows_close(
+    meta_r_log_lik(known_program, mu[1], sigma[1]),
+    r_log_lik[1, , drop = FALSE], 1e-10
+  )
+})
+
+test_that("a summary row with an unknown growth rate is corrected with the pgrowth a line list informs", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  # The line list pins the delay, and the naive mean of a study that
+  # stopped at a calendar date then pins the growth rate it accrued cases
+  # under, which the study did not report.
+  skip_on_cran()
+  skip_if_no_fits()
+  growth_rate <- 0.5
+  obs <- simulate_exponential_cases(
+    r = growth_rate, sample_size = 500, seed = 101
+  ) |>
+    simulate_secondary(meanlog = meanlog, sdlog = sdlog)
+  # The windows are built on the simulation clock, so that the exact times
+  # simulate_study() works from sit inside them.
+  linelist <- as_epidist_linelist_data(
+    floor(obs$ptime), floor(obs$ptime) + 1,
+    floor(obs$stime), floor(obs$stime) + 1,
+    obs_time = ceiling(max(obs$stime)) + 1
+  )
+  linelist$ptime <- obs$ptime
+  linelist$stime <- obs$stime
+  set.seed(101)
+  study <- simulate_study(
+    linelist, "calendar stop",
+    cens_adjusted = 0, trunc_adjusted = FALSE, trunc_design = "accrual",
+    relative_obs_time = 30, growth_rate = NA, n = 200
+  )
+  expect_true(all(is.na(study$growth_rate)))
+  meta <- suppressMessages(as_epidist_meta_model(
+    linelist,
+    estimates = study, primary = "expgrowth"
+  ))
+  expect_identical(sum(meta$growth_known == 0L), 1L)
+  fit <- suppressMessages(epidist(
+    data = meta,
+    formula = bf(mu ~ 1, pgrowth ~ 1),
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000
+  ))
+  expect_convergence(fit)
+  # One rate is shared by the line list and the summary row, and it is
+  # estimated rather than returned as its normal(0, 0.25) prior.
+  set.seed(1)
+  draws <- delay_parameter_draws(fit)
+  expect_true(hasName(draws, "pgrowth"))
+  expect_equal(mean(draws$pgrowth), growth_rate, tolerance = 0.2)
+  expect_lt(stats::sd(draws$pgrowth), 0.15)
+  expect_equal(mean(draws$mu), meanlog, tolerance = 0.1)
+  expect_equal(mean(draws$sigma), sdlog, tolerance = 0.15)
+  # The R log likelihood of the summary row uses the fitted rate of each
+  # draw, and agrees with Stan at those draws.
+  ids <- 1:4
+  log_lik <- brms::log_lik(fit, draw_ids = ids)
+  prep <- brms::prepare_predictions(fit, draw_ids = ids)
+  summary_row <- which(prep$data$vint1 != 1L)
+  expect_length(summary_row, 1)
+  rates <- as.numeric(brms::get_dpar(prep, "pgrowth", i = summary_row))
+  expect_length(unique(rates), 4)
+  program <- meta_log_lik_program(meta)
+  stan_log_lik <- meta_stan_log_lik(
+    program,
+    as.numeric(brms::get_dpar(prep, "mu", i = summary_row)),
+    as.numeric(brms::get_dpar(prep, "sigma", i = summary_row)),
+    rates
+  )
+  expect_rows_close(
+    log_lik[, summary_row, drop = FALSE],
+    stan_log_lik[, summary_row, drop = FALSE], 1e-4
+  )
+})
+
 # Simulation and recovery checks that take several minutes to run. They are
 # opted into with environment variables so that the ordinary test run stays
 # quick. EPIDIST_META_RECOVERY=true fits one meta model per bias code and

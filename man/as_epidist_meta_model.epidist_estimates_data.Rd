@@ -25,7 +25,8 @@ Allows summary estimates to be passed as the first argument, so that
 \details{
 A model built from summaries alone takes no \code{primary} argument, because
 summary rows tilt the primary event by the \code{growth_rate} metadata of their
-study rather than by an estimated parameter. Passing one is an error.
+study, estimating it only where that is \code{NA} or has a \code{growth_rate_sd}.
+Passing one is an error.
 }
 \examples{
 estimates <- as_epidist_estimates_data(
