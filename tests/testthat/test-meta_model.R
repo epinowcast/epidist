@@ -1911,28 +1911,228 @@ test_that("a single integer day quantile carries information that saturates in n
   expect_lt(curvature(10000) / curvature(100), 10)
 })
 
-test_that(".meta_quantile_set_ll merges coincident reported quantiles into one cell", { # nolint: line_length_linter.
+test_that(".meta_crossing_counts are the order statistics of type 1 quantiles", { # nolint: line_length_linter.
+  expect_identical(
+    .meta_crossing_counts(c(0.25, 0.5, 0.75), 30), c(8L, 15L, 23L)
+  )
+  # n p landing on an integer up to floating point error is not pushed up.
+  expect_identical(.meta_crossing_counts(0.1, 30), 3L)
+  expect_identical(.meta_crossing_counts(c(0.01, 0.999), 5), c(1L, 5L))
+})
+
+test_that(".meta_box_grid holds the box boundaries and the strides between them", { # nolint: line_length_linter.
+  expect_identical(.meta_box_grid(0, 20, 5), c(0L, 5L, 10L, 15L, 20L))
+  expect_identical(.meta_box_grid(3, 11, 4), c(3L, 4L, 8L, 11L))
+  expect_identical(.meta_box_grid(7, 9, 4), c(7L, 8L, 9L))
+  expect_identical(.meta_box_grid(9, 11, 4), c(9L, 11L))
+  expect_identical(.meta_box_grid(8, 8, 4), 8L)
+  expect_identical(.meta_box_stride(30), 3L)
+  expect_identical(.meta_box_stride(1000), 16L)
+  expect_identical(.meta_band_half_width(250, 16), 119L)
+})
+
+test_that(".meta_box_mode_path follows the boxes rather than the means", {
+  # A chain whose distribution function expects 85 of a thousand delays at
+  # the first edge is pulled up by a box asking for at least 500 at the
+  # second, so its most likely path sits at that boundary and well above the
+  # first mean, which a band around the means would miss.
+  path <- .meta_box_mode_path(
+    1000, c(0.085, 0.245), c(0, 500), c(499, 1000), 16
+  )
+  expect_identical(path[2], 500L)
+  expect_gt(path[1], 150)
+  expect_lt(path[1], 250)
+  # An unconstrained chain stays near its means, to within a stride.
+  free <- .meta_box_mode_path(1000, c(0.25, 0.5), c(0, 0), c(1000, 1000), 16)
+  expect_lt(max(abs(free - c(250, 500))), 16)
+  # Boxes no non decreasing chain can satisfy give no path.
+  expect_null(.meta_box_mode_path(100, c(0.2, 0.4), c(50, 0), c(100, 40), 5))
+})
+
+# The probability of every box holding, by a pass over every count, for
+# checking the banded forward pass on small studies.
+enumerate_box <- function(study_n, cdf, lower, upper) {
+  counts <- 0:study_n
+  alpha <- stats::dbinom(counts, study_n, cdf[1])
+  alpha[counts < lower[1] | counts > upper[1]] <- 0
+  for (i in seq_along(cdf)[-1]) {
+    r <- (cdf[i] - cdf[i - 1]) / (1 - cdf[i - 1])
+    reached <- numeric(study_n + 1)
+    for (s in counts[alpha > 0]) {
+      reached <- reached + alpha[s + 1] *
+        stats::dbinom(counts - s, study_n - s, r)
+    }
+    reached[counts < lower[i] | counts > upper[i]] <- 0
+    alpha <- reached
+  }
+  return(log(sum(alpha)))
+}
+
+test_that(".meta_grid_box_ll matches an enumeration of the chain of counts", {
   args <- list(meanlog = 1.6, sdlog = 0.5)
   slots <- list(
     lower = 0, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
     cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0
   )
-  n <- 30
+  mass <- .meta_grid_pmf("plnorm", args, 0, 30, 1, 1, 0, 0L)
+  grid_cdf <- c(0, cumsum(mass))
   p <- c(0.25, 0.5, 0.75)
-  counts <- .meta_quantile_counts(p, n)
-  # A median and an upper quartile both reported as 5 days are two
-  # constraints on the empirical distribution function at the same cell,
-  # which the multinomial reads as one cell holding both counts.
-  merged <- .meta_quantile_set_ll(
-    c(4, 5, 5), counts, n, "plnorm", args, slots,
-    p = p
+  for (n in c(12L, 40L)) {
+    k <- .meta_crossing_counts(p, n)
+    # Separated, adjacent, and coincident reported days, the last two being
+    # two and three constraints at one edge.
+    for (y in list(c(3, 5, 8), c(4, 5, 6), c(4, 5, 5), c(5, 5, 5))) {
+      edges <- sort(unique(c(y - 1, y)))
+      lower <- vapply(edges, function(e) max(0L, k[y == e]), integer(1))
+      upper <- vapply(edges, function(e) min(n, k[y - 1 == e] - 1L), integer(1))
+      expected <- enumerate_box(n, grid_cdf[edges + 2], lower, upper)
+      actual <- .meta_grid_box_ll(y, k - 1L, k, n, "plnorm", args, slots)
+      expect_equal(actual, expected, tolerance = 1e-10)
+      expect_equal(
+        .meta_quantile_set_ll(
+          y, k - 1L, n, "plnorm", args, slots,
+          p = p, lower = k
+        ),
+        expected,
+        tolerance = 1e-10
+      )
+    }
+  }
+})
+
+test_that(".meta_grid_box_ll reduces to the crossing cell for a single quantile", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  for (design in list(
+    list(cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0),
+    list(cens_adjusted = 3L, trunc_design = 0L, growth_rate = 0),
+    list(cens_adjusted = 0L, trunc_design = 1L, growth_rate = 0.1)
+  )) {
+    slots <- c(
+      list(
+        lower = 0, cutoff = 30, pwindow = 1, swindow = 1,
+        trunc_adjusted = 0L
+      ),
+      design
+    )
+    shift <- .meta_cens_shift(design$cens_adjusted, 1, 1)
+    # In the body of the distribution and far into either tail, where the
+    # crossing cell takes its tails on the accurate side, the band of the
+    # forward pass has to follow the constrained chain to keep up.
+    for (n in c(30L, 100L, 1000L)) {
+      for (p in c(0.25, 0.5, 0.9)) {
+        for (y in c(3, 5, 8)) {
+          k <- .meta_crossing_counts(p, n)
+          box <- .meta_grid_box_ll(
+            y + shift, k - 1L, k, n, "plnorm", args, slots
+          )
+          crossing <- .meta_grid_crossing_ll(
+            y + shift, p, n, "plnorm", args, slots
+          )
+          expect_true(is.finite(box))
+          expect_lt(abs(box - crossing), 1e-8 * max(1, abs(crossing)))
+        }
+      }
+    }
+  }
+})
+
+test_that(".meta_grid_box_ll stays finite far from the reported quantiles and rejects an impossible box", { # nolint: line_length_linter.
+  slots <- list(
+    lower = 0, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0
   )
-  direct <- .meta_quantile_set_ll(
-    c(4, 5), counts[c(1, 3)], n, "plnorm", args, slots,
-    p = p[c(1, 3)]
+  n <- 1000L
+  k <- .meta_crossing_counts(c(0.25, 0.5, 0.75), n)
+  # A random initial value puts the reported quartiles far into a tail of the
+  # implied distribution, where the probability of the crossings is tiny but
+  # must stay finite for a chain to start.
+  for (m in c(0.3, 1, 2.5, 3.5)) {
+    far <- .meta_grid_box_ll(
+      c(3, 5, 8), k - 1L, k, n, "plnorm", list(meanlog = m, sdlog = 0.5),
+      slots
+    )
+    expect_true(is.finite(far))
+    expect_lt(far, -100)
+  }
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  # A reported day outside the grid, or the same order statistic reported on
+  # two different days, is an event no chain of counts can produce.
+  expect_identical(
+    .meta_grid_box_ll(c(3, 30), k[-1] - 1L, k[-1], n, "plnorm", args, slots),
+    -Inf
   )
-  expect_equal(merged, direct, tolerance = 1e-12)
-  expect_true(is.finite(merged))
+  expect_identical(
+    .meta_grid_box_ll(
+      c(4, 5), c(499L, 499L), c(500L, 500L), n, "plnorm", args, slots
+    ),
+    -Inf
+  )
+})
+
+test_that("several integer day quantiles from a thousand delays give a box likelihood", { # nolint: line_length_linter.
+  # Once the binomial spread of each crossing is narrower than a day, the
+  # reported quartiles stop moving and the joint likelihood tends to an
+  # indicator of the parameters that put the population quartiles in the
+  # reported cells, a plateau with walls rather than a peak. At a thousand
+  # delays the plateau is still rounded, because a crossing is located to
+  # about a seventh of a day, so the walls are a few hundredths of meanlog
+  # wide. The multinomial on the continuity corrected grid, which this
+  # replaces, keeps a curvature that grows like n.
+  truth <- list(meanlog = 1.6, sdlog = 0.5)
+  slots <- list(
+    lower = 0, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0
+  )
+  n <- 1000L
+  p <- c(0.25, 0.5, 0.75)
+  k <- .meta_crossing_counts(p, n)
+  population_quartiles <- function(meanlog) {
+    mass <- .meta_grid_pmf(
+      "plnorm", list(meanlog = meanlog, sdlog = truth$sdlog), 0, 30, 1, 1, 0,
+      0L
+    )
+    return(vapply(p, function(q) sum(cumsum(mass) < q), numeric(1)))
+  }
+  reported <- population_quartiles(truth$meanlog)
+  grid <- seq(1.3, 1.9, by = 0.005)
+  inside <- vapply(
+    grid,
+    function(m) all(population_quartiles(m) == reported),
+    logical(1)
+  )
+  box <- range(grid[inside])
+  expect_gt(diff(box), 0.05)
+  log_lik <- function(m) {
+    return(.meta_grid_box_ll(
+      reported, k - 1L, k, n, "plnorm",
+      list(meanlog = m, sdlog = truth$sdlog), slots
+    ))
+  }
+  profile <- vapply(grid, log_lik, numeric(1))
+  # Flat to within a nat across the box, and more than ten nats down a
+  # tenth beyond either wall.
+  expect_lt(diff(range(profile[inside])), 1)
+  expect_gt(max(profile[inside]), -2)
+  outside <- grid < box[1] - 0.1 | grid > box[2] + 0.1
+  expect_lt(max(profile[outside]), max(profile) - 10)
+  # The curvature of the multinomial at its peak is several times that of
+  # the box likelihood at the centre of the box, which is what a Hessian
+  # would report as a standard error several times too small.
+  multinomial <- function(m) {
+    prob <- .meta_implied_probs(
+      reported, "plnorm", list(meanlog = m, sdlog = truth$sdlog), slots
+    )
+    count <- diff(c(0, round(n * p), n))
+    return(sum(count * log(diff(c(0, prob, 1)))))
+  }
+  curvature <- function(f, at, h = 0.01) {
+    return(-(f(at + h) - 2 * f(at) + f(at - h)) / h^2)
+  }
+  multinomial_profile <- vapply(grid, multinomial, numeric(1))
+  peak <- grid[which.max(multinomial_profile)]
+  expect_gt(
+    curvature(multinomial, peak), 3 * curvature(log_lik, mean(box))
+  )
 })
 
 test_that("as_epidist_meta_model accepts coincident quantiles from an integer day study", { # nolint: line_length_linter.
@@ -2076,7 +2276,10 @@ test_that("as_epidist_meta_model groups the quantiles of one study into a set", 
   expect_identical(meta$obs_type, 6L)
   expect_identical(meta$group_len, 3L)
   expect_identical(.meta_members(meta)$value, c(4.2, 6.1, 9.4))
-  expect_identical(.meta_members(meta)$count, c(15L, 30L, 45L))
+  # Integer date differences by default, so the members carry the box of
+  # each crossing.
+  expect_identical(.meta_members(meta)$count, c(14L, 29L, 44L))
+  expect_identical(.meta_members(meta)$lower, c(15L, 30L, 45L))
 })
 
 test_that("as_epidist_meta_model keeps a single quantile fittable on its own", {
@@ -2230,7 +2433,13 @@ test_that("epidist_stancode.epidist_meta_model passes the grouped members to Sta
     grepl("array[N_meta_group] int meta_group_count;", scode, fixed = TRUE)
   )
   expect_true(
+    grepl("array[N_meta_group] int meta_group_lower;", scode, fixed = TRUE)
+  )
+  expect_true(
     grepl("meta_lognormal_quantile_set_lpmf", scode, fixed = TRUE)
+  )
+  expect_true(
+    grepl("meta_lognormal_grid_box_ll", scode, fixed = TRUE)
   )
   expect_true(
     grepl("meta_lognormal_moment_pair_lpdf", scode, fixed = TRUE)
@@ -2269,6 +2478,16 @@ test_that(".meta_row_log_lik dispatches on the observation type", {
   expect_equal(
     .meta_row_log_lik(qset, "plnorm", args),
     .meta_quantile_set_ll(c(4, 6), c(15, 30), 60, "plnorm", args, qset),
+    tolerance = 1e-10
+  )
+  days <- utils::modifyList(base, list(
+    obs_type = 6L, cens_adjusted = 0L, trunc_adjusted = 0L, cutoff = 30,
+    group_value = c(4, 6), group_count = c(14, 29), group_lower = c(15, 30),
+    group_p = c(0.25, 0.5), quantile_p = 0.25
+  ))
+  expect_equal(
+    .meta_row_log_lik(days, "plnorm", args),
+    .meta_grid_box_ll(c(4, 6), c(14, 29), c(15, 30), 60, "plnorm", args, days),
     tolerance = 1e-10
   )
 })
@@ -3100,7 +3319,10 @@ test_that("assert_epidist.epidist_meta_model checks a joint quantile row", {
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   expect_identical(meta$obs_type, 6L)
   members <- .meta_members(meta)
-  expect_identical(members$count, c(25L, 75L))
+  # The box of each crossing: fewer than the order statistic below the
+  # reported day and at least that many at or below it.
+  expect_identical(members$count, c(24L, 74L))
+  expect_identical(members$lower, c(25L, 75L))
   none <- meta
   suppressWarnings({
     none$group_len <- 0L
@@ -3124,6 +3346,35 @@ test_that("assert_epidist.epidist_meta_model checks a joint quantile row", {
   expect_error(
     assert_epidist(.meta_set_members(meta, beyond)), "cumulative counts"
   )
+  falling_lower <- members
+  falling_lower$lower <- c(75L, 25L)
+  expect_error(
+    assert_epidist(.meta_set_members(meta, falling_lower)), "lower counts"
+  )
+})
+
+test_that("as_epidist_meta_model refuses one order statistic reported on two days", { # nolint: line_length_linter.
+  # Of two delays, the type 1 lower quartile and median are both the
+  # smallest, so they cannot land on different days.
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = "quantile", value = c(4, 5),
+    p = c(0.25, 0.5), n = 2, relative_obs_time = 30,
+    trunc_adjusted = FALSE, cens_adjusted = 0, stringsAsFactors = FALSE
+  )))
+  expect_error(
+    as_epidist_meta_model(estimates = estimates), "same order statistic"
+  )
+  # On the same day they are two constraints at one edge.
+  estimates$value <- c(4, 4)
+  expect_no_error(
+    suppressMessages(as_epidist_meta_model(estimates = estimates))
+  )
+  # A continuous estimand keeps the cumulative counts of the multinomial.
+  estimates$value <- c(4, 5)
+  estimates$cens_adjusted <- 1L
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  expect_identical(.meta_members(meta)$count, c(0L, 1L))
+  expect_identical(.meta_members(meta)$lower, c(0L, 0L))
 })
 
 test_that(".meta_ddist pairs each distribution function with its density", {
@@ -3327,9 +3578,96 @@ test_that(".meta_quantile_set_ll rejects a draw whose grid mass underflows", {
     cens_adjusted = 0L, growth_rate = 0, trunc_design = 0L
   )
   expect_identical(
-    .meta_quantile_set_ll(c(2, 3), c(20, 60), 100, "plnorm", args, slots),
+    .meta_quantile_set_ll(
+      c(2, 3), c(20, 60), 100, "plnorm", args, slots,
+      lower = c(21, 61)
+    ),
     -Inf
   )
+})
+
+test_that(".meta_quantile_set_ll rejects a draw whose accrual grid mass underflows", { # nolint: line_length_linter.
+  args <- list(meanlog = 100, sdlog = 0.1)
+  slots <- list(
+    lower = 0, cutoff = 5, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, growth_rate = 0.1, trunc_design = 1L
+  )
+  expect_identical(
+    .meta_quantile_set_ll(
+      c(2, 3), c(20, 60), 100, "plnorm", args, slots,
+      lower = c(21, 61)
+    ),
+    -Inf
+  )
+})
+
+test_that(".meta_step_prob is zero once the distribution function reaches one", { # nolint: line_length_linter.
+  expect_identical(.meta_step_prob(1, 1), 0)
+  expect_identical(.meta_step_prob(1, 1.2), 0)
+})
+
+test_that(".meta_step_kernel is zero where no target count follows a source", { # nolint: line_length_linter.
+  # A target band entirely below the source band, as if counts could fall,
+  # holds no reachable step.
+  kernel <- .meta_step_kernel(10, 10, 0, 5, 1000L)
+  expect_true(all(kernel == 0))
+})
+
+test_that(".meta_box_step gives -Inf when every source count is impossible", { # nolint: line_length_linter.
+  n <- 100
+  lg <- lgamma(seq_len(n + 1))
+  alpha <- rep(-Inf, 5)
+  step <- .meta_box_step(alpha, 10, 14, 15, 20, 0.5, n, 12, 17, lg)
+  expect_true(all(is.infinite(step)))
+})
+
+test_that(".meta_grid_box_ll rejects a negative count below the first cell", { # nolint: line_length_linter.
+  # The grid starts at day 5, so a reported day 5 puts an upper bound on
+  # the edge below it, at day 4, which is impossible when negative.
+  slots <- list(
+    lower = 5, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0
+  )
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  expect_identical(
+    .meta_grid_box_ll(5, -1L, 0L, 100L, "plnorm", args, slots),
+    -Inf
+  )
+})
+
+test_that(".meta_grid_box_ll rejects boxes no non decreasing chain can satisfy", { # nolint: line_length_linter.
+  # The count at day 2 is boxed to at least 60 and the count at day 5 to at
+  # most 40, which no non decreasing chain of counts can cross.
+  slots <- list(
+    lower = 0, cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    cens_adjusted = 0L, trunc_design = 0L, growth_rate = 0
+  )
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  expect_identical(
+    .meta_grid_box_ll(
+      c(2, 5), c(100L, 40L), c(60L, 0L), 100L, "plnorm", args, slots
+    ),
+    -Inf
+  )
+})
+
+test_that(".meta_row_slots reads the group arrays for a Stan row", {
+  prep <- list(data = list(
+    vint1 = 1L, vint2 = 100L, vint3 = 0L, vint4 = 0L, vint5 = 0L,
+    vint6 = 1L, vint7 = 2L, vint8 = 1L, vint9 = 1L,
+    vreal1 = 30, vreal2 = 1, vreal3 = 1, vreal4 = 0, vreal5 = 0,
+    vreal6 = 0, vreal7 = 0, vreal8 = 0,
+    meta_group_value = c(1.5, 2.5),
+    meta_group_count = c(10L, 20L),
+    meta_group_lower = c(11L, 21L),
+    meta_group_type = c(1L, 1L),
+    meta_group_p = c(0.25, 0.5),
+    meta_group_chol = c(1, 0, 0, 1)
+  ))
+  slots <- .meta_row_slots(1, prep)
+  expect_identical(slots$group_lower, c(11, 21))
+  expect_identical(slots$group_value, c(1.5, 2.5))
+  expect_identical(slots$group_chol, matrix(c(1, 0, 0, 1), 2, 2))
 })
 
 test_that(".meta_summary_terms predicts the first member of a covariance row", { # nolint: line_length_linter.
