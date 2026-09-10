@@ -296,8 +296,10 @@ See #596.
 ## CI
 
 - Added a `render-vignettes` workflow that rebuilds the precomputed vignettes and opens a pull request with the result.
-- Took the stan-dev and mrc-ide r-universes out of `extra-repositories`.
-`cmdstanr` and `epireview` are installed on their own in the jobs that use them, so neither r-universe is consulted for any other package.
+- Took the stan-dev r-universe out of `extra-repositories`.
+It served `cmdstanr`, but the dependency step also took `rstan` and `StanHeaders` from it.
+`check-cmdstan` and `render-vignettes` install `cmdstanr` on its own instead, so the r-universe is never consulted for anything else.
+The mrc-ide r-universe stays, because `epireview` is suggested and is not on CRAN, and it serves no part of the Stan toolchain.
 See #687.
 - The `\donttest{}` examples fit through `rstan`, so they run on Linux only while the CRAN `rstan` and `StanHeaders` cannot compile a model on macOS or Windows.
 See #688.

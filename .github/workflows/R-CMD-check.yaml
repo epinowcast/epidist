@@ -54,21 +54,17 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
+          # epireview is suggested and is not on CRAN, so pak cannot resolve
+          # the dependencies without its r-universe. The stan-dev r-universe
+          # is deliberately absent: it also serves rstan and StanHeaders, and
+          # taking those from a continuously rebuilt source is what broke the
+          # macOS and Windows checks. See #687.
+          extra-repositories: 'https://mrc-ide.r-universe.dev'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
-
-      # epireview is not on CRAN. It is installed on its own so that its
-      # r-universe is never consulted for anything else.
-      - name: Install epireview
-        run: |
-          install.packages(
-            "epireview",
-            repos = c("https://mrc-ide.r-universe.dev", getOption("repos"))
-          )
-        shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
         with:
