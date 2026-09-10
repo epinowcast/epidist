@@ -28,16 +28,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # The \donttest{} examples fit models through the rstan backend.
+        # rstan cannot compile a model on the macOS and Windows runners while
+        # the CRAN rstan and StanHeaders are built against different Stan
+        # versions, so those runners skip the examples and Linux keeps
+        # running them. See #687 and #688.
         config:
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
-          - {os: macOS-latest,   r: 'release'}
+          - {os: windows-latest, r: 'release', donttest: 'false'}
+          - {os: ubuntu-latest,   r: 'release', donttest: 'true'}
+          - {os: ubuntu-latest,   r: 'oldrel-1', donttest: 'true'}
+          - {os: macOS-latest,   r: 'release', donttest: 'false'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
       NOT_CRAN: true
+      _R_CHECK_DONTTEST_EXAMPLES_: ${{ matrix.config.donttest }}
 
     steps:
       - uses: actions/checkout@v7
@@ -48,19 +54,17 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           use-public-rspm: true
-          extra-repositories: 'https://stan-dev.r-universe.dev https://mrc-ide.r-universe.dev'
+          # epireview is suggested and is not on CRAN, so pak cannot resolve
+          # the dependencies without its r-universe. The stan-dev r-universe
+          # is deliberately absent: it also serves rstan and StanHeaders, and
+          # taking those from a continuously rebuilt source is what broke the
+          # macOS and Windows checks. See #687.
+          extra-repositories: 'https://mrc-ide.r-universe.dev'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
-
-
-      - name: Install cmdstan
-        uses: epinowcast/actions/install-cmdstan@v1
-        with:
-          cmdstan-version: 'latest'
-          num-cores: 2
 
       - uses: r-lib/actions/check-r-package@v2
         with:

@@ -1,7 +1,7 @@
 # Helpers for evaluating the Stan meta model log likelihood outside a fit.
 #
-# cmdstanr::expose_functions() cannot be relied on for the meta model, so the
-# Stan log likelihood is evaluated through a fixed parameter generated
+# Exposing the Stan functions to R cannot be relied on for the meta model, so
+# the Stan log likelihood is evaluated through a fixed parameter generated
 # quantities program that calls meta_lognormal_lpmf with the parameters
 # passed as data, one row of the model data per column and one parameter
 # draw per row.
@@ -23,7 +23,7 @@ meta_log_lik_program <- function(meta) {
   standata <- suppressMessages(epidist(meta, fn = brms::make_standata))
   slots <- meta_slot_names()
   growth <- "pgrowth" %in% meta_family$dpars
-  mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(paste0(
+  mod <- rstan::stan_model(model_code = paste0(
     "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode, "\n}\n",
     "data {\n  int N;\n  array[N] int Y;\n",
     paste0("  array[N] int ", slots[1:10], ";\n", collapse = ""),
@@ -47,7 +47,7 @@ meta_log_lik_program <- function(meta) {
     ", meta_group_value, meta_group_count, meta_group_lower, meta_group_type",
     ", meta_group_p",
     ", meta_group_chol, primary_params);\n    }\n  }\n}\n"
-  )))
+  ))
   stan_data <- c(
     list(N = length(standata$Y), Y = as.integer(standata$Y)),
     lapply(standata[slots[1:10]], as.integer),
@@ -76,16 +76,16 @@ meta_stan_log_lik <- function(program, mu, sigma, pgrowth = 0) {
   if (program$growth) {
     growth <- list(pgrowth = as.array(rep_len(pgrowth, length(mu))))
   }
-  fit <- program$mod$sample(
+  fit <- rstan::sampling(
+    program$mod,
     data = c(
       program$data,
       list(D = length(mu), mu = as.array(mu), sigma = as.array(sigma)),
       growth
     ),
-    fixed_param = TRUE, chains = 1, iter_sampling = 1, iter_warmup = 0,
-    refresh = 0, show_messages = FALSE, sig_figs = 18
+    algorithm = "Fixed_param", chains = 1, iter = 1, warmup = 0, refresh = 0
   )
-  draws <- posterior::as_draws_matrix(fit$draws("log_lik"))
+  draws <- posterior::as_draws_matrix(fit)
   n <- program$data$N
   return(t(vapply(
     seq_along(mu),

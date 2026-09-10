@@ -1,49 +1,37 @@
 # fmt: skip file
 test_that("epidist.epidist_meta_model Stan code has no syntax errors in the default case", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
   stancode <- suppressMessages(epidist(
     data = prep_meta_obs,
     fn = brms::make_stancode
   ))
-  mod <- cmdstanr::cmdstan_model(
-    stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
-  )
-  expect_true(mod$check_syntax())
+  expect_no_error(rstan::stanc(model_code = stancode))
 })
 
 test_that("epidist.epidist_meta_model Stan code has no syntax errors for a gamma delay", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
   stancode <- suppressMessages(epidist(
     data = prep_meta_obs,
     family = Gamma(link = "log"),
     fn = brms::make_stancode
   ))
-  mod <- cmdstanr::cmdstan_model(
-    stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
-  )
-  expect_true(mod$check_syntax())
+  expect_no_error(rstan::stanc(model_code = stancode))
 })
 
 test_that("epidist.epidist_meta_model Stan code has no syntax errors for a weibull delay", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
   stancode <- suppressMessages(epidist(
     data = prep_meta_obs,
     family = "weibull",
     fn = brms::make_stancode
   ))
-  mod <- cmdstanr::cmdstan_model(
-    stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
-  )
-  expect_true(mod$check_syntax())
+  expect_no_error(rstan::stanc(model_code = stancode))
 })
 
 test_that("epidist.epidist_meta_model fits and the MCMC converges with summary estimates only", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   expect_s3_class(fit_meta_estimates, "brmsfit")
   expect_s3_class(fit_meta_estimates, "epidist_fit")
   expect_convergence(fit_meta_estimates)
@@ -52,7 +40,7 @@ test_that("epidist.epidist_meta_model fits and the MCMC converges with summary e
 test_that("epidist.epidist_meta_model recovers the simulation settings from biased summary estimates", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   set.seed(1)
   pred <- delay_parameter_draws(fit_meta_estimates)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
@@ -62,7 +50,7 @@ test_that("epidist.epidist_meta_model recovers the simulation settings from bias
 test_that("epidist.epidist_meta_model fits and the MCMC converges with mixed data", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   expect_s3_class(fit_meta_mixed, "brmsfit")
   expect_s3_class(fit_meta_mixed, "epidist_fit")
   expect_convergence(fit_meta_mixed)
@@ -71,7 +59,7 @@ test_that("epidist.epidist_meta_model fits and the MCMC converges with mixed dat
 test_that("epidist.epidist_meta_model recovers the simulation settings from mixed data", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   set.seed(1)
   pred <- delay_parameter_draws(fit_meta_mixed)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
@@ -80,7 +68,7 @@ test_that("epidist.epidist_meta_model recovers the simulation settings from mixe
 
 test_that("epidist.epidist_meta_model log_lik and posterior_predict have the expected shapes", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   set.seed(1)
   log_lik <- brms::log_lik(fit_meta_estimates)
   expect_identical(ncol(log_lik), nrow(prep_meta_biased))
@@ -93,7 +81,7 @@ test_that("epidist.epidist_meta_model log_lik and posterior_predict have the exp
 
 test_that("epidist.epidist_meta_model predicts individual level rows on the delay scale", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   set.seed(1)
   prep <- brms::prepare_predictions(fit_meta_mixed)
   individual <- which(prep$data$vint1 == 1L)
@@ -116,7 +104,7 @@ test_that("epidist.epidist_meta_model predicts individual level rows on the dela
 
 test_that("the R and Stan meta model log likelihoods agree for every observation type", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   meta <- suppressMessages(
     as_epidist_meta_model(estimates = lockstep_estimates)
   )
@@ -152,7 +140,7 @@ test_that("the R and Stan meta model log likelihoods agree for every observation
 
 test_that("a quantile far beyond a narrow fitted delay keeps R and Stan in step", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   # Stan differences log distribution functions and R differences them on
   # the natural scale, so a cell far into the upper tail used to keep a tiny
   # mass in one and none in the other, giving a finite log likelihood in
@@ -194,7 +182,7 @@ test_that("a quantile far beyond a narrow fitted delay keeps R and Stan in step"
 
 test_that("brms::log_lik() matches the Stan log likelihood at posterior draws", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   # Pins the R log likelihood generator to what was sampled rather than to a
   # hand picked parameter, over the naive cohort and accrual studies of
   # fit_meta_estimates.
@@ -216,7 +204,7 @@ test_that("brms::log_lik() matches the Stan log likelihood at posterior draws", 
 
 test_that("the Stan grid and truncated moments match independent references", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   # The R and Stan implementations share their discretisation, so agreement
   # between them cannot catch a shared mistake. The Stan grid is compared
   # with primarycensored::dpcens(), with and without a left truncation
@@ -271,7 +259,7 @@ test_that("the Stan grid and truncated moments match independent references", { 
     formula <- epidist_formula(meta, family, formula = bf(mu ~ 1))
     stanvars <- epidist_stancode(meta, family = family, formula = formula)
     fn <- function(x) paste0("meta_", family_name, "_", x)
-    mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(paste0(
+    mod <- rstan::stan_model(model_code = paste0(
       "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode,
       "\n}\n",
       "data {\n  int S;\n  array[S, 2] real params;\n  int n_quad;\n}\n",
@@ -287,16 +275,16 @@ test_that("the Stan grid and truncated moments match independent references", { 
       "    moments[s] = ", fn("implied_moments"), "(params[s], 0, ", cutoff,
       ", 1, 1, 0, 1, 1, primary_params, 0, 0, n_quad);\n",
       "  }\n}\n"
-    )))
-    fit <- mod$sample(
+    ))
+    fit <- rstan::sampling(
+      mod,
       data = list(
         S = length(family_spec$sets),
         params = do.call(rbind, family_spec$sets), n_quad = n_quad
       ),
-      fixed_param = TRUE, chains = 1, iter_sampling = 1, iter_warmup = 0,
-      sig_figs = 18, refresh = 0, show_messages = FALSE
+      algorithm = "Fixed_param", chains = 1, iter = 1, warmup = 0, refresh = 0
     )
-    draws <- posterior::as_draws_matrix(fit$draws())
+    draws <- posterior::as_draws_matrix(fit)
     for (s in seq_along(family_spec$sets)) {
       set <- family_spec$sets[[s]]
       args <- stats::setNames(as.list(set), family_spec$names)
@@ -351,7 +339,7 @@ test_that("the Stan grid and truncated moments match independent references", { 
 
 test_that("the Stan naive grid stays finite on a grid that runs into the tail", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   # Over a wide grid the primary censored distribution function saturates at
   # one, so its log stops increasing and differencing it returns NaN. A
   # generous `max_delay` puts a truncation adjusted naive study in this
@@ -369,7 +357,7 @@ test_that("the Stan naive grid stays finite on a grid that runs into the tail", 
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   stanvars <- epidist_stancode(meta)
-  mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(paste0(
+  mod <- rstan::stan_model(model_code = paste0(
     "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode, "\n}\n",
     "data {\n  int<lower=1> N;\n  array[N] real cutoff;\n",
     "  array[N] int accrual;\n  real mu;\n  real sigma;\n}\n",
@@ -385,16 +373,16 @@ test_that("the Stan naive grid stays finite on a grid that runs into the tail", 
     "      {mu, sigma}, 0, cutoff[n], 1, 1, 0, 0, 1, primary_params,\n",
     "      accrual[n], 0, ", .meta_n_quad(), "\n",
     "    );\n  }\n}\n"
-  )))
-  fit <- mod$sample(
+  ))
+  fit <- rstan::sampling(
+    mod,
     data = list(
       N = n_case, cutoff = cutoff, accrual = accrual, mu = meanlog,
       sigma = sdlog
     ),
-    fixed_param = TRUE, chains = 1, iter_sampling = 1, iter_warmup = 0,
-    refresh = 0, show_messages = FALSE
+    algorithm = "Fixed_param", chains = 1, iter = 1, warmup = 0, refresh = 0
   )
-  draws <- posterior::as_draws_matrix(fit$draws())
+  draws <- posterior::as_draws_matrix(fit)
   stan_moments <- vapply(
     seq_len(n_case),
     function(n) {
@@ -433,7 +421,7 @@ test_that("the Stan naive grid stays finite on a grid that runs into the tail", 
 
 test_that("the R and Stan implied quantiles agree for every family and design", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   # The chord inverse is refined exactly through the family quantile function
   # for a lognormal or weibull delay, by Newton steps with the closed form
   # primary censored distribution function otherwise, and left alone on the
@@ -476,7 +464,7 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
     formula <- epidist_formula(meta, family, formula = bf(mu ~ 1))
     stanvars <- epidist_stancode(meta, family = family, formula = formula)
     fn <- function(x) paste0("meta_", family_name, "_", x)
-    mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(paste0(
+    mod <- rstan::stan_model(model_code = paste0(
       "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode,
       "\n}\n",
       "data {\n  int N;\n  array[N] int cens;\n  array[N] int trunc_adj;\n",
@@ -499,7 +487,7 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
       "delay_min[n], cutoff[n], 1, 1, trunc_adj[n], cens[n], prim_id, ",
       "prim_params, accrual, growth[n]);\n",
       "    }\n  }\n}\n"
-    )))
+    ))
     n_node <- vapply(
       seq_len(nrow(designs)),
       function(i) {
@@ -507,7 +495,8 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
       },
       numeric(1)
     )
-    fit <- mod$sample(
+    fit <- rstan::sampling(
+      mod,
       data = list(
         N = nrow(designs), cens = designs$cens,
         trunc_adj = designs$trunc_adj, design = designs$design,
@@ -515,10 +504,9 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
         growth = designs$growth, n_node = n_node, K = length(probs),
         probs = probs, params = unname(unlist(args)), n_quad = .meta_n_quad()
       ),
-      fixed_param = TRUE, chains = 1, iter_sampling = 1, iter_warmup = 0,
-      sig_figs = 18, refresh = 0, show_messages = FALSE
+      algorithm = "Fixed_param", chains = 1, iter = 1, warmup = 0, refresh = 0
     )
-    draws <- posterior::as_draws_matrix(fit$draws("q"))
+    draws <- posterior::as_draws_matrix(fit)
     for (i in seq_len(nrow(designs))) {
       slots <- design_slots(i)
       nodes <- .meta_implied_nodes(dist, args, slots)
@@ -551,11 +539,7 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
 
 test_that("the meta model log density has finite gradients or rejects at narrow and wide delays", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
-  # The diagnostic runs the compiled executable directly, which needs the
-  # library path cmdstanr sets up for itself on Windows, so it is only run
-  # where the executable can be called as it is.
-  skip_on_os("windows")
+  skip_if_no_fits()
   # Every grid and quadrature path evaluates the primary censored
   # distribution function from the study's minimum delay upwards, so a
   # narrow delay reaches deep into its lower tail, where primarycensored's
@@ -563,8 +547,8 @@ test_that("the meta model log density has finite gradients or rejects at narrow 
   # meta model severs nodes that cannot matter before calling it, and
   # rejects a draw whose analytic moments overflow, so that the sampler sees
   # a rejection rather than a chain that cannot start. The nine designs of
-  # the meta vignette are checked with CmdStan's gradient diagnostic at the
-  # vignette's log mean and at narrow and wide log standard deviations.
+  # the meta vignette are checked at the vignette's log mean and at narrow
+  # and wide log standard deviations.
   set.seed(2)
   n_pool <- 20000
   ptime <- stats::runif(n_pool, 0, 30)
@@ -675,50 +659,53 @@ test_that("the meta model log density has finite gradients or rejects at narrow 
     return(suppressMessages(as_epidist_meta_model(estimates = study)))
   })
   # The Stan program is the same for every design, so it is compiled once.
-  stan_dir <- tempfile("meta_diagnose")
-  dir.create(stan_dir)
-  on.exit(unlink(stan_dir, recursive = TRUE), add = TRUE)
-  mod <- cmdstanr::cmdstan_model(cmdstanr::write_stan_file(
-    suppressMessages(epidist(models[[1]], fn = brms::make_stancode)),
-    dir = stan_dir
-  ))
-  diagnose <- function(standata, mu, sigma) {
-    data_file <- file.path(stan_dir, "data.json")
-    init_file <- file.path(stan_dir, "init.json")
-    cmdstanr::write_stan_json(standata, data_file)
-    cmdstanr::write_stan_json(
-      list(
-        Intercept = mu, Intercept_sigma = log(sigma),
-        primary_params = numeric(0)
-      ),
-      init_file
-    )
-    out <- suppressWarnings(system2(
-      mod$exe_file(),
-      c(
-        "diagnose", "test=gradient", "epsilon=1e-6", "error=1e-2", "data",
-        paste0("file=", data_file), paste0("init=", init_file), "output",
-        paste0("file=", file.path(stan_dir, "diagnose.csv"))
-      ),
-      stdout = TRUE, stderr = TRUE
+  stancode <- suppressMessages(
+    epidist(models[[1]], fn = brms::make_stancode)
+  )
+  mod <- rstan::stan_model(model_code = stancode)
+  # The analytic gradient of the log density, and a central finite difference
+  # of the log density at the same unconstrained parameters to compare it
+  # with. A rejected draw reaches R as an error naming the function that
+  # rejected it.
+  epsilon <- 1e-6
+  diagnose <- function(fit, mu, sigma) {
+    upars <- rstan::unconstrain_pars(fit, list(
+      Intercept = mu, Intercept_sigma = log(sigma),
+      primary_params = numeric(0)
     ))
-    if (any(grepl("Log probability=", out, fixed = TRUE))) {
-      rows <- out[grepl("^ *[0-9]+ +-?[0-9.e+-]+ +", out)]
-      gradient <- as.numeric(vapply(
-        strsplit(trimws(rows), " +"), `[`, character(1), 3
+    gradient <- tryCatch(
+      rstan::grad_log_prob(fit, upars),
+      error = function(e) {
+        return(conditionMessage(e))
+      }
+    )
+    if (is.character(gradient)) {
+      rejected <- grepl("meta_lognormal_", gradient, fixed = TRUE)
+      return(list(
+        outcome = if (rejected) "reject" else "other", error = NA_real_
       ))
-      return(if (all(is.finite(gradient))) "ok" else "gradient not finite")
     }
-    if (any(
-      grepl("meta_lognormal_", out, fixed = TRUE) &
-        grepl("Exception", out, fixed = TRUE)
-    )) {
-      return("reject")
+    if (!all(is.finite(gradient))) {
+      return(list(outcome = "gradient not finite", error = NA_real_))
     }
-    if (any(grepl("not finite", out, fixed = TRUE))) {
-      return("gradient not finite")
-    }
-    return("other")
+    difference <- tryCatch(
+      vapply(
+        seq_along(upars),
+        function(i) {
+          shift <- replace(numeric(length(upars)), i, epsilon)
+          return((rstan::log_prob(fit, upars + shift) -
+            rstan::log_prob(fit, upars - shift)) / (2 * epsilon))
+        },
+        numeric(1)
+      ),
+      error = function(e) {
+        return(NA_real_)
+      }
+    )
+    return(list(
+      outcome = "ok",
+      error = max(abs(gradient - difference) / pmax(abs(gradient), 1))
+    ))
   }
   sigmas <- c(0.03, 0.05, 0.1, 5, 10)
   outcomes <- character(0)
@@ -726,10 +713,21 @@ test_that("the meta model log density has finite gradients or rejects at narrow 
     standata <- suppressMessages(
       epidist(models[[design]], fn = brms::make_standata)
     )
+    fit <- suppressWarnings(suppressMessages(
+      rstan::sampling(mod, data = standata, chains = 0)
+    ))
     for (sigma in sigmas) {
       cell <- paste0(design, ":", sigma)
-      outcomes[cell] <- diagnose(standata, meanlog, sigma)
+      result <- diagnose(fit, meanlog, sigma)
+      outcomes[cell] <- result$outcome
       expect_true(outcomes[cell] %in% c("ok", "reject"), label = cell)
+      # The finite difference only says anything where the log density is
+      # smooth over a step of `epsilon`. At a narrow log standard deviation
+      # the grid branch moves cells between the difference's two points, so
+      # it is only compared at the plausible draws.
+      if (sigma >= 1 && identical(result$outcome, "ok")) {
+        expect_lt(result$error, 1e-2, label = cell)
+      }
     }
   }
   # The narrow and the plausible draws must evaluate on every design, and
@@ -746,7 +744,7 @@ test_that("epidist.epidist_meta_model recovers known parameters from simulated g
   # Every study reports integer date differences from a right truncated
   # cohort, so the Stan grid branch carries all of the likelihood.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   expect_true(all(prep_meta_grid$cens_adjusted == 0L))
   expect_true(all(prep_meta_grid$trunc_design == 0L))
   expect_true(all(prep_meta_grid$trunc_adjusted == 0L))
@@ -773,7 +771,7 @@ test_that("epidist.epidist_meta_model recovers known parameters from reported fi
   # posterior draws of the delay mean and standard deviation, so every study
   # contributes a covariance row.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   expect_convergence(fit_meta_reported)
   expect_named(
     .estimates_vcov(sim_reported_estimates),
@@ -800,7 +798,7 @@ test_that("as_epidist_multivariate round trips draws of a fitted model", {
   # An analyst publishes draws of the delay mean and standard deviation from
   # a fitted model, and those become a summary row of a downstream meta model.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   dpars <- dplyr::ungroup(add_summaries(delay_parameter_draws(fit_marginal)))
   dpars <- dpars[dpars$.row == 1, ]
   reported <- as_epidist_multivariate(dpars, params = c("mean", "sd"))
@@ -831,7 +829,6 @@ test_that("as_epidist_multivariate round trips draws of a fitted model", {
 
 test_that("epidist.epidist_meta_model Stan code has no syntax errors with an expgrowth primary event", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
   model <- suppressMessages(as_epidist_meta_model(
     sim_obs,
     estimates = sim_estimates, primary = "expgrowth"
@@ -845,10 +842,7 @@ test_that("epidist.epidist_meta_model Stan code has no syntax errors with an exp
   # summary rows keep their growth_rate slot.
   expect_match(stancode, "2, {pgrowth}", fixed = TRUE)
   expect_match(stancode, "pgrowth[n], vint1[n]", fixed = TRUE)
-  mod <- cmdstanr::cmdstan_model(
-    stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
-  )
-  expect_true(mod$check_syntax())
+  expect_no_error(rstan::stanc(model_code = stancode))
 })
 
 test_that("epidist.epidist_meta_model with an expgrowth primary event recovers the marginal model fit", { # nolint: line_length_linter.
@@ -857,7 +851,7 @@ test_that("epidist.epidist_meta_model with an expgrowth primary event recovers t
   # with the same data, prior and seed the two fits should agree on the delay
   # and on the growth rate.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   growth_rate <- 0.5
   obs <- simulate_exponential_cases(
     r = growth_rate, sample_size = 500, seed = 101
@@ -878,8 +872,7 @@ test_that("epidist.epidist_meta_model with an expgrowth primary event recovers t
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   ))
   fit_marginal_growth <- suppressMessages(epidist(
     data = as_epidist_marginal_model(linelist, primary = "expgrowth"),
@@ -890,8 +883,7 @@ test_that("epidist.epidist_meta_model with an expgrowth primary event recovers t
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   ))
   expect_convergence(fit_meta_growth)
   expect_true(all(fit_meta_growth$data$obs_type == 1L))
@@ -953,7 +945,7 @@ test_that("epidist.epidist_meta_model with an expgrowth primary event recovers t
 
 test_that("the R and Stan meta model log likelihoods agree for summary rows that estimate their growth rate", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   # Every path the growth rate takes: the accrual grid of a naive study
   # (GA, GB), the quadrature of a study that adjusted for truncation but not
   # for its growing primary event (GC), the density of a continuous
@@ -1029,7 +1021,7 @@ test_that("a summary row with an unknown growth rate is corrected with the pgrow
   # stopped at a calendar date then pins the growth rate it accrued cases
   # under, which the study did not report.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   growth_rate <- 0.5
   obs <- simulate_exponential_cases(
     r = growth_rate, sample_size = 500, seed = 101
@@ -1064,8 +1056,7 @@ test_that("a summary row with an unknown growth rate is corrected with the pgrow
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   ))
   expect_convergence(fit)
   # One rate is shared by the line list and the summary row, and it is
@@ -1207,14 +1198,14 @@ recovery_fit <- function(estimates, iter = 1000, seed = 1) {
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   return(suppressMessages(epidist(
     data = meta, seed = seed, chains = 2, cores = 2, silent = 2,
-    refresh = 0, iter = iter, backend = "cmdstanr"
+    refresh = 0, iter = iter
   )))
 }
 
 test_that("the meta model recovers the truth from every bias code", {
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   skip_if_not(
     identical(Sys.getenv("EPIDIST_META_RECOVERY"), "true"),
     "Set EPIDIST_META_RECOVERY=true to run the recovery fits"
@@ -1289,7 +1280,7 @@ test_that("the meta model recovers the truth from every bias code", {
 test_that("the exact quantile set likelihood is calibrated over repeated studies", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   skip_if_not(
     identical(Sys.getenv("EPIDIST_META_CALIBRATION"), "true"),
     "Set EPIDIST_META_CALIBRATION=true to run the calibration fits"
@@ -1362,7 +1353,7 @@ test_that("the exact quantile set likelihood is calibrated over repeated studies
 test_that("the meta model is calibrated over repeated studies", {
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   skip_if_not(
     identical(Sys.getenv("EPIDIST_META_CALIBRATION"), "true"),
     "Set EPIDIST_META_CALIBRATION=true to run the calibration fits"
