@@ -15,3 +15,8 @@ for them i.e. `~ 1`.
 - formula:
 
   A `brms` formula object.
+
+## Value
+
+The formula with an explicit intercept for every distributional
+parameter that had none.

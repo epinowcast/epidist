@@ -27,3 +27,7 @@ arguments. None of those are supported here.
 - data:
 
   A `data.frame` used to expand `.` in the formula.
+
+## Value
+
+A `brmsformula` object.

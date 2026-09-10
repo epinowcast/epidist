@@ -8,7 +8,7 @@ defaults to the uniform distribution.
 ## Usage
 
 ``` r
-simulate_exponential_cases(r = 0.2, sample_size = 10000, seed, t = 30)
+simulate_exponential_cases(r = 0.2, sample_size = 10000, seed = NULL, t = 30)
 ```
 
 ## Arguments
@@ -23,7 +23,8 @@ simulate_exponential_cases(r = 0.2, sample_size = 10000, seed, t = 30)
 
 - seed:
 
-  The random seed to be used in the simulation process.
+  The random seed to be used in the simulation process. Defaults to
+  `NULL`, which leaves the random number generator as it is.
 
 - t:
 

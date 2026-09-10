@@ -32,6 +32,11 @@ as_epidist_estimates_data(data, advise = TRUE, ...)
 
   Passed to the method used for each element.
 
+## Value
+
+An object of class `epidist_estimates_data` holding the rows of every
+element.
+
 ## See also
 
 Other estimates_data:

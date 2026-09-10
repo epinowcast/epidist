@@ -20,3 +20,7 @@ would be 1.4. If `f = 1` then `floor_mult` behaves as `floor`. If
 - f:
 
   A positive number specifying the multiple to be rounded down to
+
+## Value
+
+`x` rounded down to the nearest multiple of `f`.

@@ -10,293 +10,6 @@
   formula and prior and can vary by covariate. See
   [\#489](https://github.com/epinowcast/epidist/issues/489) and
   [\#618](https://github.com/epinowcast/epidist/issues/618).
-
-### Features
-
-- Added
-  [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md),
-  which wraps the three usual post-processing steps into one call. It
-  builds one row per unique combination of the predictors with
-  [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md),
-  draws the delay distribution parameters for each with
-  [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
-  and adds the natural scale mean and standard deviation, and any
-  quantiles asked for, with
-  [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md).
-  Each step is still available on its own. See
-  [`?delay_summary_draws`](https://epidist.epinowcast.org/reference/delay_summary_draws.md)
-  and [\#667](https://github.com/epinowcast/epidist/issues/667).
-
-- Added
-  [`epidist_newdata()`](https://epidist.epinowcast.org/reference/epidist_newdata.md),
-  which builds the `newdata` needed to predict from a fitted model. It
-  expands the variables you give it into a grid and adds the response
-  and observation process variables the model uses, so you no longer
-  have to know the column names each model expects. The defaults give
-  the delay distribution with no censoring and no truncation, and
-  arguments set the censoring windows, the relative observation time and
-  the minimum delay. The result works with
-  [`brms::posterior_epred()`](https://mc-stan.org/rstantools/reference/posterior_epred.html),
-  [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md)
-  and the `tidybayes` draw functions. See
-  [`?epidist_newdata`](https://epidist.epinowcast.org/reference/epidist_newdata.md)
-  and [\#280](https://github.com/epinowcast/epidist/issues/280).
-
-- Added
-  [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
-  and
-  [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
-  which return posterior draws of the delay distribution parameters in
-  the long format used by `tidybayes`.
-
-- Added
-  [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
-  and
-  [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
-  which return posterior draws of the delay distribution parameters in
-  the long format used by `tidybayes`. The draws come back with `.row`,
-  `.chain`, `.iteration` and `.draw` columns alongside the columns of
-  `newdata`. `predict_delay_parameters()` and `predict_dpar()` are
-  removed in their favour. See
-  [\#471](https://github.com/epinowcast/epidist/issues/471).
-
-- Added
-  [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md),
-  which adds the mean, the standard deviation and quantiles of the delay
-  distribution implied by each draw of its parameters. It uses the
-  analytic solution for the lognormal, gamma and Weibull families, and
-  simulates from any other family, so it works for every family `brms`
-  can predict from. `add_mean_sd()` is removed in its favour. See
-  [\#471](https://github.com/epinowcast/epidist/issues/471).
-
-- Added
-  [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md),
-  which returns one row of the model data per unique combination of the
-  variables that predict the delay distribution parameters. Passing it
-  to
-  [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
-  draws each set of parameters once rather than once per observation.
-  See [\#471](https://github.com/epinowcast/epidist/issues/471).
-
-- `epidist` data objects now check themselves when they are modified.
-  Every object also carries a shared `epidist_data` class with methods
-  for subsetting, replacement,
-  [`rbind()`](https://rdrr.io/r/base/cbind.html) and the `dplyr` verbs.
-  These re-check the object and drop any `epidist` class whose
-  requirements it no longer meets, warning about what was dropped and
-  why. An object that still carries an `epidist` class is therefore a
-  valid object of that class. Results with no columns are an exception,
-  documented in
-  [`?epidist_data`](https://epidist.epinowcast.org/reference/epidist_data.md).
-  See
-  [`?epidist_data`](https://epidist.epinowcast.org/reference/epidist_data.md)
-  and [\#399](https://github.com/epinowcast/epidist/issues/399).
-
-- [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
-  and
-  [`dplyr::ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
-  now keep the `epidist` classes. A grouped object carries them ahead of
-  the `grouped_df` class, the `dplyr` verbs keep both, and
-  [`dplyr::ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
-  returns an object of the original class.
-  [`dplyr::summarise()`](https://dplyr.tidyverse.org/reference/summarise.html)
-  builds a new object from the groups, so its result does not carry the
-  classes. Converting a grouped `epidist_linelist_data` object to a
-  model now errors, asking for
-  [`dplyr::ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
-  first, because the model constructors number rows in a way that a
-  grouped input would silently get wrong. Closes
-  [\#629](https://github.com/epinowcast/epidist/issues/629).
-
-- Dropped the checks in
-  [`epidist_stancode()`](https://epidist.epinowcast.org/reference/epidist_stancode.md)
-  and in the conversions between linelist and aggregate data, which ran
-  on objects that had already been checked. The conversions from
-  linelist data to a model still check their input, because
-  [`new_epidist_linelist_data()`](https://epidist.epinowcast.org/reference/new_epidist_linelist_data.md)
-  does not. See
-  [\#399](https://github.com/epinowcast/epidist/issues/399).
-
-- [`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md)
-  now checks the object it builds for the marginal and naive models.
-  That object was never checked before, which only showed once the check
-  in
-  [`epidist_stancode()`](https://epidist.epinowcast.org/reference/epidist_stancode.md)
-  was removed. See
-  [\#399](https://github.com/epinowcast/epidist/issues/399). \## Package
-
-- Reworded the message
-  [`as_epidist_marginal_model()`](https://epidist.epinowcast.org/reference/as_epidist_marginal_model.md)
-  gives when it sets relative observation times to `Inf`. The message
-  now names `relative_obs_time` and `orig_relative_obs_time`. It
-  explains that the impact on accuracy is small because these
-  observation times cause very limited right truncation. It also points
-  at `obs_time_threshold` for users who do not want the behaviour. See
-  [\#536](https://github.com/epinowcast/epidist/issues/536).
-
-- [`epidist_prior()`](https://epidist.epinowcast.org/reference/epidist_prior.md)
-  no longer warns about user priors on parameters that are in the model
-  but not in the `epidist` default set. The warning now checks user
-  priors against the `brms` default priors for the model as well as the
-  `epidist` ones, so a prior on a regression coefficient no longer looks
-  unmatched. See
-  [\#483](https://github.com/epinowcast/epidist/issues/483).
-
-- Simplified the internals of prior handling.
-  [`.replace_prior()`](https://epidist.epinowcast.org/reference/dot-replace_prior.md)
-  now only merges priors, with the warning about unmatched priors moved
-  to
-  [`.warn_unmatched_prior()`](https://epidist.epinowcast.org/reference/dot-warn_unmatched_prior.md)
-  and the `merge` argument handled in
-  [`epidist_prior()`](https://epidist.epinowcast.org/reference/epidist_prior.md).
-  The latent model checks of the event window priors moved to
-  `R/latent_model.R` and dispatch on the data class, so a model can now
-  state its own prior requirements. The returned priors, and the Stan
-  code they produce, are unchanged. See
-  [\#483](https://github.com/epinowcast/epidist/issues/483).
-
-- The warning about unmatched priors now lists each prior with the
-  parameter it applies to, rather than printing the internal join it
-  came from. See
-  [\#483](https://github.com/epinowcast/epidist/issues/483).
-
-- Documented the return value of every exported function.
-
-- Declared `scales` in `Suggests`, which the FAQ vignette loads but
-  nothing declared.
-
-- Fixed four typos that `inst/WORDLIST` was masking, corrected two moved
-  URLs, title cased the `Title` field, and set `Language: en-GB`.
-
-- Fixed `inst/CITATION` rendering the year as `NULL`.
-
-- [`epidist()`](https://epidist.epinowcast.org/reference/epidist.md) now
-  restores the `PKG_CPPFLAGS` and `PKG_LIBS` environment variables it
-  found before fitting. The `rstan` backend sets both while compiling
-  and never restores them. The leaked `PKG_CPPFLAGS` made the next
-  [`pkgbuild::has_build_tools()`](https://pkgbuild.r-lib.org/reference/has_build_tools.html)
-  check fail, which printed a spurious
-  `fatal error: cmath: No such file or directory` before the model
-  compiled and fitted successfully. See
-  [\#532](https://github.com/epinowcast/epidist/issues/532).
-
-- Added
-  [`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md),
-  which turns simulated event times into the censored dates an analyst
-  would receive.
-
-- Removed the calls to unexported `brms` functions that
-  `R CMD check --as-cran` flags. `R/brms-compat.R` now holds small
-  internal helpers reproducing the narrow behaviour `epidist` relied on
-  from `brms:::validate_family()`, `brms:::validate_formula()`,
-  `brms:::validate_data()`, `brms:::dpar_bounds()` and
-  `brms:::log_lik_weight()`. The helpers are written against the public
-  `brms` interface rather than copied from `brms`.
-  `tests/testthat/test-brms-compat.R` checks each one against the `brms`
-  internal it replaces. Those checks are skipped on CRAN, since they
-  reach into `brms` internals. Credit for the original behaviour goes to
-  the `brms` authors. See
-  [\#420](https://github.com/epinowcast/epidist/issues/420) and
-  paul-buerkner/brms#1676.
-
-- Removed the `Remotes` field from `DESCRIPTION` so dependencies resolve
-  from CRAN. `cmdstanr` is now found through `Additional_repositories`
-  and the development version of `brms` is no longer used. See
-  [\#592](https://github.com/epinowcast/epidist/issues/592).
-
-- Turned off evaluation of the approximate inference vignette. It uses
-  `pathfinder`, which needs an unreleased `brms` fix. This release
-  resolves `brms` from CRAN. See
-  [\#579](https://github.com/epinowcast/epidist/issues/579).
-
-- Added a `brms (>= 2.23.0)` floor, the version the compatibility
-  helpers were checked against.
-
-- Pointed the CI workflows at the Stan r-universe with
-  `extra-repositories`. Dropping `Remotes` means `pak` can no longer
-  resolve `cmdstanr`. `pak` does not read `Additional_repositories`.
-
-- Raised the minimum R version to 4.1.0. The package uses the native
-  pipe and the lambda shorthand. Both need R 4.1.0.
-
-- Added the copyright holder role to Sam Abbott in `DESCRIPTION`.
-
-- Guarded the shared test fits and the tests that use them so the suite
-  runs without `cmdstanr`.
-
-- Wrapped the
-  [`epidist()`](https://epidist.epinowcast.org/reference/epidist.md) and
-  [`epidist_diagnostics()`](https://epidist.epinowcast.org/reference/epidist_diagnostics.md)
-  examples in `\donttest{}`. Both fit a model. They ran for 118 and 110
-  seconds against CRAN’s 5 second guidance.
-
-- Anchored the `brms` links in the documentation so `R CMD check` no
-  longer reports Rd cross-references with missing package anchors.
-
-- Dropped a stale `fix` entry from the declared global variables.
-
-- Updated the `brms` documentation URL, which had moved.
-
-- Added `cran-comments.md`.
-
-- Rewrote the generic
-  [`epidist_gen_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_log_lik.md)
-  method so it evaluates the `brms` log likelihood once per delay rather
-  than once per delay per posterior draw. A single `brms` call already
-  returns the cdf for every draw, so the results are cached and reused.
-  The method also calls
-  [`primarycensored::pcens_cdf()`](https://primarycensored.epinowcast.org/reference/pcens_cdf.html)
-  directly instead of
-  [`primarycensored::dpcens()`](https://primarycensored.epinowcast.org/reference/dprimarycensored.html),
-  which revalidates the distribution function at random points on every
-  call and so would defeat the cache. Cost is now linear rather than
-  quadratic in the number of draws. For 500 draws this is around 80
-  times faster, and the log likelihoods are unchanged. The guard that
-  `dpcens()` applied when the delay upper bound exceeds the relative
-  observation time is reproduced explicitly, since this no longer goes
-  through `dpcens()`. Left truncation is carried through the rewritten
-  path: the density is normalised over the interval from `delay_min` to
-  the relative observation time. See
-  [\#476](https://github.com/epinowcast/epidist/issues/476).
-
-### Documentation
-
-- Added an `extending-epidist` vignette covering why you might build
-  your own model type, the six generics a model type implements, a
-  worked example, and a table of the packages that already extend
-  `epidist`.
-- Precomputed the `ebola`, `faq` and `approx-inference` vignettes. All
-  three fit models and need `cmdstanr`, so they were excluded from the
-  build by `.Rbuildignore` and never reached anyone who installed the
-  package. They are now knitted from a `.Rmd.orig` source into a
-  committed `.Rmd` holding static output, so they ship without needing
-  `cmdstanr` or a model fit at build time.
-- Gave each precomputed vignette its own figure prefix. `ebola` and
-  `approx-inference` both wrote to `figures/epidist-`, which would
-  collide once more than one is precomputed.
-
-### Package
-
-- Made
-  [`epidist_family_param()`](https://epidist.epinowcast.org/reference/epidist_family_param.md)
-  internal. It is reached through
-  [`epidist_family()`](https://epidist.epinowcast.org/reference/epidist_family.md),
-  and a custom model supplies its family through
-  [`epidist_family_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md)
-  instead. See [\#79](https://github.com/epinowcast/epidist/issues/79).
-- Exported
-  [`epidist_gen_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_log_lik.md),
-  which was the only one of the three post-processing generators not
-  exported. See [\#79](https://github.com/epinowcast/epidist/issues/79).
-- Made
-  [`epidist_transform_data()`](https://epidist.epinowcast.org/reference/epidist_transform_data.md)
-  internal. It is a wrapper that dispatches to
-  [`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md),
-  which is the generic an extension implements and which remains
-  exported. See [\#79](https://github.com/epinowcast/epidist/issues/79).
-
-### Models
-
 - Added left truncation support via a `delay_min` parameter in
   [`as_epidist_marginal_model()`](https://epidist.epinowcast.org/reference/as_epidist_marginal_model.md).
   This passes the `L` (left truncation) argument through to the
@@ -304,14 +17,6 @@
   behaviour. See
   [\#588](https://github.com/epinowcast/epidist/issues/588) and
   [\#596](https://github.com/epinowcast/epidist/issues/596).
-
-### CI
-
-- Added a `render-vignettes` workflow that rebuilds the precomputed
-  vignettes and opens a pull request with the result.
-
-### Models
-
 - Added the meta model, for fitting to summarised and potentially biased
   published estimates, jointly with individual level data. Published
   estimates are forward modelled from the study’s own estimation
@@ -611,8 +316,291 @@
   mean and standard deviation with their bootstrap covariance. Closes
   [\#672](https://github.com/epinowcast/epidist/issues/672).
 
+### Features
+
+- Added
+  [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md),
+  which wraps the three usual post-processing steps into one call. It
+  builds one row per unique combination of the predictors with
+  [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md),
+  draws the delay distribution parameters for each with
+  [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
+  and adds the natural scale mean and standard deviation, and any
+  quantiles asked for, with
+  [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md).
+  Each step is still available on its own. See
+  [`?delay_summary_draws`](https://epidist.epinowcast.org/reference/delay_summary_draws.md)
+  and [\#667](https://github.com/epinowcast/epidist/issues/667).
+- Added
+  [`epidist_newdata()`](https://epidist.epinowcast.org/reference/epidist_newdata.md),
+  which builds the `newdata` needed to predict from a fitted model. It
+  expands the variables you give it into a grid and adds the response
+  and observation process variables the model uses, so you no longer
+  have to know the column names each model expects. The defaults give
+  the delay distribution with no censoring and no truncation, and
+  arguments set the censoring windows, the relative observation time and
+  the minimum delay. The result works with
+  [`brms::posterior_epred()`](https://mc-stan.org/rstantools/reference/posterior_epred.html),
+  [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md)
+  and the `tidybayes` draw functions. See
+  [`?epidist_newdata`](https://epidist.epinowcast.org/reference/epidist_newdata.md)
+  and [\#280](https://github.com/epinowcast/epidist/issues/280).
+- Added
+  [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
+  and
+  [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
+  which return posterior draws of the delay distribution parameters in
+  the long format used by `tidybayes`. The draws come back with `.row`,
+  `.chain`, `.iteration` and `.draw` columns alongside the columns of
+  `newdata`. `predict_delay_parameters()` and `predict_dpar()` are
+  removed in their favour. See
+  [\#471](https://github.com/epinowcast/epidist/issues/471).
+- Added
+  [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md),
+  which adds the mean, the standard deviation and quantiles of the delay
+  distribution implied by each draw of its parameters. It uses the
+  analytic solution for the lognormal, gamma and Weibull families, and
+  simulates from any other family, so it works for every family `brms`
+  can predict from. `add_mean_sd()` is removed in its favour. See
+  [\#471](https://github.com/epinowcast/epidist/issues/471).
+- Added
+  [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md),
+  which returns one row of the model data per unique combination of the
+  variables that predict the delay distribution parameters. Passing it
+  to
+  [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
+  draws each set of parameters once rather than once per observation.
+  See [\#471](https://github.com/epinowcast/epidist/issues/471).
+- `epidist` data objects now check themselves when they are modified.
+  Every object also carries a shared `epidist_data` class with methods
+  for subsetting, replacement,
+  [`rbind()`](https://rdrr.io/r/base/cbind.html) and the `dplyr` verbs.
+  These re-check the object and drop any `epidist` class whose
+  requirements it no longer meets, warning about what was dropped and
+  why. An object that still carries an `epidist` class is therefore a
+  valid object of that class.
+  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
+  and results with no columns are exceptions, both documented in
+  [`?epidist_data`](https://epidist.epinowcast.org/reference/epidist_data.md).
+  See
+  [`?epidist_data`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  and [\#399](https://github.com/epinowcast/epidist/issues/399).
+- Dropped the checks in
+  [`epidist_stancode()`](https://epidist.epinowcast.org/reference/epidist_stancode.md)
+  and in the conversions between linelist and aggregate data, which ran
+  on objects that had already been checked. The conversions from
+  linelist data to a model still check their input, because
+  [`new_epidist_linelist_data()`](https://epidist.epinowcast.org/reference/new_epidist_linelist_data.md)
+  does not. See
+  [\#399](https://github.com/epinowcast/epidist/issues/399).
+- [`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md)
+  now checks the object it builds for the marginal and naive models.
+  That object was never checked before, which only showed once the check
+  in
+  [`epidist_stancode()`](https://epidist.epinowcast.org/reference/epidist_stancode.md)
+  was removed. See
+  [\#399](https://github.com/epinowcast/epidist/issues/399).
+
+### Package
+
+- Acted on a software review of the package. Every exported function and
+  method now documents its return value, including the meta model,
+  estimates data and multivariate functions added in this release.
+  [`is_epidist_meta_model()`](https://epidist.epinowcast.org/reference/is_epidist_meta_model.md)
+  and
+  [`is_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/is_epidist_estimates_data.md)
+  gained examples.
+  [`as_epidist_meta_model()`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.md)
+  now refuses individual level delays that are not whole numbers rather
+  than truncating them.
+  [`simulate_gillespie()`](https://epidist.epinowcast.org/reference/simulate_gillespie.md)
+  and
+  [`simulate_exponential_cases()`](https://epidist.epinowcast.org/reference/simulate_exponential_cases.md)
+  take `seed = NULL` by default instead of a missing argument, which
+  does not change what they return.
+  [`simulate_study()`](https://epidist.epinowcast.org/reference/simulate_study.md)
+  documents that it uses the random number generator. The
+  `trunc_adjusted` default of
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  is described as it behaves. Dropped `modelr` from `Suggests`, which
+  nothing used, and split the author names in `DESCRIPTION` into given
+  and family names. Added `tests/spelling.R` so the spelling check runs
+  with the tests, and corrected the spellings that `inst/WORDLIST` was
+  masking in the README and the vignette sources. The `check-cmdstan`
+  workflow now checks the meta model Stan program as well as the latent
+  and marginal ones. Consolidated the duplicated section headings and a
+  repeated entry in this file. See
+  [\#702](https://github.com/epinowcast/epidist/issues/702).
+
+- Reworded the message
+  [`as_epidist_marginal_model()`](https://epidist.epinowcast.org/reference/as_epidist_marginal_model.md)
+  gives when it sets relative observation times to `Inf`. The message
+  now names `relative_obs_time` and `orig_relative_obs_time`. It
+  explains that the impact on accuracy is small because these
+  observation times cause very limited right truncation. It also points
+  at `obs_time_threshold` for users who do not want the behaviour. See
+  [\#536](https://github.com/epinowcast/epidist/issues/536).
+
+- [`epidist_prior()`](https://epidist.epinowcast.org/reference/epidist_prior.md)
+  no longer warns about user priors on parameters that are in the model
+  but not in the `epidist` default set. The warning now checks user
+  priors against the `brms` default priors for the model as well as the
+  `epidist` ones, so a prior on a regression coefficient no longer looks
+  unmatched. See
+  [\#483](https://github.com/epinowcast/epidist/issues/483).
+
+- Simplified the internals of prior handling.
+  [`.replace_prior()`](https://epidist.epinowcast.org/reference/dot-replace_prior.md)
+  now only merges priors, with the warning about unmatched priors moved
+  to
+  [`.warn_unmatched_prior()`](https://epidist.epinowcast.org/reference/dot-warn_unmatched_prior.md)
+  and the `merge` argument handled in
+  [`epidist_prior()`](https://epidist.epinowcast.org/reference/epidist_prior.md).
+  The latent model checks of the event window priors moved to
+  `R/latent_model.R` and dispatch on the data class, so a model can now
+  state its own prior requirements. The returned priors, and the Stan
+  code they produce, are unchanged. See
+  [\#483](https://github.com/epinowcast/epidist/issues/483).
+
+- The warning about unmatched priors now lists each prior with the
+  parameter it applies to, rather than printing the internal join it
+  came from. See
+  [\#483](https://github.com/epinowcast/epidist/issues/483).
+
+- Documented the return value of every exported function.
+
+- Declared `scales` in `Suggests`, which the FAQ vignette loads but
+  nothing declared.
+
+- Fixed four typos that `inst/WORDLIST` was masking, corrected two moved
+  URLs, title cased the `Title` field, and set `Language: en-GB`.
+
+- Fixed `inst/CITATION` rendering the year as `NULL`.
+
+- [`epidist()`](https://epidist.epinowcast.org/reference/epidist.md) now
+  restores the `PKG_CPPFLAGS` and `PKG_LIBS` environment variables it
+  found before fitting. The `rstan` backend sets both while compiling
+  and never restores them. The leaked `PKG_CPPFLAGS` made the next
+  [`pkgbuild::has_build_tools()`](https://pkgbuild.r-lib.org/reference/has_build_tools.html)
+  check fail, which printed a spurious
+  `fatal error: cmath: No such file or directory` before the model
+  compiled and fitted successfully. See
+  [\#532](https://github.com/epinowcast/epidist/issues/532).
+
+- Added
+  [`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md),
+  which turns simulated event times into the censored dates an analyst
+  would receive.
+
+- Removed the calls to unexported `brms` functions that
+  `R CMD check --as-cran` flags. `R/brms-compat.R` now holds small
+  internal helpers reproducing the narrow behaviour `epidist` relied on
+  from `brms:::validate_family()`, `brms:::validate_formula()`,
+  `brms:::validate_data()`, `brms:::dpar_bounds()` and
+  `brms:::log_lik_weight()`. The helpers are written against the public
+  `brms` interface rather than copied from `brms`.
+  `tests/testthat/test-brms-compat.R` checks each one against the `brms`
+  internal it replaces. Those checks are skipped on CRAN, since they
+  reach into `brms` internals. Credit for the original behaviour goes to
+  the `brms` authors. See
+  [\#420](https://github.com/epinowcast/epidist/issues/420) and
+  paul-buerkner/brms#1676.
+
+- Removed the `Remotes` field from `DESCRIPTION` so dependencies resolve
+  from CRAN. `cmdstanr` is now found through `Additional_repositories`
+  and the development version of `brms` is no longer used. See
+  [\#592](https://github.com/epinowcast/epidist/issues/592).
+
+- Turned off evaluation of the approximate inference vignette. It uses
+  `pathfinder`, which needs an unreleased `brms` fix. This release
+  resolves `brms` from CRAN. See
+  [\#579](https://github.com/epinowcast/epidist/issues/579).
+
+- Added a `brms (>= 2.23.0)` floor, the version the compatibility
+  helpers were checked against.
+
+- Pointed the CI workflows at the Stan r-universe with
+  `extra-repositories`. Dropping `Remotes` means `pak` can no longer
+  resolve `cmdstanr`. `pak` does not read `Additional_repositories`.
+
+- Raised the minimum R version to 4.1.0. The package uses the native
+  pipe and the lambda shorthand. Both need R 4.1.0.
+
+- Added the copyright holder role to Sam Abbott in `DESCRIPTION`.
+
+- Guarded the shared test fits and the tests that use them so the suite
+  runs without `cmdstanr`.
+
+- Wrapped the
+  [`epidist()`](https://epidist.epinowcast.org/reference/epidist.md) and
+  [`epidist_diagnostics()`](https://epidist.epinowcast.org/reference/epidist_diagnostics.md)
+  examples in `\donttest{}`. Both fit a model. They ran for 118 and 110
+  seconds against CRAN’s 5 second guidance.
+
+- Anchored the `brms` links in the documentation so `R CMD check` no
+  longer reports Rd cross-references with missing package anchors.
+
+- Dropped a stale `fix` entry from the declared global variables.
+
+- Updated the `brms` documentation URL, which had moved.
+
+- Added `cran-comments.md`.
+
+- Rewrote the generic
+  [`epidist_gen_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_log_lik.md)
+  method so it evaluates the `brms` log likelihood once per delay rather
+  than once per delay per posterior draw. A single `brms` call already
+  returns the cdf for every draw, so the results are cached and reused.
+  The method also calls
+  [`primarycensored::pcens_cdf()`](https://primarycensored.epinowcast.org/reference/pcens_cdf.html)
+  directly instead of
+  [`primarycensored::dpcens()`](https://primarycensored.epinowcast.org/reference/dprimarycensored.html),
+  which revalidates the distribution function at random points on every
+  call and so would defeat the cache. Cost is now linear rather than
+  quadratic in the number of draws. For 500 draws this is around 80
+  times faster, and the log likelihoods are unchanged. The guard that
+  `dpcens()` applied when the delay upper bound exceeds the relative
+  observation time is reproduced explicitly, since this no longer goes
+  through `dpcens()`. Left truncation is carried through the rewritten
+  path: the density is normalised over the interval from `delay_min` to
+  the relative observation time. See
+  [\#476](https://github.com/epinowcast/epidist/issues/476).
+
+- Made
+  [`epidist_family_param()`](https://epidist.epinowcast.org/reference/epidist_family_param.md)
+  internal. It is reached through
+  [`epidist_family()`](https://epidist.epinowcast.org/reference/epidist_family.md),
+  and a custom model supplies its family through
+  [`epidist_family_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md)
+  instead. See [\#79](https://github.com/epinowcast/epidist/issues/79).
+
+- Exported
+  [`epidist_gen_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_log_lik.md),
+  which was the only one of the three post-processing generators not
+  exported. See [\#79](https://github.com/epinowcast/epidist/issues/79).
+
+- Made
+  [`epidist_transform_data()`](https://epidist.epinowcast.org/reference/epidist_transform_data.md)
+  internal. It is a wrapper that dispatches to
+  [`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md),
+  which is the generic an extension implements and which remains
+  exported. See [\#79](https://github.com/epinowcast/epidist/issues/79).
+
 ### Documentation
 
+- Added an `extending-epidist` vignette covering why you might build
+  your own model type, the six generics a model type implements, a
+  worked example, and a table of the packages that already extend
+  `epidist`.
+- Precomputed the `ebola`, `faq` and `approx-inference` vignettes. All
+  three fit models and need `cmdstanr`, so they were excluded from the
+  build by `.Rbuildignore` and never reached anyone who installed the
+  package. They are now knitted from a `.Rmd.orig` source into a
+  committed `.Rmd` holding static output, so they ship without needing
+  `cmdstanr` or a model fit at build time.
+- Gave each precomputed vignette its own figure prefix. `ebola` and
+  `approx-inference` both wrote to `figures/epidist-`, which would
+  collide once more than one is precomputed.
 - Added a “The meta model” section to the model guide vignette, with the
   forward model and sampling likelihoods used for published summary
   estimates. See
@@ -635,6 +623,25 @@
   and scale alongside the natural mean and standard deviation, and
   compares the result with a modern re-analysis of one of the same line
   lists. See [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Added a `left-truncation` vignette showing how to use `delay_min`. See
+  [\#596](https://github.com/epinowcast/epidist/issues/596).
+- Documented installing from CRAN in the README, with `r-universe` as
+  the route to the latest version.
+
+### CI
+
+- Added a `render-vignettes` workflow that rebuilds the precomputed
+  vignettes and opens a pull request with the result.
+- Passed the coverage report to `codecov/codecov-action` through `files`
+  rather than `file`. `file` is not an input the action accepts, so with
+  `disable_search` set it found no report and the `test-coverage` job
+  failed on `main`.
+- Pinned the `precommit` hooks to a revision whose lockfile uses
+  `digest` 0.6.39. The tagged v0.4.3 lockfile pins `digest` 0.6.36,
+  which calls `Calloc` and `Free`. Those were removed from the R API in
+  R 4.5, so the hook environment failed to build and the `pre-commit`
+  job failed on every pull request. See
+  [\#578](https://github.com/epinowcast/epidist/issues/578).
 
 ### Bug fixes
 
@@ -688,29 +695,6 @@
   read the formula of a `brmsfit`, but only suggests it, so the test
   failed on a clean library. See
   [\#601](https://github.com/epinowcast/epidist/issues/601).
-
-### Documentation
-
-- Added a `left-truncation` vignette showing how to use `delay_min`. See
-  [\#596](https://github.com/epinowcast/epidist/issues/596).
-
-### CI
-
-- Passed the coverage report to `codecov/codecov-action` through `files`
-  rather than `file`. `file` is not an input the action accepts, so with
-  `disable_search` set it found no report and the `test-coverage` job
-  failed on `main`.
-- Pinned the `precommit` hooks to a revision whose lockfile uses
-  `digest` 0.6.39. The tagged v0.4.3 lockfile pins `digest` 0.6.36,
-  which calls `Calloc` and `Free`. Those were removed from the R API in
-  R 4.5, so the hook environment failed to build and the `pre-commit`
-  job failed on every pull request. See
-  [\#578](https://github.com/epinowcast/epidist/issues/578).
-
-### Documentation
-
-- Documented installing from CRAN in the README, with `r-universe` as
-  the route to the latest version.
 
 ## epidist 0.4.1
 

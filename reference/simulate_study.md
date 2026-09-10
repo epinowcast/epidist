@@ -143,6 +143,9 @@ the study stopped at a calendar date `relative_obs_time` after the start
 of the line list, and keeps every case whose secondary event fell before
 it.
 
+Sampling `n` cases and the bootstrap behind `report = "multivariate"`
+use the random number generator, so set a seed for a reproducible study.
+
 The advisory checks of
 [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
 do not run on the result. They run once on the combined object when

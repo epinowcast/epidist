@@ -161,9 +161,10 @@ truncation.</p></dd>
 <dt id="arg-trunc-adjusted">trunc_adjusted<a class="anchor" aria-label="anchor" href="#arg-trunc-adjusted"></a></dt>
 <dd><p>A string giving the column of <code>data</code> containing a
 logical flag for whether the study corrected for right truncation. Defaults
-to <code>TRUE</code> where no <code>relative_obs_time</code> is supplied and <code>FALSE</code> otherwise.
-A study assumed to have adjusted is warned about, because real time
-estimates are right truncated unless the study corrected for it and
+to <code>TRUE</code> for a study with no finite <code>relative_obs_time</code>, which includes
+every study where no <code>relative_obs_time</code> column is supplied, and <code>FALSE</code>
+otherwise. A study assumed to have adjusted is warned about, because real
+time estimates are right truncated unless the study corrected for it and
 reviews rarely record which studies did. Supply the column to say so
 yourself.</p></dd>
 
@@ -251,6 +252,10 @@ combined object.</p></dd>
 <dd><p>Not used in this method.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>An object of class <code>epidist_estimates_data</code>.</p>
+    </div>
     <div class="section level2">
     <h2 id="what-we-need-from-each-study">What we need from each study<a class="anchor" aria-label="anchor" href="#what-we-need-from-each-study"></a></h2>
     <p>Published delay estimates are almost never estimates of the true continuous

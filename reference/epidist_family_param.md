@@ -30,6 +30,10 @@ epidist_family_param(family, ...)
 
   Additional arguments passed to `fn` method.
 
+## Value
+
+The family with a `param` element giving the Stan parameter ordering.
+
 ## See also
 
 Other family:

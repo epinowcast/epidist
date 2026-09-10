@@ -19,3 +19,7 @@ A formula containing `.` on the right hand side is expanded against
 - data:
 
   A `data.frame` used to expand `.`.
+
+## Value
+
+The expanded formula.

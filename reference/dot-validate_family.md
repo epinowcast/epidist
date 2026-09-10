@@ -23,3 +23,7 @@ families, which `epidist` never sets.
 
   Optional character string giving the link function. Only used when
   `family` is a character string without a second element.
+
+## Value
+
+A `brmsfamily` object.

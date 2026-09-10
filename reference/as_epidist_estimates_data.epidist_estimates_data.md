@@ -21,6 +21,10 @@ as_epidist_estimates_data(data, ...)
 
   Not used in this method.
 
+## Value
+
+The input, unchanged.
+
 ## See also
 
 Other estimates_data:

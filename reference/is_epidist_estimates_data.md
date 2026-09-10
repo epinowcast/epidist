@@ -18,6 +18,11 @@ is_epidist_estimates_data(data, ...)
 
   Additional arguments
 
+## Value
+
+A logical, `TRUE` if `data` inherits from `epidist_estimates_data` and
+`FALSE` otherwise.
+
 ## See also
 
 Other estimates_data:
@@ -30,3 +35,12 @@ Other estimates_data:
 [`epidist_estimates_parameters()`](https://epidist.epinowcast.org/reference/epidist_estimates_parameters.md),
 [`epidist_estimates_summaries()`](https://epidist.epinowcast.org/reference/epidist_estimates_summaries.md),
 [`new_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/new_epidist_estimates_data.md)
+
+## Examples
+
+``` r
+is_epidist_estimates_data(data.frame())
+#> [1] FALSE
+is_epidist_estimates_data(new_epidist_estimates_data(data.frame()))
+#> [1] TRUE
+```

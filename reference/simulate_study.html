@@ -203,6 +203,8 @@ delay fell in is below <code>relative_obs_time</code>, and a code 4 study keeps 
 case if its code 2 delay is. Under an <code>"accrual"</code> design the study stopped
 at a calendar date <code>relative_obs_time</code> after the start of the line list,
 and keeps every case whose secondary event fell before it.</p>
+<p>Sampling <code>n</code> cases and the bootstrap behind <code>report = "multivariate"</code> use
+the random number generator, so set a seed for a reproducible study.</p>
 <p>The advisory checks of <code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> do not run on the
 result. They run once on the combined object when several studies are
 passed to <code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> in a list.</p>

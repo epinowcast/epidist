@@ -26,6 +26,10 @@ as_epidist_meta_model(data, estimates = NULL, ...)
 
   Additional arguments passed to methods.
 
+## Value
+
+An object of class `epidist_meta_model`.
+
 ## Details
 
 A model built from summaries alone takes no `primary` argument, because

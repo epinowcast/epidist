@@ -14,6 +14,11 @@ is_epidist_meta_model(data)
 
   A `data.frame` to check.
 
+## Value
+
+A logical, `TRUE` if `data` inherits from `epidist_meta_model` and
+`FALSE` otherwise.
+
 ## See also
 
 Other meta_model:
@@ -29,3 +34,12 @@ Other meta_model:
 [`epidist_newdata.epidist_meta_model()`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_meta_model.md),
 [`epidist_transform_data_model.epidist_meta_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.epidist_meta_model.md),
 [`new_epidist_meta_model()`](https://epidist.epinowcast.org/reference/new_epidist_meta_model.md)
+
+## Examples
+
+``` r
+is_epidist_meta_model(data.frame())
+#> [1] FALSE
+is_epidist_meta_model(new_epidist_meta_model(data.frame()))
+#> [1] TRUE
+```

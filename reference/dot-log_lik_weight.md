@@ -23,3 +23,7 @@ otherwise.
 - prep:
 
   A `brms` prepared predictions object.
+
+## Value
+
+The weighted log likelihood values.

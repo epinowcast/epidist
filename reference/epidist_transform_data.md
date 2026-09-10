@@ -36,6 +36,10 @@ epidist_transform_data(data, family, formula, ...)
 
   Additional arguments passed to `fn` method.
 
+## Value
+
+The data transformed ready for fitting.
+
 ## See also
 
 Other transform_data:

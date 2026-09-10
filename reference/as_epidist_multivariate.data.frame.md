@@ -46,6 +46,10 @@ as_epidist_multivariate(draws, params = NULL, index = NULL, draw = NULL, ...)
 
   Not used in this method.
 
+## Value
+
+An object of class `epidist_multivariate`.
+
 ## See also
 
 Other multivariate:

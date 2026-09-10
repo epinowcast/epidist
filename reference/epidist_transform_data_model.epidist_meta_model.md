@@ -32,6 +32,11 @@ epidist_transform_data_model(data, family, formula, ...)
 
   Additional arguments passed to methods
 
+## Value
+
+An `epidist_meta_model` object with the individual level rows summarised
+and the summary rows unchanged.
+
 ## See also
 
 Other meta_model:

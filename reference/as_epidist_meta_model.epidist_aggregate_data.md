@@ -67,6 +67,10 @@ as_epidist_meta_model(
 
   Additional arguments passed to methods.
 
+## Value
+
+An object of class `epidist_meta_model`.
+
 ## See also
 
 Other meta_model:

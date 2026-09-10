@@ -23,3 +23,7 @@ cannot generate Stan code without a bound.
 
   Unused. Kept so that the signature matches the `brms` internal this
   helper replaces.
+
+## Value
+
+A list with character elements `lb` and `ub`.

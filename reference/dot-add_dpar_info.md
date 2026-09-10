@@ -23,3 +23,7 @@ conditional mean `mu`.
   Commonly used, such as
   [`brms::lognormal()`](https://paulbuerkner.com/brms/reference/brmsfamily.html),
   are also reexported as part of `epidist`.
+
+## Value
+
+The family with `other_links` and `other_bounds` elements added.

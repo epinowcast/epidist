@@ -8,7 +8,7 @@ total population size \\N\\.
 ## Usage
 
 ``` r
-simulate_gillespie(r = 0.2, gamma = 1/7, I0 = 50, N = 10000, seed)
+simulate_gillespie(r = 0.2, gamma = 1/7, I0 = 50, N = 10000, seed = NULL)
 ```
 
 ## Arguments
@@ -31,7 +31,8 @@ simulate_gillespie(r = 0.2, gamma = 1/7, I0 = 50, N = 10000, seed)
 
 - seed:
 
-  The random seed to be used in the simulation process.
+  The random seed to be used in the simulation process. Defaults to
+  `NULL`, which leaves the random number generator as it is.
 
 ## Value
 

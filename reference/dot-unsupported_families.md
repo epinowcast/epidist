@@ -9,3 +9,7 @@ Mixture families are tracked in epidist issue 617.
 ``` r
 .unsupported_families()
 ```
+
+## Value
+
+A character vector of family names.

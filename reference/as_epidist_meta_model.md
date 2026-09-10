@@ -28,6 +28,10 @@ as_epidist_meta_model(data = NULL, estimates = NULL, ...)
 
   Additional arguments passed to methods.
 
+## Value
+
+An object of class `epidist_meta_model`.
+
 ## Details
 
 The meta model is experimental. Its interface may still change in future

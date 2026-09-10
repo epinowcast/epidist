@@ -68,6 +68,11 @@ as_epidist_estimates_data(
   Study metadata, as documented in
   [`as_epidist_estimates_data.data.frame()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.data.frame.md).
 
+## Value
+
+An object of class `epidist_estimates_data` with one row per reported
+summary and the covariance matrix attached.
+
 ## Details
 
 Where `family` is given, the draws hold the natural parameters of a

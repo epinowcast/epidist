@@ -22,6 +22,10 @@ as_epidist_multivariate(draws, ...)
 
   Additional arguments passed to methods.
 
+## Value
+
+An object of class `epidist_multivariate`.
+
 ## Details
 
 The draws may be of any parameters. Posterior draws of a delay mean and

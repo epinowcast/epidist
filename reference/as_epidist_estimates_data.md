@@ -25,6 +25,10 @@ as_epidist_estimates_data(data, ...)
 
   Additional arguments passed to methods
 
+## Value
+
+An object of class `epidist_estimates_data`.
+
 ## Details
 
 The meta model these objects feed is experimental. Its interface may

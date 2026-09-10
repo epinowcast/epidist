@@ -25,3 +25,7 @@ remains. It warns when a used column contains infinite values.
 
   An object returned by
   [`brms::brmsterms()`](https://paulbuerkner.com/brms/reference/brmsterms.html).
+
+## Value
+
+`data`, invisibly.

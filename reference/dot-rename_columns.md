@@ -21,3 +21,7 @@ Rename the columns of a `data.frame`
 - old_names:
 
   A character vector of old column names.
+
+## Value
+
+The `data.frame` with its columns renamed.

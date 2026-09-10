@@ -97,11 +97,12 @@ as_epidist_estimates_data(
 
   A string giving the column of `data` containing a logical flag for
   whether the study corrected for right truncation. Defaults to `TRUE`
-  where no `relative_obs_time` is supplied and `FALSE` otherwise. A
-  study assumed to have adjusted is warned about, because real time
-  estimates are right truncated unless the study corrected for it and
-  reviews rarely record which studies did. Supply the column to say so
-  yourself.
+  for a study with no finite `relative_obs_time`, which includes every
+  study where no `relative_obs_time` column is supplied, and `FALSE`
+  otherwise. A study assumed to have adjusted is warned about, because
+  real time estimates are right truncated unless the study corrected for
+  it and reviews rarely record which studies did. Supply the column to
+  say so yourself.
 
 - trunc_design:
 
@@ -187,6 +188,10 @@ as_epidist_estimates_data(
 - ...:
 
   Not used in this method.
+
+## Value
+
+An object of class `epidist_estimates_data`.
 
 ## What we need from each study
 

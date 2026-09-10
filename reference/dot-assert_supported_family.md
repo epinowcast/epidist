@@ -13,3 +13,7 @@ Check that a family is one the `epidist` helpers support
 - family:
 
   A `brmsfamily` object.
+
+## Value
+
+The family, invisibly. Errors when the family is not supported.
