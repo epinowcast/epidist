@@ -198,7 +198,8 @@
     * Stan's reverse pass chains every node on the stack, so a NaN partial
     * poisons the gradient even when the value is discarded. Lognormal:
     * Phi(z) < exp(-100) for z < -14. Gamma: P(a, x) <= x^a / Gamma(a + 1).
-    * Weibull: 1 - exp(-y) <= y. Mirrors .meta_deep_tail() in R.
+    * Weibull: 1 - exp(-y) <= y. Generalised gamma: the gamma bound at
+    * x = (d / scale)^shape with a = k. Mirrors .meta_deep_tail() in R.
     */
   int meta_family_deep_tail(real d, array[] real params) {
     if (dist_id == 1) {
@@ -209,6 +210,10 @@
     }
     if (dist_id == 3) {
       return params[1] * (log(d) - log(params[2])) < -100;
+    }
+    if (dist_id == 5) {
+      return params[1] * params[3] * log(d / params[2]) -
+        lgamma(params[3] + 1) < -100;
     }
     return 0;
   }
@@ -485,9 +490,22 @@
       third = params[2] ^ 3 * (g3 - 3 * g1 * g2 + 2 * g1 ^ 3);
       fourth = params[2] ^ 4 *
         (g4 - 4 * g1 * g3 + 6 * g1 ^ 2 * g2 - 3 * g1 ^ 4);
+    } else if (dist_id == 5) {
+      // Raw moments E[T^r] = scale^r Gamma(k + r / shape) / Gamma(k), so the
+      // weibull expressions apply with these ratios in place of
+      // tgamma(1 + r / shape).
+      real g1 = exp(lgamma(params[3] + 1 / params[1]) - lgamma(params[3]));
+      real g2 = exp(lgamma(params[3] + 2 / params[1]) - lgamma(params[3]));
+      real g3 = exp(lgamma(params[3] + 3 / params[1]) - lgamma(params[3]));
+      real g4 = exp(lgamma(params[3] + 4 / params[1]) - lgamma(params[3]));
+      delay_mean = params[2] * g1;
+      variance = params[2] ^ 2 * (g2 - g1 ^ 2);
+      third = params[2] ^ 3 * (g3 - 3 * g1 * g2 + 2 * g1 ^ 3);
+      fourth = params[2] ^ 4 *
+        (g4 - 4 * g1 * g3 + 6 * g1 ^ 2 * g2 - 3 * g1 ^ 4);
     } else {
-      reject("Meta model summary rows support lognormal, gamma and weibull ",
-             "delay distributions only.");
+      reject("Meta model summary rows support lognormal, gamma, weibull and ",
+             "generalised gamma delay distributions only.");
     }
     // A draw wide enough to overflow a moment would leave a finite density
     // whose gradient carries the infinite intermediate, so it is rejected
@@ -1002,8 +1020,16 @@
     if (dist_id == 3) {
       return exp(weibull_lpdf(y | params[1], params[2]));
     }
-    reject("Meta model summary rows support lognormal, gamma and weibull ",
-           "delay distributions only.");
+    if (dist_id == 5) {
+      // Stacy parameterisation with params [shape, scale, k], see
+      // gengamma_lcdf() in primarycensored.
+      real log_z = log(y / params[2]);
+      return exp(log(params[1]) - lgamma(params[3]) +
+                 params[1] * params[3] * log_z - log(y) -
+                 exp(params[1] * log_z));
+    }
+    reject("Meta model summary rows support lognormal, gamma, weibull and ",
+           "generalised gamma delay distributions only.");
   }
 
   /** Density of a delay censored by a uniform primary window. */
@@ -1035,8 +1061,15 @@
       return params[2] * tgamma(1 + 1 / params[1]) *
         gamma_p(1 + 1 / params[1], pow(x / params[2], params[1]));
     }
-    reject("Meta model summary rows support lognormal, gamma and weibull ",
-           "delay distributions only.");
+    if (dist_id == 5) {
+      // The mean times the distribution function with k + 1 / shape, as
+      // for the weibull, which is the k = 1 case.
+      return params[2] *
+        exp(lgamma(params[3] + 1 / params[1]) - lgamma(params[3])) *
+        gamma_p(params[3] + 1 / params[1], pow(x / params[2], params[1]));
+    }
+    reject("Meta model summary rows support lognormal, gamma, weibull and ",
+           "generalised gamma delay distributions only.");
   }
 
   /**
@@ -2064,8 +2097,8 @@
   // An extreme draw can overflow the analytic kurtosis, which would turn the
   // sampling standard error and the log density into NaN. Reject the draw
   // instead, as .meta_row_log_lik() does in R.
-  for (k in 1:4) {
-    if (is_nan(moments[k]) || is_inf(moments[k])) {
+  for (m in 1:4) {
+    if (is_nan(moments[m]) || is_inf(moments[m])) {
       return negative_infinity();
     }
   }

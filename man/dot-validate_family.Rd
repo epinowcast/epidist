@@ -8,7 +8,7 @@
 }
 \arguments{
 \item{family}{A family function, a \code{brmsfamily} object, a \code{stats} family
-object, or a character string naming a \code{brms} family.}
+object, or a character string naming a \code{brms} or \code{epidist} family.}
 
 \item{link}{Optional character string giving the link function. Only used
 when \code{family} is a character string without a second element.}
@@ -21,6 +21,7 @@ Replaces \code{brms:::validate_family()}. Guarantees that a family given as a
 family function, a \code{brms} family object, a \code{stats} family object or a
 character string is returned as a \code{brmsfamily} object. Unlike the \code{brms}
 internal it does not handle the \code{threshold} argument of ordinal
-families, which \code{epidist} never sets.
+families, which \code{epidist} never sets, and it also accepts the name of a
+family \code{epidist} defines itself, such as \code{"gengamma"}.
 }
 \keyword{internal}

@@ -11,7 +11,8 @@
 \code{"plnorm"}.}
 }
 \value{
-The corresponding function from \code{stats}.
+The corresponding function from \code{stats}, or from \code{flexsurv} for
+the generalised gamma.
 }
 \description{
 The distribution function used for a \code{primarycensored} distribution name

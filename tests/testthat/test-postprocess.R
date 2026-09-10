@@ -426,3 +426,26 @@ test_that("delay_parameter_draws works with the naive model", {
   summaries <- add_summaries(draws)
   expect_true(all(summaries$mean > 0))
 })
+
+test_that("add_summaries adds the closed form summaries of a gengamma", {
+  skip_if_not_installed("flexsurv")
+  draws <- data.frame(mu = c(3, 5), shape = c(1, 1.5), k = c(2, 0.8))
+  out <- add_summaries(draws, family = "gengamma", probs = 0.5)
+  expect_named(out, c("mu", "shape", "k", "mean", "sd", "q50"))
+  # With shape 1 the first row is a gamma with shape 2 and scale 3
+  expect_equal(out$mean[1], 6, tolerance = 1e-10)
+  expect_equal(out$sd[1], sqrt(2) * 3, tolerance = 1e-10)
+  expect_equal(out$q50[1], stats::qgamma(0.5, 2, scale = 3), tolerance = 1e-10)
+  expect_identical(
+    out$q50[2],
+    flexsurv::qgengamma.orig(0.5, shape = 1.5, scale = 5, k = 0.8)
+  )
+  set.seed(1)
+  sampled <- add_summaries(
+    draws,
+    family = "gengamma", probs = 0.5, method = "sample", nsim = 50000
+  )
+  expect_equal(sampled$mean, out$mean, tolerance = 0.05)
+  expect_equal(sampled$sd, out$sd, tolerance = 0.1)
+  expect_equal(sampled$q50, out$q50, tolerance = 0.05)
+})

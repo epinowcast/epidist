@@ -74,3 +74,48 @@ test_that("the marginal model Stan signature matches the vreal order in the form
     )
   )
 })
+
+# Every Stan function chunk a model adds, as one string
+.stanvars_code <- function(stanvars) {
+  return(.flatten_stan(vapply(stanvars, function(x) x$scode, character(1))))
+}
+
+test_that("the gengamma family reaches primarycensored as dist_id 5 with the Stacy parameter order", { # nolint: line_length_linter.
+  skip_if_not_installed("flexsurv")
+  for (data in list(prep_marginal_obs, prep_meta_obs)) {
+    family <- epidist_family(data, family = gengamma())
+    formula <- epidist_formula(data, family, formula = bf(mu ~ 1))
+    code <- .stanvars_code(epidist_stancode(data, family, formula))
+    expect_true(grepl("5, {shape, mu, k}", code, fixed = TRUE))
+    expect_true(grepl("real gengamma_lcdf(real y", code, fixed = TRUE))
+  }
+})
+
+test_that("the latent and naive models carry the gengamma Stan functions", {
+  skip_if_not_installed("flexsurv")
+  family <- epidist_family(prep_obs, family = gengamma())
+  formula <- epidist_formula(prep_obs, family, formula = bf(mu ~ 1))
+  code <- .stanvars_code(epidist_stancode(prep_obs, family, formula))
+  expect_true(grepl("gengamma_lpdf(d | mu, shape, k)", code, fixed = TRUE))
+  expect_true(grepl(
+    "gengamma_lcdf(obs_time | mu, shape, k)", code,
+    fixed = TRUE
+  ))
+  expect_true(grepl("real gengamma_lpdf(vector y", code, fixed = TRUE))
+
+  family <- epidist_family(prep_naive_obs, family = gengamma())
+  formula <- epidist_formula(prep_naive_obs, family, formula = bf(mu ~ 1))
+  code <- .stanvars_code(epidist_stancode(prep_naive_obs, family, formula))
+  expect_true(grepl("real gengamma_lpdf(real y", code, fixed = TRUE))
+  # brms calls the density with the parameters in the order declared
+  model <- .flatten_stan(epidist(
+    prep_naive_obs,
+    family = gengamma(), fn = brms::make_stancode
+  ))
+  expect_true(grepl(
+    "gengamma_lpdf(Y[n] | mu[n], shape[n], k[n])", model,
+    fixed = TRUE
+  ))
+  # A brms family adds nothing to the naive model
+  expect_null(epidist_stancode(prep_naive_obs))
+})

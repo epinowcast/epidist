@@ -544,10 +544,15 @@ epidist_estimates_parameters <- function(
 #'
 #' @inheritParams .pdist
 #'
-#' @returns The corresponding function from `stats`.
+#' @returns The corresponding function from `stats`, or from `flexsurv` for
+#'  the generalised gamma.
 #'
 #' @keywords internal
 .estimates_qdist <- function(dist) {
+  if (identical(dist, "pgengamma.orig")) {
+    .require_flexsurv()
+    return(flexsurv::qgengamma.orig)
+  }
   return(switch(dist,
     plnorm = stats::qlnorm,
     pgamma = stats::qgamma,

@@ -14,7 +14,8 @@ users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
 families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
 \code{\link[brms:brmsfamily]{brms::lognormal()}}, are also
-reexported as part of \code{epidist}.}
+reexported as part of \code{epidist}. The generalised gamma family
+\code{\link[=gengamma]{gengamma()}} is defined by \code{epidist} itself.}
 }
 \value{
 A function that calculates the marginal log likelihood for a single

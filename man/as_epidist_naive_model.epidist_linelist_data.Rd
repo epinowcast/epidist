@@ -50,6 +50,7 @@ Other naive_model:
 \code{\link{as_epidist_naive_model.epidist_aggregate_data}()},
 \code{\link{epidist_formula_model.epidist_naive_model}()},
 \code{\link{epidist_newdata.epidist_naive_model}()},
+\code{\link{epidist_stancode.epidist_naive_model}()},
 \code{\link{epidist_transform_data_model.epidist_naive_model}()},
 \code{\link{is_epidist_naive_model}()},
 \code{\link{new_epidist_naive_model}()}

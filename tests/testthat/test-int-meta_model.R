@@ -1233,3 +1233,59 @@ test_that("the meta model is calibrated over repeated studies", {
     decile_uniformity(mean_se[, "sigma_rank"])
   ))
 })
+
+test_that("the R and Stan meta model log likelihoods agree for the gengamma family", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  skip_if_not_installed("flexsurv")
+  meta <- suppressMessages(
+    as_epidist_meta_model(estimates = lockstep_estimates)
+  )
+  program <- meta_log_lik_program(meta, family = gengamma())
+  expect_identical(program$dpars, c("mu", "shape", "k"))
+  # Two parameter points, one of them the gamma special case
+  mu <- c(5, 3)
+  shape <- c(1.5, 1)
+  k <- c(1.2, 2)
+  stan_log_lik <- meta_stan_log_lik(program, mu, shape, k)
+  r_log_lik <- meta_r_log_lik(program, mu, shape, k)
+  expect_true(all(is.finite(stan_log_lik)))
+  expect_true(all(is.finite(r_log_lik)))
+  growth <- program$standata$vreal8 != 0
+  for (d in seq_along(mu)) {
+    expect_rows_close(stan_log_lik[d, !growth], r_log_lik[d, !growth], 1e-6)
+    expect_rows_close(stan_log_lik[d, growth], r_log_lik[d, growth], 1e-4)
+  }
+  # The gamma special case is the gamma meta model
+  gamma_program <- meta_log_lik_program(meta, family = Gamma(link = "log"))
+  gamma_log_lik <- meta_stan_log_lik(gamma_program, 6, 2)
+  expect_rows_close(stan_log_lik[2, ], gamma_log_lik[1, ], 1e-6)
+})
+
+test_that("epidist.epidist_meta_model fits the gengamma family to mixed data", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  skip_if_not_installed("flexsurv")
+  set.seed(1)
+  fit <- suppressMessages(epidist(
+    data = prep_meta_obs,
+    family = gengamma(),
+    seed = 1,
+    chains = 2,
+    cores = 2,
+    silent = 2,
+    refresh = 0,
+    iter = 1000,
+    backend = "cmdstanr"
+  ))
+  expect_s3_class(fit, "epidist_fit")
+  expect_convergence(fit)
+  log_lik <- brms::log_lik(fit, draw_ids = 1:5)
+  expect_identical(dim(log_lik), c(5L, nrow(fit$data)))
+  expect_true(all(is.finite(log_lik)))
+  pred <- brms::posterior_predict(fit, draw_ids = 1:5)
+  expect_false(anyNA(pred))
+  draws <- add_summaries(delay_parameter_draws(fit))
+  expect_true(all(is.finite(draws$mean)))
+})

@@ -3527,6 +3527,73 @@ test_that("the meta model posterior predictions use the fitted primary event", {
   expect_false(isTRUE(all.equal(mean(growing), mean(uniform))))
 })
 
+test_that(".meta_continuous_moments matches Monte Carlo generalised gamma summaries", { # nolint: line_length_linter.
+  skip_if_not_installed("flexsurv")
+  set.seed(110)
+  args <- list(shape = 1.4, scale = 6, k = 1.8)
+  moments <- .meta_continuous_moments("pgengamma.orig", args)
+  simulated <- sim_moments(flexsurv::rgengamma.orig(
+    5e5,
+    shape = args$shape, scale = args$scale, k = args$k
+  ))
+  expect_equal(moments[["mean"]], simulated[["mean"]], tolerance = 0.01)
+  expect_equal(moments[["sd"]], simulated[["sd"]], tolerance = 0.01)
+  expect_equal(
+    moments[["kurtosis"]], simulated[["kurtosis"]],
+    tolerance = 0.05
+  )
+  expect_equal(
+    moments[["skewness"]], simulated[["skewness"]],
+    tolerance = 0.02
+  )
+  # The gamma and weibull are the shape = 1 and k = 1 special cases
+  expect_equal(
+    .meta_continuous_moments(
+      "pgengamma.orig", list(shape = 1, scale = 3, k = 2.5)
+    ),
+    .meta_continuous_moments("pgamma", list(shape = 2.5, scale = 3)),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    .meta_continuous_moments(
+      "pgengamma.orig", list(shape = 1.7, scale = 8, k = 1)
+    ),
+    .meta_continuous_moments("pweibull", list(shape = 1.7, scale = 8)),
+    tolerance = 1e-10
+  )
+  # A draw whose moments overflow is rejected
+  expect_identical(
+    .meta_continuous_moments(
+      "pgengamma.orig", list(shape = 0.01, scale = 5, k = 1.5)
+    ),
+    .meta_moment_failure()
+  )
+})
+
+test_that(".meta_implied_moments and .meta_deep_tail support the generalised gamma", { # nolint: line_length_linter.
+  skip_if_not_installed("flexsurv")
+  args <- list(shape = 1.4, scale = 6, k = 1.8)
+  full <- .meta_implied_moments(
+    "pgengamma.orig", args,
+    cutoff = 100, pwindow = 1, swindow = 1,
+    trunc_adjusted = 1L, cens_adjusted = 1L, growth_rate = 0
+  )
+  expect_identical(full, .meta_continuous_moments("pgengamma.orig", args))
+  # A study that took date differences and stopped early sees a shorter delay
+  naive <- .meta_implied_moments(
+    "pgengamma.orig", args,
+    cutoff = 15, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0
+  )
+  expect_lt(naive[["mean"]], full[["mean"]])
+  expect_true(all(is.finite(naive)))
+  # The lower tail is severed where the closed form bound says it is empty
+  q <- c(1e-30, 1e-20, 1)
+  deep <- .meta_deep_tail(q, "pgengamma.orig", args)
+  expect_identical(deep, c(TRUE, TRUE, FALSE))
+  expect_identical(.meta_dist_cdf(q, "pgengamma.orig", args)[1:2], c(0, 0))
+})
+
 # The slots of a joint study row, a continuous estimand reporting a mean or a
 # standard deviation alongside quantiles, fully adjusted unless overridden.
 joint_study_slots <- function(types, probs, values, study_n = 200, ...) {

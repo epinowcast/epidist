@@ -5,6 +5,10 @@
 #' that as a user you will need this function, but we export it nonetheless to
 #' be transparent about what happens inside of a call to [epidist()].
 #'
+#' The family may be any `brms` family of a positive response, such as
+#' [brms::lognormal()], `Gamma(link = "log")` or [brms::weibull()], or a
+#' family `epidist` defines itself, such as [gengamma()].
+#'
 #' @inheritParams epidist
 #' @family family
 #' @returns A `brms` custom family object.
@@ -13,10 +17,10 @@
 epidist_family <- function(data, family = lognormal(), ...) {
   assert_epidist(data)
   family <- .validate_family(family)
-  class(family) <- c(family$family, class(family))
+  class(family) <- c(.family_name(family), class(family))
   family <- .add_dpar_info(family)
   custom_family <- epidist_family_model(data, family, ...)
-  class(custom_family) <- c(family$family, class(custom_family))
+  class(custom_family) <- c(.family_name(family), class(custom_family))
   custom_family <- epidist_family_param(custom_family)
   return(custom_family)
 }
@@ -135,5 +139,230 @@ epidist_family_param.default <- function(family, ...) {
       "Unable to extract Stan parameterisation for {family_name}."
     )
   }
+  return(family)
+}
+
+#' Generalised gamma delay distribution family
+#'
+#' A `brms` custom family for the generalised gamma distribution in the
+#' parameterisation of Stacy (1962), as used by `flexsurv::dgengamma.orig()`
+#' and by the `primarycensored` package.
+#' It has three positive distributional parameters, modelled on the log scale
+#' by default: `mu` is the scale, `shape` is the power parameter and `k` is
+#' the shape of the underlying gamma distribution.
+#' If \eqn{G} is gamma distributed with shape `k` and unit scale then
+#' `mu * G^(1 / shape)` is generalised gamma, so the gamma (`shape = 1`) and
+#' Weibull (`k = 1`) families are special cases and the lognormal is a limit.
+#' The mean is `mu * gamma(k + 1 / shape) / gamma(k)`, and [add_summaries()]
+#' gives the mean, the standard deviation and quantiles in closed form.
+#'
+#' `brms` has no generalised gamma family, so this one carries the Stan
+#' density and distribution function and the R functions `brms` uses to
+#' compute the log likelihood and to predict from a fit.
+#' The `flexsurv` package must be installed to use it.
+#' It works with every `epidist` model, including the meta model, and with
+#' every primary event distribution.
+#'
+#' The default prior of [epidist_family_prior()] is weakly informative around
+#' the gamma and Weibull special cases, because `shape` and `k` are only
+#' weakly identified by a modest number of delays.
+#'
+#' @param link,link_shape,link_k The link functions of `mu`, `shape` and `k`.
+#'  All default to `"log"`.
+#'
+#' @returns A `brms` custom family object.
+#'
+#' @references Stacy, E. W. (1962). A generalization of the gamma
+#'  distribution. The Annals of Mathematical Statistics, 33(3), 1187-1192.
+#'  \doi{10.1214/aoms/1177704481}
+#'
+#' @family family
+#' @export
+#' @examples
+#' gengamma()
+gengamma <- function(link = "log", link_shape = "log", link_k = "log") {
+  .require_flexsurv()
+  out <- brms::custom_family(
+    "gengamma",
+    dpars = c("mu", "shape", "k"),
+    links = c(link, link_shape, link_k),
+    lb = c(0, 0, 0),
+    ub = c(NA, NA, NA),
+    type = "real",
+    log_lik = .gengamma_log_lik,
+    posterior_predict = .gengamma_posterior_predict,
+    posterior_epred = .gengamma_posterior_epred
+  )
+  # `brms::custom_family()` does not record the support of the response,
+  # which the model families take from here
+  out$ybounds <- c(0, Inf)
+  return(out)
+}
+
+#' The families `epidist` defines itself
+#'
+#' `brms` names a custom family `"custom"` and keeps its own name in `name`,
+#' so these are looked up by that name where `brms` would be asked for one of
+#' its own families.
+#'
+#' @returns A named list of family constructors.
+#'
+#' @keywords internal
+.epidist_families <- function() {
+  return(list(gengamma = gengamma))
+}
+
+#' The name of a delay distribution family
+#'
+#' A family built with [brms::custom_family()], such as [gengamma()], is
+#' named `"custom"` for `brms` to dispatch on and records its own name in
+#' `name`. Every other family is named by `family`.
+#'
+#' @inheritParams epidist_family
+#'
+#' @returns A character string.
+#'
+#' @keywords internal
+.family_name <- function(family) {
+  if (identical(family$family, "custom")) {
+    return(family$name)
+  }
+  return(family$family)
+}
+
+#' Stan functions a family defines itself
+#'
+#' A family `brms` does not have, such as [gengamma()], carries the Stan
+#' density and distribution function `brms` and the latent model call. They
+#' are read from the `stan/family/` folder of the installed package.
+#'
+#' @inheritParams epidist_family
+#'
+#' @returns A `brms` `stanvars` object, or `NULL` for a `brms` family.
+#'
+#' @keywords internal
+.family_stanvars <- function(family) {
+  name <- .delay_family(family)$name
+  if (!name %in% names(.epidist_families())) {
+    return(NULL)
+  }
+  return(brms::stanvar(
+    block = "functions",
+    scode = .stan_chunk(file.path("family", paste0(name, ".stan")))
+  ))
+}
+
+#' Check that `flexsurv` is installed
+#'
+#' @returns `NULL`, invisibly, called for the error it may raise.
+#'
+#' @keywords internal
+.require_flexsurv <- function() {
+  if (!requireNamespace("flexsurv", quietly = TRUE)) {
+    cli_abort(c(
+      "The {.pkg flexsurv} package is needed for the generalised gamma family.",
+      i = "Install it with {.code install.packages(\"flexsurv\")}."
+    ))
+  }
+  return(invisible(NULL))
+}
+
+#' The generalised gamma parameters of a `brms` prep object
+#'
+#' @param prep A `brms` prep object.
+#'
+#' @param i The observation index, or `NULL` for every observation.
+#'
+#' @returns A named list of the `shape`, `scale` and `k` parameters in the
+#'  parameterisation of `flexsurv::dgengamma.orig()`.
+#'
+#' @keywords internal
+.gengamma_dpars <- function(prep, i = NULL) {
+  return(list(
+    shape = brms::get_dpar(prep, "shape", i = i),
+    scale = brms::get_dpar(prep, "mu", i = i),
+    k = brms::get_dpar(prep, "k", i = i)
+  ))
+}
+
+#' The mean and standard deviation of the generalised gamma distribution
+#'
+#' From the raw moments \eqn{E[T^r] = \theta^r \Gamma(k + r / a) / \Gamma(k)},
+#' with \eqn{\theta} the scale and \eqn{a} the `shape`.
+#'
+#' @param scale,shape,k Generalised gamma parameters in the parameterisation
+#'  of `flexsurv::dgengamma.orig()`.
+#'
+#' @returns A numeric vector.
+#'
+#' @keywords internal
+.gengamma_mean <- function(scale, shape, k) {
+  return(scale * exp(lgamma(k + 1 / shape) - lgamma(k)))
+}
+
+#' @rdname dot-gengamma_mean
+#' @keywords internal
+.gengamma_sd <- function(scale, shape, k) {
+  g1 <- exp(lgamma(k + 1 / shape) - lgamma(k))
+  g2 <- exp(lgamma(k + 2 / shape) - lgamma(k))
+  return(scale * sqrt(g2 - g1^2))
+}
+
+#' The `brms` post-processing functions of the [gengamma()] family
+#'
+#' Used by `brms` for a fit of the naive model, which passes the family
+#' through unchanged, and by the generators in `R/gen.R` for the other models.
+#'
+#' @inheritParams .gengamma_dpars
+#'
+#' @param ... Not used.
+#'
+#' @returns The log likelihood of observation `i` for every draw, a delay
+#'  drawn for observation `i` for every draw, and the mean of the delay for
+#'  every draw and observation.
+#'
+#' @keywords internal
+.gengamma_log_lik <- function(i, prep) {
+  dpars <- .gengamma_dpars(prep, i)
+  log_lik <- flexsurv::dgengamma.orig(
+    prep$data$Y[i],
+    shape = dpars$shape, scale = dpars$scale, k = dpars$k, log = TRUE
+  )
+  return(.log_lik_weight(log_lik, i = i, prep = prep))
+}
+
+#' @rdname dot-gengamma_log_lik
+#' @keywords internal
+.gengamma_posterior_predict <- function(i, prep, ...) {
+  dpars <- .gengamma_dpars(prep, i)
+  return(flexsurv::rgengamma.orig(
+    prep$ndraws,
+    shape = dpars$shape, scale = dpars$scale, k = dpars$k
+  ))
+}
+
+#' @rdname dot-gengamma_log_lik
+#' @keywords internal
+.gengamma_posterior_epred <- function(prep) {
+  dpars <- .gengamma_dpars(prep)
+  return(as.matrix(.gengamma_mean(dpars$scale, dpars$shape, dpars$k)))
+}
+
+#' Method for the [gengamma()] family
+#'
+#' `brms` calls the Stan density of a custom family with its distributional
+#' parameters in the order they are declared, which is the `param` the
+#' latent model uses. `primarycensored` takes the generalised gamma as
+#' `[shape, scale, k]`, so the marginal and meta models pass `pcd_param`.
+#'
+#' @inheritParams epidist_family_param
+#' @family family
+#' @returns The family with a `param` element giving the Stan parameter
+#'  ordering and a `pcd_param` element giving the `primarycensored` one.
+#'
+#' @export
+epidist_family_param.gengamma <- function(family, ...) {
+  family$param <- "mu, shape, k"
+  family$pcd_param <- "shape, mu, k"
   return(family)
 }

@@ -16,7 +16,8 @@ users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
 families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
 \code{\link[brms:brmsfamily]{brms::lognormal()}}, are also
-reexported as part of \code{epidist}.}
+reexported as part of \code{epidist}. The generalised gamma family
+\code{\link[=gengamma]{gengamma()}} is defined by \code{epidist} itself.}
 }
 \value{
 The requested brms function
@@ -24,6 +25,8 @@ The requested brms function
 \description{
 Helper function to get internal brms functions by constructing their name
 from a prefix and family. Used to get functions like \verb{log_lik_*},
-\verb{posterior_predict_*} etc.
+\verb{posterior_predict_*} etc. A family \code{epidist} defines itself, such as
+\code{\link[=gengamma]{gengamma()}}, carries these functions, so they are taken from it, whether
+it is given as the family or as a model family built on it.
 }
 \keyword{internal}

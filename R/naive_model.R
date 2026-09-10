@@ -214,6 +214,36 @@ epidist_transform_data_model.epidist_naive_model <- function(
   return(trans_data)
 }
 
+#' Define the Stan code of the naive model
+#'
+#' The naive model uses the `brms` family as it is, so it only needs Stan
+#' code for a family `brms` does not have, such as [gengamma()], whose
+#' density `brms` calls by name.
+#'
+#' @inheritParams epidist
+#'
+#' @param family The epidist family object specifying the distribution
+#'
+#' @param formula The model formula
+#'
+#' @method epidist_stancode epidist_naive_model
+#' @family naive_model
+#' @returns A list of `stanvars` objects, or `NULL` when none are needed.
+#'
+#' @export
+epidist_stancode.epidist_naive_model <- function(
+  data,
+  family = epidist_family(data),
+  formula = epidist_formula(data),
+  ...
+) {
+  family_stanvars <- .family_stanvars(family)
+  if (is.null(family_stanvars)) {
+    return(NULL)
+  }
+  return(.version_stanvar() + family_stanvars)
+}
+
 #' Build `newdata` for the naive model
 #'
 #' The naive model accounts for neither censoring nor truncation, so the only

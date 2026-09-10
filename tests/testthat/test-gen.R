@@ -304,7 +304,11 @@ test_that("the generic log likelihood rejects a delay beyond the observation tim
     "Upper truncation point is greater than D"
   )
 
-  log_lik <- epidist_gen_log_lik(epidist_family(prep_obs))
+  # The guard belongs to the generic method, which the analytical method
+  # reaches through dpcens() instead, so build that method directly rather
+  # than through epidist_gen_log_lik(), which resolves a supported family to
+  # the analytical method.
+  log_lik <- .generic_gen_log_lik(.get_brms_fn("log_lik", lognormal()))
   prep <- list(
     data = list(Y = 5, vreal1 = 5.5, vreal2 = 1, vreal3 = 1),
     ndraws = 1,
