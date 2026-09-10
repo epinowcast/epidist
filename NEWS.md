@@ -148,6 +148,18 @@ Closes #678.
 
 ## Features
 
+- Added `plot_events()`, which plots the primary and secondary event windows of each case in an `epidist_linelist_data` object, ordered by primary event time.
+It can mark the observation time and colour the cases by a column of the data.
+The vignettes drew this plot by hand and now use it.
+Closes #689.
+- Added a `plot()` method for the draws returned by `delay_parameter_draws()`, `delay_summary_draws()` and `add_summaries()`.
+The default draws the posterior density of each parameter in its own panel, coloured by stratum, with true values as dashed lines when given.
+`type = "delay"` draws the delay distribution the draws imply, as the posterior median with a ribbon or as one line per draw.
+The draws now carry the `epidist_delay_draws` class, which records the family and the stratum variables the plot needs.
+`ggplot2::autoplot()` works too.
+The vignettes now use it in place of the plots they drew by hand.
+Closes #670.
+- Both plot functions use `ggplot2::theme_minimal()` and a colour blind friendly palette, so that their output matches the plots in the package documentation.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
 It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
 Each step is still available on its own.
