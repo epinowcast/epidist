@@ -24,6 +24,7 @@ Other estimates_data:
 \code{\link{as_epidist_estimates_data.epidist_estimates_data}()},
 \code{\link{as_epidist_estimates_data.epidist_multivariate}()},
 \code{\link{as_epidist_estimates_data.list}()},
+\code{\link{epidist_estimates_epireview}()},
 \code{\link{epidist_estimates_parameters}()},
 \code{\link{epidist_estimates_summaries}()},
 \code{\link{is_epidist_estimates_data}()},

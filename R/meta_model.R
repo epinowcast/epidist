@@ -515,7 +515,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 .meta_assign_groups <- function(estimates, mvn = NULL) {
   separator <- rawToChar(as.raw(31L))
   key_cols <- setdiff(names(estimates), c("type", "value", "se", "p"))
-  parts <- lapply(estimates[key_cols], as.character)
+  parts <- lapply(.drop_epidist_class(estimates)[key_cols], as.character)
   kind <- ifelse(estimates$type == "quantile", "quantile", "moment")
   key <- do.call(paste, c(unname(parts), list(kind), list(sep = separator)))
   # A study reporting two means, or two standard deviations, with otherwise
@@ -654,7 +654,9 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     growth_rate = as.numeric(estimates$growth_rate[1])
   )
   consumed <- setdiff(.estimates_required_cols(), "study")
-  extra <- estimates[setdiff(names(estimates), c(names(group), consumed))]
+  extra <- .drop_epidist_class(estimates)[
+    setdiff(names(estimates), c(names(group), consumed))
+  ]
   return(list(
     row = bind_cols(group, extra[1, , drop = FALSE]),
     members = members,
