@@ -46,6 +46,7 @@ Other estimates_data:
 \code{\link[=as_epidist_estimates_data.epidist_estimates_data]{as_epidist_estimates_data.epidist_estimates_data()}},
 \code{\link[=as_epidist_estimates_data.epidist_multivariate]{as_epidist_estimates_data.epidist_multivariate()}},
 \code{\link[=assert_epidist.epidist_estimates_data]{assert_epidist.epidist_estimates_data()}},
+\code{\link[=epidist_estimates_epireview]{epidist_estimates_epireview()}},
 \code{\link[=epidist_estimates_parameters]{epidist_estimates_parameters()}},
 \code{\link[=epidist_estimates_summaries]{epidist_estimates_summaries()}},
 \code{\link[=is_epidist_estimates_data]{is_epidist_estimates_data()}},

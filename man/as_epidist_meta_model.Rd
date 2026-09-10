@@ -54,10 +54,13 @@ that they form their own level of any such term.
 Summaries that one study computed from the same delays are correlated, so
 they are fitted jointly. Two are grouped when they agree on every column of
 \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} other than the summary itself, and a summary
-supplied with its own \code{se} is fitted alone. One observation is therefore a
-group rather than a single reported value, so \code{log_lik()} and \code{\link[loo:loo]{loo::loo()}}
-report per group, and \code{loo} only compares fits to the same studies and the
-same mix of individual and summary rows. See \code{vignette("faq")}.
+supplied with its own \code{se} is fitted alone. A study that reported integer
+date differences (\code{cens_adjusted} 0 or 3) is the exception: its mean and
+standard deviation form one group and its quantiles another. One
+observation is therefore a group rather than a single reported value, so
+\code{log_lik()} and \code{\link[loo:loo]{loo::loo()}} report per group, and \code{loo} only compares
+fits to the same studies and the same mix of individual and summary rows.
+See \code{vignette("faq")}.
 
 Three consequences of the sampling likelihoods change what you should do.
 \itemize{
@@ -71,11 +74,15 @@ on the sampling error alone.
 have smaller sampling error than assumed here. Supply a reported \code{se} in
 \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} for those rows, which also takes them out of
 the joint quantile likelihood.
-\item The normal approximations degrade at small study sample sizes, and
-summaries of different kinds from one study, such as a mean and a median,
-are treated as independent. A study that published draws of its parameters
-avoids the second, because \code{\link[=as_epidist_multivariate]{as_epidist_multivariate()}} turns them into a
-covariance over the summaries that is fitted jointly.
+\item The normal approximations degrade at small study sample sizes. A study
+that reported integer date differences has its mean and standard
+deviation fitted separately from its quantiles, as if they came from
+different delays, which counts such a study about twice for the location
+where it reports both kinds, so keep its mean and standard deviation
+and drop its quantiles. A study with a continuous estimand has every kind
+fitted jointly. A study that published draws of its parameters avoids
+both, because \code{\link[=as_epidist_multivariate]{as_epidist_multivariate()}} turns them into a covariance
+over the summaries that is fitted jointly.
 }
 
 Two approximations are worth knowing about before fitting quantiles.
@@ -95,13 +102,11 @@ standard deviation recover the truth, so prefer those where a study
 reports them, and check that \code{swindow} is the resolution it worked at.
 \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} warns for studies in this range.
 \item The accrual weight applied to a study that stopped collecting at a
-calendar date treats the last primary window as complete, so it is exact
-on the grid only when \code{relative_obs_time} is a multiple of \code{pwindow},
-and it averages over the primary window for a study that adjusted the
-secondary interval only. With a weekly primary window, a collection
-window of 28 days and a delay of mean 4.6 days the latter puts the
-implied mean 0.8\% high at a growth rate of 0.05 and 2.6\% high at 0.2.
-\code{vignette("model")} gives the measurements.
+calendar date is exact on the grid, but averages over the primary window
+for a study that adjusted the secondary interval only. With a weekly
+primary window, a collection window of 28 days and a delay of mean 4.6
+days this puts the implied mean 0.8\% high at a growth rate of 0.05 and
+2.6\% high at 0.2. \code{vignette("model")} gives the measurements.
 }
 
 Two settings trade accuracy against speed: \code{max_delay} in
