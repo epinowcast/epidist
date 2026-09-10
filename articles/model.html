@@ -418,29 +418,44 @@ It is fitted as the probability of that event,
 P(N_{\le y} \ge k) - P(N_{\le y - w_s} \ge k), \quad k = \lceil n p \rceil, \quad N_{\le y} \sim \text{Binomial}\left(n, G_0(y)\right), \tag{5.7}
 \]</span>
 where <span class="math inline">\(w_s\)</span> is the reporting resolution and <span class="math inline">\(G_0\)</span> the step distribution function of the discrete estimand of Section <a href="#the-biased-estimands">5.3</a>, before continuity correction.
-The information this carries saturates as <span class="math inline">\(n\)</span> grows.
-Several quantiles of integer day delays use Equation <a href="#eq:meta-quantile-set">(5.6)</a> on the continuity corrected <span class="math inline">\(G\)</span>, which is calibrated at around thirty delays but claims a standard error five times too small at a thousand, so <code><a href="../reference/as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> warns about such studies.</p>
+The information this carries saturates as <span class="math inline">\(n\)</span> grows.</p>
+<p>Several quantiles of integer day delays from one study are fitted as the joint probability of the crossings they stand for.
+The counts <span class="math inline">\(N_{e_1} \le N_{e_2} \le \dots \le N_{e_m}\)</span> at the integer edges the reported quantiles name, the day below each and the day itself, form a Markov chain of binomial steps,
+<span class="math display" id="eq:meta-quantile-chain">\[
+N_{e_1} \sim \text{Binomial}\left(n, \; G_0(e_1)\right), \quad
+N_{e_{i+1}} \mid N_{e_i} \sim N_{e_i} + \text{Binomial}\left(n - N_{e_i}, \; \frac{G_0(e_{i+1}) - G_0(e_i)}{1 - G_0(e_i)}\right), \tag{5.8}
+\]</span>
+and a quantile reported at <span class="math inline">\(p\)</span> landing on day <span class="math inline">\(y\)</span> puts the box <span class="math inline">\(N_{\le y - w_s} \le \lceil n p \rceil - 1\)</span> and <span class="math inline">\(N_{\le y} \ge \lceil n p \rceil\)</span> on two of them.
+The likelihood is the probability that every count fell in its box,
+<span class="math display" id="eq:meta-quantile-box">\[
+P\left(l_i \le N_{e_i} \le u_i, \; i = 1, \dots, m\right), \tag{5.9}
+\]</span>
+computed by a forward pass over the counts <span class="math inline">\(0, \dots, n\)</span> on the log scale, one binomial step per edge.
+The pass is kept to a band of counts around the most likely path of the constrained chain, six standard deviations and a few counts wide, so its cost grows like <span class="math inline">\(m n^{3/2}\)</span> rather than <span class="math inline">\(m n^2\)</span> and it is exact to well within a millionth.
+Two quantiles reported at the same value are two constraints at one edge, and a single quantile reduces Equation <a href="#eq:meta-quantile-box">(5.9)</a> to Equation <a href="#eq:meta-quantile-crossing">(5.7)</a>.
+The multinomial of Equation <a href="#eq:meta-quantile-set">(5.6)</a> on the continuity corrected <span class="math inline">\(G\)</span> treats each reported quantile as a continuous cut point, so its curvature grows like <span class="math inline">\(n\)</span> and it claims a standard error five times too small at a thousand delays, where Equation <a href="#eq:meta-quantile-box">(5.9)</a> is close to an indicator of the parameters that put the population quantiles in the reported cells.
+That is a box rather than a peak, so the posterior of such a study is described by its bounds rather than a standard error, and the sampler explores the box.</p>
 <p>A study with a continuous estimand, codes 1, 2 and 4 of Section <a href="#the-biased-estimands">5.3</a>, that reports a mean or a standard deviation alongside quantiles has all of them fitted as one multivariate normal,
 <span class="math display" id="eq:meta-joint-study">\[
 \begin{pmatrix} y_m \\ y_\sigma \\ y_{p_1} \\ \vdots \\ y_{p_k} \end{pmatrix} \sim
 \text{Normal}\left(
 \begin{pmatrix} m_1 \\ \sigma \\ Q_{p_1} \\ \vdots \\ Q_{p_k} \end{pmatrix}, \;
 \frac{1}{n} \Sigma
-\right), \tag{5.8}
+\right), \tag{5.10}
 \]</span>
 whose mean and standard deviation block is that of Equation <a href="#eq:meta-moment-pair">(5.5)</a>.
 The rest follows from the Bahadur representation of a sample quantile, <span class="math inline">\(\hat{Q}_p - Q_p \approx -(\hat{G}(Q_p) - p) / g(Q_p)\)</span> with <span class="math inline">\(g\)</span> the density of <span class="math inline">\(G\)</span> <span class="citation">(<a href="#ref-bahadur1966">Bahadur 1966</a>)</span>,
 <span class="math display" id="eq:meta-joint-cov">\[
 \Sigma_{q_i q_j} = \frac{p_i (1 - p_j)}{g(Q_{p_i}) \, g(Q_{p_j})}, \quad p_i \le p_j, \qquad
 \Sigma_{m q_i} = -\frac{\int_L^{Q_{p_i}} (x - m_1) \, \text{d}G(x)}{g(Q_{p_i})}, \qquad
-\Sigma_{\sigma q_i} = -\frac{\int_L^{Q_{p_i}} \left((x - m_1)^2 - \sigma^2\right) \text{d}G(x)}{2 \sigma \, g(Q_{p_i})}, \tag{5.9}
+\Sigma_{\sigma q_i} = -\frac{\int_L^{Q_{p_i}} \left((x - m_1)^2 - \sigma^2\right) \text{d}G(x)}{2 \sigma \, g(Q_{p_i})}, \tag{5.11}
 \]</span>
 with <span class="math inline">\(L\)</span> the smallest delay the study counted, and the last entry carried from the sample variance to the standard deviation by the delta method.
 The partial moments are integrated by parts over the nodes on which <span class="math inline">\(G\)</span> is evaluated, and <span class="math inline">\(g(Q_p)\)</span> is the closed form density of the estimand where its quantile is refined and the slope of <span class="math inline">\(G\)</span> between the bracketing nodes where it is not, see Section <a href="#quantiles-of-the-estimands">5.3.4</a>.
 Against 4000 simulated lognormal studies of 200 delays the derived standard errors are within 3% and the correlations within 0.02 of their sampling values.
 Fitting the two kinds separately counts a study reporting a mean, a standard deviation and quartiles about twice for the location and 1.4 times for the spread, and a mean with a median 1.5 times at <span class="math inline">\(n = 100\)</span> and 3 times at <span class="math inline">\(n = 30\)</span>.
 A continuous estimand reporting only a mean and a standard deviation, or only quantiles, keeps Equation <a href="#eq:meta-moment-pair">(5.5)</a> or <a href="#eq:meta-quantile-set">(5.6)</a>, which the joint normal reduces to and which is exact for a single quantile.
-On the grid of codes 0 and 3 the quantiles are discrete statistics fitted by Equations <a href="#eq:meta-quantile-crossing">(5.7)</a> and <a href="#eq:meta-quantile-set">(5.6)</a>, so the mean and standard deviation of such a study are fitted separately from its quantiles, and a study reporting both kinds is over weighted in the same way.
+On the grid of codes 0 and 3 the quantiles are discrete statistics fitted by Equations <a href="#eq:meta-quantile-crossing">(5.7)</a> and <a href="#eq:meta-quantile-box">(5.9)</a>, so the mean and standard deviation of such a study are fitted separately from its quantiles, and a study reporting both kinds is over weighted in the same way.
 Keep its mean and standard deviation and drop its quantiles.
 The normal approximations degrade for small study sample sizes.</p>
 </div>
@@ -452,7 +467,7 @@ The normal approximations degrade for small study sample sizes.</p>
 This is the reporting format we recommend, because it keeps the correlation between the reported quantities.
 With <span class="math inline">\(y\)</span> the reported vector and <span class="math inline">\(\Sigma\)</span> the covariance over it,
 <span class="math display" id="eq:meta-mvn">\[
-y \sim \text{Normal}\left(m(\theta), \; \Sigma\right), \tag{5.10}
+y \sim \text{Normal}\left(m(\theta), \; \Sigma\right), \tag{5.12}
 \]</span>
 where <span class="math inline">\(m(\theta)\)</span> holds <span class="math inline">\(m_1\)</span> for a mean, <span class="math inline">\(\sigma\)</span> for a standard deviation and <span class="math inline">\(Q_p\)</span> for a quantile.
 Summaries of a <span class="math inline">\(k\)</span> parameter fit are functions of <span class="math inline">\(k\)</span> numbers, so at most <span class="math inline">\(k\)</span> may be reported with a covariance or standard errors, and asking for more is an error.</p>
@@ -464,11 +479,11 @@ Summaries of a <span class="math inline">\(k\)</span> parameter fit are function
 <p>A study that published the parameters of a fitted distribution <span class="math inline">\(\hat{F}\)</span> has them converted to summaries by <code><a href="../reference/epidist_estimates_parameters.html">epidist_estimates_parameters()</a></code>, so the family it fitted need not match the family fitted to it.
 The summaries are taken over the range of delays the study could have seen, conditioning <span class="math inline">\(\hat{F}\)</span> on <span class="math inline">\((L, D]\)</span>,
 <span class="math display" id="eq:meta-reported-cond">\[
-\hat{F}_{L,D}(y) = \frac{\hat{F}(y) - \hat{F}(L)}{\hat{F}(D) - \hat{F}(L)}, \quad L &lt; y \le D, \tag{5.11}
+\hat{F}_{L,D}(y) = \frac{\hat{F}(y) - \hat{F}(L)}{\hat{F}(D) - \hat{F}(L)}, \quad L &lt; y \le D, \tag{5.13}
 \]</span>
 with <span class="math inline">\(L\)</span> the smallest delay it counted and <span class="math inline">\(D\)</span> its observation time, or <span class="math inline">\(D = \infty\)</span> for a study that adjusted for right truncation.
 Without this a study that did not correct for right truncation is charged with tail spread its data never had, which can reach tens of percent on a standard deviation.
-Reported parameter standard errors are carried onto the summaries by the delta method, as <span class="math inline">\(J V J^\top\)</span> with <span class="math inline">\(V\)</span> the diagonal matrix of squared standard errors and <span class="math inline">\(J\)</span> the Jacobian of the map from parameters to summaries, and fitted jointly through Equation <a href="#eq:meta-mvn">(5.10)</a>.
+Reported parameter standard errors are carried onto the summaries by the delta method, as <span class="math inline">\(J V J^\top\)</span> with <span class="math inline">\(V\)</span> the diagonal matrix of squared standard errors and <span class="math inline">\(J\)</span> the Jacobian of the map from parameters to summaries, and fitted jointly through Equation <a href="#eq:meta-mvn">(5.12)</a>.
 For <span class="math inline">\(k\)</span> summaries of a <span class="math inline">\(k\)</span> parameter fit this gives back the curvature <span class="math inline">\(V^{-1}\)</span>, where fitting each with its own standard error would claim standard errors 1.4 to 1.5 times too wide for a lognormal mean and standard deviation.
 A full parameter covariance is better passed as draws to <code><a href="../reference/as_epidist_multivariate.html">as_epidist_multivariate()</a></code>.
 A study with no parameter uncertainty falls back to the sample size likelihoods above, and any number of its summaries may be reported.
@@ -522,18 +537,18 @@ Four moments are needed, because the kurtosis sets the sampling error of a repor
 <p>Code 0, no adjustment, summarised integer date differences directly, so its estimand is discrete.
 With <span class="math inline">\(q_j\)</span> the probability on the <span class="math inline">\(j\)</span>th secondary window,
 <span class="math display" id="eq:meta-grid">\[
-q_j = \frac{F_{pc}(j w_s; \theta) - F_{pc}((j-1) w_s; \theta)}{F_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j = 1, \dots, \lfloor D / w_s \rfloor, \tag{5.12}
+q_j = \frac{F_{pc}(j w_s; \theta) - F_{pc}((j-1) w_s; \theta)}{F_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j = 1, \dots, \lfloor D / w_s \rfloor, \tag{5.14}
 \]</span>
 where bin <span class="math inline">\(j\)</span> carries the delay <span class="math inline">\((j-1) w_s\)</span> and the truncation point is discretised to the last full grid boundary.
 This is the doubly interval censored, right truncated probability mass function the marginal model of Section <a href="#the-marginal-model">4</a> uses for individual observations.
 Summing over the grid gives the moments, and its cumulative sum gives <span class="math inline">\(G_0\)</span>.
 For quantile rows <span class="math inline">\(G\)</span> is continuity corrected by interpolating <span class="math inline">\(G_0\)</span> linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise lands on a jump.
-A single reported quantile uses Equation <a href="#eq:meta-quantile-crossing">(5.7)</a> on <span class="math inline">\(G_0\)</span>.
+Reported quantiles without a standard error use Equation <a href="#eq:meta-quantile-crossing">(5.7)</a> or <a href="#eq:meta-quantile-box">(5.9)</a> on <span class="math inline">\(G_0\)</span> instead.
 The reported value is itself rounded to the grid, so a bias remains that does not shrink with <span class="math inline">\(n\)</span>.
 It stays under 4% on the mean and 9% on the standard deviation once the reported quantiles sit twenty five or more cells above the smallest delay counted, and reaches tens of percent on both within ten, so a coarsely resolved delay is better fitted through its mean and standard deviation where reported.</p>
 <p>Code 1, full adjustment, reported the moments of <span class="math inline">\(f(\cdot \, ; \theta)\)</span> itself, right truncated at <span class="math inline">\(D\)</span>,
 <span class="math display" id="eq:meta-trunc-moments">\[
-\mathbb{E}[\tau^k \mid \tau \le D] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4, \tag{5.13}
+\mathbb{E}[\tau^k \mid \tau \le D] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4, \tag{5.15}
 \]</span>
 which reduces to the family moments when <span class="math inline">\(D = \infty\)</span>.
 Its distribution function is <span class="math inline">\(F(y; \theta) / F(D; \theta)\)</span>.</p>
@@ -541,19 +556,19 @@ Its distribution function is <span class="math inline">\(F(y; \theta) / F(D; \th
 <span class="math display" id="eq:meta-uniform-moments">\[
 \mathbb{E}[(\tau^\star + U)^k \mid \tau^\star + U \le D] =
 \frac{\int_0^D k t^{k-1} \left(F_{pc}(D; \theta) - F_{pc}(t; \theta)\right) \text{d}t}{F_{pc}(D; \theta)},
-\quad k = 1, \dots, 4. \tag{5.14}
+\quad k = 1, \dots, 4. \tag{5.16}
 \]</span>
 Its distribution function is <span class="math inline">\(F_{pc}(y; \theta) / F_{pc}(D; \theta)\)</span>.
-Equations <a href="#eq:meta-trunc-moments">(5.13)</a> and <a href="#eq:meta-uniform-moments">(5.14)</a> are evaluated by Simpson’s rule.
+Equations <a href="#eq:meta-trunc-moments">(5.15)</a> and <a href="#eq:meta-uniform-moments">(5.16)</a> are evaluated by Simpson’s rule.
 Where <span class="math inline">\(D = \infty\)</span> and the primary event is uniform the convolution is exact,
 <span class="math display" id="eq:meta-uniform-exact">\[
 \mu_{pc} = \mu + \frac{w_p}{2}, \quad
 \sigma_{pc}^2 = \sigma^2 + \frac{w_p^2}{12}, \quad
-\mu_{4,pc} = \mu_4 + 6 \sigma^2 \frac{w_p^2}{12} + \frac{w_p^4}{80}, \tag{5.15}
+\mu_{4,pc} = \mu_4 + 6 \sigma^2 \frac{w_p^2}{12} + \frac{w_p^4}{80}, \tag{5.17}
 \]</span>
 with <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\sigma^2\)</span> and <span class="math inline">\(\mu_4\)</span> the mean, variance and fourth central moment of <span class="math inline">\(f(\cdot \, ; \theta)\)</span>.</p>
-<p>Code 3, midpoint imputation, assigned each delay to the centre of its interval, so its estimand is the grid of Equation <a href="#eq:meta-grid">(5.12)</a> moved up by <span class="math inline">\(w_s / 2\)</span>.
-A single reported quantile uses Equation <a href="#eq:meta-quantile-crossing">(5.7)</a>, as for code 0.
+<p>Code 3, midpoint imputation, assigned each delay to the centre of its interval, so its estimand is the grid of Equation <a href="#eq:meta-grid">(5.14)</a> moved up by <span class="math inline">\(w_s / 2\)</span>.
+Reported quantiles use Equations <a href="#eq:meta-quantile-crossing">(5.7)</a> and <a href="#eq:meta-quantile-box">(5.9)</a>, as for code 0.
 Code 4, midpoint imputation with a uniform interval, placed the primary event at the midpoint of its window and integrated the secondary interval, so its estimand is that of code 2 moved down by <span class="math inline">\(w_p / 2\)</span>.
 A shift changes the mean alone and moves the distribution function and quantiles with it.
 Code 4 therefore has the mean of code 1 and the variance of code 2 before truncation, because midpointing removes the mean of <span class="math inline">\(U\)</span> but not its spread.
@@ -571,16 +586,16 @@ Right censoring is not yet supported.</p>
 <p>A study that accrued primary events over a window of length <span class="math inline">\(A\)</span> and stopped at its calendar end saw a delay <span class="math inline">\(d\)</span> only for primary events at least <span class="math inline">\(d\)</span> before the stop.
 With primary events arriving at a rate proportional to <span class="math inline">\(\exp(r t)\)</span> the follow up available is
 <span class="math display" id="eq:meta-accrual">\[
-w(d) = \int_0^{A - d} \exp(r t) \, \text{d}t = \frac{\exp(r (A - d)) - 1}{r}, \quad 0 \le d \le A, \tag{5.16}
+w(d) = \int_0^{A - d} \exp(r t) \, \text{d}t = \frac{\exp(r (A - d)) - 1}{r}, \quad 0 \le d \le A, \tag{5.18}
 \]</span>
 which tends to <span class="math inline">\(A - d\)</span> as <span class="math inline">\(r\)</span> tends to zero and, for a long window and a growing epidemic, to an exponential tilt by <span class="math inline">\(\exp(-r d)\)</span>.
 This is the dynamical bias of <span class="citation">Park et al. (<a href="#ref-park2024estimating">2024</a>)</span>.
 The estimand is <span class="math inline">\(f(d; \theta) w(d)\)</span> renormalised over <span class="math inline">\([0, A]\)</span>, so <span class="math inline">\(A\)</span> replaces the cohort cutoff <span class="math inline">\(D\)</span>.
 Applying both at once double counts, so a study is one or the other.
-The weight multiplies the quadrature for Equations <a href="#eq:meta-trunc-moments">(5.13)</a> and <a href="#eq:meta-uniform-moments">(5.14)</a> at each node and renormalises.
-For Equation <a href="#eq:meta-uniform-moments">(5.14)</a> it is evaluated at <span class="math inline">\(d - w_p / 2\)</span>, to average the primary offset back out.
+The weight multiplies the quadrature for Equations <a href="#eq:meta-trunc-moments">(5.15)</a> and <a href="#eq:meta-uniform-moments">(5.16)</a> at each node and renormalises.
+For Equation <a href="#eq:meta-uniform-moments">(5.16)</a> it is evaluated at <span class="math inline">\(d - w_p / 2\)</span>, to average the primary offset back out.
 The correction is only as good as the growth rate supplied.</p>
-<p>On the grid of Equation <a href="#eq:meta-grid">(5.12)</a> the primary event is known only to its window, and a complete primary window starting at <span class="math inline">\(k w_p\)</span> holds a delay of <span class="math inline">\(x\)</span> from its start when <span class="math inline">\(k w_p + x \le A\)</span>.
+<p>On the grid of Equation <a href="#eq:meta-grid">(5.14)</a> the primary event is known only to its window, and a complete primary window starting at <span class="math inline">\(k w_p\)</span> holds a delay of <span class="math inline">\(x\)</span> from its start when <span class="math inline">\(k w_p + x \le A\)</span>.
 The growth weighted mass of the complete windows eligible for <span class="math inline">\(x\)</span> is therefore a step function of <span class="math inline">\(x\)</span> that steps down at <span class="math inline">\(A - j w_p\)</span>.
 Each cell of the grid is cut at those points, each piece is weighted by that mass, and the pieces are summed back before renormalising.
 When <span class="math inline">\(A\)</span> is not a multiple of <span class="math inline">\(w_p\)</span> the last primary window is partial, of length <span class="math inline">\(l = A - w_p \lfloor A / w_p \rfloor\)</span>.
@@ -589,7 +604,7 @@ The grid weight is then exact for any <span class="math inline">\(A\)</span>, <s
 Weighting each cell at its lower edge instead is exact only when <span class="math inline">\(w_p = w_s\)</span> and <span class="math inline">\(A\)</span> is a multiple of both, and for a daily primary and weekly secondary window puts the mean 36% low at <span class="math inline">\(r = 0.2\)</span> where the piecewise weight is within 0.2%.
 Treating the partial window as complete put the mean 27% low for weekly primary and secondary windows with <span class="math inline">\(A = 30\)</span> at <span class="math inline">\(r = 0.2\)</span>.</p>
 <p>One residual remains.
-Equation <a href="#eq:meta-uniform-moments">(5.14)</a> keeps the smooth weight, because the follow up available to a primary event is only known to within its window, and at <span class="math inline">\(w_p = 7\)</span> its mean is 2.6% high at <span class="math inline">\(r = 0.2\)</span>.
+Equation <a href="#eq:meta-uniform-moments">(5.16)</a> keeps the smooth weight, because the follow up available to a primary event is only known to within its window, and at <span class="math inline">\(w_p = 7\)</span> its mean is 2.6% high at <span class="math inline">\(r = 0.2\)</span>.
 The residual grows with <span class="math inline">\(r\)</span> and as <span class="math inline">\(w_p\)</span> grows towards <span class="math inline">\(A\)</span>.</p>
 </div>
 <div class="section level4" number="5.3.3">
@@ -598,21 +613,21 @@ The residual grows with <span class="math inline">\(r\)</span> and as <span clas
 </h4>
 <p>A study that only counted delays of at least <span class="math inline">\(L\)</span> reported summaries conditioned on <span class="math inline">\(\tau &gt; L\)</span>, the left truncation of survival analysis <span class="citation">(<a href="#ref-klein2003">Klein and Moeschberger 2003</a>)</span>.
 Each expression above reduces to its earlier form when <span class="math inline">\(L = 0\)</span>.
-On the grid of Equation <a href="#eq:meta-grid">(5.12)</a> the cells below <span class="math inline">\(L\)</span> are dropped and the rest renormalised by their mass, which is <span class="math inline">\(F_{pc}(D) - F_{pc}(L)\)</span> when <span class="math inline">\(L\)</span> falls on a grid boundary.
-The truncated moments of Equation <a href="#eq:meta-trunc-moments">(5.13)</a> pick up a boundary term,
+On the grid of Equation <a href="#eq:meta-grid">(5.14)</a> the cells below <span class="math inline">\(L\)</span> are dropped and the rest renormalised by their mass, which is <span class="math inline">\(F_{pc}(D) - F_{pc}(L)\)</span> when <span class="math inline">\(L\)</span> falls on a grid boundary.
+The truncated moments of Equation <a href="#eq:meta-trunc-moments">(5.15)</a> pick up a boundary term,
 <span class="math display" id="eq:meta-left-moments">\[
 \mathbb{E}[\tau^k \mid L &lt; \tau \le D] =
 \frac{L^k \left(F(D; \theta) - F(L; \theta)\right) +
 \int_L^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}
-{F(D; \theta) - F(L; \theta)}, \quad k = 1, \dots, 4, \tag{5.17}
+{F(D; \theta) - F(L; \theta)}, \quad k = 1, \dots, 4, \tag{5.19}
 \]</span>
-and Equation <a href="#eq:meta-uniform-moments">(5.14)</a> likewise with <span class="math inline">\(F_{pc}\)</span> in place of <span class="math inline">\(F\)</span>.
+and Equation <a href="#eq:meta-uniform-moments">(5.16)</a> likewise with <span class="math inline">\(F_{pc}\)</span> in place of <span class="math inline">\(F\)</span>.
 The distribution function becomes
 <span class="math display" id="eq:meta-left-cdf">\[
-G(y) = \frac{F(y; \theta) - F(L; \theta)}{F(D; \theta) - F(L; \theta)}, \quad L &lt; y \le D, \tag{5.18}
+G(y) = \frac{F(y; \theta) - F(L; \theta)}{F(D; \theta) - F(L; \theta)}, \quad L &lt; y \le D, \tag{5.20}
 \]</span>
 zero at or below <span class="math inline">\(L\)</span> and one above <span class="math inline">\(D\)</span>.
-The accrual weight of Equation <a href="#eq:meta-accrual">(5.16)</a> is unchanged, since the cells and nodes it multiplies now start at <span class="math inline">\(L\)</span>.
+The accrual weight of Equation <a href="#eq:meta-accrual">(5.18)</a> is unchanged, since the cells and nodes it multiplies now start at <span class="math inline">\(L\)</span>.
 Individual level rows pass <span class="math inline">\(L\)</span> to <code>primarycensored</code> as their left truncation point, as the marginal model does.</p>
 </div>
 <div class="section level4" number="5.3.4">
@@ -620,7 +635,7 @@ Individual level rows pass <span class="math inline">\(L\)</span> to <code>prima
 <span class="header-section-number">5.3.4</span> Quantiles of the estimands<a class="anchor" aria-label="anchor" href="#quantiles-of-the-estimands"></a>
 </h4>
 <p>The quantile <span class="math inline">\(Q_p\)</span> of an estimand is read off by inverse linear interpolation between the two points of <span class="math inline">\(G\)</span> that bracket <span class="math inline">\(p\)</span>.
-On the grid of Equation <a href="#eq:meta-grid">(5.12)</a> that interpolant is the continuity corrected quantile, so it is exact.
+On the grid of Equation <a href="#eq:meta-grid">(5.14)</a> that interpolant is the continuity corrected quantile, so it is exact.
 For a continuous estimand the chord is refined, exactly through the family quantile function for a lognormal or weibull delay under code 1, and otherwise by two Newton steps using the closed form distribution function and density of the estimand.
 An accrual estimand is defined by the interpolation between its nodes and keeps its chord.
 Both keep <span class="math inline">\(Q_p\)</span> differentiable in <span class="math inline">\(\theta\)</span>.</p>

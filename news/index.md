@@ -149,6 +149,27 @@
   warns when a large study reports several such quantiles, whose joint
   likelihood is still overconfident. See
   [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Several quantiles reported by a study that summarised integer day
+  delays are now fitted with the exact joint likelihood of the crossings
+  they stand for. The cumulative counts at the days the quantiles name
+  form a Markov chain of binomial steps on the uncorrected grid
+  distribution function, each reported quantile is a box on two of them,
+  and the probability of every box holding is a forward pass over the
+  counts, kept to a band around the most likely path so that it costs
+  about the sample size to the power one and a half per edge. Coincident
+  quantiles are two constraints at one edge. The multinomial on the
+  continuity corrected grid that fitted such a set before claimed a
+  standard error five times too small at a thousand delays, where the
+  exact likelihood is a box of parameters rather than a peak. The
+  warning of
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  about several integer day quantiles from more than 100 delays is
+  removed, and the model data carries a `meta_group_lower` array with
+  the lower bounds of the boxes. `EPIDIST_META_CALIBRATION=true` now
+  also fits forty replicates of a study reporting its quartiles at
+  thirty and at a hundred delays, where the 90% intervals covered the
+  truth 34 to 35 times in 40. Closes
+  [\#675](https://github.com/epinowcast/epidist/issues/675).
 - A multinomial cell that underflows is floored rather than sent to
   zero, so the R and Stan log likelihoods are both finite for a badly
   misfitting draw and

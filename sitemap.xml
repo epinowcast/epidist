@@ -119,7 +119,6 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_multivariate_types.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_mvn_summarise.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_n_quad.html</loc></url>
-<url><loc>https://epidist.epinowcast.org/reference/dot-estimates_overconfident_sets.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_parameter_dist.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_parameter_positive.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_parameter_sets.html</loc></url>
@@ -155,6 +154,11 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_accrual_weight.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_add_uniform.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_assign_groups.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_band_half_width.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_box_grid.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_box_mode_path.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_box_step.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_box_stride.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_cell_floor.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_cens_base.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_cens_lower.html</loc></url>
@@ -164,6 +168,8 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_central_from_raw.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_chol.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_continuous_moments.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_crossing_box.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_crossing_counts.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_ddist.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_deep_tail.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_dist_cdf.html</loc></url>
@@ -171,6 +177,9 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_draws.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_empty_members.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_estimate_rows.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_fixed_point.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_grid_box_ll.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_grid_cdf.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_grid_crossing_ll.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_grid_edges.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_grid_first.html</loc></url>
@@ -193,6 +202,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_joint_study_terms.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_left_moments.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_log_accrual_weight.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_log_binom.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_log_binom_upper.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_log_cdf_floor.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_log_diff_exp.html</loc></url>
@@ -226,11 +236,16 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_refine_quantile.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_row_draw_moments.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_row_log_lik.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_row_log_sum_exp.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_row_moments.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_row_slots.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_sd_se.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_set_members.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_slots_n_quad.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_step_kernel.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_step_kernel_alive.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_step_kernel_top.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_step_prob.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_summary_dist.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_summary_terms.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_survival_moments.html</loc></url>

@@ -16,4 +16,4 @@ The grouped summary members of an `epidist_meta_model` object
 
 ## Value
 
-A tibble of member `value`, `count`, `type` and `p` columns.
+A tibble of member `value`, `count`, `lower`, `type` and `p` columns.

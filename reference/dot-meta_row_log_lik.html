@@ -8,12 +8,16 @@
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="The log likelihood of one meta model summary row for one draw — .meta_row_log_lik"><meta name="description" content="Ungrouped rows use the normal approximations of .meta_summary_terms().
 A group row, which stands for several summaries reported by one study, uses
 the joint likelihood of its members: .meta_moment_pair_ll() for a mean and
-a standard deviation, .meta_quantile_set_ll() for a set of quantiles, and
-.meta_joint_study_ll() for a continuous estimand reporting both kinds."><meta property="og:description" content="Ungrouped rows use the normal approximations of .meta_summary_terms().
+a standard deviation, .meta_quantile_set_ll() for a set of quantiles,
+which hands quantiles of integer day delays to .meta_grid_crossing_ll()
+or .meta_grid_box_ll(), and .meta_joint_study_ll() for a continuous
+estimand reporting both kinds."><meta property="og:description" content="Ungrouped rows use the normal approximations of .meta_summary_terms().
 A group row, which stands for several summaries reported by one study, uses
 the joint likelihood of its members: .meta_moment_pair_ll() for a mean and
-a standard deviation, .meta_quantile_set_ll() for a set of quantiles, and
-.meta_joint_study_ll() for a continuous estimand reporting both kinds."><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
+a standard deviation, .meta_quantile_set_ll() for a set of quantiles,
+which hands quantiles of integer day delays to .meta_grid_crossing_ll()
+or .meta_grid_box_ll(), and .meta_joint_study_ll() for a continuous
+estimand reporting both kinds."><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -68,8 +72,10 @@ a standard deviation, .meta_quantile_set_ll() for a set of quantiles, and
     <p>Ungrouped rows use the normal approximations of <code><a href="dot-meta_summary_terms.html">.meta_summary_terms()</a></code>.
 A group row, which stands for several summaries reported by one study, uses
 the joint likelihood of its members: <code><a href="dot-meta_moment_pair_ll.html">.meta_moment_pair_ll()</a></code> for a mean and
-a standard deviation, <code><a href="dot-meta_quantile_set_ll.html">.meta_quantile_set_ll()</a></code> for a set of quantiles, and
-<code><a href="dot-meta_joint_study_ll.html">.meta_joint_study_ll()</a></code> for a continuous estimand reporting both kinds.</p>
+a standard deviation, <code><a href="dot-meta_quantile_set_ll.html">.meta_quantile_set_ll()</a></code> for a set of quantiles,
+which hands quantiles of integer day delays to <code><a href="dot-meta_grid_crossing_ll.html">.meta_grid_crossing_ll()</a></code>
+or <code><a href="dot-meta_grid_box_ll.html">.meta_grid_box_ll()</a></code>, and <code><a href="dot-meta_joint_study_ll.html">.meta_joint_study_ll()</a></code> for a continuous
+estimand reporting both kinds.</p>
     </div>
 
     <div class="section level2">

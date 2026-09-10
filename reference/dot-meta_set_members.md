@@ -20,7 +20,7 @@ See
 
 - members:
 
-  A tibble of member `value`, `count`, `type` and `p` columns.
+  A tibble of member `value`, `count`, `lower`, `type` and `p` columns.
 
 - chol:
 

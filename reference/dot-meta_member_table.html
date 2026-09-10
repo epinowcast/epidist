@@ -71,7 +71,7 @@ summary each member is.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">.meta_member_table</span><span class="op">(</span><span class="va">estimates</span>, <span class="va">count</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">.meta_member_table</span><span class="op">(</span><span class="va">estimates</span>, <span class="va">count</span>, lower <span class="op">=</span> <span class="fl">0L</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -85,12 +85,26 @@ one group, already ordered.</p></dd>
 
 <dt id="arg-count">count<a class="anchor" aria-label="anchor" href="#arg-count"></a></dt>
 <dd><p>The cumulative counts the multinomial quantile likelihood
-uses, or zeros for a group that does not use it.</p></dd>
+uses, the largest counts below each reported day for quantiles of
+integer day delays, or zeros for a group that uses neither.</p></dd>
+
+
+<dt id="arg-lower">lower<a class="anchor" aria-label="anchor" href="#arg-lower"></a></dt>
+<dd><p>The smallest counts at or below each reported day for
+quantiles of integer day delays, or zeros otherwise.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble of member <code>value</code>, <code>count</code>, <code>type</code> and <code>p</code> columns.</p>
+    <p>A tibble of member <code>value</code>, <code>count</code>, <code>lower</code>, <code>type</code> and <code>p</code>
+columns.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>A set of quantiles of integer day delays carries the box each reported
+day puts on the study's cumulative counts: <code>count</code> is the largest number
+of delays the study can have seen below the day and <code>lower</code> the smallest
+at or below it. See <code><a href="dot-meta_grid_box_ll.html">.meta_grid_box_ll()</a></code>.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

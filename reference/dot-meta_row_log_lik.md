@@ -7,7 +7,11 @@ uses the joint likelihood of its members:
 [`.meta_moment_pair_ll()`](https://epidist.epinowcast.org/reference/dot-meta_moment_pair_ll.md)
 for a mean and a standard deviation,
 [`.meta_quantile_set_ll()`](https://epidist.epinowcast.org/reference/dot-meta_quantile_set_ll.md)
-for a set of quantiles, and
+for a set of quantiles, which hands quantiles of integer day delays to
+[`.meta_grid_crossing_ll()`](https://epidist.epinowcast.org/reference/dot-meta_grid_crossing_ll.md)
+or
+[`.meta_grid_box_ll()`](https://epidist.epinowcast.org/reference/dot-meta_grid_box_ll.md),
+and
 [`.meta_joint_study_ll()`](https://epidist.epinowcast.org/reference/dot-meta_joint_study_ll.md)
 for a continuous estimand reporting both kinds.
 

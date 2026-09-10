@@ -99,7 +99,8 @@ interquartile range.</p>
 <span>  <span class="va">dist</span>,</span>
 <span>  <span class="va">args</span>,</span>
 <span>  <span class="va">slots</span>,</span>
-<span>  p <span class="op">=</span> <span class="va">slots</span><span class="op">$</span><span class="va">group_p</span></span>
+<span>  p <span class="op">=</span> <span class="va">slots</span><span class="op">$</span><span class="va">group_p</span>,</span>
+<span>  lower <span class="op">=</span> <span class="va">slots</span><span class="op">$</span><span class="va">group_lower</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -113,7 +114,9 @@ interquartile range.</p>
 
 <dt id="arg-cum-count">cum_count<a class="anchor" aria-label="anchor" href="#arg-cum-count"></a></dt>
 <dd><p>A vector of cumulative counts from
-<code><a href="dot-meta_quantile_counts.html">.meta_quantile_counts()</a></code>.</p></dd>
+<code><a href="dot-meta_quantile_counts.html">.meta_quantile_counts()</a></code>, or for quantiles of integer day delays the
+largest count of delays below each reported day, from
+<code><a href="dot-meta_crossing_counts.html">.meta_crossing_counts()</a></code> less one.</p></dd>
 
 
 <dt id="arg-study-n">study_n<a class="anchor" aria-label="anchor" href="#arg-study-n"></a></dt>
@@ -136,6 +139,12 @@ interquartile range.</p>
 <dd><p>The probabilities the quantiles were reported at, in the order
 of <code>y</code>. Only used for a single quantile of integer day delays.</p></dd>
 
+
+<dt id="arg-lower">lower<a class="anchor" aria-label="anchor" href="#arg-lower"></a></dt>
+<dd><p>For quantiles of integer day delays, the smallest count of
+delays at or below each reported day, from <code><a href="dot-meta_crossing_counts.html">.meta_crossing_counts()</a></code>.
+Unused otherwise.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -145,10 +154,16 @@ of <code>y</code>. Only used for a single quantile of integer day delays.</p></d
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Two quantiles reported at the same value are two constraints on the
 empirical distribution function at one cell, so they are merged into that
-cell with their combined count. A single quantile of integer day delays
-is fitted by <code><a href="dot-meta_grid_crossing_ll.html">.meta_grid_crossing_ll()</a></code> instead, because the multinomial
-on the continuity corrected distribution function keeps sharpening with
-the study size while a rounded quantile stops moving.</p>
+cell with their combined count.</p>
+<p>Quantiles of integer day delays (<code>cens_adjusted</code> 0 or 3) are discrete
+statistics, and the multinomial on the continuity corrected distribution
+function keeps sharpening with the study size while a rounded quantile
+stops moving. A single such quantile is fitted by
+<code><a href="dot-meta_grid_crossing_ll.html">.meta_grid_crossing_ll()</a></code> as the cell in which the empirical
+distribution function crossed its probability, and several by
+<code><a href="dot-meta_grid_box_ll.html">.meta_grid_box_ll()</a></code> as the joint probability of every such crossing,
+with <code>cum_count</code> and <code>lower</code> read as the box each crossing puts on the
+counts below and at the reported day.</p>
 <p>A cell whose implied probability underflows to zero while the study saw
 delays in it is floored at <code><a href="dot-meta_cell_floor.html">.meta_cell_floor()</a></code>.</p>
     </div>
