@@ -11,6 +11,9 @@
 
 \item{data}{A \code{data.frame} used to expand \code{.}.}
 }
+\value{
+The expanded formula.
+}
 \description{
 Replaces the part of \code{brms:::expand_dot_formula()} that \code{epidist} needs.
 A formula containing \code{.} on the right hand side is expanded against

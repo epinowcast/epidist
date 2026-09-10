@@ -2,7 +2,7 @@
 #'
 #' @param data Object to validate
 #' @param ... Additional arguments
-#' @return NULL invisibly
+#' @returns NULL invisibly
 #' @export
 #' @family assert
 assert_epidist <- function(data, ...) {

@@ -9,8 +9,16 @@ is_epidist_meta_model(data)
 \arguments{
 \item{data}{A \code{data.frame} to check.}
 }
+\value{
+A logical, \code{TRUE} if \code{data} inherits from \code{epidist_meta_model} and
+\code{FALSE} otherwise.
+}
 \description{
 Check if data has the \code{epidist_meta_model} class
+}
+\examples{
+is_epidist_meta_model(data.frame())
+is_epidist_meta_model(new_epidist_meta_model(data.frame()))
 }
 \seealso{
 Other meta_model: 

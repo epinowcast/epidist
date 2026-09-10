@@ -18,3 +18,4 @@
 ^cran-comments\.md$
 ^vignettes/.*\.Rmd\.orig$
 ^design$
+^codemeta\.json$

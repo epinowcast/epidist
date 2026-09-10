@@ -36,7 +36,7 @@
 #'   existing default priors. If `FALSE` then allow user priors that are not
 #'   present in the default set. Defaults to `FALSE`.
 #'
-#' @return A `brmsprior` object containing the combined custom prior
+#' @returns A `brmsprior` object containing the combined custom prior
 #'  distributions.
 #'
 #' @rdname epidist_prior
