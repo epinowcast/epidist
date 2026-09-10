@@ -13,6 +13,8 @@
 #' @param formula A formula object created using [epidist_formula()].
 #'
 #' @family transform_data
+#' @returns The data transformed ready for fitting.
+#'
 #' @keywords internal
 epidist_transform_data <- function(data, family, formula, ...) {
   assert_epidist(data)

@@ -105,7 +105,7 @@ delay_parameter_draws <- function(object, newdata = NULL, ...) {
 #' @param vars A character vector of the columns of `data` that define the
 #'  strata, or `NULL` when there are none.
 #'
-#' @return `data` with the `epidist_delay_draws` class and the
+#' @returns `data` with the `epidist_delay_draws` class and the
 #'  `epidist_family` and `epidist_vars` attributes.
 #'
 #' @keywords internal
@@ -179,14 +179,13 @@ add_delay_parameter_draws <- function(newdata, object, ...) {
 #' delay_summary_draws(fit, probs = c(0.05, 0.95))
 #' }
 delay_summary_draws <- function(
-  object,
-  newdata = NULL,
-  vars = NULL,
-  probs = NULL,
-  method = c("auto", "analytic", "sample"),
-  nsim = 1000,
-  ...
-) {
+    object,
+    newdata = NULL,
+    vars = NULL,
+    probs = NULL,
+    method = c("auto", "analytic", "sample"),
+    nsim = 1000,
+    ...) {
   method <- match.arg(method)
   if (is.null(newdata)) {
     newdata <- epidist_strata(object, vars = vars)
@@ -200,7 +199,7 @@ delay_summary_draws <- function(
 #'
 #' @inheritParams delay_parameter_draws
 #'
-#' @return A `data.frame` with columns `.row`, `.chain`, `.iteration`, `.draw`
+#' @returns A `data.frame` with columns `.row`, `.chain`, `.iteration`, `.draw`
 #'  and one column per distributional parameter.
 #'
 #' @keywords internal
@@ -240,7 +239,7 @@ delay_summary_draws <- function(
 #'
 #' @param pp A `brmsprep` object from [brms::prepare_predictions()].
 #'
-#' @return A list with `chain` and `iteration` elements.
+#' @returns A list with `chain` and `iteration` elements.
 #'
 #' @keywords internal
 .draw_chain_iteration <- function(object, pp) {
@@ -386,12 +385,11 @@ epidist_strata <- function(object, vars = NULL) {
 #' draws <- data.frame(mu = c(1.8, 2.0), sigma = c(0.5, 0.4))
 #' add_summaries(draws, family = "lognormal", probs = c(0.05, 0.95))
 add_summaries <- function(
-  data,
-  family = NULL,
-  probs = NULL,
-  method = c("auto", "analytic", "sample"),
-  nsim = 1000
-) {
+    data,
+    family = NULL,
+    probs = NULL,
+    method = c("auto", "analytic", "sample"),
+    nsim = 1000) {
   method <- match.arg(method)
   assert_data_frame(data)
   assert_numeric(
@@ -430,7 +428,7 @@ add_summaries <- function(
 #' @param analytic A list of analytic solutions, as returned by
 #'  `.analytic_delay_summaries()`.
 #'
-#' @return The input with summary columns added.
+#' @returns The input with summary columns added.
 #'
 #' @keywords internal
 .analytic_summaries <- function(data, analytic, probs = NULL) {
@@ -447,7 +445,7 @@ add_summaries <- function(
 #'
 #' @inheritParams add_summaries
 #'
-#' @return The input with summary columns added.
+#' @returns The input with summary columns added.
 #'
 #' @keywords internal
 .sample_summaries <- function(data, family, probs = NULL, nsim = 1000) {
@@ -476,7 +474,7 @@ add_summaries <- function(
 #'
 #' @param dpars The distributional parameters the family needs.
 #'
-#' @return The input, invisibly.
+#' @returns The input, invisibly.
 #'
 #' @keywords internal
 .assert_dpars <- function(data, name, dpars) {
@@ -501,7 +499,7 @@ add_summaries <- function(
 #'
 #' @param dpars A named list of distributional parameter vectors.
 #'
-#' @return A matrix with one row per element of the vectors in `dpars` and
+#' @returns A matrix with one row per element of the vectors in `dpars` and
 #'  `nsim` columns.
 #'
 #' @keywords internal
@@ -546,7 +544,7 @@ add_summaries <- function(
 #'
 #' @param name The name of a delay distribution family.
 #'
-#' @return A list of solutions, or `NULL` when the family has none.
+#' @returns A list of solutions, or `NULL` when the family has none.
 #'
 #' @keywords internal
 .analytic_delay_summaries <- function(name) {
@@ -614,7 +612,7 @@ add_summaries <- function(
 #'
 #' @param prob A probability.
 #'
-#' @return A column name.
+#' @returns A column name.
 #'
 #' @keywords internal
 .quantile_name <- function(prob) {
@@ -630,7 +628,7 @@ add_summaries <- function(
 #'
 #' @param family A `brms` family.
 #'
-#' @return A list with the delay distribution `name` and its distributional
+#' @returns A list with the delay distribution `name` and its distributional
 #'  parameters `dpars`.
 #'
 #' @keywords internal
@@ -650,7 +648,7 @@ add_summaries <- function(
 #'
 #' @inheritParams add_summaries
 #'
-#' @return A list with the delay distribution `name` and its distributional
+#' @returns A list with the delay distribution `name` and its distributional
 #'  parameters `dpars`.
 #'
 #' @keywords internal

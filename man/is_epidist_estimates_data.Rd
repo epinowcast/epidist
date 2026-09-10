@@ -11,8 +11,16 @@ is_epidist_estimates_data(data, ...)
 
 \item{...}{Additional arguments}
 }
+\value{
+A logical, \code{TRUE} if \code{data} inherits from \code{epidist_estimates_data}
+and \code{FALSE} otherwise.
+}
 \description{
 Check if data has the \code{epidist_estimates_data} class
+}
+\examples{
+is_epidist_estimates_data(data.frame())
+is_epidist_estimates_data(new_epidist_estimates_data(data.frame()))
 }
 \seealso{
 Other estimates_data: 
@@ -22,6 +30,7 @@ Other estimates_data:
 \code{\link{as_epidist_estimates_data.epidist_multivariate}()},
 \code{\link{as_epidist_estimates_data.list}()},
 \code{\link{assert_epidist.epidist_estimates_data}()},
+\code{\link{epidist_estimates_epireview}()},
 \code{\link{epidist_estimates_parameters}()},
 \code{\link{epidist_estimates_summaries}()},
 \code{\link{new_epidist_estimates_data}()}

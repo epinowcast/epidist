@@ -11,6 +11,9 @@ as_epidist_estimates_data(data, ...)
 
 \item{...}{Additional arguments passed to methods}
 }
+\value{
+An object of class \code{epidist_estimates_data}.
+}
 \description{
 Creates an \code{epidist_estimates_data} object from published summary estimates
 of a delay distribution.
@@ -32,6 +35,7 @@ Other estimates_data:
 \code{\link{as_epidist_estimates_data.epidist_multivariate}()},
 \code{\link{as_epidist_estimates_data.list}()},
 \code{\link{assert_epidist.epidist_estimates_data}()},
+\code{\link{epidist_estimates_epireview}()},
 \code{\link{epidist_estimates_parameters}()},
 \code{\link{epidist_estimates_summaries}()},
 \code{\link{is_epidist_estimates_data}()},

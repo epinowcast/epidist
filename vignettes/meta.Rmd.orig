@@ -578,79 +578,27 @@ Studies rarely adjusted correctly, the common mistakes being to discretise the s
 Observation times are not recorded either, so every study gets `trunc_adjusted = TRUE` and the `phase` term stands in.
 :::
 
-A small helper maps each row of `onset_to_death` to the long format `as_epidist_estimates_data()` expects.
+`epidist_estimates_epireview()` maps each record of `onset_to_death` to the long format `as_epidist_estimates_data()` expects.
 Means become `"mean"` rows, with a matching `"sd"` row where a standard deviation is reported, either as the study's own spread or as the second parameter of a fitted Gamma.
 A reported standard error becomes an `se` on the mean row instead.
 Medians become `"quantile"` rows at `p = 0.5`, with further quantile rows at `p = 0.25` and `p = 0.75` where an interquartile range is reported.
-A study reporting a spread that does not match its own value type, such as a median alongside a standard deviation, keeps only the matching set, because summaries of different kinds from one study are fitted as though they were independent.
-A study that reports the parameters of a distribution it fitted can be fitted through `epidist_estimates_parameters()`.
-The fitted distributions here are Gammas that epireview records as a mean and a standard deviation, which the helper picks up as moments.
+A study reporting a spread that does not match its own value type, such as a median alongside a standard deviation, keeps only the matching set, because the two kinds of summary from a study that reported integer date differences are fitted as though they were independent.
+A study that reports the natural parameters of a distribution it fitted is converted as `epidist_estimates_parameters()` would convert it.
+The fitted distributions here are Gammas that epireview records as a mean and a standard deviation, which the function picks up as moments.
 
-<details><summary>Click to expand for the epireview conversion helper</summary>
+The metadata we assume for every study is passed as arguments.
+Where we know the metadata of individual studies, from the papers or another source, the `metadata` argument takes a table with a row per study that overrides these, and the result is an `epidist_estimates_data` object that can be edited afterwards.
+`keep` carries the `phase` covariate onto the rows.
 
 ```{r}
-meta_cols <- c(
-  "study", "n", "trunc_adjusted", "relative_obs_time", "cens_adjusted", "phase"
+ebola_estimates <- epidist_estimates_epireview(
+  onset_to_death,
+  trunc_adjusted = TRUE,
+  relative_obs_time = Inf,
+  cens_adjusted = 0,
+  keep = "phase"
 )
-
-row_to_estimates <- function(row) {
-  base <- as_tibble(row[meta_cols])
-  spread_type <- row$parameter_uncertainty_singe_type
-  spread <- row$parameter_uncertainty_single_value
-  reported_sd <- if (identical(spread_type, "Standard Deviation")) {
-    spread
-  } else if (identical(row$distribution_par2_type, "Mean sd")) {
-    row$distribution_par2_value
-  }
-  if (identical(row$parameter_value_type, "Mean")) {
-    rows <- mutate(
-      base, type = "mean", value = row$parameter_value, p = NA_real_
-    )
-    if (identical(spread_type, "Standard Error")) {
-      rows$se <- spread
-    }
-    if (!is.null(reported_sd) && !is.na(reported_sd)) {
-      rows <- bind_rows(
-        rows, mutate(base, type = "sd", value = reported_sd, p = NA_real_)
-      )
-    }
-  } else {
-    rows <- mutate(
-      base, type = "quantile", value = row$parameter_value, p = 0.5
-    )
-    if (identical(row$parameter_uncertainty_type, "IQR")) {
-      rows <- bind_rows(
-        rows,
-        mutate(
-          base, type = "quantile",
-          value = row$parameter_uncertainty_lower_value, p = 0.25
-        ),
-        mutate(
-          base, type = "quantile",
-          value = row$parameter_uncertainty_upper_value, p = 0.75
-        )
-      )
-    }
-  }
-  return(rows)
-}
-```
-
-</details>
-
-```{r}
-ebola_estimates_df <- onset_to_death |>
-  mutate(
-    trunc_adjusted = TRUE,
-    relative_obs_time = Inf,
-    cens_adjusted = 0,
-    study = .data$article_label,
-    n = .data$population_sample_size
-  ) |>
-  pmap(\(...) row_to_estimates(list(...))) |>
-  list_rbind()
-
-ebola_estimates <- as_epidist_estimates_data(ebola_estimates_df)
+ebola_estimates
 ```
 
 We fit a Gamma, which is the family most of these studies fitted, with a `(1 | study)` term on both the mean and the shape.
@@ -762,6 +710,7 @@ bdbv <- read.csv("bdbv-onset-to-death.csv") |>
 
 isiro_reported <- ebola_estimates |>
   filter(.data$study == "Rosello 2015 (3)") |>
+  as.data.frame() |>
   select("type", "value") |>
   pivot_wider(names_from = "type", values_from = "value") |>
   mutate(shape = (.data$mean / .data$sd)^2, scale = .data$sd^2 / .data$mean)

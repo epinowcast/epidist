@@ -168,7 +168,7 @@ plot_events <- function(data, obs_time = NULL, by = NULL, n = 200) {
 #' `ggplot2` is a suggested package, so the plot functions check for it before
 #' they use it.
 #'
-#' @return `NULL`, invisibly.
+#' @returns `NULL`, invisibly.
 #'
 #' @keywords internal
 .check_ggplot2 <- function() {
@@ -187,7 +187,7 @@ plot_events <- function(data, obs_time = NULL, by = NULL, n = 200) {
 #' and green the vignettes use for the primary and secondary events. It is
 #' colour blind friendly and holds eight colours.
 #'
-#' @return A character vector of colours.
+#' @returns A character vector of colours.
 #'
 #' @keywords internal
 .epidist_palette <- function() {
@@ -205,7 +205,7 @@ plot_events <- function(data, obs_time = NULL, by = NULL, n = 200) {
 #'
 #' @param n The number of levels to colour.
 #'
-#' @return A `ggplot2` scale.
+#' @returns A `ggplot2` scale.
 #'
 #' @keywords internal
 .epidist_colour_scale <- function(n) {
@@ -225,7 +225,7 @@ plot_events <- function(data, obs_time = NULL, by = NULL, n = 200) {
 #' [ggplot2::theme_minimal()] with the legend below the plot, as the package
 #' documentation draws its plots.
 #'
-#' @return A `ggplot2` theme.
+#' @returns A `ggplot2` theme.
 #'
 #' @keywords internal
 .epidist_plot_theme <- function() {
@@ -360,7 +360,7 @@ autoplot.epidist_delay_draws <- function(
 #'
 #' @inheritParams plot.epidist_delay_draws
 #'
-#' @return A list with `data`, an ungrouped `tibble` of the draws with a
+#' @returns A list with `data`, an ungrouped `tibble` of the draws with a
 #'  `.stratum` factor column, `by`, the columns the strata are defined by or
 #'  `NULL` when there is a single stratum, and `legend`, a legend title.
 #'
@@ -396,7 +396,7 @@ autoplot.epidist_delay_draws <- function(
 #' @param family A list with the delay distribution `name` and its
 #'  distributional parameters `dpars`, as returned by `.delay_family()`.
 #'
-#' @return A `ggplot` object.
+#' @returns A `ggplot` object.
 #'
 #' @autoglobal
 #' @keywords internal
@@ -474,7 +474,7 @@ autoplot.epidist_delay_draws <- function(
 #'
 #' @inheritParams .plot_parameter_draws
 #'
-#' @return A `ggplot` object.
+#' @returns A `ggplot` object.
 #'
 #' @autoglobal
 #' @keywords internal
@@ -601,7 +601,7 @@ autoplot.epidist_delay_draws <- function(
 #'
 #' @param n_grid The number of delays to evaluate the density at.
 #'
-#' @return A list with `delays`, the delays the density is evaluated at, and
+#' @returns A list with `delays`, the delays the density is evaluated at, and
 #'  `density`, a matrix with one row per draw and one column per delay.
 #'
 #' @keywords internal

@@ -16,6 +16,10 @@ combined object.}
 
 \item{...}{Passed to the method used for each element.}
 }
+\value{
+An object of class \code{epidist_estimates_data} holding the rows of
+every element.
+}
 \description{
 Each element is coerced on its own and the results are bound into one
 object. Combining is associative, so contributions can be assembled in any
@@ -42,6 +46,7 @@ Other estimates_data:
 \code{\link{as_epidist_estimates_data.epidist_estimates_data}()},
 \code{\link{as_epidist_estimates_data.epidist_multivariate}()},
 \code{\link{assert_epidist.epidist_estimates_data}()},
+\code{\link{epidist_estimates_epireview}()},
 \code{\link{epidist_estimates_parameters}()},
 \code{\link{epidist_estimates_summaries}()},
 \code{\link{is_epidist_estimates_data}()},

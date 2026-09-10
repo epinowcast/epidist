@@ -29,10 +29,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this vignette, we use the `epidist` package to analyze line list data from the 2014-2016 outbreak of Ebola in Sierra Leone [@who_ebola_2014_2016].
+In this vignette, we use the `epidist` package to analyse line list data from the 2014-2016 outbreak of Ebola in Sierra Leone [@who_ebola_2014_2016].
 These data were collated by @fang2016transmission.
 We provide the data in the `epidist` package via `?sierra_leone_ebola_data`.
-In analyzing this data, we demonstrate the following features of `epidist`:
+In analysing this data, we demonstrate the following features of `epidist`:
 
 1. Fitting district-sex stratified partially pooled delay distribution estimates with a lognormal delay distribution.
 2. Post-processing and plotting functionality using the integration of `brms` functionality with the [`tidybayes`](http://mjskay.github.io/tidybayes/) package.
