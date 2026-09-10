@@ -17,7 +17,7 @@ bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
-# exclude compile warnings from cmdstanr
+# hide the Stan compile warnings
 knitr::opts_chunk$set(
   fig.path = file.path("figures", "epidist-"),
   collapse = TRUE,
