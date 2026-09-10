@@ -114,8 +114,7 @@ head(delays)
 (ref:outbreak) The primary and secondary event windows of 200 evenly spaced cases from the simulated outbreak, ordered by primary event time.
 
 ```{r outbreak, fig.cap="(ref:outbreak)"}
-plot_events(linelist) +
-  theme_minimal()
+plot_events(linelist)
 ```
 
 Now imagine several studies each analysing this outbreak at a different point in time, reporting integer date differences with no adjustment for right truncation, that is `cens_adjusted = 0` and `trunc_adjusted = FALSE`.

@@ -88,6 +88,10 @@ every draw, so thin the draws with the \code{ndraws} argument of
 when there are many.
 
 \code{plot()} and \code{autoplot()} are the same function. Both need \code{ggplot2}.
+
+The plot is drawn with \code{\link[ggplot2:ggtheme]{ggplot2::theme_minimal()}} and the colour blind
+friendly palette the package documentation uses. Add a theme or a scale of
+your own to the returned plot to override either.
 }
 \examples{
 \dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

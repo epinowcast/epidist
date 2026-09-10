@@ -40,6 +40,11 @@ numbered in that order, so the vertical axis shows the growth of the
 outbreak. When there are more than \code{n} cases, \code{n} evenly spaced cases in
 that order are drawn. This keeps the shape of the outbreak without
 over-plotting.
+
+The plot is drawn with \code{\link[ggplot2:ggtheme]{ggplot2::theme_minimal()}} and the colour blind
+friendly palette the package documentation uses. Add a theme or a scale of
+your own to the returned plot to override either. The column named by \code{by}
+is kept in the plot data, so the plot can be faceted by it.
 }
 \examples{
 \dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

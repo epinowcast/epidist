@@ -81,32 +81,29 @@ fraction <- 5
 ndistrict <- length(unique(sierra_leone_ebola_data$district))
 ```
 
-Figure \@ref(fig:ebola-outbreak) shows the dates of symptom onset and sample testing for cases across in each district.
-(In this figure, we filter down to every `r fraction`th case in order to avoid overplotting.)
+Figure \@ref(fig:ebola-outbreak) shows the symptom onset and sample testing windows of each case in each district, drawn with `plot_events()`.
+(In this figure, we draw one in every `r fraction` cases in order to avoid overplotting.)
 We can see that the start time and course of the epidemic varies across districts.
 
 <details><summary>Click to expand for code to prepare outbreak plot</summary>
 
 ```{r}
-p_outbreak <- sierra_leone_ebola_data |>
-  filter(id %% fraction == 0) |>
-  ggplot() +
-  geom_segment(
-    aes(
-      x = date_of_symptom_onset, xend = date_of_sample_tested,
-      y = id, yend = id
-    ),
-    col = "grey"
-  ) +
-  geom_point(aes(x = date_of_symptom_onset, y = id), col = "#56B4E9") +
-  geom_point(aes(x = date_of_sample_tested, y = id), col = "#009E73") +
+ebola_linelist <- sierra_leone_ebola_data |>
+  filter(!is.na(date_of_symptom_onset), !is.na(date_of_sample_tested)) |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  )
+
+p_outbreak <- ebola_linelist |>
+  plot_events(by = "district", n = nrow(ebola_linelist) / fraction) +
   facet_wrap(district ~ ., ncol = 2) +
-  labs(x = "", y = "Case ID") +
-  theme_minimal()
+  labs(x = "") +
+  theme(legend.position = "none")
 ```
 
 </details>
-(ref:ebola-outbreak) Primary and secondary event times for every `r fraction`th case, over the `r ndistrict` districts of Sierra Leone.
+(ref:ebola-outbreak) Primary and secondary event windows for one in every `r fraction` cases, over the `r ndistrict` districts of Sierra Leone.
 
 ```{r ebola-outbreak, fig.cap="(ref:ebola-outbreak)", fig.height=9}
 p_outbreak

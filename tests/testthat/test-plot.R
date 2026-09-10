@@ -59,6 +59,22 @@ test_that("plot_events errors on bad input", {
   expect_error(plot_events(sim_obs, obs_time = "a"), "obs_time")
 })
 
+test_that("plot_events uses the package theme and palette", {
+  skip_if_not_installed("ggplot2")
+  p <- plot_events(sim_obs)
+  expect_identical(p$theme$legend.position, "bottom")
+  expect_identical(
+    unname(p$scales$get_scales("colour")$palette(2))[1:2],
+    .epidist_palette()[1:2]
+  )
+  # A stratum with more levels than the palette falls back to viridis
+  many <- sim_obs
+  many$group <- factor(seq_len(nrow(many)) %% 10)
+  p_many <- plot_events(many, by = "group")
+  expect_length(unique(p_many$scales$get_scales("colour")$palette(10)), 10)
+  expect_no_error(ggplot2::ggplot_build(p_many))
+})
+
 test_that("plot functions error when ggplot2 is not installed", {
   with_mocked_bindings(
     requireNamespace = function(...) FALSE,
@@ -144,8 +160,8 @@ test_that("plot.epidist_delay_draws colours the strata", {
   expect_identical(levels(p_by$data$.stratum), c("0, 1", "1, 2"))
   expect_identical(p_by$labels$fill, "sex, .row")
   expect_error(plot(draws, by = "missing"), "missing")
-  # A single stratum has no legend
-  expect_null(plot(fake_delay_draws())$labels$fill)
+  # A single stratum has no legend, as nothing is mapped to the fill
+  expect_null(plot(fake_delay_draws())$layers[[1]]$mapping$fill)
 })
 
 test_that("plot.epidist_delay_draws plots the delay distribution", {
@@ -189,6 +205,20 @@ test_that("plot.epidist_delay_draws draws the delay distribution per draw", {
   # Asking for more draws than there are plots them all
   p_all <- plot(draws, type = "delay", ndraws = 500)
   expect_length(unique(p_all$data$.draw), 100)
+})
+
+test_that("plot.epidist_delay_draws draws one line per row of the draws", {
+  skip_if_not_installed("ggplot2")
+  # Two rows of newdata share the draw numbers, so lines are grouped by row
+  draws <- fake_delay_draws(strata = TRUE)
+  attr(draws, "epidist_vars") <- NULL
+  p <- plot(draws, type = "delay", by = "sex", ndraws = 10)
+  expect_no_error(ggplot2::ggplot_build(p))
+  expect_length(unique(p$data$.line), 20L)
+  expect_identical(as.vector(table(p$data$.line)), rep(101L, 20L))
+  # Each line covers the delay grid once, so it is drawn left to right
+  line <- p$data[p$data$.line == p$data$.line[1], ]
+  expect_false(is.unsorted(line$delay))
 })
 
 test_that("plot.epidist_delay_draws simulates for a family with no density", {
@@ -319,4 +349,17 @@ test_that("plot.epidist_delay_draws errors when no parameter can be plotted", {
   expect_error(plot(draws), "lognormal")
   expect_error(plot(draws), "mu")
   expect_s3_class(plot(draws, pars = "x"), "ggplot")
+})
+
+test_that("plot.epidist_delay_draws uses the package theme and palette", {
+  skip_if_not_installed("ggplot2")
+  draws <- fake_delay_draws(strata = TRUE)
+  for (p in list(plot(draws), plot(draws, type = "delay"))) {
+    expect_identical(p$theme$legend.position, "bottom")
+    expect_identical(
+      unname(p$scales$get_scales("colour")$palette(2))[1:2],
+      .epidist_palette()[1:2]
+    )
+  }
+  expect_identical(plot(fake_delay_draws())$theme$legend.position, "bottom")
 })

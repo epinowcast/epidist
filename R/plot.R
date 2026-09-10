@@ -18,6 +18,11 @@
 #' that order are drawn. This keeps the shape of the outbreak without
 #' over-plotting.
 #'
+#' The plot is drawn with [ggplot2::theme_minimal()] and the colour blind
+#' friendly palette the package documentation uses. Add a theme or a scale of
+#' your own to the returned plot to override either. The column named by `by`
+#' is kept in the plot data, so the plot can be faceted by it.
+#'
 #' @param data An `epidist_linelist_data` object.
 #'
 #' @param obs_time The observation time to mark with a dashed vertical line,
@@ -101,7 +106,8 @@ plot_events <- function(data, obs_time = NULL, by = NULL, n = 200) {
         xend = .data$secondary_upr,
         yend = .data$case
       ),
-      colour = "grey"
+      colour = "grey70",
+      linewidth = 0.4
     )
   if (is.null(by)) {
     p <- p +
@@ -113,10 +119,15 @@ plot_events <- function(data, obs_time = NULL, by = NULL, n = 200) {
           yend = .data$case,
           colour = .data$event
         ),
-        linewidth = 1.5
+        linewidth = 1.5,
+        lineend = "round"
       ) +
       ggplot2::scale_colour_manual(
-        values = c(primary = "#56B4E9", secondary = "#009E73")
+        values = c(
+          primary = .epidist_palette()[1],
+          secondary = .epidist_palette()[2]
+        ),
+        labels = c(primary = "Primary", secondary = "Secondary")
       ) +
       ggplot2::labs(colour = "Event")
   } else {
@@ -129,19 +140,26 @@ plot_events <- function(data, obs_time = NULL, by = NULL, n = 200) {
           yend = .data$case,
           colour = .data[[by]]
         ),
-        linewidth = 1.5
+        linewidth = 1.5,
+        lineend = "round"
       ) +
+      .epidist_colour_scale(nlevels(cases[[by]])) +
       ggplot2::labs(colour = by)
   }
   if (!is.null(obs_time)) {
     p <- p +
-      ggplot2::geom_vline(xintercept = obs_time, linetype = "dashed")
+      ggplot2::geom_vline(
+        xintercept = obs_time,
+        linetype = "dashed",
+        colour = "grey30"
+      )
   }
   p <- p +
     ggplot2::labs(
       x = ifelse(use_dates, "Event date", "Event time"),
       y = "Case"
-    )
+    ) +
+    .epidist_plot_theme()
   return(p)
 }
 
@@ -161,6 +179,64 @@ plot_events <- function(data, obs_time = NULL, by = NULL, n = 200) {
     ))
   }
   return(invisible(NULL))
+}
+
+#' The colour palette the package plots use
+#'
+#' The Okabe-Ito palette, ordered so that the first two colours are the blue
+#' and green the vignettes use for the primary and secondary events. It is
+#' colour blind friendly and holds eight colours.
+#'
+#' @return A character vector of colours.
+#'
+#' @keywords internal
+.epidist_palette <- function() {
+  return(c(
+    "#56B4E9", "#009E73", "#E69F00", "#CC79A7",
+    "#0072B2", "#D55E00", "#F0E442", "#999999"
+  ))
+}
+
+#' The discrete colour scale the package plots use
+#'
+#' Uses `.epidist_palette()` when it holds enough colours and the viridis
+#' scale otherwise. The scale covers both the `colour` and the `fill`
+#' aesthetic, so that a variable mapped to each gets one legend.
+#'
+#' @param n The number of levels to colour.
+#'
+#' @return A `ggplot2` scale.
+#'
+#' @keywords internal
+.epidist_colour_scale <- function(n) {
+  aesthetics <- c("colour", "fill")
+  values <- .epidist_palette()
+  if (n <= length(values)) {
+    return(ggplot2::scale_colour_manual(
+      values = unname(values),
+      aesthetics = aesthetics
+    ))
+  }
+  return(ggplot2::scale_colour_viridis_d(end = 0.9, aesthetics = aesthetics))
+}
+
+#' The theme the package plots use
+#'
+#' [ggplot2::theme_minimal()] with the legend below the plot, as the package
+#' documentation draws its plots.
+#'
+#' @return A `ggplot2` theme.
+#'
+#' @keywords internal
+.epidist_plot_theme <- function() {
+  return(
+    ggplot2::theme_minimal() +
+      ggplot2::theme(
+        legend.position = "bottom",
+        panel.grid.minor = ggplot2::element_blank(),
+        strip.text = ggplot2::element_text(face = "bold")
+      )
+  )
 }
 
 #' Plot posterior draws of the delay distribution
@@ -191,6 +267,10 @@ plot_events <- function(data, obs_time = NULL, by = NULL, n = 200) {
 #' when there are many.
 #'
 #' `plot()` and `autoplot()` are the same function. Both need `ggplot2`.
+#'
+#' The plot is drawn with [ggplot2::theme_minimal()] and the colour blind
+#' friendly palette the package documentation uses. Add a theme or a scale of
+#' your own to the returned plot to override either.
 #'
 #' @param x,object An `epidist_delay_draws` object, as returned by
 #'  [delay_parameter_draws()], [delay_summary_draws()] or [add_summaries()].
@@ -256,17 +336,16 @@ plot.epidist_delay_draws <- function(x, ...) {
 #' @rdname plot.epidist_delay_draws
 #' @exportS3Method ggplot2::autoplot
 autoplot.epidist_delay_draws <- function(
-  object,
-  type = c("parameters", "delay"),
-  by = NULL,
-  pars = NULL,
-  true_values = NULL,
-  ndraws = NULL,
-  probs = c(0.05, 0.95),
-  max_delay = NULL,
-  family = NULL,
-  ...
-) {
+    object,
+    type = c("parameters", "delay"),
+    by = NULL,
+    pars = NULL,
+    true_values = NULL,
+    ndraws = NULL,
+    probs = c(0.05, 0.95),
+    max_delay = NULL,
+    family = NULL,
+    ...) {
   .check_ggplot2()
   type <- match.arg(type)
   family <- .resolve_delay_family(object, family)
@@ -354,11 +433,22 @@ autoplot.epidist_delay_draws <- function(
 
   p <- ggplot2::ggplot(long, ggplot2::aes(x = .data$value))
   if (is.null(strata$by)) {
-    p <- p + ggplot2::geom_density(fill = "#56B4E9", alpha = 0.5)
+    p <- p +
+      ggplot2::geom_density(
+        fill = .epidist_palette()[1],
+        colour = .epidist_palette()[1],
+        alpha = 0.5,
+        linewidth = 0.4
+      )
   } else {
     p <- p +
-      ggplot2::geom_density(ggplot2::aes(fill = .data$.stratum), alpha = 0.5) +
-      ggplot2::labs(fill = strata$legend)
+      ggplot2::geom_density(
+        ggplot2::aes(fill = .data$.stratum, colour = .data$.stratum),
+        alpha = 0.5,
+        linewidth = 0.4
+      ) +
+      .epidist_colour_scale(nlevels(long$.stratum)) +
+      ggplot2::labs(fill = strata$legend, colour = strata$legend)
   }
   if (!is.null(true_values)) {
     true_data <- tibble::tibble(
@@ -369,12 +459,14 @@ autoplot.epidist_delay_draws <- function(
       ggplot2::geom_vline(
         data = true_data,
         ggplot2::aes(xintercept = .data$value),
-        linetype = "dashed"
+        linetype = "dashed",
+        colour = "grey30"
       )
   }
   p <- p +
     ggplot2::facet_wrap(ggplot2::vars(.data$parameter), scales = "free") +
-    ggplot2::labs(x = NULL, y = "Posterior density")
+    ggplot2::labs(x = NULL, y = "Posterior density") +
+    .epidist_plot_theme()
   return(p)
 }
 
@@ -426,6 +518,8 @@ autoplot.epidist_delay_draws <- function(
         values <- dens$density[rows, , drop = FALSE]
         out <- tibble::tibble(
           .draw = rep(draw_id[rows], times = ncol(values)),
+          # One line per row of the draws, as a draw is not unique to a row
+          .line = rep(rows, times = ncol(values)),
           delay = rep(dens$delays, each = nrow(values)),
           density = as.vector(values)
         )
@@ -443,10 +537,14 @@ autoplot.epidist_delay_draws <- function(
     p <- p +
       ggplot2::geom_ribbon(
         ggplot2::aes(ymin = .data$lower, ymax = .data$upper),
-        fill = "#56B4E9",
+        fill = .epidist_palette()[1],
         alpha = 0.3
       ) +
-      ggplot2::geom_line(ggplot2::aes(y = .data$density), colour = "#56B4E9")
+      ggplot2::geom_line(
+        ggplot2::aes(y = .data$density),
+        colour = .epidist_palette()[1],
+        linewidth = 0.8
+      )
   } else if (is.null(ndraws)) {
     p <- p +
       ggplot2::geom_ribbon(
@@ -458,14 +556,16 @@ autoplot.epidist_delay_draws <- function(
         alpha = 0.3
       ) +
       ggplot2::geom_line(
-        ggplot2::aes(y = .data$density, colour = .data$.stratum)
+        ggplot2::aes(y = .data$density, colour = .data$.stratum),
+        linewidth = 0.8
       ) +
+      .epidist_colour_scale(nlevels(plot_data$.stratum)) +
       ggplot2::labs(colour = strata$legend, fill = strata$legend)
   } else if (is.null(strata$by)) {
     p <- p +
       ggplot2::geom_line(
-        ggplot2::aes(y = .data$density, group = .data$.draw),
-        colour = "#56B4E9",
+        ggplot2::aes(y = .data$density, group = .data$.line),
+        colour = .epidist_palette()[1],
         alpha = 0.2
       )
   } else {
@@ -473,17 +573,20 @@ autoplot.epidist_delay_draws <- function(
       ggplot2::geom_line(
         ggplot2::aes(
           y = .data$density,
-          group = interaction(.data$.draw, .data$.stratum),
+          group = .data$.line,
           colour = .data$.stratum
         ),
         alpha = 0.2
       ) +
+      .epidist_colour_scale(nlevels(plot_data$.stratum)) +
       ggplot2::guides(
         colour = ggplot2::guide_legend(override.aes = list(alpha = 1))
       ) +
       ggplot2::labs(colour = strata$legend)
   }
-  p <- p + ggplot2::labs(x = "Delay", y = "Density")
+  p <- p +
+    ggplot2::labs(x = "Delay", y = "Density") +
+    .epidist_plot_theme()
   return(p)
 }
 
