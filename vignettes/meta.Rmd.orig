@@ -439,10 +439,7 @@ summary(fit_meta_mixed)
 ## Estimating a study's growth rate
 
 The calendar stop study was given the growth rate we measured from the line list as a known number.
-A review rarely has that.
-Setting `growth_rate = NA` makes a study estimate its rate as the `pgrowth` distributional parameter, and giving `growth_rate_sd` as well turns a reported rate into a normal prior on that parameter, so its uncertainty reaches the delay.
-The meta model adds `pgrowth ~ 0 + study` to the formula, one rate per study, and the prior of each study that reported a rate, so nothing else changes.
-A study whose rate is unknown gets a weakly informative `normal(0, 0.25)` prior, and can share its coefficient with a line list from the same outbreak through a formula such as `pgrowth ~ 1`.
+Setting `growth_rate = NA` makes a study estimate its rate as the `pgrowth` distributional parameter, and giving `growth_rate_sd` turns a reported rate into a normal prior on that parameter.
 See `vignette("model")` for the details.
 
 ```{r}
