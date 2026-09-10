@@ -294,9 +294,6 @@ biased_estimates <- study_designs |>
 #>   quantiles less than ten days above their smallest counted delay. Quantiles
 #>   rounded to whole days that close to the origin carry a bias that a larger
 #>   sample does not shrink.
-#> ! "calendar stop" reports several quantiles of delays counted in whole days
-#>   from more than 100 delays. The joint quantile likelihood is overconfident at
-#>   that sample size and weights it too heavily.
 #> ℹ See the Checks section of `?as_epidist_estimates_data`.
 biased_estimates
 #> # A tibble: 22 × 16

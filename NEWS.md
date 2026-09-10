@@ -64,7 +64,7 @@ See #620.
 A study that only counted delays above a minimum has every implied summary conditioned on the delay exceeding it.
 See #596 and #620.
 - A single quantile reported by a study that summarised integer day delays is now fitted as the cell in which the empirical distribution function crossed its probability, the exact event a rounded quantile stands for, rather than with a multinomial on the continuity corrected grid whose claimed precision keeps growing with the sample size.
-Two quantiles reported at the same value are accepted and merged into one cell, and `as_epidist_estimates_data()` warns when a large study reports several such quantiles, whose joint likelihood is still overconfident.
+Two quantiles reported at the same value are accepted and merged into one cell.
 See #620.
 - Several quantiles reported by a study that summarised integer day delays are now fitted with the exact joint likelihood of the crossings they stand for.
 The cumulative counts at the days the quantiles name form a Markov chain of binomial steps on the uncorrected grid distribution function, each reported quantile is a box on two of them, and the probability of every box holding is a forward pass over the counts, kept to a band around the most likely path so that it costs about the sample size to the power one and a half per edge.
