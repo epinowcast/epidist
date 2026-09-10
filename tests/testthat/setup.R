@@ -496,26 +496,57 @@ lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
   lockstep_narrow
 )))
 
-# The shared fits below use the cmdstanr backend, so they are only built
-# when cmdstanr and CmdStan are both available. Tests that use them call
-# `skip_if_no_cmdstanr()`.
-if (not_on_cran() && has_cmdstanr()) {
+# The shared fits below compile Stan models through the default rstan
+# backend, so they are not built on CRAN. rstan and StanHeaders must be
+# built against each other, and where they are not every compile fails, so
+# the first fit is taken as a probe: if it cannot be built the rest are
+# skipped and the tests that use them call `skip_if_no_fits()`. See #687.
+fits_available <- FALSE
+
+if (not_on_cran()) {
   set.seed(1)
-  cli::cli_alert_info("Compiling the latent model with cmdstanr")
-  fit <- epidist(
-    data = prep_obs,
+  cli::cli_alert_info("Compiling the latent model")
+  fit <- try(
+    epidist(
+      data = prep_obs,
+      seed = 1,
+      chains = 2,
+      cores = 2,
+      silent = 2,
+      refresh = 0,
+      iter = 1000
+    ),
+    silent = TRUE
+  )
+  fits_available <- !inherits(fit, "try-error")
+  if (!fits_available) {
+    # brms compiles inside a sink(), which a failed compile leaves open, and
+    # every later sink() then errors. Close any that are still open.
+    while (sink.number() > 0) {
+      sink()
+    }
+    cli::cli_alert_warning(c(
+      "Could not compile a model, so the fits below are not built: ",
+      as.character(fit)
+    ))
+  }
+}
+
+if (fits_available) {
+  cli::cli_alert_info("Compiling the marginal model")
+  fit_marginal <- suppressMessages(epidist(
+    data = prep_marginal_obs,
     seed = 1,
     chains = 2,
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
-  )
+    iter = 1000
+  ))
 
-  cli::cli_alert_info("Compiling the latent model with rstan")
-  fit_rstan <- epidist(
-    data = prep_obs,
+  cli::cli_alert_info("Compiling the naive model")
+  fit_naive <- epidist(
+    data = prep_naive_obs,
     seed = 1,
     chains = 2,
     cores = 2,
@@ -524,32 +555,8 @@ if (not_on_cran() && has_cmdstanr()) {
     iter = 1000
   )
 
-  cli::cli_alert_info("Compiling the marginal model with cmdstanr")
-  fit_marginal <- suppressMessages(epidist(
-    data = prep_marginal_obs,
-    seed = 1,
-    chains = 2,
-    cores = 2,
-    silent = 2,
-    refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
-  ))
-
-  cli::cli_alert_info("Compiling the naive model with cmdstanr")
-  fit_naive <- epidist(
-    data = prep_naive_obs,
-    seed = 1,
-    chains = 2,
-    cores = 2,
-    silent = 2,
-    refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
-  )
-
   cli::cli_alert_info(
-    "Compiling the latent model with cmdstanr and a gamma dist"
+    "Compiling the latent model with a gamma dist"
   )
   fit_gamma <- epidist(
     data = prep_obs_gamma,
@@ -559,12 +566,11 @@ if (not_on_cran() && has_cmdstanr()) {
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   )
 
   cli::cli_alert_info(
-    "Compiling the marginal model with cmdstanr and a weibull dist"
+    "Compiling the marginal model with a weibull dist"
   )
   fit_marginal_weibull <- epidist(
     data = prep_marginal_obs_weibull,
@@ -572,12 +578,11 @@ if (not_on_cran() && has_cmdstanr()) {
     seed = 1,
     chains = 2,
     cores = 2,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   )
 
   cli::cli_alert_info(
-    "Compiling the marginal model with cmdstanr and a gamma dist"
+    "Compiling the marginal model with a gamma dist"
   )
   fit_marginal_gamma <- suppressMessages(epidist(
     data = prep_marginal_obs_gamma,
@@ -585,12 +590,11 @@ if (not_on_cran() && has_cmdstanr()) {
     seed = 1,
     chains = 2,
     cores = 2,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   ))
 
   cli::cli_alert_info(
-    "Compiling the latent model with cmdstanr and a sex stratification"
+    "Compiling the latent model with a sex stratification"
   )
   fit_sex <- epidist(
     data = prep_obs_sex,
@@ -598,8 +602,7 @@ if (not_on_cran() && has_cmdstanr()) {
     seed = 1,
     iter = 1000,
     cores = 2,
-    chains = 2,
-    backend = "cmdstanr"
+    chains = 2
   )
 
   cli::cli_alert_info("Compiling the latent model with overlapping windows")
@@ -609,8 +612,7 @@ if (not_on_cran() && has_cmdstanr()) {
     chains = 2,
     cores = 2,
     silent = 2,
-    refresh = 0,
-    backend = "cmdstanr"
+    refresh = 0
   )
 
   cli::cli_alert_info("Compiling the marginal model with overlapping windows")
@@ -620,12 +622,11 @@ if (not_on_cran() && has_cmdstanr()) {
     chains = 2,
     cores = 2,
     silent = 2,
-    refresh = 0,
-    backend = "cmdstanr"
+    refresh = 0
   ))
 
   cli::cli_alert_info(
-    "Compiling the marginal model with cmdstanr and a sex stratification"
+    "Compiling the marginal model with a sex stratification"
   )
   fit_marginal_sex <- suppressMessages(epidist(
     data = prep_marginal_obs_sex,
@@ -633,8 +634,7 @@ if (not_on_cran() && has_cmdstanr()) {
     seed = 1,
     iter = 1000,
     cores = 2,
-    chains = 2,
-    backend = "cmdstanr"
+    chains = 2
   ))
 
   # Synthetic "published" estimates produced by applying naive estimators
@@ -861,7 +861,7 @@ if (not_on_cran() && has_cmdstanr()) {
   )
 
   cli::cli_alert_info(
-    "Compiling the meta model with cmdstanr and reported fits and draws"
+    "Compiling the meta model with reported fits and draws"
   )
   fit_meta_reported <- suppressMessages(epidist(
     data = prep_meta_reported,
@@ -870,12 +870,11 @@ if (not_on_cran() && has_cmdstanr()) {
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   ))
 
   cli::cli_alert_info(
-    "Compiling the meta model with cmdstanr and simulated grid summaries"
+    "Compiling the meta model with simulated grid summaries"
   )
   fit_meta_grid <- suppressMessages(epidist(
     data = prep_meta_grid,
@@ -884,12 +883,11 @@ if (not_on_cran() && has_cmdstanr()) {
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   ))
 
   cli::cli_alert_info(
-    "Compiling the meta model with cmdstanr and summary estimates only"
+    "Compiling the meta model with summary estimates only"
   )
   fit_meta_estimates <- suppressMessages(epidist(
     data = prep_meta_biased,
@@ -898,12 +896,11 @@ if (not_on_cran() && has_cmdstanr()) {
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   ))
 
   cli::cli_alert_info(
-    "Compiling the meta model with cmdstanr and mixed data"
+    "Compiling the meta model with mixed data"
   )
   fit_meta_mixed <- suppressMessages(epidist(
     data = prep_meta_mixed,
@@ -912,7 +909,6 @@ if (not_on_cran() && has_cmdstanr()) {
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   ))
 }
