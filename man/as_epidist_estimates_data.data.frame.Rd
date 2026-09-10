@@ -301,18 +301,6 @@ even when the larger quantiles of the same study sit well up the grid.
 Check that \code{swindow} is the resolution the study worked at. A reported
 mean and standard deviation of the same delays do not carry this
 residual, so fit them in preference where the study gives them.
-\item \strong{Several integer day quantiles from a large study.} A quantile of
-delays counted in whole censoring windows is a discrete statistic, and
-the information it carries about the delay distribution saturates once
-the binomial spread of the crossing point of the empirical distribution
-function is narrower than a window. A single such quantile is fitted as
-the exact crossing event, but several are still fitted with the
-multinomial on the continuity corrected distribution function, whose
-claimed precision keeps growing with the sample size. It is calibrated
-at around thirty delays and overconfident from around a hundred, so a
-study reporting two or more such quantiles from more than 100 delays is
-flagged and will be weighted too heavily. Fit a reported mean and
-standard deviation instead where one is available.
 \item \strong{Heavy tailed standard deviation.} The sampling standard error of a
 reported standard deviation is \eqn{\sigma \sqrt{(\kappa - 1) / (4 n)}},
 with \eqn{\kappa} the kurtosis of the delays. The normal approximation

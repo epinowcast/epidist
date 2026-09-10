@@ -81,9 +81,9 @@ test_that("simulate_study returns a multivariate mean and sd", {
 
 test_that("simulate_study leaves the advisory checks to the combined object", { # nolint: line_length_linter.
   # Three quantile studies on the daily grid each trip the coarse quantile
-  # and the overconfident checks. Built on their own they print nothing.
-  # Combined in a list each check prints once, naming every study, and the
-  # pointer to the documentation prints once after them.
+  # check. Built on their own they print nothing. Combined in a list the
+  # check prints once, naming every study, and the pointer to the
+  # documentation prints once after it.
   studies <- lapply(c("A", "B", "C"), function(study) {
     return(expect_silent(simulate_study(
       study_obs, study,
@@ -100,9 +100,6 @@ test_that("simulate_study leaves the advisory checks to the combined object", { 
   expect_true(grepl("\"A\" (row 1)", coarse, fixed = TRUE))
   expect_true(grepl("\"B\" (row 4)", coarse, fixed = TRUE))
   expect_true(grepl("\"C\" (row 7)", coarse, fixed = TRUE))
-  over <- msgs[grepl("overconfident", msgs, fixed = TRUE)]
-  expect_length(over, 1)
-  expect_true(grepl("\"A\", \"B\", and \"C\"", over, fixed = TRUE))
   pointer <- msgs[grepl("Checks section", msgs, fixed = TRUE)]
   expect_length(pointer, 1)
   expect_identical(pointer, msgs[length(msgs)])

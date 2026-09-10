@@ -438,30 +438,19 @@ test_that(".estimates_coarse_quadrature names the studies with coarse nodes", {
   expect_identical(.estimates_coarse_quadrature(data), "A")
 })
 
-test_that("as_epidist_estimates_data warns about several integer day quantiles from a large study", { # nolint: line_length_linter.
+test_that("as_epidist_estimates_data does not warn about several integer day quantiles from a large study", { # nolint: line_length_linter.
+  # Several quantiles of integer day delays are fitted exactly, as the joint
+  # probability of the crossings they stand for, so a large study reporting
+  # them is no longer flagged as overconfident. The quantiles here sit well
+  # up the grid, so the coarse quantile check stays quiet as well.
   quantiles <- data.frame(
-    study = "A", type = "quantile", value = c(3, 5, 8),
-    p = c(0.25, 0.5, 0.75), n = 400, relative_obs_time = 30,
+    study = "A", type = "quantile", value = c(12, 15, 19),
+    p = c(0.25, 0.5, 0.75), n = 4000, relative_obs_time = 40,
     trunc_adjusted = FALSE, cens_adjusted = 0, stringsAsFactors = FALSE
   )
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
-  expect_true(any(grepl("overconfident", msgs, fixed = TRUE)))
-  over_msg <- msgs[grepl("overconfident", msgs, fixed = TRUE)]
-  expect_length(over_msg, 1)
-  expect_true(grepl("\"A\"", over_msg, fixed = TRUE))
-  expect_false(grepl("mean and standard deviation", over_msg, fixed = TRUE))
-  expect_false(grepl("Checks", over_msg, fixed = TRUE))
-  expect_identical(sum(grepl("Checks section", msgs, fixed = TRUE)), 1L)
-  # A small study, a single quantile or a continuous study does not trip it.
-  quantiles$n <- 60
-  msgs <- capture_messages(as_epidist_estimates_data(quantiles))
   expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
-  quantiles$n <- 400
-  msgs <- capture_messages(as_epidist_estimates_data(quantiles[2, ]))
-  expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
-  quantiles$cens_adjusted <- 1
-  msgs <- capture_messages(as_epidist_estimates_data(quantiles))
-  expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
+  expect_false(any(grepl("Checks section", msgs, fixed = TRUE)))
 })
 
 test_that("as_epidist_estimates_data warns about a heavy tailed standard deviation from a small study", { # nolint: line_length_linter.
@@ -504,27 +493,30 @@ test_that("as_epidist_estimates_data warns about a heavy tailed standard deviati
 })
 
 test_that("as_epidist_estimates_data points at the Checks section once per call", { # nolint: line_length_linter.
-  # A study that trips the coarse quantile and the overconfident checks gets
-  # one pointer to the documentation, after both messages, and a study that
-  # trips none gets no pointer.
+  # A study that trips the coarse quantile check and the short cutoff check
+  # gets one pointer to the documentation, after both messages, and a study
+  # that trips none gets no pointer.
   quantiles <- data.frame(
     study = "A", type = "quantile", value = c(3, 5, 8),
     p = c(0.25, 0.5, 0.75), n = 400, relative_obs_time = 30,
-    trunc_adjusted = FALSE, cens_adjusted = 0, stringsAsFactors = FALSE
+    trunc_adjusted = FALSE, cens_adjusted = 0, max_delay = 12,
+    stringsAsFactors = FALSE
   )
+  quantiles$trunc_adjusted <- TRUE
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
   expect_identical(sum(grepl("smallest counted delay", msgs, fixed = TRUE)), 1L)
-  expect_identical(sum(grepl("overconfident", msgs, fixed = TRUE)), 1L)
+  expect_identical(sum(grepl("short", msgs, fixed = TRUE)), 1L)
   pointer <- grepl("Checks section", msgs, fixed = TRUE)
   expect_identical(sum(pointer), 1L)
   expect_true(pointer[length(pointer)])
   quantiles$cens_adjusted <- 1
+  quantiles$max_delay <- NULL
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
   expect_false(any(grepl("Checks section", msgs, fixed = TRUE)))
   # Set advise = FALSE to skip the checks.
   quantiles$cens_adjusted <- 0
   msgs <- capture_messages(as_epidist_estimates_data(quantiles, advise = FALSE))
-  expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
+  expect_false(any(grepl("smallest counted delay", msgs, fixed = TRUE)))
   expect_false(any(grepl("Checks section", msgs, fixed = TRUE)))
 })
 

@@ -1138,6 +1138,79 @@ test_that("the meta model recovers the truth from every bias code", {
   )), collapse = "\n"))
 })
 
+test_that("the exact quantile set likelihood is calibrated over repeated studies", { # nolint: line_length_linter.
+  # Note: this test is stochastic. See note at the top of this script
+  skip_on_cran()
+  skip_if_no_cmdstanr()
+  skip_if_not(
+    identical(Sys.getenv("EPIDIST_META_CALIBRATION"), "true"),
+    "Set EPIDIST_META_CALIBRATION=true to run the calibration fits"
+  )
+  # A naive cohort study reporting the type 1 quartiles of its integer day
+  # delays, fitted as the joint probability of the crossings they stand for.
+  # The multinomial on the continuity corrected grid this replaces was
+  # calibrated at thirty delays and claimed standard errors 0.55 to 0.8 of
+  # the truth at a hundred.
+  n_rep <- 40
+  replicate_study <- function(size, obs_time) {
+    delays <- recovery_delays(0, FALSE, obs_time, "cohort", 0, 0, size)
+    probs <- c(0.25, 0.5, 0.75)
+    rows <- data.frame(
+      study = "A", type = "quantile",
+      value = stats::quantile(delays, probs, type = 1, names = FALSE),
+      p = probs, n = length(delays), relative_obs_time = obs_time,
+      trunc_adjusted = FALSE, cens_adjusted = 0, stringsAsFactors = FALSE
+    )
+    return(suppressMessages(as_epidist_estimates_data(rows)))
+  }
+  fit_replicate <- function(seed, size, obs_time) {
+    set.seed(seed)
+    fit <- recovery_fit(
+      replicate_study(size, obs_time),
+      iter = 600, seed = seed
+    )
+    pred <- delay_parameter_draws(fit)
+    return(c(
+      mu_lower = stats::quantile(pred$mu, 0.05, names = FALSE),
+      mu_upper = stats::quantile(pred$mu, 0.95, names = FALSE),
+      mu_rank = mean(pred$mu < meanlog),
+      sigma_lower = stats::quantile(pred$sigma, 0.05, names = FALSE),
+      sigma_upper = stats::quantile(pred$sigma, 0.95, names = FALSE),
+      sigma_rank = mean(pred$sigma < sdlog)
+    ))
+  }
+  calibration <- function(size, obs_time) {
+    # The first fit compiles the model before the rest run in parallel.
+    first <- fit_replicate(1, size, obs_time)
+    rest <- parallel::mclapply(
+      seq_len(n_rep)[-1], fit_replicate,
+      size = size, obs_time = obs_time, mc.cores = 4
+    )
+    return(do.call(rbind, c(list(first), rest)))
+  }
+  covered <- function(results, name, truth) {
+    return(sum(
+      results[, paste0(name, "_lower")] <= truth &
+        results[, paste0(name, "_upper")] >= truth
+    ))
+  }
+  small <- calibration(30, 22)
+  expect_gte(covered(small, "mu", meanlog), 30)
+  expect_gte(covered(small, "sigma", sdlog), 30)
+  medium <- calibration(100, 22)
+  expect_gte(covered(medium, "mu", meanlog), 30)
+  expect_gte(covered(medium, "sigma", sdlog), 30)
+  message(sprintf(
+    paste0(
+      "quartiles, n 30: mu covered %d of %d, sigma covered %d of %d; ",
+      "n 100: mu covered %d of %d, sigma covered %d of %d"
+    ),
+    covered(small, "mu", meanlog), n_rep, covered(small, "sigma", sdlog),
+    n_rep, covered(medium, "mu", meanlog), n_rep,
+    covered(medium, "sigma", sdlog), n_rep
+  ))
+})
+
 test_that("the meta model is calibrated over repeated studies", {
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
