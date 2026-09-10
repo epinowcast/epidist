@@ -1,9 +1,10 @@
 # Rebuilds the precomputed vignettes.
 #
-# `ebola`, `faq`, `approx-inference` and `meta` fit models and need cmdstanr,
-# so they are knitted from a `.Rmd.orig` source into a committed `.Rmd`
-# holding static output. That keeps them in the package without needing
-# cmdstanr, or a long model fit, at build time.
+# Every vignette that fits a model is knitted here from a `.Rmd.orig` source
+# into a committed `.Rmd` holding static output. That keeps the fits, and
+# the Stan toolchain they need, off the package build and check path.
+# `approx-inference` needs cmdstanr for the algorithms it demonstrates; the
+# rest use the default rstan backend.
 on:
   push:
     paths:
@@ -30,11 +31,22 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
-          extra-repositories: 'https://stan-dev.r-universe.dev https://mrc-ide.r-universe.dev'
+          extra-repositories: 'https://mrc-ide.r-universe.dev'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: local::.
+
+      # cmdstanr is not a package dependency. It is installed here, on its
+      # own, so that the stan-dev r-universe is never consulted for rstan or
+      # StanHeaders, which must be built against each other. See #687.
+      - name: Install cmdstanr
+        run: |
+          install.packages(
+            "cmdstanr",
+            repos = c("https://stan-dev.r-universe.dev", getOption("repos"))
+          )
+        shell: Rscript {0}
 
       - name: Install cmdstan
         uses: epinowcast/actions/install-cmdstan@v1

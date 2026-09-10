@@ -28,6 +28,7 @@ Obs
 Okabe
 PMF
 PSIS
+Poisson
 Quickstart
 Reparameterise
 Reweight
@@ -69,7 +70,6 @@ dw
 dx
 dy
 dz
-epinowcast
 epireview
 eq
 estimand
@@ -141,6 +141,7 @@ tibble
 traceplots
 treedepth
 trunc
+u
 unclassed
 uncounting
 underflowed

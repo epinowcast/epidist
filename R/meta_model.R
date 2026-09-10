@@ -96,6 +96,21 @@
 #' reported, up to a cap of 2000 that the option lifts when set above it, and
 #' the number is held in the `n_quad` column of the model data.
 #'
+#' # Advanced: an estimated growth rate
+#'
+#' A summary row tilts its primary event, and weights the follow up of an
+#' accrual design, by the `growth_rate` of its study. Where that rate is
+#' `NA` in [as_epidist_estimates_data()], or was given there with a
+#' `growth_rate_sd`, the study estimates it as the `pgrowth` distributional
+#' parameter instead. That is the parameter `primary = "expgrowth"`
+#' estimates from individual level rows, so the two can share it. The model
+#' adds `pgrowth ~ 0 + study` unless a `pgrowth` formula is given, and
+#' [epidist_model_prior()] sets the priors from the reported rates.
+#' Summaries carry little information about the rate on their own, so share
+#' the coefficient with rows that do inform it, for example `pgrowth ~ 1`
+#' with a line list from the same outbreak. `vignette("model")` gives the
+#' details.
+#'
 #' @param data An `epidist_linelist_data` or `epidist_aggregate_data` object of
 #'  individual level observations, an `epidist_estimates_data` object of
 #'  published summary estimates, or `NULL`.
@@ -129,8 +144,9 @@ as_epidist_meta_model <- function(data = NULL, estimates = NULL, ...) {
 #'  default, assumes it is equally likely at any point. `"expgrowth"` tilts
 #'  it, with the growth rate estimated as the `pgrowth` distributional
 #'  parameter. Summary rows are unaffected. They tilt the primary event by
-#'  the `growth_rate` metadata of their study, which
-#'  [as_epidist_estimates_data()] takes as a known quantity.
+#'  the `growth_rate` metadata of their study, or estimate it as the same
+#'  `pgrowth` parameter where that is `NA` or has a `growth_rate_sd`, see
+#'  [as_epidist_meta_model()].
 #'
 #' @inheritParams as_epidist_meta_model
 #' @inheritParams as_epidist_marginal_model.epidist_linelist_data
@@ -225,7 +241,8 @@ as_epidist_meta_model.epidist_aggregate_data <- function(
 #'
 #' A model built from summaries alone takes no `primary` argument, because
 #' summary rows tilt the primary event by the `growth_rate` metadata of their
-#' study rather than by an estimated parameter. Passing one is an error.
+#' study, estimating it only where that is `NA` or has a `growth_rate_sd`.
+#' Passing one is an error.
 #'
 #' @param data An `epidist_estimates_data` object.
 #'
@@ -269,8 +286,9 @@ as_epidist_meta_model.epidist_estimates_data <- function(
 #'
 #' Used when no individual level data is available and only the `estimates`
 #' argument is supplied. It takes no `primary` argument, because summary rows
-#' tilt the primary event by the `growth_rate` metadata of their study rather
-#' than by an estimated parameter. Passing one is an error.
+#' tilt the primary event by the `growth_rate` metadata of their study,
+#' estimating it only where that is `NA` or has a `growth_rate_sd`. Passing
+#' one is an error.
 #'
 #' @param data `NULL`.
 #'
@@ -320,7 +338,9 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
       ),
       i = paste0(
         "Summary rows tilt the primary event by the {.var growth_rate} ",
-        "metadata of their study in {.fn as_epidist_estimates_data}."
+        "metadata of their study in {.fn as_epidist_estimates_data}, and ",
+        "estimate it as {.var pgrowth} where that is {.val NA} or has a ",
+        "positive {.var growth_rate_sd}."
       )
     ))
   }
@@ -485,7 +505,8 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     delay_min = as.numeric(data$delay_min),
     report_se = 0,
     quantile_p = 0,
-    growth_rate = 0
+    growth_rate = 0,
+    growth_known = 1L
   )
   extra <- data[setdiff(names(data), names(rows))]
   return(bind_cols(rows, extra))
@@ -676,7 +697,13 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     delay_min = as.numeric(estimates$delay_min[1]),
     report_se = ifelse(is.na(estimates$se[1]), 0, estimates$se[1]),
     quantile_p = ifelse(is.na(estimates$p[1]), 0, estimates$p[1]),
-    growth_rate = as.numeric(estimates$growth_rate[1])
+    # An estimated rate leaves its slot holding the reported centre of its
+    # prior, or zero where there is none, which Stan ignores.
+    growth_rate = ifelse(
+      is.na(estimates$growth_rate[1]), 0, as.numeric(estimates$growth_rate[1])
+    ),
+    growth_known = as.integer(!.estimates_growth_estimated(estimates)[1]),
+    growth_rate_sd = as.numeric(estimates$growth_rate_sd[1])
   )
   consumed <- setdiff(.estimates_required_cols(), "study")
   extra <- .drop_epidist_class(estimates)[
@@ -855,7 +882,8 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 #'
 #' @param primary The primary event distribution of the individual level
 #'  rows, `"uniform"` or `"expgrowth"`. Summary rows use their `growth_rate`
-#'  metadata instead.
+#'  metadata instead, or the `pgrowth` parameter where their `growth_known`
+#'  slot is 0.
 #'
 #' @returns An object of class `epidist_meta_model`
 #'
@@ -909,7 +937,11 @@ assert_epidist.epidist_meta_model <- function(data, ...) {
   assert_numeric(data$delay_min, lower = 0, any.missing = FALSE)
   assert_numeric(data$report_se, lower = 0)
   assert_numeric(data$quantile_p, lower = 0, upper = 1)
-  assert_numeric(data$growth_rate, finite = TRUE)
+  assert_numeric(data$growth_rate, finite = TRUE, any.missing = FALSE)
+  assert_subset(data$growth_known, 0:1, .var.name = "growth_known")
+  if (hasName(data, "growth_rate_sd")) {
+    assert_numeric(data$growth_rate_sd, lower = 0, finite = TRUE)
+  }
   assert_integerish(data$n_quad, lower = 2, any.missing = FALSE)
   if (any(data$n_quad %% 2 != 0)) {
     cli::cli_abort(paste0(
@@ -1103,6 +1135,7 @@ epidist_family_model.epidist_meta_model <- function(
   ...
 ) {
   family <- .add_primary_dpars(family, data)
+  family <- .meta_add_growth_dpar(family, data)
   custom_family <- brms::custom_family(
     paste0("meta_", family$family),
     dpars = family$dpars,
@@ -1117,7 +1150,7 @@ epidist_family_model.epidist_meta_model <- function(
     ),
     type = "int",
     vars = c(
-      paste0("vint", 1:9, "[n]"),
+      paste0("vint", 1:10, "[n]"),
       paste0("vreal", 1:8, "[n]"),
       "meta_group_value",
       "meta_group_count",
@@ -1139,6 +1172,15 @@ epidist_family_model.epidist_meta_model <- function(
 #' Define the model-specific component of an `epidist` custom formula for the
 #' meta model
 #'
+#' Adds the response and the slots of the meta model to the formula. Where a
+#' summary row estimates its growth rate as the `pgrowth` distributional
+#' parameter, see [as_epidist_meta_model()], and the formula has no term for
+#' `pgrowth`, `pgrowth ~ 0 + study` is added so that each study has its own
+#' rate and the priors [epidist_model_prior()] builds from the reported
+#' rates have a coefficient to act on. Data holding a single study get
+#' `pgrowth ~ 1` instead, because `brms` cannot code a factor with one
+#' level. A `pgrowth` formula given by the user is kept as it is.
+#'
 #' @inheritParams epidist_formula_model
 #'
 #' @param ... Additional arguments passed to method.
@@ -1154,7 +1196,7 @@ epidist_formula_model.epidist_meta_model <- function(
   formula,
   ...
 ) {
-  # data is only used to dispatch on
+  formula <- .meta_growth_formula(data, formula)
   formula <- stats::update(
     formula,
     delay_lwr |
@@ -1168,7 +1210,8 @@ epidist_formula_model.epidist_meta_model <- function(
           group_start,
           group_len,
           chol_start,
-          n_quad
+          n_quad,
+          growth_known
         ) +
         vreal(
           relative_obs_time,
@@ -1182,6 +1225,75 @@ epidist_formula_model.epidist_meta_model <- function(
         ) ~
       .
   )
+  return(formula)
+}
+
+#' Whether any summary row of a meta model estimates its growth rate
+#'
+#' @param data An `epidist_meta_model` object.
+#'
+#' @returns `TRUE` where a summary row has a `growth_known` slot of 0.
+#'
+#' @keywords internal
+.meta_growth_estimated <- function(data) {
+  return(any(data$obs_type != 1L & data$growth_known == 0L))
+}
+
+#' Add the `pgrowth` parameter a summary row with an estimated growth rate
+#' needs
+#'
+#' A summary row whose growth rate is estimated reads the `pgrowth`
+#' distributional parameter, which the family only carries where the
+#' individual level rows use an exponential growth primary event. It is
+#' added here otherwise, with the link and bounds of that primary event,
+#' while the primary event of the individual level rows is left as it is.
+#'
+#' @param family A `brms` family object, after [.add_primary_dpars()].
+#'
+#' @param data An `epidist_meta_model` object.
+#'
+#' @returns The family with `pgrowth` among its distributional parameters
+#'  where a summary row needs it.
+#'
+#' @keywords internal
+.meta_add_growth_dpar <- function(family, data) {
+  spec <- .primary_spec("expgrowth")
+  if (!.meta_growth_estimated(data) || all(spec$dpars %in% family$dpars)) {
+    return(family)
+  }
+  family <- .fill_other_links(family)
+  family$dpars <- c(family$dpars, spec$dpars)
+  family$other_links <- c(family$other_links, spec$links)
+  family$other_bounds <- c(family$other_bounds, spec$bounds)
+  return(family)
+}
+
+#' The default `pgrowth` formula of a meta model
+#'
+#' See [epidist_formula_model.epidist_meta_model()].
+#'
+#' @param data An `epidist_meta_model` object.
+#'
+#' @param formula A `brmsformula` object carrying its family.
+#'
+#' @returns The formula, with `pgrowth ~ 0 + study`, or `pgrowth ~ 1` for a
+#'  single study, added where a summary row estimates its growth rate and no
+#'  `pgrowth` formula was given.
+#'
+#' @keywords internal
+.meta_growth_formula <- function(data, formula) {
+  if (
+    !"pgrowth" %in% formula$family$dpars ||
+      "pgrowth" %in% c(names(formula$pforms), names(formula$pfix)) ||
+      !.meta_growth_estimated(data)
+  ) {
+    return(formula)
+  }
+  if (length(unique(data$study)) > 1) {
+    formula$pforms$pgrowth <- pgrowth ~ 0 + study
+  } else {
+    formula$pforms$pgrowth <- pgrowth ~ 1
+  }
   return(formula)
 }
 
@@ -1259,12 +1371,15 @@ epidist_stancode.epidist_meta_model <- function(
 
   stanvars_version <- .version_stanvar()
 
-  # The primary event distribution only reaches the individual level rows,
-  # since summary rows take their tilt from the growth_rate slot. The
-  # quadrature resolution of each summary row travels with it as data.
+  # The primary event distribution only reaches the individual level rows.
+  # Summary rows take their tilt from the growth_rate slot, or from pgrowth
+  # where their growth_known slot is 0, which needs the family to carry it.
+  # The quadrature resolution of each summary row travels with it as data.
+  growth_param <- ifelse("pgrowth" %in% family$dpars, "pgrowth", "growth_rate")
   stanvars_functions <- .family_functions_stanvar(
     file.path("meta_model", "functions.stan"), family, "meta_",
-    primary = .primary_spec(.primary_dist(data))
+    primary = .primary_spec(.primary_dist(data)),
+    extra = c(pgrowth_param = growth_param)
   )
 
   stanvars_parameters <- brms::stanvar(
@@ -1384,6 +1499,7 @@ epidist_stancode.epidist_meta_model <- function(
     "delay_min",
     "report_se",
     "quantile_p",
-    "growth_rate"
+    "growth_rate",
+    "growth_known"
   ))
 }

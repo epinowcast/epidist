@@ -81,7 +81,7 @@ See #620.
 See #620.
 - The meta model takes a `primary` argument for its individual level rows, as the marginal model does.
 With `primary = "expgrowth"` the growth rate of primary events is estimated as the `pgrowth` distributional parameter.
-Summary rows are unchanged and keep the `growth_rate` metadata of their study as a known tilt.
+Summary rows keep the `growth_rate` metadata of their study as a known tilt, unless the study estimates its rate.
 See #620.
 - Added an `epidist_model_prior()` method for the meta model, which puts a `normal(1, 1)` prior on the intercept of `mu` where it is on the log scale, the scale of the lognormal family prior.
 The centre is fixed rather than taken from the reported values, because a prior chosen from the data would put the posterior of a small review where the data already sit.
@@ -145,6 +145,13 @@ Closes #672.
 Before, the mean and standard deviation of a study were fitted separately from its quantiles, which counted a study reporting a mean, a standard deviation and quartiles about twice for the location, and a mean with a median 1.5 times at a study size of 100.
 A study that reported integer date differences still has the two kinds fitted separately, because its quantiles are discrete statistics, so report its mean and standard deviation and drop its quantiles.
 Closes #676.
+- Summary rows of the meta model can now estimate their growth rate.
+An `NA` `growth_rate` in `as_epidist_estimates_data()` makes the study use the `pgrowth` distributional parameter, the parameter that `primary = "expgrowth"` estimates from individual level data, so a line list from the same outbreak can inform the rate a published summary is corrected with.
+A new `growth_rate_sd` column treats a reported rate as a normal prior on that parameter rather than as a fixed number.
+The meta model adds `pgrowth ~ 0 + study` to the formula where a study estimates its rate, unless a `pgrowth` formula is given, and `epidist_model_prior()` sets the per study priors and a `normal(0, 0.25)` default for the rest.
+The R and Stan implementations read the rate of each posterior draw.
+`epidist_formula()` now lets a model add its own formulas before the remaining distributional parameters are given an intercept.
+Closes #678.
 
 ## Features
 
@@ -194,6 +201,13 @@ That object was never checked before, which only showed once the check in `epidi
 See #399.
 
 ## Package
+
+- `cmdstanr` is no longer a suggested dependency.
+It is not on CRAN, so it put the stan-dev r-universe in `Additional_repositories` and in every workflow, and the dependency step then took `rstan` and `StanHeaders` from there at whatever versions each happened to be.
+The two must be built against each other and a mismatch fails every model compile, which is what broke the macOS and Windows checks when CRAN released `StanHeaders` 2.39.1.
+The test suite now fits through the default `rstan` backend and checks generated Stan code with `rstan::stanc()`.
+`cmdstanr` is still supported as a `brms` backend and the README says how to install it.
+See #687 and #688.
 
 - The primary distribution arguments are passed to `primarycensored` under the name that version accepts.
 1.5.2 renamed `dprimary_args` to `primary_args`, because the arguments reach both the primary density and its distribution function, and kept the old name as a soft deprecation.
@@ -303,6 +317,10 @@ See #619 and #620.
 It adjusts for the phase of the outbreak each estimate was made in, taking the retrospective studies as the reference so the population level estimate is the one least affected by right truncation, and reports the phase bias as a marginal effect.
 It reports the population level posterior of the Gamma shape and scale alongside the natural mean and standard deviation, and compares the result with a modern re-analysis of one of the same line lists.
 See #620.
+- Precomputed the `epidist`, `left-truncation` and `primary-events` vignettes.
+Between them they fitted eight models on four platforms on every check run, and a fit was the only thing standing between a Stan toolchain problem and a red check.
+They are now knitted from a `.Rmd.orig` source into a committed `.Rmd` holding static output, as the other model fitting vignettes already were.
+See #688.
 - Added a `left-truncation` vignette showing how to use `delay_min`.
 See #596.
 - Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
@@ -310,6 +328,13 @@ See #596.
 ## CI
 
 - Added a `render-vignettes` workflow that rebuilds the precomputed vignettes and opens a pull request with the result.
+- Took the stan-dev r-universe out of `extra-repositories`.
+It served `cmdstanr`, but the dependency step also took `rstan` and `StanHeaders` from it.
+`check-cmdstan` and `render-vignettes` install `cmdstanr` on its own instead, so the r-universe is never consulted for anything else.
+The mrc-ide r-universe stays, because `epireview` is suggested and is not on CRAN, and it serves no part of the Stan toolchain.
+See #687.
+- The `\donttest{}` examples fit through `rstan`, so they run on Linux only while the CRAN `rstan` and `StanHeaders` cannot compile a model on macOS or Windows.
+See #688.
 - Passed the coverage report to `codecov/codecov-action` through `files` rather than `file`.
 `file` is not an input the action accepts, so with `disable_search` set it found no report and the `test-coverage` job failed on `main`.
 - Pinned the `precommit` hooks to a revision whose lockfile uses `digest` 0.6.39.

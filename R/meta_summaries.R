@@ -1629,6 +1629,13 @@
 #' reported values and cumulative counts of the group are read back out here
 #' for the R mirrors of the joint likelihoods.
 #'
+#' A row whose `growth_known` slot is 0 estimates its growth rate as the
+#' `pgrowth` distributional parameter, so its `growth_rate` element holds one
+#' value per posterior draw rather than the number in the slot. Everything
+#' that works one draw at a time takes the slots of that draw from
+#' [.meta_draw_slots()]. A fit made before the slot existed has no
+#' `growth_known` and every row of it is known.
+#'
 #' @param i The row index.
 #'
 #' @param prep A `brms` prep object.
@@ -1643,6 +1650,14 @@
   chol_start <- prep$data$vint8[i]
   member <- seq_len(group_len) + group_start - 1L
   entry <- seq_len(group_len^2) + chol_start - 1L
+  growth_known <- prep$data$vint10[i]
+  if (is.null(growth_known)) {
+    growth_known <- 1L
+  }
+  growth_rate <- prep$data$vreal8[i]
+  if (growth_known == 0L) {
+    growth_rate <- as.numeric(brms::get_dpar(prep, "pgrowth", i = i))
+  }
   return(list(
     obs_type = prep$data$vint1[i],
     study_n = prep$data$vint2[i],
@@ -1657,7 +1672,8 @@
     lower = prep$data$vreal5[i],
     report_se = prep$data$vreal6[i],
     quantile_p = prep$data$vreal7[i],
-    growth_rate = prep$data$vreal8[i],
+    growth_rate = growth_rate,
+    growth_known = growth_known,
     group_value = as.numeric(prep$data$meta_group_value)[member],
     group_count = as.numeric(prep$data$meta_group_count)[member],
     group_lower = as.numeric(prep$data$meta_group_lower)[member],
@@ -1667,6 +1683,27 @@
       as.numeric(prep$data$meta_group_chol)[entry], group_len, group_len
     )
   ))
+}
+
+#' The slots of one meta model row for one posterior draw
+#'
+#' A row with an estimated growth rate holds one rate per draw, see
+#' [.meta_row_slots()], and the implied summaries of a draw are computed
+#' from the rate of that draw. A row with a known rate is returned as it is.
+#'
+#' @param slots The output of [.meta_row_slots()].
+#'
+#' @param draw The posterior draw index.
+#'
+#' @returns The slots with a single `growth_rate`.
+#'
+#' @keywords internal
+.meta_draw_slots <- function(slots, draw) {
+  rates <- slots$growth_rate
+  if (length(rates) > 1) {
+    slots$growth_rate <- rates[[min(draw, length(rates))]]
+  }
+  return(slots)
 }
 
 #' The sampling standard error of a reported standard deviation
@@ -2058,6 +2095,21 @@
   ))
 }
 
+#' Whether the primary event of a meta model row is tilted
+#'
+#' Mirrors the primary event id of `meta_family_lpmf()` in Stan, which takes
+#' the exponential growth path for every row that estimates its rate,
+#' whatever value the parameter holds, and for a known rate other than zero.
+#'
+#' @param slots The output of [.meta_draw_slots()].
+#'
+#' @returns `TRUE` where the primary event is not uniform.
+#'
+#' @keywords internal
+.meta_slots_tilted <- function(slots) {
+  return(isTRUE(slots$growth_known == 0L) || slots$growth_rate != 0)
+}
+
 #' The number of Newton steps taken from the chord inverse
 #'
 #' Matches `meta_family_node_quantile()` in Stan. Each step squares the
@@ -2244,7 +2296,7 @@
   accrual <- .meta_accrual_flag(slots$trunc_adjusted, slots$trunc_design)
   return(
     base_code == 0L || accrual == 1L ||
-      (base_code == 2L && slots$growth_rate != 0)
+      (base_code == 2L && .meta_slots_tilted(slots))
   )
 }
 
@@ -3497,7 +3549,10 @@
 #' Rows sharing a study design, the same parameter draws and the same
 #' quadrature resolution imply the same summaries, so they are computed once
 #' and reused. The cache is bounded and lives in the package namespace, so it
-#' is never written into a fitted model object. See [.meta_draws].
+#' is never written into a fitted model object. See [.meta_draws]. A row with
+#' an estimated growth rate holds one rate per draw, so the rates are part of
+#' what a cached entry is compared against, and each draw is summarised at
+#' its own rate.
 #'
 #' Only reported means and standard deviations need implied summaries. Quantile
 #' rows work on the cumulative probability scale, so they get a list of `NULL`
@@ -3521,25 +3576,34 @@
   # because changing it changes the summaries a design implies.
   key <- paste(
     dist, length(dist_args), .meta_slots_n_quad(slots), slots$trunc_adjusted,
-    slots$cens_adjusted, slots$trunc_design,
+    slots$cens_adjusted, slots$trunc_design, slots$growth_known,
     sprintf(
       "%.17g|%.17g|%.17g|%.17g|%.17g",
       slots$lower, slots$cutoff, slots$pwindow, slots$swindow,
-      slots$growth_rate
+      slots$growth_rate[1]
     ),
     sep = "|"
   )
   cached <- .meta_draws[[key]]
-  if (!is.null(cached) && identical(cached$args, dist_args)) {
+  if (
+    !is.null(cached) && identical(cached$args, dist_args) &&
+      identical(cached$growth, slots$growth_rate)
+  ) {
     return(cached$moments)
   }
-  moments <- lapply(dist_args, function(args) {
-    return(.meta_row_moments(slots, dist, args))
+  moments <- lapply(seq_along(dist_args), function(draw) {
+    return(.meta_row_moments(
+      .meta_draw_slots(slots, draw), dist, dist_args[[draw]]
+    ))
   })
   if (length(.meta_draws) >= .meta_draw_cache_limit()) {
     rm(list = ls(.meta_draws), envir = .meta_draws)
   }
-  assign(key, list(args = dist_args, moments = moments), envir = .meta_draws)
+  assign(
+    key,
+    list(args = dist_args, growth = slots$growth_rate, moments = moments),
+    envir = .meta_draws
+  )
   return(moments)
 }
 
@@ -3606,7 +3670,8 @@ epidist_gen_meta_log_lik <- function(family) {
     moments <- .meta_row_draw_moments(slots, dist_name, dist_args)
     lpdf <- map_dbl(seq_along(dist_args), function(draw) {
       return(.meta_row_log_lik(
-        slots, dist_name, dist_args[[draw]], moments[[draw]]
+        .meta_draw_slots(slots, draw), dist_name, dist_args[[draw]],
+        moments[[draw]]
       ))
     })
     lpdf <- .log_lik_weight(lpdf, i = i, prep = prep)
@@ -3658,7 +3723,8 @@ epidist_gen_meta_predict <- function(family) {
     moments <- .meta_row_draw_moments(slots, dist_name, dist_args)
     draws <- map_dbl(seq_along(dist_args), function(draw) {
       summaries <- .meta_summary_terms(
-        slots, dist_name, dist_args[[draw]], moments[[draw]]
+        .meta_draw_slots(slots, draw), dist_name, dist_args[[draw]],
+        moments[[draw]]
       )
       # A draw the likelihood rejects has no predictive distribution.
       if (!is.finite(summaries[["se"]])) {

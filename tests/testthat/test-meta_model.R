@@ -210,7 +210,8 @@ test_that("epidist_formula_model.epidist_meta_model binds the required slots", {
   expect_true(grepl(
     paste0(
       "vint(obs_type, study_n, trunc_adjusted, cens_adjusted, ",
-      "trunc_design, group_start, group_len, chol_start, n_quad)"
+      "trunc_design, group_start, group_len, chol_start, n_quad, ",
+      "growth_known)"
     ),
     form,
     fixed = TRUE
@@ -3865,6 +3866,258 @@ test_that("the meta model posterior predictions use the fitted primary event", {
   expect_false(isTRUE(all.equal(mean(growing), mean(uniform))))
 })
 
+# Summary rows that estimate their growth rate. Study A gives no rate, B
+# gives a rate with a standard deviation, and C a known rate.
+growth_estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+  study = c("A", "A", "B", "B", "C", "C"),
+  type = c("mean", "sd", "quantile", "quantile", "mean", "sd"),
+  value = c(7.5, 3.6, 4.8, 8.6, 6.4, 3.0),
+  p = c(NA, NA, 0.25, 0.75, NA, NA),
+  n = 120,
+  relative_obs_time = c(20, 20, 30, 30, 25, 25),
+  trunc_adjusted = FALSE,
+  trunc_design = c(
+    "accrual", "accrual", "accrual", "accrual", "cohort", "cohort"
+  ),
+  cens_adjusted = c(0, 0, 0, 0, 2, 2),
+  growth_rate = c(NA, NA, 0.1, 0.1, 0.05, 0.05),
+  growth_rate_sd = c(NA, NA, 0.02, 0.02, NA, NA),
+  stringsAsFactors = FALSE
+)))
+
+test_that("as_epidist_meta_model flags summary rows that estimate their growth rate", { # nolint: line_length_linter.
+  meta <- suppressMessages(
+    as_epidist_meta_model(sim_obs, estimates = growth_estimates)
+  )
+  expect_true("growth_known" %in% .meta_required_cols())
+  summaries <- meta[meta$obs_type != 1L, ]
+  expect_identical(summaries$study, c("A", "B", "C"))
+  expect_identical(summaries$growth_known, c(0L, 0L, 1L))
+  # The slot of an estimated rate holds the centre of its prior, or zero
+  # where there is none, and the standard deviation travels with the row.
+  expect_identical(summaries$growth_rate, c(0, 0.1, 0.05))
+  expect_identical(summaries$growth_rate_sd, c(NA, 0.02, NA))
+  individual <- meta[meta$obs_type == 1L, ]
+  expect_true(all(individual$growth_known == 1L))
+  expect_true(all(is.na(individual$growth_rate_sd)))
+  expect_true(.meta_growth_estimated(meta))
+  expect_false(.meta_growth_estimated(prep_meta_obs))
+  expect_true(all(prep_meta_obs$growth_known == 1L))
+})
+
+test_that("a summary row with an estimated growth rate adds pgrowth to the family", { # nolint: line_length_linter.
+  meta <- suppressMessages(
+    as_epidist_meta_model(sim_obs, estimates = growth_estimates)
+  )
+  family <- epidist_family(meta)
+  expect_true("pgrowth" %in% family$dpars)
+  # The individual level rows keep the uniform primary event they were
+  # given, and only the flagged summary rows read pgrowth.
+  expect_identical(family$primary, "uniform")
+  code <- suppressMessages(epidist(meta, fn = brms::make_stancode))
+  expect_match(code, "1, primary_params", fixed = TRUE)
+  expect_match(code, "real mu, real sigma, real pgrowth", fixed = TRUE)
+  expect_match(
+    code, "growth_known == 0 ? pgrowth : growth_rate",
+    fixed = TRUE
+  )
+  expect_match(code, "vint10[n]", fixed = TRUE)
+  # With an exponential growth primary event the parameter is added once.
+  growing <- suppressMessages(as_epidist_meta_model(
+    sim_obs,
+    estimates = growth_estimates, primary = "expgrowth"
+  ))
+  family <- epidist_family(growing)
+  expect_identical(sum(family$dpars == "pgrowth"), 1L)
+  expect_identical(family$primary, "expgrowth")
+  # A model whose rates are all known reads the slot in Stan.
+  code <- suppressMessages(epidist(prep_meta_obs, fn = brms::make_stancode))
+  expect_false("pgrowth" %in% epidist_family(prep_meta_obs)$dpars)
+  expect_match(
+    code, "growth_known == 0 ? growth_rate : growth_rate",
+    fixed = TRUE
+  )
+})
+
+test_that("the meta model adds a per study pgrowth formula unless one is given", { # nolint: line_length_linter.
+  meta <- suppressMessages(as_epidist_meta_model(estimates = growth_estimates))
+  family <- epidist_family(meta)
+  formula <- epidist_formula(meta, family, bf(mu ~ 1))
+  expect_identical(
+    as_string_formula(formula$pforms$pgrowth), "pgrowth ~ 0 + study"
+  )
+  expect_identical(as_string_formula(formula$pforms$sigma), "sigma ~ 1")
+  # A formula given for pgrowth is kept as it is.
+  shared <- epidist_formula(meta, family, bf(mu ~ 1, pgrowth ~ 1))
+  expect_identical(as_string_formula(shared$pforms$pgrowth), "pgrowth ~ 1")
+  grouped <- epidist_formula(
+    meta, family, bf(mu ~ 1, pgrowth ~ 1 + (1 | study))
+  )
+  expect_identical(
+    as_string_formula(grouped$pforms$pgrowth), "pgrowth ~ 1 + (1 | study)"
+  )
+  # Nothing is added where every rate is known, and individual level rows
+  # with an exponential growth primary event keep their intercept.
+  known <- epidist_formula(
+    prep_meta_obs, epidist_family(prep_meta_obs), bf(mu ~ 1)
+  )
+  expect_false("pgrowth" %in% names(known$pforms))
+  individual <- suppressMessages(
+    as_epidist_meta_model(sim_obs, primary = "expgrowth")
+  )
+  intercept <- epidist_formula(
+    individual, epidist_family(individual), bf(mu ~ 1)
+  )
+  expect_identical(
+    as_string_formula(intercept$pforms$pgrowth), "pgrowth ~ 1"
+  )
+  # A single study cannot be coded as a factor, so it gets the intercept.
+  single <- suppressMessages(as_epidist_meta_model(
+    estimates = growth_estimates[growth_estimates$study == "A", ]
+  ))
+  alone <- epidist_formula(single, epidist_family(single), bf(mu ~ 1))
+  expect_identical(as_string_formula(alone$pforms$pgrowth), "pgrowth ~ 1")
+  code <- suppressMessages(epidist(single, fn = brms::make_stancode))
+  expect_match(code, "Intercept_pgrowth", fixed = TRUE)
+})
+
+test_that("the growth slots of a meta model survive the data transform and reach newdata", { # nolint: line_length_linter.
+  meta <- suppressMessages(
+    as_epidist_meta_model(sim_obs, estimates = growth_estimates)
+  )
+  family <- epidist_family(meta)
+  formula <- epidist_formula(meta, family, bf(mu ~ 1))
+  transformed <- suppressMessages(
+    epidist_transform_data_model(meta, family, formula)
+  )
+  expect_s3_class(transformed, "epidist_meta_model")
+  summaries <- transformed[transformed$obs_type != 1L, ]
+  expect_identical(summaries$growth_known, c(0L, 0L, 1L))
+  expect_identical(summaries$growth_rate_sd, c(NA, 0.02, NA))
+  expect_true(all(transformed$growth_known[transformed$obs_type == 1L] == 1L))
+  newdata <- epidist_newdata(meta)
+  expect_identical(newdata$growth_known, 1L)
+  expect_identical(newdata$growth_rate, 0)
+})
+
+test_that(".meta_row_slots reads the growth rate of an estimated row from pgrowth", { # nolint: line_length_linter.
+  standata <- suppressMessages(
+    epidist(
+      as_epidist_meta_model(estimates = growth_estimates),
+      fn = brms::make_standata
+    )
+  )
+  rates <- c(0.05, 0.1, 0.2)
+  prep <- structure(
+    list(
+      data = standata,
+      dpars = list(pgrowth = matrix(rates, nrow = 3, ncol = standata$N)),
+      ndraws = 3,
+      nobs = standata$N
+    ),
+    class = "brmsprep"
+  )
+  estimated <- .meta_row_slots(1, prep)
+  expect_identical(estimated$growth_known, 0L)
+  expect_identical(estimated$growth_rate, rates)
+  known <- .meta_row_slots(3, prep)
+  expect_identical(known$growth_known, 1L)
+  expect_identical(known$growth_rate, 0.05)
+  # One draw at a time.
+  expect_identical(.meta_draw_slots(estimated, 2)$growth_rate, 0.1)
+  expect_identical(.meta_draw_slots(estimated, 5)$growth_rate, 0.2)
+  expect_identical(.meta_draw_slots(known, 2), known)
+  # A fit made before the slot existed has no vint10 and is all known.
+  prep$data$vint10 <- NULL
+  expect_identical(.meta_row_slots(1, prep)$growth_known, 1L)
+  expect_identical(.meta_row_slots(1, prep)$growth_rate, 0)
+  # An estimated rate always tilts the primary event, as in Stan.
+  expect_true(.meta_slots_tilted(.meta_draw_slots(estimated, 1)))
+  expect_true(.meta_slots_tilted(list(growth_known = 0L, growth_rate = 0)))
+  expect_false(.meta_slots_tilted(list(growth_known = 1L, growth_rate = 0)))
+  expect_true(.meta_slots_tilted(list(growth_known = 1L, growth_rate = 0.1)))
+})
+
+test_that(".meta_row_draw_moments summarises each draw at its own growth rate", { # nolint: line_length_linter.
+  rm(list = ls(.meta_draws), envir = .meta_draws)
+  on.exit(rm(list = ls(.meta_draws), envir = .meta_draws), add = TRUE)
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  slots <- list(
+    lower = 0,
+    obs_type = 2L, cutoff = 30, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = c(0.05, 0.2),
+    growth_known = 0L, trunc_design = 1L, study_n = 60
+  )
+  dist_args <- rep(list(args), 2)
+  moments <- .meta_row_draw_moments(slots, "plnorm", dist_args)
+  expect_length(moments, 2)
+  expect_identical(
+    moments[[1]],
+    .meta_row_moments(.meta_draw_slots(slots, 1), "plnorm", args)
+  )
+  expect_identical(
+    moments[[2]],
+    .meta_row_moments(.meta_draw_slots(slots, 2), "plnorm", args)
+  )
+  # A faster growing epidemic cuts the follow up of long delays further, so
+  # the same parameters imply a shorter reported mean.
+  expect_lt(moments[[2]][["mean"]], moments[[1]][["mean"]])
+  # The rates are part of what a cached entry is compared against.
+  slower <- slots
+  slower$growth_rate <- c(0.05, 0.1)
+  other <- .meta_row_draw_moments(slower, "plnorm", dist_args)
+  expect_identical(other[[1]], moments[[1]])
+  expect_false(isTRUE(all.equal(other[[2]], moments[[2]])))
+  expect_identical(
+    .meta_row_draw_moments(slots, "plnorm", dist_args), moments
+  )
+})
+
+test_that("the meta model log likelihood of an estimated growth rate row varies by draw", { # nolint: line_length_linter.
+  meta <- suppressMessages(as_epidist_meta_model(estimates = growth_estimates))
+  family <- epidist_family(meta)
+  standata <- suppressMessages(epidist(meta, fn = brms::make_standata))
+  rates <- c(0.02, 0.1, 0.3)
+  prep <- structure(
+    list(
+      data = standata,
+      dpars = list(
+        mu = matrix(1.8, nrow = 3, ncol = standata$N),
+        sigma = matrix(0.5, nrow = 3, ncol = standata$N),
+        pgrowth = matrix(rates, nrow = 3, ncol = standata$N)
+      ),
+      ndraws = 3,
+      nobs = standata$N,
+      family = list(primary = "uniform")
+    ),
+    class = "brmsprep"
+  )
+  args <- list(meanlog = 1.8, sdlog = 0.5)
+  for (i in 1:2) {
+    log_lik <- family$log_lik(i = i, prep)
+    slots <- .meta_row_slots(i, prep)
+    expected <- vapply(
+      1:3,
+      function(draw) {
+        return(.meta_row_log_lik(
+          .meta_draw_slots(slots, draw), "plnorm", args
+        ))
+      },
+      numeric(1)
+    )
+    expect_equal(log_lik, expected, tolerance = 1e-8)
+    expect_true(all(is.finite(log_lik)))
+    expect_gt(diff(range(log_lik)), 0)
+  }
+  # The row with a known rate does not move with pgrowth.
+  known <- family$log_lik(i = 3, prep)
+  expect_identical(known[1], known[2])
+  expect_identical(known[2], known[3])
+  predicted <- family$posterior_predict(i = 1, prep)
+  expect_identical(dim(predicted), c(3L, 1L))
+  expect_true(all(is.finite(predicted)))
+})
+
 # The slots of a joint study row, a continuous estimand reporting a mean or a
 # standard deviation alongside quantiles, fully adjusted unless overridden.
 joint_study_slots <- function(types, probs, values, study_n = 200, ...) {
@@ -3896,6 +4149,10 @@ test_that(".meta_quantile_on_chord names the designs that keep the chord", {
   expect_true(.meta_quantile_on_chord(
     utils::modifyList(base, list(cens_adjusted = 2L, growth_rate = 0.1))
   ))
+  # An estimated rate is tilted whatever value it holds.
+  expect_true(.meta_quantile_on_chord(utils::modifyList(
+    base, list(cens_adjusted = 2L, growth_known = 0L, growth_rate = 0)
+  )))
 })
 
 test_that(".meta_node_interval finds the node interval holding a delay", {

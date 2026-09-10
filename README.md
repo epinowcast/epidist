@@ -120,8 +120,7 @@ vignette, with other details and support at the [package
 site](https://mc-stan.org/cmdstanr/), but the brief version is:
 
 ``` r
-# if you have not yet installed `epidist`, or you installed it without
-# `Suggests` dependencies
+# `cmdstanr` is not a dependency of `epidist`, so install it yourself
 install.packages(
   "cmdstanr",
   repos = c("https://stan-dev.r-universe.dev", getOption("repos"))

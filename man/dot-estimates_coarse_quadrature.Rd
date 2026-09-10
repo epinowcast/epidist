@@ -20,8 +20,8 @@ is left with nodes further apart than a quarter of that spread. This
 covers a study that did not adjust for right truncation and used a
 continuous adjustment (\code{cens_adjusted} of 1, 2 or 4), a study that did
 adjust but whose primary events were not uniform within their window
-(\code{cens_adjusted} of 2 or 4 with a non zero \code{growth_rate}), and the
-quantile members of a covariance matrix group, which are read off the
-same nodes.
+(\code{cens_adjusted} of 2 or 4 with a non zero or estimated \code{growth_rate}),
+and the quantile members of a covariance matrix group, which are read off
+the same nodes.
 }
 \keyword{internal}
