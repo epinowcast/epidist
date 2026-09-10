@@ -1133,7 +1133,7 @@ test_that("the meta model recovers the truth from every bias code", {
 test_that("the exact quantile set likelihood is calibrated over repeated studies", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   skip_if_not(
     identical(Sys.getenv("EPIDIST_META_CALIBRATION"), "true"),
     "Set EPIDIST_META_CALIBRATION=true to run the calibration fits"
