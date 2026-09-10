@@ -5,9 +5,11 @@ Ungrouped rows use the normal approximations of
 A group row, which stands for several summaries reported by one study,
 uses the joint likelihood of its members:
 [`.meta_moment_pair_ll()`](https://epidist.epinowcast.org/reference/dot-meta_moment_pair_ll.md)
-for a mean and a standard deviation, and
+for a mean and a standard deviation,
 [`.meta_quantile_set_ll()`](https://epidist.epinowcast.org/reference/dot-meta_quantile_set_ll.md)
-for a set of quantiles.
+for a set of quantiles, and
+[`.meta_joint_study_ll()`](https://epidist.epinowcast.org/reference/dot-meta_joint_study_ll.md)
+for a continuous estimand reporting both kinds.
 
 ## Usage
 

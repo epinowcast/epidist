@@ -182,6 +182,9 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_implied_summary_vector.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_individual_rows.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_interpolate.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_joint_covariance.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_joint_study_ll.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_joint_study_terms.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_left_moments.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_log_accrual_weight.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_log_binom_upper.html</loc></url>
@@ -201,6 +204,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_n_quad_default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_n_quad_max.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_newton_steps.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_node_interval.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_node_quantile.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_obs_type.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_order_group.html</loc></url>
@@ -208,6 +212,9 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_pcens_trunc_moments.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_primary.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_quantile_counts.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_quantile_density.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_quantile_on_chord.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_quantile_partials.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_quantile_set_ll.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_raw_from_central.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_refine_quantile.html</loc></url>

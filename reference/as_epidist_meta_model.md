@@ -69,11 +69,13 @@ so they are fitted jointly. Two are grouped when they agree on every
 column of
 [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
 other than the summary itself, and a summary supplied with its own `se`
-is fitted alone. One observation is therefore a group rather than a
-single reported value, so `log_lik()` and
-[`loo::loo()`](https://mc-stan.org/loo/reference/loo.html) report per
-group, and `loo` only compares fits to the same studies and the same mix
-of individual and summary rows. See
+is fitted alone. A study that reported integer date differences
+(`cens_adjusted` 0 or 3) is the exception: its mean and standard
+deviation form one group and its quantiles another. One observation is
+therefore a group rather than a single reported value, so `log_lik()`
+and [`loo::loo()`](https://mc-stan.org/loo/reference/loo.html) report
+per group, and `loo` only compares fits to the same studies and the same
+mix of individual and summary rows. See
 [`vignette("faq")`](https://epidist.epinowcast.org/articles/faq.md).
 
 Three consequences of the sampling likelihoods change what you should
@@ -93,10 +95,14 @@ do.
   for those rows, which also takes them out of the joint quantile
   likelihood.
 
-- The normal approximations degrade at small study sample sizes, and
-  summaries of different kinds from one study, such as a mean and a
-  median, are treated as independent. A study that published draws of
-  its parameters avoids the second, because
+- The normal approximations degrade at small study sample sizes. A study
+  that reported integer date differences has its mean and standard
+  deviation fitted separately from its quantiles, as if they came from
+  different delays, which counts such a study about twice for the
+  location where it reports both kinds, so keep its mean and standard
+  deviation and drop its quantiles. A study with a continuous estimand
+  has every kind fitted jointly. A study that published draws of its
+  parameters avoids both, because
   [`as_epidist_multivariate()`](https://epidist.epinowcast.org/reference/as_epidist_multivariate.md)
   turns them into a covariance over the summaries that is fitted
   jointly.

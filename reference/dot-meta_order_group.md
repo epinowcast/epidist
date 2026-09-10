@@ -1,10 +1,11 @@
 # Order the summaries within a joint likelihood group
 
-A mean and standard deviation pair is stored with the mean first so that
-the bivariate normal knows which member is which. A set of quantiles is
-stored in increasing probability, which must also be non decreasing in
-the reported value for the cells of the multinomial to be a partition of
-the delay axis. Coincident values are merged into one cell by the
+Members are stored as the mean, then the standard deviation, then the
+quantiles in increasing probability, so that the bivariate normal knows
+which member is which and a joint study group is laid out as its
+covariance is built. The quantiles must be non decreasing in the
+reported value for the cells of the multinomial to be a partition of the
+delay axis. Coincident values are merged into one cell by the
 likelihood.
 
 ## Usage

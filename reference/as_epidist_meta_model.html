@@ -126,10 +126,13 @@ that they form their own level of any such term.</p>
     <p>Summaries that one study computed from the same delays are correlated, so
 they are fitted jointly. Two are grouped when they agree on every column of
 <code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> other than the summary itself, and a summary
-supplied with its own <code>se</code> is fitted alone. One observation is therefore a
-group rather than a single reported value, so <code>log_lik()</code> and <code><a href="https://mc-stan.org/loo/reference/loo.html" class="external-link">loo::loo()</a></code>
-report per group, and <code>loo</code> only compares fits to the same studies and the
-same mix of individual and summary rows. See <code><a href="../articles/faq.html">vignette("faq")</a></code>.</p>
+supplied with its own <code>se</code> is fitted alone. A study that reported integer
+date differences (<code>cens_adjusted</code> 0 or 3) is the exception: its mean and
+standard deviation form one group and its quantiles another. One
+observation is therefore a group rather than a single reported value, so
+<code>log_lik()</code> and <code><a href="https://mc-stan.org/loo/reference/loo.html" class="external-link">loo::loo()</a></code> report per group, and <code>loo</code> only compares
+fits to the same studies and the same mix of individual and summary rows.
+See <code><a href="../articles/faq.html">vignette("faq")</a></code>.</p>
 <p>Three consequences of the sampling likelihoods change what you should do.</p><ul><li><p>The standard errors are plug in quantities that depend on the parameters,
 so studies no single distribution can explain may be accommodated by
 inflating the implied standard deviation rather than by moving the
@@ -140,11 +143,15 @@ on the sampling error alone.</p></li>
 have smaller sampling error than assumed here. Supply a reported <code>se</code> in
 <code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> for those rows, which also takes them out of
 the joint quantile likelihood.</p></li>
-<li><p>The normal approximations degrade at small study sample sizes, and
-summaries of different kinds from one study, such as a mean and a median,
-are treated as independent. A study that published draws of its parameters
-avoids the second, because <code><a href="as_epidist_multivariate.html">as_epidist_multivariate()</a></code> turns them into a
-covariance over the summaries that is fitted jointly.</p></li>
+<li><p>The normal approximations degrade at small study sample sizes. A study
+that reported integer date differences has its mean and standard
+deviation fitted separately from its quantiles, as if they came from
+different delays, which counts such a study about twice for the location
+where it reports both kinds, so keep its mean and standard deviation
+and drop its quantiles. A study with a continuous estimand has every kind
+fitted jointly. A study that published draws of its parameters avoids
+both, because <code><a href="as_epidist_multivariate.html">as_epidist_multivariate()</a></code> turns them into a covariance
+over the summaries that is fitted jointly.</p></li>
 </ul><p>Two approximations are worth knowing about before fitting quantiles.</p><ul><li><p>A study that took integer date differences reports quantiles of a discrete
 distribution. The model interpolates its grid distribution function
 through the mid points of the cells, but the reported value is itself
