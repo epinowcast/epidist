@@ -404,9 +404,10 @@ test_that("epidist_model_prior warns where a reported growth rate has no coeffic
   estimates$growth_rate_sd <- NA
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
   expect_no_warning(epidist_model_prior(meta, shared))
-  # The only study of a model puts its reported rate on the intercept.
-  estimates$growth_rate_sd <- 0.02
+  # The only study of a model puts its reported rate on the intercept. The
+  # rate is set first, because a standard deviation without one is an error.
   estimates$growth_rate <- 0.1
+  estimates$growth_rate_sd <- 0.02
   single <- suppressMessages(
     as_epidist_meta_model(estimates = estimates[estimates$study == "B", ])
   )

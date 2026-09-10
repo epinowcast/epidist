@@ -105,6 +105,36 @@ jobs:
           )
         shell: Rscript {0}
 
+      - name: Check meta model syntax
+        run: |
+          estimates <- epidist::as_epidist_estimates_data(
+            data.frame(
+              study = c("A", "A"),
+              type = c("mean", "sd"),
+              value = c(7.5, 3.6),
+              n = c(120, 120),
+              relative_obs_time = c(20, 20),
+              trunc_adjusted = c(FALSE, FALSE),
+              cens_adjusted = c(0, 0)
+            )
+          )
+          dummy_obs <- epidist::as_epidist_meta_model(estimates = estimates)
+          stancode <- epidist::epidist(
+            data = dummy_obs, fn = brms::make_stancode
+          )
+          mod <- cmdstanr::cmdstan_model(
+            stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
+          )
+          message <- capture.output(
+            mod$check_syntax(pedantic = FALSE),
+            type = "message"
+          )
+          stopifnot(
+            length(message) != 0 &&
+            all(message == "Stan program is syntactically correct")
+          )
+        shell: Rscript {0}
+
       - name: Create issue on failure
         if: failure() && github.event_name == 'schedule'
         uses: actions/github-script@v9

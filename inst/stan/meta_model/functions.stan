@@ -273,9 +273,12 @@
     * (2024). See the model guide vignette for the maths. Cells recording a
     * delay below `delay_min` are dropped and the rest renormalised, which
     * conditions the grid on the study's left truncation point. Under an
-    * accrual design each cell is cut at the multiples of the primary window
-    * inside it and every piece is weighted by the follow up available to
-    * the primary window it starts in. Mirrors .meta_grid_pmf() in R.
+    * accrual design each cell is cut where a complete primary window stops
+    * being eligible for it and every piece is weighted by the growth
+    * weighted mass of the complete windows eligible inside it, and the
+    * partial last primary window of a collection window that is not a
+    * multiple of the primary window is added separately. Mirrors
+    * .meta_grid_pmf() in R.
     */
   vector meta_family_grid_pmf(array[] real params, data real delay_min,
                               data real cutoff, data real pwindow_width,
@@ -292,6 +295,16 @@
     {
       vector[n_cell + 1] log_cdf;
       vector[n_cell] log_mass;
+      // The collection window holds n_full complete primary windows and,
+      // unless it is a multiple of the primary window, a partial last one
+      // of length cutoff - pwindow_width * n_full. That length is written
+      // out wherever it is used, because Stan only treats expressions built
+      // from data arguments and integers as data only.
+      int n_full = to_int(floor(cutoff / pwindow_width + 1e-9));
+      int partial = (cutoff - pwindow_width * n_full > 1e-9 * pwindow_width)
+        ? 1 : 0;
+      real log_partial = negative_infinity();
+      real log_lo_partial = negative_infinity();
       for (j in 0:n_cell) {
         log_cdf[j + 1] = meta_family_pcens_lcdf(
           (first + j) * swindow_width | params, pwindow_width, prim_id,
@@ -317,41 +330,70 @@
         }
         return exp(log_mass - log(total));
       }
+      // The partial window only holds delays up to its own length, and the
+      // offset of its primary events runs over that length, so its cases
+      // follow the primary censored distribution function with that window,
+      // weighted by the growth weighted length of the window.
+      if (partial == 1) {
+        log_partial = growth_rate * n_full * pwindow_width +
+          meta_family_log_accrual_weight(
+            n_full * pwindow_width, cutoff, growth_rate
+          );
+        log_lo_partial = meta_family_pcens_lcdf(
+          fmin(first * swindow_width, cutoff - pwindow_width * n_full) |
+          params, cutoff - pwindow_width * n_full, prim_id, prim_params
+        );
+      }
       for (j in 1:n_cell) {
-        // The pieces run from the cell's lower edge through the multiples of
-        // the primary window strictly inside the cell to its upper edge. The
-        // positions are written out from data arguments and loop indices,
-        // because Stan only treats such expressions as data only.
-        int k_lo = to_int(floor(
-          (first + j - 1) * swindow_width / pwindow_width + 1e-9
+        // A complete window k holds a delay of x from its start when
+        // k * pwindow_width + x <= cutoff, so the number of complete windows
+        // eligible steps down at cutoff - i * pwindow_width. The pieces run
+        // from the cell's lower edge through those points strictly inside
+        // the cell to its upper edge, each weighted by the growth weighted
+        // mass of the complete windows eligible inside it.
+        int i_lo = to_int(floor(
+          (cutoff - (first + j) * swindow_width) / pwindow_width + 1e-9
         )) + 1;
-        int k_hi = to_int(ceil(
-          (first + j) * swindow_width / pwindow_width - 1e-9
+        int i_hi = to_int(ceil(
+          (cutoff - (first + j - 1) * swindow_width) / pwindow_width - 1e-9
         )) - 1;
         real log_lo = log_cdf[j];
         real log_weight = meta_family_log_accrual_weight(
-          pwindow_width * floor(
-            (first + j - 1) * swindow_width / pwindow_width + 1e-9
-          ),
-          cutoff, growth_rate
+          cutoff - pwindow_width * min(i_hi + 1, n_full), cutoff, growth_rate
         );
         real acc = negative_infinity();
-        for (k in k_lo:k_hi) {
+        for (i in 0:(i_hi - i_lo)) {
+          int cut = i_hi - i;
           real log_hi = meta_family_pcens_lcdf(
-            k * pwindow_width | params, pwindow_width, prim_id, prim_params
+            cutoff - cut * pwindow_width | params, pwindow_width, prim_id,
+            prim_params
           );
           if (log_hi > log_lo) {
             acc = log_sum_exp(acc, log_diff_exp(log_hi, log_lo) + log_weight);
           }
           log_lo = log_hi;
           log_weight = meta_family_log_accrual_weight(
-            k * pwindow_width, cutoff, growth_rate
+            cutoff - pwindow_width * min(cut, n_full), cutoff, growth_rate
           );
         }
         if (log_cdf[j + 1] > log_lo) {
           acc = log_sum_exp(
             acc, log_diff_exp(log_cdf[j + 1], log_lo) + log_weight
           );
+        }
+        if (partial == 1 &&
+            (first + j - 1) * swindow_width < cutoff - pwindow_width * n_full) {
+          real log_hi_partial = meta_family_pcens_lcdf(
+            fmin((first + j) * swindow_width, cutoff - pwindow_width * n_full) |
+            params, cutoff - pwindow_width * n_full, prim_id, prim_params
+          );
+          if (log_hi_partial > log_lo_partial) {
+            acc = log_sum_exp(
+              acc,
+              log_diff_exp(log_hi_partial, log_lo_partial) + log_partial
+            );
+          }
+          log_lo_partial = log_hi_partial;
         }
         log_mass[j] = acc;
       }
@@ -1413,6 +1455,291 @@
   }
 
   /**
+    * Whether the implied quantile of a design is left on its chord, see
+    * meta_family_node_quantile(). Mirrors .meta_quantile_on_chord() in R.
+    */
+  int meta_family_quantile_on_chord(data int cens_adj, data int accrual,
+                                    data int prim_id) {
+    int base_code = meta_family_cens_base(cens_adj);
+    if (base_code == 0 || accrual == 1) {
+      return 1;
+    }
+    if (base_code == 2 && prim_id != 1) {
+      return 1;
+    }
+    return 0;
+  }
+
+  /**
+    * The index of the node interval holding a delay, for nodes packed as
+    * [origin, spacing, values]. Interval i runs from node i to node i + 1.
+    * The delay may depend on the parameters, so the interval is found by
+    * stepping rather than by to_int. Mirrors .meta_node_interval() in R.
+    */
+  int meta_family_node_interval(vector nodes, real q) {
+    int n_interval = num_elements(nodes) - 3;
+    int index = 1;
+    while (index < n_interval && nodes[1] + index * nodes[2] <= q) {
+      index += 1;
+    }
+    return index;
+  }
+
+  /**
+    * Density of a continuous estimand at its implied quantile. On the chord
+    * it is the slope of the node interval holding the quantile. Otherwise it
+    * is the closed form density over the truncation normaliser, as in
+    * meta_family_implied_density(), at a delay that may depend on the
+    * parameters. Mirrors .meta_quantile_density() in R, returning zero where
+    * R returns infinity so that the caller rejects the draw.
+    */
+  real meta_family_quantile_density(real q, int index, vector nodes,
+                                    array[] real params, data real delay_min,
+                                    data real cutoff, data real pwindow_width,
+                                    data real swindow_width,
+                                    data int trunc_adj, data int cens_adj,
+                                    data int prim_id,
+                                    array[] real prim_params,
+                                    data int accrual, real growth_rate) {
+    if (meta_family_quantile_on_chord(cens_adj, accrual, prim_id) == 1) {
+      return (nodes[index + 3] - nodes[index + 2]) / nodes[2];
+    }
+    {
+      int base_code = meta_family_cens_base(cens_adj);
+      real left = meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                                         swindow_width);
+      real y = q - meta_family_shift(cens_adj, pwindow_width, swindow_width);
+      real density;
+      real log_base;
+      real base;
+      real norm;
+      if (y <= left || (trunc_adj != 1 && y >= cutoff)) {
+        return 0;
+      }
+      if (base_code == 2) {
+        density = meta_family_uniform_pcens_density(y, params, pwindow_width);
+        // The left truncation point is written out from the data arguments,
+        // because a local variable is not data only.
+        log_base = left > 0
+          ? meta_family_pcens_lcdf(
+              meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                                     swindow_width) | params, pwindow_width,
+              prim_id, prim_params
+            )
+          : negative_infinity();
+      } else {
+        density = meta_family_density(y, params);
+        log_base = left > 0
+          ? dist_lcdf(left | params, dist_id) : negative_infinity();
+      }
+      base = is_inf(log_base) ? 0 : exp(log_base);
+      if (trunc_adj == 1) {
+        norm = 1 - base;
+      } else {
+        real log_top = base_code == 2
+          ? meta_family_pcens_lcdf(cutoff | params, pwindow_width, prim_id,
+                                   prim_params)
+          : dist_lcdf(cutoff | params, dist_id);
+        norm = meta_family_diff_exp(log_top, log_base);
+      }
+      if (is_nan(norm) || norm <= 0) {
+        return 0;
+      }
+      return density / norm;
+    }
+  }
+
+  /**
+    * Centred partial moments of an estimand below its implied quantile,
+    * int_L^q (x - centre)^k dG for k = 1, 2, by parts over the linear
+    * interpolant of the packed nodes, which reaches p at q. Mirrors
+    * .meta_quantile_partials() in R.
+    */
+  vector meta_family_quantile_partials(vector nodes, real q, data real p,
+                                       int index, real centre) {
+    real step = nodes[2];
+    real top = q - centre;
+    real remainder = q - (nodes[1] + (index - 1) * step);
+    real x_last = nodes[1] + (index - 1) * step - centre;
+    real int_g = 0;
+    real int_first = 0;
+    for (i in 1:(index - 1)) {
+      real x_lo = nodes[1] + (i - 1) * step - centre;
+      int_g += (nodes[i + 2] + nodes[i + 3]) / 2 * step;
+      int_first += (x_lo * nodes[i + 2] + (x_lo + step) * nodes[i + 3]) / 2 *
+        step;
+    }
+    int_g += (nodes[index + 2] + p) / 2 * remainder;
+    int_first += (x_last * nodes[index + 2] + top * p) / 2 * remainder;
+    return [top * p - int_g, top ^ 2 * p - 2 * int_first]';
+  }
+
+  /**
+    * Sampling covariance of the mean, standard deviation and quantiles one
+    * study computed from the same delays. The moment block is that of
+    * meta_family_moment_pair_lpdf(), the quantile block is the Bahadur
+    * covariance p_i (1 - p_j) / (n f_i f_j), and the cross terms are the
+    * centred partial moments over -(n f_i), carried onto the standard
+    * deviation scale by 1 / (2 sigma). Mirrors .meta_joint_covariance() in R.
+    */
+  matrix meta_family_joint_covariance(data array[] int types,
+                                      data vector probs, vector moments,
+                                      vector density, matrix partials,
+                                      data int study_n) {
+    int k = num_elements(types);
+    matrix[k, k] covariance;
+    array[k] int position;
+    int seen = 0;
+    real spread = moments[2];
+    real se_mean = spread / sqrt(1.0 * study_n);
+    real se_sd = meta_family_sd_se(moments, study_n);
+    // Matches .meta_max_correlation() in R/meta_summaries.R.
+    real limit = 1 - 1e-6;
+    real rho = fmin(fmax(moments[4] / sqrt(fmax(moments[3] - 1, 1e-10)),
+                         -limit), limit);
+    for (j in 1:k) {
+      if (types[j] == 3) {
+        seen += 1;
+      }
+      position[j] = seen;
+    }
+    for (i in 1:k) {
+      for (j in 1:k) {
+        if (types[i] == 3 && types[j] == 3) {
+          covariance[i, j] = fmin(probs[i], probs[j]) *
+            (1 - fmax(probs[i], probs[j])) /
+            (study_n * density[position[i]] * density[position[j]]);
+        } else if (types[i] == 3 || types[j] == 3) {
+          int moment_type = types[i] == 3 ? types[j] : types[i];
+          int m = types[i] == 3 ? position[i] : position[j];
+          real prob = types[i] == 3 ? probs[i] : probs[j];
+          if (moment_type == 1) {
+            covariance[i, j] = -partials[1, m] / (study_n * density[m]);
+          } else {
+            covariance[i, j] = -(partials[2, m] - spread ^ 2 * prob) /
+              (2 * spread * study_n * density[m]);
+          }
+        } else if (types[i] != types[j]) {
+          covariance[i, j] = rho * se_mean * se_sd;
+        } else if (types[i] == 1) {
+          covariance[i, j] = se_mean ^ 2;
+        } else {
+          covariance[i, j] = se_sd ^ 2;
+        }
+      }
+    }
+    return covariance;
+  }
+
+  /**
+    * Joint log density of the mean, standard deviation and quantiles a study
+    * with a continuous estimand reports, as the multivariate normal with the
+    * covariance of meta_family_joint_covariance() derived from the implied
+    * distribution. The implied quantiles are read off the packed nodes as
+    * for a covariance matrix group. A draw whose implied moments overflow,
+    * whose estimand has no density at a quantile, or whose covariance is not
+    * positive definite is rejected with negative infinity, so the Cholesky
+    * factor is taken here with a pivot check rather than thrown from
+    * cholesky_decompose. Mirrors .meta_joint_study_ll() in R.
+    */
+  real meta_family_joint_study_lpdf(data vector y, data array[] int types,
+                                    data vector probs, data int study_n,
+                                    array[] real params, data real delay_min,
+                                    data real cutoff, data real pwindow_width,
+                                    data real swindow_width,
+                                    data int trunc_adj, data int cens_adj,
+                                    data int prim_id,
+                                    array[] real prim_params,
+                                    data int accrual, real growth_rate,
+                                    data int n_quad) {
+    int k = num_elements(types);
+    int n_quantile = 0;
+    vector[k] implied;
+    vector[4] moments = meta_family_implied_moments(
+      params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+      cens_adj, prim_id, prim_params, accrual, growth_rate, n_quad
+    );
+    for (j in 1:4) {
+      if (is_nan(moments[j]) || is_inf(moments[j])) {
+        return negative_infinity();
+      }
+    }
+    for (j in 1:k) {
+      if (types[j] == 3) {
+        n_quantile += 1;
+      } else if (types[j] == 1) {
+        implied[j] = moments[1];
+      } else {
+        implied[j] = moments[2];
+      }
+    }
+    {
+      vector[n_quantile] density;
+      matrix[2, n_quantile] partials;
+      matrix[k, k] covariance;
+      matrix[k, k] factor = rep_matrix(0, k, k);
+      if (n_quantile > 0) {
+        int n_node = meta_family_node_count(
+          delay_min, cutoff, pwindow_width, swindow_width, cens_adj, n_quad
+        );
+        vector[2 + n_node] nodes = meta_family_implied_nodes(
+          params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+          cens_adj, prim_id, prim_params, accrual, growth_rate, n_quad
+        );
+        int m = 0;
+        for (j in 1:k) {
+          if (types[j] == 3) {
+            real q = meta_family_node_quantile(
+              nodes, probs[j], params, delay_min, cutoff, pwindow_width,
+              swindow_width, trunc_adj, cens_adj, prim_id, prim_params,
+              accrual, growth_rate
+            );
+            int index = meta_family_node_interval(nodes, q);
+            real f = meta_family_quantile_density(
+              q, index, nodes, params, delay_min, cutoff, pwindow_width,
+              swindow_width, trunc_adj, cens_adj, prim_id, prim_params,
+              accrual, growth_rate
+            );
+            vector[2] partial;
+            if (is_nan(f) || is_inf(f) || f <= 0) {
+              return negative_infinity();
+            }
+            m += 1;
+            implied[j] = q;
+            density[m] = f;
+            partial = meta_family_quantile_partials(
+              nodes, q, probs[j], index, moments[1]
+            );
+            partials[1, m] = partial[1];
+            partials[2, m] = partial[2];
+          }
+        }
+      }
+      covariance = meta_family_joint_covariance(
+        types, probs, moments, density, partials, study_n
+      );
+      for (j in 1:k) {
+        real pivot = covariance[j, j];
+        for (l in 1:(j - 1)) {
+          pivot -= factor[j, l] ^ 2;
+        }
+        if (is_nan(pivot) || pivot <= 0) {
+          return negative_infinity();
+        }
+        factor[j, j] = sqrt(pivot);
+        for (i in (j + 1):k) {
+          real acc = covariance[i, j];
+          for (l in 1:(j - 1)) {
+            acc -= factor[i, l] * factor[j, l];
+          }
+          factor[i, j] = acc / factor[j, j];
+        }
+      }
+      return multi_normal_cholesky_lpdf(y | implied, factor);
+    }
+  }
+
+  /**
     * The log upper tail P(M >= m) of a binomial count, stable far into the
     * tail. Nine standard deviations above the mean, or below a probability
     * of 1e-12, the tail is summed term by term on the log scale until the
@@ -1626,7 +1953,10 @@
   * have converged to given the biases in its estimation procedure.
   * Summaries reported by the same study are fitted jointly, indexed into the
   * flat group_value, group_count, group_type and group_p arrays by
-  * group_start and group_len. A group whose covariance comes from a
+  * group_start and group_len. A continuous estimand reporting a mean or a
+  * standard deviation alongside quantiles has the covariance over all of
+  * them derived from the implied distribution, see
+  * meta_family_joint_study_lpdf(). A group whose covariance comes from a
   * multivariate representation of a study's parameter draws indexes its
   * Cholesky factor into group_chol from chol_start, which holds
   * group_len * group_len entries in column major order. R builds that factor
@@ -1686,6 +2016,15 @@
     );
     return multi_normal_cholesky_lpdf(
       group_value[group_start:last] | implied, chol
+    );
+  }
+
+  if (obs_type == 8) {
+    return meta_family_joint_study_lpdf(
+      group_value[group_start:last] | group_type[group_start:last],
+      group_p[group_start:last], study_n, {dpars_B}, delay_min,
+      relative_obs_t, pwindow_width, swindow_width, trunc_adj, cens_adj,
+      prim_id, prim_params, accrual, growth, n_quad
     );
   }
 
