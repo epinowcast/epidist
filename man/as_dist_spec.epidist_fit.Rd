@@ -99,10 +99,10 @@ as_dist_spec(fit, max = 60)
 \code{\link[=epidist_newdata]{epidist_newdata()}} to build \code{newdata}, and \code{\link[=simulate_secondary]{simulate_secondary()}} to
 simulate delays from the result.
 
-Other postprocess: 
-\code{\link{add_summaries}()},
-\code{\link{delay_parameter_draws}()},
-\code{\link{delay_summary_draws}()},
-\code{\link{epidist_strata}()}
+Other postprocess:
+\code{\link[=add_summaries]{add_summaries()}},
+\code{\link[=delay_parameter_draws]{delay_parameter_draws()}},
+\code{\link[=delay_summary_draws]{delay_summary_draws()}},
+\code{\link[=epidist_strata]{epidist_strata()}}
 }
 \concept{postprocess}

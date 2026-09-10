@@ -70,10 +70,10 @@ delay_summary_draws(fit, probs = c(0.05, 0.95))
 \code{\link[=add_summaries]{add_summaries()}} to summarise draws you already have, and
 \code{\link[=epidist_strata]{epidist_strata()}} to build \code{newdata}.
 
-Other postprocess: 
-\code{\link{add_summaries}()},
-\code{\link{as_dist_spec.epidist_fit}()},
-\code{\link{delay_parameter_draws}()},
-\code{\link{epidist_strata}()}
+Other postprocess:
+\code{\link[=add_summaries]{add_summaries()}},
+\code{\link[=as_dist_spec.epidist_fit]{as_dist_spec.epidist_fit()}},
+\code{\link[=delay_parameter_draws]{delay_parameter_draws()}},
+\code{\link[=epidist_strata]{epidist_strata()}}
 }
 \concept{postprocess}

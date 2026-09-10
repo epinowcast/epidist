@@ -48,27 +48,27 @@ formula has no group level term. The prior on the intercept of the other
 distributional parameters is left to the family or to \code{brms}.
 }
 \seealso{
-Other prior: 
-\code{\link{epidist_family_prior}()},
-\code{\link{epidist_family_prior.default}()},
-\code{\link{epidist_family_prior.lognormal}()},
-\code{\link{epidist_model_prior}()},
-\code{\link{epidist_model_prior.default}()},
-\code{\link{epidist_prior}()}
+Other prior:
+\code{\link[=epidist_family_prior]{epidist_family_prior()}},
+\code{\link[=epidist_family_prior.default]{epidist_family_prior.default()}},
+\code{\link[=epidist_family_prior.lognormal]{epidist_family_prior.lognormal()}},
+\code{\link[=epidist_model_prior]{epidist_model_prior()}},
+\code{\link[=epidist_model_prior.default]{epidist_model_prior.default()}},
+\code{\link[=epidist_prior]{epidist_prior()}}
 
-Other meta_model: 
-\code{\link{as_epidist_meta_model}()},
-\code{\link{as_epidist_meta_model.NULL}()},
-\code{\link{as_epidist_meta_model.epidist_aggregate_data}()},
-\code{\link{as_epidist_meta_model.epidist_estimates_data}()},
-\code{\link{as_epidist_meta_model.epidist_linelist_data}()},
-\code{\link{assert_epidist.epidist_meta_model}()},
-\code{\link{epidist_family_model.epidist_meta_model}()},
-\code{\link{epidist_formula_model.epidist_meta_model}()},
-\code{\link{epidist_newdata.epidist_meta_model}()},
-\code{\link{epidist_transform_data_model.epidist_meta_model}()},
-\code{\link{is_epidist_meta_model}()},
-\code{\link{new_epidist_meta_model}()}
+Other meta_model:
+\code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}},
+\code{\link[=as_epidist_meta_model.NULL]{as_epidist_meta_model.NULL()}},
+\code{\link[=as_epidist_meta_model.epidist_aggregate_data]{as_epidist_meta_model.epidist_aggregate_data()}},
+\code{\link[=as_epidist_meta_model.epidist_estimates_data]{as_epidist_meta_model.epidist_estimates_data()}},
+\code{\link[=as_epidist_meta_model.epidist_linelist_data]{as_epidist_meta_model.epidist_linelist_data()}},
+\code{\link[=assert_epidist.epidist_meta_model]{assert_epidist.epidist_meta_model()}},
+\code{\link[=epidist_family_model.epidist_meta_model]{epidist_family_model.epidist_meta_model()}},
+\code{\link[=epidist_formula_model.epidist_meta_model]{epidist_formula_model.epidist_meta_model()}},
+\code{\link[=epidist_newdata.epidist_meta_model]{epidist_newdata.epidist_meta_model()}},
+\code{\link[=epidist_transform_data_model.epidist_meta_model]{epidist_transform_data_model.epidist_meta_model()}},
+\code{\link[=is_epidist_meta_model]{is_epidist_meta_model()}},
+\code{\link[=new_epidist_meta_model]{new_epidist_meta_model()}}
 }
 \concept{meta_model}
 \concept{prior}

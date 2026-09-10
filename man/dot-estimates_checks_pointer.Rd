@@ -7,7 +7,7 @@
 .estimates_checks_pointer()
 }
 \value{
-A named character vector for \code{\link[cli:cli_abort]{cli::cli_inform()}}.
+A named character vector for \code{\link[cli:cli_inform]{cli::cli_inform()}}.
 }
 \description{
 The pointer that follows the advisory messages

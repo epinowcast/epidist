@@ -21,10 +21,10 @@ A \code{brms} custom family object.
 Default method for defining a model specific family
 }
 \seealso{
-Other family: 
-\code{\link{epidist_family}()},
-\code{\link{epidist_family_model}()},
-\code{\link{epidist_family_param}()},
-\code{\link{epidist_family_param.default}()}
+Other family:
+\code{\link[=epidist_family]{epidist_family()}},
+\code{\link[=epidist_family_model]{epidist_family_model()}},
+\code{\link[=epidist_family_param]{epidist_family_param()}},
+\code{\link[=epidist_family_param.default]{epidist_family_param.default()}}
 }
 \concept{family}

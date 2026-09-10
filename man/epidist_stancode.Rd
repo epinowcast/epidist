@@ -21,7 +21,7 @@ as a user you will need this function, but we export it nonetheless to be
 transparent about what exactly is happening inside of a call to \code{\link[=epidist]{epidist()}}.
 }
 \seealso{
-Other stan: 
-\code{\link{epidist_stancode.default}()}
+Other stan:
+\code{\link[=epidist_stancode.default]{epidist_stancode.default()}}
 }
 \concept{stan}
