@@ -355,3 +355,41 @@ test_that("a covariance row with quartile members recovers a study of n = 1000",
   expect_lt(abs(grid[which.max(profile)] - meanlog), sdlog / sqrt(n))
   expect_true(all(diff(profile, differences = 2) < 0))
 })
+
+test_that("as_epidist_multivariate needs names for a matrix of draws", {
+  set.seed(11)
+  draws <- cbind(rnorm(50, 7, 0.1), rnorm(50, 3, 0.1))
+  expect_error(as_epidist_multivariate(draws), "column names")
+  mvn <- as_epidist_multivariate(draws, params = c("mean", "sd"))
+  expect_identical(mvn$params, c("mean", "sd"))
+  expect_error(
+    as_epidist_multivariate(draws, params = "mean"),
+    "params"
+  )
+})
+
+test_that("as_epidist_multivariate needs the same draws at every index", {
+  set.seed(11)
+  draws <- data.frame(
+    .row = c(rep(1, 50), rep(2, 40)),
+    mean = rnorm(90, 7, 0.1),
+    sd = rnorm(90, 3, 0.1)
+  )
+  expect_error(as_epidist_multivariate(draws), "same number of draws")
+  expect_error(
+    as_epidist_multivariate(draws, index = "missing"),
+    "no column"
+  )
+})
+
+test_that("print.epidist_multivariate says what it holds", {
+  mvn <- new_epidist_multivariate(
+    value = c(mean = 7.5, sd = 3.6),
+    vcov = matrix(c(0.09, 0.02, 0.02, 0.04), nrow = 2),
+    params = c("mean", "sd")
+  )
+  expect_message(print(mvn), "2 parameters at 1 index point")
+  expect_output(print(mvn), "7.5")
+  expect_identical(vcov(mvn), mvn$vcov)
+  expect_false(is_epidist_multivariate(list()))
+})

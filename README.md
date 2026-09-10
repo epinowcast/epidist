@@ -11,7 +11,7 @@ coverage](https://codecov.io/gh/epinowcast/epidist/branch/main/graph/badge.svg)]
 
 [![Universe](https://epinowcast.r-universe.dev/badges/epidist)](https://epinowcast.r-universe.dev/epidist)
 [![MIT
-license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/epinowcast/epidist/blob/master/LICENSE.md/)
+license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/epinowcast/epidist/blob/main/LICENSE.md)
 [![GitHub
 contributors](https://img.shields.io/github/contributors/epinowcast/epidist)](https://github.com/epinowcast/epidist/graphs/contributors)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14213017.svg)](https://doi.org/10.5281/zenodo.14213017)
@@ -75,7 +75,7 @@ install.packages(
 
 Alternatively, you can use the [`remotes`
 package](https://remotes.r-lib.org/) to install the development version
-from Github (warning! this version may contain breaking changes and/or
+from GitHub (warning! this version may contain breaking changes and/or
 bugs):
 
 ``` r
@@ -216,16 +216,15 @@ Package citation information
 citation("epidist")
 To cite package 'epidist' in publications use:
 
-  Adam Howes, Park S, Sam Abbott (2026). _epidist: Estimate
-  Epidemiological Delay Distributions with 'brms'_.
-  doi:10.5281/zenodo.14213017
+  Howes A, Park S, Abbott S (2026). _epidist: Estimate Epidemiological
+  Delay Distributions with 'brms'_. doi:10.5281/zenodo.14213017
   <https://doi.org/10.5281/zenodo.14213017>.
 
 A BibTeX entry for LaTeX users is
 
   @Manual{,
     title = {epidist: Estimate Epidemiological Delay Distributions with 'brms'},
-    author = {{Adam Howes} and Sang Woo Park and {Sam Abbott}},
+    author = {Adam Howes and Sang Woo Park and Sam Abbott},
     year = {2026},
     doi = {10.5281/zenodo.14213017},
   }

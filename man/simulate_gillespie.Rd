@@ -4,7 +4,7 @@
 \alias{simulate_gillespie}
 \title{Simulate cases from a stochastic SIR model}
 \usage{
-simulate_gillespie(r = 0.2, gamma = 1/7, I0 = 50, N = 10000, seed)
+simulate_gillespie(r = 0.2, gamma = 1/7, I0 = 50, N = 10000, seed = NULL)
 }
 \arguments{
 \item{r}{The initial epidemic growth rate. Defaults to 0.2.}
@@ -15,7 +15,8 @@ simulate_gillespie(r = 0.2, gamma = 1/7, I0 = 50, N = 10000, seed)
 
 \item{N}{The total population size. Defaults to 10000.}
 
-\item{seed}{The random seed to be used in the simulation process.}
+\item{seed}{The random seed to be used in the simulation process. Defaults
+to \code{NULL}, which leaves the random number generator as it is.}
 }
 \value{
 A \code{data.frame} with two columns: \code{case} (case number) and \code{ptime}

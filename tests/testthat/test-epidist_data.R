@@ -35,6 +35,10 @@ test_that("dplyr verbs that keep the required columns keep the class", {
 
 test_that("dplyr verbs that drop a required column drop the class", {
   expect_warning(dplyr::select(sim_obs, -"obs_time"), "Dropping the")
+  expect_warning(
+    expect_warning(dplyr::mutate(sim_obs, ptime_lwr = -1), "Dropping the"),
+    NA
+  )
   dropped <- suppressWarnings(dplyr::select(sim_obs, -"obs_time"))
   expect_false(is_epidist_linelist_data(dropped))
   expect_false(is_epidist_data(dropped))
@@ -146,10 +150,124 @@ test_that("a zero column result is unclassed without a warning", {
   expect_false(is_epidist_data(sim_obs[0]))
 })
 
-test_that("dplyr::group_by() drops the class, see epidist issue 629", {
+test_that("dplyr::group_by() keeps the class ahead of grouped_df", {
   grouped <- dplyr::group_by(sim_obs, obs_time)
+  expect_s3_class(
+    grouped,
+    c(
+      "epidist_linelist_data",
+      "epidist_data",
+      "grouped_df",
+      "tbl_df",
+      "tbl",
+      "data.frame"
+    ),
+    exact = TRUE
+  )
+  expect_identical(dplyr::group_vars(grouped), "obs_time")
+
+  grouped <- dplyr::group_by(prep_marginal_obs, obs_time)
+  expect_s3_class(
+    grouped,
+    c(
+      "epidist_marginal_model",
+      "epidist_linelist_data",
+      "epidist_data",
+      "grouped_df",
+      "tbl_df",
+      "tbl",
+      "data.frame"
+    ),
+    exact = TRUE
+  )
+})
+
+test_that("converting a grouped linelist object to a model errors", {
+  grouped <- dplyr::group_by(sim_obs, obs_time)
+  expect_error(
+    as_epidist_latent_model(grouped),
+    "must not be grouped"
+  )
+  expect_error(
+    as_epidist_naive_model(grouped),
+    "must not be grouped"
+  )
+  expect_error(
+    as_epidist_marginal_model(grouped),
+    "must not be grouped"
+  )
+  expect_error(
+    as_epidist_aggregate_data(grouped),
+    "must not be grouped"
+  )
+  expect_error(
+    as_epidist_latent_model(dplyr::ungroup(grouped)),
+    NA
+  )
+})
+
+test_that("dplyr::ungroup() returns an object of the original class", {
+  ungrouped <- sim_obs |>
+    dplyr::group_by(obs_time) |>
+    dplyr::mutate(extra = 1) |>
+    dplyr::ungroup()
+  expect_s3_class(ungrouped, class(sim_obs), exact = TRUE)
+  expect_identical(dplyr::group_vars(ungrouped), character(0))
+  expect_true("extra" %in% names(ungrouped))
+
+  partly <- sim_obs |>
+    dplyr::group_by(obs_time, ptime_lwr) |>
+    dplyr::ungroup(ptime_lwr)
+  expect_s3_class(partly, "epidist_linelist_data")
+  expect_s3_class(partly, "grouped_df")
+  expect_identical(dplyr::group_vars(partly), "obs_time")
+
+  expect_silent(dplyr::ungroup(sim_obs))
+  expect_s3_class(dplyr::ungroup(sim_obs), class(sim_obs), exact = TRUE)
+})
+
+test_that("dplyr verbs on a grouped object keep both sets of classes", {
+  grouped <- dplyr::group_by(sim_obs, obs_time)
+  for (out in list(
+    dplyr::mutate(grouped, extra = 1),
+    dplyr::filter(grouped, ptime_lwr > 0),
+    dplyr::arrange(grouped, ptime_lwr),
+    dplyr::slice(grouped, 1:10)
+  )) {
+    expect_s3_class(out, class(grouped), exact = TRUE)
+    expect_identical(dplyr::group_vars(out), "obs_time")
+  }
+})
+
+test_that("grouped results that fail the requirements drop the class", {
+  grouped <- dplyr::group_by(sim_obs, obs_time)
+  expect_warning(dplyr::select(grouped, -"ptime_lwr"), "Dropping the")
+  dropped <- suppressWarnings(dplyr::select(grouped, -"ptime_lwr"))
+  expect_false(is_epidist_data(dropped))
+  expect_s3_class(dropped, "grouped_df")
+
+  expect_warning(dplyr::mutate(grouped, ptime_lwr = -1), "Dropping the")
+  dropped <- suppressWarnings(dplyr::mutate(grouped, ptime_lwr = -1))
+  expect_false(is_epidist_data(dropped))
+  expect_s3_class(dropped, "grouped_df")
+
+  expect_warning(
+    {
+      grouped$ptime_lwr <- -1
+    },
+    "Dropping the"
+  )
   expect_false(is_epidist_data(grouped))
-  expect_false(is_epidist_linelist_data(grouped))
+  expect_s3_class(grouped, "grouped_df")
+})
+
+test_that("dplyr::summarise() builds a new object without the class", {
+  grouped <- dplyr::group_by(sim_obs, obs_time)
+  expect_silent(dplyr::summarise(grouped, n = dplyr::n()))
+  summary <- dplyr::summarise(grouped, n = dplyr::n())
+  expect_false(is_epidist_data(summary))
+  expect_s3_class(summary, "tbl_df")
+  expect_identical(nrow(summary), 1L)
 })
 
 test_that(".new_epidist_data adds epidist_data once", {

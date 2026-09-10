@@ -13,6 +13,9 @@
 
 \item{prep}{A \code{brms} prepared predictions object.}
 }
+\value{
+The weighted log likelihood values.
+}
 \description{
 Replaces \code{brms:::log_lik_weight()}. Multiplies \code{x} by the weight of
 observation \code{i}, if the model has weights, and returns \code{x} unchanged

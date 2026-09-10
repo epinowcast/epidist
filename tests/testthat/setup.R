@@ -420,14 +420,38 @@ lockstep_accrual_windows <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# Studies AC to AH report quantiles of integer day delays. AC and AD report a
-# single quantile, one per truncation design, which is fitted as the crossing
-# cell of the empirical distribution function. AE reports coincident quantiles
-# and AH three quartiles from a thousand delays, both fitted as the joint
-# probability of their crossings by the forward pass on the cohort grid, and
-# AI two quantiles of midpointed delays above a minimum on the accrual grid.
+# Studies AH and AI stopped collecting at a calendar date that is not a
+# multiple of their weekly primary window, so the partial last primary window
+# is weighted on its own and the complete windows stop being eligible off the
+# multiples of the window. AH grows and reports by week, AI does not grow and
+# reports by day.
+lockstep_partial_window <- data.frame(
+  study = c("AH", "AH", "AI", "AI"),
+  type = c("mean", "sd", "mean", "quantile"),
+  value = c(4.7, 3.7, 8.1, 8.0),
+  se = NA,
+  p = c(NA, NA, NA, 0.5),
+  n = c(150, 150, 130, 130),
+  relative_obs_time = 30,
+  trunc_adjusted = FALSE,
+  trunc_design = "accrual",
+  cens_adjusted = 0,
+  pwindow = 7,
+  swindow = c(7, 7, 1, 1),
+  delay_min = 0,
+  growth_rate = c(0.2, 0.2, 0, 0),
+  stringsAsFactors = FALSE
+)
+
+# Studies AC to AE, AO and AP report quantiles of integer day delays. AC and
+# AD report a single quantile, one per truncation design, which is fitted as
+# the crossing cell of the empirical distribution function. AE reports
+# coincident quantiles and AO three quartiles from a thousand delays, both
+# fitted as the joint probability of their crossings by the forward pass on
+# the cohort grid, and AP two quantiles of midpointed delays above a minimum
+# on the accrual grid.
 lockstep_grid_quantiles <- data.frame(
-  study = c("AC", "AD", "AE", "AE", "AE", "AH", "AH", "AH", "AI", "AI"),
+  study = c("AC", "AD", "AE", "AE", "AE", "AO", "AO", "AO", "AP", "AP"),
   type = "quantile",
   value = c(5, 6.5, 4, 5, 5, 4, 6, 9, 5.5, 8.5),
   p = c(0.5, 0.75, 0.25, 0.5, 0.75, 0.25, 0.5, 0.75, 0.25, 0.75),
@@ -465,6 +489,51 @@ lockstep_narrow <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Studies AJ to AN report a mean or a standard deviation alongside quantiles
+# of a continuous estimand, so every summary of a study is fitted jointly with
+# the covariance derived from the implied distribution. AJ is fully adjusted,
+# so its quantiles are refined exactly through the lognormal quantile
+# function. AK used the uniform single interval approximation without
+# adjusting for truncation, so its quantile is refined by Newton steps. AL
+# midpointed the primary event under an accrual design and AM adjusted for
+# truncation with a growing primary event, so both keep their quantiles on
+# the chord of their nodes and take the density from its slope. AN counted
+# only delays above a minimum.
+lockstep_joint <- data.frame(
+  study = c(
+    "AJ", "AJ", "AJ", "AJ", "AJ", "AK", "AK", "AK", "AL", "AL", "AL",
+    "AM", "AM", "AN", "AN"
+  ),
+  type = c(
+    "mean", "sd", "quantile", "quantile", "quantile",
+    "mean", "sd", "quantile", "mean", "quantile", "quantile",
+    "sd", "quantile", "mean", "quantile"
+  ),
+  value = c(
+    7.4, 3.9, 4.6, 6.3, 9.1, 6.8, 3.2, 5.9, 5.6, 5.1, 9.8, 3.4, 6.7, 8.2, 9.6
+  ),
+  p = c(
+    NA, NA, 0.25, 0.5, 0.75, NA, NA, 0.5, NA, 0.5, 0.9, NA, 0.5, NA, 0.75
+  ),
+  n = c(
+    150, 150, 150, 150, 150, 90, 90, 90, 120, 120, 120, 200, 200, 80, 80
+  ),
+  relative_obs_time = c(
+    Inf, Inf, Inf, Inf, Inf, 30, 30, 30, 28, 28, 28, Inf, Inf, 30, 30
+  ),
+  trunc_adjusted = c(
+    TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
+    TRUE, TRUE, FALSE, FALSE
+  ),
+  trunc_design = c(
+    rep("cohort", 8), "accrual", "accrual", "accrual", rep("cohort", 4)
+  ),
+  cens_adjusted = c(1, 1, 1, 1, 1, 2, 2, 2, 4, 4, 4, 2, 2, 1, 1),
+  delay_min = c(rep(0, 13), 2, 2),
+  growth_rate = c(rep(0, 8), 0.1, 0.1, 0.1, 0.05, 0.05, 0, 0),
+  stringsAsFactors = FALSE
+)
+
 lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
   lockstep_base_rows,
   lockstep_mvn_q,
@@ -473,8 +542,10 @@ lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
   lockstep_left_midpoint,
   lockstep_mvn_z,
   lockstep_accrual_windows,
+  lockstep_partial_window,
   lockstep_grid_quantiles,
-  lockstep_narrow
+  lockstep_narrow,
+  lockstep_joint
 )))
 
 # The shared fits below use the cmdstanr backend, so they are only built

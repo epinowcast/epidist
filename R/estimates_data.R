@@ -17,6 +17,8 @@
 #' @param ... Additional arguments passed to methods
 #'
 #' @family estimates_data
+#' @returns An object of class `epidist_estimates_data`.
+#'
 #' @export
 as_epidist_estimates_data <- function(data, ...) {
   UseMethod("as_epidist_estimates_data")
@@ -229,9 +231,10 @@ as_epidist_estimates_data <- function(data, ...) {
 #'
 #' @param trunc_adjusted A string giving the column of `data` containing a
 #'  logical flag for whether the study corrected for right truncation. Defaults
-#'  to `TRUE` where no `relative_obs_time` is supplied and `FALSE` otherwise.
-#'  A study assumed to have adjusted is warned about, because real time
-#'  estimates are right truncated unless the study corrected for it and
+#'  to `TRUE` for a study with no finite `relative_obs_time`, which includes
+#'  every study where no `relative_obs_time` column is supplied, and `FALSE`
+#'  otherwise. A study assumed to have adjusted is warned about, because real
+#'  time estimates are right truncated unless the study corrected for it and
 #'  reviews rarely record which studies did. Supply the column to say so
 #'  yourself.
 #'
@@ -241,9 +244,9 @@ as_epidist_estimates_data <- function(data, ...) {
 #'  window of that length and stopped at its calendar end). Defaults to
 #'  `"cohort"`, and is only used for studies that did not adjust for right
 #'  truncation. The accrual weight on the grid of a study that did not adjust
-#'  for censoring is exact whenever `relative_obs_time` is a multiple of
-#'  `pwindow`, for any `swindow`. The weight used for the uniform single
-#'  interval approximation is exact only for a narrow `pwindow`, and puts the
+#'  for censoring is exact for any `relative_obs_time`, `pwindow` and
+#'  `swindow`. The weight used for the uniform single interval approximation
+#'  is exact only for a narrow `pwindow`, and puts the
 #'  implied mean about 3% high with a weekly primary window, a collection
 #'  window of 28 days, a delay of mean 4.6 days and a growth rate of 0.2. See
 #'  `vignette("model")`.
@@ -307,6 +310,8 @@ as_epidist_estimates_data <- function(data, ...) {
 #' @method as_epidist_estimates_data data.frame
 #'
 #' @family estimates_data
+#' @returns An object of class `epidist_estimates_data`.
+#'
 #' @autoglobal
 #' @importFrom checkmate assert_data_frame assert_subset assert_logical
 #' @export
@@ -399,6 +404,9 @@ as_epidist_estimates_data.data.frame <- function(
 #' @method as_epidist_estimates_data list
 #'
 #' @family estimates_data
+#' @returns An object of class `epidist_estimates_data` holding the rows of
+#'  every element.
+#'
 #' @importFrom dplyr bind_rows
 #' @export
 #' @examples
@@ -437,6 +445,8 @@ as_epidist_estimates_data.list <- function(data, advise = TRUE, ...) {
 #' @method as_epidist_estimates_data epidist_estimates_data
 #'
 #' @family estimates_data
+#' @returns The input, unchanged.
+#'
 #' @export
 #' @examples
 #' estimates <- epidist_estimates_summaries(
@@ -497,6 +507,9 @@ as_epidist_estimates_data.epidist_estimates_data <- function(data, ...) {
 #' @method as_epidist_estimates_data epidist_multivariate
 #'
 #' @family estimates_data
+#' @returns An object of class `epidist_estimates_data` with one row per
+#'  reported summary and the covariance matrix attached.
+#'
 #' @importFrom tibble tibble
 #' @export
 #' @examples
@@ -809,7 +822,10 @@ as_epidist_estimates_data.epidist_multivariate <- function(
     # Every summary the matrix covers is fitted as one observation, which
     # takes its study metadata from the first of them.
     varies <- vapply(
-      data[rows, .estimates_metadata_cols(), drop = FALSE],
+      .drop_epidist_class(data)[
+        rows, .estimates_metadata_cols(),
+        drop = FALSE
+      ],
       function(column) {
         return(length(unique(column)) > 1)
       },
@@ -831,6 +847,22 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   }
   return(invisible(NULL))
 }
+
+#' Default values `as_epidist_estimates_data()` assumes for metadata columns
+#'
+#' Shared by [.fill_estimates_defaults()] and
+#' [.epireview_default()] so the two stay in step.
+#'
+#' @keywords internal
+.estimates_default_values <- list(
+  pwindow = 1,
+  swindow = 1,
+  relative_obs_time = Inf,
+  trunc_design = "cohort",
+  cens_adjusted = 0,
+  delay_min = 0,
+  growth_rate = 0
+)
 
 #' Fill in the optional columns of an `epidist_estimates_data` object
 #'
@@ -865,7 +897,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
           "(daily reporting) for every study."
         )
       ))
-      data[[col]] <- 1
+      data[[col]] <- .estimates_default_values[[col]]
     }
   }
   if (!hasName(data, "relative_obs_time")) {
@@ -875,7 +907,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
         "limit (no right truncation) for every study."
       )
     ))
-    data$relative_obs_time <- Inf
+    data$relative_obs_time <- .estimates_default_values$relative_obs_time
   }
   if (!hasName(data, "trunc_adjusted")) {
     data$trunc_adjusted <- is.infinite(data$relative_obs_time)
@@ -915,7 +947,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
         )
       ))
     }
-    data$trunc_design <- "cohort"
+    data$trunc_design <- .estimates_default_values$trunc_design
   }
   if (!hasName(data, "cens_adjusted")) {
     cli::cli_inform(c(
@@ -924,16 +956,16 @@ as_epidist_estimates_data.epidist_multivariate <- function(
         "integer date differences without a censoring adjustment."
       )
     ))
-    data$cens_adjusted <- 0
+    data$cens_adjusted <- .estimates_default_values$cens_adjusted
   }
   if (!hasName(data, "delay_min")) {
-    data$delay_min <- 0
+    data$delay_min <- .estimates_default_values$delay_min
   }
   # Studies are often stacked from separate tables, so a study that did not
   # left truncate leaves a gap rather than a zero.
-  data$delay_min[is.na(data$delay_min)] <- 0
+  data$delay_min[is.na(data$delay_min)] <- .estimates_default_values$delay_min
   if (!hasName(data, "growth_rate")) {
-    data$growth_rate <- 0
+    data$growth_rate <- .estimates_default_values$growth_rate
   }
   if (!hasName(data, "max_delay")) {
     data <- .add_default_max_delay(data)
@@ -1338,8 +1370,7 @@ as_epidist_estimates_data.epidist_multivariate <- function(
 #' df <- new_epidist_estimates_data(data.frame())
 #' class(df)
 new_epidist_estimates_data <- function(data) {
-  class(data) <- c("epidist_estimates_data", class(data))
-  return(data)
+  return(.new_epidist_data(data, "epidist_estimates_data"))
 }
 
 #' Check if data has the `epidist_estimates_data` class
@@ -1349,7 +1380,13 @@ new_epidist_estimates_data <- function(data) {
 #' @param ... Additional arguments
 #'
 #' @family estimates_data
+#' @returns A logical, `TRUE` if `data` inherits from `epidist_estimates_data`
+#'  and `FALSE` otherwise.
+#'
 #' @export
+#' @examples
+#' is_epidist_estimates_data(data.frame())
+#' is_epidist_estimates_data(new_epidist_estimates_data(data.frame()))
 is_epidist_estimates_data <- function(data, ...) {
   return(inherits(data, "epidist_estimates_data"))
 }
@@ -1363,6 +1400,8 @@ is_epidist_estimates_data <- function(data, ...) {
 #' @method assert_epidist epidist_estimates_data
 #'
 #' @family estimates_data
+#' @returns `NULL`, invisibly. Called for the side effect of validating `data`.
+#'
 #' @autoglobal
 #' @export
 assert_epidist.epidist_estimates_data <- function(data, ...) {

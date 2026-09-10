@@ -26,6 +26,9 @@ order.}
 
 \item{...}{Not used in this method.}
 }
+\value{
+An object of class \code{epidist_multivariate}.
+}
 \description{
 \code{\link[=delay_parameter_draws]{delay_parameter_draws()}} returns exactly this shape, with a \code{.draw}
 column, a \code{.row} column and one column per parameter, so its output can be

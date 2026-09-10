@@ -17,6 +17,10 @@ reexported as part of \code{epidist}.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
+\value{
+The family with a \code{param} element giving the Stan parameter
+ordering.
+}
 \description{
 Called by \code{\link[=epidist_family]{epidist_family()}}. A custom model supplies its family through
 \code{\link[=epidist_family_model]{epidist_family_model()}} rather than by calling this.
