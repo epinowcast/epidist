@@ -93,6 +93,11 @@ reference:
 - subtitle: Diagnostic functions
   contents:
   - has_concept("diagnostics")
+- title: Plotting
+- subtitle: Plotting
+  desc: Functions for plotting data and posterior draws
+  contents:
+  - has_concept("plot")
 - title: Model specification
 - subtitle: Family
   desc: Functions related to specifying custom `brms` families
