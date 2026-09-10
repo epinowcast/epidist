@@ -81,7 +81,7 @@ See #620.
 See #620.
 - The meta model takes a `primary` argument for its individual level rows, as the marginal model does.
 With `primary = "expgrowth"` the growth rate of primary events is estimated as the `pgrowth` distributional parameter.
-Summary rows are unchanged and keep the `growth_rate` metadata of their study as a known tilt.
+Summary rows keep the `growth_rate` metadata of their study as a known tilt, unless the study estimates its rate.
 See #620.
 - Added an `epidist_model_prior()` method for the meta model, which puts a `normal(1, 1)` prior on the intercept of `mu` where it is on the log scale, the scale of the lognormal family prior.
 The centre is fixed rather than taken from the reported values, because a prior chosen from the data would put the posterior of a small review where the data already sit.
@@ -145,6 +145,13 @@ Closes #672.
 Before, the mean and standard deviation of a study were fitted separately from its quantiles, which counted a study reporting a mean, a standard deviation and quartiles about twice for the location, and a mean with a median 1.5 times at a study size of 100.
 A study that reported integer date differences still has the two kinds fitted separately, because its quantiles are discrete statistics, so report its mean and standard deviation and drop its quantiles.
 Closes #676.
+- Summary rows of the meta model can now estimate their growth rate.
+An `NA` `growth_rate` in `as_epidist_estimates_data()` makes the study use the `pgrowth` distributional parameter, the parameter that `primary = "expgrowth"` estimates from individual level data, so a line list from the same outbreak can inform the rate a published summary is corrected with.
+A new `growth_rate_sd` column treats a reported rate as a normal prior on that parameter rather than as a fixed number.
+The meta model adds `pgrowth ~ 0 + study` to the formula where a study estimates its rate, unless a `pgrowth` formula is given, and `epidist_model_prior()` sets the per study priors and a `normal(0, 0.25)` default for the rest.
+The R and Stan implementations read the rate of each posterior draw.
+`epidist_formula()` now lets a model add its own formulas before the remaining distributional parameters are given an intercept.
+Closes #678.
 
 ## Features
 
