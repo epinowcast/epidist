@@ -209,6 +209,12 @@ The test suite now fits through the default `rstan` backend and checks generated
 `cmdstanr` is still supported as a `brms` backend and the README says how to install it.
 See #687 and #688.
 
+- The primary distribution arguments are passed to `primarycensored` under the name that version accepts.
+1.5.2 renamed `dprimary_args` to `primary_args`, because the arguments reach both the primary density and its distribution function, and kept the old name as a soft deprecation.
+A soft deprecation is quiet for calls from another package but warns while that package's tests run, so this was visible only as warnings in our own suite.
+The name is chosen from the installed version, so the package works with the CRAN version and with 1.5.2 alike, and `.primary_args_name()` can go once the minimum can be raised to 1.5.2.
+Closes #727.
+
 - Acted on a software review of the package.
 Every exported function and method now documents its return value, including the meta model, estimates data and multivariate functions added in this release.
 `is_epidist_meta_model()` and `is_epidist_estimates_data()` gained examples.
