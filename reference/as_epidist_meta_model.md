@@ -120,13 +120,11 @@ Two approximations are worth knowing about before fitting quantiles.
   warns for studies in this range.
 
 - The accrual weight applied to a study that stopped collecting at a
-  calendar date treats the last primary window as complete, so it is
-  exact on the grid only when `relative_obs_time` is a multiple of
-  `pwindow`, and it averages over the primary window for a study that
-  adjusted the secondary interval only. With a weekly primary window, a
-  collection window of 28 days and a delay of mean 4.6 days the latter
-  puts the implied mean 0.8% high at a growth rate of 0.05 and 2.6% high
-  at 0.2.
+  calendar date is exact on the grid, but averages over the primary
+  window for a study that adjusted the secondary interval only. With a
+  weekly primary window, a collection window of 28 days and a delay of
+  mean 4.6 days this puts the implied mean 0.8% high at a growth rate of
+  0.05 and 2.6% high at 0.2.
   [`vignette("model")`](https://epidist.epinowcast.org/articles/model.md)
   gives the measurements.
 

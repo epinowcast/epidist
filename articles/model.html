@@ -559,14 +559,17 @@ Applying both at once double counts, so a study is one or the other.
 The weight multiplies the quadrature for Equations <a href="#eq:meta-trunc-moments">(5.11)</a> and <a href="#eq:meta-uniform-moments">(5.12)</a> at each node and renormalises.
 For Equation <a href="#eq:meta-uniform-moments">(5.12)</a> it is evaluated at <span class="math inline">\(d - w_p / 2\)</span>, to average the primary offset back out.
 The correction is only as good as the growth rate supplied.</p>
-<p>On the grid of Equation <a href="#eq:meta-grid">(5.10)</a> the follow up is a step function, <span class="math inline">\(w(w_p \lfloor x / w_p \rfloor)\)</span> for a delay of <span class="math inline">\(x\)</span> from the start of the primary window, because the primary event is known only to its window.
-Each cell of the grid is cut at the multiples of <span class="math inline">\(w_p\)</span> inside it, each piece is weighted by the follow up at the primary window it starts in, and the pieces are summed back before renormalising.
-Weighting each cell at its lower edge instead is exact only when <span class="math inline">\(w_p = w_s\)</span>, and for a daily primary and weekly secondary window puts the mean 36% low at <span class="math inline">\(r = 0.2\)</span> where the piecewise weight is within 0.2%.</p>
-<p>Two residuals remain.
-The piecewise weight treats the last primary window as complete, so when <span class="math inline">\(A\)</span> is not a multiple of <span class="math inline">\(w_p\)</span> the primary events it cuts short are overweighted, by 5% on the mean for a weekly primary and daily secondary window with <span class="math inline">\(A = 30\)</span> at <span class="math inline">\(r = 0.2\)</span>.
-Use a collection window that is a multiple of <span class="math inline">\(w_p\)</span> where the study allows it.
+<p>On the grid of Equation <a href="#eq:meta-grid">(5.10)</a> the primary event is known only to its window, and a complete primary window starting at <span class="math inline">\(k w_p\)</span> holds a delay of <span class="math inline">\(x\)</span> from its start when <span class="math inline">\(k w_p + x \le A\)</span>.
+The growth weighted mass of the complete windows eligible for <span class="math inline">\(x\)</span> is therefore a step function of <span class="math inline">\(x\)</span> that steps down at <span class="math inline">\(A - j w_p\)</span>.
+Each cell of the grid is cut at those points, each piece is weighted by that mass, and the pieces are summed back before renormalising.
+When <span class="math inline">\(A\)</span> is not a multiple of <span class="math inline">\(w_p\)</span> the last primary window is partial, of length <span class="math inline">\(l = A - w_p \lfloor A / w_p \rfloor\)</span>.
+It only holds delays up to <span class="math inline">\(l\)</span>, and the offset of a primary event within it runs over <span class="math inline">\(l\)</span> rather than <span class="math inline">\(w_p\)</span>, so its cases follow <span class="math inline">\(F_{pc}\)</span> with a window of <span class="math inline">\(l\)</span> in place of <span class="math inline">\(w_p\)</span>, weighted by the growth weighted length of the window, and are added to the cells below <span class="math inline">\(l\)</span>.
+The grid weight is then exact for any <span class="math inline">\(A\)</span>, <span class="math inline">\(w_p\)</span> and <span class="math inline">\(w_s\)</span>.
+Weighting each cell at its lower edge instead is exact only when <span class="math inline">\(w_p = w_s\)</span> and <span class="math inline">\(A\)</span> is a multiple of both, and for a daily primary and weekly secondary window puts the mean 36% low at <span class="math inline">\(r = 0.2\)</span> where the piecewise weight is within 0.2%.
+Treating the partial window as complete put the mean 27% low for weekly primary and secondary windows with <span class="math inline">\(A = 30\)</span> at <span class="math inline">\(r = 0.2\)</span>.</p>
+<p>One residual remains.
 Equation <a href="#eq:meta-uniform-moments">(5.12)</a> keeps the smooth weight, because the follow up available to a primary event is only known to within its window, and at <span class="math inline">\(w_p = 7\)</span> its mean is 2.6% high at <span class="math inline">\(r = 0.2\)</span>.
-Both residuals grow with <span class="math inline">\(r\)</span> and as <span class="math inline">\(w_p\)</span> grows towards <span class="math inline">\(A\)</span>.</p>
+The residual grows with <span class="math inline">\(r\)</span> and as <span class="math inline">\(w_p\)</span> grows towards <span class="math inline">\(A\)</span>.</p>
 </div>
 <div class="section level4" number="5.3.3">
 <h4 id="left-truncation">
