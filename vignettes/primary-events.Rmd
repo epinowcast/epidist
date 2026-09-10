@@ -72,6 +72,12 @@ obs <- simulate_exponential_cases(r = growth_rate, sample_size = 500) |>
 linelist <- as_epidist_linelist_data(obs)
 ```
 
+`plot_events()` shows the windows each event is reported in.
+
+```{r windows, fig.cap="The event windows of 100 of the 500 simulated cases, ordered by primary event time. The primary windows are three days wide and the secondary windows one day."}
+plot_events(linelist, n = 100)
+```
+
 # Uniform against exponential growth
 
 The marginal model takes the primary event distribution when the data are converted.
@@ -126,19 +132,11 @@ draws <- bind_rows(
   `Exponential growth` = growing_draws,
   .id = "model"
 ) |>
-  mutate(model = factor(model, levels = c("Uniform", "Exponential growth")))
+  mutate(model = factor(model, levels = c("Uniform", "Exponential growth"))) |>
+  add_summaries(family = fit_uniform)
 
-draws |>
-  ggplot(aes(x = mu, fill = model)) +
-  geom_density(alpha = 0.6, colour = NA) +
-  geom_vline(xintercept = meanlog, linetype = "dashed") +
-  scale_fill_manual(values = c(
-    Uniform = "#56B4E9",
-    `Exponential growth` = "#D55E00"
-  )) +
-  labs(x = "meanlog", y = "Density", fill = "Primary event") +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+plot(draws, by = "model", pars = "mu", true_values = c(mu = meanlog)) +
+  labs(fill = "Primary event", colour = "Primary event")
 ```
 
 # A growth rate that varies

@@ -38,10 +38,13 @@
 #'
 #' @family postprocess
 #' @returns A `tibble` of posterior draws of the delay distribution parameters,
-#'  grouped by the columns of `newdata` and by `.row`.
+#'  grouped by the columns of `newdata` and by `.row`. It has the
+#'  `epidist_delay_draws` class, which records the delay distribution family
+#'  and gives it a [plot()][plot.epidist_delay_draws] method.
 #'
 #' @seealso [add_summaries()] to add natural scale summaries of the delay,
-#'  [epidist_strata()] to build `newdata`.
+#'  [epidist_strata()] to build `newdata`, and [plot.epidist_delay_draws()]
+#'  to plot the draws.
 #'
 #' @export
 #' @examples
@@ -78,8 +81,42 @@ delay_parameter_draws <- function(object, newdata = NULL, ...) {
   )
   group_cols <- c(names(pred_data)[vector_cols], ".row")
   out <- dplyr::group_by(out, dplyr::across(dplyr::all_of(group_cols)))
-  attr(out, "epidist_family") <- .delay_family(object$family)
-  return(out)
+  vars <- NULL
+  if (!is.null(object$formula)) {
+    vars <- intersect(.extract_dpar_terms(object$formula), names(pred_data))
+  }
+  return(.new_delay_draws(out, .delay_family(object$family), vars))
+}
+
+#' Class constructor for `epidist_delay_draws` objects
+#'
+#' Records the delay distribution family, and the variables that define the
+#' strata, on a `data.frame` of draws of the distributional parameters, and
+#' adds the `epidist_delay_draws` class in front of its existing classes. The
+#' class gives the draws a [plot()][plot.epidist_delay_draws] method. Most
+#' `dplyr` verbs rebuild their input and so drop the class and what it
+#' records.
+#'
+#' @inheritParams add_summaries
+#'
+#' @param family A list with the delay distribution `name` and its
+#'  distributional parameters `dpars`, as returned by `.delay_family()`.
+#'
+#' @param vars A character vector of the columns of `data` that define the
+#'  strata, or `NULL` when there are none.
+#'
+#' @returns `data` with the `epidist_delay_draws` class and the
+#'  `epidist_family` and `epidist_vars` attributes.
+#'
+#' @keywords internal
+.new_delay_draws <- function(data, family, vars = NULL) {
+  attr(data, "epidist_family") <- family
+  attr(data, "epidist_vars") <- vars
+  class(data) <- c(
+    "epidist_delay_draws",
+    setdiff(class(data), "epidist_delay_draws")
+  )
+  return(data)
 }
 
 #' @rdname delay_parameter_draws
@@ -342,7 +379,8 @@ epidist_strata <- function(object, vars = NULL) {
 #'
 #' @family postprocess
 #' @returns The input with `mean` and `sd` columns added, and one column per
-#'  element of `probs`.
+#'  element of `probs`. It has the `epidist_delay_draws` class, which records
+#'  the family used and gives it a [plot()][plot.epidist_delay_draws] method.
 #'
 #' @export
 #' @examples
@@ -378,9 +416,12 @@ add_summaries <- function(
     .assert_dpars(data, family$name, analytic$dpars)
   }
   if (has_analytic && !identical(method, "sample")) {
-    return(.analytic_summaries(data, analytic, probs))
+    out <- .analytic_summaries(data, analytic, probs)
+  } else {
+    out <- .sample_summaries(data, family, probs, nsim)
   }
-  return(.sample_summaries(data, family, probs, nsim))
+  # Adding columns to a grouped tibble rebuilds it, dropping the class
+  return(.new_delay_draws(out, family, attr(data, "epidist_vars")))
 }
 
 #' Add summaries from an analytic solution
@@ -504,9 +545,9 @@ add_summaries <- function(
 #' Analytic delay summaries for the families that have them
 #'
 #' Each element gives the distributional parameters the solution needs and
-#' functions of them returning the mean, the standard deviation and the
-#' quantile function of the delay distribution. The parameters are the `brms`
-#' parameters of the family. The generalised gamma moments follow from
+#' functions of them returning the mean, the standard deviation, the quantile
+#' function and the density of the delay distribution. The parameters are the
+#' `brms` parameters of the family. The generalised gamma moments follow from
 #' \eqn{E[T^r] = \mu^r \Gamma(k + r / a) / \Gamma(k)}, with \eqn{a} the
 #' `shape`.
 #'
@@ -527,6 +568,9 @@ add_summaries <- function(
       },
       quantile = function(d, p) {
         return(stats::qlnorm(p, meanlog = d$mu, sdlog = d$sigma))
+      },
+      density = function(d, x) {
+        return(stats::dlnorm(x, meanlog = d$mu, sdlog = d$sigma))
       }
     ),
     gamma = list(
@@ -539,6 +583,9 @@ add_summaries <- function(
       },
       quantile = function(d, p) {
         return(stats::qgamma(p, shape = d$shape, rate = d$shape / d$mu))
+      },
+      density = function(d, x) {
+        return(stats::dgamma(x, shape = d$shape, rate = d$shape / d$mu))
       }
     ),
     weibull = list(
@@ -557,6 +604,13 @@ add_summaries <- function(
           shape = d$shape,
           scale = d$mu / gamma(1 + 1 / d$shape)
         ))
+      },
+      density = function(d, x) {
+        return(stats::dweibull(
+          x,
+          shape = d$shape,
+          scale = d$mu / gamma(1 + 1 / d$shape)
+        ))
       }
     ),
     gengamma = list(
@@ -571,6 +625,13 @@ add_summaries <- function(
         .require_flexsurv()
         return(flexsurv::qgengamma.orig(
           p,
+          shape = d$shape, scale = d$mu, k = d$k
+        ))
+      },
+      density = function(d, x) {
+        .require_flexsurv()
+        return(flexsurv::dgengamma.orig(
+          x,
           shape = d$shape, scale = d$mu, k = d$k
         ))
       }

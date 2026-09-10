@@ -87,7 +87,7 @@ We simulate an outbreak exactly as in `vignette("epidist")`, a stochastic epidem
 `as_epidist_linelist_data()` converts the dates to times in days from the first primary event.
 We keep the simulated times as well, to work out what each study would have measured.
 `as_epidist_marginal_model()` adds the censoring windows and the bounds of each delay.
-Figure \@ref(fig:outbreak) shows the case counts.
+Figure \@ref(fig:outbreak) shows the event windows of the simulated cases.
 
 ```{r}
 set.seed(101)
@@ -111,15 +111,10 @@ delays <- as_epidist_marginal_model(linelist)
 head(delays)
 ```
 
-(ref:outbreak) Case counts over the course of the simulated outbreak (only every 50th case is shown to avoid over-plotting).
+(ref:outbreak) The primary and secondary event windows of 200 evenly spaced cases from the simulated outbreak, ordered by primary event time.
 
 ```{r outbreak, fig.cap="(ref:outbreak)"}
-linelist |>
-  filter(case %% 50 == 0) |>
-  ggplot(aes(x = ptime, y = case)) +
-  geom_point(col = "#56B4E9") +
-  labs(x = "Primary event time (day)", y = "Case number") +
-  theme_minimal()
+plot_events(linelist)
 ```
 
 Now imagine several studies each analysing this outbreak at a different point in time, reporting integer date differences with no adjustment for right truncation, that is `cens_adjusted = 0` and `trunc_adjusted = FALSE`.
