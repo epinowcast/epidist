@@ -28,6 +28,7 @@ Obs
 Okabe
 PMF
 PSIS
+Poisson
 Quickstart
 Reparameterise
 Reweight
@@ -141,6 +142,7 @@ tibble
 traceplots
 treedepth
 trunc
+u
 unclassed
 uncounting
 underflowed
