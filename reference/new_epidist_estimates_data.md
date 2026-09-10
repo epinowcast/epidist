@@ -27,6 +27,7 @@ Other estimates_data:
 [`as_epidist_estimates_data.epidist_multivariate()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.epidist_multivariate.md),
 [`as_epidist_estimates_data.list()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.list.md),
 [`assert_epidist.epidist_estimates_data()`](https://epidist.epinowcast.org/reference/assert_epidist.epidist_estimates_data.md),
+[`epidist_estimates_epireview()`](https://epidist.epinowcast.org/reference/epidist_estimates_epireview.md),
 [`epidist_estimates_parameters()`](https://epidist.epinowcast.org/reference/epidist_estimates_parameters.md),
 [`epidist_estimates_summaries()`](https://epidist.epinowcast.org/reference/epidist_estimates_summaries.md),
 [`is_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/is_epidist_estimates_data.md)
@@ -36,5 +37,5 @@ Other estimates_data:
 ``` r
 df <- new_epidist_estimates_data(data.frame())
 class(df)
-#> [1] "epidist_estimates_data" "data.frame"            
+#> [1] "epidist_estimates_data" "epidist_data"           "data.frame"            
 ```

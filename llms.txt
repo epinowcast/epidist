@@ -369,6 +369,11 @@ Functions for preparing published summary estimates
 
   Assert validity of `epidist_estimates_data` objects
 
+- [`epidist_estimates_epireview()`](https://epidist.epinowcast.org/reference/epidist_estimates_epireview.md)
+  :
+
+  Report studies from an `epireview` parameter table
+
 - [`epidist_estimates_parameters()`](https://epidist.epinowcast.org/reference/epidist_estimates_parameters.md)
   : Report a study that published the parameters of a distribution it
   fitted

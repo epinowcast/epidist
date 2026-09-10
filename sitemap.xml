@@ -82,6 +82,19 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-draw_chain_iteration.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-drop_epidist_class.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-epidist_classes.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_column.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_default.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_family.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_metadata.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_metadata_cols.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_parameter_name.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_parameters.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_report_dropped.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_report_gaps.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_row.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_rows.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_sd.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-epireview_shared_metadata.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-escape_braces.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_advise.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_bind.html</loc></url>
@@ -89,6 +102,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_coarse_quadrature.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_coarse_quantiles.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_coarse_rows.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-estimates_default_values.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_delta_jacobian.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_from_summaries.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_grid_cutoff.html</loc></url>
@@ -259,6 +273,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/epidist.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_data.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_diagnostics.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_estimates_epireview.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_estimates_parameters.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_estimates_summaries.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_family.html</loc></url>

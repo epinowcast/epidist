@@ -101,7 +101,7 @@ summary(fit_growing)$fixed[
   "pgrowth_Intercept", c("Estimate", "l-95% CI", "u-95% CI")
 ]
 #>                   Estimate  l-95% CI  u-95% CI
-#> pgrowth_Intercept 0.497564 0.2974636 0.6850866
+#> pgrowth_Intercept 0.497369 0.3040914 0.6797716
 ```
 
 Both are compared against the delay used to simulate.
