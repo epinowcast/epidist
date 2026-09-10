@@ -68,6 +68,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_multivariate_definite.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_no_meta_primary.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_supported_family.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-assert_ungrouped.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_window.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-build_newdata.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-capture_compile_env.html</loc></url>
@@ -236,6 +237,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-replace_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-resolve_delay_family.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-restore_compile_env.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-restore_epidist_class.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-revalidate_epidist.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-sample_summaries.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-simulate_delays.html</loc></url>

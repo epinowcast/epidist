@@ -96,14 +96,26 @@ which accept one do not need to re-check it.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">...</span>, deparse.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'epidist_data'</span></span>
-<span><span class="fu">dplyr_reconstruct</span><span class="op">(</span><span class="va">data</span>, <span class="va">template</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">dplyr_reconstruct</span><span class="op">(</span><span class="va">data</span>, <span class="va">template</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'epidist_data'</span></span>
+<span><span class="fu">dplyr_row_slice</span><span class="op">(</span><span class="va">data</span>, <span class="va">i</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'epidist_data'</span></span>
+<span><span class="fu">dplyr_col_modify</span><span class="op">(</span><span class="va">data</span>, <span class="va">cols</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'epidist_data'</span></span>
+<span><span class="fu">group_by</span><span class="op">(</span><span class="va">.data</span>, <span class="va">...</span>, .add <span class="op">=</span> <span class="cn">FALSE</span>, .drop <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by_drop_default.html" class="external-link">group_by_drop_default</a></span><span class="op">(</span><span class="va">.data</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'epidist_data'</span></span>
+<span><span class="fu">ungroup</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dl><dt id="arg-x-data">x, .data<a class="anchor" aria-label="anchor" href="#arg-x-data"></a></dt>
 <dd><p>An object with the <code>epidist_data</code> class.</p></dd>
 
 
@@ -122,6 +134,15 @@ which accept one do not need to re-check it.</p>
 <dt id="arg-data-template">data, template<a class="anchor" aria-label="anchor" href="#arg-data-template"></a></dt>
 <dd><p>Passed to <code><a href="https://dplyr.tidyverse.org/reference/dplyr_extending.html" class="external-link">dplyr::dplyr_reconstruct()</a></code>.</p></dd>
 
+
+<dt id="arg-i-cols">i, cols<a class="anchor" aria-label="anchor" href="#arg-i-cols"></a></dt>
+<dd><p>Passed to <code><a href="https://dplyr.tidyverse.org/reference/dplyr_extending.html" class="external-link">dplyr::dplyr_row_slice()</a></code> and
+<code><a href="https://dplyr.tidyverse.org/reference/dplyr_extending.html" class="external-link">dplyr::dplyr_col_modify()</a></code>.</p></dd>
+
+
+<dt id="arg--add-drop">.add, .drop<a class="anchor" aria-label="anchor" href="#arg--add-drop"></a></dt>
+<dd><p>Passed to <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -133,8 +154,13 @@ no longer meets removed.</p>
     <p>Methods are provided for base subsetting and replacement, and for
 <code><a href="https://dplyr.tidyverse.org/reference/dplyr_extending.html" class="external-link">dplyr::dplyr_reconstruct()</a></code>, which <code>dplyr</code> verbs such as <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>,
 <code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">dplyr::filter()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">dplyr::select()</a></code> use to restore the class of their
-input. <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code> is an exception, as it builds a grouped tibble
-rather than restoring the class of its input. See epidist issue 629.</p>
+input. <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::ungroup()</a></code> build a new tibble rather
+than restoring the class of their input, as do the <code>grouped_df</code> methods for
+<code><a href="https://dplyr.tidyverse.org/reference/dplyr_extending.html" class="external-link">dplyr::dplyr_row_slice()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/dplyr_extending.html" class="external-link">dplyr::dplyr_col_modify()</a></code>, so each has a
+method of its own that puts the classes back. A grouped object keeps the
+<code>grouped_df</code> class after the <code>epidist</code> classes, and the <code>dplyr</code> verbs keep
+both. <code><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">dplyr::summarise()</a></code> builds a new object from the groups rather than
+modifying its input, so its result does not carry the <code>epidist</code> classes.</p>
 <p>A result with no columns is unclassed without a warning. Such a result is
 almost always the prototype <code>vctrs</code> takes internally, in <code><a href="https://dplyr.tidyverse.org/reference/bind_cols.html" class="external-link">dplyr::bind_cols()</a></code>
 for example, rather than something the user asked for, and it cannot be told
@@ -171,6 +197,11 @@ apart from a deliberate empty selection.</p>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span>   elements {'obs_time'}.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use the matching `as_epidist_*()` function to recreate the object.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "tbl_df"     "tbl"        "data.frame"</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Grouping keeps the class alongside the grouped_df class</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">linelist_data</span>, <span class="va">obs_time</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "epidist_linelist_data" "epidist_data"          "grouped_df"           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4] "tbl_df"                "tbl"                   "data.frame"           </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

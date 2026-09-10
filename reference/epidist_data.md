@@ -30,11 +30,23 @@ rbind(..., deparse.level = 1)
 
 # S3 method for class 'epidist_data'
 dplyr_reconstruct(data, template)
+
+# S3 method for class 'epidist_data'
+dplyr_row_slice(data, i, ...)
+
+# S3 method for class 'epidist_data'
+dplyr_col_modify(data, cols)
+
+# S3 method for class 'epidist_data'
+group_by(.data, ..., .add = FALSE, .drop = dplyr::group_by_drop_default(.data))
+
+# S3 method for class 'epidist_data'
+ungroup(x, ...)
 ```
 
 ## Arguments
 
-- x:
+- x, .data:
 
   An object with the `epidist_data` class.
 
@@ -55,6 +67,18 @@ dplyr_reconstruct(data, template)
   Passed to
   [`dplyr::dplyr_reconstruct()`](https://dplyr.tidyverse.org/reference/dplyr_extending.html).
 
+- i, cols:
+
+  Passed to
+  [`dplyr::dplyr_row_slice()`](https://dplyr.tidyverse.org/reference/dplyr_extending.html)
+  and
+  [`dplyr::dplyr_col_modify()`](https://dplyr.tidyverse.org/reference/dplyr_extending.html).
+
+- .add, .drop:
+
+  Passed to
+  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html).
+
 ## Value
 
 The modified object with any `epidist` class whose requirements it no
@@ -71,8 +95,19 @@ and
 [`dplyr::select()`](https://dplyr.tidyverse.org/reference/select.html)
 use to restore the class of their input.
 [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
-is an exception, as it builds a grouped tibble rather than restoring the
-class of its input. See epidist issue 629.
+and
+[`dplyr::ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
+build a new tibble rather than restoring the class of their input, as do
+the `grouped_df` methods for
+[`dplyr::dplyr_row_slice()`](https://dplyr.tidyverse.org/reference/dplyr_extending.html)
+and
+[`dplyr::dplyr_col_modify()`](https://dplyr.tidyverse.org/reference/dplyr_extending.html),
+so each has a method of its own that puts the classes back. A grouped
+object keeps the `grouped_df` class after the `epidist` classes, and the
+`dplyr` verbs keep both.
+[`dplyr::summarise()`](https://dplyr.tidyverse.org/reference/summarise.html)
+builds a new object from the groups rather than modifying its input, so
+its result does not carry the `epidist` classes.
 
 A result with no columns is unclassed without a warning. Such a result
 is almost always the prototype `vctrs` takes internally, in
@@ -111,4 +146,9 @@ class(dplyr::select(linelist_data, -"obs_time"))
 #>   elements {'obs_time'}.
 #> ℹ Use the matching `as_epidist_*()` function to recreate the object.
 #> [1] "tbl_df"     "tbl"        "data.frame"
+
+# Grouping keeps the class alongside the grouped_df class
+class(dplyr::group_by(linelist_data, obs_time))
+#> [1] "epidist_linelist_data" "epidist_data"          "grouped_df"           
+#> [4] "tbl_df"                "tbl"                   "data.frame"           
 ```

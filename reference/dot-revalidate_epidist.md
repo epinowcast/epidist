@@ -1,6 +1,8 @@
 # Re-check a modified `epidist` object and drop any classes it fails
 
-Checks `data` against each of its `epidist` classes using
+Puts the `epidist` classes of `original` back on `data` with
+[`.restore_epidist_class()`](https://epidist.epinowcast.org/reference/dot-restore_epidist_class.md),
+then checks `data` against each of them using
 [`.check_epidist_class()`](https://epidist.epinowcast.org/reference/dot-check_epidist_class.md)
 and drops those it no longer meets the requirements of. Modifications
 that leave the object unchanged are not checked. Used by the methods

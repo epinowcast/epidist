@@ -85,13 +85,28 @@
   These re-check the object and drop any `epidist` class whose
   requirements it no longer meets, warning about what was dropped and
   why. An object that still carries an `epidist` class is therefore a
-  valid object of that class.
-  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
-  and results with no columns are exceptions, both documented in
+  valid object of that class. Results with no columns are an exception,
+  documented in
   [`?epidist_data`](https://epidist.epinowcast.org/reference/epidist_data.md).
   See
   [`?epidist_data`](https://epidist.epinowcast.org/reference/epidist_data.md)
   and [\#399](https://github.com/epinowcast/epidist/issues/399).
+
+- [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
+  and
+  [`dplyr::ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
+  now keep the `epidist` classes. A grouped object carries them ahead of
+  the `grouped_df` class, the `dplyr` verbs keep both, and
+  [`dplyr::ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
+  returns an object of the original class.
+  [`dplyr::summarise()`](https://dplyr.tidyverse.org/reference/summarise.html)
+  builds a new object from the groups, so its result does not carry the
+  classes. Converting a grouped `epidist_linelist_data` object to a
+  model now errors, asking for
+  [`dplyr::ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html)
+  first, because the model constructors number rows in a way that a
+  grouped input would silently get wrong. Closes
+  [\#629](https://github.com/epinowcast/epidist/issues/629).
 
 - Dropped the checks in
   [`epidist_stancode()`](https://epidist.epinowcast.org/reference/epidist_stancode.md)

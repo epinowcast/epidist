@@ -76,6 +76,10 @@ Methods that keep modified objects in their `epidist` class
   [`` `names<-`( ``*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
   [`rbind(`*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
   [`dplyr_reconstruct(`*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  [`dplyr_row_slice(`*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  [`dplyr_col_modify(`*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  [`group_by(`*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
+  [`ungroup(`*`<epidist_data>`*`)`](https://epidist.epinowcast.org/reference/epidist_data.md)
   :
 
   Keep `epidist` objects in their class
