@@ -4,7 +4,7 @@
 \alias{epidist_model_prior.epidist_meta_model}
 \title{Model specific prior distributions for the meta model}
 \usage{
-\method{epidist_model_prior}{epidist_meta_model}(data, formula, ...)
+\method{epidist_model_prior}{epidist_meta_model}(data, formula, default = NULL, ...)
 }
 \arguments{
 \item{data}{An object with class corresponding to an implemented model.}
@@ -14,6 +14,10 @@
 the model to be fitted. A formula must be provided for the distributional
 parameter \code{mu}, and may optionally be provided for other distributional
 parameters.}
+
+\item{default}{The default prior distributions from
+\code{\link[brms:default_prior]{brms::default_prior()}}, which \code{\link[=epidist_prior]{epidist_prior()}} passes so that they are
+not built twice. Built here where missing.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}
 }
@@ -46,6 +50,18 @@ the linear predictor, so that a small review cannot fit that spread from
 almost nothing under the wide \code{brms} default. It is dropped where the
 formula has no group level term. The prior on the intercept of the other
 distributional parameters is left to the family or to \code{brms}.
+
+Where a summary row estimates its growth rate as the \code{pgrowth}
+distributional parameter, see \code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}, the coefficients
+and intercept of \code{pgrowth} get a \code{normal(0, 0.25)} prior, which is weakly
+informative for a delay measured in days, because the \code{brms} default is
+flat and the summaries carry little information about the rate. A study
+that reported its rate with a \code{growth_rate_sd} gets a normal prior with
+that centre and spread on its own coefficient, which exists under the
+default \code{pgrowth ~ 0 + study} formula, or on the intercept of \code{pgrowth}
+where it is the only study. Under another \code{pgrowth} formula the reported
+rates have no coefficient to act on and are dropped with a warning, so
+set their priors yourself.
 }
 \seealso{
 Other prior:

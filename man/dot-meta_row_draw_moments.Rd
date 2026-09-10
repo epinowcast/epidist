@@ -20,7 +20,10 @@ A list of summary vectors, one per posterior draw.
 Rows sharing a study design, the same parameter draws and the same
 quadrature resolution imply the same summaries, so they are computed once
 and reused. The cache is bounded and lives in the package namespace, so it
-is never written into a fitted model object. See \link{.meta_draws}.
+is never written into a fitted model object. See \link{.meta_draws}. A row with
+an estimated growth rate holds one rate per draw, so the rates are part of
+what a cached entry is compared against, and each draw is summarised at
+its own rate.
 }
 \details{
 Only reported means and standard deviations need implied summaries. Quantile

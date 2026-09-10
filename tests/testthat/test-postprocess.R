@@ -276,7 +276,7 @@ test_that("epidist_strata errors when the object has no fitted data", {
 
 test_that("delay_parameter_draws works with NULL newdata and the latent and marginal lognormal model", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   test_draws <- function(fit, expected_rows = nrow(prep_obs)) {
     draws <- delay_parameter_draws(fit)
@@ -303,7 +303,7 @@ test_that("delay_parameter_draws works with NULL newdata and the latent and marg
 
 test_that("delay_summary_draws matches the steps it wraps", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   expect_identical(
     delay_summary_draws(fit_marginal_sex, probs = c(0.05, 0.95)),
@@ -319,7 +319,7 @@ test_that("delay_summary_draws matches the steps it wraps", {
 
 test_that("delay_summary_draws strata by default and keeps the grouping", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   draws <- delay_summary_draws(fit_marginal_sex)
   expect_s3_class(draws, "epidist_delay_draws")
@@ -338,7 +338,7 @@ test_that("delay_summary_draws strata by default and keeps the grouping", {
 
 test_that("delay_summary_draws passes vars, probs and dots on", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   draws <- delay_summary_draws(
     fit_marginal_sex,
@@ -351,7 +351,7 @@ test_that("delay_summary_draws passes vars, probs and dots on", {
 
 test_that("delay_parameter_draws matches add_delay_parameter_draws", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   strata <- epidist_strata(fit)
   expect_identical(
@@ -362,7 +362,7 @@ test_that("delay_parameter_draws matches add_delay_parameter_draws", {
 
 test_that("delay_parameter_draws keeps the columns of newdata", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   strata <- epidist_strata(fit_sex)
   draws <- delay_parameter_draws(fit_sex, newdata = strata)
@@ -377,7 +377,7 @@ test_that("delay_parameter_draws keeps the columns of newdata", {
 
 test_that("delay_parameter_draws subsets draws and reports no chain", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   draws <- delay_parameter_draws(fit, ndraws = 10)
   expect_length(unique(draws$.draw), 10)
@@ -387,7 +387,7 @@ test_that("delay_parameter_draws subsets draws and reports no chain", {
 
 test_that("epidist_strata reduces a fitted model to its unique strata", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   expect_identical(nrow(epidist_strata(fit)), 1L)
   strata_sex <- epidist_strata(fit_sex)
@@ -398,7 +398,7 @@ test_that("epidist_strata reduces a fitted model to its unique strata", {
 
 test_that("delay_parameter_draws by strata recovers the underlying parameters", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   test_sex_draws <- function(fit) {
     draws <- fit |>
@@ -426,7 +426,7 @@ test_that("delay_parameter_draws by strata recovers the underlying parameters", 
 
 test_that("add_summaries takes the family from a fit", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   draws <- fit |>
     epidist_strata() |>
@@ -439,7 +439,7 @@ test_that("add_summaries takes the family from a fit", {
 
 test_that("add_summaries uses the family recorded by delay_parameter_draws", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   draws <- fit |>
     epidist_strata() |>
@@ -459,7 +459,7 @@ test_that("add_summaries uses the family recorded by delay_parameter_draws", {
 
 test_that("add_summaries by simulation agrees with the analytic solution for a fitted model", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   set.seed(1)
   draws <- fit |>
@@ -473,7 +473,7 @@ test_that("add_summaries by simulation agrees with the analytic solution for a f
 
 test_that("add_summaries works for the gamma and weibull models", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   gamma_draws <- fit_gamma |>
     epidist_strata() |>
@@ -492,7 +492,7 @@ test_that("add_summaries works for the gamma and weibull models", {
 
 test_that("delay_parameter_draws works with the naive model", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   draws <- delay_parameter_draws(fit_naive)
   expect_true(all(c("mu", "sigma") %in% names(draws)))

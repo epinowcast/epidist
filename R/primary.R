@@ -99,9 +99,34 @@
   if (length(spec$dpars) == 0) {
     return(family)
   }
+  family <- .fill_other_links(family)
   family$dpars <- c(family$dpars, spec$dpars)
   family$other_links <- c(family$other_links, spec$links)
   family$other_bounds <- c(family$other_bounds, spec$bounds)
+  return(family)
+}
+
+#' Give every distributional parameter after `mu` a link
+#'
+#' [brms::custom_family()] recycles a single link over every parameter, and
+#' a family such as [brms::brmsfamily()]'s Gamma carries no link for its
+#' other parameters, so a link appended for a further parameter would be
+#' matched to the wrong one. The missing links are filled with the link of
+#' `mu`, which is what the recycling gives.
+#'
+#' @param family A `brms` family object.
+#'
+#' @returns The family with one entry of `other_links` per parameter after
+#'  `mu`.
+#'
+#' @keywords internal
+.fill_other_links <- function(family) {
+  other <- setdiff(family$dpars, "mu")
+  links <- family$other_links
+  if (length(links) < length(other)) {
+    links <- c(links, rep(family$link, length(other) - length(links)))
+  }
+  family$other_links <- links
   return(family)
 }
 

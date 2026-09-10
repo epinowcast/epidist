@@ -119,6 +119,21 @@ reported, up to a cap of 2000 that the option lifts when set above it, and
 the number is held in the \code{n_quad} column of the model data.
 }
 
+\section{Advanced: an estimated growth rate}{
+A summary row tilts its primary event, and weights the follow up of an
+accrual design, by the \code{growth_rate} of its study. Where that rate is
+\code{NA} in \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}}, or was given there with a
+\code{growth_rate_sd}, the study estimates it as the \code{pgrowth} distributional
+parameter instead. That is the parameter \code{primary = "expgrowth"}
+estimates from individual level rows, so the two can share it. The model
+adds \code{pgrowth ~ 0 + study} unless a \code{pgrowth} formula is given, and
+\code{\link[=epidist_model_prior]{epidist_model_prior()}} sets the priors from the reported rates.
+Summaries carry little information about the rate on their own, so share
+the coefficient with rows that do inform it, for example \code{pgrowth ~ 1}
+with a line list from the same outbreak. \code{vignette("model")} gives the
+details.
+}
+
 \seealso{
 Other meta_model:
 \code{\link[=as_epidist_meta_model.NULL]{as_epidist_meta_model.NULL()}},

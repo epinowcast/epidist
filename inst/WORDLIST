@@ -25,8 +25,10 @@ Linelist
 MVN
 ORCID
 Obs
+Okabe
 PMF
 PSIS
+Poisson
 Quickstart
 Reparameterise
 Reweight
@@ -70,7 +72,6 @@ dx
 dy
 dz
 epiforecasts
-epinowcast
 epireview
 eq
 estimand
@@ -142,6 +143,7 @@ tibble
 traceplots
 treedepth
 trunc
+u
 unclassed
 uncounting
 underflowed

@@ -10,7 +10,8 @@
 \item{data}{An \code{epidist_meta_model} object.}
 }
 \value{
-A tibble of member \code{value}, \code{count}, \code{type} and \code{p} columns.
+A tibble of member \code{value}, \code{count}, \code{lower}, \code{type} and \code{p}
+columns.
 }
 \description{
 The grouped summary members of an \code{epidist_meta_model} object

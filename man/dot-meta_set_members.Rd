@@ -9,7 +9,8 @@
 \arguments{
 \item{data}{An \code{epidist_meta_model} object.}
 
-\item{members}{A tibble of member \code{value}, \code{count}, \code{type} and \code{p} columns.}
+\item{members}{A tibble of member \code{value}, \code{count}, \code{lower}, \code{type} and
+\code{p} columns.}
 
 \item{chol}{A flat numeric vector of Cholesky factor entries, in column
 major order, for the groups covered by a covariance matrix.}

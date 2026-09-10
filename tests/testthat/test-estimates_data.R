@@ -438,30 +438,19 @@ test_that(".estimates_coarse_quadrature names the studies with coarse nodes", {
   expect_identical(.estimates_coarse_quadrature(data), "A")
 })
 
-test_that("as_epidist_estimates_data warns about several integer day quantiles from a large study", { # nolint: line_length_linter.
+test_that("as_epidist_estimates_data does not warn about several integer day quantiles from a large study", { # nolint: line_length_linter.
+  # Several quantiles of integer day delays are fitted exactly, as the joint
+  # probability of the crossings they stand for, so a large study reporting
+  # them is no longer flagged as overconfident. The quantiles here sit well
+  # up the grid, so the coarse quantile check stays quiet as well.
   quantiles <- data.frame(
-    study = "A", type = "quantile", value = c(3, 5, 8),
-    p = c(0.25, 0.5, 0.75), n = 400, relative_obs_time = 30,
+    study = "A", type = "quantile", value = c(12, 15, 19),
+    p = c(0.25, 0.5, 0.75), n = 4000, relative_obs_time = 40,
     trunc_adjusted = FALSE, cens_adjusted = 0, stringsAsFactors = FALSE
   )
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
-  expect_true(any(grepl("overconfident", msgs, fixed = TRUE)))
-  over_msg <- msgs[grepl("overconfident", msgs, fixed = TRUE)]
-  expect_length(over_msg, 1)
-  expect_true(grepl("\"A\"", over_msg, fixed = TRUE))
-  expect_false(grepl("mean and standard deviation", over_msg, fixed = TRUE))
-  expect_false(grepl("Checks", over_msg, fixed = TRUE))
-  expect_identical(sum(grepl("Checks section", msgs, fixed = TRUE)), 1L)
-  # A small study, a single quantile or a continuous study does not trip it.
-  quantiles$n <- 60
-  msgs <- capture_messages(as_epidist_estimates_data(quantiles))
   expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
-  quantiles$n <- 400
-  msgs <- capture_messages(as_epidist_estimates_data(quantiles[2, ]))
-  expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
-  quantiles$cens_adjusted <- 1
-  msgs <- capture_messages(as_epidist_estimates_data(quantiles))
-  expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
+  expect_false(any(grepl("Checks section", msgs, fixed = TRUE)))
 })
 
 test_that("as_epidist_estimates_data warns about a heavy tailed standard deviation from a small study", { # nolint: line_length_linter.
@@ -504,27 +493,30 @@ test_that("as_epidist_estimates_data warns about a heavy tailed standard deviati
 })
 
 test_that("as_epidist_estimates_data points at the Checks section once per call", { # nolint: line_length_linter.
-  # A study that trips the coarse quantile and the overconfident checks gets
-  # one pointer to the documentation, after both messages, and a study that
-  # trips none gets no pointer.
+  # A study that trips the coarse quantile check and the short cutoff check
+  # gets one pointer to the documentation, after both messages, and a study
+  # that trips none gets no pointer.
   quantiles <- data.frame(
     study = "A", type = "quantile", value = c(3, 5, 8),
     p = c(0.25, 0.5, 0.75), n = 400, relative_obs_time = 30,
-    trunc_adjusted = FALSE, cens_adjusted = 0, stringsAsFactors = FALSE
+    trunc_adjusted = FALSE, cens_adjusted = 0, max_delay = 12,
+    stringsAsFactors = FALSE
   )
+  quantiles$trunc_adjusted <- TRUE
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
   expect_identical(sum(grepl("smallest counted delay", msgs, fixed = TRUE)), 1L)
-  expect_identical(sum(grepl("overconfident", msgs, fixed = TRUE)), 1L)
+  expect_identical(sum(grepl("short", msgs, fixed = TRUE)), 1L)
   pointer <- grepl("Checks section", msgs, fixed = TRUE)
   expect_identical(sum(pointer), 1L)
   expect_true(pointer[length(pointer)])
   quantiles$cens_adjusted <- 1
+  quantiles$max_delay <- NULL
   msgs <- capture_messages(as_epidist_estimates_data(quantiles))
   expect_false(any(grepl("Checks section", msgs, fixed = TRUE)))
   # Set advise = FALSE to skip the checks.
   quantiles$cens_adjusted <- 0
   msgs <- capture_messages(as_epidist_estimates_data(quantiles, advise = FALSE))
-  expect_false(any(grepl("overconfident", msgs, fixed = TRUE)))
+  expect_false(any(grepl("smallest counted delay", msgs, fixed = TRUE)))
   expect_false(any(grepl("Checks section", msgs, fixed = TRUE)))
 })
 
@@ -858,6 +850,119 @@ test_that("as_epidist_estimates_data checks the censoring windows against the gr
     suppressMessages(as_epidist_estimates_data(wide)),
     "at least as large as"
   )
+})
+
+test_that("as_epidist_estimates_data accepts an unknown growth rate and a growth rate standard deviation", { # nolint: line_length_linter.
+  est <- suppressMessages(as_epidist_estimates_data(est_df))
+  expect_true("growth_rate_sd" %in% .estimates_required_cols())
+  expect_identical(est$growth_rate_sd, rep(NA_real_, 4))
+  expect_false(any(.estimates_growth_estimated(est)))
+  expect_false(any(.estimates_growth_tilted(est)))
+  uncertain <- est_df
+  uncertain$growth_rate <- c(NA, NA, 0.1, 0.05)
+  uncertain$growth_rate_sd <- c(NA, NA, 0.02, 0)
+  est <- suppressMessages(as_epidist_estimates_data(uncertain))
+  expect_identical(est$growth_rate, c(NA, NA, 0.1, 0.05))
+  expect_identical(est$growth_rate_sd, c(NA, NA, 0.02, 0))
+  # An NA rate, or a positive standard deviation, is estimated. A standard
+  # deviation of zero is a known rate.
+  expect_identical(.estimates_growth_estimated(est), c(TRUE, TRUE, TRUE, FALSE))
+  expect_identical(.estimates_growth_tilted(est), c(TRUE, TRUE, TRUE, TRUE))
+  est$growth_rate[4] <- 0
+  expect_identical(.estimates_growth_tilted(est), c(TRUE, TRUE, TRUE, FALSE))
+  # The column can be renamed like any other.
+  renamed <- uncertain
+  names(renamed)[names(renamed) == "growth_rate_sd"] <- "rate_sd"
+  est <- suppressMessages(
+    as_epidist_estimates_data(renamed, growth_rate_sd = "rate_sd")
+  )
+  expect_identical(est$growth_rate_sd, c(NA, NA, 0.02, 0))
+})
+
+test_that("as_epidist_estimates_data checks the growth rate standard deviation", { # nolint: line_length_linter.
+  uncentred <- est_df
+  uncentred$growth_rate <- NA
+  uncentred$growth_rate_sd <- 0.02
+  expect_error(
+    suppressMessages(as_epidist_estimates_data(uncentred)),
+    "centre"
+  )
+  negative <- est_df
+  negative$growth_rate_sd <- -0.1
+  expect_error(suppressMessages(as_epidist_estimates_data(negative)))
+  infinite <- est_df
+  infinite$growth_rate_sd <- Inf
+  expect_error(suppressMessages(as_epidist_estimates_data(infinite)))
+  infinite$growth_rate_sd <- NA
+  infinite$growth_rate <- Inf
+  expect_error(suppressMessages(as_epidist_estimates_data(infinite)))
+  # A non numeric column is rejected rather than coerced. A factor would
+  # otherwise become its level codes, and a character an NA, which reads as a
+  # request to estimate the rate.
+  factored <- est_df
+  factored$growth_rate <- factor(c("0", "0", "0.1", "0.1"))
+  expect_error(suppressMessages(as_epidist_estimates_data(factored)))
+  worded <- est_df
+  worded$growth_rate <- "fast"
+  expect_error(suppressMessages(as_epidist_estimates_data(worded)))
+  worded <- est_df
+  worded$growth_rate_sd <- "wide"
+  expect_error(suppressMessages(as_epidist_estimates_data(worded)))
+})
+
+test_that("the quadrature checks treat an estimated growth rate as a tilted primary event", { # nolint: line_length_linter.
+  # A study that adjusted for right truncation uses the analytic moments
+  # only with a uniform primary event, so an estimated rate puts it on the
+  # quadrature like a known non zero rate does.
+  narrow <- data.frame(
+    study = "A", type = c("mean", "sd"), value = c(24, 0.02), n = 500,
+    relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 2,
+    max_delay = 100, stringsAsFactors = FALSE
+  )
+  msgs <- capture_messages(as_epidist_estimates_data(narrow))
+  expect_false(any(grepl("quadrature", msgs, fixed = TRUE)))
+  narrow$growth_rate <- NA
+  msgs <- capture_messages(as_epidist_estimates_data(narrow))
+  expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
+  narrow$growth_rate <- 0
+  narrow$growth_rate_sd <- 0.01
+  msgs <- capture_messages(as_epidist_estimates_data(narrow))
+  expect_true(any(grepl("quadrature", msgs, fixed = TRUE)))
+  data <- suppressMessages(as_epidist_estimates_data(narrow))
+  expect_identical(.estimates_coarse_quadrature(data), "A")
+  # The same holds for the grid cutoff, which only matters on the
+  # quadrature. This study's tail runs well beyond its cutoff.
+  heavy <- data.frame(
+    study = "B", type = c("mean", "sd"), value = c(8, 6), n = 100,
+    relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 2,
+    max_delay = 20, growth_rate = 0, stringsAsFactors = FALSE
+  )
+  data <- suppressMessages(as_epidist_estimates_data(heavy))
+  expect_identical(.estimates_short_cutoff(data), character(0))
+  heavy$growth_rate <- NA
+  data <- suppressMessages(as_epidist_estimates_data(heavy))
+  expect_identical(.estimates_short_cutoff(data), "B")
+})
+
+test_that("simulate_study passes an unknown growth rate through", {
+  linelist <- simulate_gillespie(seed = 1) |>
+    simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
+    simulate_dates(keep_times = TRUE) |>
+    as_epidist_linelist_data()
+  est <- simulate_study(
+    linelist, "calendar stop",
+    cens_adjusted = 0, trunc_adjusted = FALSE, trunc_design = "accrual",
+    relative_obs_time = 20, growth_rate = NA
+  )
+  expect_identical(est$growth_rate, c(NA_real_, NA_real_))
+  expect_true(all(.estimates_growth_estimated(est)))
+  reported <- simulate_study(
+    linelist, "calendar stop",
+    cens_adjusted = 0, trunc_adjusted = FALSE, trunc_design = "accrual",
+    relative_obs_time = 20, growth_rate = 0.1, growth_rate_sd = 0.02
+  )
+  expect_identical(reported$growth_rate_sd, c(0.02, 0.02))
+  expect_true(all(.estimates_growth_estimated(reported)))
 })
 
 test_that("the advisory messages count windows in days, weeks or windows", {

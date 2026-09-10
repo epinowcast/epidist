@@ -20,6 +20,7 @@
   cens_adjusted = NULL,
   delay_min = NULL,
   growth_rate = NULL,
+  growth_rate_sd = NULL,
   max_delay = NULL,
   advise = TRUE,
   ...
@@ -110,11 +111,24 @@ available to each delay, which is the dynamical bias of a growing epidemic
 and can move the implied mean by a day or more. A non-zero rate is
 expensive, because the primary censored delay distribution then has no
 analytical solution and every evaluation becomes a numerical integration.
-Leave it at 0 unless the study accrued cases over a period of growth. It
-is a known quantity here, taken from the study. For individual level data
-the same rate is estimated instead, as the \code{pgrowth} parameter of
-\code{primary = "expgrowth"} in \code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}}. See
-\code{vignette("primary-events")}.}
+Leave it at 0 unless the study accrued cases over a period of growth.
+A number is taken as known. \code{NA} means the rate is unknown, and the
+study then uses the \code{pgrowth} distributional parameter of the meta
+model, the same parameter that \code{primary = "expgrowth"} estimates from
+individual level data in \code{\link[=as_epidist_marginal_model]{as_epidist_marginal_model()}}. Give
+\code{growth_rate_sd} as well to treat a reported rate as an informative
+prior on that parameter rather than as a fixed number. See
+\code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}} and \code{vignette("primary-events")}.}
+
+\item{growth_rate_sd}{A string giving the column of \code{data} containing the
+standard deviation of \code{growth_rate}, where the study reported the rate
+with uncertainty. Defaults to \code{NA}, meaning the rate is known exactly. A
+positive value makes the study estimate its rate as the \code{pgrowth}
+distributional parameter, with a normal prior centred on \code{growth_rate}
+with this standard deviation. That prior is set up by
+\code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}, see there for the formula it uses. A value of
+0 is the same as \code{NA}, and a value with an \code{NA} \code{growth_rate} is an
+error, because the prior has no centre.}
 
 \item{max_delay}{A string giving the column of \code{data} containing the delay
 beyond which the implied summaries are truncated when building the discrete
@@ -260,17 +274,18 @@ and reviews rarely record which did, so this is the assumption most
 likely to be wrong and is a warning rather than a message.
 \item \strong{Short grid cutoff.} The implied summaries of a study that adjusted
 for right truncation but is evaluated on a grid, which is a study with
-\code{cens_adjusted} 0 or 3, or 2 or 4 with a non zero \code{growth_rate}, run to
-\code{max_delay}. A cutoff the delay distribution has not decayed by biases
-them downwards, and the standard deviation most, because the tail beyond
-the cutoff carries a share of the second moment out of all proportion to
-its mass. A lognormal is matched to what the study reported, through its
-mean and standard deviation, or its median and largest quantile above
-the median where it reported only quantiles, and the study is flagged
-when more than 2\% of the second moment of that lognormal lies beyond the
-cutoff. That is where the standard deviation on the grid falls about 1\%
-short, and the shortfall grows with the share. Studies reporting neither
-pair are not checked. Raise \code{max_delay} for the study.
+\code{cens_adjusted} 0 or 3, or 2 or 4 with a non zero or estimated
+\code{growth_rate}, run to \code{max_delay}. A cutoff the delay distribution has
+not decayed by biases them downwards, and the standard deviation most,
+because the tail beyond the cutoff carries a share of the second moment
+out of all proportion to its mass. A lognormal is matched to what the
+study reported, through its mean and standard deviation, or its median
+and largest quantile above the median where it reported only quantiles,
+and the study is flagged when more than 2\% of the second moment of that
+lognormal lies beyond the cutoff. That is where the standard deviation
+on the grid falls about 1\% short, and the shortfall grows with the
+share. Studies reporting neither pair are not checked. Raise
+\code{max_delay} for the study.
 \item \strong{Coarse quadrature.} The moments and distribution function of a
 continuous estimand truncated at the grid cutoff are computed by
 Simpson's rule on equally spaced intervals from \code{delay_min} to the
@@ -284,9 +299,10 @@ so its implied summaries may be inaccurate. This covers a study that did
 not adjust for right truncation and used a continuous adjustment
 (\code{cens_adjusted} 1, 2 or 4), a study that did adjust but whose primary
 events were not uniform within their window (\code{cens_adjusted} 2 or 4 with
-a non zero \code{growth_rate}), and the quantiles of a study reporting a
-covariance matrix, which are read off the same nodes. Raise the option
-above the cap before building the model data, or lower \code{max_delay}.
+a non zero or estimated \code{growth_rate}), and the quantiles of a study
+reporting a covariance matrix, which are read off the same nodes. Raise
+the option above the cap before building the model data, or lower
+\code{max_delay}.
 \item \strong{Coarse quantiles.} A study that summarised interval censored delays
 without adjusting for censoring (\code{cens_adjusted} 0 or 3) reports
 quantiles of a discrete distribution, which the model interpolates
@@ -301,18 +317,6 @@ even when the larger quantiles of the same study sit well up the grid.
 Check that \code{swindow} is the resolution the study worked at. A reported
 mean and standard deviation of the same delays do not carry this
 residual, so fit them in preference where the study gives them.
-\item \strong{Several integer day quantiles from a large study.} A quantile of
-delays counted in whole censoring windows is a discrete statistic, and
-the information it carries about the delay distribution saturates once
-the binomial spread of the crossing point of the empirical distribution
-function is narrower than a window. A single such quantile is fitted as
-the exact crossing event, but several are still fitted with the
-multinomial on the continuity corrected distribution function, whose
-claimed precision keeps growing with the sample size. It is calibrated
-at around thirty delays and overconfident from around a hundred, so a
-study reporting two or more such quantiles from more than 100 delays is
-flagged and will be weighted too heavily. Fit a reported mean and
-standard deviation instead where one is available.
 \item \strong{Heavy tailed standard deviation.} The sampling standard error of a
 reported standard deviation is \eqn{\sigma \sqrt{(\kappa - 1) / (4 n)}},
 with \eqn{\kappa} the kurtosis of the delays. The normal approximation

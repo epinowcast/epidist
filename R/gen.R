@@ -122,10 +122,14 @@ epidist_gen_log_lik <- function(family) {
     # every call, which would miss the cache once per draw, so integrate with
     # [primarycensored::pcens_cdf()] and form the censored pmf here.
     primary <- .primary_spec_from_prep(prep, spec)
-    pcens_obj <- primarycensored::new_pcens(
-      pdist = pdist_draw,
-      dprimary = primary$ddist,
-      dprimary_args = .primary_args(primary, prep, i)
+    pcens_obj <- do.call(
+      primarycensored::new_pcens,
+      c(
+        list(pdist = pdist_draw, dprimary = primary$ddist),
+        stats::setNames(
+          list(.primary_args(primary, prep, i)), .primary_args_name()
+        )
+      )
     )
     delays <- unique(c(y, y + swindow, relative_obs_time, delay_min))
     delays <- sort(delays[is.finite(delays)])
@@ -181,8 +185,11 @@ epidist_gen_log_lik <- function(family) {
               L = delay_min,
               D = relative_obs_time,
               dprimary = primary$ddist,
-              dprimary_args = .primary_args(primary, prep, i, draw),
               log = TRUE
+            ),
+            stats::setNames(
+              list(.primary_args(primary, prep, i, draw)),
+              .primary_args_name()
             ),
             dist_args[[draw]]
           )

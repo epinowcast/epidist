@@ -126,7 +126,7 @@ test_that("epidist_newdata checks its numeric arguments", {
 
 test_that("epidist_newdata works with brms and tidybayes", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   newdata <- epidist_newdata(prep_obs_sex, sex)
   expect_no_error(suppressWarnings(brms::validate_newdata(newdata, fit_sex)))
   epred <- suppressWarnings(
@@ -140,7 +140,7 @@ test_that("epidist_newdata works with brms and tidybayes", {
 
 test_that("epidist_newdata works with the marginal model and tidybayes", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   newdata <- epidist_newdata(prep_marginal_obs_sex, sex)
   expect_no_error(suppressWarnings(
     brms::validate_newdata(newdata, fit_marginal_sex)
@@ -158,7 +158,7 @@ test_that("epidist_newdata works with the marginal model and tidybayes", {
 
 test_that("epidist_newdata works with the naive model and tidybayes", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   newdata <- epidist_newdata(prep_naive_obs)
   expect_no_error(brms::validate_newdata(newdata, fit_naive))
   epred <- tidybayes::add_epred_draws(newdata, fit_naive, ndraws = 5)
@@ -218,7 +218,7 @@ test_that("epidist_newdata.epidist_meta_model expands the study", {
 
 test_that("epidist_newdata works with the meta model and tidybayes", {
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   newdata <- epidist_newdata(prep_meta_biased)
   expect_no_error(suppressWarnings(
     brms::validate_newdata(newdata, fit_meta_estimates)

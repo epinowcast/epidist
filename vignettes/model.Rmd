@@ -17,7 +17,7 @@ bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
-# exclude compile warnings from cmdstanr
+# hide the Stan compile warnings
 knitr::opts_chunk$set(
   fig.path = file.path("figures", "epidist-"),
   collapse = TRUE,
@@ -354,7 +354,23 @@ P(N_{\le y} \ge k) - P(N_{\le y - w_s} \ge k), \quad k = \lceil n p \rceil, \qua
 $$
 where $w_s$ is the reporting resolution and $G_0$ the step distribution function of the discrete estimand of Section \@ref(the-biased-estimands), before continuity correction.
 The information this carries saturates as $n$ grows.
-Several quantiles of integer day delays use Equation \@ref(eq:meta-quantile-set) on the continuity corrected $G$, which is calibrated at around thirty delays but claims a standard error five times too small at a thousand, so `as_epidist_estimates_data()` warns about such studies.
+
+Several quantiles of integer day delays from one study are fitted as the joint probability of the crossings they stand for.
+The counts $N_{e_1} \le N_{e_2} \le \dots \le N_{e_m}$ at the integer edges the reported quantiles name, the day below each and the day itself, form a Markov chain of binomial steps,
+$$
+N_{e_1} \sim \text{Binomial}\left(n, \; G_0(e_1)\right), \quad
+N_{e_{i+1}} \mid N_{e_i} \sim N_{e_i} + \text{Binomial}\left(n - N_{e_i}, \; \frac{G_0(e_{i+1}) - G_0(e_i)}{1 - G_0(e_i)}\right), (\#eq:meta-quantile-chain)
+$$
+and a quantile reported at $p$ landing on day $y$ puts the box $N_{\le y - w_s} \le \lceil n p \rceil - 1$ and $N_{\le y} \ge \lceil n p \rceil$ on two of them.
+The likelihood is the probability that every count fell in its box,
+$$
+P\left(l_i \le N_{e_i} \le u_i, \; i = 1, \dots, m\right), (\#eq:meta-quantile-box)
+$$
+computed by a forward pass over the counts $0, \dots, n$ on the log scale, one binomial step per edge.
+The pass is kept to a band of counts around the most likely path of the constrained chain, six standard deviations and a few counts wide, so its cost grows like $m n^{3/2}$ rather than $m n^2$ and it is exact to well within a millionth.
+Two quantiles reported at the same value are two constraints at one edge, and a single quantile reduces Equation \@ref(eq:meta-quantile-box) to Equation \@ref(eq:meta-quantile-crossing).
+The multinomial of Equation \@ref(eq:meta-quantile-set) on the continuity corrected $G$ treats each reported quantile as a continuous cut point, so its curvature grows like $n$ and it claims a standard error five times too small at a thousand delays, where Equation \@ref(eq:meta-quantile-box) is close to an indicator of the parameters that put the population quantiles in the reported cells.
+That is a box rather than a peak, so the posterior of such a study is described by its bounds rather than a standard error, and the sampler explores the box.
 
 A study with a continuous estimand, codes 1, 2 and 4 of Section \@ref(the-biased-estimands), that reports a mean or a standard deviation alongside quantiles has all of them fitted as one multivariate normal,
 $$
@@ -376,7 +392,7 @@ The partial moments are integrated by parts over the nodes on which $G$ is evalu
 Against 4000 simulated lognormal studies of 200 delays the derived standard errors are within 3% and the correlations within 0.02 of their sampling values.
 Fitting the two kinds separately counts a study reporting a mean, a standard deviation and quartiles about twice for the location and 1.4 times for the spread, and a mean with a median 1.5 times at $n = 100$ and 3 times at $n = 30$.
 A continuous estimand reporting only a mean and a standard deviation, or only quantiles, keeps Equation \@ref(eq:meta-moment-pair) or \@ref(eq:meta-quantile-set), which the joint normal reduces to and which is exact for a single quantile.
-On the grid of codes 0 and 3 the quantiles are discrete statistics fitted by Equations \@ref(eq:meta-quantile-crossing) and \@ref(eq:meta-quantile-set), so the mean and standard deviation of such a study are fitted separately from its quantiles, and a study reporting both kinds is over weighted in the same way.
+On the grid of codes 0 and 3 the quantiles are discrete statistics fitted by Equations \@ref(eq:meta-quantile-crossing) and \@ref(eq:meta-quantile-box), so the mean and standard deviation of such a study are fitted separately from its quantiles, and a study reporting both kinds is over weighted in the same way.
 Keep its mean and standard deviation and drop its quantiles.
 The normal approximations degrade for small study sample sizes.
 
@@ -411,7 +427,7 @@ There, quantiles in the body of the distribution are more reliable than a standa
 
 Individual level rows use the marginal model likelihood of Section \@ref(the-marginal-model) unchanged, with $\theta$ shared with the summary rows.
 Their primary event distribution is set with `primary`, so the tilted primary event of Section \@ref(primary-tilt) is available to them.
-Summary rows take the growth rate given for each study as a known quantity rather than the estimated `pgrowth`, a limitation tracked in [epinowcast/epidist#678](https://github.com/epinowcast/epidist/issues/678).
+A summary row whose growth rate is unknown, or reported with uncertainty, uses the same `pgrowth` parameter, see Section \@ref(estimated-growth).
 The joint likelihood is the product of the sampling likelihoods above over the summary rows and the marginal model likelihood over the individual level rows.
 
 ## What we need from each study
@@ -419,7 +435,7 @@ The joint likelihood is the product of the sampling likelihoods above over the s
 `as_epidist_estimates_data()` takes, for each summary:
 
 * how the study adjusted for interval censoring, a code from 0 to 4 defined in Section \@ref(the-biased-estimands),
-* whether it adjusted for right truncation, and if not its observation time, how collection stopped and the growth rate of primary events over the study period,
+* whether it adjusted for right truncation, and if not its observation time, how collection stopped and the growth rate of primary events over the study period, or `NA` where that is to be estimated, with a standard deviation where the study reported one,
 * its censoring windows $w_p$ and $w_s$, the widths of the intervals its primary and secondary events were observed in,
 * its sample size, or a standard error or covariance in its place,
 * the smallest delay it counted.
@@ -452,7 +468,7 @@ where bin $j$ carries the delay $(j-1) w_s$ and the truncation point is discreti
 This is the doubly interval censored, right truncated probability mass function the marginal model of Section \@ref(the-marginal-model) uses for individual observations.
 Summing over the grid gives the moments, and its cumulative sum gives $G_0$.
 For quantile rows $G$ is continuity corrected by interpolating $G_0$ linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise lands on a jump.
-A single reported quantile uses Equation \@ref(eq:meta-quantile-crossing) on $G_0$.
+Reported quantiles without a standard error use Equation \@ref(eq:meta-quantile-crossing) or \@ref(eq:meta-quantile-box) on $G_0$ instead.
 The reported value is itself rounded to the grid, so a bias remains that does not shrink with $n$.
 It stays under 4% on the mean and 9% on the standard deviation once the reported quantiles sit twenty five or more cells above the smallest delay counted, and reaches tens of percent on both within ten, so a coarsely resolved delay is better fitted through its mean and standard deviation where reported.
 
@@ -480,7 +496,7 @@ $$
 with $\mu$, $\sigma^2$ and $\mu_4$ the mean, variance and fourth central moment of $f(\cdot \, ; \theta)$.
 
 Code 3, midpoint imputation, assigned each delay to the centre of its interval, so its estimand is the grid of Equation \@ref(eq:meta-grid) moved up by $w_s / 2$.
-A single reported quantile uses Equation \@ref(eq:meta-quantile-crossing), as for code 0.
+Reported quantiles use Equations \@ref(eq:meta-quantile-crossing) and \@ref(eq:meta-quantile-box), as for code 0.
 Code 4, midpoint imputation with a uniform interval, placed the primary event at the midpoint of its window and integrated the secondary interval, so its estimand is that of code 2 moved down by $w_p / 2$.
 A shift changes the mean alone and moves the distribution function and quantiles with it.
 Code 4 therefore has the mean of code 1 and the variance of code 2 before truncation, because midpointing removes the mean of $U$ but not its spread.
@@ -519,6 +535,19 @@ Treating the partial window as complete put the mean 27% low for weekly primary 
 One residual remains.
 Equation \@ref(eq:meta-uniform-moments) keeps the smooth weight, because the follow up available to a primary event is only known to within its window, and at $w_p = 7$ its mean is 2.6% high at $r = 0.2$.
 The residual grows with $r$ and as $w_p$ grows towards $A$.
+
+### An estimated growth rate {#estimated-growth}
+
+The rate $r_j$ of study $j$ sets the tilt of $g_p$, which every code but code 1 uses.
+It also sets the weight of Equation \@ref(eq:meta-accrual).
+Where the study's `growth_rate` is `NA`, or is given with a `growth_rate_sd`, it is instead the distributional parameter `pgrowth` evaluated on the row, the parameter of Section \@ref(primary-tilt), so it takes a `brms` formula and a prior and can be shared with individual level rows from the same outbreak.
+Unless a formula is given for `pgrowth` the model uses `pgrowth ~ 0 + study`, one rate per study.
+A study that reported a rate $\hat{r}_j$ with a standard deviation $s_j$ then gets
+$$
+r_j \sim \text{Normal}(\hat{r}_j, s_j^2), (\#eq:meta-growth-prior)
+$$
+so the reported rate is a prior rather than a constant and its uncertainty reaches the delay.
+Every other coefficient of `pgrowth` gets $\text{Normal}(0, 0.25^2)$, which is weakly informative for a delay measured in days.
 
 ### Left truncation
 
