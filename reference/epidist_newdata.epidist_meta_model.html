@@ -201,26 +201,26 @@ rather than a column, so it needs nothing here.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The population level delay, with no censoring and no truncation</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="epidist_newdata.html">epidist_newdata</a></span><span class="op">(</span><span class="va">meta</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 18</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 19</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   delay_lwr obs_type study_n trunc_adjusted trunc_design cens_adjusted</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>         0        1       0              0            0             0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 12 more variables: group_start &lt;int&gt;, group_len &lt;int&gt;, chol_start &lt;int&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 13 more variables: group_start &lt;int&gt;, group_len &lt;int&gt;, chol_start &lt;int&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   n_quad &lt;int&gt;, relative_obs_time &lt;dbl&gt;, pwindow &lt;dbl&gt;, swindow &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   delay_upr &lt;dbl&gt;, delay_min &lt;dbl&gt;, report_se &lt;dbl&gt;, quantile_p &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   growth_rate &lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   growth_rate &lt;dbl&gt;, growth_known &lt;int&gt;</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A row for each study, with daily censoring</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="epidist_newdata.html">epidist_newdata</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">study</span>, pwindow <span class="op">=</span> <span class="fl">1</span>, swindow <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 19</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 20</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   study delay_lwr obs_type study_n trunc_adjusted trunc_design cens_adjusted</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> A             0        1       0              0            0             0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> B             0        1       0              0            0             0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 12 more variables: group_start &lt;int&gt;, group_len &lt;int&gt;, chol_start &lt;int&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 13 more variables: group_start &lt;int&gt;, group_len &lt;int&gt;, chol_start &lt;int&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   n_quad &lt;int&gt;, relative_obs_time &lt;dbl&gt;, pwindow &lt;dbl&gt;, swindow &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   delay_upr &lt;dbl&gt;, delay_min &lt;dbl&gt;, report_se &lt;dbl&gt;, quantile_p &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   growth_rate &lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   growth_rate &lt;dbl&gt;, growth_known &lt;int&gt;</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

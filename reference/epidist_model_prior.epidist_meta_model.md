@@ -14,7 +14,7 @@ with a 95% range of roughly 0.4 to 20 days.
 
 ``` r
 # S3 method for class 'epidist_meta_model'
-epidist_model_prior(data, formula, ...)
+epidist_model_prior(data, formula, default = NULL, ...)
 ```
 
 ## Arguments
@@ -32,6 +32,14 @@ epidist_model_prior(data, formula, ...)
   of the model to be fitted. A formula must be provided for the
   distributional parameter `mu`, and may optionally be provided for
   other distributional parameters.
+
+- default:
+
+  The default prior distributions from
+  [`brms::default_prior()`](https://paulbuerkner.com/brms/reference/default_prior.html),
+  which
+  [`epidist_prior()`](https://epidist.epinowcast.org/reference/epidist_prior.md)
+  passes so that they are not built twice. Built here where missing.
 
 - ...:
 
@@ -59,6 +67,19 @@ of the linear predictor, so that a small review cannot fit that spread
 from almost nothing under the wide `brms` default. It is dropped where
 the formula has no group level term. The prior on the intercept of the
 other distributional parameters is left to the family or to `brms`.
+
+Where a summary row estimates its growth rate as the `pgrowth`
+distributional parameter, see
+[`as_epidist_meta_model()`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.md),
+the coefficients and intercept of `pgrowth` get a `normal(0, 0.25)`
+prior, which is weakly informative for a delay measured in days, because
+the `brms` default is flat and the summaries carry little information
+about the rate. A study that reported its rate with a `growth_rate_sd`
+gets a normal prior with that centre and spread on its own coefficient,
+which exists under the default `pgrowth ~ 0 + study` formula, or on the
+intercept of `pgrowth` where it is the only study. Under another
+`pgrowth` formula the reported rates have no coefficient to act on and
+are dropped with a warning, so set their priors yourself.
 
 ## See also
 

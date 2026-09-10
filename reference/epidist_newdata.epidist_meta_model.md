@@ -139,24 +139,24 @@ meta <- as_epidist_meta_model(estimates = estimates)
 
 # The population level delay, with no censoring and no truncation
 epidist_newdata(meta)
-#> # A tibble: 1 × 18
+#> # A tibble: 1 × 19
 #>   delay_lwr obs_type study_n trunc_adjusted trunc_design cens_adjusted
 #>       <dbl>    <int>   <int>          <int>        <int>         <int>
 #> 1         0        1       0              0            0             0
-#> # ℹ 12 more variables: group_start <int>, group_len <int>, chol_start <int>,
+#> # ℹ 13 more variables: group_start <int>, group_len <int>, chol_start <int>,
 #> #   n_quad <int>, relative_obs_time <dbl>, pwindow <dbl>, swindow <dbl>,
 #> #   delay_upr <dbl>, delay_min <dbl>, report_se <dbl>, quantile_p <dbl>,
-#> #   growth_rate <dbl>
+#> #   growth_rate <dbl>, growth_known <int>
 
 # A row for each study, with daily censoring
 epidist_newdata(meta, study, pwindow = 1, swindow = 1)
-#> # A tibble: 2 × 19
+#> # A tibble: 2 × 20
 #>   study delay_lwr obs_type study_n trunc_adjusted trunc_design cens_adjusted
 #>   <chr>     <dbl>    <int>   <int>          <int>        <int>         <int>
 #> 1 A             0        1       0              0            0             0
 #> 2 B             0        1       0              0            0             0
-#> # ℹ 12 more variables: group_start <int>, group_len <int>, chol_start <int>,
+#> # ℹ 13 more variables: group_start <int>, group_len <int>, chol_start <int>,
 #> #   n_quad <int>, relative_obs_time <dbl>, pwindow <dbl>, swindow <dbl>,
 #> #   delay_upr <dbl>, delay_min <dbl>, report_se <dbl>, quantile_p <dbl>,
-#> #   growth_rate <dbl>
+#> #   growth_rate <dbl>, growth_known <int>
 ```

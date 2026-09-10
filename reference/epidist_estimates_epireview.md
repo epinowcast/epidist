@@ -198,7 +198,7 @@ epidist_estimates_epireview(
 #>   as the grid cutoff, or five times the largest reported value where nothing
 #>   can be matched. Raise it if the delay has a longer tail than that, and lower
 #>   it to speed up fitting.
-#> # A tibble: 6 × 16
+#> # A tibble: 6 × 17
 #>   study  type     value    se     n     p pwindow swindow relative_obs_time
 #>   <chr>  <chr>    <dbl> <dbl> <dbl> <dbl>   <dbl>   <dbl>             <dbl>
 #> 1 A 2015 mean      10.6    NA    76 NA          1       1                60
@@ -207,9 +207,9 @@ epidist_estimates_epireview(
 #> 4 B 2016 quantile  11      NA    20  0.25       1       1               Inf
 #> 5 B 2016 quantile  15      NA    20  0.75       1       1               Inf
 #> 6 B 2016 mean       8.9    NA    92 NA          1       1               Inf
-#> # ℹ 7 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
-#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>, max_delay <dbl>,
-#> #   mvn_id <chr>
+#> # ℹ 8 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
+#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>,
+#> #   growth_rate_sd <dbl>, max_delay <dbl>, mvn_id <chr>
 ebola <- suppressMessages(epireview::load_epidata("ebola"))$params
 onset_to_death <- ebola[
   ebola$parameter_type_short == "delay_onset_to_death",
@@ -254,7 +254,7 @@ epidist_estimates_epireview(
 #>   sampling error that large is far from normal, so the likelihood of the
 #>   standard deviation cannot be trusted.
 #> ℹ See the Checks section of `?as_epidist_estimates_data`.
-#> # A tibble: 45 × 17
+#> # A tibble: 45 × 18
 #>    study         type  value    se     n     p pwindow swindow relative_obs_time
 #>    <chr>         <chr> <dbl> <dbl> <dbl> <dbl>   <dbl>   <dbl>             <dbl>
 #>  1 Xu 2016       mean   8.6   NA      76 NA          1       1               Inf
@@ -268,7 +268,8 @@ epidist_estimates_epireview(
 #>  9 Qureshi 2015  mean   8.9   NA      70 NA          1       1               Inf
 #> 10 Qureshi 2015  sd     3.8   NA      70 NA          1       1               Inf
 #> # ℹ 35 more rows
-#> # ℹ 8 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
-#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>, max_delay <dbl>,
-#> #   mvn_id <chr>, method_moment_value <chr>
+#> # ℹ 9 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
+#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>,
+#> #   growth_rate_sd <dbl>, max_delay <dbl>, mvn_id <chr>,
+#> #   method_moment_value <chr>
 ```

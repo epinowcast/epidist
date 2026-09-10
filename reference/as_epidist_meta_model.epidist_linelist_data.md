@@ -71,9 +71,9 @@ as_epidist_meta_model(
   `"expgrowth"` tilts it, with the growth rate estimated as the
   `pgrowth` distributional parameter. Summary rows are unaffected. They
   tilt the primary event by the `growth_rate` metadata of their study,
-  which
-  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
-  takes as a known quantity.
+  or estimate it as the same `pgrowth` parameter where that is `NA` or
+  has a `growth_rate_sd`, see
+  [`as_epidist_meta_model()`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.md).
 
 - ...:
 
@@ -120,7 +120,7 @@ sierra_leone_ebola_data |>
 #> ℹ The original relative observation times are available in
 #>   `orig_relative_obs_time`.
 #> ℹ Raise `obs_time_threshold` to avoid this behaviour.
-#> # A tibble: 8,358 × 35
+#> # A tibble: 8,358 × 36
 #>    delay_lwr     n obs_type study_n trunc_adjusted trunc_design cens_adjusted
 #>        <int> <dbl>    <int>   <int>          <int>        <int>         <int>
 #>  1         5     1        1       0              0            0             0
@@ -134,10 +134,10 @@ sierra_leone_ebola_data |>
 #>  9         5     1        1       0              0            0             0
 #> 10         5     1        1       0              0            0             0
 #> # ℹ 8,348 more rows
-#> # ℹ 28 more variables: group_start <int>, group_len <int>, chol_start <int>,
+#> # ℹ 29 more variables: group_start <int>, group_len <int>, chol_start <int>,
 #> #   n_quad <int>, relative_obs_time <dbl>, pwindow <dbl>, swindow <dbl>,
 #> #   delay_upr <dbl>, delay_min <dbl>, report_se <dbl>, quantile_p <dbl>,
-#> #   growth_rate <dbl>, ptime_lwr <dbl>, ptime_upr <dbl>, stime_lwr <dbl>,
-#> #   stime_upr <dbl>, obs_time <dbl>, id <int>, age <dbl>, sex <chr>,
-#> #   pdate_lwr <date>, sdate_lwr <date>, district <chr>, chiefdom <chr>, …
+#> #   growth_rate <dbl>, growth_known <int>, ptime_lwr <dbl>, ptime_upr <dbl>,
+#> #   stime_lwr <dbl>, stime_upr <dbl>, obs_time <dbl>, id <int>, age <dbl>,
+#> #   sex <chr>, pdate_lwr <date>, sdate_lwr <date>, district <chr>, …
 ```

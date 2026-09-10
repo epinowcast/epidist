@@ -157,7 +157,9 @@ below it are dropped.</p></dd>
 <dt id="arg-growth-rate">growth_rate<a class="anchor" aria-label="anchor" href="#arg-growth-rate"></a></dt>
 <dd><p>The growth rate the study is described by. Passed
 through as metadata and not used to select cases, so it should be the
-rate the line list was simulated with.</p></dd>
+rate the line list was simulated with, or <code>NA</code> for a study that
+estimates it, see <code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code>. A <code>growth_rate_sd</code>
+passes through <code>...</code>.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
@@ -236,14 +238,14 @@ passed to <code><a href="as_epidist_estimates_data.html">as_epidist_estimates_da
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   as the grid cutoff, or five times the largest reported value where nothing</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   can be matched. Raise it if the delay has a longer tail than that, and lower</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   it to speed up fitting.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 17</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   study          type  value    se     n     p pwindow swindow relative_obs_time</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> naive snapshot mean   6.41    <span style="color: #BB0000;">NA</span>  <span style="text-decoration: underline;">8</span>316    <span style="color: #BB0000;">NA</span>       1       1                15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> naive snapshot sd     2.84    <span style="color: #BB0000;">NA</span>  <span style="text-decoration: underline;">8</span>316    <span style="color: #BB0000;">NA</span>       1       1                15</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 7 more variables: trunc_adjusted &lt;lgl&gt;, trunc_design &lt;chr&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   cens_adjusted &lt;int&gt;, delay_min &lt;dbl&gt;, growth_rate &lt;dbl&gt;, max_delay &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   mvn_id &lt;chr&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 8 more variables: trunc_adjusted &lt;lgl&gt;, trunc_design &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   cens_adjusted &lt;int&gt;, delay_min &lt;dbl&gt;, growth_rate &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   growth_rate_sd &lt;dbl&gt;, max_delay &lt;dbl&gt;, mvn_id &lt;chr&gt;</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

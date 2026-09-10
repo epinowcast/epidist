@@ -144,6 +144,25 @@ study is given as many intervals as it needs to resolve the spread it
 reported, up to a cap of 2000 that the option lifts when set above it,
 and the number is held in the `n_quad` column of the model data.
 
+## Advanced: an estimated growth rate
+
+A summary row tilts its primary event, and weights the follow up of an
+accrual design, by the `growth_rate` of its study. Where that rate is
+`NA` in
+[`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md),
+or was given there with a `growth_rate_sd`, the study estimates it as
+the `pgrowth` distributional parameter instead. That is the parameter
+`primary = "expgrowth"` estimates from individual level rows, so the two
+can share it. The model adds `pgrowth ~ 0 + study` unless a `pgrowth`
+formula is given, and
+[`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md)
+sets the priors from the reported rates. Summaries carry little
+information about the rate on their own, so share the coefficient with
+rows that do inform it, for example `pgrowth ~ 1` with a line list from
+the same outbreak.
+[`vignette("model")`](https://epidist.epinowcast.org/articles/model.md)
+gives the details.
+
 ## See also
 
 Other meta_model:

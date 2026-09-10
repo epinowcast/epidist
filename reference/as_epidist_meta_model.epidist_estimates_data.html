@@ -97,7 +97,8 @@ estimates, or <code>NULL</code>.</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>A model built from summaries alone takes no <code>primary</code> argument, because
 summary rows tilt the primary event by the <code>growth_rate</code> metadata of their
-study rather than by an estimated parameter. Passing one is an error.</p>
+study, estimating it only where that is <code>NA</code> or has a <code>growth_rate_sd</code>.
+Passing one is an error.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -143,14 +144,14 @@ study rather than by an estimated parameter. Passing one is an error.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   can be matched. Raise it if the delay has a longer tail than that, and lower</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   it to speed up fitting.</span>
 <span class="r-in"><span><span class="fu"><a href="as_epidist_meta_model.html">as_epidist_meta_model</a></span><span class="op">(</span><span class="va">estimates</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 20</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 22</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   delay_lwr     n obs_type study_n trunc_adjusted trunc_design cens_adjusted</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>         0     1        5     120              0            0             0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 13 more variables: group_start &lt;int&gt;, group_len &lt;int&gt;, chol_start &lt;int&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 15 more variables: group_start &lt;int&gt;, group_len &lt;int&gt;, chol_start &lt;int&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   n_quad &lt;int&gt;, relative_obs_time &lt;dbl&gt;, pwindow &lt;dbl&gt;, swindow &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   delay_upr &lt;dbl&gt;, delay_min &lt;dbl&gt;, report_se &lt;dbl&gt;, quantile_p &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   growth_rate &lt;dbl&gt;, study &lt;chr&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   growth_rate &lt;dbl&gt;, growth_known &lt;int&gt;, growth_rate_sd &lt;dbl&gt;, study &lt;chr&gt;</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -84,7 +84,7 @@ delay of about 3 days with a 95% range of roughly 0.4 to 20 days.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'epidist_meta_model'</span></span>
-<span><span class="fu"><a href="epidist_model_prior.html">epidist_model_prior</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">formula</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="epidist_model_prior.html">epidist_model_prior</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">formula</span>, default <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -101,6 +101,12 @@ delay of about 3 days with a 95% range of roughly 0.4 to 20 days.</p>
 the model to be fitted. A formula must be provided for the distributional
 parameter <code>mu</code>, and may optionally be provided for other distributional
 parameters.</p></dd>
+
+
+<dt id="arg-default">default<a class="anchor" aria-label="anchor" href="#arg-default"></a></dt>
+<dd><p>The default prior distributions from
+<code><a href="https://paulbuerkner.com/brms/reference/default_prior.html" class="external-link">brms::default_prior()</a></code>, which <code><a href="epidist_prior.html">epidist_prior()</a></code> passes so that they are
+not built twice. Built here where missing.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -127,6 +133,17 @@ the linear predictor, so that a small review cannot fit that spread from
 almost nothing under the wide <code>brms</code> default. It is dropped where the
 formula has no group level term. The prior on the intercept of the other
 distributional parameters is left to the family or to <code>brms</code>.</p>
+<p>Where a summary row estimates its growth rate as the <code>pgrowth</code>
+distributional parameter, see <code><a href="as_epidist_meta_model.html">as_epidist_meta_model()</a></code>, the coefficients
+and intercept of <code>pgrowth</code> get a <code>normal(0, 0.25)</code> prior, which is weakly
+informative for a delay measured in days, because the <code>brms</code> default is
+flat and the summaries carry little information about the rate. A study
+that reported its rate with a <code>growth_rate_sd</code> gets a normal prior with
+that centre and spread on its own coefficient, which exists under the
+default <code>pgrowth ~ 0 + study</code> formula, or on the intercept of <code>pgrowth</code>
+where it is the only study. Under another <code>pgrowth</code> formula the reported
+rates have no coefficient to act on and are dropped with a warning, so
+set their priors yourself.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

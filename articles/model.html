@@ -451,7 +451,7 @@ The rest follows from the Bahadur representation of a sample quantile, <span cla
 \Sigma_{\sigma q_i} = -\frac{\int_L^{Q_{p_i}} \left((x - m_1)^2 - \sigma^2\right) \text{d}G(x)}{2 \sigma \, g(Q_{p_i})}, \tag{5.11}
 \]</span>
 with <span class="math inline">\(L\)</span> the smallest delay the study counted, and the last entry carried from the sample variance to the standard deviation by the delta method.
-The partial moments are integrated by parts over the nodes on which <span class="math inline">\(G\)</span> is evaluated, and <span class="math inline">\(g(Q_p)\)</span> is the closed form density of the estimand where its quantile is refined and the slope of <span class="math inline">\(G\)</span> between the bracketing nodes where it is not, see Section <a href="#quantiles-of-the-estimands">5.3.4</a>.
+The partial moments are integrated by parts over the nodes on which <span class="math inline">\(G\)</span> is evaluated, and <span class="math inline">\(g(Q_p)\)</span> is the closed form density of the estimand where its quantile is refined and the slope of <span class="math inline">\(G\)</span> between the bracketing nodes where it is not, see Section <a href="#quantiles-of-the-estimands">5.3.5</a>.
 Against 4000 simulated lognormal studies of 200 delays the derived standard errors are within 3% and the correlations within 0.02 of their sampling values.
 Fitting the two kinds separately counts a study reporting a mean, a standard deviation and quartiles about twice for the location and 1.4 times for the spread, and a mean with a median 1.5 times at <span class="math inline">\(n = 100\)</span> and 3 times at <span class="math inline">\(n = 30\)</span>.
 A continuous estimand reporting only a mean and a standard deviation, or only quantiles, keeps Equation <a href="#eq:meta-moment-pair">(5.5)</a> or <a href="#eq:meta-quantile-set">(5.6)</a>, which the joint normal reduces to and which is exact for a single quantile.
@@ -496,7 +496,7 @@ There, quantiles in the body of the distribution are more reliable than a standa
 </h4>
 <p>Individual level rows use the marginal model likelihood of Section <a href="#the-marginal-model">4</a> unchanged, with <span class="math inline">\(\theta\)</span> shared with the summary rows.
 Their primary event distribution is set with <code>primary</code>, so the tilted primary event of Section <a href="#primary-tilt">3.2</a> is available to them.
-Summary rows take the growth rate given for each study as a known quantity rather than the estimated <code>pgrowth</code>, a limitation tracked in <a href="https://github.com/epinowcast/epidist/issues/678" class="external-link">epinowcast/epidist#678</a>.
+A summary row whose growth rate is unknown, or reported with uncertainty, uses the same <code>pgrowth</code> parameter, see Section <a href="#estimated-growth">5.3.3</a>.
 The joint likelihood is the product of the sampling likelihoods above over the summary rows and the marginal model likelihood over the individual level rows.</p>
 </div>
 </div>
@@ -507,7 +507,7 @@ The joint likelihood is the product of the sampling likelihoods above over the s
 <p><code><a href="../reference/as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> takes, for each summary:</p>
 <ul>
 <li>how the study adjusted for interval censoring, a code from 0 to 4 defined in Section <a href="#the-biased-estimands">5.3</a>,</li>
-<li>whether it adjusted for right truncation, and if not its observation time, how collection stopped and the growth rate of primary events over the study period,</li>
+<li>whether it adjusted for right truncation, and if not its observation time, how collection stopped and the growth rate of primary events over the study period, or <code>NA</code> where that is to be estimated, with a standard deviation where the study reported one,</li>
 <li>its censoring windows <span class="math inline">\(w_p\)</span> and <span class="math inline">\(w_s\)</span>, the widths of the intervals its primary and secondary events were observed in,</li>
 <li>its sample size, or a standard error or covariance in its place,</li>
 <li>the smallest delay it counted.</li>
@@ -608,8 +608,23 @@ Equation <a href="#eq:meta-uniform-moments">(5.16)</a> keeps the smooth weight, 
 The residual grows with <span class="math inline">\(r\)</span> and as <span class="math inline">\(w_p\)</span> grows towards <span class="math inline">\(A\)</span>.</p>
 </div>
 <div class="section level4" number="5.3.3">
+<h4 id="estimated-growth">
+<span class="header-section-number">5.3.3</span> An estimated growth rate<a class="anchor" aria-label="anchor" href="#estimated-growth"></a>
+</h4>
+<p>The rate <span class="math inline">\(r_j\)</span> of study <span class="math inline">\(j\)</span> sets the tilt of <span class="math inline">\(g_p\)</span>, which every code but code 1 uses.
+It also sets the weight of Equation <a href="#eq:meta-accrual">(5.18)</a>.
+Where the study’s <code>growth_rate</code> is <code>NA</code>, or is given with a <code>growth_rate_sd</code>, it is instead the distributional parameter <code>pgrowth</code> evaluated on the row, the parameter of Section <a href="#primary-tilt">3.2</a>, so it takes a <code>brms</code> formula and a prior and can be shared with individual level rows from the same outbreak.
+Unless a formula is given for <code>pgrowth</code> the model uses <code>pgrowth ~ 0 + study</code>, one rate per study.
+A study that reported a rate <span class="math inline">\(\hat{r}_j\)</span> with a standard deviation <span class="math inline">\(s_j\)</span> then gets
+<span class="math display" id="eq:meta-growth-prior">\[
+r_j \sim \text{Normal}(\hat{r}_j, s_j^2), \tag{5.19}
+\]</span>
+so the reported rate is a prior rather than a constant and its uncertainty reaches the delay.
+Every other coefficient of <code>pgrowth</code> gets <span class="math inline">\(\text{Normal}(0, 0.25^2)\)</span>, which is weakly informative for a delay measured in days.</p>
+</div>
+<div class="section level4" number="5.3.4">
 <h4 id="left-truncation">
-<span class="header-section-number">5.3.3</span> Left truncation<a class="anchor" aria-label="anchor" href="#left-truncation"></a>
+<span class="header-section-number">5.3.4</span> Left truncation<a class="anchor" aria-label="anchor" href="#left-truncation"></a>
 </h4>
 <p>A study that only counted delays of at least <span class="math inline">\(L\)</span> reported summaries conditioned on <span class="math inline">\(\tau &gt; L\)</span>, the left truncation of survival analysis <span class="citation">(<a href="#ref-klein2003">Klein and Moeschberger 2003</a>)</span>.
 Each expression above reduces to its earlier form when <span class="math inline">\(L = 0\)</span>.
@@ -619,20 +634,20 @@ The truncated moments of Equation <a href="#eq:meta-trunc-moments">(5.15)</a> pi
 \mathbb{E}[\tau^k \mid L &lt; \tau \le D] =
 \frac{L^k \left(F(D; \theta) - F(L; \theta)\right) +
 \int_L^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}
-{F(D; \theta) - F(L; \theta)}, \quad k = 1, \dots, 4, \tag{5.19}
+{F(D; \theta) - F(L; \theta)}, \quad k = 1, \dots, 4, \tag{5.20}
 \]</span>
 and Equation <a href="#eq:meta-uniform-moments">(5.16)</a> likewise with <span class="math inline">\(F_{pc}\)</span> in place of <span class="math inline">\(F\)</span>.
 The distribution function becomes
 <span class="math display" id="eq:meta-left-cdf">\[
-G(y) = \frac{F(y; \theta) - F(L; \theta)}{F(D; \theta) - F(L; \theta)}, \quad L &lt; y \le D, \tag{5.20}
+G(y) = \frac{F(y; \theta) - F(L; \theta)}{F(D; \theta) - F(L; \theta)}, \quad L &lt; y \le D, \tag{5.21}
 \]</span>
 zero at or below <span class="math inline">\(L\)</span> and one above <span class="math inline">\(D\)</span>.
 The accrual weight of Equation <a href="#eq:meta-accrual">(5.18)</a> is unchanged, since the cells and nodes it multiplies now start at <span class="math inline">\(L\)</span>.
 Individual level rows pass <span class="math inline">\(L\)</span> to <code>primarycensored</code> as their left truncation point, as the marginal model does.</p>
 </div>
-<div class="section level4" number="5.3.4">
+<div class="section level4" number="5.3.5">
 <h4 id="quantiles-of-the-estimands">
-<span class="header-section-number">5.3.4</span> Quantiles of the estimands<a class="anchor" aria-label="anchor" href="#quantiles-of-the-estimands"></a>
+<span class="header-section-number">5.3.5</span> Quantiles of the estimands<a class="anchor" aria-label="anchor" href="#quantiles-of-the-estimands"></a>
 </h4>
 <p>The quantile <span class="math inline">\(Q_p\)</span> of an estimand is read off by inverse linear interpolation between the two points of <span class="math inline">\(G\)</span> that bracket <span class="math inline">\(p\)</span>.
 On the grid of Equation <a href="#eq:meta-grid">(5.14)</a> that interpolant is the continuity corrected quantile, so it is exact.

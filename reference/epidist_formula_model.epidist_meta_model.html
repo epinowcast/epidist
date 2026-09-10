@@ -5,9 +5,21 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Define the model-specific component of an epidist custom formula for the meta model — epidist_formula_model.epidist_meta_model"><meta name="description" content="Define the model-specific component of an epidist custom formula for the
-meta model"><meta property="og:description" content="Define the model-specific component of an epidist custom formula for the
-meta model"><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Define the model-specific component of an epidist custom formula for the meta model — epidist_formula_model.epidist_meta_model"><meta name="description" content="Adds the response and the slots of the meta model to the formula. Where a
+summary row estimates its growth rate as the pgrowth distributional
+parameter, see as_epidist_meta_model(), and the formula has no term for
+pgrowth, pgrowth ~ 0 + study is added so that each study has its own
+rate and the priors epidist_model_prior() builds from the reported
+rates have a coefficient to act on. Data holding a single study get
+pgrowth ~ 1 instead, because brms cannot code a factor with one
+level. A pgrowth formula given by the user is kept as it is."><meta property="og:description" content="Adds the response and the slots of the meta model to the formula. Where a
+summary row estimates its growth rate as the pgrowth distributional
+parameter, see as_epidist_meta_model(), and the formula has no term for
+pgrowth, pgrowth ~ 0 + study is added so that each study has its own
+rate and the priors epidist_model_prior() builds from the reported
+rates have a coefficient to act on. Data holding a single study get
+pgrowth ~ 1 instead, because brms cannot code a factor with one
+level. A pgrowth formula given by the user is kept as it is."><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -59,8 +71,14 @@ meta model"><meta property="og:image" content="https://epidist.epinowcast.org/lo
     </div>
 
     <div class="ref-description section level2">
-    <p>Define the model-specific component of an <code>epidist</code> custom formula for the
-meta model</p>
+    <p>Adds the response and the slots of the meta model to the formula. Where a
+summary row estimates its growth rate as the <code>pgrowth</code> distributional
+parameter, see <code><a href="as_epidist_meta_model.html">as_epidist_meta_model()</a></code>, and the formula has no term for
+<code>pgrowth</code>, <code>pgrowth ~ 0 + study</code> is added so that each study has its own
+rate and the priors <code><a href="epidist_model_prior.html">epidist_model_prior()</a></code> builds from the reported
+rates have a coefficient to act on. Data holding a single study get
+<code>pgrowth ~ 1</code> instead, because <code>brms</code> cannot code a factor with one
+level. A <code>pgrowth</code> formula given by the user is kept as it is.</p>
     </div>
 
     <div class="section level2">

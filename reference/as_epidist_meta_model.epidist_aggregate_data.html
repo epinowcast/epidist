@@ -117,8 +117,9 @@ window for the individual level rows, as in
 default, assumes it is equally likely at any point. <code>"expgrowth"</code> tilts
 it, with the growth rate estimated as the <code>pgrowth</code> distributional
 parameter. Summary rows are unaffected. They tilt the primary event by
-the <code>growth_rate</code> metadata of their study, which
-<code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> takes as a known quantity.</p></dd>
+the <code>growth_rate</code> metadata of their study, or estimate it as the same
+<code>pgrowth</code> parameter where that is <code>NA</code> or has a <code>growth_rate_sd</code>, see
+<code><a href="as_epidist_meta_model.html">as_epidist_meta_model()</a></code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -168,7 +169,7 @@ the <code>growth_rate</code> metadata of their study, which
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The original relative observation times are available in</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   `orig_relative_obs_time`.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Raise `obs_time_threshold` to avoid this behaviour.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,453 × 30</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,453 × 31</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    delay_lwr     n obs_type study_n trunc_adjusted trunc_design cens_adjusted</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>         5     1        1       0              0            0             0</span>
@@ -182,12 +183,12 @@ the <code>growth_rate</code> metadata of their study, which
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>         5     1        1       0              0            0             0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>         7     1        1       0              0            0             0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2,443 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 23 more variables: group_start &lt;int&gt;, group_len &lt;int&gt;, chol_start &lt;int&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 24 more variables: group_start &lt;int&gt;, group_len &lt;int&gt;, chol_start &lt;int&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   n_quad &lt;int&gt;, relative_obs_time &lt;dbl&gt;, pwindow &lt;dbl&gt;, swindow &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   delay_upr &lt;dbl&gt;, delay_min &lt;dbl&gt;, report_se &lt;dbl&gt;, quantile_p &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   growth_rate &lt;dbl&gt;, ptime_lwr &lt;dbl&gt;, ptime_upr &lt;dbl&gt;, stime_lwr &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   stime_upr &lt;dbl&gt;, obs_time &lt;dbl&gt;, pdate_lwr &lt;date&gt;, sdate_lwr &lt;date&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   pdate_upr &lt;date&gt;, sdate_upr &lt;date&gt;, obs_date &lt;date&gt;, …</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   growth_rate &lt;dbl&gt;, growth_known &lt;int&gt;, ptime_lwr &lt;dbl&gt;, ptime_upr &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   stime_lwr &lt;dbl&gt;, stime_upr &lt;dbl&gt;, obs_time &lt;dbl&gt;, pdate_lwr &lt;date&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   sdate_lwr &lt;date&gt;, pdate_upr &lt;date&gt;, sdate_upr &lt;date&gt;, obs_date &lt;date&gt;, …</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

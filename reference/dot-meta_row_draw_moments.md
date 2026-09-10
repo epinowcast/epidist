@@ -5,6 +5,9 @@ quadrature resolution imply the same summaries, so they are computed
 once and reused. The cache is bounded and lives in the package
 namespace, so it is never written into a fitted model object. See
 [.meta_draws](https://epidist.epinowcast.org/reference/dot-meta_draws.md).
+A row with an estimated growth rate holds one rate per draw, so the
+rates are part of what a cached entry is compared against, and each draw
+is summarised at its own rate.
 
 ## Usage
 

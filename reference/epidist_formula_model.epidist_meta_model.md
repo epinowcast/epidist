@@ -1,7 +1,16 @@
 # Define the model-specific component of an `epidist` custom formula for the meta model
 
-Define the model-specific component of an `epidist` custom formula for
-the meta model
+Adds the response and the slots of the meta model to the formula. Where
+a summary row estimates its growth rate as the `pgrowth` distributional
+parameter, see
+[`as_epidist_meta_model()`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.md),
+and the formula has no term for `pgrowth`, `pgrowth ~ 0 + study` is
+added so that each study has its own rate and the priors
+[`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md)
+builds from the reported rates have a coefficient to act on. Data
+holding a single study get `pgrowth ~ 1` instead, because `brms` cannot
+code a factor with one level. A `pgrowth` formula given by the user is
+kept as it is.
 
 ## Usage
 

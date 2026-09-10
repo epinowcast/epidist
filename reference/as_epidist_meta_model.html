@@ -182,6 +182,21 @@ reported, up to a cap of 2000 that the option lifts when set above it, and
 the number is held in the <code>n_quad</code> column of the model data.</p>
     </div>
     <div class="section level2">
+    <h2 id="advanced-an-estimated-growth-rate">Advanced: an estimated growth rate<a class="anchor" aria-label="anchor" href="#advanced-an-estimated-growth-rate"></a></h2>
+    <p>A summary row tilts its primary event, and weights the follow up of an
+accrual design, by the <code>growth_rate</code> of its study. Where that rate is
+<code>NA</code> in <code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code>, or was given there with a
+<code>growth_rate_sd</code>, the study estimates it as the <code>pgrowth</code> distributional
+parameter instead. That is the parameter <code>primary = "expgrowth"</code>
+estimates from individual level rows, so the two can share it. The model
+adds <code>pgrowth ~ 0 + study</code> unless a <code>pgrowth</code> formula is given, and
+<code><a href="epidist_model_prior.html">epidist_model_prior()</a></code> sets the priors from the reported rates.
+Summaries carry little information about the rate on their own, so share
+the coefficient with rows that do inform it, for example <code>pgrowth ~ 1</code>
+with a line list from the same outbreak. <code><a href="../articles/model.html">vignette("model")</a></code> gives the
+details.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other meta_model:
 <code><a href="as_epidist_meta_model.NULL.html">as_epidist_meta_model.NULL()</a></code>,

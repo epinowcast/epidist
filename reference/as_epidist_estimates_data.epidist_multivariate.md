@@ -128,12 +128,12 @@ as_epidist_estimates_data(
 #>   as the grid cutoff, or five times the largest reported value where nothing
 #>   can be matched. Raise it if the delay has a longer tail than that, and lower
 #>   it to speed up fitting.
-#> # A tibble: 2 × 16
+#> # A tibble: 2 × 17
 #>   study  type  value    se     n     p pwindow swindow relative_obs_time
 #>   <chr>  <chr> <dbl> <dbl> <dbl> <dbl>   <dbl>   <dbl>             <dbl>
 #> 1 site A mean   7.51    NA    NA    NA       1       1               Inf
 #> 2 site A sd     3.59    NA    NA    NA       1       1               Inf
-#> # ℹ 7 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
-#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>, max_delay <dbl>,
-#> #   mvn_id <chr>
+#> # ℹ 8 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
+#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>,
+#> #   growth_rate_sd <dbl>, max_delay <dbl>, mvn_id <chr>
 ```

@@ -112,6 +112,8 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_delta_jacobian.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_from_summaries.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_grid_cutoff.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-estimates_growth_estimated.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-estimates_growth_tilted.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_heavy_tail_rows.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_heavy_tail_sd.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-estimates_lnorm_match.html</loc></url>
@@ -137,6 +139,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-extract_dpar_terms.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-family_functions_stanvar.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-fill_estimates_defaults.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-fill_other_links.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-floor_mult.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-get_brms_fn.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-has_non_uniform_window_prior.html</loc></url>
@@ -152,6 +155,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_accrual_prob.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_accrual_reweight.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_accrual_weight.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_add_growth_dpar.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_add_uniform.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_assign_groups.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_band_half_width.html</loc></url>
@@ -174,6 +178,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_deep_tail.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_dist_cdf.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_draw_cache_limit.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_draw_slots.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_draws.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_empty_members.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_estimate_rows.html</loc></url>
@@ -189,6 +194,9 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_grid_probs.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_group_row.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_group_stanvars.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_growth_estimated.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_growth_formula.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_growth_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_implied_density.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_implied_moments.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_implied_nodes.html</loc></url>
@@ -242,6 +250,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_sd_se.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_set_members.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_slots_n_quad.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-meta_slots_tilted.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_step_kernel.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_step_kernel_alive.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_step_kernel_top.html</loc></url>

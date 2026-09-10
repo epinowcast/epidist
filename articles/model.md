@@ -460,7 +460,7 @@ partial moments are integrated by parts over the nodes on which \\G\\ is
 evaluated, and \\g(Q_p)\\ is the closed form density of the estimand
 where its quantile is refined and the slope of \\G\\ between the
 bracketing nodes where it is not, see Section
-[5.3.4](#quantiles-of-the-estimands). Against 4000 simulated lognormal
+[5.3.5](#quantiles-of-the-estimands). Against 4000 simulated lognormal
 studies of 200 delays the derived standard errors are within 3% and the
 correlations within 0.02 of their sampling values. Fitting the two kinds
 separately counts a study reporting a mean, a standard deviation and
@@ -533,12 +533,11 @@ Individual level rows use the marginal model likelihood of Section
 [4](#the-marginal-model) unchanged, with \\\theta\\ shared with the
 summary rows. Their primary event distribution is set with `primary`, so
 the tilted primary event of Section [3.2](#primary-tilt) is available to
-them. Summary rows take the growth rate given for each study as a known
-quantity rather than the estimated `pgrowth`, a limitation tracked in
-[epinowcast/epidist#678](https://github.com/epinowcast/epidist/issues/678).
-The joint likelihood is the product of the sampling likelihoods above
-over the summary rows and the marginal model likelihood over the
-individual level rows.
+them. A summary row whose growth rate is unknown, or reported with
+uncertainty, uses the same `pgrowth` parameter, see Section
+[5.3.3](#estimated-growth). The joint likelihood is the product of the
+sampling likelihoods above over the summary rows and the marginal model
+likelihood over the individual level rows.
 
 ### 5.2 What we need from each study
 
@@ -549,7 +548,8 @@ takes, for each summary:
   defined in Section [5.3](#the-biased-estimands),
 - whether it adjusted for right truncation, and if not its observation
   time, how collection stopped and the growth rate of primary events
-  over the study period,
+  over the study period, or `NA` where that is to be estimated, with a
+  standard deviation where the study reported one,
 - its censoring windows \\w_p\\ and \\w_s\\, the widths of the intervals
   its primary and secondary events were observed in,
 - its sample size, or a standard error or covariance in its place,
@@ -704,7 +704,24 @@ only known to within its window, and at \\w_p = 7\\ its mean is 2.6%
 high at \\r = 0.2\\. The residual grows with \\r\\ and as \\w_p\\ grows
 towards \\A\\.
 
-#### 5.3.3 Left truncation
+#### 5.3.3 An estimated growth rate
+
+The rate \\r_j\\ of study \\j\\ sets the tilt of \\g_p\\, which every
+code but code 1 uses. It also sets the weight of Equation
+[(5.18)](#eq:meta-accrual). Where the study’s `growth_rate` is `NA`, or
+is given with a `growth_rate_sd`, it is instead the distributional
+parameter `pgrowth` evaluated on the row, the parameter of Section
+[3.2](#primary-tilt), so it takes a `brms` formula and a prior and can
+be shared with individual level rows from the same outbreak. Unless a
+formula is given for `pgrowth` the model uses `pgrowth ~ 0 + study`, one
+rate per study. A study that reported a rate \\\hat{r}\_j\\ with a
+standard deviation \\s_j\\ then gets \\ r_j \sim
+\text{Normal}(\hat{r}\_j, s_j^2), \tag{5.19} \\ so the reported rate is
+a prior rather than a constant and its uncertainty reaches the delay.
+Every other coefficient of `pgrowth` gets \\\text{Normal}(0, 0.25^2)\\,
+which is weakly informative for a delay measured in days.
+
+#### 5.3.4 Left truncation
 
 A study that only counted delays of at least \\L\\ reported summaries
 conditioned on \\\tau \> L\\, the left truncation of survival analysis
@@ -717,17 +734,17 @@ renormalised by their mass, which is \\F\_{pc}(D) - F\_{pc}(L)\\ when
 \mathbb{E}\[\tau^k \mid L \< \tau \le D\] = \frac{L^k \left(F(D;
 \theta) - F(L; \theta)\right) + \int_L^D k t^{k-1} \left(F(D; \theta) -
 F(t; \theta)\right) \text{d}t} {F(D; \theta) - F(L; \theta)}, \quad k =
-1, \dots, 4, \tag{5.19} \\ and Equation
+1, \dots, 4, \tag{5.20} \\ and Equation
 [(5.16)](#eq:meta-uniform-moments) likewise with \\F\_{pc}\\ in place of
 \\F\\. The distribution function becomes \\ G(y) = \frac{F(y; \theta) -
 F(L; \theta)}{F(D; \theta) - F(L; \theta)}, \quad L \< y \le D,
-\tag{5.20} \\ zero at or below \\L\\ and one above \\D\\. The accrual
+\tag{5.21} \\ zero at or below \\L\\ and one above \\D\\. The accrual
 weight of Equation [(5.18)](#eq:meta-accrual) is unchanged, since the
 cells and nodes it multiplies now start at \\L\\. Individual level rows
 pass \\L\\ to `primarycensored` as their left truncation point, as the
 marginal model does.
 
-#### 5.3.4 Quantiles of the estimands
+#### 5.3.5 Quantiles of the estimands
 
 The quantile \\Q_p\\ of an estimand is read off by inverse linear
 interpolation between the two points of \\G\\ that bracket \\p\\. On the

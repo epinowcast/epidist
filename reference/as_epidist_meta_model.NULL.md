@@ -2,8 +2,9 @@
 
 Used when no individual level data is available and only the `estimates`
 argument is supplied. It takes no `primary` argument, because summary
-rows tilt the primary event by the `growth_rate` metadata of their study
-rather than by an estimated parameter. Passing one is an error.
+rows tilt the primary event by the `growth_rate` metadata of their
+study, estimating it only where that is `NA` or has a `growth_rate_sd`.
+Passing one is an error.
 
 ## Usage
 
@@ -75,12 +76,12 @@ estimates <- as_epidist_estimates_data(
 #>   can be matched. Raise it if the delay has a longer tail than that, and lower
 #>   it to speed up fitting.
 as_epidist_meta_model(estimates = estimates)
-#> # A tibble: 1 × 20
+#> # A tibble: 1 × 22
 #>   delay_lwr     n obs_type study_n trunc_adjusted trunc_design cens_adjusted
 #>       <int> <dbl>    <int>   <int>          <int>        <int>         <int>
 #> 1         0     1        5     120              0            0             0
-#> # ℹ 13 more variables: group_start <int>, group_len <int>, chol_start <int>,
+#> # ℹ 15 more variables: group_start <int>, group_len <int>, chol_start <int>,
 #> #   n_quad <int>, relative_obs_time <dbl>, pwindow <dbl>, swindow <dbl>,
 #> #   delay_upr <dbl>, delay_min <dbl>, report_se <dbl>, quantile_p <dbl>,
-#> #   growth_rate <dbl>, study <chr>
+#> #   growth_rate <dbl>, growth_known <int>, growth_rate_sd <dbl>, study <chr>
 ```

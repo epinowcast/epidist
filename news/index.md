@@ -190,9 +190,9 @@
 - The meta model takes a `primary` argument for its individual level
   rows, as the marginal model does. With `primary = "expgrowth"` the
   growth rate of primary events is estimated as the `pgrowth`
-  distributional parameter. Summary rows are unchanged and keep the
-  `growth_rate` metadata of their study as a known tilt. See
-  [\#620](https://github.com/epinowcast/epidist/issues/620).
+  distributional parameter. Summary rows keep the `growth_rate` metadata
+  of their study as a known tilt, unless the study estimates its rate.
+  See [\#620](https://github.com/epinowcast/epidist/issues/620).
 - Added an
   [`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md)
   method for the meta model, which puts a `normal(1, 1)` prior on the
@@ -356,6 +356,25 @@
   statistics, so report its mean and standard deviation and drop its
   quantiles. Closes
   [\#676](https://github.com/epinowcast/epidist/issues/676).
+- Summary rows of the meta model can now estimate their growth rate. An
+  `NA` `growth_rate` in
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  makes the study use the `pgrowth` distributional parameter, the
+  parameter that `primary = "expgrowth"` estimates from individual level
+  data, so a line list from the same outbreak can inform the rate a
+  published summary is corrected with. A new `growth_rate_sd` column
+  treats a reported rate as a normal prior on that parameter rather than
+  as a fixed number. The meta model adds `pgrowth ~ 0 + study` to the
+  formula where a study estimates its rate, unless a `pgrowth` formula
+  is given, and
+  [`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md)
+  sets the per study priors and a `normal(0, 0.25)` default for the
+  rest. The R and Stan implementations read the rate of each posterior
+  draw.
+  [`epidist_formula()`](https://epidist.epinowcast.org/reference/epidist_formula.md)
+  now lets a model add its own formulas before the remaining
+  distributional parameters are given an intercept. Closes
+  [\#678](https://github.com/epinowcast/epidist/issues/678).
 
 ### Features
 

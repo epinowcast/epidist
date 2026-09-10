@@ -18,7 +18,8 @@ new_epidist_meta_model(data, primary = .primary_choices())
 
   The primary event distribution of the individual level rows,
   `"uniform"` or `"expgrowth"`. Summary rows use their `growth_rate`
-  metadata instead.
+  metadata instead, or the `pgrowth` parameter where their
+  `growth_known` slot is 0.
 
 ## Value
 

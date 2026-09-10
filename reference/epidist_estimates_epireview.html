@@ -262,7 +262,7 @@ See <a href="epidist_data.html">epidist_data</a>.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   as the grid cutoff, or five times the largest reported value where nothing</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   can be matched. Raise it if the delay has a longer tail than that, and lower</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   it to speed up fitting.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 17</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   study  type     value    se     n     p pwindow swindow relative_obs_time</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> A 2015 mean      10.6    <span style="color: #BB0000;">NA</span>    76 <span style="color: #BB0000;">NA</span>          1       1                60</span>
@@ -271,9 +271,9 @@ See <a href="epidist_data.html">epidist_data</a>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> B 2016 quantile  11      <span style="color: #BB0000;">NA</span>    20  0.25       1       1               <span style="color: #BB0000;">Inf</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> B 2016 quantile  15      <span style="color: #BB0000;">NA</span>    20  0.75       1       1               <span style="color: #BB0000;">Inf</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> B 2016 mean       8.9    <span style="color: #BB0000;">NA</span>    92 <span style="color: #BB0000;">NA</span>          1       1               <span style="color: #BB0000;">Inf</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 7 more variables: trunc_adjusted &lt;lgl&gt;, trunc_design &lt;chr&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   cens_adjusted &lt;int&gt;, delay_min &lt;dbl&gt;, growth_rate &lt;dbl&gt;, max_delay &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   mvn_id &lt;chr&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 8 more variables: trunc_adjusted &lt;lgl&gt;, trunc_design &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   cens_adjusted &lt;int&gt;, delay_min &lt;dbl&gt;, growth_rate &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   growth_rate_sd &lt;dbl&gt;, max_delay &lt;dbl&gt;, mvn_id &lt;chr&gt;</span></span>
 <span class="r-in"><span><span class="va">ebola</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span><span class="fu">epireview</span><span class="fu">::</span><span class="fu"><a href="https://mrc-ide.github.io/epireview/reference/load_epidata.html" class="external-link">load_epidata</a></span><span class="op">(</span><span class="st">"ebola"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">params</span></span></span>
 <span class="r-in"><span><span class="va">onset_to_death</span> <span class="op">&lt;-</span> <span class="va">ebola</span><span class="op">[</span></span></span>
 <span class="r-in"><span>  <span class="va">ebola</span><span class="op">$</span><span class="va">parameter_type_short</span> <span class="op">==</span> <span class="st">"delay_onset_to_death"</span>,</span></span>
@@ -318,7 +318,7 @@ See <a href="epidist_data.html">epidist_data</a>.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   sampling error that large is far from normal, so the likelihood of the</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   standard deviation cannot be trusted.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> See the Checks section of `?as_epidist_estimates_data`.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 45 × 17</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 45 × 18</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    study         type  value    se     n     p pwindow swindow relative_obs_time</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Xu 2016       mean   8.6   <span style="color: #BB0000;">NA</span>      76 <span style="color: #BB0000;">NA</span>          1       1               <span style="color: #BB0000;">Inf</span></span>
@@ -332,9 +332,10 @@ See <a href="epidist_data.html">epidist_data</a>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Qureshi 2015  mean   8.9   <span style="color: #BB0000;">NA</span>      70 <span style="color: #BB0000;">NA</span>          1       1               <span style="color: #BB0000;">Inf</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Qureshi 2015  sd     3.8   <span style="color: #BB0000;">NA</span>      70 <span style="color: #BB0000;">NA</span>          1       1               <span style="color: #BB0000;">Inf</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 35 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 8 more variables: trunc_adjusted &lt;lgl&gt;, trunc_design &lt;chr&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   cens_adjusted &lt;int&gt;, delay_min &lt;dbl&gt;, growth_rate &lt;dbl&gt;, max_delay &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   mvn_id &lt;chr&gt;, method_moment_value &lt;chr&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 9 more variables: trunc_adjusted &lt;lgl&gt;, trunc_design &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   cens_adjusted &lt;int&gt;, delay_min &lt;dbl&gt;, growth_rate &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   growth_rate_sd &lt;dbl&gt;, max_delay &lt;dbl&gt;, mvn_id &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   method_moment_value &lt;chr&gt;</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

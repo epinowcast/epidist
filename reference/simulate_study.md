@@ -89,7 +89,9 @@ simulate_study(
 
   The growth rate the study is described by. Passed through as metadata
   and not used to select cases, so it should be the rate the line list
-  was simulated with.
+  was simulated with, or `NA` for a study that estimates it, see
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md).
+  A `growth_rate_sd` passes through `...`.
 
 - n:
 
@@ -180,12 +182,12 @@ simulate_study(
 #>   as the grid cutoff, or five times the largest reported value where nothing
 #>   can be matched. Raise it if the delay has a longer tail than that, and lower
 #>   it to speed up fitting.
-#> # A tibble: 2 × 16
+#> # A tibble: 2 × 17
 #>   study          type  value    se     n     p pwindow swindow relative_obs_time
 #>   <chr>          <chr> <dbl> <dbl> <dbl> <dbl>   <dbl>   <dbl>             <dbl>
 #> 1 naive snapshot mean   6.41    NA  8316    NA       1       1                15
 #> 2 naive snapshot sd     2.84    NA  8316    NA       1       1                15
-#> # ℹ 7 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
-#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>, max_delay <dbl>,
-#> #   mvn_id <chr>
+#> # ℹ 8 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
+#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>,
+#> #   growth_rate_sd <dbl>, max_delay <dbl>, mvn_id <chr>
 ```

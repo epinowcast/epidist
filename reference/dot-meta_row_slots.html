@@ -88,6 +88,15 @@ for the R mirrors of the joint likelihoods.</p>
     <p>A named list of the observation type, study metadata and reported
 values for row <code>i</code>.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>A row whose <code>growth_known</code> slot is 0 estimates its growth rate as the
+<code>pgrowth</code> distributional parameter, so its <code>growth_rate</code> element holds one
+value per posterior draw rather than the number in the slot. Everything
+that works one draw at a time takes the slots of that draw from
+<code><a href="dot-meta_draw_slots.html">.meta_draw_slots()</a></code>. A fit made before the slot existed has no
+<code>growth_known</code> and every row of it is known.</p>
+    </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
