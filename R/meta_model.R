@@ -81,13 +81,11 @@
 #'   reports them, and check that `swindow` is the resolution it worked at.
 #'   [as_epidist_estimates_data()] warns for studies in this range.
 #' * The accrual weight applied to a study that stopped collecting at a
-#'   calendar date treats the last primary window as complete, so it is exact
-#'   on the grid only when `relative_obs_time` is a multiple of `pwindow`,
-#'   and it averages over the primary window for a study that adjusted the
-#'   secondary interval only. With a weekly primary window, a collection
-#'   window of 28 days and a delay of mean 4.6 days the latter puts the
-#'   implied mean 0.8% high at a growth rate of 0.05 and 2.6% high at 0.2.
-#'   `vignette("model")` gives the measurements.
+#'   calendar date is exact on the grid, but averages over the primary window
+#'   for a study that adjusted the secondary interval only. With a weekly
+#'   primary window, a collection window of 28 days and a delay of mean 4.6
+#'   days this puts the implied mean 0.8% high at a growth rate of 0.05 and
+#'   2.6% high at 0.2. `vignette("model")` gives the measurements.
 #'
 #' Two settings trade accuracy against speed: `max_delay` in
 #' [as_epidist_estimates_data()], which sets the grid a study that adjusted for
@@ -108,6 +106,8 @@
 #' @param ... Additional arguments passed to methods.
 #'
 #' @family meta_model
+#' @returns An object of class `epidist_meta_model`.
+#'
 #' @export
 as_epidist_meta_model <- function(data = NULL, estimates = NULL, ...) {
   # Dispatch explicitly on data so that a summary only call, where data is
@@ -138,6 +138,8 @@ as_epidist_meta_model <- function(data = NULL, estimates = NULL, ...) {
 #' @method as_epidist_meta_model epidist_linelist_data
 #'
 #' @family meta_model
+#' @returns An object of class `epidist_meta_model`.
+#'
 #' @autoglobal
 #' @export
 #' @examples
@@ -156,6 +158,7 @@ as_epidist_meta_model.epidist_linelist_data <- function(
   primary = .primary_choices(),
   ...
 ) {
+  .assert_ungrouped(data)
   assert_epidist.epidist_linelist_data(data)
   data <- .prepare_marginal_data(
     data,
@@ -182,6 +185,8 @@ as_epidist_meta_model.epidist_linelist_data <- function(
 #' @method as_epidist_meta_model epidist_aggregate_data
 #'
 #' @family meta_model
+#' @returns An object of class `epidist_meta_model`.
+#'
 #' @autoglobal
 #' @export
 #' @examples
@@ -229,6 +234,8 @@ as_epidist_meta_model.epidist_aggregate_data <- function(
 #' @method as_epidist_meta_model epidist_estimates_data
 #'
 #' @family meta_model
+#' @returns An object of class `epidist_meta_model`.
+#'
 #' @export
 #' @examples
 #' estimates <- as_epidist_estimates_data(
@@ -272,6 +279,8 @@ as_epidist_meta_model.epidist_estimates_data <- function(
 #' @method as_epidist_meta_model NULL
 #'
 #' @family meta_model
+#' @returns An object of class `epidist_meta_model`.
+#'
 #' @export
 #' @examples
 #' estimates <- as_epidist_estimates_data(
@@ -451,6 +460,9 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
   # Work on a plain tibble so that dropping the consumed columns does not
   # revalidate, and warn about, the input class.
   data <- tibble::as_tibble(unclass(data))
+  # The meta family has an integer response, so a delay that is not a whole
+  # number must be refused rather than truncated by the cast below.
+  assert_integerish(data$delay_lwr, .var.name = "delay_lwr")
   rows <- tibble(
     delay_lwr = as.integer(data$delay_lwr),
     n = data$n,
@@ -513,7 +525,7 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
 .meta_assign_groups <- function(estimates, mvn = NULL) {
   separator <- rawToChar(as.raw(31L))
   key_cols <- setdiff(names(estimates), c("type", "value", "se", "p"))
-  parts <- lapply(estimates[key_cols], as.character)
+  parts <- lapply(.drop_epidist_class(estimates)[key_cols], as.character)
   kind <- ifelse(estimates$type == "quantile", "quantile", "moment")
   kind[estimates$cens_adjusted %in% c(1, 2, 4)] <- "joint"
   key <- do.call(paste, c(unname(parts), list(kind), list(sep = separator)))
@@ -658,7 +670,9 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
     growth_rate = as.numeric(estimates$growth_rate[1])
   )
   consumed <- setdiff(.estimates_required_cols(), "study")
-  extra <- estimates[setdiff(names(estimates), c(names(group), consumed))]
+  extra <- .drop_epidist_class(estimates)[
+    setdiff(names(estimates), c(names(group), consumed))
+  ]
   return(list(
     row = bind_cols(group, extra[1, , drop = FALSE]),
     members = members,
@@ -801,7 +815,13 @@ new_epidist_meta_model <- function(data, primary = .primary_choices()) {
 #' @param data A `data.frame` to check.
 #'
 #' @family meta_model
+#' @returns A logical, `TRUE` if `data` inherits from `epidist_meta_model` and
+#'  `FALSE` otherwise.
+#'
 #' @export
+#' @examples
+#' is_epidist_meta_model(data.frame())
+#' is_epidist_meta_model(new_epidist_meta_model(data.frame()))
 is_epidist_meta_model <- function(data) {
   return(inherits(data, "epidist_meta_model"))
 }
@@ -815,6 +835,8 @@ is_epidist_meta_model <- function(data) {
 #' @method assert_epidist epidist_meta_model
 #'
 #' @family meta_model
+#' @returns `NULL`, invisibly. Called for the side effect of validating `data`.
+#'
 #' @export
 assert_epidist.epidist_meta_model <- function(data, ...) {
   assert_data_frame(data)
@@ -1009,6 +1031,8 @@ assert_epidist.epidist_meta_model <- function(data, ...) {
 #' @method epidist_family_model epidist_meta_model
 #'
 #' @family meta_model
+#' @returns A `brms` custom family object.
+#'
 #' @export
 epidist_family_model.epidist_meta_model <- function(
   data,
@@ -1058,6 +1082,8 @@ epidist_family_model.epidist_meta_model <- function(
 #' @method epidist_formula_model epidist_meta_model
 #'
 #' @family meta_model
+#' @returns A `brmsformula` object.
+#'
 #' @export
 epidist_formula_model.epidist_meta_model <- function(
   data,
@@ -1113,6 +1139,9 @@ epidist_formula_model.epidist_meta_model <- function(
 #'
 #' @method epidist_transform_data_model epidist_meta_model
 #' @family meta_model
+#' @returns An `epidist_meta_model` object with the individual level rows
+#'  summarised and the summary rows unchanged.
+#'
 #' @autoglobal
 #' @export
 epidist_transform_data_model.epidist_meta_model <- function(
@@ -1152,6 +1181,8 @@ epidist_transform_data_model.epidist_meta_model <- function(
 #' @method epidist_stancode epidist_meta_model
 #' @importFrom brms stanvar
 #' @family meta_model
+#' @returns A list of `stanvars` objects, or `NULL` when none are needed.
+#'
 #' @autoglobal
 #' @export
 epidist_stancode.epidist_meta_model <- function(

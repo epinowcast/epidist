@@ -1,5 +1,6 @@
 ADM
 ADVI
+Bahadur
 Bundibugyo
 CMD
 CRAN's
@@ -13,7 +14,6 @@ DrAuxetic
 Epuyén
 ExpGrowth
 Gelman
-Github
 HMC
 Hotfix
 Inf
@@ -56,6 +56,7 @@ cli
 cmdstanr
 coef
 cond
+cov
 cutoff
 cutoffs
 damonbayer
@@ -128,6 +129,7 @@ reweights
 rfloor
 sbfnk
 sd
+sdlog
 se
 seabbs
 sim
@@ -143,5 +145,6 @@ uncounting
 underflowed
 unnormalised
 untruncated
+vdots
 weibull
 zsusswein

@@ -9,6 +9,9 @@
 \arguments{
 \item{family}{A \code{brmsfamily} object.}
 }
+\value{
+The family, invisibly. Errors when the family is not supported.
+}
 \description{
 Check that a family is one the \code{epidist} helpers support
 }

@@ -2,7 +2,7 @@ on:
   push:
     paths:
       - DESCRIPTION
-      - .github/workflows/codemeta.yml
+      - .github/workflows/codemeta.yaml
   workflow_dispatch:
 
 name: Render codemeta

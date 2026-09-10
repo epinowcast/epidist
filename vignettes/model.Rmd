@@ -507,15 +507,18 @@ The weight multiplies the quadrature for Equations \@ref(eq:meta-trunc-moments) 
 For Equation \@ref(eq:meta-uniform-moments) it is evaluated at $d - w_p / 2$, to average the primary offset back out.
 The correction is only as good as the growth rate supplied.
 
-On the grid of Equation \@ref(eq:meta-grid) the follow up is a step function, $w(w_p \lfloor x / w_p \rfloor)$ for a delay of $x$ from the start of the primary window, because the primary event is known only to its window.
-Each cell of the grid is cut at the multiples of $w_p$ inside it, each piece is weighted by the follow up at the primary window it starts in, and the pieces are summed back before renormalising.
-Weighting each cell at its lower edge instead is exact only when $w_p = w_s$, and for a daily primary and weekly secondary window puts the mean 36% low at $r = 0.2$ where the piecewise weight is within 0.2%.
+On the grid of Equation \@ref(eq:meta-grid) the primary event is known only to its window, and a complete primary window starting at $k w_p$ holds a delay of $x$ from its start when $k w_p + x \le A$.
+The growth weighted mass of the complete windows eligible for $x$ is therefore a step function of $x$ that steps down at $A - j w_p$.
+Each cell of the grid is cut at those points, each piece is weighted by that mass, and the pieces are summed back before renormalising.
+When $A$ is not a multiple of $w_p$ the last primary window is partial, of length $l = A - w_p \lfloor A / w_p \rfloor$.
+It only holds delays up to $l$, and the offset of a primary event within it runs over $l$ rather than $w_p$, so its cases follow $F_{pc}$ with a window of $l$ in place of $w_p$, weighted by the growth weighted length of the window, and are added to the cells below $l$.
+The grid weight is then exact for any $A$, $w_p$ and $w_s$.
+Weighting each cell at its lower edge instead is exact only when $w_p = w_s$ and $A$ is a multiple of both, and for a daily primary and weekly secondary window puts the mean 36% low at $r = 0.2$ where the piecewise weight is within 0.2%.
+Treating the partial window as complete put the mean 27% low for weekly primary and secondary windows with $A = 30$ at $r = 0.2$.
 
-Two residuals remain.
-The piecewise weight treats the last primary window as complete, so when $A$ is not a multiple of $w_p$ the primary events it cuts short are overweighted, by 5% on the mean for a weekly primary and daily secondary window with $A = 30$ at $r = 0.2$.
-Use a collection window that is a multiple of $w_p$ where the study allows it.
+One residual remains.
 Equation \@ref(eq:meta-uniform-moments) keeps the smooth weight, because the follow up available to a primary event is only known to within its window, and at $w_p = 7$ its mean is 2.6% high at $r = 0.2$.
-Both residuals grow with $r$ and as $w_p$ grows towards $A$.
+The residual grows with $r$ and as $w_p$ grows towards $A$.
 
 ### Left truncation
 

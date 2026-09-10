@@ -11,6 +11,9 @@
 
 \item{bterms}{An object returned by \code{\link[brms:brmsterms]{brms::brmsterms()}}.}
 }
+\value{
+\code{data}, invisibly.
+}
 \description{
 Replaces the checks that \code{epidist} relies on from
 \code{brms:::validate_data()}. \code{epidist} calls the \code{brms} internal only for

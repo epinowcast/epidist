@@ -420,6 +420,29 @@ lockstep_accrual_windows <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Studies AH and AI stopped collecting at a calendar date that is not a
+# multiple of their weekly primary window, so the partial last primary window
+# is weighted on its own and the complete windows stop being eligible off the
+# multiples of the window. AH grows and reports by week, AI does not grow and
+# reports by day.
+lockstep_partial_window <- data.frame(
+  study = c("AH", "AH", "AI", "AI"),
+  type = c("mean", "sd", "mean", "quantile"),
+  value = c(4.7, 3.7, 8.1, 8.0),
+  se = NA,
+  p = c(NA, NA, NA, 0.5),
+  n = c(150, 150, 130, 130),
+  relative_obs_time = 30,
+  trunc_adjusted = FALSE,
+  trunc_design = "accrual",
+  cens_adjusted = 0,
+  pwindow = 7,
+  swindow = c(7, 7, 1, 1),
+  delay_min = 0,
+  growth_rate = c(0.2, 0.2, 0, 0),
+  stringsAsFactors = FALSE
+)
+
 # Studies AC to AE report quantiles of integer day delays. AC and AD report a
 # single quantile, one per truncation design, which is fitted as the crossing
 # cell of the empirical distribution function. AE reports coincident quantiles,
@@ -460,20 +483,20 @@ lockstep_narrow <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# Studies AH to AL report a mean or a standard deviation alongside quantiles
+# Studies AJ to AN report a mean or a standard deviation alongside quantiles
 # of a continuous estimand, so every summary of a study is fitted jointly with
-# the covariance derived from the implied distribution. AH is fully adjusted,
+# the covariance derived from the implied distribution. AJ is fully adjusted,
 # so its quantiles are refined exactly through the lognormal quantile
-# function. AI used the uniform single interval approximation without
-# adjusting for truncation, so its quantile is refined by Newton steps. AJ
-# midpointed the primary event under an accrual design and AK adjusted for
+# function. AK used the uniform single interval approximation without
+# adjusting for truncation, so its quantile is refined by Newton steps. AL
+# midpointed the primary event under an accrual design and AM adjusted for
 # truncation with a growing primary event, so both keep their quantiles on
-# the chord of their nodes and take the density from its slope. AL counted
+# the chord of their nodes and take the density from its slope. AN counted
 # only delays above a minimum.
 lockstep_joint <- data.frame(
   study = c(
-    "AH", "AH", "AH", "AH", "AH", "AI", "AI", "AI", "AJ", "AJ", "AJ",
-    "AK", "AK", "AL", "AL"
+    "AJ", "AJ", "AJ", "AJ", "AJ", "AK", "AK", "AK", "AL", "AL", "AL",
+    "AM", "AM", "AN", "AN"
   ),
   type = c(
     "mean", "sd", "quantile", "quantile", "quantile",
@@ -513,6 +536,7 @@ lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
   lockstep_left_midpoint,
   lockstep_mvn_z,
   lockstep_accrual_windows,
+  lockstep_partial_window,
   lockstep_grid_quantiles,
   lockstep_narrow,
   lockstep_joint

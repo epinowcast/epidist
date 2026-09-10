@@ -14,6 +14,9 @@ function.}
 
 \item{data}{A \code{data.frame} used to expand \code{.} in the formula.}
 }
+\value{
+A \code{brmsformula} object.
+}
 \description{
 Replaces \code{brms:::validate_formula()} for the families \code{epidist}
 supports. Guarantees that the result is a \code{brmsformula} object carrying
