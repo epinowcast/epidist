@@ -186,6 +186,7 @@ test_that("the latent and marginal models agree when censoring windows overlap",
   # two disagree. The fixtures use weekly censoring windows, which leaves
   # around a quarter of observations overlapping.
   skip_on_cran()
+  skip_if_no_fits()
 
   overlap_fraction <- mean(prep_obs_overlap$woverlap > 0)
   # Guard against the fixture drifting into a case with no overlap at all,

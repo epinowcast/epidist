@@ -188,6 +188,7 @@ test_that(
   "epidist_gen_log_lik passes delay_min as L and relative_obs_time as D",
   {
     skip_on_cran()
+    skip_if_no_fits()
 
     # vreal1 (D) and vreal5 (L) are given distinct values so that a swap
     # between them changes the answer.
