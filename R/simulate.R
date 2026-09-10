@@ -8,7 +8,7 @@
 #' @param t Upper bound of the uniform distribution to generate primary event
 #'  times.
 #'
-#' @return A `data.frame` with two columns: `case` (case number) and `ptime`
+#' @returns A `data.frame` with two columns: `case` (case number) and `ptime`
 #'  (primary event time).
 #'
 #' @family simulate
@@ -31,11 +31,12 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 #'
 #' @param sample_size The number of cases to simulate. Defaults to 10000.
 #'
-#' @param seed The random seed to be used in the simulation process.
+#' @param seed The random seed to be used in the simulation process. Defaults
+#'  to `NULL`, which leaves the random number generator as it is.
 #'
 #' @param t Upper bound of the survival time. Defaults to 30.
 #'
-#' @return A `data.frame` with two columns: `case` (case number) and `ptime`
+#' @returns A `data.frame` with two columns: `case` (case number) and `ptime`
 #'  (primary event time).
 #'
 #' @family simulate
@@ -43,10 +44,10 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 simulate_exponential_cases <- function(
   r = 0.2,
   sample_size = 10000,
-  seed,
+  seed = NULL,
   t = 30
 ) {
-  if (!missing(seed)) {
+  if (!is.null(seed)) {
     set.seed(seed)
   }
   quant <- stats::runif(sample_size, 0, 1)
@@ -76,9 +77,10 @@ simulate_exponential_cases <- function(
 #'
 #' @param N The total population size. Defaults to 10000.
 #'
-#' @param seed The random seed to be used in the simulation process.
+#' @param seed The random seed to be used in the simulation process. Defaults
+#'  to `NULL`, which leaves the random number generator as it is.
 #'
-#' @return A `data.frame` with two columns: `case` (case number) and `ptime`
+#' @returns A `data.frame` with two columns: `case` (case number) and `ptime`
 #' (primary event time).
 #'
 #' @family simulate
@@ -88,9 +90,9 @@ simulate_gillespie <- function(
   gamma = 1 / 7,
   I0 = 50, # nolint: object_name_linter
   N = 10000, # nolint: object_name_linter
-  seed
+  seed = NULL
 ) {
-  if (!missing(seed)) {
+  if (!is.null(seed)) {
     set.seed(seed)
   }
   current_time <- 0
@@ -135,7 +137,7 @@ simulate_gillespie <- function(
 #'
 #' @param ... Arguments to be passed to the delay distribution function.
 #'
-#' @return A `data.frame` that augments `data` with two new columns: `delay`
+#' @returns A `data.frame` that augments `data` with two new columns: `delay`
 #'  (secondary event latency) and `stime` (the time of the secondary event).
 #'
 #' @family simulate

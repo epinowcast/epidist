@@ -11,6 +11,9 @@ as_epidist_estimates_data(data, ...)
 
 \item{...}{Additional arguments passed to methods}
 }
+\value{
+An object of class \code{epidist_estimates_data}.
+}
 \description{
 Creates an \code{epidist_estimates_data} object from published summary estimates
 of a delay distribution.

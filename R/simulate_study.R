@@ -34,6 +34,9 @@
 #' at a calendar date `relative_obs_time` after the start of the line list,
 #' and keeps every case whose secondary event fell before it.
 #'
+#' Sampling `n` cases and the bootstrap behind `report = "multivariate"` use
+#' the random number generator, so set a seed for a reproducible study.
+#'
 #' The advisory checks of [as_epidist_estimates_data()] do not run on the
 #' result. They run once on the combined object when several studies are
 #' passed to [as_epidist_estimates_data()] in a list.

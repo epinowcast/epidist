@@ -14,6 +14,9 @@ the column names of \code{draws}.}
 
 \item{...}{Not used in this method.}
 }
+\value{
+An object of class \code{epidist_multivariate}.
+}
 \description{
 Rows are draws and columns are parameters, describing a single point.
 }

@@ -273,3 +273,14 @@ test_that("as_epidist_estimates_data is idempotent", {
   )))
   expect_identical(as_epidist_estimates_data(estimates), estimates)
 })
+
+test_that("epidist_estimates_summaries needs at least one summary", {
+  expect_error(
+    epidist_estimates_summaries("A", n = 120),
+    "at least one of"
+  )
+  expect_error(
+    epidist_estimates_summaries("A", mean = c(7.5, 8), n = 120),
+    "mean"
+  )
+})

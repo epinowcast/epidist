@@ -16,6 +16,9 @@ estimates, or \code{NULL}.}
 
 \item{...}{Additional arguments passed to methods.}
 }
+\value{
+An object of class \code{epidist_meta_model}.
+}
 \description{
 Creates an \code{epidist_meta_model} object from individual level data, published
 summary estimates, or a mix of the two.
