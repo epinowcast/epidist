@@ -116,8 +116,8 @@ The posterior for the rate stays close to the prior, which is expected.
 summary(fit_growing)$fixed[
   "pgrowth_Intercept", c("Estimate", "l-95% CI", "u-95% CI")
 ]
-#>                    Estimate  l-95% CI  u-95% CI
-#> pgrowth_Intercept 0.4916175 0.3058019 0.6770035
+#>                    Estimate  l-95% CI u-95% CI
+#> pgrowth_Intercept 0.9224226 0.3469857 1.346566
 ```
 
 Both are compared against the delay used to simulate.
@@ -139,7 +139,9 @@ plot(draws, by = "model", pars = "mu", true_values = c(mu = meanlog)) +
   labs(fill = "Primary event", colour = "Primary event")
 ```
 
-![](figures/primary-events-compare-1.png)
+![plot of chunk compare](figures/primary-events-compare-1.png)
+
+Figure 3.1: plot of chunk compare
 
 ## 4 A growth rate that varies
 
@@ -212,7 +214,10 @@ epred |>
   theme_minimal()
 ```
 
-![](figures/primary-events-location-estimates-1.png)
+![plot of chunk
+location-estimates](figures/primary-events-location-estimates-1.png)
+
+Figure 4.1: plot of chunk location-estimates
 
 ### 4.1 Identifying the growth rate
 

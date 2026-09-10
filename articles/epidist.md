@@ -70,13 +70,16 @@ will need the following packages:
 library(epidist)
 library(ggplot2)
 library(dplyr)
-#> 
+#>
 #> Attaching package: 'dplyr'
+#> The following object is masked from 'package:testthat':
+#>
+#>     matches
 #> The following objects are masked from 'package:stats':
-#> 
+#>
 #>     filter, lag
 #> The following objects are masked from 'package:base':
-#> 
+#>
 #>     intersect, setdiff, setequal, union
 ```
 
@@ -289,8 +292,6 @@ p_cens <- obs_cens |>
 ``` r
 
 p_cens
-#> `height` was translated to `width`.
-#> `height` was translated to `width`.
 ```
 
 ![Interval censoring of the primary and secondary event times obscures
@@ -349,8 +350,6 @@ p_trunc <- obs_cens |>
 ``` r
 
 p_trunc
-#> `height` was translated to `width`.
-#> `height` was translated to `width`.
 ```
 
 ![This figure duplicates Figure 3.4 but adds truncation at 10 days due
@@ -412,12 +411,8 @@ plot_data <- combined_data |>
   group_by(type, delay, .drop = FALSE) |>
   summarise(n = n()) |>
   mutate(p = n / sum(n))
-#> `summarise()` has regrouped the output.
-#> ℹ Summaries were computed grouped by type and delay.
-#> ℹ Output is grouped by type.
-#> ℹ Use `summarise(.groups = "drop_last")` to silence this message.
-#> ℹ Use `summarise(.by = c(type, delay))` for per-operation grouping
-#>   (`?dplyr::dplyr_by`) instead.
+#> `summarise()` has grouped output by 'type'. You can override using the
+#> `.groups` argument.
 
 # Create the plot
 delay_histogram <- ggplot(plot_data) +
@@ -509,7 +504,7 @@ obs_data <- obs_cens_trunc_samp |>
 ```
 
 The resulting simulated data `obs_data` has 4 columns: `id`,
-`symptom_onset`, `case_notification`, and `obs_time`. Where
+`symptom_onset`, `case_notification`, and `obs_date`. Where
 `symptom_onset` and `case_notification` are dates and `obs_date` is the
 date of the last observation based on case notification.
 
@@ -555,8 +550,8 @@ linelist_data <- as_epidist_linelist_data(
 
 head(linelist_data)
 #> # A tibble: 6 × 11
-#>   ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr 
-#>       <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>    
+#>   ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr
+#>       <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>
 #> 1        15        16        23        24       25  1280 2024-02-16 2024-02-24
 #> 2        18        19        24        25       25  2167 2024-02-19 2024-02-25
 #> 3        11        12        13        14       25   743 2024-02-12 2024-02-14
@@ -619,8 +614,8 @@ function.
 naive_data <- as_epidist_naive_model(linelist_data)
 naive_data
 #> # A tibble: 200 × 13
-#>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr 
-#>        <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>    
+#>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr
+#>        <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>
 #>  1        15        16        23        24       25  1280 2024-02-16 2024-02-24
 #>  2        18        19        24        25       25  2167 2024-02-19 2024-02-25
 #>  3        11        12        13        14       25   743 2024-02-12 2024-02-14
@@ -652,7 +647,7 @@ naive_fit <- epidist(
 #> ! Reduced from 200 to 12 rows.
 #> ℹ This should improve model efficiency with no loss of information.
 #> Compiling Stan program...
-#> 
+#>
 #> Start sampling
 ```
 
@@ -661,9 +656,9 @@ recommend using the `cmdstanr` backend for faster sampling and
 additional features. This can be set using `backend = "cmdstanr"` after
 following the installing CmdStan instructions in the README.
 
-One of the progress messages output here is “Reduced from 200 to 91
-rows”. What this is indicating is that non-unique rows (based on the
-user formula) have been aggregated. This is done in several of the
+The progress output reports how many unique rows remain after
+aggregation. What this is indicating is that non-unique rows (based on
+the user formula) have been aggregated. This is done in several of the
 `epidist` models for efficiency and should have no impact on accuracy.
 If you want to explore this see the documentation for the
 [`epidist_transform_data_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.md).
@@ -681,19 +676,19 @@ the posterior distribution of the parameters.
 ``` r
 
 summary(naive_fit)
-#>  Family: lognormal 
-#>   Links: mu = identity; sigma = log 
-#> Formula: delay | weights(n) ~ 1 
+#>  Family: lognormal
+#>   Links: mu = identity; sigma = log
+#> Formula: delay | weights(n) ~ 1
 #>          sigma ~ 1
-#>    Data: transformed_data (Number of observations: 12) 
+#>    Data: transformed_data (Number of observations: 12)
 #>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
 #>          total post-warmup draws = 4000
-#> 
+#>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     2982     2695
-#> sigma_Intercept    -0.75      0.05    -0.85    -0.66 1.00     2865     2124
-#> 
+#> Intercept           1.42      0.03     1.35     1.48 1.00     4087     2587
+#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3861     2836
+#>
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
 #> scale reduction factor on split chains (at convergence, Rhat = 1).
@@ -734,8 +729,8 @@ and truncated distributions in both Stan and R. The documentation for
 marginal_data <- as_epidist_marginal_model(linelist_data)
 marginal_data
 #> # A tibble: 200 × 19
-#>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr 
-#>        <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>    
+#>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time    id pdate_lwr  sdate_lwr
+#>        <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>
 #>  1        15        16        23        24       25  1280 2024-02-16 2024-02-24
 #>  2        18        19        24        25       25  2167 2024-02-19 2024-02-25
 #>  3        11        12        13        14       25   743 2024-02-12 2024-02-14
@@ -771,7 +766,7 @@ marginal_fit <- epidist(
 #> ! Reduced from 200 to 92 rows.
 #> ℹ This should improve model efficiency with no loss of information.
 #> Compiling Stan program...
-#> 
+#>
 #> Start sampling
 ```
 
@@ -781,19 +776,19 @@ We again summarise the posterior using
 ``` r
 
 summary(marginal_fit)
-#>  Family: marginal_lognormal 
-#>   Links: mu = identity; sigma = log 
-#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min) ~ 1 
+#>  Family: marginal_lognormal
+#>   Links: mu = identity; sigma = log
+#> Formula: delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min) ~ 1
 #>          sigma ~ 1
-#>    Data: transformed_data (Number of observations: 92) 
+#>    Data: transformed_data (Number of observations: 92)
 #>   Draws: 4 chains, each with iter = 2000; warmup = 1000; thin = 1;
 #>          total post-warmup draws = 4000
-#> 
+#>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.65 1.00     2226     1986
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2217     2428
-#> 
+#> Intercept           1.55      0.05     1.46     1.65 1.00     2010     1901
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2172     2000
+#>
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
 #> scale reduction factor on split chains (at convergence, Rhat = 1).

@@ -490,6 +490,20 @@
 
 ### Package
 
+- `cmdstanr` is no longer a suggested dependency. It is not on CRAN, so
+  it put the stan-dev r-universe in `Additional_repositories` and in
+  every workflow, and the dependency step then took `rstan` and
+  `StanHeaders` from there at whatever versions each happened to be. The
+  two must be built against each other and a mismatch fails every model
+  compile, which is what broke the macOS and Windows checks when CRAN
+  released `StanHeaders` 2.39.1. The test suite now fits through the
+  default `rstan` backend and checks generated Stan code with
+  [`rstan::stanc()`](https://mc-stan.org/rstan/reference/stanc.html).
+  `cmdstanr` is still supported as a `brms` backend and the README says
+  how to install it. See
+  [\#687](https://github.com/epinowcast/epidist/issues/687) and
+  [\#688](https://github.com/epinowcast/epidist/issues/688).
+
 - Acted on a software review of the package. Every exported function and
   method now documents its return value, including the meta model,
   estimates data and multivariate functions added in this release.
@@ -710,6 +724,13 @@
   and scale alongside the natural mean and standard deviation, and
   compares the result with a modern re-analysis of one of the same line
   lists. See [\#620](https://github.com/epinowcast/epidist/issues/620).
+- Precomputed the `epidist`, `left-truncation` and `primary-events`
+  vignettes. Between them they fitted eight models on four platforms on
+  every check run, and a fit was the only thing standing between a Stan
+  toolchain problem and a red check. They are now knitted from a
+  `.Rmd.orig` source into a committed `.Rmd` holding static output, as
+  the other model fitting vignettes already were. See
+  [\#688](https://github.com/epinowcast/epidist/issues/688).
 - Added a `left-truncation` vignette showing how to use `delay_min`. See
   [\#596](https://github.com/epinowcast/epidist/issues/596).
 - Documented installing from CRAN in the README, with `r-universe` as
@@ -719,6 +740,18 @@
 
 - Added a `render-vignettes` workflow that rebuilds the precomputed
   vignettes and opens a pull request with the result.
+- Took the stan-dev r-universe out of `extra-repositories`. It served
+  `cmdstanr`, but the dependency step also took `rstan` and
+  `StanHeaders` from it. `check-cmdstan` and `render-vignettes` install
+  `cmdstanr` on its own instead, so the r-universe is never consulted
+  for anything else. The mrc-ide r-universe stays, because `epireview`
+  is suggested and is not on CRAN, and it serves no part of the Stan
+  toolchain. See
+  [\#687](https://github.com/epinowcast/epidist/issues/687).
+- The `\donttest{}` examples fit through `rstan`, so they run on Linux
+  only while the CRAN `rstan` and `StanHeaders` cannot compile a model
+  on macOS or Windows. See
+  [\#688](https://github.com/epinowcast/epidist/issues/688).
 - Passed the coverage report to `codecov/codecov-action` through `files`
   rather than `file`. `file` is not an input the action accepts, so with
   `disable_search` set it found no report and the `test-coverage` job
