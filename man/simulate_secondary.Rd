@@ -31,8 +31,7 @@ the spread of the delay distribution itself.
 
 \code{\link[distspec:sample_dist]{distspec::sample_dist()}} does not apply the bounds set with \code{max} or
 \code{cdf_max}, so a bounded \code{dist} gives the same delays as an unbounded one.
-Passing a bounded \code{dist} warns for that reason. See
-epiforecasts/distspec#168.
+Passing a bounded \code{dist} warns for that reason.
 
 \code{distspec} supports a fixed set of distributions. Open an issue at
 \url{https://github.com/epiforecasts/distspec/issues} to ask for another one.

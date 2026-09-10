@@ -140,8 +140,7 @@ simulate_gillespie <- function(
 #'
 #' [distspec::sample_dist()] does not apply the bounds set with `max` or
 #' `cdf_max`, so a bounded `dist` gives the same delays as an unbounded one.
-#' Passing a bounded `dist` warns for that reason. See
-#' epiforecasts/distspec#168.
+#' Passing a bounded `dist` warns for that reason.
 #'
 #' `distspec` supports a fixed set of distributions. Open an issue at
 #' <https://github.com/epiforecasts/distspec/issues> to ask for another one.
@@ -204,7 +203,7 @@ simulate_secondary <- function(data, dist) {
 #'
 #' [distspec::sample_dist()] ignores the `max` and `cdf_max` bounds of a
 #' `<dist_spec>`, so delays drawn from a bounded distribution can fall outside
-#' its bounds. See epiforecasts/distspec#168.
+#' its bounds.
 #'
 #' @inheritParams simulate_secondary
 #'
@@ -220,8 +219,7 @@ simulate_secondary <- function(data, dist) {
     cli_warn(c(
       "The bounds of {.arg dist} are not applied when drawing delays, so some
        delays will fall outside them.",
-      i = "{.fn distspec::sample_dist} ignores {.arg max} and {.arg cdf_max}:
-           see epiforecasts/distspec#168.",
+      i = "{.fn distspec::sample_dist} ignores {.arg max} and {.arg cdf_max}.",
       "*" = "Drop the bounds, or discard the delays outside them yourself."
     ))
   }

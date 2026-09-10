@@ -17,6 +17,6 @@ a \code{distspec} constructor such as \code{\link[distspec:LogNormal]{distspec::
 \description{
 \code{\link[distspec:sample_dist]{distspec::sample_dist()}} ignores the \code{max} and \code{cdf_max} bounds of a
 \verb{<dist_spec>}, so delays drawn from a bounded distribution can fall outside
-its bounds. See epiforecasts/distspec#168.
+its bounds.
 }
 \keyword{internal}

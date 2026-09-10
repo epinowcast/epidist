@@ -34,7 +34,8 @@ there is no analytic solution, or \code{"sample"}, which always simulates.}
 }
 \value{
 The input with \code{mean} and \code{sd} columns added, and one column per
-element of \code{probs}.
+element of \code{probs}. It has the \code{epidist_delay_draws} class, which records
+the family used and gives it a \link[=plot.epidist_delay_draws]{plot()} method.
 }
 \description{
 Adds the mean and standard deviation of the delay distribution implied by

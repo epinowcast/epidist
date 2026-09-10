@@ -141,14 +141,25 @@ Closes #676.
 
 ## Features
 
+- Added `plot_events()`, which plots the primary and secondary event windows of each case in an `epidist_linelist_data` object, ordered by primary event time.
+It can mark the observation time and colour the cases by a column of the data.
+The vignettes drew this plot by hand and now use it.
+Closes #689.
+- Added a `plot()` method for the draws returned by `delay_parameter_draws()`, `delay_summary_draws()` and `add_summaries()`.
+The default draws the posterior density of each parameter in its own panel, coloured by stratum, with true values as dashed lines when given.
+`type = "delay"` draws the delay distribution the draws imply, as the posterior median with a ribbon or as one line per draw.
+The draws now carry the `epidist_delay_draws` class, which records the family and the stratum variables the plot needs.
+`ggplot2::autoplot()` works too.
+The vignettes now use it in place of the plots they drew by hand.
+Closes #670.
+- Both plot functions use `ggplot2::theme_minimal()` and a colour blind friendly palette, so that their output matches the plots in the package documentation.
 - Added a `distspec::as_dist_spec()` method for fitted models, which exports a fitted delay distribution as an uncertain `<dist_spec>`.
 The natural parameters of the delay distribution are computed for each posterior draw and summarised into a `Normal()` prior on each.
 The generic is re-exported, so `as_dist_spec(fit)` works with `epidist` alone.
-See `?as_dist_spec.epidist_fit` and epiforecasts/distspec#140.
+See `?as_dist_spec.epidist_fit`.
 - `simulate_secondary()` now takes its delay distribution as a `<dist_spec>` rather than a random number generator, so `simulate_secondary(dist = rlnorm, meanlog = 1.8, sdlog = 0.5)` becomes `simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5))`.
 A `<dist_spec>` with uncertain parameters, such as one exported from a fit with `as_dist_spec()`, has its parameters resolved once per row, so the simulated delays carry the parameter uncertainty.
 `distspec::sample_dist()` ignores the `max` and `cdf_max` bounds of a `<dist_spec>`, so `simulate_secondary()` warns when given a bounded distribution.
-See epiforecasts/distspec#168.
 `distspec` is now an imported package.
 This is a breaking change.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.

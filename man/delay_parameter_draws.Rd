@@ -22,7 +22,9 @@ such as \code{ndraws} or \code{re_formula}.}
 }
 \value{
 A \code{tibble} of posterior draws of the delay distribution parameters,
-grouped by the columns of \code{newdata} and by \code{.row}.
+grouped by the columns of \code{newdata} and by \code{.row}. It has the
+\code{epidist_delay_draws} class, which records the delay distribution family
+and gives it a \link[=plot.epidist_delay_draws]{plot()} method.
 }
 \description{
 Returns posterior draws of the parameters of the delay distribution in the
@@ -69,7 +71,8 @@ fit |>
 }
 \seealso{
 \code{\link[=add_summaries]{add_summaries()}} to add natural scale summaries of the delay,
-\code{\link[=epidist_strata]{epidist_strata()}} to build \code{newdata}.
+\code{\link[=epidist_strata]{epidist_strata()}} to build \code{newdata}, and \code{\link[=plot.epidist_delay_draws]{plot.epidist_delay_draws()}}
+to plot the draws.
 
 Other postprocess:
 \code{\link[=add_summaries]{add_summaries()}},
