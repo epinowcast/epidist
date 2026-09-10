@@ -11,14 +11,17 @@
   dist,
   args,
   slots,
-  p = slots$group_p
+  p = slots$group_p,
+  lower = slots$group_lower
 )
 }
 \arguments{
 \item{y}{A vector of reported quantile values in non decreasing order.}
 
 \item{cum_count}{A vector of cumulative counts from
-\code{\link[=.meta_quantile_counts]{.meta_quantile_counts()}}.}
+\code{\link[=.meta_quantile_counts]{.meta_quantile_counts()}}, or for quantiles of integer day delays the
+largest count of delays below each reported day, from
+\code{\link[=.meta_crossing_counts]{.meta_crossing_counts()}} less one.}
 
 \item{study_n}{The number of delays the quantiles were computed from.}
 
@@ -30,6 +33,10 @@
 
 \item{p}{The probabilities the quantiles were reported at, in the order
 of \code{y}. Only used for a single quantile of integer day delays.}
+
+\item{lower}{For quantiles of integer day delays, the smallest count of
+delays at or below each reported day, from \code{\link[=.meta_crossing_counts]{.meta_crossing_counts()}}.
+Unused otherwise.}
 }
 \value{
 A log probability mass.
@@ -50,10 +57,17 @@ interquartile range.
 \details{
 Two quantiles reported at the same value are two constraints on the
 empirical distribution function at one cell, so they are merged into that
-cell with their combined count. A single quantile of integer day delays
-is fitted by \code{\link[=.meta_grid_crossing_ll]{.meta_grid_crossing_ll()}} instead, because the multinomial
-on the continuity corrected distribution function keeps sharpening with
-the study size while a rounded quantile stops moving.
+cell with their combined count.
+
+Quantiles of integer day delays (\code{cens_adjusted} 0 or 3) are discrete
+statistics, and the multinomial on the continuity corrected distribution
+function keeps sharpening with the study size while a rounded quantile
+stops moving. A single such quantile is fitted by
+\code{\link[=.meta_grid_crossing_ll]{.meta_grid_crossing_ll()}} as the cell in which the empirical
+distribution function crossed its probability, and several by
+\code{\link[=.meta_grid_box_ll]{.meta_grid_box_ll()}} as the joint probability of every such crossing,
+with \code{cum_count} and \code{lower} read as the box each crossing puts on the
+counts below and at the reported day.
 
 A cell whose implied probability underflows to zero while the study saw
 delays in it is floored at \code{\link[=.meta_cell_floor]{.meta_cell_floor()}}.

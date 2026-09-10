@@ -31,6 +31,7 @@ meta_log_lik_program <- function(meta) {
     "  int<lower=0> N_meta_group;\n",
     "  vector[N_meta_group] meta_group_value;\n",
     "  array[N_meta_group] int meta_group_count;\n",
+    "  array[N_meta_group] int meta_group_lower;\n",
     "  array[N_meta_group] int meta_group_type;\n",
     "  vector[N_meta_group] meta_group_p;\n",
     "  int<lower=0> N_meta_chol;\n",
@@ -43,7 +44,8 @@ meta_log_lik_program <- function(meta) {
     "      log_lik[d, n] = meta_lognormal_lpmf(Y[n] | mu[d], sigma[d], ",
     ifelse(growth, "pgrowth[d], ", ""),
     paste0(slots, "[n]", collapse = ", "),
-    ", meta_group_value, meta_group_count, meta_group_type, meta_group_p",
+    ", meta_group_value, meta_group_count, meta_group_lower, meta_group_type",
+    ", meta_group_p",
     ", meta_group_chol, primary_params);\n    }\n  }\n}\n"
   )))
   stan_data <- c(
@@ -54,6 +56,7 @@ meta_log_lik_program <- function(meta) {
       N_meta_group = standata$N_meta_group,
       meta_group_value = as.array(standata$meta_group_value),
       meta_group_count = as.array(standata$meta_group_count),
+      meta_group_lower = as.array(standata$meta_group_lower),
       meta_group_type = as.array(standata$meta_group_type),
       meta_group_p = as.array(standata$meta_group_p),
       N_meta_chol = standata$N_meta_chol,
