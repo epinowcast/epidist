@@ -896,6 +896,18 @@ test_that("as_epidist_estimates_data checks the growth rate standard deviation",
   infinite$growth_rate_sd <- NA
   infinite$growth_rate <- Inf
   expect_error(suppressMessages(as_epidist_estimates_data(infinite)))
+  # A non numeric column is rejected rather than coerced. A factor would
+  # otherwise become its level codes, and a character an NA, which reads as a
+  # request to estimate the rate.
+  factored <- est_df
+  factored$growth_rate <- factor(c("0", "0", "0.1", "0.1"))
+  expect_error(suppressMessages(as_epidist_estimates_data(factored)))
+  worded <- est_df
+  worded$growth_rate <- "fast"
+  expect_error(suppressMessages(as_epidist_estimates_data(worded)))
+  worded <- est_df
+  worded$growth_rate_sd <- "wide"
+  expect_error(suppressMessages(as_epidist_estimates_data(worded)))
 })
 
 test_that("the quadrature checks treat an estimated growth rate as a tilted primary event", { # nolint: line_length_linter.

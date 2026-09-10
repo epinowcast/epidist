@@ -538,7 +538,8 @@ The residual grows with $r$ and as $w_p$ grows towards $A$.
 
 ### An estimated growth rate {#estimated-growth}
 
-The rate $r_j$ of study $j$ sets the tilt of $g_p$ in every code above and the weight of Equation \@ref(eq:meta-accrual).
+The rate $r_j$ of study $j$ sets the tilt of $g_p$, which every code but code 1 uses.
+It also sets the weight of Equation \@ref(eq:meta-accrual).
 Where the study's `growth_rate` is `NA`, or is given with a `growth_rate_sd`, it is instead the distributional parameter `pgrowth` evaluated on the row, the parameter of Section \@ref(primary-tilt), so it takes a `brms` formula and a prior and can be shared with individual level rows from the same outbreak.
 Unless a formula is given for `pgrowth` the model uses `pgrowth ~ 0 + study`, one rate per study.
 A study that reported a rate $\hat{r}_j$ with a standard deviation $s_j$ then gets

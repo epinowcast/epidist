@@ -987,9 +987,15 @@ as_epidist_estimates_data.epidist_multivariate <- function(
   if (!hasName(data, "growth_rate_sd")) {
     data$growth_rate_sd <- NA_real_
   }
-  # A column of NA alone arrives as logical.
-  data$growth_rate <- as.numeric(data$growth_rate)
-  data$growth_rate_sd <- as.numeric(data$growth_rate_sd)
+  # A column of NA alone arrives as logical. Anything else is left as it is,
+  # so that a factor or a character column is rejected by assert_epidist()
+  # rather than coerced into level codes or into an NA that would read as a
+  # request to estimate the rate.
+  for (col in c("growth_rate", "growth_rate_sd")) {
+    if (is.logical(data[[col]])) {
+      data[[col]] <- as.numeric(data[[col]])
+    }
+  }
   if (!hasName(data, "max_delay")) {
     data <- .add_default_max_delay(data)
   }

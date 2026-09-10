@@ -29,32 +29,6 @@
 #' Individual level rows are labelled `"individual"` in the `study` column so
 #' that they form their own level of any such term.
 #'
-#' # The growth rate of a summary row
-#'
-#' A summary row tilts the primary event within its window, and weights the
-#' follow up of an accrual design, by the `growth_rate` of its study. A
-#' number given in [as_epidist_estimates_data()] is used as it is. A study
-#' whose rate is `NA`, or whose rate was given with a `growth_rate_sd`,
-#' estimates it instead as the `pgrowth` distributional parameter, the same
-#' parameter that `primary = "expgrowth"` estimates from individual level
-#' rows. The model then adds `pgrowth ~ 0 + study` to the formula unless a
-#' `pgrowth` formula is given, so that every study has its own rate, or
-#' `pgrowth ~ 1` where the data hold a single study, and
-#' [epidist_model_prior()] gives each study that reported a rate and a
-#' standard deviation a normal prior with that centre and spread. Every
-#' other coefficient of `pgrowth`, including that of a study whose rate is
-#' unknown, gets a `normal(0, 0.25)` prior, which is weakly informative for
-#' a delay measured in days. Summaries carry little information about the
-#' rate, so give a study whose rate is unknown an informative prior, or
-#' share its coefficient with rows that do inform it. For example
-#' `pgrowth ~ 1` fits one rate to a line list from the same outbreak, given
-#' with `primary = "expgrowth"`, and to a summary row whose rate is `NA`, and
-#' `pgrowth ~ 0 + outbreak` does the same per outbreak. A formula given for
-#' `pgrowth` is used as it is, and the reported rates then only reach the
-#' model through priors on its coefficients where they exist, so set them
-#' yourself. A fit with a `study` term in `pgrowth` needs a `study` column
-#' in any `newdata` it predicts from.
-#'
 #' # What this means in practice
 #'
 #' Summaries that one study computed from the same delays are correlated, so
@@ -121,6 +95,21 @@
 #' study is given as many intervals as it needs to resolve the spread it
 #' reported, up to a cap of 2000 that the option lifts when set above it, and
 #' the number is held in the `n_quad` column of the model data.
+#'
+#' # Advanced: an estimated growth rate
+#'
+#' A summary row tilts its primary event, and weights the follow up of an
+#' accrual design, by the `growth_rate` of its study. Where that rate is
+#' `NA` in [as_epidist_estimates_data()], or was given there with a
+#' `growth_rate_sd`, the study estimates it as the `pgrowth` distributional
+#' parameter instead. That is the parameter `primary = "expgrowth"`
+#' estimates from individual level rows, so the two can share it. The model
+#' adds `pgrowth ~ 0 + study` unless a `pgrowth` formula is given, and
+#' [epidist_model_prior()] sets the priors from the reported rates.
+#' Summaries carry little information about the rate on their own, so share
+#' the coefficient with rows that do inform it, for example `pgrowth ~ 1`
+#' with a line list from the same outbreak. `vignette("model")` gives the
+#' details.
 #'
 #' @param data An `epidist_linelist_data` or `epidist_aggregate_data` object of
 #'  individual level observations, an `epidist_estimates_data` object of
@@ -350,7 +339,8 @@ as_epidist_meta_model.NULL <- function(data = NULL, estimates = NULL, ...) {
       i = paste0(
         "Summary rows tilt the primary event by the {.var growth_rate} ",
         "metadata of their study in {.fn as_epidist_estimates_data}, and ",
-        "estimate it as {.var pgrowth} where that is {.val NA}."
+        "estimate it as {.var pgrowth} where that is {.val NA} or has a ",
+        "positive {.var growth_rate_sd}."
       )
     ))
   }
