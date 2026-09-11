@@ -324,6 +324,7 @@ See #688.
 - Added a `left-truncation` vignette showing how to use `delay_min`.
 See #596.
 - Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
+- The `primary-events` vignette now plots the growth rate of each location with the package draws plot method, and gives each location its own simulation seed so the locations no longer share random numbers. Closes #724.
 
 ## CI
 
