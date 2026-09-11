@@ -93,42 +93,38 @@ secondary_dist <- data.frame(mu = 1.6, sigma = 0.5) |>
 secondary_dist
 ```
 
-We the simulate the stochastic outbreak in continuous time, sample a reporting delay for each event and finally observe the events (i.e restrict them to be dates).
-We assume that the outbreak has a growth rate of 0.2 and that we observe the outbreak for 25 days.
+`add_summaries()` records the family it was given, so `plot()` can draw the delay distribution these parameters describe (Figure \@ref(fig:lognormal)).
+
+(ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
+
+```{r lognormal, fig.cap="(ref:lognormal)"}
+plot(secondary_dist, type = "delay", max_delay = 30)
+```
+
+We then simulate the stochastic outbreak in continuous time, sample a reporting delay for each event and finally observe the events (i.e restrict them to be dates).
+We assume that the outbreak has a growth rate of 0.2, that we observe the outbreak for 25 days, and that the first infection was on the 1st of February 2024.
 
 ```{r}
 growth_rate <- 0.2
 obs_time <- 25
+outbreak_start_date <- as.Date("2024-02-01")
 ```
 
 <details><summary>Click to expand for simulation details</summary>
 
-First, we use the [Gillespie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data (Figure \@ref(fig:outbreak)) from a stochastic compartmental model.
+First, we use the [Gillespie algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to generate infectious disease outbreak data from a stochastic compartmental model.
 
 ```{r}
 outbreak <- simulate_gillespie(r = growth_rate, seed = 101)
-```
 
-(ref:outbreak) Early on in the epidemic, there is a high rate of growth in new cases. As more people are infected, the rate of growth slows. (Only every 50th case is shown to avoid over-plotting.)
-
-```{r outbreak, fig.cap="(ref:outbreak)"}
-outbreak |>
-  filter(case %% 50 == 0) |>
-  ggplot(aes(x = ptime, y = case)) +
-  geom_point(col = "#56B4E9") +
-  labs(x = "Primary event time (day)", y = "Case number") +
-  theme_minimal()
+head(outbreak)
 ```
 
 `outbreak` is a `data.frame` with the two columns: `case` and `ptime`.
 Here `ptime` is a numeric column giving the time of infection.
 In reality, it is more common to receive primary event times as a date rather than a numeric.
 
-```{r}
-head(outbreak)
-```
-
-To generate secondary events, we will use a lognormal distribution (Figure \@ref(fig:lognormal)) for the delay between primary and secondary events:
+To generate secondary events, we use `simulate_secondary()` with the lognormal distribution of Figure \@ref(fig:lognormal).
 
 ```{r}
 obs <- simulate_secondary(
@@ -137,152 +133,74 @@ obs <- simulate_secondary(
   meanlog = secondary_dist[["mu"]],
   sdlog = secondary_dist[["sigma"]]
 )
-```
 
-(ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
-
-```{r lognormal, fig.cap="(ref:lognormal)"}
-ggplot(data.frame(x = c(0, 30)), aes(x = x)) +
-  geom_function(
-    fun = dlnorm,
-    args = list(
-      meanlog = secondary_dist[["mu"]],
-      sdlog = secondary_dist[["sigma"]]
-    )
-  ) +
-  theme_minimal() +
-  labs(
-    x = "Delay between primary and secondary event (days)",
-    y = "Probability density"
-  )
-```
-
-(ref:delay) Secondary events (in green) occur with a delay drawn from the lognormal distribution (Figure \@ref(fig:lognormal)).As with Figure \@ref(fig:outbreak), to make this figure easier to read, only every 50th case is shown.
-
-```{r delay, fig.cap="(ref:delay)"}
-obs |>
-  filter(case %% 50 == 0) |>
-  ggplot(aes(y = case)) +
-  geom_segment(
-    aes(x = ptime, xend = stime, y = case, yend = case),
-    col = "grey"
-  ) +
-  geom_point(aes(x = ptime), col = "#56B4E9") +
-  geom_point(aes(x = stime), col = "#009E73") +
-  labs(x = "Event time (day)", y = "Case number") +
-  theme_minimal()
+head(obs)
 ```
 
 `obs` is now a `data.frame` with further columns for `delay` and `stime`.
-The secondary event time is simply the primary event time plus the delay:
-
-```{r}
-all(obs$ptime + obs$delay == obs$stime)
-```
+The secondary event time is simply the primary event time plus the delay.
 
 If we were to receive the complete data `obs` as above then it would be simple to accurately estimate the delay distribution.
 However, in reality, during an outbreak we almost never receive the data as above.
 
 First, the times of primary and secondary events will usually be censored.
 This means that rather than exact event times, we observe event times within an interval.
-Here we suppose that the interval is daily, meaning that only the date of the primary or secondary event, not the exact event time, is reported (Figure \@ref(fig:cens)):
+`simulate_dates()` does this for us.
+It floors each event time to its reporting window, daily by default, and offsets it from the date the outbreak started.
+Passing `obs_time` also records the date of the last observation.
 
 ```{r}
-obs_cens <- mutate(
+obs_cens <- simulate_dates(
   obs,
-  ptime_lwr = floor(.data$ptime),
-  ptime_upr = .data$ptime_lwr + 1,
-  stime_lwr = floor(.data$stime),
-  stime_upr = .data$stime_lwr + 1,
-  delay_daily = stime_lwr - ptime_lwr
+  outbreak_start_date = outbreak_start_date,
+  obs_time = obs_time
 )
+
+head(obs_cens)
 ```
 
-<details><summary>Click to expand for code to create the censored data figure</summary>
+The columns `simulate_dates()` returns are named for `as_epidist_linelist_data()`, which converts them to the format `epidist` works in.
+We use it here to draw the figures below, and return to it in Section \@ref(preprocessing).
 
 ```{r}
-p_cens <- obs_cens |>
-  filter(case %% 50 == 0, case <= 500) |>
-  ggplot(aes(y = case)) +
-  geom_segment(
-    aes(x = ptime, xend = stime, y = case, yend = case),
-    col = "grey"
-  ) +
-  # The primary event censoring intervals
-  geom_errorbarh(
-    aes(xmin = ptime_lwr, xmax = ptime_upr, y = case),
-    col = "#56B4E9", height = 5
-  ) +
-  # The secondary event censoring intervals
-  geom_errorbarh(
-    aes(xmin = stime_lwr, xmax = stime_upr, y = case),
-    col = "#009E73", height = 5
-  ) +
-  geom_point(aes(x = ptime), fill = "white", col = "#56B4E9", shape = 21) +
-  geom_point(aes(x = stime), fill = "white", col = "#009E73", shape = 21) +
-  labs(x = "Event time (day)", y = "Case number") +
-  theme_minimal()
+linelist_all <- as_epidist_linelist_data(obs_cens)
 ```
 
-</details>
+`plot_events()` draws one row per case, ordered by primary event time (Figure \@ref(fig:outbreak)).
+
+(ref:outbreak) Early on in the epidemic, there is a high rate of growth in new cases. As more people are infected, the rate of growth slows. Each secondary event (in green) occurs with a delay drawn from the lognormal distribution (Figure \@ref(fig:lognormal)) after its primary event (in blue). Only 200 evenly spaced cases are shown to avoid over-plotting.
+
+```{r outbreak, fig.cap="(ref:outbreak)"}
+plot_events(linelist_all)
+```
+
+Looking at the first 500 cases shows the effect of the daily censoring, as each event is only known to have happened within a one day window (Figure \@ref(fig:cens)).
 
 (ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. A common example of this is when events are reported as daily aggregates. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
 
 ```{r cens, fig.cap="(ref:cens)"}
-p_cens
+plot_events(filter(linelist_all, .data$case <= 500), n = 50)
 ```
 
 During an outbreak we will usually be estimating delays in real time.
 The result is that only those cases with a secondary event occurring before some time will be observed.
 This is called (right) truncation, and biases the observation process towards shorter delays.
-In Figure \@ref(fig:trunc) we see a simulation of this process where we have restricted the data to only include cases where the secondary event occurred before day 10.
+In Figure \@ref(fig:trunc) we see this process where we have marked day 10 as the point at which the data were observed.
 
-<details><summary>Click to expand for code to create the truncated data figure</summary>
-
-```{r}
-p_trunc <- obs_cens |>
-  filter(case %% 50 == 0, case <= 500) |>
-  mutate(
-    observed = ifelse(stime_upr <= 10, "observed", "not observed"),
-    observed = factor(observed, levels = c("observed", "not observed"))
-  ) |>
-  ggplot(aes(y = case)) +
-  geom_segment(
-    aes(x = ptime, xend = stime, y = case, yend = case, linetype = observed),
-    col = "grey"
-  ) +
-  # The primary event censoring intervals
-  geom_errorbarh(
-    aes(xmin = ptime_lwr, xmax = ptime_upr, y = case),
-    col = "#56B4E9", height = 5
-  ) +
-  # The secondary event censoring intervals
-  geom_errorbarh(
-    aes(xmin = stime_lwr, xmax = stime_upr, y = case),
-    col = "#009E73", height = 5
-  ) +
-  geom_point(aes(x = ptime), fill = "white", col = "#56B4E9", shape = 21) +
-  geom_point(aes(x = stime), fill = "white", col = "#009E73", shape = 21) +
-  geom_vline(xintercept = 10, col = "black", linetype = "dashed") +
-  labs(x = "Event time (day)", y = "Case number") +
-  theme_minimal() +
-  theme(legend.position = "none")
-```
-
-</details>
-
-(ref:trunc) This figure duplicates Figure \@ref(fig:cens) but adds truncation at 10 days due to stopping the observation period at this point. Event pairs using dashed lines are now not observed.
+(ref:trunc) This figure duplicates Figure \@ref(fig:cens) but marks an observation date 10 days after the outbreak started with a dashed line. Cases whose secondary event falls to the right of it are not observed.
 
 ```{r trunc, fig.cap="(ref:trunc)"}
-p_trunc
+plot_events(
+  filter(linelist_all, .data$case <= 500),
+  n = 50,
+  obs_time = outbreak_start_date + 10
+)
 ```
 
-We can simulate the effect of right truncation by restricting the data to only include cases where the secondary event occurred before the observation time.
+We can simulate the effect of right truncation by keeping only the cases whose secondary event window closed on or before the observation date.
 
 ```{r}
-obs_cens_trunc <- obs_cens |>
-  mutate(obs_time = obs_time) |>
-  filter(.data$stime_upr <= .data$obs_time)
+obs_cens_trunc <- filter(obs_cens, .data$sdate_upr <= .data$obs_date)
 ```
 
 Finally, in reality, it's not possible to observe every case.
@@ -304,26 +222,16 @@ obs_cens_trunc_samp <- slice_sample(
 <details><summary>Click to expand for code to create the observed data histogram</summary>
 
 ```{r}
-# Prepare the complete, retrospective data
-complete_data <- obs_cens |>
-  mutate(type = "Censored retrospective data") |>
-  select(delay = delay_daily, type)
+plot_data <- bind_rows(
+  "Censored retrospective data" = obs_cens,
+  "Censored, truncated,\nsampled data" = obs_cens_trunc_samp,
+  .id = "type"
+) |>
+  mutate(delay = as.numeric(.data$sdate_lwr - .data$pdate_lwr)) |>
+  count(.data$type, .data$delay) |>
+  group_by(.data$type) |>
+  mutate(p = .data$n / sum(.data$n))
 
-# Prepare the censored, truncated, sampled data
-censored_data <- obs_cens_trunc_samp |>
-  mutate(type = "Censored, truncated,\nsampled data") |>
-  select(delay = delay_daily, type)
-
-# Combine the datasets
-combined_data <- bind_rows(complete_data, censored_data)
-
-# Calculate proportions
-plot_data <- combined_data |>
-  group_by(type, delay, .drop = FALSE) |>
-  summarise(n = n()) |>
-  mutate(p = n / sum(n))
-
-# Create the plot
 delay_histogram <- ggplot(plot_data) +
   geom_col(
     aes(x = delay, y = p, fill = type, group = type),
@@ -366,18 +274,10 @@ Whereas each case is equally likely to appear in the sample above, under ascerta
 
 </details>
 
-Our data is now very nearly what we would observe in practice but as a final step we will transform it to use meaningful dates.
-To do this we introduce a `outbreak_start_date` which is the date of the first infection, and use `simulate_dates()` to floor the event times to their reporting window and offset them from it.
-Here we rename the columns to show that `epidist` does not require particular names.
+As a final step we rename the columns to show that `epidist` does not require particular names.
 
 ```{r}
-outbreak_start_date <- as.Date("2024-02-01")
-
 obs_data <- obs_cens_trunc_samp |>
-  simulate_dates(
-    outbreak_start_date = outbreak_start_date,
-    obs_time = obs_time
-  ) |>
   transmute(
     id = case,
     symptom_onset = pdate_lwr,
@@ -569,41 +469,32 @@ p_pp_params
 As expected we see that the naive model has done a very poor job of recovering the true parameters and the marginal model has done a much better job.
 However, it is important to note that the marginal model doesn't perfectly recover the true parameters either due to information loss in the censoring and truncation and due to the inherent uncertainty in the posterior distribution.
 
-# Visualise posterior predictions of the true delay distribution {#postprocessing}
+# Compare the estimated delay distributions {#postprocessing}
 
-As a final step we can visualise the posterior predictions of the delay distribution.
-This tells us how good a fit the estimated delay distribution is to the true delay distribution.
-
-`type = "delay"` draws the delay distribution the parameters imply, one line per draw when `ndraws` is given.
+The parameters are easier to read as the delay distribution they imply.
+`type = "delay"` draws that distribution, as the posterior median density with a ribbon between the 5% and 95% quantiles.
+The true distribution is a `data.frame` of parameters in the same form as the draws, so adding it as a third model draws it on the same axes without any extra code.
 
 ```{r}
-set.seed(123)
+delay_draws <- bind_rows(
+  predicted_parameters,
+  mutate(secondary_dist, model = "true")
+) |>
+  add_summaries(family = marginal_fit)
 
 p_fitted_lognormal <- plot(
-  predicted_parameters,
+  delay_draws,
   type = "delay",
   by = "model",
-  ndraws = 100,
   max_delay = 15
 ) +
-  geom_function(
-    fun = dlnorm,
-    args = list(
-      meanlog = secondary_dist[["mu"]],
-      sdlog = secondary_dist[["sigma"]]
-    ),
-    linewidth = 1.5,
-    col = "black"
-  ) +
-  facet_wrap(~model, nrow = 2) +
   labs(
     x = "Delay between primary and secondary event (days)",
     y = "Probability density"
-  ) +
-  theme(legend.position = "none")
+  )
 ```
 
-(ref:fitted-lognormal) The posterior draws from the marginal and naive models (coloured lines, 100 draws from each posterior) compared to the true underlying delay distribution (black line). Each coloured line represents one possible delay distribution based on the estimated model parameters. The naive model shows substantial bias whilst the marginal model better recovers the true distribution.
+(ref:fitted-lognormal) The delay distribution implied by the posterior draws of the marginal and naive models, and the true underlying delay distribution. For the two models the line is the posterior median and the ribbon spans the 5% to 95% quantiles. The naive model shows substantial bias whilst the marginal model better recovers the true distribution.
 
 ```{r fitted-lognormal, fig.cap="(ref:fitted-lognormal)"}
 p_fitted_lognormal
