@@ -173,6 +173,7 @@
 <li>Precomputed the <code>epidist</code>, <code>left-truncation</code> and <code>primary-events</code> vignettes. Between them they fitted eight models on four platforms on every check run, and a fit was the only thing standing between a Stan toolchain problem and a red check. They are now knitted from a <code>.Rmd.orig</code> source into a committed <code>.Rmd</code> holding static output, as the other model fitting vignettes already were. See <a href="https://github.com/epinowcast/epidist/issues/688" class="external-link">#688</a>.</li>
 <li>Added a <code>left-truncation</code> vignette showing how to use <code>delay_min</code>. See <a href="https://github.com/epinowcast/epidist/issues/596" class="external-link">#596</a>.</li>
 <li>Documented installing from CRAN in the README, with <code>r-universe</code> as the route to the latest version.</li>
+<li>Restructured the README install instructions to match <code>primarycensored</code>, with CRAN first, then <code>r-universe</code>, then <code>pak</code> for the development version and for historical releases. The text now lives in <code>vignettes/chunks/_readme-install-epidist.Rmd</code> and is included by the README, so it can be reused elsewhere.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="ci-0-5-0">CI<a class="anchor" aria-label="anchor" href="#ci-0-5-0"></a></h3>

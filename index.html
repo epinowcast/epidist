@@ -112,28 +112,19 @@
 </h2>
 <details><summary>
 Installing the package
-</summary><p>Install the released version from CRAN:</p>
+</summary><p>You can install the latest released version from CRAN using the standard <code>install.packages</code> function:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"epidist"</span><span class="op">)</span></span></code></pre></div>
-<p>Install the latest version from our <code>r-universe</code> repository:</p>
+<p>Alternatively, you can install the latest release from our r-universe repository:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span></span>
-<span>  <span class="st">"epidist"</span>,</span>
-<span>  repos <span class="op">=</span> <span class="st">"https://epinowcast.r-universe.dev"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>Alternatively, you can use the <a href="https://remotes.r-lib.org/" class="external-link"><code>remotes</code> package</a> to install the development version from GitHub (warning! this version may contain breaking changes and/or bugs):</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"epidist"</span>, repos <span class="op">=</span> <span class="st">"https://epinowcast.r-universe.dev"</span><span class="op">)</span></span></code></pre></div>
+<p>To install the development version from GitHub (warning! this version may contain breaking changes and/or bugs), use the <a href="https://pak.r-lib.org/" class="external-link"><code>pak</code> package</a>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"epinowcast"</span>, <span class="st">"epidist"</span><span class="op">)</span>,</span>
-<span>  dependencies <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>Similarly, you can install historical versions by specifying the release tag (e.g. this installs <a href="https://github.com/epinowcast/epidist/releases/tag/v0.1.0" class="external-link"><code>0.1.0</code></a>):</p>
+<code class="sourceCode R"><span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"epinowcast/epidist"</span><span class="op">)</span></span></code></pre></div>
+<p>Similarly, you can install historical versions by specifying the release tag (e.g., <a href="https://github.com/epinowcast/epidist/releases/tag/v0.4.0" class="external-link"><code>v0.4.0</code></a>):</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"epinowcast"</span>, <span class="st">"epidist"</span><span class="op">)</span>,</span>
-<span>  dependencies <span class="op">=</span> <span class="cn">TRUE</span>, ref <span class="op">=</span> <span class="st">"v0.1.0"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><em>Note: You can also use that last approach to install a specific commit if needed, e.g. if you want to try out a specific unreleased feature, but not the absolute latest developmental version.</em></p>
+<code class="sourceCode R"><span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"epinowcast/epidist@v0.4.0"</span><span class="op">)</span></span></code></pre></div>
+<p><em>Note: You can also use the above approach to install a specific commit if needed, for example, if you want to try out a specific unreleased feature, but not the absolute latest developmental version.</em></p>
 </details><details><summary>
 Installing CmdStan (optional)
 </summary><p>By default <code>epidist</code> uses the <code>rstan</code> package for fitting models. If you wish to use the <code>cmdstanr</code> package instead, you will need to install <a href="https://mc-stan.org/users/interfaces/cmdstan" class="external-link">CmdStan</a>, which also entails having a suitable C++ toolchain setup. We recommend using the <a href="https://mc-stan.org/cmdstanr/" class="external-link"><code>cmdstanr</code> package</a> to manage CmdStan. The Stan team provides instructions in the <a href="https://mc-stan.org/cmdstanr/articles/cmdstanr.html" class="external-link"><em>Getting started with <code>cmdstanr</code></em></a> vignette, with other details and support at the <a href="https://mc-stan.org/cmdstanr/" class="external-link">package site</a>, but the brief version is:</p>

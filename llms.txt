@@ -43,51 +43,43 @@ order:
 
 Installing the package
 
-Install the released version from CRAN:
+You can install the latest released version from CRAN using the standard
+`install.packages` function:
 
 ``` r
 
 install.packages("epidist")
 ```
 
-Install the latest version from our `r-universe` repository:
+Alternatively, you can install the latest release from our r-universe
+repository:
 
 ``` r
 
-install.packages(
-  "epidist",
-  repos = "https://epinowcast.r-universe.dev"
-)
+install.packages("epidist", repos = "https://epinowcast.r-universe.dev")
 ```
 
-Alternatively, you can use the [`remotes`
-package](https://remotes.r-lib.org/) to install the development version
-from GitHub (warning! this version may contain breaking changes and/or
-bugs):
+To install the development version from GitHub (warning! this version
+may contain breaking changes and/or bugs), use the [`pak`
+package](https://pak.r-lib.org/):
 
 ``` r
 
-remotes::install_github(
-  file.path("epinowcast", "epidist"),
-  dependencies = TRUE
-)
+pak::pak("epinowcast/epidist")
 ```
 
 Similarly, you can install historical versions by specifying the release
-tag (e.g. this installs
-[`0.1.0`](https://github.com/epinowcast/epidist/releases/tag/v0.1.0)):
+tag (e.g.,
+[`v0.4.0`](https://github.com/epinowcast/epidist/releases/tag/v0.4.0)):
 
 ``` r
 
-remotes::install_github(
-  file.path("epinowcast", "epidist"),
-  dependencies = TRUE, ref = "v0.1.0"
-)
+pak::pak("epinowcast/epidist@v0.4.0")
 ```
 
-*Note: You can also use that last approach to install a specific commit
-if needed, e.g. if you want to try out a specific unreleased feature,
-but not the absolute latest developmental version.*
+*Note: You can also use the above approach to install a specific commit
+if needed, for example, if you want to try out a specific unreleased
+feature, but not the absolute latest developmental version.*
 
 Installing CmdStan (optional)
 
