@@ -93,7 +93,7 @@ secondary_dist <- data.frame(mu = 1.6, sigma = 0.5) |>
 secondary_dist
 ```
 
-`add_summaries()` records the family it was given, so `plot()` can draw the delay distribution these parameters describe (Figure \@ref(fig:lognormal)).
+We can visualise the delay distribution these parameters describe with `plot()` (Figure \@ref(fig:lognormal)).
 
 (ref:lognormal) The lognormal distribution is skewed to the right. Long delay times still have some probability.
 
@@ -102,7 +102,7 @@ plot(secondary_dist, type = "delay", max_delay = 30)
 ```
 
 We then simulate the stochastic outbreak in continuous time, sample a reporting delay for each event and finally observe the events (i.e restrict them to be dates).
-We assume that the outbreak has a growth rate of 0.2, that we observe the outbreak for 25 days, and that the first infection was on the 1st of February 2024.
+We assume that the outbreak has a growth rate of 0.2, that we observe the outbreak for 25 days, and that the first case was infected on the 1st of February 2024.
 
 ```{r}
 growth_rate <- 0.2
@@ -116,15 +116,17 @@ First, we use the [Gillespie algorithm](https://en.wikipedia.org/wiki/Gillespie_
 
 ```{r}
 outbreak <- simulate_gillespie(r = growth_rate, seed = 101)
-
-head(outbreak)
 ```
 
 `outbreak` is a `data.frame` with the two columns: `case` and `ptime`.
 Here `ptime` is a numeric column giving the time of infection.
 In reality, it is more common to receive primary event times as a date rather than a numeric.
 
-To generate secondary events, we use `simulate_secondary()` with the lognormal distribution of Figure \@ref(fig:lognormal).
+```{r}
+head(outbreak)
+```
+
+To generate secondary events, we will use a lognormal distribution (Figure \@ref(fig:lognormal)) for the delay between primary and secondary events:
 
 ```{r}
 obs <- simulate_secondary(
@@ -133,21 +135,21 @@ obs <- simulate_secondary(
   meanlog = secondary_dist[["mu"]],
   sdlog = secondary_dist[["sigma"]]
 )
-
-head(obs)
 ```
 
 `obs` is now a `data.frame` with further columns for `delay` and `stime`.
-The secondary event time is simply the primary event time plus the delay.
+The secondary event time is simply the primary event time plus the delay:
+
+```{r}
+all(obs$ptime + obs$delay == obs$stime)
+```
 
 If we were to receive the complete data `obs` as above then it would be simple to accurately estimate the delay distribution.
 However, in reality, during an outbreak we almost never receive the data as above.
 
 First, the times of primary and secondary events will usually be censored.
 This means that rather than exact event times, we observe event times within an interval.
-`simulate_dates()` does this for us.
-It floors each event time to its reporting window, daily by default, and offsets it from the date the outbreak started.
-Passing `obs_time` also records the date of the last observation.
+Here we suppose that the interval is daily, meaning that only the date of the primary or secondary event, not the exact event time, is reported (Figure \@ref(fig:cens)):
 
 ```{r}
 obs_cens <- simulate_dates(
@@ -159,45 +161,14 @@ obs_cens <- simulate_dates(
 head(obs_cens)
 ```
 
-The columns `simulate_dates()` returns are named for `as_epidist_linelist_data()`, which converts them to the format `epidist` works in.
-We use it here to draw the figures below, and return to it in Section \@ref(preprocessing).
-
-```{r}
-linelist_all <- as_epidist_linelist_data(obs_cens)
-```
-
-`plot_events()` draws one row per case, ordered by primary event time (Figure \@ref(fig:outbreak)).
-
-(ref:outbreak) Early on in the epidemic, there is a high rate of growth in new cases. As more people are infected, the rate of growth slows. Each secondary event (in green) occurs with a delay drawn from the lognormal distribution (Figure \@ref(fig:lognormal)) after its primary event (in blue). Only 200 evenly spaced cases are shown to avoid over-plotting.
-
-```{r outbreak, fig.cap="(ref:outbreak)"}
-plot_events(linelist_all)
-```
-
-Looking at the first 500 cases shows the effect of the daily censoring, as each event is only known to have happened within a one day window (Figure \@ref(fig:cens)).
-
-(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. A common example of this is when events are reported as daily aggregates. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals.
-
-```{r cens, fig.cap="(ref:cens)"}
-plot_events(filter(linelist_all, .data$case <= 500), n = 50)
-```
+`simulate_dates()` floors each event time to its reporting window, daily by default, offsets it from the date the outbreak started, and records the date of the last observation.
 
 During an outbreak we will usually be estimating delays in real time.
 The result is that only those cases with a secondary event occurring before some time will be observed.
 This is called (right) truncation, and biases the observation process towards shorter delays.
-In Figure \@ref(fig:trunc) we see this process where we have marked day 10 as the point at which the data were observed.
+In Figure \@ref(fig:trunc) we see a simulation of this process where we have restricted the data to only include cases where the secondary event occurred before day 10.
 
-(ref:trunc) This figure duplicates Figure \@ref(fig:cens) but marks an observation date 10 days after the outbreak started with a dashed line. Cases whose secondary event falls to the right of it are not observed.
-
-```{r trunc, fig.cap="(ref:trunc)"}
-plot_events(
-  filter(linelist_all, .data$case <= 500),
-  n = 50,
-  obs_time = outbreak_start_date + 10
-)
-```
-
-We can simulate the effect of right truncation by keeping only the cases whose secondary event window closed on or before the observation date.
+We can simulate the effect of right truncation by restricting the data to only include cases where the secondary event occurred before the observation time.
 
 ```{r}
 obs_cens_trunc <- filter(obs_cens, .data$sdate_upr <= .data$obs_date)
@@ -217,6 +188,101 @@ obs_cens_trunc_samp <- slice_sample(
   obs_cens_trunc,
   n = sample_size, replace = FALSE
 )
+```
+
+<details>
+<summary>Issues not considered</summary>
+
+Another issue, which `epidist` currently does not account for, is that sometimes only the secondary event might be observed, and not the primary event.
+For example, symptom onset may be reported, but start of infection unknown.
+Discarding events of this type leads to what are called ascertainment biases.
+Whereas each case is equally likely to appear in the sample above, under ascertainment bias some cases are more likely to appear in the data than others.
+
+</details>
+
+Our data is now very nearly what we would observe in practice but as a final step we rename the columns to show that `epidist` does not require particular names.
+
+```{r}
+obs_data <- transmute(
+  obs_cens_trunc_samp,
+  id = case,
+  symptom_onset = pdate_lwr,
+  case_notification = sdate_lwr,
+  obs_date = obs_date
+)
+```
+
+</details>
+
+The resulting simulated data `obs_data` has 4 columns: `id`, `symptom_onset`, `case_notification`, and `obs_date`.
+Where `symptom_onset` and `case_notification` are dates and `obs_date` is the date of the last observation based on case notification.
+
+```{r}
+head(obs_data)
+```
+
+# Preprocessing the data {#preprocessing}
+
+The first step in using `epidist` is to convert the data into a format that `epidist` understands.
+The most common format is a linelist, which is a table with one row per case and columns for the primary and secondary event dates.
+
+The `as_epidist_linelist_data()` function converts the data into a linelist format.
+It has a few different entry points depending on the format of the data you have but the most common is to use a `data.frame` containing dates.
+This dispatches to `as_epidist_linelist_data.data.frame()` which takes the column names of the primary and secondary event dates and the observation date.
+
+```{r}
+linelist_data <- as_epidist_linelist_data(
+  obs_data,
+  pdate_lwr = "symptom_onset",
+  sdate_lwr = "case_notification",
+  obs_date = "obs_date"
+)
+
+head(linelist_data)
+```
+
+Here you can see that `epidist` has assumed that the events are both daily censored as upper bounds have not been provided.
+If your data was not daily censored, you can provide the upper bounds (`pdate_upr` and `sdate_upr`) to `as_epidist_linelist_data()` and it will use the correct model.
+Internally this function converts the data into a relative (to the first event date) time format and creates a variable (`delay`) which contains the observed delay.
+These are the variables that `epidist` will use to fit the model.
+
+Other formats are supported, for example aggregate data (e.g. daily case counts), and there is functionality to map between these formats.
+See `?as_epidist_aggregate_data()` for more details.
+
+# Visualising the data {#vis}
+
+`simulate_dates()` names its columns as `as_epidist_linelist_data()` expects, so the complete simulated data converts without any arguments.
+Comparing it with `linelist_data` shows what the observation process removed.
+
+```{r}
+linelist_all <- as_epidist_linelist_data(obs_cens)
+```
+
+(ref:cens) Interval censoring of the primary and secondary event times obscures the delay times. A common example of this is when events are reported as daily aggregates. While daily censoring is most common, `epidist` supports the primary and secondary events having other delay intervals. Only the first 500 cases are shown, thinned to the 200 `plot_events()` draws by default, so that the daily windows stay legible.
+
+```{r cens, fig.cap="(ref:cens)"}
+plot_events(filter(linelist_all, .data$case <= 500))
+```
+
+(ref:trunc) This figure duplicates Figure \@ref(fig:cens) but adds truncation at 10 days due to stopping the observation period at this point. The cases whose secondary event had not happened by the dashed line are now missing.
+
+```{r trunc, fig.cap="(ref:trunc)"}
+plot_events(
+  filter(
+    linelist_all,
+    .data$case <= 500,
+    .data$sdate_upr <= outbreak_start_date + 10
+  ),
+  obs_time = outbreak_start_date + 10
+)
+```
+
+The same view of `linelist_data` shows the data we will fit to (Figure \@ref(fig:linelist)).
+
+(ref:linelist) The primary and secondary event windows of each observed case, ordered by the date of symptom onset. The dashed line is the observation date, after which no secondary event is seen. These are the 200 sampled cases, drawn from across the whole outbreak rather than the first 500 cases of Figure \@ref(fig:cens).
+
+```{r linelist, fig.cap="(ref:linelist)"}
+plot_events(linelist_data, obs_time = max(linelist_data$obs_date))
 ```
 
 <details><summary>Click to expand for code to create the observed data histogram</summary>
@@ -263,74 +329,6 @@ delay_histogram <- ggplot(plot_data) +
 ```{r obs-est, fig.cap="(ref:obs-est)"}
 delay_histogram
 ```
-
-<details>
-<summary>Issues not considered</summary>
-
-Another issue, which `epidist` currently does not account for, is that sometimes only the secondary event might be observed, and not the primary event.
-For example, symptom onset may be reported, but start of infection unknown.
-Discarding events of this type leads to what are called ascertainment biases.
-Whereas each case is equally likely to appear in the sample above, under ascertainment bias some cases are more likely to appear in the data than others.
-
-</details>
-
-As a final step we rename the columns to show that `epidist` does not require particular names.
-
-```{r}
-obs_data <- obs_cens_trunc_samp |>
-  transmute(
-    id = case,
-    symptom_onset = pdate_lwr,
-    case_notification = sdate_lwr,
-    obs_date = obs_date
-  )
-```
-
-</details>
-
-The resulting simulated data `obs_data` has 4 columns: `id`, `symptom_onset`, `case_notification`, and `obs_date`.
-Where `symptom_onset` and `case_notification` are dates and `obs_date` is the date of the last observation based on case notification.
-
-```{r}
-head(obs_data)
-```
-
-# Preprocessing the data {#preprocessing}
-
-The first step in using `epidist` is to convert the data into a format that `epidist` understands.
-The most common format is a linelist, which is a table with one row per case and columns for the primary and secondary event dates.
-
-The `as_epidist_linelist_data()` function converts the data into a linelist format.
-It has a few different entry points depending on the format of the data you have but the most common is to use a `data.frame` containing dates.
-This dispatches to `as_epidist_linelist_data.data.frame()` which takes the column names of the primary and secondary event dates and the observation date.
-
-```{r}
-linelist_data <- as_epidist_linelist_data(
-  obs_data,
-  pdate_lwr = "symptom_onset",
-  sdate_lwr = "case_notification",
-  obs_date = "obs_date"
-)
-
-head(linelist_data)
-```
-
-`plot_events()` draws the event windows of a linelist (Figure \@ref(fig:linelist)).
-It gives the same view as Figure \@ref(fig:trunc), for the data we will fit to.
-
-(ref:linelist) The primary and secondary event windows of each observed case, ordered by the date of symptom onset. The dashed line is the observation date, after which no secondary event is seen.
-
-```{r linelist, fig.cap="(ref:linelist)"}
-plot_events(linelist_data, obs_time = max(obs_data$obs_date))
-```
-
-Here you can see that `epidist` has assumed that the events are both daily censored as upper bounds have not been provided.
-If your data was not daily censored, you can provide the upper bounds (`pdate_upr` and `sdate_upr`) to `as_epidist_linelist_data()` and it will use the correct model.
-Internally this function converts the data into a relative (to the first event date) time format and creates a variable (`delay`) which contains the observed delay.
-These are the variables that `epidist` will use to fit the model.
-
-Other formats are supported, for example aggregate data (e.g. daily case counts), and there is functionality to map between these formats.
-See `?as_epidist_aggregate_data()` for more details.
 
 # Fitting models {#fit}
 
@@ -469,11 +467,13 @@ p_pp_params
 As expected we see that the naive model has done a very poor job of recovering the true parameters and the marginal model has done a much better job.
 However, it is important to note that the marginal model doesn't perfectly recover the true parameters either due to information loss in the censoring and truncation and due to the inherent uncertainty in the posterior distribution.
 
-# Compare the estimated delay distributions {#postprocessing}
+# Visualise posterior predictions of the true delay distribution {#postprocessing}
 
-The parameters are easier to read as the delay distribution they imply.
-`type = "delay"` draws that distribution, as the posterior median density with a ribbon between the 5% and 95% quantiles.
-The true distribution is a `data.frame` of parameters in the same form as the draws, so adding it as a third model draws it on the same axes without any extra code.
+As a final step we can visualise the posterior predictions of the delay distribution.
+This tells us how good a fit the estimated delay distribution is to the true delay distribution.
+
+`type = "delay"` draws the delay distribution the parameters imply, as the posterior median with a ribbon between the 5% and 95% quantiles.
+Adding the true parameters as a third model draws the true distribution on the same axes.
 
 ```{r}
 delay_draws <- bind_rows(

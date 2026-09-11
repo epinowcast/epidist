@@ -332,7 +332,8 @@ See #596.
 - Restructured the README install instructions to match `primarycensored`, with CRAN first, then `r-universe`, then `pak` for the development version and for historical releases.
 The text now lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is included by the README, so it can be reused elsewhere.
 - Reworked the getting started vignette to use the package's own simulation and plotting tools.
-It now simulates the censored dates with `simulate_dates()`, converts them with `as_epidist_linelist_data()`, draws the outbreak, censoring and truncation figures with `plot_events()`, and compares the fitted and true delay distributions with the `plot()` method for delay draws.
+It now simulates the censored dates with `simulate_dates()`, converts them with `as_epidist_linelist_data()`, draws the censoring and truncation figures with `plot_events()`, and compares the fitted and true delay distributions with the `plot()` method for delay draws.
+The data is simulated, then converted, then visualised, rather than being converted part way through the simulation.
 
 ## CI
 
