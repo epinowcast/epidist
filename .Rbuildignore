@@ -19,3 +19,4 @@
 ^vignettes/.*\.Rmd\.orig$
 ^design$
 ^codemeta\.json$
+^vignettes/chunks$
