@@ -324,6 +324,8 @@ See #688.
 - Added a `left-truncation` vignette showing how to use `delay_min`.
 See #596.
 - Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
+- Reworked the getting started vignette to use the package's own simulation and plotting tools.
+It now simulates the censored dates with `simulate_dates()`, converts them with `as_epidist_linelist_data()`, draws the outbreak, censoring and truncation figures with `plot_events()`, and compares the fitted and true delay distributions with the `plot()` method for delay draws.
 
 ## CI
 
