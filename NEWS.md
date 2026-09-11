@@ -324,6 +324,8 @@ See #688.
 - Added a `left-truncation` vignette showing how to use `delay_min`.
 See #596.
 - Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
+- Restructured the README install instructions to match `primarycensored`, with CRAN first, then `r-universe`, then `pak` for the development version and for historical releases.
+The text now lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is included by the README, so it can be reused elsewhere.
 
 ## CI
 
