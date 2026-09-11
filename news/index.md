@@ -490,6 +490,14 @@
 
 ### Package
 
+- Rendered vignette output is no longer copied into the built package
+  tarball. `R CMD build` does not read `.gitignore`, so a locally
+  rendered `vignettes/epidist.html` or a knitr cache directory was
+  shipped with the package. `.Rbuildignore` now excludes `.html`,
+  `.pdf`, `.tex` and `.md` files under `vignettes/`, along with `_cache`
+  and `_files` directories. The `.Rmd` sources and the precomputed
+  figures in `vignettes/figures/` are unaffected.
+
 - `cmdstanr` is no longer a suggested dependency. It is not on CRAN, so
   it put the stan-dev r-universe in `Additional_repositories` and in
   every workflow, and the dependency step then took `rstan` and
