@@ -62,7 +62,6 @@ cov
 cutoff
 cutoffs
 damonbayer
-datetime
 ddsynth
 discretise
 discretised
@@ -96,7 +95,6 @@ lockfile
 logmean
 longmapsto
 lpdf
-macOS
 mapsto
 mathbb
 mathbf
@@ -150,6 +148,5 @@ underflowed
 unnormalised
 untruncated
 vdots
-viridis
 weibull
 zsusswein
