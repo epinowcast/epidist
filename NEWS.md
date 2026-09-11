@@ -324,6 +324,7 @@ See #688.
 - Added a `left-truncation` vignette showing how to use `delay_min`.
 See #596.
 - Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
+- The `faq` and `left-truncation` vignettes now build their simulated dates with `simulate_dates()` and plot posterior draws with the package `plot()` method, in place of hand rolled equivalents.
 
 ## CI
 
