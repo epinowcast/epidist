@@ -324,6 +324,7 @@ See #688.
 - Added a `left-truncation` vignette showing how to use `delay_min`.
 See #596.
 - Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
+- The `ebola` vignette now uses `delay_summary_draws()` and the `plot()` method for its posterior expectation, parameter and delay distribution figures, in place of hand written `ggplot2` code.
 
 ## CI
 

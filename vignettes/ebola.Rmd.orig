@@ -35,7 +35,7 @@ We provide the data in the `epidist` package via `?sierra_leone_ebola_data`.
 In analysing this data, we demonstrate the following features of `epidist`:
 
 1. Fitting district-sex stratified partially pooled delay distribution estimates with a lognormal delay distribution.
-2. Post-processing and plotting functionality using the integration of `brms` functionality with the [`tidybayes`](http://mjskay.github.io/tidybayes/) package.
+2. Post-processing and plotting with the package's own tools, alongside the integration of `brms` functionality with the [`tidybayes`](http://mjskay.github.io/tidybayes/) package.
 
 The packages used in this article are:
 
@@ -265,44 +265,32 @@ ranef(fit_sex_district)
 
 ## Posterior expectations {#posterior-expectation}
 
-To go further than summaries of the fitted model, we recommend using the `tidybayes` package.
-For example, to obtain the posterior expectation of the delay distribution, under no censoring or truncation, we may use `epidist_newdata()` in combination with the `tidybayes::add_epred_draws()` function.
-`epidist_newdata()` expands the variables we give it into a grid and adds the response and observation process variables the model uses, which saves us knowing the column names the marginal model expects.
-Its defaults are no censoring and no truncation.
-The `tidybayes::add_epred_draws()` function uses the `epidist_gen_posterior_predict()` function to generate a posterior prediction function for the `lognormal()` distribution.
+To go further than summaries of the fitted model, `delay_summary_draws()` returns posterior draws of the delay distribution, under no censoring and no truncation.
+It draws one set of parameters for each unique combination of the predictors, and adds the mean and standard deviation of the delay distribution each draw implies.
+`epidist_strata()`, `delay_parameter_draws()` and `add_summaries()` are the three steps it wraps, and each is available on its own.
 
+The `plot()` method draws the posterior density of each parameter, coloured by stratum.
 In Figure \@ref(fig:epred) we show the posterior expectation of the delay distribution for each of the three fitted models.
 Figure \@ref(fig:epred)B illustrates the higher mean of men as compared with women.
+The sex-district stratified model has 28 strata, too many to read as densities, so we draw those as intervals instead.
 
 <details><summary>Click to expand for code to the posterior expectation plots</summary>
 
 ```{r}
-expectation_draws <- obs_prep |>
-  epidist_newdata() |>
-  add_epred_draws(fit, dpar = TRUE)
+mean_draws <- delay_summary_draws(fit)
 
-epred_base_figure <- expectation_draws |>
-  ggplot(aes(x = .epred)) +
-  stat_halfeye() +
-  labs(x = "", y = "", title = "Intercept-only", tag = "A") +
-  theme_minimal()
+epred_base_figure <- plot(mean_draws, pars = "mean") +
+  labs(title = "Intercept-only", tag = "A")
 
-expectation_draws_sex <- obs_prep |>
-  epidist_newdata(sex) |>
-  add_epred_draws(fit_sex, dpar = TRUE)
+mean_draws_sex <- delay_summary_draws(fit_sex)
 
-epred_sex_figure <- expectation_draws_sex |>
-  ggplot(aes(x = .epred, y = sex)) +
-  stat_halfeye() +
-  labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
-  theme_minimal()
+epred_sex_figure <- plot(mean_draws_sex, pars = "mean") +
+  labs(title = "Sex-stratified", tag = "B")
 
-expectation_draws_sex_district <- obs_prep |>
-  epidist_newdata(sex, district) |>
-  add_epred_draws(fit_sex_district, dpar = TRUE)
+mean_draws_sex_district <- delay_summary_draws(fit_sex_district)
 
-epred_sex_district_figure <- expectation_draws_sex_district |>
-  ggplot(aes(x = .epred, y = district)) +
+epred_sex_district_figure <- mean_draws_sex_district |>
+  ggplot(aes(x = mean, y = district)) +
   stat_pointinterval() +
   facet_grid(. ~ sex) +
   labs(
@@ -322,33 +310,35 @@ epred_base_figure / epred_sex_figure / epred_sex_district_figure +
   plot_layout(heights = c(1, 1.5, 2.5))
 ```
 
-## Linear predictor posteriors
+## Delay distribution parameter posteriors
 
-The `tidybayes` package also allows users to generate draws of the linear predictors for all distributional parameters using `tidybayes::add_linpred_draws()`.
-For example, for the `mu` parameter in the sex-district stratified model (Figure \@ref(fig:linpred-sex-district)):
+`delay_parameter_draws()` gives the distributional parameters on their own, without the natural scale summaries.
+`add_delay_parameter_draws()` is the same function with the data to predict for first, for use at the start of a pipeline.
+Here we pair it with `epidist_strata()`, which builds one row per unique combination of the predictors.
+For example, for the `mu` parameter in the sex-district stratified model (Figure \@ref(fig:pars-sex-district)):
 
-<details><summary>Click to expand for code to prepare linear predictor plot</summary>
+<details><summary>Click to expand for code to prepare parameter plot</summary>
 
 ```{r}
-linpred_draws_sex_district <- obs_prep |>
-  epidist_newdata(sex, district) |>
-  add_linpred_draws(fit_sex_district, dpar = TRUE)
+pars_draws_sex_district <- fit_sex_district |>
+  epidist_strata() |>
+  add_delay_parameter_draws(fit_sex_district)
 
-p_linpred_sex_district <- linpred_draws_sex_district |>
+p_pars_sex_district <- pars_draws_sex_district |>
   ggplot(aes(x = mu, y = district)) +
   stat_pointinterval() +
   facet_grid(. ~ sex) +
-  labs(x = "Posterior of the mu linear predictor", y = "") +
+  labs(x = "Posterior of the mu parameter", y = "") +
   scale_y_discrete(limits = rev) +
   theme_minimal()
 ```
 
 </details>
 
-(ref:linpred-sex-district) The posterior distribution of the linear predictor of `mu` parameter within the sex-district stratified model. The posterior expectations in Section \@ref(posterior-expectation) are a function of both the `mu` linear predictor posterior distribution and `sigma` linear predictor posterior distribution.
+(ref:pars-sex-district) The posterior distribution of the `mu` parameter within the sex-district stratified model. The posterior expectations in Section \@ref(posterior-expectation) are a function of both the `mu` posterior distribution and the `sigma` posterior distribution.
 
-```{r linpred-sex-district, fig.cap="(ref:linpred-sex-district)"}
-p_linpred_sex_district
+```{r pars-sex-district, fig.cap="(ref:pars-sex-district)"}
+p_pars_sex_district
 ```
 
 ## Delay posterior distributions
@@ -359,7 +349,9 @@ In this section, we demonstrate how to produce either a discrete probability mas
 ### Discrete probability mass function
 
 To generate a discrete probability mass function (PMF) we predict the delay distribution that would be observed with daily censoring and no right truncation.
-To do this, we set each of `pwindow` and `swindow` to 1 for daily censoring, and leave `relative_obs_time` at its default of `Inf` for no right truncation.
+`epidist_newdata()` builds the data to predict for.
+It expands the variables we give it into a grid and adds the response and observation process variables the model uses, which saves us knowing the column names the marginal model expects.
+To ask for daily censoring we set each of `pwindow` and `swindow` to 1, and we leave `relative_obs_time` at its default of `Inf` for no right truncation.
 Figure \@ref(fig:pmf) shows the result, where the few delays greater than 30 are omitted from the figure.
 
 <details><summary>Click to expand for code to prepare PMF plots</summary>
@@ -424,56 +416,29 @@ pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
 
 ### Continuous probability density function
 
-The posterior predictive distribution under no truncation and no censoring.
-That is to produce continuous delay times (Figure \@ref(fig:pdf)):
+The delay distribution itself, under no censoring and no truncation, follows from the parameter draws we already have.
+`plot()` with `type = "delay"` draws it as the posterior median density with a ribbon between the 5% and 95% quantiles (Figure \@ref(fig:pdf)):
 
 <details><summary>Click to expand for code to prepare PDF plots</summary>
 
 ```{r}
-draws_pdf <- obs_prep |>
-  epidist_newdata() |>
-  add_predicted_draws(fit, ndraws = 1000)
+pdf_base_figure <- plot(mean_draws, type = "delay", max_delay = 30) +
+  labs(x = "", title = "Intercept-only", tag = "A")
 
-pdf_base_figure <- ggplot(draws_pdf, aes(x = .prediction)) +
-  geom_density() +
-  labs(x = "", y = "", title = "Intercept-only", tag = "A") +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
+pdf_sex_figure <- plot(mean_draws_sex, type = "delay", max_delay = 30) +
+  labs(x = "", title = "Sex-stratified", tag = "B")
 
-draws_sex_pdf <- obs_prep |>
-  epidist_newdata(sex) |>
-  add_predicted_draws(fit_sex, ndraws = 1000)
-
-pdf_sex_figure <- draws_sex_pdf |>
-  ggplot(aes(x = .prediction)) +
-  geom_density() +
-  labs(x = "", y = "", title = "Sex-stratified", tag = "B") +
-  facet_grid(. ~ sex) +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
-
-draws_sex_district_pdf <- obs_prep |>
-  epidist_newdata(sex, district) |>
-  add_predicted_draws(fit_sex_district, ndraws = 1000)
-
-pdf_sex_district_figure <- draws_sex_district_pdf |>
-  mutate(
-    district = case_when(
-      district == "Port Loko" ~ "Port\nLoko",
-      district == "Western Rural" ~ "Western\nRural",
-      district == "Western Urban" ~ "Western\nUrban",
-      .default = district
-    )
-  ) |>
-  ggplot(aes(x = .prediction)) +
-  geom_density() +
+pdf_sex_district_figure <- plot(
+  mean_draws_sex_district,
+  type = "delay",
+  max_delay = 30
+) +
+  facet_grid(district ~ sex, labeller = label_wrap_gen(10)) +
   labs(
-    x = "PDF with no censoring and no truncation", y = "",
+    x = "PDF with no censoring and no truncation",
     title = "Sex-district-stratified", tag = "C"
   ) +
-  facet_grid(district ~ sex) +
-  scale_x_continuous(limits = c(0, 30)) +
-  theme_minimal()
+  theme(legend.position = "none")
 ```
 
 </details>
@@ -489,7 +454,7 @@ pdf_base_figure / pdf_sex_figure / pdf_sex_district_figure +
 
 In this vignette, we demonstrate how the `epidist` package can be used to fit delay distribution models.
 These models can be stratified by covariates such as sex and district using fixed and random effects.
-Post-processing and prediction with fitted models is possible using the `tidybayes` package.
-We illustrate generating posterior expectations, the posteriors of linear predictors, as well as discrete and continuous representations of the delay distribution.
+Post-processing and prediction with fitted models is possible using the package's own draws functions and plot methods, and with the `tidybayes` package.
+We illustrate generating posterior expectations, the posteriors of the delay distribution parameters, as well as discrete and continuous representations of the delay distribution.
 
 ## References {-}
