@@ -372,6 +372,9 @@ See #606.
 - Declared `reformulas` in `Suggests` and skipped the `marginaleffects` integration test when it is absent.
 `insight` needs `reformulas` to read the formula of a `brmsfit`, but only suggests it, so the test failed on a clean library.
 See #601.
+- `delay_parameter_draws()` and `delay_summary_draws()` no longer pass on the `brms` warning about infinite values in the data when the only infinite values are the relative observation time `epidist` uses to mean no truncation.
+Infinite values a user supplies in any other column still warn.
+Closes #718.
 
 # epidist 0.4.1
 
