@@ -202,6 +202,11 @@ See #399.
 
 ## Package
 
+- Rendered vignette output is no longer copied into the built package tarball.
+`R CMD build` does not read `.gitignore`, so a locally rendered `vignettes/epidist.html` or a knitr cache directory was shipped with the package.
+`.Rbuildignore` now excludes `.html`, `.pdf`, `.tex` and `.md` files under `vignettes/`, along with `_cache` and `_files` directories.
+The `.Rmd` sources and the precomputed figures in `vignettes/figures/` are unaffected.
+
 - `cmdstanr` is no longer a suggested dependency.
 It is not on CRAN, so it put the stan-dev r-universe in `Additional_repositories` and in every workflow, and the dependency step then took `rstan` and `StanHeaders` from there at whatever versions each happened to be.
 The two must be built against each other and a mismatch fails every model compile, which is what broke the macOS and Windows checks when CRAN released `StanHeaders` 2.39.1.
@@ -324,6 +329,8 @@ See #688.
 - Added a `left-truncation` vignette showing how to use `delay_min`.
 See #596.
 - Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
+- Restructured the README install instructions to match `primarycensored`, with CRAN first, then `r-universe`, then `pak` for the development version and for historical releases.
+The text now lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is included by the README, so it can be reused elsewhere.
 - The `faq` and `left-truncation` vignettes now build their simulated dates with `simulate_dates()` and plot posterior draws with the package `plot()` method, in place of hand rolled equivalents.
 
 ## CI

@@ -18,5 +18,8 @@ exclusions: list(
     ),
     "vignettes/faq.Rmd" = list(
       library_call_linter = Inf
+    ),
+    "vignettes/chunks/_readme-install-epidist.Rmd" = list(
+      nonportable_path_linter = Inf
     )
   )
