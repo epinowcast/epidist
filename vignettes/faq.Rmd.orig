@@ -35,7 +35,6 @@ library(brms)
 library(dplyr)
 library(ggplot2)
 library(scales)
-library(tidyr)
 
 set.seed(1)
 
@@ -52,44 +51,25 @@ sample_size <- 200
 base_data <- simulate_gillespie(seed = 101)
 base_data$location <- rbinom(n = nrow(base_data), size = 1, prob = 0.5)
 
-# Create location 0 data
-location_0_data <- base_data |>
-  filter(location == 0) |>
-  simulate_secondary(
-    meanlog = meanlog_0,
-    sdlog = sdlog_0
-  ) |>
-  select(case, ptime, delay, stime, location)
+# Simulate a delay from each primary event, with different parameters in
+# each location
+obs <- bind_rows(
+  base_data |>
+    filter(location == 0) |>
+    simulate_secondary(meanlog = meanlog_0, sdlog = sdlog_0),
+  base_data |>
+    filter(location == 1) |>
+    simulate_secondary(meanlog = meanlog_1, sdlog = sdlog_1)
+)
 
-# Create location 1 data
-location_1_data <- base_data |>
-  filter(location == 1) |>
-  simulate_secondary(
-    meanlog = meanlog_1,
-    sdlog = sdlog_1
-  ) |>
-  select(case, ptime, delay, stime, location)
-
-# Combine datasets
-obs_cens_trunc_samp <- bind_rows(location_0_data, location_1_data) |>
-  mutate(
-    ptime_lwr = floor(.data$ptime),
-    ptime_upr = .data$ptime_lwr + 1,
-    stime_lwr = floor(.data$stime),
-    stime_upr = .data$stime_lwr + 1,
-    obs_time = obs_time
-  ) |>
-  filter(.data$stime_upr <= .data$obs_time) |>
+# Floor the event times to daily reporting windows, drop the cases not yet
+# observed at obs_time, and take a sample
+obs_cens_trunc_samp <- obs |>
+  simulate_dates(obs_time = obs_time) |>
+  filter(.data$sdate_upr <= .data$obs_date) |>
   slice_sample(n = sample_size, replace = FALSE)
 
-linelist_data <- as_epidist_linelist_data(
-  obs_cens_trunc_samp$ptime_lwr,
-  obs_cens_trunc_samp$ptime_upr,
-  obs_cens_trunc_samp$stime_lwr,
-  obs_cens_trunc_samp$stime_upr,
-  obs_time = obs_cens_trunc_samp$obs_time,
-  covariates = data.frame(location = obs_cens_trunc_samp$location)
-)
+linelist_data <- as_epidist_linelist_data(obs_cens_trunc_samp)
 data <- as_epidist_marginal_model(linelist_data)
 
 fit <- epidist(
@@ -270,19 +250,7 @@ pred <- fit_ppc |>
   add_delay_parameter_draws(fit_ppc) |>
   add_summaries()
 
-pred |>
-  as.data.frame() |>
-  pivot_longer(
-    cols = c("mu", "sigma", "mean", "sd"),
-    names_to = "parameter",
-    values_to = "value"
-  ) |>
-  filter(parameter %in% c("mean", "sd")) |>
-  ggplot(aes(x = value, y = after_stat(density))) +
-  geom_histogram() +
-  facet_wrap(. ~ parameter, scales = "free") +
-  labs(x = "", y = "Density") +
-  theme_minimal() +
+plot(pred, pars = c("mean", "sd")) +
   scale_x_log10(labels = comma)
 
 quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
@@ -333,7 +301,8 @@ As a short example, to generate 4000 predictions (equal to the number of draws) 
 ```{r}
 library(tidybayes)
 draws_pmf <- tibble::tibble(
-  relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
+  relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA,
+  delay_min = 0
 ) |>
   add_predicted_draws(fit)
 

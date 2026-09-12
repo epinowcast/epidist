@@ -60,7 +60,6 @@ Data should therefore be excluded on the observed delay rather than on the under
 library(epidist)
 library(ggplot2)
 library(dplyr)
-library(tidybayes)
 ```
 
 # Simulate left truncated data
@@ -89,25 +88,22 @@ Roughly this share of the delay distribution lies below the truncation point.
 plnorm(delay_min, true_meanlog, true_sdlog)
 ```
 
-We add daily censoring windows and then drop the pairs whose observed delay is below `delay_min`.
+`simulate_dates()` adds daily reporting windows and returns date.
+We then drop the pairs whose observed delay is below `delay_min`.
 
 ```{r truncate}
 obs_trunc <- obs |>
-  mutate(
-    ptime_lwr = floor(ptime),
-    ptime_upr = ptime_lwr + 1,
-    stime_lwr = floor(stime),
-    stime_upr = stime_lwr + 1
-  ) |>
-  filter(stime_lwr - ptime_lwr >= delay_min) |>
-  mutate(obs_time = max(stime_upr)) |>
+  simulate_dates() |>
+  filter(as.numeric(sdate_lwr - pdate_lwr) >= delay_min) |>
   slice_sample(n = 500)
+
+linelist <- as_epidist_linelist_data(obs_trunc)
 ```
 
 The observed delays are truncated below `delay_min`.
 
 ```{r hist, fig.cap="Observed delays after left truncation. The dashed line marks the minimum delay."}
-ggplot(obs_trunc, aes(x = stime_lwr - ptime_lwr)) +
+ggplot(linelist, aes(x = stime_lwr - ptime_lwr)) +
   geom_histogram(
     aes(y = after_stat(density)),
     binwidth = 1, fill = "#56B4E9", alpha = 0.7
@@ -122,14 +118,6 @@ ggplot(obs_trunc, aes(x = stime_lwr - ptime_lwr)) +
 # Fit models with and without the adjustment
 
 ```{r prepare}
-linelist <- as_epidist_linelist_data(
-  obs_trunc$ptime_lwr,
-  ptime_upr = obs_trunc$ptime_upr,
-  stime_lwr = obs_trunc$stime_lwr,
-  stime_upr = obs_trunc$stime_upr,
-  obs_time = obs_trunc$obs_time
-)
-
 marginal_no_trunc <- as_epidist_marginal_model(linelist)
 marginal_trunc <- as_epidist_marginal_model(linelist, delay_min = delay_min)
 ```
@@ -194,44 +182,19 @@ The adjusted model recovers the simulation values.
 
 # Compare the estimated delay distributions
 
-We predict from both models with `delay_min = 0` so that the predictions describe the underlying delay distribution rather than the truncated one.
+Plotting the same draws with `type = "delay"` draws the delay distribution each model implies, as the posterior median density with a ribbon between the 5% and 95% quantiles.
 
-```{r predict}
-pred_data <- data.frame(
-  relative_obs_time = Inf, pwindow = 0, swindow = 0,
-  delay_upr = NA, delay_min = 0
-)
-
-draws_pred <- bind_rows(
-  "No adjustment" = add_predicted_draws(
-    pred_data, fit_no_trunc,
-    ndraws = 1000
-  ),
-  "With delay_min" = add_predicted_draws(
-    pred_data, fit_trunc,
-    ndraws = 1000
-  ),
-  .id = "model"
-)
-```
-
-```{r pdf-plot, fig.cap="Predicted delay distributions against the true lognormal density (black line)."}
-ggplot(draws_pred, aes(x = .prediction)) +
-  geom_density(aes(col = model), linewidth = 0.8) +
+```{r pdf-plot, fig.cap="Estimated delay distributions against the true lognormal density (black line)."}
+plot(param_draws, type = "delay", by = "model") +
   geom_function(
     fun = dlnorm,
     args = list(meanlog = true_meanlog, sdlog = true_sdlog),
     linewidth = 1
-  ) +
-  scale_colour_manual(values = c(
-    "No adjustment" = "#56B4E9",
-    "With delay_min" = "#E69F00"
-  )) +
-  coord_cartesian(xlim = c(0, 20)) +
-  labs(x = "Delay (days)", y = "Density", col = "") +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+  )
 ```
+
+These are the underlying delay distributions rather than the truncated ones, because the distributional parameters do not describe the observation process.
+Predictions from `tidybayes::add_predicted_draws()` do the same only when `newdata` sets `delay_min` to 0.
 
 # Summary
 
