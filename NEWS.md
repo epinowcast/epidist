@@ -335,6 +335,10 @@ The text now lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is incl
 - Reworked the getting started vignette to use the package's own simulation and plotting tools.
 It now simulates the censored dates with `simulate_dates()`, converts them with `as_epidist_linelist_data()`, draws the censoring and truncation figures with `plot_events()`, and compares the fitted and true delay distributions with the `plot()` method for delay draws.
 The data is simulated, then converted, then visualised, rather than being converted part way through the simulation.
+- The getting started vignette is no longer precomputed.
+It fits its two models during `R CMD build` and `R CMD check`, so its output is generated from the version being installed rather than committed alongside it.
+The fits take about 90 seconds, almost all of which is compiling the two Stan models, and they now use two chains rather than four.
+See #736.
 - The `faq` and `left-truncation` vignettes now build their simulated dates with `simulate_dates()` and plot posterior draws with the package `plot()` method, in place of hand rolled equivalents.
 
 ## CI

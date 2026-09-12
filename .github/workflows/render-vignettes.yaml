@@ -1,10 +1,12 @@
 # Rebuilds the precomputed vignettes.
 #
-# Every vignette that fits a model is knitted here from a `.Rmd.orig` source
-# into a committed `.Rmd` holding static output. That keeps the fits, and
-# the Stan toolchain they need, off the package build and check path.
+# Each vignette with a `.Rmd.orig` source is knitted here into a committed
+# `.Rmd` holding static output. That keeps its fits, and the Stan toolchain
+# they need, off the package build and check path.
 # `approx-inference` needs cmdstanr for the algorithms it demonstrates; the
 # rest use the default rstan backend.
+# The getting started vignette is deliberately not precomputed. It is cheap
+# enough to fit during check and we want its output to be live on CRAN.
 on:
   push:
     paths:
