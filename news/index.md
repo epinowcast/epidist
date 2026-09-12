@@ -791,6 +791,16 @@
 
 ### Bug fixes
 
+- The `epidist_delay_draws` class, and the family and stratum variables
+  it records, now survive
+  [`dplyr::bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html),
+  [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html)
+  and the other common verbs, so
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) still
+  dispatches without calling
+  [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
+  last. Closes
+  [\#721](https://github.com/epinowcast/epidist/issues/721).
 - [`.delay_family()`](https://epidist.epinowcast.org/reference/dot-delay_family.md)
   now strips the `meta_` prefix alongside `latent_` and `marginal_`.
   Without it

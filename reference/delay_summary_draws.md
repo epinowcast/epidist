@@ -90,6 +90,7 @@ to build `newdata`.
 Other postprocess:
 [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md),
 [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
+[`epidist_delay_draws`](https://epidist.epinowcast.org/reference/epidist_delay_draws.md),
 [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)
 
 ## Examples

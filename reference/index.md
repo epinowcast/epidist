@@ -445,11 +445,25 @@ Functions for postprocessing model output
 
 - [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
   : Add natural scale summaries of the delay distribution
+
 - [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
   [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
   : Posterior draws of the delay distribution parameters
+
 - [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md)
   : Posterior draws of the delay distribution, summarised
+
+- [`` `[`( ``*`<epidist_delay_draws>`*`)`](https://epidist.epinowcast.org/reference/epidist_delay_draws.md)
+  [`` `names<-`( ``*`<epidist_delay_draws>`*`)`](https://epidist.epinowcast.org/reference/epidist_delay_draws.md)
+  [`dplyr_reconstruct(`*`<epidist_delay_draws>`*`)`](https://epidist.epinowcast.org/reference/epidist_delay_draws.md)
+  [`dplyr_row_slice(`*`<epidist_delay_draws>`*`)`](https://epidist.epinowcast.org/reference/epidist_delay_draws.md)
+  [`dplyr_col_modify(`*`<epidist_delay_draws>`*`)`](https://epidist.epinowcast.org/reference/epidist_delay_draws.md)
+  [`group_by(`*`<epidist_delay_draws>`*`)`](https://epidist.epinowcast.org/reference/epidist_delay_draws.md)
+  [`ungroup(`*`<epidist_delay_draws>`*`)`](https://epidist.epinowcast.org/reference/epidist_delay_draws.md)
+  :
+
+  Keep the `epidist_delay_draws` class through `dplyr` verbs
+
 - [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)
   : Unique combinations of the predictors in a model
 
