@@ -88,7 +88,7 @@ Roughly this share of the delay distribution lies below the truncation point.
 plnorm(delay_min, true_meanlog, true_sdlog)
 ```
 
-`simulate_dates()` adds daily reporting windows and returns the dates an analyst would receive.
+`simulate_dates()` adds daily reporting windows and returns date.
 We then drop the pairs whose observed delay is below `delay_min`.
 
 ```{r truncate}
