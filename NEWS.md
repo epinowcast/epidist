@@ -385,6 +385,9 @@ See #601.
 - `delay_parameter_draws()` and `delay_summary_draws()` no longer pass on the `brms` warning about infinite values in the data when the only infinite values are the relative observation time `epidist` uses to mean no truncation.
 Infinite values a user supplies in any other column still warn.
 Closes #718.
+- The generic `epidist_gen_log_lik()` method now normalises over the left truncation point when the relative observation time is infinite.
+It reassembled the censored density itself and dropped that normaliser, so it disagreed with the analytical method for a model with a `delay_min` and no right truncation.
+Closes #646.
 
 # epidist 0.4.1
 

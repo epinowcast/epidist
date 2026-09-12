@@ -362,6 +362,25 @@ test_that("the generic log likelihood matches dpcens() under truncation", {
   expect_false(isTRUE(all.equal(generic(i = 1, prep), expected)))
 })
 
+test_that("the generic log likelihood left truncates at an infinite D", {
+  # An infinite relative observation time still leaves the density to
+  # normalise over [delay_min, Inf). Reassembling the density locally dropped
+  # that normaliser and disagreed with the analytical method. See #646.
+  prep <- .gen_log_lik_prep(ndraws = 2)
+  prep$data$vreal1 <- Inf
+
+  generic <- .generic_gen_log_lik(.get_brms_fn("log_lik", lognormal()))
+  analytical <- epidist_gen_log_lik(lognormal())
+
+  expect_equal(generic(i = 1, prep), analytical(i = 1, prep), tolerance = 1e-8)
+
+  # The left truncation point must still matter, otherwise this test would
+  # pass with the normaliser dropped from both methods.
+  unnormalised <- generic(i = 1, prep)
+  prep$data$vreal5 <- 0
+  expect_false(isTRUE(all.equal(generic(i = 1, prep), unnormalised)))
+})
+
 test_that("the generic log likelihood rejects a delay beyond the observation time", { # nolint: line_length_linter.
   # `dpcens()` clips the upper end of the interval at D rather than erroring,
   # so it answers a different question from the one asked and the guard has
