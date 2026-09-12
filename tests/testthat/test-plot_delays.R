@@ -43,8 +43,8 @@ test_that("plot_delays strata by a column of the data", {
   # The column is kept so that the plot can be faceted by it
   expect_s3_class(p$data$sex, "factor")
   # Proportions are within each stratum
-  by_stratum <- tapply(p$data$p, p$data$.stratum, sum)
-  expect_equal(unname(by_stratum), c(1, 1), tolerance = 1e-12)
+  by_stratum <- as.vector(tapply(p$data$p, p$data$.stratum, sum))
+  expect_equal(by_stratum, c(1, 1), tolerance = 1e-12)
 })
 
 test_that("plot_delays compares a named list of datasets", {
@@ -54,8 +54,8 @@ test_that("plot_delays compares a named list of datasets", {
   expect_no_error(ggplot2::ggplot_build(p))
   expect_identical(levels(p$data$.stratum), c("All", "Truncated"))
   expect_identical(sum(p$data$n), as.double(nrow(sim_obs) + nrow(truncated)))
-  by_stratum <- tapply(p$data$p, p$data$.stratum, sum)
-  expect_equal(unname(by_stratum), c(1, 1), tolerance = 1e-12)
+  by_stratum <- as.vector(tapply(p$data$p, p$data$.stratum, sum))
+  expect_equal(by_stratum, c(1, 1), tolerance = 1e-12)
   expect_null(p$labels$fill)
 })
 

@@ -110,6 +110,7 @@ plot(draws, type = "delay", ndraws = 50)
 draws, and \code{\link[=plot_events]{plot_events()}} to plot the data.
 
 Other plot: 
+\code{\link{plot_delays}()},
 \code{\link{plot_events}()}
 }
 \concept{plot}
