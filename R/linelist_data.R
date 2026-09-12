@@ -261,14 +261,12 @@ new_epidist_linelist_data <- function(data) {
 #'
 #' @inheritParams as_epidist_linelist_data
 #'
-#' @param ... Additional arguments
-#'
 #' @family linelist_data
 #' @returns A logical, `TRUE` if `data` inherits from `epidist_linelist_data`
 #'  and `FALSE` otherwise.
 #'
 #' @export
-is_epidist_linelist_data <- function(data, ...) {
+is_epidist_linelist_data <- function(data) {
   return(inherits(data, "epidist_linelist_data"))
 }
 
