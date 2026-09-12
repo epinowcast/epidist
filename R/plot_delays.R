@@ -134,7 +134,8 @@ plot_delays <- function(
 .delay_strata <- function(data, by = NULL) {
   if (is_epidist_linelist_data(data)) {
     datasets <- list(data)
-    names(datasets) <- ""
+    # The label `.draw_strata()` gives a single stratum
+    names(datasets) <- "all"
   } else if (is.list(data) && !is.data.frame(data)) {
     datasets <- data
     if (

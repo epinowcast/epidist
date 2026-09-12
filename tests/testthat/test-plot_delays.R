@@ -6,6 +6,7 @@ test_that("plot_delays returns a ggplot of the binned observed delays", {
   expect_length(p$layers, 1)
   expect_s3_class(p$layers[[1]]$geom, "GeomCol")
   expect_named(p$data, c(".stratum", "delay", "n", "p", "density"))
+  expect_identical(levels(p$data$.stratum), "all")
   delays <- sim_obs$stime_lwr - sim_obs$ptime_lwr
   expect_identical(nrow(p$data), length(unique(delays)))
   expect_identical(sum(p$data$n), as.double(nrow(sim_obs)))
