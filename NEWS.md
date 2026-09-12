@@ -351,6 +351,8 @@ See #578.
 
 ## Bug fixes
 
+- The `epidist_delay_draws` class, and the family and stratum variables it records, now survive `dplyr::bind_rows()`, `dplyr::mutate()` and the other common verbs, so `plot()` still dispatches without calling `add_summaries()` last.
+Closes #721.
 - `.delay_family()` now strips the `meta_` prefix alongside `latent_` and `marginal_`.
 Without it `add_summaries()` could not find the delay distribution of a meta model fit, because the family is named `meta_gamma` rather than `gamma`.
 See #620.

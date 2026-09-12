@@ -432,7 +432,11 @@ test_that("add_summaries takes the family from a fit", {
     epidist_strata() |>
     add_delay_parameter_draws(fit) |>
     dplyr::ungroup()
-  expect_error(add_summaries(draws), "Could not work out")
+  # The class, and the family it records, survive `ungroup()`, so the family
+  # has to be stripped to check that it can be supplied instead
+  bare <- draws
+  attr(bare, "epidist_family") <- NULL
+  expect_error(add_summaries(bare), "Could not work out")
   expect_true(all(add_summaries(draws, family = fit)$mean > 0))
   expect_true(all(add_summaries(draws, family = fit$family)$mean > 0))
 })
