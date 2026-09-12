@@ -350,6 +350,8 @@ See #688.
 The tagged v0.4.3 lockfile pins `digest` 0.6.36, which calls `Calloc` and `Free`.
 Those were removed from the R API in R 4.5, so the hook environment failed to build and the `pre-commit` job failed on every pull request.
 See #578.
+- `check-cmdstan` now runs on a change under `R/**` as well as to a `.stan` file, and checks the meta model on the path where a summary row leaves its growth rate to be estimated, because the Stan programs are generated from R and that path makes the rate a parameter rather than data.
+Closes #730.
 
 ## Bug fixes
 
