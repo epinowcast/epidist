@@ -77,6 +77,7 @@ to plot the draws.
 Other postprocess: 
 \code{\link{add_summaries}()},
 \code{\link{delay_summary_draws}()},
+\code{\link{epidist_delay_draws}},
 \code{\link{epidist_strata}()}
 }
 \concept{postprocess}

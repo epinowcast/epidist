@@ -17,5 +17,12 @@
 ^\.lintr$
 ^cran-comments\.md$
 ^vignettes/.*\.Rmd\.orig$
+^vignettes/.*\.html$
+^vignettes/.*\.pdf$
+^vignettes/.*\.tex$
+^vignettes/.*\.md$
+^vignettes/.*_cache(/|$)
+^vignettes/.*_files(/|$)
 ^design$
 ^codemeta\.json$
+^vignettes/chunks$
