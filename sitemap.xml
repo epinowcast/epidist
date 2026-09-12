@@ -144,6 +144,8 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-floor_mult.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-get_brms_fn.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-has_non_uniform_window_prior.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-inf_is_obs_time_only.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-infinite_data_warning.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-inform_data_summarised.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-internal_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-is_manual_prior.html</loc></url>
@@ -263,6 +265,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_trunc_moments.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_uniform_pcens_density.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-meta_window_slot.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-muffle_infinite_data_warning.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-multivariate_column.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-multivariate_eigen_floor.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-multivariate_from_matrix.html</loc></url>
@@ -272,6 +275,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-new_delay_draws.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-new_epidist_data.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-new_meta_model_from_parts.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-obs_time_cols.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-pcd_family_dist_name.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-pdist.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-pick_prior_col.html</loc></url>

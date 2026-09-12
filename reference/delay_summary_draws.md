@@ -128,7 +128,6 @@ fit <- sierra_leone_ebola_data |>
 #> Start sampling
 
 delay_summary_draws(fit, probs = c(0.05, 0.95))
-#> Warning: Found infinite values in the data, which may cause issues for Stan.
 #> # A tibble: 2,000 × 17
 #> # Groups:   delay_lwr, relative_obs_time, pwindow, swindow, delay_upr,
 #> #   delay_min, n, .row [1]
