@@ -329,11 +329,13 @@ See #688.
 - Added a `left-truncation` vignette showing how to use `delay_min`.
 See #596.
 - Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
+- The `primary-events` vignette now plots the growth rate of each location with the package draws plot method, and gives each location its own simulation seed so the locations no longer share random numbers. Closes #724.
 - Restructured the README install instructions to match `primarycensored`, with CRAN first, then `r-universe`, then `pak` for the development version and for historical releases.
 The text now lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is included by the README, so it can be reused elsewhere.
 - Reworked the getting started vignette to use the package's own simulation and plotting tools.
 It now simulates the censored dates with `simulate_dates()`, converts them with `as_epidist_linelist_data()`, draws the censoring and truncation figures with `plot_events()`, and compares the fitted and true delay distributions with the `plot()` method for delay draws.
 The data is simulated, then converted, then visualised, rather than being converted part way through the simulation.
+- The `faq` and `left-truncation` vignettes now build their simulated dates with `simulate_dates()` and plot posterior draws with the package `plot()` method, in place of hand rolled equivalents.
 
 ## CI
 
@@ -354,6 +356,8 @@ See #578.
 
 ## Bug fixes
 
+- The `epidist_delay_draws` class, and the family and stratum variables it records, now survive `dplyr::bind_rows()`, `dplyr::mutate()` and the other common verbs, so `plot()` still dispatches without calling `add_summaries()` last.
+Closes #721.
 - `.delay_family()` now strips the `meta_` prefix alongside `latent_` and `marginal_`.
 Without it `add_summaries()` could not find the delay distribution of a meta model fit, because the family is named `meta_gamma` rather than `gamma`.
 See #620.
@@ -375,6 +379,9 @@ See #606.
 - Declared `reformulas` in `Suggests` and skipped the `marginaleffects` integration test when it is absent.
 `insight` needs `reformulas` to read the formula of a `brmsfit`, but only suggests it, so the test failed on a clean library.
 See #601.
+- `delay_parameter_draws()` and `delay_summary_draws()` no longer pass on the `brms` warning about infinite values in the data when the only infinite values are the relative observation time `epidist` uses to mean no truncation.
+Infinite values a user supplies in any other column still warn.
+Closes #718.
 
 # epidist 0.4.1
 
