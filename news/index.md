@@ -708,6 +708,18 @@
   which is the generic an extension implements and which remains
   exported. See [\#79](https://github.com/epinowcast/epidist/issues/79).
 
+- The `is_epidist_*()` predicates now share one signature,
+  `is_epidist_<class>(data)`.
+  [`is_epidist_data()`](https://epidist.epinowcast.org/reference/is_epidist_data.md),
+  [`is_epidist_linelist_data()`](https://epidist.epinowcast.org/reference/is_epidist_linelist_data.md),
+  [`is_epidist_aggregate_data()`](https://epidist.epinowcast.org/reference/is_epidist_aggregate_data.md)
+  and
+  [`is_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/is_epidist_estimates_data.md)
+  no longer take a `...` that nothing used, and
+  [`is_epidist_multivariate()`](https://epidist.epinowcast.org/reference/is_epidist_multivariate.md)
+  names its argument `data` rather than `x`. Closes
+  [\#706](https://github.com/epinowcast/epidist/issues/706).
+
 ### Documentation
 
 - Added an `extending-epidist` vignette covering why you might build

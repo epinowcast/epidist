@@ -5,12 +5,12 @@ Check if an object has the `epidist_multivariate` class
 ## Usage
 
 ``` r
-is_epidist_multivariate(x)
+is_epidist_multivariate(data)
 ```
 
 ## Arguments
 
-- x:
+- data:
 
   An object.
 

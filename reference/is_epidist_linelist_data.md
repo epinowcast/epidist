@@ -5,7 +5,7 @@ Check if data has the `epidist_linelist_data` class
 ## Usage
 
 ``` r
-is_epidist_linelist_data(data, ...)
+is_epidist_linelist_data(data)
 ```
 
 ## Arguments
@@ -13,10 +13,6 @@ is_epidist_linelist_data(data, ...)
 - data:
 
   The data to convert
-
-- ...:
-
-  Additional arguments
 
 ## Value
 

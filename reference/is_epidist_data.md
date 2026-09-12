@@ -8,7 +8,7 @@ for the methods it provides.
 ## Usage
 
 ``` r
-is_epidist_data(data, ...)
+is_epidist_data(data)
 ```
 
 ## Arguments
@@ -16,10 +16,6 @@ is_epidist_data(data, ...)
 - data:
 
   An object.
-
-- ...:
-
-  Additional arguments
 
 ## Value
 
