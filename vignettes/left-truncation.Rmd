@@ -52,7 +52,6 @@ Data should therefore be excluded on the observed delay rather than on the under
 library(epidist)
 library(ggplot2)
 library(dplyr)
-library(tidybayes)
 ```
 
 # Simulate left truncated data
@@ -84,27 +83,24 @@ plnorm(delay_min, true_meanlog, true_sdlog)
 #> [1] 0.3506501
 ```
 
-We add daily censoring windows and then drop the pairs whose observed delay is below `delay_min`.
+`simulate_dates()` adds daily reporting windows and returns date.
+We then drop the pairs whose observed delay is below `delay_min`.
 
 
 ``` r
 obs_trunc <- obs |>
-  mutate(
-    ptime_lwr = floor(ptime),
-    ptime_upr = ptime_lwr + 1,
-    stime_lwr = floor(stime),
-    stime_upr = stime_lwr + 1
-  ) |>
-  filter(stime_lwr - ptime_lwr >= delay_min) |>
-  mutate(obs_time = max(stime_upr)) |>
+  simulate_dates() |>
+  filter(as.numeric(sdate_lwr - pdate_lwr) >= delay_min) |>
   slice_sample(n = 500)
+
+linelist <- as_epidist_linelist_data(obs_trunc)
 ```
 
 The observed delays are truncated below `delay_min`.
 
 
 ``` r
-ggplot(obs_trunc, aes(x = stime_lwr - ptime_lwr)) +
+ggplot(linelist, aes(x = stime_lwr - ptime_lwr)) +
   geom_histogram(
     aes(y = after_stat(density)),
     binwidth = 1, fill = "#56B4E9", alpha = 0.7
@@ -125,14 +121,6 @@ ggplot(obs_trunc, aes(x = stime_lwr - ptime_lwr)) +
 
 
 ``` r
-linelist <- as_epidist_linelist_data(
-  obs_trunc$ptime_lwr,
-  ptime_upr = obs_trunc$ptime_upr,
-  stime_lwr = obs_trunc$stime_lwr,
-  stime_upr = obs_trunc$stime_upr,
-  obs_time = obs_trunc$obs_time
-)
-
 marginal_no_trunc <- as_epidist_marginal_model(linelist)
 marginal_trunc <- as_epidist_marginal_model(linelist, delay_min = delay_min)
 ```
@@ -156,22 +144,24 @@ identical(
 
 ``` r
 marginal_trunc
-#> # A tibble: 500 × 13
-#>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time pwindow swindow
-#>        <dbl>     <dbl>     <dbl>     <dbl>    <dbl>   <dbl>   <dbl>
-#>  1        33        34        38        39      116       1       1
-#>  2        40        41        53        54      116       1       1
-#>  3        13        14        17        18      116       1       1
-#>  4        20        21        28        29      116       1       1
-#>  5        18        19        22        23      116       1       1
-#>  6        26        27        30        31      116       1       1
-#>  7        22        23        26        27      116       1       1
-#>  8        32        33        35        36      116       1       1
-#>  9        11        12        15        16      116       1       1
-#> 10        29        30        31        32      116       1       1
+#> # A tibble: 500 × 19
+#>    ptime_lwr ptime_upr stime_lwr stime_upr obs_time  case pdate_lwr  pdate_upr
+#>        <dbl>     <dbl>     <dbl>     <dbl>    <dbl> <int> <date>     <date>
+#>  1        33        34        38        39       84  7022 2024-02-03 2024-02-04
+#>  2        40        41        53        54       84  8003 2024-02-10 2024-02-11
+#>  3        13        14        17        18       84  1000 2024-01-14 2024-01-15
+#>  4        20        21        28        29       84  2739 2024-01-21 2024-01-22
+#>  5        18        19        22        23       84  2301 2024-01-19 2024-01-20
+#>  6        26        27        30        31       84  5070 2024-01-27 2024-01-28
+#>  7        22        23        26        27       84  3556 2024-01-23 2024-01-24
+#>  8        32        33        35        36       84  6810 2024-02-02 2024-02-03
+#>  9        11        12        15        16       84   720 2024-01-12 2024-01-13
+#> 10        29        30        31        32       84  6148 2024-01-30 2024-01-31
 #> # ℹ 490 more rows
-#> # ℹ 6 more variables: relative_obs_time <dbl>, orig_relative_obs_time <dbl>,
-#> #   delay_lwr <dbl>, delay_upr <dbl>, n <dbl>, delay_min <dbl>
+#> # ℹ 11 more variables: sdate_lwr <date>, sdate_upr <date>, obs_date <date>,
+#> #   pwindow <dbl>, swindow <dbl>, relative_obs_time <dbl>,
+#> #   orig_relative_obs_time <dbl>, delay_lwr <dbl>, delay_upr <dbl>, n <dbl>,
+#> #   delay_min <dbl>
 ```
 
 
@@ -224,51 +214,25 @@ The adjusted model recovers the simulation values.
 
 # Compare the estimated delay distributions
 
-We predict from both models with `delay_min = 0` so that the predictions describe the underlying delay distribution rather than the truncated one.
+Plotting the same draws with `type = "delay"` draws the delay distribution each model implies, as the posterior median density with a ribbon between the 5% and 95% quantiles.
 
 
 ``` r
-pred_data <- data.frame(
-  relative_obs_time = Inf, pwindow = 0, swindow = 0,
-  delay_upr = NA, delay_min = 0
-)
-
-draws_pred <- bind_rows(
-  "No adjustment" = add_predicted_draws(
-    pred_data, fit_no_trunc,
-    ndraws = 1000
-  ),
-  "With delay_min" = add_predicted_draws(
-    pred_data, fit_trunc,
-    ndraws = 1000
-  ),
-  .id = "model"
-)
-```
-
-
-``` r
-ggplot(draws_pred, aes(x = .prediction)) +
-  geom_density(aes(col = model), linewidth = 0.8) +
+plot(param_draws, type = "delay", by = "model") +
   geom_function(
     fun = dlnorm,
     args = list(meanlog = true_meanlog, sdlog = true_sdlog),
     linewidth = 1
-  ) +
-  scale_colour_manual(values = c(
-    "No adjustment" = "#56B4E9",
-    "With delay_min" = "#E69F00"
-  )) +
-  coord_cartesian(xlim = c(0, 20)) +
-  labs(x = "Delay (days)", y = "Density", col = "") +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+  )
 ```
 
 <div class="figure">
-<img src="figures/left-truncation-pdf-plot-1.png" alt="Predicted delay distributions against the true lognormal density (black line)."  />
-<p class="caption">(\#fig:pdf-plot)Predicted delay distributions against the true lognormal density (black line).</p>
+<img src="figures/left-truncation-pdf-plot-1.png" alt="Estimated delay distributions against the true lognormal density (black line)."  />
+<p class="caption">(\#fig:pdf-plot)Estimated delay distributions against the true lognormal density (black line).</p>
 </div>
+
+These are the underlying delay distributions rather than the truncated ones, because the distributional parameters do not describe the observation process.
+Predictions from `tidybayes::add_predicted_draws()` do the same only when `newdata` sets `delay_min` to 0.
 
 # Summary
 

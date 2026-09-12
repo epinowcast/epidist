@@ -302,6 +302,9 @@ See #79.
 - Made `epidist_transform_data()` internal.
 It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
 See #79.
+- The `is_epidist_*()` predicates now share one signature, `is_epidist_<class>(data)`.
+`is_epidist_data()`, `is_epidist_linelist_data()`, `is_epidist_aggregate_data()` and `is_epidist_estimates_data()` no longer take a `...` that nothing used, and `is_epidist_multivariate()` names its argument `data` rather than `x`.
+Closes #706.
 - The generic `epidist_gen_log_lik()` method calls `primarycensored::dpcens()` again, with validation disabled, rather than reassembling the censored density from `primarycensored::pcens_cdf()`.
 This drops the copies of the censored probability mass function and of the truncation normalisation that had to stay in step with `primarycensored`.
 Validation is disabled in the analytical method too, so the log likelihood no longer advances the RNG stream once per draw.
