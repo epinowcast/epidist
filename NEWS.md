@@ -303,7 +303,7 @@ See #79.
 It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
 See #79.
 - The generic `epidist_gen_log_lik()` method calls `primarycensored::dpcens()` again, with validation disabled, rather than reassembling the censored density from `primarycensored::pcens_cdf()`.
-This drops the copies of the censored pmf and the truncation normalisation that had to stay in step with `primarycensored`.
+This drops the copies of the censored probability mass function and of the truncation normalisation that had to stay in step with `primarycensored`.
 Validation is disabled in the analytical method too, so the log likelihood no longer advances the RNG stream once per draw.
 The log likelihoods are unchanged and the generic method stays linear in the number of draws, but it is around nine times slower per draw, because `dpcens()` rebuilds its setup and takes three passes over the delay distribution on every call where the previous code built the object once and took one.
 Needs `primarycensored` 1.5.2.
