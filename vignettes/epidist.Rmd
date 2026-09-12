@@ -286,8 +286,8 @@ plot_events(linelist_data, obs_time = max(linelist_data$obs_date))
 
 ```{r}
 plot_data <- bind_rows(
-  "Censored retrospective data" = linelist_all,
-  "Censored, truncated,\nsampled data" = linelist_data,
+  "Censored retrospective data" = as.data.frame(linelist_all),
+  "Censored, truncated,\nsampled data" = as.data.frame(linelist_data),
   .id = "type"
 ) |>
   mutate(delay = as.numeric(.data$sdate_lwr - .data$pdate_lwr)) |>
