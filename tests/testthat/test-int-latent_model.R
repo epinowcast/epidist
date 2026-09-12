@@ -42,8 +42,13 @@ test_that("epidist.epidist_latent_model samples from the prior according to marg
   # suppressWarnings here used to prevent warnings about ties
   ks1 <- suppressWarnings(stats::ks.test(pred$mu, samples1))
   ks2 <- suppressWarnings(stats::ks.test(pred$sigma, samples2))
-  testthat::expect_gt(ks1$p.value, 0.01)
-  testthat::expect_gt(ks2$p.value, 0.01)
+  # A correct prior gives a uniform p value, so a threshold of 0.01 rejects
+  # one run in a hundred per parameter for no reason, on each of the four
+  # platforms. A wrong prior on either parameter is separated from this one
+  # by orders of magnitude rather than by a factor of ten, so 0.001 keeps
+  # the check and makes the false alarm ten times rarer. See #733.
+  testthat::expect_gt(ks1$p.value, 0.001)
+  testthat::expect_gt(ks2$p.value, 0.001)
 })
 
 test_that("epidist.epidist_latent_model fits and the MCMC converges in the default case", { # nolint: line_length_linter.

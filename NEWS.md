@@ -303,6 +303,11 @@ See #79.
 It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
 See #79.
 
+- The simulation and recovery checks of the meta model tests now require the credible interval to bracket the simulated parameter with a margin of one posterior standard deviation, through a new `expect_recovers()` test helper.
+The interval narrows with the size of the simulated studies while the bias of the summaries they report does not, so the 2.5% quantile of `sigma` sat 2.4e-5 above a true 0.5 and the comparison was decided by the platform's last digits, failing the macOS check on every pull request.
+The marginal Kolmogorov-Smirnov checks of the latent model prior moved from a p value threshold of 0.01 to 0.001 for the same reason.
+Closes #733.
+
 ## Documentation
 
 - Added an `extending-epidist` vignette covering why you might build your own model type, the six generics a model type implements, a worked example, and a table of the packages that already extend `epidist`.

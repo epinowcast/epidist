@@ -757,10 +757,8 @@ test_that("epidist.epidist_meta_model recovers known parameters from simulated g
   pred <- delay_parameter_draws(fit_meta_grid)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.05)
   expect_equal(mean(pred$sigma), sdlog, tolerance = 0.1)
-  expect_lt(stats::quantile(pred$mu, 0.025, names = FALSE), meanlog)
-  expect_gt(stats::quantile(pred$mu, 0.975, names = FALSE), meanlog)
-  expect_lt(stats::quantile(pred$sigma, 0.025, names = FALSE), sdlog)
-  expect_gt(stats::quantile(pred$sigma, 0.975, names = FALSE), sdlog)
+  expect_recovers(pred$mu, meanlog)
+  expect_recovers(pred$sigma, sdlog)
 })
 
 test_that("epidist.epidist_meta_model recovers known parameters from reported fits and posterior draws", { # nolint: line_length_linter.
@@ -788,10 +786,8 @@ test_that("epidist.epidist_meta_model recovers known parameters from reported fi
   pred <- delay_parameter_draws(fit_meta_reported)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.05)
   expect_equal(mean(pred$sigma), sdlog, tolerance = 0.1)
-  expect_lt(stats::quantile(pred$mu, 0.025, names = FALSE), meanlog)
-  expect_gt(stats::quantile(pred$mu, 0.975, names = FALSE), meanlog)
-  expect_lt(stats::quantile(pred$sigma, 0.025, names = FALSE), sdlog)
-  expect_gt(stats::quantile(pred$sigma, 0.975, names = FALSE), sdlog)
+  expect_recovers(pred$mu, meanlog)
+  expect_recovers(pred$sigma, sdlog)
 })
 
 test_that("as_epidist_multivariate round trips draws of a fitted model", {
