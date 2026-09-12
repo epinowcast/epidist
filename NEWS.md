@@ -305,6 +305,12 @@ See #79.
 - The `is_epidist_*()` predicates now share one signature, `is_epidist_<class>(data)`.
 `is_epidist_data()`, `is_epidist_linelist_data()`, `is_epidist_aggregate_data()` and `is_epidist_estimates_data()` no longer take a `...` that nothing used, and `is_epidist_multivariate()` names its argument `data` rather than `x`.
 Closes #706.
+- The generic `epidist_gen_log_lik()` method calls `primarycensored::dpcens()` again, with validation disabled, rather than reassembling the censored density from `primarycensored::pcens_cdf()`.
+This drops the copies of the censored probability mass function and of the truncation normalisation that had to stay in step with `primarycensored`.
+Validation is disabled in the analytical method too, so the log likelihood no longer advances the RNG stream once per draw.
+The log likelihoods are unchanged and the generic method stays linear in the number of draws, but it is around nine times slower per draw, because `dpcens()` rebuilds its setup and takes three passes over the delay distribution on every call where the previous code built the object once and took one.
+Needs `primarycensored` 1.5.2.
+Closes #646.
 
 ## Documentation
 
@@ -382,6 +388,9 @@ See #601.
 - `delay_parameter_draws()` and `delay_summary_draws()` no longer pass on the `brms` warning about infinite values in the data when the only infinite values are the relative observation time `epidist` uses to mean no truncation.
 Infinite values a user supplies in any other column still warn.
 Closes #718.
+- The generic `epidist_gen_log_lik()` method now normalises over the left truncation point when the relative observation time is infinite.
+It reassembled the censored density itself and dropped that normaliser, so it disagreed with the analytical method for a model with a `delay_min` and no right truncation.
+Closes #646.
 
 # epidist 0.4.1
 

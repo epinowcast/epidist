@@ -291,11 +291,100 @@ test_that( # nolint: line_length_linter.
   }
 )
 
+.gen_log_lik_prep <- function(ndraws = 3) {
+  return(structure(
+    list(
+      data = list(
+        Y = 5, vreal1 = 12, vreal2 = 1, vreal3 = 1, vreal4 = 6, vreal5 = 2
+      ),
+      dpars = list(
+        mu = matrix(1.5, nrow = ndraws, ncol = 1),
+        sigma = matrix(0.5, nrow = ndraws, ncol = 1)
+      ),
+      ndraws = ndraws,
+      nobs = 1,
+      family = list()
+    ),
+    class = "brmsprep"
+  ))
+}
+
+test_that("the log likelihood leaves the RNG stream untouched", {
+  # `dpcens()` validates `pdist` at four points drawn with `runif()`, so
+  # calling it with validation on advances the RNG once per draw. Downstream
+  # draws would then depend on how many times the log likelihood had run.
+  # See epinowcast/primarycensored#330.
+  skip_if_not_installed("primarycensored", "1.5.2")
+
+  prep <- .gen_log_lik_prep()
+
+  set.seed(42)
+  expected <- stats::runif(1)
+
+  set.seed(42)
+  invisible(epidist_gen_log_lik(lognormal())(i = 1, prep))
+  expect_identical(stats::runif(1), expected)
+
+  set.seed(42)
+  generic <- .generic_gen_log_lik(.get_brms_fn("log_lik", lognormal()))
+  invisible(generic(i = 1, prep))
+  expect_identical(stats::runif(1), expected)
+})
+
+test_that("the generic log likelihood matches dpcens() under truncation", {
+  # The generic method must give the same answer as a plain `dpcens()` call,
+  # so that the censored pmf and the truncation normalisation stay in step
+  # with `primarycensored` rather than drifting from it. See #646.
+  prep <- .gen_log_lik_prep(ndraws = 2)
+
+  generic <- .generic_gen_log_lik(.get_brms_fn("log_lik", lognormal()))
+
+  expected <- rep(
+    primarycensored::dpcens(
+      x = 5,
+      pdist = stats::plnorm,
+      pwindow = 1,
+      swindow = 1,
+      L = 2,
+      D = 12,
+      dprimary = stats::dunif,
+      log = TRUE,
+      meanlog = 1.5,
+      sdlog = 0.5
+    ),
+    prep$ndraws
+  )
+  expect_equal(generic(i = 1, prep), expected, tolerance = 1e-8)
+
+  # Dropping the left truncation point must change the answer, otherwise this
+  # test would pass with `delay_min` ignored.
+  prep$data$vreal5 <- 0
+  expect_false(isTRUE(all.equal(generic(i = 1, prep), expected)))
+})
+
+test_that("the generic log likelihood left truncates at an infinite D", {
+  # An infinite relative observation time still leaves the density to
+  # normalise over [delay_min, Inf). Reassembling the density locally dropped
+  # that normaliser and disagreed with the analytical method. See #646.
+  prep <- .gen_log_lik_prep(ndraws = 2)
+  prep$data$vreal1 <- Inf
+
+  generic <- .generic_gen_log_lik(.get_brms_fn("log_lik", lognormal()))
+  analytical <- epidist_gen_log_lik(lognormal())
+
+  expect_equal(generic(i = 1, prep), analytical(i = 1, prep), tolerance = 1e-8)
+
+  # The left truncation point must still matter, otherwise this test would
+  # pass with the normaliser dropped from both methods.
+  unnormalised <- generic(i = 1, prep)
+  prep$data$vreal5 <- 0
+  expect_false(isTRUE(all.equal(generic(i = 1, prep), unnormalised)))
+})
+
 test_that("the generic log likelihood rejects a delay beyond the observation time", { # nolint: line_length_linter.
-  # `dpcens()` will not give a usable answer for an upper bound beyond D, and
-  # the refactor integrates with `pcens_cdf()` instead, so the same guard has
-  # to be applied here. Without it the truncation normalisation can return a
-  # density above one.
+  # `dpcens()` clips the upper end of the interval at D rather than erroring,
+  # so it answers a different question from the one asked and the guard has
+  # to be applied here.
   skip_on_cran()
 
   upper_beyond_d <- function() {
@@ -304,14 +393,7 @@ test_that("the generic log likelihood rejects a delay beyond the observation tim
       pwindow = 1, swindow = 1, D = 5.5, dprimary = stats::dunif
     ))
   }
-  # primarycensored errored on this until 1.5.2, which clips the interval at
-  # D and returns a density instead. Either way it refuses to answer the
-  # question as asked, which is what the guard below is for.
-  if (package_version(getNamespaceVersion("primarycensored")) < "1.5.2") {
-    expect_error(upper_beyond_d(), "Upper truncation point is greater than D")
-  } else {
-    expect_message(upper_beyond_d(), "clipping the upper end")
-  }
+  expect_message(upper_beyond_d(), "clipping the upper end")
 
   log_lik <- epidist_gen_log_lik(epidist_family(prep_obs))
   prep <- list(
