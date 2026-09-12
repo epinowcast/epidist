@@ -63,17 +63,6 @@ To run this vignette yourself, as well as the `epidist` package, you will need t
 library(epidist)
 library(ggplot2)
 library(dplyr)
-#>
-#> Attaching package: 'dplyr'
-#> The following object is masked from 'package:testthat':
-#>
-#>     matches
-#> The following objects are masked from 'package:stats':
-#>
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#>
-#>     intersect, setdiff, setequal, union
 ```
 
 # Simulating data {#data}
@@ -269,6 +258,8 @@ p_cens <- obs_cens |>
 
 ``` r
 p_cens
+#> `height` was translated to `width`.
+#> `height` was translated to `width`.
 ```
 
 <div class="figure">
@@ -321,6 +312,8 @@ p_trunc <- obs_cens |>
 
 ``` r
 p_trunc
+#> `height` was translated to `width`.
+#> `height` was translated to `width`.
 ```
 
 <div class="figure">
@@ -377,8 +370,12 @@ plot_data <- combined_data |>
   group_by(type, delay, .drop = FALSE) |>
   summarise(n = n()) |>
   mutate(p = n / sum(n))
-#> `summarise()` has grouped output by 'type'. You can override using the
-#> `.groups` argument.
+#> `summarise()` has regrouped the output.
+#> ℹ Summaries were computed grouped by type and delay.
+#> ℹ Output is grouped by type.
+#> ℹ Use `summarise(.groups = "drop_last")` to silence this message.
+#> ℹ Use `summarise(.by = c(type, delay))` for per-operation grouping
+#>   (`?dplyr::dplyr_by`) instead.
 
 # Create the plot
 delay_histogram <- ggplot(plot_data) +
@@ -605,8 +602,8 @@ summary(naive_fit)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     4087     2587
-#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3861     2836
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3562     2565
+#> sigma_Intercept    -0.75      0.05    -0.85    -0.65 1.00     3499     2323
 #>
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -687,8 +684,8 @@ summary(marginal_fit)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.65 1.00     2010     1901
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2172     2000
+#> Intercept           1.55      0.05     1.46     1.65 1.00     1866     1880
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.56 1.00     2147     2268
 #>
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
