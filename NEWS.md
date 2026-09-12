@@ -302,6 +302,8 @@ See #79.
 - Made `epidist_transform_data()` internal.
 It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
 See #79.
+- The study labels of the test lockstep fixtures are now namespaced by the fixture that owns them and checked before the fixtures are bound, so a branch that adds a fixture reusing a label fails loudly rather than merging cleanly into a silent collision.
+Closes #725.
 
 ## Documentation
 

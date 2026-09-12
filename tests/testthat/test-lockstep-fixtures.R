@@ -14,23 +14,27 @@ test_that("check_lockstep_studies() accepts the assembled fixtures", {
 })
 
 test_that("check_lockstep_studies() fails on a label shared by two fixtures", {
-  # Two branches that each append a fixture reusing a label merge cleanly, so
-  # the collision has to fail here rather than silently join two studies.
-  shared <- list(
-    one = data.frame(study = c("one_A", "one_A"), stringsAsFactors = FALSE),
-    two = data.frame(study = "one_A", stringsAsFactors = FALSE)
+  # Two branches that each append a fixture under the same name merge
+  # cleanly, so the collision has to fail here rather than silently join two
+  # studies into one.
+  shared <- stats::setNames(
+    list(
+      data.frame(study = c("one_A", "one_A"), stringsAsFactors = FALSE),
+      data.frame(study = "one_A", stringsAsFactors = FALSE)
+    ),
+    c("one", "one")
   )
   expect_error(check_lockstep_studies(shared), "one_A")
 })
 
-test_that("check_lockstep_studies() fails on a label from another fixture", {
-  # A tag copied from the fixture above it puts a label outside its own
-  # namespace, which is how a collision becomes possible again.
-  mislabelled <- list(
+test_that("check_lockstep_studies() fails on a label outside its fixture", {
+  # A fixture that labels its studies by hand leaves its own namespace, which
+  # is how a collision becomes possible again.
+  by_hand <- list(
     one = data.frame(study = "one_A", stringsAsFactors = FALSE),
-    two = data.frame(study = "three_A", stringsAsFactors = FALSE)
+    two = data.frame(study = c("AH", "AI"), stringsAsFactors = FALSE)
   )
-  expect_error(check_lockstep_studies(mislabelled), "three_A")
+  expect_error(check_lockstep_studies(by_hand), "AH")
 })
 
 test_that("check_lockstep_studies() requires fixtures to be named", {

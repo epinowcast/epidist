@@ -231,6 +231,10 @@ prep_meta_obs <- suppressMessages(
 # truncation design, so that every branch of the implied density is exercised.
 # Studies M to P counted only delays above a minimum, one per censoring
 # adjustment, and Q and R report a covariance matrix over their summaries.
+#
+# Every fixture below takes its study labels from `lockstep_studies()`, which
+# namespaces them by the fixture. The letters are therefore local to a
+# fixture, and a new fixture starts its own rather than continuing a sequence.
 lockstep_mvn_q <- suppressMessages(as_epidist_estimates_data(
   new_epidist_multivariate(
     value = c(mean = 7.2, sd = 3.4, q0.5 = 6.5),
@@ -240,7 +244,7 @@ lockstep_mvn_q <- suppressMessages(as_epidist_estimates_data(
     ),
     params = c("mean", "sd", "q0.5")
   ),
-  study = "Q",
+  study = lockstep_studies("mvn_q", "Q"),
   relative_obs_time = Inf,
   trunc_adjusted = TRUE,
   trunc_design = "cohort",
@@ -255,7 +259,7 @@ lockstep_mvn_r <- suppressMessages(as_epidist_estimates_data(
     vcov = matrix(c(0.12, -0.03, -0.03, 0.2), nrow = 2),
     params = c("q0.25", "q0.75")
   ),
-  study = "R",
+  study = lockstep_studies("mvn_r", "R"),
   relative_obs_time = 30,
   trunc_adjusted = FALSE,
   trunc_design = "accrual",
@@ -269,7 +273,9 @@ lockstep_mvn_r <- suppressMessages(as_epidist_estimates_data(
 # implementations of that code are compared on the moment path, the quantile
 # path, the accrual path and with a left truncation.
 lockstep_midpoint_uniform <- data.frame(
-  study = c("S", "S", "T", "T", "U", "U", "V", "V"),
+  study = lockstep_studies(
+    "midpoint_uniform", c("S", "S", "T", "T", "U", "U", "V", "V")
+  ),
   type = c(
     "mean", "sd", "quantile", "quantile", "mean", "sd", "quantile", "quantile"
   ),
@@ -296,7 +302,9 @@ lockstep_midpoint_uniform <- data.frame(
 # quantiles with a covariance matrix, so the node count of the shifted grid
 # is exercised as well.
 lockstep_left_midpoint <- data.frame(
-  study = c("W", "W", "X", "X", "Y", "Y"),
+  study = lockstep_studies(
+    "left_midpoint", c("W", "W", "X", "X", "Y", "Y")
+  ),
   type = c("mean", "sd", "quantile", "quantile", "mean", "sd"),
   value = c(7.9, 3.4, 5.5, 9.5, 8.6, 3.6),
   se = c(NA, NA, NA, 0.5, NA, NA),
@@ -321,7 +329,7 @@ lockstep_mvn_z <- suppressMessages(as_epidist_estimates_data(
     vcov = matrix(c(0.1, 0.02, 0.02, 0.15), nrow = 2),
     params = c("q0.25", "q0.5")
   ),
-  study = "Z",
+  study = lockstep_studies("mvn_z", "Z"),
   relative_obs_time = 32,
   trunc_adjusted = FALSE,
   trunc_design = "cohort",
@@ -333,11 +341,11 @@ lockstep_mvn_z <- suppressMessages(as_epidist_estimates_data(
 ))
 
 lockstep_base_rows <- data.frame(
-  study = c(
+  study = lockstep_studies("base_rows", c(
     "A", "A", "B", "B", "B", "C", "C", "D", "E", "E", "F", "F", "F",
     "G", "H", "I", "J", "K", "K", "L", "L",
     "M", "M", "N", "N", "O", "O", "P", "P"
-  ),
+  )),
   type = c(
     "mean", "sd", "quantile", "quantile", "quantile", "mean", "sd",
     "quantile", "mean", "sd", "mean", "sd", "quantile",
@@ -403,7 +411,9 @@ lockstep_base_rows <- data.frame(
 # because the R and Stan primary censored distribution functions of
 # primarycensored only agree to about 1e-6 for a wider one under growth.
 lockstep_accrual_windows <- data.frame(
-  study = c("AA", "AA", "AA", "AB", "AB"),
+  study = lockstep_studies(
+    "accrual_windows", c("AA", "AA", "AA", "AB", "AB")
+  ),
   type = c("mean", "sd", "quantile", "mean", "quantile"),
   value = c(1.4, 2.9, 0.5, 5.8, 5.5),
   se = c(NA, NA, 0.4, NA, NA),
@@ -426,7 +436,7 @@ lockstep_accrual_windows <- data.frame(
 # multiples of the window. AH grows and reports by week, AI does not grow and
 # reports by day.
 lockstep_partial_window <- data.frame(
-  study = c("AH", "AH", "AI", "AI"),
+  study = lockstep_studies("partial_window", c("AH", "AH", "AI", "AI")),
   type = c("mean", "sd", "mean", "quantile"),
   value = c(4.7, 3.7, 8.1, 8.0),
   se = NA,
@@ -451,7 +461,10 @@ lockstep_partial_window <- data.frame(
 # the cohort grid, and AP two quantiles of midpointed delays above a minimum
 # on the accrual grid.
 lockstep_grid_quantiles <- data.frame(
-  study = c("AC", "AD", "AE", "AE", "AE", "AO", "AO", "AO", "AP", "AP"),
+  study = lockstep_studies(
+    "grid_quantiles",
+    c("AC", "AD", "AE", "AE", "AE", "AO", "AO", "AO", "AP", "AP")
+  ),
   type = "quantile",
   value = c(5, 6.5, 4, 5, 5, 4, 6, 9, 5.5, 8.5),
   p = c(0.5, 0.75, 0.25, 0.5, 0.75, 0.25, 0.5, 0.75, 0.25, 0.75),
@@ -474,7 +487,7 @@ lockstep_grid_quantiles <- data.frame(
 # at a long observation time, and AG adjusted for truncation with a growing
 # primary event, so its quantile is read off the chord of its nodes.
 lockstep_narrow <- data.frame(
-  study = c("AF", "AF", "AG", "AG"),
+  study = lockstep_studies("narrow", c("AF", "AF", "AG", "AG")),
   type = c("mean", "sd", "mean", "quantile"),
   value = c(7.1, 0.4, 7.3, 7.6),
   se = c(NA, NA, NA, 0.1),
@@ -500,10 +513,10 @@ lockstep_narrow <- data.frame(
 # the chord of their nodes and take the density from its slope. AN counted
 # only delays above a minimum.
 lockstep_joint <- data.frame(
-  study = c(
+  study = lockstep_studies("joint", c(
     "AJ", "AJ", "AJ", "AJ", "AJ", "AK", "AK", "AK", "AL", "AL", "AL",
     "AM", "AM", "AN", "AN"
-  ),
+  )),
   type = c(
     "mean", "sd", "quantile", "quantile", "quantile",
     "mean", "sd", "quantile", "mean", "quantile", "quantile",
@@ -534,19 +547,26 @@ lockstep_joint <- data.frame(
   stringsAsFactors = FALSE
 )
 
-lockstep_estimates <- suppressMessages(as_epidist_estimates_data(list(
-  lockstep_base_rows,
-  lockstep_mvn_q,
-  lockstep_mvn_r,
-  lockstep_midpoint_uniform,
-  lockstep_left_midpoint,
-  lockstep_mvn_z,
-  lockstep_accrual_windows,
-  lockstep_partial_window,
-  lockstep_grid_quantiles,
-  lockstep_narrow,
-  lockstep_joint
-)))
+# Each fixture is named by the namespace its study labels were built from, so
+# that `check_lockstep_studies()` can hold every label inside its own fixture
+# and reject one used twice.
+lockstep_fixtures <- list(
+  base_rows = lockstep_base_rows,
+  mvn_q = lockstep_mvn_q,
+  mvn_r = lockstep_mvn_r,
+  midpoint_uniform = lockstep_midpoint_uniform,
+  left_midpoint = lockstep_left_midpoint,
+  mvn_z = lockstep_mvn_z,
+  accrual_windows = lockstep_accrual_windows,
+  partial_window = lockstep_partial_window,
+  grid_quantiles = lockstep_grid_quantiles,
+  narrow = lockstep_narrow,
+  joint = lockstep_joint
+)
+
+lockstep_estimates <- suppressMessages(as_epidist_estimates_data(
+  check_lockstep_studies(lockstep_fixtures)
+))
 
 # The shared fits below compile Stan models through the default rstan
 # backend, so they are not built on CRAN. rstan and StanHeaders must be
