@@ -98,7 +98,7 @@ keep the simulated times as well, to work out what each study would have
 measured.
 [`as_epidist_marginal_model()`](https://epidist.epinowcast.org/reference/as_epidist_marginal_model.md)
 adds the censoring windows and the bounds of each delay. Figure
-[3.1](#fig:outbreak) shows the case counts.
+[3.1](#fig:outbreak) shows the event windows of the simulated cases.
 
 ``` r
 
@@ -148,19 +148,15 @@ head(delays)
 
 ``` r
 
-linelist |>
-  filter(case %% 50 == 0) |>
-  ggplot(aes(x = ptime, y = case)) +
-  geom_point(col = "#56B4E9") +
-  labs(x = "Primary event time (day)", y = "Case number") +
-  theme_minimal()
+plot_events(linelist)
 ```
 
-![Case counts over the course of the simulated outbreak (only every 50th
-case is shown to avoid over-plotting).](figures/meta-outbreak-1.png)
+![The primary and secondary event windows of 200 evenly spaced cases
+from the simulated outbreak, ordered by primary event
+time.](figures/meta-outbreak-1.png)
 
-Figure 3.1: Case counts over the course of the simulated outbreak (only
-every 50th case is shown to avoid over-plotting).
+Figure 3.1: The primary and secondary event windows of 200 evenly spaced
+cases from the simulated outbreak, ordered by primary event time.
 
 Now imagine several studies each analysing this outbreak at a different
 point in time, reporting integer date differences with no adjustment for
@@ -322,12 +318,9 @@ biased_estimates <- study_designs |>
 #>   quantiles less than ten days above their smallest counted delay. Quantiles
 #>   rounded to whole days that close to the origin carry a bias that a larger
 #>   sample does not shrink.
-#> ! "calendar stop" reports several quantiles of delays counted in whole days
-#>   from more than 100 delays. The joint quantile likelihood is overconfident at
-#>   that sample size and weights it too heavily.
 #> ℹ See the Checks section of `?as_epidist_estimates_data`.
 biased_estimates
-#> # A tibble: 22 × 16
+#> # A tibble: 22 × 17
 #>    study         type  value    se     n     p pwindow swindow relative_obs_time
 #>    <chr>         <chr> <dbl> <dbl> <dbl> <dbl>   <dbl>   <dbl>             <dbl>
 #>  1 naive cohort  mean   6.27    NA   180 NA          1       1                12
@@ -341,9 +334,9 @@ biased_estimates
 #>  9 uniform wind… mean   6.99    NA    95 NA          1       1                25
 #> 10 uniform wind… sd     3.79    NA    95 NA          1       1                25
 #> # ℹ 12 more rows
-#> # ℹ 7 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
-#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>, max_delay <dbl>,
-#> #   mvn_id <chr>
+#> # ℹ 8 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
+#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>,
+#> #   growth_rate_sd <dbl>, max_delay <dbl>, mvn_id <chr>
 ```
 
 `max_delay` sets how far the grid used to work out the implied naive
@@ -385,7 +378,7 @@ fit_meta_summary <- epidist(
 summary(fit_meta_summary)
 #>  Family: meta_lognormal
 #>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ 1
+#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad, growth_known) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ 1
 #>          sigma ~ 1
 #>    Data: transformed_data (Number of observations: 10)
 #>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
@@ -393,8 +386,8 @@ summary(fit_meta_summary)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.81      0.01     1.78     1.84 1.00     1018      825
-#> sigma_Intercept    -0.73      0.02    -0.77    -0.69 1.00      801      645
+#> Intercept           1.81      0.01     1.79     1.84 1.00      924      842
+#> sigma_Intercept    -0.74      0.02    -0.78    -0.70 1.00      750      640
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -418,8 +411,8 @@ delay_parameter_draws(fit_meta_summary) |>
 #> # A tibble: 2 × 7
 #>   parameter value .lower .upper .width .point .interval
 #>   <chr>     <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>
-#> 1 mu        1.81   1.78   1.84    0.95 median qi
-#> 2 sigma     0.484  0.463  0.502   0.95 median qi
+#> 1 mu        1.82   1.79   1.84    0.95 median qi
+#> 2 sigma     0.477  0.457  0.497   0.95 median qi
 ```
 
 Even though every study is individually biased, the meta model recovers
@@ -458,7 +451,7 @@ fit_meta_summary_study <- epidist(
 fit_meta_summary_study
 #>  Family: meta_lognormal
 #>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ (1 | study)
+#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad, growth_known) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ (1 | study)
 #>          sigma ~ 1 + (1 | study)
 #>    Data: transformed_data (Number of observations: 10)
 #>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
@@ -467,13 +460,13 @@ fit_meta_summary_study
 #> Multilevel Hyperparameters:
 #> ~study (Number of levels: 10)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.03      0.03     0.00     0.10 1.01      272      405
-#> sd(sigma_Intercept)     0.10      0.06     0.01     0.24 1.01      266      339
+#> sd(Intercept)           0.03      0.03     0.00     0.09 1.00      362      534
+#> sd(sigma_Intercept)     0.08      0.05     0.01     0.20 1.00      301      486
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.82      0.02     1.77     1.86 1.00      425      406
-#> sigma_Intercept    -0.70      0.05    -0.81    -0.59 1.01      357      373
+#> Intercept           1.82      0.02     1.78     1.86 1.00      991      599
+#> sigma_Intercept    -0.72      0.04    -0.80    -0.62 1.00      564      560
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -582,7 +575,7 @@ fit_meta_wrong_flags <- epidist(
 summary(fit_meta_wrong_flags)
 #>  Family: meta_lognormal
 #>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ 1
+#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad, growth_known) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ 1
 #>          sigma ~ 1
 #>    Data: transformed_data (Number of observations: 10)
 #>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
@@ -590,8 +583,8 @@ summary(fit_meta_wrong_flags)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.75      0.01     1.72     1.77 1.00      779      672
-#> sigma_Intercept    -0.81      0.02    -0.85    -0.77 1.00      644      541
+#> Intercept           1.76      0.01     1.73     1.78 1.00      943      722
+#> sigma_Intercept    -0.83      0.02    -0.87    -0.79 1.00      796      653
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -648,7 +641,7 @@ fit_meta_mixed <- epidist(
 summary(fit_meta_mixed)
 #>  Family: meta_lognormal
 #>   Links: mu = identity; sigma = log
-#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ 1
+#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad, growth_known) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ 1
 #>          sigma ~ 1
 #>    Data: transformed_data (Number of observations: 192)
 #>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
@@ -656,8 +649,8 @@ summary(fit_meta_mixed)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.81      0.01     1.79     1.84 1.00      889      699
-#> sigma_Intercept    -0.72      0.02    -0.76    -0.68 1.00      603      430
+#> Intercept           1.82      0.01     1.79     1.85 1.00      667      471
+#> sigma_Intercept    -0.73      0.02    -0.77    -0.69 1.00     1170      734
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -890,7 +883,8 @@ treat every study as `cens_adjusted = 0`, integer date differences
 summarised directly. Observation times are not recorded either, so every
 study gets `trunc_adjusted = TRUE` and the `phase` term stands in.
 
-A small helper maps each row of `onset_to_death` to the long format
+[`epidist_estimates_epireview()`](https://epidist.epinowcast.org/reference/epidist_estimates_epireview.md)
+maps each record of `onset_to_death` to the long format
 [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
 expects. Means become `"mean"` rows, with a matching `"sd"` row where a
 standard deviation is reported, either as the study’s own spread or as
@@ -899,79 +893,31 @@ becomes an `se` on the mean row instead. Medians become `"quantile"`
 rows at `p = 0.5`, with further quantile rows at `p = 0.25` and
 `p = 0.75` where an interquartile range is reported. A study reporting a
 spread that does not match its own value type, such as a median
-alongside a standard deviation, keeps only the matching set, because
-summaries of different kinds from one study are fitted as though they
-were independent. A study that reports the parameters of a distribution
-it fitted can be fitted through
-[`epidist_estimates_parameters()`](https://epidist.epinowcast.org/reference/epidist_estimates_parameters.md).
-The fitted distributions here are Gammas that epireview records as a
-mean and a standard deviation, which the helper picks up as moments.
+alongside a standard deviation, keeps only the matching set, because the
+two kinds of summary from a study that reported integer date differences
+are fitted as though they were independent. A study that reports the
+natural parameters of a distribution it fitted is converted as
+[`epidist_estimates_parameters()`](https://epidist.epinowcast.org/reference/epidist_estimates_parameters.md)
+would convert it. The fitted distributions here are Gammas that
+epireview records as a mean and a standard deviation, which the function
+picks up as moments.
 
-Click to expand for the epireview conversion helper
+The metadata we assume for every study is passed as arguments. Where we
+know the metadata of individual studies, from the papers or another
+source, the `metadata` argument takes a table with a row per study that
+overrides these, and the result is an `epidist_estimates_data` object
+that can be edited afterwards. `keep` carries the `phase` covariate onto
+the rows.
 
 ``` r
 
-meta_cols <- c(
-  "study", "n", "trunc_adjusted", "relative_obs_time", "cens_adjusted", "phase"
+ebola_estimates <- epidist_estimates_epireview(
+  onset_to_death,
+  trunc_adjusted = TRUE,
+  relative_obs_time = Inf,
+  cens_adjusted = 0,
+  keep = "phase"
 )
-
-row_to_estimates <- function(row) {
-  base <- as_tibble(row[meta_cols])
-  spread_type <- row$parameter_uncertainty_singe_type
-  spread <- row$parameter_uncertainty_single_value
-  reported_sd <- if (identical(spread_type, "Standard Deviation")) {
-    spread
-  } else if (identical(row$distribution_par2_type, "Mean sd")) {
-    row$distribution_par2_value
-  }
-  if (identical(row$parameter_value_type, "Mean")) {
-    rows <- mutate(
-      base, type = "mean", value = row$parameter_value, p = NA_real_
-    )
-    if (identical(spread_type, "Standard Error")) {
-      rows$se <- spread
-    }
-    if (!is.null(reported_sd) && !is.na(reported_sd)) {
-      rows <- bind_rows(
-        rows, mutate(base, type = "sd", value = reported_sd, p = NA_real_)
-      )
-    }
-  } else {
-    rows <- mutate(
-      base, type = "quantile", value = row$parameter_value, p = 0.5
-    )
-    if (identical(row$parameter_uncertainty_type, "IQR")) {
-      rows <- bind_rows(
-        rows,
-        mutate(
-          base, type = "quantile",
-          value = row$parameter_uncertainty_lower_value, p = 0.25
-        ),
-        mutate(
-          base, type = "quantile",
-          value = row$parameter_uncertainty_upper_value, p = 0.75
-        )
-      )
-    }
-  }
-  return(rows)
-}
-```
-
-``` r
-
-ebola_estimates_df <- onset_to_death |>
-  mutate(
-    trunc_adjusted = TRUE,
-    relative_obs_time = Inf,
-    cens_adjusted = 0,
-    study = .data$article_label,
-    n = .data$population_sample_size
-  ) |>
-  pmap(\(...) row_to_estimates(list(...))) |>
-  list_rbind()
-
-ebola_estimates <- as_epidist_estimates_data(ebola_estimates_df)
 #> ℹ No `pwindow` column supplied, assuming a censoring window of 1 (daily
 #>   reporting) for every study.
 #> ℹ No `swindow` column supplied, assuming a censoring window of 1 (daily
@@ -994,6 +940,24 @@ ebola_estimates <- as_epidist_estimates_data(ebola_estimates_df)
 #>   sampling error that large is far from normal, so the likelihood of the
 #>   standard deviation cannot be trusted.
 #> ℹ See the Checks section of `?as_epidist_estimates_data`.
+ebola_estimates
+#> # A tibble: 45 × 18
+#>    study         type  value    se     n     p pwindow swindow relative_obs_time
+#>    <chr>         <chr> <dbl> <dbl> <dbl> <dbl>   <dbl>   <dbl>             <dbl>
+#>  1 Xu 2016       mean   8.6   NA      76 NA          1       1               Inf
+#>  2 Xu 2016       sd     4.8   NA      76 NA          1       1               Inf
+#>  3 Uyeki 2016    quan… 14     NA       5  0.5        1       1               Inf
+#>  4 Senga 2016 (… mean  11.1   NA      92 NA          1       1               Inf
+#>  5 Schieffelin … mean   9.79   0.7    38 NA          1       1               Inf
+#>  6 Nanclares 20… quan…  9     NA      25  0.5        1       1               Inf
+#>  7 Nanclares 20… quan…  7     NA      25  0.25       1       1               Inf
+#>  8 Nanclares 20… quan… 12     NA      25  0.75       1       1               Inf
+#>  9 Qureshi 2015  mean   8.9   NA      70 NA          1       1               Inf
+#> 10 Qureshi 2015  sd     3.8   NA      70 NA          1       1               Inf
+#> # ℹ 35 more rows
+#> # ℹ 9 more variables: trunc_adjusted <lgl>, trunc_design <chr>,
+#> #   cens_adjusted <int>, delay_min <dbl>, growth_rate <dbl>,
+#> #   growth_rate_sd <dbl>, max_delay <dbl>, mvn_id <chr>, phase <fct>
 ```
 
 We fit a Gamma, which is the family most of these studies fitted, with a
@@ -1066,7 +1030,7 @@ fit_ebola <- epidist(
 summary(fit_ebola)
 #>  Family: meta_gamma
 #>   Links: mu = log; shape = log
-#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ phase + (1 | study)
+#> Formula: delay_lwr | weights(n) + vint(obs_type, study_n, trunc_adjusted, cens_adjusted, trunc_design, group_start, group_len, chol_start, n_quad, growth_known) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min, report_se, quantile_p, growth_rate) ~ phase + (1 | study)
 #>          shape ~ 1 + (1 | study)
 #>    Data: transformed_data (Number of observations: 29)
 #>   Draws: 2 chains, each with iter = 1000; warmup = 500; thin = 1;
@@ -1075,15 +1039,15 @@ summary(fit_ebola)
 #> Multilevel Hyperparameters:
 #> ~study (Number of levels: 29)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.14      0.03     0.08     0.21 1.00      299      473
-#> sd(shape_Intercept)     0.51      0.10     0.35     0.72 1.00      491      692
+#> sd(Intercept)           0.14      0.03     0.08     0.21 1.00      263      426
+#> sd(shape_Intercept)     0.52      0.10     0.34     0.74 1.00      501      570
 #>
 #> Regression Coefficients:
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept               2.23      0.06     2.11     2.35 1.01      434      694
-#> shape_Intercept         1.25      0.14     0.96     1.53 1.00      389      520
-#> phaseduringoutbreak     0.06      0.13    -0.19     0.32 1.00      734      627
-#> phaseunrecorded        -0.01      0.07    -0.15     0.14 1.01      405      521
+#> Intercept               2.24      0.06     2.12     2.35 1.00      607      604
+#> shape_Intercept         1.27      0.15     0.98     1.56 1.02      380      498
+#> phaseduringoutbreak     0.06      0.12    -0.19     0.29 1.00      763      659
+#> phaseunrecorded        -0.01      0.07    -0.15     0.12 1.00      532      762
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -1120,10 +1084,10 @@ population_draws |>
 #> # A tibble: 4 × 7
 #>   parameter value .lower .upper .width .point .interval
 #>   <chr>     <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>
-#> 1 mean       9.32   8.21  10.4    0.95 median qi
-#> 2 scale      2.66   1.99   3.69   0.95 median qi
-#> 3 sd         4.99   4.14   5.99   0.95 median qi
-#> 4 shape      3.51   2.61   4.63   0.95 median qi
+#> 1 mean       9.35   8.33  10.5    0.95 median qi
+#> 2 scale      2.64   1.88   3.63   0.95 median qi
+#> 3 sd         4.97   4.05   5.99   0.95 median qi
+#> 4 shape      3.55   2.67   4.77   0.95 median qi
 ```
 
 The phase bias is the contrast between each phase and the retrospective
@@ -1144,8 +1108,8 @@ phase_ratio <- marginaleffects::comparisons(
 phase_ratio
 #>
 #>                         Contrast Estimate 2.5 % 97.5 %
-#>  during outbreak / post outbreak    1.067 0.830   1.38
-#>  unrecorded / post outbreak         0.994 0.862   1.15
+#>  during outbreak / post outbreak    1.060 0.824   1.34
+#>  unrecorded / post outbreak         0.991 0.860   1.13
 #>
 #> Term: phase
 #> Type: response
@@ -1157,8 +1121,8 @@ marginaleffects::get_draws(phase_ratio) |>
     .by = "contrast"
   )
 #>                          contrast P(shorter) P(shorter by over 10%)
-#> 1 during outbreak / post outbreak      0.300                  0.085
-#> 2      unrecorded / post outbreak      0.538                  0.074
+#> 1 during outbreak / post outbreak      0.293                  0.075
+#> 2      unrecorded / post outbreak      0.556                  0.082
 ```
 
 ### 5.3 Comparing with a modern re-analysis of the same line list
@@ -1183,6 +1147,7 @@ bdbv <- read.csv("bdbv-onset-to-death.csv") |>
 
 isiro_reported <- ebola_estimates |>
   filter(.data$study == "Rosello 2015 (3)") |>
+  as.data.frame() |>
   select("type", "value") |>
   pivot_wider(names_from = "type", values_from = "value") |>
   mutate(shape = (.data$mean / .data$sd)^2, scale = .data$sd^2 / .data$mean)
@@ -1228,8 +1193,8 @@ bind_rows(
 #>   source                          mean                sd
 #>   <chr>                           <chr>               <chr>
 #> 1 as reported by Rosello 2015 (3) 11.37               5.41
-#> 2 Rosello 2015 (3), study level   10.67 (9.22, 12.58) 5.19 (4.12, 6.98)
-#> 3 meta model, population level    9.32 (8.21, 10.44)  4.99 (4.14, 5.99)
+#> 2 Rosello 2015 (3), study level   10.66 (9.21, 12.85) 5.21 (4.12, 7.19)
+#> 3 meta model, population level    9.35 (8.33, 10.51)  4.97 (4.05, 5.99)
 #> 4 re-analysis of the line list    11.76 (9.31, 15.06) 6.57 (4.88, 9.44)
 ```
 

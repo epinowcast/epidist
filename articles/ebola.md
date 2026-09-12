@@ -1,12 +1,12 @@
 # Using epidist to estimate delay between symptom onset and positive test for an Ebola outbreak in Sierra Leone
 
-In this vignette, we use the `epidist` package to analyze line list data
+In this vignette, we use the `epidist` package to analyse line list data
 from the 2014-2016 outbreak of Ebola in Sierra Leone ([World Health
 Organization 2016](#ref-who_ebola_2014_2016)). These data were collated
 by Fang et al. ([2016](#ref-fang2016transmission)). We provide the data
 in the `epidist` package via
 [`?sierra_leone_ebola_data`](https://epidist.epinowcast.org/reference/sierra_leone_ebola_data.md).
-In analyzing this data, we demonstrate the following features of
+In analysing this data, we demonstrate the following features of
 `epidist`:
 
 1.  Fitting district-sex stratified partially pooled delay distribution
@@ -80,31 +80,29 @@ fraction <- 5
 ndistrict <- length(unique(sierra_leone_ebola_data$district))
 ```
 
-Figure [2.1](#fig:ebola-outbreak) shows the dates of symptom onset and
-sample testing for cases across in each district. (In this figure, we
-filter down to every 5th case in order to avoid overplotting.) We can
-see that the start time and course of the epidemic varies across
-districts.
+Figure [2.1](#fig:ebola-outbreak) shows the symptom onset and sample
+testing windows of each case in each district, drawn with
+[`plot_events()`](https://epidist.epinowcast.org/reference/plot_events.md).
+(In this figure, we draw one in every 5 cases in order to avoid
+overplotting.) We can see that the start time and course of the epidemic
+varies across districts.
 
 Click to expand for code to prepare outbreak plot
 
 ``` r
 
-p_outbreak <- sierra_leone_ebola_data |>
-  filter(id %% fraction == 0) |>
-  ggplot() +
-  geom_segment(
-    aes(
-      x = date_of_symptom_onset, xend = date_of_sample_tested,
-      y = id, yend = id
-    ),
-    col = "grey"
-  ) +
-  geom_point(aes(x = date_of_symptom_onset, y = id), col = "#56B4E9") +
-  geom_point(aes(x = date_of_sample_tested, y = id), col = "#009E73") +
+ebola_linelist <- sierra_leone_ebola_data |>
+  filter(!is.na(date_of_symptom_onset), !is.na(date_of_sample_tested)) |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  )
+
+p_outbreak <- ebola_linelist |>
+  plot_events(by = "district", n = nrow(ebola_linelist) / fraction) +
   facet_wrap(district ~ ., ncol = 2) +
-  labs(x = "", y = "Case ID") +
-  theme_minimal()
+  labs(x = "") +
+  theme(legend.position = "none")
 ```
 
 ``` r
@@ -112,11 +110,11 @@ p_outbreak <- sierra_leone_ebola_data |>
 p_outbreak
 ```
 
-![Primary and secondary event times for every 5th case, over the 14
-districts of Sierra Leone.](figures/ebola-ebola-outbreak-1.png)
+![Primary and secondary event windows for one in every 5 cases, over the
+14 districts of Sierra Leone.](figures/ebola-ebola-outbreak-1.png)
 
-Figure 2.1: Primary and secondary event times for every 5th case, over
-the 14 districts of Sierra Leone.
+Figure 2.1: Primary and secondary event windows for one in every 5
+cases, over the 14 districts of Sierra Leone.
 
 ## 3 Fitting sex-district stratified delay distributions
 
@@ -257,12 +255,12 @@ fit <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 5.7 seconds.
-#> Chain 1 finished in 6.0 seconds.
+#> Chain 2 finished in 9.3 seconds.
+#> Chain 1 finished in 9.5 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 5.8 seconds.
-#> Total execution time: 6.0 seconds.
+#> Mean chain execution time: 9.4 seconds.
+#> Total execution time: 9.6 seconds.
 ```
 
 The `fit` object is a
@@ -314,12 +312,12 @@ fit_sex <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 12.3 seconds.
-#> Chain 1 finished in 12.4 seconds.
+#> Chain 1 finished in 17.9 seconds.
+#> Chain 2 finished in 18.0 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 12.3 seconds.
-#> Total execution time: 12.5 seconds.
+#> Mean chain execution time: 18.0 seconds.
+#> Total execution time: 18.1 seconds.
 ```
 
 A summary of the model shows that males tend to have longer delays (the
@@ -380,12 +378,12 @@ fit_sex_district <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 165.5 seconds.
-#> Chain 2 finished in 183.8 seconds.
+#> Chain 1 finished in 241.6 seconds.
+#> Chain 2 finished in 266.6 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 174.6 seconds.
-#> Total execution time: 184.0 seconds.
+#> Mean chain execution time: 254.1 seconds.
+#> Total execution time: 266.8 seconds.
 ```
 
 **As this is a longer running model (~ 2 minutes) we have reduced the

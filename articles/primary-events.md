@@ -116,8 +116,8 @@ The posterior for the rate stays close to the prior, which is expected.
 summary(fit_growing)$fixed[
   "pgrowth_Intercept", c("Estimate", "l-95% CI", "u-95% CI")
 ]
-#>                    Estimate  l-95% CI u-95% CI
-#> pgrowth_Intercept 0.9224226 0.3469857 1.346566
+#>                    Estimate  l-95% CI  u-95% CI
+#> pgrowth_Intercept 0.4987178 0.3012336 0.7038089
 ```
 
 Both are compared against the delay used to simulate.
@@ -146,14 +146,17 @@ Figure 3.1: plot of chunk compare
 ## 4 A growth rate that varies
 
 `pgrowth` takes a formula, so the rate can vary. Here each location has
-its own rate, drawn around the shared value.
+its own rate, drawn around the shared value. Each location is given its
+own seed, so they do not share random numbers.
 
 ``` r
 
 locations <- c(a = 0.2, b = 0.5, c = 0.8)
 
 by_location <- purrr::imap(locations, function(r, location) {
-  sim <- simulate_exponential_cases(r = r, sample_size = 300, seed = 1) |>
+  sim <- simulate_exponential_cases(
+    r = r, sample_size = 300, seed = match(location, names(locations))
+  ) |>
     simulate_secondary(meanlog = meanlog, sdlog = sdlog) |>
     simulate_dates(
       outbreak_start_date = as.Date("2024-01-01"), primary_window = window
@@ -197,34 +200,34 @@ day, which is the range `normal(0, 0.3)` allows.
 
 ``` r
 
-newdata <- epidist_newdata(marginal_locations, location = names(locations))
+location_draws <- marginal_locations |>
+  epidist_newdata(location = names(locations)) |>
+  add_delay_parameter_draws(fit_locations)
 
-epred <- tidybayes::add_epred_draws(newdata, fit_locations, dpar = "pgrowth")
+truth <- tibble(location = names(locations), pgrowth = locations)
 
-epred |>
-  ggplot(aes(x = pgrowth, y = location)) +
-  tidybayes::stat_halfeye(
-    fill = "#56B4E9", colour = "#2A5674", .width = c(0.5, 0.95)
-  ) +
-  geom_point(
-    data = tibble(location = names(locations), pgrowth = locations),
-    colour = "#D55E00", size = 3
-  ) +
-  labs(x = "Growth rate", y = "Location") +
-  theme_minimal()
+plot(location_draws, pars = "pgrowth") +
+  geom_vline(
+    aes(xintercept = pgrowth, colour = location),
+    data = truth,
+    linetype = "dashed",
+    show.legend = FALSE
+  )
 ```
 
-![plot of chunk
-location-estimates](figures/primary-events-location-estimates-1.png)
+![The posterior growth rate of each location. The dashed lines mark the
+rates the locations were simulated
+at.](figures/primary-events-location-estimates-1.png)
 
-Figure 4.1: plot of chunk location-estimates
+Figure 4.1: The posterior growth rate of each location. The dashed lines
+mark the rates the locations were simulated at.
 
 ### 4.1 Identifying the growth rate
 
 A delay shared across locations cannot absorb a difference in growth
 between them, so the rates are better determined than they are from any
 one location alone. Refitting these data with a delay per location
-widens the interval on every rate by about a fifth. They are still far
+widens the interval on every rate by about a tenth. They are still far
 from pinned down, so an informative prior remains worth having.
 
 ## 5 Summary

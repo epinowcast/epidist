@@ -127,7 +127,7 @@ Please check <code>brms</code> package updates if interested!</p>
 <h3 id="laplace-method">
 <span class="header-section-number">2.1</span> Laplace method<a class="anchor" aria-label="anchor" href="#laplace-method"></a>
 </h3>
-<p>The Laplace method approximates a posterior distribution by a Gaussian distribution centered (by default) at the posterior mode.
+<p>The Laplace method approximates a posterior distribution by a Gaussian distribution centred (by default) at the posterior mode.
 In Stan, the Gaussian approximation is constructed on the unconstrained parameter space (as the domain of a Gaussian distribution is the real line).
 Samples from the Gaussian approximation may then be transformed to the constrained parameter space.
 To access the Laplace method, specify <code>algorithm = "laplace"</code> within <code><a href="https://paulbuerkner.com/brms/reference/brm.html" class="external-link">brms::brm()</a></code>.
@@ -297,7 +297,7 @@ Click to expand for code to extract posterior draws
 <span><span class="co">#&gt;   &lt;fct&gt;      &lt;dbl&gt; &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1 HMC         1.75 0.460</span></span>
 <span><span class="co">#&gt; 2 Laplace     1.74 0.455</span></span>
-<span><span class="co">#&gt; 3 ADVI        1.79 0.540</span></span>
+<span><span class="co">#&gt; 3 ADVI        1.77 0.420</span></span>
 <span><span class="co">#&gt; 4 Pathfinder  1.74 0.456</span></span></code></pre></div>
 <p>More comprehensively, the estimated posterior distributions are shown in Figure <a href="#fig:posterior">3.1</a>.</p>
 <details><summary>
@@ -367,19 +367,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <span><span class="va">times</span></span>
 <span><span class="co">#&gt; $HMC</span></span>
 <span><span class="co">#&gt;    user  system elapsed</span></span>
-<span><span class="co">#&gt;   6.620   0.171   6.856</span></span>
+<span><span class="co">#&gt;  10.667   0.182  10.983</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; $Laplace</span></span>
 <span><span class="co">#&gt;    user  system elapsed</span></span>
-<span><span class="co">#&gt;   0.712   0.084   0.899</span></span>
+<span><span class="co">#&gt;   1.081   0.100   1.300</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; $ADVI</span></span>
 <span><span class="co">#&gt;    user  system elapsed</span></span>
-<span><span class="co">#&gt;   0.880   0.061   0.955</span></span>
+<span><span class="co">#&gt;   0.926   0.063   1.034</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; $Pathfinder</span></span>
 <span><span class="co">#&gt;    user  system elapsed</span></span>
-<span><span class="co">#&gt;   0.288   0.060   0.352</span></span></code></pre></div>
+<span><span class="co">#&gt;   0.383   0.070   0.527</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2" number="4">

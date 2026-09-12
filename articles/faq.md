@@ -15,7 +15,6 @@ library(brms)
 library(dplyr)
 library(ggplot2)
 library(scales)
-library(tidyr)
 
 set.seed(1)
 
@@ -32,44 +31,25 @@ sample_size <- 200
 base_data <- simulate_gillespie(seed = 101)
 base_data$location <- rbinom(n = nrow(base_data), size = 1, prob = 0.5)
 
-# Create location 0 data
-location_0_data <- base_data |>
-  filter(location == 0) |>
-  simulate_secondary(
-    meanlog = meanlog_0,
-    sdlog = sdlog_0
-  ) |>
-  select(case, ptime, delay, stime, location)
+# Simulate a delay from each primary event, with different parameters in
+# each location
+obs <- bind_rows(
+  base_data |>
+    filter(location == 0) |>
+    simulate_secondary(meanlog = meanlog_0, sdlog = sdlog_0),
+  base_data |>
+    filter(location == 1) |>
+    simulate_secondary(meanlog = meanlog_1, sdlog = sdlog_1)
+)
 
-# Create location 1 data
-location_1_data <- base_data |>
-  filter(location == 1) |>
-  simulate_secondary(
-    meanlog = meanlog_1,
-    sdlog = sdlog_1
-  ) |>
-  select(case, ptime, delay, stime, location)
-
-# Combine datasets
-obs_cens_trunc_samp <- bind_rows(location_0_data, location_1_data) |>
-  mutate(
-    ptime_lwr = floor(.data$ptime),
-    ptime_upr = .data$ptime_lwr + 1,
-    stime_lwr = floor(.data$stime),
-    stime_upr = .data$stime_lwr + 1,
-    obs_time = obs_time
-  ) |>
-  filter(.data$stime_upr <= .data$obs_time) |>
+# Floor the event times to daily reporting windows, drop the cases not yet
+# observed at obs_time, and take a sample
+obs_cens_trunc_samp <- obs |>
+  simulate_dates(obs_time = obs_time) |>
+  filter(.data$sdate_upr <= .data$obs_date) |>
   slice_sample(n = sample_size, replace = FALSE)
 
-linelist_data <- as_epidist_linelist_data(
-  obs_cens_trunc_samp$ptime_lwr,
-  obs_cens_trunc_samp$ptime_upr,
-  obs_cens_trunc_samp$stime_lwr,
-  obs_cens_trunc_samp$stime_upr,
-  obs_time = obs_cens_trunc_samp$obs_time,
-  covariates = data.frame(location = obs_cens_trunc_samp$location)
-)
+linelist_data <- as_epidist_linelist_data(obs_cens_trunc_samp)
 data <- as_epidist_marginal_model(linelist_data)
 
 fit <- epidist(
@@ -189,7 +169,7 @@ documentation](https://mc-stan.org/posterior/articles/rvar.html).
 
 The output of a call to `epidist` is compatible with typical Stan
 workflows. We recommend use of the
-[`bayesplot`](http://mc-stan.org/bayesplot/) package for sampling
+[`bayesplot`](https://mc-stan.org/bayesplot/) package for sampling
 diagnostic plots. For example, the function
 [`bayesplot::mcmc_trace()`](https://mc-stan.org/bayesplot/reference/MCMC-traces.html)
 can be used to produce traceplots for specified parameters.
@@ -217,7 +197,7 @@ epidist_diagnostics(fit)
     ## # A tibble: 1 × 8
     ##    time samples max_rhat divergent_transitions per_divergent_transitions
     ##   <dbl>   <dbl>    <dbl>                 <dbl>                     <dbl>
-    ## 1  2.18    1000     1.00                     0                         0
+    ## 1  3.57    1000     1.00                     0                         0
     ## # ℹ 3 more variables: max_treedepth <dbl>, no_at_max_treedepth <int>,
     ## #   per_at_max_treedepth <dbl>
 
@@ -311,7 +291,7 @@ containing the code for Park et al. ([2024](#ref-park2024estimating)).
 
 ### How are the default priors for `epidist` chosen?
 
-[`brms`](http://paulbuerkner.com/brms/) provides default priors for all
+[`brms`](https://paulbuerkner.com/brms/) provides default priors for all
 parameters. However, some of those priors do not make sense in the
 context of our application. Instead, we used [prior predictive
 checking](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)
@@ -380,23 +360,9 @@ pred <- fit_ppc |>
   add_delay_parameter_draws(fit_ppc) |>
   add_summaries()
 
-pred |>
-  as.data.frame() |>
-  pivot_longer(
-    cols = c("mu", "sigma", "mean", "sd"),
-    names_to = "parameter",
-    values_to = "value"
-  ) |>
-  filter(parameter %in% c("mean", "sd")) |>
-  ggplot(aes(x = value, y = after_stat(density))) +
-  geom_histogram() +
-  facet_wrap(. ~ parameter, scales = "free") +
-  labs(x = "", y = "Density") +
-  theme_minimal() +
+plot(pred, pars = c("mean", "sd")) +
   scale_x_log10(labels = comma)
 ```
-
-    ## `stat_bin()` using `bins = 30`. Pick better value `binwidth`.
 
 ![plot of chunk unnamed-chunk-9](figures/faq-unnamed-chunk-9-1.png)
 
@@ -439,7 +405,7 @@ Figure 4: plot of chunk unnamed-chunk-10
 
 ## What do the parameters in my model output correspond to?
 
-The `epidist` package uses [`brms`](http://paulbuerkner.com/brms/) to
+The `epidist` package uses [`brms`](https://paulbuerkner.com/brms/) to
 fit models. This means that the model output will include `brms`-style
 names for parameters. Here, we provide a table giving the correspondence
 between the distributional parameter names used in `brms` and those used
@@ -490,14 +456,13 @@ one) then:
 
 library(tidybayes)
 draws_pmf <- tibble::tibble(
-  relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA
+  relative_obs_time = Inf, pwindow = 1, swindow = 1, delay_upr = NA,
+  delay_min = 0
 ) |>
   add_predicted_draws(fit)
 ```
 
-    ## Error in `validate_data()`:
-    ## ! The following variables can neither be found in 'data' nor in 'data2':
-    ## 'delay_min'
+    ## Warning: Found infinite values in the data, which may cause issues for Stan.
 
 ``` r
 
@@ -508,10 +473,10 @@ ggplot(draws_pmf, aes(x = .prediction)) +
   theme_minimal()
 ```
 
-    ## Warning: Removed 1 row containing non-finite outside the scale range
+    ## Warning: Removed 2 rows containing non-finite outside the scale range
     ## (`stat_count()`).
 
-    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## Warning: Removed 1 row containing missing values or values outside the scale range
     ## (`geom_bar()`).
 
 ![plot of chunk unnamed-chunk-11](figures/faq-unnamed-chunk-11-1.png)

@@ -47,7 +47,7 @@ updated. Please check `brms` package updates if interested!
 ### 2.1 Laplace method
 
 The Laplace method approximates a posterior distribution by a Gaussian
-distribution centered (by default) at the posterior mode. In Stan, the
+distribution centred (by default) at the posterior mode. In Stan, the
 Gaussian approximation is constructed on the unconstrained parameter
 space (as the domain of a Gaussian distribution is the real line).
 Samples from the Gaussian approximation may then be transformed to the
@@ -278,7 +278,7 @@ pars
 #>   <fct>      <dbl> <dbl>
 #> 1 HMC         1.75 0.460
 #> 2 Laplace     1.74 0.455
-#> 3 ADVI        1.79 0.540
+#> 3 ADVI        1.77 0.420
 #> 4 Pathfinder  1.74 0.456
 ```
 
@@ -367,19 +367,19 @@ times <- list(
 times
 #> $HMC
 #>    user  system elapsed
-#>   6.620   0.171   6.856
+#>  10.667   0.182  10.983
 #>
 #> $Laplace
 #>    user  system elapsed
-#>   0.712   0.084   0.899
+#>   1.081   0.100   1.300
 #>
 #> $ADVI
 #>    user  system elapsed
-#>   0.880   0.061   0.955
+#>   0.926   0.063   1.034
 #>
 #> $Pathfinder
 #>    user  system elapsed
-#>   0.288   0.060   0.352
+#>   0.383   0.070   0.527
 ```
 
 ## 4 Conclusion
