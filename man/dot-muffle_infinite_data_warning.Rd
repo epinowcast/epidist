@@ -18,6 +18,6 @@ The value of \code{expr}.
 Muffles only the warning \code{\link[=.infinite_data_warning]{.infinite_data_warning()}} matches, through the
 \code{muffleWarning} restart, so every other warning \code{expr} raises is left to
 propagate. The restart is only invoked when it exists, so a condition
-signalled without one is passed on rather than erroring.
+signalled without one is passed on rather than raising an error.
 }
 \keyword{internal}
