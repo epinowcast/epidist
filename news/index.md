@@ -761,6 +761,12 @@
   the development version and for historical releases. The text now
   lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is
   included by the README, so it can be reused elsewhere.
+- The `faq` and `left-truncation` vignettes now build their simulated
+  dates with
+  [`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md)
+  and plot posterior draws with the package
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method, in
+  place of hand rolled equivalents.
 
 ### CI
 

@@ -175,6 +175,7 @@
 <li>Added a <code>left-truncation</code> vignette showing how to use <code>delay_min</code>. See <a href="https://github.com/epinowcast/epidist/issues/596" class="external-link">#596</a>.</li>
 <li>Documented installing from CRAN in the README, with <code>r-universe</code> as the route to the latest version.</li>
 <li>Restructured the README install instructions to match <code>primarycensored</code>, with CRAN first, then <code>r-universe</code>, then <code>pak</code> for the development version and for historical releases. The text now lives in <code>vignettes/chunks/_readme-install-epidist.Rmd</code> and is included by the README, so it can be reused elsewhere.</li>
+<li>The <code>faq</code> and <code>left-truncation</code> vignettes now build their simulated dates with <code><a href="../reference/simulate_dates.html">simulate_dates()</a></code> and plot posterior draws with the package <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method, in place of hand rolled equivalents.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="ci-0-5-0">CI<a class="anchor" aria-label="anchor" href="#ci-0-5-0"></a></h3>
