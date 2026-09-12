@@ -3,7 +3,7 @@
 # over the window, so the estimands of a cohort study have no tilt.
 study_linelist <- function(n, r = 0, t = 60, meanlog = 1.8, sdlog = 0.5) {
   cases <- simulate_exponential_cases(r = r, sample_size = n, t = t) |>
-    simulate_secondary(dist = rlnorm, meanlog = meanlog, sdlog = sdlog) |>
+    simulate_secondary(distspec::LogNormal(meanlog, sdlog)) |>
     simulate_dates(keep_times = TRUE)
   return(suppressMessages(as_epidist_linelist_data(cases)))
 }
@@ -132,7 +132,7 @@ test_that("simulate_study passes the study metadata through", {
 
 test_that("simulate_study needs the exact event times", {
   no_times <- simulate_exponential_cases(r = 0, sample_size = 50, t = 10) |>
-    simulate_secondary(dist = rlnorm, meanlog = 1.8, sdlog = 0.5) |>
+    simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
     simulate_dates() |>
     as_epidist_linelist_data() |>
     suppressMessages()
@@ -167,7 +167,7 @@ test_that("simulate_study truncates by the study time, not the line list", {
   # observed at 120 days must still lose its long delays.
   set.seed(17)
   cases <- simulate_exponential_cases(r = 0, sample_size = 5000, t = 60) |>
-    simulate_secondary(dist = rlnorm, meanlog = 1.8, sdlog = 0.5) |>
+    simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
     simulate_dates(keep_times = TRUE, obs_time = 120)
   linelist <- suppressMessages(as_epidist_linelist_data(cases))
   expect_true(all(linelist$obs_time == 120))

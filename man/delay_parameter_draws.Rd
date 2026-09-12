@@ -37,7 +37,7 @@ natural scale mean and standard deviation of the delay. Use
 \code{\link[=add_summaries]{add_summaries()}} to add those.
 
 \code{add_delay_parameter_draws()} is the same function with \code{newdata} first, for
-use at the start of a pipeline as with \code{\link[tidybayes:add_predicted_draws]{tidybayes::add_epred_draws()}}.
+use at the start of a pipeline as with \code{\link[tidybayes:add_epred_draws]{tidybayes::add_epred_draws()}}.
 }
 \details{
 The returned columns follow the \code{tidybayes} conventions. The columns of
@@ -74,9 +74,10 @@ fit |>
 \code{\link[=epidist_strata]{epidist_strata()}} to build \code{newdata}, and \code{\link[=plot.epidist_delay_draws]{plot.epidist_delay_draws()}}
 to plot the draws.
 
-Other postprocess: 
-\code{\link{add_summaries}()},
-\code{\link{delay_summary_draws}()},
-\code{\link{epidist_strata}()}
+Other postprocess:
+\code{\link[=add_summaries]{add_summaries()}},
+\code{\link[=as_dist_spec.epidist_fit]{as_dist_spec.epidist_fit()}},
+\code{\link[=delay_summary_draws]{delay_summary_draws()}},
+\code{\link[=epidist_strata]{epidist_strata()}}
 }
 \concept{postprocess}

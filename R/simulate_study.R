@@ -102,7 +102,7 @@
 #' @export
 #' @examples
 #' linelist <- simulate_gillespie(seed = 1) |>
-#'   simulate_secondary(meanlog = 1.8, sdlog = 0.5) |>
+#'   simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
 #'   simulate_dates(keep_times = TRUE) |>
 #'   as_epidist_linelist_data()
 #' simulate_study(

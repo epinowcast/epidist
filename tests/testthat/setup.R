@@ -9,11 +9,7 @@ sdlog <- 0.5
 # The mean of the lognormal distribution is: exp(meanlog + 0.5 * sdlog^2)
 
 sim_obs <- simulate_gillespie() |>
-  simulate_secondary(
-    dist = rlnorm,
-    meanlog = meanlog,
-    sdlog = sdlog
-  ) |>
+  simulate_secondary(distspec::LogNormal(meanlog, sdlog)) |>
   dplyr::mutate(
     ptime_lwr = floor(.data$ptime),
     ptime_upr = .data$ptime_lwr + 1,
@@ -44,11 +40,7 @@ rate <- 1 / 3
 mu <- shape / rate
 
 sim_obs_gamma <- simulate_gillespie() |>
-  simulate_secondary(
-    dist = rgamma,
-    shape = shape,
-    rate = rate
-  ) |>
+  simulate_secondary(distspec::Gamma(shape = shape, rate = rate)) |>
   dplyr::mutate(
     ptime_lwr = floor(.data$ptime),
     ptime_upr = .data$ptime_lwr + 1,
@@ -75,9 +67,7 @@ scale_weibull <- 7
 
 sim_obs_weibull <- simulate_gillespie() |>
   simulate_secondary(
-    dist = rweibull,
-    shape = shape_weibull,
-    scale = scale_weibull
+    distspec::Weibull(shape = shape_weibull, scale = scale_weibull)
   ) |>
   dplyr::mutate(
     ptime_lwr = floor(.data$ptime),
@@ -112,19 +102,11 @@ sim_obs_sex <- simulate_gillespie()
 sim_obs_sex$sex <- rbinom(n = nrow(sim_obs_sex), size = 1, prob = 0.5)
 
 sim_obs_sex_m <- dplyr::filter(sim_obs_sex, sex == 0) |>
-  simulate_secondary(
-    dist = rlnorm,
-    meanlog = meanlog_m,
-    sdlog = sdlog_m
-  ) |>
+  simulate_secondary(distspec::LogNormal(meanlog_m, sdlog_m)) |>
   dplyr::select(case, ptime, delay, stime, sex)
 
 sim_obs_sex_f <- dplyr::filter(sim_obs_sex, sex == 1) |>
-  simulate_secondary(
-    dist = rlnorm,
-    meanlog = meanlog_f,
-    sdlog = sdlog_f
-  ) |>
+  simulate_secondary(distspec::LogNormal(meanlog_f, sdlog_f)) |>
   dplyr::select(case, ptime, delay, stime, sex)
 
 sim_obs_sex <- dplyr::bind_rows(sim_obs_sex_m, sim_obs_sex_f) |>
@@ -158,11 +140,7 @@ set.seed(101)
 overlap_n <- sample_size
 
 sim_obs_overlap <- simulate_gillespie(seed = 101) |>
-  simulate_secondary(
-    dist = rlnorm,
-    meanlog = meanlog,
-    sdlog = sdlog
-  ) |>
+  simulate_secondary(distspec::LogNormal(meanlog, sdlog)) |>
   dplyr::mutate(
     ptime_lwr = 7 * floor(.data$ptime / 7),
     ptime_upr = .data$ptime_lwr + 7,

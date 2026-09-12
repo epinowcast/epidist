@@ -121,7 +121,7 @@ passed to \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} 
 }
 \examples{
 linelist <- simulate_gillespie(seed = 1) |>
-  simulate_secondary(meanlog = 1.8, sdlog = 0.5) |>
+  simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
   simulate_dates(keep_times = TRUE) |>
   as_epidist_linelist_data()
 simulate_study(
@@ -130,11 +130,11 @@ simulate_study(
 )
 }
 \seealso{
-Other simulate: 
-\code{\link{simulate_dates}()},
-\code{\link{simulate_exponential_cases}()},
-\code{\link{simulate_gillespie}()},
-\code{\link{simulate_secondary}()},
-\code{\link{simulate_uniform_cases}()}
+Other simulate:
+\code{\link[=simulate_dates]{simulate_dates()}},
+\code{\link[=simulate_exponential_cases]{simulate_exponential_cases()}},
+\code{\link[=simulate_gillespie]{simulate_gillespie()}},
+\code{\link[=simulate_secondary]{simulate_secondary()}},
+\code{\link[=simulate_uniform_cases]{simulate_uniform_cases()}}
 }
 \concept{simulate}

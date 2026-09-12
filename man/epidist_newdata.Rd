@@ -38,7 +38,7 @@ truncation. Set \code{pwindow} and \code{swindow} to ask for censoring, and
 for the arguments it takes.
 
 The result is a plain \code{\link[tibble:tibble]{tibble::tibble()}}. Pass it to
-\code{\link[brms:posterior_epred.brmsfit]{brms::posterior_epred()}}, \code{\link[brms:posterior_predict.brmsfit]{brms::posterior_predict()}},
+\code{\link[brms:posterior_epred]{brms::posterior_epred()}}, \code{\link[brms:posterior_predict]{brms::posterior_predict()}},
 \code{\link[=add_delay_parameter_draws]{add_delay_parameter_draws()}} or \code{\link[=delay_parameter_draws]{delay_parameter_draws()}}, or to the
 \code{tidybayes} functions \code{add_epred_draws()} and \code{add_predicted_draws()}.
 }
@@ -57,11 +57,11 @@ epidist_newdata(prep_obs)
 epidist_newdata(prep_obs, sex)
 }
 \seealso{
-Other newdata: 
-\code{\link{epidist_newdata.default}()},
-\code{\link{epidist_newdata.epidist_latent_model}()},
-\code{\link{epidist_newdata.epidist_marginal_model}()},
-\code{\link{epidist_newdata.epidist_meta_model}()},
-\code{\link{epidist_newdata.epidist_naive_model}()}
+Other newdata:
+\code{\link[=epidist_newdata.default]{epidist_newdata.default()}},
+\code{\link[=epidist_newdata.epidist_latent_model]{epidist_newdata.epidist_latent_model()}},
+\code{\link[=epidist_newdata.epidist_marginal_model]{epidist_newdata.epidist_marginal_model()}},
+\code{\link[=epidist_newdata.epidist_meta_model]{epidist_newdata.epidist_meta_model()}},
+\code{\link[=epidist_newdata.epidist_naive_model]{epidist_newdata.epidist_naive_model()}}
 }
 \concept{newdata}

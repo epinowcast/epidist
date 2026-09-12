@@ -54,16 +54,16 @@ output can be passed straight to it.
 }
 \examples{
 simulate_gillespie(seed = 1) |>
-  simulate_secondary(meanlog = 1.8, sdlog = 0.5) |>
+  simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
   simulate_dates(outbreak_start_date = as.Date("2024-02-01")) |>
   head()
 }
 \seealso{
-Other simulate: 
-\code{\link{simulate_exponential_cases}()},
-\code{\link{simulate_gillespie}()},
-\code{\link{simulate_secondary}()},
-\code{\link{simulate_study}()},
-\code{\link{simulate_uniform_cases}()}
+Other simulate:
+\code{\link[=simulate_exponential_cases]{simulate_exponential_cases()}},
+\code{\link[=simulate_gillespie]{simulate_gillespie()}},
+\code{\link[=simulate_secondary]{simulate_secondary()}},
+\code{\link[=simulate_study]{simulate_study()}},
+\code{\link[=simulate_uniform_cases]{simulate_uniform_cases()}}
 }
 \concept{simulate}

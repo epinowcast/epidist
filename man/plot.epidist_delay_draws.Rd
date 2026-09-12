@@ -109,7 +109,7 @@ plot(draws, type = "delay", ndraws = 50)
 \code{\link[=delay_parameter_draws]{delay_parameter_draws()}} and \code{\link[=delay_summary_draws]{delay_summary_draws()}} for the
 draws, and \code{\link[=plot_events]{plot_events()}} to plot the data.
 
-Other plot: 
-\code{\link{plot_events}()}
+Other plot:
+\code{\link[=plot_events]{plot_events()}}
 }
 \concept{plot}

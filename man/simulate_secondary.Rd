@@ -4,30 +4,60 @@
 \alias{simulate_secondary}
 \title{Simulate secondary events based on a delay distribution}
 \usage{
-simulate_secondary(data, dist = rlnorm, ...)
+simulate_secondary(data, dist)
 }
 \arguments{
 \item{data}{A data frame with the primary event times.}
 
-\item{dist}{The delay distribution to be used. Defaults to \code{\link[=rlnorm]{rlnorm()}}.}
-
-\item{...}{Arguments to be passed to the delay distribution function.}
+\item{dist}{The delay distribution to be used, as a \verb{<dist_spec>} built with
+a \code{distspec} constructor such as \code{\link[distspec:LogNormal]{distspec::LogNormal()}}, or returned by
+\code{\link[=as_dist_spec.epidist_fit]{as_dist_spec.epidist_fit()}}.}
 }
 \value{
 A \code{data.frame} that augments \code{data} with two new columns: \code{delay}
 (secondary event latency) and \code{stime} (the time of the secondary event).
 }
 \description{
-This function simulates secondary events based on a given delay
-distribution. The input dataset should have the primary event times in a
-column named \code{ptime}.
+This function simulates secondary events from a delay distribution given as
+a \verb{<dist_spec>} from the \code{distspec} package. The input dataset should have
+the primary event times in a column named \code{ptime}.
+}
+\details{
+Delays are drawn with \code{\link[distspec:sample_dist]{distspec::sample_dist()}}. When \code{dist} has uncertain
+parameters, as returned by \code{\link[=as_dist_spec.epidist_fit]{as_dist_spec.epidist_fit()}}, the parameters are
+resolved once per row with \code{\link[distspec:fix_parameters]{distspec::fix_parameters()}} before the delay is
+drawn. The simulated delays then carry the parameter uncertainty as well as
+the spread of the delay distribution itself.
+
+\code{\link[distspec:sample_dist]{distspec::sample_dist()}} does not apply the bounds set with \code{max} or
+\code{cdf_max}, so a bounded \code{dist} gives the same delays as an unbounded one.
+Passing a bounded \code{dist} warns for that reason.
+
+\code{distspec} supports a fixed set of distributions. Open an issue at
+\url{https://github.com/epiforecasts/distspec/issues} to ask for another one.
+}
+\examples{
+simulate_gillespie(seed = 1) |>
+  simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
+  head()
+
+# An uncertain delay distribution, such as one exported from a fit with
+# as_dist_spec(), is resolved once per row
+simulate_gillespie(seed = 1) |>
+  simulate_secondary(
+    distspec::LogNormal(
+      meanlog = distspec::Normal(mean = 1.8, sd = 0.1),
+      sdlog = 0.5
+    )
+  ) |>
+  head()
 }
 \seealso{
-Other simulate: 
-\code{\link{simulate_dates}()},
-\code{\link{simulate_exponential_cases}()},
-\code{\link{simulate_gillespie}()},
-\code{\link{simulate_study}()},
-\code{\link{simulate_uniform_cases}()}
+Other simulate:
+\code{\link[=simulate_dates]{simulate_dates()}},
+\code{\link[=simulate_exponential_cases]{simulate_exponential_cases()}},
+\code{\link[=simulate_gillespie]{simulate_gillespie()}},
+\code{\link[=simulate_study]{simulate_study()}},
+\code{\link[=simulate_uniform_cases]{simulate_uniform_cases()}}
 }
 \concept{simulate}

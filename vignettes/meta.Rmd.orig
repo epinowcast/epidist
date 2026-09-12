@@ -99,7 +99,7 @@ outbreak_start_date <- as.Date("2024-01-01")
 outbreak <- simulate_gillespie(r = growth_rate, seed = 101)
 obs <- simulate_secondary(
   outbreak,
-  dist = rlnorm, meanlog = meanlog, sdlog = sdlog
+  distspec::LogNormal(meanlog = meanlog, sdlog = sdlog)
 )
 obs_cens <- simulate_dates(
   obs,
