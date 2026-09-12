@@ -363,10 +363,9 @@ test_that("the generic log likelihood matches dpcens() under truncation", {
 })
 
 test_that("the generic log likelihood rejects a delay beyond the observation time", { # nolint: line_length_linter.
-  # `dpcens()` will not give a usable answer for an upper bound beyond D, and
-  # the refactor integrates with `pcens_cdf()` instead, so the same guard has
-  # to be applied here. Without it the truncation normalisation can return a
-  # density above one.
+  # `dpcens()` clips the upper end of the interval at D rather than erroring,
+  # so it answers a different question from the one asked and the guard has
+  # to be applied here.
   skip_on_cran()
 
   upper_beyond_d <- function() {
@@ -375,14 +374,7 @@ test_that("the generic log likelihood rejects a delay beyond the observation tim
       pwindow = 1, swindow = 1, D = 5.5, dprimary = stats::dunif
     ))
   }
-  # primarycensored errored on this until 1.5.2, which clips the interval at
-  # D and returns a density instead. Either way it refuses to answer the
-  # question as asked, which is what the guard below is for.
-  if (package_version(getNamespaceVersion("primarycensored")) < "1.5.2") {
-    expect_error(upper_beyond_d(), "Upper truncation point is greater than D")
-  } else {
-    expect_message(upper_beyond_d(), "clipping the upper end")
-  }
+  expect_message(upper_beyond_d(), "clipping the upper end")
 
   log_lik <- epidist_gen_log_lik(epidist_family(prep_obs))
   prep <- list(
