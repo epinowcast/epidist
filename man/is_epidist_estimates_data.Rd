@@ -4,12 +4,10 @@
 \alias{is_epidist_estimates_data}
 \title{Check if data has the \code{epidist_estimates_data} class}
 \usage{
-is_epidist_estimates_data(data, ...)
+is_epidist_estimates_data(data)
 }
 \arguments{
 \item{data}{The data to convert}
-
-\item{...}{Additional arguments}
 }
 \value{
 A logical, \code{TRUE} if \code{data} inherits from \code{epidist_estimates_data}

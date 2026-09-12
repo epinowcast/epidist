@@ -171,8 +171,6 @@ ungroup.epidist_data <- function(x, ...) {
 #'
 #' @param data An object.
 #'
-#' @param ... Additional arguments
-#'
 #' @returns A logical, `TRUE` if `data` inherits from `epidist_data` and
 #'  `FALSE` otherwise.
 #'
@@ -185,7 +183,7 @@ ungroup.epidist_data <- function(x, ...) {
 #'     sdate_lwr = "date_of_sample_tested"
 #'   ) |>
 #'   is_epidist_data()
-is_epidist_data <- function(data, ...) {
+is_epidist_data <- function(data) {
   return(inherits(data, "epidist_data"))
 }
 

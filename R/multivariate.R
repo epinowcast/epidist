@@ -187,7 +187,7 @@ new_epidist_multivariate <- function(
 
 #' Check if an object has the `epidist_multivariate` class
 #'
-#' @param x An object.
+#' @param data An object.
 #'
 #' @returns A logical.
 #'
@@ -195,8 +195,8 @@ new_epidist_multivariate <- function(
 #' @export
 #' @examples
 #' is_epidist_multivariate(1)
-is_epidist_multivariate <- function(x) {
-  return(inherits(x, "epidist_multivariate"))
+is_epidist_multivariate <- function(data) {
+  return(inherits(data, "epidist_multivariate"))
 }
 
 #' Assert validity of `epidist_multivariate` objects
