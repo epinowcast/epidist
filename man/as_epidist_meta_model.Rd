@@ -61,6 +61,8 @@ observation is therefore a group rather than a single reported value, so
 \code{log_lik()} and \code{\link[loo:loo]{loo::loo()}} report per group, and \code{loo} only compares
 fits to the same studies and the same mix of individual and summary rows.
 See \code{vignette("faq")}.
+\code{\link[=epidist_leave_one_out]{epidist_leave_one_out()}} asks the study level question instead, refitting
+with each study held out.
 
 Three consequences of the sampling likelihoods change what you should do.
 \itemize{
@@ -143,6 +145,7 @@ Other meta_model:
 \code{\link{assert_epidist.epidist_meta_model}()},
 \code{\link{epidist_family_model.epidist_meta_model}()},
 \code{\link{epidist_formula_model.epidist_meta_model}()},
+\code{\link{epidist_leave_one_out}()},
 \code{\link{epidist_model_prior.epidist_meta_model}()},
 \code{\link{epidist_newdata.epidist_meta_model}()},
 \code{\link{epidist_transform_data_model.epidist_meta_model}()},

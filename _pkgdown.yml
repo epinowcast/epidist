@@ -90,6 +90,7 @@ reference:
   desc: Functions for postprocessing model output
   contents:
   - has_concept("postprocess")
+  - epidist_leave_one_out
 - subtitle: Diagnostic functions
   contents:
   - has_concept("diagnostics")

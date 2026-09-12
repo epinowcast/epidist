@@ -167,6 +167,11 @@ The draws now carry the `epidist_delay_draws` class, which records the family an
 The vignettes now use it in place of the plots they drew by hand.
 Closes #670.
 - Both plot functions use `ggplot2::theme_minimal()` and a colour blind friendly palette, so that their output matches the plots in the package documentation.
+- Added `epidist_leave_one_out()`, which refits a meta model once per study with that study held out and compares the delay mean and standard deviation of each refit with the full fit.
+It reports the posterior median and interval of both, a shift standardised by the full fit's posterior standard deviation, and flags a study whose removal moves the estimate outside the full fit's interval.
+Individual level rows are held out together as the `"individual"` study.
+`vignette("meta")` uses it on the Ebola estimates.
+Closes #642.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
 It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
 Each step is still available on its own.

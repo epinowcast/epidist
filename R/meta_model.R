@@ -41,6 +41,8 @@
 #' `log_lik()` and [loo::loo()] report per group, and `loo` only compares
 #' fits to the same studies and the same mix of individual and summary rows.
 #' See `vignette("faq")`.
+#' [epidist_leave_one_out()] asks the study level question instead, refitting
+#' with each study held out.
 #'
 #' Three consequences of the sampling likelihoods change what you should do.
 #'

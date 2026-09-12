@@ -74,6 +74,7 @@ Other meta_model:
 \code{\link{assert_epidist.epidist_meta_model}()},
 \code{\link{epidist_family_model.epidist_meta_model}()},
 \code{\link{epidist_formula_model.epidist_meta_model}()},
+\code{\link{epidist_leave_one_out}()},
 \code{\link{epidist_model_prior.epidist_meta_model}()},
 \code{\link{epidist_newdata.epidist_meta_model}()},
 \code{\link{epidist_transform_data_model.epidist_meta_model}()},
