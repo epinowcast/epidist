@@ -11,6 +11,9 @@ utils::globalVariables(c(
   ".data", # <plot_events>
   ".data", # <.plot_parameter_draws>
   ".data", # <.plot_delay_draws>
+  ".data", # <plot_delays>
+  ".data", # <.bin_delays>
+  ".data", # <.delay_reference_layer>
   "rlnorm", # <simulate_secondary>
   ".data", # <simulate_secondary>
   ".data", # <simulate_dates>

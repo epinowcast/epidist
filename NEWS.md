@@ -166,7 +166,10 @@ The draws now carry the `epidist_delay_draws` class, which records the family an
 `ggplot2::autoplot()` works too.
 The vignettes now use it in place of the plots they drew by hand.
 Closes #670.
-- Both plot functions use `ggplot2::theme_minimal()` and a colour blind friendly palette, so that their output matches the plots in the package documentation.
+- Added `plot_delays()`, which draws the observed delay distribution of an `epidist_linelist_data` or `epidist_aggregate_data` object, binned and as a proportion of the cases.
+It compares a named list of datasets, weights aggregate data by its counts, overlays a reference delay distribution and marks a minimum delay.
+Closes #743.
+- The plot functions use `ggplot2::theme_minimal()` and a colour blind friendly palette, so that their output matches the plots in the package documentation.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
 It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
 Each step is still available on its own.
