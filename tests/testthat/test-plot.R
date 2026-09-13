@@ -90,7 +90,7 @@ test_that("plot functions error when ggplot2 is not installed", {
 # Draws of a lognormal delay with an optional second stratum, built as
 # delay_parameter_draws() builds them
 fake_delay_draws <- function(n = 100, strata = FALSE) {
-  set.seed(1)
+  withr::local_seed(1)
   draws <- tibble::tibble(
     .row = 1L,
     .draw = seq_len(n),
@@ -223,7 +223,7 @@ test_that("plot.epidist_delay_draws draws one line per row of the draws", {
 
 test_that("plot.epidist_delay_draws simulates for a family with no density", {
   skip_if_not_installed("ggplot2")
-  set.seed(1)
+  withr::local_seed(1)
   draws <- .new_delay_draws(
     data.frame(mu = rnorm(20, 5, 0.1)),
     .delay_family(brms::brmsfamily("exponential"))

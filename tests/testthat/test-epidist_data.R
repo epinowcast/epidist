@@ -309,3 +309,26 @@ test_that("converting a hand built linelist checks it first", {
   expect_error(as_epidist_marginal_model(invalid))
   expect_error(as_epidist_naive_model(invalid))
 })
+
+test_that("the is_epidist_*() predicates share one signature", {
+  predicates <- c(
+    "is_epidist_data",
+    "is_epidist_linelist_data",
+    "is_epidist_aggregate_data",
+    "is_epidist_estimates_data",
+    "is_epidist_latent_model",
+    "is_epidist_marginal_model",
+    "is_epidist_naive_model",
+    "is_epidist_meta_model",
+    "is_epidist_multivariate"
+  )
+  signatures <- lapply(predicates, function(predicate) {
+    return(names(formals(match.fun(predicate))))
+  })
+  names(signatures) <- predicates
+
+  expect_identical(
+    signatures,
+    stats::setNames(rep(list("data"), length(predicates)), predicates)
+  )
+})
