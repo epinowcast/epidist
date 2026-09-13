@@ -6,22 +6,12 @@ not_on_cran <- function() {
   return(identical(Sys.getenv("NOT_CRAN"), "true"))
 }
 
-has_cmdstanr <- function() {
-  if (!requireNamespace("cmdstanr", quietly = TRUE)) {
-    return(FALSE)
-  }
-  installed <- try(
-    cmdstanr::cmdstan_version(error_on_NA = FALSE),
-    silent = TRUE
-  )
-  return(!inherits(installed, "try-error") && !is.null(installed))
-}
-
-skip_if_no_cmdstanr <- function() {
-  if (has_cmdstanr()) {
+# `fits_available` is set in setup.R, which builds the shared model fits.
+skip_if_no_fits <- function() {
+  if (exists("fits_available") && isTRUE(fits_available)) {
     return(invisible(TRUE))
   }
-  return(testthat::skip("cmdstanr or CmdStan is not available"))
+  return(testthat::skip("the shared model fits were not built"))
 }
 
 skip_on_local <- function() {

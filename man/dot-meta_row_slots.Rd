@@ -20,4 +20,12 @@ Group rows point into the flat member arrays passed to Stan as data, so the
 reported values and cumulative counts of the group are read back out here
 for the R mirrors of the joint likelihoods.
 }
+\details{
+A row whose \code{growth_known} slot is 0 estimates its growth rate as the
+\code{pgrowth} distributional parameter, so its \code{growth_rate} element holds one
+value per posterior draw rather than the number in the slot. Everything
+that works one draw at a time takes the slots of that draw from
+\code{\link[=.meta_draw_slots]{.meta_draw_slots()}}. A fit made before the slot existed has no
+\code{growth_known} and every row of it is known.
+}
 \keyword{internal}

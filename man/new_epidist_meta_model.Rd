@@ -11,7 +11,8 @@ new_epidist_meta_model(data, primary = .primary_choices())
 
 \item{primary}{The primary event distribution of the individual level
 rows, \code{"uniform"} or \code{"expgrowth"}. Summary rows use their \code{growth_rate}
-metadata instead.}
+metadata instead, or the \code{pgrowth} parameter where their \code{growth_known}
+slot is 0.}
 }
 \value{
 An object of class \code{epidist_meta_model}

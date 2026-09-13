@@ -80,7 +80,7 @@ epidist_prior <- function(
 #'
 #' @keywords internal
 .internal_prior <- function(data, family, formula, default) {
-  model <- epidist_model_prior(data, formula)
+  model <- epidist_model_prior(data, formula, default = default)
   if (!is.null(model)) {
     model$source <- "model"
   }
@@ -229,21 +229,42 @@ epidist_model_prior.default <- function(data, formula, ...) {
 #' formula has no group level term. The prior on the intercept of the other
 #' distributional parameters is left to the family or to `brms`.
 #'
+#' Where a summary row estimates its growth rate as the `pgrowth`
+#' distributional parameter, see [as_epidist_meta_model()], the coefficients
+#' and intercept of `pgrowth` get a `normal(0, 0.25)` prior, which is weakly
+#' informative for a delay measured in days, because the `brms` default is
+#' flat and the summaries carry little information about the rate. A study
+#' that reported its rate with a `growth_rate_sd` gets a normal prior with
+#' that centre and spread on its own coefficient, which exists under the
+#' default `pgrowth ~ 0 + study` formula, or on the intercept of `pgrowth`
+#' where it is the only study. Under another `pgrowth` formula the reported
+#' rates have no coefficient to act on and are dropped with a warning, so
+#' set their priors yourself.
+#'
 #' @inheritParams epidist
+#' @param default The default prior distributions from
+#'  [brms::default_prior()], which [epidist_prior()] passes so that they are
+#'  not built twice. Built here where missing.
 #' @method epidist_model_prior epidist_meta_model
 #' @family prior
 #' @family meta_model
 #' @returns A `brmsprior` object, or `NULL` when the model adds no priors.
 #'
 #' @export
-epidist_model_prior.epidist_meta_model <- function(data, formula, ...) {
+epidist_model_prior.epidist_meta_model <- function(
+  data,
+  formula,
+  default = NULL,
+  ...
+) {
+  growth <- .meta_growth_prior(data, formula, default)
   link <- formula$family$link
   if (all(data$obs_type == 1L) || is.null(link)) {
-    return(NULL)
+    return(growth)
   }
   lognormal <- identical(.delay_family(formula$family)$name, "lognormal")
   if (link != "log" && !(lognormal && link == "identity")) {
-    return(NULL)
+    return(growth)
   }
   # Between study spread on the scale of the linear predictor, for every
   # distributional parameter. A study random effect on the log of a delay
@@ -259,8 +280,99 @@ epidist_model_prior.epidist_meta_model <- function(data, formula, ...) {
   )
   return(do.call(c, c(
     list(set_prior("normal(1, 1)", class = "Intercept")),
-    spread
+    spread,
+    list(growth)
   )))
+}
+
+#' Prior distributions for the growth rate of summary rows
+#'
+#' See [epidist_model_prior.epidist_meta_model()].
+#'
+#' @param data An `epidist_meta_model` object, optionally holding a `study`
+#'  and a `growth_rate_sd` column.
+#'
+#' @param formula A `brmsformula` object whose `family$dpars` say whether
+#'  the model estimates `pgrowth`.
+#'
+#' @param default The result of `brms::default_prior()` on `data` and
+#'  `formula`, or `NULL` to compute it here.
+#'
+#' @returns A `brmsprior` object, or `NULL` where no summary row estimates
+#'  its growth rate.
+#'
+#' @keywords internal
+.meta_growth_prior <- function(data, formula, default = NULL) {
+  if (
+    !"pgrowth" %in% formula$family$dpars || !.meta_growth_estimated(data)
+  ) {
+    return(NULL)
+  }
+  prior <- set_prior("normal(0, 0.25)", class = "b", dpar = "pgrowth") +
+    set_prior("normal(0, 0.25)", class = "Intercept", dpar = "pgrowth")
+  if (!all(hasName(data, c("study", "growth_rate_sd")))) {
+    return(prior)
+  }
+  plain <- tibble::as_tibble(unclass(data))
+  reported <- plain[
+    plain$obs_type != 1L & plain$growth_known == 0L &
+      !is.na(plain$growth_rate_sd) & plain$growth_rate_sd > 0,
+    c("study", "growth_rate", "growth_rate_sd"),
+    drop = FALSE
+  ]
+  reported <- unique(reported)
+  if (nrow(reported) == 0) {
+    return(prior)
+  }
+  if (is.null(default)) {
+    default <- brms::default_prior(formula, data = data)
+  }
+  growth <- default[default$dpar == "pgrowth", , drop = FALSE]
+  coefs <- growth$coef[growth$class == "b" & nzchar(growth$coef)]
+  # `0 + study` orders its `b` coefficients by the levels of the study
+  # factor, whatever punctuation `brms` mangles into each coefficient name,
+  # so pair them up by position rather than re-deriving the mangling.
+  study_levels <- levels(factor(plain$study))
+  coef_lookup <- character(0)
+  if (length(coefs) == length(study_levels)) {
+    coef_lookup <- stats::setNames(coefs, study_levels)
+  }
+  coef_name <- unname(coef_lookup[as.character(reported$study)])
+  matched <- !is.na(coef_name)
+  # The only study of a model has the intercept to itself.
+  if (
+    nrow(reported) == 1 && length(unique(plain$study)) == 1 &&
+      !any(matched) && "Intercept" %in% growth$class
+  ) {
+    return(.replace_prior(prior, set_prior(
+      sprintf(
+        "normal(%s, %s)", reported$growth_rate[1], reported$growth_rate_sd[1]
+      ),
+      class = "Intercept", dpar = "pgrowth"
+    ), enforce_presence = FALSE))
+  }
+  if (!all(matched)) {
+    cli::cli_warn(c(
+      paste0(
+        "The reported growth rate of {.val {reported$study[!matched]}} is ",
+        "not used, because the {.var pgrowth} formula has no coefficient ",
+        "for that study."
+      ),
+      i = paste0(
+        "Give the prior yourself, or leave the {.var pgrowth} formula to ",
+        "{.fn as_epidist_meta_model}."
+      )
+    ))
+  }
+  for (i in which(matched)) {
+    prior <- prior + set_prior(
+      sprintf(
+        "normal(%s, %s)", reported$growth_rate[i], reported$growth_rate_sd[i]
+      ),
+      class = "b", coef = coef_name[i], dpar = "pgrowth"
+    )
+  }
+  return(prior)
 }
 
 #' Family specific prior distributions

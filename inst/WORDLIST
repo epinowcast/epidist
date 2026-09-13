@@ -28,6 +28,7 @@ Obs
 Okabe
 PMF
 PSIS
+Poisson
 Quickstart
 Reparameterise
 Reweight
@@ -69,9 +70,9 @@ dw
 dx
 dy
 dz
-epinowcast
 epireview
 eq
+erroring
 estimand
 estimand's
 estimands
@@ -87,6 +88,7 @@ jamesmbaazam
 jonathonmellor
 kcharniga
 kgostic
+knitr
 lceil
 lfloor
 lik
@@ -141,6 +143,7 @@ tibble
 traceplots
 treedepth
 trunc
+u
 unclassed
 uncounting
 underflowed

@@ -309,3 +309,160 @@ test_that("epidist_model_prior adds nothing to a meta model of individual rows o
   formula <- epidist_formula(prep_meta_individual, family, bf(mu ~ 1))
   expect_null(epidist_model_prior(prep_meta_individual, formula))
 })
+
+test_that("epidist_model_prior gives the growth rate of a summary row a prior", { # nolint: line_length_linter.
+  # Study A gives no rate, "site 2" a rate with a standard deviation whose
+  # level brms strips the space from, and C a known rate.
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = c("A", "A", "site 2", "site 2", "C", "C"),
+    type = c("mean", "sd", "quantile", "quantile", "mean", "sd"),
+    value = c(7.5, 3.6, 4.8, 8.6, 6.4, 3.0),
+    p = c(NA, NA, 0.25, 0.75, NA, NA),
+    n = 120,
+    relative_obs_time = c(20, 20, 30, 30, 25, 25),
+    trunc_adjusted = FALSE,
+    trunc_design = c(
+      "accrual", "accrual", "accrual", "accrual", "cohort", "cohort"
+    ),
+    cens_adjusted = c(0, 0, 0, 0, 2, 2),
+    growth_rate = c(NA, NA, 0.1, 0.1, 0.05, 0.05),
+    growth_rate_sd = c(NA, NA, 0.02, 0.02, NA, NA),
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  family <- epidist_family(meta, lognormal())
+  formula <- epidist_formula(meta, family, bf(mu ~ 1))
+  prior <- epidist_model_prior(meta, formula)
+  growth <- prior[prior$dpar == "pgrowth", ]
+  expect_identical(growth$class, c("sd", "b", "Intercept", "b"))
+  expect_identical(growth$coef, c("", "", "", "studysite2"))
+  expect_identical(
+    growth$prior,
+    c(
+      "normal(0, 0.25)", "normal(0, 0.25)", "normal(0, 0.25)",
+      "normal(0.1, 0.02)"
+    )
+  )
+  # Only the priors of coefficients the formula has survive the merge with
+  # the brms defaults, and the reported rate reaches its own coefficient.
+  full <- suppressWarnings(epidist_prior(meta, family, formula, prior = NULL))
+  growth <- full[full$dpar == "pgrowth", ]
+  expect_identical(growth$class, c("b", "b"))
+  expect_identical(growth$coef, c("", "studysite2"))
+  expect_identical(growth$prior, c("normal(0, 0.25)", "normal(0.1, 0.02)"))
+  expect_true(all(growth$source == "model"))
+  code <- suppressMessages(epidist(meta, fn = brms::make_stancode))
+  expect_match(code, "normal_lpdf(b_pgrowth[3] | 0.1, 0.02)", fixed = TRUE)
+  # A user prior on the coefficient wins.
+  user <- suppressWarnings(epidist_prior(
+    meta, family, formula,
+    prior = prior(normal(0.2, 0.05),
+      class = "b", coef = "studysite2",
+      dpar = "pgrowth"
+    )
+  ))
+  expect_identical(
+    user$prior[user$dpar == "pgrowth" & user$coef == "studysite2"],
+    "normal(0.2, 0.05)"
+  )
+  # The growth priors do not depend on the link of mu.
+  gamma <- epidist_family(meta, Gamma(link = "identity"))
+  gamma_formula <- epidist_formula(meta, gamma, bf(mu ~ 1))
+  prior <- epidist_model_prior(meta, gamma_formula)
+  expect_true(all(prior$dpar == "pgrowth"))
+  expect_true("studysite2" %in% prior$coef)
+})
+
+test_that("epidist_model_prior warns where a reported growth rate has no coefficient", { # nolint: line_length_linter.
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = c("A", "A", "B", "B"),
+    type = c("mean", "sd", "mean", "sd"),
+    value = c(7.5, 3.6, 6.4, 3.0),
+    n = 120,
+    relative_obs_time = c(20, 20, 25, 25),
+    trunc_adjusted = FALSE,
+    trunc_design = "accrual",
+    cens_adjusted = 0,
+    growth_rate = c(NA, NA, 0.1, 0.1),
+    growth_rate_sd = c(NA, NA, 0.02, 0.02),
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  family <- epidist_family(meta, lognormal())
+  shared <- epidist_formula(meta, family, bf(mu ~ 1, pgrowth ~ 1))
+  expect_warning(epidist_model_prior(meta, shared), "no coefficient")
+  prior <- suppressWarnings(epidist_model_prior(meta, shared))
+  growth <- prior[prior$dpar == "pgrowth" & prior$class != "sd", ]
+  expect_identical(growth$class, c("b", "Intercept"))
+  expect_false(any(nzchar(growth$coef)))
+  full <- suppressWarnings(
+    epidist_prior(meta, family, shared, prior = NULL)
+  )
+  intercept <- full[full$dpar == "pgrowth" & full$class == "Intercept", ]
+  expect_identical(intercept$prior, "normal(0, 0.25)")
+  # A study without a standard deviation has nothing to warn about.
+  estimates$growth_rate_sd <- NA
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  expect_no_warning(epidist_model_prior(meta, shared))
+  # The only study of a model puts its reported rate on the intercept. The
+  # rate is set first, because a standard deviation without one is an error.
+  estimates$growth_rate <- 0.1
+  estimates$growth_rate_sd <- 0.02
+  single <- suppressMessages(
+    as_epidist_meta_model(estimates = estimates[estimates$study == "B", ])
+  )
+  family <- epidist_family(single, lognormal())
+  formula <- epidist_formula(single, family, bf(mu ~ 1))
+  expect_identical(as_string_formula(formula$pforms$pgrowth), "pgrowth ~ 1")
+  prior <- epidist_model_prior(single, formula)
+  intercept <- prior[prior$dpar == "pgrowth" & prior$class == "Intercept", ]
+  expect_identical(intercept$prior, "normal(0.1, 0.02)")
+  full <- suppressWarnings(epidist_prior(single, family, formula, prior = NULL))
+  intercept <- full[full$dpar == "pgrowth" & full$class == "Intercept", ]
+  expect_identical(intercept$prior, "normal(0.1, 0.02)")
+})
+
+test_that("epidist_model_prior matches a study id brms mangles by substitution", { # nolint: line_length_linter.
+  # brms turns a hyphen into "M" rather than stripping it, so "site-2"
+  # becomes "studysiteM2". Matching the reported rate positionally against
+  # the levels of the study factor, rather than re-deriving the mangling,
+  # finds that coefficient without a warning.
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = c("A", "A", "site-2", "site-2"),
+    type = c("mean", "sd", "mean", "sd"),
+    value = c(7.5, 3.6, 6.4, 3.0),
+    n = 120,
+    relative_obs_time = c(20, 20, 25, 25),
+    trunc_adjusted = FALSE,
+    trunc_design = "accrual",
+    cens_adjusted = 0,
+    growth_rate = c(NA, NA, 0.1, 0.1),
+    growth_rate_sd = c(NA, NA, 0.02, 0.02),
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  family <- epidist_family(meta, lognormal())
+  formula <- epidist_formula(meta, family, bf(mu ~ 1))
+  prior <- epidist_model_prior(meta, formula)
+  expect_no_warning(epidist_model_prior(meta, formula))
+  growth <- prior[prior$dpar == "pgrowth" & prior$class == "b", ]
+  expect_true("studysiteM2" %in% growth$coef)
+  expect_identical(
+    growth$prior[growth$coef == "studysiteM2"], "normal(0.1, 0.02)"
+  )
+})
+
+test_that("epidist_model_prior adds no growth prior where every rate is known", { # nolint: line_length_linter.
+  family <- epidist_family(prep_meta_estimates, lognormal())
+  formula <- epidist_formula(prep_meta_estimates, family, bf(mu ~ 1))
+  prior <- epidist_model_prior(prep_meta_estimates, formula)
+  expect_false(any(prior$dpar == "pgrowth"))
+  # Individual level rows with an exponential growth primary event are left
+  # to the family or brms default, as in the marginal model.
+  growing <- suppressMessages(
+    as_epidist_meta_model(sim_obs, primary = "expgrowth")
+  )
+  family <- epidist_family(growing, lognormal())
+  formula <- epidist_formula(growing, family, bf(mu ~ 1, pgrowth ~ 1))
+  expect_null(epidist_model_prior(growing, formula))
+})

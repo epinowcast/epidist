@@ -17,8 +17,10 @@
 epidist_formula <- function(data, family, formula, ...) {
   assert_epidist(data)
   formula <- .validate_formula(formula, family = family, data = data)
-  formula <- .make_intercepts_explicit(formula)
+  # The model adds its own defaults for distributional parameters before the
+  # remaining ones are given an intercept.
   formula <- epidist_formula_model(data, formula)
+  formula <- .make_intercepts_explicit(formula)
   # Using this here for checking purposes
   bterms <- brms::brmsterms(formula)
   .validate_data(data, bterms)
