@@ -12,7 +12,7 @@ test_that("epidist.epidist_latent_model samples from the prior according to marg
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   prior_samples <- epidist(
     data = prep_obs,
     fn = brms::brm,
@@ -59,7 +59,7 @@ test_that("epidist.epidist_latent_model fits, the MCMC converges, and the draws 
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   fit_constant <- epidist(
     data = prep_obs,
     formula = bf(mu ~ 1, sigma = 1),
@@ -78,7 +78,7 @@ test_that("epidist.epidist_latent_model fits, the MCMC converges, and the draws 
 test_that("epidist.epidist_latent_model Stan code has no syntax errors", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  set.seed(1)
+  withr::local_seed(1)
   stancode_string <- epidist(
     data = prep_obs,
     family = lognormal(),
@@ -93,7 +93,7 @@ test_that("epidist.epidist_latent_model recovers the simulation settings for the
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   pred <- delay_parameter_draws(fit)
   # Unclear the extent to which we should expect parameter recovery here
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
@@ -116,7 +116,7 @@ test_that("epidist.epidist_latent_model fits and the MCMC converges in the gamma
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   expect_s3_class(fit_gamma, "brmsfit")
   expect_s3_class(fit_gamma, "epidist_fit")
   expect_convergence(fit_gamma)
@@ -126,7 +126,7 @@ test_that("epidist.epidist_latent_model recovers the simulation settings for the
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   draws_gamma <- posterior::as_draws_df(fit_gamma$fit)
   draws_gamma_mu <- exp(draws_gamma$Intercept)
   draws_gamma_shape <- exp(draws_gamma$Intercept_shape)
@@ -155,7 +155,7 @@ test_that("epidist.epidist_latent_model recovers a sex effect", { # nolint: line
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   draws <- posterior::as_draws_df(fit_sex$fit)
   expect_equal(mean(draws$b_Intercept), meanlog_m, tolerance = 0.3)
   expect_equal(
