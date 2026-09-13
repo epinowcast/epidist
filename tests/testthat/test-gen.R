@@ -318,14 +318,14 @@ test_that("the log likelihood leaves the RNG stream untouched", {
 
   prep <- .gen_log_lik_prep()
 
-  set.seed(42)
+  withr::local_seed(42)
   expected <- stats::runif(1)
 
-  set.seed(42)
+  withr::local_seed(42)
   invisible(epidist_gen_log_lik(lognormal())(i = 1, prep))
   expect_identical(stats::runif(1), expected)
 
-  set.seed(42)
+  withr::local_seed(42)
   generic <- .generic_gen_log_lik(.get_brms_fn("log_lik", lognormal()))
   invisible(generic(i = 1, prep))
   expect_identical(stats::runif(1), expected)
