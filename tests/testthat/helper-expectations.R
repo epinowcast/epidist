@@ -26,10 +26,17 @@ expect_convergence <- function(
 #
 # One standard deviation of slack widens a 95% interval to roughly a 99.8%
 # one, so a calibrated posterior misses about once in 500 checks rather than
-# once in 20. It still fails once the recovered parameter is more than about
-# three posterior standard deviations from the truth, which is 2% of `sigma`
-# here, and so stays tighter than the tolerances on the posterior means
-# beside it.
+# once in 20. Over ten refits that quantile moved by 0.0004, so the margin
+# is about eight times the spread the sampler puts on it. It still fails
+# once the recovered parameter is more than about three posterior standard
+# deviations from the truth, which is 2% of `sigma` here, and so stays
+# tighter than the tolerances on the posterior means beside it.
+#
+# The margin gives this check headroom rather than reframing it, since it
+# still compares a bias against an interval width. Coverage over replicate
+# fits is the property itself, and is checked by the decile uniformity test
+# behind `EPIDIST_META_CALIBRATION`, which is too expensive to run per pull
+# request. This is the cheap bound that runs every time.
 expect_recovers <- function(
   draws,
   truth,
