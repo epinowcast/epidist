@@ -26,7 +26,6 @@ docs
 /doc/
 /Meta/
 vignettes/**_cache/
-vignettes/*_files/
 *.pdf
 .vscode/
 vignettes/figures/*
@@ -34,6 +33,7 @@ vignettes/figures/*
 !vignettes/figures/faq-*.png
 !vignettes/figures/approx-inference-*.png
 !vignettes/figures/meta-*.png
+!vignettes/figures/epidist-*.png
 !vignettes/figures/left-truncation-*.png
 !vignettes/figures/primary-events-*.png
 design/
