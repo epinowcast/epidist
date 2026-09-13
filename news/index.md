@@ -720,6 +720,14 @@
   names its argument `data` rather than `x`. Closes
   [\#706](https://github.com/epinowcast/epidist/issues/706).
 
+- Left `object_usage_linter` disabled after trying it. It reported one
+  real finding, a dead variable in
+  [`epidist_family_param()`](https://epidist.epinowcast.org/reference/epidist_family_param.md)
+  that is now removed, and twelve false positives from cli glue strings,
+  [`case_when()`](https://dplyr.tidyverse.org/reference/case-and-replace-when.html)
+  formulas and test fixtures bound at the top level of `setup.R`. Closes
+  [\#710](https://github.com/epinowcast/epidist/issues/710).
+
 - Tests now seed the generator with
   [`withr::local_seed()`](https://withr.r-lib.org/reference/with_seed.html)
   rather than [`set.seed()`](https://rdrr.io/r/base/Random.html), so a
