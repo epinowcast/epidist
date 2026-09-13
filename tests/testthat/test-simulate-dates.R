@@ -50,7 +50,7 @@ test_that("simulate_dates rejects bad input", {
 test_that("simulate_dates output can be used by as_epidist_linelist_data", {
   # The column names are chosen to match, so this should need no renaming.
   data <- simulate_gillespie(seed = 1) |>
-    simulate_secondary(meanlog = 1.8, sdlog = 0.5) |>
+    simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
     simulate_dates(outbreak_start_date = as.Date("2024-02-01"), obs_time = 60)
 
   # No column arguments, so this fails if the names do not line up.

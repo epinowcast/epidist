@@ -54,7 +54,7 @@ output can be passed straight to it.
 }
 \examples{
 simulate_gillespie(seed = 1) |>
-  simulate_secondary(meanlog = 1.8, sdlog = 0.5) |>
+  simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
   simulate_dates(outbreak_start_date = as.Date("2024-02-01")) |>
   head()
 }

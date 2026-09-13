@@ -53,10 +53,10 @@ base_data$location <- rbinom(n = nrow(base_data), size = 1, prob = 0.5)
 obs <- bind_rows(
   base_data |>
     filter(location == 0) |>
-    simulate_secondary(meanlog = meanlog_0, sdlog = sdlog_0),
+    simulate_secondary(distspec::LogNormal(meanlog_0, sdlog_0)),
   base_data |>
     filter(location == 1) |>
-    simulate_secondary(meanlog = meanlog_1, sdlog = sdlog_1)
+    simulate_secondary(distspec::LogNormal(meanlog_1, sdlog_1))
 )
 
 # Floor the event times to daily reporting windows, drop the cases not yet

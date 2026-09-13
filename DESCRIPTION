@@ -41,6 +41,7 @@ Imports:
     brms (>= 2.23.0),
     checkmate,
     cli,
+    distspec (>= 0.2.0),
     dplyr,
     lubridate,
     primarycensored (>= 1.4.0),

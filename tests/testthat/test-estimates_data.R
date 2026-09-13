@@ -946,7 +946,7 @@ test_that("the quadrature checks treat an estimated growth rate as a tilted prim
 
 test_that("simulate_study passes an unknown growth rate through", {
   linelist <- simulate_gillespie(seed = 1) |>
-    simulate_secondary(meanlog = 1.8, sdlog = 0.5) |>
+    simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5)) |>
     simulate_dates(keep_times = TRUE) |>
     as_epidist_linelist_data()
   est <- simulate_study(

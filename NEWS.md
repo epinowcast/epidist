@@ -167,6 +167,15 @@ The draws now carry the `epidist_delay_draws` class, which records the family an
 The vignettes now use it in place of the plots they drew by hand.
 Closes #670.
 - Both plot functions use `ggplot2::theme_minimal()` and a colour blind friendly palette, so that their output matches the plots in the package documentation.
+- Added a `distspec::as_dist_spec()` method for fitted models, which exports a fitted delay distribution as an uncertain `<dist_spec>`.
+The natural parameters of the delay distribution are computed for each posterior draw and summarised into a `Normal()` prior on each.
+The generic is re-exported, so `as_dist_spec(fit)` works with `epidist` alone.
+See `?as_dist_spec.epidist_fit`.
+- `simulate_secondary()` now takes its delay distribution as a `<dist_spec>` rather than a random number generator, so `simulate_secondary(dist = rlnorm, meanlog = 1.8, sdlog = 0.5)` becomes `simulate_secondary(distspec::LogNormal(meanlog = 1.8, sdlog = 0.5))`.
+A `<dist_spec>` with uncertain parameters, such as one exported from a fit with `as_dist_spec()`, has its parameters resolved once per row, so the simulated delays carry the parameter uncertainty.
+`distspec::sample_dist()` ignores the `max` and `cdf_max` bounds of a `<dist_spec>`, so `simulate_secondary()` warns when given a bounded distribution.
+`distspec` is now an imported package.
+This is a breaking change.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
 It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
 Each step is still available on its own.
