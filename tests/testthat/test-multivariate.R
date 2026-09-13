@@ -1,6 +1,6 @@
 # fmt: skip file
 test_that("as_epidist_multivariate reports column means and covariance", {
-  set.seed(11)
+  withr::local_seed(11)
   draws <- cbind(mean = rnorm(500, 7.5, 0.3), sd = rnorm(500, 3.6, 0.2))
   mvn <- as_epidist_multivariate(draws)
   expect_true(is_epidist_multivariate(mvn))
@@ -13,7 +13,7 @@ test_that("as_epidist_multivariate reports column means and covariance", {
 })
 
 test_that("as_epidist_multivariate accepts a data frame of draws", {
-  set.seed(11)
+  withr::local_seed(11)
   draws <- data.frame(mean = rnorm(50, 7, 0.1), sd = rnorm(50, 3, 0.1))
   mvn <- as_epidist_multivariate(draws)
   expect_identical(mvn$params, c("mean", "sd"))
@@ -21,7 +21,7 @@ test_that("as_epidist_multivariate accepts a data frame of draws", {
 })
 
 test_that("as_epidist_multivariate takes named parameter columns", {
-  set.seed(11)
+  withr::local_seed(11)
   draws <- data.frame(
     .draw = seq_len(50), .row = 1L,
     meanlog = rnorm(50, 1.6, 0.03), sdlog = rnorm(50, 0.5, 0.02),
@@ -35,7 +35,7 @@ test_that("as_epidist_multivariate takes named parameter columns", {
 })
 
 test_that("as_epidist_multivariate orders a trajectory index major", {
-  set.seed(11)
+  withr::local_seed(11)
   draws <- data.frame(
     .draw = rep(seq_len(200), 2),
     .row = rep(c(1L, 2L), each = 200),
@@ -55,7 +55,7 @@ test_that("as_epidist_multivariate orders a trajectory index major", {
 
 test_that("as_epidist_multivariate works on delay_parameter_draws output", {
   # The shape delay_parameter_draws() returns for a lognormal fit.
-  set.seed(14)
+  withr::local_seed(14)
   dpars <- data.frame(
     .draw = seq_len(500), .row = 1L,
     mu = rnorm(500, 1.6, 0.03), sigma = rnorm(500, 0.5, 0.02)
@@ -71,7 +71,7 @@ test_that("as_epidist_multivariate works on delay_parameter_draws output", {
 })
 
 test_that("as_epidist_multivariate rejects draws it cannot summarise", {
-  set.seed(11)
+  withr::local_seed(11)
   draws <- cbind(mean = rnorm(50), sd = rnorm(50))
   expect_error(
     as_epidist_multivariate(draws[1:2, ]),
@@ -99,7 +99,7 @@ test_that("as_epidist_multivariate rejects draws it cannot summarise", {
 })
 
 test_that("a rank deficient set of draws says so", {
-  set.seed(11)
+  withr::local_seed(11)
   meanlog <- rnorm(500, 1.6, 0.05)
   sdlog <- rnorm(500, 0.5, 0.02)
   # Five summaries of a two parameter fit carry two degrees of freedom.
@@ -136,7 +136,7 @@ test_that("new_epidist_multivariate takes a published mean and covariance", {
 })
 
 test_that("as_epidist_estimates_data maps multivariate elements to types", {
-  set.seed(11)
+  withr::local_seed(11)
   draws <- cbind(
     mean = rnorm(500, 7.5, 0.3),
     q0.5 = rnorm(500, 6.8, 0.3)
@@ -152,7 +152,7 @@ test_that("as_epidist_estimates_data maps multivariate elements to types", {
 })
 
 test_that("as_epidist_estimates_data rejects elements it cannot report", {
-  set.seed(11)
+  withr::local_seed(11)
   draws <- cbind(meanlog = rnorm(500, 1.6, 0.03), sdlog = rnorm(500, 0.5, 0.02))
   mvn <- as_epidist_multivariate(draws)
   expect_error(
@@ -172,7 +172,7 @@ test_that("as_epidist_estimates_data rejects elements it cannot report", {
 })
 
 test_that("the multivariate family path agrees with the delta method", {
-  set.seed(11)
+  withr::local_seed(11)
   draws <- cbind(
     shape = rnorm(20000, 4.1, 0.2), rate = rnorm(20000, 0.55, 0.03)
   )
@@ -197,7 +197,7 @@ test_that("the multivariate family path agrees with the delta method", {
 })
 
 test_that("a multivariate trajectory cannot be fitted", {
-  set.seed(11)
+  withr::local_seed(11)
   draws <- data.frame(
     .draw = rep(seq_len(200), 2),
     .row = rep(c(1L, 2L), each = 200),
@@ -211,7 +211,7 @@ test_that("a multivariate trajectory cannot be fitted", {
 })
 
 test_that("a multivariate estimate round trips to a recoverable meta model", {
-  set.seed(15)
+  withr::local_seed(15)
   meanlog <- 1.6
   sdlog <- 0.5
   # A study that published draws of the mean and standard deviation it fitted.
@@ -239,7 +239,7 @@ test_that("a multivariate estimate round trips to a recoverable meta model", {
 })
 
 test_that("one study can contribute two multivariate objects", {
-  set.seed(11)
+  withr::local_seed(11)
   first <- as_epidist_multivariate(
     cbind(mean = rnorm(500, 7.5, 0.3), sd = rnorm(500, 3.6, 0.2))
   )
@@ -263,7 +263,7 @@ test_that("one study can contribute two multivariate objects", {
 })
 
 test_that("as_epidist_estimates_data refuses more summaries than a family has parameters", { # nolint: line_length_linter.
-  set.seed(11)
+  withr::local_seed(11)
   draws <- cbind(meanlog = rnorm(500, 1.6, 0.03), sdlog = rnorm(500, 0.5, 0.02))
   mvn <- as_epidist_multivariate(draws)
   # Three quartiles of a two parameter fit are deterministic functions of
@@ -294,7 +294,7 @@ test_that("as_epidist_estimates_data refuses more summaries than a family has pa
 })
 
 test_that("a nearly singular covariance over reported summaries is refused", {
-  set.seed(12)
+  withr::local_seed(12)
   meanlog <- rnorm(4000, 1.6, 0.03)
   sdlog <- rnorm(4000, 0.5, 0.02)
   # The quartiles of a two parameter fit lie on a two dimensional manifold, so
@@ -315,7 +315,7 @@ test_that("a nearly singular covariance over reported summaries is refused", {
 })
 
 test_that("a covariance row with quartile members recovers a study of n = 1000", { # nolint: line_length_linter.
-  set.seed(16)
+  withr::local_seed(16)
   meanlog <- 1.6
   sdlog <- 0.5
   n <- 1000
@@ -357,7 +357,7 @@ test_that("a covariance row with quartile members recovers a study of n = 1000",
 })
 
 test_that("as_epidist_multivariate needs names for a matrix of draws", {
-  set.seed(11)
+  withr::local_seed(11)
   draws <- cbind(rnorm(50, 7, 0.1), rnorm(50, 3, 0.1))
   expect_error(as_epidist_multivariate(draws), "column names")
   mvn <- as_epidist_multivariate(draws, params = c("mean", "sd"))
@@ -369,7 +369,7 @@ test_that("as_epidist_multivariate needs names for a matrix of draws", {
 })
 
 test_that("as_epidist_multivariate needs the same draws at every index", {
-  set.seed(11)
+  withr::local_seed(11)
   draws <- data.frame(
     .row = c(rep(1, 50), rep(2, 40)),
     mean = rnorm(90, 7, 0.1),

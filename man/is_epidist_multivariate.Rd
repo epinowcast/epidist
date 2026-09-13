@@ -4,10 +4,10 @@
 \alias{is_epidist_multivariate}
 \title{Check if an object has the \code{epidist_multivariate} class}
 \usage{
-is_epidist_multivariate(x)
+is_epidist_multivariate(data)
 }
 \arguments{
-\item{x}{An object.}
+\item{data}{An object.}
 }
 \value{
 A logical.
