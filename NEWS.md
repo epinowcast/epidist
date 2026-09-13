@@ -305,6 +305,20 @@ See #79.
 - The `is_epidist_*()` predicates now share one signature, `is_epidist_<class>(data)`.
 `is_epidist_data()`, `is_epidist_linelist_data()`, `is_epidist_aggregate_data()` and `is_epidist_estimates_data()` no longer take a `...` that nothing used, and `is_epidist_multivariate()` names its argument `data` rather than `x`.
 Closes #706.
+- Left `object_usage_linter` disabled after trying it.
+It reported one real finding, a dead variable in `epidist_family_param()` that is now removed, and twelve false positives from cli glue strings, `case_when()` formulas and test fixtures bound at the top level of `setup.R`.
+Closes #710.
+- Tests now seed the generator with `withr::local_seed()` rather than `set.seed()`, so a test no longer leaves the generator where the next one picks it up.
+This covers the 74 calls that sit inside a `test_that()` block or a helper function.
+The calls that seed a whole file from its top level are unchanged.
+`test-int-meta_model.R` is left alone pending #733.
+`withr` is now suggested.
+Closes #703.
+
+- The simulation and recovery checks of the meta model tests now require the credible interval to bracket the simulated parameter with a margin of one posterior standard deviation, through a new `expect_recovers()` test helper.
+The interval narrows with the size of the simulated studies while the bias of the summaries they report does not, so the 2.5% quantile of `sigma` sat 2.4e-5 above a true 0.5 and the comparison was decided by the platform's last digits, failing the macOS check on every pull request.
+The marginal Kolmogorov-Smirnov checks of the latent model prior moved from a p value threshold of 0.01 to 0.001 for the same reason.
+Closes #733.
 - Split `R/meta_summaries.R` by concern into `R/meta_settings.R` (the quadrature and cache options), `R/meta_estimand.R` (the distribution function, censoring design and accrual weight), `R/meta_moments.R`, `R/meta_probability.R`, `R/meta_quantiles.R`, `R/meta_likelihood.R` (the normal approximations), `R/meta_grid_likelihood.R` (the exact likelihoods for quantiles on a discrete grid) and `R/meta_gen.R` (`epidist_gen_meta_log_lik()`, `epidist_gen_meta_predict()` and the row level functions they call).
 No function was renamed or changed.
 Closes #709.
