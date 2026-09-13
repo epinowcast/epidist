@@ -31,7 +31,7 @@ test_that("add_summaries adds quantiles named as in posterior", {
 })
 
 test_that("add_summaries by simulation agrees with the analytic solution", {
-  set.seed(1)
+  withr::local_seed(1)
   draws <- data.frame(mu = c(1.8, 2.0), sigma = c(0.5, 0.4))
   analytic <- add_summaries(draws, family = "lognormal", probs = 0.5)
   sampled <- add_summaries(
@@ -48,7 +48,7 @@ test_that("add_summaries by simulation agrees with the analytic solution", {
 })
 
 test_that("add_summaries simulates for a family with no analytic solution", {
-  set.seed(1)
+  withr::local_seed(1)
   draws <- data.frame(mu = c(2, 4))
   out <- add_summaries(draws, family = "exponential", nsim = 20000)
   expect_named(out, c("mu", "mean", "sd"))
@@ -193,7 +193,7 @@ test_that("add_summaries accepts a stats family object", {
 })
 
 test_that("add_summaries simulates in chunks without changing the answer", {
-  set.seed(1)
+  withr::local_seed(1)
   draws <- data.frame(mu = rep(1.8, 3), sigma = rep(0.5, 3))
   # `nsim` above the chunk size means each row is simulated in its own chunk
   out <- add_summaries(
@@ -465,7 +465,7 @@ test_that("add_summaries by simulation agrees with the analytic solution for a f
   skip_on_cran()
   skip_if_no_fits()
 
-  set.seed(1)
+  withr::local_seed(1)
   draws <- fit |>
     epidist_strata() |>
     add_delay_parameter_draws(fit)
