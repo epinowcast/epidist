@@ -350,6 +350,10 @@ See #596.
 - Restructured the README install instructions to match `primarycensored`, with CRAN first, then `r-universe`, then `pak` for the development version and for historical releases.
 The text now lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is included by the README, so it can be reused elsewhere.
 - The `faq` and `left-truncation` vignettes now build their simulated dates with `simulate_dates()` and plot posterior draws with the package `plot()` method, in place of hand rolled equivalents.
+- Dropped `analyze`, `analyzing`, `centered` and `erroring` from `inst/WORDLIST`.
+The first three were held there only because the precomputed vignettes lagged their `.Rmd.orig` sources, which the rebuild in #752 fixed.
+The description of `.muffle_infinite_data_warning()` now says "raising an error", so the fourth is not needed either.
+Closes #708.
 
 ## CI
 
@@ -367,9 +371,6 @@ See #688.
 The tagged v0.4.3 lockfile pins `digest` 0.6.36, which calls `Calloc` and `Free`.
 Those were removed from the R API in R 4.5, so the hook environment failed to build and the `pre-commit` job failed on every pull request.
 See #578.
-- The `render-readme` workflow no longer runs `spelling::update_wordlist()`, and no longer commits `inst/WORDLIST`.
-Every newly flagged word was added to the word list by the automatic README pull request, so a real misspelling was absorbed rather than reported, and `tests/spelling.R` now errors so one fails the tests instead.
-See #708.
 
 ## Bug fixes
 
