@@ -124,7 +124,7 @@ test_that("epidist_estimates_parameters reports quantiles of the fit", {
 
 test_that("epidist_estimates_parameters matches a Monte Carlo delta method", {
   skip_if_not_installed("MASS")
-  set.seed(12)
+  withr::local_seed(12)
   parameter_se <- c(0.03, 0.02)
   estimates <- suppressWarnings(suppressMessages(epidist_estimates_parameters(
     "A", "lognormal", c(meanlog = 1.6, sdlog = 0.5),
@@ -196,7 +196,7 @@ test_that("a reported fit implies the summaries its biased procedure gave", {
   # right truncated cohort. Its reported parameters describe the biased
   # distribution its procedure converged to, so the summaries they imply must
   # match the summaries the meta model forward models for that design.
-  set.seed(13)
+  withr::local_seed(13)
   meanlog <- 1.6
   sdlog <- 0.5
   obs_time <- 20
