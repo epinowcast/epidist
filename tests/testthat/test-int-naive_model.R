@@ -11,7 +11,7 @@ test_that("epidist.epidist_naive_model fits and the MCMC converges in the defaul
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   fit <- epidist(
     data = prep_naive_obs,
     seed = 1,
