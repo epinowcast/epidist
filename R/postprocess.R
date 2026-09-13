@@ -257,7 +257,7 @@ delay_summary_draws <- function(
 #' Muffles only the warning [`.infinite_data_warning()`] matches, through the
 #' `muffleWarning` restart, so every other warning `expr` raises is left to
 #' propagate. The restart is only invoked when it exists, so a condition
-#' signalled without one is passed on rather than erroring.
+#' signalled without one is passed on rather than raising an error.
 #'
 #' @param expr An expression to evaluate.
 #'

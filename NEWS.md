@@ -350,6 +350,10 @@ See #596.
 - Restructured the README install instructions to match `primarycensored`, with CRAN first, then `r-universe`, then `pak` for the development version and for historical releases.
 The text now lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is included by the README, so it can be reused elsewhere.
 - The `faq` and `left-truncation` vignettes now build their simulated dates with `simulate_dates()` and plot posterior draws with the package `plot()` method, in place of hand rolled equivalents.
+- Dropped `analyze`, `analyzing`, `centered` and `erroring` from `inst/WORDLIST`.
+The first three were held there only because the precomputed vignettes lagged their `.Rmd.orig` sources, which the rebuild in #752 fixed.
+The description of `.muffle_infinite_data_warning()` now says "raising an error", so the fourth is not needed either.
+Closes #708.
 
 ## CI
 
