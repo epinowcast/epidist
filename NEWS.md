@@ -305,6 +305,12 @@ See #79.
 - The `is_epidist_*()` predicates now share one signature, `is_epidist_<class>(data)`.
 `is_epidist_data()`, `is_epidist_linelist_data()`, `is_epidist_aggregate_data()` and `is_epidist_estimates_data()` no longer take a `...` that nothing used, and `is_epidist_multivariate()` names its argument `data` rather than `x`.
 Closes #706.
+- Tests now seed the generator with `withr::local_seed()` rather than `set.seed()`, so a test no longer leaves the generator where the next one picks it up.
+This covers the 74 calls that sit inside a `test_that()` block or a helper function.
+The calls that seed a whole file from its top level are unchanged.
+`test-int-meta_model.R` is left alone pending #733.
+`withr` is now suggested.
+Closes #703.
 
 ## Documentation
 
