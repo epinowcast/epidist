@@ -226,7 +226,12 @@ test_that("epidist.epidist_latent_model fits the gengamma family and recovers a 
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000
+    # The two shape parameters of a generalised gamma fitted to gamma data
+    # trade off against each other, which leaves a ridge the sampler needs
+    # longer warmup and a smaller step size to traverse. At the defaults a
+    # chain can stay stuck out in the tail of `mu`.
+    iter = 2000,
+    control = list(adapt_delta = 0.95)
   )
   expect_s3_class(fit, "epidist_fit")
   expect_convergence(fit)
