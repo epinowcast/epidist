@@ -28,7 +28,7 @@ be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
 families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
-\code{\link[brms:lognormal]{brms::lognormal()}}, are also
+\code{\link[brms:brmsfamily]{brms::lognormal()}}, are also
 reexported as part of \code{epidist}.}
 
 \item{prior}{One or more \code{brmsprior} objects created by \code{\link[brms:set_prior]{brms::set_prior()}}
@@ -44,8 +44,8 @@ particular use case.}
 
 \item{fn}{The internal function to be called. By default this is
 \code{\link[brms:brm]{brms::brm()}} which performs inference for the specified model. Other options
-are \code{\link[brms:make_stancode]{brms::make_stancode()}} which returns the Stan code for the specified
-model, or \code{\link[brms:make_standata]{brms::make_standata()}} which returns the data passed to Stan.
+are \code{\link[brms:stancode]{brms::make_stancode()}} which returns the Stan code for the specified
+model, or \code{\link[brms:standata]{brms::make_standata()}} which returns the data passed to Stan.
 These two later options may be useful for model debugging and extensions.}
 
 \item{...}{Additional arguments passed to \code{fn} method.}

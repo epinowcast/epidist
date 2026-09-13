@@ -44,7 +44,7 @@
 
 \item{value}{A replacement value.}
 
-\item{deparse.level}{Passed to \code{\link[base:rbind]{base::rbind()}}.}
+\item{deparse.level}{Passed to \code{\link[base:cbind]{base::rbind()}}.}
 
 \item{data, template}{Passed to \code{\link[dplyr:dplyr_reconstruct]{dplyr::dplyr_reconstruct()}}.}
 
@@ -99,7 +99,7 @@ class(dplyr::select(linelist_data, -"obs_time"))
 class(dplyr::group_by(linelist_data, obs_time))
 }
 \seealso{
-Other epidist_data:
-\code{\link[=is_epidist_data]{is_epidist_data()}}
+Other epidist_data: 
+\code{\link{is_epidist_data}()}
 }
 \concept{epidist_data}

@@ -34,10 +34,10 @@ The function works by:
 }
 }
 \seealso{
-Other family:
-\code{\link[=epidist_family]{epidist_family()}},
-\code{\link[=epidist_family_model]{epidist_family_model()}},
-\code{\link[=epidist_family_model.default]{epidist_family_model.default()}},
-\code{\link[=epidist_family_param]{epidist_family_param()}}
+Other family: 
+\code{\link{epidist_family}()},
+\code{\link{epidist_family_model}()},
+\code{\link{epidist_family_model.default}()},
+\code{\link{epidist_family_param}()}
 }
 \concept{family}

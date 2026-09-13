@@ -61,12 +61,12 @@ sierra_leone_ebola_data |>
   )
 }
 \seealso{
-Other linelist_data:
-\code{\link[=as_epidist_linelist_data]{as_epidist_linelist_data()}},
-\code{\link[=as_epidist_linelist_data.default]{as_epidist_linelist_data.default()}},
-\code{\link[=as_epidist_linelist_data.epidist_aggregate_data]{as_epidist_linelist_data.epidist_aggregate_data()}},
-\code{\link[=assert_epidist.epidist_linelist_data]{assert_epidist.epidist_linelist_data()}},
-\code{\link[=is_epidist_linelist_data]{is_epidist_linelist_data()}},
-\code{\link[=new_epidist_linelist_data]{new_epidist_linelist_data()}}
+Other linelist_data: 
+\code{\link{as_epidist_linelist_data}()},
+\code{\link{as_epidist_linelist_data.default}()},
+\code{\link{as_epidist_linelist_data.epidist_aggregate_data}()},
+\code{\link{assert_epidist.epidist_linelist_data}()},
+\code{\link{is_epidist_linelist_data}()},
+\code{\link{new_epidist_linelist_data}()}
 }
 \concept{linelist_data}
