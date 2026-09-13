@@ -305,6 +305,9 @@ See #79.
 - The `is_epidist_*()` predicates now share one signature, `is_epidist_<class>(data)`.
 `is_epidist_data()`, `is_epidist_linelist_data()`, `is_epidist_aggregate_data()` and `is_epidist_estimates_data()` no longer take a `...` that nothing used, and `is_epidist_multivariate()` names its argument `data` rather than `x`.
 Closes #706.
+- Left `object_usage_linter` disabled after trying it.
+It reported one real finding, a dead variable in `epidist_family_param()` that is now removed, and twelve false positives from cli glue strings, `case_when()` formulas and test fixtures bound at the top level of `setup.R`.
+Closes #710.
 
 ## Documentation
 
