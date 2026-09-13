@@ -5,6 +5,7 @@ utils::globalVariables(c(
   "samples", # <epidist_diagnostics>
   ".data", # <as_epidist_latent_model.epidist_linelist_data>
   "woverlap", # <epidist_stancode.epidist_latent_model>
+  ".data", # <.leave_one_out_summaries>
   ".data", # <as_epidist_linelist_data.epidist_aggregate_data>
   ".data", # <.prepare_marginal_data>
   ".data", # <as_epidist_naive_model.epidist_linelist_data>
