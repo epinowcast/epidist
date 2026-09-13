@@ -720,6 +720,17 @@
   names its argument `data` rather than `x`. Closes
   [\#706](https://github.com/epinowcast/epidist/issues/706).
 
+- Tests now seed the generator with
+  [`withr::local_seed()`](https://withr.r-lib.org/reference/with_seed.html)
+  rather than [`set.seed()`](https://rdrr.io/r/base/Random.html), so a
+  test no longer leaves the generator where the next one picks it up.
+  This covers the 74 calls that sit inside a `test_that()` block or a
+  helper function. The calls that seed a whole file from its top level
+  are unchanged. `test-int-meta_model.R` is left alone pending
+  [\#733](https://github.com/epinowcast/epidist/issues/733). `withr` is
+  now suggested. Closes
+  [\#703](https://github.com/epinowcast/epidist/issues/703).
+
 ### Documentation
 
 - Added an `extending-epidist` vignette covering why you might build
