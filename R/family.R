@@ -114,7 +114,7 @@ epidist_family_param.default <- function(family, ...) {
     "_(lpdf|lpmf)\\(Y \\| (.+?)\\)" # nolint
   )
   lpdf_match <- regexpr(lpdf_pattern, dummy_mdl)
-  reparam <- if (lpdf_match > 0) {
+  if (lpdf_match > 0) {
     matches <- unlist(regmatches(dummy_mdl, lpdf_match))
     mu_matches <- matches[grepl("mu", matches, fixed = TRUE)]
     if (length(mu_matches) > 1) {

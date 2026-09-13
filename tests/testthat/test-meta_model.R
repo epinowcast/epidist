@@ -210,7 +210,8 @@ test_that("epidist_formula_model.epidist_meta_model binds the required slots", {
   expect_true(grepl(
     paste0(
       "vint(obs_type, study_n, trunc_adjusted, cens_adjusted, ",
-      "trunc_design, group_start, group_len, chol_start, n_quad)"
+      "trunc_design, group_start, group_len, chol_start, n_quad, ",
+      "growth_known)"
     ),
     form,
     fixed = TRUE
@@ -313,7 +314,7 @@ test_that(".meta_implied_moments matches the Monte Carlo moments of a naive stud
 })
 
 test_that(".meta_implied_moments matches Monte Carlo naive discretisation with a wide secondary window", { # nolint: line_length_linter.
-  set.seed(102)
+  withr::local_seed(102)
   args <- list(shape = 2, scale = 2.5)
   cutoff <- 40
   moments <- .meta_implied_moments(
@@ -356,7 +357,7 @@ test_that(".meta_implied_moments returns the analytic moments when fully adjuste
 })
 
 test_that(".meta_implied_moments matches Monte Carlo right truncated continuous moments", { # nolint: line_length_linter.
-  set.seed(103)
+  withr::local_seed(103)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 8
   moments <- .meta_implied_moments(
@@ -398,7 +399,7 @@ test_that(".meta_implied_moments recovers a study that midpoints the primary and
   # reported delays of at least delay_min dropped the records whose
   # midpointed delay fell below it, so the base estimand is left truncated at
   # delay_min + pwindow / 2 rather than at delay_min.
-  set.seed(115)
+  withr::local_seed(115)
   args <- list(meanlog = 1.8, sdlog = 0.5)
   n_sim <- 1e6
   designs <- expand.grid(
@@ -449,7 +450,7 @@ test_that(".meta_implied_moments recovers a left truncated study that midpoints 
   # only counted reported delays of at least delay_min kept the cells from
   # ceiling(delay_min / swindow - 1 / 2), which differs from the untruncated
   # grid rule whenever delay_min / swindow is not an integer.
-  set.seed(116)
+  withr::local_seed(116)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   swindow <- 2
   delay_min <- 3
@@ -574,7 +575,7 @@ test_that(".meta_cens_base and .meta_cens_shift describe the midpoint codes", {
 })
 
 test_that(".meta_implied_moments truncates the uniform single interval estimand rather than shifting a truncated one", { # nolint: line_length_linter.
-  set.seed(114)
+  withr::local_seed(114)
   args <- list(meanlog = 1.8, sdlog = 0.5)
   cutoff <- 8
   moments <- .meta_implied_moments(
@@ -764,7 +765,7 @@ test_that(".meta_implied_prob normalises the continuous CDF by the study cutoff"
 
 
 test_that(".meta_summary_terms uses the kurtosis based standard error for reported sds", { # nolint: line_length_linter.
-  set.seed(108)
+  withr::local_seed(108)
   args <- list(meanlog = 1.5, sdlog = 0.5)
   cutoff <- 20
   study_n <- 200
@@ -909,7 +910,7 @@ test_that(".meta_summary_terms uses a reported standard error when one is given"
 })
 
 test_that(".meta_implied_moments accounts for exponential growth in the primary window", { # nolint: line_length_linter.
-  set.seed(105)
+  withr::local_seed(105)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 30
   moments <- .meta_implied_moments(
@@ -958,7 +959,7 @@ test_that(".meta_implied_moments matches the analytic gamma summaries", {
 })
 
 test_that(".meta_implied_moments matches Monte Carlo weibull summaries", {
-  set.seed(109)
+  withr::local_seed(109)
   args <- list(shape = 1.7, scale = 8)
   moments <- .meta_implied_moments(
     "pweibull", args,
@@ -1002,7 +1003,7 @@ test_that(".meta_implied_prob uses the primary censored CDF for the uniform sing
 })
 
 test_that(".meta_implied_prob truncates the primary censored CDF when the study did not", { # nolint: line_length_linter.
-  set.seed(115)
+  withr::local_seed(115)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 10
   n_sim <- 2e5
@@ -1019,7 +1020,7 @@ test_that(".meta_implied_prob truncates the primary censored CDF when the study 
 })
 
 test_that(".meta_summary_terms uses the implied sd over root n for reported means", { # nolint: line_length_linter.
-  set.seed(110)
+  withr::local_seed(110)
   args <- list(meanlog = 1.5, sdlog = 0.5)
   cutoff <- 20
   study_n <- 200
@@ -1076,7 +1077,7 @@ sim_accrual_ptime <- function(n, window, growth_rate) {
 }
 
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation without growth", { # nolint: line_length_linter.
-  set.seed(120)
+  withr::local_seed(120)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 30
   moments <- .meta_implied_moments(
@@ -1095,7 +1096,7 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation without 
 })
 
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation with growth", { # nolint: line_length_linter.
-  set.seed(121)
+  withr::local_seed(121)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 30
   growth_rate <- 0.2
@@ -1121,7 +1122,7 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation with une
   # the primary window shares one weight with its neighbours. A weekly
   # reported secondary date against a daily primary date at an outbreak
   # growth rate is where the lower edge weight fails worst.
-  set.seed(123)
+  withr::local_seed(123)
   mean <- 4.6
   sd <- 2.4
   var_log <- log1p((sd / mean)^2)
@@ -1182,7 +1183,7 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation with a p
   # the cells below two days, and the complete windows stop being eligible
   # for a delay at 30 - 7k rather than at the multiples of seven. Treating
   # the partial window as complete put the implied mean 27% low here.
-  set.seed(124)
+  withr::local_seed(124)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 30
   growth_rate <- 0.2
@@ -1204,7 +1205,7 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation with a p
 })
 
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation with a partial last primary window under every window pairing", { # nolint: line_length_linter.
-  set.seed(125)
+  withr::local_seed(125)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 30
   n_sim <- 2e6
@@ -1301,7 +1302,7 @@ test_that(".meta_grid_pmf with a partial last primary window drops the cells bel
 })
 
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation of a continuous estimand", { # nolint: line_length_linter.
-  set.seed(122)
+  withr::local_seed(122)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 20
   moments <- .meta_implied_moments(
@@ -1319,7 +1320,7 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation of a con
 })
 
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation of the uniform single interval approximation", { # nolint: line_length_linter.
-  set.seed(127)
+  withr::local_seed(127)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 15
   pwindow <- 2
@@ -1368,7 +1369,7 @@ test_that(".meta_implied_moments accrual weight offsets the primary window only 
 })
 
 test_that(".meta_implied_prob matches the accrual truncated uniform single interval CDF", { # nolint: line_length_linter.
-  set.seed(128)
+  withr::local_seed(128)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 15
   n_sim <- 2e6
@@ -1440,7 +1441,7 @@ test_that(".meta_implied_moments ignores the truncation design when the study ad
 })
 
 test_that(".meta_implied_prob matches the accrual truncated empirical CDF", {
-  set.seed(123)
+  withr::local_seed(123)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 20
   n_sim <- 5e5
@@ -1598,7 +1599,7 @@ test_that("a quantile far into the tail gives a slope on the delay scale rather 
 })
 
 test_that("a delay scale quantile se is calibrated against a bootstrapped median", { # nolint: line_length_linter.
-  set.seed(126)
+  withr::local_seed(126)
   args <- list(meanlog = 1.5, sdlog = 0.5)
   cutoff <- 20
   study_n <- 200
@@ -2907,7 +2908,7 @@ test_that(".meta_implied_moments reduces to the untruncated formulas at a delay_
 })
 
 test_that(".meta_implied_moments conditions a continuous estimand on delay_min", { # nolint: line_length_linter.
-  set.seed(203)
+  withr::local_seed(203)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 60
   moments <- .meta_implied_moments(
@@ -3004,7 +3005,7 @@ test_that(".meta_implied_moments of a truncation adjusted study conditions on de
   }
   # The uniform single interval approximation has the same identity, with
   # the primary censored distribution function in place of the delay's.
-  set.seed(205)
+  withr::local_seed(205)
   args <- lnorm_args(10, 25)
   pwindow <- 2
   moments <- .meta_implied_moments(
@@ -3028,7 +3029,7 @@ test_that(".meta_implied_moments of a truncation adjusted study conditions on de
 })
 
 test_that(".meta_implied_prob conditions the naive grid on delay_min", {
-  set.seed(204)
+  withr::local_seed(204)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 25
   n_sim <- 2e6
@@ -3803,19 +3804,23 @@ test_that("the meta model log likelihood uses the fitted primary event for indiv
   expected <- vapply(
     seq_len(prep$ndraws),
     function(draw) {
-      return(primarycensored::dpcens(
-        x = 5,
-        pdist = stats::plnorm,
-        pwindow = 1,
-        swindow = 1,
-        L = 2,
-        D = 12,
-        dprimary = primarycensored::dexpgrowth,
-        dprimary_args = list(r = prep$dpars$pgrowth[draw, 1]),
-        log = TRUE,
-        meanlog = 1.5,
-        sdlog = 0.5
-      ))
+      return(do.call(primarycensored::dpcens, c(
+        list(
+          x = 5,
+          pdist = stats::plnorm,
+          pwindow = 1,
+          swindow = 1,
+          L = 2,
+          D = 12,
+          dprimary = primarycensored::dexpgrowth,
+          log = TRUE,
+          meanlog = 1.5,
+          sdlog = 0.5
+        ),
+        stats::setNames(
+          list(list(r = prep$dpars$pgrowth[draw, 1])), .primary_args_name()
+        )
+      )))
     },
     numeric(1)
   )
@@ -3853,12 +3858,12 @@ test_that("the meta model posterior predictions use the fitted primary event", {
     ),
     class = "brmsprep"
   )
-  set.seed(101)
+  withr::local_seed(101)
   growing <- family$posterior_predict(i = 1, prep)
   # Without a primary event on the prep the family's own is used, so a
   # uniform family draws a uniform primary event.
   prep$family <- list()
-  set.seed(101)
+  withr::local_seed(101)
   uniform <- epidist_family(prep_meta_individual)$posterior_predict(
     i = 1, prep
   )
@@ -3932,6 +3937,258 @@ test_that(".meta_implied_moments and .meta_deep_tail support the generalised gam
   expect_identical(.meta_dist_cdf(q, "pgengamma.orig", args)[1:2], c(0, 0))
 })
 
+# Summary rows that estimate their growth rate. Study A gives no rate, B
+# gives a rate with a standard deviation, and C a known rate.
+growth_estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+  study = c("A", "A", "B", "B", "C", "C"),
+  type = c("mean", "sd", "quantile", "quantile", "mean", "sd"),
+  value = c(7.5, 3.6, 4.8, 8.6, 6.4, 3.0),
+  p = c(NA, NA, 0.25, 0.75, NA, NA),
+  n = 120,
+  relative_obs_time = c(20, 20, 30, 30, 25, 25),
+  trunc_adjusted = FALSE,
+  trunc_design = c(
+    "accrual", "accrual", "accrual", "accrual", "cohort", "cohort"
+  ),
+  cens_adjusted = c(0, 0, 0, 0, 2, 2),
+  growth_rate = c(NA, NA, 0.1, 0.1, 0.05, 0.05),
+  growth_rate_sd = c(NA, NA, 0.02, 0.02, NA, NA),
+  stringsAsFactors = FALSE
+)))
+
+test_that("as_epidist_meta_model flags summary rows that estimate their growth rate", { # nolint: line_length_linter.
+  meta <- suppressMessages(
+    as_epidist_meta_model(sim_obs, estimates = growth_estimates)
+  )
+  expect_true("growth_known" %in% .meta_required_cols())
+  summaries <- meta[meta$obs_type != 1L, ]
+  expect_identical(summaries$study, c("A", "B", "C"))
+  expect_identical(summaries$growth_known, c(0L, 0L, 1L))
+  # The slot of an estimated rate holds the centre of its prior, or zero
+  # where there is none, and the standard deviation travels with the row.
+  expect_identical(summaries$growth_rate, c(0, 0.1, 0.05))
+  expect_identical(summaries$growth_rate_sd, c(NA, 0.02, NA))
+  individual <- meta[meta$obs_type == 1L, ]
+  expect_true(all(individual$growth_known == 1L))
+  expect_true(all(is.na(individual$growth_rate_sd)))
+  expect_true(.meta_growth_estimated(meta))
+  expect_false(.meta_growth_estimated(prep_meta_obs))
+  expect_true(all(prep_meta_obs$growth_known == 1L))
+})
+
+test_that("a summary row with an estimated growth rate adds pgrowth to the family", { # nolint: line_length_linter.
+  meta <- suppressMessages(
+    as_epidist_meta_model(sim_obs, estimates = growth_estimates)
+  )
+  family <- epidist_family(meta)
+  expect_true("pgrowth" %in% family$dpars)
+  # The individual level rows keep the uniform primary event they were
+  # given, and only the flagged summary rows read pgrowth.
+  expect_identical(family$primary, "uniform")
+  code <- suppressMessages(epidist(meta, fn = brms::make_stancode))
+  expect_match(code, "1, primary_params", fixed = TRUE)
+  expect_match(code, "real mu, real sigma, real pgrowth", fixed = TRUE)
+  expect_match(
+    code, "growth_known == 0 ? pgrowth : growth_rate",
+    fixed = TRUE
+  )
+  expect_match(code, "vint10[n]", fixed = TRUE)
+  # With an exponential growth primary event the parameter is added once.
+  growing <- suppressMessages(as_epidist_meta_model(
+    sim_obs,
+    estimates = growth_estimates, primary = "expgrowth"
+  ))
+  family <- epidist_family(growing)
+  expect_identical(sum(family$dpars == "pgrowth"), 1L)
+  expect_identical(family$primary, "expgrowth")
+  # A model whose rates are all known reads the slot in Stan.
+  code <- suppressMessages(epidist(prep_meta_obs, fn = brms::make_stancode))
+  expect_false("pgrowth" %in% epidist_family(prep_meta_obs)$dpars)
+  expect_match(
+    code, "growth_known == 0 ? growth_rate : growth_rate",
+    fixed = TRUE
+  )
+})
+
+test_that("the meta model adds a per study pgrowth formula unless one is given", { # nolint: line_length_linter.
+  meta <- suppressMessages(as_epidist_meta_model(estimates = growth_estimates))
+  family <- epidist_family(meta)
+  formula <- epidist_formula(meta, family, bf(mu ~ 1))
+  expect_identical(
+    as_string_formula(formula$pforms$pgrowth), "pgrowth ~ 0 + study"
+  )
+  expect_identical(as_string_formula(formula$pforms$sigma), "sigma ~ 1")
+  # A formula given for pgrowth is kept as it is.
+  shared <- epidist_formula(meta, family, bf(mu ~ 1, pgrowth ~ 1))
+  expect_identical(as_string_formula(shared$pforms$pgrowth), "pgrowth ~ 1")
+  grouped <- epidist_formula(
+    meta, family, bf(mu ~ 1, pgrowth ~ 1 + (1 | study))
+  )
+  expect_identical(
+    as_string_formula(grouped$pforms$pgrowth), "pgrowth ~ 1 + (1 | study)"
+  )
+  # Nothing is added where every rate is known, and individual level rows
+  # with an exponential growth primary event keep their intercept.
+  known <- epidist_formula(
+    prep_meta_obs, epidist_family(prep_meta_obs), bf(mu ~ 1)
+  )
+  expect_false("pgrowth" %in% names(known$pforms))
+  individual <- suppressMessages(
+    as_epidist_meta_model(sim_obs, primary = "expgrowth")
+  )
+  intercept <- epidist_formula(
+    individual, epidist_family(individual), bf(mu ~ 1)
+  )
+  expect_identical(
+    as_string_formula(intercept$pforms$pgrowth), "pgrowth ~ 1"
+  )
+  # A single study cannot be coded as a factor, so it gets the intercept.
+  single <- suppressMessages(as_epidist_meta_model(
+    estimates = growth_estimates[growth_estimates$study == "A", ]
+  ))
+  alone <- epidist_formula(single, epidist_family(single), bf(mu ~ 1))
+  expect_identical(as_string_formula(alone$pforms$pgrowth), "pgrowth ~ 1")
+  code <- suppressMessages(epidist(single, fn = brms::make_stancode))
+  expect_match(code, "Intercept_pgrowth", fixed = TRUE)
+})
+
+test_that("the growth slots of a meta model survive the data transform and reach newdata", { # nolint: line_length_linter.
+  meta <- suppressMessages(
+    as_epidist_meta_model(sim_obs, estimates = growth_estimates)
+  )
+  family <- epidist_family(meta)
+  formula <- epidist_formula(meta, family, bf(mu ~ 1))
+  transformed <- suppressMessages(
+    epidist_transform_data_model(meta, family, formula)
+  )
+  expect_s3_class(transformed, "epidist_meta_model")
+  summaries <- transformed[transformed$obs_type != 1L, ]
+  expect_identical(summaries$growth_known, c(0L, 0L, 1L))
+  expect_identical(summaries$growth_rate_sd, c(NA, 0.02, NA))
+  expect_true(all(transformed$growth_known[transformed$obs_type == 1L] == 1L))
+  newdata <- epidist_newdata(meta)
+  expect_identical(newdata$growth_known, 1L)
+  expect_identical(newdata$growth_rate, 0)
+})
+
+test_that(".meta_row_slots reads the growth rate of an estimated row from pgrowth", { # nolint: line_length_linter.
+  standata <- suppressMessages(
+    epidist(
+      as_epidist_meta_model(estimates = growth_estimates),
+      fn = brms::make_standata
+    )
+  )
+  rates <- c(0.05, 0.1, 0.2)
+  prep <- structure(
+    list(
+      data = standata,
+      dpars = list(pgrowth = matrix(rates, nrow = 3, ncol = standata$N)),
+      ndraws = 3,
+      nobs = standata$N
+    ),
+    class = "brmsprep"
+  )
+  estimated <- .meta_row_slots(1, prep)
+  expect_identical(estimated$growth_known, 0L)
+  expect_identical(estimated$growth_rate, rates)
+  known <- .meta_row_slots(3, prep)
+  expect_identical(known$growth_known, 1L)
+  expect_identical(known$growth_rate, 0.05)
+  # One draw at a time.
+  expect_identical(.meta_draw_slots(estimated, 2)$growth_rate, 0.1)
+  expect_identical(.meta_draw_slots(estimated, 5)$growth_rate, 0.2)
+  expect_identical(.meta_draw_slots(known, 2), known)
+  # A fit made before the slot existed has no vint10 and is all known.
+  prep$data$vint10 <- NULL
+  expect_identical(.meta_row_slots(1, prep)$growth_known, 1L)
+  expect_identical(.meta_row_slots(1, prep)$growth_rate, 0)
+  # An estimated rate always tilts the primary event, as in Stan.
+  expect_true(.meta_slots_tilted(.meta_draw_slots(estimated, 1)))
+  expect_true(.meta_slots_tilted(list(growth_known = 0L, growth_rate = 0)))
+  expect_false(.meta_slots_tilted(list(growth_known = 1L, growth_rate = 0)))
+  expect_true(.meta_slots_tilted(list(growth_known = 1L, growth_rate = 0.1)))
+})
+
+test_that(".meta_row_draw_moments summarises each draw at its own growth rate", { # nolint: line_length_linter.
+  rm(list = ls(.meta_draws), envir = .meta_draws)
+  on.exit(rm(list = ls(.meta_draws), envir = .meta_draws), add = TRUE)
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  slots <- list(
+    lower = 0,
+    obs_type = 2L, cutoff = 30, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = c(0.05, 0.2),
+    growth_known = 0L, trunc_design = 1L, study_n = 60
+  )
+  dist_args <- rep(list(args), 2)
+  moments <- .meta_row_draw_moments(slots, "plnorm", dist_args)
+  expect_length(moments, 2)
+  expect_identical(
+    moments[[1]],
+    .meta_row_moments(.meta_draw_slots(slots, 1), "plnorm", args)
+  )
+  expect_identical(
+    moments[[2]],
+    .meta_row_moments(.meta_draw_slots(slots, 2), "plnorm", args)
+  )
+  # A faster growing epidemic cuts the follow up of long delays further, so
+  # the same parameters imply a shorter reported mean.
+  expect_lt(moments[[2]][["mean"]], moments[[1]][["mean"]])
+  # The rates are part of what a cached entry is compared against.
+  slower <- slots
+  slower$growth_rate <- c(0.05, 0.1)
+  other <- .meta_row_draw_moments(slower, "plnorm", dist_args)
+  expect_identical(other[[1]], moments[[1]])
+  expect_false(isTRUE(all.equal(other[[2]], moments[[2]])))
+  expect_identical(
+    .meta_row_draw_moments(slots, "plnorm", dist_args), moments
+  )
+})
+
+test_that("the meta model log likelihood of an estimated growth rate row varies by draw", { # nolint: line_length_linter.
+  meta <- suppressMessages(as_epidist_meta_model(estimates = growth_estimates))
+  family <- epidist_family(meta)
+  standata <- suppressMessages(epidist(meta, fn = brms::make_standata))
+  rates <- c(0.02, 0.1, 0.3)
+  prep <- structure(
+    list(
+      data = standata,
+      dpars = list(
+        mu = matrix(1.8, nrow = 3, ncol = standata$N),
+        sigma = matrix(0.5, nrow = 3, ncol = standata$N),
+        pgrowth = matrix(rates, nrow = 3, ncol = standata$N)
+      ),
+      ndraws = 3,
+      nobs = standata$N,
+      family = list(primary = "uniform")
+    ),
+    class = "brmsprep"
+  )
+  args <- list(meanlog = 1.8, sdlog = 0.5)
+  for (i in 1:2) {
+    log_lik <- family$log_lik(i = i, prep)
+    slots <- .meta_row_slots(i, prep)
+    expected <- vapply(
+      1:3,
+      function(draw) {
+        return(.meta_row_log_lik(
+          .meta_draw_slots(slots, draw), "plnorm", args
+        ))
+      },
+      numeric(1)
+    )
+    expect_equal(log_lik, expected, tolerance = 1e-8)
+    expect_true(all(is.finite(log_lik)))
+    expect_gt(diff(range(log_lik)), 0)
+  }
+  # The row with a known rate does not move with pgrowth.
+  known <- family$log_lik(i = 3, prep)
+  expect_identical(known[1], known[2])
+  expect_identical(known[2], known[3])
+  predicted <- family$posterior_predict(i = 1, prep)
+  expect_identical(dim(predicted), c(3L, 1L))
+  expect_true(all(is.finite(predicted)))
+})
+
 # The slots of a joint study row, a continuous estimand reporting a mean or a
 # standard deviation alongside quantiles, fully adjusted unless overridden.
 joint_study_slots <- function(types, probs, values, study_n = 200, ...) {
@@ -3963,6 +4220,10 @@ test_that(".meta_quantile_on_chord names the designs that keep the chord", {
   expect_true(.meta_quantile_on_chord(
     utils::modifyList(base, list(cens_adjusted = 2L, growth_rate = 0.1))
   ))
+  # An estimated rate is tilted whatever value it holds.
+  expect_true(.meta_quantile_on_chord(utils::modifyList(
+    base, list(cens_adjusted = 2L, growth_known = 0L, growth_rate = 0)
+  )))
 })
 
 test_that(".meta_node_interval finds the node interval holding a delay", {
@@ -4053,7 +4314,7 @@ test_that(".meta_joint_study_terms matches the asymptotic covariance of a lognor
 })
 
 test_that("the joint study covariance matches the sampling covariance of simulated studies", { # nolint: line_length_linter.
-  set.seed(676)
+  withr::local_seed(676)
   args <- list(meanlog = 1.8, sdlog = 0.5)
   probs <- c(0.25, 0.5, 0.75)
   n <- 200

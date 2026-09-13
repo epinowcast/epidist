@@ -1,7 +1,7 @@
 # fmt: skip file
 test_that("epidist_gen_posterior_predict returns a function that outputs positive integers with length equal to draws", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   # Helper function to test predictions
   test_predictions <- function(fit, family) {
@@ -25,7 +25,7 @@ test_that("epidist_gen_posterior_predict returns a function that outputs positiv
 
 test_that("epidist_gen_posterior_predict returns a function that errors for i out of bounds", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   # Helper function to test out of bounds errors
   test_out_of_bounds <- function(fit, family) {
@@ -48,7 +48,7 @@ test_that("epidist_gen_posterior_predict returns a function that errors for i ou
 
 test_that("epidist_gen_posterior_predict returns a function that can generate predictions with no censoring", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   # Helper function to test uncensored predictions
   test_uncensored <- function(fit, family) {
@@ -77,7 +77,7 @@ test_that("epidist_gen_posterior_predict returns a function that can generate pr
 
 test_that("epidist_gen_posterior_predict returns a function that predicts delays in the 95% credible interval", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   # Helper function to test credible intervals
   test_credible_intervals <- function(fit, family) {
@@ -111,7 +111,7 @@ test_that("epidist_gen_posterior_predict returns a function that predicts delays
 
 test_that("epidist_gen_posterior_epred returns a function that creates arrays with correct dimensions", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
 
   # Helper function to test epred
   test_epred <- function(fit, expected_mean) {
@@ -138,7 +138,7 @@ test_that( # nolint: line_length_linter.
   "epidist_gen_log_lik returns a function that produces valid log likelihoods",
   {
     skip_on_cran()
-    skip_if_no_cmdstanr()
+    skip_if_no_fits()
     # Test lognormal
     prep <- brms::prepare_predictions(fit)
     prep$ndraws <- 10
@@ -164,7 +164,7 @@ test_that( # nolint: line_length_linter.
   "epidist_gen_log_lik falls back to generic method for unsupported distributions", # nolint: line_length_linter.
   {
     skip_on_cran()
-    skip_if_no_cmdstanr()
+    skip_if_no_fits()
 
     # Test with normal distribution without analytical solution
     prep <- brms::prepare_predictions(fit)
@@ -188,6 +188,7 @@ test_that(
   "epidist_gen_log_lik passes delay_min as L and relative_obs_time as D",
   {
     skip_on_cran()
+    skip_if_no_fits()
 
     # vreal1 (D) and vreal5 (L) are given distinct values so that a swap
     # between them changes the answer.
@@ -238,7 +239,7 @@ test_that( # nolint: line_length_linter.
   "epidist_gen_log_lik generic method agrees with the analytical method",
   {
     skip_on_cran()
-    skip_if_no_cmdstanr()
+    skip_if_no_fits()
 
     analytical <- epidist_gen_log_lik(lognormal())
     log_lik_brms <- .get_brms_fn("log_lik", lognormal())
@@ -260,7 +261,7 @@ test_that( # nolint: line_length_linter.
   "epidist_gen_log_lik generic method evaluates each delay once for all draws",
   {
     skip_on_cran()
-    skip_if_no_cmdstanr()
+    skip_if_no_fits()
 
     prep <- brms::prepare_predictions(fit)
 
@@ -291,18 +292,26 @@ test_that( # nolint: line_length_linter.
 )
 
 test_that("the generic log likelihood rejects a delay beyond the observation time", { # nolint: line_length_linter.
-  # dpcens() errors on this, and the refactor integrates with pcens_cdf()
-  # instead, so the same guard has to be applied here. Without it the
-  # truncation normalisation can return a density above one.
+  # `dpcens()` will not give a usable answer for an upper bound beyond D, and
+  # the refactor integrates with `pcens_cdf()` instead, so the same guard has
+  # to be applied here. Without it the truncation normalisation can return a
+  # density above one.
   skip_on_cran()
 
-  expect_error(
-    primarycensored::dpcens(
+  upper_beyond_d <- function() {
+    return(primarycensored::dpcens(
       x = 5, pdist = stats::plnorm, meanlog = 1.5, sdlog = 0.5,
       pwindow = 1, swindow = 1, D = 5.5, dprimary = stats::dunif
-    ),
-    "Upper truncation point is greater than D"
-  )
+    ))
+  }
+  # primarycensored errored on this until 1.5.2, which clips the interval at
+  # D and returns a density instead. Either way it refuses to answer the
+  # question as asked, which is what the guard below is for.
+  if (package_version(getNamespaceVersion("primarycensored")) < "1.5.2") {
+    expect_error(upper_beyond_d(), "Upper truncation point is greater than D")
+  } else {
+    expect_message(upper_beyond_d(), "clipping the upper end")
+  }
 
   # The guard belongs to the generic method, which the analytical method
   # reaches through dpcens() instead, so build that method directly rather
@@ -345,19 +354,23 @@ test_that("the post-processing uses the primary event distribution of the fit", 
   expected <- vapply(
     seq_len(prep$ndraws),
     function(draw) {
-      return(primarycensored::dpcens(
-        x = 5,
-        pdist = stats::plnorm,
-        pwindow = 1,
-        swindow = 1,
-        L = 2,
-        D = 12,
-        dprimary = primarycensored::dexpgrowth,
-        dprimary_args = list(r = prep$dpars$pgrowth[draw, 1]),
-        log = TRUE,
-        meanlog = 1.5,
-        sdlog = 0.5
-      ))
+      return(do.call(primarycensored::dpcens, c(
+        list(
+          x = 5,
+          pdist = stats::plnorm,
+          pwindow = 1,
+          swindow = 1,
+          L = 2,
+          D = 12,
+          dprimary = primarycensored::dexpgrowth,
+          log = TRUE,
+          meanlog = 1.5,
+          sdlog = 0.5
+        ),
+        stats::setNames(
+          list(list(r = prep$dpars$pgrowth[draw, 1])), .primary_args_name()
+        )
+      )))
     },
     numeric(1)
   )
@@ -392,11 +405,11 @@ test_that("posterior predictions use the primary event distribution", {
 
   # A steep growth rate puts the primary event at the end of its window, so
   # the sampler must be given it rather than a uniform draw.
-  set.seed(101)
+  withr::local_seed(101)
   predict_fn <- epidist_gen_posterior_predict(lognormal())
   growing <- predict_fn(i = 1, prep)
   prep$family <- list()
-  set.seed(101)
+  withr::local_seed(101)
   uniform <- predict_fn(i = 1, prep)
   expect_false(isTRUE(all.equal(mean(growing), mean(uniform))))
 })

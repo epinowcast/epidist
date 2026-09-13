@@ -5,7 +5,7 @@
 - Added the generalised gamma delay distribution as the `gengamma()` family.
 It has three distributional parameters, `mu` for the scale and `shape` and `k` for the two shape parameters of the Stacy parameterisation, so the gamma and Weibull families are special cases.
 It works with the naive, latent, marginal and meta models, with every primary event distribution, and with `add_summaries()`, which uses its closed form mean, standard deviation and quantiles.
-It needs the `flexsurv` package and the version of `primarycensored` that adds the distribution to its Stan functions.
+It needs the `flexsurv` package and `primarycensored` 1.5.2 or later, which adds the distribution to its Stan functions.
 See #644 and epinowcast/primarycensored#334.
 - Added an exponentially growing primary event distribution to the latent model.
 `as_epidist_latent_model(primary = "expgrowth")` makes the growth rate a distributional parameter, so it takes a `brms` formula and prior and can vary by covariate.
@@ -86,7 +86,7 @@ See #620.
 See #620.
 - The meta model takes a `primary` argument for its individual level rows, as the marginal model does.
 With `primary = "expgrowth"` the growth rate of primary events is estimated as the `pgrowth` distributional parameter.
-Summary rows are unchanged and keep the `growth_rate` metadata of their study as a known tilt.
+Summary rows keep the `growth_rate` metadata of their study as a known tilt, unless the study estimates its rate.
 See #620.
 - Added an `epidist_model_prior()` method for the meta model, which puts a `normal(1, 1)` prior on the intercept of `mu` where it is on the log scale, the scale of the lognormal family prior.
 The centre is fixed rather than taken from the reported values, because a prior chosen from the data would put the posterior of a small review where the data already sit.
@@ -150,6 +150,13 @@ Closes #672.
 Before, the mean and standard deviation of a study were fitted separately from its quantiles, which counted a study reporting a mean, a standard deviation and quartiles about twice for the location, and a mean with a median 1.5 times at a study size of 100.
 A study that reported integer date differences still has the two kinds fitted separately, because its quantiles are discrete statistics, so report its mean and standard deviation and drop its quantiles.
 Closes #676.
+- Summary rows of the meta model can now estimate their growth rate.
+An `NA` `growth_rate` in `as_epidist_estimates_data()` makes the study use the `pgrowth` distributional parameter, the parameter that `primary = "expgrowth"` estimates from individual level data, so a line list from the same outbreak can inform the rate a published summary is corrected with.
+A new `growth_rate_sd` column treats a reported rate as a normal prior on that parameter rather than as a fixed number.
+The meta model adds `pgrowth ~ 0 + study` to the formula where a study estimates its rate, unless a `pgrowth` formula is given, and `epidist_model_prior()` sets the per study priors and a `normal(0, 0.25)` default for the rest.
+The R and Stan implementations read the rate of each posterior draw.
+`epidist_formula()` now lets a model add its own formulas before the remaining distributional parameters are given an intercept.
+Closes #678.
 
 ## Features
 
@@ -199,6 +206,24 @@ That object was never checked before, which only showed once the check in `epidi
 See #399.
 
 ## Package
+
+- Rendered vignette output is no longer copied into the built package tarball.
+`R CMD build` does not read `.gitignore`, so a locally rendered `vignettes/epidist.html` or a knitr cache directory was shipped with the package.
+`.Rbuildignore` now excludes `.html`, `.pdf`, `.tex` and `.md` files under `vignettes/`, along with `_cache` and `_files` directories.
+The `.Rmd` sources and the precomputed figures in `vignettes/figures/` are unaffected.
+
+- `cmdstanr` is no longer a suggested dependency.
+It is not on CRAN, so it put the stan-dev r-universe in `Additional_repositories` and in every workflow, and the dependency step then took `rstan` and `StanHeaders` from there at whatever versions each happened to be.
+The two must be built against each other and a mismatch fails every model compile, which is what broke the macOS and Windows checks when CRAN released `StanHeaders` 2.39.1.
+The test suite now fits through the default `rstan` backend and checks generated Stan code with `rstan::stanc()`.
+`cmdstanr` is still supported as a `brms` backend and the README says how to install it.
+See #687 and #688.
+
+- The primary distribution arguments are passed to `primarycensored` under the name that version accepts.
+1.5.2 renamed `dprimary_args` to `primary_args`, because the arguments reach both the primary density and its distribution function, and kept the old name as a soft deprecation.
+A soft deprecation is quiet for calls from another package but warns while that package's tests run, so this was visible only as warnings in our own suite.
+The name is chosen from the installed version, so the package works with the CRAN version and with 1.5.2 alike, and `.primary_args_name()` can go once the minimum can be raised to 1.5.2.
+Closes #727.
 
 - Acted on a software review of the package.
 Every exported function and method now documents its return value, including the meta model, estimates data and multivariate functions added in this release.
@@ -282,6 +307,23 @@ See #79.
 - Made `epidist_transform_data()` internal.
 It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
 See #79.
+- The `is_epidist_*()` predicates now share one signature, `is_epidist_<class>(data)`.
+`is_epidist_data()`, `is_epidist_linelist_data()`, `is_epidist_aggregate_data()` and `is_epidist_estimates_data()` no longer take a `...` that nothing used, and `is_epidist_multivariate()` names its argument `data` rather than `x`.
+Closes #706.
+- Left `object_usage_linter` disabled after trying it.
+It reported one real finding, a dead variable in `epidist_family_param()` that is now removed, and twelve false positives from cli glue strings, `case_when()` formulas and test fixtures bound at the top level of `setup.R`.
+Closes #710.
+- Tests now seed the generator with `withr::local_seed()` rather than `set.seed()`, so a test no longer leaves the generator where the next one picks it up.
+This covers the 74 calls that sit inside a `test_that()` block or a helper function.
+The calls that seed a whole file from its top level are unchanged.
+`test-int-meta_model.R` is left alone pending #733.
+`withr` is now suggested.
+Closes #703.
+
+- The simulation and recovery checks of the meta model tests now require the credible interval to bracket the simulated parameter with a margin of one posterior standard deviation, through a new `expect_recovers()` test helper.
+The interval narrows with the size of the simulated studies while the bias of the summaries they report does not, so the 2.5% quantile of `sigma` sat 2.4e-5 above a true 0.5 and the comparison was decided by the platform's last digits, failing the macOS check on every pull request.
+The marginal Kolmogorov-Smirnov checks of the latent model prior moved from a p value threshold of 0.01 to 0.001 for the same reason.
+Closes #733.
 
 ## Documentation
 
@@ -302,13 +344,28 @@ See #619 and #620.
 It adjusts for the phase of the outbreak each estimate was made in, taking the retrospective studies as the reference so the population level estimate is the one least affected by right truncation, and reports the phase bias as a marginal effect.
 It reports the population level posterior of the Gamma shape and scale alongside the natural mean and standard deviation, and compares the result with a modern re-analysis of one of the same line lists.
 See #620.
+- Precomputed the `epidist`, `left-truncation` and `primary-events` vignettes.
+Between them they fitted eight models on four platforms on every check run, and a fit was the only thing standing between a Stan toolchain problem and a red check.
+They are now knitted from a `.Rmd.orig` source into a committed `.Rmd` holding static output, as the other model fitting vignettes already were.
+See #688.
 - Added a `left-truncation` vignette showing how to use `delay_min`.
 See #596.
 - Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
+- The `primary-events` vignette now plots the growth rate of each location with the package draws plot method, and gives each location its own simulation seed so the locations no longer share random numbers. Closes #724.
+- Restructured the README install instructions to match `primarycensored`, with CRAN first, then `r-universe`, then `pak` for the development version and for historical releases.
+The text now lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is included by the README, so it can be reused elsewhere.
+- The `faq` and `left-truncation` vignettes now build their simulated dates with `simulate_dates()` and plot posterior draws with the package `plot()` method, in place of hand rolled equivalents.
 
 ## CI
 
 - Added a `render-vignettes` workflow that rebuilds the precomputed vignettes and opens a pull request with the result.
+- Took the stan-dev r-universe out of `extra-repositories`.
+It served `cmdstanr`, but the dependency step also took `rstan` and `StanHeaders` from it.
+`check-cmdstan` and `render-vignettes` install `cmdstanr` on its own instead, so the r-universe is never consulted for anything else.
+The mrc-ide r-universe stays, because `epireview` is suggested and is not on CRAN, and it serves no part of the Stan toolchain.
+See #687.
+- The `\donttest{}` examples fit through `rstan`, so they run on Linux only while the CRAN `rstan` and `StanHeaders` cannot compile a model on macOS or Windows.
+See #688.
 - Passed the coverage report to `codecov/codecov-action` through `files` rather than `file`.
 `file` is not an input the action accepts, so with `disable_search` set it found no report and the `test-coverage` job failed on `main`.
 - Pinned the `precommit` hooks to a revision whose lockfile uses `digest` 0.6.39.
@@ -318,6 +375,8 @@ See #578.
 
 ## Bug fixes
 
+- The `epidist_delay_draws` class, and the family and stratum variables it records, now survive `dplyr::bind_rows()`, `dplyr::mutate()` and the other common verbs, so `plot()` still dispatches without calling `add_summaries()` last.
+Closes #721.
 - `.delay_family()` now strips the `meta_` prefix alongside `latent_` and `marginal_`.
 Without it `add_summaries()` could not find the delay distribution of a meta model fit, because the family is named `meta_gamma` rather than `gamma`.
 See #620.
@@ -339,6 +398,9 @@ See #606.
 - Declared `reformulas` in `Suggests` and skipped the `marginaleffects` integration test when it is absent.
 `insight` needs `reformulas` to read the formula of a `brmsfit`, but only suggests it, so the test failed on a clean library.
 See #601.
+- `delay_parameter_draws()` and `delay_summary_draws()` no longer pass on the `brms` warning about infinite values in the data when the only infinite values are the relative observation time `epidist` uses to mean no truncation.
+Infinite values a user supplies in any other column still warn.
+Closes #718.
 
 # epidist 0.4.1
 

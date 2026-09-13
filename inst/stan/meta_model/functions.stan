@@ -11,8 +11,14 @@
   * - 'primary_id, primary_params' is replaced with the primarycensored
   *   identifier and parameters of the primary event distribution used for
   *   individual level rows, for example '2, {pgrowth}' for exponential
-  *   growth. Summary rows tilt the primary event by their growth_rate slot
-  *   instead, which is data.
+  *   growth. A summary row tilts the primary event by its growth_rate slot
+  *   instead, which is data, unless its growth_known slot is 0.
+  * - 'pgrowth_param' is replaced with 'pgrowth' where the model carries
+  *   that distributional parameter, and with 'growth_rate' otherwise. A
+  *   summary row whose growth_known slot is 0 takes its growth rate from
+  *   it, so the same estimated rate corrects individual level rows and
+  *   summary rows. Every function below therefore takes the growth rate as
+  *   a parameter rather than as data.
   *
   * The number of quadrature intervals a summary row is evaluated on is the
   * `n_quad` slot of the row, chosen by `.estimates_n_quad()` in R from the
@@ -137,7 +143,7 @@
 
   /** Log follow up available to a delay under an accrual design. */
   real meta_family_log_accrual_weight(data real d, data real window,
-                                      data real r) {
+                                      real r) {
     real remaining = fmax(window - d, 0);
     if (remaining <= 0) {
       return negative_infinity();
@@ -154,7 +160,7 @@
 
   /** Reweight a distribution function for an accrual design. */
   vector meta_family_accrual_reweight(vector cdf, data real delay_min,
-                                      data real cutoff, data real r,
+                                      data real cutoff, real r,
                                       data real weight_offset) {
     int n_quad = num_elements(cdf) - 1;
     vector[n_quad] weight;
@@ -283,7 +289,7 @@
                               data real cutoff, data real pwindow_width,
                               data real swindow_width, data int prim_id,
                               array[] real prim_params, data int accrual,
-                              data real growth_rate) {
+                              real growth_rate) {
     int n_grid = to_int(floor(cutoff / swindow_width));
     int first = meta_family_grid_first(delay_min, swindow_width);
     int n_cell = n_grid - first;
@@ -557,7 +563,7 @@
   /** Summaries of a right truncated delay distribution. */
   vector meta_family_trunc_moments(array[] real params, data real delay_min,
                                    data real cutoff, data int n_quad,
-                                   data int accrual, data real growth_rate) {
+                                   data int accrual, real growth_rate) {
     vector[n_quad + 1] grid = linspaced_vector(n_quad + 1, delay_min, cutoff);
     vector[n_quad + 1] cdf;
     for (i in 1:(n_quad + 1)) {
@@ -580,7 +586,7 @@
                                          data int prim_id,
                                          array[] real prim_params,
                                          data int n_quad, data int accrual,
-                                         data real growth_rate) {
+                                         real growth_rate) {
     vector[n_quad + 1] cdf;
     for (i in 1:(n_quad + 1)) {
       cdf[i] = exp(meta_family_pcens_lcdf(
@@ -700,7 +706,7 @@
                                      data int prim_id,
                                      array[] real prim_params,
                                      data int accrual,
-                                     data real growth_rate,
+                                     real growth_rate,
                                      data int n_quad) {
     if (cens_adj == 3 || cens_adj == 4) {
       // Midpoint imputation moves the base estimand along the delay axis, so
@@ -770,7 +776,7 @@
                              data real pwindow_width,
                              data real swindow_width, data int prim_id,
                              array[] real prim_params, data int accrual,
-                             data real growth_rate) {
+                             real growth_rate) {
     int n_grid = to_int(floor(cutoff / swindow_width));
     int first = meta_family_grid_first(delay_min, swindow_width);
     int cell = to_int(floor(y / swindow_width + 0.5));
@@ -804,7 +810,7 @@
                                  data real cutoff,
                                  data real pwindow_width, data int cens_adj,
                                  data int prim_id, array[] real prim_params,
-                                 data real growth_rate, data int n_quad) {
+                                 real growth_rate, data int n_quad) {
     vector[n_quad + 1] cdf;
     for (i in 1:(n_quad + 1)) {
       if (cens_adj == 2) {
@@ -829,7 +835,7 @@
                                 data real pwindow_width,
                                 data int cens_adj, data int prim_id,
                                 array[] real prim_params,
-                                data real growth_rate, data int n_quad) {
+                                real growth_rate, data int n_quad) {
     int lower_node = to_int(
       floor((y - delay_min) / (cutoff - delay_min) * n_quad)
     );
@@ -856,7 +862,7 @@
                                    data real pwindow_width,
                                    data int cens_adj, data int prim_id,
                                    array[] real prim_params,
-                                   data real growth_rate, data int n_quad) {
+                                   real growth_rate, data int n_quad) {
     int lower_node = to_int(
       floor((y - delay_min) / (cutoff - delay_min) * n_quad)
     );
@@ -883,7 +889,7 @@
                                 data real swindow_width, data int trunc_adj,
                                 data int cens_adj, data int prim_id,
                                 array[] real prim_params, data int accrual,
-                                data real growth_rate, data int n_quad) {
+                                real growth_rate, data int n_quad) {
     if (cens_adj == 3 || cens_adj == 4) {
       // Midpoint imputation moved every delay along the axis, so the base
       // estimand is evaluated at the reported delay moved back, and its left
@@ -990,7 +996,7 @@
                                       data int prim_id,
                                       array[] real prim_params,
                                       data int accrual,
-                                      data real growth_rate,
+                                      real growth_rate,
                                       data int n_quad) {
     real prob_upper = meta_family_implied_prob(
       y + step, params, delay_min, cutoff, pwindow_width, swindow_width,
@@ -1120,7 +1126,7 @@
                                    data real swindow_width, data int trunc_adj,
                                    data int cens_adj, data int prim_id,
                                    array[] real prim_params, data int accrual,
-                                   data real growth_rate, data int n_quad) {
+                                   real growth_rate, data int n_quad) {
     if (cens_adj == 3 || cens_adj == 4) {
       return meta_family_implied_density(
         y - meta_family_shift(cens_adj, pwindow_width, swindow_width), params,
@@ -1210,7 +1216,7 @@
                                    data real swindow_width, data int trunc_adj,
                                    data int cens_adj, data int prim_id,
                                    array[] real prim_params, data int accrual,
-                                   data real growth_rate, data int n_quad) {
+                                   real growth_rate, data int n_quad) {
     if (cens_adj == 3 || cens_adj == 4) {
       // The nodes are packed as [origin, spacing, values], so moving the
       // estimand along the delay axis moves the origin. The left truncation
@@ -1296,7 +1302,7 @@
                                  data real swindow_width, data int trunc_adj,
                                  data int cens_adj, data int prim_id,
                                  array[] real prim_params, data int accrual,
-                                 data real growth_rate) {
+                                 real growth_rate) {
     real origin = nodes[1];
     real spacing = nodes[2];
     int n = num_elements(nodes) - 2;
@@ -1328,7 +1334,7 @@
     if (base_code == 0 || accrual == 1) {
       return chord;
     }
-    if (base_code == 2 && growth_rate != 0) {
+    if (base_code == 2 && prim_id != 1) {
       return chord;
     }
     if (base_code == 1 && (dist_id == 1 || dist_id == 3)) {
@@ -1410,7 +1416,7 @@
                                             data int prim_id,
                                             array[] real prim_params,
                                             data int accrual,
-                                            data real growth_rate,
+                                            real growth_rate,
                                             data int n_quad) {
     int k = num_elements(probs);
     vector[k] implied = rep_vector(0, k);
@@ -1486,12 +1492,12 @@
     * meta_family_node_quantile(). Mirrors .meta_quantile_on_chord() in R.
     */
   int meta_family_quantile_on_chord(data int cens_adj, data int accrual,
-                                    data real growth_rate) {
+                                    data int prim_id) {
     int base_code = meta_family_cens_base(cens_adj);
     if (base_code == 0 || accrual == 1) {
       return 1;
     }
-    if (base_code == 2 && growth_rate != 0) {
+    if (base_code == 2 && prim_id != 1) {
       return 1;
     }
     return 0;
@@ -1527,8 +1533,8 @@
                                     data int trunc_adj, data int cens_adj,
                                     data int prim_id,
                                     array[] real prim_params,
-                                    data int accrual, data real growth_rate) {
-    if (meta_family_quantile_on_chord(cens_adj, accrual, growth_rate) == 1) {
+                                    data int accrual, real growth_rate) {
+    if (meta_family_quantile_on_chord(cens_adj, accrual, prim_id) == 1) {
       return (nodes[index + 3] - nodes[index + 2]) / nodes[2];
     }
     {
@@ -1677,7 +1683,7 @@
                                     data int trunc_adj, data int cens_adj,
                                     data int prim_id,
                                     array[] real prim_params,
-                                    data int accrual, data real growth_rate,
+                                    data int accrual, real growth_rate,
                                     data int n_quad) {
     int k = num_elements(types);
     int n_quantile = 0;
@@ -1829,7 +1835,7 @@
                                     data int cens_adj, data int prim_id,
                                     array[] real prim_params,
                                     data int accrual,
-                                    data real growth_rate) {
+                                    real growth_rate) {
     int n_grid = to_int(floor(cutoff / swindow_width));
     int first = meta_family_grid_first(delay_min, swindow_width);
     // The shift back to the base grid is inlined because to_int needs a
@@ -2193,7 +2199,7 @@
                                data real cutoff, data real pwindow_width,
                                data real swindow_width, data int cens_adj,
                                data int prim_id, array[] real prim_params,
-                               data int accrual, data real growth_rate) {
+                               data int accrual, real growth_rate) {
     int n_reported = num_elements(y);
     int n_grid = to_int(floor(cutoff / swindow_width));
     int first = meta_family_grid_first(delay_min, swindow_width);
@@ -2374,7 +2380,7 @@
                                      data int prim_id,
                                      array[] real prim_params,
                                      data int accrual,
-                                     data real growth_rate,
+                                     real growth_rate,
                                      data int n_quad) {
     int n_reported = num_elements(y);
     real lp = lgamma(study_n + 1);
@@ -2453,6 +2459,7 @@
                         data int cens_adj, data int trunc_design,
                         data int group_start, data int group_len,
                         data int chol_start, data int n_quad,
+                        data int growth_known,
                         data real relative_obs_t,
                         data real pwindow_width, data real swindow_width,
                         data real y_upper, data real delay_min,
@@ -2473,21 +2480,26 @@
     );
   }
 
-  int prim_id = growth_rate == 0 ? 1 : 2;
-  array[growth_rate == 0 ? 0 : 1] real prim_params;
+  // A row whose growth rate is estimated always takes the exponential
+  // growth path, whatever value the parameter happens to hold, so that the
+  // branch does not depend on a parameter. A row with a known rate of zero
+  // keeps the uniform primary event.
+  int prim_id = (growth_known == 0 || growth_rate != 0) ? 2 : 1;
+  array[prim_id == 1 ? 0 : 1] real prim_params;
+  real growth = growth_known == 0 ? pgrowth_param : growth_rate;
   // The truncation design only matters for a study that did not adjust for
   // right truncation, because a study that did has already removed it.
   int accrual = (trunc_adj != 1 && trunc_design == 1) ? 1 : 0;
   int last = group_start + group_len - 1;
-  if (growth_rate != 0) {
-    prim_params[1] = growth_rate;
+  if (prim_id == 2) {
+    prim_params[1] = growth;
   }
 
   if (obs_type == 7) {
     vector[group_len] implied = meta_family_implied_summary_vector(
       group_type[group_start:last], group_p[group_start:last], {dpars_B},
       delay_min, relative_obs_t, pwindow_width, swindow_width, trunc_adj,
-      cens_adj, prim_id, prim_params, accrual, growth_rate, n_quad
+      cens_adj, prim_id, prim_params, accrual, growth, n_quad
     );
     matrix[group_len, group_len] chol = to_matrix(
       group_chol[chol_start:(chol_start + group_len * group_len - 1)],
@@ -2503,7 +2515,7 @@
       group_value[group_start:last] | group_type[group_start:last],
       group_p[group_start:last], study_n, {dpars_B}, delay_min,
       relative_obs_t, pwindow_width, swindow_width, trunc_adj, cens_adj,
-      prim_id, prim_params, accrual, growth_rate, n_quad
+      prim_id, prim_params, accrual, growth, n_quad
     );
   }
 
@@ -2513,7 +2525,7 @@
       group_lower[group_start:last], group_p[group_start:last], study_n,
       {dpars_B}, delay_min,
       relative_obs_t, pwindow_width, swindow_width, trunc_adj, cens_adj,
-      prim_id, prim_params, accrual, growth_rate, n_quad
+      prim_id, prim_params, accrual, growth, n_quad
     );
   }
 
@@ -2528,12 +2540,12 @@
     );
     vector[2 + n_node] nodes = meta_family_implied_nodes(
       {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
-      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate, n_quad
+      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth, n_quad
     );
     real implied = meta_family_node_quantile(
       nodes, quantile_p, {dpars_B}, delay_min, relative_obs_t, pwindow_width,
       swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
-      growth_rate
+      growth
     );
     return normal_lpdf(y_upper | implied, fmax(report_se, 1e-6));
   }
@@ -2542,7 +2554,7 @@
     real implied = meta_family_implied_prob(
       y_upper, {dpars_B}, delay_min, relative_obs_t, pwindow_width,
       swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
-      growth_rate, n_quad
+      growth, n_quad
     );
     return normal_lpdf(
       quantile_p | implied, sqrt(quantile_p * (1 - quantile_p) / study_n)
@@ -2551,7 +2563,7 @@
 
   vector[4] moments = meta_family_implied_moments(
     {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
-    trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate, n_quad
+    trunc_adj, cens_adj, prim_id, prim_params, accrual, growth, n_quad
   );
   // An extreme draw can overflow the analytic kurtosis, which would turn the
   // sampling standard error and the log density into NaN. Reject the draw

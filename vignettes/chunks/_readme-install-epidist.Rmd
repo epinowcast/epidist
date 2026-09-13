@@ -1,0 +1,25 @@
+You can install the latest released version from CRAN using the standard `install.packages` function:
+
+```{r, eval = FALSE}
+install.packages("epidist")
+```
+
+Alternatively, you can install the latest release from our r-universe repository:
+
+```{r, eval = FALSE}
+install.packages("epidist", repos = "https://epinowcast.r-universe.dev")
+```
+
+To install the development version from GitHub (warning! this version may contain breaking changes and/or bugs), use the [`pak` package](https://pak.r-lib.org/):
+
+```{r, eval = FALSE}
+pak::pak("epinowcast/epidist")
+```
+
+Similarly, you can install historical versions by specifying the release tag (e.g., [`v0.4.0`](https://github.com/epinowcast/epidist/releases/tag/v0.4.0)):
+
+```{r, eval = FALSE}
+pak::pak("epinowcast/epidist@v0.4.0")
+```
+
+*Note: You can also use the above approach to install a specific commit if needed, for example, if you want to try out a specific unreleased feature, but not the absolute latest developmental version.*

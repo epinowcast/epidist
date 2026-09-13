@@ -41,8 +41,9 @@ window for the individual level rows, as in
 default, assumes it is equally likely at any point. \code{"expgrowth"} tilts
 it, with the growth rate estimated as the \code{pgrowth} distributional
 parameter. Summary rows are unaffected. They tilt the primary event by
-the \code{growth_rate} metadata of their study, which
-\code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}} takes as a known quantity.}
+the \code{growth_rate} metadata of their study, or estimate it as the same
+\code{pgrowth} parameter where that is \code{NA} or has a \code{growth_rate_sd}, see
+\code{\link[=as_epidist_meta_model]{as_epidist_meta_model()}}.}
 
 \item{...}{Additional arguments passed to methods.}
 }

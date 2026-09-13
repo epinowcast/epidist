@@ -151,7 +151,8 @@ epidist_newdata.epidist_meta_model <- function(
       delay_min = delay_min,
       report_se = 0,
       quantile_p = 0,
-      growth_rate = 0
+      growth_rate = 0,
+      growth_known = 1L
     ),
     .supplied = intersect(names(match.call()), names(formals()))
   )

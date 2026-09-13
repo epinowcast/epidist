@@ -58,7 +58,9 @@ below it are dropped.}
 
 \item{growth_rate}{The growth rate the study is described by. Passed
 through as metadata and not used to select cases, so it should be the
-rate the line list was simulated with.}
+rate the line list was simulated with, or \code{NA} for a study that
+estimates it, see \code{\link[=as_epidist_estimates_data]{as_epidist_estimates_data()}}. A \code{growth_rate_sd}
+passes through \code{...}.}
 
 \item{n}{The number of cases the study sampled from those it could have
 seen. Defaults to \code{NULL}, meaning all of them.}
