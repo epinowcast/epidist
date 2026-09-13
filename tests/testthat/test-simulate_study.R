@@ -165,7 +165,7 @@ test_that("simulate_study truncates by the study time, not the line list", {
   # filter on a bare argument name would pick up in place of the study's
   # observation time. A naive cohort study cut at 12 days on a line list
   # observed at 120 days must still lose its long delays.
-  set.seed(17)
+  withr::local_seed(17)
   cases <- simulate_exponential_cases(r = 0, sample_size = 5000, t = 60) |>
     simulate_secondary(dist = rlnorm, meanlog = 1.8, sdlog = 0.5) |>
     simulate_dates(keep_times = TRUE, obs_time = 120)
@@ -269,7 +269,7 @@ simulate_design <- function(design, linelists, report, probs = NULL) {
 
 test_that("simulate_study reproduces the naive cohort fixture", {
   skip_on_cran()
-  set.seed(12)
+  withr::local_seed(12)
   large <- study_linelist(2e5)
   # The fixture of setup.R: integer date differences of a daily line list,
   # keeping a delay when the whole day it falls in is below the cutoff.
@@ -302,7 +302,7 @@ test_that("simulate_study reproduces the naive cohort fixture", {
 
 test_that("simulate_study reproduces the accrual fixture", {
   skip_on_cran()
-  set.seed(13)
+  withr::local_seed(13)
   # The fixture of setup.R: primary events growing over a collection window,
   # kept when the delay completed before its calendar end, under integer
   # date differences, the uniform single interval approximation and
@@ -362,7 +362,7 @@ test_that("simulate_study reproduces the accrual fixture", {
 
 test_that("simulate_study moments agree with the implied moments", {
   skip_on_cran()
-  set.seed(14)
+  withr::local_seed(14)
   linelists <- list(
     cohort = study_linelist(2e5),
     accrual = study_linelist(2e5, r = 0.1, t = 24)
@@ -395,7 +395,7 @@ test_that("simulate_study moments agree with the implied moments", {
 
 test_that("simulate_study quantiles agree with the implied probabilities", {
   skip_on_cran()
-  set.seed(15)
+  withr::local_seed(15)
   linelists <- list(
     cohort = study_linelist(2e5),
     accrual = study_linelist(2e5, r = 0.1, t = 24)
@@ -433,7 +433,7 @@ test_that("simulate_study quantiles agree with the implied probabilities", {
 
 test_that("simulate_study standard errors agree with the implied ones", {
   skip_on_cran()
-  set.seed(16)
+  withr::local_seed(16)
   linelist <- study_linelist(1e5)
   for (cens_adjusted in c(0, 2)) {
     est <- suppressMessages(simulate_study(

@@ -1407,8 +1407,6 @@ new_epidist_estimates_data <- function(data) {
 #'
 #' @inheritParams as_epidist_estimates_data
 #'
-#' @param ... Additional arguments
-#'
 #' @family estimates_data
 #' @returns A logical, `TRUE` if `data` inherits from `epidist_estimates_data`
 #'  and `FALSE` otherwise.
@@ -1417,7 +1415,7 @@ new_epidist_estimates_data <- function(data) {
 #' @examples
 #' is_epidist_estimates_data(data.frame())
 #' is_epidist_estimates_data(new_epidist_estimates_data(data.frame()))
-is_epidist_estimates_data <- function(data, ...) {
+is_epidist_estimates_data <- function(data) {
   return(inherits(data, "epidist_estimates_data"))
 }
 
