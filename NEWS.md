@@ -353,6 +353,10 @@ See #688.
 The tagged v0.4.3 lockfile pins `digest` 0.6.36, which calls `Calloc` and `Free`.
 Those were removed from the R API in R 4.5, so the hook environment failed to build and the `pre-commit` job failed on every pull request.
 See #578.
+- Added a `CITATION.cff` and replaced the `update-citation-cff` workflow with a check that the file still matches `DESCRIPTION` and `inst/CITATION`.
+The old workflow never ran a step.
+Its only run in the repository's history was a startup failure, and its `push` trigger had never matched a branch push.
+Closes #751.
 
 ## Bug fixes
 
