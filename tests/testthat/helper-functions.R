@@ -35,11 +35,10 @@ extract_normal_parameters_brms <- function(prior) {
   return(list(mean = prior_mean, sd = prior_sd))
 }
 
-# Study labels for the lockstep fixtures of setup.R. The fixtures are bound
-# into one object, so a label used by two of them merges two distinct studies
-# into one and quietly changes what the lockstep tests compare. Labels are
-# namespaced by the fixture that owns them, which is why the letters passed
-# here are local to a fixture and need not continue any sequence.
+# Study labels for the lockstep fixtures of setup.R, namespaced by the fixture
+# that owns them. The fixtures are bound into one object, so a label used by
+# two of them merges two distinct studies into one and quietly changes what
+# the lockstep tests compare.
 lockstep_studies <- function(fixture, labels) {
   return(paste(fixture, labels, sep = "_"))
 }
