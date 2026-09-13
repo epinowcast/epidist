@@ -1486,10 +1486,7 @@ test_that("epidist.epidist_meta_model fits the gengamma family to mixed data", {
     cores = 2,
     silent = 2,
     refresh = 0,
-    # As for the latent model above, the two shape parameters trade off, and
-    # the summary rows add their own curvature on top.
-    iter = 2000,
-    control = list(adapt_delta = 0.95)
+    iter = 1000
   ))
   expect_s3_class(fit, "epidist_fit")
   expect_convergence(fit)
