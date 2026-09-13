@@ -215,7 +215,7 @@ test_that("the latent and marginal models agree when censoring windows overlap",
 test_that("epidist.epidist_latent_model fits the gengamma family and recovers a gamma delay", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   skip_if_not_installed("flexsurv")
   set.seed(1)
   fit <- epidist(
@@ -226,8 +226,7 @@ test_that("epidist.epidist_latent_model fits the gengamma family and recovers a 
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   )
   expect_s3_class(fit, "epidist_fit")
   expect_convergence(fit)

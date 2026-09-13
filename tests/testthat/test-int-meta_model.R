@@ -1446,7 +1446,7 @@ test_that("the meta model is calibrated over repeated studies", {
 
 test_that("the R and Stan meta model log likelihoods agree for the gengamma family", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   skip_if_not_installed("flexsurv")
   meta <- suppressMessages(
     as_epidist_meta_model(estimates = lockstep_estimates)
@@ -1475,7 +1475,7 @@ test_that("the R and Stan meta model log likelihoods agree for the gengamma fami
 test_that("epidist.epidist_meta_model fits the gengamma family to mixed data", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   skip_if_not_installed("flexsurv")
   set.seed(1)
   fit <- suppressMessages(epidist(
@@ -1486,8 +1486,7 @@ test_that("epidist.epidist_meta_model fits the gengamma family to mixed data", {
     cores = 2,
     silent = 2,
     refresh = 0,
-    iter = 1000,
-    backend = "cmdstanr"
+    iter = 1000
   ))
   expect_s3_class(fit, "epidist_fit")
   expect_convergence(fit)
