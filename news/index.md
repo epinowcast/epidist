@@ -739,6 +739,18 @@
   now suggested. Closes
   [\#703](https://github.com/epinowcast/epidist/issues/703).
 
+- The simulation and recovery checks of the meta model tests now require
+  the credible interval to bracket the simulated parameter with a margin
+  of one posterior standard deviation, through a new `expect_recovers()`
+  test helper. The interval narrows with the size of the simulated
+  studies while the bias of the summaries they report does not, so the
+  2.5% quantile of `sigma` sat 2.4e-5 above a true 0.5 and the
+  comparison was decided by the platform’s last digits, failing the
+  macOS check on every pull request. The marginal Kolmogorov-Smirnov
+  checks of the latent model prior moved from a p value threshold of
+  0.01 to 0.001 for the same reason. Closes
+  [\#733](https://github.com/epinowcast/epidist/issues/733).
+
 ### Documentation
 
 - Added an `extending-epidist` vignette covering why you might build
