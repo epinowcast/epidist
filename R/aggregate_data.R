@@ -229,13 +229,12 @@ new_epidist_aggregate_data <- function(data) {
 #' Check if data has the `epidist_aggregate_data` class
 #'
 #' @inheritParams as_epidist_aggregate_data
-#' @param ... Additional arguments
 #' @family aggregate_data
 #' @returns A logical, `TRUE` if `data` inherits from `epidist_aggregate_data`
 #'  and `FALSE` otherwise.
 #'
 #' @export
-is_epidist_aggregate_data <- function(data, ...) {
+is_epidist_aggregate_data <- function(data) {
   return(inherits(data, "epidist_aggregate_data"))
 }
 
