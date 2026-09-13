@@ -211,6 +211,11 @@ See #399.
 
 ## Package
 
+- Rendered vignette output is no longer copied into the built package tarball.
+`R CMD build` does not read `.gitignore`, so a locally rendered `vignettes/epidist.html` or a knitr cache directory was shipped with the package.
+`.Rbuildignore` now excludes `.html`, `.pdf`, `.tex` and `.md` files under `vignettes/`, along with `_cache` and `_files` directories.
+The `.Rmd` sources and the precomputed figures in `vignettes/figures/` are unaffected.
+
 - `cmdstanr` is no longer a suggested dependency.
 It is not on CRAN, so it put the stan-dev r-universe in `Additional_repositories` and in every workflow, and the dependency step then took `rstan` and `StanHeaders` from there at whatever versions each happened to be.
 The two must be built against each other and a mismatch fails every model compile, which is what broke the macOS and Windows checks when CRAN released `StanHeaders` 2.39.1.
@@ -306,6 +311,23 @@ See #79.
 - Made `epidist_transform_data()` internal.
 It is a wrapper that dispatches to `epidist_transform_data_model()`, which is the generic an extension implements and which remains exported.
 See #79.
+- The `is_epidist_*()` predicates now share one signature, `is_epidist_<class>(data)`.
+`is_epidist_data()`, `is_epidist_linelist_data()`, `is_epidist_aggregate_data()` and `is_epidist_estimates_data()` no longer take a `...` that nothing used, and `is_epidist_multivariate()` names its argument `data` rather than `x`.
+Closes #706.
+- Left `object_usage_linter` disabled after trying it.
+It reported one real finding, a dead variable in `epidist_family_param()` that is now removed, and twelve false positives from cli glue strings, `case_when()` formulas and test fixtures bound at the top level of `setup.R`.
+Closes #710.
+- Tests now seed the generator with `withr::local_seed()` rather than `set.seed()`, so a test no longer leaves the generator where the next one picks it up.
+This covers the 74 calls that sit inside a `test_that()` block or a helper function.
+The calls that seed a whole file from its top level are unchanged.
+`test-int-meta_model.R` is left alone pending #733.
+`withr` is now suggested.
+Closes #703.
+
+- The simulation and recovery checks of the meta model tests now require the credible interval to bracket the simulated parameter with a margin of one posterior standard deviation, through a new `expect_recovers()` test helper.
+The interval narrows with the size of the simulated studies while the bias of the summaries they report does not, so the 2.5% quantile of `sigma` sat 2.4e-5 above a true 0.5 and the comparison was decided by the platform's last digits, failing the macOS check on every pull request.
+The marginal Kolmogorov-Smirnov checks of the latent model prior moved from a p value threshold of 0.01 to 0.001 for the same reason.
+Closes #733.
 
 ## Documentation
 
@@ -333,6 +355,10 @@ See #688.
 - Added a `left-truncation` vignette showing how to use `delay_min`.
 See #596.
 - Documented installing from CRAN in the README, with `r-universe` as the route to the latest version.
+- The `primary-events` vignette now plots the growth rate of each location with the package draws plot method, and gives each location its own simulation seed so the locations no longer share random numbers. Closes #724.
+- Restructured the README install instructions to match `primarycensored`, with CRAN first, then `r-universe`, then `pak` for the development version and for historical releases.
+The text now lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is included by the README, so it can be reused elsewhere.
+- The `faq` and `left-truncation` vignettes now build their simulated dates with `simulate_dates()` and plot posterior draws with the package `plot()` method, in place of hand rolled equivalents.
 
 ## CI
 
@@ -353,6 +379,8 @@ See #578.
 
 ## Bug fixes
 
+- The `epidist_delay_draws` class, and the family and stratum variables it records, now survive `dplyr::bind_rows()`, `dplyr::mutate()` and the other common verbs, so `plot()` still dispatches without calling `add_summaries()` last.
+Closes #721.
 - `.delay_family()` now strips the `meta_` prefix alongside `latent_` and `marginal_`.
 Without it `add_summaries()` could not find the delay distribution of a meta model fit, because the family is named `meta_gamma` rather than `gamma`.
 See #620.
@@ -374,6 +402,9 @@ See #606.
 - Declared `reformulas` in `Suggests` and skipped the `marginaleffects` integration test when it is absent.
 `insight` needs `reformulas` to read the formula of a `brmsfit`, but only suggests it, so the test failed on a clean library.
 See #601.
+- `delay_parameter_draws()` and `delay_summary_draws()` no longer pass on the `brms` warning about infinite values in the data when the only infinite values are the relative observation time `epidist` uses to mean no truncation.
+Infinite values a user supplies in any other column still warn.
+Closes #718.
 
 # epidist 0.4.1
 

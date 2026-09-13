@@ -314,7 +314,7 @@ test_that(".meta_implied_moments matches the Monte Carlo moments of a naive stud
 })
 
 test_that(".meta_implied_moments matches Monte Carlo naive discretisation with a wide secondary window", { # nolint: line_length_linter.
-  set.seed(102)
+  withr::local_seed(102)
   args <- list(shape = 2, scale = 2.5)
   cutoff <- 40
   moments <- .meta_implied_moments(
@@ -357,7 +357,7 @@ test_that(".meta_implied_moments returns the analytic moments when fully adjuste
 })
 
 test_that(".meta_implied_moments matches Monte Carlo right truncated continuous moments", { # nolint: line_length_linter.
-  set.seed(103)
+  withr::local_seed(103)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 8
   moments <- .meta_implied_moments(
@@ -399,7 +399,7 @@ test_that(".meta_implied_moments recovers a study that midpoints the primary and
   # reported delays of at least delay_min dropped the records whose
   # midpointed delay fell below it, so the base estimand is left truncated at
   # delay_min + pwindow / 2 rather than at delay_min.
-  set.seed(115)
+  withr::local_seed(115)
   args <- list(meanlog = 1.8, sdlog = 0.5)
   n_sim <- 1e6
   designs <- expand.grid(
@@ -450,7 +450,7 @@ test_that(".meta_implied_moments recovers a left truncated study that midpoints 
   # only counted reported delays of at least delay_min kept the cells from
   # ceiling(delay_min / swindow - 1 / 2), which differs from the untruncated
   # grid rule whenever delay_min / swindow is not an integer.
-  set.seed(116)
+  withr::local_seed(116)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   swindow <- 2
   delay_min <- 3
@@ -575,7 +575,7 @@ test_that(".meta_cens_base and .meta_cens_shift describe the midpoint codes", {
 })
 
 test_that(".meta_implied_moments truncates the uniform single interval estimand rather than shifting a truncated one", { # nolint: line_length_linter.
-  set.seed(114)
+  withr::local_seed(114)
   args <- list(meanlog = 1.8, sdlog = 0.5)
   cutoff <- 8
   moments <- .meta_implied_moments(
@@ -765,7 +765,7 @@ test_that(".meta_implied_prob normalises the continuous CDF by the study cutoff"
 
 
 test_that(".meta_summary_terms uses the kurtosis based standard error for reported sds", { # nolint: line_length_linter.
-  set.seed(108)
+  withr::local_seed(108)
   args <- list(meanlog = 1.5, sdlog = 0.5)
   cutoff <- 20
   study_n <- 200
@@ -910,7 +910,7 @@ test_that(".meta_summary_terms uses a reported standard error when one is given"
 })
 
 test_that(".meta_implied_moments accounts for exponential growth in the primary window", { # nolint: line_length_linter.
-  set.seed(105)
+  withr::local_seed(105)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 30
   moments <- .meta_implied_moments(
@@ -959,7 +959,7 @@ test_that(".meta_implied_moments matches the analytic gamma summaries", {
 })
 
 test_that(".meta_implied_moments matches Monte Carlo weibull summaries", {
-  set.seed(109)
+  withr::local_seed(109)
   args <- list(shape = 1.7, scale = 8)
   moments <- .meta_implied_moments(
     "pweibull", args,
@@ -1003,7 +1003,7 @@ test_that(".meta_implied_prob uses the primary censored CDF for the uniform sing
 })
 
 test_that(".meta_implied_prob truncates the primary censored CDF when the study did not", { # nolint: line_length_linter.
-  set.seed(115)
+  withr::local_seed(115)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 10
   n_sim <- 2e5
@@ -1020,7 +1020,7 @@ test_that(".meta_implied_prob truncates the primary censored CDF when the study 
 })
 
 test_that(".meta_summary_terms uses the implied sd over root n for reported means", { # nolint: line_length_linter.
-  set.seed(110)
+  withr::local_seed(110)
   args <- list(meanlog = 1.5, sdlog = 0.5)
   cutoff <- 20
   study_n <- 200
@@ -1077,7 +1077,7 @@ sim_accrual_ptime <- function(n, window, growth_rate) {
 }
 
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation without growth", { # nolint: line_length_linter.
-  set.seed(120)
+  withr::local_seed(120)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 30
   moments <- .meta_implied_moments(
@@ -1096,7 +1096,7 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation without 
 })
 
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation with growth", { # nolint: line_length_linter.
-  set.seed(121)
+  withr::local_seed(121)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 30
   growth_rate <- 0.2
@@ -1122,7 +1122,7 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation with une
   # the primary window shares one weight with its neighbours. A weekly
   # reported secondary date against a daily primary date at an outbreak
   # growth rate is where the lower edge weight fails worst.
-  set.seed(123)
+  withr::local_seed(123)
   mean <- 4.6
   sd <- 2.4
   var_log <- log1p((sd / mean)^2)
@@ -1183,7 +1183,7 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation with a p
   # the cells below two days, and the complete windows stop being eligible
   # for a delay at 30 - 7k rather than at the multiples of seven. Treating
   # the partial window as complete put the implied mean 27% low here.
-  set.seed(124)
+  withr::local_seed(124)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 30
   growth_rate <- 0.2
@@ -1205,7 +1205,7 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation with a p
 })
 
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation with a partial last primary window under every window pairing", { # nolint: line_length_linter.
-  set.seed(125)
+  withr::local_seed(125)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 30
   n_sim <- 2e6
@@ -1302,7 +1302,7 @@ test_that(".meta_grid_pmf with a partial last primary window drops the cells bel
 })
 
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation of a continuous estimand", { # nolint: line_length_linter.
-  set.seed(122)
+  withr::local_seed(122)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 20
   moments <- .meta_implied_moments(
@@ -1320,7 +1320,7 @@ test_that(".meta_implied_moments matches Monte Carlo accrual truncation of a con
 })
 
 test_that(".meta_implied_moments matches Monte Carlo accrual truncation of the uniform single interval approximation", { # nolint: line_length_linter.
-  set.seed(127)
+  withr::local_seed(127)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 15
   pwindow <- 2
@@ -1369,7 +1369,7 @@ test_that(".meta_implied_moments accrual weight offsets the primary window only 
 })
 
 test_that(".meta_implied_prob matches the accrual truncated uniform single interval CDF", { # nolint: line_length_linter.
-  set.seed(128)
+  withr::local_seed(128)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 15
   n_sim <- 2e6
@@ -1441,7 +1441,7 @@ test_that(".meta_implied_moments ignores the truncation design when the study ad
 })
 
 test_that(".meta_implied_prob matches the accrual truncated empirical CDF", {
-  set.seed(123)
+  withr::local_seed(123)
   args <- list(meanlog = 1.6, sdlog = 0.5)
   window <- 20
   n_sim <- 5e5
@@ -1599,7 +1599,7 @@ test_that("a quantile far into the tail gives a slope on the delay scale rather 
 })
 
 test_that("a delay scale quantile se is calibrated against a bootstrapped median", { # nolint: line_length_linter.
-  set.seed(126)
+  withr::local_seed(126)
   args <- list(meanlog = 1.5, sdlog = 0.5)
   cutoff <- 20
   study_n <- 200
@@ -2908,7 +2908,7 @@ test_that(".meta_implied_moments reduces to the untruncated formulas at a delay_
 })
 
 test_that(".meta_implied_moments conditions a continuous estimand on delay_min", { # nolint: line_length_linter.
-  set.seed(203)
+  withr::local_seed(203)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 60
   moments <- .meta_implied_moments(
@@ -3005,7 +3005,7 @@ test_that(".meta_implied_moments of a truncation adjusted study conditions on de
   }
   # The uniform single interval approximation has the same identity, with
   # the primary censored distribution function in place of the delay's.
-  set.seed(205)
+  withr::local_seed(205)
   args <- lnorm_args(10, 25)
   pwindow <- 2
   moments <- .meta_implied_moments(
@@ -3029,7 +3029,7 @@ test_that(".meta_implied_moments of a truncation adjusted study conditions on de
 })
 
 test_that(".meta_implied_prob conditions the naive grid on delay_min", {
-  set.seed(204)
+  withr::local_seed(204)
   args <- list(meanlog = 1.6, sdlog = 0.6)
   cutoff <- 25
   n_sim <- 2e6
@@ -3804,19 +3804,23 @@ test_that("the meta model log likelihood uses the fitted primary event for indiv
   expected <- vapply(
     seq_len(prep$ndraws),
     function(draw) {
-      return(primarycensored::dpcens(
-        x = 5,
-        pdist = stats::plnorm,
-        pwindow = 1,
-        swindow = 1,
-        L = 2,
-        D = 12,
-        dprimary = primarycensored::dexpgrowth,
-        dprimary_args = list(r = prep$dpars$pgrowth[draw, 1]),
-        log = TRUE,
-        meanlog = 1.5,
-        sdlog = 0.5
-      ))
+      return(do.call(primarycensored::dpcens, c(
+        list(
+          x = 5,
+          pdist = stats::plnorm,
+          pwindow = 1,
+          swindow = 1,
+          L = 2,
+          D = 12,
+          dprimary = primarycensored::dexpgrowth,
+          log = TRUE,
+          meanlog = 1.5,
+          sdlog = 0.5
+        ),
+        stats::setNames(
+          list(list(r = prep$dpars$pgrowth[draw, 1])), .primary_args_name()
+        )
+      )))
     },
     numeric(1)
   )
@@ -3854,12 +3858,12 @@ test_that("the meta model posterior predictions use the fitted primary event", {
     ),
     class = "brmsprep"
   )
-  set.seed(101)
+  withr::local_seed(101)
   growing <- family$posterior_predict(i = 1, prep)
   # Without a primary event on the prep the family's own is used, so a
   # uniform family draws a uniform primary event.
   prep$family <- list()
-  set.seed(101)
+  withr::local_seed(101)
   uniform <- epidist_family(prep_meta_individual)$posterior_predict(
     i = 1, prep
   )
@@ -4243,7 +4247,7 @@ test_that(".meta_joint_study_terms matches the asymptotic covariance of a lognor
 })
 
 test_that("the joint study covariance matches the sampling covariance of simulated studies", { # nolint: line_length_linter.
-  set.seed(676)
+  withr::local_seed(676)
   args <- list(meanlog = 1.8, sdlog = 0.5)
   probs <- c(0.25, 0.5, 0.75)
   n <- 200

@@ -35,7 +35,9 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: local::.
+          extra-packages: |
+            local::.
+            any::remotes
 
       # cmdstanr is not a package dependency. It is installed here, on its
       # own, so that the stan-dev r-universe is never consulted for rstan or

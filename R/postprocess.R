@@ -196,6 +196,96 @@ delay_summary_draws <- function(
   return(out)
 }
 
+#' Columns that `epidist` may set to an infinite observation time
+#'
+#' The relative observation time is infinite when the delay is not right
+#' truncated, which is the default of the [epidist_newdata()] methods. The
+#' marginal model also sets it for observation times far beyond the longest
+#' delay, keeping the original in `orig_relative_obs_time`.
+#'
+#' @returns A character vector of column names.
+#'
+#' @keywords internal
+.obs_time_cols <- function() {
+  return(c("relative_obs_time", "orig_relative_obs_time"))
+}
+
+#' Are the infinite values of `data` all observation times?
+#'
+#' @param data A `data.frame`, or `NULL`.
+#'
+#' @returns `TRUE` when `data` holds at least one infinite value and every
+#'  column holding one is an [`.obs_time_cols()`] column, and `FALSE`
+#'  otherwise.
+#'
+#' @keywords internal
+.inf_is_obs_time_only <- function(data) {
+  if (!is.data.frame(data)) {
+    return(FALSE)
+  }
+  has_inf <- vapply(
+    data,
+    function(x) {
+      return(is.numeric(x) && any(is.infinite(x)))
+    },
+    logical(1)
+  )
+  if (!any(has_inf)) {
+    return(FALSE)
+  }
+  return(all(names(data)[has_inf] %in% .obs_time_cols()))
+}
+
+#' The `brms` warning about infinite values in the data
+#'
+#' A substring of the message `brms:::validate_data()` warns with, which
+#' `brms::prepare_predictions()` reaches through `brms:::validate_newdata()`.
+#' Matching a substring rather than the whole message keeps the match narrow
+#' enough not to catch another warning, while surviving a change to the rest
+#' of the sentence. A reworded message brings the warning back rather than
+#' muffling something else.
+#'
+#' @returns A string to match against a warning message.
+#'
+#' @keywords internal
+.infinite_data_warning <- function() {
+  return("infinite values in the data")
+}
+
+#' Evaluate an expression, muffling the `brms` infinite data warning
+#'
+#' Muffles only the warning [`.infinite_data_warning()`] matches, through the
+#' `muffleWarning` restart, so every other warning `expr` raises is left to
+#' propagate. The restart is only invoked when it exists, so a condition
+#' signalled without one is passed on rather than erroring.
+#'
+#' @param expr An expression to evaluate.
+#'
+#' @param muffle A logical. `expr` is evaluated unguarded when `FALSE`.
+#'
+#' @returns The value of `expr`.
+#'
+#' @keywords internal
+.muffle_infinite_data_warning <- function(expr, muffle = TRUE) {
+  if (!isTRUE(muffle)) {
+    return(expr)
+  }
+  return(withCallingHandlers(
+    expr,
+    warning = function(w) {
+      matched <- grepl(
+        .infinite_data_warning(),
+        conditionMessage(w),
+        fixed = TRUE
+      )
+      if (any(matched) && !is.null(findRestart("muffleWarning"))) {
+        invokeRestart("muffleWarning")
+      }
+      return(invisible(NULL))
+    }
+  ))
+}
+
 #' Draws of each distributional parameter in a long `data.frame`
 #'
 #' @inheritParams delay_parameter_draws
@@ -205,11 +295,18 @@ delay_summary_draws <- function(
 #'
 #' @keywords internal
 .dpar_draws <- function(object, newdata = NULL, ...) {
-  pp <- brms::prepare_predictions(
-    object,
-    newdata = newdata,
-    check_response = FALSE,
-    ...
+  # An infinite relative observation time is how `epidist` says there is no
+  # truncation, so the warning `brms` raises for it is expected noise here.
+  # It is only muffled when every infinite value is an observation time, so
+  # a user's own infinite values still warn.
+  pp <- .muffle_infinite_data_warning(
+    brms::prepare_predictions(
+      object,
+      newdata = newdata,
+      check_response = FALSE,
+      ...
+    ),
+    muffle = .inf_is_obs_time_only(newdata)
   )
   ndraws <- pp$ndraws
   n_obs <- pp$nobs

@@ -31,7 +31,7 @@ test_that("add_summaries adds quantiles named as in posterior", {
 })
 
 test_that("add_summaries by simulation agrees with the analytic solution", {
-  set.seed(1)
+  withr::local_seed(1)
   draws <- data.frame(mu = c(1.8, 2.0), sigma = c(0.5, 0.4))
   analytic <- add_summaries(draws, family = "lognormal", probs = 0.5)
   sampled <- add_summaries(
@@ -48,7 +48,7 @@ test_that("add_summaries by simulation agrees with the analytic solution", {
 })
 
 test_that("add_summaries simulates for a family with no analytic solution", {
-  set.seed(1)
+  withr::local_seed(1)
   draws <- data.frame(mu = c(2, 4))
   out <- add_summaries(draws, family = "exponential", nsim = 20000)
   expect_named(out, c("mu", "mean", "sd"))
@@ -193,7 +193,7 @@ test_that("add_summaries accepts a stats family object", {
 })
 
 test_that("add_summaries simulates in chunks without changing the answer", {
-  set.seed(1)
+  withr::local_seed(1)
   draws <- data.frame(mu = rep(1.8, 3), sigma = rep(0.5, 3))
   # `nsim` above the chunk size means each row is simulated in its own chunk
   out <- add_summaries(
@@ -432,7 +432,11 @@ test_that("add_summaries takes the family from a fit", {
     epidist_strata() |>
     add_delay_parameter_draws(fit) |>
     dplyr::ungroup()
-  expect_error(add_summaries(draws), "Could not work out")
+  # The class, and the family it records, survive `ungroup()`, so the family
+  # has to be stripped to check that it can be supplied instead
+  bare <- draws
+  attr(bare, "epidist_family") <- NULL
+  expect_error(add_summaries(bare), "Could not work out")
   expect_true(all(add_summaries(draws, family = fit)$mean > 0))
   expect_true(all(add_summaries(draws, family = fit$family)$mean > 0))
 })
@@ -461,7 +465,7 @@ test_that("add_summaries by simulation agrees with the analytic solution for a f
   skip_on_cran()
   skip_if_no_fits()
 
-  set.seed(1)
+  withr::local_seed(1)
   draws <- fit |>
     epidist_strata() |>
     add_delay_parameter_draws(fit)
@@ -499,4 +503,97 @@ test_that("delay_parameter_draws works with the naive model", {
   expect_length(unique(draws$.draw), summary(fit_naive)$total_ndraws)
   summaries <- add_summaries(draws)
   expect_true(all(summaries$mean > 0))
+})
+
+test_that(".inf_is_obs_time_only is TRUE only for observation time columns", {
+  expect_true(
+    .inf_is_obs_time_only(data.frame(relative_obs_time = Inf, delay = 1))
+  )
+  expect_true(
+    .inf_is_obs_time_only(
+      data.frame(relative_obs_time = Inf, orig_relative_obs_time = Inf)
+    )
+  )
+  expect_false(
+    .inf_is_obs_time_only(data.frame(relative_obs_time = 10, delay = Inf))
+  )
+  expect_false(
+    .inf_is_obs_time_only(data.frame(relative_obs_time = Inf, delay = Inf))
+  )
+  expect_false(.inf_is_obs_time_only(data.frame(relative_obs_time = 10)))
+  expect_false(.inf_is_obs_time_only(NULL))
+})
+
+test_that(".inf_is_obs_time_only copes with list and character columns", {
+  data <- tibble::tibble(relative_obs_time = Inf, sex = "f")
+  data$notes <- list(list(1))
+  expect_true(.inf_is_obs_time_only(data))
+})
+
+test_that(".muffle_infinite_data_warning muffles only the brms warning", {
+  expect_no_warning(
+    .muffle_infinite_data_warning(
+      warning(
+        "Found infinite values in the data, which may cause issues for Stan.",
+        call. = FALSE
+      ),
+      muffle = TRUE
+    )
+  )
+  expect_identical(
+    .muffle_infinite_data_warning(
+      {
+        warning(
+          "Found infinite values in the data, which may cause issues for Stan.",
+          call. = FALSE
+        )
+        "value"
+      },
+      muffle = TRUE
+    ),
+    "value"
+  )
+})
+
+test_that(".muffle_infinite_data_warning lets other warnings through", {
+  expect_warning(
+    .muffle_infinite_data_warning(
+      {
+        warning(
+          "Found infinite values in the data, which may cause issues for Stan.",
+          call. = FALSE
+        )
+        warning("something else entirely", call. = FALSE)
+        "value"
+      },
+      muffle = TRUE
+    ),
+    "something else entirely"
+  )
+})
+
+test_that(".muffle_infinite_data_warning warns when not muffling", {
+  expect_warning(
+    .muffle_infinite_data_warning(
+      warning(
+        "Found infinite values in the data, which may cause issues for Stan.",
+        call. = FALSE
+      ),
+      muffle = FALSE
+    ),
+    "infinite values"
+  )
+})
+
+test_that("delay draws do not warn about the infinite observation time", {
+  skip_on_cran()
+  skip_if_no_fits()
+
+  expect_no_warning(delay_summary_draws(fit_marginal))
+  expect_no_warning(
+    delay_parameter_draws(
+      fit_marginal,
+      newdata = epidist_strata(fit_marginal)
+    )
+  )
 })

@@ -21,7 +21,7 @@ test_that("epidist.epidist_marginal_model recovers the simulation settings for t
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   pred <- delay_parameter_draws(fit_marginal)
   expect_equal(mean(pred$mu), meanlog, tolerance = 0.1)
   expect_equal(mean(pred$sigma), sdlog, tolerance = 0.1)
@@ -31,7 +31,7 @@ test_that("epidist.epidist_marginal_model fits and the MCMC converges in the gam
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   expect_s3_class(fit_marginal_gamma, "brmsfit")
   expect_s3_class(fit_marginal_gamma, "epidist_fit")
   expect_convergence(fit_marginal_gamma)
@@ -41,7 +41,7 @@ test_that("epidist.epidist_marginal_model recovers the simulation settings for t
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   draws_gamma <- posterior::as_draws_df(fit_marginal_gamma$fit)
   draws_gamma_mu <- exp(draws_gamma$Intercept)
   draws_gamma_shape <- exp(draws_gamma$Intercept_shape)
@@ -59,7 +59,7 @@ test_that("epidist.epidist_marginal_model fits and recovers a sex effect", { # n
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   expect_s3_class(fit_marginal_sex, "brmsfit")
   expect_s3_class(fit_marginal_sex, "epidist_fit")
   expect_convergence(fit_marginal_sex)
