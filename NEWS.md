@@ -305,6 +305,9 @@ See #79.
 - The `is_epidist_*()` predicates now share one signature, `is_epidist_<class>(data)`.
 `is_epidist_data()`, `is_epidist_linelist_data()`, `is_epidist_aggregate_data()` and `is_epidist_estimates_data()` no longer take a `...` that nothing used, and `is_epidist_multivariate()` names its argument `data` rather than `x`.
 Closes #706.
+- Split `R/meta_summaries.R` by concern into `R/meta_settings.R` (the quadrature and cache options), `R/meta_estimand.R` (the distribution function, censoring design and accrual weight), `R/meta_moments.R`, `R/meta_probability.R`, `R/meta_quantiles.R`, `R/meta_likelihood.R` (the normal approximations), `R/meta_grid_likelihood.R` (the exact likelihoods for quantiles on a discrete grid) and `R/meta_gen.R` (`epidist_gen_meta_log_lik()`, `epidist_gen_meta_predict()` and the row level functions they call).
+No function was renamed or changed.
+Closes #709.
 
 ## Documentation
 
@@ -336,6 +339,8 @@ See #596.
 - Restructured the README install instructions to match `primarycensored`, with CRAN first, then `r-universe`, then `pak` for the development version and for historical releases.
 The text now lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is included by the README, so it can be reused elsewhere.
 - The `faq` and `left-truncation` vignettes now build their simulated dates with `simulate_dates()` and plot posterior draws with the package `plot()` method, in place of hand rolled equivalents.
+- Shortened the `as_epidist_meta_model()` help page, moving the accuracy measurements and the fitting advice into a "Fitting in practice" section of the model guide vignette and pointing at `as_epidist_estimates_data()` for the checks and settings it documents.
+See #709.
 
 ## CI
 
