@@ -2,23 +2,22 @@
 % Please edit documentation in R/plot_delays.R
 \name{.delay_strata}
 \alias{.delay_strata}
-\title{Take the observed delays of one or more datasets}
+\title{Label the strata of the observed delays of one or more datasets}
 \usage{
-.delay_strata(data, by = NULL)
+.delay_strata(datasets, by = NULL)
 }
 \arguments{
-\item{data}{An \code{epidist_linelist_data} or \code{epidist_aggregate_data} object,
-or a named list of them to compare. The names label the strata.}
+\item{datasets}{A named list of \code{epidist_linelist_data} objects.}
 
-\item{by}{A string naming a column of \code{data} to stratify the delays by.
-Cannot be used when \code{data} is a list, which is stratified by its names.}
+\item{by}{A string naming a column of \code{x} to stratify the delays by.}
 }
 \value{
-A list with \code{data}, a \code{tibble} of the observed \code{delay} of each
-case, its weight \code{n} and its \code{.stratum}, \code{datasets}, the datasets the
-delays came from, and \code{legend}, a legend title or \code{NULL}.
+A list as returned by \code{\link[=.draw_strata]{.draw_strata()}}, holding the observed
+\code{delay} of each case, its weight \code{n} and its \code{.stratum}.
 }
 \description{
-Take the observed delays of one or more datasets
+Takes the observed delay of each case, labels it with the dataset it came
+from, and hands the labelling to \code{\link[=.draw_strata]{.draw_strata()}}. A single dataset with no
+\code{by} has one stratum, and a list of datasets is stratified by its names.
 }
 \keyword{internal}

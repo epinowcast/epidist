@@ -3,6 +3,9 @@ test_that(".floor_mult works as expected, including with one and zero as f", { #
   expect_identical(.floor_mult(1.5, 1), floor(1.5))
   expect_identical(.floor_mult(1.5, 0), 1.5)
   expect_error(.floor_mult(1.5, -1))
+  # A single multiple rounds down every element
+  expect_identical(.floor_mult(c(1.5, 2.7, 4.2), 2), c(0, 2, 4))
+  expect_identical(.floor_mult(c(1.5, 2.7), 0), c(1.5, 2.7))
 })
 
 test_that(".replace_prior successfully replaces priors", { # nolint: line_length_linter.

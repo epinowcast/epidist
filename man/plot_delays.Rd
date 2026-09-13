@@ -2,40 +2,15 @@
 % Please edit documentation in R/plot_delays.R
 \name{plot_delays}
 \alias{plot_delays}
-\title{Plot the observed delay distribution of a linelist}
+\title{Plot the observed delay distribution}
 \usage{
-plot_delays(
-  data,
-  by = NULL,
-  binwidth = 1,
-  delay_min = NULL,
-  reference = NULL,
-  family = "lognormal"
-)
+plot_delays(x, ...)
 }
 \arguments{
-\item{data}{An \code{epidist_linelist_data} or \code{epidist_aggregate_data} object,
-or a named list of them to compare. The names label the strata.}
+\item{x}{An \code{epidist_linelist_data} or \code{epidist_aggregate_data} object, a
+named list of them to compare, or a model fitted with \code{\link[=epidist]{epidist()}}.}
 
-\item{by}{A string naming a column of \code{data} to stratify the delays by.
-Cannot be used when \code{data} is a list, which is stratified by its names.}
-
-\item{binwidth}{The width of the delay bins, on the scale of the event
-times. Defaults to 1, the daily censoring the data usually has.}
-
-\item{delay_min}{The minimum delay to mark with a dashed vertical line, as
-a number on the scale of the event times. If \code{NULL}, the default, the
-\code{delay_min} column of \code{data} is used when it has one and no line is drawn
-otherwise.}
-
-\item{reference}{A named numeric vector of the distributional parameters of
-a delay distribution to draw over the columns, as
-\code{c(mu = 1.8, sigma = 0.5)} for a lognormal delay. If \code{NULL}, the default,
-no distribution is drawn.}
-
-\item{family}{A \code{brms} family, or the name of one, giving the delay
-distribution \code{reference} holds the parameters of. Defaults to
-\code{"lognormal"}.}
+\item{...}{Passed to the method.}
 }
 \value{
 A \code{ggplot} object.
@@ -44,9 +19,9 @@ A \code{ggplot} object.
 Bins the delay between the lower bounds of the primary and secondary event
 windows of each case, the delay as it was observed, and draws the
 proportion of cases in each bin as a column. Pass a named list of datasets
-to compare their observed delays, and a reference distribution to draw the
-delay distribution they are a sample of. This is the plot the vignettes use
-to show how censoring and truncation bias the observed delays.
+to compare their observed delays, a reference distribution to draw the
+delay distribution they are a sample of, or a model fitted with \code{\link[=epidist]{epidist()}}
+to draw the delays it predicts over the delays it was fitted to.
 }
 \details{
 The observed delay is \code{stime_lwr - ptime_lwr}, the delay between the days
@@ -55,20 +30,18 @@ response the naive model fits, so the plot shows the data that model sees
 rather than the delay distribution itself. Censoring and truncation both
 bias it, which is what the reference distribution makes visible.
 
-Counts are weighted by the \code{n} column when \code{data} has one, so aggregate
+Counts are weighted by the \code{n} column when the data has one, so aggregate
 data gives the same plot as the linelist it was aggregated from.
 
 Proportions are within each stratum, so datasets of different sizes can be
 compared. The density is the proportion divided by \code{binwidth}, which puts
 the columns on the scale of the reference distribution.
 
-The plot is drawn with \code{\link[ggplot2:ggtheme]{ggplot2::theme_minimal()}} and the colour blind
-friendly palette the package documentation uses. Add a theme or a scale of
-your own to the returned plot to override either. The column named by \code{by}
-is kept in the plot data, so the plot can be faceted by it.
+The columns named by \code{by} are kept in the plot data, so the plot can be
+faceted by them.
 }
 \examples{
-\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 linelist <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",
@@ -85,6 +58,10 @@ and \code{\link[=plot.epidist_delay_draws]{plot.epidist_delay_draws()}} to plot 
 
 Other plot: 
 \code{\link{plot.epidist_delay_draws}()},
+\code{\link{plot_delays.default}()},
+\code{\link{plot_delays.epidist_fit}()},
+\code{\link{plot_delays.epidist_linelist_data}()},
+\code{\link{plot_delays.list}()},
 \code{\link{plot_events}()}
 }
 \concept{plot}

@@ -16,13 +16,13 @@ no distribution is drawn.}
 distribution \code{reference} holds the parameters of. Defaults to
 \code{"lognormal"}.}
 
-\item{plot_data}{The binned delays, as returned by \code{.bin_delays()}.}
+\item{plot_data}{The binned delays, as returned by \code{\link[=.bin_delays]{.bin_delays()}}.}
 
 \item{binwidth}{The width of the delay bins, on the scale of the event
 times. Defaults to 1, the daily censoring the data usually has.}
 }
 \value{
-A list of \code{ggplot2} layers.
+A \code{ggplot2} layer.
 }
 \description{
 Draw a reference delay distribution over the observed delays

@@ -2,15 +2,19 @@
 % Please edit documentation in R/plot_delays.R
 \name{.bin_delays}
 \alias{.bin_delays}
-\title{Bin the observed delays of each stratum}
+\title{Bin the delays of each stratum}
 \usage{
-.bin_delays(delays, binwidth = 1)
+.bin_delays(delays, binwidth = 1, keep = NULL)
 }
 \arguments{
-\item{delays}{A \code{tibble} of delays as returned by \code{.delay_strata()}.}
+\item{delays}{A \code{tibble} of delays with their \code{.stratum}, as returned by
+\code{\link[=.draw_strata]{.draw_strata()}}.}
 
 \item{binwidth}{The width of the delay bins, on the scale of the event
 times. Defaults to 1, the daily censoring the data usually has.}
+
+\item{keep}{A character vector of columns of \code{delays} to keep, which must
+be constant within a stratum.}
 }
 \value{
 A \code{tibble} with one row per stratum and bin, holding the lower
@@ -18,6 +22,6 @@ edge of the bin as \code{delay}, the weighted count \code{n}, the proportion of 
 stratum \code{p} and the density \code{density}.
 }
 \description{
-Bin the observed delays of each stratum
+Bin the delays of each stratum
 }
 \keyword{internal}

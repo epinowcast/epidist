@@ -111,6 +111,10 @@ draws, and \code{\link[=plot_events]{plot_events()}} to plot the data.
 
 Other plot: 
 \code{\link{plot_delays}()},
+\code{\link{plot_delays.default}()},
+\code{\link{plot_delays.epidist_fit}()},
+\code{\link{plot_delays.epidist_linelist_data}()},
+\code{\link{plot_delays.list}()},
 \code{\link{plot_events}()}
 }
 \concept{plot}

@@ -32,7 +32,8 @@ test_that("plot_delays bins to the width given", {
   expect_true(all(p$data$delay %% 2 == 0))
   expect_equal(sum(p$data$p), 1, tolerance = 1e-12)
   expect_equal(p$data$density, p$data$p / 2, tolerance = 1e-12)
-  expect_identical(p$layers[[1]]$aes_params$width, 2)
+  built <- ggplot2::layer_data(p, 1)
+  expect_equal(unique(built$xmax - built$xmin), 2, tolerance = 1e-12)
 })
 
 test_that("plot_delays strata by a column of the data", {
@@ -103,6 +104,23 @@ test_that("plot_delays marks a minimum delay", {
   )
 })
 
+test_that("plot_delays marks a minimum delay the datasets agree on", {
+  skip_if_not_installed("ggplot2")
+  truncated <- dplyr::filter(sim_obs, .data$stime_upr <= 15)
+  agreed <- list(
+    All = dplyr::mutate(sim_obs, delay_min = 2),
+    Truncated = dplyr::mutate(truncated, delay_min = 2)
+  )
+  p <- plot_delays(agreed)
+  expect_length(p$layers, 2)
+  expect_s3_class(p$layers[[2]]$geom, "GeomVline")
+  expect_identical(p$layers[[2]]$data$xintercept, 2)
+  # Datasets that disagree have no single minimum delay to mark
+  disagreed <- agreed
+  disagreed$Truncated$delay_min <- 3
+  expect_length(plot_delays(disagreed)$layers, 1)
+})
+
 test_that("plot_delays uses the package theme and palette", {
   skip_if_not_installed("ggplot2")
   p <- plot_delays(sim_obs)
@@ -127,10 +145,63 @@ test_that("plot_delays errors on bad input", {
   expect_error(plot_delays(sim_obs, by = "missing"), "missing")
   expect_error(plot_delays(sim_obs, binwidth = 0), "not >= ")
   expect_error(plot_delays(sim_obs, delay_min = "a"), "delay_min")
+  expect_error(plot_delays(sim_obs, delay_min = -1), "not >= 0")
   expect_error(
     plot_delays(sim_obs, reference = c(mu = 1.8)),
     "sigma"
   )
+})
+
+test_that("plot_delays draws the delays a fitted model predicts", {
+  skip_if_not_installed("ggplot2")
+  skip_if_no_fits()
+  p <- plot_delays(fit_marginal, ndraws = 50)
+  expect_s3_class(p, "ggplot")
+  expect_no_error(ggplot2::ggplot_build(p))
+  expect_length(p$layers, 3)
+  expect_s3_class(p$layers[[1]]$geom, "GeomCol")
+  expect_s3_class(p$layers[[2]]$geom, "GeomRibbon")
+  expect_s3_class(p$layers[[3]]$geom, "GeomLine")
+  # The columns are the observed delays of the data the model was fitted to
+  observed <- plot_delays(sim_obs)
+  expect_identical(p$data$delay, observed$data$delay)
+  expect_identical(p$data$n, observed$data$n)
+  expect_equal(p$data$p, observed$data$p, tolerance = 1e-12)
+  # The predictions are the proportion of the cases in each bin
+  predicted <- p$layers[[2]]$data
+  expect_named(predicted, c(".stratum", "delay", "density", "lower", "upper"))
+  expect_true(all(predicted$lower <= predicted$density))
+  expect_true(all(predicted$density <= predicted$upper))
+  expect_gt(sum(predicted$density), 0.8)
+  expect_lt(sum(predicted$density), 1.05)
+  expect_identical(p$labels$x, "Delay")
+  expect_identical(p$labels$y, "Density")
+})
+
+test_that("plot_delays colours the strata of a fitted model", {
+  skip_if_not_installed("ggplot2")
+  skip_if_no_fits()
+  p <- plot_delays(fit_marginal_sex, ndraws = 50)
+  expect_no_error(ggplot2::ggplot_build(p))
+  expect_identical(levels(p$data$.stratum), c("0", "1"))
+  expect_identical(p$labels$fill, "sex")
+  # The column is kept so that the plot can be faceted by it
+  expect_true("sex" %in% names(p$data))
+  by_stratum <- as.vector(tapply(p$data$p, p$data$.stratum, sum))
+  expect_equal(by_stratum, c(1, 1), tolerance = 1e-12)
+  # The predictions are stratified too
+  expect_identical(levels(p$layers[[2]]$data$.stratum), c("0", "1"))
+  # A single stratum can be asked for by name
+  p_one <- plot_delays(fit_marginal, by = "pwindow", ndraws = 50)
+  expect_identical(p_one$labels$fill, "pwindow")
+})
+
+test_that("plot_delays errors on a fitted model it cannot plot", {
+  skip_if_not_installed("ggplot2")
+  skip_if_no_fits()
+  expect_error(plot_delays(fit_marginal, by = "missing"), "missing")
+  expect_error(plot_delays(fit_marginal, ndraws = 0), "ndraws")
+  expect_error(plot_delays(fit_meta_estimates), "meta analytic")
 })
 
 test_that("plot_delays errors when ggplot2 is not installed", {
