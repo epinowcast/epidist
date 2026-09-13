@@ -75,6 +75,9 @@ test_that("every observation type of the meta model reads the estimated growth r
   # placeholder rather than the rate in use, so a row reading the slot
   # still has a rate to fit at and would fail quietly.
   expect_true(all(program$standata$vint10 == 0L))
+  # The second of these guards the fixture rather than the package. The
+  # slots below hold 0 and 0.1, so a row reading one is separated from the
+  # 0.05 fitted at, and the checks that follow can tell the two apart.
   expect_false(any(program$standata$vreal8 == 0.05))
   base <- meta_stan_log_lik(program, 1.9, 0.5, 0.05)
   moved <- meta_stan_log_lik(program, 1.9, 0.5, 0.2)
