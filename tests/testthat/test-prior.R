@@ -310,6 +310,23 @@ test_that("epidist_model_prior adds nothing to a meta model of individual rows o
   expect_null(epidist_model_prior(prep_meta_individual, formula))
 })
 
+test_that("epidist_prior applies the gengamma family priors to every model", { # nolint: line_length_linter.
+  skip_if_not_installed("flexsurv")
+  for (data in list(prep_naive_obs, prep_obs, prep_marginal_obs)) {
+    family <- epidist_family(data, family = gengamma())
+    formula <- epidist_formula(data, family, formula = bf(mu ~ 1))
+    prior <- suppressWarnings(
+      epidist_prior(data, family, formula, prior = NULL)
+    )
+    intercepts <- prior[prior$class == "Intercept", ]
+    expect_identical(intercepts$prior[!nzchar(intercepts$dpar)], "normal(1, 1)")
+    expect_identical(
+      intercepts$prior[intercepts$dpar == "shape"], "normal(0, 0.5)"
+    )
+    expect_identical(intercepts$prior[intercepts$dpar == "k"], "normal(0, 0.5)")
+  }
+})
+
 test_that("epidist_model_prior gives the growth rate of a summary row a prior", { # nolint: line_length_linter.
   # Study A gives no rate, "site 2" a rate with a standard deviation whose
   # level brms strips the space from, and C a known rate.

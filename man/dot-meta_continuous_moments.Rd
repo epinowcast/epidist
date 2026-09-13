@@ -17,10 +17,13 @@ A named numeric vector with elements \code{mean}, \code{sd}, \code{kurtosis} and
 }
 \description{
 The mean and standard deviation mirror the formulas used by
-\code{\link[=add_summaries]{add_summaries()}}. A draw wide enough to overflow a moment, such as a
-lognormal whose \code{exp(4 * sdlog^2)} is infinite, is returned as
-\code{\link[=.meta_moment_failure]{.meta_moment_failure()}} so that the row is rejected rather than carrying
-a \code{NaN} into its standard error. Matches the reject in
+\code{\link[=add_summaries]{add_summaries()}}. The generalised gamma follows the weibull, which is its
+\code{k = 1} case, with the raw moments
+\eqn{E[T^r] = \theta^r \Gamma(k + r / a) / \Gamma(k)} for \code{scale}
+\eqn{\theta} and \code{shape} \eqn{a}. A draw wide enough to overflow a
+moment, such as a lognormal whose \code{exp(4 * sdlog^2)} is infinite, is
+returned as \code{\link[=.meta_moment_failure]{.meta_moment_failure()}} so that the row is rejected rather
+than carrying a \code{NaN} into its standard error. Matches the reject in
 \code{meta_family_moments()} in \code{inst/stan/meta_model/functions.stan}, where an
 infinite intermediate would otherwise leave a finite density with a non
 finite gradient.

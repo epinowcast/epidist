@@ -24,6 +24,8 @@ and Stan's reverse pass chains every node on the stack, so the \code{NaN}
 poisons the gradient even when the value is discarded. The bounds are
 \code{Phi(z) < exp(-100)} for \code{z < -14} for the lognormal,
 \code{P(a, x) <= x^a / Gamma(a + 1)} for the gamma and \code{1 - exp(-y) <= y} for
-the weibull. Mirrors \code{meta_family_deep_tail()} in Stan.
+the weibull. The generalised gamma uses the gamma bound at
+\code{x = (q / scale)^shape} with \code{a = k}. Mirrors \code{meta_family_deep_tail()}
+in Stan.
 }
 \keyword{internal}
