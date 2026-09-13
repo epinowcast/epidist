@@ -113,9 +113,9 @@
 #' )
 #'
 #' # The formula does not use study, so pass the model data
-#' epidist_leave_one_out(fit, data = meta, refresh = 0)
+#' epidist_meta_leave_one_out(fit, data = meta, refresh = 0)
 #' }
-epidist_leave_one_out <- function(
+epidist_meta_leave_one_out <- function(
   fit,
   data = NULL,
   newdata = NULL,
@@ -152,7 +152,7 @@ epidist_leave_one_out <- function(
 
 #' Check that a fit is a meta model fitted with `epidist()`
 #'
-#' @inheritParams epidist_leave_one_out
+#' @inheritParams epidist_meta_leave_one_out
 #'
 #' @returns `NULL`, invisibly.
 #'
@@ -175,7 +175,7 @@ epidist_leave_one_out <- function(
 #' The families `epidist` builds are custom families named after the model
 #' and the delay distribution, such as `meta_lognormal`.
 #'
-#' @inheritParams epidist_leave_one_out
+#' @inheritParams epidist_meta_leave_one_out
 #'
 #' @returns A string.
 #'
@@ -190,7 +190,7 @@ epidist_leave_one_out <- function(
 
 #' The model data used to hold each study out of a meta model fit
 #'
-#' @inheritParams epidist_leave_one_out
+#' @inheritParams epidist_meta_leave_one_out
 #'
 #' @returns The `epidist_meta_model` object given as `data`, or the plain
 #'  `data.frame` of model data stored in `fit`.
@@ -255,7 +255,7 @@ epidist_leave_one_out <- function(
 #' truncation. [epidist_newdata()] only reads its `data` argument to expand
 #' variables, so a copy of the model data carrying the class is enough.
 #'
-#' @inheritParams epidist_leave_one_out
+#' @inheritParams epidist_meta_leave_one_out
 #'
 #' @returns A [tibble::tibble()] of one row.
 #'
@@ -301,7 +301,7 @@ epidist_leave_one_out <- function(
 
 #' Refit a model to new data, reusing the compiled model
 #'
-#' @inheritParams epidist_leave_one_out
+#' @inheritParams epidist_meta_leave_one_out
 #'
 #' @param newdata The data to refit to.
 #'
@@ -316,7 +316,7 @@ epidist_leave_one_out <- function(
 
 #' Posterior summaries of the delay mean and standard deviation of a fit
 #'
-#' @inheritParams epidist_leave_one_out
+#' @inheritParams epidist_meta_leave_one_out
 #'
 #' @param newdata A `data.frame` of data to predict the delay for, passed to
 #'  [delay_summary_draws()].
