@@ -401,11 +401,11 @@ test_that("posterior predictions use the primary event distribution", {
 
   # A steep growth rate puts the primary event at the end of its window, so
   # the sampler must be given it rather than a uniform draw.
-  set.seed(101)
+  withr::local_seed(101)
   predict_fn <- epidist_gen_posterior_predict(lognormal())
   growing <- predict_fn(i = 1, prep)
   prep$family <- list()
-  set.seed(101)
+  withr::local_seed(101)
   uniform <- predict_fn(i = 1, prep)
   expect_false(isTRUE(all.equal(mean(growing), mean(uniform))))
 })

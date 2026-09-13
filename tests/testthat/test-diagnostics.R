@@ -2,7 +2,7 @@
 test_that("epidist_diagnostics", { # nolint: line_length_linter.
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   diag <- epidist_diagnostics(fit)
   expected_names <- c(
     "time", "samples", "max_rhat", "divergent_transitions",
@@ -25,7 +25,7 @@ test_that("epidist_diagnostics", { # nolint: line_length_linter.
 test_that("epidist_diagnostics gives an error when passed a model fit with an approximate algorithm", { # nolint: line_length_linter.
   skip_on_cran()
   skip_if_no_fits()
-  set.seed(1)
+  withr::local_seed(1)
   prep_obs <- as_epidist_latent_model(sim_obs)
   # The variational fit only has to exist, so its Pareto k warning is noise.
   fit_meanfield <- suppressWarnings(epidist(
