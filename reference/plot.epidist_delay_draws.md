@@ -145,6 +145,11 @@ for the draws, and
 to plot the data.
 
 Other plot:
+[`plot_delays()`](https://epidist.epinowcast.org/reference/plot_delays.md),
+[`plot_delays.default()`](https://epidist.epinowcast.org/reference/plot_delays.default.md),
+[`plot_delays.epidist_fit()`](https://epidist.epinowcast.org/reference/plot_delays.epidist_fit.md),
+[`plot_delays.epidist_linelist_data()`](https://epidist.epinowcast.org/reference/plot_delays.epidist_linelist_data.md),
+[`plot_delays.list()`](https://epidist.epinowcast.org/reference/plot_delays.list.md),
 [`plot_events()`](https://epidist.epinowcast.org/reference/plot_events.md)
 
 ## Examples

@@ -401,7 +401,17 @@
   works too. The vignettes now use it in place of the plots they drew by
   hand. Closes
   [\#670](https://github.com/epinowcast/epidist/issues/670).
-- Both plot functions use
+- Added
+  [`plot_delays()`](https://epidist.epinowcast.org/reference/plot_delays.md),
+  which draws the observed delay distribution of an
+  `epidist_linelist_data` or `epidist_aggregate_data` object, binned and
+  as a proportion of the cases. It compares a named list of datasets,
+  weights aggregate data by its counts, overlays a reference delay
+  distribution and marks a minimum delay. Given a fitted model it draws
+  the delays the model predicts over the delays it was fitted to, as a
+  posterior predictive check of the observed delays. Closes
+  [\#743](https://github.com/epinowcast/epidist/issues/743).
+- The plot functions use
   [`ggplot2::theme_minimal()`](https://ggplot2.tidyverse.org/reference/ggtheme.html)
   and a colour blind friendly palette, so that their output matches the
   plots in the package documentation.

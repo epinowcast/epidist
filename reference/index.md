@@ -483,6 +483,17 @@ Functions for plotting data and posterior draws
 - [`plot(`*`<epidist_delay_draws>`*`)`](https://epidist.epinowcast.org/reference/plot.epidist_delay_draws.md)
   [`autoplot(`*`<epidist_delay_draws>`*`)`](https://epidist.epinowcast.org/reference/plot.epidist_delay_draws.md)
   : Plot posterior draws of the delay distribution
+- [`plot_delays()`](https://epidist.epinowcast.org/reference/plot_delays.md)
+  : Plot the observed delay distribution
+- [`plot_delays(`*`<default>`*`)`](https://epidist.epinowcast.org/reference/plot_delays.default.md)
+  : Default method for plotting observed delays
+- [`plot_delays(`*`<epidist_fit>`*`)`](https://epidist.epinowcast.org/reference/plot_delays.epidist_fit.md)
+  : Plot the delays a fitted model predicts over the delays it was
+  fitted to
+- [`plot_delays(`*`<epidist_linelist_data>`*`)`](https://epidist.epinowcast.org/reference/plot_delays.epidist_linelist_data.md)
+  : Plot the observed delays of a dataset
+- [`plot_delays(`*`<list>`*`)`](https://epidist.epinowcast.org/reference/plot_delays.list.md)
+  : Compare the observed delays of several datasets
 - [`plot_events()`](https://epidist.epinowcast.org/reference/plot_events.md)
   : Plot the primary and secondary event windows of each case
 

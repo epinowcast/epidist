@@ -62,7 +62,12 @@ can be faceted by it.
 ## See also
 
 Other plot:
-[`plot.epidist_delay_draws()`](https://epidist.epinowcast.org/reference/plot.epidist_delay_draws.md)
+[`plot.epidist_delay_draws()`](https://epidist.epinowcast.org/reference/plot.epidist_delay_draws.md),
+[`plot_delays()`](https://epidist.epinowcast.org/reference/plot_delays.md),
+[`plot_delays.default()`](https://epidist.epinowcast.org/reference/plot_delays.default.md),
+[`plot_delays.epidist_fit()`](https://epidist.epinowcast.org/reference/plot_delays.epidist_fit.md),
+[`plot_delays.epidist_linelist_data()`](https://epidist.epinowcast.org/reference/plot_delays.epidist_linelist_data.md),
+[`plot_delays.list()`](https://epidist.epinowcast.org/reference/plot_delays.list.md)
 
 ## Examples
 
