@@ -127,8 +127,8 @@ summary(fit)
 #> 
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.62      0.01     1.60     1.63 1.00     1954     1177
-#> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1628     1384
+#> Intercept           1.62      0.01     1.60     1.63 1.00     1842     1247
+#> sigma_Intercept    -0.53      0.01    -0.54    -0.51 1.00     1521     1197
 #> 
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential

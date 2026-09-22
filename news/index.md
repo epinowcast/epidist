@@ -891,9 +891,9 @@
   `codemeta.json` instead. The workflow could not add the file because
   its commit step names it directly to `git commit`, which only works on
   a file git already tracks. The file is now built with
-  `codemetar::write_codemeta()` and refreshed by hand when `DESCRIPTION`
-  changes. It is no longer in `.Rbuildignore`, so it ships in the
-  package tarball. Closes
+  [`codemetar::write_codemeta()`](https://docs.ropensci.org/codemetar/reference/write_codemeta.html)
+  and refreshed by hand when `DESCRIPTION` changes. It is no longer in
+  `.Rbuildignore`, so it ships in the package tarball. Closes
   [\#707](https://github.com/epinowcast/epidist/issues/707).
 
 ### Bug fixes

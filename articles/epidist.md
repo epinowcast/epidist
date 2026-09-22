@@ -70,14 +70,6 @@ will need the following packages:
 library(epidist)
 library(ggplot2)
 library(dplyr)
-#>
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#>
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#>
-#>     intersect, setdiff, setequal, union
 ```
 
 ## 3 Simulating data
@@ -581,8 +573,8 @@ summary(naive_fit)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.36     1.48 1.00     3642     2636
-#> sigma_Intercept    -0.76      0.05    -0.85    -0.65 1.00     3393     2495
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3291     2807
+#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3903     2782
 #>
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -681,8 +673,8 @@ summary(marginal_fit)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.47     1.65 1.00     2226     2244
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2343     2426
+#> Intercept           1.55      0.05     1.46     1.64 1.00     1846     2148
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     1923     2110
 #>
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential

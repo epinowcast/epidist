@@ -386,8 +386,8 @@ summary(fit_meta_summary)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.81      0.01     1.79     1.84 1.00      924      842
-#> sigma_Intercept    -0.74      0.02    -0.78    -0.70 1.00      750      640
+#> Intercept           1.81      0.01     1.79     1.84 1.00      944      731
+#> sigma_Intercept    -0.74      0.02    -0.78    -0.70 1.00      582      602
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -411,8 +411,8 @@ delay_parameter_draws(fit_meta_summary) |>
 #> # A tibble: 2 × 7
 #>   parameter value .lower .upper .width .point .interval
 #>   <chr>     <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>
-#> 1 mu        1.82   1.79   1.84    0.95 median qi
-#> 2 sigma     0.477  0.457  0.497   0.95 median qi
+#> 1 mu        1.81   1.79   1.84    0.95 median qi
+#> 2 sigma     0.477  0.458  0.496   0.95 median qi
 ```
 
 Even though every study is individually biased, the meta model recovers
@@ -460,13 +460,13 @@ fit_meta_summary_study
 #> Multilevel Hyperparameters:
 #> ~study (Number of levels: 10)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.03      0.03     0.00     0.09 1.00      362      534
-#> sd(sigma_Intercept)     0.08      0.05     0.01     0.20 1.00      301      486
+#> sd(Intercept)           0.03      0.03     0.00     0.09 1.00      302      436
+#> sd(sigma_Intercept)     0.08      0.06     0.00     0.22 1.00      314      281
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.82      0.02     1.78     1.86 1.00      991      599
-#> sigma_Intercept    -0.72      0.04    -0.80    -0.62 1.00      564      560
+#> Intercept           1.82      0.02     1.78     1.86 1.00      517      378
+#> sigma_Intercept    -0.72      0.04    -0.80    -0.63 1.00      418      574
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -649,8 +649,8 @@ summary(fit_meta_mixed)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.82      0.01     1.79     1.85 1.00      667      471
-#> sigma_Intercept    -0.73      0.02    -0.77    -0.69 1.00     1170      734
+#> Intercept           1.82      0.01     1.80     1.85 1.00      638      486
+#> sigma_Intercept    -0.73      0.02    -0.76    -0.69 1.00     1110      715
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -1039,15 +1039,15 @@ summary(fit_ebola)
 #> Multilevel Hyperparameters:
 #> ~study (Number of levels: 29)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.14      0.03     0.08     0.21 1.00      263      426
-#> sd(shape_Intercept)     0.52      0.10     0.34     0.74 1.00      501      570
+#> sd(Intercept)           0.14      0.03     0.08     0.22 1.01      345      401
+#> sd(shape_Intercept)     0.51      0.10     0.35     0.72 1.01      338      429
 #>
 #> Regression Coefficients:
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept               2.24      0.06     2.12     2.35 1.00      607      604
-#> shape_Intercept         1.27      0.15     0.98     1.56 1.02      380      498
-#> phaseduringoutbreak     0.06      0.12    -0.19     0.29 1.00      763      659
-#> phaseunrecorded        -0.01      0.07    -0.15     0.12 1.00      532      762
+#> Intercept               2.24      0.06     2.11     2.37 1.00      483      531
+#> shape_Intercept         1.28      0.15     0.99     1.57 1.01      450      534
+#> phaseduringoutbreak     0.06      0.12    -0.19     0.29 1.01      450      748
+#> phaseunrecorded        -0.02      0.08    -0.18     0.14 1.00      420      388
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -1084,10 +1084,10 @@ population_draws |>
 #> # A tibble: 4 × 7
 #>   parameter value .lower .upper .width .point .interval
 #>   <chr>     <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>
-#> 1 mean       9.35   8.33  10.5    0.95 median qi
-#> 2 scale      2.64   1.88   3.63   0.95 median qi
-#> 3 sd         4.97   4.05   5.99   0.95 median qi
-#> 4 shape      3.55   2.67   4.77   0.95 median qi
+#> 1 mean       9.40   8.28  10.7    0.95 median qi
+#> 2 scale      2.65   1.89   3.55   0.95 median qi
+#> 3 sd         4.98   4.08   6.00   0.95 median qi
+#> 4 shape      3.57   2.69   4.81   0.95 median qi
 ```
 
 The phase bias is the contrast between each phase and the retrospective
@@ -1108,8 +1108,8 @@ phase_ratio <- marginaleffects::comparisons(
 phase_ratio
 #>
 #>                         Contrast Estimate 2.5 % 97.5 %
-#>  during outbreak / post outbreak    1.060 0.824   1.34
-#>  unrecorded / post outbreak         0.991 0.860   1.13
+#>  during outbreak / post outbreak    1.061 0.826   1.34
+#>  unrecorded / post outbreak         0.982 0.839   1.15
 #>
 #> Term: phase
 #> Type: response
@@ -1121,8 +1121,8 @@ marginaleffects::get_draws(phase_ratio) |>
     .by = "contrast"
   )
 #>                          contrast P(shorter) P(shorter by over 10%)
-#> 1 during outbreak / post outbreak      0.293                  0.075
-#> 2      unrecorded / post outbreak      0.556                  0.082
+#> 1 during outbreak / post outbreak      0.301                  0.076
+#> 2      unrecorded / post outbreak      0.591                  0.126
 ```
 
 ### 5.3 Comparing with a modern re-analysis of the same line list
@@ -1193,8 +1193,8 @@ bind_rows(
 #>   source                          mean                sd
 #>   <chr>                           <chr>               <chr>
 #> 1 as reported by Rosello 2015 (3) 11.37               5.41
-#> 2 Rosello 2015 (3), study level   10.66 (9.21, 12.85) 5.21 (4.12, 7.19)
-#> 3 meta model, population level    9.35 (8.33, 10.51)  4.97 (4.05, 5.99)
+#> 2 Rosello 2015 (3), study level   10.69 (9.26, 12.67) 5.21 (4.09, 7.23)
+#> 3 meta model, population level    9.40 (8.28, 10.68)  4.98 (4.08, 6.00)
 #> 4 re-analysis of the line list    11.76 (9.31, 15.06) 6.57 (4.88, 9.44)
 ```
 

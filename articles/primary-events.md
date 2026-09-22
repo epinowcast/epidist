@@ -116,8 +116,8 @@ The posterior for the rate stays close to the prior, which is expected.
 summary(fit_growing)$fixed[
   "pgrowth_Intercept", c("Estimate", "l-95% CI", "u-95% CI")
 ]
-#>                    Estimate  l-95% CI  u-95% CI
-#> pgrowth_Intercept 0.4987178 0.3012336 0.7038089
+#>                    Estimate  l-95% CI u-95% CI
+#> pgrowth_Intercept 0.4965325 0.3132402 0.691949
 ```
 
 Both are compared against the delay used to simulate.
@@ -200,27 +200,29 @@ day, which is the range `normal(0, 0.3)` allows.
 
 ``` r
 
-location_draws <- marginal_locations |>
-  epidist_newdata(location = names(locations)) |>
-  add_delay_parameter_draws(fit_locations)
+newdata <- epidist_newdata(marginal_locations, location = names(locations))
 
-truth <- tibble(location = names(locations), pgrowth = locations)
+epred <- tidybayes::add_epred_draws(newdata, fit_locations, dpar = "pgrowth")
 
-plot(location_draws, pars = "pgrowth") +
-  geom_vline(
-    aes(xintercept = pgrowth, colour = location),
-    data = truth,
-    linetype = "dashed",
-    show.legend = FALSE
-  )
+epred |>
+  ggplot(aes(x = pgrowth, y = location)) +
+  tidybayes::stat_halfeye(
+    fill = "#56B4E9", colour = "#2A5674", .width = c(0.5, 0.95)
+  ) +
+  geom_point(
+    data = tibble(location = names(locations), pgrowth = locations),
+    colour = "#D55E00", size = 3
+  ) +
+  labs(x = "Growth rate", y = "Location") +
+  theme_minimal()
 ```
 
-![The posterior growth rate of each location. The dashed lines mark the
-rates the locations were simulated
+![The posterior growth rate of each location. The points mark the rates
+the locations were simulated
 at.](figures/primary-events-location-estimates-1.png)
 
-Figure 4.1: The posterior growth rate of each location. The dashed lines
-mark the rates the locations were simulated at.
+Figure 4.1: The posterior growth rate of each location. The points mark
+the rates the locations were simulated at.
 
 ### 4.1 Identifying the growth rate
 

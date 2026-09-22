@@ -175,7 +175,7 @@ To do this, we first need to install CmdStan (see the README for more details).
 We can check we have everything we need as follows:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "2.39.0"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "2.40.0"</span></span></code></pre></div>
 <p>We can simulate data to use for fitting models.
 The example data simulation process follows that used in the <a href="https://epidist.epinowcast.org/articles/epidist.html#data">Getting started with epidist</a> vignette, so we will not detail exactly what is happening here, but please consult that vignette if interested:</p>
 <details><summary>
@@ -367,19 +367,19 @@ That said, even for HMC the computation time in this case is unlikely to be proh
 <span><span class="va">times</span></span>
 <span><span class="co">#&gt; $HMC</span></span>
 <span><span class="co">#&gt;    user  system elapsed</span></span>
-<span><span class="co">#&gt;  10.667   0.182  10.983</span></span>
+<span><span class="co">#&gt;   6.332   0.154   6.777</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; $Laplace</span></span>
 <span><span class="co">#&gt;    user  system elapsed</span></span>
-<span><span class="co">#&gt;   1.081   0.100   1.300</span></span>
+<span><span class="co">#&gt;   0.642   0.082   0.845</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; $ADVI</span></span>
 <span><span class="co">#&gt;    user  system elapsed</span></span>
-<span><span class="co">#&gt;   0.926   0.063   1.034</span></span>
+<span><span class="co">#&gt;   0.538   0.063   0.605</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; $Pathfinder</span></span>
 <span><span class="co">#&gt;    user  system elapsed</span></span>
-<span><span class="co">#&gt;   0.383   0.070   0.527</span></span></code></pre></div>
+<span><span class="co">#&gt;   0.221   0.052   0.294</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2" number="4">

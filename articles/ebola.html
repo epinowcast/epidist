@@ -121,7 +121,7 @@ To use the <code>cmdstanr</code> backend, we first need to install CmdStan (see 
 We can check we have everything we need as follows:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/set_cmdstan_path.html" class="external-link">cmdstan_version</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "2.39.0"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "2.40.0"</span></span></code></pre></div>
 </div>
 <div class="section level2" number="2">
 <h2 id="data-preparation">
@@ -272,12 +272,12 @@ As a model is not explicitly placed on <code>sigma</code>, a constant model <cod
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 9.3 seconds.</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 9.5 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 5.7 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 6.0 seconds.</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 9.4 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 9.6 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 5.8 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 6.0 seconds.</span></span></code></pre></div>
 <p>The <code>fit</code> object is a <a href="https://paulbuerkner.com/brms/reference/brmsfit-class.html" class="external-link"><code>brmsfit</code></a> object, and has the associated range of methods.
 See <code>methods(class = "brmsfit")</code> for more details.
 For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> to view information about the fitted model, including posterior estimates for the regression coefficients:</p>
@@ -318,12 +318,12 @@ For example, we may use <code><a href="https://rdrr.io/r/base/summary.html" clas
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 17.9 seconds.</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 18.0 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 10.7 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 10.7 seconds.</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 18.0 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 18.1 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 10.7 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 10.8 seconds.</span></span></code></pre></div>
 <p>A summary of the model shows that males tend to have longer delays (the posterior mean of <code>sexMale</code> is 0.04) and greater delay variation (the posterior mean of <code>sigma_sexMale</code> is 0.02).
 For the <code>sexMale</code> effect, the 95% credible interval is greater than zero, whereas for the <code>sigma_sexMale</code> effect the 95% credible interval includes zero.
 It is important to note that the estimates represent an average of the observed data, and individual delays between men and women vary significantly.</p>
@@ -372,12 +372,12 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span>  backend <span class="op">=</span> <span class="st">"cmdstanr"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Running MCMC with 2 parallel chains...</span></span>
-<span><span class="co">#&gt; Chain 1 finished in 241.6 seconds.</span></span>
-<span><span class="co">#&gt; Chain 2 finished in 266.6 seconds.</span></span>
+<span><span class="co">#&gt; Chain 1 finished in 146.5 seconds.</span></span>
+<span><span class="co">#&gt; Chain 2 finished in 146.7 seconds.</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Both chains finished successfully.</span></span>
-<span><span class="co">#&gt; Mean chain execution time: 254.1 seconds.</span></span>
-<span><span class="co">#&gt; Total execution time: 266.8 seconds.</span></span></code></pre></div>
+<span><span class="co">#&gt; Mean chain execution time: 146.6 seconds.</span></span>
+<span><span class="co">#&gt; Total execution time: 146.8 seconds.</span></span></code></pre></div>
 <p><strong>As this is a longer running model (~ 2 minutes) we have reduced the number of iterations but for real world use cases this may not be sufficient.</strong></p>
 <p>For this model, along with looking at the <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, we may also use the <code><a href="https://rdrr.io/pkg/nlme/man/random.effects.html" class="external-link">brms::ranef()</a></code> function to look at the estimates of the random effects:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -393,15 +393,15 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
 <span><span class="co">#&gt; ~district (Number of levels: 14)</span></span>
 <span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)           0.16      0.04     0.10     0.26 1.01      243      425</span></span>
-<span><span class="co">#&gt; sd(sigma_Intercept)     0.20      0.05     0.13     0.33 1.00      320      544</span></span>
+<span><span class="co">#&gt; sd(Intercept)           0.16      0.04     0.10     0.24 1.00      249      452</span></span>
+<span><span class="co">#&gt; sd(sigma_Intercept)     0.20      0.05     0.13     0.33 1.00      276      407</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.63      0.05     1.53     1.73 1.01      203      229</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.66      0.06    -0.78    -0.55 1.00      180      475</span></span>
-<span><span class="co">#&gt; sexMale             0.04      0.01     0.02     0.07 1.00     1155      711</span></span>
-<span><span class="co">#&gt; sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1046      717</span></span>
+<span><span class="co">#&gt; Intercept           1.63      0.04     1.54     1.71 1.00      228      326</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.67      0.06    -0.78    -0.56 1.01      343      528</span></span>
+<span><span class="co">#&gt; sexMale             0.04      0.01     0.01     0.07 1.00     1199      724</span></span>
+<span><span class="co">#&gt; sigma_sexMale       0.02      0.02    -0.01     0.06 1.00     1384      771</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -411,38 +411,38 @@ These random effects are specified by including <code>(1 | district)</code> in t
 <span><span class="co">#&gt; , , Intercept</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt;                   Estimate  Est.Error        Q2.5       Q97.5</span></span>
-<span><span class="co">#&gt; Bo            -0.004734519 0.06053815 -0.12442781  0.11376508</span></span>
-<span><span class="co">#&gt; Bombali        0.257345374 0.05117867  0.15151442  0.35946819</span></span>
-<span><span class="co">#&gt; Bonthe        -0.022324727 0.13050027 -0.27022801  0.23445881</span></span>
-<span><span class="co">#&gt; Kailahun      -0.001974225 0.05185061 -0.10456039  0.10976209</span></span>
-<span><span class="co">#&gt; Kambia        -0.059364435 0.06267521 -0.18155077  0.06619807</span></span>
-<span><span class="co">#&gt; Kenema        -0.249843953 0.05602416 -0.36410389 -0.14078391</span></span>
-<span><span class="co">#&gt; Koinadugu      0.181596312 0.07955986  0.03722483  0.34475640</span></span>
-<span><span class="co">#&gt; Kono          -0.079611313 0.05983969 -0.19577006  0.04451104</span></span>
-<span><span class="co">#&gt; Moyamba       -0.010432806 0.06624814 -0.14170206  0.12703567</span></span>
-<span><span class="co">#&gt; Port Loko      0.145291432 0.05196573  0.04169572  0.24574739</span></span>
-<span><span class="co">#&gt; Pujehun       -0.053640887 0.09941718 -0.25354477  0.13246247</span></span>
-<span><span class="co">#&gt; Tonkolili      0.080918781 0.05311473 -0.01953644  0.18756047</span></span>
-<span><span class="co">#&gt; Western Rural -0.022943546 0.05273685 -0.13024891  0.07967034</span></span>
-<span><span class="co">#&gt; Western Urban -0.152138721 0.05269011 -0.26340244 -0.03901819</span></span>
+<span><span class="co">#&gt; Bo            -0.005561097 0.05706448 -0.11035575  0.10943902</span></span>
+<span><span class="co">#&gt; Bombali        0.255485765 0.04629636  0.17176710  0.34501120</span></span>
+<span><span class="co">#&gt; Bonthe        -0.022784213 0.12131879 -0.26479419  0.20469375</span></span>
+<span><span class="co">#&gt; Kailahun      -0.003952666 0.04775880 -0.09294404  0.09131267</span></span>
+<span><span class="co">#&gt; Kambia        -0.060888157 0.06750369 -0.19201001  0.07260713</span></span>
+<span><span class="co">#&gt; Kenema        -0.250787145 0.05131084 -0.34328209 -0.14759471</span></span>
+<span><span class="co">#&gt; Koinadugu      0.178968458 0.07132135  0.04033937  0.31853674</span></span>
+<span><span class="co">#&gt; Kono          -0.081795214 0.05622214 -0.19838807  0.03486541</span></span>
+<span><span class="co">#&gt; Moyamba       -0.009323983 0.05979106 -0.12596475  0.10710027</span></span>
+<span><span class="co">#&gt; Port Loko      0.142443792 0.04627176  0.05697054  0.24313148</span></span>
+<span><span class="co">#&gt; Pujehun       -0.057834082 0.09859517 -0.25195641  0.13421540</span></span>
+<span><span class="co">#&gt; Tonkolili      0.078815642 0.04889342 -0.01208369  0.17978433</span></span>
+<span><span class="co">#&gt; Western Rural -0.023823792 0.04796506 -0.11444361  0.07714104</span></span>
+<span><span class="co">#&gt; Western Urban -0.154820062 0.04693254 -0.24506475 -0.06001742</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; , , sigma_Intercept</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt;                  Estimate  Est.Error        Q2.5       Q97.5</span></span>
-<span><span class="co">#&gt; Bo             0.18569262 0.07369534  0.04482826  0.33737619</span></span>
-<span><span class="co">#&gt; Bombali       -0.22775131 0.06437477 -0.35554116 -0.11495850</span></span>
-<span><span class="co">#&gt; Bonthe        -0.12969344 0.21161946 -0.58030178  0.23547407</span></span>
-<span><span class="co">#&gt; Kailahun      -0.33616645 0.06800887 -0.47243605 -0.21498099</span></span>
-<span><span class="co">#&gt; Kambia         0.05750006 0.08168920 -0.09891025  0.21946416</span></span>
-<span><span class="co">#&gt; Kenema         0.11012150 0.06758485 -0.01744927  0.25279819</span></span>
-<span><span class="co">#&gt; Koinadugu      0.06908751 0.09597918 -0.11773948  0.26293122</span></span>
-<span><span class="co">#&gt; Kono           0.03001546 0.07544342 -0.12010087  0.18096483</span></span>
-<span><span class="co">#&gt; Moyamba        0.09643314 0.07632248 -0.05890960  0.25667593</span></span>
-<span><span class="co">#&gt; Port Loko     -0.02593841 0.06372404 -0.15444021  0.09431119</span></span>
-<span><span class="co">#&gt; Pujehun       -0.09253076 0.13856786 -0.36327888  0.19085602</span></span>
-<span><span class="co">#&gt; Tonkolili     -0.15478393 0.06856191 -0.28870574 -0.02958416</span></span>
-<span><span class="co">#&gt; Western Rural  0.07046308 0.06427971 -0.05123806  0.18937480</span></span>
-<span><span class="co">#&gt; Western Urban  0.26692945 0.06209873  0.14346072  0.38832898</span></span></code></pre></div>
+<span><span class="co">#&gt; Bo             0.19687634 0.07217190  0.06543128  0.33535443</span></span>
+<span><span class="co">#&gt; Bombali       -0.21813541 0.06023717 -0.33230894 -0.10763316</span></span>
+<span><span class="co">#&gt; Bonthe        -0.13630132 0.20251358 -0.59353397  0.23798522</span></span>
+<span><span class="co">#&gt; Kailahun      -0.32763586 0.06465009 -0.45085586 -0.20562920</span></span>
+<span><span class="co">#&gt; Kambia         0.06592753 0.08160453 -0.09091753  0.23691711</span></span>
+<span><span class="co">#&gt; Kenema         0.11875335 0.06558067 -0.01639708  0.24562278</span></span>
+<span><span class="co">#&gt; Koinadugu      0.07738227 0.09889096 -0.11501531  0.26681214</span></span>
+<span><span class="co">#&gt; Kono           0.04088128 0.07252897 -0.10307151  0.18543238</span></span>
+<span><span class="co">#&gt; Moyamba        0.10497760 0.07306350 -0.03757349  0.25747690</span></span>
+<span><span class="co">#&gt; Port Loko     -0.01456683 0.05995553 -0.13081596  0.09491043</span></span>
+<span><span class="co">#&gt; Pujehun       -0.08913832 0.13767190 -0.37026409  0.17896683</span></span>
+<span><span class="co">#&gt; Tonkolili     -0.14534619 0.06563557 -0.27064688 -0.01735425</span></span>
+<span><span class="co">#&gt; Western Rural  0.08114856 0.06085888 -0.03694431  0.20271113</span></span>
+<span><span class="co">#&gt; Western Urban  0.27798870 0.05835323  0.16340678  0.39435379</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3" number="3.3">
