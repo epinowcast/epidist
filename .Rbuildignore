@@ -24,5 +24,4 @@
 ^vignettes/.*_cache(/|$)
 ^vignettes/.*_files(/|$)
 ^design$
-^codemeta\.json$
 ^vignettes/chunks$

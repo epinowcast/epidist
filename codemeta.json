@@ -1,0 +1,523 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "epidist",
+  "description": "Understanding and accurately estimating epidemiological delay distributions is important for public health policy. These estimates influence epidemic situational awareness, control strategies, and resource allocation. This package provides methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. These issues are frequently overlooked, resulting in biased conclusions. Built on top of 'brms', it allows for flexible modelling including time-varying spatial components and partially pooled estimates of demographic characteristics.",
+  "name": "epidist: Estimate Epidemiological Delay Distributions with 'brms'",
+  "relatedLink": "https://epidist.epinowcast.org/",
+  "codeRepository": "https://github.com/epinowcast/epidist/",
+  "issueTracker": "https://github.com/epinowcast/epidist/issues/",
+  "license": "https://spdx.org/licenses/MIT",
+  "version": "0.5.0",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "R",
+    "url": "https://r-project.org"
+  },
+  "runtimePlatform": "R version 4.3.0 (2023-04-21)",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Adam",
+      "familyName": "Howes",
+      "email": "adamthowes@gmail.com",
+      "@id": "https://orcid.org/0000-0003-2386-4031"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Sang Woo",
+      "familyName": "Park",
+      "email": "swp2@princeton.edu",
+      "@id": "https://orcid.org/0000-0003-2202-3361"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Sam",
+      "familyName": "Abbott",
+      "email": "contact@samabbott.co.uk",
+      "@id": "https://orcid.org/0000-0001-8057-8037"
+    }
+  ],
+  "contributor": [
+    {
+      "@type": "Person",
+      "givenName": "Sebastian",
+      "familyName": "Funk",
+      "email": "sebastian.funk@lshtm.ac.uk",
+      "@id": "https://orcid.org/0000-0002-2842-3406"
+    }
+  ],
+  "copyrightHolder": [
+    {
+      "@type": "Person",
+      "givenName": "Sam",
+      "familyName": "Abbott",
+      "email": "contact@samabbott.co.uk",
+      "@id": "https://orcid.org/0000-0001-8057-8037"
+    }
+  ],
+  "maintainer": [
+    {
+      "@type": "Person",
+      "givenName": "Sam",
+      "familyName": "Abbott",
+      "email": "contact@samabbott.co.uk",
+      "@id": "https://orcid.org/0000-0001-8057-8037"
+    }
+  ],
+  "softwareSuggestions": [
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "MASS",
+      "name": "MASS"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "bayesplot",
+      "name": "bayesplot",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=bayesplot"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "BH",
+      "name": "BH",
+      "version": ">= 1.66.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=BH"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "bookdown",
+      "name": "bookdown",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=bookdown"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "collapse",
+      "name": "collapse",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=collapse"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "epireview",
+      "name": "epireview"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "ggplot2",
+      "name": "ggplot2",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=ggplot2"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "knitr",
+      "name": "knitr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=knitr"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "loo",
+      "name": "loo",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=loo"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "marginaleffects",
+      "name": "marginaleffects",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=marginaleffects"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "patchwork",
+      "name": "patchwork",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=patchwork"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "pkgdown",
+      "name": "pkgdown",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=pkgdown"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "posterior",
+      "name": "posterior",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=posterior"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "priorsense",
+      "name": "priorsense",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=priorsense"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "Rcpp",
+      "name": "Rcpp",
+      "version": ">= 0.12.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=Rcpp"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "RcppEigen",
+      "name": "RcppEigen",
+      "version": ">= 0.3.3.3.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=RcppEigen"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "reformulas",
+      "name": "reformulas",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=reformulas"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "roxyglobals",
+      "name": "roxyglobals",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=roxyglobals"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "scales",
+      "name": "scales",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=scales"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "spelling",
+      "name": "spelling",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=spelling"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "testthat",
+      "name": "testthat",
+      "version": ">= 3.0.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=testthat"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "tidybayes",
+      "name": "tidybayes",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=tidybayes"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "usethis",
+      "name": "usethis",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=usethis"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "withr",
+      "name": "withr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=withr"
+    }
+  ],
+  "softwareRequirements": {
+    "1": {
+      "@type": "SoftwareApplication",
+      "identifier": "R",
+      "name": "R",
+      "version": ">= 4.1.0"
+    },
+    "2": {
+      "@type": "SoftwareApplication",
+      "identifier": "brms",
+      "name": "brms",
+      "version": ">= 2.23.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=brms"
+    },
+    "3": {
+      "@type": "SoftwareApplication",
+      "identifier": "checkmate",
+      "name": "checkmate",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=checkmate"
+    },
+    "4": {
+      "@type": "SoftwareApplication",
+      "identifier": "cli",
+      "name": "cli",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=cli"
+    },
+    "5": {
+      "@type": "SoftwareApplication",
+      "identifier": "dplyr",
+      "name": "dplyr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=dplyr"
+    },
+    "6": {
+      "@type": "SoftwareApplication",
+      "identifier": "lubridate",
+      "name": "lubridate",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=lubridate"
+    },
+    "7": {
+      "@type": "SoftwareApplication",
+      "identifier": "primarycensored",
+      "name": "primarycensored",
+      "version": ">= 1.4.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=primarycensored"
+    },
+    "8": {
+      "@type": "SoftwareApplication",
+      "identifier": "purrr",
+      "name": "purrr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=purrr"
+    },
+    "9": {
+      "@type": "SoftwareApplication",
+      "identifier": "rstan",
+      "name": "rstan",
+      "version": ">= 2.26.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=rstan"
+    },
+    "10": {
+      "@type": "SoftwareApplication",
+      "identifier": "stats",
+      "name": "stats"
+    },
+    "11": {
+      "@type": "SoftwareApplication",
+      "identifier": "tibble",
+      "name": "tibble",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=tibble"
+    },
+    "12": {
+      "@type": "SoftwareApplication",
+      "identifier": "tidyr",
+      "name": "tidyr",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=tidyr"
+    },
+    "SystemRequirements": null
+  },
+  "fileSize": "3284.156KB",
+  "citation": [
+    {
+      "@type": "SoftwareSourceCode",
+      "datePublished": "2026",
+      "author": [
+        {
+          "@type": "Person",
+          "givenName": "Adam",
+          "familyName": "Howes",
+          "email": "adamthowes@gmail.com",
+          "@id": "https://orcid.org/0000-0003-2386-4031"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Sang Woo",
+          "familyName": "Park",
+          "email": "swp2@princeton.edu",
+          "@id": "https://orcid.org/0000-0003-2202-3361"
+        },
+        {
+          "@type": "Person",
+          "givenName": "Sam",
+          "familyName": "Abbott",
+          "email": "contact@samabbott.co.uk",
+          "@id": "https://orcid.org/0000-0001-8057-8037"
+        }
+      ],
+      "name": "epidist: Estimate Epidemiological Delay Distributions with 'brms'",
+      "identifier": "10.5281/zenodo.14213017",
+      "@id": "https://doi.org/10.5281/zenodo.14213017",
+      "sameAs": "https://doi.org/10.5281/zenodo.14213017"
+    }
+  ],
+  "releaseNotes": "https://github.com/epinowcast/epidist/blob/main/NEWS.md",
+  "readme": "https://github.com/epinowcast/epidist/blob/main/README.md",
+  "contIntegration": ["https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml", "https://app.codecov.io/gh/epinowcast/epidist"],
+  "developmentStatus": "https://lifecycle.r-lib.org/articles/stages.html#experimental"
+}
