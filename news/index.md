@@ -730,6 +730,24 @@
   names its argument `data` rather than `x`. Closes
   [\#706](https://github.com/epinowcast/epidist/issues/706).
 
+- The generic
+  [`epidist_gen_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_log_lik.md)
+  method calls
+  [`primarycensored::dpcens()`](https://primarycensored.epinowcast.org/reference/dprimarycensored.html)
+  again, with validation disabled, rather than reassembling the censored
+  density from
+  [`primarycensored::pcens_cdf()`](https://primarycensored.epinowcast.org/reference/pcens_cdf.html).
+  This drops the copies of the censored probability mass function and of
+  the truncation normalisation that had to stay in step with
+  `primarycensored`. Validation is disabled in the analytical method
+  too, so the log likelihood no longer advances the RNG stream once per
+  draw. The log likelihoods are unchanged and the generic method stays
+  linear in the number of draws, but it is around nine times slower per
+  draw, because `dpcens()` rebuilds its setup and takes three passes
+  over the delay distribution on every call where the previous code
+  built the object once and took one. Needs `primarycensored` 1.5.2.
+  Closes [\#646](https://github.com/epinowcast/epidist/issues/646).
+
 - Left `object_usage_linter` disabled after trying it. It reported one
   real finding, a dead variable in
   [`epidist_family_param()`](https://epidist.epinowcast.org/reference/epidist_family_param.md)
@@ -760,6 +778,12 @@
   checks of the latent model prior moved from a p value threshold of
   0.01 to 0.001 for the same reason. Closes
   [\#733](https://github.com/epinowcast/epidist/issues/733).
+
+- The study labels of the test lockstep fixtures are now namespaced by
+  the fixture that owns them and checked before the fixtures are bound,
+  so a branch that adds a fixture reusing a label fails loudly rather
+  than merging cleanly into a silent collision. Closes
+  [\#725](https://github.com/epinowcast/epidist/issues/725).
 
 ### Documentation
 
@@ -809,16 +833,27 @@
   [\#596](https://github.com/epinowcast/epidist/issues/596).
 - Documented installing from CRAN in the README, with `r-universe` as
   the route to the latest version.
-- The `primary-events` vignette now plots the growth rate of each
-  location with the package draws plot method, and gives each location
-  its own simulation seed so the locations no longer share random
-  numbers. Closes
-  [\#724](https://github.com/epinowcast/epidist/issues/724).
+- The `primary-events` vignette now gives each location its own
+  simulation seed so the locations no longer share random numbers.
+  Closes [\#724](https://github.com/epinowcast/epidist/issues/724).
 - Restructured the README install instructions to match
   `primarycensored`, with CRAN first, then `r-universe`, then `pak` for
   the development version and for historical releases. The text now
   lives in `vignettes/chunks/_readme-install-epidist.Rmd` and is
   included by the README, so it can be reused elsewhere.
+- Reworked the getting started vignette to use the package’s own
+  simulation and plotting tools. It now simulates the censored dates
+  with
+  [`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md),
+  converts them with
+  [`as_epidist_linelist_data()`](https://epidist.epinowcast.org/reference/as_epidist_linelist_data.md),
+  draws the censoring and truncation figures with
+  [`plot_events()`](https://epidist.epinowcast.org/reference/plot_events.md),
+  and compares the fitted and true delay distributions with the
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method for
+  delay draws. The data is simulated, then converted, then visualised,
+  rather than being converted part way through the simulation. See
+  [\#736](https://github.com/epinowcast/epidist/issues/736).
 - The `faq` and `left-truncation` vignettes now build their simulated
   dates with
   [`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md)
@@ -852,6 +887,14 @@
   R 4.5, so the hook environment failed to build and the `pre-commit`
   job failed on every pull request. See
   [\#578](https://github.com/epinowcast/epidist/issues/578).
+- Removed the `codemeta` workflow and committed a generated
+  `codemeta.json` instead. The workflow could not add the file because
+  its commit step names it directly to `git commit`, which only works on
+  a file git already tracks. The file is now built with
+  `codemetar::write_codemeta()` and refreshed by hand when `DESCRIPTION`
+  changes. It is no longer in `.Rbuildignore`, so it ships in the
+  package tarball. Closes
+  [\#707](https://github.com/epinowcast/epidist/issues/707).
 
 ### Bug fixes
 
@@ -923,6 +966,14 @@
   `epidist` uses to mean no truncation. Infinite values a user supplies
   in any other column still warn. Closes
   [\#718](https://github.com/epinowcast/epidist/issues/718).
+- The generic
+  [`epidist_gen_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_log_lik.md)
+  method now normalises over the left truncation point when the relative
+  observation time is infinite. It reassembled the censored density
+  itself and dropped that normaliser, so it disagreed with the
+  analytical method for a model with a `delay_min` and no right
+  truncation. Closes
+  [\#646](https://github.com/epinowcast/epidist/issues/646).
 
 ## epidist 0.4.1
 
