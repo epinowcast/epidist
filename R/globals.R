@@ -11,6 +11,11 @@ utils::globalVariables(c(
   ".data", # <plot_events>
   ".data", # <.plot_parameter_draws>
   ".data", # <.plot_delay_draws>
+  ".data", # <.predicted_delays>
+  ".data", # <.bin_delays>
+  ".data", # <.delay_column_plot>
+  ".data", # <.delay_predictive_layers>
+  ".data", # <.delay_reference_layer>
   ".data", # <simulate_secondary>
   ".data", # <simulate_dates>
   ".data", # <.replace_prior>
