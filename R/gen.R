@@ -73,10 +73,9 @@ epidist_gen_log_lik <- function(family) {
     # this means we get the cdf of the target distribution
     prep$data$cens <- rep(-1, prep$nobs)
 
-    # This integrates with pcens_cdf() rather than dpcens(), so the guard
-    # dpcens() applies has to be reproduced here. Without it the truncation
-    # normalisation below divides by a cdf evaluated before the delay upper
-    # bound, which can push the density above one.
+    # [primarycensored::dpcens()] clips the upper end of the secondary
+    # interval at D rather than erroring, which answers a different question
+    # from the one asked, so refuse the observation here instead.
     if (y + swindow > relative_obs_time) {
       cli::cli_abort(
         c(
@@ -118,38 +117,30 @@ epidist_gen_log_lik <- function(family) {
       return(cache$cdf[cache$draw, idx])
     }
 
-    # [primarycensored::dpcens()] revalidates `pdist` at random points on
-    # every call, which would miss the cache once per draw, so integrate with
-    # [primarycensored::pcens_cdf()] and form the censored pmf here.
+    # `check = FALSE` stops [primarycensored::dpcens()] revalidating `pdist`
+    # at random points on every call, which would miss the cache once per
+    # draw. The arguments are the same for every draw, so build them once.
     primary <- .primary_spec_from_prep(prep, spec)
-    pcens_obj <- do.call(
-      primarycensored::new_pcens,
-      c(
-        list(pdist = pdist_draw, dprimary = primary$ddist),
-        stats::setNames(
-          list(.primary_args(primary, prep, i)), .primary_args_name()
-        )
+    dpcens_args <- c(
+      list(
+        x = y,
+        pdist = pdist_draw,
+        pwindow = pwindow,
+        swindow = swindow,
+        L = delay_min,
+        D = relative_obs_time,
+        dprimary = primary$ddist,
+        log = TRUE,
+        check = FALSE
+      ),
+      stats::setNames(
+        list(.primary_args(primary, prep, i)), .primary_args_name()
       )
     )
-    delays <- unique(c(y, y + swindow, relative_obs_time, delay_min))
-    delays <- sort(delays[is.finite(delays)])
-    upr <- match(y + swindow, delays)
-    lwr <- match(y, delays)
-    trunc_idx <- match(relative_obs_time, delays)
-    min_idx <- match(delay_min, delays)
 
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(d) {
       cache$draw <- d
-      cdfs <- primarycensored::pcens_cdf(pcens_obj, delays, pwindow)
-      pmf <- cdfs[upr] - cdfs[lwr]
-      # Normalise over the interval that could have been observed, which runs
-      # from the left truncation point to the relative observation time, as
-      # [primarycensored::dpcens()] does.
-      lower_mass <- if (is.na(min_idx)) 0 else cdfs[min_idx]
-      if (!is.na(trunc_idx)) {
-        pmf <- pmf / (cdfs[trunc_idx] - lower_mass)
-      }
-      return(log(max(0, pmf)))
+      return(do.call(primarycensored::dpcens, dpcens_args))
     })
     lpdf <- .log_lik_weight(lpdf, i = i, prep = prep)
     return(lpdf)
@@ -171,7 +162,9 @@ epidist_gen_log_lik <- function(family) {
     dist_args <- .get_supported_dist_args(dist, prep, i)
     primary <- .primary_spec_from_prep(prep, spec)
 
-    # Calculate density for each draw using primarycensored::dpcens()
+    # Calculate density for each draw using primarycensored::dpcens().
+    # `check = FALSE` because `pdist` comes from `stats` and so needs no
+    # validation, and validating it would advance the RNG once per draw.
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
       return(
         do.call(
@@ -185,7 +178,8 @@ epidist_gen_log_lik <- function(family) {
               L = delay_min,
               D = relative_obs_time,
               dprimary = primary$ddist,
-              log = TRUE
+              log = TRUE,
+              check = FALSE
             ),
             stats::setNames(
               list(.primary_args(primary, prep, i, draw)),

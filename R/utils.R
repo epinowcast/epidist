@@ -119,7 +119,10 @@
 #' @keywords internal
 .floor_mult <- function(x, f = 1) {
   assert_numeric(f, lower = 0)
-  return(ifelse(f == 0, x, floor(x / f) * f))
+  # `f` is recycled over `x`, as a single `f` would otherwise round only the
+  # first element down. Rounding to a multiple of zero divides by zero, so
+  # `x` is taken there rather than the `NaN` it gives
+  return(ifelse(rep_len(f == 0, length(x)), x, floor(x / f) * f))
 }
 
 #' Identify manually specified `brms` priors

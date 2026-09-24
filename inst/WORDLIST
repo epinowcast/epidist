@@ -40,8 +40,6 @@ Stacy
 TimTaylor
 Unif
 allcontributors
-analyze
-analyzing
 andv
 athowes
 autodiff
@@ -52,7 +50,6 @@ buerkner
 burdon
 cdf
 cdot
-centered
 cfrnow
 cherz
 cli
@@ -97,6 +94,7 @@ lfloor
 lik
 linelist
 lockfile
+lockstep
 logmean
 longmapsto
 lpdf
