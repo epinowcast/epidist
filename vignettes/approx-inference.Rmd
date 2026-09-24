@@ -97,7 +97,7 @@ We can check we have everything we need as follows:
 
 ``` r
 cmdstanr::cmdstan_version()
-#> [1] "2.39.0"
+#> [1] "2.40.0"
 ```
 
 We can simulate data to use for fitting models.
@@ -338,19 +338,19 @@ times <- list(
 times
 #> $HMC
 #>    user  system elapsed
-#>  10.667   0.182  10.983
+#>   6.332   0.154   6.777
 #>
 #> $Laplace
 #>    user  system elapsed
-#>   1.081   0.100   1.300
+#>   0.642   0.082   0.845
 #>
 #> $ADVI
 #>    user  system elapsed
-#>   0.926   0.063   1.034
+#>   0.538   0.063   0.605
 #>
 #> $Pathfinder
 #>    user  system elapsed
-#>   0.383   0.070   0.527
+#>   0.221   0.052   0.294
 ```
 
 # Conclusion

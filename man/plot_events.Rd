@@ -59,6 +59,11 @@ plot_events(linelist, obs_time = as.Date("2014-10-01"), by = "district")
 }
 \seealso{
 Other plot: 
-\code{\link{plot.epidist_delay_draws}()}
+\code{\link{plot.epidist_delay_draws}()},
+\code{\link{plot_delays}()},
+\code{\link{plot_delays.default}()},
+\code{\link{plot_delays.epidist_fit}()},
+\code{\link{plot_delays.epidist_linelist_data}()},
+\code{\link{plot_delays.list}()}
 }
 \concept{plot}
