@@ -2094,10 +2094,12 @@ test_that(".meta_quantile_set_ll moves an off grid delay_min back for midpoint i
     y <- case$y
     k <- .meta_crossing_counts(p, n)
     expected <- .meta_quantile_set_ll(
-      y, k - 1L, n, "plnorm", args, naive, p = p, lower = k
+      y, k - 1L, n, "plnorm", args, naive,
+      p = p, lower = k
     )
     actual <- .meta_quantile_set_ll(
-      y + 0.5, k - 1L, n, "plnorm", args, midpoint, p = p, lower = k
+      y + 0.5, k - 1L, n, "plnorm", args, midpoint,
+      p = p, lower = k
     )
     expect_true(is.finite(expected))
     expect_identical(actual, expected)
