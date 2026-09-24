@@ -3343,6 +3343,12 @@
   lower = slots$group_lower
 ) {
   if (slots$cens_adjusted %in% c(0, 3)) {
+    # The grid starts from delay_min moved back to the base estimand, as it
+    # does for the same study's mean and standard deviation. The censoring
+    # code is kept so that the reported values move back as well.
+    slots$lower <- .meta_cens_lower(
+      slots$lower, slots$cens_adjusted, slots$pwindow, slots$swindow
+    )
     if (length(y) == 1) {
       return(.meta_grid_crossing_ll(y, p[1], study_n, dist, args, slots))
     }
