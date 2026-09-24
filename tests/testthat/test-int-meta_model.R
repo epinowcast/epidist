@@ -1446,7 +1446,7 @@ test_that("the meta model is calibrated over repeated studies", {
 
 test_that("epidist_meta_leave_one_out refits a meta model without each study in turn", { # nolint: line_length_linter.
   skip_on_cran()
-  skip_if_no_cmdstanr()
+  skip_if_no_fits()
   # The formula does not use study, so the model data must be passed
   expect_error(epidist_meta_leave_one_out(fit_meta_grid), "no .*study.* column")
   studies <- unique(prep_meta_grid$study)
