@@ -163,8 +163,9 @@ epidist_gen_log_lik <- function(family) {
     primary <- .primary_spec_from_prep(prep, spec)
 
     # Calculate density for each draw using primarycensored::dpcens().
-    # `check = FALSE` because `pdist` comes from `stats` and so needs no
-    # validation, and validating it would advance the RNG once per draw.
+    # `check = FALSE` because `pdist` comes from `stats`, or from `flexsurv`
+    # for the generalised gamma, and so needs no validation, and validating
+    # it would advance the RNG once per draw.
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
       return(
         do.call(
