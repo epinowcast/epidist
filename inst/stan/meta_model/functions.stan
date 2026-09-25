@@ -197,6 +197,40 @@
   }
 
   /**
+    * Deep lower tail bound of a lognormal delay with params
+    * [meanlog, sdlog], see meta_family_deep_tail(). Mirrors
+    * .meta_deep_tail_lognormal().
+    */
+  int meta_deep_tail_lognormal(real d, array[] real params) {
+    return (log(d) - params[1]) / params[2] < -14;
+  }
+
+  /**
+    * Deep lower tail bound of a gamma delay with params [shape, rate]. Mirrors
+    * .meta_deep_tail_gamma().
+    */
+  int meta_deep_tail_gamma(real d, array[] real params) {
+    return params[1] * log(params[2] * d) - lgamma(params[1] + 1) < -100;
+  }
+
+  /**
+    * Deep lower tail bound of a weibull delay with params [shape, scale].
+    * Mirrors .meta_deep_tail_weibull().
+    */
+  int meta_deep_tail_weibull(real d, array[] real params) {
+    return params[1] * (log(d) - log(params[2])) < -100;
+  }
+
+  /**
+    * Deep lower tail bound of a generalised gamma delay with Stacy params
+    * [shape, scale, k]. Mirrors .meta_deep_tail_gengamma().
+    */
+  int meta_deep_tail_gengamma(real d, array[] real params) {
+    return params[1] * params[3] * log(d / params[2]) -
+      lgamma(params[3] + 1) < -100;
+  }
+
+  /**
     * Whether a delay is so deep in the lower tail that its log distribution
     * function is certainly below -100, decided from a closed form bound on
     * the parameters. The distribution function itself must not be evaluated
@@ -209,17 +243,16 @@
     */
   int meta_family_deep_tail(real d, array[] real params) {
     if (dist_id == 1) {
-      return (log(d) - params[1]) / params[2] < -14;
+      return meta_deep_tail_lognormal(d, params);
     }
     if (dist_id == 2) {
-      return params[1] * log(params[2] * d) - lgamma(params[1] + 1) < -100;
+      return meta_deep_tail_gamma(d, params);
     }
     if (dist_id == 3) {
-      return params[1] * (log(d) - log(params[2])) < -100;
+      return meta_deep_tail_weibull(d, params);
     }
     if (dist_id == 5) {
-      return params[1] * params[3] * log(d / params[2]) -
-        lgamma(params[3] + 1) < -100;
+      return meta_deep_tail_gengamma(d, params);
     }
     return 0;
   }
