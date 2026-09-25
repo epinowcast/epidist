@@ -1,3 +1,5 @@
+skip_if_not_installed("distspec")
+
 test_that(".dist_spec_family maps the lognormal family to LogNormal", {
   family <- .dist_spec_family("lognormal")
   expect_identical(family$name, "lognormal")
@@ -106,7 +108,7 @@ test_that(".dist_spec_from_draws needs at least two draws", {
 test_that("as_dist_spec exports a latent lognormal fit", {
   skip_on_cran()
   skip_if_no_fits()
-  dist <- as_dist_spec(fit)
+  dist <- distspec::as_dist_spec(fit)
   expect_s3_class(dist, "dist_spec")
   expect_identical(distspec::get_distribution(dist), "lognormal")
   expect_true(distspec::has_uncertainty(dist))
@@ -129,7 +131,7 @@ test_that("as_dist_spec exports a latent lognormal fit", {
 test_that("as_dist_spec converts the gamma rate per draw", {
   skip_on_cran()
   skip_if_no_fits()
-  dist <- as_dist_spec(fit_gamma)
+  dist <- distspec::as_dist_spec(fit_gamma)
   expect_identical(distspec::get_distribution(dist), "gamma")
   draws <- delay_parameter_draws(
     fit_gamma,
@@ -152,7 +154,7 @@ test_that("as_dist_spec converts the gamma rate per draw", {
 test_that("as_dist_spec exports a marginal weibull fit", {
   skip_on_cran()
   skip_if_no_fits()
-  dist <- as_dist_spec(fit_marginal_weibull, max = 50)
+  dist <- distspec::as_dist_spec(fit_marginal_weibull, max = 50)
   expect_identical(distspec::get_distribution(dist), "weibull")
   draws <- delay_parameter_draws(
     fit_marginal_weibull,
@@ -169,7 +171,7 @@ test_that("as_dist_spec exports a marginal weibull fit", {
 test_that("as_dist_spec returns a named list for several strata", {
   skip_on_cran()
   skip_if_no_fits()
-  dists <- as_dist_spec(fit_sex)
+  dists <- distspec::as_dist_spec(fit_sex)
   expect_type(dists, "list")
   expect_named(dists, c("sex=0", "sex=1"))
   expect_s3_class(dists[["sex=0"]], "dist_spec")
@@ -183,7 +185,7 @@ test_that("as_dist_spec returns a named list for several strata", {
     expect_equal(mean(params$sdlog), mean(by_sex[[i]]$sigma), tolerance = 1e-8)
   }
   expect_identical(
-    as_dist_spec(fit_sex, newdata = newdata[2, ]),
+    distspec::as_dist_spec(fit_sex, newdata = newdata[2, ]),
     dists[["sex=1"]]
   )
 })
@@ -191,7 +193,7 @@ test_that("as_dist_spec returns a named list for several strata", {
 test_that("as_dist_spec passes arguments on to delay_parameter_draws", {
   skip_on_cran()
   skip_if_no_fits()
-  dist <- as_dist_spec(fit_marginal, draw_ids = 1:100)
+  dist <- distspec::as_dist_spec(fit_marginal, draw_ids = 1:100)
   draws <- delay_parameter_draws(
     fit_marginal,
     newdata = epidist_newdata(prep_marginal_obs),
@@ -212,7 +214,7 @@ test_that("as_dist_spec errors for an unsupported family", {
   fit_beta <- fit
   fit_beta$family$name <- "latent_beta"
   expect_error(
-    as_dist_spec(fit_beta),
+    distspec::as_dist_spec(fit_beta),
     "\"beta\" family cannot be exported"
   )
 })
@@ -236,7 +238,7 @@ test_that(".fit_newdata restores the model class of the fitted data", {
 test_that("as_dist_spec exports naive and meta fits", {
   skip_on_cran()
   skip_if_no_fits()
-  dist <- as_dist_spec(fit_naive)
+  dist <- distspec::as_dist_spec(fit_naive)
   expect_s3_class(dist, "dist_spec")
   expect_identical(distspec::get_distribution(dist), "lognormal")
   draws <- delay_parameter_draws(fit_naive)
@@ -244,7 +246,7 @@ test_that("as_dist_spec exports naive and meta fits", {
   expect_equal(mean(params$meanlog), mean(draws$mu), tolerance = 1e-8)
   expect_equal(mean(params$sdlog), mean(draws$sigma), tolerance = 1e-8)
 
-  dist <- suppressWarnings(as_dist_spec(fit_meta_estimates))
+  dist <- suppressWarnings(distspec::as_dist_spec(fit_meta_estimates))
   expect_s3_class(dist, "dist_spec")
   expect_identical(distspec::get_distribution(dist), "lognormal")
   draws <- suppressWarnings(delay_parameter_draws(
@@ -254,8 +256,4 @@ test_that("as_dist_spec exports naive and meta fits", {
   params <- distspec::get_parameters(dist)
   expect_equal(mean(params$meanlog), mean(draws$mu), tolerance = 1e-8)
   expect_equal(mean(params$sdlog), mean(draws$sigma), tolerance = 1e-8)
-})
-
-test_that("as_dist_spec leaves anything but a fit to distspec", {
-  expect_error(as_dist_spec(prep_obs), "to a <dist_spec>")
 })

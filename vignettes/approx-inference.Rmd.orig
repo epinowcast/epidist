@@ -124,7 +124,10 @@ obs_time <- 25
 sample_size <- 200
 
 obs_cens_trunc_samp <- simulate_gillespie(seed = 101) |>
-  simulate_secondary(distspec::LogNormal(meanlog, sdlog)) |>
+  simulate_secondary(
+    meanlog = meanlog,
+    sdlog = sdlog
+  ) |>
   mutate(
     ptime_lwr = floor(.data$ptime),
     ptime_upr = .data$ptime_lwr + 1,

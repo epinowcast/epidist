@@ -16,6 +16,7 @@ utils::globalVariables(c(
   ".data", # <.delay_column_plot>
   ".data", # <.delay_predictive_layers>
   ".data", # <.delay_reference_layer>
+  "rlnorm", # <simulate_secondary>
   ".data", # <simulate_secondary>
   ".data", # <simulate_dates>
   ".data", # <.replace_prior>

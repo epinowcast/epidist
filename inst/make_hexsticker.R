@@ -11,10 +11,8 @@ secondary_dist <- data.frame(mu = 1.8, sigma = 0.5) |>
 
 obs <- outbreak |>
   simulate_secondary(
-    distspec::LogNormal(
-      meanlog = secondary_dist$mu[[1]],
-      sdlog = secondary_dist$sigma[[1]]
-    )
+    meanlog = secondary_dist$mu[[1]],
+    sdlog = secondary_dist$sigma[[1]]
   ) |>
   mutate(
     ptime_lwr = floor(.data$ptime),

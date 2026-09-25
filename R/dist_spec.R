@@ -46,12 +46,10 @@
 #'
 #' @param max The maximum of the delay distribution, passed to
 #'  [distspec::bound_dist()]. Defaults to `Inf`, which is no maximum.
-#'  [simulate_secondary()] does not apply this bound when drawing delays, and
-#'  warns when given a bounded distribution.
 #'
 #' @param cdf_max The cumulative probability to keep the delay distribution
 #'  up to, passed to [distspec::bound_dist()]. Defaults to 1, which keeps the
-#'  whole distribution. Not applied by [simulate_secondary()] either.
+#'  whole distribution.
 #'
 #' @family postprocess
 #' @returns A `<dist_spec>` when `newdata` has one row. A named list of them,
@@ -59,35 +57,31 @@
 #'  of the columns of `newdata` that differ between rows, such as `"sex=0"`,
 #'  and are the row numbers when no column differs.
 #'
-#' @seealso [delay_parameter_draws()] for the draws this summarises,
-#'  [epidist_newdata()] to build `newdata`, and [simulate_secondary()] to
-#'  simulate delays from the result.
+#' @seealso [delay_parameter_draws()] for the draws this summarises and
+#'  [epidist_newdata()] to build `newdata`.
 #'
 #' @exportS3Method distspec::as_dist_spec
 #' @examples
 #' \donttest{
-#' fit <- sierra_leone_ebola_data |>
-#'   as_epidist_linelist_data(
-#'     pdate_lwr = "date_of_symptom_onset",
-#'     sdate_lwr = "date_of_sample_tested"
-#'   ) |>
-#'   as_epidist_aggregate_data() |>
-#'   as_epidist_marginal_model() |>
-#'   epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+#' if (requireNamespace("distspec", quietly = TRUE)) {
+#'   fit <- sierra_leone_ebola_data |>
+#'     as_epidist_linelist_data(
+#'       pdate_lwr = "date_of_symptom_onset",
+#'       sdate_lwr = "date_of_sample_tested"
+#'     ) |>
+#'     as_epidist_aggregate_data() |>
+#'     as_epidist_marginal_model() |>
+#'     epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
 #'
-#' dist <- as_dist_spec(fit)
-#' dist
+#'   dist <- distspec::as_dist_spec(fit)
+#'   dist
 #'
-#' # The delay distribution at the posterior mean of its parameters
-#' distspec::fix_parameters(dist, strategy = "mean")
+#'   # The delay distribution at the posterior mean of its parameters
+#'   distspec::fix_parameters(dist, strategy = "mean")
 #'
-#' # Simulate delays that carry the posterior uncertainty
-#' simulate_gillespie(seed = 1) |>
-#'   simulate_secondary(dist) |>
-#'   head()
-#'
-#' # Bound the delay distribution at 60 days for a package that takes bounds
-#' as_dist_spec(fit, max = 60)
+#'   # Bound the delay distribution at 60 days for a package that takes bounds
+#'   distspec::as_dist_spec(fit, max = 60)
+#' }
 #' }
 as_dist_spec.epidist_fit <- function(
   x,

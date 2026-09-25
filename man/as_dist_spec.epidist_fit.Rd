@@ -15,13 +15,11 @@ builds one row per unique combination of the predictors, with no
 censoring and no truncation. See the details.}
 
 \item{max}{The maximum of the delay distribution, passed to
-\code{\link[distspec:bound_dist]{distspec::bound_dist()}}. Defaults to \code{Inf}, which is no maximum.
-\code{\link[=simulate_secondary]{simulate_secondary()}} does not apply this bound when drawing delays, and
-warns when given a bounded distribution.}
+\code{\link[distspec:bound_dist]{distspec::bound_dist()}}. Defaults to \code{Inf}, which is no maximum.}
 
 \item{cdf_max}{The cumulative probability to keep the delay distribution
 up to, passed to \code{\link[distspec:bound_dist]{distspec::bound_dist()}}. Defaults to 1, which keeps the
-whole distribution. Not applied by \code{\link[=simulate_secondary]{simulate_secondary()}} either.}
+whole distribution.}
 
 \item{...}{Additional arguments passed to \code{\link[brms:prepare_predictions]{brms::prepare_predictions()}},
 such as \code{ndraws} or \code{re_formula}.}
@@ -70,34 +68,30 @@ row. A continuous predictor gets a row per distinct value, so pass
 }
 \examples{
 \donttest{
-fit <- sierra_leone_ebola_data |>
-  as_epidist_linelist_data(
-    pdate_lwr = "date_of_symptom_onset",
-    sdate_lwr = "date_of_sample_tested"
-  ) |>
-  as_epidist_aggregate_data() |>
-  as_epidist_marginal_model() |>
-  epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
+if (requireNamespace("distspec", quietly = TRUE)) {
+  fit <- sierra_leone_ebola_data |>
+    as_epidist_linelist_data(
+      pdate_lwr = "date_of_symptom_onset",
+      sdate_lwr = "date_of_sample_tested"
+    ) |>
+    as_epidist_aggregate_data() |>
+    as_epidist_marginal_model() |>
+    epidist(chains = 2, cores = 2, refresh = ifelse(interactive(), 250, 0))
 
-dist <- as_dist_spec(fit)
-dist
+  dist <- distspec::as_dist_spec(fit)
+  dist
 
-# The delay distribution at the posterior mean of its parameters
-distspec::fix_parameters(dist, strategy = "mean")
+  # The delay distribution at the posterior mean of its parameters
+  distspec::fix_parameters(dist, strategy = "mean")
 
-# Simulate delays that carry the posterior uncertainty
-simulate_gillespie(seed = 1) |>
-  simulate_secondary(dist) |>
-  head()
-
-# Bound the delay distribution at 60 days for a package that takes bounds
-as_dist_spec(fit, max = 60)
+  # Bound the delay distribution at 60 days for a package that takes bounds
+  distspec::as_dist_spec(fit, max = 60)
+}
 }
 }
 \seealso{
-\code{\link[=delay_parameter_draws]{delay_parameter_draws()}} for the draws this summarises,
-\code{\link[=epidist_newdata]{epidist_newdata()}} to build \code{newdata}, and \code{\link[=simulate_secondary]{simulate_secondary()}} to
-simulate delays from the result.
+\code{\link[=delay_parameter_draws]{delay_parameter_draws()}} for the draws this summarises and
+\code{\link[=epidist_newdata]{epidist_newdata()}} to build \code{newdata}.
 
 Other postprocess: 
 \code{\link{add_summaries}()},

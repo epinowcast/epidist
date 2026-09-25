@@ -7,7 +7,6 @@
 \alias{weibull}
 \alias{Gamma}
 \alias{bf}
-\alias{as_dist_spec}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -16,8 +15,6 @@ below to see their documentation.
 
 \describe{
   \item{brms}{\code{\link[brms:brmsformula]{bf}}, \code{\link[brms:brmsfamily]{lognormal}}, \code{\link[brms:brmsfamily]{weibull}}}
-
-  \item{distspec}{\code{\link[distspec]{as_dist_spec}}}
 
   \item{stats}{\code{\link[stats:family]{Gamma}}}
 }}

@@ -15,13 +15,11 @@ result of \code{\link[=delay_parameter_draws]{delay_parameter_draws()}}.}
 \code{.dist_spec_family()}.}
 
 \item{max}{The maximum of the delay distribution, passed to
-\code{\link[distspec:bound_dist]{distspec::bound_dist()}}. Defaults to \code{Inf}, which is no maximum.
-\code{\link[=simulate_secondary]{simulate_secondary()}} does not apply this bound when drawing delays, and
-warns when given a bounded distribution.}
+\code{\link[distspec:bound_dist]{distspec::bound_dist()}}. Defaults to \code{Inf}, which is no maximum.}
 
 \item{cdf_max}{The cumulative probability to keep the delay distribution
 up to, passed to \code{\link[distspec:bound_dist]{distspec::bound_dist()}}. Defaults to 1, which keeps the
-whole distribution. Not applied by \code{\link[=simulate_secondary]{simulate_secondary()}} either.}
+whole distribution.}
 }
 \value{
 A \verb{<dist_spec>}.
