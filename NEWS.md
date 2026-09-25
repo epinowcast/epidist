@@ -1,3 +1,14 @@
+# epidist 1.0.0
+
+This is the first release of `epidist` on CRAN.
+It contains the features of 0.5.0.
+The meta model is still experimental and its interface may change.
+
+## Package
+
+- The vignettes are built with `bookdown::html_vignette2`, which cuts the installed size of the package by about 4Mb.
+- Added `.claude` and `.jj` to `.Rbuildignore`, and cited the `sierra_leone_ebola_data` source by its DOI.
+
 # epidist 0.5.0
 
 This release adds a meta model for fitting to published summary estimates, exponentially growing primary events, left truncation, and a new set of tools for post-processing and plotting fitted models.
@@ -33,6 +44,8 @@ They cover means, standard deviations, quantiles, standard errors, fitted distri
 See #620.
 - Added `epidist_gen_meta_log_lik()` and `epidist_gen_meta_predict()`, so `log_lik()`, `loo()` and posterior predictions work for meta model fits.
 See #620.
+- Added `epidist_meta_leave_one_out()`, which refits a meta model once per study with that study held out and reports how the delay mean and standard deviation change.
+Closes #642.
 - Added `simulate_study()`, which applies a published study's observation and estimation procedure to a simulated line list.
 Closes #672.
 - The meta model can estimate the growth rate of a study from `NA` or uncertain `growth_rate` values, sharing it with individual level data.
@@ -56,6 +69,10 @@ See #79, #476 and #646.
 - `epidist_prior()` no longer warns about user priors on valid `brms` parameters, and lists unmatched priors clearly.
 See #483.
 
+- The package lifecycle is now maturing rather than experimental.
+The meta model is still experimental.
+See #781.
+
 ## Bug fixes
 
 - Added a missing Jacobian adjustment to the latent model for observations whose primary and secondary windows overlap.
@@ -68,6 +85,8 @@ Closes #646.
 Closes #718.
 - Delay draws keep their class through common `dplyr` verbs, so `plot()` still dispatches.
 Closes #721.
+- The meta model log likelihood no longer advances the RNG stream.
+Closes #750.
 - Removed calls to unexported `brms` functions.
 See #420.
 
