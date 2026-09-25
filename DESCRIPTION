@@ -55,6 +55,7 @@ Suggests:
     BH (>= 1.66.0),
     bookdown,
     collapse,
+    distspec (>= 0.2.0),
     epireview,
     flexsurv,
     ggplot2,

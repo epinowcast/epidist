@@ -26,6 +26,7 @@ docs
 /doc/
 /Meta/
 vignettes/**_cache/
+vignettes/*_files/
 *.pdf
 .vscode/
 vignettes/figures/*

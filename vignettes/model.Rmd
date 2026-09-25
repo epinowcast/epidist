@@ -19,7 +19,6 @@ bibliography: references.bib
 ```{r setup, include=FALSE}
 # hide the Stan compile warnings
 knitr::opts_chunk$set(
-  fig.path = file.path("figures", "epidist-"),
   collapse = TRUE,
   comment = "#>",
   message = FALSE,
@@ -306,7 +305,9 @@ For a lognormal with kurtosis 9 that is $n$ below about 30.
 
 ### A reported quantile
 
-A reported quantile at probability $p$ is fitted on the probability scale, which avoids inverting $G$,
+A reported quantile at probability $p$ is fitted through the number of delays at or below it, which is binomial on $G(y)$ and so avoids inverting $G$.
+This is Equation \@ref(eq:meta-quantile-set) below, or Equations \@ref(eq:meta-quantile-crossing) and \@ref(eq:meta-quantile-box) for integer day delays.
+Posterior predictions for a quantile row are drawn from its normal approximation,
 $$
 p \sim \text{Normal}\left(G(y), \; \text{se}_p\right), (\#eq:meta-quantile-lik)
 $$
@@ -343,7 +344,7 @@ $$
 (c_1, \dots, c_{k+1}) \sim \text{Multinomial}\left(n, \; \left(G(y_1), \; G(y_2) - G(y_1), \; \dots, \; 1 - G(y_k)\right)\right), (\#eq:meta-quantile-set)
 $$
 with $c_j = \text{round}(n p_j) - \text{round}(n p_{j-1})$ and $c_{k+1} = n - \text{round}(n p_k)$.
-A single quantile reduces this to the binomial of which Equation \@ref(eq:meta-quantile-lik) is the normal approximation, so quantile rows of a continuous estimand use Equation \@ref(eq:meta-quantile-set) unless a standard error is supplied.
+A single quantile reduces this to the binomial of which Equation \@ref(eq:meta-quantile-lik) is the normal approximation.
 Two quantiles reported at the same value are merged into one cell.
 A cell whose probability underflows to zero while the study saw delays in it is floored at $10^{-300}$.
 
@@ -500,7 +501,7 @@ Code 3, midpoint imputation, assigned each delay to the centre of its interval, 
 Reported quantiles use Equations \@ref(eq:meta-quantile-crossing) and \@ref(eq:meta-quantile-box), as for code 0.
 Code 4, midpoint imputation with a uniform interval, placed the primary event at the midpoint of its window and integrated the secondary interval, so its estimand is that of code 2 moved down by $w_p / 2$.
 A shift changes the mean alone and moves the distribution function and quantiles with it.
-Code 4 therefore has the mean of code 1 and the variance of code 2 before truncation, because midpointing removes the mean of $U$ but not its spread.
+Under a uniform primary event code 4 therefore has the mean of code 1 and the variance of code 2 before truncation, because midpointing removes the mean of $U$ but not its spread.
 The mirror reading, a midpointed secondary event and an integrated primary interval, has variance $\sigma^2 + w_s^2 / 12$ and is not used, because the literature midpoints the wide exposure window of the primary event.
 A study that midpointed the secondary interval and left the primary alone is code 3.
 Each code integrates the interval it did not midpoint rather than drawing a random position in it, which would add $w^2 / 6$ to the variance.
@@ -555,6 +556,7 @@ Every other coefficient of `pgrowth` gets $\text{Normal}(0, 0.25^2)$, which is w
 A study that only counted delays of at least $L$ reported summaries conditioned on $\tau > L$, the left truncation of survival analysis [@klein2003].
 Each expression above reduces to its earlier form when $L = 0$.
 On the grid of Equation \@ref(eq:meta-grid) the cells below $L$ are dropped and the rest renormalised by their mass, which is $F_{pc}(D) - F_{pc}(L)$ when $L$ falls on a grid boundary.
+For codes 3 and 4, $L$ is on the reported scale, so the estimand they move is truncated at $L$ moved back by the same shift, $L - w_s / 2$ or $L + w_p / 2$.
 The truncated moments of Equation \@ref(eq:meta-trunc-moments) pick up a boundary term,
 $$
 \mathbb{E}[\tau^k \mid L < \tau \le D] =

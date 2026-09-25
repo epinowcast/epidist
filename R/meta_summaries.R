@@ -3326,6 +3326,11 @@
 #' [.meta_grid_box_ll()] as the joint probability of every such crossing,
 #' with `cum_count` and `lower` read as the box each crossing puts on the
 #' counts below and at the reported day.
+#' Both start the grid at `delay_min` moved back by [.meta_cens_lower()], as
+#' the mean and standard deviation of the same study do. For a midpoint
+#' imputed grid (`cens_adjusted` 3) the reported `delay_min` sits on the
+#' midpointed scale, so an off grid value would otherwise drop the lowest
+#' counted cell.
 #'
 #' A cell whose implied probability underflows to zero while the study saw
 #' delays in it is floored at [.meta_cell_floor()].
@@ -3366,6 +3371,12 @@
   lower = slots$group_lower
 ) {
   if (slots$cens_adjusted %in% c(0, 3)) {
+    # The grid starts from delay_min moved back to the base estimand, as it
+    # does for the same study's mean and standard deviation. The censoring
+    # code is kept so that the reported values move back as well.
+    slots$lower <- .meta_cens_lower(
+      slots$lower, slots$cens_adjusted, slots$pwindow, slots$swindow
+    )
     if (length(y) == 1) {
       return(.meta_grid_crossing_ll(y, p[1], study_n, dist, args, slots))
     }
