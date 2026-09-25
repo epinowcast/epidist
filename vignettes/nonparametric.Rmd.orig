@@ -34,8 +34,12 @@ When the shape is wrong the fitted delay is biased, most of all in its tail.
 It places the delay on a grid of bins and estimates the probability of each bin, using the non-parametric distributions of [`primarycensored`](https://primarycensored.epinowcast.org/) [@primarycensored].
 
 The distribution is written in terms of the hazard of each bin, the probability that the delay ends in that bin given that it has not ended before.
-The logit hazards follow a random walk, so neighbouring bins have similar hazards.
-The `mu` parameter shifts the logit hazard of every bin, so a covariate in its formula gives each stratum its own delay.
+The logit hazards are a linear predictor over the bins, set by the `formula` argument of `nonparametric()`.
+It takes `brms` terms in two variables of the bins, `delay`, the right edge of each bin, and `bin`, a factor with a level per bin.
+The default is a spline over the delay, `~ s(delay)`, so neighbouring bins have similar hazards.
+`~ (1 | bin)` gives each bin its own hazard around the mean, and `~ delay` a logit hazard that changes linearly with the delay.
+The `mu` parameter is the mean logit hazard, so a covariate in its formula shifts the logit hazard of every bin.
+Each coefficient of the hazard formula is a distributional parameter too, so a covariate in its formula changes the shape of the delay.
 `?nonparametric` gives the details.
 
 ```{r libraries}
@@ -73,12 +77,15 @@ model_data <- as_epidist_marginal_model(linelist)
 
 The non-parametric fit puts a bin at each whole day from 0 to the longest observed delay.
 Pass `boundaries` to `nonparametric()` to set other bins.
+The default hazard formula is a thin plate spline with one unpenalised coefficient, `h1b`, for its linear part.
+Its penalised part has a standard deviation, `h1sd`, and standardised coefficients `h1z`, `h2z` and so on.
+We let `mu` and `h1b` vary by age group, so the age groups differ in the level and the slope of the logit hazard over the delay.
 We compare it with a lognormal fit whose `mu` and `sigma` both vary by age group.
 
 ```{r fit}
 fit_np <- epidist(
   model_data,
-  formula = mu ~ 1 + age_group,
+  formula = bf(mu ~ 1 + age_group, h1b ~ 1 + age_group),
   family = nonparametric(),
   chains = 2, cores = 2, refresh = 0, seed = 1, backend = "cmdstanr"
 )
@@ -229,12 +236,13 @@ It gives an error for any other summary under that code.
 
 * `nonparametric()` estimates the probability of each bin rather than assuming a shape.
 It fits in the marginal and meta models and is summarised in the same way as the other families.
+* The logit hazards are a formula over the bins.
+The default spline smooths the fitted delay, and other `brms` terms such as `(1 | bin)` or `delay` give other structures.
 * A covariate in the `mu` formula shifts the logit hazard of every bin by the same amount.
 This is a proportional odds model for the hazard.
-It lets strata with little data borrow the shape of the delay from the others, but it cannot give strata delays of different shapes.
-* The random walk on the logit hazard smooths the fitted delay.
-`hazard_model = "re"` treats the hazards as independent around `mu` instead.
-* Each bin is a parameter, so a long delay on daily bins is slower to fit than a parametric family.
+It lets strata with little data borrow the shape of the delay from the others.
+* A covariate in the formula of a hazard coefficient, such as `h1b`, changes the shape of the delay by stratum.
+* Each bin adds to the cost of the likelihood, so a long delay on daily bins is slower to fit than a parametric family.
 Wider bins in the tail make it faster.
 
 # References
