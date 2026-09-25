@@ -2617,6 +2617,99 @@
     return lp;
   }
 
+  /**
+    * Log density of a group whose covariance comes from a multivariate
+    * representation of a study's parameter draws, with its Cholesky factor
+    * flattened column major in `chol`. Mirrors .meta_multi_normal_ll() in R.
+    */
+  real meta_family_mvn_group_lpdf(data vector y, data array[] int types,
+                                  data vector probs, data vector chol,
+                                  array[] real params, data real delay_min,
+                                  data real cutoff, data real pwindow_width,
+                                  data real swindow_width,
+                                  data int trunc_adj, data int cens_adj,
+                                  data int prim_id,
+                                  array[] real prim_params,
+                                  data int accrual, real growth_rate,
+                                  data int n_quad) {
+    int k = num_elements(y);
+    vector[k] implied = meta_family_implied_summary_vector(
+      types, probs, params, delay_min, cutoff, pwindow_width, swindow_width,
+      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate, n_quad
+    );
+    return multi_normal_cholesky_lpdf(y | implied, to_matrix(chol, k, k));
+  }
+
+  /**
+    * Log density of a reported quantile whose standard error is on the delay
+    * scale, so the reported value is compared with the implied quantile on
+    * that scale. Matches .meta_summary_terms() in R, including the 1e-6
+    * guard of .meta_min_prob_se().
+    */
+  real meta_family_quantile_delay_lpdf(data real y, data real p,
+                                       data real report_se,
+                                       array[] real params,
+                                       data real delay_min, data real cutoff,
+                                       data real pwindow_width,
+                                       data real swindow_width,
+                                       data int trunc_adj, data int cens_adj,
+                                       data int prim_id,
+                                       array[] real prim_params,
+                                       data int accrual, real growth_rate,
+                                       data int n_quad) {
+    int n_node = meta_family_node_count(
+      delay_min, cutoff, pwindow_width, swindow_width, cens_adj, n_quad
+    );
+    vector[2 + n_node] nodes = meta_family_implied_nodes(
+      params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+      cens_adj, prim_id, prim_params, accrual, growth_rate, n_quad
+    );
+    real implied = meta_family_node_quantile(
+      nodes, p, params, delay_min, cutoff, pwindow_width, swindow_width,
+      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
+    );
+    return normal_lpdf(y | implied, fmax(report_se, 1e-6));
+  }
+
+  /**
+    * Log density of the probability `p` of a reported quantile `y`,
+    * compared with the probability the estimand puts below `y` with its
+    * binomial sampling error. Matches .meta_summary_terms() in R.
+    */
+  real meta_family_quantile_prob_lpdf(data real p, data real y,
+                                      data int study_n, array[] real params,
+                                      data real delay_min, data real cutoff,
+                                      data real pwindow_width,
+                                      data real swindow_width,
+                                      data int trunc_adj, data int cens_adj,
+                                      data int prim_id,
+                                      array[] real prim_params,
+                                      data int accrual, real growth_rate,
+                                      data int n_quad) {
+    real implied = meta_family_implied_prob(
+      y, params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+      cens_adj, prim_id, prim_params, accrual, growth_rate, n_quad
+    );
+    return normal_lpdf(p | implied, sqrt(p * (1 - p) / study_n));
+  }
+
+  /**
+    * Log density of a reported mean (obs_type 2) or standard deviation
+    * (obs_type 3) given the implied summaries, with the reported standard
+    * error where there is one. Matches .meta_summary_terms() in R.
+    */
+  real meta_family_moment_lpdf(data real y, data int obs_type,
+                               data real report_se, vector moments,
+                               data int study_n) {
+    if (obs_type == 2) {
+      real se = report_se > 0 ? report_se : moments[2] / sqrt(study_n);
+      return normal_lpdf(y | moments[1], se);
+    }
+    real se = report_se > 0 ? report_se
+      : meta_family_sd_se(moments, study_n);
+    return normal_lpdf(y | moments[2], se);
+  }
+
 /**
   * Compute the log probability mass function for the meta model.
   * Individual level rows use the marginal likelihood from primarycensored.
@@ -2677,17 +2770,12 @@
   }
 
   if (obs_type == 7) {
-    vector[group_len] implied = meta_family_implied_summary_vector(
-      group_type[group_start:last], group_p[group_start:last], {dpars_B},
-      delay_min, relative_obs_t, pwindow_width, swindow_width, trunc_adj,
-      cens_adj, prim_id, prim_params, accrual, growth, n_quad
-    );
-    matrix[group_len, group_len] chol = to_matrix(
+    return meta_family_mvn_group_lpdf(
+      group_value[group_start:last] | group_type[group_start:last],
+      group_p[group_start:last],
       group_chol[chol_start:(chol_start + group_len * group_len - 1)],
-      group_len, group_len
-    );
-    return multi_normal_cholesky_lpdf(
-      group_value[group_start:last] | implied, chol
+      {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
+      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth, n_quad
     );
   }
 
@@ -2711,34 +2799,18 @@
   }
 
   if (obs_type == 4 && report_se > 0) {
-    // A reported quantile standard error is on the delay scale, so the
-    // reported value is compared with the implied quantile on that scale.
-    // Matches .meta_summary_terms() in R, including the 1e-6 guard of
-    // .meta_min_prob_se().
-    int n_node = meta_family_node_count(
-      delay_min, relative_obs_t, pwindow_width, swindow_width, cens_adj,
-      n_quad
+    return meta_family_quantile_delay_lpdf(
+      y_upper | quantile_p, report_se, {dpars_B}, delay_min, relative_obs_t,
+      pwindow_width, swindow_width, trunc_adj, cens_adj, prim_id,
+      prim_params, accrual, growth, n_quad
     );
-    vector[2 + n_node] nodes = meta_family_implied_nodes(
-      {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
-      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth, n_quad
-    );
-    real implied = meta_family_node_quantile(
-      nodes, quantile_p, {dpars_B}, delay_min, relative_obs_t, pwindow_width,
-      swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
-      growth
-    );
-    return normal_lpdf(y_upper | implied, fmax(report_se, 1e-6));
   }
 
   if (obs_type == 4) {
-    real implied = meta_family_implied_prob(
-      y_upper, {dpars_B}, delay_min, relative_obs_t, pwindow_width,
-      swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
-      growth, n_quad
-    );
-    return normal_lpdf(
-      quantile_p | implied, sqrt(quantile_p * (1 - quantile_p) / study_n)
+    return meta_family_quantile_prob_lpdf(
+      quantile_p | y_upper, study_n, {dpars_B}, delay_min, relative_obs_t,
+      pwindow_width, swindow_width, trunc_adj, cens_adj, prim_id,
+      prim_params, accrual, growth, n_quad
     );
   }
 
@@ -2755,14 +2827,10 @@
     }
   }
 
-  if (obs_type == 2) {
-    real se = report_se > 0 ? report_se : moments[2] / sqrt(study_n);
-    return normal_lpdf(y_upper | moments[1], se);
-  }
-  if (obs_type == 3) {
-    real se = report_se > 0 ? report_se
-      : meta_family_sd_se(moments, study_n);
-    return normal_lpdf(y_upper | moments[2], se);
+  if (obs_type == 2 || obs_type == 3) {
+    return meta_family_moment_lpdf(
+      y_upper | obs_type, report_se, moments, study_n
+    );
   }
   if (obs_type == 5) {
     return meta_family_moment_pair_lpdf(
