@@ -697,6 +697,40 @@ marginaleffects::get_draws(phase_ratio) |>
   )
 ```
 
+## Does any one study drive the estimate? {#leave-one-out}
+
+`epidist_meta_leave_one_out()` refits the model once per study with that study removed.
+We compare the population level delay at the post outbreak reference level.
+
+```{r results='hide', message=FALSE}
+ebola_leave_one_out <- epidist_meta_leave_one_out(
+  fit_ebola,
+  newdata = filter(phase_grid, .data$phase == "post outbreak"),
+  refresh = ifelse(interactive(), 250, 0)
+)
+```
+
+`difference` is each refit's posterior relative to the full fit's median.
+
+```{r}
+ebola_leave_one_out |>
+  select("study", "summary", starts_with("difference"))
+```
+
+```{r leave-one-out, fig.cap="Posterior median and 95% interval of the delay mean and standard deviation with each study held out, relative to the full fit's median.", fig.width=8, fig.height=5}
+ggplot(ebola_leave_one_out) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_pointrange(
+    aes(
+      x = difference, xmin = difference_lower, xmax = difference_upper,
+      y = study
+    )
+  ) +
+  facet_wrap(vars(summary), scales = "free_x") +
+  labs(x = "Difference from the full fit (days)", y = "Study held out") +
+  theme_minimal()
+```
+
 ## Comparing with a modern re-analysis of the same line list {#bdbv}
 
 `Rosello 2015 (3)` is the 2012 Isiro outbreak, and that line list has since been re-analysed in [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis) from the individual records, adjusting for double interval censoring.
