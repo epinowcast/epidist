@@ -2354,16 +2354,26 @@
     real previous_prob = 0;
     int previous_count = 0;
     if (cens_adj == 0 || cens_adj == 3) {
+      // The grid starts from delay_min moved back to the base estimand, as
+      // it does for the same study's mean and standard deviation. The
+      // censoring code is kept so that the reported values move back as
+      // well. The moved delay_min is written out in full, because Stan only
+      // treats expressions built from data arguments as data only.
       if (n_reported == 1) {
         return meta_family_grid_crossing_ll(
-          y[1], p[1], study_n, params, delay_min, cutoff, pwindow_width,
-          swindow_width, cens_adj, prim_id, prim_params, accrual, growth_rate
+          y[1], p[1], study_n, params,
+          meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                                 swindow_width),
+          cutoff, pwindow_width, swindow_width, cens_adj, prim_id,
+          prim_params, accrual, growth_rate
         );
       }
       return meta_family_grid_box_ll(
-        y, cum_count, lower_count, study_n, params, delay_min, cutoff,
-        pwindow_width, swindow_width, cens_adj, prim_id, prim_params, accrual,
-        growth_rate
+        y, cum_count, lower_count, study_n, params,
+        meta_family_cens_lower(delay_min, cens_adj, pwindow_width,
+                               swindow_width),
+        cutoff, pwindow_width, swindow_width, cens_adj, prim_id, prim_params,
+        accrual, growth_rate
       );
     }
     for (j in 1:n_reported) {
