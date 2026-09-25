@@ -2070,6 +2070,42 @@ test_that(".meta_grid_box_ll stays finite far from the reported quantiles and re
   )
 })
 
+test_that(".meta_quantile_set_ll moves an off grid delay_min back for midpoint imputed quantiles", { # nolint: line_length_linter.
+  args <- list(meanlog = 1.6, sdlog = 0.5)
+  n <- 200L
+  base <- list(
+    cutoff = 30, pwindow = 1, swindow = 1, trunc_adjusted = 0L,
+    trunc_design = 0L, growth_rate = 0
+  )
+  # A code 3 study reports delays at the centre of each day, so counting
+  # reported delays from 1.5 keeps the base cell of one day. Its quantiles
+  # must see the same grid as code 0 on the moved delay_min, as its mean
+  # and standard deviation do.
+  midpoint <- c(base, list(lower = 1.5, cens_adjusted = 3L))
+  naive <- c(base, list(
+    lower = .meta_cens_lower(1.5, 3L, 1, 1), cens_adjusted = 0L
+  ))
+  # One quantile takes the crossing cell and several the box likelihood.
+  for (case in list(
+    list(p = 0.05, y = 1),
+    list(p = c(0.05, 0.5, 0.9), y = c(1, 5, 9))
+  )) {
+    p <- case$p
+    y <- case$y
+    k <- .meta_crossing_counts(p, n)
+    expected <- .meta_quantile_set_ll(
+      y, k - 1L, n, "plnorm", args, naive,
+      p = p, lower = k
+    )
+    actual <- .meta_quantile_set_ll(
+      y + 0.5, k - 1L, n, "plnorm", args, midpoint,
+      p = p, lower = k
+    )
+    expect_true(is.finite(expected))
+    expect_identical(actual, expected)
+  }
+})
+
 test_that("several integer day quantiles from a thousand delays give a box likelihood", { # nolint: line_length_linter.
   # Once the binomial spread of each crossing is narrower than a day, the
   # reported quartiles stop moving and the joint likelihood tends to an

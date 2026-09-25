@@ -180,6 +180,31 @@ test_that("a quantile far beyond a narrow fitted delay keeps R and Stan in step"
   expect_true(all(r_log_lik < -30))
 })
 
+test_that("R and Stan agree on midpoint imputed quantiles with an off grid delay_min", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_fits()
+  # Counting reported delays from 1.5 keeps the base cell of one day, so a
+  # quantile reported there is finite in both languages.
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = c("single", "set", "set", "set"),
+    type = "quantile",
+    value = c(1.5, 1.5, 5.5, 9.5),
+    p = c(0.05, 0.05, 0.5, 0.9),
+    n = 200,
+    relative_obs_time = 30,
+    trunc_adjusted = FALSE,
+    cens_adjusted = 3,
+    delay_min = 1.5,
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  program <- meta_log_lik_program(meta)
+  stan_log_lik <- meta_stan_log_lik(program, 1.6, 0.5)
+  r_log_lik <- meta_r_log_lik(program, 1.6, 0.5)
+  expect_true(all(is.finite(r_log_lik)))
+  expect_rows_close(stan_log_lik, r_log_lik, 1e-6)
+})
+
 test_that("brms::log_lik() matches the Stan log likelihood at posterior draws", { # nolint: line_length_linter.
   skip_on_cran()
   skip_if_no_fits()
