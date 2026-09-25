@@ -1,8 +1,25 @@
 # epidist 1.0.0
 
 This is the first release of `epidist` on CRAN.
-It contains the features of 0.5.0.
+`epidist` estimates epidemiological delay distributions, such as the incubation period or the delay from onset to report, using `brms`.
+It corrects for the common biases in these data: interval censoring of the primary and secondary events, right truncation, left truncation, and the dynamical bias from a growing or shrinking epidemic.
+It provides a naive model, a latent model that samples the unobserved event times, and a marginal model that integrates them out through `primarycensored`.
+It also provides an experimental meta model, which fits published summary estimates jointly with individual level data and adjusts each summary for how its study was estimated.
+Delays can follow a lognormal, gamma, Weibull or generalised gamma distribution.
+Every distributional parameter can take a `brms` formula, so delays can vary with covariates, over time or between groups with partial pooling.
+Tools for preparing data, setting priors, simulating data, summarising and plotting fitted delay distributions, and passing them on to other packages complete the workflow.
 The meta model is still experimental and its interface may change.
+
+## New features
+
+- Added `gengamma()`, a generalised gamma delay family in the Prentice parameterisation of `flexsurv::dgengamma()`, for the naive, latent, marginal and meta models.
+The Weibull and gamma are special cases and the lognormal is its limit.
+Closes #644.
+
+## Documentation
+
+- The help for `epidist_gen_meta_log_lik()` and `as_epidist_meta_model()` now states the cost of `log_lik()` and `loo()` for meta model summary rows, and how `ndraws` reduces it.
+Closes #705.
 
 ## Package
 
