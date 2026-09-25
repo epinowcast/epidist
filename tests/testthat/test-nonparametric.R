@@ -1,29 +1,69 @@
-test_that("nonparametric() builds a random walk hazard family by default", {
-  family <- nonparametric(boundaries = -1:5)
+test_that("nonparametric() builds a spline hazard family by default", {
+  family <- nonparametric(boundaries = -1:20)
   expect_s3_class(family, "brmsfamily")
-  expect_identical(family$family, "discretehazard_rw")
-  expect_identical(family$np$hazard_model, "rw")
-  expect_identical(family$np$boundaries, as.numeric(-1:5))
-  # Six bins, so four hazards are free after the first and the last
+  expect_identical(family$family, "nonparametric")
+  expect_identical(family$np$boundaries, as.numeric(-1:20))
+  expect_identical(
+    deparse(family$np$formula), "~s(delay, k = 10)"
+  )
+  # A thin plate spline of ten basis functions less the intercept is one
+  # unpenalised column and eight penalised ones with a shared sd
   expect_identical(
     family$dpars,
-    c("mu", "hsigma", "h2eps", "h3eps", "h4eps", "h5eps")
+    c("mu", "h1b", "h1sd", paste0("h", 1:8, "z"))
   )
   expect_identical(family$link, "identity")
+  expect_identical(family$other_links, c("identity", "log", rep("identity", 8)))
+  expect_identical(family$other_bounds[[2]]$lb, "0")
+  expect_identical(dim(family$np$basis), c(20L, 9L))
 })
 
-test_that("nonparametric() builds a random effect hazard family", {
-  family <- nonparametric(boundaries = -1:5, hazard_model = "re")
-  expect_identical(family$family, "discretehazard_re")
+test_that("the default spline has no more basis functions than bins", {
+  family <- nonparametric(boundaries = -1:4)
+  expect_identical(deparse(family$np$formula), "~s(delay, k = 4)")
+  family <- nonparametric(boundaries = -1:2)
+  expect_identical(deparse(family$np$formula), "~s(bin, bs = \"re\")")
+  expect_identical(family$dpars, c("mu", "h1sd", "h1z", "h2z"))
+})
+
+test_that("nonparametric() takes brms terms over the bins", {
+  family <- nonparametric(~ (1 | bin) + delay, boundaries = -1:6)
+  expect_identical(
+    deparse(family$np$formula), "~s(bin, bs = \"re\") + delay"
+  )
+  expect_identical(
+    family$np$coefficients$term,
+    c("delay", rep("s(bin)", 6))
+  )
   expect_identical(
     family$dpars,
-    c("mu", "hsigma", "h1eps", "h2eps", "h3eps", "h4eps", "h5eps")
+    c("mu", "h1b", "h1sd", paste0("h", 1:6, "z"))
   )
+  linear <- nonparametric(~ delay + I(delay^2), boundaries = -1:6)
+  expect_identical(linear$dpars, c("mu", "h1b", "h2b"))
+  expect_true(all(is.na(linear$np$coefficients$sd)))
+  constant <- nonparametric(~1, boundaries = -1:6)
+  expect_identical(constant$dpars, "mu")
+  expect_identical(dim(constant$np$basis), c(6L, 0L))
+  pspline <- nonparametric(
+    ~ s(delay, bs = "ps", k = 5),
+    boundaries = c(-1:5, 7, 10)
+  )
+  expect_identical(pspline$np$coefficients$term[1], "s(delay)")
+})
+
+test_that("the hazard basis is centred and scaled over the bins", {
+  family <- nonparametric(~ delay + s(bin, bs = "re"), boundaries = -1:8)
+  basis <- family$np$basis
+  expect_equal(colMeans(basis), rep(0, ncol(basis)), tolerance = 1e-12)
+  expect_equal(mean(basis[, 1]^2), 1, tolerance = 1e-12)
+  expect_equal(mean(rowSums(basis[, -1]^2)), 1, tolerance = 1e-12)
 })
 
 test_that("nonparametric() leaves the parameters to the data by default", {
   family <- nonparametric()
   expect_null(family$np$boundaries)
+  expect_null(family$np$formula)
   expect_identical(family$dpars, "mu")
 })
 
@@ -31,65 +71,83 @@ test_that("nonparametric() rejects boundaries it cannot use", {
   expect_error(nonparametric(boundaries = c(0, 2, 1, 3)), "increasing")
   expect_error(nonparametric(boundaries = c(-1, 0, 1)), "at least")
   expect_error(nonparametric(boundaries = c(-1, 0, 1, NA)))
-  expect_error(nonparametric(hazard_model = "dirichlet"))
+})
+
+test_that("nonparametric() rejects formulas it cannot build", {
+  expect_error(nonparametric(y ~ delay), "one sided")
+  expect_error(nonparametric(~age_group), "age_group")
+  expect_error(nonparametric(~ (delay | bin)), "random")
+  expect_error(
+    nonparametric(~ delay + bin, boundaries = -1:6), "not identified"
+  )
 })
 
 test_that("the hazard family maps to the primarycensored hazard likelihood", {
   # primarycensored gives the alias "nonparametric" to the direct PMF step,
-  # dist_id 26, so the family must not be looked up by that name.
-  expect_identical(
-    primarycensored::pcd_stan_dist_id(nonparametric(-1:5)$family), 27L
-  )
-  expect_identical(
-    primarycensored::pcd_stan_dist_id(
-      nonparametric(-1:5, hazard_model = "re")$family
-    ),
-    28L
-  )
+  # dist_id 26, so the family is looked up by its hazard name.
+  family <- epidist_family(prep_marginal_obs, family = nonparametric())
+  code <- .family_functions_stanvar(
+    file.path("marginal_model", "functions.stan"), family, "marginal_"
+  )[[1]]$scode
+  expect_match(code, "y | 27,", fixed = TRUE)
 })
 
-test_that(".np_pmf() matches primarycensored for each hazard model", {
-  boundaries <- -1:4
-  mu <- c(-1, 0.5)
-  hsigma <- c(0.5, 1.2)
-  eps <- list(h2eps = c(0.3, -0.2), h3eps = c(-1, 0.4), h4eps = c(0.2, 0.1))
-  pmf <- .np_pmf(c(list(mu = mu, hsigma = hsigma), eps), boundaries, "rw")
-  expect_identical(dim(pmf), c(2L, 5L))
+np_family <- nonparametric(~ delay + (1 | bin), boundaries = -1:4)
+np_draws <- data.frame(
+  mu = c(-1, -0.5), h1b = c(0.3, -0.2), h1sd = c(0.5, 0.8),
+  h1z = c(0.1, -1), h2z = c(-0.5, 0.4), h3z = c(0.2, 0.1),
+  h4z = c(1, -0.3)
+)
+
+test_that(".np_hazards() is mu plus the basis times the coefficients", {
+  hazards <- .np_hazards(np_draws, np_family$np)
+  expect_identical(dim(hazards), c(2L, 5L))
+  expect_identical(hazards[, 5], c(1, 1))
+  basis <- np_family$np$basis
   for (d in 1:2) {
-    offset <- c(0, cumsum(unname(vapply(eps, `[`, numeric(1), d))))
-    hazards <- c(stats::plogis(mu[d] + hsigma[d] * offset), 1)
+    coefs <- c(
+      np_draws$h1b[d],
+      np_draws$h1sd[d] * unlist(np_draws[d, paste0("h", 1:4, "z")])
+    )
     expect_equal(
-      pmf[d, ], primarycensored::hazards_to_pmf(hazards),
+      hazards[d, 1:4],
+      stats::plogis(np_draws$mu[d] + as.vector(basis %*% coefs)),
       tolerance = 1e-12
     )
   }
-  re_eps <- c(list(h1eps = c(0.1, 0.2)), eps)
-  pmf_re <- .np_pmf(
-    c(list(mu = mu, hsigma = hsigma), re_eps), boundaries, "re"
-  )
-  offset <- unname(vapply(re_eps, `[`, numeric(1), 1))
-  hazards <- c(stats::plogis(mu[1] + hsigma[1] * offset), 1)
-  expect_equal(
-    pmf_re[1, ], primarycensored::hazards_to_pmf(hazards),
-    tolerance = 1e-12
-  )
+})
+
+test_that(".np_pmf() matches primarycensored", {
+  pmf <- .np_pmf(np_draws, np_family$np)
+  hazards <- .np_hazards(np_draws, np_family$np)
+  for (d in 1:2) {
+    expect_equal(
+      pmf[d, ], primarycensored::hazards_to_pmf(hazards[d, ]),
+      tolerance = 1e-12
+    )
+  }
 })
 
 test_that("epidist_family() sets default boundaries from the marginal data", {
   family <- epidist_family(prep_marginal_obs, family = nonparametric())
   expect_s3_class(family, "customfamily")
-  expect_identical(family$name, "marginal_discretehazard_rw")
+  expect_identical(family$name, "marginal_nonparametric")
   longest <- max(prep_marginal_obs$delay_upr)
   expect_identical(family$np$boundaries, as.numeric(seq(-1, longest)))
+  expect_identical(family$dpars[1:3], c("mu", "h1b", "h1sd"))
   expect_identical(
-    family$dpars,
-    c("mu", "hsigma", paste0("h", 2:longest, "eps"))
+    family$param,
+    paste0(
+      "epidist_np_params(epidist_np_boundaries(), mu, epidist_np_basis(), ",
+      "[h1b, ", toString(paste0("h1sd * h", 1:8, "z")), "]')"
+    )
   )
-  expect_match(
-    family$param, "epidist_np_params({-1.0, 0.0, 1.0",
-    fixed = TRUE
-  )
-  expect_match(family$param, "mu, hsigma, {h2eps, h3eps", fixed = TRUE)
+})
+
+test_that("epidist_family() keeps at least three free bins by default", {
+  data <- prep_marginal_obs[prep_marginal_obs$delay_upr <= 2, ]
+  family <- epidist_family(data, family = nonparametric())
+  expect_identical(family$np$boundaries, as.numeric(-1:3))
 })
 
 test_that("epidist_family() rejects the nonparametric family elsewhere", {
@@ -108,9 +166,28 @@ test_that("epidist_family() rejects the nonparametric family elsewhere", {
 
 test_that("epidist_family() rejects boundaries short of the observed delays", {
   expect_error(
-    epidist_family(prep_marginal_obs, family = nonparametric(-1:3)),
+    epidist_family(
+      prep_marginal_obs,
+      family = nonparametric(boundaries = -1:3)
+    ),
     "longest observed delay"
   )
+})
+
+test_that("the nonparametric Stan functions hold the bins exactly", {
+  family <- epidist_family(
+    prep_marginal_obs,
+    family = nonparametric(~delay, boundaries = c(-1, 0.5, 2, 30))
+  )
+  code <- .np_stanvars(family)[[1]]$scode
+  expect_match(code, "return {-1.0, 0.5, 2.0, 30.0};", fixed = TRUE)
+  basis <- sprintf("%.17g", family$np$basis)
+  for (value in basis) {
+    expect_match(code, paste0("[", value, "]"), fixed = TRUE)
+  }
+  expect_identical(.np_stan_reals(c(1, 0.1, 1e-20)), c(
+    "1.0", "0.10000000000000001", "9.9999999999999995e-21"
+  ))
 })
 
 test_that("the marginal nonparametric Stan code uses the hazard likelihood", {
@@ -122,27 +199,34 @@ test_that("the marginal nonparametric Stan code uses the hazard likelihood", {
   code <- as.character(code)
   expect_match(code, "primarycensored_lpmf(\n      y | 27,", fixed = TRUE)
   expect_match(code, "array[] real epidist_np_params(", fixed = TRUE)
+  expect_match(code, "matrix epidist_np_basis() {", fixed = TRUE)
   expect_match(
     code,
-    "marginal_discretehazard_rw_lpmf(Y[n] | mu[n], hsigma[n], h2eps[n]",
+    "marginal_nonparametric_lpmf(Y[n] | mu[n], h1b[n], h1sd[n], h1z[n]",
     fixed = TRUE
   )
   skip_on_cran()
   expect_no_error(rstan::stanc(model_code = code))
 })
 
-test_that("the random effect hazard model passes its flag to Stan", {
+test_that("a constant hazard compiles with an empty basis", {
   code <- suppressMessages(epidist(
     prep_marginal_obs,
-    family = nonparametric(boundaries = -1:25, hazard_model = "re"),
+    family = nonparametric(~1, boundaries = -1:25),
     fn = brms::make_stancode
   ))
-  expect_match(as.character(code), "y | 28,", fixed = TRUE)
-  expect_match(as.character(code), "h25eps}, 0)", fixed = TRUE)
+  code <- as.character(code)
+  expect_match(code, "rep_matrix(0, 25, 0)", fixed = TRUE)
+  expect_match(code, "rep_vector(0, 0))", fixed = TRUE)
+  skip_on_cran()
+  expect_no_error(rstan::stanc(model_code = code))
 })
 
 test_that("the nonparametric family sets its default priors", {
-  family <- epidist_family(prep_marginal_obs, nonparametric(-1:25))
+  family <- epidist_family(
+    prep_marginal_obs,
+    nonparametric(~ delay + (1 | bin), boundaries = -1:25)
+  )
   formula <- epidist_formula(prep_marginal_obs, family, formula = mu ~ 1)
   prior <- suppressMessages(
     epidist_prior(prep_marginal_obs, family, formula, prior = NULL)
@@ -152,23 +236,32 @@ test_that("the nonparametric family sets its default priors", {
   expect_identical(
     intercept$prior[!nzchar(intercept$dpar)], "normal(-3.22, 1.5)"
   )
-  expect_identical(
-    intercept$prior[intercept$dpar == "hsigma"], "normal(0, 1)"
-  )
-  eps <- intercept$prior[endsWith(intercept$dpar, "eps")]
-  expect_length(eps, 24)
-  expect_true(all(eps == "std_normal()"))
+  expect_identical(intercept$prior[intercept$dpar == "h1b"], "normal(0, 2)")
+  expect_identical(intercept$prior[intercept$dpar == "h1sd"], "normal(0, 1)")
+  z <- intercept$prior[grepl("^h[0-9]+z$", intercept$dpar)]
+  expect_length(z, 25)
+  expect_true(all(z == "std_normal()"))
 })
 
-np_draws <- data.frame(
-  mu = c(-1, -0.5), hsigma = c(0.5, 0.8),
-  h2eps = c(0.3, -0.2), h3eps = c(-0.5, 0.4), h4eps = c(0.2, 0.1)
-)
+test_that("a hazard coefficient takes a formula for a non-proportional effect", { # nolint: line_length_linter.
+  data <- prep_marginal_obs
+  data$group <- rep_len(c("a", "b"), nrow(data))
+  family <- nonparametric(~delay, boundaries = -1:25)
+  code <- suppressMessages(epidist(
+    data,
+    formula = bf(mu ~ group, h1b ~ group),
+    family = family,
+    fn = brms::make_stancode
+  ))
+  expect_match(as.character(code), "b_h1b", fixed = TRUE)
+})
 
 test_that("add_summaries() gives the moments and quantiles of the bins", {
-  family <- nonparametric(boundaries = -1:4)
-  out <- add_summaries(np_draws, family = family, probs = c(0.1, 0.5, 0.99))
-  pmf <- .np_pmf(np_draws, -1:4, "rw")
+  out <- add_summaries(
+    np_draws,
+    family = np_family, probs = c(0.1, 0.5, 0.99)
+  )
+  pmf <- .np_pmf(np_draws, np_family$np)
   edges <- as.numeric(0:4)
   expect_equal(out$mean, as.vector(pmf %*% edges), tolerance = 1e-12)
   expect_equal(
@@ -184,20 +277,19 @@ test_that("add_summaries() gives the moments and quantiles of the bins", {
 })
 
 test_that("add_summaries() by simulation agrees with the analytic summaries", {
-  family <- nonparametric(boundaries = -1:4)
-  analytic <- add_summaries(np_draws, family = family)
+  analytic <- add_summaries(np_draws, family = np_family)
   withr::local_seed(1)
   sampled <- add_summaries(
     np_draws,
-    family = family, method = "sample", nsim = 20000
+    family = np_family, method = "sample", nsim = 20000
   )
   expect_equal(sampled$mean, analytic$mean, tolerance = 0.02)
   expect_equal(sampled$sd, analytic$sd, tolerance = 0.03)
 })
 
 test_that("the nonparametric density is the histogram of the bins", {
-  summaries <- .np_delay_summaries(nonparametric(-1:4)$np)
-  pmf <- .np_pmf(np_draws, -1:4, "rw")
+  summaries <- .np_delay_summaries(np_family$np)
+  pmf <- .np_pmf(np_draws, np_family$np)
   expect_identical(summaries$density(np_draws, 2.5), pmf[, 4])
   expect_identical(summaries$density(np_draws, 3), pmf[, 4])
   expect_identical(summaries$density(np_draws, 5), c(0, 0))
@@ -230,7 +322,7 @@ np_meta <- suppressMessages(as_epidist_meta_model(
 
 test_that("the meta model takes the nonparametric family", {
   family <- epidist_family(np_meta, family = nonparametric())
-  expect_identical(family$name, "meta_discretehazard_rw")
+  expect_identical(family$name, "meta_nonparametric")
   expect_identical(max(family$np$boundaries), 30)
   code <- suppressMessages(epidist(
     np_meta,
@@ -266,7 +358,7 @@ test_that("the meta model rejects continuous summaries it cannot imply", {
   expect_error(
     epidist_family(
       suppressMessages(as_epidist_meta_model(estimates = left)),
-      family = nonparametric(-1:20)
+      family = nonparametric(boundaries = -1:20)
     ),
     "\"D\""
   )
@@ -278,7 +370,7 @@ test_that("the meta model rejects continuous summaries it cannot imply", {
   expect_error(
     epidist_family(
       suppressMessages(as_epidist_meta_model(estimates = truncated)),
-      family = nonparametric(-1:20)
+      family = nonparametric(boundaries = -1:20)
     ),
     "\"E\""
   )
@@ -314,24 +406,17 @@ test_that("the uniform primary censored density leaves out mass at zero", {
   )
 })
 
-test_that("the meta model has no density for the nonparametric family", {
-  expect_error(.meta_ddist("pdiscretehazard"), "no density")
+test_that("the nonparametric family has no density or quantile function", {
+  expect_error(.ddist("pdiscretehazard"), "no density")
+  expect_error(.qdist("pdiscretehazard"), "no density")
+  expect_identical(.pdist("pdiscretehazard"), primarycensored::pdiscretehazard)
 })
 
 # A prepared predictions object in the form brms passes to the log
 # likelihood, prediction and expectation functions of a custom family, with
-# two draws of the non-parametric parameters for three observations.
-np_prep <- function(boundaries = -1:4, hazard_model = "rw") {
-  n_bins <- length(boundaries) - 1
-  eps <- .np_eps_names(n_bins, hazard_model)
-  draws <- c(
-    list(mu = c(-1, -0.5), hsigma = c(0.5, 0.8)),
-    stats::setNames(
-      lapply(seq_along(eps), function(j) c(0.3, -0.2) * j),
-      eps
-    )
-  )
-  dpars <- lapply(draws, matrix, nrow = 2, ncol = 3)
+# the two draws of np_draws for three observations.
+np_prep <- function() {
+  dpars <- lapply(as.list(np_draws), matrix, nrow = 2, ncol = 3)
   prep <- structure(
     list(
       ndraws = 2, nobs = 3, dpars = dpars,
@@ -342,28 +427,24 @@ np_prep <- function(boundaries = -1:4, hazard_model = "rw") {
     ),
     class = "brmsprep"
   )
-  np <- list(boundaries = as.numeric(boundaries), hazard_model = hazard_model)
-  return(list(prep = prep, draws = draws, np = np))
+  return(list(prep = prep, draws = np_draws, np = np_family$np))
 }
 
 test_that(".np_dist_args() gives the hazards of each draw", {
-  for (hazard_model in c("rw", "re")) {
-    setup <- np_prep(hazard_model = hazard_model)
-    args <- .np_dist_args(setup$prep, 2, setup$np)
-    expect_length(args, 2)
-    hazards <- .np_hazards(setup$draws, hazard_model)
-    for (draw in 1:2) {
-      expect_identical(args[[draw]]$boundaries, setup$np$boundaries)
-      expect_identical(args[[draw]]$hazards, hazards[draw, ])
-    }
+  setup <- np_prep()
+  args <- .np_dist_args(setup$prep, 2, setup$np)
+  expect_length(args, 2)
+  hazards <- .np_hazards(setup$draws, setup$np)
+  for (draw in 1:2) {
+    expect_identical(args[[draw]]$boundaries, setup$np$boundaries)
+    expect_identical(args[[draw]]$hazards, hazards[draw, ])
   }
 })
 
 test_that("the nonparametric log likelihood matches primarycensored", {
   setup <- np_prep()
-  family <- nonparametric(-1:4)
-  log_lik <- epidist_gen_log_lik(family)
-  hazards <- .np_hazards(setup$draws, "rw")
+  log_lik <- epidist_gen_log_lik(np_family)
+  hazards <- .np_hazards(setup$draws, setup$np)
   for (i in 1:3) {
     data <- setup$prep$data
     expected <- vapply(1:2, function(draw) {
@@ -371,7 +452,7 @@ test_that("the nonparametric log likelihood matches primarycensored", {
         data$Y[i], primarycensored::pdiscretehazard,
         pwindow = data$vreal2[i], swindow = data$vreal3[i],
         L = data$vreal5[i], D = data$vreal1[i], log = TRUE,
-        boundaries = family$np$boundaries, hazards = hazards[draw, ]
+        boundaries = setup$np$boundaries, hazards = hazards[draw, ]
       ))
     }, numeric(1))
     expect_equal(log_lik(i, setup$prep), expected, tolerance = 1e-10)
@@ -386,25 +467,24 @@ test_that("nonparametric posterior draws lie on the bin edges", {
   delays <- rdist(1000, 1, setup$prep)
   expect_length(delays, 1000)
   expect_true(all(delays %in% setup$np$boundaries[-1]))
-  mass <- .np_pmf(setup$draws, setup$np$boundaries, "rw")
+  mass <- .np_pmf(setup$draws, setup$np)
   expect_equal(
     mean(delays), mean(mass %*% setup$np$boundaries[-1]),
     tolerance = 0.1
   )
-  predict <- epidist_gen_posterior_predict(nonparametric(-1:4))
+  predict <- epidist_gen_posterior_predict(np_family)
   withr::local_seed(2)
   predicted <- predict(2, setup$prep)
   expect_identical(dim(predicted), c(2L, 1L))
-  # Observation 2 is truncated at a delay of 10, which the bins never reach,
-  # and every delay is a whole number of days after daily censoring
+  # Every delay is a whole number of days after daily censoring
   expect_identical(predicted, round(predicted))
 })
 
 test_that("the nonparametric expected delay is the mean of the bins", {
   setup <- np_prep()
-  epred <- epidist_gen_posterior_epred(nonparametric(-1:4))(setup$prep)
+  epred <- epidist_gen_posterior_epred(np_family)(setup$prep)
   expect_identical(dim(epred), c(2L, 3L))
-  mass <- .np_pmf(setup$draws, setup$np$boundaries, "rw")
+  mass <- .np_pmf(setup$draws, setup$np)
   expected <- as.vector(mass %*% setup$np$boundaries[-1])
   # The parameters are the same for every observation
   for (i in 1:3) {
