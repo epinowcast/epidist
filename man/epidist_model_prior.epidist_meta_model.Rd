@@ -67,6 +67,7 @@ set their priors yourself.
 Other prior:
 \code{\link[=epidist_family_prior]{epidist_family_prior()}},
 \code{\link[=epidist_family_prior.default]{epidist_family_prior.default()}},
+\code{\link[=epidist_family_prior.discretehazard_rw]{epidist_family_prior.discretehazard_rw()}},
 \code{\link[=epidist_family_prior.lognormal]{epidist_family_prior.lognormal()}},
 \code{\link[=epidist_model_prior]{epidist_model_prior()}},
 \code{\link[=epidist_model_prior.default]{epidist_model_prior.default()}},

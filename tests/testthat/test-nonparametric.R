@@ -58,7 +58,10 @@ test_that(".np_pmf() matches primarycensored for each hazard model", {
   for (d in 1:2) {
     offset <- c(0, cumsum(unname(vapply(eps, `[`, numeric(1), d))))
     hazards <- c(stats::plogis(mu[d] + hsigma[d] * offset), 1)
-    expect_equal(pmf[d, ], primarycensored::hazards_to_pmf(hazards))
+    expect_equal(
+      pmf[d, ], primarycensored::hazards_to_pmf(hazards),
+      tolerance = 1e-12
+    )
   }
   re_eps <- c(list(h1eps = c(0.1, 0.2)), eps)
   pmf_re <- .np_pmf(
@@ -66,7 +69,10 @@ test_that(".np_pmf() matches primarycensored for each hazard model", {
   )
   offset <- unname(vapply(re_eps, `[`, numeric(1), 1))
   hazards <- c(stats::plogis(mu[1] + hsigma[1] * offset), 1)
-  expect_equal(pmf_re[1, ], primarycensored::hazards_to_pmf(hazards))
+  expect_equal(
+    pmf_re[1, ], primarycensored::hazards_to_pmf(hazards),
+    tolerance = 1e-12
+  )
 })
 
 test_that("epidist_family() sets default boundaries from the marginal data", {
@@ -79,8 +85,11 @@ test_that("epidist_family() sets default boundaries from the marginal data", {
     family$dpars,
     c("mu", "hsigma", paste0("h", 2:longest, "eps"))
   )
-  expect_match(family$param, "epidist_np_params\\(\\{-1.0, 0.0, 1.0")
-  expect_match(family$param, "mu, hsigma, \\{h2eps, h3eps")
+  expect_match(
+    family$param, "epidist_np_params({-1.0, 0.0, 1.0",
+    fixed = TRUE
+  )
+  expect_match(family$param, "mu, hsigma, {h2eps, h3eps", fixed = TRUE)
 })
 
 test_that("epidist_family() rejects the nonparametric family elsewhere", {
@@ -139,11 +148,11 @@ test_that("the nonparametric family sets its default priors", {
     epidist_prior(prep_marginal_obs, family, formula, prior = NULL)
   )
   intercept <- prior[prior$class == "Intercept", ]
-  expect_identical(intercept$prior[intercept$dpar == ""], "normal(0, 1.5)")
+  expect_identical(intercept$prior[!nzchar(intercept$dpar)], "normal(0, 1.5)")
   expect_identical(
     intercept$prior[intercept$dpar == "hsigma"], "normal(0, 1)"
   )
-  eps <- intercept$prior[grepl("eps$", intercept$dpar)]
+  eps <- intercept$prior[endsWith(intercept$dpar, "eps")]
   expect_length(eps, 24)
   expect_true(all(eps == "std_normal()"))
 })
@@ -158,9 +167,10 @@ test_that("add_summaries() gives the moments and quantiles of the bins", {
   out <- add_summaries(np_draws, family = family, probs = c(0.1, 0.5, 0.99))
   pmf <- .np_pmf(np_draws, -1:4, "rw")
   edges <- as.numeric(0:4)
-  expect_equal(out$mean, as.vector(pmf %*% edges))
+  expect_equal(out$mean, as.vector(pmf %*% edges), tolerance = 1e-12)
   expect_equal(
-    out$sd, sqrt(as.vector(pmf %*% edges^2) - out$mean^2)
+    out$sd, sqrt(as.vector(pmf %*% edges^2) - out$mean^2),
+    tolerance = 1e-10
   )
   for (row in 1:2) {
     cdf <- cumsum(pmf[row, ])
@@ -185,8 +195,8 @@ test_that("add_summaries() by simulation agrees with the analytic summaries", {
 test_that("the nonparametric density is the histogram of the bins", {
   summaries <- .np_delay_summaries(nonparametric(-1:4)$np)
   pmf <- .np_pmf(np_draws, -1:4, "rw")
-  expect_equal(summaries$density(np_draws, 2.5), pmf[, 4])
-  expect_equal(summaries$density(np_draws, 3), pmf[, 4])
+  expect_identical(summaries$density(np_draws, 2.5), pmf[, 4])
+  expect_identical(summaries$density(np_draws, 3), pmf[, 4])
   expect_identical(summaries$density(np_draws, 5), c(0, 0))
 })
 
@@ -278,8 +288,8 @@ test_that("the meta model moments of the bins match primarycensored", {
   edges <- c(0, 1, 3, 6)
   delay_mean <- sum(mass * edges)
   variance <- sum(mass * (edges - delay_mean)^2)
-  expect_equal(unname(moments[1]), delay_mean)
-  expect_equal(unname(moments[2]), sqrt(variance))
+  expect_equal(unname(moments[1]), delay_mean, tolerance = 1e-12)
+  expect_equal(unname(moments[2]), sqrt(variance), tolerance = 1e-12)
   set.seed(2)
   draws <- primarycensored::rdiscretehazard(
     1e5,
@@ -296,6 +306,7 @@ test_that("the uniform primary censored density leaves out mass at zero", {
   )
   expect_equal(
     .meta_uniform_pcens_density(1.5, "pdiscretehazard", args, 1),
-    primarycensored::hazards_to_pmf(args$hazards)[2]
+    primarycensored::hazards_to_pmf(args$hazards)[2],
+    tolerance = 1e-12
   )
 })

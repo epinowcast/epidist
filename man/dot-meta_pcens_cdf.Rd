@@ -21,6 +21,11 @@
 A numeric vector of cumulative probabilities.
 }
 \description{
+\code{check = FALSE} skips the validation of \code{pdist} and \code{dprimary}, which are
+taken from \code{stats} and \code{primarycensored} and so need none, and which would
+otherwise be repeated on every call.
+}
+\details{
 Primary distributions without an analytical solution are integrated
 numerically, which can return a non finite or negative cumulative
 probability deep in the lower tail. Those cases carry negligible

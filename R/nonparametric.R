@@ -34,9 +34,9 @@
 #'   strength between neighbouring bins.
 #'
 #' The random walk is the default because `primarycensored` recommends it as
-#' the better starting point for most delays. See the `primarycensored`
-#' article on fitting non-parametric delays at
-#' <https://primarycensored.epinowcast.org/articles/fitting-nonparametric-delays.html>.
+#' the better starting point for most delays, in its article on fitting
+#' non-parametric delays, `fitting-nonparametric-delays`, at
+#' <https://primarycensored.epinowcast.org/articles/>.
 #'
 #' The default priors are `normal(0, 1.5)` on the intercept of `mu`, which is
 #' close to uniform on the hazard scale, `normal(0, 1)` on the intercept of
@@ -62,18 +62,18 @@
 #' nonparametric(hazard_model = "re")
 nonparametric <- function(boundaries = NULL, hazard_model = c("rw", "re")) {
   hazard_model <- match.arg(hazard_model)
-  family <- list(
+  out <- list(
     family = paste0("discretehazard_", hazard_model),
     link = "identity",
     dpars = "mu",
     ybounds = c(-Inf, Inf),
     np = list(boundaries = NULL, hazard_model = hazard_model)
   )
-  class(family) <- c("brmsfamily", "family")
+  class(out) <- c("brmsfamily", "family")
   if (!is.null(boundaries)) {
-    family <- .np_set_boundaries(family, boundaries)
+    out <- .np_set_boundaries(out, boundaries)
   }
-  return(family)
+  return(out)
 }
 
 #' Stan parameterisation of the non-parametric family
@@ -337,7 +337,7 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
            these studies target has no density. Only a mean or standard
            deviation of the whole distribution, from a study that adjusted
            for right truncation and counted every delay, is supported.",
-      i = "Use a parametric family, or drop these summaries."
+      "*" = "Use a parametric family, or drop these summaries."
     ))
   }
   return(invisible(NULL))
@@ -486,13 +486,13 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
 #' @keywords internal
 .np_rdist <- function(np) {
   return(function(n, i, prep, ...) {
-    args <- .np_dist_args(prep, i, np)
-    draws <- rep_len(seq_along(args), n)
+    dist_args <- .np_dist_args(prep, i, np)
+    draws <- rep_len(seq_along(dist_args), n)
     return(vapply(draws, function(draw) {
       return(primarycensored::rdiscretehazard(
         1,
-        boundaries = args[[draw]]$boundaries,
-        hazards = args[[draw]]$hazards
+        boundaries = dist_args[[draw]]$boundaries,
+        hazards = dist_args[[draw]]$hazards
       ))
     }, numeric(1)))
   })
@@ -511,8 +511,8 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
   return(function(prep) {
     edges <- np$boundaries[-1]
     means <- vapply(seq_len(prep$nobs), function(i) {
-      args <- .np_dist_args(prep, i, np)
-      return(vapply(args, function(arg) {
+      dist_args <- .np_dist_args(prep, i, np)
+      return(vapply(dist_args, function(arg) {
         return(sum(edges * primarycensored::hazards_to_pmf(arg$hazards)))
       }, numeric(1)))
     }, numeric(prep$ndraws))

@@ -570,15 +570,15 @@ np_lockstep_estimates <- function() {
   bad <- lockstep_estimates$cens_adjusted == 1 &
     !(lockstep_estimates$type %in% c("mean", "sd") &
       lockstep_estimates$trunc_adjusted & lockstep_estimates$delay_min == 0)
-  drop <- unique(lockstep_estimates$study[bad])
+  dropped <- unique(lockstep_estimates$study[bad])
   kept <- lapply(lockstep_fixtures, function(fixture) {
     if (inherits(fixture, "epidist_estimates_data")) {
-      if (any(fixture$study %in% drop)) {
+      if (any(fixture$study %in% dropped)) {
         return(NULL)
       }
       return(fixture)
     }
-    return(fixture[!fixture$study %in% drop, , drop = FALSE])
+    return(fixture[!fixture$study %in% dropped, , drop = FALSE])
   })
   kept <- kept[!vapply(kept, is.null, logical(1))]
   kept$np_moments <- data.frame(
@@ -741,12 +741,11 @@ test_that("the R and Stan implied quantiles agree for a nonparametric delay", { 
     # the refined quantile inverts it exactly.
     if (designs$cens[i] %in% c(2, 4) && designs$growth[i] == 0 &&
       designs$design[i] == 0) {
-      implied <- vapply(r_quantile, function(q) {
-        return(.meta_implied_prob(
-          q, dist, args, slots$lower, slots$cutoff, 1, 1,
-          slots$trunc_adjusted, slots$cens_adjusted, 0, 0
-        ))
-      }, numeric(1))
+      implied <- vapply(
+        r_quantile, .meta_implied_prob, numeric(1), dist, args,
+        slots$lower, slots$cutoff, 1, 1, slots$trunc_adjusted,
+        slots$cens_adjusted, 0, 0
+      )
       expect_equal(implied, probs, tolerance = 1e-8)
     }
   }

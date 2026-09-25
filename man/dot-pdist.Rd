@@ -11,7 +11,8 @@
 \code{"plnorm"}.}
 }
 \value{
-The corresponding function from \code{stats}.
+The corresponding function from \code{stats}, or from
+\code{primarycensored} for the non-parametric hazard distribution.
 }
 \description{
 The distribution function used for a \code{primarycensored} distribution name

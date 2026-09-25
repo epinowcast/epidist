@@ -141,10 +141,10 @@ meta_r_log_lik <- function(program, mu, sigma, pgrowth = 0,
       )
       draw <- lapply(dpars, `[`, d)
       if (is.null(np)) {
-        dist <- "plnorm"
+        dist_name <- "plnorm"
         dist_args <- list(meanlog = draw$mu, sdlog = draw$sigma)
       } else {
-        dist <- "pdiscretehazard"
+        dist_name <- "pdiscretehazard"
         dist_args <- list(
           boundaries = np$boundaries,
           hazards = as.vector(.np_hazards(draw, np$hazard_model))
@@ -154,7 +154,7 @@ meta_r_log_lik <- function(program, mu, sigma, pgrowth = 0,
         seq_len(n),
         function(i) {
           return(.meta_row_log_lik(
-            .meta_row_slots(i, prep), dist, dist_args
+            .meta_row_slots(i, prep), dist_name, dist_args
           ))
         },
         numeric(1)

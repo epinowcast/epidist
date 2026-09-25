@@ -2,6 +2,13 @@
 
 ## Models
 
+- Added `nonparametric()`, a delay distribution family with no parametric form, for the marginal and meta models.
+The delay sits on a grid of bins, with its probability at the right edge of each bin, and is written as the discrete time hazard of each bin, using the non-parametric distributions of `primarycensored`.
+The logit hazards follow a random walk by default, or independent random effects with `hazard_model = "re"`.
+The `mu` formula shifts the logit hazard of every bin, so `mu ~ 1 + age_group` fits a separate delay per age group under a proportional odds model for the hazard.
+In the meta model a study that fully adjusted for censoring can only report the mean and standard deviation of the whole delay, because the family has no density.
+See `vignette("nonparametric")` and #557.
+
 - Added an exponentially growing primary event distribution to the latent model.
 `as_epidist_latent_model(primary = "expgrowth")` makes the growth rate a distributional parameter, so it takes a `brms` formula and prior and can vary by covariate.
 See #489 and #618.

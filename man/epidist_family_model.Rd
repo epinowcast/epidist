@@ -25,6 +25,8 @@ Other family:
 \code{\link[=epidist_family]{epidist_family()}},
 \code{\link[=epidist_family_model.default]{epidist_family_model.default()}},
 \code{\link[=epidist_family_param]{epidist_family_param()}},
-\code{\link[=epidist_family_param.default]{epidist_family_param.default()}}
+\code{\link[=epidist_family_param.default]{epidist_family_param.default()}},
+\code{\link[=epidist_family_param.discretehazard_rw]{epidist_family_param.discretehazard_rw()}},
+\code{\link[=nonparametric]{nonparametric()}}
 }
 \concept{family}
