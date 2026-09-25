@@ -596,16 +596,28 @@ np_lockstep_estimates <- function() {
 # Irregular bins, so that nothing relies on unit width bins.
 np_lockstep_boundaries <- c(-1, 0:15, 18, 22, 28, 40)
 
-# Three parameter points for the random walk hazard family on those bins.
-np_lockstep_dpars <- function() {
-  withr::local_seed(11)
-  n_eps <- length(np_lockstep_boundaries) - 3
-  eps <- lapply(seq_len(n_eps), function(i) stats::rnorm(3))
-  names(eps) <- paste0("h", seq_len(n_eps) + 1, "eps")
-  return(c(
-    list(mu = c(-1.8, -2.2, -1.5), hsigma = c(0.3, 0.5, 0.2)),
-    eps
+# A hazard formula with a spline and a random intercept per bin, so that
+# unpenalised and penalised columns and two standard deviations are all used.
+np_lockstep_family <- function() {
+  return(nonparametric(
+    ~ s(delay, k = 6) + (1 | bin),
+    boundaries = np_lockstep_boundaries
   ))
+}
+
+# Three parameter points for the hazard coefficients of that family, in the
+# order of its distributional parameters.
+np_lockstep_dpars <- function(np) {
+  withr::local_seed(11)
+  dpars <- .np_dpars(np)
+  draws <- lapply(dpars, function(dpar) {
+    if (dpar %in% np$coefficients$sd) {
+      return(exp(stats::rnorm(3, -0.5, 0.3)))
+    }
+    return(stats::rnorm(3))
+  })
+  names(draws) <- dpars
+  return(c(list(mu = c(-1.8, -2.2, -1.5)), draws))
 }
 
 test_that("the R and Stan meta model log likelihoods agree for a nonparametric delay", { # nolint: line_length_linter.
@@ -614,10 +626,7 @@ test_that("the R and Stan meta model log likelihoods agree for a nonparametric d
   meta <- suppressMessages(
     as_epidist_meta_model(estimates = np_lockstep_estimates())
   )
-  program <- meta_log_lik_program(
-    meta,
-    family = nonparametric(np_lockstep_boundaries)
-  )
+  program <- meta_log_lik_program(meta, family = np_lockstep_family())
   standata <- program$standata
   # Every observation type and censoring adjustment is exercised, and both
   # truncation designs and a left truncated study.
@@ -625,9 +634,10 @@ test_that("the R and Stan meta model log likelihoods agree for a nonparametric d
   expect_setequal(unique(standata$vint4), 0:4)
   expect_setequal(unique(standata$vint5), 0:1)
   expect_true(any(standata$vreal5 > 0))
-  dpars <- np_lockstep_dpars()
-  stan_log_lik <- meta_stan_log_lik(program, dpars = dpars)
-  r_log_lik <- meta_r_log_lik(program, dpars = dpars)
+  dpars <- np_lockstep_dpars(program$np)
+  expect_named(dpars, program$dpars)
+  stan_log_lik <- do.call(meta_stan_log_lik, c(list(program), dpars))
+  r_log_lik <- do.call(meta_r_log_lik, c(list(program), dpars))
   expect_true(all(is.finite(stan_log_lik)))
   expect_true(all(is.finite(r_log_lik)))
   growth <- standata$vreal8 != 0
@@ -658,19 +668,16 @@ test_that("the R and Stan implied quantiles agree for a nonparametric delay", { 
     trunc_adjusted = TRUE, cens_adjusted = 1, stringsAsFactors = FALSE
   )))
   meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
-  family <- epidist_family(
-    meta,
-    family = nonparametric(np_lockstep_boundaries)
-  )
+  family <- epidist_family(meta, family = np_lockstep_family())
   formula <- epidist_formula(meta, family, formula = bf(mu ~ 1))
   stanvars <- epidist_stancode(meta, family = family, formula = formula)
-  draw <- lapply(np_lockstep_dpars(), `[`, 1)
+  draw <- lapply(np_lockstep_dpars(family$np), `[`, 1)
   args <- list(
     boundaries = np_lockstep_boundaries,
-    hazards = as.vector(.np_hazards(draw, "rw"))
+    hazards = as.vector(.np_hazards(draw, family$np))
   )
   params <- c(args$boundaries, args$hazards)
-  fn <- function(x) paste0("meta_discretehazard_rw_", x)
+  fn <- function(x) paste0("meta_nonparametric_", x)
   mod <- rstan::stan_model(model_code = paste0(
     "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode,
     "\n", .np_stanvars(family)[[1]]$scode, "\n}\n",
