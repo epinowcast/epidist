@@ -832,11 +832,11 @@ test_that(".meta_row_log_lik leaves the random number stream alone", {
     report_se = 0, quantile_p = 0, growth_rate = 0.1, trunc_design = 0L,
     group_value = 5
   )
-  set.seed(101)
+  withr::local_seed(101)
   expected <- stats::runif(1)
   for (cens_adjusted in c(0L, 2L, 4L)) {
     slots$cens_adjusted <- cens_adjusted
-    set.seed(101)
+    withr::local_seed(101)
     expect_true(is.finite(.meta_row_log_lik(slots, "plnorm", args)))
     expect_identical(stats::runif(1), expected)
   }
