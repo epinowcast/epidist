@@ -113,8 +113,9 @@ That holds only where the metadata describing what each study did is
 correct. It is usually the analyst's judgement rather than something the
 study reported, so state it explicitly and vary it in a sensitivity
 analysis.
-<code><a href="../articles/model.html">vignette("model")</a></code> gives the forward model and the sampling likelihoods,
-and <code><a href="../articles/meta.html">vignette("meta")</a></code> works through a simulated and a real example.</p>
+<code><a href="../articles/model.html">vignette("model")</a></code> gives the forward model, the sampling likelihoods
+and the accuracy of the approximations, and <code><a href="../articles/meta.html">vignette("meta")</a></code> works
+through a simulated and a real example.</p>
 <p>At least one of <code>data</code> and <code>estimates</code> must be supplied. Study level
 heterogeneity is specified through the <code>brms</code> formula in <code><a href="epidist.html">epidist()</a></code>, for
 example <code>mu ~ 1 + (1 | study)</code>, rather than through this function.
@@ -133,53 +134,15 @@ observation is therefore a group rather than a single reported value, so
 <code>log_lik()</code> and <code><a href="https://mc-stan.org/loo/reference/loo.html" class="external-link">loo::loo()</a></code> report per group, and <code>loo</code> only compares
 fits to the same studies and the same mix of individual and summary rows.
 See <code><a href="../articles/faq.html">vignette("faq")</a></code>.</p>
-<p>Three consequences of the sampling likelihoods change what you should do.</p><ul><li><p>The standard errors are plug in quantities that depend on the parameters,
-so studies no single distribution can explain may be accommodated by
-inflating the implied standard deviation rather than by moving the
-location, and sampling can become multimodal. Allow for genuine
-differences with a term such as <code>mu ~ 1 + (1 | study)</code> rather than relying
-on the sampling error alone.</p></li>
-<li><p>Quantiles read off a fitted distribution rather than the empirical data
-have smaller sampling error than assumed here. Supply a reported <code>se</code> in
-<code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> for those rows, which also takes them out of
-the joint quantile likelihood.</p></li>
-<li><p>The normal approximations degrade at small study sample sizes. A study
-that reported integer date differences has its mean and standard
-deviation fitted separately from its quantiles, as if they came from
-different delays, which counts such a study about twice for the location
-where it reports both kinds, so keep its mean and standard deviation
-and drop its quantiles. A study with a continuous estimand has every kind
-fitted jointly. A study that published draws of its parameters avoids
-both, because <code><a href="as_epidist_multivariate.html">as_epidist_multivariate()</a></code> turns them into a covariance
-over the summaries that is fitted jointly.</p></li>
-</ul><p>Two approximations are worth knowing about before fitting quantiles.</p><ul><li><p>A study that took integer date differences reports quantiles of a discrete
-distribution. The model interpolates its grid distribution function
-through the mid points of the cells, but the reported value is itself
-rounded to that grid, and what is left does not shrink with the study
-sample size. It stays under 4% on the mean and 9% on the standard
-deviation once the reported quantiles sit twenty five or more cells above
-the smallest delay the study counted, and reaches tens of percent on both
-when they sit within ten. Refitting the median and
-interquartile range of a lognormal delay of mean 5.9 days, on daily
-windows with an observation time of 12 days, recovers a delay mean 27%
-high and a standard deviation 69% high. The same study's mean and
-standard deviation recover the truth, so prefer those where a study
-reports them, and check that <code>swindow</code> is the resolution it worked at.
-<code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> warns for studies in this range.</p></li>
-<li><p>The accrual weight applied to a study that stopped collecting at a
-calendar date is exact on the grid, but averages over the primary window
-for a study that adjusted the secondary interval only. With a weekly
-primary window, a collection window of 28 days and a delay of mean 4.6
-days this puts the implied mean 0.8% high at a growth rate of 0.05 and
-2.6% high at 0.2. <code><a href="../articles/model.html">vignette("model")</a></code> gives the measurements.</p></li>
-</ul><p>Two settings trade accuracy against speed: <code>max_delay</code> in
-<code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code>, which sets the grid a study that adjusted for
-right truncation is summarised on and needs raising for a long tailed delay,
-and <code>options(epidist.meta_n_quad = )</code>, the smallest number of quadrature
-intervals used where a study is summarised by quadrature instead. Each
-study is given as many intervals as it needs to resolve the spread it
-reported, up to a cap of 2000 that the option lifts when set above it, and
-the number is held in the <code>n_quad</code> column of the model data.</p>
+<p>The sampling standard errors are plug in quantities that depend on the
+parameters, so allow for genuine differences between studies with a term
+such as <code>mu ~ 1 + (1 | study)</code> rather than relying on them alone. Supply a
+reported <code>se</code> in <code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> for quantiles read off a
+fitted distribution rather than the empirical data. Where a study reported
+integer date differences, keep its mean and standard deviation and drop its
+quantiles. <code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> warns for the studies the
+approximations serve least well, and documents the two settings, <code>max_delay</code>
+and <code>options(epidist.meta_n_quad = )</code>, that trade accuracy against speed.</p>
     </div>
     <div class="section level2">
     <h2 id="advanced-an-estimated-growth-rate">Advanced: an estimated growth rate<a class="anchor" aria-label="anchor" href="#advanced-an-estimated-growth-rate"></a></h2>
@@ -198,7 +161,9 @@ details.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Other meta_model:
+    <div class="dont-index"><p><code><a href="as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> for preparing the summary estimates,
+and for the checks and the settings the approximations here depend on.</p>
+<p>Other meta_model:
 <code><a href="as_epidist_meta_model.NULL.html">as_epidist_meta_model.NULL()</a></code>,
 <code><a href="as_epidist_meta_model.epidist_aggregate_data.html">as_epidist_meta_model.epidist_aggregate_data()</a></code>,
 <code><a href="as_epidist_meta_model.epidist_estimates_data.html">as_epidist_meta_model.epidist_estimates_data()</a></code>,

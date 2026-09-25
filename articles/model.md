@@ -605,11 +605,7 @@ quantile of day resolution data otherwise lands on a jump. Reported
 quantiles without a standard error use Equation
 [(5.7)](#eq:meta-quantile-crossing) or [(5.9)](#eq:meta-quantile-box) on
 \\G_0\\ instead. The reported value is itself rounded to the grid, so a
-bias remains that does not shrink with \\n\\. It stays under 4% on the
-mean and 9% on the standard deviation once the reported quantiles sit
-twenty five or more cells above the smallest delay counted, and reaches
-tens of percent on both within ten, so a coarsely resolved delay is
-better fitted through its mean and standard deviation where reported.
+bias remains that does not shrink with \\n\\.
 
 Code 1, full adjustment, reported the moments of \\f(\cdot \\ ;
 \theta)\\ itself, right truncated at \\D\\, \\ \mathbb{E}\[\tau^k \mid
@@ -703,9 +699,8 @@ low for weekly primary and secondary windows with \\A = 30\\ at \\r =
 
 One residual remains. Equation [(5.16)](#eq:meta-uniform-moments) keeps
 the smooth weight, because the follow up available to a primary event is
-only known to within its window, and at \\w_p = 7\\ its mean is 2.6%
-high at \\r = 0.2\\. The residual grows with \\r\\ and as \\w_p\\ grows
-towards \\A\\.
+only known to within its window. The residual grows with \\r\\ and as
+\\w_p\\ grows towards \\A\\.
 
 #### 5.3.3 An estimated growth rate
 

@@ -787,6 +787,18 @@
   0.01 to 0.001 for the same reason. Closes
   [\#733](https://github.com/epinowcast/epidist/issues/733).
 
+- Split `R/meta_summaries.R` by concern into `R/meta_settings.R` (the
+  quadrature and cache options), `R/meta_estimand.R` (the distribution
+  function, censoring design and accrual weight), `R/meta_moments.R`,
+  `R/meta_probability.R`, `R/meta_quantiles.R`, `R/meta_likelihood.R`
+  (the normal approximations), `R/meta_grid_likelihood.R` (the exact
+  likelihoods for quantiles on a discrete grid) and `R/meta_gen.R`
+  ([`epidist_gen_meta_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_meta_log_lik.md),
+  [`epidist_gen_meta_predict()`](https://epidist.epinowcast.org/reference/epidist_gen_meta_predict.md)
+  and the row level functions they call). No function was renamed or
+  changed. Closes
+  [\#709](https://github.com/epinowcast/epidist/issues/709).
+
 - The study labels of the test lockstep fixtures are now namespaced by
   the fixture that owns them and checked before the fixtures are bound,
   so a branch that adds a fixture reusing a label fails loudly rather
@@ -874,6 +886,14 @@
   and plot posterior draws with the package
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method, in
   place of hand rolled equivalents.
+- Shortened the
+  [`as_epidist_meta_model()`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.md)
+  help page, moving the accuracy measurements and the fitting advice
+  into a “Fitting in practice” section of the model guide vignette and
+  pointing at
+  [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
+  for the checks and settings it documents. See
+  [\#709](https://github.com/epinowcast/epidist/issues/709).
 
 ### CI
 

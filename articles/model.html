@@ -546,8 +546,7 @@ This is the doubly interval censored, right truncated probability mass function 
 Summing over the grid gives the moments, and its cumulative sum gives <span class="math inline">\(G_0\)</span>.
 For quantile rows <span class="math inline">\(G\)</span> is continuity corrected by interpolating <span class="math inline">\(G_0\)</span> linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise lands on a jump.
 Reported quantiles without a standard error use Equation <a href="#eq:meta-quantile-crossing">(5.7)</a> or <a href="#eq:meta-quantile-box">(5.9)</a> on <span class="math inline">\(G_0\)</span> instead.
-The reported value is itself rounded to the grid, so a bias remains that does not shrink with <span class="math inline">\(n\)</span>.
-It stays under 4% on the mean and 9% on the standard deviation once the reported quantiles sit twenty five or more cells above the smallest delay counted, and reaches tens of percent on both within ten, so a coarsely resolved delay is better fitted through its mean and standard deviation where reported.</p>
+The reported value is itself rounded to the grid, so a bias remains that does not shrink with <span class="math inline">\(n\)</span>.</p>
 <p>Code 1, full adjustment, reported the moments of <span class="math inline">\(f(\cdot \, ; \theta)\)</span> itself, right truncated at <span class="math inline">\(D\)</span>,
 <span class="math display" id="eq:meta-trunc-moments">\[
 \mathbb{E}[\tau^k \mid \tau \le D] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4, \tag{5.15}
@@ -606,7 +605,7 @@ The grid weight is then exact for any <span class="math inline">\(A\)</span>, <s
 Weighting each cell at its lower edge instead is exact only when <span class="math inline">\(w_p = w_s\)</span> and <span class="math inline">\(A\)</span> is a multiple of both, and for a daily primary and weekly secondary window puts the mean 36% low at <span class="math inline">\(r = 0.2\)</span> where the piecewise weight is within 0.2%.
 Treating the partial window as complete put the mean 27% low for weekly primary and secondary windows with <span class="math inline">\(A = 30\)</span> at <span class="math inline">\(r = 0.2\)</span>.</p>
 <p>One residual remains.
-Equation <a href="#eq:meta-uniform-moments">(5.16)</a> keeps the smooth weight, because the follow up available to a primary event is only known to within its window, and at <span class="math inline">\(w_p = 7\)</span> its mean is 2.6% high at <span class="math inline">\(r = 0.2\)</span>.
+Equation <a href="#eq:meta-uniform-moments">(5.16)</a> keeps the smooth weight, because the follow up available to a primary event is only known to within its window.
 The residual grows with <span class="math inline">\(r\)</span> and as <span class="math inline">\(w_p\)</span> grows towards <span class="math inline">\(A\)</span>.</p>
 </div>
 <div class="section level4" number="5.3.3">
