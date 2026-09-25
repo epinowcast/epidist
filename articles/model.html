@@ -371,7 +371,9 @@ For a lognormal with kurtosis 9 that is <span class="math inline">\(n\)</span> b
 <h4 id="a-reported-quantile">
 <span class="header-section-number">5.1.3</span> A reported quantile<a class="anchor" aria-label="anchor" href="#a-reported-quantile"></a>
 </h4>
-<p>A reported quantile at probability <span class="math inline">\(p\)</span> is fitted on the probability scale, which avoids inverting <span class="math inline">\(G\)</span>,
+<p>A reported quantile at probability <span class="math inline">\(p\)</span> is fitted through the number of delays at or below it, which is binomial on <span class="math inline">\(G(y)\)</span> and so avoids inverting <span class="math inline">\(G\)</span>.
+This is Equation <a href="#eq:meta-quantile-set">(5.6)</a> below, or Equations <a href="#eq:meta-quantile-crossing">(5.7)</a> and <a href="#eq:meta-quantile-box">(5.9)</a> for integer day delays.
+Posterior predictions for a quantile row are drawn from its normal approximation,
 <span class="math display" id="eq:meta-quantile-lik">\[
 p \sim \text{Normal}\left(G(y), \; \text{se}_p\right), \tag{5.3}
 \]</span>
@@ -408,7 +410,7 @@ Moments taken from a grid or quadrature can sit just outside, so the correlation
 (c_1, \dots, c_{k+1}) \sim \text{Multinomial}\left(n, \; \left(G(y_1), \; G(y_2) - G(y_1), \; \dots, \; 1 - G(y_k)\right)\right), \tag{5.6}
 \]</span>
 with <span class="math inline">\(c_j = \text{round}(n p_j) - \text{round}(n p_{j-1})\)</span> and <span class="math inline">\(c_{k+1} = n - \text{round}(n p_k)\)</span>.
-A single quantile reduces this to the binomial of which Equation <a href="#eq:meta-quantile-lik">(5.3)</a> is the normal approximation, so quantile rows of a continuous estimand use Equation <a href="#eq:meta-quantile-set">(5.6)</a> unless a standard error is supplied.
+A single quantile reduces this to the binomial of which Equation <a href="#eq:meta-quantile-lik">(5.3)</a> is the normal approximation.
 Two quantiles reported at the same value are merged into one cell.
 A cell whose probability underflows to zero while the study saw delays in it is floored at <span class="math inline">\(10^{-300}\)</span>.</p>
 <p>A single quantile of integer day delays is a discrete statistic.
@@ -571,7 +573,7 @@ with <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\sigm
 Reported quantiles use Equations <a href="#eq:meta-quantile-crossing">(5.7)</a> and <a href="#eq:meta-quantile-box">(5.9)</a>, as for code 0.
 Code 4, midpoint imputation with a uniform interval, placed the primary event at the midpoint of its window and integrated the secondary interval, so its estimand is that of code 2 moved down by <span class="math inline">\(w_p / 2\)</span>.
 A shift changes the mean alone and moves the distribution function and quantiles with it.
-Code 4 therefore has the mean of code 1 and the variance of code 2 before truncation, because midpointing removes the mean of <span class="math inline">\(U\)</span> but not its spread.
+Under a uniform primary event code 4 therefore has the mean of code 1 and the variance of code 2 before truncation, because midpointing removes the mean of <span class="math inline">\(U\)</span> but not its spread.
 The mirror reading, a midpointed secondary event and an integrated primary interval, has variance <span class="math inline">\(\sigma^2 + w_s^2 / 12\)</span> and is not used, because the literature midpoints the wide exposure window of the primary event.
 A study that midpointed the secondary interval and left the primary alone is code 3.
 Each code integrates the interval it did not midpoint rather than drawing a random position in it, which would add <span class="math inline">\(w^2 / 6\)</span> to the variance.</p>
@@ -629,6 +631,7 @@ Every other coefficient of <code>pgrowth</code> gets <span class="math inline">\
 <p>A study that only counted delays of at least <span class="math inline">\(L\)</span> reported summaries conditioned on <span class="math inline">\(\tau &gt; L\)</span>, the left truncation of survival analysis <span class="citation">(<a href="#ref-klein2003">Klein and Moeschberger 2003</a>)</span>.
 Each expression above reduces to its earlier form when <span class="math inline">\(L = 0\)</span>.
 On the grid of Equation <a href="#eq:meta-grid">(5.14)</a> the cells below <span class="math inline">\(L\)</span> are dropped and the rest renormalised by their mass, which is <span class="math inline">\(F_{pc}(D) - F_{pc}(L)\)</span> when <span class="math inline">\(L\)</span> falls on a grid boundary.
+For codes 3 and 4, <span class="math inline">\(L\)</span> is on the reported scale, so the estimand they move is truncated at <span class="math inline">\(L\)</span> moved back by the same shift, <span class="math inline">\(L - w_s / 2\)</span> or <span class="math inline">\(L + w_p / 2\)</span>.
 The truncated moments of Equation <a href="#eq:meta-trunc-moments">(5.15)</a> pick up a boundary term,
 <span class="math display" id="eq:meta-left-moments">\[
 \mathbb{E}[\tau^k \mid L &lt; \tau \le D] =

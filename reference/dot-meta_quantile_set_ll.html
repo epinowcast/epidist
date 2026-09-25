@@ -163,7 +163,12 @@ stops moving. A single such quantile is fitted by
 distribution function crossed its probability, and several by
 <code><a href="dot-meta_grid_box_ll.html">.meta_grid_box_ll()</a></code> as the joint probability of every such crossing,
 with <code>cum_count</code> and <code>lower</code> read as the box each crossing puts on the
-counts below and at the reported day.</p>
+counts below and at the reported day.
+Both start the grid at <code>delay_min</code> moved back by <code><a href="dot-meta_cens_lower.html">.meta_cens_lower()</a></code>, as
+the mean and standard deviation of the same study do. For a midpoint
+imputed grid (<code>cens_adjusted</code> 3) the reported <code>delay_min</code> sits on the
+midpointed scale, so an off grid value would otherwise drop the lowest
+counted cell.</p>
 <p>A cell whose implied probability underflows to zero while the study saw
 delays in it is floored at <code><a href="dot-meta_cell_floor.html">.meta_cell_floor()</a></code>.</p>
     </div>

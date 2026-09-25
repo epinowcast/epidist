@@ -91,7 +91,12 @@ probability, and several by
 [`.meta_grid_box_ll()`](https://epidist.epinowcast.org/reference/dot-meta_grid_box_ll.md)
 as the joint probability of every such crossing, with `cum_count` and
 `lower` read as the box each crossing puts on the counts below and at
-the reported day.
+the reported day. Both start the grid at `delay_min` moved back by
+[`.meta_cens_lower()`](https://epidist.epinowcast.org/reference/dot-meta_cens_lower.md),
+as the mean and standard deviation of the same study do. For a midpoint
+imputed grid (`cens_adjusted` 3) the reported `delay_min` sits on the
+midpointed scale, so an off grid value would otherwise drop the lowest
+counted cell.
 
 A cell whose implied probability underflows to zero while the study saw
 delays in it is floored at

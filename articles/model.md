@@ -351,15 +351,19 @@ lognormal delay.
 
 #### 5.1.3 A reported quantile
 
-A reported quantile at probability \\p\\ is fitted on the probability
-scale, which avoids inverting \\G\\, \\ p \sim \text{Normal}\left(G(y),
-\\ \text{se}\_p\right), \tag{5.3} \\ with \\\text{se}\_p =
-\sqrt{p(1-p)/n}\\ the binomial standard error of an empirical
-distribution function. A quantile supplied with a standard error
-\\\text{se}\_y\\ on the delay scale is fitted on that scale instead, \\
-y \sim \text{Normal}\left(Q_p, \\ \text{se}\_y\right), \tag{5.4} \\
-since the density that would carry \\\text{se}\_y\\ onto the probability
-scale vanishes far from the implied quantile.
+A reported quantile at probability \\p\\ is fitted through the number of
+delays at or below it, which is binomial on \\G(y)\\ and so avoids
+inverting \\G\\. This is Equation [(5.6)](#eq:meta-quantile-set) below,
+or Equations [(5.7)](#eq:meta-quantile-crossing) and
+[(5.9)](#eq:meta-quantile-box) for integer day delays. Posterior
+predictions for a quantile row are drawn from its normal approximation,
+\\ p \sim \text{Normal}\left(G(y), \\ \text{se}\_p\right), \tag{5.3} \\
+with \\\text{se}\_p = \sqrt{p(1-p)/n}\\ the binomial standard error of
+an empirical distribution function. A quantile supplied with a standard
+error \\\text{se}\_y\\ on the delay scale is fitted on that scale
+instead, \\ y \sim \text{Normal}\left(Q_p, \\ \text{se}\_y\right),
+\tag{5.4} \\ since the density that would carry \\\text{se}\_y\\ onto
+the probability scale vanishes far from the implied quantile.
 
 #### 5.1.4 Summaries from the same study
 
@@ -390,11 +394,9 @@ G(y_1), \\ \dots, \\ 1 - G(y_k)\right)\right), \tag{5.6} \\ with \\c_j =
 \text{round}(n p_j) - \text{round}(n p\_{j-1})\\ and \\c\_{k+1} = n -
 \text{round}(n p_k)\\. A single quantile reduces this to the binomial of
 which Equation [(5.3)](#eq:meta-quantile-lik) is the normal
-approximation, so quantile rows of a continuous estimand use Equation
-[(5.6)](#eq:meta-quantile-set) unless a standard error is supplied. Two
-quantiles reported at the same value are merged into one cell. A cell
-whose probability underflows to zero while the study saw delays in it is
-floored at \\10^{-300}\\.
+approximation. Two quantiles reported at the same value are merged into
+one cell. A cell whose probability underflows to zero while the study
+saw delays in it is floored at \\10^{-300}\\.
 
 A single quantile of integer day delays is a discrete statistic. “The
 median is 5 days” says that the empirical distribution function crossed
@@ -641,15 +643,16 @@ imputation with a uniform interval, placed the primary event at the
 midpoint of its window and integrated the secondary interval, so its
 estimand is that of code 2 moved down by \\w_p / 2\\. A shift changes
 the mean alone and moves the distribution function and quantiles with
-it. Code 4 therefore has the mean of code 1 and the variance of code 2
-before truncation, because midpointing removes the mean of \\U\\ but not
-its spread. The mirror reading, a midpointed secondary event and an
-integrated primary interval, has variance \\\sigma^2 + w_s^2 / 12\\ and
-is not used, because the literature midpoints the wide exposure window
-of the primary event. A study that midpointed the secondary interval and
-left the primary alone is code 3. Each code integrates the interval it
-did not midpoint rather than drawing a random position in it, which
-would add \\w^2 / 6\\ to the variance.
+it. Under a uniform primary event code 4 therefore has the mean of code
+1 and the variance of code 2 before truncation, because midpointing
+removes the mean of \\U\\ but not its spread. The mirror reading, a
+midpointed secondary event and an integrated primary interval, has
+variance \\\sigma^2 + w_s^2 / 12\\ and is not used, because the
+literature midpoints the wide exposure window of the primary event. A
+study that midpointed the secondary interval and left the primary alone
+is code 3. Each code integrates the interval it did not midpoint rather
+than drawing a random position in it, which would add \\w^2 / 6\\ to the
+variance.
 
 #### 5.3.2 Right truncation
 
@@ -729,12 +732,14 @@ conditioned on \\\tau \> L\\, the left truncation of survival analysis
 reduces to its earlier form when \\L = 0\\. On the grid of Equation
 [(5.14)](#eq:meta-grid) the cells below \\L\\ are dropped and the rest
 renormalised by their mass, which is \\F\_{pc}(D) - F\_{pc}(L)\\ when
-\\L\\ falls on a grid boundary. The truncated moments of Equation
-[(5.15)](#eq:meta-trunc-moments) pick up a boundary term, \\
-\mathbb{E}\[\tau^k \mid L \< \tau \le D\] = \frac{L^k \left(F(D;
-\theta) - F(L; \theta)\right) + \int_L^D k t^{k-1} \left(F(D; \theta) -
-F(t; \theta)\right) \text{d}t} {F(D; \theta) - F(L; \theta)}, \quad k =
-1, \dots, 4, \tag{5.20} \\ and Equation
+\\L\\ falls on a grid boundary. For codes 3 and 4, \\L\\ is on the
+reported scale, so the estimand they move is truncated at \\L\\ moved
+back by the same shift, \\L - w_s / 2\\ or \\L + w_p / 2\\. The
+truncated moments of Equation [(5.15)](#eq:meta-trunc-moments) pick up a
+boundary term, \\ \mathbb{E}\[\tau^k \mid L \< \tau \le D\] = \frac{L^k
+\left(F(D; \theta) - F(L; \theta)\right) + \int_L^D k t^{k-1} \left(F(D;
+\theta) - F(t; \theta)\right) \text{d}t} {F(D; \theta) - F(L; \theta)},
+\quad k = 1, \dots, 4, \tag{5.20} \\ and Equation
 [(5.16)](#eq:meta-uniform-moments) likewise with \\F\_{pc}\\ in place of
 \\F\\. The distribution function becomes \\ G(y) = \frac{F(y; \theta) -
 F(L; \theta)}{F(D; \theta) - F(L; \theta)}, \quad L \< y \le D,
