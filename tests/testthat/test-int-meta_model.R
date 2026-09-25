@@ -1524,3 +1524,50 @@ test_that("epidist.epidist_meta_model fits the gengamma family to mixed data", {
   draws <- add_summaries(delay_parameter_draws(fit))
   expect_true(all(is.finite(draws$mean)))
 })
+
+test_that("epidist_meta_leave_one_out refits a meta model without each study in turn", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_fits()
+  # The formula does not use study, so the model data must be passed
+  expect_error(epidist_meta_leave_one_out(fit_meta_grid), "no .*study.* column")
+  studies <- unique(prep_meta_grid$study)
+  out <- suppressMessages(epidist_meta_leave_one_out(
+    fit_meta_grid,
+    data = prep_meta_grid,
+    keep_fits = TRUE,
+    chains = 1,
+    iter = 300,
+    seed = 1,
+    refresh = 0,
+    silent = 2
+  ))
+  expect_s3_class(out, "tbl_df")
+  expect_identical(nrow(out), 2L * length(studies))
+  expect_named(out, c(
+    "study", ".row", "summary", "estimate", "lower", "upper",
+    "full_estimate", "full_lower", "full_upper",
+    "difference", "difference_lower", "difference_upper"
+  ))
+  expect_identical(unique(out$study), studies)
+  expect_identical(out$summary, rep(c("mean", "sd"), times = length(studies)))
+  expect_true(all(out$.row == 1L))
+  expect_type(out$estimate, "double")
+  expect_true(all(out$lower <= out$estimate))
+  expect_true(all(out$estimate <= out$upper))
+  expect_identical(out$difference, out$estimate - out$full_estimate)
+  expect_true(all(out$difference_lower <= out$difference))
+  expect_true(all(out$difference <= out$difference_upper))
+  # The full fit is the same for every held out study
+  expect_length(unique(out$full_estimate[out$summary == "mean"]), 1L)
+  expect_length(unique(out$full_estimate[out$summary == "sd"]), 1L)
+  expect_identical(attr(out, "width"), 0.95)
+  fits <- attr(out, "fits")
+  expect_named(fits, studies)
+  expect_s3_class(fits[[1]], "brmsfit")
+  expect_s3_class(fits[[1]], "epidist_fit")
+  expect_identical(as.integer(brms::nchains(fits[[1]])), 1L)
+  expect_identical(
+    nrow(fits[[1]]$data),
+    nrow(fit_meta_grid$data) - sum(prep_meta_grid$study == studies[1])
+  )
+})

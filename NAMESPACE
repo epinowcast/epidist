@@ -120,6 +120,7 @@ export(epidist_gen_meta_log_lik)
 export(epidist_gen_meta_predict)
 export(epidist_gen_posterior_epred)
 export(epidist_gen_posterior_predict)
+export(epidist_meta_leave_one_out)
 export(epidist_model_prior)
 export(epidist_newdata)
 export(epidist_prior)
@@ -227,7 +228,8 @@ importFrom(tibble,
 )
 importFrom(tidyr,
   expand,
-  expand_grid
+  expand_grid,
+  pivot_longer
 )
 importFrom(utils,
   getS3method,
