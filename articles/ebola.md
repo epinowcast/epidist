@@ -13,7 +13,7 @@ In analysing this data, we demonstrate the following features of
     estimates with a lognormal delay distribution.
 2.  Post-processing and plotting functionality using the integration of
     `brms` functionality with the
-    [`tidybayes`](http://mjskay.github.io/tidybayes/) package.
+    [`tidybayes`](https://mjskay.github.io/tidybayes/) package.
 
 The packages used in this article are:
 

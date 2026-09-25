@@ -433,7 +433,7 @@ It is possible to generate predictions manually by working with [samples
 from the model
 output](https://epidist.epinowcast.org/articles/faq.html#i-would-like-to-work-with-the-samples-output).
 However this is tricky to do, and so where possible we recommend using
-the [`tidybayes`](http://mjskay.github.io/tidybayes/) package. In
+the [`tidybayes`](https://mjskay.github.io/tidybayes/) package. In
 particular, following functions may be useful:
 
 1.  [`tidybayes::add_epred_draws()`](https://mjskay.github.io/tidybayes/reference/add_predicted_draws.html)
