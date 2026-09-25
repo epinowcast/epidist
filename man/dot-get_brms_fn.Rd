@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{.get_brms_fn}
 \alias{.get_brms_fn}
-\title{Get a brms function by prefix and family}
+\title{Get the post-processing function of a family by prefix}
 \usage{
 .get_brms_fn(prefix, family)
 }
@@ -19,13 +19,13 @@ families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, s
 reexported as part of \code{epidist}.}
 }
 \value{
-The requested brms function
+The requested function
 }
 \description{
-Helper function to get internal brms functions by constructing their name
-from a prefix and family. Used to get functions like \verb{log_lik_*},
-\verb{posterior_predict_*} etc. A family \code{epidist} defines itself, such as
+Gets the function \code{brms} would call for a family, such as \code{log_lik} or
+\code{posterior_predict}. A family \code{epidist} defines itself, such as
 \code{\link[=gengamma]{gengamma()}}, carries these functions, so they are taken from it, whether
-it is given as the family or as a model family built on it.
+it is given as the family or as a model family built on it. For a \code{brms}
+family they come from \code{\link[=.brms_family_fn]{.brms_family_fn()}}.
 }
 \keyword{internal}
