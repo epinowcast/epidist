@@ -279,6 +279,9 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
     }
     family <- .np_set_boundaries(family, seq(-1, ceiling(longest)))
   }
+  if (inherits(data, "epidist_meta_model")) {
+    .np_check_meta(data)
+  }
   top <- max(family$np$boundaries)
   observed <- .np_longest_observed(data)
   if (top < observed) {
@@ -289,6 +292,55 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
     ))
   }
   return(family)
+}
+
+#' Check that a meta model only uses summaries the non-parametric family has
+#'
+#' The non-parametric family puts its probability at bin edges, so the
+#' continuous delay a study that fully adjusted for censoring targets
+#' (`cens_adjusted` 1) is a step function with no density. Its mean and
+#' standard deviation over the whole distribution are exact sums over the
+#' bins. Its quantiles on the delay scale, and its moments when truncated,
+#' would need a density or quadrature over a step, which the meta model does
+#' not have. Every other censoring adjustment convolves the steps with a
+#' censoring window, which gives a continuous distribution function, and is
+#' supported.
+#'
+#' @param data An `epidist_meta_model` object.
+#'
+#' @returns `NULL`, invisibly. Errors naming the studies whose summaries are
+#'  not supported.
+#'
+#' @keywords internal
+.np_check_meta <- function(data) {
+  members <- .meta_members(data)
+  quantile_member <- vapply(seq_len(nrow(data)), function(row) {
+    if (data$obs_type[row] != 7L) {
+      return(FALSE)
+    }
+    rows <- seq(data$group_start[row], length.out = data$group_len[row])
+    return(any(members$type[rows] == 3L))
+  }, logical(1))
+  moments_only <- data$obs_type %in% c(2L, 3L, 5L) |
+    (data$obs_type == 7L & !quantile_member)
+  unsupported <- data$obs_type != 1L & data$cens_adjusted == 1L &
+    !(moments_only & data$trunc_adjusted == 1L & data$delay_min == 0)
+  if (any(unsupported)) {
+    studies <- paste("row", which(unsupported))
+    if (hasName(data, "study")) {
+      studies <- unique(as.character(data$study[unsupported]))
+    }
+    cli_abort(c(
+      "The {.fn nonparametric} family does not support some summaries of
+       studies with {.code cens_adjusted = 1}: {.val {studies}}.",
+      i = "It puts its probability at bin edges, so the continuous delay
+           these studies target has no density. Only a mean or standard
+           deviation of the whole distribution, from a study that adjusted
+           for right truncation and counted every delay, is supported.",
+      i = "Use a parametric family, or drop these summaries."
+    ))
+  }
+  return(invisible(NULL))
 }
 
 #' The longest delay observed in individual level data

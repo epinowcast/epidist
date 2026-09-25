@@ -204,7 +204,10 @@
     * Stan's reverse pass chains every node on the stack, so a NaN partial
     * poisons the gradient even when the value is discarded. Lognormal:
     * Phi(z) < exp(-100) for z < -14. Gamma: P(a, x) <= x^a / Gamma(a + 1).
-    * Weibull: 1 - exp(-y) <= y. Mirrors .meta_deep_tail() in R.
+    * Weibull: 1 - exp(-y) <= y. The non-parametric hazard families
+    * (dist_id 27 and 28) need no bound, because their distribution function
+    * is a constant zero below the first bin edge and bounded away from zero
+    * above it. Mirrors .meta_deep_tail() in R.
     */
   int meta_family_deep_tail(real d, array[] real params) {
     if (dist_id == 1) {
@@ -462,13 +465,41 @@
     return meta_family_moment_vector(m1, variance, third, fourth);
   }
 
-  /** Analytic summaries of the delay distribution. */
+  /**
+    * Edges and probabilities of the bins of a non-parametric hazard delay,
+    * whose params hold the K + 1 boundaries followed by the K hazards. The
+    * probability of each bin sits at its right edge. Returns the K edges
+    * followed by the K probabilities.
+    */
+  vector meta_family_np_bins(array[] real params) {
+    int K = (size(params) - 1) %/% 2;
+    return append_row(
+      to_vector(params[2:(K + 1)]),
+      hazards_to_pmf(to_vector(params[(K + 2):(2 * K + 1)]))
+    );
+  }
+
+  /**
+    * Analytic summaries of the delay distribution. The non-parametric hazard
+    * families take the moments of their bin probabilities. Mirrors
+    * .meta_continuous_moments() in R.
+    */
   vector meta_family_moments(array[] real params) {
     real delay_mean;
     real variance;
     real third;
     real fourth;
-    if (dist_id == 1) {
+    if (dist_id == 27 || dist_id == 28) {
+      int K = (size(params) - 1) %/% 2;
+      vector[2 * K] bins = meta_family_np_bins(params);
+      vector[K] mass = bins[(K + 1):(2 * K)];
+      vector[K] centred;
+      delay_mean = dot_product(mass, bins[1:K]);
+      centred = bins[1:K] - delay_mean;
+      variance = dot_product(mass, square(centred));
+      third = dot_product(mass, pow(centred, 3));
+      fourth = dot_product(mass, pow(centred, 4));
+    } else if (dist_id == 1) {
       real var_log = params[2] ^ 2;
       delay_mean = exp(params[1] + var_log / 2);
       variance = delay_mean ^ 2 * expm1(var_log);
@@ -492,8 +523,8 @@
       fourth = params[2] ^ 4 *
         (g4 - 4 * g1 * g3 + 6 * g1 ^ 2 * g2 - 3 * g1 ^ 4);
     } else {
-      reject("Meta model summary rows support lognormal, gamma and weibull ",
-             "delay distributions only.");
+      reject("Meta model summary rows support lognormal, gamma, weibull and ",
+             "non-parametric delay distributions only.");
     }
     // A draw wide enough to overflow a moment would leave a finite density
     // whose gradient carries the infinite intermediate, so it is rejected
@@ -1008,8 +1039,10 @@
     if (dist_id == 3) {
       return exp(weibull_lpdf(y | params[1], params[2]));
     }
-    reject("Meta model summary rows support lognormal, gamma and weibull ",
-           "delay distributions only.");
+    // The non-parametric hazard families put their probability at bin
+    // edges, so they have no density. R rejects the summary rows that would
+    // need one when the model is built, see .np_check_meta().
+    reject("meta_family_density: this delay distribution has no density.");
   }
 
   /** Density of a delay censored by a uniform primary window. */
@@ -1023,11 +1056,25 @@
 
   /**
     * Partial expectation of the delay below `x`, the integral of t f(t) from
-    * zero to x, in closed form for each family.
+    * zero to x, in closed form for each family. For the non-parametric
+    * hazard families it is the sum over the bin edges up to and including x
+    * of the edge times its probability.
     */
   real meta_family_partial_expectation(real x, array[] real params) {
     if (x <= 0) {
       return 0;
+    }
+    if (dist_id == 27 || dist_id == 28) {
+      // The bin probabilities up to and including the edge at x.
+      int K = (size(params) - 1) %/% 2;
+      vector[2 * K] bins = meta_family_np_bins(params);
+      real total = 0;
+      for (i in 1:K) {
+        if (bins[i] <= x) {
+          total += bins[i] * bins[K + i];
+        }
+      }
+      return total;
     }
     if (dist_id == 1) {
       return exp(params[1] + 0.5 * square(params[2]) +
@@ -1041,8 +1088,8 @@
       return params[2] * tgamma(1 + 1 / params[1]) *
         gamma_p(1 + 1 / params[1], pow(x / params[2], params[1]));
     }
-    reject("Meta model summary rows support lognormal, gamma and weibull ",
-           "delay distributions only.");
+    reject("Meta model summary rows support lognormal, gamma, weibull and ",
+           "non-parametric delay distributions only.");
   }
 
   /**

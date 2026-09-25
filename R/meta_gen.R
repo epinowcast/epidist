@@ -379,7 +379,7 @@ epidist_gen_meta_log_lik <- function(family) {
       return(rep(NA_real_, prep$ndraws))
     }
     slots <- .meta_row_slots(i, prep)
-    dist_args <- .get_supported_dist_args(dist_name, prep, i)
+    dist_args <- .get_supported_dist_args(dist_name, prep, i, family$np)
     moments <- .meta_row_draw_moments(slots, dist_name, dist_args)
     lpdf <- map_dbl(seq_along(dist_args), function(draw) {
       return(.meta_row_log_lik(
@@ -432,7 +432,7 @@ epidist_gen_meta_predict <- function(family) {
       return(as.matrix(rep(NA_real_, prep$ndraws)))
     }
     slots <- .meta_row_slots(i, prep)
-    dist_args <- .get_supported_dist_args(dist_name, prep, i)
+    dist_args <- .get_supported_dist_args(dist_name, prep, i, family$np)
     moments <- .meta_row_draw_moments(slots, dist_name, dist_args)
     draws <- map_dbl(seq_along(dist_args), function(draw) {
       summaries <- .meta_summary_terms(

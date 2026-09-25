@@ -506,7 +506,13 @@
 .meta_uniform_pcens_density <- function(y, dist, args, pwindow) {
   pdist <- .pdist(dist)
   upper <- do.call(pdist, c(list(q = y), args))
-  lower <- do.call(pdist, c(list(q = max(y - pwindow, 0)), args))
+  # The window reaches below zero, where the delay has no mass. This is not
+  # the distribution function at zero, which holds any mass at a delay of
+  # zero. Matches meta_family_uniform_pcens_density() in Stan.
+  lower <- 0
+  if (y > pwindow) {
+    lower <- do.call(pdist, c(list(q = y - pwindow), args))
+  }
   return(max(upper - lower, 0) / pwindow)
 }
 

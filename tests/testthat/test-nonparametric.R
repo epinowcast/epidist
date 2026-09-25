@@ -196,3 +196,106 @@ test_that("add_summaries() needs the boundaries of the family", {
     "boundaries"
   )
 })
+
+np_meta_estimates <- suppressMessages(as_epidist_estimates_data(
+  data.frame(
+    study = c("A", "A", "B", "B", "C"),
+    type = c("mean", "sd", "mean", "sd", "quantile"),
+    value = c(7.5, 3.6, 6.4, 3.1, 5.4),
+    p = c(NA, NA, NA, NA, 0.5),
+    n = c(120, 120, 80, 80, 200),
+    relative_obs_time = c(20, 20, Inf, Inf, 30),
+    trunc_adjusted = c(FALSE, FALSE, TRUE, TRUE, FALSE),
+    cens_adjusted = c(0, 0, 1, 1, 2),
+    stringsAsFactors = FALSE
+  )
+))
+np_meta <- suppressMessages(as_epidist_meta_model(
+  sim_obs,
+  estimates = np_meta_estimates
+))
+
+test_that("the meta model takes the nonparametric family", {
+  family <- epidist_family(np_meta, family = nonparametric())
+  expect_identical(family$name, "meta_discretehazard_rw")
+  expect_identical(max(family$np$boundaries), 30)
+  code <- suppressMessages(epidist(
+    np_meta,
+    family = nonparametric(),
+    fn = brms::make_stancode
+  ))
+  code <- as.character(code)
+  expect_match(code, "y | 27,", fixed = TRUE)
+  expect_match(code, "if (27 == 27 || 27 == 28) {", fixed = TRUE)
+  skip_on_cran()
+  expect_no_error(rstan::stanc(model_code = code))
+})
+
+test_that("the meta model sets default boundaries from summaries alone", {
+  meta <- suppressMessages(
+    as_epidist_meta_model(estimates = np_meta_estimates)
+  )
+  family <- epidist_family(meta, family = nonparametric())
+  expect_identical(family$np$boundaries, as.numeric(seq(-1, 30)))
+})
+
+test_that("the meta model rejects continuous summaries it cannot imply", {
+  # Study B of prep_meta_obs reports a quantile of the continuous delay
+  expect_error(
+    epidist_family(prep_meta_obs, family = nonparametric()),
+    "\"B\""
+  )
+  left <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "D", type = "mean", value = 6, n = 50,
+    relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 1,
+    delay_min = 1, stringsAsFactors = FALSE
+  )))
+  expect_error(
+    epidist_family(
+      suppressMessages(as_epidist_meta_model(estimates = left)),
+      family = nonparametric(-1:20)
+    ),
+    "\"D\""
+  )
+  truncated <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "E", type = "mean", value = 6, n = 50,
+    relative_obs_time = 20, trunc_adjusted = FALSE, cens_adjusted = 1,
+    stringsAsFactors = FALSE
+  )))
+  expect_error(
+    epidist_family(
+      suppressMessages(as_epidist_meta_model(estimates = truncated)),
+      family = nonparametric(-1:20)
+    ),
+    "\"E\""
+  )
+})
+
+test_that("the meta model moments of the bins match primarycensored", {
+  args <- list(boundaries = c(-1, 0, 1, 3, 6), hazards = c(0.2, 0.3, 0.5, 1))
+  moments <- .meta_continuous_moments("pdiscretehazard", args)
+  mass <- primarycensored::hazards_to_pmf(args$hazards)
+  edges <- c(0, 1, 3, 6)
+  delay_mean <- sum(mass * edges)
+  variance <- sum(mass * (edges - delay_mean)^2)
+  expect_equal(unname(moments[1]), delay_mean)
+  expect_equal(unname(moments[2]), sqrt(variance))
+  set.seed(2)
+  draws <- primarycensored::rdiscretehazard(
+    1e5,
+    boundaries = args$boundaries, hazards = args$hazards
+  )
+  expect_equal(unname(moments[1]), mean(draws), tolerance = 0.01)
+})
+
+test_that("the uniform primary censored density leaves out mass at zero", {
+  args <- list(boundaries = c(-1, 0, 1, 3, 6), hazards = c(0.2, 0.3, 0.5, 1))
+  # Over (y - 1, y] with y below the window the only mass is at zero
+  expect_equal(
+    .meta_uniform_pcens_density(0.5, "pdiscretehazard", args, 1), 0.2
+  )
+  expect_equal(
+    .meta_uniform_pcens_density(1.5, "pdiscretehazard", args, 1),
+    primarycensored::hazards_to_pmf(args$hazards)[2]
+  )
+})

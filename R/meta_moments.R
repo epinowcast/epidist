@@ -102,7 +102,17 @@
 #'
 #' @keywords internal
 .meta_continuous_moments <- function(dist, args) {
-  if (identical(dist, "plnorm")) {
+  if (identical(dist, "pdiscretehazard")) {
+    # Point masses at the right edge of each bin
+    edges <- args$boundaries[-1]
+    mass <- primarycensored::hazards_to_pmf(args$hazards)
+    delay_mean <- sum(mass * edges)
+    centred <- edges - delay_mean
+    moments <- .meta_moment_vector(
+      delay_mean, sum(mass * centred^2), sum(mass * centred^3),
+      sum(mass * centred^4)
+    )
+  } else if (identical(dist, "plnorm")) {
     var_log <- args$sdlog^2
     delay_mean <- exp(args$meanlog + var_log / 2)
     variance <- delay_mean^2 * expm1(var_log)

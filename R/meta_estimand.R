@@ -9,6 +9,13 @@
 #'
 #' @keywords internal
 .meta_ddist <- function(dist) {
+  if (identical(dist, "pdiscretehazard")) {
+    # The model is never built with a summary row that needs this, see
+    # `.np_check_meta()`.
+    cli::cli_abort(
+      "The non-parametric delay distribution has no density."
+    )
+  }
   return(switch(dist,
     plnorm = stats::dlnorm,
     pgamma = stats::dgamma,
@@ -114,7 +121,9 @@
 
 #' The primary censored distribution function, guarded against underflow
 #'
-#' Primary distributions without an analytical solution are integrated
+#' `check = FALSE` skips the validation of `pdist` and `dprimary`, which are
+#' taken from `stats` and `primarycensored` and so need none, and which would
+#' otherwise be repeated on every call. Primary distributions without an analytical solution are integrated
 #' numerically, which can return a non finite or negative cumulative
 #' probability deep in the lower tail. Those cases carry negligible
 #' probability and are treated as zero, matching the guard in
@@ -145,7 +154,8 @@
         q = q,
         pdist = .pdist(dist),
         pwindow = pwindow,
-        dprimary = primary$dprimary
+        dprimary = primary$dprimary,
+        check = FALSE
       ),
       stats::setNames(list(primary$dprimary_args), .primary_args_name()),
       args
