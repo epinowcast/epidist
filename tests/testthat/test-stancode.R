@@ -154,6 +154,7 @@ gengamma_stan_values <- function(y, mu, sigma, Q) {
 
 test_that("the gengamma Stan density and distribution function match flexsurv", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_fits()
   skip_if_not_installed("flexsurv")
   y <- c(0.5, 2, 6, 15)
   mu <- c(1.6, 1.1, 2, 0.7)
@@ -213,6 +214,7 @@ test_that("the gengamma Stan density and distribution function match flexsurv", 
 
 test_that("the gengamma Stan distribution function stays finite deep in the lower tail", { # nolint: line_length_linter.
   skip_on_cran()
+  skip_if_no_fits()
   skip_if_not_installed("flexsurv")
   # The distribution function underflows to zero at each of these points. A
   # log distribution function of minus infinity in the latent model's
