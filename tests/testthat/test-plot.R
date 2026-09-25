@@ -198,9 +198,9 @@ test_that("plot.epidist_delay_draws plots the delay distribution of a gengamma",
   draws <- tibble::tibble(
     .row = 1L,
     .draw = seq_len(n),
-    mu = exp(rnorm(n, log(6), 0.05)),
-    shape = exp(rnorm(n, log(1.4), 0.05)),
-    k = exp(rnorm(n, log(0.9), 0.05))
+    mu = rnorm(n, 1.8, 0.05),
+    sigma = exp(rnorm(n, log(0.6), 0.05)),
+    Q = exp(rnorm(n, log(0.9), 0.05))
   )
   draws <- dplyr::group_by(draws, .row)
   draws <- .new_delay_draws(draws, .delay_family(gengamma()), NULL)
@@ -214,9 +214,9 @@ test_that("plot.epidist_delay_draws plots the delay distribution of a gengamma",
   expect_equal(sum(p$data$density) * step, 1, tolerance = 0.02)
   expect_equal(
     max(p$data$delay),
-    stats::median(flexsurv::qgengamma.orig(
+    stats::median(flexsurv::qgengamma(
       0.99,
-      shape = draws$shape, scale = draws$mu, k = draws$k
+      mu = draws$mu, sigma = draws$sigma, Q = draws$Q
     )),
     tolerance = 1e-8
   )

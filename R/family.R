@@ -145,16 +145,25 @@ epidist_family_param.default <- function(family, ...) {
 #' Generalised gamma delay distribution family
 #'
 #' A `brms` custom family for the generalised gamma distribution in the
-#' parameterisation of Stacy (1962), as used by `flexsurv::dgengamma.orig()`
-#' and by the `primarycensored` package.
-#' It has three positive distributional parameters, modelled on the log scale
-#' by default: `mu` is the scale, `shape` is the power parameter and `k` is
-#' the shape of the underlying gamma distribution.
-#' If \eqn{G} is gamma distributed with shape `k` and unit scale then
-#' `mu * G^(1 / shape)` is generalised gamma, so the gamma (`shape = 1`) and
-#' Weibull (`k = 1`) families are special cases and the lognormal is a limit.
-#' The mean is `mu * gamma(k + 1 / shape) / gamma(k)`, and [add_summaries()]
-#' gives the mean, the standard deviation and quantiles in closed form.
+#' parameterisation of Prentice (1974), as used by `flexsurv::dgengamma()`.
+#' `mu` is the location and `sigma` the scale of the log delay, and `Q` is
+#' the shape.
+#' `mu` is modelled on the identity scale and the positive `sigma` and `Q` on
+#' the log scale by default.
+#' If \eqn{G} is gamma distributed with shape \eqn{1 / Q^2} and unit scale
+#' then \eqn{\exp(\mu) (Q^2 G)^{\sigma / Q}} is generalised gamma.
+#' The Weibull (`Q = 1`) and gamma (`Q = sigma`) families are special cases
+#' and the lognormal is the limit as `Q` goes to zero.
+#' In this parameterisation `mu` and `sigma` stay close to the location and
+#' scale of the log delay whatever the shape, which keeps the posterior easy
+#' to sample.
+#' In the parameterisation of Stacy (1962), used by
+#' `flexsurv::dgengamma.orig()` and by `primarycensored`, the same
+#' distribution has shape `Q / sigma`, scale `exp(mu + 2 * sigma * log(Q) / Q)`
+#' and `k = 1 / Q^2`.
+#' The marginal and meta models pass it to `primarycensored` in that form.
+#' [add_summaries()] gives the mean, the standard deviation and quantiles in
+#' closed form.
 #'
 #' `brms` has no generalised gamma family, so this one carries the Stan
 #' density and distribution function and the R functions `brms` uses to
@@ -163,30 +172,37 @@ epidist_family_param.default <- function(family, ...) {
 #' It works with every `epidist` model, including the meta model, and with
 #' every primary event distribution.
 #'
+#' `Q` is positive because the Stan functions of `primarycensored` take the
+#' Stacy form, which has no counterpart for `Q` of zero or below.
+#' The lognormal limit is approached but not reached.
 #' The default prior of [epidist_family_prior()] is weakly informative around
-#' the gamma and Weibull special cases, because `shape` and `k` are only
-#' weakly identified by a modest number of delays.
+#' the Weibull case, because `Q` is only weakly identified by a modest number
+#' of delays.
 #'
-#' @param link,link_shape,link_k The link functions of `mu`, `shape` and `k`.
-#'  All default to `"log"`.
+#' @param link,link_sigma,link_Q The link functions of `mu`, `sigma` and `Q`.
+#'  `link` defaults to `"identity"` and the others to `"log"`.
 #'
 #' @returns A `brms` custom family object.
 #'
-#' @references Stacy, E. W. (1962). A generalization of the gamma
-#'  distribution. The Annals of Mathematical Statistics, 33(3), 1187-1192.
+#' @references Prentice, R. L. (1974). A log gamma model and its maximum
+#'  likelihood estimation. Biometrika, 61(3), 539-544.
+#'  \doi{10.1093/biomet/61.3.539}
+#'
+#'  Stacy, E. W. (1962). A generalization of the gamma distribution. The
+#'  Annals of Mathematical Statistics, 33(3), 1187-1192.
 #'  \doi{10.1214/aoms/1177704481}
 #'
 #' @family family
 #' @export
 #' @examples
 #' gengamma()
-gengamma <- function(link = "log", link_shape = "log", link_k = "log") {
+gengamma <- function(link = "identity", link_sigma = "log", link_Q = "log") {
   .require_flexsurv()
   out <- brms::custom_family(
     "gengamma",
-    dpars = c("mu", "shape", "k"),
-    links = c(link, link_shape, link_k),
-    lb = c(0, 0, 0),
+    dpars = c("mu", "sigma", "Q"),
+    links = c(link, link_sigma, link_Q),
+    lb = c(NA, 0, 0),
     ub = c(NA, NA, NA),
     type = "real",
     log_lik = .gengamma_log_lik,
@@ -278,10 +294,27 @@ gengamma <- function(link = "log", link_shape = "log", link_k = "log") {
 #'
 #' @keywords internal
 .gengamma_dpars <- function(prep, i = NULL) {
+  return(.gengamma_stacy(
+    mu = brms::get_dpar(prep, "mu", i = i),
+    sigma = brms::get_dpar(prep, "sigma", i = i),
+    Q = brms::get_dpar(prep, "Q", i = i)
+  ))
+}
+
+#' Convert the generalised gamma from the Prentice to the Stacy form
+#'
+#' @param mu,sigma,Q Generalised gamma parameters in the parameterisation of
+#'  `flexsurv::dgengamma()`, with `Q` positive.
+#'
+#' @returns A named list of the `shape`, `scale` and `k` parameters in the
+#'  parameterisation of `flexsurv::dgengamma.orig()`.
+#'
+#' @keywords internal
+.gengamma_stacy <- function(mu, sigma, Q) {
   return(list(
-    shape = brms::get_dpar(prep, "shape", i = i),
-    scale = brms::get_dpar(prep, "mu", i = i),
-    k = brms::get_dpar(prep, "k", i = i)
+    shape = Q / sigma,
+    scale = exp(mu + 2 * sigma * log(Q) / Q),
+    k = 1 / Q^2
   ))
 }
 
@@ -352,8 +385,9 @@ gengamma <- function(link = "log", link_shape = "log", link_k = "log") {
 #'
 #' `brms` calls the Stan density of a custom family with its distributional
 #' parameters in the order they are declared, which is the `param` the
-#' latent model uses. `primarycensored` takes the generalised gamma as
-#' `[shape, scale, k]`, so the marginal and meta models pass `pcd_param`.
+#' latent model uses. `primarycensored` takes the generalised gamma in the
+#' Stacy form `[shape, scale, k]`, so the marginal and meta models pass
+#' `pcd_param`, which converts to it.
 #'
 #' @inheritParams epidist_family_param
 #' @family family
@@ -362,7 +396,9 @@ gengamma <- function(link = "log", link_shape = "log", link_k = "log") {
 #'
 #' @export
 epidist_family_param.gengamma <- function(family, ...) {
-  family$param <- "mu, shape, k"
-  family$pcd_param <- "shape, mu, k"
+  family$param <- "mu, sigma, Q"
+  family$pcd_param <- paste0(
+    "Q / sigma, exp(mu + 2 * sigma * log(Q) / Q), ", "inv_square(Q)"
+  )
   return(family)
 }

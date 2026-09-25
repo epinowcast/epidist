@@ -17,7 +17,7 @@ Each element gives the distributional parameters the solution needs and
 functions of them returning the mean, the standard deviation, the quantile
 function and the density of the delay distribution. The parameters are the
 \code{brms} parameters of the family. The generalised gamma moments follow from
-\eqn{E[T^r] = \mu^r \Gamma(k + r / a) / \Gamma(k)}, with \eqn{a} the
-\code{shape}.
+\eqn{E[T^r] = \theta^r \Gamma(k + r / a) / \Gamma(k)} in its Stacy form,
+with scale \eqn{\theta}, shape \eqn{a} and \eqn{k}, see \code{\link[=gengamma]{gengamma()}}.
 }
 \keyword{internal}

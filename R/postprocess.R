@@ -645,8 +645,8 @@ add_summaries <- function(
 #' functions of them returning the mean, the standard deviation, the quantile
 #' function and the density of the delay distribution. The parameters are the
 #' `brms` parameters of the family. The generalised gamma moments follow from
-#' \eqn{E[T^r] = \mu^r \Gamma(k + r / a) / \Gamma(k)}, with \eqn{a} the
-#' `shape`.
+#' \eqn{E[T^r] = \theta^r \Gamma(k + r / a) / \Gamma(k)} in its Stacy form,
+#' with scale \eqn{\theta}, shape \eqn{a} and \eqn{k}, see [gengamma()].
 #'
 #' @param name The name of a delay distribution family.
 #'
@@ -711,25 +711,30 @@ add_summaries <- function(
       }
     ),
     gengamma = list(
-      dpars = c("mu", "shape", "k"),
+      dpars = c("mu", "sigma", "Q"),
       mean = function(d) {
-        return(.gengamma_mean(d$mu, d$shape, d$k))
+        s <- .gengamma_stacy(d$mu, d$sigma, d$Q)
+        return(.gengamma_mean(s$scale, s$shape, s$k))
       },
       sd = function(d) {
-        return(.gengamma_sd(d$mu, d$shape, d$k))
+        s <- .gengamma_stacy(d$mu, d$sigma, d$Q)
+        return(.gengamma_sd(s$scale, s$shape, s$k))
       },
       quantile = function(d, p) {
         .require_flexsurv()
-        return(flexsurv::qgengamma.orig(
+        return(flexsurv::qgengamma(
           p,
-          shape = d$shape, scale = d$mu, k = d$k
+          mu = d$mu, sigma = d$sigma, Q = d$Q
         ))
       },
       density = function(d, x) {
         .require_flexsurv()
+        # `flexsurv::dgengamma()` is not a number at a delay of zero, where
+        # the Stacy form gives zero
+        s <- .gengamma_stacy(d$mu, d$sigma, d$Q)
         return(flexsurv::dgengamma.orig(
           x,
-          shape = d$shape, scale = d$mu, k = d$k
+          shape = s$shape, scale = s$scale, k = s$k
         ))
       }
     ),

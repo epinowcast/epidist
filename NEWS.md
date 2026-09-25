@@ -3,7 +3,9 @@
 ## Models
 
 - Added the generalised gamma delay distribution as the `gengamma()` family.
-It has three distributional parameters, `mu` for the scale and `shape` and `k` for the two shape parameters of the Stacy parameterisation, so the gamma and Weibull families are special cases.
+It uses the Prentice parameterisation of `flexsurv::dgengamma()`, with `mu` and `sigma` the location and scale of the log delay and `Q` a positive shape.
+The Weibull and gamma families are special cases and the lognormal is the limit as `Q` goes to zero.
+The marginal and meta models pass it to `primarycensored` in the Stacy form.
 It works with the naive, latent, marginal and meta models, with every primary event distribution, and with `add_summaries()`, which uses its closed form mean, standard deviation and quantiles.
 It needs the `flexsurv` package and `primarycensored` 1.5.2 or later, which adds the distribution to its Stan functions.
 See #644 and epinowcast/primarycensored#334.

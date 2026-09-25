@@ -41,16 +41,16 @@ test_that(
   }
 )
 
-test_that("gengamma builds a brms custom family in the Stacy parameterisation", { # nolint: line_length_linter.
+test_that("gengamma builds a brms custom family in the Prentice parameterisation", { # nolint: line_length_linter.
   skip_if_not_installed("flexsurv")
   family <- gengamma()
   expect_s3_class(family, "customfamily")
   expect_identical(family$name, "gengamma")
-  expect_identical(family$dpars, c("mu", "shape", "k"))
-  expect_identical(family$link, "log")
-  expect_identical(family$link_shape, "log")
-  expect_identical(family$link_k, "log")
-  expect_identical(unname(unlist(family$lb)), c("0", "0", "0"))
+  expect_identical(family$dpars, c("mu", "sigma", "Q"))
+  expect_identical(family$link, "identity")
+  expect_identical(family$link_sigma, "log")
+  expect_identical(family$link_Q, "log")
+  expect_identical(unname(unlist(family$lb))[2:3], c("0", "0"))
   expect_identical(family$ybounds, c(0, Inf))
   expect_type(family$log_lik, "closure")
   expect_type(family$posterior_predict, "closure")
@@ -62,16 +62,17 @@ test_that("epidist_family builds the gengamma family for every model", {
   latent <- epidist_family(prep_obs, family = gengamma())
   expect_s3_class(latent, "gengamma")
   expect_identical(latent$name, "latent_gengamma")
-  expect_identical(latent$dpars, c("mu", "shape", "k"))
-  expect_identical(latent$param, "mu, shape, k")
-  expect_identical(latent$pcd_param, "shape, mu, k")
-  expect_identical(latent$link_shape, "log")
-  expect_identical(latent$link_k, "log")
+  stacy <- "Q / sigma, exp(mu + 2 * sigma * log(Q) / Q), inv_square(Q)"
+  expect_identical(latent$dpars, c("mu", "sigma", "Q"))
+  expect_identical(latent$param, "mu, sigma, Q")
+  expect_identical(latent$pcd_param, stacy)
+  expect_identical(latent$link_sigma, "log")
+  expect_identical(latent$link_Q, "log")
   marginal <- epidist_family(prep_marginal_obs, family = gengamma())
   expect_identical(marginal$name, "marginal_gengamma")
   meta <- epidist_family(prep_meta_obs, family = "gengamma")
   expect_identical(meta$name, "meta_gengamma")
-  expect_identical(meta$pcd_param, "shape, mu, k")
+  expect_identical(meta$pcd_param, stacy)
   # The naive model passes the family to brms unchanged
   naive <- epidist_family(prep_naive_obs, family = gengamma())
   expect_identical(naive$name, "gengamma")
@@ -91,16 +92,11 @@ test_that(".pcd_family_dist_name resolves a model-wrapped meta family", { # noli
 test_that("the gengamma family is looked up by name where brms would be", {
   skip_if_not_installed("flexsurv")
   expect_identical(.validate_family("gengamma")$name, "gengamma")
-  expect_identical(.validate_family("gengamma")$link, "log")
+  expect_identical(.validate_family("gengamma")$link, "identity")
+  expect_identical(.validate_family(c("gengamma", "log"))$link, "log")
+  expect_identical(.validate_family("gengamma", link = "log")$link, "log")
   expect_identical(
-    .validate_family(c("gengamma", "identity"))$link, "identity"
-  )
-  expect_identical(
-    .validate_family("gengamma", link = "identity")$link, "identity"
-  )
-  expect_identical(
-    epidist_family(prep_obs, family = c("gengamma", "identity"))$link,
-    "identity"
+    epidist_family(prep_obs, family = c("gengamma", "log"))$link, "log"
   )
   expect_identical(.pcd_family_dist_name(gengamma()), "pgengamma.orig")
   expect_identical(

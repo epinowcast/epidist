@@ -1477,13 +1477,14 @@ test_that("the R and Stan meta model log likelihoods agree for the gengamma fami
     as_epidist_meta_model(estimates = lockstep_estimates)
   )
   program <- meta_log_lik_program(meta, family = gengamma())
-  expect_identical(program$dpars, c("mu", "shape", "k"))
-  # Two parameter points, one of them the gamma special case
-  mu <- c(5, 3)
-  shape <- c(1.5, 1)
-  k <- c(1.2, 2)
-  stan_log_lik <- meta_stan_log_lik(program, mu, shape, k)
-  r_log_lik <- meta_r_log_lik(program, mu, shape, k)
+  expect_identical(program$dpars, c("mu", "sigma", "Q"))
+  # Two parameter points, the second the gamma special case with shape 2 and
+  # scale 3, where sigma equals Q
+  mu <- c(1.7, log(6))
+  sigma <- c(0.6, sqrt(0.5))
+  Q <- c(0.9, sqrt(0.5))
+  stan_log_lik <- meta_stan_log_lik(program, mu, sigma, Q)
+  r_log_lik <- meta_r_log_lik(program, mu, sigma, Q)
   expect_true(all(is.finite(stan_log_lik)))
   expect_true(all(is.finite(r_log_lik)))
   growth <- program$standata$vreal8 != 0

@@ -321,9 +321,9 @@ test_that("epidist_prior applies the gengamma family priors to every model", { #
     intercepts <- prior[prior$class == "Intercept", ]
     expect_identical(intercepts$prior[!nzchar(intercepts$dpar)], "normal(1, 1)")
     expect_identical(
-      intercepts$prior[intercepts$dpar == "shape"], "normal(0, 0.5)"
+      intercepts$prior[intercepts$dpar == "sigma"], "normal(-0.7, 0.4)"
     )
-    expect_identical(intercepts$prior[intercepts$dpar == "k"], "normal(0, 0.5)")
+    expect_identical(intercepts$prior[intercepts$dpar == "Q"], "normal(0, 0.5)")
   }
 })
 

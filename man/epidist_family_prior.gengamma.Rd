@@ -28,13 +28,12 @@ parameters.}
 A \code{brmsprior} object, or \code{NULL} when the model adds no priors.
 }
 \description{
-The intercept of \code{mu}, the scale on the log scale, gets the \code{normal(1, 1)}
-prior of the lognormal family. The intercepts of \code{shape} and \code{k}, both on
-the log scale, get \code{normal(0, 0.5)} priors, which centre the family on
-the gamma (\code{shape = 1}) and Weibull (\code{k = 1}) special cases with a 95\%
-range of roughly 0.4 to 2.7 for each. The two shape parameters are only
-weakly identified by a modest number of delays, so a wide prior on either
-lets the sampler wander far into the tails.
+\code{mu} and \code{sigma}, the location and scale of the log delay, get the
+\code{normal(1, 1)} and \code{normal(-0.7, 0.4)} intercept priors of the lognormal
+family. The intercept of \code{Q}, on the log scale, gets a \code{normal(0, 0.5)}
+prior, which centres the family on the Weibull case (\code{Q = 1}) with a 95\%
+range of roughly 0.4 to 2.7. \code{Q} is only weakly identified by a modest
+number of delays.
 }
 \seealso{
 Other prior:

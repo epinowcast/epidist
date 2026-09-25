@@ -42,7 +42,7 @@ test_that("epidist.epidist_naive_model fits the gengamma family and predicts fro
   expect_convergence(fit)
   draws <- add_summaries(delay_parameter_draws(fit), probs = 0.5)
   expect_true(all(
-    c("mu", "shape", "k", "mean", "sd", "q50") %in% names(draws)
+    c("mu", "sigma", "Q", "mean", "sd", "q50") %in% names(draws)
   ))
   expect_true(all(draws$mean > 0))
   # brms uses the family's own functions for a naive fit
@@ -51,9 +51,9 @@ test_that("epidist.epidist_naive_model fits the gengamma family and predicts fro
   expect_true(all(is.finite(log_lik)))
   expect_equal(
     as.numeric(log_lik[, 1]),
-    fit$data$n[1] * flexsurv::dgengamma.orig(
+    fit$data$n[1] * flexsurv::dgengamma(
       fit$data$delay[1],
-      shape = draws$shape[1:5], scale = draws$mu[1:5], k = draws$k[1:5],
+      mu = draws$mu[1:5], sigma = draws$sigma[1:5], Q = draws$Q[1:5],
       log = TRUE
     ),
     tolerance = 1e-6

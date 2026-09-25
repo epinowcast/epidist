@@ -422,13 +422,12 @@ epidist_family_prior.lognormal <- function(family, formula, ...) {
 
 #' Family specific prior distributions for the generalised gamma family
 #'
-#' The intercept of `mu`, the scale on the log scale, gets the `normal(1, 1)`
-#' prior of the lognormal family. The intercepts of `shape` and `k`, both on
-#' the log scale, get `normal(0, 0.5)` priors, which centre the family on
-#' the gamma (`shape = 1`) and Weibull (`k = 1`) special cases with a 95%
-#' range of roughly 0.4 to 2.7 for each. The two shape parameters are only
-#' weakly identified by a modest number of delays, so a wide prior on either
-#' lets the sampler wander far into the tails.
+#' `mu` and `sigma`, the location and scale of the log delay, get the
+#' `normal(1, 1)` and `normal(-0.7, 0.4)` intercept priors of the lognormal
+#' family. The intercept of `Q`, on the log scale, gets a `normal(0, 0.5)`
+#' prior, which centres the family on the Weibull case (`Q = 1`) with a 95%
+#' range of roughly 0.4 to 2.7. `Q` is only weakly identified by a modest
+#' number of delays.
 #'
 #' @inheritParams epidist
 #' @method epidist_family_prior gengamma
@@ -438,7 +437,7 @@ epidist_family_prior.lognormal <- function(family, formula, ...) {
 #' @export
 epidist_family_prior.gengamma <- function(family, formula, ...) {
   prior <- prior("normal(1, 1)", class = "Intercept") +
-    prior("normal(0, 0.5)", class = "Intercept", dpar = "shape") +
-    prior("normal(0, 0.5)", class = "Intercept", dpar = "k")
+    prior("normal(-0.7, 0.4)", class = "Intercept", dpar = "sigma") +
+    prior("normal(0, 0.5)", class = "Intercept", dpar = "Q")
   return(prior)
 }

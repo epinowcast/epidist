@@ -4,27 +4,36 @@
 \alias{gengamma}
 \title{Generalised gamma delay distribution family}
 \usage{
-gengamma(link = "log", link_shape = "log", link_k = "log")
+gengamma(link = "identity", link_sigma = "log", link_Q = "log")
 }
 \arguments{
-\item{link, link_shape, link_k}{The link functions of \code{mu}, \code{shape} and \code{k}.
-All default to \code{"log"}.}
+\item{link, link_sigma, link_Q}{The link functions of \code{mu}, \code{sigma} and \code{Q}.
+\code{link} defaults to \code{"identity"} and the others to \code{"log"}.}
 }
 \value{
 A \code{brms} custom family object.
 }
 \description{
 A \code{brms} custom family for the generalised gamma distribution in the
-parameterisation of Stacy (1962), as used by \code{flexsurv::dgengamma.orig()}
-and by the \code{primarycensored} package.
-It has three positive distributional parameters, modelled on the log scale
-by default: \code{mu} is the scale, \code{shape} is the power parameter and \code{k} is
-the shape of the underlying gamma distribution.
-If \eqn{G} is gamma distributed with shape \code{k} and unit scale then
-\code{mu * G^(1 / shape)} is generalised gamma, so the gamma (\code{shape = 1}) and
-Weibull (\code{k = 1}) families are special cases and the lognormal is a limit.
-The mean is \code{mu * gamma(k + 1 / shape) / gamma(k)}, and \code{\link[=add_summaries]{add_summaries()}}
-gives the mean, the standard deviation and quantiles in closed form.
+parameterisation of Prentice (1974), as used by \code{flexsurv::dgengamma()}.
+\code{mu} is the location and \code{sigma} the scale of the log delay, and \code{Q} is
+the shape.
+\code{mu} is modelled on the identity scale and the positive \code{sigma} and \code{Q} on
+the log scale by default.
+If \eqn{G} is gamma distributed with shape \eqn{1 / Q^2} and unit scale
+then \eqn{\exp(\mu) (Q^2 G)^{\sigma / Q}} is generalised gamma.
+The Weibull (\code{Q = 1}) and gamma (\code{Q = sigma}) families are special cases
+and the lognormal is the limit as \code{Q} goes to zero.
+In this parameterisation \code{mu} and \code{sigma} stay close to the location and
+scale of the log delay whatever the shape, which keeps the posterior easy
+to sample.
+In the parameterisation of Stacy (1962), used by
+\code{flexsurv::dgengamma.orig()} and by \code{primarycensored}, the same
+distribution has shape \code{Q / sigma}, scale \code{exp(mu + 2 * sigma * log(Q) / Q)}
+and \code{k = 1 / Q^2}.
+The marginal and meta models pass it to \code{primarycensored} in that form.
+\code{\link[=add_summaries]{add_summaries()}} gives the mean, the standard deviation and quantiles in
+closed form.
 }
 \details{
 \code{brms} has no generalised gamma family, so this one carries the Stan
@@ -34,16 +43,23 @@ The \code{flexsurv} package must be installed to use it.
 It works with every \code{epidist} model, including the meta model, and with
 every primary event distribution.
 
+\code{Q} is positive because the Stan functions of \code{primarycensored} take the
+Stacy form, which has no counterpart for \code{Q} of zero or below.
+The lognormal limit is approached but not reached.
 The default prior of \code{\link[=epidist_family_prior]{epidist_family_prior()}} is weakly informative around
-the gamma and Weibull special cases, because \code{shape} and \code{k} are only
-weakly identified by a modest number of delays.
+the Weibull case, because \code{Q} is only weakly identified by a modest number
+of delays.
 }
 \examples{
 gengamma()
 }
 \references{
-Stacy, E. W. (1962). A generalization of the gamma
-distribution. The Annals of Mathematical Statistics, 33(3), 1187-1192.
+Prentice, R. L. (1974). A log gamma model and its maximum
+likelihood estimation. Biometrika, 61(3), 539-544.
+\doi{10.1093/biomet/61.3.539}
+
+Stacy, E. W. (1962). A generalization of the gamma distribution. The
+Annals of Mathematical Statistics, 33(3), 1187-1192.
 \doi{10.1214/aoms/1177704481}
 }
 \seealso{

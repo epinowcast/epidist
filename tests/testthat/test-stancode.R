@@ -80,13 +80,17 @@ test_that("the marginal model Stan signature matches the vreal order in the form
   return(.flatten_stan(vapply(stanvars, function(x) x$scode, character(1))))
 }
 
-test_that("the gengamma family reaches primarycensored as dist_id 5 with the Stacy parameter order", { # nolint: line_length_linter.
+test_that("the gengamma family reaches primarycensored as dist_id 5 in the Stacy form", { # nolint: line_length_linter.
   skip_if_not_installed("flexsurv")
   for (data in list(prep_marginal_obs, prep_meta_obs)) {
     family <- epidist_family(data, family = gengamma())
     formula <- epidist_formula(data, family, formula = bf(mu ~ 1))
     code <- .stanvars_code(epidist_stancode(data, family, formula))
-    expect_true(grepl("5, {shape, mu, k}", code, fixed = TRUE))
+    expect_true(grepl(
+      "5, {Q / sigma, exp(mu + 2 * sigma * log(Q) / Q), inv_square(Q)}",
+      code,
+      fixed = TRUE
+    ))
     expect_true(grepl("real gengamma_lcdf(real y", code, fixed = TRUE))
   }
 })
@@ -96,9 +100,9 @@ test_that("the latent and naive models carry the gengamma Stan functions", {
   family <- epidist_family(prep_obs, family = gengamma())
   formula <- epidist_formula(prep_obs, family, formula = bf(mu ~ 1))
   code <- .stanvars_code(epidist_stancode(prep_obs, family, formula))
-  expect_true(grepl("gengamma_lpdf(d | mu, shape, k)", code, fixed = TRUE))
+  expect_true(grepl("gengamma_lpdf(d | mu, sigma, Q)", code, fixed = TRUE))
   expect_true(grepl(
-    "gengamma_lcdf(obs_time | mu, shape, k)", code,
+    "gengamma_lcdf(obs_time | mu, sigma, Q)", code,
     fixed = TRUE
   ))
   expect_true(grepl("real gengamma_lpdf(vector y", code, fixed = TRUE))
@@ -113,49 +117,96 @@ test_that("the latent and naive models carry the gengamma Stan functions", {
     family = gengamma(), fn = brms::make_stancode
   ))
   expect_true(grepl(
-    "gengamma_lpdf(Y[n] | mu[n], shape[n], k[n])", model,
+    "gengamma_lpdf(Y[n] | mu[n], sigma[n], Q[n])", model,
     fixed = TRUE
   ))
   # A brms family adds nothing to the naive model
   expect_null(epidist_stancode(prep_naive_obs))
 })
 
-test_that("the gengamma Stan density and distribution function match flexsurv", { # nolint: line_length_linter.
-  skip_on_cran()
-  skip_if_not_installed("flexsurv")
-  y <- c(0.5, 2, 6, 15)
-  mu <- c(5, 3, 7, 2)
-  shape <- c(1.5, 1, 0.4, 2.5)
-  k <- c(1.2, 2, 3, 0.6)
+# Evaluate the gengamma Stan density and distribution function at each
+# element of the Prentice parameters.
+gengamma_stan_values <- function(y, mu, sigma, Q) {
   code <- paste(
     "functions {", .stan_chunk(file.path("family", "gengamma.stan")), "}",
-    "data { int N; vector[N] y; vector[N] mu; vector[N] shape;",
-    "vector[N] k; }",
+    "data { int N; vector[N] y; vector[N] mu; vector[N] sigma;",
+    "vector[N] Q; }",
     "generated quantities {",
     "vector[N] lpdf; vector[N] lcdf;",
     "for (n in 1:N) {",
-    "lpdf[n] = gengamma_lpdf(y[n] | mu[n], shape[n], k[n]);",
-    "lcdf[n] = gengamma_lcdf(y[n:n] | mu[n:n], shape[n], k[n]);",
+    "lpdf[n] = gengamma_lpdf(y[n] | mu[n], sigma[n], Q[n]);",
+    "lcdf[n] = gengamma_lcdf(y[n:n] | mu[n:n], sigma[n], Q[n]);",
     "}",
     "}",
     sep = "\n"
   )
   fit <- suppressMessages(rstan::sampling(
     rstan::stan_model(model_code = code),
-    data = list(N = length(y), y = y, mu = mu, shape = shape, k = k),
+    data = list(N = length(y), y = y, mu = mu, sigma = sigma, Q = Q),
     algorithm = "Fixed_param", chains = 1, iter = 1, warmup = 0, refresh = 0
   ))
   draws <- posterior::as_draws_matrix(fit)
-  lpdf <- as.numeric(draws[1, paste0("lpdf[", seq_along(y), "]")])
-  lcdf <- as.numeric(draws[1, paste0("lcdf[", seq_along(y), "]")])
+  return(list(
+    lpdf = as.numeric(draws[1, paste0("lpdf[", seq_along(y), "]")]),
+    lcdf = as.numeric(draws[1, paste0("lcdf[", seq_along(y), "]")])
+  ))
+}
+
+test_that("the gengamma Stan density and distribution function match flexsurv", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_not_installed("flexsurv")
+  y <- c(0.5, 2, 6, 15)
+  mu <- c(1.6, 1.1, 2, 0.7)
+  sigma <- c(0.6, 0.7, 1.2, 0.4)
+  Q <- c(0.9, 0.7, 0.3, 1.8)
+  stan <- gengamma_stan_values(y, mu, sigma, Q)
   expect_equal(
-    lpdf,
-    flexsurv::dgengamma.orig(y, shape = shape, scale = mu, k = k, log = TRUE),
+    stan$lpdf,
+    flexsurv::dgengamma(y, mu = mu, sigma = sigma, Q = Q, log = TRUE),
     tolerance = 1e-8
   )
   expect_equal(
-    lcdf,
-    log(flexsurv::pgengamma.orig(y, shape = shape, scale = mu, k = k)),
+    stan$lcdf,
+    flexsurv::pgengamma(y, mu = mu, sigma = sigma, Q = Q, log.p = TRUE),
+    tolerance = 1e-8
+  )
+  # Close to the lognormal limit the density uses Stirling's series and the
+  # distribution function the normal approximation to the gamma distribution
+  # function
+  near_lognormal <- gengamma_stan_values(
+    c(2, 6, 15), rep(1.8, 3), rep(0.5, 3), rep(0.02, 3)
+  )
+  expect_equal(
+    near_lognormal$lpdf,
+    flexsurv::dgengamma(c(2, 6, 15), 1.8, 0.5, 0.02, log = TRUE),
+    tolerance = 1e-8
+  )
+  expect_equal(
+    near_lognormal$lcdf,
+    flexsurv::pgengamma(c(2, 6, 15), 1.8, 0.5, 0.02, log.p = TRUE),
+    tolerance = 1e-5
+  )
+  # and both reach the lognormal where Q is far too small to use the gamma
+  # function directly
+  lognormal <- gengamma_stan_values(
+    c(2, 6, 15), rep(1.8, 3), rep(0.5, 3), rep(1e-12, 3)
+  )
+  expect_equal(
+    lognormal$lpdf, dlnorm(c(2, 6, 15), 1.8, 0.5, log = TRUE),
+    tolerance = 1e-8
+  )
+  expect_equal(
+    lognormal$lcdf, plnorm(c(2, 6, 15), 1.8, 0.5, log.p = TRUE),
+    tolerance = 1e-8
+  )
+  # The Stacy form that the marginal and meta models pass to primarycensored
+  stacy <- .gengamma_stacy(mu, sigma, Q)
+  expect_equal(
+    stan$lpdf,
+    flexsurv::dgengamma.orig(
+      y,
+      shape = stacy$shape, scale = stacy$scale, k = stacy$k, log = TRUE
+    ),
     tolerance = 1e-8
   )
 })
@@ -165,31 +216,18 @@ test_that("the gengamma Stan distribution function stays finite deep in the lowe
   skip_if_not_installed("flexsurv")
   # The distribution function underflows to zero at each of these points. A
   # log distribution function of minus infinity in the latent model's
-  # truncation adjustment makes the log posterior plus infinity.
-  y <- c(2, 2, 20)
-  mu <- c(5, 5, 48)
-  shape <- c(5, 1, 5000)
-  k <- c(100, 400, 7480)
-  code <- paste(
-    "functions {", .stan_chunk(file.path("family", "gengamma.stan")), "}",
-    "data { int N; vector[N] y; vector[N] mu; vector[N] shape;",
-    "vector[N] k; }",
-    "generated quantities {",
-    "vector[N] lcdf;",
-    "for (n in 1:N) {",
-    "lcdf[n] = gengamma_lcdf(y[n:n] | mu[n:n], shape[n], k[n]);",
-    "}",
-    "}",
-    sep = "\n"
-  )
-  fit <- suppressMessages(rstan::sampling(
-    rstan::stan_model(model_code = code),
-    data = list(N = length(y), y = y, mu = mu, shape = shape, k = k),
-    algorithm = "Fixed_param", chains = 1, iter = 1, warmup = 0, refresh = 0
-  ))
-  draws <- posterior::as_draws_matrix(fit)
-  lcdf <- as.numeric(draws[1, paste0("lcdf[", seq_along(y), "]")])
-  log_x <- shape * log(y / mu)
+  # truncation adjustment makes the log posterior plus infinity. The points
+  # are given in the Stacy form, whose gamma distribution function argument
+  # is (y / scale)^shape with shape parameter k.
+  y <- c(2, 2, 2)
+  scale <- c(5, 5, 5)
+  shape <- c(5, 1, 50)
+  k <- c(100, 400, 400)
+  Q <- 1 / sqrt(k)
+  sigma <- Q / shape
+  mu <- log(scale) - 2 * sigma * log(Q) / Q
+  lcdf <- gengamma_stan_values(y, mu, sigma, Q)$lcdf
+  log_x <- shape * log(y / scale)
   expected <- c(
     pgamma(exp(log_x[1:2]), k[1:2], log.p = TRUE),
     # The limit as the argument of the gamma distribution function goes to 0

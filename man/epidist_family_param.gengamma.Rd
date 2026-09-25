@@ -25,8 +25,9 @@ ordering and a \code{pcd_param} element giving the \code{primarycensored} one.
 \description{
 \code{brms} calls the Stan density of a custom family with its distributional
 parameters in the order they are declared, which is the \code{param} the
-latent model uses. \code{primarycensored} takes the generalised gamma as
-\verb{[shape, scale, k]}, so the marginal and meta models pass \code{pcd_param}.
+latent model uses. \code{primarycensored} takes the generalised gamma in the
+Stacy form \verb{[shape, scale, k]}, so the marginal and meta models pass
+\code{pcd_param}, which converts to it.
 }
 \seealso{
 Other family:

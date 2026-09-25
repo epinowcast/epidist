@@ -85,7 +85,7 @@ meta_dpar_draws <- function(program, ...) {
 meta_dist_args <- function(dist, dpars) {
   return(switch(dist,
     plnorm = list(meanlog = dpars$mu, sdlog = dpars$sigma),
-    pgengamma.orig = list(shape = dpars$shape, scale = dpars$mu, k = dpars$k)
+    pgengamma.orig = .gengamma_stacy(dpars$mu, dpars$sigma, dpars$Q)
   ))
 }
 
