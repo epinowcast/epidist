@@ -16,6 +16,12 @@ The meta model is still experimental and its interface may change.
 The Weibull and gamma are special cases and the lognormal is its limit.
 Closes #644.
 
+## Bug fixes
+
+- Removed the remaining lookups of unexported `brms` functions, so `log_lik()`, `posterior_predict()` and `posterior_epred()` use `epidist`'s own functions for every family.
+These cover the lognormal, gamma, Weibull, exponential and generalised gamma families.
+For any other family these functions now give an error.
+
 ## Documentation
 
 - The help for `epidist_gen_meta_log_lik()` and `as_epidist_meta_model()` now states the cost of `log_lik()` and `loo()` for meta model summary rows, and how `ndraws` reduces it.

@@ -21,8 +21,8 @@ A matrix with one row per element of the vectors in \code{dpars} and
 \code{nsim} columns.
 }
 \description{
-Simulation goes through the \code{brms} posterior prediction function for the
-family, so it works for any family \code{brms} can predict from. Rows are
+Simulation goes through the posterior prediction function
+\code{\link[=.get_brms_fn]{.get_brms_fn()}} gives for the family. Rows are
 simulated in chunks to bound the memory used.
 }
 \keyword{internal}
