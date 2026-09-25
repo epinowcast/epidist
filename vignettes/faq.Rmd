@@ -398,7 +398,7 @@ This parameter does not necessarily correspond to the mean, hence the provision 
 # How can I generate predictions with my fitted `epidist` model?
 
 It is possible to generate predictions manually by working with [samples from the model output](https://epidist.epinowcast.org/articles/faq.html#i-would-like-to-work-with-the-samples-output).
-However this is tricky to do, and so where possible we recommend using the [`tidybayes`](http://mjskay.github.io/tidybayes/) package.
+However this is tricky to do, and so where possible we recommend using the [`tidybayes`](https://mjskay.github.io/tidybayes/) package.
 In particular, following functions may be useful:
 
 1. `tidybayes::add_epred_draws()` for predictions of the expected value of a delay.
