@@ -1138,6 +1138,44 @@
   }
 
   /**
+    * Partial expectation below a positive x of a lognormal delay with params
+    * [meanlog, sdlog].
+    */
+  real meta_partial_expectation_lognormal(real x, array[] real params) {
+    return exp(params[1] + 0.5 * square(params[2]) +
+               lognormal_lcdf(x | params[1] + square(params[2]), params[2]));
+  }
+
+  /**
+    * Partial expectation below a positive x of a gamma delay with params
+    * [shape, rate].
+    */
+  real meta_partial_expectation_gamma(real x, array[] real params) {
+    return params[1] / params[2] * gamma_p(params[1] + 1, params[2] * x);
+  }
+
+  /**
+    * Partial expectation below a positive x of a weibull delay with params
+    * [shape, scale].
+    */
+  real meta_partial_expectation_weibull(real x, array[] real params) {
+    return params[2] * tgamma(1 + 1 / params[1]) *
+      gamma_p(1 + 1 / params[1], pow(x / params[2], params[1]));
+  }
+
+  /**
+    * Partial expectation below a positive x of a generalised gamma delay
+    * with Stacy params [shape, scale, k]: the mean times the distribution
+    * function with k + 1 / shape, as for the weibull, which is the k = 1
+    * case.
+    */
+  real meta_partial_expectation_gengamma(real x, array[] real params) {
+    return params[2] *
+      exp(lgamma(params[3] + 1 / params[1]) - lgamma(params[3])) *
+      gamma_p(params[3] + 1 / params[1], pow(x / params[2], params[1]));
+  }
+
+  /**
     * Partial expectation of the delay below `x`, the integral of t f(t) from
     * zero to x, in closed form for each family.
     */
@@ -1146,23 +1184,16 @@
       return 0;
     }
     if (dist_id == 1) {
-      return exp(params[1] + 0.5 * square(params[2]) +
-                 lognormal_lcdf(x | params[1] + square(params[2]),
-                                params[2]));
+      return meta_partial_expectation_lognormal(x, params);
     }
     if (dist_id == 2) {
-      return params[1] / params[2] * gamma_p(params[1] + 1, params[2] * x);
+      return meta_partial_expectation_gamma(x, params);
     }
     if (dist_id == 3) {
-      return params[2] * tgamma(1 + 1 / params[1]) *
-        gamma_p(1 + 1 / params[1], pow(x / params[2], params[1]));
+      return meta_partial_expectation_weibull(x, params);
     }
     if (dist_id == 5) {
-      // The mean times the distribution function with k + 1 / shape, as
-      // for the weibull, which is the k = 1 case.
-      return params[2] *
-        exp(lgamma(params[3] + 1 / params[1]) - lgamma(params[3])) *
-        gamma_p(params[3] + 1 / params[1], pow(x / params[2], params[1]));
+      return meta_partial_expectation_gengamma(x, params);
     }
     reject("Meta model summary rows support lognormal, gamma, weibull and ",
            "generalised gamma delay distributions only.");
