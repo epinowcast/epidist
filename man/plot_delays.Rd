@@ -41,7 +41,7 @@ The columns named by \code{by} are kept in the plot data, so the plot can be
 faceted by them.
 }
 \examples{
-\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 linelist <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",
@@ -56,12 +56,12 @@ plot_delays(list(All = linelist, Early = head(linelist, 500)))
 \code{\link[=plot_events]{plot_events()}} to plot the event windows the delays come from,
 and \code{\link[=plot.epidist_delay_draws]{plot.epidist_delay_draws()}} to plot a fitted delay distribution.
 
-Other plot: 
-\code{\link{plot.epidist_delay_draws}()},
-\code{\link{plot_delays.default}()},
-\code{\link{plot_delays.epidist_fit}()},
-\code{\link{plot_delays.epidist_linelist_data}()},
-\code{\link{plot_delays.list}()},
-\code{\link{plot_events}()}
+Other plot:
+\code{\link[=plot.epidist_delay_draws]{plot.epidist_delay_draws()}},
+\code{\link[=plot_delays.default]{plot_delays.default()}},
+\code{\link[=plot_delays.epidist_fit]{plot_delays.epidist_fit()}},
+\code{\link[=plot_delays.epidist_linelist_data]{plot_delays.epidist_linelist_data()}},
+\code{\link[=plot_delays.list]{plot_delays.list()}},
+\code{\link[=plot_events]{plot_events()}}
 }
 \concept{plot}
