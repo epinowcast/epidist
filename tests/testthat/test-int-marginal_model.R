@@ -79,6 +79,8 @@ test_that("epidist.epidist_marginal_model fits and recovers a sex effect", { # n
 })
 
 test_that("epidist.epidist_marginal_model with a nonparametric delay recovers the mean of each stratum", { # nolint: line_length_linter.
+  # The strata differ in the shape of the delay as well as its location, so
+  # the linear part of the hazard spline varies by stratum as well as `mu`.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()
   skip_if_no_fits()
@@ -110,10 +112,22 @@ test_that("epidist.epidist_marginal_model with a nonparametric delay recovers th
   # observation time, which brms warns about.
   fit <- suppressWarnings(suppressMessages(epidist(
     data,
-    formula = mu ~ 1 + group, family = nonparametric(),
+    formula = bf(mu ~ 1 + group, h1b ~ 1 + group),
+    family = nonparametric(),
     seed = 1, chains = 2, cores = 2, refresh = 0, iter = 1000, silent = 2
   )))
   expect_convergence(fit)
+  # The post-processing brms does from the prep object works per
+  # observation, as for the parametric families.
+  log_lik <- brms::log_lik(fit, draw_ids = 1:5)
+  expect_identical(dim(log_lik), c(5L, nrow(fit$data)))
+  expect_true(all(is.finite(log_lik)))
+  expect_s3_class(suppressWarnings(loo::loo(fit)), "loo")
+  pred <- brms::posterior_predict(fit, draw_ids = 1:5)
+  expect_identical(dim(pred), c(5L, nrow(fit$data)))
+  epred <- brms::posterior_epred(fit, draw_ids = 1:5)
+  expect_identical(dim(epred), c(5L, nrow(fit$data)))
+  expect_true(all(epred > 0))
   summaries <- delay_summary_draws(fit)
   # The daily delay of a uniform primary event has the mean of the
   # continuous delay, which is what the bins recover.
