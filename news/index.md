@@ -415,6 +415,14 @@
   [`ggplot2::theme_minimal()`](https://ggplot2.tidyverse.org/reference/ggtheme.html)
   and a colour blind friendly palette, so that their output matches the
   plots in the package documentation.
+- Added a
+  [`distspec::as_dist_spec()`](https://epiforecasts.io/distspec/reference/as_dist_spec.html)
+  method for fitted models, which exports a fitted delay distribution as
+  an uncertain `<dist_spec>`. The natural parameters of the delay
+  distribution are computed for each posterior draw and summarised into
+  a `Normal()` prior on each. `distspec` is a suggested package, and the
+  method is registered when it is loaded. See
+  [`?as_dist_spec.epidist_fit`](https://epidist.epinowcast.org/reference/as_dist_spec.epidist_fit.md).
 - Added
   [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md),
   which wraps the three usual post-processing steps into one call. It

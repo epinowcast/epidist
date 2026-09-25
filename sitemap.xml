@@ -16,6 +16,7 @@
 <url><loc>https://epidist.epinowcast.org/index.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/news/index.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/add_summaries.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/as_dist_spec.epidist_fit.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/as_epidist_aggregate_data.data.frame.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/as_epidist_aggregate_data.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/as_epidist_aggregate_data.epidist_linelist_data.html</loc></url>
@@ -87,6 +88,8 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-delay_reference_layer.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-delay_strata.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-describe_prior.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-dist_spec_family.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-dist_spec_from_draws.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-dpar_bounds.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-dpar_draws.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-draw_chain_iteration.html</loc></url>
@@ -149,6 +152,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-family_functions_stanvar.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-fill_estimates_defaults.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-fill_other_links.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-fit_newdata.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-fitted_delays.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-floor_mult.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-get_brms_fn.html</loc></url>
@@ -314,6 +318,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-sample_summaries.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-simulate_delays.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-stan_chunk.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-stratum_names.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-study_bootstrap.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-study_cases.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-study_measured_delay.html</loc></url>

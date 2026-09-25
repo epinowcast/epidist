@@ -682,6 +682,11 @@ Functions for postprocessing model output
 - [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
   : Add natural scale summaries of the delay distribution
 
+- [`as_dist_spec(`*`<epidist_fit>`*`)`](https://epidist.epinowcast.org/reference/as_dist_spec.epidist_fit.md)
+  :
+
+  Export a fitted delay distribution as a `distspec` distribution
+
 - [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
   [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
   : Posterior draws of the delay distribution parameters

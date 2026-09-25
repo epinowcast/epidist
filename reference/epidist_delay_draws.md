@@ -109,6 +109,7 @@ same family.
 
 Other postprocess:
 [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md),
+[`as_dist_spec.epidist_fit()`](https://epidist.epinowcast.org/reference/as_dist_spec.epidist_fit.md),
 [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
 [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md),
 [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)

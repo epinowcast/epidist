@@ -84,6 +84,7 @@ if it is slow.
 ## See also
 
 Other postprocess:
+[`as_dist_spec.epidist_fit()`](https://epidist.epinowcast.org/reference/as_dist_spec.epidist_fit.md),
 [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
 [`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md),
 [`epidist_delay_draws`](https://epidist.epinowcast.org/reference/epidist_delay_draws.md),
