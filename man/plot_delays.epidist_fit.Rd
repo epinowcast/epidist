@@ -44,7 +44,7 @@ predicts for the same cases over them, as the posterior median proportion
 in each bin with a ribbon between two quantiles.
 }
 \details{
-The predictions come from \code{\link[brms:posterior_predict.brmsfit]{brms::posterior_predict()}}, so they are of the
+The predictions come from \code{\link[brms:posterior_predict]{brms::posterior_predict()}}, so they are of the
 delay as it was observed, under the censoring and truncation of each case.
 That makes the plot a posterior predictive check of the observed delays
 rather than a picture of the delay distribution itself, which
@@ -56,7 +56,7 @@ data nor the predictive interval puts any mass are dropped, which trims the
 tail of the predictive distribution.
 }
 \examples{
-\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 \donttest{
 fit <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
@@ -72,12 +72,12 @@ plot_delays(fit)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-Other plot: 
-\code{\link{plot.epidist_delay_draws}()},
-\code{\link{plot_delays}()},
-\code{\link{plot_delays.default}()},
-\code{\link{plot_delays.epidist_linelist_data}()},
-\code{\link{plot_delays.list}()},
-\code{\link{plot_events}()}
+Other plot:
+\code{\link[=plot.epidist_delay_draws]{plot.epidist_delay_draws()}},
+\code{\link[=plot_delays]{plot_delays()}},
+\code{\link[=plot_delays.default]{plot_delays.default()}},
+\code{\link[=plot_delays.epidist_linelist_data]{plot_delays.epidist_linelist_data()}},
+\code{\link[=plot_delays.list]{plot_delays.list()}},
+\code{\link[=plot_events]{plot_events()}}
 }
 \concept{plot}

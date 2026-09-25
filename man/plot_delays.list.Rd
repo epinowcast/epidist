@@ -46,12 +46,12 @@ A \code{ggplot} object.
 The names of \code{x} label the strata.
 }
 \seealso{
-Other plot: 
-\code{\link{plot.epidist_delay_draws}()},
-\code{\link{plot_delays}()},
-\code{\link{plot_delays.default}()},
-\code{\link{plot_delays.epidist_fit}()},
-\code{\link{plot_delays.epidist_linelist_data}()},
-\code{\link{plot_events}()}
+Other plot:
+\code{\link[=plot.epidist_delay_draws]{plot.epidist_delay_draws()}},
+\code{\link[=plot_delays]{plot_delays()}},
+\code{\link[=plot_delays.default]{plot_delays.default()}},
+\code{\link[=plot_delays.epidist_fit]{plot_delays.epidist_fit()}},
+\code{\link[=plot_delays.epidist_linelist_data]{plot_delays.epidist_linelist_data()}},
+\code{\link[=plot_events]{plot_events()}}
 }
 \concept{plot}
