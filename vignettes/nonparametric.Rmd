@@ -78,12 +78,12 @@ fit_np <- epidist(
   chains = 2, cores = 2, refresh = 0, seed = 1, backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 117.1 seconds.
-#> Chain 1 finished in 122.2 seconds.
+#> Chain 2 finished in 116.5 seconds.
+#> Chain 1 finished in 117.9 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 119.6 seconds.
-#> Total execution time: 122.3 seconds.
+#> Mean chain execution time: 117.2 seconds.
+#> Total execution time: 118.1 seconds.
 
 fit_lognormal <- epidist(
   model_data,
@@ -92,12 +92,12 @@ fit_lognormal <- epidist(
   chains = 2, cores = 2, refresh = 0, seed = 1, backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
+#> Chain 2 finished in 1.1 seconds.
 #> Chain 1 finished in 1.2 seconds.
-#> Chain 2 finished in 1.2 seconds.
 #>
 #> Both chains finished successfully.
 #> Mean chain execution time: 1.2 seconds.
-#> Total execution time: 1.3 seconds.
+#> Total execution time: 1.4 seconds.
 ```
 
 `delay_summary_draws()` gives the mean and standard deviation of the delay in each age group, as for any other family.
@@ -127,8 +127,8 @@ bind_rows(
 #> # A tibble: 6 × 5
 #>   model          age_group  mean    sd   q90
 #>   <chr>          <chr>     <dbl> <dbl> <dbl>
-#> 1 Non-parametric younger    3.75  2.71  7
-#> 2 Non-parametric older      6.90  4.73 14
+#> 1 Non-parametric younger    3.76  2.71  7
+#> 2 Non-parametric older      6.91  4.73 14
 #> 3 Lognormal      younger    3.96  3.48  7.83
 #> 4 Lognormal      older      7.30  7.28 15.0
 #> 5 Truth          younger    3.61  2.45  6.97
@@ -246,12 +246,12 @@ fit_meta <- epidist(
 )
 #> Running MCMC with 2 parallel chains...
 #>
-#> Chain 1 finished in 283.5 seconds.
-#> Chain 2 finished in 293.3 seconds.
+#> Chain 1 finished in 389.2 seconds.
+#> Chain 2 finished in 394.7 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 288.4 seconds.
-#> Total execution time: 293.5 seconds.
+#> Mean chain execution time: 391.9 seconds.
+#> Total execution time: 394.9 seconds.
 ```
 
 The reported means are biased low by right truncation.
@@ -268,7 +268,7 @@ delay_summary_draws(fit_meta) |>
 #> # A tibble: 1 × 3
 #>   median lower upper
 #>    <dbl> <dbl> <dbl>
-#> 1   6.63  6.12  14.4
+#> 1   6.84  6.17  22.2
 truth$mean[truth$age_group == "older"]
 #>    older
 #> 7.221962
