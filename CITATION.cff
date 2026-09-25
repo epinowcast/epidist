@@ -1,0 +1,61 @@
+# ------------------------------------------------
+# CITATION.cff file created with {cffr} R package
+# See also: https://docs.ropensci.org/cffr/
+# ------------------------------------------------
+
+cff-version: 1.2.0
+message: 'To cite package "epidist" in publications use:'
+type: software
+license: MIT
+title: 'epidist: Estimate Epidemiological Delay Distributions with ''brms'''
+version: 0.5.0
+doi: 10.5281/zenodo.14213017
+identifiers:
+- type: url
+  value: https://github.com/epinowcast/epidist/
+abstract: Understanding and accurately estimating epidemiological delay distributions
+  is important for public health policy. These estimates influence epidemic situational
+  awareness, control strategies, and resource allocation. This package provides methods
+  to address the key challenges in estimating these distributions, including truncation,
+  interval censoring, and dynamical biases. These issues are frequently overlooked,
+  resulting in biased conclusions. Built on top of 'brms', it allows for flexible
+  modelling including time-varying spatial components and partially pooled estimates
+  of demographic characteristics.
+authors:
+- family-names: Howes
+  given-names: Adam
+  email: adamthowes@gmail.com
+  orcid: https://orcid.org/0000-0003-2386-4031
+- family-names: Park
+  given-names: Sang Woo
+  email: swp2@princeton.edu
+  orcid: https://orcid.org/0000-0003-2202-3361
+- family-names: Abbott
+  given-names: Sam
+  email: contact@samabbott.co.uk
+  orcid: https://orcid.org/0000-0001-8057-8037
+preferred-citation:
+  type: manual
+  title: 'epidist: Estimate Epidemiological Delay Distributions with ''brms'''
+  authors:
+  - family-names: Howes
+    given-names: Adam
+    email: adamthowes@gmail.com
+    orcid: https://orcid.org/0000-0003-2386-4031
+  - family-names: Park
+    given-names: Sang Woo
+    email: swp2@princeton.edu
+    orcid: https://orcid.org/0000-0003-2202-3361
+  - family-names: Abbott
+    given-names: Sam
+    email: contact@samabbott.co.uk
+    orcid: https://orcid.org/0000-0001-8057-8037
+  year: '2026'
+  doi: 10.5281/zenodo.14213017
+repository-code: https://github.com/epinowcast/epidist
+url: https://epidist.epinowcast.org/
+contact:
+- family-names: Abbott
+  given-names: Sam
+  email: contact@samabbott.co.uk
+  orcid: https://orcid.org/0000-0001-8057-8037
