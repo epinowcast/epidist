@@ -44,6 +44,8 @@
 #' Summary rows are evaluated in R for each posterior draw, so both are slow
 #' for a fit with many draws and summary rows. Pass `ndraws` to use fewer
 #' draws, as [epidist_gen_meta_log_lik()] explains. See `vignette("faq")`.
+#' [epidist_meta_leave_one_out()] asks the study level question instead,
+#' refitting with each study held out.
 #'
 #' The sampling standard errors are plug in quantities that depend on the
 #' parameters, so allow for genuine differences between studies with a term

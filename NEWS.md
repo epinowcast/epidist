@@ -171,6 +171,8 @@ It compares a named list of datasets, weights aggregate data by its counts, over
 Given a fitted model it draws the delays the model predicts over the delays it was fitted to, as a posterior predictive check of the observed delays.
 Closes #743.
 - The plot functions use `ggplot2::theme_minimal()` and a colour blind friendly palette, so that their output matches the plots in the package documentation.
+- Added `epidist_meta_leave_one_out()`, which refits a meta model once per study with that study held out and reports how the delay mean and standard deviation differ from the full fit.
+Closes #642.
 - Added a `distspec::as_dist_spec()` method for fitted models, which exports a fitted delay distribution as an uncertain `<dist_spec>`.
 The natural parameters of the delay distribution are computed for each posterior draw and summarised into a `Normal()` prior on each.
 `distspec` is a suggested package, and the method is registered when it is loaded.
@@ -210,6 +212,8 @@ See #399.
 
 ## Package
 
+- The package lifecycle is now maturing rather than experimental.
+The meta model is still marked as experimental.
 - Rendered vignette output is no longer copied into the built package tarball.
 `R CMD build` does not read `.gitignore`, so a locally rendered `vignettes/epidist.html` or a knitr cache directory was shipped with the package.
 `.Rbuildignore` now excludes `.html`, `.pdf`, `.tex` and `.md` files under `vignettes/`, along with `_cache` and `_files` directories.
@@ -341,6 +345,10 @@ Closes #725.
 - The package is now documented with `roxygen2` 8.1.0.
 The version is recorded in `Config/roxygen2/version` in place of `RoxygenNote`.
 `NAMESPACE` now has one `importFrom()` directive per package, and links to other packages now point at the topic alias rather than the Rd file name.
+- The meta model calls `primarycensored::pprimarycensored()` with validation disabled, as the marginal model log likelihoods already did.
+Its delay and primary event distributions are fixed functions from `stats` and `primarycensored`, so they need no validation.
+The meta model log likelihood no longer advances the RNG stream, and a call is a few percent faster.
+Closes #750.
 
 ## Documentation
 

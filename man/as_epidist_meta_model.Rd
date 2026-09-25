@@ -64,6 +64,8 @@ fits to the same studies and the same mix of individual and summary rows.
 Summary rows are evaluated in R for each posterior draw, so both are slow
 for a fit with many draws and summary rows. Pass \code{ndraws} to use fewer
 draws, as \code{\link[=epidist_gen_meta_log_lik]{epidist_gen_meta_log_lik()}} explains. See \code{vignette("faq")}.
+\code{\link[=epidist_meta_leave_one_out]{epidist_meta_leave_one_out()}} asks the study level question instead,
+refitting with each study held out.
 
 The sampling standard errors are plug in quantities that depend on the
 parameters, so allow for genuine differences between studies with a term
@@ -103,6 +105,7 @@ Other meta_model:
 \code{\link[=assert_epidist.epidist_meta_model]{assert_epidist.epidist_meta_model()}},
 \code{\link[=epidist_family_model.epidist_meta_model]{epidist_family_model.epidist_meta_model()}},
 \code{\link[=epidist_formula_model.epidist_meta_model]{epidist_formula_model.epidist_meta_model()}},
+\code{\link[=epidist_meta_leave_one_out]{epidist_meta_leave_one_out()}},
 \code{\link[=epidist_model_prior.epidist_meta_model]{epidist_model_prior.epidist_meta_model()}},
 \code{\link[=epidist_newdata.epidist_meta_model]{epidist_newdata.epidist_meta_model()}},
 \code{\link[=epidist_transform_data_model.epidist_meta_model]{epidist_transform_data_model.epidist_meta_model()}},
