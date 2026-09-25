@@ -149,6 +149,9 @@
 #' @keywords internal
 .meta_pcens_cdf <- function(q, dist, args, pwindow, growth_rate) {
   primary <- .meta_primary(growth_rate)
+  # `check = FALSE` because `pdist` and `dprimary` are fixed functions that
+  # need no validation. Validating them would evaluate each at random
+  # points on every call and so advance the RNG.
   cdf <- do.call(
     primarycensored::pprimarycensored,
     c(
