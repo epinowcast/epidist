@@ -28,6 +28,13 @@ for each posterior draw. A row that stands for several summaries reported by
 one study returns the joint log likelihood of all of them, so an observation
 here is a group of summaries rather than a single reported value.
 }
+\details{
+Summary rows are evaluated in R, one posterior draw at a time, and each
+evaluation can run a quadrature of up to 2000 intervals by default. The
+cost of \code{\link[brms:log_lik]{brms::log_lik()}} and \code{\link[loo:loo]{loo::loo()}} therefore grows with the number
+of draws times the number of summary rows. Pass \code{ndraws} to either to use
+fewer draws, at the price of noisier estimates.
+}
 \seealso{
 \code{\link[brms:log_lik]{brms::log_lik()}} for details on the brms log likelihood interface.
 
