@@ -171,6 +171,10 @@ It compares a named list of datasets, weights aggregate data by its counts, over
 Given a fitted model it draws the delays the model predicts over the delays it was fitted to, as a posterior predictive check of the observed delays.
 Closes #743.
 - The plot functions use `ggplot2::theme_minimal()` and a colour blind friendly palette, so that their output matches the plots in the package documentation.
+- Added a `distspec::as_dist_spec()` method for fitted models, which exports a fitted delay distribution as an uncertain `<dist_spec>`.
+The natural parameters of the delay distribution are computed for each posterior draw and summarised into a `Normal()` prior on each.
+`distspec` is a suggested package, and the method is registered when it is loaded.
+See `?as_dist_spec.epidist_fit`.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
 It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
 Each step is still available on its own.
@@ -334,6 +338,9 @@ No function was renamed or changed.
 Closes #709.
 - The study labels of the test lockstep fixtures are now namespaced by the fixture that owns them and checked before the fixtures are bound, so a branch that adds a fixture reusing a label fails loudly rather than merging cleanly into a silent collision.
 Closes #725.
+- The package is now documented with `roxygen2` 8.1.0.
+The version is recorded in `Config/roxygen2/version` in place of `RoxygenNote`.
+`NAMESPACE` now has one `importFrom()` directive per package, and links to other packages now point at the topic alias rather than the Rd file name.
 
 ## Documentation
 

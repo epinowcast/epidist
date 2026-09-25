@@ -41,13 +41,13 @@ outbreak. When there are more than \code{n} cases, \code{n} evenly spaced cases 
 that order are drawn. This keeps the shape of the outbreak without
 over-plotting.
 
-The plot is drawn with \code{\link[ggplot2:ggtheme]{ggplot2::theme_minimal()}} and the colour blind
+The plot is drawn with \code{\link[ggplot2:theme_minimal]{ggplot2::theme_minimal()}} and the colour blind
 friendly palette the package documentation uses. Add a theme or a scale of
 your own to the returned plot to override either. The column named by \code{by}
 is kept in the plot data, so the plot can be faceted by it.
 }
 \examples{
-\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 linelist <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",
@@ -58,12 +58,12 @@ plot_events(linelist, obs_time = as.Date("2014-10-01"), by = "district")
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-Other plot: 
-\code{\link{plot.epidist_delay_draws}()},
-\code{\link{plot_delays}()},
-\code{\link{plot_delays.default}()},
-\code{\link{plot_delays.epidist_fit}()},
-\code{\link{plot_delays.epidist_linelist_data}()},
-\code{\link{plot_delays.list}()}
+Other plot:
+\code{\link[=plot.epidist_delay_draws]{plot.epidist_delay_draws()}},
+\code{\link[=plot_delays]{plot_delays()}},
+\code{\link[=plot_delays.default]{plot_delays.default()}},
+\code{\link[=plot_delays.epidist_fit]{plot_delays.epidist_fit()}},
+\code{\link[=plot_delays.epidist_linelist_data]{plot_delays.epidist_linelist_data()}},
+\code{\link[=plot_delays.list]{plot_delays.list()}}
 }
 \concept{plot}
