@@ -102,52 +102,101 @@
 #'
 #' @keywords internal
 .meta_continuous_moments <- function(dist, args) {
-  if (identical(dist, "pdiscretehazard")) {
-    # Point masses at the right edge of each bin
-    edges <- args$boundaries[-1]
-    mass <- primarycensored::hazards_to_pmf(args$hazards)
-    delay_mean <- sum(mass * edges)
-    centred <- edges - delay_mean
-    moments <- .meta_moment_vector(
-      delay_mean, sum(mass * centred^2), sum(mass * centred^3),
-      sum(mass * centred^4)
-    )
-  } else if (identical(dist, "plnorm")) {
-    var_log <- args$sdlog^2
-    delay_mean <- exp(args$meanlog + var_log / 2)
-    variance <- delay_mean^2 * expm1(var_log)
-    kurtosis <- exp(4 * var_log) +
-      2 * exp(3 * var_log) +
-      3 * exp(2 * var_log) -
-      3
-    skewness <- (exp(var_log) + 2) * sqrt(expm1(var_log))
-    moments <- .meta_moment_vector(
-      delay_mean, variance, skewness * variance^1.5, kurtosis * variance^2
-    )
-  } else if (identical(dist, "pgamma")) {
-    variance <- args$shape * args$scale^2
-    moments <- .meta_moment_vector(
-      args$shape * args$scale,
-      variance,
-      2 / sqrt(args$shape) * variance^1.5,
-      (3 + 6 / args$shape) * variance^2
-    )
-  } else if (identical(dist, "pweibull")) {
-    g <- gamma(1 + seq_len(4) / args$shape)
-    variance <- args$scale^2 * (g[2] - g[1]^2)
-    third <- args$scale^3 * (g[3] - 3 * g[1] * g[2] + 2 * g[1]^3)
-    fourth <- args$scale^4 *
-      (g[4] - 4 * g[1] * g[3] + 6 * g[1]^2 * g[2] - 3 * g[1]^4)
-    moments <- .meta_moment_vector(args$scale * g[1], variance, third, fourth)
-  } else {
-    return(cli::cli_abort(
+  central <- switch(dist,
+    plnorm = .meta_moments_lognormal(args),
+    pgamma = .meta_moments_gamma(args),
+    pweibull = .meta_moments_weibull(args),
+    pgengamma.orig = .meta_moments_gengamma(args),
+    pdiscretehazard = .meta_moments_np(args),
+    cli::cli_abort(
       "Summary estimates are not supported for the {.val {dist}} distribution."
-    ))
-  }
+    )
+  )
+  moments <- do.call(.meta_moment_vector, as.list(unname(central)))
   if (!all(is.finite(moments))) {
     return(.meta_moment_failure())
   }
   return(moments)
+}
+
+#' Central moments of the delay distributions with analytic summaries
+#'
+#' Each returns the mean, the variance and the third and fourth central
+#' moments. They mirror the Stan functions of the same name in
+#' `inst/stan/meta_model/functions.stan`. The weibull and generalised gamma
+#' share [.meta_moments_scaled()], since their raw moments are
+#' \eqn{E[T^r] = scale^r g_r}.
+#'
+#' @param args A named list of distribution parameters.
+#'
+#' @param scale The scale of the distribution.
+#'
+#' @param g The ratios \eqn{g_1, \dots, g_4} of the raw moments.
+#'
+#' @returns A numeric vector of length four.
+#'
+#' @keywords internal
+.meta_moments_lognormal <- function(args) {
+  var_log <- args$sdlog^2
+  delay_mean <- exp(args$meanlog + var_log / 2)
+  variance <- delay_mean^2 * expm1(var_log)
+  return(c(
+    delay_mean,
+    variance,
+    (exp(var_log) + 2) * sqrt(expm1(var_log)) * variance^1.5,
+    (exp(4 * var_log) + 2 * exp(3 * var_log) + 3 * exp(2 * var_log) - 3) *
+      variance^2
+  ))
+}
+
+#' @rdname dot-meta_moments_lognormal
+#' @keywords internal
+.meta_moments_gamma <- function(args) {
+  variance <- args$shape * args$scale^2
+  return(c(
+    args$shape * args$scale,
+    variance,
+    2 / sqrt(args$shape) * variance^1.5,
+    (3 + 6 / args$shape) * variance^2
+  ))
+}
+
+#' @rdname dot-meta_moments_lognormal
+#' @keywords internal
+.meta_moments_scaled <- function(scale, g) {
+  return(c(
+    scale * g[1],
+    scale^2 * (g[2] - g[1]^2),
+    scale^3 * (g[3] - 3 * g[1] * g[2] + 2 * g[1]^3),
+    scale^4 * (g[4] - 4 * g[1] * g[3] + 6 * g[1]^2 * g[2] - 3 * g[1]^4)
+  ))
+}
+
+#' @rdname dot-meta_moments_lognormal
+#' @keywords internal
+.meta_moments_weibull <- function(args) {
+  return(.meta_moments_scaled(args$scale, gamma(1 + seq_len(4) / args$shape)))
+}
+
+#' @rdname dot-meta_moments_lognormal
+#' @keywords internal
+.meta_moments_gengamma <- function(args) {
+  g <- exp(lgamma(args$k + seq_len(4) / args$shape) - lgamma(args$k))
+  return(.meta_moments_scaled(args$scale, g))
+}
+
+#' @rdname dot-meta_moments_lognormal
+#' @keywords internal
+.meta_moments_np <- function(args) {
+  # Point masses at the right edge of each bin
+  edges <- args$boundaries[-1]
+  mass <- primarycensored::hazards_to_pmf(args$hazards)
+  delay_mean <- sum(mass * edges)
+  centred <- edges - delay_mean
+  return(c(
+    delay_mean, sum(mass * centred^2), sum(mass * centred^3),
+    sum(mass * centred^4)
+  ))
 }
 
 #' Summaries implied by a distribution function evaluated on a grid

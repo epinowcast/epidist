@@ -1,29 +1,3 @@
-#' The density function used for a `primarycensored` distribution name
-#'
-#' Shares the distribution function lookup with [.pdist()] in `R/gen.R`; only
-#' the density direction is meta model specific.
-#'
-#' @inheritParams .pdist
-#'
-#' @returns The corresponding function from `stats`.
-#'
-#' @keywords internal
-.meta_ddist <- function(dist) {
-  if (identical(dist, "pdiscretehazard")) {
-    # The model is never built with a summary row that needs this, see
-    # `.np_check_meta()`.
-    cli::cli_abort(
-      "The non-parametric delay distribution has no density."
-    )
-  }
-  return(switch(dist,
-    plnorm = stats::dlnorm,
-    pgamma = stats::dgamma,
-    pweibull = stats::dweibull,
-    get(sub("^p", "d", dist), envir = asNamespace("stats"))
-  ))
-}
-
 #' The primary event distribution implied by a growth rate
 #'
 #' A growth rate of zero corresponds to a uniform primary event within its
@@ -73,7 +47,9 @@
 #' poisons the gradient even when the value is discarded. The bounds are
 #' `Phi(z) < exp(-100)` for `z < -14` for the lognormal,
 #' `P(a, x) <= x^a / Gamma(a + 1)` for the gamma and `1 - exp(-y) <= y` for
-#' the weibull. Mirrors `meta_family_deep_tail()` in Stan.
+#' the weibull. The generalised gamma uses the gamma bound at
+#' `x = (q / scale)^shape` with `a = k`. Mirrors `meta_family_deep_tail()`
+#' in Stan.
 #'
 #' @inheritParams .meta_dist_cdf
 #'
@@ -95,6 +71,12 @@
   }
   if (identical(dist, "pweibull")) {
     return(args$shape * (log(q) - log(args$scale)) < floor_log)
+  }
+  if (identical(dist, "pgengamma.orig")) {
+    return(
+      args$shape * args$k * log(q / args$scale) - lgamma(args$k + 1) <
+        floor_log
+    )
   }
   return(rep(FALSE, length(q)))
 }

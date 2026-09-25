@@ -356,6 +356,12 @@
 #' one study returns the joint log likelihood of all of them, so an observation
 #' here is a group of summaries rather than a single reported value.
 #'
+#' Summary rows are evaluated in R, one posterior draw at a time, and each
+#' evaluation can run a quadrature of up to 2000 intervals by default. The
+#' cost of [brms::log_lik()] and [loo::loo()] therefore grows with the number
+#' of draws times the number of summary rows. Pass `ndraws` to either to use
+#' fewer draws, at the price of noisier estimates.
+#'
 #' @inheritParams epidist_family
 #'
 #' @returns A function that calculates the log likelihood for a single

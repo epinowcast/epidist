@@ -163,9 +163,9 @@ epidist_gen_log_lik <- function(family) {
     primary <- .primary_spec_from_prep(prep, spec)
 
     # Calculate density for each draw using primarycensored::dpcens().
-    # `check = FALSE` because `pdist` comes from `stats` or
-    # `primarycensored` and so needs no validation, and validating it would
-    # advance the RNG once per draw.
+    # `check = FALSE` because `pdist` comes from `stats`, or from `flexsurv`
+    # for the generalised gamma, and so needs no validation, and validating
+    # it would advance the RNG once per draw.
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
       return(
         do.call(
@@ -222,15 +222,23 @@ epidist_gen_log_lik <- function(family) {
         shape = shape,
         scale = brms::get_dpar(prep, "mu", i = i) / gamma(1 + 1 / shape)
       )
-    }
+    },
+    pgengamma.orig = .gengamma_dpars(prep, i)
   )
   return(.transpose_named_list2(dist_params))
 }
 
 #' The `primarycensored` distribution name for a family
 #'
-#' Falls back to the lower cased family name if `primarycensored` does not
+#' The generalised gamma distribution function lives in `flexsurv`, so
+#' `primarycensored` records no name for it and the name is given here. Falls
+#' back to the lower cased family name if `primarycensored` does not
 #' recognise it, so the caller can still report a name in a message.
+#' Uses [.delay_family()] rather than `family$family` directly, so this
+#' resolves correctly whether `family` is a plain `brms` family, a custom
+#' family such as [gengamma()], or a model family such as `meta_lognormal`
+#' wrapped by [brms::custom_family()], which records its own name as
+#' `"custom"`.
 #'
 #' @inheritParams epidist_family
 #'
@@ -239,33 +247,73 @@ epidist_gen_log_lik <- function(family) {
 #'
 #' @keywords internal
 .pcd_family_dist_name <- function(family) {
+  name <- .delay_family(family)$name
+  if (identical(name, "gengamma")) {
+    return("pgengamma.orig")
+  }
   return(tryCatch(
-    primarycensored::pcd_dist_name(tolower(family$family)),
-    error = function(e) tolower(family$family)
+    primarycensored::pcd_dist_name(name),
+    error = function(e) name
   ))
 }
 
-#' The distribution function used for a `primarycensored` distribution name
+#' The functions of a `primarycensored` distribution name
+#'
+#' `.pdist()` gives the distribution function, `.ddist()` the density and
+#' `.qdist()` the quantile function, all found by swapping the leading `p` of
+#' the name.
 #'
 #' @param dist A `primarycensored` distribution function name, for example
 #'  `"plnorm"`.
 #'
-#' @returns The corresponding function from `stats`, or from
-#'  `primarycensored` for the non-parametric hazard distribution.
+#' @param type One of `"p"`, `"d"` or `"q"`.
+#'
+#' @returns The function of that name from the package that provides the
+#'  distribution.
 #'
 #' @keywords internal
+.dist_fn <- function(dist, type) {
+  name <- sub("^p", type, dist)
+  if (identical(dist, "pdiscretehazard")) {
+    if (!identical(type, "p")) {
+      # The model is never built with a summary row that needs this, see
+      # `.np_check_meta()`.
+      cli::cli_abort(
+        "The non-parametric delay distribution has no density or quantile
+         function."
+      )
+    }
+    return(primarycensored::pdiscretehazard)
+  }
+  if (identical(dist, "pgengamma.orig")) {
+    .require_flexsurv()
+    return(get(name, envir = asNamespace("flexsurv")))
+  }
+  return(get(name, envir = asNamespace("stats")))
+}
+
+#' @rdname dot-dist_fn
+#' @keywords internal
 .pdist <- function(dist) {
-  return(switch(dist,
-    plnorm = stats::plnorm,
-    pgamma = stats::pgamma,
-    pweibull = stats::pweibull,
-    pdiscretehazard = primarycensored::pdiscretehazard,
-    get(dist, envir = asNamespace("stats"))
-  ))
+  return(.dist_fn(dist, "p"))
+}
+
+#' @rdname dot-dist_fn
+#' @keywords internal
+.ddist <- function(dist) {
+  return(.dist_fn(dist, "d"))
+}
+
+#' @rdname dot-dist_fn
+#' @keywords internal
+.qdist <- function(dist) {
+  return(.dist_fn(dist, "q"))
 }
 
 .get_supported_dists <- function() {
-  return(c("plnorm", "pgamma", "pweibull", "pdiscretehazard"))
+  return(c(
+    "plnorm", "pgamma", "pweibull", "pgengamma.orig", "pdiscretehazard"
+  ))
 }
 
 .transpose_named_list2 <- function(lst) {

@@ -41,7 +41,9 @@
 #' observation is therefore a group rather than a single reported value, so
 #' `log_lik()` and [loo::loo()] report per group, and `loo` only compares
 #' fits to the same studies and the same mix of individual and summary rows.
-#' See `vignette("faq")`.
+#' Summary rows are evaluated in R for each posterior draw, so both are slow
+#' for a fit with many draws and summary rows. Pass `ndraws` to use fewer
+#' draws, as [epidist_gen_meta_log_lik()] explains. See `vignette("faq")`.
 #' [epidist_meta_leave_one_out()] asks the study level question instead,
 #' refitting with each study held out.
 #'
@@ -1099,7 +1101,7 @@ epidist_family_model.epidist_meta_model <- function(
   family <- .add_primary_dpars(family, data)
   family <- .meta_add_growth_dpar(family, data)
   custom_family <- brms::custom_family(
-    paste0("meta_", family$family),
+    paste0("meta_", .family_name(family)),
     dpars = family$dpars,
     links = c(family$link, family$other_links),
     lb = c(

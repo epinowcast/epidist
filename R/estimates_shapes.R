@@ -503,7 +503,7 @@ epidist_estimates_parameters <- function(
     dist_args <- list(shape = dist_args$shape, scale = 1 / dist_args$rate)
   }
   pdist <- .pdist(dist_name)
-  qdist <- .estimates_qdist(dist_name)
+  qdist <- .qdist(dist_name)
   summaries <- numeric(0)
   if (length(moments) > 0) {
     if (lower == 0 && is.infinite(cutoff)) {
@@ -535,25 +535,6 @@ epidist_estimates_parameters <- function(
     summaries <- c(summaries, do.call(qdist, c(list(p = scaled), dist_args)))
   }
   return(summaries)
-}
-
-#' The quantile function used for a `primarycensored` distribution name
-#'
-#' Shares the distribution function lookup with [.pdist()] in `R/gen.R`; only
-#' the quantile direction is specific to reported distribution parameters.
-#'
-#' @inheritParams .pdist
-#'
-#' @returns The corresponding function from `stats`.
-#'
-#' @keywords internal
-.estimates_qdist <- function(dist) {
-  return(switch(dist,
-    plnorm = stats::qlnorm,
-    pgamma = stats::qgamma,
-    pweibull = stats::qweibull,
-    get(sub("^p", "q", dist), envir = asNamespace("stats"))
-  ))
 }
 
 #' A numerical Jacobian of the map from parameters to summaries

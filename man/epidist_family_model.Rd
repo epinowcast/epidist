@@ -27,6 +27,8 @@ Other family:
 \code{\link[=epidist_family_param]{epidist_family_param()}},
 \code{\link[=epidist_family_param.default]{epidist_family_param.default()}},
 \code{\link[=epidist_family_param.discretehazard_rw]{epidist_family_param.discretehazard_rw()}},
+\code{\link[=epidist_family_param.gengamma]{epidist_family_param.gengamma()}},
+\code{\link[=gengamma]{gengamma()}},
 \code{\link[=nonparametric]{nonparametric()}}
 }
 \concept{family}

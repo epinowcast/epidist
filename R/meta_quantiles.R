@@ -229,7 +229,7 @@
       top <- do.call(pdist, c(list(q = slots$cutoff), args))
     }
     exact <- do.call(
-      .estimates_qdist(dist), c(list(p = base + p * (top - base)), args)
+      .qdist(dist), c(list(p = base + p * (top - base)), args)
     )
     if (!is.finite(exact)) {
       return(chord)

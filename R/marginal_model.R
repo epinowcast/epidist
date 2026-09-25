@@ -239,7 +239,7 @@ epidist_family_model.epidist_marginal_model <- function(
 ) {
   family <- .add_primary_dpars(family, data)
   custom_family <- brms::custom_family(
-    paste0("marginal_", family$family),
+    paste0("marginal_", .family_name(family)),
     dpars = family$dpars,
     links = c(family$link, family$other_links),
     lb = c(

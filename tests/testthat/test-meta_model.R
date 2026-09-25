@@ -3436,12 +3436,18 @@ test_that("as_epidist_meta_model refuses one order statistic reported on two day
   expect_identical(.meta_members(meta)$lower, c(0L, 0L))
 })
 
-test_that(".meta_ddist pairs each distribution function with its density", {
-  expect_identical(.meta_ddist("plnorm"), stats::dlnorm)
-  expect_identical(.meta_ddist("pgamma"), stats::dgamma)
-  expect_identical(.meta_ddist("pweibull"), stats::dweibull)
+test_that(".dist_fn pairs each distribution function with its density and quantile function", { # nolint: line_length_linter.
+  expect_identical(.pdist("plnorm"), stats::plnorm)
+  expect_identical(.ddist("plnorm"), stats::dlnorm)
+  expect_identical(.qdist("plnorm"), stats::qlnorm)
+  expect_identical(.ddist("pgamma"), stats::dgamma)
+  expect_identical(.qdist("pweibull"), stats::qweibull)
   # Any other name is taken from stats by dropping the leading p.
-  expect_identical(.meta_ddist("pnorm"), stats::dnorm)
+  expect_identical(.ddist("pnorm"), stats::dnorm)
+  skip_if_not_installed("flexsurv")
+  expect_identical(.pdist("pgengamma.orig"), flexsurv::pgengamma.orig)
+  expect_identical(.ddist("pgengamma.orig"), flexsurv::dgengamma.orig)
+  expect_identical(.qdist("pgengamma.orig"), flexsurv::qgengamma.orig)
 })
 
 test_that(".meta_log_accrual_weight matches the follow up integral", {
@@ -3926,6 +3932,73 @@ test_that("the meta model posterior predictions use the fitted primary event", {
     i = 1, prep
   )
   expect_false(isTRUE(all.equal(mean(growing), mean(uniform))))
+})
+
+test_that(".meta_continuous_moments matches Monte Carlo generalised gamma summaries", { # nolint: line_length_linter.
+  skip_if_not_installed("flexsurv")
+  set.seed(110)
+  args <- list(shape = 1.4, scale = 6, k = 1.8)
+  moments <- .meta_continuous_moments("pgengamma.orig", args)
+  simulated <- sim_moments(flexsurv::rgengamma.orig(
+    5e5,
+    shape = args$shape, scale = args$scale, k = args$k
+  ))
+  expect_equal(moments[["mean"]], simulated[["mean"]], tolerance = 0.01)
+  expect_equal(moments[["sd"]], simulated[["sd"]], tolerance = 0.01)
+  expect_equal(
+    moments[["kurtosis"]], simulated[["kurtosis"]],
+    tolerance = 0.05
+  )
+  expect_equal(
+    moments[["skewness"]], simulated[["skewness"]],
+    tolerance = 0.02
+  )
+  # The gamma and weibull are the shape = 1 and k = 1 special cases
+  expect_equal(
+    .meta_continuous_moments(
+      "pgengamma.orig", list(shape = 1, scale = 3, k = 2.5)
+    ),
+    .meta_continuous_moments("pgamma", list(shape = 2.5, scale = 3)),
+    tolerance = 1e-10
+  )
+  expect_equal(
+    .meta_continuous_moments(
+      "pgengamma.orig", list(shape = 1.7, scale = 8, k = 1)
+    ),
+    .meta_continuous_moments("pweibull", list(shape = 1.7, scale = 8)),
+    tolerance = 1e-10
+  )
+  # A draw whose moments overflow is rejected
+  expect_identical(
+    .meta_continuous_moments(
+      "pgengamma.orig", list(shape = 0.01, scale = 5, k = 1.5)
+    ),
+    .meta_moment_failure()
+  )
+})
+
+test_that(".meta_implied_moments and .meta_deep_tail support the generalised gamma", { # nolint: line_length_linter.
+  skip_if_not_installed("flexsurv")
+  args <- list(shape = 1.4, scale = 6, k = 1.8)
+  full <- .meta_implied_moments(
+    "pgengamma.orig", args,
+    cutoff = 100, pwindow = 1, swindow = 1,
+    trunc_adjusted = 1L, cens_adjusted = 1L, growth_rate = 0
+  )
+  expect_identical(full, .meta_continuous_moments("pgengamma.orig", args))
+  # A study that took date differences and stopped early sees a shorter delay
+  naive <- .meta_implied_moments(
+    "pgengamma.orig", args,
+    cutoff = 15, pwindow = 1, swindow = 1,
+    trunc_adjusted = 0L, cens_adjusted = 0L, growth_rate = 0
+  )
+  expect_lt(naive[["mean"]], full[["mean"]])
+  expect_true(all(is.finite(naive)))
+  # The lower tail is severed where the closed form bound says it is empty
+  q <- c(1e-30, 1e-20, 1)
+  deep <- .meta_deep_tail(q, "pgengamma.orig", args)
+  expect_identical(deep, c(TRUE, TRUE, FALSE))
+  expect_identical(.meta_dist_cdf(q, "pgengamma.orig", args)[1:2], c(0, 0))
 })
 
 # Summary rows that estimate their growth rate. Study A gives no rate, B

@@ -646,7 +646,7 @@
       lower > 0, .meta_pcens_cdf(lower, dist, args, pwindow, growth_rate), 0
     )
   } else {
-    height <- do.call(.meta_ddist(dist), c(list(x = y), args))
+    height <- do.call(.ddist(dist), c(list(x = y), args))
     base <- ifelse(
       lower > 0, do.call(.pdist(dist), c(list(q = lower), args)), 0
     )

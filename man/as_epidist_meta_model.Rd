@@ -61,7 +61,9 @@ standard deviation form one group and its quantiles another. One
 observation is therefore a group rather than a single reported value, so
 \code{log_lik()} and \code{\link[loo:loo]{loo::loo()}} report per group, and \code{loo} only compares
 fits to the same studies and the same mix of individual and summary rows.
-See \code{vignette("faq")}.
+Summary rows are evaluated in R for each posterior draw, so both are slow
+for a fit with many draws and summary rows. Pass \code{ndraws} to use fewer
+draws, as \code{\link[=epidist_gen_meta_log_lik]{epidist_gen_meta_log_lik()}} explains. See \code{vignette("faq")}.
 \code{\link[=epidist_meta_leave_one_out]{epidist_meta_leave_one_out()}} asks the study level question instead,
 refitting with each study held out.
 

@@ -5,6 +5,10 @@
 #' that as a user you will need this function, but we export it nonetheless to
 #' be transparent about what happens inside of a call to [epidist()].
 #'
+#' The family may be any `brms` family of a positive response, such as
+#' [brms::lognormal()], `Gamma(link = "log")` or [brms::weibull()], or a
+#' family `epidist` defines itself, such as [gengamma()].
+#'
 #' @inheritParams epidist
 #' @family family
 #' @returns A `brms` custom family object.
@@ -16,10 +20,10 @@ epidist_family <- function(data, family = lognormal(), ...) {
   if (.is_nonparametric(family)) {
     family <- .np_resolve(family, data)
   }
-  class(family) <- c(family$family, class(family))
+  class(family) <- c(.family_name(family), class(family))
   family <- .add_dpar_info(family)
   custom_family <- epidist_family_model(data, family, ...)
-  class(custom_family) <- c(family$family, class(custom_family))
+  class(custom_family) <- c(.family_name(family), class(custom_family))
   custom_family <- epidist_family_param(custom_family)
   return(custom_family)
 }
@@ -139,4 +143,57 @@ epidist_family_param.default <- function(family, ...) {
     )
   }
   return(family)
+}
+
+#' The families `epidist` defines itself
+#'
+#' `brms` names a custom family `"custom"` and keeps its own name in `name`,
+#' so these are looked up by that name where `brms` would be asked for one of
+#' its own families.
+#'
+#' @returns A named list of family constructors.
+#'
+#' @keywords internal
+.epidist_families <- function() {
+  return(list(gengamma = gengamma))
+}
+
+#' The name of a delay distribution family
+#'
+#' A family built with [brms::custom_family()], such as [gengamma()], is
+#' named `"custom"` for `brms` to dispatch on and records its own name in
+#' `name`. Every other family is named by `family`.
+#'
+#' @inheritParams epidist_family
+#'
+#' @returns A character string.
+#'
+#' @keywords internal
+.family_name <- function(family) {
+  if (identical(family$family, "custom")) {
+    return(family$name)
+  }
+  return(family$family)
+}
+
+#' Stan functions a family defines itself
+#'
+#' A family `brms` does not have, such as [gengamma()], carries the Stan
+#' density and distribution function `brms` and the latent model call. They
+#' are read from the `stan/family/` folder of the installed package.
+#'
+#' @inheritParams epidist_family
+#'
+#' @returns A `brms` `stanvars` object, or `NULL` for a `brms` family.
+#'
+#' @keywords internal
+.family_stanvars <- function(family) {
+  name <- .delay_family(family)$name
+  if (!name %in% names(.epidist_families())) {
+    return(NULL)
+  }
+  return(brms::stanvar(
+    block = "functions",
+    scode = .stan_chunk(file.path("family", paste0(name, ".stan")))
+  ))
 }
