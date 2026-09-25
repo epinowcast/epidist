@@ -210,6 +210,8 @@ See #399.
 
 ## Package
 
+- The package lifecycle is now maturing rather than experimental.
+The meta model is still marked as experimental.
 - Rendered vignette output is no longer copied into the built package tarball.
 `R CMD build` does not read `.gitignore`, so a locally rendered `vignettes/epidist.html` or a knitr cache directory was shipped with the package.
 `.Rbuildignore` now excludes `.html`, `.pdf`, `.tex` and `.md` files under `vignettes/`, along with `_cache` and `_files` directories.
