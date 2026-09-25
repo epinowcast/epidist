@@ -157,12 +157,12 @@ if (requireNamespace("distspec", quietly = TRUE)) {
 #>       mean:
 #>         1.6
 #>       sd:
-#>         0.0066
+#>         0.0067
 #>   sdlog:
 #>     - normal distribution:
 #>       mean:
 #>         0.59
 #>       sd:
-#>         0.0049
+#>         0.005
 # }
 ```
