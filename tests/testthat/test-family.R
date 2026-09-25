@@ -79,6 +79,35 @@ test_that("epidist_family builds the gengamma family for every model", {
   expect_identical(.delay_family(naive)$name, "gengamma")
 })
 
+test_that("epidist starts gengamma fits at the gamma and Weibull special case", { # nolint: line_length_linter.
+  skip_if_not_installed("flexsurv")
+  capture <- function(..., init = NULL) {
+    return(list(init = init))
+  }
+  for (data in list(prep_obs, prep_marginal_obs, prep_meta_obs)) {
+    init <- suppressMessages(
+      epidist(data, family = gengamma(), fn = capture)$init
+    )
+    expect_type(init, "closure")
+    expect_identical(init(), list(Intercept_shape = 0, Intercept_k = 0))
+  }
+  init <- epidist(
+    prep_obs,
+    family = gengamma(link_shape = "identity"), fn = capture
+  )$init
+  expect_identical(init(), list(Intercept_shape = 1, Intercept_k = 0))
+  # A user's own initial values are left alone
+  expect_identical(
+    epidist(prep_obs, family = gengamma(), fn = capture, init = 0)$init, 0
+  )
+  # Other families keep the defaults of the fitting function
+  expect_null(epidist(prep_obs, fn = capture)$init)
+  # A fitting function without initial values is not given any
+  expect_false(
+    "init" %in% names(epidist(prep_obs, family = gengamma(), fn = list))
+  )
+})
+
 test_that(".pcd_family_dist_name resolves a model-wrapped meta family", { # nolint: line_length_linter.
   # `epidist_family()` returns the family already wrapped by
   # `brms::custom_family()`, so `family$family` is `"custom"` and only
