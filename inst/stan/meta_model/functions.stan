@@ -1476,7 +1476,7 @@
                                     vector moments, data int study_n) {
     real se_mean = moments[2] / sqrt(1.0 * study_n);
     real se_sd = meta_family_sd_se(moments, study_n);
-    // Matches .meta_max_correlation() in R/meta_summaries.R.
+    // Matches .meta_max_correlation() in R/meta_likelihood.R.
     real limit = 1 - 1e-6;
     real rho = fmin(fmax(moments[4] / sqrt(fmax(moments[3] - 1, 1e-10)),
                          -limit), limit);
@@ -1626,7 +1626,7 @@
     real spread = moments[2];
     real se_mean = spread / sqrt(1.0 * study_n);
     real se_sd = meta_family_sd_se(moments, study_n);
-    // Matches .meta_max_correlation() in R/meta_summaries.R.
+    // Matches .meta_max_correlation() in R/meta_likelihood.R.
     real limit = 1 - 1e-6;
     real rho = fmin(fmax(moments[4] / sqrt(fmax(moments[3] - 1, 1e-10)),
                          -limit), limit);

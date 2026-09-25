@@ -4,10 +4,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
   cancel-in-progress: true
 
+# The Stan programs are generated from R, so a change under `R/**` can
+# break the syntax of every model without touching a `.stan` file. Both
+# paths therefore trigger the check.
 on:
   push:
     paths:
       - '**.stan'
+      - 'R/**'
     branches:
       - main
       - develop
@@ -16,6 +20,7 @@ on:
   pull_request:
     paths:
       - '**.stan'
+      - 'R/**'
     branches:
       - main
       - develop
@@ -130,6 +135,44 @@ jobs:
             )
           )
           dummy_obs <- epidist::as_epidist_meta_model(estimates = estimates)
+          stancode <- epidist::epidist(
+            data = dummy_obs, fn = brms::make_stancode
+          )
+          mod <- cmdstanr::cmdstan_model(
+            stan_file = cmdstanr::write_stan_file(stancode), compile = FALSE
+          )
+          message <- capture.output(
+            mod$check_syntax(pedantic = FALSE),
+            type = "message"
+          )
+          stopifnot(
+            length(message) != 0 &&
+            all(message == "Stan program is syntactically correct")
+          )
+        shell: Rscript {0}
+
+      - name: Check meta model syntax on the estimated growth rate path
+        run: |
+          # A study that reports no growth rate leaves it to be estimated,
+          # which makes the rate a parameter rather than the reported slot.
+          # Every function the likelihood reaches must then stop qualifying
+          # its growth rate argument as data only, which is a rejection
+          # `stanc` raises and nothing else does.
+          estimates <- epidist::as_epidist_estimates_data(
+            data.frame(
+              study = c("A", "A"),
+              type = c("mean", "sd"),
+              value = c(7.5, 3.6),
+              n = c(120, 120),
+              relative_obs_time = c(20, 20),
+              trunc_adjusted = c(FALSE, FALSE),
+              trunc_design = c("accrual", "accrual"),
+              cens_adjusted = c(0, 0),
+              growth_rate = c(NA, NA)
+            )
+          )
+          dummy_obs <- epidist::as_epidist_meta_model(estimates = estimates)
+          stopifnot("pgrowth" %in% epidist::epidist_family(dummy_obs)$dpars)
           stancode <- epidist::epidist(
             data = dummy_obs, fn = brms::make_stancode
           )
