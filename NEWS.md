@@ -333,6 +333,9 @@ Closes #703.
 The interval narrows with the size of the simulated studies while the bias of the summaries they report does not, so the 2.5% quantile of `sigma` sat 2.4e-5 above a true 0.5 and the comparison was decided by the platform's last digits, failing the macOS check on every pull request.
 The marginal Kolmogorov-Smirnov checks of the latent model prior moved from a p value threshold of 0.01 to 0.001 for the same reason.
 Closes #733.
+- Split `R/meta_summaries.R` by concern into `R/meta_settings.R` (the quadrature and cache options), `R/meta_estimand.R` (the distribution function, censoring design and accrual weight), `R/meta_moments.R`, `R/meta_probability.R`, `R/meta_quantiles.R`, `R/meta_likelihood.R` (the normal approximations), `R/meta_grid_likelihood.R` (the exact likelihoods for quantiles on a discrete grid) and `R/meta_gen.R` (`epidist_gen_meta_log_lik()`, `epidist_gen_meta_predict()` and the row level functions they call).
+No function was renamed or changed.
+Closes #709.
 - The study labels of the test lockstep fixtures are now namespaced by the fixture that owns them and checked before the fixtures are bound, so a branch that adds a fixture reusing a label fails loudly rather than merging cleanly into a silent collision.
 Closes #725.
 - The package is now documented with `roxygen2` 8.1.0.
@@ -374,6 +377,8 @@ It now simulates the censored dates with `simulate_dates()`, converts them with 
 The data is simulated, then converted, then visualised, rather than being converted part way through the simulation.
 See #736.
 - The `faq` and `left-truncation` vignettes now build their simulated dates with `simulate_dates()` and plot posterior draws with the package `plot()` method, in place of hand rolled equivalents.
+- Shortened the `as_epidist_meta_model()` help page, moving the accuracy measurements and the fitting advice into a "Fitting in practice" section of the model guide vignette and pointing at `as_epidist_estimates_data()` for the checks and settings it documents.
+See #709.
 
 ## CI
 
