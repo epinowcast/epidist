@@ -29,3 +29,5 @@
 ^\.jj$
 ^\.git$
 ^codemeta\.json$
+^worktrees$
+^vignettes/bdbv-onset-to-death\.csv$
