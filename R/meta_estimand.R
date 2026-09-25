@@ -57,28 +57,57 @@
 #'
 #' @keywords internal
 .meta_deep_tail <- function(q, dist, args) {
-  floor_log <- .meta_log_cdf_floor()
   # A delay at or below zero is severed by the caller, so it only needs a
   # finite logarithm here.
   q <- pmax(q, .Machine$double.xmin)
-  if (identical(dist, "plnorm")) {
-    return((log(q) - args$meanlog) / args$sdlog < -14)
-  }
-  if (identical(dist, "pgamma")) {
-    return(
-      args$shape * log(q / args$scale) - lgamma(args$shape + 1) < floor_log
-    )
-  }
-  if (identical(dist, "pweibull")) {
-    return(args$shape * (log(q) - log(args$scale)) < floor_log)
-  }
-  if (identical(dist, "pgengamma.orig")) {
-    return(
-      args$shape * args$k * log(q / args$scale) - lgamma(args$k + 1) <
-        floor_log
-    )
-  }
-  return(rep(FALSE, length(q)))
+  return(switch(dist,
+    plnorm = .meta_deep_tail_lognormal(q, args),
+    pgamma = .meta_deep_tail_gamma(q, args),
+    pweibull = .meta_deep_tail_weibull(q, args),
+    pgengamma.orig = .meta_deep_tail_gengamma(q, args),
+    rep(FALSE, length(q))
+  ))
+}
+
+#' Deep lower tail bounds of the delay distributions
+#'
+#' One per family with a closed form bound, see [.meta_deep_tail()]. They
+#' mirror the Stan functions of the same name in
+#' `inst/stan/meta_model/functions.stan`.
+#'
+#' @param q A numeric vector of positive delays.
+#'
+#' @param args A named list of distribution parameters.
+#'
+#' @returns A logical vector.
+#'
+#' @keywords internal
+.meta_deep_tail_lognormal <- function(q, args) {
+  return((log(q) - args$meanlog) / args$sdlog < -14)
+}
+
+#' @rdname dot-meta_deep_tail_lognormal
+#' @keywords internal
+.meta_deep_tail_gamma <- function(q, args) {
+  return(
+    args$shape * log(q / args$scale) - lgamma(args$shape + 1) <
+      .meta_log_cdf_floor()
+  )
+}
+
+#' @rdname dot-meta_deep_tail_lognormal
+#' @keywords internal
+.meta_deep_tail_weibull <- function(q, args) {
+  return(args$shape * (log(q) - log(args$scale)) < .meta_log_cdf_floor())
+}
+
+#' @rdname dot-meta_deep_tail_lognormal
+#' @keywords internal
+.meta_deep_tail_gengamma <- function(q, args) {
+  return(
+    args$shape * args$k * log(q / args$scale) - lgamma(args$k + 1) <
+      .meta_log_cdf_floor()
+  )
 }
 
 #' The distribution function of the delay, severed deep in its lower tail
