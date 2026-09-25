@@ -53,8 +53,8 @@ for the arguments it takes.
 The result is a plain
 [`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html).
 Pass it to
-[`brms::posterior_epred()`](https://paulbuerkner.com/brms/reference/posterior_epred.brmsfit.html),
-[`brms::posterior_predict()`](https://paulbuerkner.com/brms/reference/posterior_predict.brmsfit.html),
+[`brms::posterior_epred()`](https://mc-stan.org/rstantools/reference/posterior_epred.html),
+[`brms::posterior_predict()`](https://mc-stan.org/rstantools/reference/posterior_predict.html),
 [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
 or
 [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),

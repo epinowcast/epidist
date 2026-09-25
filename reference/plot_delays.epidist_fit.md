@@ -65,7 +65,7 @@ A `ggplot` object.
 ## Details
 
 The predictions come from
-[`brms::posterior_predict()`](https://paulbuerkner.com/brms/reference/posterior_predict.brmsfit.html),
+[`brms::posterior_predict()`](https://mc-stan.org/rstantools/reference/posterior_predict.html),
 so they are of the delay as it was observed, under the censoring and
 truncation of each case. That makes the plot a posterior predictive
 check of the observed delays rather than a picture of the delay

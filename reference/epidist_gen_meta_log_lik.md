@@ -36,7 +36,7 @@ The prep object must have the meta model `vint` and `vreal` slots.
 
 ## See also
 
-[`brms::log_lik()`](https://paulbuerkner.com/brms/reference/log_lik.brmsfit.html)
+[`brms::log_lik()`](https://mc-stan.org/rstantools/reference/log_lik.html)
 for details on the brms log likelihood interface.
 
 Other gen:

@@ -11,7 +11,3 @@ so the two stay in step.
 ``` r
 .estimates_default_values
 ```
-
-## Format
-
-An object of class `list` of length 7.

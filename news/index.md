@@ -785,6 +785,12 @@
   than merging cleanly into a silent collision. Closes
   [\#725](https://github.com/epinowcast/epidist/issues/725).
 
+- The package is now documented with `roxygen2` 8.1.0. The version is
+  recorded in `Config/roxygen2/version` in place of `RoxygenNote`.
+  `NAMESPACE` now has one `importFrom()` directive per package, and
+  links to other packages now point at the topic alias rather than the
+  Rd file name.
+
 ### Documentation
 
 - Added an `extending-epidist` vignette covering why you might build

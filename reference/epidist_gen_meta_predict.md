@@ -40,7 +40,7 @@ of posterior predictions.
 
 ## See also
 
-[`brms::posterior_predict()`](https://paulbuerkner.com/brms/reference/posterior_predict.brmsfit.html)
+[`brms::posterior_predict()`](https://mc-stan.org/rstantools/reference/posterior_predict.html)
 for details on how this is used within `brms`.
 
 Other gen:
