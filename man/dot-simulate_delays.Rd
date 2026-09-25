@@ -7,11 +7,9 @@
 .simulate_delays(family, dpars, nsim = 1000)
 }
 \arguments{
-\item{family}{A model fit with \code{\link[=epidist]{epidist()}}, a \code{brms} family, or
-the name of one, giving the delay distribution. If \code{NULL}, the default,
-the family is taken from \code{data}, which \code{\link[=delay_parameter_draws]{delay_parameter_draws()}} records
-on it. Some \code{dplyr} verbs drop that record, so pass the fit or the family
-if \code{data} has been through one of them.}
+\item{family}{A delay distribution family as returned by
+\code{\link[=.resolve_delay_family]{.resolve_delay_family()}}, a list with the family \code{name} and its
+distributional parameters \code{dpars}.}
 
 \item{dpars}{A named list of distributional parameter vectors.}
 

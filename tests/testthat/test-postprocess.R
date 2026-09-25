@@ -185,6 +185,44 @@ test_that(".analytic_delay_summaries gives the quantile and density", {
   expect_null(.analytic_delay_summaries("exponential"))
 })
 
+test_that(".analytic_delay_summaries gives the gengamma quantile and density", { # nolint: line_length_linter.
+  skip_if_not_installed("flexsurv")
+  d <- list(mu = c(1.8, 2.1), sigma = c(0.5, 0.7), Q = c(1.1, 0.9))
+  gengamma <- .analytic_delay_summaries("gengamma")
+  expect_identical(gengamma$dpars, c("mu", "sigma", "Q"))
+  expect_equal(
+    gengamma$quantile(d, 0.5),
+    flexsurv::qgengamma(0.5, mu = d$mu, sigma = d$sigma, Q = d$Q),
+    tolerance = 1e-10
+  )
+  # The plotting of a delay distribution needs the density as well as the
+  # quantile, so a family missing one is only found when a plot is drawn.
+  expect_equal(
+    gengamma$density(d, 3),
+    flexsurv::dgengamma(3, mu = d$mu, sigma = d$sigma, Q = d$Q),
+    tolerance = 1e-10
+  )
+  expect_identical(gengamma$density(d, 0), c(0, 0))
+  total <- stats::integrate(
+    function(x) gengamma$density(list(mu = 1.8, sigma = 0.5, Q = 1.1), x),
+    0,
+    Inf
+  )$value
+  expect_equal(total, 1, tolerance = 1e-6)
+})
+
+test_that("every analytic family gives the same set of solutions", {
+  # A family added to one lookup and not the other fails only where the
+  # missing solution is used, so check them together.
+  for (name in c("lognormal", "gamma", "weibull", "gengamma")) {
+    expect_named(
+      .analytic_delay_summaries(name),
+      c("dpars", "mean", "sd", "quantile", "density"),
+      info = name
+    )
+  }
+})
+
 test_that("add_summaries accepts a stats family object", {
   draws <- data.frame(mu = c(6, 8), shape = c(2, 3))
   out <- add_summaries(draws, family = Gamma())
@@ -503,6 +541,33 @@ test_that("delay_parameter_draws works with the naive model", {
   expect_length(unique(draws$.draw), summary(fit_naive)$total_ndraws)
   summaries <- add_summaries(draws)
   expect_true(all(summaries$mean > 0))
+})
+
+test_that("add_summaries adds the closed form summaries of a gengamma", {
+  skip_if_not_installed("flexsurv")
+  draws <- data.frame(
+    mu = c(log(6), 1.6), sigma = c(sqrt(0.5), 0.6), Q = c(sqrt(0.5), 1.2)
+  )
+  out <- add_summaries(draws, family = "gengamma", probs = 0.5)
+  expect_named(out, c("mu", "sigma", "Q", "mean", "sd", "q50"))
+  # With sigma equal to Q the first row is a gamma with shape 1 / Q^2 = 2 and
+  # scale exp(mu) * Q^2 = 3
+  expect_equal(out$mean[1], 6, tolerance = 1e-10)
+  expect_equal(out$sd[1], sqrt(2) * 3, tolerance = 1e-10)
+  expect_equal(out$q50[1], stats::qgamma(0.5, 2, scale = 3), tolerance = 1e-10)
+  expect_equal(
+    out$q50[2],
+    flexsurv::qgengamma(0.5, mu = 1.6, sigma = 0.6, Q = 1.2),
+    tolerance = 1e-10
+  )
+  set.seed(1)
+  sampled <- add_summaries(
+    draws,
+    family = "gengamma", probs = 0.5, method = "sample", nsim = 50000
+  )
+  expect_equal(sampled$mean, out$mean, tolerance = 0.05)
+  expect_equal(sampled$sd, out$sd, tolerance = 0.1)
+  expect_equal(sampled$q50, out$q50, tolerance = 0.05)
 })
 
 test_that(".inf_is_obs_time_only is TRUE only for observation time columns", {

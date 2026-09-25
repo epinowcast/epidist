@@ -122,8 +122,8 @@ The posterior for the rate stays close to the prior, which is expected.
 summary(fit_growing)$fixed[
   "pgrowth_Intercept", c("Estimate", "l-95% CI", "u-95% CI")
 ]
-#>                    Estimate  l-95% CI u-95% CI
-#> pgrowth_Intercept 0.4965325 0.3132402 0.691949
+#>                    Estimate  l-95% CI  u-95% CI
+#> pgrowth_Intercept 0.4930032 0.3044068 0.6964133
 ```
 
 Both are compared against the delay used to simulate.

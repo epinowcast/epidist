@@ -32,6 +32,7 @@ By default, we do not return any family specific prior distributions.
 \seealso{
 Other prior:
 \code{\link[=epidist_family_prior]{epidist_family_prior()}},
+\code{\link[=epidist_family_prior.gengamma]{epidist_family_prior.gengamma()}},
 \code{\link[=epidist_family_prior.lognormal]{epidist_family_prior.lognormal()}},
 \code{\link[=epidist_model_prior]{epidist_model_prior()}},
 \code{\link[=epidist_model_prior.default]{epidist_model_prior.default()}},

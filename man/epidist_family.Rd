@@ -28,11 +28,18 @@ This function is used within \code{\link[=epidist]{epidist()}} to create a model
 that as a user you will need this function, but we export it nonetheless to
 be transparent about what happens inside of a call to \code{\link[=epidist]{epidist()}}.
 }
+\details{
+The family may be any \code{brms} family of a positive response, such as
+\code{\link[brms:lognormal]{brms::lognormal()}}, \code{Gamma(link = "log")} or \code{\link[brms:weibull]{brms::weibull()}}, or a
+family \code{epidist} defines itself, such as \code{\link[=gengamma]{gengamma()}}.
+}
 \seealso{
 Other family:
 \code{\link[=epidist_family_model]{epidist_family_model()}},
 \code{\link[=epidist_family_model.default]{epidist_family_model.default()}},
 \code{\link[=epidist_family_param]{epidist_family_param()}},
-\code{\link[=epidist_family_param.default]{epidist_family_param.default()}}
+\code{\link[=epidist_family_param.default]{epidist_family_param.default()}},
+\code{\link[=epidist_family_param.gengamma]{epidist_family_param.gengamma()}},
+\code{\link[=gengamma]{gengamma()}}
 }
 \concept{family}
