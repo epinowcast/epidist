@@ -119,3 +119,43 @@ test_that("the latent and naive models carry the gengamma Stan functions", {
   # A brms family adds nothing to the naive model
   expect_null(epidist_stancode(prep_naive_obs))
 })
+
+test_that("the gengamma Stan density and distribution function match flexsurv", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_not_installed("flexsurv")
+  y <- c(0.5, 2, 6, 15)
+  mu <- c(5, 3, 7, 2)
+  shape <- c(1.5, 1, 0.4, 2.5)
+  k <- c(1.2, 2, 3, 0.6)
+  code <- paste(
+    "functions {", .stan_chunk(file.path("family", "gengamma.stan")), "}",
+    "data { int N; vector[N] y; vector[N] mu; vector[N] shape;",
+    "vector[N] k; }",
+    "generated quantities {",
+    "vector[N] lpdf; vector[N] lcdf;",
+    "for (n in 1:N) {",
+    "lpdf[n] = gengamma_lpdf(y[n] | mu[n], shape[n], k[n]);",
+    "lcdf[n] = gengamma_lcdf(y[n:n] | mu[n:n], shape[n], k[n]);",
+    "}",
+    "}",
+    sep = "\n"
+  )
+  fit <- suppressMessages(rstan::sampling(
+    rstan::stan_model(model_code = code),
+    data = list(N = length(y), y = y, mu = mu, shape = shape, k = k),
+    algorithm = "Fixed_param", chains = 1, iter = 1, warmup = 0, refresh = 0
+  ))
+  draws <- posterior::as_draws_matrix(fit)
+  lpdf <- as.numeric(draws[1, paste0("lpdf[", seq_along(y), "]")])
+  lcdf <- as.numeric(draws[1, paste0("lcdf[", seq_along(y), "]")])
+  expect_equal(
+    lpdf,
+    flexsurv::dgengamma.orig(y, shape = shape, scale = mu, k = k, log = TRUE),
+    tolerance = 1e-8
+  )
+  expect_equal(
+    lcdf,
+    log(flexsurv::pgengamma.orig(y, shape = shape, scale = mu, k = k)),
+    tolerance = 1e-8
+  )
+})
