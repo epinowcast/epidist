@@ -379,6 +379,8 @@ See #736.
 - The `faq` and `left-truncation` vignettes now build their simulated dates with `simulate_dates()` and plot posterior draws with the package `plot()` method, in place of hand rolled equivalents.
 - Shortened the `as_epidist_meta_model()` help page, moving the accuracy measurements and the fitting advice into a "Fitting in practice" section of the model guide vignette and pointing at `as_epidist_estimates_data()` for the checks and settings it documents.
 See #709.
+- The help for `epidist_gen_meta_log_lik()` and `as_epidist_meta_model()` now states that `log_lik()` and `loo()` evaluate each summary row in R for every posterior draw, and suggests passing `ndraws` to use fewer.
+Closes #705.
 
 ## CI
 

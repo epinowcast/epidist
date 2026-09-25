@@ -61,7 +61,9 @@ standard deviation form one group and its quantiles another. One
 observation is therefore a group rather than a single reported value, so
 \code{log_lik()} and \code{\link[loo:loo]{loo::loo()}} report per group, and \code{loo} only compares
 fits to the same studies and the same mix of individual and summary rows.
-See \code{vignette("faq")}.
+Summary rows are evaluated in R for each posterior draw, so both are slow
+for a fit with many draws and summary rows. Pass \code{ndraws} to use fewer
+draws, as \code{\link[=epidist_gen_meta_log_lik]{epidist_gen_meta_log_lik()}} explains. See \code{vignette("faq")}.
 
 The sampling standard errors are plug in quantities that depend on the
 parameters, so allow for genuine differences between studies with a term
