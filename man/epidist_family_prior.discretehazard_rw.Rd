@@ -30,8 +30,13 @@ parameters.}
 A \code{brmsprior} object.
 }
 \description{
-The intercept of \code{mu}, the logit hazard, gets \code{normal(0, 1.5)}, which is
-close to uniform on the hazard scale. The intercept of \code{hsigma} gets
+The intercept of \code{mu}, the logit hazard, gets a normal prior with a
+standard deviation of 1.5 centred on \eqn{\mathrm{logit}(1 / K)}, the
+hazard of the first of \eqn{K} bins when every bin is equally likely. A
+prior centred on a hazard of a half would put half the prior mass on the
+first bin, so the prior mean delay would be about a day whatever the bins.
+Centred on the bins, the prior median of the mean delay is near the middle
+of the bins, with a wide spread. The intercept of \code{hsigma} gets
 \code{normal(0, 1)} on the log scale, the prior \code{primarycensored} uses for the
 spread of the logit hazards. Each innovation gets \code{std_normal()}, which
 makes the offsets non-centred.

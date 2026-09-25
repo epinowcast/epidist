@@ -754,7 +754,11 @@ add_summaries <- function(
   # Drop the model prefix `epidist` adds, keeping families whose own name
   # contains an underscore intact
   name <- sub("^(latent|marginal|meta)_", "", name)
-  return(list(name = name, dpars = family$dpars, np = family$np))
+  out <- list(name = name, dpars = family$dpars)
+  # Only the non-parametric family has an `np` element, and assigning NULL
+  # leaves every other family as it was.
+  out$np <- family$np
+  return(out)
 }
 
 #' Resolve the delay distribution family of a `data.frame` of draws

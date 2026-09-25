@@ -59,8 +59,9 @@ the better starting point for most delays, in its article on fitting
 non-parametric delays, \code{fitting-nonparametric-delays}, at
 \url{https://primarycensored.epinowcast.org/articles/}.
 
-The default priors are \code{normal(0, 1.5)} on the intercept of \code{mu}, which is
-close to uniform on the hazard scale, \code{normal(0, 1)} on the intercept of
+The default priors are \code{normal(logit(1 / K), 1.5)} on the intercept of
+\code{mu}, centred on the hazard of the first bin when every bin is equally
+likely, \code{normal(0, 1)} on the intercept of
 \code{hsigma} on the log scale, as in \code{primarycensored}, and \code{std_normal()} on
 each innovation. Set others with the \code{prior} argument of \code{\link[=epidist]{epidist()}}.
 }

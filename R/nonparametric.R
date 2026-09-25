@@ -38,8 +38,9 @@
 #' non-parametric delays, `fitting-nonparametric-delays`, at
 #' <https://primarycensored.epinowcast.org/articles/>.
 #'
-#' The default priors are `normal(0, 1.5)` on the intercept of `mu`, which is
-#' close to uniform on the hazard scale, `normal(0, 1)` on the intercept of
+#' The default priors are `normal(logit(1 / K), 1.5)` on the intercept of
+#' `mu`, centred on the hazard of the first bin when every bin is equally
+#' likely, `normal(0, 1)` on the intercept of
 #' `hsigma` on the log scale, as in `primarycensored`, and `std_normal()` on
 #' each innovation. Set others with the `prior` argument of [epidist()].
 #'
@@ -141,8 +142,13 @@ epidist_family_param.discretehazard_re <- function(family, ...) {
 
 #' Family specific prior distributions for the non-parametric family
 #'
-#' The intercept of `mu`, the logit hazard, gets `normal(0, 1.5)`, which is
-#' close to uniform on the hazard scale. The intercept of `hsigma` gets
+#' The intercept of `mu`, the logit hazard, gets a normal prior with a
+#' standard deviation of 1.5 centred on \eqn{\mathrm{logit}(1 / K)}, the
+#' hazard of the first of \eqn{K} bins when every bin is equally likely. A
+#' prior centred on a hazard of a half would put half the prior mass on the
+#' first bin, so the prior mean delay would be about a day whatever the bins.
+#' Centred on the bins, the prior median of the mean delay is near the middle
+#' of the bins, with a wide spread. The intercept of `hsigma` gets
 #' `normal(0, 1)` on the log scale, the prior `primarycensored` uses for the
 #' spread of the logit hazards. Each innovation gets `std_normal()`, which
 #' makes the offsets non-centred.
@@ -154,7 +160,9 @@ epidist_family_param.discretehazard_re <- function(family, ...) {
 #'
 #' @export
 epidist_family_prior.discretehazard_rw <- function(family, formula, ...) {
-  prior <- set_prior("normal(0, 1.5)", class = "Intercept") +
+  n_bins <- length(family$np$boundaries) - 1
+  centre <- round(stats::qlogis(1 / n_bins), 2)
+  prior <- set_prior(sprintf("normal(%s, 1.5)", centre), class = "Intercept") +
     set_prior("normal(0, 1)", class = "Intercept", dpar = "hsigma")
   for (eps in .np_eps_dpars(family$dpars)) {
     prior <- prior +

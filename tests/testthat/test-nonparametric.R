@@ -148,7 +148,10 @@ test_that("the nonparametric family sets its default priors", {
     epidist_prior(prep_marginal_obs, family, formula, prior = NULL)
   )
   intercept <- prior[prior$class == "Intercept", ]
-  expect_identical(intercept$prior[!nzchar(intercept$dpar)], "normal(0, 1.5)")
+  # 26 bins, so the hazard of the first is 1 / 26 when all are equally likely
+  expect_identical(
+    intercept$prior[!nzchar(intercept$dpar)], "normal(-3.22, 1.5)"
+  )
   expect_identical(
     intercept$prior[intercept$dpar == "hsigma"], "normal(0, 1)"
   )
