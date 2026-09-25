@@ -257,6 +257,7 @@ specification. Contributions of any kind are welcome!
 <a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=claude">claude</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=sbfnk">sbfnk</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=cherz4">cherz4</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>,

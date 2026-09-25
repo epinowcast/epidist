@@ -41,7 +41,9 @@
 #' observation is therefore a group rather than a single reported value, so
 #' `log_lik()` and [loo::loo()] report per group, and `loo` only compares
 #' fits to the same studies and the same mix of individual and summary rows.
-#' See `vignette("faq")`.
+#' Summary rows are evaluated in R for each posterior draw, so both are slow
+#' for a fit with many draws and summary rows. Pass `ndraws` to use fewer
+#' draws, as [epidist_gen_meta_log_lik()] explains. See `vignette("faq")`.
 #' [epidist_meta_leave_one_out()] asks the study level question instead,
 #' refitting with each study held out.
 #'
