@@ -2,13 +2,9 @@
 
 ## Models
 
-- Added the generalised gamma delay distribution as the `gengamma()` family.
-It uses the Prentice parameterisation of `flexsurv::dgengamma()`, with `mu` and `sigma` the location and scale of the log delay and `Q` a positive shape.
-The Weibull and gamma families are special cases and the lognormal is the limit as `Q` goes to zero.
-The marginal and meta models pass it to `primarycensored` in the Stacy form.
-It works with the naive, latent, marginal and meta models, with every primary event distribution, and with `add_summaries()`, which uses its closed form mean, standard deviation and quantiles.
-It needs the `flexsurv` package and `primarycensored` 1.5.2 or later, which adds the distribution to its Stan functions.
-See #644 and epinowcast/primarycensored#334.
+- Added the generalised gamma delay distribution as the `gengamma()` family, in the parameterisation of `flexsurv::dgengamma()`.
+It works with every model and needs the `flexsurv` package.
+See #644.
 - Added an exponentially growing primary event distribution to the latent model.
 `as_epidist_latent_model(primary = "expgrowth")` makes the growth rate a distributional parameter, so it takes a `brms` formula and prior and can vary by covariate.
 See #489 and #618.
