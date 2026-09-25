@@ -147,3 +147,52 @@ test_that("the nonparametric family sets its default priors", {
   expect_length(eps, 24)
   expect_true(all(eps == "std_normal()"))
 })
+
+np_draws <- data.frame(
+  mu = c(-1, -0.5), hsigma = c(0.5, 0.8),
+  h2eps = c(0.3, -0.2), h3eps = c(-0.5, 0.4), h4eps = c(0.2, 0.1)
+)
+
+test_that("add_summaries() gives the moments and quantiles of the bins", {
+  family <- nonparametric(boundaries = -1:4)
+  out <- add_summaries(np_draws, family = family, probs = c(0.1, 0.5, 0.99))
+  pmf <- .np_pmf(np_draws, -1:4, "rw")
+  edges <- as.numeric(0:4)
+  expect_equal(out$mean, as.vector(pmf %*% edges))
+  expect_equal(
+    out$sd, sqrt(as.vector(pmf %*% edges^2) - out$mean^2)
+  )
+  for (row in 1:2) {
+    cdf <- cumsum(pmf[row, ])
+    expect_identical(out$q50[row], edges[which(cdf >= 0.5)[1]])
+    expect_identical(out$q10[row], edges[which(cdf >= 0.1)[1]])
+    expect_identical(out$q99[row], edges[which(cdf >= 0.99)[1]])
+  }
+})
+
+test_that("add_summaries() by simulation agrees with the analytic summaries", {
+  family <- nonparametric(boundaries = -1:4)
+  analytic <- add_summaries(np_draws, family = family)
+  withr::local_seed(1)
+  sampled <- add_summaries(
+    np_draws,
+    family = family, method = "sample", nsim = 20000
+  )
+  expect_equal(sampled$mean, analytic$mean, tolerance = 0.02)
+  expect_equal(sampled$sd, analytic$sd, tolerance = 0.03)
+})
+
+test_that("the nonparametric density is the histogram of the bins", {
+  summaries <- .np_delay_summaries(nonparametric(-1:4)$np)
+  pmf <- .np_pmf(np_draws, -1:4, "rw")
+  expect_equal(summaries$density(np_draws, 2.5), pmf[, 4])
+  expect_equal(summaries$density(np_draws, 3), pmf[, 4])
+  expect_identical(summaries$density(np_draws, 5), c(0, 0))
+})
+
+test_that("add_summaries() needs the boundaries of the family", {
+  expect_error(
+    add_summaries(np_draws, family = nonparametric()),
+    "boundaries"
+  )
+})

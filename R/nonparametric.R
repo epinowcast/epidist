@@ -492,3 +492,73 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
     return(list(boundaries = np$boundaries, hazards = hazards[draw, ]))
   }))
 }
+
+#' Analytic delay summaries of the non-parametric family
+#'
+#' @inheritParams .np_dist_args
+#'
+#' @returns A list in the form of `.analytic_delay_summaries()`.
+#'
+#' @keywords internal
+.np_delay_summaries <- function(np) {
+  if (is.null(np$boundaries)) {
+    cli_abort(c(
+      "The {.fn nonparametric} family has no {.arg boundaries}.",
+      i = "Pass the fit as {.arg family}, or set {.arg boundaries}."
+    ))
+  }
+  edges <- np$boundaries[-1]
+  widths <- diff(np$boundaries)
+  pmf <- function(d) {
+    return(.np_pmf(d, np$boundaries, np$hazard_model))
+  }
+  delay_mean <- function(d) {
+    return(as.vector(pmf(d) %*% edges))
+  }
+  return(list(
+    dpars = c(
+      "mu", "hsigma", .np_eps_names(length(edges), np$hazard_model)
+    ),
+    mean = delay_mean,
+    sd = function(d) {
+      second <- as.vector(pmf(d) %*% edges^2)
+      return(sqrt(pmax(second - delay_mean(d)^2, 0)))
+    },
+    quantile = function(d, p) {
+      mass <- pmf(d)
+      cum <- mass
+      for (j in seq_len(ncol(mass))[-1]) {
+        cum[, j] <- cum[, j - 1] + mass[, j]
+      }
+      reached <- cum >= p - sqrt(.Machine$double.eps)
+      reached[, ncol(reached)] <- TRUE
+      return(edges[max.col(reached, ties.method = "first")])
+    },
+    density = function(d, x) {
+      bin <- findInterval(x, np$boundaries, left.open = TRUE)
+      if (bin < 1 || bin > length(edges)) {
+        return(rep(0, length(d$mu)))
+      }
+      return(pmf(d)[, bin] / widths[bin])
+    }
+  ))
+}
+
+#' Simulate delays from each draw of the non-parametric family
+#'
+#' @inheritParams .np_dist_args
+#'
+#' @inheritParams .simulate_delays
+#'
+#' @returns A matrix with one row per element of the vectors in `dpars` and
+#'  `nsim` columns.
+#'
+#' @keywords internal
+.np_simulate_delays <- function(np, dpars, nsim = 1000) {
+  mass <- .np_pmf(dpars, np$boundaries, np$hazard_model)
+  edges <- np$boundaries[-1]
+  samples <- lapply(seq_len(nrow(mass)), function(row) {
+    return(sample(edges, nsim, replace = TRUE, prob = mass[row, ]))
+  })
+  return(matrix(unlist(samples), nrow = nrow(mass), byrow = TRUE))
+}
