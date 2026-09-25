@@ -14,8 +14,8 @@
 \item{natural}{A function of the \code{brms} parameters returning the named
 arguments of the distribution's R functions.}
 
-\item{mean, sd}{Functions of those arguments returning the mean and the
-standard deviation.}
+\item{mean, sd}{Functions of the \code{brms} parameters returning the mean and
+the standard deviation.}
 }
 \value{
 A list with \code{dpars} and the functions \code{mean(d)}, \code{sd(d)},
