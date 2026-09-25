@@ -17,11 +17,12 @@
 #' Build the Stan functions block shared by the marginal and meta models
 #'
 #' Both models read a `functions.stan` chunk with the same placeholders
-#' (`family`, `dist_id`, `dpars_A`, `dpars_B`, and the pair
+#' (`family`, `dist_id`, `dpars_A`, `{dpars_B}`, and the pair
 #' `primary_id, primary_params`), filled in with the target distribution's
-#' details and the primary event distribution. `dpars_B` is the parameter
-#' order of `primarycensored`, which a family may record as `pcd_param`
-#' where it differs from the order of its Stan density. Used within
+#' details and the primary event distribution. `{dpars_B}` is the parameter
+#' array of `primarycensored`, see [.stan_dist_params()], which a family may
+#' order as `pcd_param` where it differs from the order of its Stan density.
+#' Used within
 #' [epidist_stancode()] methods for the marginal and meta models, which
 #' differ only in the chunk path, the family name prefix, and any further
 #' placeholders they need substituted.

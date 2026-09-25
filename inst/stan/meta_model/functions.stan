@@ -6,8 +6,8 @@
   * - 'dist_id' is replaced with the primarycensored distribution identifier
   * - 'dpars_A' is replaced with multiple distribution parameters in the format
   *   "real paramname1, real paramname2, ...".
-  * - 'dpars_B' is replaced with the same parameters as dpars_A but
-  *   reparameterised according to the brms parameterisation for Stan.
+  * - The parameter array placeholder in braces is replaced with the same
+  *   parameters as dpars_A but in the primarycensored parameterisation.
   * - 'primary_id, primary_params' is replaced with the primarycensored
   *   identifier and parameters of the primary event distribution used for
   *   individual level rows, for example '2, {pgrowth}' for exponential
