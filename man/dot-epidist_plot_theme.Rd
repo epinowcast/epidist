@@ -10,7 +10,7 @@
 A \code{ggplot2} theme.
 }
 \description{
-\code{\link[ggplot2:ggtheme]{ggplot2::theme_minimal()}} with the legend below the plot, as the package
+\code{\link[ggplot2:theme_minimal]{ggplot2::theme_minimal()}} with the legend below the plot, as the package
 documentation draws its plots.
 }
 \keyword{internal}

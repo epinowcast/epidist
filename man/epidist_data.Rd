@@ -44,12 +44,12 @@
 
 \item{value}{A replacement value.}
 
-\item{deparse.level}{Passed to \code{\link[base:cbind]{base::rbind()}}.}
+\item{deparse.level}{Passed to \code{\link[base:rbind]{base::rbind()}}.}
 
-\item{data, template}{Passed to \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_reconstruct()}}.}
+\item{data, template}{Passed to \code{\link[dplyr:dplyr_reconstruct]{dplyr::dplyr_reconstruct()}}.}
 
-\item{i, cols}{Passed to \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_row_slice()}} and
-\code{\link[dplyr:dplyr_extending]{dplyr::dplyr_col_modify()}}.}
+\item{i, cols}{Passed to \code{\link[dplyr:dplyr_row_slice]{dplyr::dplyr_row_slice()}} and
+\code{\link[dplyr:dplyr_col_modify]{dplyr::dplyr_col_modify()}}.}
 
 \item{.add, .drop}{Passed to \code{\link[dplyr:group_by]{dplyr::group_by()}}.}
 }
@@ -67,11 +67,11 @@ which accept one do not need to re-check it.
 }
 \details{
 Methods are provided for base subsetting and replacement, and for
-\code{\link[dplyr:dplyr_extending]{dplyr::dplyr_reconstruct()}}, which \code{dplyr} verbs such as \code{\link[dplyr:mutate]{dplyr::mutate()}},
+\code{\link[dplyr:dplyr_reconstruct]{dplyr::dplyr_reconstruct()}}, which \code{dplyr} verbs such as \code{\link[dplyr:mutate]{dplyr::mutate()}},
 \code{\link[dplyr:filter]{dplyr::filter()}} and \code{\link[dplyr:select]{dplyr::select()}} use to restore the class of their
-input. \code{\link[dplyr:group_by]{dplyr::group_by()}} and \code{\link[dplyr:group_by]{dplyr::ungroup()}} build a new tibble rather
+input. \code{\link[dplyr:group_by]{dplyr::group_by()}} and \code{\link[dplyr:ungroup]{dplyr::ungroup()}} build a new tibble rather
 than restoring the class of their input, as do the \code{grouped_df} methods for
-\code{\link[dplyr:dplyr_extending]{dplyr::dplyr_row_slice()}} and \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_col_modify()}}, so each has a
+\code{\link[dplyr:dplyr_row_slice]{dplyr::dplyr_row_slice()}} and \code{\link[dplyr:dplyr_col_modify]{dplyr::dplyr_col_modify()}}, so each has a
 method of its own that puts the classes back. A grouped object keeps the
 \code{grouped_df} class after the \code{epidist} classes, and the \code{dplyr} verbs keep
 both. \code{\link[dplyr:summarise]{dplyr::summarise()}} builds a new object from the groups rather than
@@ -99,7 +99,7 @@ class(dplyr::select(linelist_data, -"obs_time"))
 class(dplyr::group_by(linelist_data, obs_time))
 }
 \seealso{
-Other epidist_data: 
-\code{\link{is_epidist_data}()}
+Other epidist_data:
+\code{\link[=is_epidist_data]{is_epidist_data()}}
 }
 \concept{epidist_data}

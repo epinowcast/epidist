@@ -12,7 +12,7 @@ be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
 families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
-\code{\link[brms:brmsfamily]{brms::lognormal()}}, are also
+\code{\link[brms:lognormal]{brms::lognormal()}}, are also
 reexported as part of \code{epidist}.}
 }
 \value{
@@ -29,12 +29,12 @@ one study returns the joint log likelihood of all of them, so an observation
 here is a group of summaries rather than a single reported value.
 }
 \seealso{
-\code{\link[brms:log_lik.brmsfit]{brms::log_lik()}} for details on the brms log likelihood interface.
+\code{\link[brms:log_lik]{brms::log_lik()}} for details on the brms log likelihood interface.
 
-Other gen: 
-\code{\link{epidist_gen_log_lik}()},
-\code{\link{epidist_gen_meta_predict}()},
-\code{\link{epidist_gen_posterior_epred}()},
-\code{\link{epidist_gen_posterior_predict}()}
+Other gen:
+\code{\link[=epidist_gen_log_lik]{epidist_gen_log_lik()}},
+\code{\link[=epidist_gen_meta_predict]{epidist_gen_meta_predict()}},
+\code{\link[=epidist_gen_posterior_epred]{epidist_gen_posterior_epred()}},
+\code{\link[=epidist_gen_posterior_predict]{epidist_gen_posterior_predict()}}
 }
 \concept{gen}

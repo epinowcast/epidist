@@ -20,12 +20,12 @@ nor a fitted model.
 Default method for plotting observed delays
 }
 \seealso{
-Other plot: 
-\code{\link{plot.epidist_delay_draws}()},
-\code{\link{plot_delays}()},
-\code{\link{plot_delays.epidist_fit}()},
-\code{\link{plot_delays.epidist_linelist_data}()},
-\code{\link{plot_delays.list}()},
-\code{\link{plot_events}()}
+Other plot:
+\code{\link[=plot.epidist_delay_draws]{plot.epidist_delay_draws()}},
+\code{\link[=plot_delays]{plot_delays()}},
+\code{\link[=plot_delays.epidist_fit]{plot_delays.epidist_fit()}},
+\code{\link[=plot_delays.epidist_linelist_data]{plot_delays.epidist_linelist_data()}},
+\code{\link[=plot_delays.list]{plot_delays.list()}},
+\code{\link[=plot_events]{plot_events()}}
 }
 \concept{plot}
