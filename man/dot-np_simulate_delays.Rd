@@ -7,8 +7,8 @@
 .np_simulate_delays(np, dpars, nsim = 1000)
 }
 \arguments{
-\item{np}{The \code{np} element of the family, holding the boundaries and the
-hazard model.}
+\item{np}{The \code{np} element of the family, holding the boundaries, the
+basis and its coefficients.}
 
 \item{dpars}{A named list of distributional parameter vectors.}
 

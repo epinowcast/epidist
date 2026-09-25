@@ -6,52 +6,90 @@
 #' same way as [brms::lognormal()].
 #'
 #' The delay sits on a grid of \eqn{K} bins with boundaries
-#' \eqn{b_0 < b_1 < \dots < b_K}. All the probability of bin \eqn{i} is
-#' placed at its right edge \eqn{b_i}, so the delay distribution function is
+#' \eqn{b_0 < b_1 < \dots < b_K}. All the probability of bin \eqn{k} is
+#' placed at its right edge \eqn{b_k}, so the delay distribution function is
 #' a step function. This is the discrete hazard distribution of
 #' [primarycensored::pdiscretehazard()], and the likelihood is the
 #' `primarycensored` one for that distribution.
 #'
 #' The distribution is written in terms of the discrete time hazard of each
-#' bin, the probability that the delay ends in bin \eqn{i} given that it did
+#' bin, the probability that the delay ends in bin \eqn{k} given that it did
 #' not end before it. The hazard of the last bin is 1, so all the delays end
-#' by \eqn{b_K}. The other hazards are modelled on the logit scale as
-#' \deqn{\mathrm{logit}(h_i) = \mu + \sigma \delta_i.}
+#' by \eqn{b_K}. The logit hazards of the other bins are a linear predictor
+#' over the bins,
+#' \deqn{\mathrm{logit}(h_k) = \mu + \sum_q B_{kq} \theta_q,}
+#' where the basis \eqn{B} comes from `formula` evaluated on the bins.
 #'
-#' `mu` is the distributional parameter that takes a formula. A covariate in
-#' the `mu` formula shifts the logit hazard of every bin by the same amount,
-#' which is a proportional odds model for the hazard. `hsigma` is
-#' \eqn{\sigma}, the spread of the bin offsets \eqn{\delta_i}. The offsets are
-#' built from standard normal innovations, one distributional parameter per
-#' innovation, named `h<i>eps` after the bin they enter at.
+#' @details
+#' # The hazard formula
 #'
-#' * `hazard_model = "rw"`, the default, is a random walk on the logit
-#'   hazard: \eqn{\delta_1 = 0} and \eqn{\delta_i = \sum_{j = 2}^{i}
-#'   \epsilon_j}. Neighbouring bins have similar hazards, so the fitted
-#'   distribution is smooth.
-#' * `hazard_model = "re"` treats the logit hazards as independent random
-#'   effects around `mu`: \eqn{\delta_i = \epsilon_i}. It does not borrow
-#'   strength between neighbouring bins.
+#' `formula` is a one sided formula in two variables of the bins: `delay`,
+#' the right edge \eqn{b_k} of each bin, and `bin`, a factor with one level
+#' per bin. It takes the terms of a `brms` formula that make sense on the
+#' bins:
 #'
-#' The random walk is the default because `primarycensored` recommends it as
-#' the better starting point for most delays, in its article on fitting
-#' non-parametric delays, `fitting-nonparametric-delays`, at
-#' <https://primarycensored.epinowcast.org/articles/>.
+#' * parametric terms such as `delay`, `I(delay^2)` or `bin`,
+#' * smooths such as `s(delay)`, `s(delay, bs = "ps")` or `t2(delay)`, built
+#'   with [mgcv::smoothCon()] as `brms` builds them,
+#' * a random intercept per bin, `(1 | bin)`, which is the smooth
+#'   `s(bin, bs = "re")`.
+#'
+#' `~ 1` gives the same hazard in every bin, a geometric delay. The default,
+#' `NULL`, is `~ s(delay, k = min(10, K - 1))`, a thin plate regression
+#' spline over the delay, which smooths the hazard over neighbouring bins.
+#' With fewer than three free bins it is `~ (1 | bin)`.
+#'
+#' The intercept of the formula is dropped, because \eqn{\mu} is the
+#' intercept. Each column of the basis is centred over the bins, so
+#' \eqn{\mu} is the mean logit hazard, and scaled, so that each coefficient
+#' is on the scale of the logit hazard.
+#'
+#' # Parameters
+#'
+#' Each coefficient \eqn{\theta_q} is a distributional parameter, so it
+#' appears in the output of [epidist()] and takes a `brms` formula and prior
+#' in the same way as `mu`:
+#'
+#' * `h<i>b` is the coefficient of the \eqn{i}th unpenalised column, such as
+#'   a parametric term or the linear part of a spline.
+#' * `h<j>sd` is the standard deviation of the \eqn{j}th penalised term, such
+#'   as the wiggly part of a spline or the random intercept per bin.
+#' * `h<i>z` is the \eqn{i}th standardised coefficient of the penalised
+#'   terms, so the coefficient is `h<j>sd * h<i>z` for the term \eqn{j} the
+#'   column belongs to. This is the non-centred form `brms` uses for smooths
+#'   and random effects.
+#'
+#' The `coefficients` element of the `np` element of the family built by
+#' [epidist_family()] names the term of each coefficient.
+#'
+#' # Covariates
+#'
+#' A covariate in the `mu` formula shifts the logit hazard of every bin by
+#' the same amount, which is a proportional odds model for the hazard. A
+#' covariate in the formula of a coefficient changes the shape of the
+#' hazard over the bins, a non-proportional effect. For example with
+#' `formula = ~ delay`, `bf(mu ~ age_group, h1b ~ age_group)` gives each age
+#' group its own intercept and slope of the logit hazard over the delay, as
+#' `delay * age_group` would.
+#'
+#' # Priors
 #'
 #' The default priors are `normal(logit(1 / K), 1.5)` on the intercept of
 #' `mu`, centred on the hazard of the first bin when every bin is equally
-#' likely, `normal(0, 1)` on the intercept of
-#' `hsigma` on the log scale, as in `primarycensored`, and `std_normal()` on
-#' each innovation. Set others with the `prior` argument of [epidist()].
+#' likely, `normal(0, 2)` on each `h<i>b`, `normal(0, 1)` on the log of each
+#' `h<j>sd`, as `primarycensored` uses for the spread of the logit hazards,
+#' and `std_normal()` on each `h<i>z`. Set others with the `prior` argument
+#' of [epidist()].
+#'
+#' @param formula A one sided formula for the logit hazards over the bins,
+#'  see Details. The default, `NULL`, is a spline over the delay.
 #'
 #' @param boundaries A numeric vector of at least four strictly increasing
 #'  bin boundaries, \eqn{b_0} to \eqn{b_K}. The default, `NULL`, is set by
 #'  [epidist()] from the data, with a bin for every whole delay from 0 up to
-#'  the longest delay in the data, that is `seq(-1, max_delay)`. The last
-#'  boundary must be at least as long as the longest observed delay.
-#'
-#' @param hazard_model The model for the logit hazards, `"rw"` for a random
-#'  walk, the default, or `"re"` for independent random effects.
+#'  the longest delay in the data, and at least four bins, that is
+#'  `seq(-1, max(3, max_delay))`. The last boundary must be at least as long
+#'  as the longest observed delay.
 #'
 #' @returns A `brmsfamily` object for use as the `family` argument of
 #'  [epidist()].
@@ -60,15 +98,18 @@
 #' @export
 #' @examples
 #' nonparametric(boundaries = -1:10)
-#' nonparametric(hazard_model = "re")
-nonparametric <- function(boundaries = NULL, hazard_model = c("rw", "re")) {
-  hazard_model <- match.arg(hazard_model)
+#' nonparametric(~ (1 | bin), boundaries = -1:10)
+#' nonparametric(~ s(delay, bs = "ps", k = 6), boundaries = c(-1:5, 7, 10))
+nonparametric <- function(formula = NULL, boundaries = NULL) {
+  if (!is.null(formula)) {
+    formula <- .np_check_formula(formula)
+  }
   out <- list(
-    family = paste0("discretehazard_", hazard_model),
+    family = "nonparametric",
     link = "identity",
     dpars = "mu",
     ybounds = c(-Inf, Inf),
-    np = list(boundaries = NULL, hazard_model = hazard_model)
+    np = list(boundaries = NULL, formula = formula)
   )
   class(out) <- c("brmsfamily", "family")
   if (!is.null(boundaries)) {
@@ -77,105 +118,348 @@ nonparametric <- function(boundaries = NULL, hazard_model = c("rw", "re")) {
   return(out)
 }
 
+#' Check the hazard formula of the non-parametric family
+#'
+#' @inheritParams nonparametric
+#'
+#' @returns The formula, with any `(1 | bin)` term written as
+#'  `s(bin, bs = "re")`.
+#'
+#' @keywords internal
+.np_check_formula <- function(formula) {
+  if (!inherits(formula, "formula") || length(formula) != 2) {
+    cli_abort(
+      "{.arg formula} must be a one sided formula, such as
+       {.code ~ s(delay)}."
+    )
+  }
+  formula <- .np_bars_to_smooths(formula)
+  vars <- setdiff(all.vars(formula), c("delay", "bin"))
+  if (length(vars) > 0) {
+    cli_abort(c(
+      "{.arg formula} of {.fn nonparametric} can only use the bin variables
+       {.var delay} and {.var bin}, not {.var {vars}}.",
+      i = "Put covariates in the formula of {.var mu} or of a hazard
+           coefficient, see {.fn nonparametric}."
+    ))
+  }
+  return(formula)
+}
+
+#' Write random intercepts per bin as random effect smooths
+#'
+#' @inheritParams nonparametric
+#'
+#' @returns The formula with each `(1 | g)` term replaced by
+#'  `s(g, bs = "re")`.
+#'
+#' @keywords internal
+.np_bars_to_smooths <- function(formula) {
+  formula_terms <- stats::terms(formula)
+  term_labels <- attr(formula_terms, "term.labels")
+  bars <- grepl("|", term_labels, fixed = TRUE)
+  if (!any(bars)) {
+    return(formula)
+  }
+  term_labels[bars] <- vapply(term_labels[bars], function(label) {
+    parts <- trimws(strsplit(label, "||", fixed = TRUE)[[1]])
+    if (length(parts) == 1) {
+      parts <- trimws(strsplit(label, "|", fixed = TRUE)[[1]])
+    }
+    if (length(parts) != 2 || parts[1] != "1") {
+      cli_abort(
+        "{.arg formula} of {.fn nonparametric} only takes random
+         intercepts, such as {.code (1 | bin)}, not {.code ({label})}."
+      )
+    }
+    return(sprintf("s(%s, bs = \"re\")", parts[2]))
+  }, character(1))
+  return(stats::reformulate(
+    term_labels,
+    intercept = attr(formula_terms, "intercept") == 1,
+    env = environment(formula)
+  ))
+}
+
+#' Set the bin boundaries of the non-parametric family
+#'
+#' Fixes the number of bins, and so the basis of the hazard formula, the
+#' distributional parameters, their links and their bounds.
+#'
+#' @param family A family built by [nonparametric()].
+#'
+#' @inheritParams nonparametric
+#'
+#' @returns The family with its boundaries, basis and parameters set.
+#'
+#' @keywords internal
+.np_set_boundaries <- function(family, boundaries) {
+  boundaries <- .assert_np_boundaries(boundaries)
+  hazard_formula <- family$np$formula
+  if (is.null(hazard_formula)) {
+    hazard_formula <- .np_default_formula(length(boundaries) - 1)
+  }
+  basis <- .np_basis(hazard_formula, boundaries)
+  family$np <- c(
+    list(boundaries = boundaries, formula = hazard_formula), basis
+  )
+  family$dpars <- c("mu", .np_dpars(family$np))
+  links <- ifelse(
+    family$dpars[-1] %in% basis$coefficients$sd, "log", "identity"
+  )
+  family$other_links <- links
+  family$other_bounds <- lapply(links, function(link) {
+    return(list(lb = ifelse(link == "log", "0", ""), ub = ""))
+  })
+  return(family)
+}
+
+#' The default hazard formula of the non-parametric family
+#'
+#' @param n_bins The number of bins, \eqn{K}.
+#'
+#' @returns A one sided formula.
+#'
+#' @keywords internal
+.np_default_formula <- function(n_bins) {
+  free <- n_bins - 1
+  if (free < 3) {
+    return(~ s(bin, bs = "re"))
+  }
+  return(stats::as.formula(
+    sprintf("~ s(delay, k = %d)", min(10L, free)),
+    env = globalenv()
+  ))
+}
+
+#' The bins the hazard formula is evaluated on
+#'
+#' @inheritParams nonparametric
+#'
+#' @returns A `data.frame` with one row per bin whose hazard is free, all
+#'  but the last, holding the right edge of the bin as `delay` and its
+#'  index as the factor `bin`.
+#'
+#' @keywords internal
+.np_bins <- function(boundaries) {
+  free <- length(boundaries) - 2
+  return(data.frame(
+    delay = boundaries[seq_len(free) + 1],
+    bin = factor(seq_len(free))
+  ))
+}
+
+#' Build the basis of the hazard formula over the bins
+#'
+#' Parametric terms come from [stats::model.matrix()] and smooths from
+#' [mgcv::smoothCon()] and [mgcv::smooth2random()], which split each smooth
+#' into unpenalised columns and penalised blocks with one standard deviation
+#' each, as `brms` does. Each column is centred over the bins, each
+#' unpenalised column is scaled to unit standard deviation and each
+#' penalised block to unit root mean square.
+#'
+#' @inheritParams nonparametric
+#'
+#' @returns A list holding `basis`, a matrix with one row per free bin and
+#'  one column per coefficient, and `coefficients`, a `data.frame` with one
+#'  row per column giving the `term` of the column, its parameter `dpar`,
+#'  and the standard deviation parameter `sd` of its penalised term, `NA`
+#'  for an unpenalised column.
+#'
+#' @keywords internal
+.np_basis <- function(formula, boundaries) {
+  bins <- .np_bins(boundaries)
+  gam <- mgcv::interpret.gam(formula)
+  parametric <- stats::terms(gam$pf)
+  attr(parametric, "intercept") <- 1L
+  fixed <- stats::model.matrix(parametric, bins)
+  fixed_terms <- attr(parametric, "term.labels")[attr(fixed, "assign")]
+  keep <- colnames(fixed) != "(Intercept)"
+  fixed <- fixed[, keep, drop = FALSE]
+  penalised <- list()
+  penalised_terms <- character()
+  for (spec in gam$smooth.spec) {
+    smooths <- mgcv::smoothCon(
+      spec,
+      data = bins, absorb.cons = TRUE, diagonal.penalty = TRUE
+    )
+    for (smooth in smooths) {
+      random <- mgcv::smooth2random(smooth, names(bins), type = 2)
+      fixed <- cbind(fixed, random$Xf)
+      fixed_terms <- c(fixed_terms, rep(smooth$label, ncol(random$Xf)))
+      penalised <- c(penalised, unname(random$rand))
+      penalised_terms <- c(
+        penalised_terms, rep(smooth$label, length(random$rand))
+      )
+    }
+  }
+  fixed <- scale(fixed, center = TRUE, scale = FALSE)
+  fixed <- sweep(fixed, 2, sqrt(colMeans(fixed^2)), "/")
+  penalised <- lapply(penalised, function(block) {
+    block <- scale(block, center = TRUE, scale = FALSE)
+    return(block / sqrt(mean(rowSums(block^2))))
+  })
+  basis <- do.call(cbind, c(list(fixed), penalised))
+  dimnames(basis) <- NULL
+  # Penalised terms are identified by their prior, as in brms, so only the
+  # unpenalised columns need to be of full rank.
+  if (!all(is.finite(basis)) ||
+    qr(cbind(1, fixed))$rank != ncol(fixed) + 1) {
+    cli_abort(c(
+      "The {.arg formula} of {.fn nonparametric} gives unpenalised terms
+       that are not identified on the bins.",
+      i = "Remove terms that repeat each other, or use more bins."
+    ))
+  }
+  n_fixed <- ncol(fixed)
+  n_penalised <- vapply(penalised, ncol, integer(1))
+  sd_index <- rep(seq_along(penalised), n_penalised)
+  coefs <- data.frame(
+    term = c(fixed_terms, rep(penalised_terms, n_penalised)),
+    dpar = c(
+      sprintf("h%db", seq_len(n_fixed)),
+      sprintf("h%dz", seq_len(sum(n_penalised)))
+    ),
+    sd = c(rep(NA_character_, n_fixed), sprintf("h%dsd", sd_index)),
+    stringsAsFactors = FALSE
+  )
+  return(list(basis = basis, coefficients = coefs))
+}
+
 #' Stan parameterisation of the non-parametric family
 #'
 #' The delay distribution parameters are the boundaries followed by the bin
-#' hazards, built from `mu`, `hsigma` and the innovations by the Stan
-#' function `epidist_np_params()`. The boundaries are written into the Stan
-#' code as a literal array.
+#' hazards, built from `mu`, the basis and the coefficients by the Stan
+#' function `epidist_np_params()`. The boundaries and the basis are written
+#' into the Stan code as functions returning them, see [.np_stanvars()].
 #'
 #' @inheritParams epidist_family_param
-#' @method epidist_family_param discretehazard_rw
+#' @method epidist_family_param nonparametric
 #' @family family
 #' @returns The family with a `param` element holding the Stan expression
 #'  for the parameter array.
 #'
 #' @export
-epidist_family_param.discretehazard_rw <- function(family, ...) {
-  eps <- .np_eps_dpars(family$dpars)
+epidist_family_param.nonparametric <- function(family, ...) {
   family$param <- paste0(
-    "epidist_np_params(", .np_stan_array(family$np$boundaries),
-    ", mu, hsigma, {", toString(eps), "}, ",
-    as.integer(family$np$hazard_model == "rw"), ")"
+    "epidist_np_params(epidist_np_boundaries(), mu, epidist_np_basis(), ",
+    .np_stan_coefficients(family$np$coefficients), ")"
   )
   return(family)
 }
 
-#' @rdname epidist_family_param.discretehazard_rw
-#' @method epidist_family_param discretehazard_re
-#' @export
-epidist_family_param.discretehazard_re <- function(family, ...) {
-  return(epidist_family_param.discretehazard_rw(family, ...))
+#' The Stan expression of the hazard coefficients
+#'
+#' @param coefs The `coefficients` element of [.np_basis()].
+#'
+#' @returns A character string holding a Stan vector expression.
+#'
+#' @keywords internal
+.np_stan_coefficients <- function(coefs) {
+  if (nrow(coefs) == 0) {
+    return("rep_vector(0, 0)")
+  }
+  values <- ifelse(
+    is.na(coefs$sd),
+    coefs$dpar,
+    paste0(coefs$sd, " * ", coefs$dpar)
+  )
+  return(paste0("[", toString(values), "]'"))
 }
 
-#' Write numbers as a Stan array literal of reals
+#' Write numbers exactly as Stan real literals
 #'
 #' @param x A numeric vector.
 #'
-#' @returns A character string such as `"{-1.0, 0.0, 1.5}"`.
+#' @returns A character vector such as `c("-1.0", "0.25")`.
 #'
 #' @keywords internal
-.np_stan_array <- function(x) {
-  values <- format(x, digits = 15, trim = TRUE, scientific = FALSE)
-  whole <- !grepl(".", values, fixed = TRUE)
+.np_stan_reals <- function(x) {
+  values <- sprintf("%.17g", x)
+  whole <- !grepl("[.e]", values)
   values[whole] <- paste0(values[whole], ".0")
-  return(paste0("{", toString(values), "}"))
+  return(values)
 }
 
 #' Stan functions of the non-parametric family
 #'
+#' `epidist_np_params()`, and the functions `epidist_np_boundaries()` and
+#' `epidist_np_basis()`, which return the boundaries and the basis of the
+#' family as constants.
+#'
 #' @param family The `epidist` family object.
 #'
-#' @returns A `brms` `stanvars` object holding `epidist_np_params()`, or
-#'  `NULL` for any other family.
+#' @returns A `brms` `stanvars` object, or `NULL` for any other family.
 #'
 #' @keywords internal
 .np_stanvars <- function(family) {
   if (!.is_nonparametric(family)) {
     return(NULL)
   }
+  np <- family$np
+  basis <- np$basis
+  if (ncol(basis) == 0) {
+    basis_code <- sprintf("rep_matrix(0, %d, 0)", nrow(basis))
+  } else {
+    rows <- apply(basis, 1, function(row) {
+      return(paste0("[", toString(.np_stan_reals(row)), "]"))
+    })
+    basis_code <- paste0(
+      "[\n      ", paste(rows, collapse = ",\n      "),
+      "\n    ]"
+    )
+  }
+  constants <- paste0(
+    "  array[] real epidist_np_boundaries() {\n",
+    "    return {", toString(.np_stan_reals(np$boundaries)), "};\n",
+    "  }\n",
+    "  matrix epidist_np_basis() {\n",
+    "    return ", basis_code, ";\n",
+    "  }\n"
+  )
   return(brms::stanvar(
     block = "functions",
-    scode = .stan_chunk(file.path("nonparametric", "functions.stan"))
+    scode = paste0(
+      .stan_chunk(file.path("nonparametric", "functions.stan")), "\n",
+      constants
+    )
   ))
 }
 
 #' Family specific prior distributions for the non-parametric family
 #'
-#' The intercept of `mu`, the logit hazard, gets a normal prior with a
+#' The intercept of `mu`, the mean logit hazard, gets a normal prior with a
 #' standard deviation of 1.5 centred on \eqn{\mathrm{logit}(1 / K)}, the
 #' hazard of the first of \eqn{K} bins when every bin is equally likely. A
 #' prior centred on a hazard of a half would put half the prior mass on the
 #' first bin, so the prior mean delay would be about a day whatever the bins.
-#' Centred on the bins, the prior median of the mean delay is near the middle
-#' of the bins, with a wide spread. The intercept of `hsigma` gets
-#' `normal(0, 1)` on the log scale, the prior `primarycensored` uses for the
-#' spread of the logit hazards. Each innovation gets `std_normal()`, which
-#' makes the offsets non-centred.
+#' Each unpenalised coefficient `h<i>b` gets `normal(0, 2)`, on the logit
+#' scale since the basis is scaled. The intercept of each standard deviation
+#' `h<j>sd` gets `normal(0, 1)` on the log scale, the prior `primarycensored`
+#' uses for the spread of the logit hazards. Each standardised coefficient
+#' `h<i>z` gets `std_normal()`, which makes the penalised terms non-centred.
 #'
 #' @inheritParams epidist
-#' @method epidist_family_prior discretehazard_rw
+#' @method epidist_family_prior nonparametric
 #' @family prior
 #' @returns A `brmsprior` object.
 #'
 #' @export
-epidist_family_prior.discretehazard_rw <- function(family, formula, ...) {
+epidist_family_prior.nonparametric <- function(family, formula, ...) {
   n_bins <- length(family$np$boundaries) - 1
   centre <- round(stats::qlogis(1 / n_bins), 2)
-  prior <- set_prior(sprintf("normal(%s, 1.5)", centre), class = "Intercept") +
-    set_prior("normal(0, 1)", class = "Intercept", dpar = "hsigma")
-  for (eps in .np_eps_dpars(family$dpars)) {
-    prior <- prior +
-      set_prior("std_normal()", class = "Intercept", dpar = eps)
+  prior <- set_prior(sprintf("normal(%s, 1.5)", centre), class = "Intercept")
+  coefs <- family$np$coefficients
+  for (dpar in .np_dpars(family$np)) {
+    dpar_prior <- "std_normal()"
+    if (dpar %in% coefs$sd) {
+      dpar_prior <- "normal(0, 1)"
+    } else if (dpar %in% coefs$dpar[is.na(coefs$sd)]) {
+      dpar_prior <- "normal(0, 2)"
+    }
+    prior <- prior + set_prior(dpar_prior, class = "Intercept", dpar = dpar)
   }
   return(prior)
-}
-
-#' @rdname epidist_family_prior.discretehazard_rw
-#' @method epidist_family_prior discretehazard_re
-#' @export
-epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
-  return(epidist_family_prior.discretehazard_rw(family, formula, ...))
 }
 
 #' Is a family the non-parametric hazard family?
@@ -212,46 +496,22 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
   return(invisible(as.numeric(boundaries)))
 }
 
-#' Set the bin boundaries of the non-parametric family
+#' The distributional parameters of the hazard coefficients
 #'
-#' Fixes the number of bins, and so the distributional parameters, their
-#' links and their bounds.
+#' @param np The `np` element of the family, holding the boundaries, the
+#'  basis and its coefficients.
 #'
-#' @param family A family built by [nonparametric()].
-#'
-#' @inheritParams nonparametric
-#'
-#' @returns The family with its boundaries and parameters set.
+#' @returns A character vector of parameter names, all but `mu`: the
+#'  unpenalised coefficients, then the standard deviations, then the
+#'  standardised penalised coefficients.
 #'
 #' @keywords internal
-.np_set_boundaries <- function(family, boundaries) {
-  boundaries <- .assert_np_boundaries(boundaries)
-  eps <- .np_eps_names(length(boundaries) - 1, family$np$hazard_model)
-  family$np$boundaries <- boundaries
-  family$dpars <- c("mu", "hsigma", eps)
-  family$other_links <- c("log", rep("identity", length(eps)))
-  family$other_bounds <- c(
-    list(list(lb = "0", ub = "")),
-    rep(list(list(lb = "", ub = "")), length(eps))
-  )
-  return(family)
-}
-
-#' Names of the innovation parameters of the non-parametric family
-#'
-#' `brms` reads a trailing digit in a distributional parameter name as a
-#' mixture component, so each name puts the bin index before `eps`.
-#'
-#' @param n_bins The number of bins, \eqn{K}.
-#'
-#' @inheritParams nonparametric
-#'
-#' @returns A character vector of parameter names.
-#'
-#' @keywords internal
-.np_eps_names <- function(n_bins, hazard_model) {
-  first <- ifelse(hazard_model == "rw", 2L, 1L)
-  return(paste0("h", seq(first, n_bins - 1L), "eps"))
+.np_dpars <- function(np) {
+  coefs <- np$coefficients
+  return(c(
+    coefs$dpar[is.na(coefs$sd)], unique(coefs$sd[!is.na(coefs$sd)]),
+    coefs$dpar[!is.na(coefs$sd)]
+  ))
 }
 
 #' Resolve the non-parametric family against the model data
@@ -278,7 +538,7 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
   }
   if (is.null(family$np$boundaries)) {
     longest <- .np_longest_delay(data)
-    family <- .np_set_boundaries(family, seq(-1, ceiling(longest)))
+    family <- .np_set_boundaries(family, seq(-1, max(3, ceiling(longest))))
   }
   if (inherits(data, "epidist_meta_model")) {
     .np_check_meta(data)
@@ -395,82 +655,53 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
   return(rep(TRUE, nrow(data)))
 }
 
-#' The innovation parameters of the non-parametric family
-#'
-#' @param dpars A character vector of distributional parameter names.
-#'
-#' @returns The names of the innovation parameters, in bin order.
-#'
-#' @keywords internal
-.np_eps_dpars <- function(dpars) {
-  eps <- grep("^h[0-9]+eps$", dpars, value = TRUE)
-  index <- as.integer(gsub("[^0-9]", "", eps))
-  return(eps[order(index)])
-}
 
-#' Logit hazard offsets of the non-parametric family
+#' Bin hazards of the non-parametric family
 #'
 #' @param dpars A named list of distributional parameter vectors of equal
-#'  length, holding `hsigma` and the innovations.
+#'  length, holding `mu` and the hazard coefficients.
 #'
-#' @inheritParams nonparametric
+#' @inheritParams .np_dpars
 #'
-#' @returns A matrix with one row per element of the vectors and one column
-#'  per bin but the last.
+#' @returns A matrix with one row per element of the vectors in `dpars` and
+#'  one column per bin, whose last column is 1. Mirrors
+#'  `epidist_np_params()` in Stan.
 #'
 #' @keywords internal
-.np_offsets <- function(dpars, hazard_model) {
-  eps_names <- .np_eps_dpars(names(dpars))
+.np_hazards <- function(dpars, np) {
   n <- length(dpars$mu)
-  eps <- matrix(
-    unlist(lapply(dpars[eps_names], rep_len, length.out = n)),
-    nrow = n
-  )
-  if (hazard_model == "rw") {
-    eps <- cbind(0, eps)
-    for (j in seq_len(ncol(eps))[-1]) {
-      eps[, j] <- eps[, j - 1] + eps[, j]
+  coefs <- np$coefficients
+  logit <- matrix(rep_len(dpars$mu, n), nrow = n, ncol = nrow(np$basis))
+  for (q in seq_len(nrow(coefs))) {
+    theta <- rep_len(dpars[[coefs$dpar[q]]], n)
+    if (!is.na(coefs$sd[q])) {
+      theta <- theta * rep_len(dpars[[coefs$sd[q]]], n)
     }
+    logit <- logit + outer(theta, np$basis[, q])
   }
-  return(eps * rep_len(dpars$hsigma, n))
+  return(cbind(stats::plogis(logit), 1))
 }
 
 #' Bin probabilities of the non-parametric family
 #'
 #' Each row is the probability mass at the right edge of each bin, from the
-#' hazards \eqn{h_i} as \eqn{h_i \prod_{j < i} (1 - h_j)}. Matches
+#' hazards \eqn{h_k} as \eqn{h_k \prod_{j < k} (1 - h_j)}. Matches
 #' [primarycensored::hazards_to_pmf()].
 #'
-#' @inheritParams .np_offsets
-#'
-#' @param boundaries The bin boundaries.
+#' @inheritParams .np_hazards
 #'
 #' @returns A matrix with one row per element of the vectors in `dpars` and
 #'  one column per bin.
 #'
 #' @keywords internal
-.np_pmf <- function(dpars, boundaries, hazard_model) {
-  hazards <- .np_hazards(dpars, hazard_model)
+.np_pmf <- function(dpars, np) {
+  hazards <- .np_hazards(dpars, np)
   n_bins <- ncol(hazards)
   log_surv <- matrix(0, nrow = nrow(hazards), ncol = n_bins)
   for (j in seq_len(n_bins)[-1]) {
     log_surv[, j] <- log_surv[, j - 1] + log1p(-hazards[, j - 1])
   }
   return(hazards * exp(log_surv))
-}
-
-#' Bin hazards of the non-parametric family
-#'
-#' @inheritParams .np_offsets
-#'
-#' @returns A matrix with one row per element of the vectors in `dpars` and
-#'  one column per bin, whose last column is 1.
-#'
-#' @keywords internal
-.np_hazards <- function(dpars, hazard_model) {
-  n <- length(dpars$mu)
-  logit <- rep_len(dpars$mu, n) + .np_offsets(dpars, hazard_model)
-  return(cbind(stats::plogis(logit), 1))
 }
 
 #' A random delay generator for the non-parametric family
@@ -524,20 +755,19 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
 #'
 #' @param i The index of the observation.
 #'
-#' @param np The `np` element of the family, holding the boundaries and the
-#'  hazard model.
+#' @inheritParams .np_dpars
 #'
 #' @returns A list with one element per draw, each a list of `boundaries`
 #'  and `hazards` for [primarycensored::pdiscretehazard()].
 #'
 #' @keywords internal
 .np_dist_args <- function(prep, i, np) {
-  dpar_names <- c("mu", "hsigma", .np_eps_dpars(names(prep$dpars)))
+  dpar_names <- c("mu", .np_dpars(np))
   dpars <- lapply(dpar_names, function(dpar) {
     return(brms::get_dpar(prep, dpar, i = i))
   })
   names(dpars) <- dpar_names
-  hazards <- .np_hazards(dpars, np$hazard_model)
+  hazards <- .np_hazards(dpars, np)
   return(lapply(seq_len(nrow(hazards)), function(draw) {
     return(list(boundaries = np$boundaries, hazards = hazards[draw, ]))
   }))
@@ -560,15 +790,13 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
   edges <- np$boundaries[-1]
   widths <- diff(np$boundaries)
   pmf <- function(d) {
-    return(.np_pmf(d, np$boundaries, np$hazard_model))
+    return(.np_pmf(d, np))
   }
   delay_mean <- function(d) {
     return(as.vector(pmf(d) %*% edges))
   }
   return(list(
-    dpars = c(
-      "mu", "hsigma", .np_eps_names(length(edges), np$hazard_model)
-    ),
+    dpars = c("mu", .np_dpars(np)),
     mean = delay_mean,
     sd = function(d) {
       second <- as.vector(pmf(d) %*% edges^2)
@@ -605,7 +833,7 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
 #'
 #' @keywords internal
 .np_simulate_delays <- function(np, dpars, nsim = 1000) {
-  mass <- .np_pmf(dpars, np$boundaries, np$hazard_model)
+  mass <- .np_pmf(dpars, np)
   edges <- np$boundaries[-1]
   samples <- lapply(seq_len(nrow(mass)), function(row) {
     return(sample(edges, nsim, replace = TRUE, prob = mass[row, ]))

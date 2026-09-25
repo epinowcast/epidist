@@ -181,7 +181,7 @@ test_that("the nonparametric Stan functions hold the bins exactly", {
   )
   code <- .np_stanvars(family)[[1]]$scode
   expect_match(code, "return {-1.0, 0.5, 2.0, 30.0};", fixed = TRUE)
-  basis <- sprintf("%.17g", family$np$basis)
+  basis <- .np_stan_reals(family$np$basis)
   for (value in basis) {
     expect_match(code, paste0("[", value, "]"), fixed = TRUE)
   }

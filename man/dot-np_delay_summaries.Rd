@@ -7,8 +7,8 @@
 .np_delay_summaries(np)
 }
 \arguments{
-\item{np}{The \code{np} element of the family, holding the boundaries and the
-hazard model.}
+\item{np}{The \code{np} element of the family, holding the boundaries, the
+basis and its coefficients.}
 }
 \value{
 A list in the form of \code{.analytic_delay_summaries()}.

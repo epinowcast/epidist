@@ -56,7 +56,7 @@
   )
 
   family_name <- gsub(family_prefix, "", family$name, fixed = TRUE)
-  dist_id <- primarycensored::pcd_stan_dist_id(family_name)
+  dist_id <- .pcd_stan_dist_id(family_name)
   substitutions <- c(
     "{dpars_B}" = .stan_dist_params(family),
     family = family_name,
@@ -76,6 +76,24 @@
   }
 
   return(stanvars_functions)
+}
+
+#' The `primarycensored` Stan distribution id of a family
+#'
+#' `primarycensored` gives the alias `"nonparametric"` to its direct
+#' probability mass step, `dist_id` 26, so the [nonparametric()] family is
+#' looked up by the name of its hazard distribution, `dist_id` 27.
+#'
+#' @param family_name The name of the delay family.
+#'
+#' @returns An integer.
+#'
+#' @keywords internal
+.pcd_stan_dist_id <- function(family_name) {
+  if (identical(family_name, "nonparametric")) {
+    family_name <- "discretehazard_rw"
+  }
+  return(primarycensored::pcd_stan_dist_id(family_name))
 }
 
 #' The Stan expression for the parameter array of a delay distribution

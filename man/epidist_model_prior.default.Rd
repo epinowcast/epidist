@@ -27,9 +27,9 @@ By default, we do not return any model specific prior distributions.
 Other prior:
 \code{\link[=epidist_family_prior]{epidist_family_prior()}},
 \code{\link[=epidist_family_prior.default]{epidist_family_prior.default()}},
-\code{\link[=epidist_family_prior.discretehazard_rw]{epidist_family_prior.discretehazard_rw()}},
 \code{\link[=epidist_family_prior.gengamma]{epidist_family_prior.gengamma()}},
 \code{\link[=epidist_family_prior.lognormal]{epidist_family_prior.lognormal()}},
+\code{\link[=epidist_family_prior.nonparametric]{epidist_family_prior.nonparametric()}},
 \code{\link[=epidist_model_prior]{epidist_model_prior()}},
 \code{\link[=epidist_model_prior.epidist_meta_model]{epidist_model_prior.epidist_meta_model()}},
 \code{\link[=epidist_prior]{epidist_prior()}}

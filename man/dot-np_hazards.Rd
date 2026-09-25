@@ -4,18 +4,19 @@
 \alias{.np_hazards}
 \title{Bin hazards of the non-parametric family}
 \usage{
-.np_hazards(dpars, hazard_model)
+.np_hazards(dpars, np)
 }
 \arguments{
 \item{dpars}{A named list of distributional parameter vectors of equal
-length, holding \code{hsigma} and the innovations.}
+length, holding \code{mu} and the hazard coefficients.}
 
-\item{hazard_model}{The model for the logit hazards, \code{"rw"} for a random
-walk, the default, or \code{"re"} for independent random effects.}
+\item{np}{The \code{np} element of the family, holding the boundaries, the
+basis and its coefficients.}
 }
 \value{
 A matrix with one row per element of the vectors in \code{dpars} and
-one column per bin, whose last column is 1.
+one column per bin, whose last column is 1. Mirrors
+\code{epidist_np_params()} in Stan.
 }
 \description{
 Bin hazards of the non-parametric family

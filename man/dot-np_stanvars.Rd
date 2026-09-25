@@ -10,10 +10,11 @@
 \item{family}{The \code{epidist} family object.}
 }
 \value{
-A \code{brms} \code{stanvars} object holding \code{epidist_np_params()}, or
-\code{NULL} for any other family.
+A \code{brms} \code{stanvars} object, or \code{NULL} for any other family.
 }
 \description{
-Stan functions of the non-parametric family
+\code{epidist_np_params()}, and the functions \code{epidist_np_boundaries()} and
+\code{epidist_np_basis()}, which return the boundaries and the basis of the
+family as constants.
 }
 \keyword{internal}

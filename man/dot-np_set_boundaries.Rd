@@ -12,14 +12,15 @@
 \item{boundaries}{A numeric vector of at least four strictly increasing
 bin boundaries, \eqn{b_0} to \eqn{b_K}. The default, \code{NULL}, is set by
 \code{\link[=epidist]{epidist()}} from the data, with a bin for every whole delay from 0 up to
-the longest delay in the data, that is \code{seq(-1, max_delay)}. The last
-boundary must be at least as long as the longest observed delay.}
+the longest delay in the data, and at least four bins, that is
+\code{seq(-1, max(3, max_delay))}. The last boundary must be at least as long
+as the longest observed delay.}
 }
 \value{
-The family with its boundaries and parameters set.
+The family with its boundaries, basis and parameters set.
 }
 \description{
-Fixes the number of bins, and so the distributional parameters, their
-links and their bounds.
+Fixes the number of bins, and so the basis of the hazard formula, the
+distributional parameters, their links and their bounds.
 }
 \keyword{internal}

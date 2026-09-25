@@ -4,16 +4,14 @@
 \alias{.np_pmf}
 \title{Bin probabilities of the non-parametric family}
 \usage{
-.np_pmf(dpars, boundaries, hazard_model)
+.np_pmf(dpars, np)
 }
 \arguments{
 \item{dpars}{A named list of distributional parameter vectors of equal
-length, holding \code{hsigma} and the innovations.}
+length, holding \code{mu} and the hazard coefficients.}
 
-\item{boundaries}{The bin boundaries.}
-
-\item{hazard_model}{The model for the logit hazards, \code{"rw"} for a random
-walk, the default, or \code{"re"} for independent random effects.}
+\item{np}{The \code{np} element of the family, holding the boundaries, the
+basis and its coefficients.}
 }
 \value{
 A matrix with one row per element of the vectors in \code{dpars} and
@@ -21,7 +19,7 @@ one column per bin.
 }
 \description{
 Each row is the probability mass at the right edge of each bin, from the
-hazards \eqn{h_i} as \eqn{h_i \prod_{j < i} (1 - h_j)}. Matches
+hazards \eqn{h_k} as \eqn{h_k \prod_{j < k} (1 - h_j)}. Matches
 \code{\link[primarycensored:hazards_to_pmf]{primarycensored::hazards_to_pmf()}}.
 }
 \keyword{internal}

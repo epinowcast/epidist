@@ -7,8 +7,8 @@
 .np_rdist(np)
 }
 \arguments{
-\item{np}{The \code{np} element of the family, holding the boundaries and the
-hazard model.}
+\item{np}{The \code{np} element of the family, holding the boundaries, the
+basis and its coefficients.}
 }
 \value{
 A function of \code{n}, \code{i} and \code{prep}, as

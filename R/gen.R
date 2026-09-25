@@ -231,7 +231,10 @@ epidist_gen_log_lik <- function(family) {
 #' The `primarycensored` distribution name for a family
 #'
 #' The generalised gamma distribution function lives in `flexsurv`, so
-#' `primarycensored` records no name for it and the name is given here. Falls
+#' `primarycensored` records no name for it and the name is given here.
+#' `primarycensored` names its direct probability mass step
+#' `"nonparametric"`, so the hazard distribution of [nonparametric()] is
+#' also given here. Falls
 #' back to the lower cased family name if `primarycensored` does not
 #' recognise it, so the caller can still report a name in a message.
 #' Uses [.delay_family()] rather than `family$family` directly, so this
@@ -250,6 +253,9 @@ epidist_gen_log_lik <- function(family) {
   name <- .delay_family(family)$name
   if (identical(name, "gengamma")) {
     return("pgengamma.orig")
+  }
+  if (identical(name, "nonparametric")) {
+    return("pdiscretehazard")
   }
   return(tryCatch(
     primarycensored::pcd_dist_name(name),

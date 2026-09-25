@@ -4,17 +4,18 @@
 \alias{nonparametric}
 \title{Non-parametric delay distribution family}
 \usage{
-nonparametric(boundaries = NULL, hazard_model = c("rw", "re"))
+nonparametric(formula = NULL, boundaries = NULL)
 }
 \arguments{
+\item{formula}{A one sided formula for the logit hazards over the bins,
+see Details. The default, \code{NULL}, is a spline over the delay.}
+
 \item{boundaries}{A numeric vector of at least four strictly increasing
 bin boundaries, \eqn{b_0} to \eqn{b_K}. The default, \code{NULL}, is set by
 \code{\link[=epidist]{epidist()}} from the data, with a bin for every whole delay from 0 up to
-the longest delay in the data, that is \code{seq(-1, max_delay)}. The last
-boundary must be at least as long as the longest observed delay.}
-
-\item{hazard_model}{The model for the logit hazards, \code{"rw"} for a random
-walk, the default, or \code{"re"} for independent random effects.}
+the longest delay in the data, and at least four bins, that is
+\code{seq(-1, max(3, max_delay))}. The last boundary must be at least as long
+as the longest observed delay.}
 }
 \value{
 A \code{brmsfamily} object for use as the \code{family} argument of
@@ -26,48 +27,86 @@ and meta models. Pass it as the \code{family} argument of \code{\link[=epidist]{
 same way as \code{\link[brms:lognormal]{brms::lognormal()}}.
 
 The delay sits on a grid of \eqn{K} bins with boundaries
-\eqn{b_0 < b_1 < \dots < b_K}. All the probability of bin \eqn{i} is
-placed at its right edge \eqn{b_i}, so the delay distribution function is
+\eqn{b_0 < b_1 < \dots < b_K}. All the probability of bin \eqn{k} is
+placed at its right edge \eqn{b_k}, so the delay distribution function is
 a step function. This is the discrete hazard distribution of
 \code{\link[primarycensored:pdiscretehazard]{primarycensored::pdiscretehazard()}}, and the likelihood is the
 \code{primarycensored} one for that distribution.
 
 The distribution is written in terms of the discrete time hazard of each
-bin, the probability that the delay ends in bin \eqn{i} given that it did
+bin, the probability that the delay ends in bin \eqn{k} given that it did
 not end before it. The hazard of the last bin is 1, so all the delays end
-by \eqn{b_K}. The other hazards are modelled on the logit scale as
-\deqn{\mathrm{logit}(h_i) = \mu + \sigma \delta_i.}
-
-\code{mu} is the distributional parameter that takes a formula. A covariate in
-the \code{mu} formula shifts the logit hazard of every bin by the same amount,
-which is a proportional odds model for the hazard. \code{hsigma} is
-\eqn{\sigma}, the spread of the bin offsets \eqn{\delta_i}. The offsets are
-built from standard normal innovations, one distributional parameter per
-innovation, named \verb{h<i>eps} after the bin they enter at.
+by \eqn{b_K}. The logit hazards of the other bins are a linear predictor
+over the bins,
+\deqn{\mathrm{logit}(h_k) = \mu + \sum_q B_{kq} \theta_q,}
+where the basis \eqn{B} comes from \code{formula} evaluated on the bins.
+}
+\section{The hazard formula}{
+\code{formula} is a one sided formula in two variables of the bins: \code{delay},
+the right edge \eqn{b_k} of each bin, and \code{bin}, a factor with one level
+per bin. It takes the terms of a \code{brms} formula that make sense on the
+bins:
 \itemize{
-\item \code{hazard_model = "rw"}, the default, is a random walk on the logit
-hazard: \eqn{\delta_1 = 0} and \eqn{\delta_i = \sum_{j = 2}^{i}
-  \epsilon_j}. Neighbouring bins have similar hazards, so the fitted
-distribution is smooth.
-\item \code{hazard_model = "re"} treats the logit hazards as independent random
-effects around \code{mu}: \eqn{\delta_i = \epsilon_i}. It does not borrow
-strength between neighbouring bins.
+\item parametric terms such as \code{delay}, \code{I(delay^2)} or \code{bin},
+\item smooths such as \code{s(delay)}, \code{s(delay, bs = "ps")} or \code{t2(delay)}, built
+with \code{\link[mgcv:smoothCon]{mgcv::smoothCon()}} as \code{brms} builds them,
+\item a random intercept per bin, \code{(1 | bin)}, which is the smooth
+\code{s(bin, bs = "re")}.
 }
 
-The random walk is the default because \code{primarycensored} recommends it as
-the better starting point for most delays, in its article on fitting
-non-parametric delays, \code{fitting-nonparametric-delays}, at
-\url{https://primarycensored.epinowcast.org/articles/}.
+\code{~ 1} gives the same hazard in every bin, a geometric delay. The default,
+\code{NULL}, is \code{~ s(delay, k = min(10, K - 1))}, a thin plate regression
+spline over the delay, which smooths the hazard over neighbouring bins.
+With fewer than three free bins it is \code{~ (1 | bin)}.
 
+The intercept of the formula is dropped, because \eqn{\mu} is the
+intercept. Each column of the basis is centred over the bins, so
+\eqn{\mu} is the mean logit hazard, and scaled, so that each coefficient
+is on the scale of the logit hazard.
+}
+
+\section{Parameters}{
+Each coefficient \eqn{\theta_q} is a distributional parameter, so it
+appears in the output of \code{\link[=epidist]{epidist()}} and takes a \code{brms} formula and prior
+in the same way as \code{mu}:
+\itemize{
+\item \verb{h<i>b} is the coefficient of the \eqn{i}th unpenalised column, such as
+a parametric term or the linear part of a spline.
+\item \verb{h<j>sd} is the standard deviation of the \eqn{j}th penalised term, such
+as the wiggly part of a spline or the random intercept per bin.
+\item \verb{h<i>z} is the \eqn{i}th standardised coefficient of the penalised
+terms, so the coefficient is \verb{h<j>sd * h<i>z} for the term \eqn{j} the
+column belongs to. This is the non-centred form \code{brms} uses for smooths
+and random effects.
+}
+
+The \code{coefficients} element of the \code{np} element of the family built by
+\code{\link[=epidist_family]{epidist_family()}} names the term of each coefficient.
+}
+
+\section{Covariates}{
+A covariate in the \code{mu} formula shifts the logit hazard of every bin by
+the same amount, which is a proportional odds model for the hazard. A
+covariate in the formula of a coefficient changes the shape of the
+hazard over the bins, a non-proportional effect. For example with
+\code{formula = ~ delay}, \code{bf(mu ~ age_group, h1b ~ age_group)} gives each age
+group its own intercept and slope of the logit hazard over the delay, as
+\code{delay * age_group} would.
+}
+
+\section{Priors}{
 The default priors are \code{normal(logit(1 / K), 1.5)} on the intercept of
 \code{mu}, centred on the hazard of the first bin when every bin is equally
-likely, \code{normal(0, 1)} on the intercept of
-\code{hsigma} on the log scale, as in \code{primarycensored}, and \code{std_normal()} on
-each innovation. Set others with the \code{prior} argument of \code{\link[=epidist]{epidist()}}.
+likely, \code{normal(0, 2)} on each \verb{h<i>b}, \code{normal(0, 1)} on the log of each
+\verb{h<j>sd}, as \code{primarycensored} uses for the spread of the logit hazards,
+and \code{std_normal()} on each \verb{h<i>z}. Set others with the \code{prior} argument
+of \code{\link[=epidist]{epidist()}}.
 }
+
 \examples{
 nonparametric(boundaries = -1:10)
-nonparametric(hazard_model = "re")
+nonparametric(~ (1 | bin), boundaries = -1:10)
+nonparametric(~ s(delay, bs = "ps", k = 6), boundaries = c(-1:5, 7, 10))
 }
 \seealso{
 Other family:
@@ -76,8 +115,8 @@ Other family:
 \code{\link[=epidist_family_model.default]{epidist_family_model.default()}},
 \code{\link[=epidist_family_param]{epidist_family_param()}},
 \code{\link[=epidist_family_param.default]{epidist_family_param.default()}},
-\code{\link[=epidist_family_param.discretehazard_rw]{epidist_family_param.discretehazard_rw()}},
 \code{\link[=epidist_family_param.gengamma]{epidist_family_param.gengamma()}},
+\code{\link[=epidist_family_param.nonparametric]{epidist_family_param.nonparametric()}},
 \code{\link[=gengamma]{gengamma()}}
 }
 \concept{family}
