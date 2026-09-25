@@ -37,6 +37,8 @@ every primary event distribution.
 The default prior of \code{\link[=epidist_family_prior]{epidist_family_prior()}} is weakly informative around
 the gamma and Weibull special cases, because \code{shape} and \code{k} are only
 weakly identified by a modest number of delays.
+\code{\link[=epidist]{epidist()}} starts the sampler with \code{shape} and \code{k} at one unless \code{init} is
+given, because a chain started where both are small can get stuck there.
 }
 \examples{
 gengamma()
