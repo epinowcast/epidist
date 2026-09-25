@@ -38,13 +38,13 @@ test_that("the hazard family maps to the primarycensored hazard likelihood", {
   # primarycensored gives the alias "nonparametric" to the direct PMF step,
   # dist_id 26, so the family must not be looked up by that name.
   expect_identical(
-    primarycensored::pcd_stan_dist_id(nonparametric(-1:5)$family), 27
+    primarycensored::pcd_stan_dist_id(nonparametric(-1:5)$family), 27L
   )
   expect_identical(
     primarycensored::pcd_stan_dist_id(
       nonparametric(-1:5, hazard_model = "re")$family
     ),
-    28
+    28L
   )
 })
 
@@ -56,7 +56,7 @@ test_that(".np_pmf() matches primarycensored for each hazard model", {
   pmf <- .np_pmf(c(list(mu = mu, hsigma = hsigma), eps), boundaries, "rw")
   expect_identical(dim(pmf), c(2L, 5L))
   for (d in 1:2) {
-    offset <- c(0, cumsum(vapply(eps, `[`, numeric(1), d)))
+    offset <- c(0, cumsum(unname(vapply(eps, `[`, numeric(1), d))))
     hazards <- c(stats::plogis(mu[d] + hsigma[d] * offset), 1)
     expect_equal(pmf[d, ], primarycensored::hazards_to_pmf(hazards))
   }
@@ -64,7 +64,7 @@ test_that(".np_pmf() matches primarycensored for each hazard model", {
   pmf_re <- .np_pmf(
     c(list(mu = mu, hsigma = hsigma), re_eps), boundaries, "re"
   )
-  offset <- vapply(re_eps, `[`, numeric(1), 1)
+  offset <- unname(vapply(re_eps, `[`, numeric(1), 1))
   hazards <- c(stats::plogis(mu[1] + hsigma[1] * offset), 1)
   expect_equal(pmf_re[1, ], primarycensored::hazards_to_pmf(hazards))
 })
