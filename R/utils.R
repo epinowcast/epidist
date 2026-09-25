@@ -82,7 +82,7 @@
 #'
 #' The functions chunks pass the delay distribution parameters to
 #' `primarycensored` as the array `{dpars_B}`. For a parametric family that is
-#' the reparameterised distributional parameters in braces. The
+#' the distributional parameters in the Stan order, in braces. The
 #' non-parametric family builds the array of boundaries and hazards with
 #' `epidist_np_params()`, which is already an array, see
 #' [epidist_family_param()].

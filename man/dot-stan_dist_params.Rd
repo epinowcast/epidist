@@ -15,7 +15,7 @@ A character string holding a Stan expression.
 \description{
 The functions chunks pass the delay distribution parameters to
 \code{primarycensored} as the array \code{{dpars_B}}. For a parametric family that is
-the reparameterised distributional parameters in braces. The
+the distributional parameters in the Stan order, in braces. The
 non-parametric family builds the array of boundaries and hazards with
 \code{epidist_np_params()}, which is already an array, see
 \code{\link[=epidist_family_param]{epidist_family_param()}}.
