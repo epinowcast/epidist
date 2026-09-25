@@ -93,7 +93,8 @@ returned by <code><a href="delay_parameter_draws.html">delay_parameter_draws()</
 
 
 <dt id="arg-family">family<a class="anchor" aria-label="anchor" href="#arg-family"></a></dt>
-<dd><p>A model fit with <code><a href="epidist.html">epidist()</a></code>, a <code>brms</code> family, or
+<dd><p>A model fit with <code><a href="epidist.html">epidist()</a></code>, a <code>brms</code> family, an
+<code>epidist</code> family such as <code><a href="gengamma.html">gengamma()</a></code>, or
 the name of one, giving the delay distribution. If <code>NULL</code>, the default,
 the family is taken from <code>data</code>, which <code><a href="delay_parameter_draws.html">delay_parameter_draws()</a></code> records
 on it. Some <code>dplyr</code> verbs drop that record, so pass the fit or the family

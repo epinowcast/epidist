@@ -266,10 +266,14 @@ P_R\]\\), the double censoring probability from Section
 [1.3](#interval-censoring) simplifies to \\ \mathbb{P}(S_L \< S \< S_R
 \mid P_L \< P \< P_R) = \int\_{P_L}^{P_R} g_P(x \mid P_L, P_R)
 \left\[F(S_R - x) - F(S_L - x)\right\] \text{d}x. \\ For common delay
-and primary event distributions, such as gamma or lognormal delays with
-uniform primary events, `primarycensored` provides closed-form
-analytical solutions to this integral. For other combinations, numerical
-integration is used.
+and primary event distributions, such as gamma, lognormal, Weibull or
+generalised gamma delays with uniform primary events, `primarycensored`
+provides closed-form analytical solutions to this integral. For other
+combinations, numerical integration is used. The generalised gamma delay
+is provided by the
+[`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md)
+family of `epidist`, since `brms` has no such family, and it contains
+the gamma and Weibull families as special cases.
 
 Right truncation at time \\T\\ is handled by normalising the likelihood
 as in the latent model: \\ \mathcal{L}(\mathbf{Y} \mid \mathbf{\theta})

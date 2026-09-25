@@ -222,6 +222,9 @@ Specific methods for the naive model
 
   Build `newdata` for the naive model
 
+- [`epidist_stancode(`*`<epidist_naive_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_stancode.epidist_naive_model.md)
+  : Define the Stan code of the naive model
+
 - [`epidist_transform_data_model(`*`<epidist_naive_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.epidist_naive_model.md)
   : Transform data for the naive model
 
@@ -533,6 +536,16 @@ Functions related to specifying custom `brms` families
   : Default method for families which do not require a
   reparameterisation
 
+- [`epidist_family_param(`*`<gengamma>`*`)`](https://epidist.epinowcast.org/reference/epidist_family_param.gengamma.md)
+  :
+
+  Method for the
+  [`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md)
+  family
+
+- [`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md) :
+  Generalised gamma delay distribution family
+
 ### Formula
 
 Functions related to specifying custom `brms` formula
@@ -558,6 +571,8 @@ Functions for specifying prior distributions
   : Family specific prior distributions
 - [`epidist_family_prior(`*`<default>`*`)`](https://epidist.epinowcast.org/reference/epidist_family_prior.default.md)
   : Default family specific prior distributions
+- [`epidist_family_prior(`*`<gengamma>`*`)`](https://epidist.epinowcast.org/reference/epidist_family_prior.gengamma.md)
+  : Family specific prior distributions for the generalised gamma family
 - [`epidist_family_prior(`*`<lognormal>`*`)`](https://epidist.epinowcast.org/reference/epidist_family_prior.lognormal.md)
   : Family specific prior distributions for the lognormal family
 - [`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md)

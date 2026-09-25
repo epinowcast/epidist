@@ -1,7 +1,16 @@
 # The `primarycensored` distribution name for a family
 
+The generalised gamma distribution function lives in `flexsurv`, so
+`primarycensored` records no name for it and the name is given here.
 Falls back to the lower cased family name if `primarycensored` does not
-recognise it, so the caller can still report a name in a message.
+recognise it, so the caller can still report a name in a message. Uses
+[`.delay_family()`](https://epidist.epinowcast.org/reference/dot-delay_family.md)
+rather than `family$family` directly, so this resolves correctly whether
+`family` is a plain `brms` family, a custom family such as
+[`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md), or
+a model family such as `meta_lognormal` wrapped by
+[`brms::custom_family()`](https://paulbuerkner.com/brms/reference/custom_family.html),
+which records its own name as `"custom"`.
 
 ## Usage
 

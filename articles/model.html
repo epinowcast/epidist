@@ -311,8 +311,9 @@ If using the marginal model, please cite <code>primarycensored</code> in additio
 <span class="math display">\[
 \mathbb{P}(S_L &lt; S &lt; S_R \mid P_L &lt; P &lt; P_R) = \int_{P_L}^{P_R} g_P(x \mid P_L, P_R) \left[F(S_R - x) - F(S_L - x)\right] \text{d}x.
 \]</span>
-For common delay and primary event distributions, such as gamma or lognormal delays with uniform primary events, <code>primarycensored</code> provides closed-form analytical solutions to this integral.
-For other combinations, numerical integration is used.</p>
+For common delay and primary event distributions, such as gamma, lognormal, Weibull or generalised gamma delays with uniform primary events, <code>primarycensored</code> provides closed-form analytical solutions to this integral.
+For other combinations, numerical integration is used.
+The generalised gamma delay is provided by the <code><a href="../reference/gengamma.html">gengamma()</a></code> family of <code>epidist</code>, since <code>brms</code> has no such family, and it contains the gamma and Weibull families as special cases.</p>
 <p>Right truncation at time <span class="math inline">\(T\)</span> is handled by normalising the likelihood as in the latent model:
 <span class="math display">\[
 \mathcal{L}(\mathbf{Y} \mid \mathbf{\theta}) = \prod_i \frac{\mathbb{P}(S_{L,i} &lt; S_i &lt; S_{R,i} \mid P_{L,i} &lt; P_i &lt; P_{R,i})}{\int_{P_{L,i}}^{P_{R,i}} g_P(z \mid p_{L,i}, p_{R,i}) F(T - z) \, \text{d}z}.

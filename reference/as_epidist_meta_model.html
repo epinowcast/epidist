@@ -133,7 +133,9 @@ standard deviation form one group and its quantiles another. One
 observation is therefore a group rather than a single reported value, so
 <code>log_lik()</code> and <code><a href="https://mc-stan.org/loo/reference/loo.html" class="external-link">loo::loo()</a></code> report per group, and <code>loo</code> only compares
 fits to the same studies and the same mix of individual and summary rows.
-See <code><a href="../articles/faq.html">vignette("faq")</a></code>.
+Summary rows are evaluated in R for each posterior draw, so both are slow
+for a fit with many draws and summary rows. Pass <code>ndraws</code> to use fewer
+draws, as <code><a href="epidist_gen_meta_log_lik.html">epidist_gen_meta_log_lik()</a></code> explains. See <code><a href="../articles/faq.html">vignette("faq")</a></code>.
 <code><a href="epidist_meta_leave_one_out.html">epidist_meta_leave_one_out()</a></code> asks the study level question instead,
 refitting with each study held out.</p>
 <p>The sampling standard errors are plug in quantities that depend on the

@@ -86,6 +86,7 @@ are dropped with a warning, so set their priors yourself.
 Other prior:
 [`epidist_family_prior()`](https://epidist.epinowcast.org/reference/epidist_family_prior.md),
 [`epidist_family_prior.default()`](https://epidist.epinowcast.org/reference/epidist_family_prior.default.md),
+[`epidist_family_prior.gengamma()`](https://epidist.epinowcast.org/reference/epidist_family_prior.gengamma.md),
 [`epidist_family_prior.lognormal()`](https://epidist.epinowcast.org/reference/epidist_family_prior.lognormal.md),
 [`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md),
 [`epidist_model_prior.default()`](https://epidist.epinowcast.org/reference/epidist_model_prior.default.md),

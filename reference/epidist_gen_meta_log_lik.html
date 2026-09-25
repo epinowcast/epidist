@@ -101,6 +101,14 @@ observation. The prep object must have the meta model <code>vint</code> and <cod
 slots.</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Summary rows are evaluated in R, one posterior draw at a time, and each
+evaluation can run a quadrature of up to 2000 intervals by default. The
+cost of <code><a href="https://mc-stan.org/rstantools/reference/log_lik.html" class="external-link">brms::log_lik()</a></code> and <code><a href="https://mc-stan.org/loo/reference/loo.html" class="external-link">loo::loo()</a></code> therefore grows with the number
+of draws times the number of summary rows. Pass <code>ndraws</code> to either to use
+fewer draws, at the price of noisier estimates.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="https://mc-stan.org/rstantools/reference/log_lik.html" class="external-link">brms::log_lik()</a></code> for details on the brms log likelihood interface.</p>
 <p>Other gen:

@@ -211,6 +211,7 @@ specification. Contributions of any kind are welcome!
 [seabbs](https://github.com/epinowcast/epidist/commits?author=seabbs),
 [athowes](https://github.com/epinowcast/epidist/commits?author=athowes),
 [parksw3](https://github.com/epinowcast/epidist/commits?author=parksw3),
+[claude](https://github.com/epinowcast/epidist/commits?author=claude),
 [sbfnk](https://github.com/epinowcast/epidist/commits?author=sbfnk),
 [cherz4](https://github.com/epinowcast/epidist/commits?author=cherz4),
 [damonbayer](https://github.com/epinowcast/epidist/commits?author=damonbayer),

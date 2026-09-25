@@ -76,7 +76,11 @@ deviation form one group and its quantiles another. One observation is
 therefore a group rather than a single reported value, so `log_lik()`
 and [`loo::loo()`](https://mc-stan.org/loo/reference/loo.html) report
 per group, and `loo` only compares fits to the same studies and the same
-mix of individual and summary rows. See
+mix of individual and summary rows. Summary rows are evaluated in R for
+each posterior draw, so both are slow for a fit with many draws and
+summary rows. Pass `ndraws` to use fewer draws, as
+[`epidist_gen_meta_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_meta_log_lik.md)
+explains. See
 [`vignette("faq")`](https://epidist.epinowcast.org/articles/faq.md).
 [`epidist_meta_leave_one_out()`](https://epidist.epinowcast.org/reference/epidist_meta_leave_one_out.md)
 asks the study level question instead, refitting with each study held

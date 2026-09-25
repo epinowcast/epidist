@@ -12,14 +12,18 @@ and Stan's reverse pass chains every node on the stack, so the NaN
 poisons the gradient even when the value is discarded. The bounds are
 Phi(z) &amp;lt; exp(-100) for z &amp;lt; -14 for the lognormal,
 P(a, x) &amp;lt;= x^a / Gamma(a + 1) for the gamma and 1 - exp(-y) &amp;lt;= y for
-the weibull. Mirrors meta_family_deep_tail() in Stan."><meta property="og:description" content="Decided from a closed form bound on the parameters rather than from the
+the weibull. The generalised gamma uses the gamma bound at
+x = (q / scale)^shape with a = k. Mirrors meta_family_deep_tail()
+in Stan."><meta property="og:description" content="Decided from a closed form bound on the parameters rather than from the
 distribution function, because in Stan the distribution function must not
 be evaluated where it underflows: its autodiff partial is then 0 / 0,
 and Stan's reverse pass chains every node on the stack, so the NaN
 poisons the gradient even when the value is discarded. The bounds are
 Phi(z) &amp;lt; exp(-100) for z &amp;lt; -14 for the lognormal,
 P(a, x) &amp;lt;= x^a / Gamma(a + 1) for the gamma and 1 - exp(-y) &amp;lt;= y for
-the weibull. Mirrors meta_family_deep_tail() in Stan."><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
+the weibull. The generalised gamma uses the gamma bound at
+x = (q / scale)^shape with a = k. Mirrors meta_family_deep_tail()
+in Stan."><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -78,7 +82,9 @@ and Stan's reverse pass chains every node on the stack, so the <code>NaN</code>
 poisons the gradient even when the value is discarded. The bounds are
 <code>Phi(z) &lt; exp(-100)</code> for <code>z &lt; -14</code> for the lognormal,
 <code>P(a, x) &lt;= x^a / Gamma(a + 1)</code> for the gamma and <code>1 - exp(-y) &lt;= y</code> for
-the weibull. Mirrors <code>meta_family_deep_tail()</code> in Stan.</p>
+the weibull. The generalised gamma uses the gamma bound at
+<code>x = (q / scale)^shape</code> with <code>a = k</code>. Mirrors <code>meta_family_deep_tail()</code>
+in Stan.</p>
     </div>
 
     <div class="section level2">

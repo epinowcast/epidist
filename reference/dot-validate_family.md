@@ -4,7 +4,8 @@ Replaces `brms:::validate_family()`. Guarantees that a family given as a
 family function, a `brms` family object, a `stats` family object or a
 character string is returned as a `brmsfamily` object. Unlike the `brms`
 internal it does not handle the `threshold` argument of ordinal
-families, which `epidist` never sets.
+families, which `epidist` never sets, and it also accepts the name of a
+family `epidist` defines itself, such as `"gengamma"`.
 
 ## Usage
 
@@ -17,7 +18,7 @@ families, which `epidist` never sets.
 - family:
 
   A family function, a `brmsfamily` object, a `stats` family object, or
-  a character string naming a `brms` family.
+  a character string naming a `brms` or `epidist` family.
 
 - link:
 

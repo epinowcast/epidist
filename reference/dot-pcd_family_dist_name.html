@@ -5,9 +5,23 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="The primarycensored distribution name for a family — .pcd_family_dist_name"><meta name="description" content="Falls back to the lower cased family name if primarycensored does not
-recognise it, so the caller can still report a name in a message."><meta property="og:description" content="Falls back to the lower cased family name if primarycensored does not
-recognise it, so the caller can still report a name in a message."><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="The primarycensored distribution name for a family — .pcd_family_dist_name"><meta name="description" content='The generalised gamma distribution function lives in flexsurv, so
+primarycensored records no name for it and the name is given here. Falls
+back to the lower cased family name if primarycensored does not
+recognise it, so the caller can still report a name in a message.
+Uses .delay_family() rather than family$family directly, so this
+resolves correctly whether family is a plain brms family, a custom
+family such as gengamma(), or a model family such as meta_lognormal
+wrapped by brms::custom_family(), which records its own name as
+"custom".'><meta property="og:description" content='The generalised gamma distribution function lives in flexsurv, so
+primarycensored records no name for it and the name is given here. Falls
+back to the lower cased family name if primarycensored does not
+recognise it, so the caller can still report a name in a message.
+Uses .delay_family() rather than family$family directly, so this
+resolves correctly whether family is a plain brms family, a custom
+family such as gengamma(), or a model family such as meta_lognormal
+wrapped by brms::custom_family(), which records its own name as
+"custom".'><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -59,8 +73,15 @@ recognise it, so the caller can still report a name in a message."><meta propert
     </div>
 
     <div class="ref-description section level2">
-    <p>Falls back to the lower cased family name if <code>primarycensored</code> does not
-recognise it, so the caller can still report a name in a message.</p>
+    <p>The generalised gamma distribution function lives in <code>flexsurv</code>, so
+<code>primarycensored</code> records no name for it and the name is given here. Falls
+back to the lower cased family name if <code>primarycensored</code> does not
+recognise it, so the caller can still report a name in a message.
+Uses <code><a href="dot-delay_family.html">.delay_family()</a></code> rather than <code>family$family</code> directly, so this
+resolves correctly whether <code>family</code> is a plain <code>brms</code> family, a custom
+family such as <code><a href="gengamma.html">gengamma()</a></code>, or a model family such as <code>meta_lognormal</code>
+wrapped by <code><a href="https://paulbuerkner.com/brms/reference/custom_family.html" class="external-link">brms::custom_family()</a></code>, which records its own name as
+<code>"custom"</code>.</p>
     </div>
 
     <div class="section level2">

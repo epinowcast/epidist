@@ -7,7 +7,9 @@ not be evaluated where it underflows: its autodiff partial is then
 `NaN` poisons the gradient even when the value is discarded. The bounds
 are `Phi(z) < exp(-100)` for `z < -14` for the lognormal,
 `P(a, x) <= x^a / Gamma(a + 1)` for the gamma and `1 - exp(-y) <= y` for
-the weibull. Mirrors `meta_family_deep_tail()` in Stan.
+the weibull. The generalised gamma uses the gamma bound at
+`x = (q / scale)^shape` with `a = k`. Mirrors `meta_family_deep_tail()`
+in Stan.
 
 ## Usage
 

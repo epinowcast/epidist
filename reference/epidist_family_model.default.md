@@ -36,4 +36,6 @@ Other family:
 [`epidist_family()`](https://epidist.epinowcast.org/reference/epidist_family.md),
 [`epidist_family_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md),
 [`epidist_family_param()`](https://epidist.epinowcast.org/reference/epidist_family_param.md),
-[`epidist_family_param.default()`](https://epidist.epinowcast.org/reference/epidist_family_param.default.md)
+[`epidist_family_param.default()`](https://epidist.epinowcast.org/reference/epidist_family_param.default.md),
+[`epidist_family_param.gengamma()`](https://epidist.epinowcast.org/reference/epidist_family_param.gengamma.md),
+[`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md)

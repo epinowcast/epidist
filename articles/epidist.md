@@ -418,38 +418,16 @@ Click to expand for code to create the observed data histogram
 
 ``` r
 
-plot_data <- bind_rows(
-  "Censored retrospective data" = as.data.frame(linelist_all),
-  "Censored, truncated,\nsampled data" = as.data.frame(linelist_data),
-  .id = "type"
-) |>
-  mutate(delay = as.numeric(.data$sdate_lwr - .data$pdate_lwr)) |>
-  count(.data$type, .data$delay) |>
-  group_by(.data$type) |>
-  mutate(p = .data$n / sum(.data$n))
-
-delay_histogram <- ggplot(plot_data) +
-  geom_col(
-    aes(x = delay, y = p, fill = type, group = type),
-    position = position_dodge2(preserve = "single")
-  ) +
-  scale_fill_brewer(palette = "Set2") +
-  geom_function(
-    data = data.frame(x = c(0, 30)), aes(x = x),
-    fun = dlnorm,
-    args = list(
-      meanlog = secondary_dist[["mu"]],
-      sdlog = secondary_dist[["sigma"]]
-    ),
-    linewidth = 1.5
-  ) +
-  labs(
-    x = "Delay between primary and secondary event (days)",
-    y = "Probability density",
-    fill = ""
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+delay_histogram <- plot_delays(
+  list(
+    "Censored retrospective data" = linelist_all,
+    "Censored, truncated,\nsampled data" = linelist_data
+  ),
+  reference = c(
+    mu = secondary_dist[["mu"]],
+    sigma = secondary_dist[["sigma"]]
+  )
+)
 ```
 
 ``` r
@@ -573,8 +551,8 @@ summary(naive_fit)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3291     2807
-#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3903     2782
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3074     2498
+#> sigma_Intercept    -0.75      0.05    -0.85    -0.65 1.00     2926     2275
 #>
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -673,8 +651,8 @@ summary(marginal_fit)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.46     1.64 1.00     1846     2148
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     1923     2110
+#> Intercept           1.55      0.05     1.47     1.65 1.00     1814     1772
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     1859     1931
 #>
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential

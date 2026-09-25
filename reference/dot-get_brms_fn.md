@@ -2,7 +2,10 @@
 
 Helper function to get internal brms functions by constructing their
 name from a prefix and family. Used to get functions like `log_lik_*`,
-`posterior_predict_*` etc.
+`posterior_predict_*` etc. A family `epidist` defines itself, such as
+[`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md),
+carries these functions, so they are taken from it, whether it is given
+as the family or as a model family built on it.
 
 ## Usage
 

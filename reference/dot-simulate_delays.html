@@ -76,11 +76,9 @@ simulated in chunks to bound the memory used.</p>
 
 
 <dl><dt id="arg-family">family<a class="anchor" aria-label="anchor" href="#arg-family"></a></dt>
-<dd><p>A model fit with <code><a href="epidist.html">epidist()</a></code>, a <code>brms</code> family, or
-the name of one, giving the delay distribution. If <code>NULL</code>, the default,
-the family is taken from <code>data</code>, which <code><a href="delay_parameter_draws.html">delay_parameter_draws()</a></code> records
-on it. Some <code>dplyr</code> verbs drop that record, so pass the fit or the family
-if <code>data</code> has been through one of them.</p></dd>
+<dd><p>A delay distribution family as returned by
+<code><a href="dot-resolve_delay_family.html">.resolve_delay_family()</a></code>, a list with the family <code>name</code> and its
+distributional parameters <code>dpars</code>.</p></dd>
 
 
 <dt id="arg-dpars">dpars<a class="anchor" aria-label="anchor" href="#arg-dpars"></a></dt>

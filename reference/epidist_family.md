@@ -40,10 +40,21 @@ epidist_family(data, family = lognormal(), ...)
 
 A `brms` custom family object.
 
+## Details
+
+The family may be any `brms` family of a positive response, such as
+[`brms::lognormal()`](https://paulbuerkner.com/brms/reference/brmsfamily.html),
+`Gamma(link = "log")` or
+[`brms::weibull()`](https://paulbuerkner.com/brms/reference/brmsfamily.html),
+or a family `epidist` defines itself, such as
+[`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md).
+
 ## See also
 
 Other family:
 [`epidist_family_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md),
 [`epidist_family_model.default()`](https://epidist.epinowcast.org/reference/epidist_family_model.default.md),
 [`epidist_family_param()`](https://epidist.epinowcast.org/reference/epidist_family_param.md),
-[`epidist_family_param.default()`](https://epidist.epinowcast.org/reference/epidist_family_param.default.md)
+[`epidist_family_param.default()`](https://epidist.epinowcast.org/reference/epidist_family_param.default.md),
+[`epidist_family_param.gengamma()`](https://epidist.epinowcast.org/reference/epidist_family_param.gengamma.md),
+[`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md)

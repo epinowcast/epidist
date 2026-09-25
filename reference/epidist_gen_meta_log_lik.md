@@ -34,6 +34,17 @@ epidist_gen_meta_log_lik(family)
 A function that calculates the log likelihood for a single observation.
 The prep object must have the meta model `vint` and `vreal` slots.
 
+## Details
+
+Summary rows are evaluated in R, one posterior draw at a time, and each
+evaluation can run a quadrature of up to 2000 intervals by default. The
+cost of
+[`brms::log_lik()`](https://mc-stan.org/rstantools/reference/log_lik.html)
+and [`loo::loo()`](https://mc-stan.org/loo/reference/loo.html) therefore
+grows with the number of draws times the number of summary rows. Pass
+`ndraws` to either to use fewer draws, at the price of noisier
+estimates.
+
 ## See also
 
 [`brms::log_lik()`](https://mc-stan.org/rstantools/reference/log_lik.html)

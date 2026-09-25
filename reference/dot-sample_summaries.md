@@ -20,8 +20,10 @@ Add summaries by simulating from the delay distribution
 
   A model fit with
   [`epidist()`](https://epidist.epinowcast.org/reference/epidist.md), a
-  `brms` family, or the name of one, giving the delay distribution. If
-  `NULL`, the default, the family is taken from `data`, which
+  `brms` family, an `epidist` family such as
+  [`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md),
+  or the name of one, giving the delay distribution. If `NULL`, the
+  default, the family is taken from `data`, which
   [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
   records on it. Some `dplyr` verbs drop that record, so pass the fit or
   the family if `data` has been through one of them.

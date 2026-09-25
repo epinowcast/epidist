@@ -1,9 +1,9 @@
 # Analytic delay summaries for the families that have them
 
-Each element gives the distributional parameters the solution needs and
-functions of them returning the mean, the standard deviation, the
-quantile function and the density of the delay distribution. The
-parameters are the `brms` parameters of the family.
+Each gives the `brms` parameters of the family and functions of them
+returning the mean, the standard deviation, the quantile function and
+the density of the delay distribution, built by
+[`.analytic_family()`](https://epidist.epinowcast.org/reference/dot-analytic_family.md).
 
 ## Usage
 

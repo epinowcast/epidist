@@ -36,6 +36,7 @@ A `brmsprior` object, or `NULL` when the model adds no priors.
 
 Other prior:
 [`epidist_family_prior.default()`](https://epidist.epinowcast.org/reference/epidist_family_prior.default.md),
+[`epidist_family_prior.gengamma()`](https://epidist.epinowcast.org/reference/epidist_family_prior.gengamma.md),
 [`epidist_family_prior.lognormal()`](https://epidist.epinowcast.org/reference/epidist_family_prior.lognormal.md),
 [`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md),
 [`epidist_model_prior.default()`](https://epidist.epinowcast.org/reference/epidist_model_prior.default.md),
