@@ -41,10 +41,11 @@
 #' family function, a `brms` family object, a `stats` family object or a
 #' character string is returned as a `brmsfamily` object. Unlike the `brms`
 #' internal it does not handle the `threshold` argument of ordinal
-#' families, which `epidist` never sets.
+#' families, which `epidist` never sets, and it also accepts the name of a
+#' family `epidist` defines itself, such as `"gengamma"`.
 #'
 #' @param family A family function, a `brmsfamily` object, a `stats` family
-#'  object, or a character string naming a `brms` family.
+#'  object, or a character string naming a `brms` or `epidist` family.
 #'
 #' @param link Optional character string giving the link function. Only used
 #'  when `family` is a character string without a second element.
@@ -68,6 +69,13 @@
   }
   if (is.null(link)) {
     link <- family[2]
+  }
+  constructor <- .epidist_families()[[family[1]]]
+  if (!is.null(constructor)) {
+    if (is.null(link) || is.na(link)) {
+      return(constructor())
+    }
+    return(constructor(link = link))
   }
   out <- brms::brmsfamily(family[1], link = link)
   # `brms::brmsfamily()` always records the default link of every
@@ -220,22 +228,27 @@
 
 #' Natural scale bounds of a distributional parameter
 #'
-#' Replaces `brms:::dpar_bounds()` for the non-mixture, non-custom families
-#' that `epidist` supports. Guarantees a list with character elements `lb`
-#' and `ub` giving the lower and upper bound of `dpar` on the natural
-#' scale, where `""` means unbounded. Unlike the `brms` internal, an
-#' unrecognised parameter is an error rather than `NULL`, because `epidist`
-#' cannot generate Stan code without a bound.
+#' Replaces `brms:::dpar_bounds()` for the non-mixture families that
+#' `epidist` supports. Guarantees a list with character elements `lb` and
+#' `ub` giving the lower and upper bound of `dpar` on the natural scale,
+#' where `""` means unbounded. A custom family, such as [gengamma()],
+#' records its own bounds, which are returned as `brms` does. Unlike the
+#' `brms` internal, an unrecognised parameter is an error rather than
+#' `NULL`, because `epidist` cannot generate Stan code without a bound.
 #'
 #' @param dpar A character string naming a distributional parameter.
 #'
-#' @param family Unused. Kept so that the signature matches the `brms`
-#'  internal this helper replaces.
+#' @param family A `brmsfamily` object, whose bounds are used when it is a
+#'  custom family. Otherwise unused and kept so that the signature matches
+#'  the `brms` internal this helper replaces.
 #'
 #' @returns A list with character elements `lb` and `ub`.
 #'
 #' @keywords internal
 .dpar_bounds <- function(dpar, family = NULL) {
+  if (inherits(family, "customfamily")) {
+    return(list(lb = family$lb[[dpar]], ub = family$ub[[dpar]]))
+  }
   bounds <- list(
     sigma = list(lb = "0", ub = ""),
     shape = list(lb = "0", ub = ""),

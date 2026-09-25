@@ -124,6 +124,16 @@ test_that(".add_dpar_info works as expected for the lognormal and gamma families
   expect_identical(gamma_extra$other_bounds, list(list(lb = "0", ub = "")))
 })
 
+test_that(".add_dpar_info gives every extra parameter of the gengamma family", { # nolint: line_length_linter.
+  skip_if_not_installed("flexsurv")
+  gengamma_extra <- .add_dpar_info(gengamma(link_Q = "identity"))
+  expect_identical(gengamma_extra$other_links, c("log", "identity"))
+  expect_identical(
+    gengamma_extra$other_bounds,
+    rep(list(list(lb = "0", ub = NA_character_)), 2)
+  )
+})
+
 test_that(".make_intercepts_explicit creates a formula which is the same as if it had been explicitly created", { # nolint: line_length_linter.
   prep_obs <- as_epidist_latent_model(sim_obs)
   epidist_family <- epidist_family(prep_obs, family = lognormal())

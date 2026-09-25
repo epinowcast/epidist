@@ -190,6 +190,38 @@ test_that("plot.epidist_delay_draws plots the delay distribution", {
   expect_identical(max(p_max$data$delay), 10)
 })
 
+test_that("plot.epidist_delay_draws plots the delay distribution of a gengamma", { # nolint: line_length_linter.
+  skip_if_not_installed("ggplot2")
+  skip_if_not_installed("flexsurv")
+  set.seed(1)
+  n <- 100
+  draws <- tibble::tibble(
+    .row = 1L,
+    .draw = seq_len(n),
+    mu = rnorm(n, 1.8, 0.05),
+    sigma = exp(rnorm(n, log(0.6), 0.05)),
+    Q = exp(rnorm(n, log(0.9), 0.05))
+  )
+  draws <- dplyr::group_by(draws, .row)
+  draws <- .new_delay_draws(draws, .delay_family(gengamma()), NULL)
+  p <- plot(draws, type = "delay")
+  expect_s3_class(p, "ggplot")
+  expect_no_error(ggplot2::ggplot_build(p))
+  expect_identical(nrow(p$data), 101L)
+  expect_true(all(is.finite(p$data$density)))
+  # The closed form density is used rather than the simulated fallback
+  step <- diff(p$data$delay[1:2])
+  expect_equal(sum(p$data$density) * step, 1, tolerance = 0.02)
+  expect_equal(
+    max(p$data$delay),
+    stats::median(flexsurv::qgengamma(
+      0.99,
+      mu = draws$mu, sigma = draws$sigma, Q = draws$Q
+    )),
+    tolerance = 1e-8
+  )
+})
+
 test_that("plot.epidist_delay_draws draws the delay distribution per draw", {
   skip_if_not_installed("ggplot2")
   draws <- fake_delay_draws(strata = TRUE)

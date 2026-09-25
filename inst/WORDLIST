@@ -31,6 +31,7 @@ Okabe
 PMF
 PSIS
 Poisson
+Prentice
 Quickstart
 Reparameterise
 Reweight
@@ -38,6 +39,7 @@ RodrigoZepeda
 Rosello
 SamuelBrand
 Softmax
+Stacy
 TimTaylor
 Unif
 Vehtari
@@ -78,8 +80,10 @@ estimand
 estimand's
 estimands
 etc
+flexsurv
 frac
 ge
+gengamma
 ide
 infty
 int

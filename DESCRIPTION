@@ -57,6 +57,7 @@ Suggests:
     collapse,
     distspec (>= 0.2.0),
     epireview,
+    flexsurv,
     ggplot2,
     knitr,
     loo,

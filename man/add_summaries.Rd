@@ -16,7 +16,8 @@ add_summaries(
 \item{data}{A \code{data.frame} of draws of the distributional parameters, as
 returned by \code{\link[=delay_parameter_draws]{delay_parameter_draws()}}.}
 
-\item{family}{A model fit with \code{\link[=epidist]{epidist()}}, a \code{brms} family, or
+\item{family}{A model fit with \code{\link[=epidist]{epidist()}}, a \code{brms} family, an
+\code{epidist} family such as \code{\link[=gengamma]{gengamma()}}, or
 the name of one, giving the delay distribution. If \code{NULL}, the default,
 the family is taken from \code{data}, which \code{\link[=delay_parameter_draws]{delay_parameter_draws()}} records
 on it. Some \code{dplyr} verbs drop that record, so pass the fit or the family
