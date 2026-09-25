@@ -68,3 +68,82 @@ test_that(".np_pmf() matches primarycensored for each hazard model", {
   hazards <- c(stats::plogis(mu[1] + hsigma[1] * offset), 1)
   expect_equal(pmf_re[1, ], primarycensored::hazards_to_pmf(hazards))
 })
+
+test_that("epidist_family() sets default boundaries from the marginal data", {
+  family <- epidist_family(prep_marginal_obs, family = nonparametric())
+  expect_s3_class(family, "customfamily")
+  expect_identical(family$name, "marginal_discretehazard_rw")
+  longest <- max(prep_marginal_obs$delay_upr)
+  expect_identical(family$np$boundaries, as.numeric(seq(-1, longest)))
+  expect_identical(
+    family$dpars,
+    c("mu", "hsigma", paste0("h", 2:longest, "eps"))
+  )
+  expect_match(family$param, "epidist_np_params\\(\\{-1.0, 0.0, 1.0")
+  expect_match(family$param, "mu, hsigma, \\{h2eps, h3eps")
+})
+
+test_that("epidist_family() rejects the nonparametric family elsewhere", {
+  expect_error(
+    epidist_family(prep_obs, family = nonparametric()),
+    "marginal and meta"
+  )
+  expect_error(
+    epidist_family(
+      as_epidist_naive_model(sim_obs),
+      family = nonparametric()
+    ),
+    "marginal and meta"
+  )
+})
+
+test_that("epidist_family() rejects boundaries short of the observed delays", {
+  expect_error(
+    epidist_family(prep_marginal_obs, family = nonparametric(-1:3)),
+    "longest observed delay"
+  )
+})
+
+test_that("the marginal nonparametric Stan code uses the hazard likelihood", {
+  code <- suppressMessages(epidist(
+    prep_marginal_obs,
+    family = nonparametric(boundaries = -1:25),
+    fn = brms::make_stancode
+  ))
+  code <- as.character(code)
+  expect_match(code, "primarycensored_lpmf(\n      y | 27,", fixed = TRUE)
+  expect_match(code, "array[] real epidist_np_params(", fixed = TRUE)
+  expect_match(
+    code,
+    "marginal_discretehazard_rw_lpmf(Y[n] | mu[n], hsigma[n], h2eps[n]",
+    fixed = TRUE
+  )
+  skip_on_cran()
+  expect_no_error(rstan::stanc(model_code = code))
+})
+
+test_that("the random effect hazard model passes its flag to Stan", {
+  code <- suppressMessages(epidist(
+    prep_marginal_obs,
+    family = nonparametric(boundaries = -1:25, hazard_model = "re"),
+    fn = brms::make_stancode
+  ))
+  expect_match(as.character(code), "y | 28,", fixed = TRUE)
+  expect_match(as.character(code), "h24eps}, 0)", fixed = TRUE)
+})
+
+test_that("the nonparametric family sets its default priors", {
+  family <- epidist_family(prep_marginal_obs, nonparametric(-1:25))
+  formula <- epidist_formula(prep_marginal_obs, family, formula = mu ~ 1)
+  prior <- suppressMessages(
+    epidist_prior(prep_marginal_obs, family, formula, prior = NULL)
+  )
+  intercept <- prior[prior$class == "Intercept", ]
+  expect_identical(intercept$prior[intercept$dpar == ""], "normal(0, 1.5)")
+  expect_identical(
+    intercept$prior[intercept$dpar == "hsigma"], "normal(0, 1)"
+  )
+  eps <- intercept$prior[grepl("eps$", intercept$dpar)]
+  expect_length(eps, 23)
+  expect_true(all(eps == "std_normal()"))
+})
