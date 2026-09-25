@@ -28,3 +28,4 @@
 ^\.claude$
 ^\.jj$
 ^\.git$
+^codemeta\.json$
