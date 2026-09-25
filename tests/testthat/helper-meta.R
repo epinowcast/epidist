@@ -10,21 +10,30 @@ meta_slot_names <- function() {
   return(c(paste0("vint", 1:10), paste0("vreal", 1:8)))
 }
 
-# Compile the generated quantities program for a lognormal meta model.
-# A model whose summary rows estimate their growth rate carries pgrowth as
-# a further parameter, passed as data alongside mu and sigma.
-meta_log_lik_program <- function(meta) {
-  meta_family <- epidist_family(meta, family = lognormal())
+# Compile the generated quantities program for a meta model, lognormal by
+# default. A model whose summary rows estimate their growth rate carries
+# pgrowth as a further parameter, passed as data alongside the delay
+# distribution parameters.
+meta_log_lik_program <- function(meta, family = lognormal()) {
+  meta_family <- epidist_family(meta, family = family)
   meta_formula <- epidist_formula(meta, meta_family, formula = bf(mu ~ 1))
   stanvars <- epidist_stancode(
     meta,
     family = meta_family, formula = meta_formula
   )
-  standata <- suppressMessages(epidist(meta, fn = brms::make_standata))
+  standata <- suppressMessages(
+    epidist(meta, family = family, fn = brms::make_standata)
+  )
   slots <- meta_slot_names()
   growth <- "pgrowth" %in% meta_family$dpars
+  delay_dpars <- setdiff(meta_family$dpars, "pgrowth")
+  np_functions <- ""
+  if (.is_nonparametric(meta_family)) {
+    np_functions <- .np_stanvars(meta_family)[[1]]$scode
+  }
   mod <- rstan::stan_model(model_code = paste0(
-    "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode, "\n}\n",
+    "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode, "\n",
+    np_functions, "\n}\n",
     "data {\n  int N;\n  array[N] int Y;\n",
     paste0("  array[N] int ", slots[1:10], ";\n", collapse = ""),
     paste0("  array[N] real ", slots[11:18], ";\n", collapse = ""),
@@ -36,12 +45,14 @@ meta_log_lik_program <- function(meta) {
     "  vector[N_meta_group] meta_group_p;\n",
     "  int<lower=0> N_meta_chol;\n",
     "  vector[N_meta_chol] meta_group_chol;\n",
-    "  int D;\n  array[D] real mu;\n  array[D] real sigma;\n",
+    "  int D;\n",
+    paste0("  array[D] real ", delay_dpars, ";\n", collapse = ""),
     ifelse(growth, "  array[D] real pgrowth;\n", ""),
     "}\n",
     "generated quantities {\n  array[0] real primary_params;\n",
     "  matrix[D, N] log_lik;\n  for (d in 1:D) {\n    for (n in 1:N) {\n",
-    "      log_lik[d, n] = meta_lognormal_lpmf(Y[n] | mu[d], sigma[d], ",
+    "      log_lik[d, n] = ", meta_family$name, "_lpmf(Y[n] | ",
+    paste0(delay_dpars, "[d], ", collapse = ""),
     ifelse(growth, "pgrowth[d], ", ""),
     paste0(slots, "[n]", collapse = ", "),
     ", meta_group_value, meta_group_count, meta_group_lower, meta_group_type",
@@ -64,23 +75,29 @@ meta_log_lik_program <- function(meta) {
     )
   )
   return(list(
-    mod = mod, data = stan_data, standata = standata, growth = growth
+    mod = mod, data = stan_data, standata = standata, growth = growth,
+    family = meta_family
   ))
 }
 
 # The Stan log likelihood, one row per draw and one column per model row.
 # pgrowth is the growth rate of the rows that estimate it, one per draw, and
-# is only read where the program carries it.
-meta_stan_log_lik <- function(program, mu, sigma, pgrowth = 0) {
+# is only read where the program carries it. `dpars` holds the delay
+# distribution parameters, one vector of draws each, and defaults to the
+# lognormal `mu` and `sigma`.
+meta_stan_log_lik <- function(program, mu, sigma, pgrowth = 0,
+                              dpars = list(mu = mu, sigma = sigma)) {
+  draws_n <- length(dpars[[1]])
   growth <- list()
   if (program$growth) {
-    growth <- list(pgrowth = as.array(rep_len(pgrowth, length(mu))))
+    growth <- list(pgrowth = as.array(rep_len(pgrowth, draws_n)))
   }
   fit <- rstan::sampling(
     program$mod,
     data = c(
       program$data,
-      list(D = length(mu), mu = as.array(mu), sigma = as.array(sigma)),
+      list(D = draws_n),
+      lapply(dpars, as.array),
       growth
     ),
     algorithm = "Fixed_param", chains = 1, iter = 1, warmup = 0, refresh = 0
@@ -88,7 +105,7 @@ meta_stan_log_lik <- function(program, mu, sigma, pgrowth = 0) {
   draws <- posterior::as_draws_matrix(fit)
   n <- program$data$N
   return(t(vapply(
-    seq_along(mu),
+    seq_len(draws_n),
     function(d) {
       return(as.numeric(draws[1, paste0("log_lik[", d, ",", seq_len(n), "]")]))
     },
@@ -106,11 +123,14 @@ expect_rows_close <- function(actual, expected, tolerance) {
 # The R log likelihood on the same layout. The prep is a brmsprep in name
 # only, holding pgrowth as a draw by row matrix so that .meta_row_slots()
 # can read it through brms::get_dpar().
-meta_r_log_lik <- function(program, mu, sigma, pgrowth = 0) {
+meta_r_log_lik <- function(program, mu, sigma, pgrowth = 0,
+                           dpars = list(mu = mu, sigma = sigma)) {
   n <- program$data$N
-  pgrowth <- rep_len(pgrowth, length(mu))
+  draws_n <- length(dpars[[1]])
+  pgrowth <- rep_len(pgrowth, draws_n)
+  np <- program$family$np
   return(t(vapply(
-    seq_along(mu),
+    seq_len(draws_n),
     function(d) {
       prep <- structure(
         list(
@@ -119,12 +139,22 @@ meta_r_log_lik <- function(program, mu, sigma, pgrowth = 0) {
         ),
         class = "brmsprep"
       )
-      dist_args <- list(meanlog = mu[d], sdlog = sigma[d])
+      draw <- lapply(dpars, `[`, d)
+      if (is.null(np)) {
+        dist <- "plnorm"
+        dist_args <- list(meanlog = draw$mu, sdlog = draw$sigma)
+      } else {
+        dist <- "pdiscretehazard"
+        dist_args <- list(
+          boundaries = np$boundaries,
+          hazards = as.vector(.np_hazards(draw, np$hazard_model))
+        )
+      }
       return(vapply(
         seq_len(n),
         function(i) {
           return(.meta_row_log_lik(
-            .meta_row_slots(i, prep), "plnorm", dist_args
+            .meta_row_slots(i, prep), dist, dist_args
           ))
         },
         numeric(1)
