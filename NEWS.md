@@ -12,7 +12,8 @@ Extensions implement `epidist_family_model()` and `epidist_transform_data_model(
 See #79.
 - The `is_epidist_*()` predicates share one signature, `is_epidist_<class>(data)`, and no longer take `...`.
 Closes #706.
-- `epidist` data objects re-check themselves when modified and drop any class whose requirements they no longer meet, with a warning.
+- `epidist` data objects share an `epidist_data` class, checked by `is_epidist_data()`.
+They re-check themselves when modified and drop any class whose requirements they no longer meet, with a warning.
 See `?epidist_data` and #399.
 - `cmdstanr` is no longer a suggested dependency.
 Tests and examples fit through `rstan`, and `cmdstanr` remains available as a `brms` backend.
@@ -27,8 +28,10 @@ See #592 and #727.
 Each summary is forward modelled from the study's own estimation procedure, so estimates that did not adjust for censoring or truncation still contribute unbiased information.
 It is experimental and its interface may change.
 See #620.
-- Added `as_epidist_estimates_data()`, `epidist_estimates_summaries()`, `epidist_estimates_parameters()` and `as_epidist_multivariate()` for preparing published estimates.
+- Added `as_epidist_estimates_data()`, `epidist_estimates_summaries()`, `epidist_estimates_parameters()`, `epidist_estimates_epireview()` and `as_epidist_multivariate()` for preparing published estimates.
 They cover means, standard deviations, quantiles, standard errors, fitted distribution parameters and summaries with a covariance, and check the inputs for common problems.
+See #620.
+- Added `epidist_gen_meta_log_lik()` and `epidist_gen_meta_predict()`, so `log_lik()`, `loo()` and posterior predictions work for meta model fits.
 See #620.
 - Added `simulate_study()`, which applies a published study's observation and estimation procedure to a simulated line list.
 Closes #672.
@@ -40,10 +43,9 @@ See #489 and #618.
 - Added left truncation through a `delay_min` argument to `as_epidist_marginal_model()`, also supported by the meta model.
 See #588 and #596.
 - Added `delay_parameter_draws()`, `add_delay_parameter_draws()`, `add_summaries()`, `epidist_strata()` and `delay_summary_draws()` for posterior draws of the delay distribution and its mean, standard deviation and quantiles.
-See #471 and #667.
-- Added `epidist_newdata()`, which builds the `newdata` needed to predict from a fitted model.
-See #280.
-- Added `plot_events()`, `plot_delays()` and a `plot()` method for delay draws.
+`epidist_newdata()` builds the `newdata` they need.
+See #280, #471 and #667.
+- Added `plot_events()`, `plot_delays()`, and `plot()` and `ggplot2::autoplot()` methods for delay draws.
 `plot_delays()` also gives a posterior predictive check of a fitted model.
 See #670, #689 and #743.
 - Added a `distspec::as_dist_spec()` method for fitted models.
@@ -68,7 +70,6 @@ Closes #718.
 Closes #721.
 - Removed calls to unexported `brms` functions.
 See #420.
-- Fixed `inst/CITATION` rendering the year as `NULL`.
 
 ## Documentation
 
