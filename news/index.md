@@ -921,6 +921,12 @@
   R 4.5, so the hook environment failed to build and the `pre-commit`
   job failed on every pull request. See
   [\#578](https://github.com/epinowcast/epidist/issues/578).
+- `check-cmdstan` now runs on a change under `R/**` as well as to a
+  `.stan` file, and checks the meta model on the path where a summary
+  row leaves its growth rate to be estimated, because the Stan programs
+  are generated from R and that path makes the rate a parameter rather
+  than data. Closes
+  [\#730](https://github.com/epinowcast/epidist/issues/730).
 - Removed the `codemeta` workflow and committed a generated
   `codemeta.json` instead. The workflow could not add the file because
   its commit step names it directly to `git commit`, which only works on
