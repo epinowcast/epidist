@@ -65,6 +65,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_dpars.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_estimates_parameters.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_estimates_vcov.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-assert_meta_fit.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_meta_groups.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_multivariate_definite.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-assert_no_meta_primary.html</loc></url>
@@ -96,6 +97,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-draw_strata.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-drop_delay_draws_class.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-drop_epidist_class.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-drop_study.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-epidist_classes.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-epidist_colour_scale.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-epidist_palette.html</loc></url>
@@ -152,6 +154,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-family_functions_stanvar.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-fill_estimates_defaults.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-fill_other_links.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-fit_family_name.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-fit_newdata.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-fitted_delays.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-floor_mult.html</loc></url>
@@ -162,6 +165,12 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-inform_data_summarised.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-internal_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-is_manual_prior.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-leave_one_out_bind_predictors.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-leave_one_out_compare.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-leave_one_out_data.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-leave_one_out_newdata.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-leave_one_out_studies.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-leave_one_out_summaries.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-log_lik_weight.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-make_intercepts_explicit.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-manual_prior_parameter.html</loc></url>
@@ -308,6 +317,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/dot-primary_stancode_args.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-prior_match_cols.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-quantile_name.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/dot-refit.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-rename_columns.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-replace_prior.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/dot-resolve_delay_family.html</loc></url>
@@ -364,6 +374,7 @@
 <url><loc>https://epidist.epinowcast.org/reference/epidist_gen_meta_predict.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_gen_posterior_epred.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_gen_posterior_predict.html</loc></url>
+<url><loc>https://epidist.epinowcast.org/reference/epidist_meta_leave_one_out.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_model_prior.default.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_model_prior.epidist_latent_model.html</loc></url>
 <url><loc>https://epidist.epinowcast.org/reference/epidist_model_prior.epidist_meta_model.html</loc></url>

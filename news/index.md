@@ -415,6 +415,11 @@
   [`ggplot2::theme_minimal()`](https://ggplot2.tidyverse.org/reference/ggtheme.html)
   and a colour blind friendly palette, so that their output matches the
   plots in the package documentation.
+- Added
+  [`epidist_meta_leave_one_out()`](https://epidist.epinowcast.org/reference/epidist_meta_leave_one_out.md),
+  which refits a meta model once per study with that study held out and
+  reports how the delay mean and standard deviation differ from the full
+  fit. Closes [\#642](https://github.com/epinowcast/epidist/issues/642).
 - Added a
   [`distspec::as_dist_spec()`](https://epiforecasts.io/distspec/reference/as_dist_spec.html)
   method for fitted models, which exports a fitted delay distribution as
@@ -813,6 +818,15 @@
   `NAMESPACE` now has one `importFrom()` directive per package, and
   links to other packages now point at the topic alias rather than the
   Rd file name.
+
+- The meta model calls
+  [`primarycensored::pprimarycensored()`](https://primarycensored.epinowcast.org/reference/pprimarycensored.html)
+  with validation disabled, as the marginal model log likelihoods
+  already did. Its delay and primary event distributions are fixed
+  functions from `stats` and `primarycensored`, so they need no
+  validation. The meta model log likelihood no longer advances the RNG
+  stream, and a call is a few percent faster. Closes
+  [\#750](https://github.com/epinowcast/epidist/issues/750).
 
 ### Documentation
 

@@ -133,7 +133,9 @@ standard deviation form one group and its quantiles another. One
 observation is therefore a group rather than a single reported value, so
 <code>log_lik()</code> and <code><a href="https://mc-stan.org/loo/reference/loo.html" class="external-link">loo::loo()</a></code> report per group, and <code>loo</code> only compares
 fits to the same studies and the same mix of individual and summary rows.
-See <code><a href="../articles/faq.html">vignette("faq")</a></code>.</p>
+See <code><a href="../articles/faq.html">vignette("faq")</a></code>.
+<code><a href="epidist_meta_leave_one_out.html">epidist_meta_leave_one_out()</a></code> asks the study level question instead,
+refitting with each study held out.</p>
 <p>The sampling standard errors are plug in quantities that depend on the
 parameters, so allow for genuine differences between studies with a term
 such as <code>mu ~ 1 + (1 | study)</code> rather than relying on them alone. Supply a
@@ -171,6 +173,7 @@ and for the checks and the settings the approximations here depend on.</p>
 <code><a href="assert_epidist.epidist_meta_model.html">assert_epidist.epidist_meta_model()</a></code>,
 <code><a href="epidist_family_model.epidist_meta_model.html">epidist_family_model.epidist_meta_model()</a></code>,
 <code><a href="epidist_formula_model.epidist_meta_model.html">epidist_formula_model.epidist_meta_model()</a></code>,
+<code><a href="epidist_meta_leave_one_out.html">epidist_meta_leave_one_out()</a></code>,
 <code><a href="epidist_model_prior.epidist_meta_model.html">epidist_model_prior.epidist_meta_model()</a></code>,
 <code><a href="epidist_newdata.epidist_meta_model.html">epidist_newdata.epidist_meta_model()</a></code>,
 <code><a href="epidist_transform_data_model.epidist_meta_model.html">epidist_transform_data_model.epidist_meta_model()</a></code>,

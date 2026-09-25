@@ -78,6 +78,9 @@ and [`loo::loo()`](https://mc-stan.org/loo/reference/loo.html) report
 per group, and `loo` only compares fits to the same studies and the same
 mix of individual and summary rows. See
 [`vignette("faq")`](https://epidist.epinowcast.org/articles/faq.md).
+[`epidist_meta_leave_one_out()`](https://epidist.epinowcast.org/reference/epidist_meta_leave_one_out.md)
+asks the study level question instead, refitting with each study held
+out.
 
 The sampling standard errors are plug in quantities that depend on the
 parameters, so allow for genuine differences between studies with a term
@@ -125,6 +128,7 @@ Other meta_model:
 [`assert_epidist.epidist_meta_model()`](https://epidist.epinowcast.org/reference/assert_epidist.epidist_meta_model.md),
 [`epidist_family_model.epidist_meta_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.epidist_meta_model.md),
 [`epidist_formula_model.epidist_meta_model()`](https://epidist.epinowcast.org/reference/epidist_formula_model.epidist_meta_model.md),
+[`epidist_meta_leave_one_out()`](https://epidist.epinowcast.org/reference/epidist_meta_leave_one_out.md),
 [`epidist_model_prior.epidist_meta_model()`](https://epidist.epinowcast.org/reference/epidist_model_prior.epidist_meta_model.md),
 [`epidist_newdata.epidist_meta_model()`](https://epidist.epinowcast.org/reference/epidist_newdata.epidist_meta_model.md),
 [`epidist_transform_data_model.epidist_meta_model()`](https://epidist.epinowcast.org/reference/epidist_transform_data_model.epidist_meta_model.md),

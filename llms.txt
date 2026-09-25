@@ -610,6 +610,9 @@ Specific methods for the meta model
   Define the model-specific component of an `epidist` custom formula for
   the meta model
 
+- [`epidist_meta_leave_one_out()`](https://epidist.epinowcast.org/reference/epidist_meta_leave_one_out.md)
+  : Refit a meta model leaving each study out in turn
+
 - [`epidist_model_prior(`*`<epidist_meta_model>`*`)`](https://epidist.epinowcast.org/reference/epidist_model_prior.epidist_meta_model.md)
   : Model specific prior distributions for the meta model
 
@@ -707,6 +710,9 @@ Functions for postprocessing model output
 
 - [`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)
   : Unique combinations of the predictors in a model
+
+- [`epidist_meta_leave_one_out()`](https://epidist.epinowcast.org/reference/epidist_meta_leave_one_out.md)
+  : Refit a meta model leaving each study out in turn
 
 ### Diagnostic functions
 
