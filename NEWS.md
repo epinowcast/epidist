@@ -171,10 +171,7 @@ It compares a named list of datasets, weights aggregate data by its counts, over
 Given a fitted model it draws the delays the model predicts over the delays it was fitted to, as a posterior predictive check of the observed delays.
 Closes #743.
 - The plot functions use `ggplot2::theme_minimal()` and a colour blind friendly palette, so that their output matches the plots in the package documentation.
-- Added `epidist_meta_leave_one_out()`, which refits a meta model once per study with that study held out and compares the delay mean and standard deviation of each refit with the full fit.
-It reports the posterior median and interval of both, a shift standardised by the full fit's posterior standard deviation, and flags a study whose removal moves the estimate outside the full fit's interval.
-Individual level rows are held out together as the `"individual"` study.
-`vignette("meta")` uses it on the Ebola estimates.
+- Added `epidist_meta_leave_one_out()`, which refits a meta model once per study with that study held out and reports how the delay mean and standard deviation differ from the full fit.
 Closes #642.
 - Added a `distspec::as_dist_spec()` method for fitted models, which exports a fitted delay distribution as an uncertain `<dist_spec>`.
 The natural parameters of the delay distribution are computed for each posterior draw and summarised into a `Normal()` prior on each.

@@ -19,14 +19,13 @@ Always an already resolved \code{data.frame}, never \code{NULL}.}
 The default \code{NA} switches off any study level term, so the summaries are
 of the population level delay.}
 
-\item{width}{The width of the central posterior interval reported for each
-summary, and used to flag influential studies.
+\item{width}{The width of the central posterior intervals.
 Defaults to \code{0.95}.}
 }
 \value{
 A \code{tibble} with one row per row of \code{newdata} and summary, with
-columns \code{.row}, \code{summary}, \code{estimate} (the posterior median), \code{lower},
-\code{upper} and \code{posterior_sd}.
+columns \code{.row}, \code{summary}, \code{estimate} (the posterior median), \code{lower}
+and \code{upper}.
 }
 \description{
 Posterior summaries of the delay mean and standard deviation of a fit

@@ -16,8 +16,9 @@ study.}
 }
 \value{
 \code{held} with the full fit values added as \code{full_estimate},
-\code{full_lower} and \code{full_upper}, the standardised \code{shift} and the
-\code{influential} flag.
+\code{full_lower} and \code{full_upper}, and the refit's median and interval minus
+the full fit's median as \code{difference}, \code{difference_lower} and
+\code{difference_upper}.
 }
 \description{
 Compare the summaries of leave one out refits with the full fit

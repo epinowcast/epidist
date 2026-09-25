@@ -1,51 +1,25 @@
 #' Refit a meta model leaving each study out in turn
 #'
 #' @description
-#' A pooled estimate should not rest on a single study.
-#' This refits a meta model once per study, each time with that study's rows
-#' removed, and compares the natural scale mean and standard deviation of the
-#' delay from each refit with the full fit.
-#' Each refit is exact rather than an importance sampling approximation.
-#' [loo::loo()] works per observation, which for the meta model is a group of
-#' summaries rather than a study, and the number of studies is usually small
-#' enough that refitting costs little.
+#' Refits a meta model once per study with that study removed, and compares
+#' the delay mean and standard deviation of each refit with the full fit.
 #'
 #' @details
-#' The study of each row is the `study` column of the model data.
-#' Individual level rows, which [as_epidist_meta_model()] labels
-#' `"individual"`, are held out together as one study.
-#' `brms` keeps only the variables the formula uses in a fit, so a model whose
-#' formula does not mention `study`, such as `mu ~ 1`, has no `study` column
-#' in `fit$data`.
-#' Pass the `epidist_meta_model` object the model was fitted to as `data` in
-#' that case.
-#' Removing a study then goes through the [epidist_data] methods, so the
-#' object is checked, and through [epidist_transform_data()], so the rows are
-#' summarised as they were for the full fit.
+#' Individual level rows are held out together as the `"individual"` study.
+#' If the formula does not use `study`, pass the `epidist_meta_model` object
+#' as `data`, because `brms` drops unused variables from `fit$data`.
+#' Each refit reuses the compiled model through [brms::update.brmsfit()].
+#' The refits are exact because Pareto smoothed importance sampling
+#' (Vehtari et al. 2017) is often unreliable when a whole study is left out.
 #'
-#' Each refit reuses the compiled model through [brms::update.brmsfit()] with
-#' the data of the held out study removed.
-#' The formula, family, priors and sampler settings of the full fit are kept
-#' unless overridden through `...`.
-#' The delay summaries come from [delay_summary_draws()] at `newdata`.
-#' The default is the population level delay with no censoring and no
-#' truncation, built with [epidist_newdata()], with any study level term
-#' switched off by `re_formula = NA`.
-#' Every refit must be able to predict `newdata`, so it must not name the
-#' held out study, and every level of a factor it uses must remain in the
-#' data once each study is removed.
+#' The comparison is reported as estimates with intervals and no threshold,
+#' as in `marginaleffects` (Arel-Bundock et al. 2024).
+#' `difference` is the refit posterior minus the full fit's posterior median.
+#' The two fits share most of their data, so their draws are not differenced.
 #'
-#' For each summary the posterior median and the central `width` interval of
-#' the held out fit are reported next to those of the full fit.
-#' `shift` is the difference between the two medians divided by the posterior
-#' standard deviation of the full fit.
-#' `influential` is `TRUE` when the held out median lies outside the full
-#' fit's interval, that is when removing the study moves the estimate by more
-#' than the full fit's own uncertainty.
-#' With few studies every refit loses a large share of the evidence, so the
-#' intervals of the refits are wider than the full fit's.
-#' The comparison is of the point estimate against the full fit's interval,
-#' so it is not affected by that.
+#' @references
+#'   - Vehtari et al. (2017) \doi{10.1007/s11222-016-9696-4}
+#'   - Arel-Bundock et al. (2024) \doi{10.18637/jss.v111.i09}
 #'
 #' @param fit A meta model fitted with [epidist()] to an `epidist_meta_model`
 #'  object.
@@ -65,8 +39,7 @@
 #'  The default `NA` switches off any study level term, so the summaries are
 #'  of the population level delay.
 #'
-#' @param width The width of the central posterior interval reported for each
-#'  summary, and used to flag influential studies.
+#' @param width The width of the central posterior intervals.
 #'  Defaults to `0.95`.
 #'
 #' @param keep_fits If `TRUE`, the refits are returned in the `fits` attribute
@@ -79,14 +52,11 @@
 #'
 #' @family meta_model
 #' @returns A `tibble` with one row per held out study, row of `newdata` and
-#'  summary.
-#'  The columns are `study`, `.row`, any predictors of the model present in
-#'  `newdata` other than `study` itself, `summary` (`"mean"` or `"sd"`),
-#'  `estimate`, `lower` and `upper` from the held out fit, `full_estimate`,
-#'  `full_lower` and `full_upper` from the full fit, `shift` and
-#'  `influential`.
-#'  `study` always names the held out study, even when `newdata` also has a
-#'  `study` column, such as one built with `epidist_newdata(meta, study)`.
+#'  summary (`"mean"` or `"sd"`).
+#'  It gives the posterior median (`estimate`) and interval (`lower`,
+#'  `upper`) of the refit and of the full fit (`full_*`), and the
+#'  `difference` from the full fit with its interval.
+#'  Predictors of the model in `newdata` other than `study` are included.
 #'  The `width` attribute records the interval width.
 #'
 #' @seealso [delay_summary_draws()] for the summaries the comparison uses and
@@ -323,8 +293,8 @@ epidist_meta_leave_one_out <- function(
 #'  Always an already resolved `data.frame`, never `NULL`.
 #'
 #' @returns A `tibble` with one row per row of `newdata` and summary, with
-#'  columns `.row`, `summary`, `estimate` (the posterior median), `lower`,
-#'  `upper` and `posterior_sd`.
+#'  columns `.row`, `summary`, `estimate` (the posterior median), `lower`
+#'  and `upper`.
 #'
 #' @keywords internal
 #' @autoglobal
@@ -345,7 +315,6 @@ epidist_meta_leave_one_out <- function(
     estimate = stats::median(.data$value),
     lower = stats::quantile(.data$value, probs[1], names = FALSE),
     upper = stats::quantile(.data$value, probs[2], names = FALSE),
-    posterior_sd = stats::sd(.data$value),
     .by = c(".row", "summary")
   )
   return(out)
@@ -361,25 +330,20 @@ epidist_meta_leave_one_out <- function(
 #'  [.leave_one_out_summaries()].
 #'
 #' @returns `held` with the full fit values added as `full_estimate`,
-#'  `full_lower` and `full_upper`, the standardised `shift` and the
-#'  `influential` flag.
+#'  `full_lower` and `full_upper`, and the refit's median and interval minus
+#'  the full fit's median as `difference`, `difference_lower` and
+#'  `difference_upper`.
 #'
 #' @keywords internal
 .leave_one_out_compare <- function(held, full) {
-  full <- full[c(
-    ".row", "summary", "estimate", "lower", "upper", "posterior_sd"
-  )]
+  full <- full[c(".row", "summary", "estimate", "lower", "upper")]
   names(full) <- c(
-    ".row", "summary", "full_estimate", "full_lower", "full_upper", "full_sd"
+    ".row", "summary", "full_estimate", "full_lower", "full_upper"
   )
   out <- dplyr::left_join(held, full, by = c(".row", "summary"))
-  out$shift <- (out$estimate - out$full_estimate) / out$full_sd
-  out$influential <- out$estimate < out$full_lower |
-    out$estimate > out$full_upper
-  out <- out[c(
-    "study", ".row", "summary", "estimate", "lower", "upper",
-    "full_estimate", "full_lower", "full_upper", "shift", "influential"
-  )]
+  out$difference <- out$estimate - out$full_estimate
+  out$difference_lower <- out$lower - out$full_estimate
+  out$difference_upper <- out$upper - out$full_estimate
   return(tibble::as_tibble(out))
 }
 
