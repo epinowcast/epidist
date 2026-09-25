@@ -22,7 +22,9 @@ and the lognormal is the limit as \code{Q} goes to zero.
 It needs the \code{flexsurv} package and works with every \code{epidist} model.
 }
 \examples{
+\dontshow{if (requireNamespace("flexsurv", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 gengamma()
+\dontshow{\}) # examplesIf}
 }
 \references{
 Prentice, R. L. (1974). A log gamma model and its maximum

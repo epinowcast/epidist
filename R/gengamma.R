@@ -18,7 +18,7 @@
 #'
 #' @family family
 #' @export
-#' @examples
+#' @examplesIf requireNamespace("flexsurv", quietly = TRUE)
 #' gengamma()
 gengamma <- function(link = "identity", link_sigma = "log", link_Q = "log") {
   .require_flexsurv()
