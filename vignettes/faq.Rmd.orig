@@ -1,7 +1,7 @@
 ---
 title: "Frequently asked questions and tips"
 output:
-  bookdown::html_document2:
+  bookdown::html_vignette2:
     toc: true
     fig_caption: yes
     code_folding: show
