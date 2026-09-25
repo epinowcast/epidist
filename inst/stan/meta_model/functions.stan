@@ -467,48 +467,80 @@
     return meta_family_moment_vector(m1, variance, third, fourth);
   }
 
+  /**
+    * Mean, variance and third and fourth central moments of a lognormal
+    * delay with params [meanlog, sdlog]. Mirrors .meta_moments_lognormal().
+    */
+  vector meta_moments_lognormal(array[] real params) {
+    real var_log = params[2] ^ 2;
+    real delay_mean = exp(params[1] + var_log / 2);
+    real variance = delay_mean ^ 2 * expm1(var_log);
+    return [delay_mean, variance,
+            (exp(var_log) + 2) * sqrt(expm1(var_log)) * pow(variance, 1.5),
+            (exp(4 * var_log) + 2 * exp(3 * var_log) +
+             3 * exp(2 * var_log) - 3) * variance ^ 2]';
+  }
+
+  /**
+    * Central moments of a gamma delay with params [shape, rate]. Mirrors
+    * .meta_moments_gamma().
+    */
+  vector meta_moments_gamma(array[] real params) {
+    real variance = params[1] / params[2] ^ 2;
+    return [params[1] / params[2], variance,
+            2 / sqrt(params[1]) * pow(variance, 1.5),
+            (3 + 6 / params[1]) * variance ^ 2]';
+  }
+
+  /**
+    * Central moments of a delay whose raw moments are E[T^r] = scale^r g[r].
+    * Mirrors .meta_moments_scaled().
+    */
+  vector meta_moments_scaled(real scale, vector g) {
+    return [scale * g[1], scale ^ 2 * (g[2] - g[1] ^ 2),
+            scale ^ 3 * (g[3] - 3 * g[1] * g[2] + 2 * g[1] ^ 3),
+            scale ^ 4 * (g[4] - 4 * g[1] * g[3] + 6 * g[1] ^ 2 * g[2] -
+                         3 * g[1] ^ 4)]';
+  }
+
+  /**
+    * Central moments of a weibull delay with params [shape, scale], whose
+    * raw moments are scale^r Gamma(1 + r / shape). Mirrors
+    * .meta_moments_weibull().
+    */
+  vector meta_moments_weibull(array[] real params) {
+    vector[4] g;
+    for (r in 1:4) {
+      g[r] = tgamma(1 + r / params[1]);
+    }
+    return meta_moments_scaled(params[2], g);
+  }
+
+  /**
+    * Central moments of a generalised gamma delay with Stacy params
+    * [shape, scale, k], whose raw moments are
+    * scale^r Gamma(k + r / shape) / Gamma(k). Mirrors
+    * .meta_moments_gengamma().
+    */
+  vector meta_moments_gengamma(array[] real params) {
+    vector[4] g;
+    for (r in 1:4) {
+      g[r] = exp(lgamma(params[3] + r / params[1]) - lgamma(params[3]));
+    }
+    return meta_moments_scaled(params[2], g);
+  }
+
   /** Analytic summaries of the delay distribution. */
   vector meta_family_moments(array[] real params) {
-    real delay_mean;
-    real variance;
-    real third;
-    real fourth;
+    vector[4] moments;
     if (dist_id == 1) {
-      real var_log = params[2] ^ 2;
-      delay_mean = exp(params[1] + var_log / 2);
-      variance = delay_mean ^ 2 * expm1(var_log);
-      third = (exp(var_log) + 2) * sqrt(expm1(var_log)) *
-        pow(variance, 1.5);
-      fourth = (exp(4 * var_log) + 2 * exp(3 * var_log) +
-                3 * exp(2 * var_log) - 3) * variance ^ 2;
+      moments = meta_moments_lognormal(params);
     } else if (dist_id == 2) {
-      delay_mean = params[1] / params[2];
-      variance = params[1] / params[2] ^ 2;
-      third = 2 / sqrt(params[1]) * pow(variance, 1.5);
-      fourth = (3 + 6 / params[1]) * variance ^ 2;
+      moments = meta_moments_gamma(params);
     } else if (dist_id == 3) {
-      real g1 = tgamma(1 + 1 / params[1]);
-      real g2 = tgamma(1 + 2 / params[1]);
-      real g3 = tgamma(1 + 3 / params[1]);
-      real g4 = tgamma(1 + 4 / params[1]);
-      delay_mean = params[2] * g1;
-      variance = params[2] ^ 2 * (g2 - g1 ^ 2);
-      third = params[2] ^ 3 * (g3 - 3 * g1 * g2 + 2 * g1 ^ 3);
-      fourth = params[2] ^ 4 *
-        (g4 - 4 * g1 * g3 + 6 * g1 ^ 2 * g2 - 3 * g1 ^ 4);
+      moments = meta_moments_weibull(params);
     } else if (dist_id == 5) {
-      // Raw moments E[T^r] = scale^r Gamma(k + r / shape) / Gamma(k), so the
-      // weibull expressions apply with these ratios in place of
-      // tgamma(1 + r / shape).
-      real g1 = exp(lgamma(params[3] + 1 / params[1]) - lgamma(params[3]));
-      real g2 = exp(lgamma(params[3] + 2 / params[1]) - lgamma(params[3]));
-      real g3 = exp(lgamma(params[3] + 3 / params[1]) - lgamma(params[3]));
-      real g4 = exp(lgamma(params[3] + 4 / params[1]) - lgamma(params[3]));
-      delay_mean = params[2] * g1;
-      variance = params[2] ^ 2 * (g2 - g1 ^ 2);
-      third = params[2] ^ 3 * (g3 - 3 * g1 * g2 + 2 * g1 ^ 3);
-      fourth = params[2] ^ 4 *
-        (g4 - 4 * g1 * g3 + 6 * g1 ^ 2 * g2 - 3 * g1 ^ 4);
+      moments = meta_moments_gengamma(params);
     } else {
       reject("Meta model summary rows support lognormal, gamma, weibull and ",
              "generalised gamma delay distributions only.");
@@ -516,13 +548,13 @@
     // A draw wide enough to overflow a moment would leave a finite density
     // whose gradient carries the infinite intermediate, so it is rejected
     // here. Matches .meta_continuous_moments() in R.
-    if (is_inf(delay_mean) || is_nan(delay_mean) || is_inf(variance) ||
-        is_nan(variance) || is_inf(third) || is_nan(third) ||
-        is_inf(fourth) || is_nan(fourth)) {
+    if (is_inf(sum(moments)) || is_nan(sum(moments))) {
       reject("meta_family_moments: the analytic moments of the delay ",
              "distribution overflowed.");
     }
-    return meta_family_moment_vector(delay_mean, variance, third, fourth);
+    return meta_family_moment_vector(
+      moments[1], moments[2], moments[3], moments[4]
+    );
   }
 
   /**
