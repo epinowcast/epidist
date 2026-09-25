@@ -577,17 +577,4 @@ For a continuous estimand the chord is refined, exactly through the family quant
 An accrual estimand is defined by the interpolation between its nodes and keeps its chord.
 Both keep $Q_p$ differentiable in $\theta$.
 
-## Fitting in practice {#meta-in-practice}
-
-The standard errors of Section \@ref(sampling-likelihoods) are plug in quantities that depend on $\theta$.
-Studies that no single distribution can explain may therefore be accommodated by inflating the implied standard deviation rather than by moving the location, and sampling can become multimodal.
-Allow for genuine differences between studies with a term such as `mu ~ 1 + (1 | study)` rather than relying on the sampling error alone.
-
-Quantiles read off a fitted distribution rather than the empirical data have smaller sampling error than assumed here.
-Supply a reported standard error in `as_epidist_estimates_data()` for those rows, which also takes them out of the joint quantile likelihood of Equation \@ref(eq:meta-quantile-set).
-
-`as_epidist_estimates_data()` checks each study against the approximations above and warns where one is coarse.
-Two of its settings trade accuracy against speed: `max_delay`, which sets the grid a study that adjusted for right truncation is summarised on and which needs raising for a long tailed delay, and `options(epidist.meta_n_quad = )`, the smallest number of quadrature intervals used where a study is summarised by quadrature instead.
-Each study is given as many intervals as it needs to resolve the spread it reported, up to a cap the option lifts when set above it, and the number is held in the `n_quad` column of the model data.
-
 ## References {-}
