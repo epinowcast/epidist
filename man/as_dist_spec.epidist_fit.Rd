@@ -93,11 +93,11 @@ if (requireNamespace("distspec", quietly = TRUE)) {
 \code{\link[=delay_parameter_draws]{delay_parameter_draws()}} for the draws this summarises and
 \code{\link[=epidist_newdata]{epidist_newdata()}} to build \code{newdata}.
 
-Other postprocess: 
-\code{\link{add_summaries}()},
-\code{\link{delay_parameter_draws}()},
-\code{\link{delay_summary_draws}()},
+Other postprocess:
+\code{\link[=add_summaries]{add_summaries()}},
+\code{\link[=delay_parameter_draws]{delay_parameter_draws()}},
+\code{\link[=delay_summary_draws]{delay_summary_draws()}},
 \code{\link{epidist_delay_draws}},
-\code{\link{epidist_strata}()}
+\code{\link[=epidist_strata]{epidist_strata()}}
 }
 \concept{postprocess}

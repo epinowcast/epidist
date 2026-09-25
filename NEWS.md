@@ -335,6 +335,9 @@ The marginal Kolmogorov-Smirnov checks of the latent model prior moved from a p 
 Closes #733.
 - The study labels of the test lockstep fixtures are now namespaced by the fixture that owns them and checked before the fixtures are bound, so a branch that adds a fixture reusing a label fails loudly rather than merging cleanly into a silent collision.
 Closes #725.
+- The package is now documented with `roxygen2` 8.1.0.
+The version is recorded in `Config/roxygen2/version` in place of `RoxygenNote`.
+`NAMESPACE` now has one `importFrom()` directive per package, and links to other packages now point at the topic alias rather than the Rd file name.
 
 ## Documentation
 

@@ -32,10 +32,10 @@
 
 \item{value}{A replacement value.}
 
-\item{data, template}{Passed to \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_reconstruct()}}.}
+\item{data, template}{Passed to \code{\link[dplyr:dplyr_reconstruct]{dplyr::dplyr_reconstruct()}}.}
 
-\item{i, cols}{Passed to \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_row_slice()}} and
-\code{\link[dplyr:dplyr_extending]{dplyr::dplyr_col_modify()}}.}
+\item{i, cols}{Passed to \code{\link[dplyr:dplyr_row_slice]{dplyr::dplyr_row_slice()}} and
+\code{\link[dplyr:dplyr_col_modify]{dplyr::dplyr_col_modify()}}.}
 
 \item{.add, .drop}{Passed to \code{\link[dplyr:group_by]{dplyr::group_by()}}.}
 }
@@ -52,11 +52,11 @@ here put the class and what it records back.
 }
 \details{
 Methods are provided for base subsetting and renaming, and for
-\code{\link[dplyr:dplyr_extending]{dplyr::dplyr_reconstruct()}}, which verbs such as \code{\link[dplyr:mutate]{dplyr::mutate()}} and
+\code{\link[dplyr:dplyr_reconstruct]{dplyr::dplyr_reconstruct()}}, which verbs such as \code{\link[dplyr:mutate]{dplyr::mutate()}} and
 \code{\link[dplyr:bind_rows]{dplyr::bind_rows()}} use to restore the class of their input.
-\code{\link[dplyr:group_by]{dplyr::group_by()}} and \code{\link[dplyr:group_by]{dplyr::ungroup()}} build a new tibble rather than
+\code{\link[dplyr:group_by]{dplyr::group_by()}} and \code{\link[dplyr:ungroup]{dplyr::ungroup()}} build a new tibble rather than
 restoring the class of their input, as do the \code{grouped_df} methods for
-\code{\link[dplyr:dplyr_extending]{dplyr::dplyr_row_slice()}} and \code{\link[dplyr:dplyr_extending]{dplyr::dplyr_col_modify()}}, so each has a
+\code{\link[dplyr:dplyr_row_slice]{dplyr::dplyr_row_slice()}} and \code{\link[dplyr:dplyr_col_modify]{dplyr::dplyr_col_modify()}}, so each has a
 method of its own that puts the class back. A grouped object keeps the
 \code{epidist_delay_draws} class ahead of \code{grouped_df}, and the \code{dplyr} verbs
 keep both. \code{\link[dplyr:summarise]{dplyr::summarise()}} builds a new object from the groups rather
@@ -80,11 +80,11 @@ class(dplyr::mutate(draws, model = "a"))
 class(dplyr::bind_rows(draws, draws))
 }
 \seealso{
-Other postprocess: 
-\code{\link{add_summaries}()},
-\code{\link{as_dist_spec.epidist_fit}()},
-\code{\link{delay_parameter_draws}()},
-\code{\link{delay_summary_draws}()},
-\code{\link{epidist_strata}()}
+Other postprocess:
+\code{\link[=add_summaries]{add_summaries()}},
+\code{\link[=as_dist_spec.epidist_fit]{as_dist_spec.epidist_fit()}},
+\code{\link[=delay_parameter_draws]{delay_parameter_draws()}},
+\code{\link[=delay_summary_draws]{delay_summary_draws()}},
+\code{\link[=epidist_strata]{epidist_strata()}}
 }
 \concept{postprocess}
