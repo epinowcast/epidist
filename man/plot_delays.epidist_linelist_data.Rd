@@ -46,12 +46,12 @@ A \code{ggplot} object.
 Plot the observed delays of a dataset
 }
 \seealso{
-Other plot: 
-\code{\link{plot.epidist_delay_draws}()},
-\code{\link{plot_delays}()},
-\code{\link{plot_delays.default}()},
-\code{\link{plot_delays.epidist_fit}()},
-\code{\link{plot_delays.list}()},
-\code{\link{plot_events}()}
+Other plot:
+\code{\link[=plot.epidist_delay_draws]{plot.epidist_delay_draws()}},
+\code{\link[=plot_delays]{plot_delays()}},
+\code{\link[=plot_delays.default]{plot_delays.default()}},
+\code{\link[=plot_delays.epidist_fit]{plot_delays.epidist_fit()}},
+\code{\link[=plot_delays.list]{plot_delays.list()}},
+\code{\link[=plot_events]{plot_events()}}
 }
 \concept{plot}
