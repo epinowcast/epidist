@@ -1,0 +1,240 @@
+---
+title: "Non-parametric delay distributions"
+description: "Fitting a delay distribution with no parametric form, stratified by a covariate, in the marginal and meta models"
+output:
+  bookdown::html_document2:
+    fig_caption: yes
+    code_folding: show
+    number_sections: true
+pkgdown:
+  as_is: true
+link-citations: true
+vignette: >
+  %\VignetteIndexEntry{Non-parametric delay distributions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  fig.path = file.path("figures", "nonparametric-"),
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+# Background
+
+The families in `epidist` assume a shape for the delay, such as a lognormal.
+When the shape is wrong the fitted delay is biased, most of all in its tail.
+`nonparametric()` makes no such assumption.
+It places the delay on a grid of bins and estimates the probability of each bin, using the non-parametric distributions of [`primarycensored`](https://primarycensored.epinowcast.org/) [@primarycensored].
+
+The distribution is written in terms of the hazard of each bin, the probability that the delay ends in that bin given that it has not ended before.
+The logit hazards follow a random walk, so neighbouring bins have similar hazards.
+The `mu` parameter shifts the logit hazard of every bin, so a covariate in its formula gives each stratum its own delay.
+`?nonparametric` gives the details.
+
+```{r libraries}
+library(epidist)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(brms)
+```
+
+# Simulating delays that differ by age
+
+We simulate a Weibull delay whose scale doubles from the younger to the older age group.
+Cases arrive at a constant rate, and follow up is long enough that no delay is right truncated.
+
+```{r simulate}
+set.seed(101)
+
+weibull_shape <- 1.5
+weibull_scale <- c(younger = 4, older = 8)
+
+cases <- imap(weibull_scale, function(scale, age_group) {
+  simulate_uniform_cases(sample_size = 500, t = 60) |>
+    simulate_secondary(dist = rweibull, shape = weibull_shape, scale = scale) |>
+    simulate_dates(obs_time = 200, keep_times = TRUE) |>
+    mutate(age_group = age_group)
+})
+
+linelist <- as_epidist_linelist_data(bind_rows(cases))
+model_data <- as_epidist_marginal_model(linelist)
+```
+
+# Fitting
+
+The non-parametric fit puts a bin at each whole day from 0 to the longest observed delay.
+Pass `boundaries` to `nonparametric()` to set other bins.
+We compare it with a lognormal fit whose `mu` and `sigma` both vary by age group.
+
+```{r fit}
+fit_np <- epidist(
+  model_data,
+  formula = mu ~ 1 + age_group,
+  family = nonparametric(),
+  chains = 2, cores = 2, refresh = 0, seed = 1, backend = "cmdstanr"
+)
+
+fit_lognormal <- epidist(
+  model_data,
+  formula = bf(mu ~ 1 + age_group, sigma ~ 1 + age_group),
+  family = lognormal(),
+  chains = 2, cores = 2, refresh = 0, seed = 1, backend = "cmdstanr"
+)
+```
+
+`delay_summary_draws()` gives the mean and standard deviation of the delay in each age group, as for any other family.
+
+```{r summaries}
+summarise_fit <- function(fit) {
+  delay_summary_draws(fit, probs = 0.9) |>
+    ungroup() |>
+    summarise(across(c(mean, sd, q90), median), .by = age_group)
+}
+
+truth <- tibble(
+  age_group = names(weibull_scale),
+  mean = weibull_scale * gamma(1 + 1 / weibull_shape),
+  sd = weibull_scale *
+    sqrt(gamma(1 + 2 / weibull_shape) - gamma(1 + 1 / weibull_shape)^2),
+  q90 = qweibull(0.9, shape = weibull_shape, scale = weibull_scale)
+)
+
+bind_rows(
+  `Non-parametric` = summarise_fit(fit_np),
+  Lognormal = summarise_fit(fit_lognormal),
+  Truth = truth,
+  .id = "model"
+)
+```
+
+The non-parametric delay puts all of the probability of each bin at its right edge.
+A delay of a whole number of days, seen with daily reporting, is what it describes.
+So we compare the fits on the probability of each daily delay, with a uniform primary event and daily censoring of both events.
+The log likelihood of a delay of `d` days, with a secondary window of one day, gives this probability for each posterior draw.
+
+```{r pmf}
+delays <- 0:25
+
+grid <- epidist_newdata(model_data, age_group, pwindow = 1, swindow = 1) |>
+  crossing(delay = delays) |>
+  mutate(delay_lwr = delay, delay_upr = delay + 1)
+
+daily_pmf <- function(fit) {
+  pmf <- exp(log_lik(fit, newdata = grid))
+  grid |>
+    select(age_group, delay) |>
+    mutate(
+      median = apply(pmf, 2, median),
+      lower = apply(pmf, 2, quantile, 0.05),
+      upper = apply(pmf, 2, quantile, 0.95)
+    )
+}
+
+true_pmf <- grid |>
+  select(age_group, delay) |>
+  mutate(median = map2_dbl(delay, age_group, function(d, group) {
+    primarycensored::dpcens(
+      d, pweibull,
+      pwindow = 1, swindow = 1,
+      shape = weibull_shape, scale = weibull_scale[[group]]
+    )
+  }))
+
+fitted_pmf <- bind_rows(
+  `Non-parametric` = daily_pmf(fit_np),
+  Lognormal = daily_pmf(fit_lognormal),
+  .id = "model"
+)
+```
+
+```{r pmf-plot, fig.cap = "The probability of each daily delay by age group. Points and ranges show the posterior median and 90% interval of each fit, and the line the truth.", fig.width = 8, fig.height = 4}
+age_levels <- names(weibull_scale)
+fitted_pmf <- mutate(fitted_pmf, age_group = factor(age_group, age_levels))
+true_pmf <- mutate(true_pmf, age_group = factor(age_group, age_levels))
+
+ggplot(fitted_pmf, aes(x = delay, y = median, colour = model)) +
+  geom_line(data = true_pmf, colour = "black") +
+  geom_pointrange(
+    aes(ymin = lower, ymax = upper),
+    position = position_dodge(width = 0.6), size = 0.2
+  ) +
+  facet_wrap(vars(age_group)) +
+  scale_colour_brewer(palette = "Dark2") +
+  labs(x = "Delay (days)", y = "Probability", colour = NULL) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+# The meta model
+
+The family works in the meta model in the same way.
+Here we use `simulate_study()` to build published summaries of the older age group from three studies.
+None of them adjusted for right truncation.
+`vignette("meta")` explains the study metadata.
+
+```{r meta-studies}
+older <- as_epidist_linelist_data(cases$older)
+
+studies <- tribble(
+  ~study,     ~report,     ~cens_adjusted, ~relative_obs_time, ~n,
+  "naive",    "moments",   0,              15,                 150,
+  "quantile", "quantiles", 0,              20,                 100,
+  "window",   "moments",   2,              25,                 200
+)
+
+estimates <- studies |>
+  pmap(simulate_study, data = older) |>
+  as_epidist_estimates_data()
+estimates
+```
+
+```{r meta-fit}
+fit_meta <- epidist(
+  as_epidist_meta_model(estimates = estimates),
+  family = nonparametric(),
+  chains = 2, cores = 2, refresh = 0, seed = 1, backend = "cmdstanr"
+)
+```
+
+The reported means are biased low by right truncation.
+
+```{r meta-summary}
+delay_summary_draws(fit_meta) |>
+  ungroup() |>
+  summarise(
+    median = median(mean),
+    lower = quantile(mean, 0.05),
+    upper = quantile(mean, 0.95)
+  )
+truth$mean[truth$age_group == "older"]
+```
+
+The fit moves the mean up and its interval covers the truth.
+The interval is wide, because three summaries say little about the tail of a delay with no assumed shape.
+
+A study that fully adjusted for censoring, `cens_adjusted = 1`, targets a continuous delay.
+The non-parametric delay has no density, so from such a study the meta model only uses a mean or standard deviation of the whole distribution, from a study that adjusted for right truncation.
+It gives an error for any other summary under that code.
+
+# Summary
+
+* `nonparametric()` estimates the probability of each bin rather than assuming a shape.
+It fits in the marginal and meta models and is summarised in the same way as the other families.
+* A covariate in the `mu` formula shifts the logit hazard of every bin by the same amount.
+This is a proportional odds model for the hazard.
+It lets strata with little data borrow the shape of the delay from the others, but it cannot give strata delays of different shapes.
+* The random walk on the logit hazard smooths the fitted delay.
+`hazard_model = "re"` treats the hazards as independent around `mu` instead.
+* Each bin is a parameter, so a long delay on daily bins is slower to fit than a parametric family.
+Wider bins in the tail make it faster.
+
+# References
