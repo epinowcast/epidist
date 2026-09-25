@@ -1,6 +1,6 @@
 Package: epidist
 Title: Estimate Epidemiological Delay Distributions with 'brms'
-Version: 0.5.0
+Version: 1.0.0
 Authors@R:
   c(person(given = "Adam",
            family = "Howes",

@@ -59,6 +59,7 @@ cov
 cutoff
 cutoffs
 damonbayer
+datetime
 ddsynth
 discretise
 discretised
@@ -148,5 +149,6 @@ underflowed
 unnormalised
 untruncated
 vdots
+viridis
 weibull
 zsusswein

@@ -18,7 +18,7 @@ A \code{tibble} with 8,358 rows and 8 columns:
 }
 }
 \source{
-\url{https://www.pnas.org/doi/full/10.1073/pnas.1518587113}
+\doi{10.1073/pnas.1518587113}
 }
 \usage{
 sierra_leone_ebola_data
