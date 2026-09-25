@@ -2620,7 +2620,7 @@
   /**
     * Log density of a group whose covariance comes from a multivariate
     * representation of a study's parameter draws, with its Cholesky factor
-    * flattened column major in `chol`. Mirrors .meta_multi_normal_ll() in R.
+    * flattened column major in `chol`. Matches .meta_multi_normal_ll() in R.
     */
   real meta_family_mvn_group_lpdf(data vector y, data array[] int types,
                                   data vector probs, data vector chol,
