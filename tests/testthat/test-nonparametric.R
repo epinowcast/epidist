@@ -313,3 +313,101 @@ test_that("the uniform primary censored density leaves out mass at zero", {
     tolerance = 1e-12
   )
 })
+
+test_that("the meta model has no density for the nonparametric family", {
+  expect_error(.meta_ddist("pdiscretehazard"), "no density")
+})
+
+# A prepared predictions object in the form brms passes to the log
+# likelihood, prediction and expectation functions of a custom family, with
+# two draws of the non-parametric parameters for three observations.
+np_prep <- function(boundaries = -1:4, hazard_model = "rw") {
+  n_bins <- length(boundaries) - 1
+  eps <- .np_eps_names(n_bins, hazard_model)
+  draws <- c(
+    list(mu = c(-1, -0.5), hsigma = c(0.5, 0.8)),
+    stats::setNames(
+      lapply(seq_along(eps), function(j) c(0.3, -0.2) * j),
+      eps
+    )
+  )
+  dpars <- lapply(draws, matrix, nrow = 2, ncol = 3)
+  prep <- structure(
+    list(
+      ndraws = 2, nobs = 3, dpars = dpars,
+      data = list(
+        Y = c(0, 1, 3), vreal1 = c(Inf, 10, 6), vreal2 = c(1, 1, 1),
+        vreal3 = c(1, 1, 1), vreal4 = c(1, 2, 4), vreal5 = c(0, 0, 0)
+      )
+    ),
+    class = "brmsprep"
+  )
+  np <- list(boundaries = as.numeric(boundaries), hazard_model = hazard_model)
+  return(list(prep = prep, draws = draws, np = np))
+}
+
+test_that(".np_dist_args() gives the hazards of each draw", {
+  for (hazard_model in c("rw", "re")) {
+    setup <- np_prep(hazard_model = hazard_model)
+    args <- .np_dist_args(setup$prep, 2, setup$np)
+    expect_length(args, 2)
+    hazards <- .np_hazards(setup$draws, hazard_model)
+    for (draw in 1:2) {
+      expect_identical(args[[draw]]$boundaries, setup$np$boundaries)
+      expect_identical(args[[draw]]$hazards, hazards[draw, ])
+    }
+  }
+})
+
+test_that("the nonparametric log likelihood matches primarycensored", {
+  setup <- np_prep()
+  family <- nonparametric(-1:4)
+  log_lik <- epidist_gen_log_lik(family)
+  hazards <- .np_hazards(setup$draws, "rw")
+  for (i in 1:3) {
+    data <- setup$prep$data
+    expected <- vapply(1:2, function(draw) {
+      return(primarycensored::dpcens(
+        data$Y[i], primarycensored::pdiscretehazard,
+        pwindow = data$vreal2[i], swindow = data$vreal3[i],
+        L = data$vreal5[i], D = data$vreal1[i], log = TRUE,
+        boundaries = family$np$boundaries, hazards = hazards[draw, ]
+      ))
+    }, numeric(1))
+    expect_equal(log_lik(i, setup$prep), expected, tolerance = 1e-10)
+  }
+})
+
+test_that("nonparametric posterior draws lie on the bin edges", {
+  setup <- np_prep()
+  rdist <- .np_rdist(setup$np)
+  withr::local_seed(1)
+  # More delays than draws recycles the draws
+  delays <- rdist(1000, 1, setup$prep)
+  expect_length(delays, 1000)
+  expect_true(all(delays %in% setup$np$boundaries[-1]))
+  mass <- .np_pmf(setup$draws, setup$np$boundaries, "rw")
+  expect_equal(
+    mean(delays), mean(mass %*% setup$np$boundaries[-1]),
+    tolerance = 0.1
+  )
+  predict <- epidist_gen_posterior_predict(nonparametric(-1:4))
+  withr::local_seed(2)
+  predicted <- predict(2, setup$prep)
+  expect_identical(dim(predicted), c(2L, 1L))
+  # Observation 2 is truncated at a delay of 10, which the bins never reach,
+  # and every delay is a whole number of days after daily censoring
+  expect_identical(predicted, round(predicted))
+})
+
+test_that("the nonparametric expected delay is the mean of the bins", {
+  setup <- np_prep()
+  epred <- epidist_gen_posterior_epred(nonparametric(-1:4))(setup$prep)
+  expect_identical(dim(epred), c(2L, 3L))
+  mass <- .np_pmf(setup$draws, setup$np$boundaries, "rw")
+  expected <- as.vector(mass %*% setup$np$boundaries[-1])
+  # The parameters are the same for every observation
+  for (i in 1:3) {
+    expect_equal(epred[, i], expected, tolerance = 1e-12)
+  }
+})

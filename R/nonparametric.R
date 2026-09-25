@@ -276,15 +276,8 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
            {.fn as_epidist_meta_model}."
     ))
   }
-  longest <- .np_longest_delay(data)
   if (is.null(family$np$boundaries)) {
-    if (!is.finite(longest)) {
-      cli_abort(c(
-        "Could not set default {.arg boundaries} for {.fn nonparametric}
-         because the data hold no finite delay.",
-        i = "Pass {.arg boundaries} to {.fn nonparametric}."
-      ))
-    }
+    longest <- .np_longest_delay(data)
     family <- .np_set_boundaries(family, seq(-1, ceiling(longest)))
   }
   if (inherits(data, "epidist_meta_model")) {
@@ -370,12 +363,13 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
 #' The longest delay the data could hold
 #'
 #' The upper delay bound of the individual level rows, and for a meta model
-#' the finite observation time of each summary row, which bounds the delays
-#' the study saw.
+#' the observation time of each summary row, which bounds the delays the
+#' study saw. Both are always finite: a summary row whose study adjusted for
+#' right truncation carries its grid cutoff as its observation time.
 #'
 #' @inheritParams epidist_family
 #'
-#' @returns A number, `-Inf` where the data hold no finite delay.
+#' @returns A number.
 #'
 #' @keywords internal
 .np_longest_delay <- function(data) {
@@ -384,11 +378,7 @@ epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
   if (inherits(data, "epidist_meta_model")) {
     delays <- c(delays, data$relative_obs_time[!rows])
   }
-  delays <- delays[is.finite(delays)]
-  if (length(delays) == 0) {
-    return(-Inf)
-  }
-  return(max(delays))
+  return(max(delays[is.finite(delays)]))
 }
 
 #' Which rows of the model data are individual level delays
