@@ -341,6 +341,10 @@ Closes #725.
 - The package is now documented with `roxygen2` 8.1.0.
 The version is recorded in `Config/roxygen2/version` in place of `RoxygenNote`.
 `NAMESPACE` now has one `importFrom()` directive per package, and links to other packages now point at the topic alias rather than the Rd file name.
+- The meta model calls `primarycensored::pprimarycensored()` with validation disabled, as the marginal model log likelihoods already did.
+Its delay and primary event distributions are fixed functions from `stats` and `primarycensored`, so they need no validation.
+The meta model log likelihood no longer advances the RNG stream, and a call is a few percent faster.
+Closes #750.
 
 ## Documentation
 
