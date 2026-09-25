@@ -176,6 +176,10 @@ It reports the posterior median and interval of both, a shift standardised by th
 Individual level rows are held out together as the `"individual"` study.
 `vignette("meta")` uses it on the Ebola estimates.
 Closes #642.
+- Added a `distspec::as_dist_spec()` method for fitted models, which exports a fitted delay distribution as an uncertain `<dist_spec>`.
+The natural parameters of the delay distribution are computed for each posterior draw and summarised into a `Normal()` prior on each.
+`distspec` is a suggested package, and the method is registered when it is loaded.
+See `?as_dist_spec.epidist_fit`.
 - Added `delay_summary_draws()`, which wraps the three usual post-processing steps into one call.
 It builds one row per unique combination of the predictors with `epidist_strata()`, draws the delay distribution parameters for each with `delay_parameter_draws()`, and adds the natural scale mean and standard deviation, and any quantiles asked for, with `add_summaries()`.
 Each step is still available on its own.
@@ -336,6 +340,9 @@ The marginal Kolmogorov-Smirnov checks of the latent model prior moved from a p 
 Closes #733.
 - The study labels of the test lockstep fixtures are now namespaced by the fixture that owns them and checked before the fixtures are bound, so a branch that adds a fixture reusing a label fails loudly rather than merging cleanly into a silent collision.
 Closes #725.
+- The package is now documented with `roxygen2` 8.1.0.
+The version is recorded in `Config/roxygen2/version` in place of `RoxygenNote`.
+`NAMESPACE` now has one `importFrom()` directive per package, and links to other packages now point at the topic alias rather than the Rd file name.
 
 ## Documentation
 
