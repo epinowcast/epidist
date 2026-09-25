@@ -1077,27 +1077,52 @@
     );
   }
 
+  /**
+    * Density of a lognormal delay at a positive y with params
+    * [meanlog, sdlog].
+    */
+  real meta_density_lognormal(real y, array[] real params) {
+    return exp(lognormal_lpdf(y | params[1], params[2]));
+  }
+
+  /** Density of a gamma delay at a positive y with params [shape, rate]. */
+  real meta_density_gamma(real y, array[] real params) {
+    return exp(gamma_lpdf(y | params[1], params[2]));
+  }
+
+  /** Density of a weibull delay at a positive y with params [shape, scale]. */
+  real meta_density_weibull(real y, array[] real params) {
+    return exp(weibull_lpdf(y | params[1], params[2]));
+  }
+
+  /**
+    * Density of a generalised gamma delay at a positive y, in the Stacy
+    * parameterisation with params [shape, scale, k], see gengamma_lcdf() in
+    * primarycensored.
+    */
+  real meta_density_gengamma(real y, array[] real params) {
+    real log_z = log(y / params[2]);
+    return exp(log(params[1]) - lgamma(params[3]) +
+               params[1] * params[3] * log_z - log(y) -
+               exp(params[1] * log_z));
+  }
+
   /** Density of the delay distribution. */
   real meta_family_density(real y, array[] real params) {
     if (y <= 0) {
       return 0;
     }
     if (dist_id == 1) {
-      return exp(lognormal_lpdf(y | params[1], params[2]));
+      return meta_density_lognormal(y, params);
     }
     if (dist_id == 2) {
-      return exp(gamma_lpdf(y | params[1], params[2]));
+      return meta_density_gamma(y, params);
     }
     if (dist_id == 3) {
-      return exp(weibull_lpdf(y | params[1], params[2]));
+      return meta_density_weibull(y, params);
     }
     if (dist_id == 5) {
-      // Stacy parameterisation with params [shape, scale, k], see
-      // gengamma_lcdf() in primarycensored.
-      real log_z = log(y / params[2]);
-      return exp(log(params[1]) - lgamma(params[3]) +
-                 params[1] * params[3] * log_z - log(y) -
-                 exp(params[1] * log_z));
+      return meta_density_gengamma(y, params);
     }
     reject("Meta model summary rows support lognormal, gamma, weibull and ",
            "generalised gamma delay distributions only.");
