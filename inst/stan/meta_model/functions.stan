@@ -1739,6 +1739,50 @@
   }
 
   /**
+    * Bahadur sampling covariance p_i (1 - p_j) / (n f_i f_j) of two
+    * quantiles with p_i <= p_j, see meta_family_joint_covariance(). Mirrors
+    * .meta_quantile_covariance() in R.
+    */
+  real meta_family_quantile_covariance(data real prob_i, data real prob_j,
+                                       real density_i, real density_j,
+                                       data int study_n) {
+    return fmin(prob_i, prob_j) * (1 - fmax(prob_i, prob_j)) /
+      (study_n * density_i * density_j);
+  }
+
+  /**
+    * Sampling covariance of a mean (moment_type 1) or a standard deviation
+    * (moment_type 2) and a quantile, from the centred partial moments at the
+    * quantile, see meta_family_joint_covariance(). Mirrors
+    * .meta_cross_covariance() in R.
+    */
+  real meta_family_cross_covariance(int moment_type, real prob,
+                                    real density, vector partial,
+                                    real spread, data int study_n) {
+    if (moment_type == 1) {
+      return -partial[1] / (study_n * density);
+    }
+    return -(partial[2] - spread ^ 2 * prob) /
+      (2 * spread * study_n * density);
+  }
+
+  /**
+    * Sampling covariance of two moment summaries, each a mean (type 1) or a
+    * standard deviation (type 2), see meta_family_joint_covariance().
+    * Mirrors .meta_moment_covariance() in R.
+    */
+  real meta_family_moment_covariance(data int type_i, data int type_j,
+                                     real se_mean, real se_sd, real rho) {
+    if (type_i != type_j) {
+      return rho * se_mean * se_sd;
+    }
+    if (type_i == 1) {
+      return se_mean ^ 2;
+    }
+    return se_sd ^ 2;
+  }
+
+  /**
     * Sampling covariance of the mean, standard deviation and quantiles one
     * study computed from the same delays. The moment block is that of
     * meta_family_moment_pair_lpdf(), the quantile block is the Bahadur
@@ -1770,25 +1814,21 @@
     for (i in 1:k) {
       for (j in 1:k) {
         if (types[i] == 3 && types[j] == 3) {
-          covariance[i, j] = fmin(probs[i], probs[j]) *
-            (1 - fmax(probs[i], probs[j])) /
-            (study_n * density[position[i]] * density[position[j]]);
+          covariance[i, j] = meta_family_quantile_covariance(
+            probs[i], probs[j], density[position[i]], density[position[j]],
+            study_n
+          );
         } else if (types[i] == 3 || types[j] == 3) {
           int moment_type = types[i] == 3 ? types[j] : types[i];
           int m = types[i] == 3 ? position[i] : position[j];
           real prob = types[i] == 3 ? probs[i] : probs[j];
-          if (moment_type == 1) {
-            covariance[i, j] = -partials[1, m] / (study_n * density[m]);
-          } else {
-            covariance[i, j] = -(partials[2, m] - spread ^ 2 * prob) /
-              (2 * spread * study_n * density[m]);
-          }
-        } else if (types[i] != types[j]) {
-          covariance[i, j] = rho * se_mean * se_sd;
-        } else if (types[i] == 1) {
-          covariance[i, j] = se_mean ^ 2;
+          covariance[i, j] = meta_family_cross_covariance(
+            moment_type, prob, density[m], partials[:, m], spread, study_n
+          );
         } else {
-          covariance[i, j] = se_sd ^ 2;
+          covariance[i, j] = meta_family_moment_covariance(
+            types[i], types[j], se_mean, se_sd, rho
+          );
         }
       }
     }
