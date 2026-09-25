@@ -26,6 +26,9 @@ specify the rate parameter \code{r}, the sample size, and the upper bound of the
 survival time. If the rate parameter is 0, then this function defaults to the
 uniform distribution.
 }
+\examples{
+simulate_exponential_cases(r = 0.2, sample_size = 5, seed = 101)
+}
 \seealso{
 Other simulate:
 \code{\link[=simulate_dates]{simulate_dates()}},

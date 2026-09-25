@@ -13,6 +13,8 @@
 #'
 #' @family simulate
 #' @export
+#' @examples
+#' simulate_uniform_cases(sample_size = 5, t = 10)
 simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
   return(data.frame(
     case = 1:sample_size,
@@ -41,6 +43,8 @@ simulate_uniform_cases <- function(sample_size = 1000, t = 60) {
 #'
 #' @family simulate
 #' @export
+#' @examples
+#' simulate_exponential_cases(r = 0.2, sample_size = 5, seed = 101)
 simulate_exponential_cases <- function(
   r = 0.2,
   sample_size = 10000,
@@ -85,6 +89,11 @@ simulate_exponential_cases <- function(
 #'
 #' @family simulate
 #' @export
+#' @examples
+#' cases <- simulate_gillespie(
+#'   r = 0.2, gamma = 1 / 7, I0 = 5, N = 50, seed = 101
+#' )
+#' head(cases)
 simulate_gillespie <- function(
   r = 0.2,
   gamma = 1 / 7,
@@ -144,6 +153,9 @@ simulate_gillespie <- function(
 #' @autoglobal
 #' @importFrom dplyr mutate
 #' @export
+#' @examples
+#' simulate_uniform_cases(sample_size = 5) |>
+#'   simulate_secondary(meanlog = 1.8, sdlog = 0.5)
 simulate_secondary <- function(data, dist = rlnorm, ...) {
   sim_data <- data |>
     mutate(

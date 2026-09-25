@@ -20,6 +20,9 @@ A \code{data.frame} with two columns: \code{case} (case number) and \code{ptime}
 This function simulates cases from a uniform distribution, where the primary
 event times are uniformly distributed between 0 and \code{t}.
 }
+\examples{
+simulate_uniform_cases(sample_size = 5, t = 10)
+}
 \seealso{
 Other simulate:
 \code{\link[=simulate_dates]{simulate_dates()}},

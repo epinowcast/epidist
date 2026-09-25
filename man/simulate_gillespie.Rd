@@ -28,6 +28,12 @@ specify the initial epidemic growth rate \eqn{r}, the rate of recovery gamma
 \eqn{\gamma}, the initial number of infected cases \eqn{I_0}, and the total
 population size \eqn{N}.
 }
+\examples{
+cases <- simulate_gillespie(
+  r = 0.2, gamma = 1 / 7, I0 = 5, N = 50, seed = 101
+)
+head(cases)
+}
 \seealso{
 Other simulate:
 \code{\link[=simulate_dates]{simulate_dates()}},

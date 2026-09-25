@@ -33,6 +33,17 @@ The family may be any \code{brms} family of a positive response, such as
 \code{\link[brms:lognormal]{brms::lognormal()}}, \code{Gamma(link = "log")} or \code{\link[brms:weibull]{brms::weibull()}}, or a
 family \code{epidist} defines itself, such as \code{\link[=gengamma]{gengamma()}}.
 }
+\examples{
+data <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model()
+family <- epidist_family(data, family = lognormal())
+family
+}
 \seealso{
 Other family:
 \code{\link[=epidist_family_model]{epidist_family_model()}},
