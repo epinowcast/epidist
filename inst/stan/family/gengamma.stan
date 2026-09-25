@@ -48,11 +48,36 @@ real gengamma_lpdf(vector y, vector mu, real shape, vector k) {
 }
 
 /**
+  * Log of the regularised lower incomplete gamma function P(k, x), given
+  * log(x). Deep in the lower tail P(k, x) underflows to zero, so there it is
+  * computed from its series, x^k exp(-x) / Gamma(k + 1) times a sum that is
+  * close to 1 / (1 - x / (k + 1)) when x is small against k. Without this a
+  * log distribution function of minus infinity in the latent model's
+  * truncation adjustment makes the log posterior plus infinity.
+  *
+  * @param log_x Log of the argument of the gamma distribution function
+  * @param k Shape parameter of the gamma distribution
+  */
+real gengamma_log_gamma_p(real log_x, real k) {
+  real x = exp(log_x);
+  real log_lead = k * log_x - x - lgamma(k + 1);
+  if (x < 0.5 * (k + 1) && log_lead < -600) {
+    return log_lead - log1m(x / (k + 1));
+  }
+  return gamma_lcdf(x | k, 1);
+}
+
+/**
   * Log distribution function of the generalised gamma, the regularised lower
   * incomplete gamma function P(k, (y / mu)^shape), summed over the vector.
   */
 real gengamma_lcdf(vector y, vector mu, vector shape, vector k) {
-  return gamma_lcdf(exp(shape .* log(y ./ mu)) | k, 1);
+  vector[num_elements(y)] log_x = shape .* log(y ./ mu);
+  real lcdf = 0;
+  for (n in 1:num_elements(y)) {
+    lcdf += gengamma_log_gamma_p(log_x[n], k[n]);
+  }
+  return lcdf;
 }
 
 real gengamma_lcdf(vector y, vector mu, real shape, real k) {
