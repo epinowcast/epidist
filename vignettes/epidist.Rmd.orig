@@ -285,38 +285,16 @@ plot_events(linelist_data, obs_time = max(linelist_data$obs_date))
 <details><summary>Click to expand for code to create the observed data histogram</summary>
 
 ```{r}
-plot_data <- bind_rows(
-  "Censored retrospective data" = as.data.frame(linelist_all),
-  "Censored, truncated,\nsampled data" = as.data.frame(linelist_data),
-  .id = "type"
-) |>
-  mutate(delay = as.numeric(.data$sdate_lwr - .data$pdate_lwr)) |>
-  count(.data$type, .data$delay) |>
-  group_by(.data$type) |>
-  mutate(p = .data$n / sum(.data$n))
-
-delay_histogram <- ggplot(plot_data) +
-  geom_col(
-    aes(x = delay, y = p, fill = type, group = type),
-    position = position_dodge2(preserve = "single")
-  ) +
-  scale_fill_brewer(palette = "Set2") +
-  geom_function(
-    data = data.frame(x = c(0, 30)), aes(x = x),
-    fun = dlnorm,
-    args = list(
-      meanlog = secondary_dist[["mu"]],
-      sdlog = secondary_dist[["sigma"]]
-    ),
-    linewidth = 1.5
-  ) +
-  labs(
-    x = "Delay between primary and secondary event (days)",
-    y = "Probability density",
-    fill = ""
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+delay_histogram <- plot_delays(
+  list(
+    "Censored retrospective data" = linelist_all,
+    "Censored, truncated,\nsampled data" = linelist_data
+  ),
+  reference = c(
+    mu = secondary_dist[["mu"]],
+    sigma = secondary_dist[["sigma"]]
+  )
+)
 ```
 
 </details>
