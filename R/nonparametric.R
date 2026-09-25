@@ -76,6 +76,100 @@ nonparametric <- function(boundaries = NULL, hazard_model = c("rw", "re")) {
   return(family)
 }
 
+#' Stan parameterisation of the non-parametric family
+#'
+#' The delay distribution parameters are the boundaries followed by the bin
+#' hazards, built from `mu`, `hsigma` and the innovations by the Stan
+#' function `epidist_np_params()`. The boundaries are written into the Stan
+#' code as a literal array.
+#'
+#' @inheritParams epidist_family_param
+#' @method epidist_family_param discretehazard_rw
+#' @family family
+#' @returns The family with a `param` element holding the Stan expression
+#'  for the parameter array.
+#'
+#' @export
+epidist_family_param.discretehazard_rw <- function(family, ...) {
+  eps <- .np_eps_dpars(family$dpars)
+  family$param <- paste0(
+    "epidist_np_params(", .np_stan_array(family$np$boundaries),
+    ", mu, hsigma, {", toString(eps), "}, ",
+    as.integer(family$np$hazard_model == "rw"), ")"
+  )
+  return(family)
+}
+
+#' @rdname epidist_family_param.discretehazard_rw
+#' @method epidist_family_param discretehazard_re
+#' @export
+epidist_family_param.discretehazard_re <- function(family, ...) {
+  return(epidist_family_param.discretehazard_rw(family, ...))
+}
+
+#' Write numbers as a Stan array literal of reals
+#'
+#' @param x A numeric vector.
+#'
+#' @returns A character string such as `"{-1.0, 0.0, 1.5}"`.
+#'
+#' @keywords internal
+.np_stan_array <- function(x) {
+  values <- format(x, digits = 15, trim = TRUE, scientific = FALSE)
+  whole <- !grepl(".", values, fixed = TRUE)
+  values[whole] <- paste0(values[whole], ".0")
+  return(paste0("{", toString(values), "}"))
+}
+
+#' Stan functions of the non-parametric family
+#'
+#' @param family The `epidist` family object.
+#'
+#' @returns A `brms` `stanvars` object holding `epidist_np_params()`, or
+#'  `NULL` for any other family.
+#'
+#' @keywords internal
+.np_stanvars <- function(family) {
+  if (!.is_nonparametric(family)) {
+    return(NULL)
+  }
+  return(brms::stanvar(
+    block = "functions",
+    scode = .stan_chunk(file.path("nonparametric", "functions.stan"))
+  ))
+}
+
+#' Family specific prior distributions for the non-parametric family
+#'
+#' The intercept of `mu`, the logit hazard, gets `normal(0, 1.5)`, which is
+#' close to uniform on the hazard scale. The intercept of `hsigma` gets
+#' `normal(0, 1)` on the log scale, the prior `primarycensored` uses for the
+#' spread of the logit hazards. Each innovation gets `std_normal()`, which
+#' makes the offsets non-centred.
+#'
+#' @inheritParams epidist
+#' @method epidist_family_prior discretehazard_rw
+#' @family prior
+#' @returns A `brmsprior` object.
+#'
+#' @export
+epidist_family_prior.discretehazard_rw <- function(family, formula, ...) {
+  prior <- set_prior("normal(0, 1.5)", class = "Intercept") +
+    set_prior("normal(0, 1)", class = "Intercept", dpar = "hsigma")
+  for (eps in .np_eps_dpars(family$dpars)) {
+    prior <- prior +
+      set_prior("std_normal()", class = "Intercept", dpar = eps)
+  }
+  return(prior)
+}
+
+#' @rdname epidist_family_prior.discretehazard_rw
+#' @method epidist_family_prior discretehazard_re
+#' @export
+epidist_family_prior.discretehazard_re <- function(family, formula, ...) {
+  return(epidist_family_prior.discretehazard_rw(family, formula, ...))
+}
+
 #' Is a family the non-parametric hazard family?
 #'
 #' @param family A family object, or a list recording a delay family as
@@ -186,12 +280,12 @@ nonparametric <- function(boundaries = NULL, hazard_model = c("rw", "re")) {
     family <- .np_set_boundaries(family, seq(-1, ceiling(longest)))
   }
   top <- max(family$np$boundaries)
-  if (is.finite(longest) && top < .np_longest_observed(data)) {
+  observed <- .np_longest_observed(data)
+  if (top < observed) {
     cli_abort(c(
       "The last of {.arg boundaries} must be at least the longest observed
        delay.",
-      i = "It is {top} and the longest delay is
-           {.np_longest_observed(data)}."
+      i = "It is {top} and the longest delay is {observed}."
     ))
   }
   return(family)
@@ -327,6 +421,51 @@ nonparametric <- function(boundaries = NULL, hazard_model = c("rw", "re")) {
   n <- length(dpars$mu)
   logit <- rep_len(dpars$mu, n) + .np_offsets(dpars, hazard_model)
   return(cbind(stats::plogis(logit), 1))
+}
+
+#' A random delay generator for the non-parametric family
+#'
+#' @inheritParams .np_dist_args
+#'
+#' @returns A function of `n`, `i` and `prep`, as
+#'  [primarycensored::rpcens()] calls it, returning `n` delays, the delay of
+#'  each draw in turn, recycled when `n` is more than the number of draws.
+#'
+#' @keywords internal
+.np_rdist <- function(np) {
+  return(function(n, i, prep, ...) {
+    args <- .np_dist_args(prep, i, np)
+    draws <- rep_len(seq_along(args), n)
+    return(vapply(draws, function(draw) {
+      return(primarycensored::rdiscretehazard(
+        1,
+        boundaries = args[[draw]]$boundaries,
+        hazards = args[[draw]]$hazards
+      ))
+    }, numeric(1)))
+  })
+}
+
+#' The expected delay of the non-parametric family
+#'
+#' @inheritParams .np_dist_args
+#'
+#' @returns A function of `prep` returning a matrix of the mean delay with
+#'  one row per draw and one column per observation, as used by
+#'  [brms::posterior_epred()].
+#'
+#' @keywords internal
+.np_epred <- function(np) {
+  return(function(prep) {
+    edges <- np$boundaries[-1]
+    means <- vapply(seq_len(prep$nobs), function(i) {
+      args <- .np_dist_args(prep, i, np)
+      return(vapply(args, function(arg) {
+        return(sum(edges * primarycensored::hazards_to_pmf(arg$hazards)))
+      }, numeric(1)))
+    }, numeric(prep$ndraws))
+    return(matrix(means, nrow = prep$ndraws))
+  })
 }
 
 #' Distribution parameters of the non-parametric family for each draw

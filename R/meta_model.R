@@ -1126,6 +1126,7 @@ epidist_family_model.epidist_meta_model <- function(
     posterior_epred = epidist_gen_posterior_epred(family)
   )
   custom_family$primary <- family$primary
+  custom_family$np <- family$np
   return(custom_family)
 }
 
@@ -1366,6 +1367,11 @@ epidist_stancode.epidist_meta_model <- function(
     pcd_stanvars_functions +
     stanvars_parameters +
     .meta_group_stanvars(data)
+
+  np_stanvars <- .np_stanvars(family)
+  if (!is.null(np_stanvars)) {
+    stanvars_all <- stanvars_all + np_stanvars
+  }
 
   return(stanvars_all)
 }

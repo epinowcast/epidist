@@ -57,6 +57,7 @@
   dist_id <- primarycensored::pcd_stan_dist_id(family_name)
 
   substitutions <- c(
+    "{dpars_B}" = .stan_dist_params(family),
     family = family_name,
     dist_id = as.character(dist_id),
     dpars_A = toString(paste0("real ", family$dpars)),
@@ -75,6 +76,27 @@
   }
 
   return(stanvars_functions)
+}
+
+#' The Stan expression for the parameter array of a delay distribution
+#'
+#' The functions chunks pass the delay distribution parameters to
+#' `primarycensored` as the array `{dpars_B}`. For a parametric family that is
+#' the reparameterised distributional parameters in braces. The
+#' non-parametric family builds the array of boundaries and hazards with
+#' `epidist_np_params()`, which is already an array, see
+#' [epidist_family_param()].
+#'
+#' @param family The `epidist` family object.
+#'
+#' @returns A character string holding a Stan expression.
+#'
+#' @keywords internal
+.stan_dist_params <- function(family) {
+  if (.is_nonparametric(family)) {
+    return(family$param)
+  }
+  return(paste0("{", family$param, "}"))
 }
 
 #' Label a `epidist` Stan model with a version indicator
@@ -269,6 +291,11 @@
 #'
 #' @keywords internal
 .add_dpar_info <- function(family) {
+  # The non-parametric family sets its own links and bounds with its
+  # boundaries, see `.np_set_boundaries()`.
+  if (.is_nonparametric(family)) {
+    return(family)
+  }
   other_links <- family[[paste0("link_", setdiff(family$dpars, "mu"))]] # nolint
   other_bounds <- lapply(
     family$dpars[-1],

@@ -129,7 +129,7 @@ test_that("the random effect hazard model passes its flag to Stan", {
     fn = brms::make_stancode
   ))
   expect_match(as.character(code), "y | 28,", fixed = TRUE)
-  expect_match(as.character(code), "h24eps}, 0)", fixed = TRUE)
+  expect_match(as.character(code), "h25eps}, 0)", fixed = TRUE)
 })
 
 test_that("the nonparametric family sets its default priors", {
@@ -144,6 +144,6 @@ test_that("the nonparametric family sets its default priors", {
     intercept$prior[intercept$dpar == "hsigma"], "normal(0, 1)"
   )
   eps <- intercept$prior[grepl("eps$", intercept$dpar)]
-  expect_length(eps, 23)
+  expect_length(eps, 24)
   expect_true(all(eps == "std_normal()"))
 })

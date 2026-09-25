@@ -29,9 +29,6 @@
 #' @importFrom purrr map_dbl
 #' @export
 epidist_gen_log_lik <- function(family) {
-  # Get internal brms log_lik function
-  log_lik_brms <- .get_brms_fn("log_lik", family)
-
   # The primary event distribution the family was built with
   spec <- .primary_spec_from_family(family)
 
@@ -40,8 +37,10 @@ epidist_gen_log_lik <- function(family) {
 
   # Check if family is supported with a analytical solution
   if (primary_dist_name %in% .get_supported_dists()) {
-    .log_lik <- .analytical_gen_log_lik(primary_dist_name, spec)
+    .log_lik <- .analytical_gen_log_lik(primary_dist_name, spec, family$np)
   } else {
+    # Get internal brms log_lik function
+    log_lik_brms <- .get_brms_fn("log_lik", family)
     cli::cli_inform(
       c(
         "Falling back to default dependency on brms for {primary_dist_name}",
@@ -150,7 +149,8 @@ epidist_gen_log_lik <- function(family) {
 }
 
 .analytical_gen_log_lik <- function(dist,
-                                    spec = .primary_spec("uniform")) {
+                                    spec = .primary_spec("uniform"),
+                                    np = NULL) {
   .log_lik <- function(i, prep) {
     y <- prep$data$Y[i]
     relative_obs_time <- prep$data$vreal1[i]
@@ -159,12 +159,13 @@ epidist_gen_log_lik <- function(family) {
     delay_min <- if (is.null(prep$data$vreal5)) 0 else prep$data$vreal5[i]
 
     # Get distribution-specific parameters
-    dist_args <- .get_supported_dist_args(dist, prep, i)
+    dist_args <- .get_supported_dist_args(dist, prep, i, np)
     primary <- .primary_spec_from_prep(prep, spec)
 
     # Calculate density for each draw using primarycensored::dpcens().
-    # `check = FALSE` because `pdist` comes from `stats` and so needs no
-    # validation, and validating it would advance the RNG once per draw.
+    # `check = FALSE` because `pdist` comes from `stats` or
+    # `primarycensored` and so needs no validation, and validating it would
+    # advance the RNG once per draw.
     lpdf <- purrr::map_dbl(seq_len(prep$ndraws), function(draw) {
       return(
         do.call(
@@ -197,8 +198,13 @@ epidist_gen_log_lik <- function(family) {
   return(.log_lik)
 }
 
-# Helper to get distribution-specific arguments
-.get_supported_dist_args <- function(dist, prep, i) {
+# Helper to get distribution-specific arguments. The non-parametric family
+# needs its boundaries and hazard model, passed as `np`, and its arguments
+# are already one list per draw.
+.get_supported_dist_args <- function(dist, prep, i, np = NULL) {
+  if (identical(dist, "pdiscretehazard")) {
+    return(.np_dist_args(prep, i, np))
+  }
   dist_params <- switch(dist,
     pgamma = {
       shape <- brms::get_dpar(prep, "shape", i = i)
@@ -244,7 +250,8 @@ epidist_gen_log_lik <- function(family) {
 #' @param dist A `primarycensored` distribution function name, for example
 #'  `"plnorm"`.
 #'
-#' @returns The corresponding function from `stats`.
+#' @returns The corresponding function from `stats`, or from
+#'  `primarycensored` for the non-parametric hazard distribution.
 #'
 #' @keywords internal
 .pdist <- function(dist) {
@@ -252,12 +259,13 @@ epidist_gen_log_lik <- function(family) {
     plnorm = stats::plnorm,
     pgamma = stats::pgamma,
     pweibull = stats::pweibull,
+    pdiscretehazard = primarycensored::pdiscretehazard,
     get(dist, envir = asNamespace("stats"))
   ))
 }
 
 .get_supported_dists <- function() {
-  return(c("plnorm", "pgamma", "pweibull"))
+  return(c("plnorm", "pgamma", "pweibull", "pdiscretehazard"))
 }
 
 .transpose_named_list2 <- function(lst) {
@@ -294,15 +302,18 @@ epidist_gen_log_lik <- function(family) {
 #' @family gen
 #' @export
 epidist_gen_posterior_predict <- function(family) {
-  dist_fn <- .get_brms_fn("posterior_predict", family)
-
   # The primary event distribution the family was built with
   spec <- .primary_spec_from_family(family)
 
-  rdist <- function(n, i, prep, ...) {
-    prep$ndraws <- n
-    result <- do.call(dist_fn, list(i = i, prep = prep))
-    return(result)
+  if (.is_nonparametric(family)) {
+    rdist <- .np_rdist(family$np)
+  } else {
+    dist_fn <- .get_brms_fn("posterior_predict", family)
+    rdist <- function(n, i, prep, ...) {
+      prep$ndraws <- n
+      result <- do.call(dist_fn, list(i = i, prep = prep))
+      return(result)
+    }
   }
 
   .predict <- function(i, prep, ...) {
@@ -350,6 +361,9 @@ epidist_gen_posterior_predict <- function(family) {
 #' @family gen
 #' @export
 epidist_gen_posterior_epred <- function(family) {
+  if (.is_nonparametric(family)) {
+    return(.np_epred(family$np))
+  }
   result <- .get_brms_fn("posterior_epred", family)
   return(result)
 }
