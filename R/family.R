@@ -166,8 +166,6 @@ epidist_family_param.default <- function(family, ...) {
 #' The default prior of [epidist_family_prior()] is weakly informative around
 #' the gamma and Weibull special cases, because `shape` and `k` are only
 #' weakly identified by a modest number of delays.
-#' [epidist()] starts the sampler with `shape` and `k` at one unless `init` is
-#' given, because a chain started where both are small can get stuck there.
 #'
 #' @param link,link_shape,link_k The link functions of `mu`, `shape` and `k`.
 #'  All default to `"log"`.
@@ -252,40 +250,6 @@ gengamma <- function(link = "log", link_shape = "log", link_k = "log") {
     block = "functions",
     scode = .stan_chunk(file.path("family", paste0(name, ".stan")))
   ))
-}
-
-#' Initial values a family starts its fits from
-#'
-#' Stan draws the initial value of every parameter uniformly between -2 and 2
-#' on the unconstrained scale. For the [gengamma()] family that includes
-#' starting points where `shape` and `k` are both small. There the
-#' distribution is so heavy tailed that the sampler adapts to a tiny step size
-#' and does not reach the bulk of the posterior. Its fits therefore start the
-#' intercepts of `shape` and `k` at one, the gamma and Weibull special case,
-#' and draw every other parameter as usual. Other families use the defaults
-#' of the fitting function.
-#'
-#' @inheritParams epidist_family
-#'
-#' @returns A function returning a named list of initial values, as taken by
-#'  the `init` argument of [brms::brm()], or `NULL`.
-#'
-#' @keywords internal
-.family_init <- function(family) {
-  if (!identical(.delay_family(family)$name, "gengamma")) {
-    return(NULL)
-  }
-  one <- c(log = 0, identity = 1, softplus = log(expm1(1)))
-  links <- c(shape = family$link_shape, k = family$link_k)
-  links <- links[links %in% names(one)]
-  if (length(links) == 0) {
-    return(NULL)
-  }
-  values <- as.list(unname(one[links]))
-  names(values) <- paste0("Intercept_", names(links))
-  return(function() {
-    return(values)
-  })
 }
 
 #' Check that `flexsurv` is installed

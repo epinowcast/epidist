@@ -88,14 +88,6 @@ epidist <- function(
     family = epidist_family,
     formula = epidist_formula
   )
-  init <- .family_init(epidist_family)
-  if (!is.null(init) && !any(c("init", "inits") %in% ...names()) &&
-    "init" %in% names(formals(fn))) {
-    fit_fn <- fn
-    fn <- function(...) {
-      return(fit_fn(..., init = init))
-    }
-  }
   fit <- fn(
     formula = epidist_formula,
     family = epidist_family,
