@@ -702,9 +702,7 @@ marginaleffects::get_draws(phase_ratio) |>
 A pooled estimate should not rest on a single study.
 `epidist_meta_leave_one_out()` asks that question directly.
 It refits the model once per study with that study's rows removed, and compares the delay mean and standard deviation from each refit with the full fit.
-The refits reuse the compiled model, so each costs one round of sampling, and the formula, priors and sampler settings are carried over from `fit_ebola`.
 We compare the population level delay at the retrospective reference level, so `newdata` is the post outbreak row of `phase_grid`, and the default `re_formula = NA` switches the study term off as above.
-Had the fit included individual level records, they would be held out together as the `"individual"` study.
 
 ```{r results='hide', message=FALSE}
 ebola_leave_one_out <- epidist_meta_leave_one_out(
