@@ -68,6 +68,11 @@ distribution function crossed its probability, and several by
 \code{\link[=.meta_grid_box_ll]{.meta_grid_box_ll()}} as the joint probability of every such crossing,
 with \code{cum_count} and \code{lower} read as the box each crossing puts on the
 counts below and at the reported day.
+Both start the grid at \code{delay_min} moved back by \code{\link[=.meta_cens_lower]{.meta_cens_lower()}}, as
+the mean and standard deviation of the same study do. For a midpoint
+imputed grid (\code{cens_adjusted} 3) the reported \code{delay_min} sits on the
+midpointed scale, so an off grid value would otherwise drop the lowest
+counted cell.
 
 A cell whose implied probability underflows to zero while the study saw
 delays in it is floored at \code{\link[=.meta_cell_floor]{.meta_cell_floor()}}.
