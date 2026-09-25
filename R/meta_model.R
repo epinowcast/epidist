@@ -20,8 +20,9 @@
 #' correct. It is usually the analyst's judgement rather than something the
 #' study reported, so state it explicitly and vary it in a sensitivity
 #' analysis.
-#' `vignette("model")` gives the forward model and the sampling likelihoods,
-#' and `vignette("meta")` works through a simulated and a real example.
+#' `vignette("model")` gives the forward model, the sampling likelihoods
+#' and the accuracy of the approximations, and `vignette("meta")` works
+#' through a simulated and a real example.
 #'
 #' At least one of `data` and `estimates` must be supplied. Study level
 #' heterogeneity is specified through the `brms` formula in [epidist()], for
@@ -44,59 +45,15 @@
 #' [epidist_meta_leave_one_out()] asks the study level question instead,
 #' refitting with each study held out.
 #'
-#' Three consequences of the sampling likelihoods change what you should do.
-#'
-#' * The standard errors are plug in quantities that depend on the parameters,
-#'   so studies no single distribution can explain may be accommodated by
-#'   inflating the implied standard deviation rather than by moving the
-#'   location, and sampling can become multimodal. Allow for genuine
-#'   differences with a term such as `mu ~ 1 + (1 | study)` rather than relying
-#'   on the sampling error alone.
-#' * Quantiles read off a fitted distribution rather than the empirical data
-#'   have smaller sampling error than assumed here. Supply a reported `se` in
-#'   [as_epidist_estimates_data()] for those rows, which also takes them out of
-#'   the joint quantile likelihood.
-#' * The normal approximations degrade at small study sample sizes. A study
-#'   that reported integer date differences has its mean and standard
-#'   deviation fitted separately from its quantiles, as if they came from
-#'   different delays, which counts such a study about twice for the location
-#'   where it reports both kinds, so keep its mean and standard deviation
-#'   and drop its quantiles. A study with a continuous estimand has every kind
-#'   fitted jointly. A study that published draws of its parameters avoids
-#'   both, because [as_epidist_multivariate()] turns them into a covariance
-#'   over the summaries that is fitted jointly.
-#'
-#' Two approximations are worth knowing about before fitting quantiles.
-#'
-#' * A study that took integer date differences reports quantiles of a discrete
-#'   distribution. The model interpolates its grid distribution function
-#'   through the mid points of the cells, but the reported value is itself
-#'   rounded to that grid, and what is left does not shrink with the study
-#'   sample size. It stays under 4% on the mean and 9% on the standard
-#'   deviation once the reported quantiles sit twenty five or more cells above
-#'   the smallest delay the study counted, and reaches tens of percent on both
-#'   when they sit within ten. Refitting the median and
-#'   interquartile range of a lognormal delay of mean 5.9 days, on daily
-#'   windows with an observation time of 12 days, recovers a delay mean 27%
-#'   high and a standard deviation 69% high. The same study's mean and
-#'   standard deviation recover the truth, so prefer those where a study
-#'   reports them, and check that `swindow` is the resolution it worked at.
-#'   [as_epidist_estimates_data()] warns for studies in this range.
-#' * The accrual weight applied to a study that stopped collecting at a
-#'   calendar date is exact on the grid, but averages over the primary window
-#'   for a study that adjusted the secondary interval only. With a weekly
-#'   primary window, a collection window of 28 days and a delay of mean 4.6
-#'   days this puts the implied mean 0.8% high at a growth rate of 0.05 and
-#'   2.6% high at 0.2. `vignette("model")` gives the measurements.
-#'
-#' Two settings trade accuracy against speed: `max_delay` in
-#' [as_epidist_estimates_data()], which sets the grid a study that adjusted for
-#' right truncation is summarised on and needs raising for a long tailed delay,
-#' and `options(epidist.meta_n_quad = )`, the smallest number of quadrature
-#' intervals used where a study is summarised by quadrature instead. Each
-#' study is given as many intervals as it needs to resolve the spread it
-#' reported, up to a cap of 2000 that the option lifts when set above it, and
-#' the number is held in the `n_quad` column of the model data.
+#' The sampling standard errors are plug in quantities that depend on the
+#' parameters, so allow for genuine differences between studies with a term
+#' such as `mu ~ 1 + (1 | study)` rather than relying on them alone. Supply a
+#' reported `se` in [as_epidist_estimates_data()] for quantiles read off a
+#' fitted distribution rather than the empirical data. Where a study reported
+#' integer date differences, keep its mean and standard deviation and drop its
+#' quantiles. [as_epidist_estimates_data()] warns for the studies the
+#' approximations serve least well, and documents the two settings, `max_delay`
+#' and `options(epidist.meta_n_quad = )`, that trade accuracy against speed.
 #'
 #' # Advanced: an estimated growth rate
 #'
@@ -121,6 +78,9 @@
 #'  estimates, or `NULL`.
 #'
 #' @param ... Additional arguments passed to methods.
+#'
+#' @seealso [as_epidist_estimates_data()] for preparing the summary estimates,
+#'  and for the checks and the settings the approximations here depend on.
 #'
 #' @family meta_model
 #' @returns An object of class `epidist_meta_model`.

@@ -103,16 +103,7 @@ linelist <- as_epidist_linelist_data(obs_trunc)
 The observed delays are truncated below `delay_min`.
 
 ```{r hist, fig.cap="Observed delays after left truncation. The dashed line marks the minimum delay."}
-ggplot(linelist, aes(x = stime_lwr - ptime_lwr)) +
-  geom_histogram(
-    aes(y = after_stat(density)),
-    binwidth = 1, fill = "#56B4E9", alpha = 0.7
-  ) +
-  geom_vline(
-    xintercept = delay_min, linetype = "dashed", linewidth = 0.8
-  ) +
-  labs(x = "Observed delay (days)", y = "Density") +
-  theme_minimal()
+plot_delays(linelist, delay_min = delay_min)
 ```
 
 # Fit models with and without the adjustment
