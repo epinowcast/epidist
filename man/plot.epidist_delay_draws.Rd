@@ -89,12 +89,12 @@ when there are many.
 
 \code{plot()} and \code{autoplot()} are the same function. Both need \code{ggplot2}.
 
-The plot is drawn with \code{\link[ggplot2:ggtheme]{ggplot2::theme_minimal()}} and the colour blind
+The plot is drawn with \code{\link[ggplot2:theme_minimal]{ggplot2::theme_minimal()}} and the colour blind
 friendly palette the package documentation uses. Add a theme or a scale of
 your own to the returned plot to override either.
 }
 \examples{
-\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 draws <- data.frame(
   mu = rnorm(200, 1.8, 0.05),
   sigma = exp(rnorm(200, log(0.5), 0.05))
@@ -109,12 +109,12 @@ plot(draws, type = "delay", ndraws = 50)
 \code{\link[=delay_parameter_draws]{delay_parameter_draws()}} and \code{\link[=delay_summary_draws]{delay_summary_draws()}} for the
 draws, and \code{\link[=plot_events]{plot_events()}} to plot the data.
 
-Other plot: 
-\code{\link{plot_delays}()},
-\code{\link{plot_delays.default}()},
-\code{\link{plot_delays.epidist_fit}()},
-\code{\link{plot_delays.epidist_linelist_data}()},
-\code{\link{plot_delays.list}()},
-\code{\link{plot_events}()}
+Other plot:
+\code{\link[=plot_delays]{plot_delays()}},
+\code{\link[=plot_delays.default]{plot_delays.default()}},
+\code{\link[=plot_delays.epidist_fit]{plot_delays.epidist_fit()}},
+\code{\link[=plot_delays.epidist_linelist_data]{plot_delays.epidist_linelist_data()}},
+\code{\link[=plot_delays.list]{plot_delays.list()}},
+\code{\link[=plot_events]{plot_events()}}
 }
 \concept{plot}

@@ -12,7 +12,7 @@ be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
 families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
-\code{\link[brms:brmsfamily]{brms::lognormal()}}, are also
+\code{\link[brms:lognormal]{brms::lognormal()}}, are also
 reexported as part of \code{epidist}. The generalised gamma family
 \code{\link[=gengamma]{gengamma()}} is defined by \code{epidist} itself.}
 
@@ -27,13 +27,13 @@ Called by \code{\link[=epidist_family]{epidist_family()}}. A custom model suppli
 \code{\link[=epidist_family_model]{epidist_family_model()}} rather than by calling this.
 }
 \seealso{
-Other family: 
-\code{\link{epidist_family}()},
-\code{\link{epidist_family_model}()},
-\code{\link{epidist_family_model.default}()},
-\code{\link{epidist_family_param.default}()},
-\code{\link{epidist_family_param.gengamma}()},
-\code{\link{gengamma}()}
+Other family:
+\code{\link[=epidist_family]{epidist_family()}},
+\code{\link[=epidist_family_model]{epidist_family_model()}},
+\code{\link[=epidist_family_model.default]{epidist_family_model.default()}},
+\code{\link[=epidist_family_param.default]{epidist_family_param.default()}},
+\code{\link[=epidist_family_param.gengamma]{epidist_family_param.gengamma()}},
+\code{\link[=gengamma]{gengamma()}}
 }
 \concept{family}
 \keyword{internal}

@@ -12,7 +12,7 @@ be used in the model. Every family function has a link argument allowing
 users to specify the link function to be applied on the response variable.
 If not specified, default links are used. For details of all supported
 families see \code{\link[brms:brmsfamily]{brms::brmsfamily()}}. Commonly used, such as
-\code{\link[brms:brmsfamily]{brms::lognormal()}}, are also
+\code{\link[brms:lognormal]{brms::lognormal()}}, are also
 reexported as part of \code{epidist}. The generalised gamma family
 \code{\link[=gengamma]{gengamma()}} is defined by \code{epidist} itself.}
 
@@ -37,13 +37,13 @@ weakly identified by a modest number of delays, so a wide prior on either
 lets the sampler wander far into the tails.
 }
 \seealso{
-Other prior: 
-\code{\link{epidist_family_prior}()},
-\code{\link{epidist_family_prior.default}()},
-\code{\link{epidist_family_prior.lognormal}()},
-\code{\link{epidist_model_prior}()},
-\code{\link{epidist_model_prior.default}()},
-\code{\link{epidist_model_prior.epidist_meta_model}()},
-\code{\link{epidist_prior}()}
+Other prior:
+\code{\link[=epidist_family_prior]{epidist_family_prior()}},
+\code{\link[=epidist_family_prior.default]{epidist_family_prior.default()}},
+\code{\link[=epidist_family_prior.lognormal]{epidist_family_prior.lognormal()}},
+\code{\link[=epidist_model_prior]{epidist_model_prior()}},
+\code{\link[=epidist_model_prior.default]{epidist_model_prior.default()}},
+\code{\link[=epidist_model_prior.epidist_meta_model]{epidist_model_prior.epidist_meta_model()}},
+\code{\link[=epidist_prior]{epidist_prior()}}
 }
 \concept{prior}

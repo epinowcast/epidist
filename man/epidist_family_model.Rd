@@ -21,12 +21,12 @@ A \code{brms} custom family object.
 The model-specific parts of an \code{epidist_family()} call
 }
 \seealso{
-Other family: 
-\code{\link{epidist_family}()},
-\code{\link{epidist_family_model.default}()},
-\code{\link{epidist_family_param}()},
-\code{\link{epidist_family_param.default}()},
-\code{\link{epidist_family_param.gengamma}()},
-\code{\link{gengamma}()}
+Other family:
+\code{\link[=epidist_family]{epidist_family()}},
+\code{\link[=epidist_family_model.default]{epidist_family_model.default()}},
+\code{\link[=epidist_family_param]{epidist_family_param()}},
+\code{\link[=epidist_family_param.default]{epidist_family_param.default()}},
+\code{\link[=epidist_family_param.gengamma]{epidist_family_param.gengamma()}},
+\code{\link[=gengamma]{gengamma()}}
 }
 \concept{family}
