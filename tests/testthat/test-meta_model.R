@@ -3414,12 +3414,18 @@ test_that("as_epidist_meta_model refuses one order statistic reported on two day
   expect_identical(.meta_members(meta)$lower, c(0L, 0L))
 })
 
-test_that(".meta_ddist pairs each distribution function with its density", {
-  expect_identical(.meta_ddist("plnorm"), stats::dlnorm)
-  expect_identical(.meta_ddist("pgamma"), stats::dgamma)
-  expect_identical(.meta_ddist("pweibull"), stats::dweibull)
+test_that(".dist_fn pairs each distribution function with its density and quantile function", { # nolint: line_length_linter.
+  expect_identical(.pdist("plnorm"), stats::plnorm)
+  expect_identical(.ddist("plnorm"), stats::dlnorm)
+  expect_identical(.qdist("plnorm"), stats::qlnorm)
+  expect_identical(.ddist("pgamma"), stats::dgamma)
+  expect_identical(.qdist("pweibull"), stats::qweibull)
   # Any other name is taken from stats by dropping the leading p.
-  expect_identical(.meta_ddist("pnorm"), stats::dnorm)
+  expect_identical(.ddist("pnorm"), stats::dnorm)
+  skip_if_not_installed("flexsurv")
+  expect_identical(.pdist("pgengamma.orig"), flexsurv::pgengamma.orig)
+  expect_identical(.ddist("pgengamma.orig"), flexsurv::dgengamma.orig)
+  expect_identical(.qdist("pgengamma.orig"), flexsurv::qgengamma.orig)
 })
 
 test_that(".meta_log_accrual_weight matches the follow up integral", {

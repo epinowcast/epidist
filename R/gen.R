@@ -252,26 +252,46 @@ epidist_gen_log_lik <- function(family) {
   ))
 }
 
-#' The distribution function used for a `primarycensored` distribution name
+#' The functions of a `primarycensored` distribution name
+#'
+#' `.pdist()` gives the distribution function, `.ddist()` the density and
+#' `.qdist()` the quantile function, all found by swapping the leading `p` of
+#' the name.
 #'
 #' @param dist A `primarycensored` distribution function name, for example
 #'  `"plnorm"`.
 #'
-#' @returns The corresponding function from `stats`, or from `flexsurv` for
-#'  the generalised gamma.
+#' @param type One of `"p"`, `"d"` or `"q"`.
+#'
+#' @returns The function of that name from the package that provides the
+#'  distribution.
 #'
 #' @keywords internal
-.pdist <- function(dist) {
+.dist_fn <- function(dist, type) {
+  name <- sub("^p", type, dist)
   if (identical(dist, "pgengamma.orig")) {
     .require_flexsurv()
-    return(flexsurv::pgengamma.orig)
+    return(get(name, envir = asNamespace("flexsurv")))
   }
-  return(switch(dist,
-    plnorm = stats::plnorm,
-    pgamma = stats::pgamma,
-    pweibull = stats::pweibull,
-    get(dist, envir = asNamespace("stats"))
-  ))
+  return(get(name, envir = asNamespace("stats")))
+}
+
+#' @rdname dot-dist_fn
+#' @keywords internal
+.pdist <- function(dist) {
+  return(.dist_fn(dist, "p"))
+}
+
+#' @rdname dot-dist_fn
+#' @keywords internal
+.ddist <- function(dist) {
+  return(.dist_fn(dist, "d"))
+}
+
+#' @rdname dot-dist_fn
+#' @keywords internal
+.qdist <- function(dist) {
+  return(.dist_fn(dist, "q"))
 }
 
 .get_supported_dists <- function() {

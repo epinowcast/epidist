@@ -1,27 +1,3 @@
-#' The density function used for a `primarycensored` distribution name
-#'
-#' Shares the distribution function lookup with [.pdist()] in `R/gen.R`; only
-#' the density direction is meta model specific.
-#'
-#' @inheritParams .pdist
-#'
-#' @returns The corresponding function from `stats`, or from `flexsurv` for
-#'  the generalised gamma.
-#'
-#' @keywords internal
-.meta_ddist <- function(dist) {
-  if (identical(dist, "pgengamma.orig")) {
-    .require_flexsurv()
-    return(flexsurv::dgengamma.orig)
-  }
-  return(switch(dist,
-    plnorm = stats::dlnorm,
-    pgamma = stats::dgamma,
-    pweibull = stats::dweibull,
-    get(sub("^p", "d", dist), envir = asNamespace("stats"))
-  ))
-}
-
 #' The primary event distribution implied by a growth rate
 #'
 #' A growth rate of zero corresponds to a uniform primary event within its
