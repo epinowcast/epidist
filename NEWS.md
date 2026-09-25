@@ -20,11 +20,18 @@ Closes #644.
 
 - The help for `epidist_gen_meta_log_lik()` and `as_epidist_meta_model()` now states the cost of `log_lik()` and `loo()` for meta model summary rows, and how `ndraws` reduces it.
 Closes #705.
+- Added examples to the `simulate_*()` functions and to `epidist_family()`, `epidist_formula()`, `epidist_prior()` and `epidist_stancode()`.
+- The package description cites the methods it implements.
+
+## Bug fixes
+
+- `print()` of an `epidist_multivariate` object writes its header as output rather than a message, so `suppressMessages()` no longer hides it.
 
 ## Package
 
 - The vignettes are built with `bookdown::html_vignette2`, which cuts the installed size of the package by about 4Mb.
-- Added `.claude` and `.jj` to `.Rbuildignore`, and cited the `sierra_leone_ebola_data` source by its DOI.
+- Cited the `sierra_leone_ebola_data` source by its DOI and corrected its column descriptions.
+- Removed the unused `BH`, `Rcpp`, `RcppEigen`, `pkgdown` and `usethis` suggested dependencies.
 
 # epidist 0.5.0
 
@@ -242,7 +249,7 @@ As some features may change, the package is marked as experimental.
 We expect to release a stable 1.0.0 version shortly.
 
 The `epidist` package implements models for epidemiological delay distributions.
-It uses [`brms`](http://paulbuerkner.com/brms/) to perform Bayesian inference.
+It uses [`brms`](https://paulbuerkner.com/brms/) to perform Bayesian inference.
 
 One data format is currently available:
 
