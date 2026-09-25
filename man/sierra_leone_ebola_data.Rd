@@ -5,12 +5,11 @@
 \alias{sierra_leone_ebola_data}
 \title{Ebola linelist data from Fang et al. (2016)}
 \format{
-A \code{tibble} with 8,358 rows and 8 columns:
+A \code{tibble} with 8,358 rows and 7 columns:
 \describe{
 \item{id}{Unique identification number for the case}
-\item{name}{Name as character, omitted}
 \item{age}{Age as numeric}
-\item{sex}{Sex as character, either "F", "M" or NA}
+\item{sex}{Sex as character, either "Female", "Male" or NA}
 \item{date_of_symptom_onset}{The date symptoms began}
 \item{date_of_sample_tested}{The date the sample was tested}
 \item{district}{The district (ADM2)}
