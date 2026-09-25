@@ -1,12 +1,8 @@
-# Code copied from citation()
-author <- meta$`Authors@R`
-if (length(author)) {
-    aar <- .read_authors_at_R_field(author)
-    author <- Filter(function(e) {
-        !(is.null(e$given) && is.null(e$family)) && !is.na(match("aut",
-            e$role))
-    }, aar)
-}
+# The authors of the package, without contributors
+author <- eval(str2lang(meta$`Authors@R`))
+author <- author[vapply(
+  author, function(e) "aut" %in% e$role, logical(1)
+)]
 
 # DESCRIPTION has no Date field, so take the year CRAN stamps on release and
 # fall back to the current year for a development install.
