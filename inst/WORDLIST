@@ -1,7 +1,9 @@
 ADM
 ADVI
+Arel
 Bahadur
 Bundibugyo
+Bundock
 CMD
 CRAN's
 Charniga
@@ -38,6 +40,7 @@ SamuelBrand
 Softmax
 TimTaylor
 Unif
+Vehtari
 allcontributors
 andv
 athowes
@@ -51,6 +54,7 @@ cdf
 cdot
 cfrnow
 cherz
+claude
 cli
 cmdstanr
 coef
@@ -89,6 +93,7 @@ kgostic
 knitr
 lceil
 lfloor
+lifecycle
 lik
 linelist
 lockfile

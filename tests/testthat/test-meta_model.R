@@ -820,6 +820,28 @@ test_that(".meta_row_log_lik rejects a draw whose implied moments overflow", {
   }
 })
 
+test_that(".meta_row_log_lik leaves the random number stream alone", {
+  # The distribution functions come from stats, so the primary censored
+  # distribution function is called without validation. Validation draws
+  # random points on every call, which would tie a seeded run to the number
+  # of likelihood evaluations.
+  args <- list(meanlog = 1.6, sdlog = 0.6)
+  slots <- list(
+    lower = 0, obs_type = 2L, study_n = 100L, trunc_adjusted = 0L,
+    cens_adjusted = 2L, cutoff = 30, pwindow = 1, swindow = 1, value = 5,
+    report_se = 0, quantile_p = 0, growth_rate = 0.1, trunc_design = 0L,
+    group_value = 5
+  )
+  withr::local_seed(101)
+  expected <- stats::runif(1)
+  for (cens_adjusted in c(0L, 2L, 4L)) {
+    slots$cens_adjusted <- cens_adjusted
+    withr::local_seed(101)
+    expect_true(is.finite(.meta_row_log_lik(slots, "plnorm", args)))
+    expect_identical(stats::runif(1), expected)
+  }
+})
+
 test_that("the distribution functions sever nodes deep in the lower tail", {
   # primarycensored's Stan lcdf has a finite value with a NaN gradient deep
   # in the lower tail of a narrow delay, where every grid and quadrature path

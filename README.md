@@ -4,7 +4,7 @@
 <!-- badges: start -->
 
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html#maturing)
 [![R-CMD-check](https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/epinowcast/epidist/branch/main/graph/badge.svg)](https://app.codecov.io/gh/epinowcast/epidist)
@@ -257,6 +257,7 @@ specification. Contributions of any kind are welcome!
 <a href="https://github.com/epinowcast/epidist/commits?author=seabbs">seabbs</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=athowes">athowes</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=parksw3">parksw3</a>,
+<a href="https://github.com/epinowcast/epidist/commits?author=claude">claude</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=sbfnk">sbfnk</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=cherz4">cherz4</a>,
 <a href="https://github.com/epinowcast/epidist/commits?author=damonbayer">damonbayer</a>,
