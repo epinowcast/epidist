@@ -1489,21 +1489,18 @@ test_that("epidist_meta_leave_one_out refits a meta model without each study in 
   expect_identical(nrow(out), 2L * length(studies))
   expect_named(out, c(
     "study", ".row", "summary", "estimate", "lower", "upper",
-    "full_estimate", "full_lower", "full_upper", "shift", "influential"
+    "full_estimate", "full_lower", "full_upper",
+    "difference", "difference_lower", "difference_upper"
   ))
   expect_identical(unique(out$study), studies)
   expect_identical(out$summary, rep(c("mean", "sd"), times = length(studies)))
   expect_true(all(out$.row == 1L))
   expect_type(out$estimate, "double")
-  expect_type(out$shift, "double")
-  expect_type(out$influential, "logical")
   expect_true(all(out$lower <= out$estimate))
   expect_true(all(out$estimate <= out$upper))
-  expect_true(all(is.finite(out$shift)))
-  expect_identical(
-    out$influential,
-    out$estimate < out$full_lower | out$estimate > out$full_upper
-  )
+  expect_identical(out$difference, out$estimate - out$full_estimate)
+  expect_true(all(out$difference_lower <= out$difference))
+  expect_true(all(out$difference <= out$difference_upper))
   # The full fit is the same for every held out study
   expect_length(unique(out$full_estimate[out$summary == "mean"]), 1L)
   expect_length(unique(out$full_estimate[out$summary == "sd"]), 1L)

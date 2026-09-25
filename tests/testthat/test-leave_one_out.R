@@ -102,8 +102,7 @@ test_that(".leave_one_out_compare flags held out medians outside the interval", 
     summary = c("mean", "sd"),
     estimate = c(10, 4),
     lower = c(9, 3),
-    upper = c(11, 5),
-    posterior_sd = c(0.5, 0.5)
+    upper = c(11, 5)
   )
   held <- tibble::tibble(
     study = rep(c("A", "B"), each = 2),
@@ -111,21 +110,23 @@ test_that(".leave_one_out_compare flags held out medians outside the interval", 
     summary = rep(c("mean", "sd"), 2),
     estimate = c(10.5, 4.25, 12, 3.75),
     lower = c(9, 3, 10, 2),
-    upper = c(12, 5, 14, 5),
-    posterior_sd = c(0.8, 0.6, 1, 0.7)
+    upper = c(12, 5, 14, 5)
   )
   out <- .leave_one_out_compare(held, full)
   expect_s3_class(out, "tbl_df")
   expect_named(out, c(
     "study", ".row", "summary", "estimate", "lower", "upper",
-    "full_estimate", "full_lower", "full_upper", "shift", "influential"
+    "full_estimate", "full_lower", "full_upper",
+    "difference", "difference_lower", "difference_upper"
   ))
   expect_identical(out$study, held$study)
   expect_identical(out$full_estimate, rep(c(10, 4), 2))
   expect_identical(out$full_lower, rep(c(9, 3), 2))
   expect_identical(out$full_upper, rep(c(11, 5), 2))
-  expect_identical(out$shift, c(1, 0.5, 4, -0.5))
-  expect_identical(out$influential, c(FALSE, FALSE, TRUE, FALSE))
+  # The refit posterior relative to the full fit's median
+  expect_identical(out$difference, c(0.5, 0.25, 2, -0.25))
+  expect_identical(out$difference_lower, c(-1, -1, 0, -2))
+  expect_identical(out$difference_upper, c(2, 1, 4, 1))
 })
 
 test_that(".leave_one_out_bind_predictors attaches predictors present in newdata", { # nolint: line_length_linter.
