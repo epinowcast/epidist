@@ -159,3 +159,42 @@ test_that("the gengamma Stan density and distribution function match flexsurv", 
     tolerance = 1e-8
   )
 })
+
+test_that("the gengamma Stan distribution function stays finite deep in the lower tail", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_not_installed("flexsurv")
+  # The distribution function underflows to zero at each of these points. A
+  # log distribution function of minus infinity in the latent model's
+  # truncation adjustment makes the log posterior plus infinity.
+  y <- c(2, 2, 20)
+  mu <- c(5, 5, 48)
+  shape <- c(5, 1, 5000)
+  k <- c(100, 400, 7480)
+  code <- paste(
+    "functions {", .stan_chunk(file.path("family", "gengamma.stan")), "}",
+    "data { int N; vector[N] y; vector[N] mu; vector[N] shape;",
+    "vector[N] k; }",
+    "generated quantities {",
+    "vector[N] lcdf;",
+    "for (n in 1:N) {",
+    "lcdf[n] = gengamma_lcdf(y[n:n] | mu[n:n], shape[n], k[n]);",
+    "}",
+    "}",
+    sep = "\n"
+  )
+  fit <- suppressMessages(rstan::sampling(
+    rstan::stan_model(model_code = code),
+    data = list(N = length(y), y = y, mu = mu, shape = shape, k = k),
+    algorithm = "Fixed_param", chains = 1, iter = 1, warmup = 0, refresh = 0
+  ))
+  draws <- posterior::as_draws_matrix(fit)
+  lcdf <- as.numeric(draws[1, paste0("lcdf[", seq_along(y), "]")])
+  log_x <- shape * log(y / mu)
+  expected <- c(
+    pgamma(exp(log_x[1:2]), k[1:2], log.p = TRUE),
+    # The limit as the argument of the gamma distribution function goes to 0
+    k[3] * log_x[3] - lgamma(k[3] + 1)
+  )
+  expect_true(all(is.finite(lcdf)))
+  expect_equal(lcdf, expected, tolerance = 1e-8)
+})
