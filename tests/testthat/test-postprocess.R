@@ -190,9 +190,10 @@ test_that(".analytic_delay_summaries gives the gengamma quantile and density", {
   d <- list(mu = c(1.8, 2.1), sigma = c(0.5, 0.7), Q = c(1.1, 0.9))
   gengamma <- .analytic_delay_summaries("gengamma")
   expect_identical(gengamma$dpars, c("mu", "sigma", "Q"))
-  expect_identical(
+  expect_equal(
     gengamma$quantile(d, 0.5),
-    flexsurv::qgengamma(0.5, mu = d$mu, sigma = d$sigma, Q = d$Q)
+    flexsurv::qgengamma(0.5, mu = d$mu, sigma = d$sigma, Q = d$Q),
+    tolerance = 1e-10
   )
   # The plotting of a delay distribution needs the density as well as the
   # quantile, so a family missing one is only found when a plot is drawn.
@@ -554,9 +555,10 @@ test_that("add_summaries adds the closed form summaries of a gengamma", {
   expect_equal(out$mean[1], 6, tolerance = 1e-10)
   expect_equal(out$sd[1], sqrt(2) * 3, tolerance = 1e-10)
   expect_equal(out$q50[1], stats::qgamma(0.5, 2, scale = 3), tolerance = 1e-10)
-  expect_identical(
+  expect_equal(
     out$q50[2],
-    flexsurv::qgengamma(0.5, mu = 1.6, sigma = 0.6, Q = 1.2)
+    flexsurv::qgengamma(0.5, mu = 1.6, sigma = 0.6, Q = 1.2),
+    tolerance = 1e-10
   )
   set.seed(1)
   sampled <- add_summaries(

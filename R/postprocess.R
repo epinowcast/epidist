@@ -641,12 +641,9 @@ add_summaries <- function(
 
 #' Analytic delay summaries for the families that have them
 #'
-#' Each element gives the distributional parameters the solution needs and
-#' functions of them returning the mean, the standard deviation, the quantile
-#' function and the density of the delay distribution. The parameters are the
-#' `brms` parameters of the family. The generalised gamma moments follow from
-#' \eqn{E[T^r] = \theta^r \Gamma(k + r / a) / \Gamma(k)} in its Stacy form,
-#' with scale \eqn{\theta}, shape \eqn{a} and \eqn{k}, see [gengamma()].
+#' Each gives the `brms` parameters of the family and functions of them
+#' returning the mean, the standard deviation, the quantile function and the
+#' density of the delay distribution, built by [.analytic_family()].
 #'
 #' @param name The name of a delay distribution family.
 #'
@@ -655,38 +652,38 @@ add_summaries <- function(
 #' @keywords internal
 .analytic_delay_summaries <- function(name) {
   return(switch(name,
-    lognormal = list(
+    lognormal = .analytic_family(
       dpars = c("mu", "sigma"),
+      dist = "plnorm",
+      natural = function(d) {
+        return(list(meanlog = d$mu, sdlog = d$sigma))
+      },
       mean = function(d) {
         return(exp(d$mu + d$sigma^2 / 2))
       },
       sd = function(d) {
         return(exp(d$mu + d$sigma^2 / 2) * sqrt(exp(d$sigma^2) - 1))
-      },
-      quantile = function(d, p) {
-        return(stats::qlnorm(p, meanlog = d$mu, sdlog = d$sigma))
-      },
-      density = function(d, x) {
-        return(stats::dlnorm(x, meanlog = d$mu, sdlog = d$sigma))
       }
     ),
-    gamma = list(
+    gamma = .analytic_family(
       dpars = c("mu", "shape"),
+      dist = "pgamma",
+      natural = function(d) {
+        return(list(shape = d$shape, rate = d$shape / d$mu))
+      },
       mean = function(d) {
         return(d$mu)
       },
       sd = function(d) {
         return(d$mu / sqrt(d$shape))
-      },
-      quantile = function(d, p) {
-        return(stats::qgamma(p, shape = d$shape, rate = d$shape / d$mu))
-      },
-      density = function(d, x) {
-        return(stats::dgamma(x, shape = d$shape, rate = d$shape / d$mu))
       }
     ),
-    weibull = list(
+    weibull = .analytic_family(
       dpars = c("mu", "shape"),
+      dist = "pweibull",
+      natural = function(d) {
+        return(list(shape = d$shape, scale = d$mu / gamma(1 + 1 / d$shape)))
+      },
       mean = function(d) {
         return(d$mu)
       },
@@ -694,24 +691,14 @@ add_summaries <- function(
         return(
           d$mu * sqrt(gamma(1 + 2 / d$shape) / gamma(1 + 1 / d$shape)^2 - 1)
         )
-      },
-      quantile = function(d, p) {
-        return(stats::qweibull(
-          p,
-          shape = d$shape,
-          scale = d$mu / gamma(1 + 1 / d$shape)
-        ))
-      },
-      density = function(d, x) {
-        return(stats::dweibull(
-          x,
-          shape = d$shape,
-          scale = d$mu / gamma(1 + 1 / d$shape)
-        ))
       }
     ),
-    gengamma = list(
+    gengamma = .analytic_family(
       dpars = c("mu", "sigma", "Q"),
+      dist = "pgengamma.orig",
+      natural = function(d) {
+        return(.gengamma_stacy(d$mu, d$sigma, d$Q))
+      },
       mean = function(d) {
         s <- .gengamma_stacy(d$mu, d$sigma, d$Q)
         return(.gengamma_mean(s$scale, s$shape, s$k))
@@ -719,26 +706,39 @@ add_summaries <- function(
       sd = function(d) {
         s <- .gengamma_stacy(d$mu, d$sigma, d$Q)
         return(.gengamma_sd(s$scale, s$shape, s$k))
-      },
-      quantile = function(d, p) {
-        .require_flexsurv()
-        return(flexsurv::qgengamma(
-          p,
-          mu = d$mu, sigma = d$sigma, Q = d$Q
-        ))
-      },
-      density = function(d, x) {
-        .require_flexsurv()
-        # `flexsurv::dgengamma()` is not a number at a delay of zero, where
-        # the Stacy form gives zero
-        s <- .gengamma_stacy(d$mu, d$sigma, d$Q)
-        return(flexsurv::dgengamma.orig(
-          x,
-          shape = s$shape, scale = s$scale, k = s$k
-        ))
       }
     ),
     NULL
+  ))
+}
+
+#' Build the analytic delay summaries of a family
+#'
+#' @param dpars The `brms` parameters of the family.
+#'
+#' @param dist The distribution function name, as used by [.pdist()].
+#'
+#' @param natural A function of the `brms` parameters returning the named
+#'  arguments of the distribution's R functions.
+#'
+#' @param mean,sd Functions of the `brms` parameters returning the mean and
+#'  the standard deviation.
+#'
+#' @returns A list with `dpars` and the functions `mean(d)`, `sd(d)`,
+#'  `quantile(d, p)` and `density(d, x)` of the `brms` parameters `d`.
+#'
+#' @keywords internal
+.analytic_family <- function(dpars, dist, natural, mean, sd) {
+  return(list(
+    dpars = dpars,
+    mean = mean,
+    sd = sd,
+    quantile = function(d, p) {
+      return(do.call(.qdist(dist), c(list(p), natural(d))))
+    },
+    density = function(d, x) {
+      return(do.call(.ddist(dist), c(list(x), natural(d))))
+    }
   ))
 }
 
