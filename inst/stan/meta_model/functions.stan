@@ -1223,13 +1223,23 @@
     return fmin(fmax((at_d - at_start) / pwindow_width, 0), 1);
   }
 
+  /** Quantile function of a lognormal delay with params [meanlog, sdlog]. */
+  real meta_quantile_lognormal(real p, array[] real params) {
+    return exp(params[1] + params[2] * inv_Phi(p));
+  }
+
+  /** Quantile function of a weibull delay with params [shape, scale]. */
+  real meta_quantile_weibull(real p, array[] real params) {
+    return params[2] * pow(-log1m(p), 1 / params[1]);
+  }
+
   /** Quantile function of the delay distribution where it has a closed form. */
   real meta_family_quantile(real p, array[] real params) {
     if (dist_id == 1) {
-      return exp(params[1] + params[2] * inv_Phi(p));
+      return meta_quantile_lognormal(p, params);
     }
     if (dist_id == 3) {
-      return params[2] * pow(-log1m(p), 1 / params[1]);
+      return meta_quantile_weibull(p, params);
     }
     reject("meta_family_quantile: this family has no closed form quantile ",
            "function.");
