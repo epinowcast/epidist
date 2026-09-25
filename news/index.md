@@ -935,6 +935,13 @@
   and refreshed by hand when `DESCRIPTION` changes. It is no longer in
   `.Rbuildignore`, so it ships in the package tarball. Closes
   [\#707](https://github.com/epinowcast/epidist/issues/707).
+- Fixed the `update-citation-cff` workflow and committed a generated
+  `CITATION.cff`. The workflow had an invalid expression, so it never
+  started, and its push trigger never matched a branch. It now runs on
+  `main` and opens a pull request when the file changes. The file is
+  built without the dependency list, so it does not change with the
+  versions installed on the runner. Closes
+  [\#751](https://github.com/epinowcast/epidist/issues/751).
 
 ### Bug fixes
 
