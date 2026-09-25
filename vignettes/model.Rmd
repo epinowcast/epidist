@@ -470,9 +470,6 @@ Summing over the grid gives the moments, and its cumulative sum gives $G_0$.
 For quantile rows $G$ is continuity corrected by interpolating $G_0$ linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise lands on a jump.
 Reported quantiles without a standard error use Equation \@ref(eq:meta-quantile-crossing) or \@ref(eq:meta-quantile-box) on $G_0$ instead.
 The reported value is itself rounded to the grid, so a bias remains that does not shrink with $n$.
-It stays under 4% on the mean and 9% on the standard deviation once the reported quantiles sit twenty five or more cells above the smallest delay counted, and reaches tens of percent on both within ten, so a coarsely resolved delay is better fitted through its mean and standard deviation where reported.
-Refitting the median and interquartile range of a lognormal delay of mean 5.9 days, on daily windows with an observation time of 12 days, recovers a delay mean 27% high and a standard deviation 69% high, while the same study's mean and standard deviation recover the truth.
-Check that `swindow` is the resolution the study worked at.
 
 Code 1, full adjustment, reported the moments of $f(\cdot \, ; \theta)$ itself, right truncated at $D$,
 $$
@@ -535,7 +532,7 @@ Weighting each cell at its lower edge instead is exact only when $w_p = w_s$ and
 Treating the partial window as complete put the mean 27% low for weekly primary and secondary windows with $A = 30$ at $r = 0.2$.
 
 One residual remains.
-Equation \@ref(eq:meta-uniform-moments) keeps the smooth weight, because the follow up available to a primary event is only known to within its window, and at $w_p = 7$ with $A = 28$ and a delay of mean 4.6 days its mean is 0.8% high at $r = 0.05$ and 2.6% high at $r = 0.2$.
+Equation \@ref(eq:meta-uniform-moments) keeps the smooth weight, because the follow up available to a primary event is only known to within its window.
 The residual grows with $r$ and as $w_p$ grows towards $A$.
 
 ### An estimated growth rate {#estimated-growth}
