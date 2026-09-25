@@ -298,3 +298,138 @@ test_that(".validate_data returns the data invisibly", {
   data <- data.frame(y = 1:3, a = 4:6)
   expect_identical(.validate_data(data, bterms), data)
 })
+
+# The delay families whose `brms` post-processing functions `epidist`
+# replaces, with the distributional parameter besides `mu` of each.
+brms_delay_families <- list(
+  lognormal = "sigma",
+  gamma = "shape",
+  weibull = "shape",
+  exponential = NULL
+)
+
+# A `brms` prep object with random distributional parameters. `aux_matrix`
+# gives the second parameter one value per draw and observation, as a
+# predicted parameter has, rather than one value per draw.
+random_family_prep <- function(family, ndraws = 20, nobs = 4,
+                               aux_matrix = TRUE) {
+  dpars <- list(
+    mu = matrix(stats::rlnorm(ndraws * nobs, 1, 0.3), ndraws, nobs)
+  )
+  aux <- brms_delay_families[[family]]
+  if (!is.null(aux)) {
+    dpars[[aux]] <- if (aux_matrix) {
+      matrix(stats::rlnorm(ndraws * nobs, 0, 0.3), ndraws, nobs)
+    } else {
+      stats::rlnorm(ndraws, 0, 0.3)
+    }
+  }
+  y <- stats::rlnorm(nobs, 1, 0.5)
+  prep <- list(
+    ndraws = ndraws,
+    nobs = nobs,
+    dpars = dpars,
+    data = list(Y = y)
+  )
+  class(prep) <- "brmsprep"
+  return(prep)
+}
+
+# Data set ups covering censoring, truncation and weights.
+family_prep_data <- function(prep, cens = NULL, lb = FALSE, ub = FALSE,
+                             weights = FALSE) {
+  y <- prep$data$Y
+  if (!is.null(cens)) {
+    prep$data$cens <- rep(cens, prep$nobs)
+    prep$data$rcens <- y + 1
+  }
+  if (lb) {
+    prep$data$lb <- y / 2
+  }
+  if (ub) {
+    prep$data$ub <- 2 * y + 2
+  }
+  if (weights) {
+    prep$data$weights <- seq_len(prep$nobs) / 2
+  }
+  return(prep)
+}
+
+family_prep_settings <- expand.grid(
+  cens = c(NA, 0, 1, -1, 2),
+  lb = c(FALSE, TRUE),
+  ub = c(FALSE, TRUE),
+  weights = c(FALSE, TRUE)
+)
+
+brms_family_fn <- function(prefix, family) {
+  return(utils::getFromNamespace(paste0(prefix, "_", family), "brms"))
+}
+
+test_that("epidist's log_lik functions match brms for every delay family", {
+  set.seed(101)
+  for (family in names(brms_delay_families)) {
+    ours <- .get_brms_fn("log_lik", list(family = family))
+    theirs <- brms_family_fn("log_lik", family)
+    for (aux_matrix in c(TRUE, FALSE)) {
+      base <- random_family_prep(family, aux_matrix = aux_matrix)
+      for (s in seq_len(nrow(family_prep_settings))) {
+        setting <- family_prep_settings[s, ]
+        cens <- if (is.na(setting$cens)) NULL else setting$cens
+        prep <- family_prep_data(
+          base,
+          cens = cens, lb = setting$lb, ub = setting$ub,
+          weights = setting$weights
+        )
+        for (i in seq_len(prep$nobs)) {
+          expect_identical(
+            ours(i = i, prep = prep), theirs(i = i, prep = prep),
+            info = paste(family, s, i, aux_matrix)
+          )
+        }
+      }
+    }
+  }
+})
+
+test_that("epidist's posterior_predict functions match brms for every delay family", { # nolint: line_length_linter.
+  for (family in names(brms_delay_families)) {
+    ours <- .get_brms_fn("posterior_predict", list(family = family))
+    theirs <- brms_family_fn("posterior_predict", family)
+    for (aux_matrix in c(TRUE, FALSE)) {
+      set.seed(202)
+      base <- random_family_prep(family, aux_matrix = aux_matrix)
+      for (s in which(is.na(family_prep_settings$cens))) {
+        setting <- family_prep_settings[s, ]
+        prep <- family_prep_data(
+          base,
+          lb = setting$lb, ub = setting$ub, weights = setting$weights
+        )
+        for (i in seq_len(prep$nobs)) {
+          set.seed(i)
+          expected <- theirs(i = i, prep = prep)
+          set.seed(i)
+          expect_identical(
+            ours(i = i, prep = prep), expected,
+            info = paste(family, s, i, aux_matrix)
+          )
+        }
+      }
+    }
+  }
+})
+
+test_that("epidist's posterior_epred functions match brms for every delay family", { # nolint: line_length_linter.
+  set.seed(303)
+  for (family in names(brms_delay_families)) {
+    ours <- .get_brms_fn("posterior_epred", list(family = family))
+    theirs <- brms_family_fn("posterior_epred", family)
+    for (aux_matrix in c(TRUE, FALSE)) {
+      prep <- random_family_prep(family, aux_matrix = aux_matrix)
+      expect_identical(
+        ours(prep = prep), theirs(prep = prep),
+        info = paste(family, aux_matrix)
+      )
+    }
+  }
+})
