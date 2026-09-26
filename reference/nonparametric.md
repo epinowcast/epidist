@@ -120,6 +120,15 @@ argument of
 
 ## See also
 
+The non-parametric section of
+[`vignette("model")`](https://epidist.epinowcast.org/articles/model.md)
+for the model,
+[`vignette("nonparametric")`](https://epidist.epinowcast.org/articles/nonparametric.md)
+for a worked example, and the `primarycensored` article on fitting
+non-parametric delays
+(<https://primarycensored.epinowcast.org/articles/fitting-nonparametric-delays.html>)
+for the censored likelihood.
+
 Other family:
 [`epidist_family()`](https://epidist.epinowcast.org/reference/epidist_family.md),
 [`epidist_family_model()`](https://epidist.epinowcast.org/reference/epidist_family_model.md),

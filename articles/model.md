@@ -299,6 +299,53 @@ specific distributions, see
 and
 [`vignette("analytic-solutions", package = "primarycensored")`](https://primarycensored.epinowcast.org/articles/analytic-solutions.html).
 
+### 4.1 A non-parametric delay
+
+The
+[`nonparametric()`](https://epidist.epinowcast.org/reference/nonparametric.md)
+family, available for the marginal and meta models, makes no assumption
+about the shape of \\F\\. The delay lies on a grid of \\K\\ bins with
+increasing boundaries \\b_0, b_1, \dots, b_K\\, and all the probability
+of bin \\k\\ sits at its right edge \\b_k\\. The distribution is written
+in terms of the discrete time hazard of each bin, \\ h_k =
+\mathbb{P}(\text{the delay ends in bin } k \mid \text{it has not ended
+in bins } 1, \dots, k - 1), \\ with \\h_K = 1\\ so that every delay ends
+by \\b_K\\. The probability of each bin and the distribution function
+follow as \\ f_k = h_k \prod\_{j \< k} (1 - h_j), \qquad F(t) = \sum\_{k
+: b_k \leq t} f_k. \\ The logit hazards of the other bins are a linear
+predictor over the bins, \\ \text{logit}(h_k) = \mu + \sum\_{q} B\_{kq}
+\theta_q, \qquad k = 1, \dots, K - 1, \\ where \\B\\ is the basis of the
+`formula` argument of
+[`nonparametric()`](https://epidist.epinowcast.org/reference/nonparametric.md),
+evaluated on the right edge of each bin and centred and scaled over the
+bins, so \\\mu\\ is the mean logit hazard. The default formula,
+`~ s(delay)`, is a thin plate regression spline over the delay, which
+smooths the hazard over neighbouring bins. `~ (1 | bin)` instead gives
+each bin its own hazard around \\\mu\\. The coefficients of unpenalised
+terms, such as the linear part of a spline, are estimated directly. The
+coefficients of a penalised term \\j\\, such as the wiggly part of a
+spline or a random intercept per bin, are \\\theta_q = \sigma_j z_q\\
+with \\z_q \sim \mathcal{N}(0, 1)\\, the non-centred form `brms` uses
+for smooths and random effects. Each unpenalised column and each
+penalised term is scaled, so an unpenalised coefficient and a
+\\\sigma_j\\ are on the scale of the logit hazard. Both \\\mu\\ and each
+\\\theta_q\\ are distributional parameters, so each takes a `brms`
+formula. A covariate in the formula of \\\mu\\ shifts the logit hazard
+of every bin by the same amount, a proportional odds model for the
+hazard, while a covariate in the formula of a \\\theta_q\\ changes the
+shape of the hazard over the bins.
+
+Because \\F\\ is a step function, the integral over the primary event
+window in the double censoring probability above is a sum over the bins,
+which `primarycensored` evaluates with its discrete hazard distribution
+([Abbott et al. 2025](#ref-primarycensored)). The right truncation
+adjustment is the same as for any other family. The `primarycensored`
+article on [fitting non-parametric
+delays](https://primarycensored.epinowcast.org/articles/fitting-nonparametric-delays.html)
+derives the censored likelihood of this distribution, and
+[`vignette("nonparametric")`](https://epidist.epinowcast.org/articles/nonparametric.md)
+shows the family in use.
+
 ## 5 The meta model
 
 Published delay estimates are usually summary statistics, and the

@@ -323,6 +323,37 @@ The generalised gamma delay is provided by the <code><a href="../reference/genga
 In addition, identical observations can be aggregated and the likelihood computed once per unique combination of delay, censoring windows, and covariates.
 Together these make the marginal model substantially more efficient than the latent model, particularly for larger datasets with daily-censored data where many observations share the same structure.</p>
 <p>For the mathematical details of primary event censored distributions, including the survival function derivation and closed-form solutions for specific distributions, see <code><a href="https://primarycensored.epinowcast.org/articles/why-it-works.html" class="external-link">vignette("why-it-works", package = "primarycensored")</a></code> and <code><a href="https://primarycensored.epinowcast.org/articles/analytic-solutions.html" class="external-link">vignette("analytic-solutions", package = "primarycensored")</a></code>.</p>
+<div class="section level3" number="4.1">
+<h3 id="nonparametric">
+<span class="header-section-number">4.1</span> A non-parametric delay<a class="anchor" aria-label="anchor" href="#nonparametric"></a>
+</h3>
+<p>The <code><a href="../reference/nonparametric.html">nonparametric()</a></code> family, available for the marginal and meta models, makes no assumption about the shape of <span class="math inline">\(F\)</span>.
+The delay lies on a grid of <span class="math inline">\(K\)</span> bins with increasing boundaries <span class="math inline">\(b_0, b_1, \dots, b_K\)</span>, and all the probability of bin <span class="math inline">\(k\)</span> sits at its right edge <span class="math inline">\(b_k\)</span>.
+The distribution is written in terms of the discrete time hazard of each bin,
+<span class="math display">\[
+h_k = \mathbb{P}(\text{the delay ends in bin } k \mid \text{it has not ended in bins } 1, \dots, k - 1),
+\]</span>
+with <span class="math inline">\(h_K = 1\)</span> so that every delay ends by <span class="math inline">\(b_K\)</span>.
+The probability of each bin and the distribution function follow as
+<span class="math display">\[
+f_k = h_k \prod_{j &lt; k} (1 - h_j), \qquad F(t) = \sum_{k : b_k \leq t} f_k.
+\]</span>
+The logit hazards of the other bins are a linear predictor over the bins,
+<span class="math display">\[
+\text{logit}(h_k) = \mu + \sum_{q} B_{kq} \theta_q, \qquad k = 1, \dots, K - 1,
+\]</span>
+where <span class="math inline">\(B\)</span> is the basis of the <code>formula</code> argument of <code><a href="../reference/nonparametric.html">nonparametric()</a></code>, evaluated on the right edge of each bin and centred and scaled over the bins, so <span class="math inline">\(\mu\)</span> is the mean logit hazard.
+The default formula, <code>~ s(delay)</code>, is a thin plate regression spline over the delay, which smooths the hazard over neighbouring bins.
+<code>~ (1 | bin)</code> instead gives each bin its own hazard around <span class="math inline">\(\mu\)</span>.
+The coefficients of unpenalised terms, such as the linear part of a spline, are estimated directly.
+The coefficients of a penalised term <span class="math inline">\(j\)</span>, such as the wiggly part of a spline or a random intercept per bin, are <span class="math inline">\(\theta_q = \sigma_j z_q\)</span> with <span class="math inline">\(z_q \sim \mathcal{N}(0, 1)\)</span>, the non-centred form <code>brms</code> uses for smooths and random effects.
+Each unpenalised column and each penalised term is scaled, so an unpenalised coefficient and a <span class="math inline">\(\sigma_j\)</span> are on the scale of the logit hazard.
+Both <span class="math inline">\(\mu\)</span> and each <span class="math inline">\(\theta_q\)</span> are distributional parameters, so each takes a <code>brms</code> formula.
+A covariate in the formula of <span class="math inline">\(\mu\)</span> shifts the logit hazard of every bin by the same amount, a proportional odds model for the hazard, while a covariate in the formula of a <span class="math inline">\(\theta_q\)</span> changes the shape of the hazard over the bins.</p>
+<p>Because <span class="math inline">\(F\)</span> is a step function, the integral over the primary event window in the double censoring probability above is a sum over the bins, which <code>primarycensored</code> evaluates with its discrete hazard distribution <span class="citation">(<a href="#ref-primarycensored">Abbott et al. 2025</a>)</span>.
+The right truncation adjustment is the same as for any other family.
+The <code>primarycensored</code> article on <a href="https://primarycensored.epinowcast.org/articles/fitting-nonparametric-delays.html" class="external-link">fitting non-parametric delays</a> derives the censored likelihood of this distribution, and <code><a href="../articles/nonparametric.html">vignette("nonparametric")</a></code> shows the family in use.</p>
+</div>
 </div>
 <div class="section level2" number="5">
 <h2 id="the-meta-model">

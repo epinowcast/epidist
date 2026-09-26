@@ -27,7 +27,11 @@ formula shifts the logit hazard of every bin. Each coefficient of the
 hazard formula is a distributional parameter too, so a covariate in its
 formula changes the shape of the delay.
 [`?nonparametric`](https://epidist.epinowcast.org/reference/nonparametric.md)
-gives the details.
+gives the details, and the non-parametric section of
+[`vignette("model")`](https://epidist.epinowcast.org/articles/model.md)
+gives the model in full. `primarycensored` derives the censored
+likelihood of the distribution in its article on [fitting non-parametric
+delays](https://primarycensored.epinowcast.org/articles/fitting-nonparametric-delays.html).
 
 ``` r
 

@@ -108,7 +108,8 @@ The default is a spline over the delay, <code>~ s(delay)</code>, so neighbouring
 <code>~ (1 | bin)</code> gives each bin its own hazard around the mean, and <code>~ delay</code> a logit hazard that changes linearly with the delay.
 The <code>mu</code> parameter is the mean logit hazard, so a covariate in its formula shifts the logit hazard of every bin.
 Each coefficient of the hazard formula is a distributional parameter too, so a covariate in its formula changes the shape of the delay.
-<code><a href="../reference/nonparametric.html">?nonparametric</a></code> gives the details.</p>
+<code><a href="../reference/nonparametric.html">?nonparametric</a></code> gives the details, and the non-parametric section of <code><a href="../articles/model.html">vignette("model")</a></code> gives the model in full.
+<code>primarycensored</code> derives the censored likelihood of the distribution in its article on <a href="https://primarycensored.epinowcast.org/articles/fitting-nonparametric-delays.html" class="external-link">fitting non-parametric delays</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epidist.epinowcast.org/">epidist</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
