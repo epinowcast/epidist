@@ -22,11 +22,13 @@ contributors](https://img.shields.io/github/contributors/epinowcast/epidist)](ht
 Understanding and accurately estimating epidemiological delay
 distributions is important for public health policy. These estimates
 influence epidemic situational awareness, control strategies, and
-resource allocation. This package provides methods to address the key
-challenges in estimating these distributions, including truncation,
-interval censoring, and dynamical biases. These issues are frequently
+resource allocation. Provides methods to address the key challenges in
+estimating these distributions, including truncation, interval
+censoring, and dynamical biases, following Park et al. (2024)
+<doi:10.1101/2024.01.12.24301247> and Charniga et al. (2024)
+<doi:10.1371/journal.pcbi.1012520>. These issues are frequently
 overlooked, resulting in biased conclusions. Built on top of ‘brms’, it
-allows for flexible modelling including time-varying spatial components
+allows for flexible modelling including time-varying and spatial effects
 and partially pooled estimates of demographic characteristics.
 
 ## Quickstart
@@ -227,8 +229,8 @@ If using our methodology, or the methodology on which ours is based,
 please cite the relevant papers. This may include:
 
 - [Estimating epidemiological delay distributions for infectious
-  diseases](https://doi.org/10.1101/2024.01.12.24301247)
-  by Park *et al.* (2024) – if using the latent model
+  diseases](https://doi.org/10.1101/2024.01.12.24301247) by Park *et
+  al.* (2024) – if using the latent model
 - [Best practices for estimating and reporting epidemiological delay
   distributions of infectious diseases using public health surveillance
   and healthcare
