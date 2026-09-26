@@ -281,11 +281,12 @@ The logit hazards of the other bins are a linear predictor over the bins,
 $$
 \text{logit}(h_k) = \mu + \sum_{q} B_{kq} \theta_q, \qquad k = 1, \dots, K - 1,
 $$
-where $B$ is the basis of the `formula` argument of `nonparametric()`, evaluated on the right edge of each bin and centred and scaled over the bins, so $\mu$ is the mean logit hazard and each $\theta_q$ is on the scale of the logit hazard.
+where $B$ is the basis of the `formula` argument of `nonparametric()`, evaluated on the right edge of each bin and centred and scaled over the bins, so $\mu$ is the mean logit hazard.
 The default formula, `~ s(delay)`, is a thin plate regression spline over the delay, which smooths the hazard over neighbouring bins.
 `~ (1 | bin)` instead gives each bin its own hazard around $\mu$.
 The coefficients of unpenalised terms, such as the linear part of a spline, are estimated directly.
 The coefficients of a penalised term $j$, such as the wiggly part of a spline or a random intercept per bin, are $\theta_q = \sigma_j z_q$ with $z_q \sim \mathcal{N}(0, 1)$, the non-centred form `brms` uses for smooths and random effects.
+Each unpenalised column and each penalised term is scaled, so an unpenalised coefficient and a $\sigma_j$ are on the scale of the logit hazard.
 Both $\mu$ and each $\theta_q$ are distributional parameters, so each takes a `brms` formula.
 A covariate in the formula of $\mu$ shifts the logit hazard of every bin by the same amount, a proportional odds model for the hazard, while a covariate in the formula of a $\theta_q$ changes the shape of the hazard over the bins.
 
