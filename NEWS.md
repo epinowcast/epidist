@@ -57,7 +57,8 @@ See #79, #476 and #646.
 See #483.
 - Added `nonparametric()`, a delay distribution family with no parametric form, for the marginal and meta models.
 The delay sits on a grid of bins, with its probability at the right edge of each bin, and is written as the discrete time hazard of each bin, using the non-parametric distributions of `primarycensored`.
-The logit hazards are given by a formula over the bins, such as a spline over the delay (the default) or a random intercept per bin with `~ (1 | bin)`.
+The logit hazards are given by a formula over the bins, such as a spline over the delay or a random intercept per bin with `~ (1 | bin)`.
+The default is the spline, or the random intercept when fewer than three bins have a free hazard.
 Each coefficient of that formula is a distributional parameter, so it takes a `brms` formula and prior.
 A covariate in the `mu` formula shifts the logit hazard of every bin, a proportional odds model for the hazard, and a covariate in the formula of a coefficient changes the shape of the delay.
 In the meta model a study that fully adjusted for censoring can only report the mean and standard deviation of the whole delay, because the family has no density.
