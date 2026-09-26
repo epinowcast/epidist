@@ -1023,6 +1023,62 @@ marginaleffects::get_draws(phase_ratio) |>
 #> 2      unrecorded / post outbreak      0.591                  0.126
 ```
 
+## Does any one study drive the estimate? {#leave-one-out}
+
+`epidist_meta_leave_one_out()` refits the model once per study with that study removed.
+We compare the population level delay at the post outbreak reference level.
+
+
+``` r
+ebola_leave_one_out <- epidist_meta_leave_one_out(
+  fit_ebola,
+  newdata = filter(phase_grid, .data$phase == "post outbreak"),
+  refresh = ifelse(interactive(), 250, 0)
+)
+```
+
+`difference` is each refit's posterior relative to the full fit's median.
+
+
+``` r
+ebola_leave_one_out |>
+  select("study", "summary", starts_with("difference"))
+#> # A tibble: 58 × 5
+#>    study            summary difference difference_lower difference_upper
+#>    <chr>            <chr>        <dbl>            <dbl>            <dbl>
+#>  1 Xu 2016          mean       0.166             -0.989            1.58
+#>  2 Xu 2016          sd         0.0646            -0.906            1.17
+#>  3 Uyeki 2016       mean       0.00162           -1.01             1.26
+#>  4 Uyeki 2016       sd        -0.0231            -0.828            0.995
+#>  5 Senga 2016 (1)   mean       0.00901           -1.06             1.25
+#>  6 Senga 2016 (1)   sd        -0.00440           -0.873            0.942
+#>  7 Schieffelin 2014 mean      -0.0488            -1.14             1.23
+#>  8 Schieffelin 2014 sd        -0.0253            -0.929            0.962
+#>  9 Nanclares 2016   mean      -0.0180            -1.08             1.19
+#> 10 Nanclares 2016   sd         0.0287            -0.825            1.16
+#> # ℹ 48 more rows
+```
+
+
+``` r
+ggplot(ebola_leave_one_out) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_pointrange(
+    aes(
+      x = difference, xmin = difference_lower, xmax = difference_upper,
+      y = study
+    )
+  ) +
+  facet_wrap(vars(summary), scales = "free_x") +
+  labs(x = "Difference from the full fit (days)", y = "Study held out") +
+  theme_minimal()
+```
+
+<div class="figure">
+<img src="figures/meta-leave-one-out-1.png" alt="Posterior median and 95% interval of the delay mean and standard deviation with each study held out, relative to the full fit's median."  />
+<p class="caption">(\#fig:leave-one-out)Posterior median and 95% interval of the delay mean and standard deviation with each study held out, relative to the full fit's median.</p>
+</div>
+
 ## Comparing with a modern re-analysis of the same line list {#bdbv}
 
 `Rosello 2015 (3)` is the 2012 Isiro outbreak, and that line list has since been re-analysed in [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis) from the individual records, adjusting for double interval censoring.
