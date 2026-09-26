@@ -6,10 +6,8 @@ Biometrika
 Bundibugyo
 Bundock
 CMD
-CRAN's
 Charniga
 CmdStan
-CmdStan's
 CodeDepends
 Codecov
 Cov
@@ -32,15 +30,12 @@ Okabe
 PMF
 PSIS
 Poisson
-Prentice
 Quickstart
 Reparameterise
 Reweight
 RodrigoZepeda
 Rosello
 SamuelBrand
-Softmax
-Stacy
 TimTaylor
 Unif
 Vehtari
@@ -51,7 +46,6 @@ autodiff
 bdbv
 brms
 brms’
-buerkner
 burdon
 cdf
 cdot
@@ -66,7 +60,6 @@ cov
 cutoff
 cutoffs
 damonbayer
-datetime
 ddsynth
 discretise
 discretised
@@ -83,10 +76,8 @@ estimand
 estimand's
 estimands
 etc
-flexsurv
 frac
 ge
-gengamma
 ide
 infty
 int
@@ -96,14 +87,11 @@ jamesmbaazam
 jonathonmellor
 kcharniga
 kgostic
-knitr
 lceil
 lfloor
 lifecycle
 lik
 linelist
-lockfile
-lockstep
 logmean
 longmapsto
 lpdf
@@ -125,7 +113,6 @@ oswaldogressani
 parameterisations
 parameterised
 parksw
-paul
 pcbi
 pearsonca
 pkgdown
@@ -159,8 +146,8 @@ unclassed
 uncounting
 underflowed
 unnormalised
+unpenalised
 untruncated
 vdots
-viridis
 weibull
 zsusswein
