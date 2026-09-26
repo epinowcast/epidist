@@ -109,6 +109,12 @@ nonparametric(~ (1 | bin), boundaries = -1:10)
 nonparametric(~ s(delay, bs = "ps", k = 6), boundaries = c(-1:5, 7, 10))
 }
 \seealso{
+The non-parametric section of \code{vignette("model")} for the
+model, \code{vignette("nonparametric")} for a worked example, and the
+\code{primarycensored} article on fitting non-parametric delays
+(\url{https://primarycensored.epinowcast.org/articles/fitting-nonparametric-delays.html})
+for the censored likelihood.
+
 Other family:
 \code{\link[=epidist_family]{epidist_family()}},
 \code{\link[=epidist_family_model]{epidist_family_model()}},

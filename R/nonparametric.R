@@ -1,3 +1,4 @@
+# nolint start: line_length_linter.
 #' Non-parametric delay distribution family
 #'
 #' @description
@@ -94,6 +95,11 @@
 #' @returns A `brmsfamily` object for use as the `family` argument of
 #'  [epidist()].
 #'
+#' @seealso The non-parametric section of `vignette("model")` for the
+#'  model, `vignette("nonparametric")` for a worked example, and the
+#'  `primarycensored` article on fitting non-parametric delays
+#'  (\url{https://primarycensored.epinowcast.org/articles/fitting-nonparametric-delays.html})
+#'  for the censored likelihood.
 #' @family family
 #' @export
 #' @examples
@@ -117,6 +123,7 @@ nonparametric <- function(formula = NULL, boundaries = NULL) {
   }
   return(out)
 }
+# nolint end
 
 #' Check the hazard formula of the non-parametric family
 #'
