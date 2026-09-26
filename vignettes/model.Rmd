@@ -281,7 +281,7 @@ The logit hazards of the other bins are a linear predictor over the bins,
 $$
 \text{logit}(h_k) = \mu + \sum_{q} B_{kq} \theta_q, \qquad k = 1, \dots, K - 1,
 $$
-where $B$ is the basis of the `formula` argument of `nonparametric()`, evaluated on the right edge of each bin and centred over the bins, so $\mu$ is the mean logit hazard.
+where $B$ is the basis of the `formula` argument of `nonparametric()`, evaluated on the right edge of each bin and centred and scaled over the bins, so $\mu$ is the mean logit hazard and each $\theta_q$ is on the scale of the logit hazard.
 The default formula, `~ s(delay)`, is a thin plate regression spline over the delay, which smooths the hazard over neighbouring bins.
 `~ (1 | bin)` instead gives each bin its own hazard around $\mu$.
 The coefficients of unpenalised terms, such as the linear part of a spline, are estimated directly.
