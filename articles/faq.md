@@ -8,6 +8,8 @@ to respond promptly!
 
 Click to expand for code to reproduce the examples in this vignette
 
+Code
+
 ``` r
 
 library(epidist)
@@ -89,6 +91,8 @@ The function
 may be used to obtain a dataframe of MCMC draws for specified
 parameters.
 
+Code
+
 ``` r
 
 library(posterior)
@@ -113,6 +117,8 @@ posterior samples as random variables. This approach allows you to
 perform mathematical operations directly with posterior distributions
 while propagating uncertainty.
 
+Code
+
 ``` r
 
 library(posterior)
@@ -125,6 +131,8 @@ rv$b_Intercept
 
     ## rvar<500,2>[1] mean ± sd:
     ## [1] 1.6 ± 0.064
+
+Code
 
 ``` r
 
@@ -142,6 +150,8 @@ summary(mean_delay_loc0)
     ##   <chr>           <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
     ## 1 mean_delay_loc0  5.54   5.47 0.441 0.396  4.94  6.30  1.00     891.     658.
 
+Code
+
 ``` r
 
 summary(mean_delay_loc1)
@@ -151,6 +161,8 @@ summary(mean_delay_loc1)
     ##   variable         mean median    sd   mad    q5   q95  rhat ess_bulk ess_tail
     ##   <chr>           <dbl>  <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>    <dbl>    <dbl>
     ## 1 mean_delay_loc1  13.3   11.2  7.23  2.76  8.27  25.9  1.02     140.     133.
+
+Code
 
 ``` r
 
@@ -174,6 +186,8 @@ diagnostic plots. For example, the function
 [`bayesplot::mcmc_trace()`](https://mc-stan.org/bayesplot/reference/MCMC-traces.html)
 can be used to produce traceplots for specified parameters.
 
+Code
+
 ``` r
 
 library(bayesplot)
@@ -188,6 +202,8 @@ We also provide a function
 [`epidist_diagnostics()`](https://epidist.epinowcast.org/reference/epidist_diagnostics.md)
 which can be used to obtain common diagnostics used to assess the
 quality of a fitted model.
+
+Code
 
 ``` r
 
@@ -222,6 +238,8 @@ individual-level format (one row per observation) using
 Then, pass this expanded data to the `newdata` argument of
 [`pp_check()`](https://mc-stan.org/bayesplot/reference/pp_check.html).
 
+Code
+
 ``` r
 
 # Expand the aggregated data to individual-level data
@@ -237,6 +255,8 @@ data_expanded <- data |>
     ##   {'delay_lwr','delay_upr','delay_min','relative_obs_time','pwindow','swindow','n'},
     ##   but is missing elements {'n'}.
     ## ℹ Use the matching `as_epidist_*()` function to recreate the object.
+
+Code
 
 ``` r
 
@@ -304,6 +324,8 @@ For example, for the
 latent individual model, we suggest the following prior distributions
 for the `brms` `mu` and `sigma` intercept parameters:
 
+Code
+
 ``` r
 
 # Note that we export lognormal() as part of epidist hence no need for brms::
@@ -340,6 +362,8 @@ are mostly for internal use!)
 Here are the distributions on the delay distribution mean and standard
 deviation parameters that these prior distributions imply:
 
+Code
+
 ``` r
 
 set.seed(1)
@@ -352,6 +376,8 @@ fit_ppc <- epidist(
   backend = "cmdstanr"
 )
 ```
+
+Code
 
 ``` r
 
@@ -368,6 +394,8 @@ plot(pred, pars = c("mean", "sd")) +
 
 Figure 3: plot of chunk unnamed-chunk-9
 
+Code
+
 ``` r
 
 quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
@@ -375,6 +403,8 @@ quantile(pred$mean, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 
     ##         1%        10%        25%        50%        75%        90%        99%
     ##  0.3172760  0.8667011  1.6163277  3.2461963  6.6291746 12.0852973 34.0415723
+
+Code
 
 ``` r
 
@@ -387,10 +417,12 @@ quantile(pred$sd, c(0.01, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 ### How can I assess how sensitive the fitted posterior distribution is to the prior distribution used?
 
 We recommend use of the
-[`priorsense`](https://github.com/n-kall/priorsense) package
+[`priorsense`](https://github.com/stan-dev/priorsense) package
 ([Kallioinen et al. 2024](#ref-kallioinen2024detecting)) to check how
 sensitive the posterior distribution is to perturbations of the prior
 distribution and likelihood using power-scaling analysis:
+
+Code
 
 ``` r
 
@@ -452,6 +484,8 @@ the delay that would be observed with a double censored observation
 process (in which the primary and secondary censoring windows are both
 one) then:
 
+Code
+
 ``` r
 
 library(tidybayes)
@@ -463,6 +497,8 @@ draws_pmf <- tibble::tibble(
 ```
 
     ## Warning: Found infinite values in the data, which may cause issues for Stan.
+
+Code
 
 ``` r
 
@@ -501,6 +537,8 @@ range of covariates
 Here’s a simple example using a model that includes location as a
 covariate:
 
+Code
+
 ``` r
 
 library(marginaleffects)
@@ -534,6 +572,8 @@ The `cmdstanr` backend is typically more performant than the default
 `rstan` backend. To use the `cmdstanr` backend, we first need to install
 CmdStan (see the README for more details). We can check we have
 everything we need as follows:
+
+Code
 
 ``` r
 

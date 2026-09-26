@@ -38,3 +38,16 @@ Other simulate:
 [`simulate_gillespie()`](https://epidist.epinowcast.org/reference/simulate_gillespie.md),
 [`simulate_study()`](https://epidist.epinowcast.org/reference/simulate_study.md),
 [`simulate_uniform_cases()`](https://epidist.epinowcast.org/reference/simulate_uniform_cases.md)
+
+## Examples
+
+``` r
+simulate_uniform_cases(sample_size = 5) |>
+  simulate_secondary(meanlog = 1.8, sdlog = 0.5)
+#>   case    ptime     delay    stime
+#> 1    1 16.63335 10.291230 26.92458
+#> 2    2 24.52047  3.874891 28.39536
+#> 3    3 50.20348  5.788692 55.99217
+#> 4    4 26.10319  3.892437 29.99563
+#> 5    5 15.24673  4.528961 19.77569
+```

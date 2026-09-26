@@ -543,8 +543,14 @@ Functions related to specifying custom `brms` families
   [`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md)
   family
 
+- [`epidist_family_param(`*`<nonparametric>`*`)`](https://epidist.epinowcast.org/reference/epidist_family_param.nonparametric.md)
+  : Stan parameterisation of the non-parametric family
+
 - [`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md) :
   Generalised gamma delay distribution family
+
+- [`nonparametric()`](https://epidist.epinowcast.org/reference/nonparametric.md)
+  : Non-parametric delay distribution family
 
 ### Formula
 
@@ -575,6 +581,8 @@ Functions for specifying prior distributions
   : Family specific prior distributions for the generalised gamma family
 - [`epidist_family_prior(`*`<lognormal>`*`)`](https://epidist.epinowcast.org/reference/epidist_family_prior.lognormal.md)
   : Family specific prior distributions for the lognormal family
+- [`epidist_family_prior(`*`<nonparametric>`*`)`](https://epidist.epinowcast.org/reference/epidist_family_prior.nonparametric.md)
+  : Family specific prior distributions for the non-parametric family
 - [`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md)
   : Model specific prior distributions
 - [`epidist_model_prior(`*`<default>`*`)`](https://epidist.epinowcast.org/reference/epidist_model_prior.default.md)

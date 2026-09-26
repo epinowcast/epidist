@@ -17,7 +17,7 @@ column named ptime."><meta property="og:image" content="https://epidist.epinowca
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,7 @@ column named ptime."><meta property="og:image" content="https://epidist.epinowca
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
     <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/primary-events.html">Primary event distributions</a></li>
+    <li><a class="dropdown-item" href="../articles/nonparametric.html">Non-parametric delay distributions</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/meta.html">Fitting to published estimates</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
@@ -102,6 +103,18 @@ column named <code>ptime</code>.</p>
 <code><a href="simulate_uniform_cases.html">simulate_uniform_cases()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="simulate_uniform_cases.html">simulate_uniform_cases</a></span><span class="op">(</span>sample_size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">simulate_secondary</span><span class="op">(</span>meanlog <span class="op">=</span> <span class="fl">1.8</span>, sdlog <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   case    ptime     delay    stime</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1 16.63335 10.291230 26.92458</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    2 24.52047  3.874891 28.39536</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    3 50.20348  5.788692 55.99217</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    4 26.10319  3.892437 29.99563</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    5 15.24673  4.528961 19.77569</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

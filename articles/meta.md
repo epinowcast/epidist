@@ -73,6 +73,8 @@ means. The meta model is for the case where the delays cannot be had.
 
 ## 2 Setup
 
+Code
+
 ``` r
 
 library(epidist)
@@ -99,6 +101,8 @@ measured.
 [`as_epidist_marginal_model()`](https://epidist.epinowcast.org/reference/as_epidist_marginal_model.md)
 adds the censoring windows and the bounds of each delay. Figure
 [3.1](#fig:outbreak) shows the event windows of the simulated cases.
+
+Code
 
 ``` r
 
@@ -146,6 +150,8 @@ head(delays)
 #> #   delay_upr <dbl>, n <dbl>, delay_min <dbl>
 ```
 
+Code
+
 ``` r
 
 plot_events(linelist)
@@ -165,6 +171,8 @@ right truncation, that is `cens_adjusted = 0` and
 less than a study specific cutoff, since a case with a longer delay
 would not yet have been observed by that study.
 
+Code
+
 ``` r
 
 naive_snapshot <- function(cutoff) {
@@ -178,6 +186,8 @@ true_mean <- exp(meanlog + sdlog^2 / 2)
 bias_illustration <- map(c(4, 6, 8, 12, 16, 25), naive_snapshot) |>
   list_rbind()
 ```
+
+Code
 
 ``` r
 
@@ -209,6 +219,8 @@ of them report a mean and standard deviation with the covariance between
 the two, one adjusted for both biases and one adjusted for neither.
 
 Click to expand for the study designs and the code to build the table
+
+Code
 
 ``` r
 
@@ -279,6 +291,8 @@ studies_table <- study_designs |>
   )
 ```
 
+Code
+
 ``` r
 
 knitr::kable(studies_table, caption = "The ten simulated studies, their estimation procedures and what each reports.")
@@ -308,6 +322,8 @@ builds them one at a time from the rows of the design.
 takes the list and combines them. The same pattern works for a review,
 with one function that converts a row of the review to the summaries and
 metadata of a study.
+
+Code
 
 ``` r
 
@@ -357,10 +373,14 @@ and we set it here rather than take the default.
 We convert the estimates to an `epidist_meta_model` object and fit it,
 exactly as we would fit any other `epidist` model.
 
+Code
+
 ``` r
 
 meta_summary_only <- as_epidist_meta_model(estimates = biased_estimates)
 ```
+
+Code
 
 ``` r
 
@@ -372,6 +392,8 @@ fit_meta_summary <- epidist(
   backend = "cmdstanr"
 )
 ```
+
+Code
 
 ``` r
 
@@ -400,6 +422,8 @@ its log link scale.
 puts both parameters back on the scale the simulation used, and
 [`tidybayes::median_qi()`](https://mjskay.github.io/ggdist/reference/point_interval.html)
 summarises the draws.
+
+Code
 
 ``` r
 
@@ -431,6 +455,8 @@ priors rather than the wide `brms` default. `init = 0.5` narrows the
 range the chains start from, because the default lets a study’s `sigma`
 start far outside where the model is finite.
 
+Code
+
 ``` r
 
 fit_meta_summary_study <- epidist(
@@ -445,6 +471,8 @@ fit_meta_summary_study <- epidist(
   backend = "cmdstanr"
 )
 ```
+
+Code
 
 ``` r
 
@@ -478,6 +506,8 @@ level delay, which we compare with the fit without the term. Figure
 [4.1](#fig:study-term) shows the delay distribution each fit implies.
 
 Click to expand for code to prepare the study term plot
+
+Code
 
 ``` r
 
@@ -529,6 +559,8 @@ p_study_term <- ggplot() +
   theme(legend.position = "bottom")
 ```
 
+Code
+
 ``` r
 
 p_study_term
@@ -552,12 +584,16 @@ Whether a study corrected for right truncation is the field reviews most
 often leave out, so we refit the same ten studies with every one of them
 relabelled as `trunc_adjusted = TRUE`.
 
+Code
+
 ``` r
 
 wrong_flags_estimates <- biased_estimates
 wrong_flags_estimates$trunc_adjusted <- TRUE
 meta_wrong_flags <- as_epidist_meta_model(estimates = wrong_flags_estimates)
 ```
+
+Code
 
 ``` r
 
@@ -569,6 +605,8 @@ fit_meta_wrong_flags <- epidist(
   backend = "cmdstanr"
 )
 ```
+
+Code
 
 ``` r
 
@@ -603,6 +641,8 @@ summaries. Individual records keep any `study` column they arrive with,
 and are labelled `"individual"` when they have none, so the study term
 above extends to line lists from several sites.
 
+Code
+
 ``` r
 
 individual_data <- linelist |>
@@ -625,6 +665,8 @@ meta_mixed <- as_epidist_meta_model(
 #> ℹ Raise `obs_time_threshold` to avoid this behaviour.
 ```
 
+Code
+
 ``` r
 
 fit_meta_mixed <- epidist(
@@ -635,6 +677,8 @@ fit_meta_mixed <- epidist(
   backend = "cmdstanr"
 )
 ```
+
+Code
 
 ``` r
 
@@ -666,6 +710,8 @@ recover with access to every underlying delay rather than to published
 summaries. The marginal model groups identical rows, so the whole line
 list costs little more to fit than a sample of it.
 
+Code
+
 ``` r
 
 fit_reference <- epidist(
@@ -680,6 +726,8 @@ fit_reference <- epidist(
 ### 4.6 Comparing the fits
 
 Click to expand for code to prepare the comparison plot
+
+Code
 
 ``` r
 
@@ -725,6 +773,8 @@ p_compare <- predicted_parameters |>
   theme(legend.position = "bottom")
 ```
 
+Code
+
 ``` r
 
 p_compare
@@ -750,12 +800,16 @@ by the Pathogen Epidemiology Review Group. It is not on CRAN, and so we
 install it from the [mrc-ide
 r-universe](https://mrc-ide.r-universe.dev).
 
+Code
+
 ``` r
 
 library(epireview) # nolint: library_call_linter.
 ```
 
 We use the onset to death delay from the Ebola data.
+
+Code
 
 ``` r
 
@@ -786,6 +840,8 @@ ebola_params
 epireview records one value per estimate with its type, so we keep the
 means and medians reported in days with no scaling exponent, and drop
 inverse rates.
+
+Code
 
 ``` r
 
@@ -839,6 +895,8 @@ the studies.
 We make the post outbreak studies the reference level. The intercept is
 then the retrospective delay, and each coefficient is the shift in the
 other groups.
+
+Code
 
 ``` r
 
@@ -909,6 +967,8 @@ overrides these, and the result is an `epidist_estimates_data` object
 that can be edited afterwards. `keep` carries the `phase` covariate onto
 the rows.
 
+Code
+
 ``` r
 
 ebola_estimates <- epidist_estimates_epireview(
@@ -976,6 +1036,8 @@ move the contrast without limit.
 [`epidist_prior()`](https://epidist.epinowcast.org/reference/epidist_prior.md)
 shows the priors the model will use.
 
+Code
+
 ``` r
 
 ebola_prior <- prior(normal(log(10), 0.5), class = "Intercept") +
@@ -1010,6 +1072,8 @@ epidist_prior(
 
 `init = 0.5` is passed for the same reason as above.
 
+Code
+
 ``` r
 
 fit_ebola <- epidist(
@@ -1024,6 +1088,8 @@ fit_ebola <- epidist(
   backend = "cmdstanr"
 )
 ```
+
+Code
 
 ``` r
 
@@ -1066,6 +1132,8 @@ population level delay, the one the studies are estimates of rather than
 any single study’s own. We report the Gamma shape and scale alongside
 the mean and standard deviation they imply.
 
+Code
+
 ``` r
 
 phase_grid <- epidist_newdata(ebola_meta, phase)
@@ -1095,6 +1163,8 @@ reference.
 [`marginaleffects::comparisons()`](https://rdrr.io/pkg/marginaleffects/man/comparisons.html)
 gives it as a ratio of mean delays, and its draws give the posterior
 probability that estimates made during an outbreak are shorter.
+
+Code
 
 ``` r
 
@@ -1140,6 +1210,8 @@ mean and standard deviation, subsampled from the posterior the project
 releases as `output/posterior_gamma.csv`, and we match a Gamma to each
 draw.
 
+Code
+
 ``` r
 
 bdbv <- read.csv("bdbv-onset-to-death.csv") |>
@@ -1159,6 +1231,8 @@ isiro_draws <- epidist_strata(fit_ebola) |>
 ```
 
 The mean and standard deviation of the delay, four ways.
+
+Code
 
 ``` r
 
@@ -1199,6 +1273,8 @@ bind_rows(
 ```
 
 Click to expand for code to prepare the comparison plot
+
+Code
 
 ``` r
 
@@ -1260,6 +1336,8 @@ p_bdbv <- ggplot() +
   theme_minimal() +
   theme(legend.position = "bottom", legend.box = "vertical")
 ```
+
+Code
 
 ``` r
 

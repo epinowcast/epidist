@@ -33,3 +33,15 @@ Other simulate:
 [`simulate_gillespie()`](https://epidist.epinowcast.org/reference/simulate_gillespie.md),
 [`simulate_secondary()`](https://epidist.epinowcast.org/reference/simulate_secondary.md),
 [`simulate_study()`](https://epidist.epinowcast.org/reference/simulate_study.md)
+
+## Examples
+
+``` r
+simulate_uniform_cases(sample_size = 5, t = 10)
+#>   case     ptime
+#> 1    1 7.7320800
+#> 2    2 6.2226937
+#> 3    3 9.3023574
+#> 4    4 7.0318862
+#> 5    5 0.9102571
+```

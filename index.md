@@ -187,8 +187,8 @@ If using our methodology, or the methodology on which ours is based,
 please cite the relevant papers. This may include:
 
 - [Estimating epidemiological delay distributions for infectious
-  diseases](https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1)
-  by Park *et al.* (2024) – if using the latent model
+  diseases](https://doi.org/10.1101/2024.01.12.24301247) by Park *et
+  al.* (2024) – if using the latent model
 - [Best practices for estimating and reporting epidemiological delay
   distributions of infectious diseases using public health surveillance
   and healthcare

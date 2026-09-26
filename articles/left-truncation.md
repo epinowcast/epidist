@@ -30,6 +30,8 @@ than on the underlying continuous delay.
 
 ## 1 Setup
 
+Code
+
 ``` r
 
 library(epidist)
@@ -42,6 +44,8 @@ library(dplyr)
 We simulate an outbreak and a lognormal delay from each primary event.
 The parameters are chosen so that a large share of the distribution
 falls below the truncation point.
+
+Code
 
 ``` r
 
@@ -62,6 +66,8 @@ obs <- simulate_gillespie(r = 0.2, seed = 101) |>
 Roughly this share of the delay distribution lies below the truncation
 point.
 
+Code
+
 ``` r
 
 plnorm(delay_min, true_meanlog, true_sdlog)
@@ -71,6 +77,8 @@ plnorm(delay_min, true_meanlog, true_sdlog)
 [`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md)
 adds daily reporting windows and returns date. We then drop the pairs
 whose observed delay is below `delay_min`.
+
+Code
 
 ``` r
 
@@ -83,6 +91,8 @@ linelist <- as_epidist_linelist_data(obs_trunc)
 ```
 
 The observed delays are truncated below `delay_min`.
+
+Code
 
 ``` r
 
@@ -97,6 +107,8 @@ the minimum delay.
 
 ## 3 Fit models with and without the adjustment
 
+Code
+
 ``` r
 
 marginal_no_trunc <- as_epidist_marginal_model(linelist)
@@ -106,6 +118,8 @@ marginal_trunc <- as_epidist_marginal_model(linelist, delay_min = delay_min)
 A `delay_min` column already in the data is picked up without the
 argument. Pass a column name instead of a number when the minimum varies
 between observations.
+
+Code
 
 ``` r
 
@@ -119,6 +133,8 @@ identical(
 ```
 
 `delay_min` is stored as a column and passed to the likelihood.
+
+Code
 
 ``` r
 
@@ -142,6 +158,8 @@ marginal_trunc
 #> #   orig_relative_obs_time <dbl>, delay_lwr <dbl>, delay_upr <dbl>, n <dbl>,
 #> #   delay_min <dbl>
 ```
+
+Code
 
 ``` r
 
@@ -169,6 +187,8 @@ covariates here.
 adds the natural scale mean and standard deviation, and records the
 family so that the draws can be plotted.
 
+Code
+
 ``` r
 
 param_draws <- list(
@@ -183,6 +203,8 @@ true_values <- data.frame(mu = true_meanlog, sigma = true_sdlog) |>
   add_summaries(family = "lognormal") |>
   unlist()
 ```
+
+Code
 
 ``` r
 
@@ -207,6 +229,8 @@ values.
 Plotting the same draws with `type = "delay"` draws the delay
 distribution each model implies, as the posterior median density with a
 ribbon between the 5% and 95% quantiles.
+
+Code
 
 ``` r
 

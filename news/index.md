@@ -1,5 +1,81 @@
 # Changelog
 
+## epidist 1.0.0
+
+This is the first release of `epidist` on CRAN. `epidist` estimates
+epidemiological delay distributions, such as the incubation period or
+the delay from onset to report, using `brms`. It corrects for the common
+biases in these data: interval censoring of the primary and secondary
+events, right truncation, left truncation, and the dynamical bias from a
+growing or shrinking epidemic. It provides a naive model, a latent model
+that samples the unobserved event times, and a marginal model that
+integrates them out through `primarycensored`. It also provides an
+experimental meta model, which fits published summary estimates jointly
+with individual level data and adjusts each summary for how its study
+was estimated. Delays can follow a lognormal, gamma, Weibull or
+generalised gamma distribution. Every distributional parameter can take
+a `brms` formula, so delays can vary with covariates, over time or
+between groups with partial pooling. Tools for preparing data, setting
+priors, simulating data, summarising and plotting fitted delay
+distributions, and passing them on to other packages complete the
+workflow. The meta model is still experimental and its interface may
+change.
+
+### New features
+
+- Added
+  [`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md),
+  a generalised gamma delay family in the Prentice parameterisation of
+  [`flexsurv::dgengamma()`](http://chjackson.github.io/flexsurv-dev/reference/GenGamma.md),
+  for the naive, latent, marginal and meta models. The Weibull and gamma
+  are special cases and the lognormal is its limit. Closes
+  [\#644](https://github.com/epinowcast/epidist/issues/644).
+
+### Documentation
+
+- The help for
+  [`epidist_gen_meta_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_meta_log_lik.md)
+  and
+  [`as_epidist_meta_model()`](https://epidist.epinowcast.org/reference/as_epidist_meta_model.md)
+  now states the cost of
+  [`log_lik()`](https://mc-stan.org/rstantools/reference/log_lik.html)
+  and [`loo()`](https://mc-stan.org/loo/reference/loo.html) for meta
+  model summary rows, and how `ndraws` reduces it. Closes
+  [\#705](https://github.com/epinowcast/epidist/issues/705).
+- Added examples to the `simulate_*()` functions and to
+  [`epidist_family()`](https://epidist.epinowcast.org/reference/epidist_family.md),
+  [`epidist_formula()`](https://epidist.epinowcast.org/reference/epidist_formula.md),
+  [`epidist_prior()`](https://epidist.epinowcast.org/reference/epidist_prior.md)
+  and
+  [`epidist_stancode()`](https://epidist.epinowcast.org/reference/epidist_stancode.md).
+- The package description cites the methods it implements.
+
+### Bug fixes
+
+- Removed the remaining lookups of unexported `brms` functions, so
+  [`log_lik()`](https://mc-stan.org/rstantools/reference/log_lik.html),
+  [`posterior_predict()`](https://mc-stan.org/rstantools/reference/posterior_predict.html)
+  and
+  [`posterior_epred()`](https://mc-stan.org/rstantools/reference/posterior_epred.html)
+  use `epidist`’s own functions for every family. These cover the
+  lognormal, gamma, Weibull, exponential and generalised gamma families.
+  For any other family these functions now give an error.
+- [`print()`](https://rdrr.io/r/base/print.html) of an
+  `epidist_multivariate` object writes its header as output rather than
+  a message, so
+  [`suppressMessages()`](https://rdrr.io/r/base/message.html) no longer
+  hides it.
+
+### Package
+
+- The vignettes are built with
+  [`bookdown::html_vignette2`](https://pkgs.rstudio.com/bookdown/reference/html_document2.html),
+  which cuts the installed size of the package by about 4Mb.
+- Cited the `sierra_leone_ebola_data` source by its DOI and corrected
+  its column descriptions.
+- Removed the unused `BH`, `Rcpp`, `RcppEigen`, `pkgdown` and `usethis`
+  suggested dependencies.
+
 ## epidist 0.5.0
 
 This release adds a meta model for fitting to published summary
@@ -51,6 +127,7 @@ removes several functions and changes some interfaces, as listed below.
   truncation still contribute unbiased information. It is experimental
   and its interface may change. See
   [\#620](https://github.com/epinowcast/epidist/issues/620).
+
 - Added
   [`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md),
   [`epidist_estimates_summaries()`](https://epidist.epinowcast.org/reference/epidist_estimates_summaries.md),
@@ -63,6 +140,7 @@ removes several functions and changes some interfaces, as listed below.
   and summaries with a covariance, and check the inputs for common
   problems. See
   [\#620](https://github.com/epinowcast/epidist/issues/620).
+
 - Added
   [`epidist_gen_meta_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_meta_log_lik.md)
   and
@@ -72,24 +150,35 @@ removes several functions and changes some interfaces, as listed below.
   [`loo()`](https://mc-stan.org/loo/reference/loo.html) and posterior
   predictions work for meta model fits. See
   [\#620](https://github.com/epinowcast/epidist/issues/620).
+
+- Added
+  [`epidist_meta_leave_one_out()`](https://epidist.epinowcast.org/reference/epidist_meta_leave_one_out.md),
+  which refits a meta model once per study with that study held out and
+  reports how the delay mean and standard deviation change. Closes
+  [\#642](https://github.com/epinowcast/epidist/issues/642).
+
 - Added
   [`simulate_study()`](https://epidist.epinowcast.org/reference/simulate_study.md),
   which applies a published study’s observation and estimation procedure
   to a simulated line list. Closes
   [\#672](https://github.com/epinowcast/epidist/issues/672).
+
 - The meta model can estimate the growth rate of a study from `NA` or
   uncertain `growth_rate` values, sharing it with individual level data.
   Closes [\#678](https://github.com/epinowcast/epidist/issues/678).
+
 - Added an exponentially growing primary event distribution with
   `primary = "expgrowth"` for the latent, marginal and meta models. The
   growth rate is a distributional parameter, so it takes a formula and
   prior. See [\#489](https://github.com/epinowcast/epidist/issues/489)
   and [\#618](https://github.com/epinowcast/epidist/issues/618).
+
 - Added left truncation through a `delay_min` argument to
   [`as_epidist_marginal_model()`](https://epidist.epinowcast.org/reference/as_epidist_marginal_model.md),
   also supported by the meta model. See
   [\#588](https://github.com/epinowcast/epidist/issues/588) and
   [\#596](https://github.com/epinowcast/epidist/issues/596).
+
 - Added
   [`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
   [`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md),
@@ -104,6 +193,7 @@ removes several functions and changes some interfaces, as listed below.
   [\#280](https://github.com/epinowcast/epidist/issues/280),
   [\#471](https://github.com/epinowcast/epidist/issues/471) and
   [\#667](https://github.com/epinowcast/epidist/issues/667).
+
 - Added
   [`plot_events()`](https://epidist.epinowcast.org/reference/plot_events.md),
   [`plot_delays()`](https://epidist.epinowcast.org/reference/plot_delays.md),
@@ -115,23 +205,51 @@ removes several functions and changes some interfaces, as listed below.
   [\#670](https://github.com/epinowcast/epidist/issues/670),
   [\#689](https://github.com/epinowcast/epidist/issues/689) and
   [\#743](https://github.com/epinowcast/epidist/issues/743).
+
 - Added a
   [`distspec::as_dist_spec()`](https://epiforecasts.io/distspec/reference/as_dist_spec.html)
   method for fitted models. See
   [\#712](https://github.com/epinowcast/epidist/issues/712).
+
 - Added
   [`simulate_dates()`](https://epidist.epinowcast.org/reference/simulate_dates.md),
   which turns simulated event times into censored dates.
+
 - Exported
   [`epidist_gen_log_lik()`](https://epidist.epinowcast.org/reference/epidist_gen_log_lik.md),
   and made its generic method linear in the number of posterior draws.
   See [\#79](https://github.com/epinowcast/epidist/issues/79),
   [\#476](https://github.com/epinowcast/epidist/issues/476) and
   [\#646](https://github.com/epinowcast/epidist/issues/646).
+
 - [`epidist_prior()`](https://epidist.epinowcast.org/reference/epidist_prior.md)
   no longer warns about user priors on valid `brms` parameters, and
   lists unmatched priors clearly. See
   [\#483](https://github.com/epinowcast/epidist/issues/483).
+
+- Added
+  [`nonparametric()`](https://epidist.epinowcast.org/reference/nonparametric.md),
+  a delay distribution family with no parametric form, for the marginal
+  and meta models. The delay sits on a grid of bins, with its
+  probability at the right edge of each bin, and is written as the
+  discrete time hazard of each bin, using the non-parametric
+  distributions of `primarycensored`. The logit hazards are given by a
+  formula over the bins, such as a spline over the delay or a random
+  intercept per bin with `~ (1 | bin)`. The default is the spline, or
+  the random intercept when fewer than three bins have a free hazard.
+  Each coefficient of that formula is a distributional parameter, so it
+  takes a `brms` formula and prior. A covariate in the `mu` formula
+  shifts the logit hazard of every bin, a proportional odds model for
+  the hazard, and a covariate in the formula of a coefficient changes
+  the shape of the delay. In the meta model a study that fully adjusted
+  for censoring can only report the mean and standard deviation of the
+  whole delay, because the family has no density. See
+  [`vignette("nonparametric")`](https://epidist.epinowcast.org/articles/nonparametric.md)
+  and [\#557](https://github.com/epinowcast/epidist/issues/557).
+
+- The package lifecycle is now maturing rather than experimental. The
+  meta model is still experimental. See
+  [\#781](https://github.com/epinowcast/epidist/issues/781).
 
 ### Bug fixes
 
@@ -155,6 +273,8 @@ removes several functions and changes some interfaces, as listed below.
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) still
   dispatches. Closes
   [\#721](https://github.com/epinowcast/epidist/issues/721).
+- The meta model log likelihood no longer advances the RNG stream.
+  Closes [\#750](https://github.com/epinowcast/epidist/issues/750).
 - Removed calls to unexported `brms` functions. See
   [\#420](https://github.com/epinowcast/epidist/issues/420).
 
@@ -418,7 +538,7 @@ users of the package. As some features may change, the package is marked
 as experimental. We expect to release a stable 1.0.0 version shortly.
 
 The `epidist` package implements models for epidemiological delay
-distributions. It uses [`brms`](http://paulbuerkner.com/brms/) to
+distributions. It uses [`brms`](https://paulbuerkner.com/brms/) to
 perform Bayesian inference.
 
 One data format is currently available:

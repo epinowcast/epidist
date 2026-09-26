@@ -6,19 +6,21 @@
     }
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Build the Stan functions block shared by the marginal and meta models — .family_functions_stanvar"><meta name="description" content="Both models read a functions.stan chunk with the same placeholders
-(family, dist_id, dpars_A, dpars_B, and the pair
+(family, dist_id, dpars_A, {dpars_B}, and the pair
 primary_id, primary_params), filled in with the target distribution's
-details and the primary event distribution. dpars_B is the parameter
-order of primarycensored, which a family may record as pcd_param
-where it differs from the order of its Stan density. Used within
+details and the primary event distribution. {dpars_B} is the parameter
+array of primarycensored, see .stan_dist_params(), which a family may
+order as pcd_param where it differs from the order of its Stan density.
+Used within
 epidist_stancode() methods for the marginal and meta models, which
 differ only in the chunk path, the family name prefix, and any further
 placeholders they need substituted."><meta property="og:description" content="Both models read a functions.stan chunk with the same placeholders
-(family, dist_id, dpars_A, dpars_B, and the pair
+(family, dist_id, dpars_A, {dpars_B}, and the pair
 primary_id, primary_params), filled in with the target distribution's
-details and the primary event distribution. dpars_B is the parameter
-order of primarycensored, which a family may record as pcd_param
-where it differs from the order of its Stan density. Used within
+details and the primary event distribution. {dpars_B} is the parameter
+array of primarycensored, see .stan_dist_params(), which a family may
+order as pcd_param where it differs from the order of its Stan density.
+Used within
 epidist_stancode() methods for the marginal and meta models, which
 differ only in the chunk path, the family name prefix, and any further
 placeholders they need substituted."><meta property="og:image" content="https://epidist.epinowcast.org/logo.png"></head><body>
@@ -29,7 +31,7 @@ placeholders they need substituted."><meta property="og:image" content="https://
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +48,7 @@ placeholders they need substituted."><meta property="og:image" content="https://
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
     <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/primary-events.html">Primary event distributions</a></li>
+    <li><a class="dropdown-item" href="../articles/nonparametric.html">Non-parametric delay distributions</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/meta.html">Fitting to published estimates</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
@@ -74,11 +77,12 @@ placeholders they need substituted."><meta property="og:image" content="https://
 
     <div class="ref-description section level2">
     <p>Both models read a <code>functions.stan</code> chunk with the same placeholders
-(<code>family</code>, <code>dist_id</code>, <code>dpars_A</code>, <code>dpars_B</code>, and the pair
+(<code>family</code>, <code>dist_id</code>, <code>dpars_A</code>, <code>{dpars_B}</code>, and the pair
 <code>primary_id, primary_params</code>), filled in with the target distribution's
-details and the primary event distribution. <code>dpars_B</code> is the parameter
-order of <code>primarycensored</code>, which a family may record as <code>pcd_param</code>
-where it differs from the order of its Stan density. Used within
+details and the primary event distribution. <code>{dpars_B}</code> is the parameter
+array of <code>primarycensored</code>, see <code><a href="dot-stan_dist_params.html">.stan_dist_params()</a></code>, which a family may
+order as <code>pcd_param</code> where it differs from the order of its Stan density.
+Used within
 <code><a href="epidist_stancode.html">epidist_stancode()</a></code> methods for the marginal and meta models, which
 differ only in the chunk path, the family name prefix, and any further
 placeholders they need substituted.</p>

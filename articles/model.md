@@ -237,6 +237,8 @@ separate estimate of epidemic growth and given an informative prior
 centred on that value, as in Brand et al.
 ([2026](#ref-brand2026scalable)), rather than learned from the delays.
 
+Code
+
 ``` r
 
 epidist(data, formula = bf(mu ~ 1, pgrowth ~ 1 + region))

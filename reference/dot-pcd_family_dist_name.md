@@ -2,8 +2,12 @@
 
 The generalised gamma distribution function lives in `flexsurv`, so
 `primarycensored` records no name for it and the name is given here.
-Falls back to the lower cased family name if `primarycensored` does not
-recognise it, so the caller can still report a name in a message. Uses
+`primarycensored` names its direct probability mass step
+`"nonparametric"`, so the hazard distribution of
+[`nonparametric()`](https://epidist.epinowcast.org/reference/nonparametric.md)
+is also given here. Falls back to the lower cased family name if
+`primarycensored` does not recognise it, so the caller can still report
+a name in a message. Uses
 [`.delay_family()`](https://epidist.epinowcast.org/reference/dot-delay_family.md)
 rather than `family$family` directly, so this resolves correctly whether
 `family` is a plain `brms` family, a custom family such as

@@ -49,6 +49,7 @@ Other prior:
 [`epidist_family_prior()`](https://epidist.epinowcast.org/reference/epidist_family_prior.md),
 [`epidist_family_prior.default()`](https://epidist.epinowcast.org/reference/epidist_family_prior.default.md),
 [`epidist_family_prior.lognormal()`](https://epidist.epinowcast.org/reference/epidist_family_prior.lognormal.md),
+[`epidist_family_prior.nonparametric()`](https://epidist.epinowcast.org/reference/epidist_family_prior.nonparametric.md),
 [`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md),
 [`epidist_model_prior.default()`](https://epidist.epinowcast.org/reference/epidist_model_prior.default.md),
 [`epidist_model_prior.epidist_meta_model()`](https://epidist.epinowcast.org/reference/epidist_model_prior.epidist_meta_model.md),

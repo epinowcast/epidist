@@ -43,6 +43,12 @@
 - [Guide to the statistical models implemented in
   epidist](https://epidist.epinowcast.org/articles/model.md):
 
+- [Non-parametric delay
+  distributions](https://epidist.epinowcast.org/articles/nonparametric.md):
+
+  Fitting a delay distribution with no parametric form, stratified by a
+  covariate, in the marginal and meta models
+
 - [Primary event
   distributions](https://epidist.epinowcast.org/articles/primary-events.md):
 

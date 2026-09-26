@@ -8,7 +8,7 @@ the density of the delay distribution, built by
 ## Usage
 
 ``` r
-.analytic_delay_summaries(name)
+.analytic_delay_summaries(name, np = NULL)
 ```
 
 ## Arguments
@@ -17,6 +17,17 @@ the density of the delay distribution, built by
 
   The name of a delay distribution family.
 
+- np:
+
+  The `np` element of a non-parametric family, holding its boundaries
+  and hazard model, or `NULL` for any other family.
+
 ## Value
 
 A list of solutions, or `NULL` when the family has none.
+
+## Details
+
+The non-parametric family puts its probability at the right edge of each
+bin, so its quantiles are bin edges and its density is the histogram of
+the bin probabilities, each spread over the width of its bin.

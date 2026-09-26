@@ -22,8 +22,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Estimate Epidemiological Delay Distributions with brms">
-<meta name="description" content="Understanding and accurately estimating epidemiological delay distributions is important for public health policy. These estimates influence epidemic situational awareness, control strategies, and resource allocation. This package provides methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. These issues are frequently overlooked, resulting in biased conclusions. Built on top of brms, it allows for flexible modelling including time-varying spatial components and partially pooled estimates of demographic characteristics.">
-<meta property="og:description" content="Understanding and accurately estimating epidemiological delay distributions is important for public health policy. These estimates influence epidemic situational awareness, control strategies, and resource allocation. This package provides methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases. These issues are frequently overlooked, resulting in biased conclusions. Built on top of brms, it allows for flexible modelling including time-varying spatial components and partially pooled estimates of demographic characteristics.">
+<meta name="description" content="Understanding and accurately estimating epidemiological delay distributions is important for public health policy. These estimates influence epidemic situational awareness, control strategies, and resource allocation. Provides methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases, following Park et al. (2024) &lt;doi:10.1101/2024.01.12.24301247&gt; and Charniga et al. (2024) &lt;doi:10.1371/journal.pcbi.1012520&gt;. These issues are frequently overlooked, resulting in biased conclusions. Built on top of brms, it allows for flexible modelling including time-varying and spatial effects and partially pooled estimates of demographic characteristics.">
+<meta property="og:description" content="Understanding and accurately estimating epidemiological delay distributions is important for public health policy. These estimates influence epidemic situational awareness, control strategies, and resource allocation. Provides methods to address the key challenges in estimating these distributions, including truncation, interval censoring, and dynamical biases, following Park et al. (2024) &lt;doi:10.1101/2024.01.12.24301247&gt; and Charniga et al. (2024) &lt;doi:10.1371/journal.pcbi.1012520&gt;. These issues are frequently overlooked, resulting in biased conclusions. Built on top of brms, it allows for flexible modelling including time-varying and spatial effects and partially pooled estimates of demographic characteristics.">
 <meta property="og:image" content="https://epidist.epinowcast.org/logo.png">
 </head>
 <body>
@@ -34,7 +34,7 @@
 
     <a class="navbar-brand me-2" href="index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,6 +53,7 @@
     <li><a class="dropdown-item" href="articles/approx-inference.html">Approximate Bayesian inference</a></li>
     <li><a class="dropdown-item" href="articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="articles/primary-events.html">Primary event distributions</a></li>
+    <li><a class="dropdown-item" href="articles/nonparametric.html">Non-parametric delay distributions</a></li>
     <li><a class="dropdown-item" href="articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="articles/meta.html">Fitting to published estimates</a></li>
     <li><a class="dropdown-item" href="articles/model.html">Guide to the statistical models implemented in epidist</a></li>
@@ -192,7 +193,7 @@ Package citation information
 </details><p>If using our methodology, or the methodology on which ours is based, please cite the relevant papers. This may include:</p>
 <ul>
 <li>
-<a href="https://www.medrxiv.org/content/10.1101/2024.01.12.24301247v1" class="external-link">Estimating epidemiological delay distributions for infectious diseases</a> by Park <em>et al.</em> (2024) – if using the latent model</li>
+<a href="https://doi.org/10.1101/2024.01.12.24301247" class="external-link">Estimating epidemiological delay distributions for infectious diseases</a> by Park <em>et al.</em> (2024) – if using the latent model</li>
 <li>
 <a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012520" class="external-link">Best practices for estimating and reporting epidemiological delay distributions of infectious diseases using public health surveillance and healthcare data</a> by Charniga <em>et al.</em> (2024)</li>
 </ul>

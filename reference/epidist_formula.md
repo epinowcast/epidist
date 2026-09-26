@@ -48,3 +48,33 @@ A `brmsformula` object.
 Other formula:
 [`epidist_formula_model()`](https://epidist.epinowcast.org/reference/epidist_formula_model.md),
 [`epidist_formula_model.default()`](https://epidist.epinowcast.org/reference/epidist_formula_model.default.md)
+
+## Examples
+
+``` r
+data <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model()
+#> ℹ No primary event upper bound provided, using the primary event lower bound + 1 day as the assumed upper bound.
+#> ℹ No secondary event upper bound provided, using the secondary event lower bound + 1 day as the assumed upper bound.
+#> ℹ No observation time column provided, using 2015-09-14 as the observation date (the maximum of the secondary event upper bound).
+#> ! Setting 2394 relative observation times (`relative_obs_time`) greater than 98
+#>   (2x the maximum delay) to Inf.
+#> ℹ This improves model efficiency by reducing the number of unique observation
+#>   times in the data.
+#> ℹ The impact on model accuracy should be negligible because these relative
+#>   observation times are high enough to cause very limited right truncation.
+#> ℹ The original relative observation times are available in
+#>   `orig_relative_obs_time`.
+#> ℹ Raise `obs_time_threshold` to avoid this behaviour.
+family <- epidist_family(data, family = lognormal())
+formula <- epidist_formula(data, family = family, formula = mu ~ 1)
+#> Warning: Found infinite values in the data, which may cause issues for Stan.
+formula
+#> delay_lwr | weights(n) + vreal(relative_obs_time, pwindow, swindow, delay_upr, delay_min) ~ 1 
+#> sigma ~ 1
+```

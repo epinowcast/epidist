@@ -91,6 +91,39 @@ Other prior:
 [`epidist_family_prior.default()`](https://epidist.epinowcast.org/reference/epidist_family_prior.default.md),
 [`epidist_family_prior.gengamma()`](https://epidist.epinowcast.org/reference/epidist_family_prior.gengamma.md),
 [`epidist_family_prior.lognormal()`](https://epidist.epinowcast.org/reference/epidist_family_prior.lognormal.md),
+[`epidist_family_prior.nonparametric()`](https://epidist.epinowcast.org/reference/epidist_family_prior.nonparametric.md),
 [`epidist_model_prior()`](https://epidist.epinowcast.org/reference/epidist_model_prior.md),
 [`epidist_model_prior.default()`](https://epidist.epinowcast.org/reference/epidist_model_prior.default.md),
 [`epidist_model_prior.epidist_meta_model()`](https://epidist.epinowcast.org/reference/epidist_model_prior.epidist_meta_model.md)
+
+## Examples
+
+``` r
+data <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model()
+#> ℹ No primary event upper bound provided, using the primary event lower bound + 1 day as the assumed upper bound.
+#> ℹ No secondary event upper bound provided, using the secondary event lower bound + 1 day as the assumed upper bound.
+#> ℹ No observation time column provided, using 2015-09-14 as the observation date (the maximum of the secondary event upper bound).
+#> ! Setting 2394 relative observation times (`relative_obs_time`) greater than 98
+#>   (2x the maximum delay) to Inf.
+#> ℹ This improves model efficiency by reducing the number of unique observation
+#>   times in the data.
+#> ℹ The impact on model accuracy should be negligible because these relative
+#>   observation times are high enough to cause very limited right truncation.
+#> ℹ The original relative observation times are available in
+#>   `orig_relative_obs_time`.
+#> ℹ Raise `obs_time_threshold` to avoid this behaviour.
+family <- epidist_family(data, family = lognormal())
+formula <- epidist_formula(data, family = family, formula = mu ~ 1)
+#> Warning: Found infinite values in the data, which may cause issues for Stan.
+epidist_prior(data, family = family, formula = formula, prior = NULL)
+#> Warning: Found infinite values in the data, which may cause issues for Stan.
+#>              prior     class coef group resp  dpar nlpar   lb   ub source  tag
+#>       normal(1, 1) Intercept                             <NA> <NA> family <NA>
+#>  normal(-0.7, 0.4) Intercept                 sigma       <NA> <NA> family <NA>
+```

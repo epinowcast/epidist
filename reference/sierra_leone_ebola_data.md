@@ -11,15 +11,11 @@ sierra_leone_ebola_data
 
 ## Format
 
-A `tibble` with 8,358 rows and 8 columns:
+A `tibble` with 8,358 rows and 7 columns:
 
 - id:
 
   Unique identification number for the case
-
-- name:
-
-  Name as character, omitted
 
 - age:
 
@@ -27,7 +23,7 @@ A `tibble` with 8,358 rows and 8 columns:
 
 - sex:
 
-  Sex as character, either "F", "M" or NA
+  Sex as character, either "Female", "Male" or NA
 
 - date_of_symptom_onset:
 
@@ -47,4 +43,4 @@ A `tibble` with 8,358 rows and 8 columns:
 
 ## Source
 
-<https://www.pnas.org/doi/full/10.1073/pnas.1518587113>
+[doi:10.1073/pnas.1518587113](https://doi.org/10.1073/pnas.1518587113)

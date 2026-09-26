@@ -17,7 +17,7 @@ density of the delay distribution, built by .analytic_family()."><meta property=
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,7 @@ density of the delay distribution, built by .analytic_family()."><meta property=
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
     <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/primary-events.html">Primary event distributions</a></li>
+    <li><a class="dropdown-item" href="../articles/nonparametric.html">Non-parametric delay distributions</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/meta.html">Fitting to published estimates</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
@@ -68,7 +69,7 @@ density of the delay distribution, built by <code><a href="dot-analytic_family.h
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">.analytic_delay_summaries</span><span class="op">(</span><span class="va">name</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">.analytic_delay_summaries</span><span class="op">(</span><span class="va">name</span>, np <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -78,10 +79,21 @@ density of the delay distribution, built by <code><a href="dot-analytic_family.h
 <dl><dt id="arg-name">name<a class="anchor" aria-label="anchor" href="#arg-name"></a></dt>
 <dd><p>The name of a delay distribution family.</p></dd>
 
+
+<dt id="arg-np">np<a class="anchor" aria-label="anchor" href="#arg-np"></a></dt>
+<dd><p>The <code>np</code> element of a non-parametric family, holding its
+boundaries and hazard model, or <code>NULL</code> for any other family.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list of solutions, or <code>NULL</code> when the family has none.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The non-parametric family puts its probability at the right edge of each
+bin, so its quantiles are bin edges and its density is the histogram of
+the bin probabilities, each spread over the width of its bin.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -45,8 +45,7 @@ Other multivariate:
 set.seed(1)
 draws <- cbind(mean = rnorm(500, 7.5, 0.3), sd = rnorm(500, 3.6, 0.2))
 as_epidist_multivariate(draws)
-#> A multivariate representation of 2 parameters at 1 index point.
-#>     mean       sd 
+#> A multivariate representation of 2 parameters at 1 index point.    mean       sd 
 #> 7.506793 3.590812 
 #>              [,1]         [,2]
 #> [1,]  0.092159903 -0.002646723

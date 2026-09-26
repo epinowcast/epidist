@@ -65,6 +65,8 @@ learning.
 To run this vignette yourself, as well as the `epidist` package, you
 will need the following packages:
 
+Code
+
 ``` r
 
 library(epidist)
@@ -89,6 +91,8 @@ We first assume that the reporting delay is lognormal with a mean log of
 [`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
 function to add the mean and sd to the `data.frame`.
 
+Code
+
 ``` r
 
 secondary_dist <- data.frame(mu = 1.6, sigma = 0.5) |>
@@ -102,6 +106,8 @@ secondary_dist
 We can visualise the delay distribution these parameters describe with
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) (Figure
 [3.1](#fig:lognormal)).
+
+Code
 
 ``` r
 
@@ -120,6 +126,8 @@ restrict them to be dates). We assume that the outbreak has a growth
 rate of 0.2, that we observe the outbreak for 25 days, and that the
 first case was infected on the 1st of February 2024.
 
+Code
+
 ``` r
 
 growth_rate <- 0.2
@@ -134,6 +142,8 @@ algorithm](https://en.wikipedia.org/wiki/Gillespie_algorithm) to
 generate infectious disease outbreak data from a stochastic
 compartmental model.
 
+Code
+
 ``` r
 
 outbreak <- simulate_gillespie(r = growth_rate, seed = 101)
@@ -143,6 +153,8 @@ outbreak <- simulate_gillespie(r = growth_rate, seed = 101)
 Here `ptime` is a numeric column giving the time of infection. In
 reality, it is more common to receive primary event times as a date
 rather than a numeric.
+
+Code
 
 ``` r
 
@@ -160,6 +172,8 @@ To generate secondary events, we will use a lognormal distribution
 (Figure [3.1](#fig:lognormal)) for the delay between primary and
 secondary events:
 
+Code
+
 ``` r
 
 obs <- simulate_secondary(
@@ -173,6 +187,8 @@ obs <- simulate_secondary(
 `obs` is now a `data.frame` with further columns for `delay` and
 `stime`. The secondary event time is simply the primary event time plus
 the delay:
+
+Code
 
 ``` r
 
@@ -189,6 +205,8 @@ censored. This means that rather than exact event times, we observe
 event times within an interval. Here we suppose that the interval is
 daily, meaning that only the date of the primary or secondary event, not
 the exact event time, is reported (Figure [5.1](#fig:cens)):
+
+Code
 
 ``` r
 
@@ -216,6 +234,8 @@ the last observation.
 As a final step we rename the columns to show that `epidist` does not
 require particular names.
 
+Code
+
 ``` r
 
 obs_data <- transmute(
@@ -231,6 +251,8 @@ The resulting simulated data `obs_data` has 4 columns: `id`,
 `symptom_onset`, `case_notification`, and `obs_date`. Where
 `symptom_onset` and `case_notification` are dates and `obs_date` is the
 date of the last observation based on case notification.
+
+Code
 
 ``` r
 
@@ -260,6 +282,8 @@ dispatches to
 [`as_epidist_linelist_data.data.frame()`](https://epidist.epinowcast.org/reference/as_epidist_linelist_data.data.frame.md)
 which takes the column names of the primary and secondary event dates
 and the observation date.
+
+Code
 
 ``` r
 
@@ -306,6 +330,8 @@ outbreak we only ever see part of it. Here we apply each part of the
 observation process in turn and plot what it leaves behind with
 [`plot_events()`](https://epidist.epinowcast.org/reference/plot_events.md).
 
+Code
+
 ``` r
 
 plot_events(filter(linelist_all, .data$id <= 500))
@@ -335,6 +361,8 @@ and biases the observation process towards shorter delays. In Figure
 restricted the data to only include cases where the secondary event
 occurred before day 10.
 
+Code
+
 ``` r
 
 plot_events(
@@ -361,6 +389,8 @@ Our own observation period ends after 25 days, so we truncate at the
 observation date. The `dplyr` verbs keep the `epidist_linelist_data`
 class, so the result is still ready to fit to.
 
+Code
+
 ``` r
 
 linelist_trunc <- filter(linelist_all, .data$sdate_upr <= .data$obs_date)
@@ -369,12 +399,16 @@ linelist_trunc <- filter(linelist_all, .data$sdate_upr <= .data$obs_date)
 Finally, in reality, it’s not possible to observe every case. We suppose
 that a sample of individuals of size `sample_size` are observed:
 
+Code
+
 ``` r
 
 sample_size <- 200
 ```
 
 This sample size corresponds to 7.7% of the data.
+
+Code
 
 ``` r
 
@@ -397,6 +431,8 @@ likely to appear in the data than others.
 `linelist_data` is the data we will fit to (Figure
 [5.3](#fig:linelist)).
 
+Code
+
 ``` r
 
 plot_events(linelist_data, obs_time = max(linelist_data$obs_date))
@@ -416,6 +452,8 @@ first 500 cases of Figure [5.1](#fig:cens).
 
 Click to expand for code to create the observed data histogram
 
+Code
+
 ``` r
 
 delay_histogram <- plot_delays(
@@ -429,6 +467,8 @@ delay_histogram <- plot_delays(
   )
 )
 ```
+
+Code
 
 ``` r
 
@@ -474,6 +514,8 @@ use the
 [`as_epidist_naive_model()`](https://epidist.epinowcast.org/reference/as_epidist_naive_model.md)
 function.
 
+Code
+
 ``` r
 
 naive_data <- as_epidist_naive_model(linelist_data)
@@ -500,6 +542,8 @@ and now we fit the model using the No-U-Turn Sampler (NUTS) Markov chain
 Monte Carlo (MCMC) algorithm via the
 [`brms`](https://paulbuerkner.com/brms/) R package ([Bürkner
 2017](#ref-brms)).
+
+Code
 
 ``` r
 
@@ -537,6 +581,8 @@ tool that supports `brms` fitted model objects will be compatible with
 For example, we can use the built in
 [`summary()`](https://rdrr.io/r/base/summary.html) function to summarise
 the posterior distribution of the parameters.
+
+Code
 
 ``` r
 
@@ -589,6 +635,8 @@ exact numerical and analytical solutions for numerous double censored
 and truncated distributions in both Stan and R. The documentation for
 `primarycensored` is a good place for learning more about this.
 
+Code
+
 ``` r
 
 marginal_data <- as_epidist_marginal_model(linelist_data)
@@ -620,6 +668,8 @@ fit the model. Note that because of the different
 `as_epidist_<model>_model()` function we have used the marginal rather
 than naive model will be fit.
 
+Code
+
 ``` r
 
 marginal_fit <- epidist(
@@ -637,6 +687,8 @@ marginal_fit <- epidist(
 
 We again summarise the posterior using
 [`summary()`](https://rdrr.io/r/base/summary.html),
+
+Code
 
 ``` r
 
@@ -680,6 +732,8 @@ are the three steps it wraps, and each is available on its own. Here we
 take them separately, so that the draws from both models can be combined
 before the summaries are added.
 
+Code
+
 ``` r
 
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
@@ -722,6 +776,8 @@ models. [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws
 the posterior density of each parameter in its own panel, coloured by a
 stratum of our choosing, and marks the true values.
 
+Code
+
 ``` r
 
 true_values <- unlist(secondary_dist[c("mu", "sigma", "mean", "sd")])
@@ -733,6 +789,8 @@ p_pp_params <- plot(
 ) +
   labs(title = "Parameter estimates compared to true values")
 ```
+
+Code
 
 ``` r
 
@@ -765,6 +823,8 @@ the posterior median with a ribbon between the 5% and 95% quantiles.
 Adding the true parameters as a third model draws the true distribution
 on the same axes.
 
+Code
+
 ``` r
 
 delay_draws <- bind_rows(
@@ -783,6 +843,8 @@ p_fitted_lognormal <- plot(
     y = "Probability density"
   )
 ```
+
+Code
 
 ``` r
 

@@ -1,15 +1,8 @@
 # The primary censored distribution function, guarded against underflow
 
-Primary distributions without an analytical solution are integrated
-numerically, which can return a non finite or negative cumulative
-probability deep in the lower tail. Those cases carry negligible
-probability and are treated as zero, matching the guard in
-`inst/stan/meta_model/functions.stan`. A delay whose plain distribution
-function is below the cut of
-[`.meta_log_cdf_floor()`](https://epidist.epinowcast.org/reference/dot-meta_log_cdf_floor.md)
-is severed to zero before the primary censored function is called, as it
-is in Stan, since the primary censored distribution function is never
-above the plain one.
+`check = FALSE` skips the validation of `pdist` and `dprimary`, which
+are taken from `stats` and `primarycensored` and so need none, and which
+would otherwise be repeated on every call.
 
 ## Usage
 
@@ -42,3 +35,16 @@ above the plain one.
 ## Value
 
 A numeric vector of cumulative probabilities.
+
+## Details
+
+Primary distributions without an analytical solution are integrated
+numerically, which can return a non finite or negative cumulative
+probability deep in the lower tail. Those cases carry negligible
+probability and are treated as zero, matching the guard in
+`inst/stan/meta_model/functions.stan`. A delay whose plain distribution
+function is below the cut of
+[`.meta_log_cdf_floor()`](https://epidist.epinowcast.org/reference/dot-meta_log_cdf_floor.md)
+is severed to zero before the primary censored function is called, as it
+is in Stan, since the primary censored distribution function is never
+above the plain one.

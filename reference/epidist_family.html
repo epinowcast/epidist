@@ -19,7 +19,7 @@ be transparent about what happens inside of a call to epidist()."><meta property
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,7 @@ be transparent about what happens inside of a call to epidist()."><meta property
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
     <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/primary-events.html">Primary event distributions</a></li>
+    <li><a class="dropdown-item" href="../articles/nonparametric.html">Non-parametric delay distributions</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/meta.html">Fitting to published estimates</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
@@ -114,9 +115,41 @@ family <code>epidist</code> defines itself, such as <code><a href="gengamma.html
 <code><a href="epidist_family_param.html">epidist_family_param()</a></code>,
 <code><a href="epidist_family_param.default.html">epidist_family_param.default()</a></code>,
 <code><a href="epidist_family_param.gengamma.html">epidist_family_param.gengamma()</a></code>,
-<code><a href="gengamma.html">gengamma()</a></code></p></div>
+<code><a href="epidist_family_param.nonparametric.html">epidist_family_param.nonparametric()</a></code>,
+<code><a href="gengamma.html">gengamma()</a></code>,
+<code><a href="nonparametric.html">nonparametric()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">sierra_leone_ebola_data</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="as_epidist_linelist_data.html">as_epidist_linelist_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    pdate_lwr <span class="op">=</span> <span class="st">"date_of_symptom_onset"</span>,</span></span>
+<span class="r-in"><span>    sdate_lwr <span class="op">=</span> <span class="st">"date_of_sample_tested"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="as_epidist_aggregate_data.html">as_epidist_aggregate_data</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="as_epidist_marginal_model.html">as_epidist_marginal_model</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No primary event upper bound provided, using the primary event lower bound + 1 day as the assumed upper bound.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No secondary event upper bound provided, using the secondary event lower bound + 1 day as the assumed upper bound.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> No observation time column provided, using 2015-09-14 as the observation date (the maximum of the secondary event upper bound).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Setting 2394 relative observation times (`relative_obs_time`) greater than 98</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   (2x the maximum delay) to <span style="color: #0000BB;">Inf</span>.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> This improves model efficiency by reducing the number of unique observation</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   times in the data.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The impact on model accuracy should be negligible because these relative</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   observation times are high enough to cause very limited right truncation.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The original relative observation times are available in</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   `orig_relative_obs_time`.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Raise `obs_time_threshold` to avoid this behaviour.</span>
+<span class="r-in"><span><span class="va">family</span> <span class="op">&lt;-</span> <span class="fu">epidist_family</span><span class="op">(</span><span class="va">data</span>, family <span class="op">=</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">family</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Custom family: marginal_lognormal </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Link function: identity </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Parameters: mu, sigma </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

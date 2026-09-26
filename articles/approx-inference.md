@@ -97,6 +97,8 @@ of the `CmdStan` User’s Guide for more information.
 
 In this demonstration, we use the following packages:
 
+Code
+
 ``` r
 
 library(epidist)
@@ -115,6 +117,8 @@ recommend using this backend for fitting models). To do this, we first
 need to install CmdStan (see the README for more details). We can check
 we have everything we need as follows:
 
+Code
+
 ``` r
 
 cmdstanr::cmdstan_version()
@@ -128,6 +132,8 @@ vignette, so we will not detail exactly what is happening here, but
 please consult that vignette if interested:
 
 Click to expand for data simulation code
+
+Code
 
 ``` r
 
@@ -156,6 +162,8 @@ We now prepare the data for fitting with the marginal model. We first
 pre-compile the Stan model so that compilation time is excluded from the
 timing comparisons below.
 
+Code
+
 ``` r
 
 linelist_data <- as_epidist_linelist_data(
@@ -178,6 +186,8 @@ fit_compile <- epidist(
 
 We now perform inference with HMC:
 
+Code
+
 ``` r
 
 t <- proc.time()
@@ -193,6 +203,8 @@ argument.
 Now, we fit[^2] the same marginal model using each method in Section
 [2](#other). To match the four Markov chains of length 1000 in HMC
 above, we then draw 4000 samples from each approximate posterior.
+
+Code
 
 ``` r
 
@@ -213,6 +225,8 @@ time_advi <- proc.time() - t
 
 For the Pathfinder algorithm we will set `num_paths = 1`.
 
+Code
+
 ``` r
 
 t <- proc.time()
@@ -230,6 +244,8 @@ is implemented to sample draws from the posterior distribution, making
 post-processing straightforward.
 
 Click to expand for code to extract posterior draws
+
+Code
 
 ``` r
 
@@ -264,6 +280,8 @@ draws <- bind_rows(draws)
 The mean estimated value of each parameter, from each method, is as
 follows.
 
+Code
+
 ``` r
 
 pars <- draws |>
@@ -287,6 +305,8 @@ Figure [3.1](#fig:posterior).
 
 Click to expand for code to create posterior distribution plot
 
+Code
+
 ``` r
 
 p_posterior <- draws |>
@@ -299,6 +319,8 @@ p_posterior <- draws |>
   labs(x = "", y = "", col = "Method") +
   theme(legend.position = "bottom")
 ```
+
+Code
 
 ``` r
 
@@ -321,6 +343,8 @@ delay distribution.
 
 Click to expand for code to create delay PDF plot
 
+Code
+
 ``` r
 
 p_delay_pdf <- pmap_df(
@@ -336,6 +360,8 @@ p_delay_pdf <- pmap_df(
   labs(x = "", y = "", col = "Method") +
   theme(legend.position = "bottom")
 ```
+
+Code
 
 ``` r
 
@@ -354,6 +380,8 @@ posterior mean estimated `mu` and `sigma` parameters.
 In this example, HMC took a longer time to run than the other methods
 and Pathfinder was the fastest running method. That said, even for HMC
 the computation time in this case is unlikely to be prohibitive.
+
+Code
 
 ``` r
 

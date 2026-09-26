@@ -18,6 +18,8 @@ al. 2025](#ref-primarycensored)).
 [`vignette("model")`](https://epidist.epinowcast.org/articles/model.md)
 gives the mathematical treatment.
 
+Code
+
 ``` r
 
 library(epidist)
@@ -33,6 +35,8 @@ draws primary events from an exponentially growing epidemic at rate `r`.
 Here we use a rate of 0.5 and a lognormal delay.
 
 Both events are censored to three day windows rather than daily ones.
+
+Code
 
 ``` r
 
@@ -55,6 +59,8 @@ linelist <- as_epidist_linelist_data(obs)
 [`plot_events()`](https://epidist.epinowcast.org/reference/plot_events.md)
 shows the windows each event is reported in.
 
+Code
+
 ``` r
 
 plot_events(linelist, n = 100)
@@ -72,6 +78,8 @@ secondary windows one day.
 
 The marginal model takes the primary event distribution when the data
 are converted.
+
+Code
 
 ``` r
 
@@ -94,6 +102,8 @@ which is the approach taken in Brand et al.
 ([2026](#ref-brand2026scalable)). The prior below is centred on the rate
 used to simulate.
 
+Code
+
 ``` r
 
 fit_uniform <- epidist(
@@ -111,6 +121,8 @@ fit_growing <- epidist(
 
 The posterior for the rate stays close to the prior, which is expected.
 
+Code
+
 ``` r
 
 summary(fit_growing)$fixed[
@@ -121,6 +133,8 @@ summary(fit_growing)$fixed[
 ```
 
 Both are compared against the delay used to simulate.
+
+Code
 
 ``` r
 
@@ -149,6 +163,8 @@ Figure 3.1: plot of chunk compare
 its own rate, drawn around the shared value. Each location is given its
 own seed, so they do not share random numbers.
 
+Code
+
 ``` r
 
 locations <- c(a = 0.2, b = 0.5, c = 0.8)
@@ -172,6 +188,8 @@ A random effect on `pgrowth` lets the rate differ by location while
 sharing information across them. The marginal model is used here. The
 latent model samples an event time per observation and would be slow at
 this size.
+
+Code
 
 ``` r
 
@@ -197,6 +215,8 @@ The prior on the standard deviation between locations is tight because
 three locations cannot tell you how much they vary. Settings within one
 outbreak rarely differ in growth by more than a couple of tenths per
 day, which is the range `normal(0, 0.3)` allows.
+
+Code
 
 ``` r
 

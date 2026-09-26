@@ -19,5 +19,6 @@ simulation need.
 
 ## Value
 
-A list with the delay distribution `name` and its distributional
-parameters `dpars`.
+A list with the delay distribution `name`, its distributional parameters
+`dpars`, and for the non-parametric family its boundaries and hazard
+model as `np`.

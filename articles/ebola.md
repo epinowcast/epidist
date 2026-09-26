@@ -17,6 +17,8 @@ In analysing this data, we demonstrate the following features of
 
 The packages used in this article are:
 
+Code
+
 ``` r
 
 set.seed(123)
@@ -43,6 +45,8 @@ typically more performant than the default `rstan` backend. To use the
 `cmdstanr` backend, we first need to install CmdStan (see the README for
 more details). We can check we have everything we need as follows:
 
+Code
+
 ``` r
 
 cmdstanr::cmdstan_version()
@@ -53,6 +57,8 @@ cmdstanr::cmdstan_version()
 
 We begin by loading the Ebola line list data:
 
+Code
+
 ``` r
 
 data("sierra_leone_ebola_data")
@@ -61,6 +67,8 @@ data("sierra_leone_ebola_data")
 The data has 8358 rows, each corresponding to a unique case report ID
 (`id`). The columns of the data are the, age, sex, the dates of Ebola
 symptom onset and positive sample, and their district and chiefdom.
+
+Code
 
 ``` r
 
@@ -89,6 +97,8 @@ varies across districts.
 
 Click to expand for code to prepare outbreak plot
 
+Code
+
 ``` r
 
 ebola_linelist <- sierra_leone_ebola_data |>
@@ -104,6 +114,8 @@ p_outbreak <- ebola_linelist |>
   labs(x = "") +
   theme(legend.position = "none")
 ```
+
+Code
 
 ``` r
 
@@ -131,6 +143,8 @@ distribution.
 
 To prepare the data, we begin by selecting the relevant columns:
 
+Code
+
 ``` r
 
 obs_cens <- select(
@@ -153,6 +167,8 @@ head(obs_cens)
 For the time being, we filter the data to only complete cases (i.e. rows
 of the data which have no missing values[^1]).
 
+Code
+
 ``` r
 
 n <- nrow(obs_cens)
@@ -165,6 +181,8 @@ to only include cases up to the 31st of January 2015. **The marginal
 model used in this is adjusting for truncation. To check it is working
 try filtering instead for the `date_of_symptom_onset` and rerunning.**
 
+Code
+
 ``` r
 
 obs_cens_trunc <- filter(
@@ -175,6 +193,8 @@ obs_cens_trunc <- filter(
 
 We prepare the data for use with the `epidist` package by converting the
 data to an `epidist_linelist_data` object:
+
+Code
 
 ``` r
 
@@ -198,6 +218,8 @@ the maximum of the secondary event upper bounds.
 
 To prepare the data for use with the marginal model, we define the data
 as being a `epidist_marginal_model` model object:
+
+Code
 
 ``` r
 
@@ -241,6 +263,8 @@ parameter of the lognormal distribution specified using
 distributional parameters `mu` and `sigma`. As a model is not explicitly
 placed on `sigma`, a constant model `sigma ~ 1` is assumed.)
 
+Code
+
 ``` r
 
 fit <- epidist(
@@ -271,6 +295,8 @@ object, and has the associated range of methods. See
 about the fitted model, including posterior estimates for the regression
 coefficients:
 
+Code
+
 ``` r
 
 summary(fit)
@@ -297,6 +323,8 @@ summary(fit)
 To fit a model which varies the parameters of the fitted lognormal
 distribution, `mu` and `sigma`, by sex we alter the `formula`
 specification to include fixed effects for sex `~ 1 + sex` as follows:
+
+Code
 
 ``` r
 
@@ -329,6 +357,8 @@ important to note that the estimates represent an average of the
 observed data, and individual delays between men and women vary
 significantly.
 
+Code
+
 ``` r
 
 summary(fit_sex)
@@ -359,6 +389,8 @@ we will use district level random effects, assumed to be drawn from a
 shared normal distribution, within the model for both the `mu` and
 `sigma` parameters. These random effects are specified by including
 `(1 | district)` in the formulas:
+
+Code
 
 ``` r
 
@@ -394,6 +426,8 @@ For this model, along with looking at the
 [`summary()`](https://rdrr.io/r/base/summary.html), we may also use the
 [`brms::ranef()`](https://rdrr.io/pkg/nlme/man/random.effects.html)
 function to look at the estimates of the random effects:
+
+Code
 
 ``` r
 
@@ -489,6 +523,8 @@ women.
 
 Click to expand for code to the posterior expectation plots
 
+Code
+
 ``` r
 
 expectation_draws <- obs_prep |>
@@ -527,6 +563,8 @@ epred_sex_district_figure <- expectation_draws_sex_district |>
   theme_minimal()
 ```
 
+Code
+
 ``` r
 
 epred_base_figure / epred_sex_figure / epred_sex_district_figure +
@@ -549,6 +587,8 @@ For example, for the `mu` parameter in the sex-district stratified model
 
 Click to expand for code to prepare linear predictor plot
 
+Code
+
 ``` r
 
 linpred_draws_sex_district <- obs_prep |>
@@ -563,6 +603,8 @@ p_linpred_sex_district <- linpred_draws_sex_district |>
   scale_y_discrete(limits = rev) +
   theme_minimal()
 ```
+
+Code
 
 ``` r
 
@@ -599,6 +641,8 @@ right truncation. To do this, we set each of `pwindow` and `swindow` to
 where the few delays greater than 30 are omitted from the figure.
 
 Click to expand for code to prepare PMF plots
+
+Code
 
 ``` r
 
@@ -650,6 +694,8 @@ pmf_sex_district_figure <- draws_sex_district_pmf |>
   theme_minimal()
 ```
 
+Code
+
 ``` r
 
 pmf_base_figure / pmf_sex_figure / pmf_sex_district_figure +
@@ -669,6 +715,8 @@ censoring. That is to produce continuous delay times (Figure
 [3.4](#fig:pdf)):
 
 Click to expand for code to prepare PDF plots
+
+Code
 
 ``` r
 
@@ -717,6 +765,8 @@ pdf_sex_district_figure <- draws_sex_district_pdf |>
   scale_x_continuous(limits = c(0, 30)) +
   theme_minimal()
 ```
+
+Code
 
 ``` r
 

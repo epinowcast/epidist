@@ -1,8 +1,9 @@
 # Simulate delays from each draw of the distributional parameters
 
-Simulation goes through the `brms` posterior prediction function for the
-family, so it works for any family `brms` can predict from. Rows are
-simulated in chunks to bound the memory used.
+Simulation goes through the posterior prediction function
+[`.get_brms_fn()`](https://epidist.epinowcast.org/reference/dot-get_brms_fn.md)
+gives for the family. Rows are simulated in chunks to bound the memory
+used.
 
 ## Usage
 

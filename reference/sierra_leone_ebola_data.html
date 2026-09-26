@@ -15,7 +15,7 @@ data in your work, please cite the corresponding paper."><meta property="og:imag
 
     <a class="navbar-brand me-2" href="../index.html">epidist</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,7 @@ data in your work, please cite the corresponding paper."><meta property="og:imag
     <li><a class="dropdown-item" href="../articles/approx-inference.html">Approximate Bayesian inference</a></li>
     <li><a class="dropdown-item" href="../articles/left-truncation.html">Adjusting for left truncation</a></li>
     <li><a class="dropdown-item" href="../articles/primary-events.html">Primary event distributions</a></li>
+    <li><a class="dropdown-item" href="../articles/nonparametric.html">Non-parametric delay distributions</a></li>
     <li><a class="dropdown-item" href="../articles/extending-epidist.html">Extending epidist</a></li>
     <li><a class="dropdown-item" href="../articles/meta.html">Fitting to published estimates</a></li>
     <li><a class="dropdown-item" href="../articles/model.html">Guide to the statistical models implemented in epidist</a></li>
@@ -70,17 +71,14 @@ data in your work, please cite the corresponding paper.</p>
 
     <div class="section level2">
     <h2 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a></h2>
-    <p>A <code>tibble</code> with 8,358 rows and 8 columns:</p><dl><dt>id</dt>
+    <p>A <code>tibble</code> with 8,358 rows and 7 columns:</p><dl><dt>id</dt>
 <dd><p>Unique identification number for the case</p></dd>
-
-<dt>name</dt>
-<dd><p>Name as character, omitted</p></dd>
 
 <dt>age</dt>
 <dd><p>Age as numeric</p></dd>
 
 <dt>sex</dt>
-<dd><p>Sex as character, either "F", "M" or NA</p></dd>
+<dd><p>Sex as character, either "Female", "Male" or NA</p></dd>
 
 <dt>date_of_symptom_onset</dt>
 <dd><p>The date symptoms began</p></dd>
@@ -98,7 +96,7 @@ data in your work, please cite the corresponding paper.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="source">Source<a class="anchor" aria-label="anchor" href="#source"></a></h2>
-    <p><a href="https://www.pnas.org/doi/full/10.1073/pnas.1518587113" class="external-link">https://www.pnas.org/doi/full/10.1073/pnas.1518587113</a></p>
+    <p><a href="https://doi.org/10.1073/pnas.1518587113" class="external-link">doi:10.1073/pnas.1518587113</a></p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

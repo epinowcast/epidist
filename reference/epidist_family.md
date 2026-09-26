@@ -57,4 +57,37 @@ Other family:
 [`epidist_family_param()`](https://epidist.epinowcast.org/reference/epidist_family_param.md),
 [`epidist_family_param.default()`](https://epidist.epinowcast.org/reference/epidist_family_param.default.md),
 [`epidist_family_param.gengamma()`](https://epidist.epinowcast.org/reference/epidist_family_param.gengamma.md),
-[`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md)
+[`epidist_family_param.nonparametric()`](https://epidist.epinowcast.org/reference/epidist_family_param.nonparametric.md),
+[`gengamma()`](https://epidist.epinowcast.org/reference/gengamma.md),
+[`nonparametric()`](https://epidist.epinowcast.org/reference/nonparametric.md)
+
+## Examples
+
+``` r
+data <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model()
+#> ℹ No primary event upper bound provided, using the primary event lower bound + 1 day as the assumed upper bound.
+#> ℹ No secondary event upper bound provided, using the secondary event lower bound + 1 day as the assumed upper bound.
+#> ℹ No observation time column provided, using 2015-09-14 as the observation date (the maximum of the secondary event upper bound).
+#> ! Setting 2394 relative observation times (`relative_obs_time`) greater than 98
+#>   (2x the maximum delay) to Inf.
+#> ℹ This improves model efficiency by reducing the number of unique observation
+#>   times in the data.
+#> ℹ The impact on model accuracy should be negligible because these relative
+#>   observation times are high enough to cause very limited right truncation.
+#> ℹ The original relative observation times are available in
+#>   `orig_relative_obs_time`.
+#> ℹ Raise `obs_time_threshold` to avoid this behaviour.
+family <- epidist_family(data, family = lognormal())
+family
+#> 
+#> Custom family: marginal_lognormal 
+#> Link function: identity 
+#> Parameters: mu, sigma 
+#> 
+```

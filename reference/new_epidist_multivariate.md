@@ -69,8 +69,7 @@ new_epidist_multivariate(
   vcov = matrix(c(0.09, 0.02, 0.02, 0.04), nrow = 2),
   params = c("mean", "sd")
 )
-#> A multivariate representation of 2 parameters at 1 index point.
-#> mean   sd 
+#> A multivariate representation of 2 parameters at 1 index point.mean   sd 
 #>  7.5  3.6 
 #>      [,1] [,2]
 #> [1,] 0.09 0.02

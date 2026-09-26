@@ -18,6 +18,8 @@ scale^r g_r\\.
 .meta_moments_weibull(args)
 
 .meta_moments_gengamma(args)
+
+.meta_moments_np(args)
 ```
 
 ## Arguments
