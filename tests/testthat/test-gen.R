@@ -166,14 +166,15 @@ test_that( # nolint: line_length_linter.
     skip_on_cran()
     skip_if_no_fits()
 
-    # Test with normal distribution without analytical solution
-    prep <- brms::prepare_predictions(fit)
+    # Test with the exponential distribution, which has no analytical
+    # solution. Its mean is the gamma `mu`, which is positive.
+    prep <- brms::prepare_predictions(fit_gamma)
     prep$ndraws <- 10
     i <- 1
 
     # Capture the message about falling back to generic method
     log_lik_fn <- suppressMessages(
-      epidist_gen_log_lik(brms::brmsfamily("gaussian"))
+      epidist_gen_log_lik(brms::exponential())
     )
 
     # Test that the generic method produces valid log likelihoods

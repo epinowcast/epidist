@@ -434,8 +434,8 @@ epidist_strata <- function(object, vars = NULL) {
 #' Adds the mean and standard deviation of the delay distribution implied by
 #' each draw of the distributional parameters, and quantiles of that
 #' distribution if `probs` is given. Analytic solutions are used for the
-#' families that have one. Every other family is summarised by simulating
-#' delays from it, which works for any family `brms` can predict from.
+#' families that have one. The exponential family is summarised by
+#' simulating delays from it.
 #'
 #' @details
 #' The summaries describe the delay distribution, not the posterior. A row of
@@ -591,8 +591,8 @@ add_summaries <- function(
 
 #' Simulate delays from each draw of the distributional parameters
 #'
-#' Simulation goes through the `brms` posterior prediction function for the
-#' family, so it works for any family `brms` can predict from. Rows are
+#' Simulation goes through the posterior prediction function
+#' [.get_brms_fn()] gives for the family. Rows are
 #' simulated in chunks to bound the memory used.
 #'
 #' @inheritParams add_summaries
@@ -629,7 +629,7 @@ add_summaries <- function(
     if (inherits(drawn, "try-error")) {
       cli_abort(c(
         "Could not simulate delays from the {.val {family$name}} family.",
-        i = "The {.pkg brms} error was: {conditionMessage(attr(drawn, 'condition'))}" # nolint: line_length_linter.
+        i = "The error was: {conditionMessage(attr(drawn, 'condition'))}" # nolint: line_length_linter.
       ))
     }
     samples[rows, ] <- matrix(

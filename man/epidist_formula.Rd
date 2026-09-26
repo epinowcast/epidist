@@ -29,6 +29,18 @@ to \code{brms}. It is unlikely that as a user you will need this function, but w
 export it nonetheless to be transparent about what exactly is happening
 inside of a call to \code{\link[=epidist]{epidist()}}.
 }
+\examples{
+data <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model()
+family <- epidist_family(data, family = lognormal())
+formula <- epidist_formula(data, family = family, formula = mu ~ 1)
+formula
+}
 \seealso{
 Other formula:
 \code{\link[=epidist_formula_model]{epidist_formula_model()}},

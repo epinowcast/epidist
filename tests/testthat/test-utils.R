@@ -251,3 +251,31 @@ test_that("epidist() does not leak the compilation variables rstan sets", { # no
   expect_identical(Sys.getenv("PKG_CPPFLAGS", unset = NA), NA_character_)
   expect_identical(Sys.getenv("PKG_LIBS", unset = NA), NA_character_)
 })
+
+test_that(".get_brms_fn never returns a function from the brms namespace", {
+  families <- list(
+    brms::lognormal(), Gamma(), brms::weibull(), brms::exponential(),
+    list(family = "meta_lognormal"), list(family = "latent_gamma"),
+    list(family = "marginal_weibull")
+  )
+  for (family in families) {
+    for (prefix in c("log_lik", "posterior_predict", "posterior_epred")) {
+      fn <- .get_brms_fn(prefix, family)
+      expect_type(fn, "closure")
+      expect_false(
+        identical(environment(fn), asNamespace("brms")),
+        info = paste(family$family, prefix)
+      )
+    }
+  }
+})
+
+test_that(".get_brms_fn gives functions that error for unsupported families", {
+  prep <- list(ndraws = 2, nobs = 1, dpars = list(mu = 1:2), data = list())
+  for (prefix in c("log_lik", "posterior_predict")) {
+    fn <- .get_brms_fn(prefix, brms::brmsfamily("gaussian"))
+    expect_error(fn(i = 1, prep = prep), "gaussian")
+  }
+  fn <- .get_brms_fn("posterior_epred", brms::brmsfamily("gaussian"))
+  expect_error(fn(prep = prep), "gaussian")
+})

@@ -4,7 +4,7 @@ description: |
   "How to set the distribution of the primary event within its censoring
   window, and when it matters."
 output:
-  bookdown::html_document2:
+  bookdown::html_vignette2:
     fig_caption: yes
     code_folding: show
     number_sections: true

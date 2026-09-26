@@ -2,9 +2,12 @@
 #
 # These helpers replace `brms:::validate_family()`,
 # `brms:::validate_formula()`, `brms:::validate_data()`,
-# `brms:::dpar_bounds()` and `brms:::log_lik_weight()`, because calls to
-# unexported functions are flagged by `R CMD check --as-cran` and are not
-# covered by the 'brms' interface guarantees. They reproduce only the narrow
+# `brms:::dpar_bounds()`, `brms:::log_lik_weight()` and the
+# `brms:::log_lik_<family>()`, `brms:::posterior_predict_<family>()` and
+# `brms:::posterior_epred_<family>()` functions of the delay families,
+# because calls to unexported functions are flagged by
+# `R CMD check --as-cran` and are not covered by the 'brms' interface
+# guarantees. They reproduce only the narrow
 # behaviour that 'epidist' depends on, written against the public 'brms'
 # interface rather than copied from the 'brms' source.
 #
@@ -298,4 +301,197 @@
     x <- x * weight
   }
   return(x)
+}
+
+#' The `stats` distribution of a `brms` delay family
+#'
+#' Replaces the family specific parts of the `brms` internals
+#' `log_lik_<family>()` and `posterior_predict_<family>()` for the delay
+#' families `brms` provides and `epidist` supports. `brms` gives `mu` as the
+#' mean of the gamma, Weibull and exponential families and as the mean of the
+#' log delay for the lognormal family.
+#'
+#' @param family The name of a `brms` family, for example `"lognormal"`.
+#'
+#' @inheritParams .log_lik_weight
+#'
+#' @returns A list with the `stats` distribution name `dist`, for example
+#'  `"lnorm"`, and its arguments `args` for observation `i`.
+#'
+#' @keywords internal
+.brms_family_dist <- function(family, prep, i) {
+  mu <- brms::get_dpar(prep, "mu", i = i)
+  out <- switch(family,
+    lognormal = list(
+      dist = "lnorm",
+      args = list(meanlog = mu, sdlog = brms::get_dpar(prep, "sigma", i = i))
+    ),
+    gamma = {
+      shape <- brms::get_dpar(prep, "shape", i = i)
+      list(dist = "gamma", args = list(shape = shape, scale = mu / shape))
+    },
+    weibull = {
+      shape <- brms::get_dpar(prep, "shape", i = i)
+      list(
+        dist = "weibull",
+        args = list(shape = shape, scale = mu / gamma(1 + 1 / shape))
+      )
+    },
+    exponential = list(dist = "exp", args = list(rate = 1 / mu))
+  )
+  return(out)
+}
+
+#' The delay families whose `brms` post-processing `epidist` replaces
+#'
+#' @returns A character vector of `brms` family names.
+#'
+#' @keywords internal
+.brms_delay_families <- function() {
+  return(c("lognormal", "gamma", "weibull", "exponential"))
+}
+
+#' The log likelihood of a `brms` delay family
+#'
+#' Replaces the `brms` internals `log_lik_<family>()`, `log_lik_censor()` and
+#' `log_lik_truncate()`. Observation `i` may be left (`cens` of -1), right
+#' (1) or interval (2) censored, with the upper end of the interval in
+#' `rcens`, and truncated to lie between `lb` and `ub`.
+#'
+#' @inheritParams .brms_family_dist
+#'
+#' @returns The log likelihood of observation `i` for every draw.
+#'
+#' @keywords internal
+.brms_family_log_lik <- function(family, i, prep) {
+  spec <- .brms_family_dist(family, prep, i)
+  dist_args <- spec$args
+  pdist <- .pdist(paste0("p", spec$dist))
+  y <- prep$data$Y[i]
+  cens <- prep$data$cens[i]
+  if (is.null(cens) || cens == 0) {
+    ddist <- .ddist(paste0("p", spec$dist))
+    out <- do.call(ddist, c(list(y), dist_args, log = TRUE))
+  } else if (cens == 1) {
+    out <- do.call(
+      pdist, c(list(y), dist_args, lower.tail = FALSE, log.p = TRUE)
+    )
+  } else if (cens == -1) {
+    out <- do.call(pdist, c(list(y), dist_args, log.p = TRUE))
+  } else if (cens == 2) {
+    rcens <- prep$data$rcens[i]
+    out <- log(
+      do.call(pdist, c(list(rcens), dist_args)) -
+        do.call(pdist, c(list(y), dist_args))
+    )
+  }
+  lb <- prep$data[["lb"]][i]
+  ub <- prep$data[["ub"]][i]
+  if (!is.null(lb) || !is.null(ub)) {
+    log_cdf_lb <- if (is.null(lb)) {
+      rep(-Inf, length(out))
+    } else {
+      do.call(pdist, c(list(lb), dist_args, log.p = TRUE))
+    }
+    log_cdf_ub <- if (is.null(ub)) {
+      rep(0, length(out))
+    } else {
+      do.call(pdist, c(list(ub), dist_args, log.p = TRUE))
+    }
+    log_mass <- ifelse(
+      log_cdf_ub > log_cdf_lb, log(exp(log_cdf_ub) - exp(log_cdf_lb)), NaN
+    )
+    out <- out - log_mass
+  }
+  return(.log_lik_weight(out, i = i, prep = prep))
+}
+
+#' Draw from a `brms` delay family
+#'
+#' Replaces the `brms` internals `posterior_predict_<family>()` and
+#' `rcontinuous()`. When observation `i` is truncated to lie between `lb`
+#' and `ub` the delays are drawn by inverting the distribution function.
+#'
+#' @inheritParams .brms_family_dist
+#'
+#' @returns A delay for observation `i` for every draw.
+#'
+#' @keywords internal
+.brms_family_posterior_predict <- function(family, i, prep) {
+  spec <- .brms_family_dist(family, prep, i)
+  dist_args <- spec$args
+  pname <- paste0("p", spec$dist)
+  lb <- prep$data$lb[i]
+  ub <- prep$data$ub[i]
+  if (is.null(lb) && is.null(ub)) {
+    rdist <- .dist_fn(pname, "r")
+    return(do.call(rdist, c(list(prep$ndraws), dist_args)))
+  }
+  if (is.null(lb)) {
+    lb <- -Inf
+  }
+  if (is.null(ub)) {
+    ub <- Inf
+  }
+  pdist <- .pdist(pname)
+  plb <- do.call(pdist, c(list(lb), dist_args))
+  pub <- do.call(pdist, c(list(ub), dist_args))
+  out <- stats::runif(prep$ndraws, min = plb, max = pub)
+  out <- do.call(.qdist(pname), c(list(out), dist_args))
+  out[out %in% c(-Inf, Inf)] <- NA
+  return(out)
+}
+
+#' The mean of a `brms` delay family
+#'
+#' Replaces the `brms` internals `posterior_epred_<family>()`.
+#'
+#' @inheritParams .brms_family_dist
+#'
+#' @returns The mean delay for every draw and observation.
+#'
+#' @keywords internal
+.brms_family_posterior_epred <- function(family, prep) {
+  if (identical(family, "lognormal")) {
+    return(exp(prep$dpars$mu + prep$dpars$sigma^2 / 2))
+  }
+  return(prep$dpars$mu)
+}
+
+#' The post-processing functions of a delay family
+#'
+#' Gives the functions with the signatures `brms` expects of a custom
+#' family, for a delay family `brms` provides. Other families get functions
+#' that error when called, so a model can still be fitted with them.
+#'
+#' @param prefix One of `"log_lik"`, `"posterior_predict"` or
+#'  `"posterior_epred"`.
+#'
+#' @inheritParams .brms_family_dist
+#'
+#' @returns A function.
+#'
+#' @keywords internal
+.brms_family_fn <- function(prefix, family) {
+  if (!family %in% .brms_delay_families()) {
+    return(function(...) {
+      return(cli_abort(c(
+        "{.fn {prefix}} is not available for the {.val {family}} family.",
+        i = "Supported families are {.val {c(.brms_delay_families(),
+          names(.epidist_families()))}}."
+      )))
+    })
+  }
+  out <- switch(prefix,
+    log_lik = function(i, prep) {
+      return(.brms_family_log_lik(family, i, prep))
+    },
+    posterior_predict = function(i, prep, ...) {
+      return(.brms_family_posterior_predict(family, i, prep))
+    },
+    posterior_epred = function(prep) {
+      return(.brms_family_posterior_epred(family, prep))
+    }
+  )
+  return(out)
 }

@@ -73,7 +73,7 @@ jobs:
       - name: Render vignettes
         run: |
           setwd("vignettes")
-          # The vignettes use bookdown::html_document2 and cross-reference
+          # The vignettes use bookdown::html_vignette2 and cross-reference
           # figures and tables with \@ref(fig:label). Outside a bookdown
           # render knitr emits a plain markdown image, which carries no
           # chunk label, so those references resolve to "??". This makes

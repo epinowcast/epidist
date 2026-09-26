@@ -331,7 +331,7 @@ test_that("the meta model takes the nonparametric family", {
   ))
   code <- as.character(code)
   expect_match(code, "y | 27,", fixed = TRUE)
-  expect_match(code, "if (27 == 27 || 27 == 28) {", fixed = TRUE)
+  expect_match(code, "if (27 == 27) {", fixed = TRUE)
   skip_on_cran()
   expect_no_error(rstan::stanc(model_code = code))
 })
@@ -490,4 +490,18 @@ test_that("the nonparametric expected delay is the mean of the bins", {
   for (i in 1:3) {
     expect_equal(epred[, i], expected, tolerance = 1e-12)
   }
+})
+
+test_that("nonparametric post-processing never asks brms for a family", {
+  local_mocked_bindings(.get_brms_fn = function(...) {
+    stop("reached .get_brms_fn()", call. = FALSE)
+  })
+  setup <- np_prep()
+  expect_no_error(epidist_gen_log_lik(np_family)(1, setup$prep))
+  withr::local_seed(1)
+  expect_no_error(epidist_gen_posterior_predict(np_family)(1, setup$prep))
+  expect_no_error(epidist_gen_posterior_epred(np_family)(setup$prep))
+  expect_no_error(
+    add_summaries(np_draws, family = np_family, method = "sample", nsim = 10)
+  )
 })

@@ -8,13 +8,13 @@
   "codeRepository": "https://github.com/epinowcast/epidist/",
   "issueTracker": "https://github.com/epinowcast/epidist/issues/",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 4.3.0 (2023-04-21)",
+  "runtimePlatform": "R version 4.6.0 (2026-04-24)",
   "author": [
     {
       "@type": "Person",
@@ -69,7 +69,14 @@
     {
       "@type": "SoftwareApplication",
       "identifier": "MASS",
-      "name": "MASS"
+      "name": "MASS",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=MASS"
     },
     {
       "@type": "SoftwareApplication",
@@ -122,8 +129,33 @@
     },
     {
       "@type": "SoftwareApplication",
+      "identifier": "distspec",
+      "name": "distspec",
+      "version": ">= 0.2.0",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=distspec"
+    },
+    {
+      "@type": "SoftwareApplication",
       "identifier": "epireview",
       "name": "epireview"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "identifier": "flexsurv",
+      "name": "flexsurv",
+      "provider": {
+        "@id": "https://cran.r-project.org",
+        "@type": "Organization",
+        "name": "Comprehensive R Archive Network (CRAN)",
+        "url": "https://cran.r-project.org"
+      },
+      "sameAs": "https://CRAN.R-project.org/package=flexsurv"
     },
     {
       "@type": "SoftwareApplication",
@@ -417,7 +449,7 @@
       "@type": "SoftwareApplication",
       "identifier": "primarycensored",
       "name": "primarycensored",
-      "version": ">= 1.4.0",
+      "version": ">= 1.5.2",
       "provider": {
         "@id": "https://cran.r-project.org",
         "@type": "Organization",
@@ -482,7 +514,7 @@
     },
     "SystemRequirements": null
   },
-  "fileSize": "3284.156KB",
+  "fileSize": "3378.312KB",
   "citation": [
     {
       "@type": "SoftwareSourceCode",
@@ -519,5 +551,5 @@
   "releaseNotes": "https://github.com/epinowcast/epidist/blob/main/NEWS.md",
   "readme": "https://github.com/epinowcast/epidist/blob/main/README.md",
   "contIntegration": ["https://github.com/epinowcast/epidist/actions/workflows/R-CMD-check.yaml", "https://app.codecov.io/gh/epinowcast/epidist"],
-  "developmentStatus": "https://lifecycle.r-lib.org/articles/stages.html#experimental"
+  "developmentStatus": "https://lifecycle.r-lib.org/articles/stages.html#maturing"
 }

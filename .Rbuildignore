@@ -25,3 +25,9 @@
 ^vignettes/.*_files(/|$)
 ^design$
 ^vignettes/chunks$
+^\.claude$
+^\.jj$
+^\.git$
+^codemeta\.json$
+^worktrees$
+^vignettes/bdbv-onset-to-death\.csv$

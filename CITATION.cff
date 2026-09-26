@@ -8,7 +8,7 @@ message: 'To cite package "epidist" in publications use:'
 type: software
 license: MIT
 title: 'epidist: Estimate Epidemiological Delay Distributions with ''brms'''
-version: 0.5.0
+version: 1.0.0
 doi: 10.5281/zenodo.14213017
 identifiers:
 - type: url

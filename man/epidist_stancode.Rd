@@ -20,6 +20,18 @@ is injected into \code{brms} via the \code{stanvars} argument. It is unlikely th
 as a user you will need this function, but we export it nonetheless to be
 transparent about what exactly is happening inside of a call to \code{\link[=epidist]{epidist()}}.
 }
+\examples{
+data <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model()
+family <- epidist_family(data, family = lognormal())
+formula <- epidist_formula(data, family = family, formula = mu ~ 1)
+epidist_stancode(data, family = family, formula = formula)
+}
 \seealso{
 Other stan:
 \code{\link[=epidist_stancode.default]{epidist_stancode.default()}}

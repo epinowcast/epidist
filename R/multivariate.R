@@ -251,9 +251,9 @@ assert_epidist.epidist_multivariate <- function(data, ...) {
 #'   params = c("mean", "sd")
 #' ))
 print.epidist_multivariate <- function(x, ...) {
-  cli::cli_inform(paste0(
+  cat(cli::pluralize(
     "A multivariate representation of {length(x$params)} parameter{?s} at ",
-    "{length(x$index)} index point{?s}."
+    "{length(x$index)} index point{?s}.\n"
   ))
   print(x$value)
   print(x$vcov)

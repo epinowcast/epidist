@@ -269,31 +269,21 @@
   position <- cumsum(types == 3L)
   entry <- function(i, j) {
     if (types[i] == 3L && types[j] == 3L) {
-      return(
-        min(probs[i], probs[j]) * (1 - max(probs[i], probs[j])) /
-          (study_n * density[position[i]] * density[position[j]])
-      )
+      return(.meta_quantile_covariance(
+        probs[i], probs[j], density[position[i]], density[position[j]],
+        study_n
+      ))
     }
     if (types[i] == 3L) {
       return(entry(j, i))
     }
     if (types[j] == 3L) {
       m <- position[j]
-      if (types[i] == 1L) {
-        return(-partial[1, m] / (study_n * density[m]))
-      }
-      return(
-        -(partial[2, m] - spread^2 * probs[j]) /
-          (2 * spread * study_n * density[m])
-      )
+      return(.meta_cross_covariance(
+        types[i], probs[j], density[m], partial[, m], spread, study_n
+      ))
     }
-    if (types[i] != types[j]) {
-      return(rho * se_mean * se_sd)
-    }
-    if (types[i] == 1L) {
-      return(se_mean^2)
-    }
-    return(se_sd^2)
+    return(.meta_moment_covariance(types[i], types[j], se_mean, se_sd, rho))
   }
   covariance <- matrix(0, k, k)
   for (i in seq_len(k)) {
@@ -302,6 +292,83 @@
     }
   }
   return(covariance)
+}
+
+#' The entries of the joint sampling covariance of one study's summaries
+#'
+#' `.meta_quantile_covariance()` gives the Bahadur covariance of two
+#' quantiles, `.meta_cross_covariance()` that of a mean or a
+#' standard deviation and a quantile, and `.meta_moment_covariance()` that of
+#' two moment summaries, see [.meta_joint_covariance()]. They mirror the Stan
+#' functions `meta_family_quantile_covariance()`,
+#' `meta_family_cross_covariance()` and
+#' `meta_family_moment_covariance()` in `inst/stan/meta_model/functions.stan`.
+#'
+#' @param prob_i,prob_j,prob Member probabilities.
+#'
+#' @param density_i,density_j,density The implied density at the implied
+#'  quantiles.
+#'
+#' @param moment_type,type_i,type_j Member types, 1 for a mean and 2 for a
+#'  standard deviation.
+#'
+#' @param partial The two centred partial moments at the quantile, a column
+#'  of [.meta_quantile_partials()].
+#'
+#' @param spread The implied standard deviation.
+#'
+#' @param se_mean,se_sd The sampling standard errors of the mean and the
+#'  standard deviation.
+#'
+#' @param rho The sampling correlation of the mean and the standard deviation
+#'  from [.meta_moment_correlation()].
+#'
+#' @inheritParams .meta_joint_covariance
+#'
+#' @returns A covariance.
+#'
+#' @keywords internal
+.meta_quantile_covariance <- function(
+  prob_i,
+  prob_j,
+  density_i,
+  density_j,
+  study_n
+) {
+  return(
+    min(prob_i, prob_j) * (1 - max(prob_i, prob_j)) /
+      (study_n * density_i * density_j)
+  )
+}
+
+#' @rdname dot-meta_quantile_covariance
+#' @keywords internal
+.meta_cross_covariance <- function(
+  moment_type,
+  prob,
+  density,
+  partial,
+  spread,
+  study_n
+) {
+  if (moment_type == 1L) {
+    return(-partial[1] / (study_n * density))
+  }
+  return(
+    -(partial[2] - spread^2 * prob) / (2 * spread * study_n * density)
+  )
+}
+
+#' @rdname dot-meta_quantile_covariance
+#' @keywords internal
+.meta_moment_covariance <- function(type_i, type_j, se_mean, se_sd, rho) {
+  if (type_i != type_j) {
+    return(rho * se_mean * se_sd)
+  }
+  if (type_i == 1L) {
+    return(se_mean^2)
+  }
+  return(se_sd^2)
 }
 
 #' The implied summaries of a joint study group and their sampling covariance

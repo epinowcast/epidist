@@ -43,7 +43,7 @@ epidist_gen_log_lik <- function(family) {
     log_lik_brms <- .get_brms_fn("log_lik", family)
     cli::cli_inform(
       c(
-        "Falling back to default dependency on brms for {primary_dist_name}",
+        "Falling back to numerical integration for the {primary_dist_name}",
         "distribution when generating the log likelihood in R. To improve",
         "performance, implement a .get_supported_dist_args_{primary_dist_name}",
         "function and ensure that p{primary_dist_name} is an available",

@@ -14,6 +14,16 @@
 #' @returns A `brms` custom family object.
 #'
 #' @export
+#' @examples
+#' data <- sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_aggregate_data() |>
+#'   as_epidist_marginal_model()
+#' family <- epidist_family(data, family = lognormal())
+#' family
 epidist_family <- function(data, family = lognormal(), ...) {
   assert_epidist(data)
   family <- .validate_family(family)

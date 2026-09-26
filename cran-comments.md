@@ -1,7 +1,9 @@
 ## Test environments
 
-- local Ubuntu 22.04, R 4.6.0
-- GitHub Actions: ubuntu-latest (release, oldrel-1), macOS-latest (release), windows-latest (release)
+- local macOS Tahoe 26.5, R 4.6.0
+- GitHub Actions: ubuntu-latest (devel, release, oldrel-1), macOS-latest (release), windows-latest (release)
+- GitHub Actions: `R CMD check --as-cran` on ubuntu-latest (release)
+- win-builder (devel)
 
 ## R CMD check results
 
@@ -21,5 +23,8 @@ Availability using Additional_repositories specification:
 
 This is a new submission.
 
-`epireview` is used by one test and by a vignette section, and is not on CRAN.
-It is declared in `Suggests` and reached through `Additional_repositories`.
+`epireview` is used by one test, one example and a vignette section, and is not on CRAN.
+It is declared in `Suggests`, reached through `Additional_repositories`, and every use is conditional on it being installed.
+
+The `\donttest{}` examples each fit a Stan model through `rstan`.
+They take about 25 seconds each, mostly compiling the model, and about 3.5 minutes in total.
