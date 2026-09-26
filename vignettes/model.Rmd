@@ -260,6 +260,35 @@ $$
 
 Removing the latent variables reduces the number of parameters that must be sampled, and where analytical solutions exist the likelihood can be evaluated without numerical integration.
 In addition, identical observations can be aggregated and the likelihood computed once per unique combination of delay, censoring windows, and covariates.
+
+## A non-parametric delay {#nonparametric}
+
+The `nonparametric()` family, available for the marginal and meta models, makes no assumption about the shape of $F$.
+The delay lies on a grid of $K$ bins with boundaries $b_0 < b_1 < \dots < b_K$, and all the probability of bin $k$ sits at its right edge $b_k$.
+The distribution is written in terms of the discrete time hazard of each bin,
+$$
+h_k = \mathbb{P}(\text{the delay ends in bin } k \mid \text{it has not ended in bins } 1, \dots, k - 1),
+$$
+with $h_K = 1$ so that every delay ends by $b_K$.
+The probability of each bin and the distribution function follow as
+$$
+f_k = h_k \prod_{j < k} (1 - h_j), \qquad F(t) = \sum_{k : b_k \leq t} f_k.
+$$
+The logit hazards of the other bins are a linear predictor over the bins,
+$$
+\text{logit}(h_k) = \mu + \sum_{q} B_{kq} \theta_q, \qquad k = 1, \dots, K - 1,
+$$
+where $B$ is the basis of the `formula` argument of `nonparametric()`, evaluated on the right edge of each bin and centred over the bins, so $\mu$ is the mean logit hazard.
+The default formula, `~ s(delay)`, is a thin plate regression spline over the delay, which smooths the hazard over neighbouring bins.
+`~ (1 | bin)` instead gives each bin its own hazard around $\mu$.
+The coefficients of unpenalised terms, such as the linear part of a spline, are estimated directly.
+The coefficients of a penalised term $j$, such as the wiggly part of a spline or a random intercept per bin, are $\theta_q = \sigma_j z_q$ with $z_q \sim \mathcal{N}(0, 1)$, the non-centred form `brms` uses for smooths and random effects.
+Both $\mu$ and each $\theta_q$ are distributional parameters, so each takes a `brms` formula.
+A covariate in the formula of $\mu$ shifts the logit hazard of every bin by the same amount, a proportional odds model for the hazard, while a covariate in the formula of a $\theta_q$ changes the shape of the hazard over the bins.
+
+Because $F$ is a step function, the integral over the primary event window in the double censoring probability above is a sum over the bins, which `primarycensored` evaluates with its discrete hazard distribution [@primarycensored].
+The right truncation adjustment is the same as for any other family.
+The `primarycensored` article on [fitting non-parametric delays](https://primarycensored.epinowcast.org/articles/fitting-nonparametric-delays.html) derives the censored likelihood of this distribution, and `vignette("nonparametric")` shows the family in use.
 Together these make the marginal model substantially more efficient than the latent model, particularly for larger datasets with daily-censored data where many observations share the same structure.
 
 For the mathematical details of primary event censored distributions, including the survival function derivation and closed-form solutions for specific distributions, see `vignette("why-it-works", package = "primarycensored")` and `vignette("analytic-solutions", package = "primarycensored")`.
