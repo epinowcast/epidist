@@ -4,10 +4,13 @@
 \alias{.analytic_delay_summaries}
 \title{Analytic delay summaries for the families that have them}
 \usage{
-.analytic_delay_summaries(name)
+.analytic_delay_summaries(name, np = NULL)
 }
 \arguments{
 \item{name}{The name of a delay distribution family.}
+
+\item{np}{The \code{np} element of a non-parametric family, holding its
+boundaries and hazard model, or \code{NULL} for any other family.}
 }
 \value{
 A list of solutions, or \code{NULL} when the family has none.
@@ -16,5 +19,10 @@ A list of solutions, or \code{NULL} when the family has none.
 Each gives the \code{brms} parameters of the family and functions of them
 returning the mean, the standard deviation, the quantile function and the
 density of the delay distribution, built by \code{\link[=.analytic_family]{.analytic_family()}}.
+}
+\details{
+The non-parametric family puts its probability at the right edge of each
+bin, so its quantiles are bin edges and its density is the histogram of
+the bin probabilities, each spread over the width of its bin.
 }
 \keyword{internal}

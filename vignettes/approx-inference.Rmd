@@ -4,7 +4,7 @@ description: |
   "A demonstration of how to fit models in epidist using approximate Bayesian
   inference methods such as the Laplace approximation, ADVI, and Pathfinder."
 output:
-  bookdown::html_document2:
+  bookdown::html_vignette2:
     fig_caption: yes
     code_folding: show
     number_sections: true

@@ -17,11 +17,12 @@
 #' Build the Stan functions block shared by the marginal and meta models
 #'
 #' Both models read a `functions.stan` chunk with the same placeholders
-#' (`family`, `dist_id`, `dpars_A`, `dpars_B`, and the pair
+#' (`family`, `dist_id`, `dpars_A`, `{dpars_B}`, and the pair
 #' `primary_id, primary_params`), filled in with the target distribution's
-#' details and the primary event distribution. `dpars_B` is the parameter
-#' order of `primarycensored`, which a family may record as `pcd_param`
-#' where it differs from the order of its Stan density. Used within
+#' details and the primary event distribution. `{dpars_B}` is the parameter
+#' array of `primarycensored`, see [.stan_dist_params()], which a family may
+#' order as `pcd_param` where it differs from the order of its Stan density.
+#' Used within
 #' [epidist_stancode()] methods for the marginal and meta models, which
 #' differ only in the chunk path, the family name prefix, and any further
 #' placeholders they need substituted.
@@ -56,17 +57,12 @@
   )
 
   family_name <- gsub(family_prefix, "", family$name, fixed = TRUE)
-  dist_id <- primarycensored::pcd_stan_dist_id(family_name)
-  pcd_param <- family$pcd_param
-  if (is.null(pcd_param)) {
-    pcd_param <- family$param
-  }
-
+  dist_id <- .pcd_stan_dist_id(family_name)
   substitutions <- c(
+    "{dpars_B}" = .stan_dist_params(family),
     family = family_name,
     dist_id = as.character(dist_id),
     dpars_A = toString(paste0("real ", family$dpars)),
-    dpars_B = pcd_param,
     "primary_id, primary_params" = .primary_stancode_args(primary),
     extra
   )
@@ -81,6 +77,50 @@
   }
 
   return(stanvars_functions)
+}
+
+#' The `primarycensored` Stan distribution id of a family
+#'
+#' `primarycensored` gives the alias `"nonparametric"` to its direct
+#' probability mass step, `dist_id` 26, so the [nonparametric()] family is
+#' looked up by the name of its hazard distribution, `dist_id` 27.
+#'
+#' @param family_name The name of the delay family.
+#'
+#' @returns An integer.
+#'
+#' @keywords internal
+.pcd_stan_dist_id <- function(family_name) {
+  if (identical(family_name, "nonparametric")) {
+    family_name <- "discretehazard_rw"
+  }
+  return(primarycensored::pcd_stan_dist_id(family_name))
+}
+
+#' The Stan expression for the parameter array of a delay distribution
+#'
+#' The functions chunks pass the delay distribution parameters to
+#' `primarycensored` as the array `{dpars_B}`. For a parametric family that is
+#' the distributional parameters in the `primarycensored` order, `pcd_param`
+#' where the family records one and `param` otherwise, in braces. The
+#' non-parametric family builds the array of boundaries and hazards with
+#' `epidist_np_params()`, which is already an array, see
+#' [epidist_family_param()].
+#'
+#' @param family The `epidist` family object.
+#'
+#' @returns A character string holding a Stan expression.
+#'
+#' @keywords internal
+.stan_dist_params <- function(family) {
+  if (.is_nonparametric(family)) {
+    return(family$param)
+  }
+  pcd_param <- family$pcd_param
+  if (is.null(pcd_param)) {
+    pcd_param <- family$param
+  }
+  return(paste0("{", pcd_param, "}"))
 }
 
 #' Label a `epidist` Stan model with a version indicator
@@ -275,6 +315,11 @@
 #'
 #' @keywords internal
 .add_dpar_info <- function(family) {
+  # The non-parametric family sets its own links and bounds with its
+  # boundaries, see `.np_set_boundaries()`.
+  if (.is_nonparametric(family)) {
+    return(family)
+  }
   other_dpars <- setdiff(family$dpars, "mu")
   other_links <- unlist(lapply(other_dpars, function(dpar) {
     return(family[[paste0("link_", dpar)]])
@@ -432,20 +477,20 @@
   return(data)
 }
 
-#' Get a brms function by prefix and family
+#' Get the post-processing function of a family by prefix
 #'
-#' Helper function to get internal brms functions by constructing their name
-#' from a prefix and family. Used to get functions like `log_lik_*`,
-#' `posterior_predict_*` etc. A family `epidist` defines itself, such as
+#' Gets the function `brms` would call for a family, such as `log_lik` or
+#' `posterior_predict`. A family `epidist` defines itself, such as
 #' [gengamma()], carries these functions, so they are taken from it, whether
-#' it is given as the family or as a model family built on it.
+#' it is given as the family or as a model family built on it. For a `brms`
+#' family they come from [.brms_family_fn()].
 #'
 #' @param prefix Character string prefix of the brms function to get (e.g.
 #'  "log_lik")
 #'
 #' @inheritParams epidist_family
 #'
-#' @returns The requested brms function
+#' @returns The requested function
 #'
 #' @keywords internal
 .get_brms_fn <- function(prefix, family) {
@@ -453,10 +498,7 @@
   if (!is.null(constructor)) {
     return(constructor()[[prefix]])
   }
-  return(get(
-    paste0(prefix, "_", tolower(family$family)),
-    asNamespace("brms")
-  ))
+  return(.brms_family_fn(prefix, .delay_family(family)$name))
 }
 
 #' Add weights to a data frame

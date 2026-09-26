@@ -42,8 +42,8 @@ the family used and gives it a \link[=plot.epidist_delay_draws]{plot()} method.
 Adds the mean and standard deviation of the delay distribution implied by
 each draw of the distributional parameters, and quantiles of that
 distribution if \code{probs} is given. Analytic solutions are used for the
-families that have one. Every other family is summarised by simulating
-delays from it, which works for any family \code{brms} can predict from.
+families that have one. The exponential family is summarised by
+simulating delays from it.
 }
 \details{
 The summaries describe the delay distribution, not the posterior. A row of

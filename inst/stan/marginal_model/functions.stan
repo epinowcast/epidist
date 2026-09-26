@@ -6,8 +6,8 @@
   * - 'family' is replaced with the target distribution (e.g., 'lognormal')
   * - 'dpars_A' is replaced with multiple distribution parameters in the format
   *   "real paramname1, real paramname2, ...".
-  * - 'dpars_B' is replaced with the same parameters as dpars_A but
-  *   reparameterised according to the brms parameterisation for Stan.
+  * - The parameter array placeholder in braces is replaced with the same
+  *   parameters as dpars_A but in the primarycensored parameterisation.
   *
   * @param y Real value of observed delay
   * @param dpars_A Distribution parameters (replaced via regex)

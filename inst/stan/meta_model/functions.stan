@@ -6,8 +6,8 @@
   * - 'dist_id' is replaced with the primarycensored distribution identifier
   * - 'dpars_A' is replaced with multiple distribution parameters in the format
   *   "real paramname1, real paramname2, ...".
-  * - 'dpars_B' is replaced with the same parameters as dpars_A but
-  *   reparameterised according to the brms parameterisation for Stan.
+  * - The parameter array placeholder in braces is replaced with the same
+  *   parameters as dpars_A but in the primarycensored parameterisation.
   * - 'primary_id, primary_params' is replaced with the primarycensored
   *   identifier and parameters of the primary event distribution used for
   *   individual level rows, for example '2, {pgrowth}' for exponential
@@ -197,6 +197,40 @@
   }
 
   /**
+    * Deep lower tail bound of a lognormal delay with params
+    * [meanlog, sdlog], see meta_family_deep_tail(). Mirrors
+    * .meta_deep_tail_lognormal().
+    */
+  int meta_deep_tail_lognormal(real d, array[] real params) {
+    return (log(d) - params[1]) / params[2] < -14;
+  }
+
+  /**
+    * Deep lower tail bound of a gamma delay with params [shape, rate]. Mirrors
+    * .meta_deep_tail_gamma().
+    */
+  int meta_deep_tail_gamma(real d, array[] real params) {
+    return params[1] * log(params[2] * d) - lgamma(params[1] + 1) < -100;
+  }
+
+  /**
+    * Deep lower tail bound of a weibull delay with params [shape, scale].
+    * Mirrors .meta_deep_tail_weibull().
+    */
+  int meta_deep_tail_weibull(real d, array[] real params) {
+    return params[1] * (log(d) - log(params[2])) < -100;
+  }
+
+  /**
+    * Deep lower tail bound of a generalised gamma delay with Stacy params
+    * [shape, scale, k]. Mirrors .meta_deep_tail_gengamma().
+    */
+  int meta_deep_tail_gengamma(real d, array[] real params) {
+    return params[1] * params[3] * log(d / params[2]) -
+      lgamma(params[3] + 1) < -100;
+  }
+
+  /**
     * Whether a delay is so deep in the lower tail that its log distribution
     * function is certainly below -100, decided from a closed form bound on
     * the parameters. The distribution function itself must not be evaluated
@@ -205,21 +239,23 @@
     * poisons the gradient even when the value is discarded. Lognormal:
     * Phi(z) < exp(-100) for z < -14. Gamma: P(a, x) <= x^a / Gamma(a + 1).
     * Weibull: 1 - exp(-y) <= y. Generalised gamma: the gamma bound at
-    * x = (d / scale)^shape with a = k. Mirrors .meta_deep_tail() in R.
+    * x = (d / scale)^shape with a = k. The non-parametric hazard family
+    * (dist_id 27) needs no bound, because their distribution function
+    * is a constant zero below the first bin edge and bounded away from zero
+    * above it. Mirrors .meta_deep_tail() in R.
     */
   int meta_family_deep_tail(real d, array[] real params) {
     if (dist_id == 1) {
-      return (log(d) - params[1]) / params[2] < -14;
+      return meta_deep_tail_lognormal(d, params);
     }
     if (dist_id == 2) {
-      return params[1] * log(params[2] * d) - lgamma(params[1] + 1) < -100;
+      return meta_deep_tail_gamma(d, params);
     }
     if (dist_id == 3) {
-      return params[1] * (log(d) - log(params[2])) < -100;
+      return meta_deep_tail_weibull(d, params);
     }
     if (dist_id == 5) {
-      return params[1] * params[3] * log(d / params[2]) -
-        lgamma(params[3] + 1) < -100;
+      return meta_deep_tail_gengamma(d, params);
     }
     return 0;
   }
@@ -468,6 +504,20 @@
   }
 
   /**
+    * Edges and probabilities of the bins of a non-parametric hazard delay,
+    * whose params hold the K + 1 boundaries followed by the K hazards. The
+    * probability of each bin sits at its right edge. Returns the K edges
+    * followed by the K probabilities.
+    */
+  vector meta_bins_nonparametric(array[] real params) {
+    int K = (size(params) - 1) %/% 2;
+    return append_row(
+      to_vector(params[2:(K + 1)]),
+      hazards_to_pmf(to_vector(params[(K + 2):(2 * K + 1)]))
+    );
+  }
+
+  /**
     * Mean, variance and third and fourth central moments of a lognormal
     * delay with params [meanlog, sdlog]. Mirrors .meta_moments_lognormal().
     */
@@ -530,10 +580,27 @@
     return meta_moments_scaled(params[2], g);
   }
 
+  /**
+    * Central moments of a non-parametric hazard delay, whose probability
+    * sits at the right edge of each bin. Mirrors .meta_moments_np().
+    */
+  vector meta_moments_nonparametric(array[] real params) {
+    int K = (size(params) - 1) %/% 2;
+    vector[2 * K] bins = meta_bins_nonparametric(params);
+    vector[K] mass = bins[(K + 1):(2 * K)];
+    real delay_mean = dot_product(mass, bins[1:K]);
+    vector[K] centred = bins[1:K] - delay_mean;
+    return [delay_mean, dot_product(mass, square(centred)),
+            dot_product(mass, pow(centred, 3)),
+            dot_product(mass, pow(centred, 4))]';
+  }
+
   /** Analytic summaries of the delay distribution. */
   vector meta_family_moments(array[] real params) {
     vector[4] moments;
-    if (dist_id == 1) {
+    if (dist_id == 27) {
+      moments = meta_moments_nonparametric(params);
+    } else if (dist_id == 1) {
       moments = meta_moments_lognormal(params);
     } else if (dist_id == 2) {
       moments = meta_moments_gamma(params);
@@ -542,8 +609,9 @@
     } else if (dist_id == 5) {
       moments = meta_moments_gengamma(params);
     } else {
-      reject("Meta model summary rows support lognormal, gamma, weibull and ",
-             "generalised gamma delay distributions only.");
+      reject("Meta model summary rows support lognormal, gamma, weibull, ",
+             "generalised gamma and non-parametric delay distributions ",
+             "only.");
     }
     // A draw wide enough to overflow a moment would leave a finite density
     // whose gradient carries the infinite intermediate, so it is rejected
@@ -1044,30 +1112,57 @@
     );
   }
 
+  /**
+    * Density of a lognormal delay at a positive y with params
+    * [meanlog, sdlog].
+    */
+  real meta_density_lognormal(real y, array[] real params) {
+    return exp(lognormal_lpdf(y | params[1], params[2]));
+  }
+
+  /** Density of a gamma delay at a positive y with params [shape, rate]. */
+  real meta_density_gamma(real y, array[] real params) {
+    return exp(gamma_lpdf(y | params[1], params[2]));
+  }
+
+  /** Density of a weibull delay at a positive y with params [shape, scale]. */
+  real meta_density_weibull(real y, array[] real params) {
+    return exp(weibull_lpdf(y | params[1], params[2]));
+  }
+
+  /**
+    * Density of a generalised gamma delay at a positive y, in the Stacy
+    * parameterisation with params [shape, scale, k], see gengamma_lcdf() in
+    * primarycensored.
+    */
+  real meta_density_gengamma(real y, array[] real params) {
+    real log_z = log(y / params[2]);
+    return exp(log(params[1]) - lgamma(params[3]) +
+               params[1] * params[3] * log_z - log(y) -
+               exp(params[1] * log_z));
+  }
+
   /** Density of the delay distribution. */
   real meta_family_density(real y, array[] real params) {
     if (y <= 0) {
       return 0;
     }
     if (dist_id == 1) {
-      return exp(lognormal_lpdf(y | params[1], params[2]));
+      return meta_density_lognormal(y, params);
     }
     if (dist_id == 2) {
-      return exp(gamma_lpdf(y | params[1], params[2]));
+      return meta_density_gamma(y, params);
     }
     if (dist_id == 3) {
-      return exp(weibull_lpdf(y | params[1], params[2]));
+      return meta_density_weibull(y, params);
     }
     if (dist_id == 5) {
-      // Stacy parameterisation with params [shape, scale, k], see
-      // gengamma_lcdf() in primarycensored.
-      real log_z = log(y / params[2]);
-      return exp(log(params[1]) - lgamma(params[3]) +
-                 params[1] * params[3] * log_z - log(y) -
-                 exp(params[1] * log_z));
+      return meta_density_gengamma(y, params);
     }
-    reject("Meta model summary rows support lognormal, gamma, weibull and ",
-           "generalised gamma delay distributions only.");
+    // The non-parametric hazard families put their probability at bin
+    // edges, so they have no density. R rejects the summary rows that would
+    // need one when the model is built, see .np_check_meta().
+    reject("meta_family_density: this delay distribution has no density.");
   }
 
   /** Density of a delay censored by a uniform primary window. */
@@ -1080,6 +1175,61 @@
   }
 
   /**
+    * Partial expectation below a positive x of a lognormal delay with params
+    * [meanlog, sdlog].
+    */
+  real meta_partial_expectation_lognormal(real x, array[] real params) {
+    return exp(params[1] + 0.5 * square(params[2]) +
+               lognormal_lcdf(x | params[1] + square(params[2]), params[2]));
+  }
+
+  /**
+    * Partial expectation below a positive x of a gamma delay with params
+    * [shape, rate].
+    */
+  real meta_partial_expectation_gamma(real x, array[] real params) {
+    return params[1] / params[2] * gamma_p(params[1] + 1, params[2] * x);
+  }
+
+  /**
+    * Partial expectation below a positive x of a weibull delay with params
+    * [shape, scale].
+    */
+  real meta_partial_expectation_weibull(real x, array[] real params) {
+    return params[2] * tgamma(1 + 1 / params[1]) *
+      gamma_p(1 + 1 / params[1], pow(x / params[2], params[1]));
+  }
+
+  /**
+    * Partial expectation below a positive x of a generalised gamma delay
+    * with Stacy params [shape, scale, k]: the mean times the distribution
+    * function with k + 1 / shape, as for the weibull, which is the k = 1
+    * case.
+    */
+  real meta_partial_expectation_gengamma(real x, array[] real params) {
+    return params[2] *
+      exp(lgamma(params[3] + 1 / params[1]) - lgamma(params[3])) *
+      gamma_p(params[3] + 1 / params[1], pow(x / params[2], params[1]));
+  }
+
+  /**
+    * Partial expectation below a positive x of a non-parametric hazard
+    * delay: the sum over the bin edges up to and including x of the edge
+    * times its probability.
+    */
+  real meta_partial_expectation_nonparametric(real x, array[] real params) {
+    int K = (size(params) - 1) %/% 2;
+    vector[2 * K] bins = meta_bins_nonparametric(params);
+    real total = 0;
+    for (i in 1:K) {
+      if (bins[i] <= x) {
+        total += bins[i] * bins[K + i];
+      }
+    }
+    return total;
+  }
+
+  /**
     * Partial expectation of the delay below `x`, the integral of t f(t) from
     * zero to x, in closed form for each family.
     */
@@ -1087,27 +1237,24 @@
     if (x <= 0) {
       return 0;
     }
+    if (dist_id == 27) {
+      return meta_partial_expectation_nonparametric(x, params);
+    }
     if (dist_id == 1) {
-      return exp(params[1] + 0.5 * square(params[2]) +
-                 lognormal_lcdf(x | params[1] + square(params[2]),
-                                params[2]));
+      return meta_partial_expectation_lognormal(x, params);
     }
     if (dist_id == 2) {
-      return params[1] / params[2] * gamma_p(params[1] + 1, params[2] * x);
+      return meta_partial_expectation_gamma(x, params);
     }
     if (dist_id == 3) {
-      return params[2] * tgamma(1 + 1 / params[1]) *
-        gamma_p(1 + 1 / params[1], pow(x / params[2], params[1]));
+      return meta_partial_expectation_weibull(x, params);
     }
     if (dist_id == 5) {
-      // The mean times the distribution function with k + 1 / shape, as
-      // for the weibull, which is the k = 1 case.
-      return params[2] *
-        exp(lgamma(params[3] + 1 / params[1]) - lgamma(params[3])) *
-        gamma_p(params[3] + 1 / params[1], pow(x / params[2], params[1]));
+      return meta_partial_expectation_gengamma(x, params);
     }
-    reject("Meta model summary rows support lognormal, gamma, weibull and ",
-           "generalised gamma delay distributions only.");
+    reject("Meta model summary rows support lognormal, gamma, weibull, ",
+           "generalised gamma and non-parametric delay distributions ",
+           "only.");
   }
 
   /**
@@ -1134,13 +1281,23 @@
     return fmin(fmax((at_d - at_start) / pwindow_width, 0), 1);
   }
 
+  /** Quantile function of a lognormal delay with params [meanlog, sdlog]. */
+  real meta_quantile_lognormal(real p, array[] real params) {
+    return exp(params[1] + params[2] * inv_Phi(p));
+  }
+
+  /** Quantile function of a weibull delay with params [shape, scale]. */
+  real meta_quantile_weibull(real p, array[] real params) {
+    return params[2] * pow(-log1m(p), 1 / params[1]);
+  }
+
   /** Quantile function of the delay distribution where it has a closed form. */
   real meta_family_quantile(real p, array[] real params) {
     if (dist_id == 1) {
-      return exp(params[1] + params[2] * inv_Phi(p));
+      return meta_quantile_lognormal(p, params);
     }
     if (dist_id == 3) {
-      return params[2] * pow(-log1m(p), 1 / params[1]);
+      return meta_quantile_weibull(p, params);
     }
     reject("meta_family_quantile: this family has no closed form quantile ",
            "function.");
@@ -1640,6 +1797,50 @@
   }
 
   /**
+    * Bahadur sampling covariance p_i (1 - p_j) / (n f_i f_j) of two
+    * quantiles with p_i <= p_j, see meta_family_joint_covariance(). Mirrors
+    * .meta_quantile_covariance() in R.
+    */
+  real meta_family_quantile_covariance(data real prob_i, data real prob_j,
+                                       real density_i, real density_j,
+                                       data int study_n) {
+    return fmin(prob_i, prob_j) * (1 - fmax(prob_i, prob_j)) /
+      (study_n * density_i * density_j);
+  }
+
+  /**
+    * Sampling covariance of a mean (moment_type 1) or a standard deviation
+    * (moment_type 2) and a quantile, from the centred partial moments at the
+    * quantile, see meta_family_joint_covariance(). Mirrors
+    * .meta_cross_covariance() in R.
+    */
+  real meta_family_cross_covariance(int moment_type, real prob,
+                                    real density, vector partial,
+                                    real spread, data int study_n) {
+    if (moment_type == 1) {
+      return -partial[1] / (study_n * density);
+    }
+    return -(partial[2] - spread ^ 2 * prob) /
+      (2 * spread * study_n * density);
+  }
+
+  /**
+    * Sampling covariance of two moment summaries, each a mean (type 1) or a
+    * standard deviation (type 2), see meta_family_joint_covariance().
+    * Mirrors .meta_moment_covariance() in R.
+    */
+  real meta_family_moment_covariance(data int type_i, data int type_j,
+                                     real se_mean, real se_sd, real rho) {
+    if (type_i != type_j) {
+      return rho * se_mean * se_sd;
+    }
+    if (type_i == 1) {
+      return se_mean ^ 2;
+    }
+    return se_sd ^ 2;
+  }
+
+  /**
     * Sampling covariance of the mean, standard deviation and quantiles one
     * study computed from the same delays. The moment block is that of
     * meta_family_moment_pair_lpdf(), the quantile block is the Bahadur
@@ -1671,25 +1872,21 @@
     for (i in 1:k) {
       for (j in 1:k) {
         if (types[i] == 3 && types[j] == 3) {
-          covariance[i, j] = fmin(probs[i], probs[j]) *
-            (1 - fmax(probs[i], probs[j])) /
-            (study_n * density[position[i]] * density[position[j]]);
+          covariance[i, j] = meta_family_quantile_covariance(
+            probs[i], probs[j], density[position[i]], density[position[j]],
+            study_n
+          );
         } else if (types[i] == 3 || types[j] == 3) {
           int moment_type = types[i] == 3 ? types[j] : types[i];
           int m = types[i] == 3 ? position[i] : position[j];
           real prob = types[i] == 3 ? probs[i] : probs[j];
-          if (moment_type == 1) {
-            covariance[i, j] = -partials[1, m] / (study_n * density[m]);
-          } else {
-            covariance[i, j] = -(partials[2, m] - spread ^ 2 * prob) /
-              (2 * spread * study_n * density[m]);
-          }
-        } else if (types[i] != types[j]) {
-          covariance[i, j] = rho * se_mean * se_sd;
-        } else if (types[i] == 1) {
-          covariance[i, j] = se_mean ^ 2;
+          covariance[i, j] = meta_family_cross_covariance(
+            moment_type, prob, density[m], partials[:, m], spread, study_n
+          );
         } else {
-          covariance[i, j] = se_sd ^ 2;
+          covariance[i, j] = meta_family_moment_covariance(
+            types[i], types[j], se_mean, se_sd, rho
+          );
         }
       }
     }
@@ -2478,6 +2675,99 @@
     return lp;
   }
 
+  /**
+    * Log density of a group whose covariance comes from a multivariate
+    * representation of a study's parameter draws, with its Cholesky factor
+    * flattened column major in `chol`. Matches .meta_multi_normal_ll() in R.
+    */
+  real meta_family_mvn_group_lpdf(data vector y, data array[] int types,
+                                  data vector probs, data vector chol,
+                                  array[] real params, data real delay_min,
+                                  data real cutoff, data real pwindow_width,
+                                  data real swindow_width,
+                                  data int trunc_adj, data int cens_adj,
+                                  data int prim_id,
+                                  array[] real prim_params,
+                                  data int accrual, real growth_rate,
+                                  data int n_quad) {
+    int k = num_elements(y);
+    vector[k] implied = meta_family_implied_summary_vector(
+      types, probs, params, delay_min, cutoff, pwindow_width, swindow_width,
+      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate, n_quad
+    );
+    return multi_normal_cholesky_lpdf(y | implied, to_matrix(chol, k, k));
+  }
+
+  /**
+    * Log density of a reported quantile whose standard error is on the delay
+    * scale, so the reported value is compared with the implied quantile on
+    * that scale. Matches .meta_summary_terms() in R, including the 1e-6
+    * guard of .meta_min_prob_se().
+    */
+  real meta_family_quantile_delay_lpdf(data real y, data real p,
+                                       data real report_se,
+                                       array[] real params,
+                                       data real delay_min, data real cutoff,
+                                       data real pwindow_width,
+                                       data real swindow_width,
+                                       data int trunc_adj, data int cens_adj,
+                                       data int prim_id,
+                                       array[] real prim_params,
+                                       data int accrual, real growth_rate,
+                                       data int n_quad) {
+    int n_node = meta_family_node_count(
+      delay_min, cutoff, pwindow_width, swindow_width, cens_adj, n_quad
+    );
+    vector[2 + n_node] nodes = meta_family_implied_nodes(
+      params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+      cens_adj, prim_id, prim_params, accrual, growth_rate, n_quad
+    );
+    real implied = meta_family_node_quantile(
+      nodes, p, params, delay_min, cutoff, pwindow_width, swindow_width,
+      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth_rate
+    );
+    return normal_lpdf(y | implied, fmax(report_se, 1e-6));
+  }
+
+  /**
+    * Log density of the probability `p` of a reported quantile `y`,
+    * compared with the probability the estimand puts below `y` with its
+    * binomial sampling error. Matches .meta_summary_terms() in R.
+    */
+  real meta_family_quantile_prob_lpdf(data real p, data real y,
+                                      data int study_n, array[] real params,
+                                      data real delay_min, data real cutoff,
+                                      data real pwindow_width,
+                                      data real swindow_width,
+                                      data int trunc_adj, data int cens_adj,
+                                      data int prim_id,
+                                      array[] real prim_params,
+                                      data int accrual, real growth_rate,
+                                      data int n_quad) {
+    real implied = meta_family_implied_prob(
+      y, params, delay_min, cutoff, pwindow_width, swindow_width, trunc_adj,
+      cens_adj, prim_id, prim_params, accrual, growth_rate, n_quad
+    );
+    return normal_lpdf(p | implied, sqrt(p * (1 - p) / study_n));
+  }
+
+  /**
+    * Log density of a reported mean (obs_type 2) or standard deviation
+    * (obs_type 3) given the implied summaries, with the reported standard
+    * error where there is one. Matches .meta_summary_terms() in R.
+    */
+  real meta_family_moment_lpdf(data real y, data int obs_type,
+                               data real report_se, vector moments,
+                               data int study_n) {
+    if (obs_type == 2) {
+      real se = report_se > 0 ? report_se : moments[2] / sqrt(study_n);
+      return normal_lpdf(y | moments[1], se);
+    }
+    real se = report_se > 0 ? report_se
+      : meta_family_sd_se(moments, study_n);
+    return normal_lpdf(y | moments[2], se);
+  }
+
 /**
   * Compute the log probability mass function for the meta model.
   * Individual level rows use the marginal likelihood from primarycensored.
@@ -2538,17 +2828,12 @@
   }
 
   if (obs_type == 7) {
-    vector[group_len] implied = meta_family_implied_summary_vector(
-      group_type[group_start:last], group_p[group_start:last], {dpars_B},
-      delay_min, relative_obs_t, pwindow_width, swindow_width, trunc_adj,
-      cens_adj, prim_id, prim_params, accrual, growth, n_quad
-    );
-    matrix[group_len, group_len] chol = to_matrix(
+    return meta_family_mvn_group_lpdf(
+      group_value[group_start:last] | group_type[group_start:last],
+      group_p[group_start:last],
       group_chol[chol_start:(chol_start + group_len * group_len - 1)],
-      group_len, group_len
-    );
-    return multi_normal_cholesky_lpdf(
-      group_value[group_start:last] | implied, chol
+      {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
+      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth, n_quad
     );
   }
 
@@ -2572,34 +2857,18 @@
   }
 
   if (obs_type == 4 && report_se > 0) {
-    // A reported quantile standard error is on the delay scale, so the
-    // reported value is compared with the implied quantile on that scale.
-    // Matches .meta_summary_terms() in R, including the 1e-6 guard of
-    // .meta_min_prob_se().
-    int n_node = meta_family_node_count(
-      delay_min, relative_obs_t, pwindow_width, swindow_width, cens_adj,
-      n_quad
+    return meta_family_quantile_delay_lpdf(
+      y_upper | quantile_p, report_se, {dpars_B}, delay_min, relative_obs_t,
+      pwindow_width, swindow_width, trunc_adj, cens_adj, prim_id,
+      prim_params, accrual, growth, n_quad
     );
-    vector[2 + n_node] nodes = meta_family_implied_nodes(
-      {dpars_B}, delay_min, relative_obs_t, pwindow_width, swindow_width,
-      trunc_adj, cens_adj, prim_id, prim_params, accrual, growth, n_quad
-    );
-    real implied = meta_family_node_quantile(
-      nodes, quantile_p, {dpars_B}, delay_min, relative_obs_t, pwindow_width,
-      swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
-      growth
-    );
-    return normal_lpdf(y_upper | implied, fmax(report_se, 1e-6));
   }
 
   if (obs_type == 4) {
-    real implied = meta_family_implied_prob(
-      y_upper, {dpars_B}, delay_min, relative_obs_t, pwindow_width,
-      swindow_width, trunc_adj, cens_adj, prim_id, prim_params, accrual,
-      growth, n_quad
-    );
-    return normal_lpdf(
-      quantile_p | implied, sqrt(quantile_p * (1 - quantile_p) / study_n)
+    return meta_family_quantile_prob_lpdf(
+      quantile_p | y_upper, study_n, {dpars_B}, delay_min, relative_obs_t,
+      pwindow_width, swindow_width, trunc_adj, cens_adj, prim_id,
+      prim_params, accrual, growth, n_quad
     );
   }
 
@@ -2616,14 +2885,10 @@
     }
   }
 
-  if (obs_type == 2) {
-    real se = report_se > 0 ? report_se : moments[2] / sqrt(study_n);
-    return normal_lpdf(y_upper | moments[1], se);
-  }
-  if (obs_type == 3) {
-    real se = report_se > 0 ? report_se
-      : meta_family_sd_se(moments, study_n);
-    return normal_lpdf(y_upper | moments[2], se);
+  if (obs_type == 2 || obs_type == 3) {
+    return meta_family_moment_lpdf(
+      y_upper | obs_type, report_se, moments, study_n
+    );
   }
   if (obs_type == 5) {
     return meta_family_moment_pair_lpdf(

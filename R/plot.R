@@ -609,7 +609,7 @@ autoplot.epidist_delay_draws <- function(
 .delay_density_grid <- function(family, dpars, max_delay = NULL, n_grid = 101,
                                 nsim = 1000) {
   n <- length(dpars[[1]])
-  analytic <- .analytic_delay_summaries(family$name)
+  analytic <- .analytic_delay_summaries(family$name, family$np)
   if (!is.null(analytic) && all(analytic$dpars %in% names(dpars))) {
     if (is.null(max_delay)) {
       max_delay <- stats::median(analytic$quantile(dpars, 0.99))

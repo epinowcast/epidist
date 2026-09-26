@@ -6,6 +6,7 @@
 \alias{.meta_moments_scaled}
 \alias{.meta_moments_weibull}
 \alias{.meta_moments_gengamma}
+\alias{.meta_moments_np}
 \title{Central moments of the delay distributions with analytic summaries}
 \usage{
 .meta_moments_lognormal(args)
@@ -17,6 +18,8 @@
 .meta_moments_weibull(args)
 
 .meta_moments_gengamma(args)
+
+.meta_moments_np(args)
 }
 \arguments{
 \item{args}{A named list of distribution parameters.}

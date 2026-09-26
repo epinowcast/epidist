@@ -78,6 +78,68 @@ test_that("epidist.epidist_marginal_model fits and recovers a sex effect", { # n
   )
 })
 
+test_that("epidist.epidist_marginal_model with a nonparametric delay recovers the mean of each stratum", { # nolint: line_length_linter.
+  # The strata differ in the shape of the delay as well as its location, so
+  # the linear part of the hazard spline varies by stratum as well as `mu`.
+  # Note: this test is stochastic. See note at the top of this script
+  skip_on_cran()
+  skip_if_no_fits()
+  set.seed(12)
+  meanlog <- c(a = 1.2, b = 1.8)
+  sdlog <- c(a = 0.5, b = 0.4)
+  cases <- lapply(names(meanlog), function(group) {
+    stratum <- simulate_gillespie() |>
+      simulate_secondary(
+        dist = rlnorm, meanlog = meanlog[[group]], sdlog = sdlog[[group]]
+      ) |>
+      dplyr::mutate(
+        ptime_lwr = floor(.data$ptime), ptime_upr = .data$ptime_lwr + 1,
+        stime_lwr = floor(.data$stime), stime_upr = .data$stime_lwr + 1,
+        obs_time = 100
+      ) |>
+      dplyr::filter(.data$stime_upr <= .data$obs_time) |>
+      dplyr::slice_sample(n = 300)
+    stratum$group <- group
+    return(stratum)
+  })
+  cases <- dplyr::bind_rows(cases)
+  data <- suppressMessages(as_epidist_marginal_model(as_epidist_linelist_data(
+    cases$ptime_lwr, cases$ptime_upr, cases$stime_lwr, cases$stime_upr,
+    cases$obs_time,
+    group = cases$group
+  )))
+  # Delays long past the observation time are set to an infinite
+  # observation time, which brms warns about.
+  fit <- suppressWarnings(suppressMessages(epidist(
+    data,
+    formula = bf(mu ~ 1 + group, h1b ~ 1 + group),
+    family = nonparametric(),
+    seed = 1, chains = 2, cores = 2, refresh = 0, iter = 1000, silent = 2
+  )))
+  expect_convergence(fit)
+  # The post-processing brms does from the prep object works per
+  # observation, as for the parametric families.
+  log_lik <- brms::log_lik(fit, draw_ids = 1:5)
+  expect_identical(dim(log_lik), c(5L, nrow(fit$data)))
+  expect_true(all(is.finite(log_lik)))
+  expect_s3_class(suppressWarnings(loo::loo(fit)), "loo")
+  pred <- brms::posterior_predict(fit, draw_ids = 1:5)
+  expect_identical(dim(pred), c(5L, nrow(fit$data)))
+  epred <- brms::posterior_epred(fit, draw_ids = 1:5)
+  expect_identical(dim(epred), c(5L, nrow(fit$data)))
+  expect_true(all(epred > 0))
+  summaries <- delay_summary_draws(fit)
+  # The daily delay of a uniform primary event has the mean of the
+  # continuous delay, which is what the bins recover.
+  truth <- exp(meanlog + sdlog^2 / 2)
+  for (group in names(truth)) {
+    expect_equal(
+      mean(summaries$mean[summaries$group == group]), truth[[group]],
+      tolerance = 0.1
+    )
+  }
+})
+
 test_that("epidist.epidist_marginal_model fits the gengamma family and recovers a gamma delay", { # nolint: line_length_linter.
   # Note: this test is stochastic. See note at the top of this script
   skip_on_cran()

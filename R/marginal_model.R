@@ -265,6 +265,7 @@ epidist_family_model.epidist_marginal_model <- function(
     posterior_epred = epidist_gen_posterior_epred(family)
   )
   custom_family$primary <- family$primary
+  custom_family$np <- family$np
   return(custom_family)
 }
 
@@ -382,6 +383,11 @@ epidist_stancode.epidist_marginal_model <- function(
     stanvars_functions +
     pcd_stanvars_functions +
     stanvars_parameters
+
+  np_stanvars <- .np_stanvars(family)
+  if (!is.null(np_stanvars)) {
+    stanvars_all <- stanvars_all + np_stanvars
+  }
 
   return(stanvars_all)
 }

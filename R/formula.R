@@ -14,6 +14,17 @@
 #' @returns A `brmsformula` object.
 #'
 #' @export
+#' @examples
+#' data <- sierra_leone_ebola_data |>
+#'   as_epidist_linelist_data(
+#'     pdate_lwr = "date_of_symptom_onset",
+#'     sdate_lwr = "date_of_sample_tested"
+#'   ) |>
+#'   as_epidist_aggregate_data() |>
+#'   as_epidist_marginal_model()
+#' family <- epidist_family(data, family = lognormal())
+#' formula <- epidist_formula(data, family = family, formula = mu ~ 1)
+#' formula
 epidist_formula <- function(data, family, formula, ...) {
   assert_epidist(data)
   formula <- .validate_formula(formula, family = family, data = data)

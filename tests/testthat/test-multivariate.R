@@ -388,7 +388,7 @@ test_that("print.epidist_multivariate says what it holds", {
     vcov = matrix(c(0.09, 0.02, 0.02, 0.04), nrow = 2),
     params = c("mean", "sd")
   )
-  expect_message(print(mvn), "2 parameters at 1 index point")
+  expect_output(print(mvn), "2 parameters at 1 index point")
   expect_output(print(mvn), "7.5")
   expect_identical(vcov(mvn), mvn$vcov)
   expect_false(is_epidist_multivariate(list()))

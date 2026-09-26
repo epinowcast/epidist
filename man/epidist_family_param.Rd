@@ -32,7 +32,9 @@ Other family:
 \code{\link[=epidist_family_model.default]{epidist_family_model.default()}},
 \code{\link[=epidist_family_param.default]{epidist_family_param.default()}},
 \code{\link[=epidist_family_param.gengamma]{epidist_family_param.gengamma()}},
-\code{\link[=gengamma]{gengamma()}}
+\code{\link[=epidist_family_param.nonparametric]{epidist_family_param.nonparametric()}},
+\code{\link[=gengamma]{gengamma()}},
+\code{\link[=nonparametric]{nonparametric()}}
 }
 \concept{family}
 \keyword{internal}

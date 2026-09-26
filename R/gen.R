@@ -29,9 +29,6 @@
 #' @importFrom purrr map_dbl
 #' @export
 epidist_gen_log_lik <- function(family) {
-  # Get internal brms log_lik function
-  log_lik_brms <- .get_brms_fn("log_lik", family)
-
   # The primary event distribution the family was built with
   spec <- .primary_spec_from_family(family)
 
@@ -40,11 +37,13 @@ epidist_gen_log_lik <- function(family) {
 
   # Check if family is supported with a analytical solution
   if (primary_dist_name %in% .get_supported_dists()) {
-    .log_lik <- .analytical_gen_log_lik(primary_dist_name, spec)
+    .log_lik <- .analytical_gen_log_lik(primary_dist_name, spec, family$np)
   } else {
+    # Get internal brms log_lik function
+    log_lik_brms <- .get_brms_fn("log_lik", family)
     cli::cli_inform(
       c(
-        "Falling back to default dependency on brms for {primary_dist_name}",
+        "Falling back to numerical integration for the {primary_dist_name}",
         "distribution when generating the log likelihood in R. To improve",
         "performance, implement a .get_supported_dist_args_{primary_dist_name}",
         "function and ensure that p{primary_dist_name} is an available",
@@ -150,7 +149,8 @@ epidist_gen_log_lik <- function(family) {
 }
 
 .analytical_gen_log_lik <- function(dist,
-                                    spec = .primary_spec("uniform")) {
+                                    spec = .primary_spec("uniform"),
+                                    np = NULL) {
   .log_lik <- function(i, prep) {
     y <- prep$data$Y[i]
     relative_obs_time <- prep$data$vreal1[i]
@@ -159,7 +159,7 @@ epidist_gen_log_lik <- function(family) {
     delay_min <- if (is.null(prep$data$vreal5)) 0 else prep$data$vreal5[i]
 
     # Get distribution-specific parameters
-    dist_args <- .get_supported_dist_args(dist, prep, i)
+    dist_args <- .get_supported_dist_args(dist, prep, i, np)
     primary <- .primary_spec_from_prep(prep, spec)
 
     # Calculate density for each draw using primarycensored::dpcens().
@@ -198,8 +198,13 @@ epidist_gen_log_lik <- function(family) {
   return(.log_lik)
 }
 
-# Helper to get distribution-specific arguments
-.get_supported_dist_args <- function(dist, prep, i) {
+# Helper to get distribution-specific arguments. The non-parametric family
+# needs its boundaries and hazard model, passed as `np`, and its arguments
+# are already one list per draw.
+.get_supported_dist_args <- function(dist, prep, i, np = NULL) {
+  if (identical(dist, "pdiscretehazard")) {
+    return(.np_dist_args(prep, i, np))
+  }
   dist_params <- switch(dist,
     pgamma = {
       shape <- brms::get_dpar(prep, "shape", i = i)
@@ -226,7 +231,10 @@ epidist_gen_log_lik <- function(family) {
 #' The `primarycensored` distribution name for a family
 #'
 #' The generalised gamma distribution function lives in `flexsurv`, so
-#' `primarycensored` records no name for it and the name is given here. Falls
+#' `primarycensored` records no name for it and the name is given here.
+#' `primarycensored` names its direct probability mass step
+#' `"nonparametric"`, so the hazard distribution of [nonparametric()] is
+#' also given here. Falls
 #' back to the lower cased family name if `primarycensored` does not
 #' recognise it, so the caller can still report a name in a message.
 #' Uses [.delay_family()] rather than `family$family` directly, so this
@@ -245,6 +253,9 @@ epidist_gen_log_lik <- function(family) {
   name <- .delay_family(family)$name
   if (identical(name, "gengamma")) {
     return("pgengamma.orig")
+  }
+  if (identical(name, "nonparametric")) {
+    return("pdiscretehazard")
   }
   return(tryCatch(
     primarycensored::pcd_dist_name(name),
@@ -269,6 +280,17 @@ epidist_gen_log_lik <- function(family) {
 #' @keywords internal
 .dist_fn <- function(dist, type) {
   name <- sub("^p", type, dist)
+  if (identical(dist, "pdiscretehazard")) {
+    if (!identical(type, "p")) {
+      # The model is never built with a summary row that needs this, see
+      # `.np_check_meta()`.
+      cli::cli_abort(
+        "The non-parametric delay distribution has no density or quantile
+         function."
+      )
+    }
+    return(primarycensored::pdiscretehazard)
+  }
   if (identical(dist, "pgengamma.orig")) {
     .require_flexsurv()
     return(get(name, envir = asNamespace("flexsurv")))
@@ -295,7 +317,9 @@ epidist_gen_log_lik <- function(family) {
 }
 
 .get_supported_dists <- function() {
-  return(c("plnorm", "pgamma", "pweibull", "pgengamma.orig"))
+  return(c(
+    "plnorm", "pgamma", "pweibull", "pgengamma.orig", "pdiscretehazard"
+  ))
 }
 
 .transpose_named_list2 <- function(lst) {
@@ -332,15 +356,18 @@ epidist_gen_log_lik <- function(family) {
 #' @family gen
 #' @export
 epidist_gen_posterior_predict <- function(family) {
-  dist_fn <- .get_brms_fn("posterior_predict", family)
-
   # The primary event distribution the family was built with
   spec <- .primary_spec_from_family(family)
 
-  rdist <- function(n, i, prep, ...) {
-    prep$ndraws <- n
-    result <- do.call(dist_fn, list(i = i, prep = prep))
-    return(result)
+  if (.is_nonparametric(family)) {
+    rdist <- .np_rdist(family$np)
+  } else {
+    dist_fn <- .get_brms_fn("posterior_predict", family)
+    rdist <- function(n, i, prep, ...) {
+      prep$ndraws <- n
+      result <- do.call(dist_fn, list(i = i, prep = prep))
+      return(result)
+    }
   }
 
   .predict <- function(i, prep, ...) {
@@ -388,6 +415,9 @@ epidist_gen_posterior_predict <- function(family) {
 #' @family gen
 #' @export
 epidist_gen_posterior_epred <- function(family) {
+  if (.is_nonparametric(family)) {
+    return(.np_epred(family$np))
+  }
   result <- .get_brms_fn("posterior_epred", family)
   return(result)
 }

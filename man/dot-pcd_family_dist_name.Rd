@@ -21,7 +21,10 @@ A \code{primarycensored} distribution function name, for example
 }
 \description{
 The generalised gamma distribution function lives in \code{flexsurv}, so
-\code{primarycensored} records no name for it and the name is given here. Falls
+\code{primarycensored} records no name for it and the name is given here.
+\code{primarycensored} names its direct probability mass step
+\code{"nonparametric"}, so the hazard distribution of \code{\link[=nonparametric]{nonparametric()}} is
+also given here. Falls
 back to the lower cased family name if \code{primarycensored} does not
 recognise it, so the caller can still report a name in a message.
 Uses \code{\link[=.delay_family]{.delay_family()}} rather than \code{family$family} directly, so this

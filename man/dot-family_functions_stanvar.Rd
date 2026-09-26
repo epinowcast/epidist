@@ -32,11 +32,12 @@ chunk.
 }
 \description{
 Both models read a \code{functions.stan} chunk with the same placeholders
-(\code{family}, \code{dist_id}, \code{dpars_A}, \code{dpars_B}, and the pair
+(\code{family}, \code{dist_id}, \code{dpars_A}, \code{{dpars_B}}, and the pair
 \verb{primary_id, primary_params}), filled in with the target distribution's
-details and the primary event distribution. \code{dpars_B} is the parameter
-order of \code{primarycensored}, which a family may record as \code{pcd_param}
-where it differs from the order of its Stan density. Used within
+details and the primary event distribution. \code{{dpars_B}} is the parameter
+array of \code{primarycensored}, see \code{\link[=.stan_dist_params]{.stan_dist_params()}}, which a family may
+order as \code{pcd_param} where it differs from the order of its Stan density.
+Used within
 \code{\link[=epidist_stancode]{epidist_stancode()}} methods for the marginal and meta models, which
 differ only in the chunk path, the family name prefix, and any further
 placeholders they need substituted.

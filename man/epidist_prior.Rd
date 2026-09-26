@@ -63,12 +63,25 @@ Stan unchanged. A prior written this way replaces any existing prior for the
 same parameter and is not checked against the parameters of the model. Note
 that the latent model requires a \code{uniform(0, 1)} prior on its event windows.
 }
+\examples{
+data <- sierra_leone_ebola_data |>
+  as_epidist_linelist_data(
+    pdate_lwr = "date_of_symptom_onset",
+    sdate_lwr = "date_of_sample_tested"
+  ) |>
+  as_epidist_aggregate_data() |>
+  as_epidist_marginal_model()
+family <- epidist_family(data, family = lognormal())
+formula <- epidist_formula(data, family = family, formula = mu ~ 1)
+epidist_prior(data, family = family, formula = formula, prior = NULL)
+}
 \seealso{
 Other prior:
 \code{\link[=epidist_family_prior]{epidist_family_prior()}},
 \code{\link[=epidist_family_prior.default]{epidist_family_prior.default()}},
 \code{\link[=epidist_family_prior.gengamma]{epidist_family_prior.gengamma()}},
 \code{\link[=epidist_family_prior.lognormal]{epidist_family_prior.lognormal()}},
+\code{\link[=epidist_family_prior.nonparametric]{epidist_family_prior.nonparametric()}},
 \code{\link[=epidist_model_prior]{epidist_model_prior()}},
 \code{\link[=epidist_model_prior.default]{epidist_model_prior.default()}},
 \code{\link[=epidist_model_prior.epidist_meta_model]{epidist_model_prior.epidist_meta_model()}}

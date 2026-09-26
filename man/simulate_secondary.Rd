@@ -22,6 +22,10 @@ This function simulates secondary events based on a given delay
 distribution. The input dataset should have the primary event times in a
 column named \code{ptime}.
 }
+\examples{
+simulate_uniform_cases(sample_size = 5) |>
+  simulate_secondary(meanlog = 1.8, sdlog = 0.5)
+}
 \seealso{
 Other simulate:
 \code{\link[=simulate_dates]{simulate_dates()}},

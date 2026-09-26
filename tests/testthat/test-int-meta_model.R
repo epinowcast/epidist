@@ -562,6 +562,202 @@ test_that("the R and Stan implied quantiles agree for every family and design", 
   }
 })
 
+# The lockstep studies a nonparametric delay supports. It puts its probability
+# at bin edges, so under cens_adjusted 1 only the mean and standard deviation
+# of the whole distribution exist, and studies reporting anything else under
+# that code are dropped. Two studies of those moments are added back.
+np_lockstep_estimates <- function() {
+  bad <- lockstep_estimates$cens_adjusted == 1 &
+    !(lockstep_estimates$type %in% c("mean", "sd") &
+      lockstep_estimates$trunc_adjusted & lockstep_estimates$delay_min == 0)
+  dropped <- unique(lockstep_estimates$study[bad])
+  kept <- lapply(lockstep_fixtures, function(fixture) {
+    if (inherits(fixture, "epidist_estimates_data")) {
+      if (any(fixture$study %in% dropped)) {
+        return(NULL)
+      }
+      return(fixture)
+    }
+    return(fixture[!fixture$study %in% dropped, , drop = FALSE])
+  })
+  kept <- kept[!vapply(kept, is.null, logical(1))]
+  kept$np_moments <- data.frame(
+    study = lockstep_studies("np_moments", c("A", "A", "B")),
+    type = c("mean", "sd", "mean"),
+    value = c(6.8, 3.1, 7.2), n = c(90, 90, 60),
+    relative_obs_time = Inf, trunc_adjusted = TRUE, cens_adjusted = 1,
+    stringsAsFactors = FALSE
+  )
+  return(suppressMessages(
+    as_epidist_estimates_data(check_lockstep_studies(kept))
+  ))
+}
+
+# Irregular bins, so that nothing relies on unit width bins.
+np_lockstep_boundaries <- c(-1, 0:15, 18, 22, 28, 40)
+
+# A hazard formula with a spline and a random intercept per bin, so that
+# unpenalised and penalised columns and two standard deviations are all used.
+np_lockstep_family <- function() {
+  return(nonparametric(
+    ~ s(delay, k = 6) + (1 | bin),
+    boundaries = np_lockstep_boundaries
+  ))
+}
+
+# Three parameter points for the hazard coefficients of that family, in the
+# order of its distributional parameters.
+np_lockstep_dpars <- function(np) {
+  withr::local_seed(11)
+  dpars <- .np_dpars(np)
+  draws <- lapply(dpars, function(dpar) {
+    if (dpar %in% np$coefficients$sd) {
+      return(exp(stats::rnorm(3, -0.5, 0.3)))
+    }
+    return(stats::rnorm(3))
+  })
+  names(draws) <- dpars
+  return(c(list(mu = c(-1.8, -2.2, -1.5)), draws))
+}
+
+test_that("the R and Stan meta model log likelihoods agree for a nonparametric delay", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_fits()
+  meta <- suppressMessages(
+    as_epidist_meta_model(estimates = np_lockstep_estimates())
+  )
+  program <- meta_log_lik_program(meta, family = np_lockstep_family())
+  standata <- program$standata
+  # Every observation type and censoring adjustment is exercised, and both
+  # truncation designs and a left truncated study.
+  expect_setequal(unique(standata$vint1), 2:8)
+  expect_setequal(unique(standata$vint4), 0:4)
+  expect_setequal(unique(standata$vint5), 0:1)
+  expect_true(any(standata$vreal5 > 0))
+  dpars <- np_lockstep_dpars(program$np)
+  expect_named(dpars, program$dpars)
+  stan_log_lik <- do.call(meta_stan_log_lik, c(list(program), dpars))
+  r_log_lik <- do.call(meta_r_log_lik, c(list(program), dpars))
+  expect_true(all(is.finite(stan_log_lik)))
+  expect_true(all(is.finite(r_log_lik)))
+  growth <- standata$vreal8 != 0
+  expect_true(any(growth))
+  for (d in seq_along(dpars$mu)) {
+    expect_rows_close(stan_log_lik[d, !growth], r_log_lik[d, !growth], 1e-6)
+    expect_rows_close(stan_log_lik[d, growth], r_log_lik[d, growth], 1e-4)
+  }
+})
+
+test_that("the R and Stan implied quantiles agree for a nonparametric delay", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_fits()
+  # Newton steps refine the chord of a uniform primary censored estimand,
+  # with the partial expectation of the bins, and the discrete grid and an
+  # accrual design keep their chord.
+  designs <- data.frame(
+    cens = c(2, 4, 2, 3, 0, 4, 2),
+    trunc_adj = c(1, 0, 0, 0, 0, 0, 0),
+    design = c(0, 0, 0, 0, 0, 0, 1),
+    lower = c(0, 0, 1.5, 0, 0, 2, 0),
+    cutoff = c(60, 25, 40, 20, 24, 30, 30),
+    growth = c(0, 0, 0.05, 0, 0, 0, 0.1)
+  )
+  probs <- c(0.1, 0.5, 0.9)
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = "A", type = c("mean", "sd"), value = c(7, 3), n = 100,
+    trunc_adjusted = TRUE, cens_adjusted = 1, stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  family <- epidist_family(meta, family = np_lockstep_family())
+  formula <- epidist_formula(meta, family, formula = bf(mu ~ 1))
+  stanvars <- epidist_stancode(meta, family = family, formula = formula)
+  draw <- lapply(np_lockstep_dpars(family$np), `[`, 1)
+  args <- list(
+    boundaries = np_lockstep_boundaries,
+    hazards = as.vector(.np_hazards(draw, family$np))
+  )
+  params <- c(args$boundaries, args$hazards)
+  fn <- function(x) paste0("meta_nonparametric_", x)
+  mod <- rstan::stan_model(model_code = paste0(
+    "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode,
+    "\n", .np_stanvars(family)[[1]]$scode, "\n}\n",
+    "data {\n  int N;\n  array[N] int cens;\n  array[N] int trunc_adj;\n",
+    "  array[N] int design;\n  array[N] real delay_min;\n",
+    "  array[N] real cutoff;\n  array[N] real growth;\n",
+    "  array[N] int n_node;\n  int K;\n  vector[K] probs;\n",
+    "  int P;\n  array[P] real params;\n  int n_quad;\n}\n",
+    "generated quantities {\n  array[N] vector[K] q;\n",
+    "  for (n in 1:N) {\n",
+    "    int prim_id = growth[n] == 0 ? 1 : 2;\n",
+    "    array[growth[n] == 0 ? 0 : 1] real prim_params;\n",
+    "    int accrual = (trunc_adj[n] != 1 && design[n] == 1) ? 1 : 0;\n",
+    "    vector[2 + n_node[n]] nodes;\n",
+    "    if (growth[n] != 0) prim_params[1] = growth[n];\n",
+    "    nodes = ", fn("implied_nodes"), "(params, delay_min[n], ",
+    "cutoff[n], 1, 1, trunc_adj[n], cens[n], prim_id, prim_params, ",
+    "accrual, growth[n], n_quad);\n",
+    "    for (k in 1:K) {\n",
+    "      q[n, k] = ", fn("node_quantile"), "(nodes, probs[k], params, ",
+    "delay_min[n], cutoff[n], 1, 1, trunc_adj[n], cens[n], prim_id, ",
+    "prim_params, accrual, growth[n]);\n",
+    "    }\n  }\n}\n"
+  ))
+  design_slots <- function(i) {
+    return(list(
+      lower = designs$lower[i], cutoff = designs$cutoff[i], pwindow = 1,
+      swindow = 1, trunc_adjusted = designs$trunc_adj[i],
+      cens_adjusted = designs$cens[i], growth_rate = designs$growth[i],
+      trunc_design = designs$design[i]
+    ))
+  }
+  dist <- "pdiscretehazard"
+  n_node <- vapply(
+    seq_len(nrow(designs)),
+    function(i) {
+      return(length(.meta_implied_nodes(dist, args, design_slots(i))$values))
+    },
+    numeric(1)
+  )
+  fit <- rstan::sampling(
+    mod,
+    data = list(
+      N = nrow(designs), cens = designs$cens,
+      trunc_adj = designs$trunc_adj, design = designs$design,
+      delay_min = designs$lower, cutoff = designs$cutoff,
+      growth = designs$growth, n_node = n_node, K = length(probs),
+      probs = probs, P = length(params), params = params,
+      n_quad = .meta_n_quad()
+    ),
+    algorithm = "Fixed_param", chains = 1, iter = 1, warmup = 0, refresh = 0
+  )
+  draws <- posterior::as_draws_matrix(fit)
+  for (i in seq_len(nrow(designs))) {
+    slots <- design_slots(i)
+    nodes <- .meta_implied_nodes(dist, args, slots)
+    r_quantile <- vapply(
+      probs,
+      function(p) .meta_node_quantile(nodes, p, dist, args, slots),
+      numeric(1)
+    )
+    stan_quantile <- as.numeric(
+      draws[1, paste0("q[", i, ",", seq_along(probs), "]")]
+    )
+    tolerance <- ifelse(designs$growth[i] == 0, 1e-10, 1e-6)
+    expect_equal(stan_quantile, r_quantile, tolerance = tolerance)
+    # The primary censored distribution function is piecewise linear, so
+    # the refined quantile inverts it exactly.
+    if (designs$cens[i] %in% c(2, 4) && designs$growth[i] == 0 &&
+      designs$design[i] == 0) {
+      implied <- vapply(
+        r_quantile, .meta_implied_prob, numeric(1), dist, args,
+        slots$lower, slots$cutoff, 1, 1, slots$trunc_adjusted,
+        slots$cens_adjusted, 0, 0
+      )
+      expect_equal(implied, probs, tolerance = 1e-8)
+    }
+  }
+})
+
 test_that("the meta model log density has finite gradients or rejects at narrow and wide delays", { # nolint: line_length_linter.
   skip_on_cran()
   skip_if_no_fits()

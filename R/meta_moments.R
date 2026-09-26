@@ -107,6 +107,7 @@
     pgamma = .meta_moments_gamma(args),
     pweibull = .meta_moments_weibull(args),
     pgengamma.orig = .meta_moments_gengamma(args),
+    pdiscretehazard = .meta_moments_np(args),
     cli::cli_abort(
       "Summary estimates are not supported for the {.val {dist}} distribution."
     )
@@ -182,6 +183,20 @@
 .meta_moments_gengamma <- function(args) {
   g <- exp(lgamma(args$k + seq_len(4) / args$shape) - lgamma(args$k))
   return(.meta_moments_scaled(args$scale, g))
+}
+
+#' @rdname dot-meta_moments_lognormal
+#' @keywords internal
+.meta_moments_np <- function(args) {
+  # Point masses at the right edge of each bin
+  edges <- args$boundaries[-1]
+  mass <- primarycensored::hazards_to_pmf(args$hazards)
+  delay_mean <- sum(mass * edges)
+  centred <- edges - delay_mean
+  return(c(
+    delay_mean, sum(mass * centred^2), sum(mass * centred^3),
+    sum(mass * centred^4)
+  ))
 }
 
 #' Summaries implied by a distribution function evaluated on a grid

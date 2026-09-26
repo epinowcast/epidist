@@ -1,3 +1,41 @@
+# epidist 1.0.0
+
+This is the first release of `epidist` on CRAN.
+`epidist` estimates epidemiological delay distributions, such as the incubation period or the delay from onset to report, using `brms`.
+It corrects for the common biases in these data: interval censoring of the primary and secondary events, right truncation, left truncation, and the dynamical bias from a growing or shrinking epidemic.
+It provides a naive model, a latent model that samples the unobserved event times, and a marginal model that integrates them out through `primarycensored`.
+It also provides an experimental meta model, which fits published summary estimates jointly with individual level data and adjusts each summary for how its study was estimated.
+Delays can follow a lognormal, gamma, Weibull or generalised gamma distribution.
+Every distributional parameter can take a `brms` formula, so delays can vary with covariates, over time or between groups with partial pooling.
+Tools for preparing data, setting priors, simulating data, summarising and plotting fitted delay distributions, and passing them on to other packages complete the workflow.
+The meta model is still experimental and its interface may change.
+
+## New features
+
+- Added `gengamma()`, a generalised gamma delay family in the Prentice parameterisation of `flexsurv::dgengamma()`, for the naive, latent, marginal and meta models.
+The Weibull and gamma are special cases and the lognormal is its limit.
+Closes #644.
+
+## Documentation
+
+- The help for `epidist_gen_meta_log_lik()` and `as_epidist_meta_model()` now states the cost of `log_lik()` and `loo()` for meta model summary rows, and how `ndraws` reduces it.
+Closes #705.
+- Added examples to the `simulate_*()` functions and to `epidist_family()`, `epidist_formula()`, `epidist_prior()` and `epidist_stancode()`.
+- The package description cites the methods it implements.
+
+## Bug fixes
+
+- Removed the remaining lookups of unexported `brms` functions, so `log_lik()`, `posterior_predict()` and `posterior_epred()` use `epidist`'s own functions for every family.
+These cover the lognormal, gamma, Weibull, exponential and generalised gamma families.
+For any other family these functions now give an error.
+- `print()` of an `epidist_multivariate` object writes its header as output rather than a message, so `suppressMessages()` no longer hides it.
+
+## Package
+
+- The vignettes are built with `bookdown::html_vignette2`, which cuts the installed size of the package by about 4Mb.
+- Cited the `sierra_leone_ebola_data` source by its DOI and corrected its column descriptions.
+- Removed the unused `BH`, `Rcpp`, `RcppEigen`, `pkgdown` and `usethis` suggested dependencies.
+
 # epidist 0.5.0
 
 This release adds a meta model for fitting to published summary estimates, exponentially growing primary events, left truncation, and a new set of tools for post-processing and plotting fitted models.
@@ -33,6 +71,8 @@ They cover means, standard deviations, quantiles, standard errors, fitted distri
 See #620.
 - Added `epidist_gen_meta_log_lik()` and `epidist_gen_meta_predict()`, so `log_lik()`, `loo()` and posterior predictions work for meta model fits.
 See #620.
+- Added `epidist_meta_leave_one_out()`, which refits a meta model once per study with that study held out and reports how the delay mean and standard deviation change.
+Closes #642.
 - Added `simulate_study()`, which applies a published study's observation and estimation procedure to a simulated line list.
 Closes #672.
 - The meta model can estimate the growth rate of a study from `NA` or uncertain `growth_rate` values, sharing it with individual level data.
@@ -55,6 +95,18 @@ See #712.
 See #79, #476 and #646.
 - `epidist_prior()` no longer warns about user priors on valid `brms` parameters, and lists unmatched priors clearly.
 See #483.
+- Added `nonparametric()`, a delay distribution family with no parametric form, for the marginal and meta models.
+The delay sits on a grid of bins, with its probability at the right edge of each bin, and is written as the discrete time hazard of each bin, using the non-parametric distributions of `primarycensored`.
+The logit hazards are given by a formula over the bins, such as a spline over the delay or a random intercept per bin with `~ (1 | bin)`.
+The default is the spline, or the random intercept when fewer than three bins have a free hazard.
+Each coefficient of that formula is a distributional parameter, so it takes a `brms` formula and prior.
+A covariate in the `mu` formula shifts the logit hazard of every bin, a proportional odds model for the hazard, and a covariate in the formula of a coefficient changes the shape of the delay.
+In the meta model a study that fully adjusted for censoring can only report the mean and standard deviation of the whole delay, because the family has no density.
+See `vignette("nonparametric")` and #557.
+
+- The package lifecycle is now maturing rather than experimental.
+The meta model is still experimental.
+See #781.
 
 ## Bug fixes
 
@@ -68,6 +120,8 @@ Closes #646.
 Closes #718.
 - Delay draws keep their class through common `dplyr` verbs, so `plot()` still dispatches.
 Closes #721.
+- The meta model log likelihood no longer advances the RNG stream.
+Closes #750.
 - Removed calls to unexported `brms` functions.
 See #420.
 
@@ -206,7 +260,7 @@ As some features may change, the package is marked as experimental.
 We expect to release a stable 1.0.0 version shortly.
 
 The `epidist` package implements models for epidemiological delay distributions.
-It uses [`brms`](http://paulbuerkner.com/brms/) to perform Bayesian inference.
+It uses [`brms`](https://paulbuerkner.com/brms/) to perform Bayesian inference.
 
 One data format is currently available:
 

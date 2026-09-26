@@ -1,7 +1,7 @@
 ---
 title: "Guide to the statistical models implemented in epidist"
 output:
-  bookdown::html_document2:
+  bookdown::html_vignette2:
     fig_caption: yes
     code_folding: show
     number_sections: true
