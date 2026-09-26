@@ -264,7 +264,7 @@ In addition, identical observations can be aggregated and the likelihood compute
 ## A non-parametric delay {#nonparametric}
 
 The `nonparametric()` family, available for the marginal and meta models, makes no assumption about the shape of $F$.
-The delay lies on a grid of $K$ bins with boundaries $b_0 < b_1 < \dots < b_K$, and all the probability of bin $k$ sits at its right edge $b_k$.
+The delay lies on a grid of $K$ bins with increasing boundaries $b_0, b_1, \dots, b_K$, and all the probability of bin $k$ sits at its right edge $b_k$.
 The distribution is written in terms of the discrete time hazard of each bin,
 $$
 h_k = \mathbb{P}(\text{the delay ends in bin } k \mid \text{it has not ended in bins } 1, \dots, k - 1),
