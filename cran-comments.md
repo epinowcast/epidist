@@ -27,4 +27,4 @@ This is a new submission.
 It is declared in `Suggests`, reached through `Additional_repositories`, and every use is conditional on it being installed.
 
 The `\donttest{}` examples each fit a Stan model through `rstan`.
-They take about 25 seconds each, mostly compiling the model, and about 3.5 minutes in total.
+They take under a minute each, mostly compiling the model, and about 5 minutes in total.
