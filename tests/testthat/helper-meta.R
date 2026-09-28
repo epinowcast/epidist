@@ -27,13 +27,8 @@ meta_log_lik_program <- function(meta, family = lognormal()) {
   )
   slots <- meta_slot_names()
   growth <- "pgrowth" %in% dpars
-  np_functions <- ""
-  if (.is_nonparametric(meta_family)) {
-    np_functions <- .np_stanvars(meta_family)[[1]]$scode
-  }
   mod <- rstan::stan_model(model_code = paste0(
-    "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode, "\n",
-    np_functions, "\n}\n",
+    "functions {\n", stanvars[[3]]$scode, "\n", stanvars[[2]]$scode, "\n}\n",
     "data {\n  int N;\n  array[N] int Y;\n",
     paste0("  array[N] int ", slots[1:10], ";\n", collapse = ""),
     paste0("  array[N] real ", slots[11:18], ";\n", collapse = ""),
@@ -74,8 +69,7 @@ meta_log_lik_program <- function(meta, family = lognormal()) {
   )
   return(list(
     mod = mod, data = stan_data, standata = standata, dpars = dpars,
-    dist = .pcd_family_dist_name(meta_family), growth = growth,
-    np = meta_family$np
+    dist = .pcd_family_dist_name(meta_family), growth = growth
   ))
 }
 
@@ -89,16 +83,11 @@ meta_dpar_draws <- function(program, ...) {
 }
 
 # The primarycensored arguments of one draw. Any parameter of the model that
-# is not one of the distribution's, pgrowth, is left out. `np` holds the
-# boundaries and hazard basis of the non-parametric family.
-meta_dist_args <- function(dist, dpars, np = NULL) {
+# is not one of the distribution's, pgrowth, is left out.
+meta_dist_args <- function(dist, dpars) {
   return(switch(dist,
     plnorm = list(meanlog = dpars$mu, sdlog = dpars$sigma),
-    pgengamma.orig = .gengamma_stacy(dpars$mu, dpars$sigma, dpars$Q),
-    pdiscretehazard = list(
-      boundaries = np$boundaries,
-      hazards = as.vector(.np_hazards(dpars, np))
-    )
+    pgengamma.orig = .gengamma_stacy(dpars$mu, dpars$sigma, dpars$Q)
   ))
 }
 
@@ -151,7 +140,7 @@ meta_r_log_lik <- function(program, ...) {
       if (program$growth) {
         prep$dpars$pgrowth <- matrix(dpars$pgrowth, nrow = 1, ncol = n)
       }
-      dist_args <- meta_dist_args(program$dist, dpars, program$np)
+      dist_args <- meta_dist_args(program$dist, dpars)
       return(vapply(
         seq_len(n),
         function(i) {

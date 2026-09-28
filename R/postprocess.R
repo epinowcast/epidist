@@ -501,7 +501,7 @@ add_summaries <- function(
   )
   assert_numeric(nsim, lower = 1, len = 1, any.missing = FALSE)
   family <- .resolve_delay_family(data, family)
-  analytic <- .analytic_delay_summaries(family$name, family$np)
+  analytic <- .analytic_delay_summaries(family$name)
   has_analytic <- !is.null(analytic) && all(analytic$dpars %in% names(data))
   if (identical(method, "analytic") && !has_analytic) {
     if (is.null(analytic)) {
@@ -608,9 +608,6 @@ add_summaries <- function(
 #'
 #' @keywords internal
 .simulate_delays <- function(family, dpars, nsim = 1000) {
-  if (.is_nonparametric(family)) {
-    return(.np_simulate_delays(family$np, dpars, nsim))
-  }
   predict_fn <- .get_brms_fn("posterior_predict", list(family = family$name))
   n <- length(dpars[[1]])
   samples <- matrix(NA_real_, nrow = n, ncol = nsim)
@@ -648,22 +645,12 @@ add_summaries <- function(
 #' returning the mean, the standard deviation, the quantile function and the
 #' density of the delay distribution, built by [.analytic_family()].
 #'
-#' The non-parametric family puts its probability at the right edge of each
-#' bin, so its quantiles are bin edges and its density is the histogram of
-#' the bin probabilities, each spread over the width of its bin.
-#'
 #' @param name The name of a delay distribution family.
-#'
-#' @param np The `np` element of a non-parametric family, holding its
-#'  boundaries and hazard model, or `NULL` for any other family.
 #'
 #' @returns A list of solutions, or `NULL` when the family has none.
 #'
 #' @keywords internal
-.analytic_delay_summaries <- function(name, np = NULL) {
-  if (!is.null(np)) {
-    return(.np_delay_summaries(np))
-  }
+.analytic_delay_summaries <- function(name) {
   return(switch(name,
     lognormal = .analytic_family(
       dpars = c("mu", "sigma"),
@@ -775,9 +762,8 @@ add_summaries <- function(
 #'
 #' @param family A `brms` family.
 #'
-#' @returns A list with the delay distribution `name`, its distributional
-#'  parameters `dpars`, and for the non-parametric family its boundaries
-#'  and hazard model as `np`.
+#' @returns A list with the delay distribution `name` and its distributional
+#'  parameters `dpars`.
 #'
 #' @keywords internal
 .delay_family <- function(family) {
@@ -789,11 +775,7 @@ add_summaries <- function(
   # Drop the model prefix `epidist` adds, keeping families whose own name
   # contains an underscore intact
   name <- sub("^(latent|marginal|meta)_", "", name)
-  out <- list(name = name, dpars = family$dpars)
-  # Only the non-parametric family has an `np` element, and assigning NULL
-  # leaves every other family as it was.
-  out$np <- family$np
-  return(out)
+  return(list(name = name, dpars = family$dpars))
 }
 
 #' Resolve the delay distribution family of a `data.frame` of draws
