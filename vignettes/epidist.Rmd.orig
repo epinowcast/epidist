@@ -410,7 +410,7 @@ head(predicted_parameters)
 ```
 
 ::: {.alert .alert-primary}
-To predict for other data, for example data built with `epidist_newdata()`, use the steps `delay_summary_draws()` wraps directly: `epidist_strata()`, `delay_parameter_draws()` and `add_summaries()`.
+`delay_summary_draws()` also takes `newdata`, for example data built with `epidist_newdata()`, and the steps it wraps, `epidist_strata()`, `delay_parameter_draws()` and `add_summaries()`, are available on their own.
 :::
 
 We can now plot posterior draws for the summary parameters from the two models.

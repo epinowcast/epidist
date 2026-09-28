@@ -242,9 +242,9 @@ biased_estimates
 ```
 
 ::: {.alert .alert-primary}
-`max_delay` sets how far the grid behind the implied summaries extends.
+`max_delay` sets how far the grid behind the implied summaries extends for a study that adjusted for right truncation, since nothing else bounds its delays.
 The default suits most delays, so raise it only for a delay with a long tail.
-We set it here, and `simulate_study()` passes it on to `as_epidist_estimates_data()`, whose help gives the default.
+We set it here, and `simulate_study()` passes it on to `as_epidist_estimates_data()`, where `?as_epidist_estimates_data.data.frame` gives the default.
 :::
 
 # Fitting and comparing models {#fit}
@@ -588,7 +588,7 @@ ebola_estimates
 We fit a Gamma, which is the family most of these studies fitted, with a `(1 | study)` term on both the mean and the shape.
 The term allows for real heterogeneity across outbreaks and Ebola species, and for studies whose metadata we have got wrong.
 
-Ebola onset to death is thought to take roughly 7 to 14 days, so the intercept prior is centred on ten days, and a shape prior centred on 2 covers the spreads reported.
+Ebola onset to death is thought to take roughly 7 to 14 days, so the intercept prior is centred on ten days, and a prior on the log shape centred on `log(2)` covers the spreads reported.
 Studies may differ by about a quarter on the log scale, so the between study standard deviations get `normal(0, 0.25)`, and the phase coefficients get `normal(0, 0.5)` so that two studies cannot move the contrast without limit.
 `epidist_prior()` shows the priors the model will use.
 
