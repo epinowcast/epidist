@@ -398,25 +398,22 @@ Compared to the naive fit we see good recovery of the true distribution paramete
 We can compare the two models by plotting the estimated parameters from the naive and marginal models.
 One way to do this is to use the `delay_summary_draws()` function.
 It draws one set of delay distribution parameters for each unique combination of the predictors, and adds the natural scale mean and standard deviation of the delay so that the numbers are easier to read.
-`epidist_strata()`, `delay_parameter_draws()` and `add_summaries()` are the three steps it wraps, and each is available on its own.
-Here we take them separately, so that the draws from both models can be combined before the summaries are added.
+We call it on each fit and combine the draws.
 
 ```{r}
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
-  lapply(\(fit) delay_parameter_draws(fit, newdata = epidist_strata(fit))) |>
+  lapply(delay_summary_draws) |>
   bind_rows(.id = "model") |>
-  mutate(model = factor(model, levels = c("naive", "marginal"))) |>
-  add_summaries()
+  mutate(model = factor(model, levels = c("naive", "marginal")))
 
 head(predicted_parameters)
 ```
 
 ::: {.alert .alert-primary}
-Note that by default `add_delay_parameter_draws()` gives draws for every row of the data passed to it.
-Neither model here has covariates, so `epidist_strata()` reduces the data to the single row they all share.
-This prevents repeating the same draws for each row.
-
-Another approach to building the data to predict for is `epidist_newdata()`, which adds the response and observation process columns the models expect.
+`delay_summary_draws()` wraps three steps, each available on its own.
+`epidist_strata()` builds one row per unique combination of the predictors, which here is a single row since neither model has covariates.
+`delay_parameter_draws()` draws the delay distribution parameters for each row, and `add_summaries()` adds the mean, standard deviation and any quantiles of the delay.
+Use them directly to predict for other data, for example data built with `epidist_newdata()`.
 :::
 
 We can now plot posterior draws for the summary parameters from the two models.
