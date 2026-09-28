@@ -328,11 +328,17 @@ Together these make the marginal model substantially more efficient than the lat
 <span class="header-section-number">5</span> The meta model<a class="anchor" aria-label="anchor" href="#the-meta-model"></a>
 </h2>
 <p>Published delay estimates are usually summary statistics, and the estimation procedure behind them is itself a source of bias <span class="citation">(<a href="#ref-charniga2024best">Charniga et al. 2024</a>; <a href="#ref-park2024estimating">Park et al. 2024</a>)</span>.
-The meta model fits one delay distribution to a mix of individual level data and published summaries.
-Each summary is fitted to what the study’s own procedure would have converged to given the delay distribution, with sampling uncertainty from the study sample size.
-Section <a href="#sampling-likelihoods">5.1</a> gives the likelihood of each kind of summary in terms of the moments, distribution function and quantiles of a delay distribution.
-Section <a href="#the-biased-estimands">5.3</a> says which distribution those are taken from for each study.
-Study level heterogeneity, for example <code>mu ~ 1 + (1 | study)</code>, is specified through the <code>brms</code> formula as for the other models.
+The meta model fits one delay distribution to a mix of individual level data and published summaries in three steps.</p>
+<ol style="list-style-type: decimal">
+<li>The latent delay is the forward distribution <span class="math inline">\(f(\cdot \, ; \theta)\)</span> of Section <a href="#maths">1</a>.
+Its parameters <span class="math inline">\(\theta\)</span> take a <code>brms</code> formula, so study level heterogeneity, for example <code>mu ~ 1 + (1 | study)</code>, is specified as for the other models.</li>
+<li>Each study’s estimation procedure is applied to the latent delay.
+How it adjusted for censoring and right truncation, its censoring windows and the smallest delay it counted give the distribution its procedure would converge to, its estimand, with moments, distribution function <span class="math inline">\(G\)</span> and quantiles <span class="math inline">\(Q_p\)</span> (Section <a href="#the-biased-estimands">5.3</a>).</li>
+<li>Each reported summary is fitted with a sampling likelihood built from the estimand and the study’s sample size or standard error (Section <a href="#sampling-likelihoods">5.1</a>).
+Individual level rows use the likelihood of the marginal model (Section <a href="#the-marginal-model">4</a>).</li>
+</ol>
+<p>Every row shares <span class="math inline">\(\theta\)</span>, so the posterior combines all of them.
+The sampling likelihoods come first below, because they are the same for every estimand.
 If using the meta model, please cite <code>primarycensored</code> in addition to <code>epidist</code>.
 The meta model is experimental and its interface may still change.</p>
 <div class="section level3" number="5.1">

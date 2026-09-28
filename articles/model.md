@@ -305,16 +305,28 @@ Published delay estimates are usually summary statistics, and the
 estimation procedure behind them is itself a source of bias ([Charniga
 et al. 2024](#ref-charniga2024best); [Park et al.
 2024](#ref-park2024estimating)). The meta model fits one delay
-distribution to a mix of individual level data and published summaries.
-Each summary is fitted to what the study’s own procedure would have
-converged to given the delay distribution, with sampling uncertainty
-from the study sample size. Section [5.1](#sampling-likelihoods) gives
-the likelihood of each kind of summary in terms of the moments,
-distribution function and quantiles of a delay distribution. Section
-[5.3](#the-biased-estimands) says which distribution those are taken
-from for each study. Study level heterogeneity, for example
-`mu ~ 1 + (1 | study)`, is specified through the `brms` formula as for
-the other models. If using the meta model, please cite `primarycensored`
+distribution to a mix of individual level data and published summaries
+in three steps.
+
+1.  The latent delay is the forward distribution \\f(\cdot \\ ;
+    \theta)\\ of Section [1](#maths). Its parameters \\\theta\\ take a
+    `brms` formula, so study level heterogeneity, for example
+    `mu ~ 1 + (1 | study)`, is specified as for the other models.
+2.  Each study’s estimation procedure is applied to the latent delay.
+    How it adjusted for censoring and right truncation, its censoring
+    windows and the smallest delay it counted give the distribution its
+    procedure would converge to, its estimand, with moments,
+    distribution function \\G\\ and quantiles \\Q_p\\ (Section
+    [5.3](#the-biased-estimands)).
+3.  Each reported summary is fitted with a sampling likelihood built
+    from the estimand and the study’s sample size or standard error
+    (Section [5.1](#sampling-likelihoods)). Individual level rows use
+    the likelihood of the marginal model (Section
+    [4](#the-marginal-model)).
+
+Every row shares \\\theta\\, so the posterior combines all of them. The
+sampling likelihoods come first below, because they are the same for
+every estimand. If using the meta model, please cite `primarycensored`
 in addition to `epidist`. The meta model is experimental and its
 interface may still change.
 
