@@ -45,11 +45,10 @@ The [ddsynth](https://github.com/cm401/ddsynth) package also combines individual
 
 # What we need from a study {#metadata}
 
-Reviews rarely record exactly how a study estimated its delay.
-To use a reported summary we need to know how the study handled the common biases, along with the data process it saw.
-The meta model supports the following approaches.
+To use a reported summary we need to know how the study estimated it, which reviews rarely record.
+The meta model needs the following for each study.
 
-* **How the study adjusted for censoring** (`cens_adjusted`), one of `0` if it took integer date differences and summarised them directly (the most common case), `1` if it used a double interval censored likelihood targeting the continuous delay, `2` if it adjusted only the secondary interval assuming a uniform delay within it, `3` if it assigned each delay to the centre of the interval it was observed in, or `4` if it took the midpoint of the primary event's window and integrated the secondary interval.
+* **How the study adjusted for censoring** (`cens_adjusted`), one of the codes in the table below.
 * **Whether it adjusted for right truncation** (`trunc_adjusted`), and if not, **the observation time** (`relative_obs_time`) and **how collection stopped** (`trunc_design`).
   For a `"cohort"` design the observation time is the truncation point on the delay scale.
   For an `"accrual"` design, where collection stopped at a calendar date, it is the length of the collection window.
@@ -57,6 +56,14 @@ The meta model supports the following approaches.
 * **The sample size** (`n`) the summary was computed from, or a reported standard error (`se`).
 * **The smallest delay it counted** (`delay_min`), where the study dropped shorter delays, so that its summaries describe a left truncated delay distribution.
   Defaults to 0, meaning it counted every delay.
+
+| `cens_adjusted` | The study |
+|---|---|
+| `0` | summarised integer date differences directly, the most common case |
+| `1` | used a double interval censored likelihood targeting the continuous delay |
+| `2` | adjusted only the secondary interval, assuming a uniform delay within it |
+| `3` | assigned each delay to the centre of the interval it was observed in |
+| `4` | took the midpoint of the primary event's window and integrated the secondary interval |
 
 If you cannot tell which of these a study used, state the assumption you are making alongside any results.
 See `?as_epidist_estimates_data` for the full details.
@@ -235,10 +242,9 @@ biased_estimates
 ```
 
 ::: {.alert .alert-primary}
-`max_delay` sets how far the grid used to work out the implied naive summaries extends.
-By default it is the point beyond which one percent of the second moment of a lognormal matched to the study's summaries lies, or five times the largest reported value where no lognormal can be matched.
-Raise it for a delay with a longer tail than that, and lower it to fit faster.
-`simulate_study()` passes it through to `as_epidist_estimates_data()`, and we set it here rather than take the default.
+`max_delay` sets how far the grid behind the implied summaries extends.
+The default suits most delays, so raise it only for a delay with a long tail.
+We set it here, and `simulate_study()` passes it on to `as_epidist_estimates_data()`, whose help gives the default.
 :::
 
 # Fitting and comparing models {#fit}
@@ -283,9 +289,8 @@ Even though every study is individually biased, the meta model recovers the simu
 These ten studies measured one outbreak, so a single `mu` and `sigma` is the right model for them.
 A real review pools studies of different outbreaks, and some of its metadata will be wrong.
 A study level random effect on both parameters, `(1 | study)`, lets each study depart from the population value.
-The meta model puts no restriction on the `brms` formula, so the term is written as it would be for any distributional parameter.
 The between study standard deviations get `normal(0, 0.25)` priors rather than the wide `brms` default.
-`init = 0.5` narrows the range the chains start from, because the default lets a study's `sigma` start far outside where the model is finite.
+`init = 0.5` narrows where the chains start, because the default can start a study's `sigma` where the model is not finite.
 
 ```{r results='hide', message=FALSE}
 fit_meta_summary_study <- epidist(
@@ -563,29 +568,11 @@ onset_to_death <- onset_to_death |>
 count(onset_to_death, phase)
 ```
 
-::: {.alert .alert-warning}
-Only two of these studies record having been made during an outbreak, so this contrast is weak.
-The `unrecorded` group mixes studies where the field is missing with studies where it is unspecified, and the term absorbs whatever separates the groups, which need not be truncation alone.
-See @charniga2024best for suggested reporting metadata for future estimation studies and reviews, and [andv-linelist-analysis](https://github.com/epiforecasts/andv-linelist-analysis) (the Epuyén Andes virus outbreak) and [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis) (the 2012 Isiro Bundibugyo Ebola outbreak) for examples of the checklist in use.
-:::
-
-::: {.alert .alert-primary}
-epireview does not record how, or whether, a study adjusted for censoring.
-Studies rarely adjusted correctly, the common mistakes being to discretise the secondary interval or to shift by the midpoint, so we treat every study as `cens_adjusted = 0`, integer date differences summarised directly.
-Observation times are not recorded either, so every study gets `trunc_adjusted = TRUE` and the `phase` term stands in.
-:::
-
-`epidist_estimates_epireview()` maps each record of `onset_to_death` to the long format `as_epidist_estimates_data()` expects.
-Means become `"mean"` rows, with a matching `"sd"` row where a standard deviation is reported, either as the study's own spread or as the second parameter of a fitted Gamma.
-A reported standard error becomes an `se` on the mean row instead.
-Medians become `"quantile"` rows at `p = 0.5`, with further quantile rows at `p = 0.25` and `p = 0.75` where an interquartile range is reported.
-A study reporting a spread that does not match its own value type, such as a median alongside a standard deviation, keeps only the matching set, because the two kinds of summary from a study that reported integer date differences are fitted as though they were independent.
-A study that reports the natural parameters of a distribution it fitted is converted as `epidist_estimates_parameters()` would convert it.
-The fitted distributions here are Gammas that epireview records as a mean and a standard deviation, which the function picks up as moments.
-
-The metadata we assume for every study is passed as arguments.
-Where we know the metadata of individual studies, from the papers or another source, the `metadata` argument takes a table with a row per study that overrides these, and the result is an `epidist_estimates_data` object that can be edited afterwards.
-`keep` carries the `phase` covariate onto the rows.
+`epidist_estimates_epireview()` turns each record into the rows `as_epidist_estimates_data()` expects, such as a mean with its standard deviation or a median with its interquartile range.
+epireview does not record how a study adjusted for censoring either, so we assume every study summarised integer date differences (`cens_adjusted = 0`).
+Without observation times every study is treated as adjusted for right truncation, and the `phase` term stands in.
+The `metadata` argument overrides these assumptions for individual studies, and `keep` carries the `phase` covariate onto the rows.
+See `?epidist_estimates_epireview` for how each kind of record is converted.
 
 ```{r}
 ebola_estimates <- epidist_estimates_epireview(
@@ -601,10 +588,8 @@ ebola_estimates
 We fit a Gamma, which is the family most of these studies fitted, with a `(1 | study)` term on both the mean and the shape.
 The term allows for real heterogeneity across outbreaks and Ebola species, and for studies whose metadata we have got wrong.
 
-Ebola onset to death is thought to take roughly 7 to 14 days, so the intercept prior is centred on ten days with a standard deviation of 0.5 on the log link.
-A Gamma shape between about 1 and 5 covers the spreads reported, so the shape intercept gets `normal(log(2), 0.5)` on its log link.
-We assume that studies may differ by about a quarter on the log scale, so both between study standard deviations get `normal(0, 0.25)`.
-The phase coefficients get `normal(0, 0.5)`, so that two studies cannot move the contrast without limit.
+Ebola onset to death is thought to take roughly 7 to 14 days, so the intercept prior is centred on ten days, and a shape prior centred on 2 covers the spreads reported.
+Studies may differ by about a quarter on the log scale, so the between study standard deviations get `normal(0, 0.25)`, and the phase coefficients get `normal(0, 0.5)` so that two studies cannot move the contrast without limit.
 `epidist_prior()` shows the priors the model will use.
 
 ```{r}
@@ -648,8 +633,10 @@ summary(fit_ebola)
 
 ::: {.alert .alert-warning}
 These estimates should not be used as they stand.
-The estimation approach of every study was assumed rather than checked against the paper.
-A publication quality meta analysis would have to do that for each study.
+The estimation approach of every study was assumed rather than checked against its paper, which a publication quality meta analysis would have to do.
+Only two studies record having been made during an outbreak, so the phase contrast is weak.
+The `unrecorded` group mixes studies where the field is missing with studies where it is unspecified, so the term absorbs whatever separates the groups, which need not be truncation alone.
+See @charniga2024best for the metadata future studies and reviews should report, and [andv-linelist-analysis](https://github.com/epiforecasts/andv-linelist-analysis) (the Epuyén Andes virus outbreak) and [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis) (the 2012 Isiro Bundibugyo Ebola outbreak) for examples of the checklist in use.
 :::
 
 ## The population level delay and the size of the phase bias {#population-estimates}
@@ -732,10 +719,11 @@ ggplot(ebola_leave_one_out) +
 
 `Rosello 2015 (3)` is the 2012 Isiro outbreak, and that line list has since been re-analysed in [bdbv-linelist-analysis](https://github.com/epiforecasts/bdbv-linelist-analysis) from the individual records, adjusting for double interval censoring.
 The outbreak had closed before the line list was published, so the delays are not truncated and the re-analysis is the closest thing to a ground truth for any study we fitted to.
-It reports onset to death as a convolution of its fitted onset to admission and admission to death delays.
-`bdbv-onset-to-death.csv` holds 1000 draws of the convolution's mean and standard deviation, subsampled from the posterior the project releases as `output/posterior_gamma.csv`, and we match a Gamma to each draw.
+It reports onset to death as a convolution of its fitted onset to admission and admission to death delays, and we match a Gamma to each of 1000 posterior draws of that convolution.
 
 ```{r}
+# 1000 draws of the convolution's mean and standard deviation, subsampled
+# from the output/posterior_gamma.csv the project releases
 bdbv <- read.csv("bdbv-onset-to-death.csv") |>
   mutate(shape = (.data$mean / .data$sd)^2, scale = .data$sd^2 / .data$mean)
 
