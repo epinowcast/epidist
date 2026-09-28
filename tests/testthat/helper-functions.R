@@ -7,8 +7,10 @@ not_on_cran <- function() {
 }
 
 # `fits_available` is set in setup.R, which builds the shared model fits.
+# It is looked up from the calling test, because under `devtools::test()` the
+# helpers are not evaluated where setup.R assigns it.
 skip_if_no_fits <- function() {
-  if (exists("fits_available") && isTRUE(fits_available)) {
+  if (isTRUE(get0("fits_available", envir = parent.frame()))) {
     return(invisible(TRUE))
   }
   return(testthat::skip("the shared model fits were not built"))
