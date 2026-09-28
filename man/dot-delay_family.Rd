@@ -10,9 +10,8 @@
 \item{family}{A \code{brms} family.}
 }
 \value{
-A list with the delay distribution \code{name}, its distributional
-parameters \code{dpars}, and for the non-parametric family its boundaries
-and hazard model as \code{np}.
+A list with the delay distribution \code{name} and its distributional
+parameters \code{dpars}.
 }
 \description{
 The families \code{epidist} builds are \code{brms} custom families named after the

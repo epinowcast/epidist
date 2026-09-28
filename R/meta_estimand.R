@@ -132,10 +132,6 @@
 
 #' The primary censored distribution function, guarded against underflow
 #'
-#' `check = FALSE` skips the validation of `pdist` and `dprimary`, which are
-#' taken from `stats` and `primarycensored` and so need none, and which would
-#' otherwise be repeated on every call.
-#'
 #' Primary distributions without an analytical solution are integrated
 #' numerically, which can return a non finite or negative cumulative
 #' probability deep in the lower tail. Those cases carry negligible

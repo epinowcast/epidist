@@ -6,8 +6,8 @@
   * - 'dist_id' is replaced with the primarycensored distribution identifier
   * - 'dpars_A' is replaced with multiple distribution parameters in the format
   *   "real paramname1, real paramname2, ...".
-  * - The parameter array placeholder in braces is replaced with the same
-  *   parameters as dpars_A but in the primarycensored parameterisation.
+  * - 'dpars_B' is replaced with the same parameters as dpars_A but
+  *   reparameterised according to the brms parameterisation for Stan.
   * - 'primary_id, primary_params' is replaced with the primarycensored
   *   identifier and parameters of the primary event distribution used for
   *   individual level rows, for example '2, {pgrowth}' for exponential
@@ -239,10 +239,7 @@
     * poisons the gradient even when the value is discarded. Lognormal:
     * Phi(z) < exp(-100) for z < -14. Gamma: P(a, x) <= x^a / Gamma(a + 1).
     * Weibull: 1 - exp(-y) <= y. Generalised gamma: the gamma bound at
-    * x = (d / scale)^shape with a = k. The non-parametric hazard family
-    * (dist_id 27) needs no bound, because their distribution function
-    * is a constant zero below the first bin edge and bounded away from zero
-    * above it. Mirrors .meta_deep_tail() in R.
+    * x = (d / scale)^shape with a = k. Mirrors .meta_deep_tail() in R.
     */
   int meta_family_deep_tail(real d, array[] real params) {
     if (dist_id == 1) {
@@ -504,20 +501,6 @@
   }
 
   /**
-    * Edges and probabilities of the bins of a non-parametric hazard delay,
-    * whose params hold the K + 1 boundaries followed by the K hazards. The
-    * probability of each bin sits at its right edge. Returns the K edges
-    * followed by the K probabilities.
-    */
-  vector meta_bins_nonparametric(array[] real params) {
-    int K = (size(params) - 1) %/% 2;
-    return append_row(
-      to_vector(params[2:(K + 1)]),
-      hazards_to_pmf(to_vector(params[(K + 2):(2 * K + 1)]))
-    );
-  }
-
-  /**
     * Mean, variance and third and fourth central moments of a lognormal
     * delay with params [meanlog, sdlog]. Mirrors .meta_moments_lognormal().
     */
@@ -580,27 +563,10 @@
     return meta_moments_scaled(params[2], g);
   }
 
-  /**
-    * Central moments of a non-parametric hazard delay, whose probability
-    * sits at the right edge of each bin. Mirrors .meta_moments_np().
-    */
-  vector meta_moments_nonparametric(array[] real params) {
-    int K = (size(params) - 1) %/% 2;
-    vector[2 * K] bins = meta_bins_nonparametric(params);
-    vector[K] mass = bins[(K + 1):(2 * K)];
-    real delay_mean = dot_product(mass, bins[1:K]);
-    vector[K] centred = bins[1:K] - delay_mean;
-    return [delay_mean, dot_product(mass, square(centred)),
-            dot_product(mass, pow(centred, 3)),
-            dot_product(mass, pow(centred, 4))]';
-  }
-
   /** Analytic summaries of the delay distribution. */
   vector meta_family_moments(array[] real params) {
     vector[4] moments;
-    if (dist_id == 27) {
-      moments = meta_moments_nonparametric(params);
-    } else if (dist_id == 1) {
+    if (dist_id == 1) {
       moments = meta_moments_lognormal(params);
     } else if (dist_id == 2) {
       moments = meta_moments_gamma(params);
@@ -609,9 +575,8 @@
     } else if (dist_id == 5) {
       moments = meta_moments_gengamma(params);
     } else {
-      reject("Meta model summary rows support lognormal, gamma, weibull, ",
-             "generalised gamma and non-parametric delay distributions ",
-             "only.");
+      reject("Meta model summary rows support lognormal, gamma, weibull and ",
+             "generalised gamma delay distributions only.");
     }
     // A draw wide enough to overflow a moment would leave a finite density
     // whose gradient carries the infinite intermediate, so it is rejected
@@ -1159,10 +1124,8 @@
     if (dist_id == 5) {
       return meta_density_gengamma(y, params);
     }
-    // The non-parametric hazard families put their probability at bin
-    // edges, so they have no density. R rejects the summary rows that would
-    // need one when the model is built, see .np_check_meta().
-    reject("meta_family_density: this delay distribution has no density.");
+    reject("Meta model summary rows support lognormal, gamma, weibull and ",
+           "generalised gamma delay distributions only.");
   }
 
   /** Density of a delay censored by a uniform primary window. */
@@ -1213,32 +1176,12 @@
   }
 
   /**
-    * Partial expectation below a positive x of a non-parametric hazard
-    * delay: the sum over the bin edges up to and including x of the edge
-    * times its probability.
-    */
-  real meta_partial_expectation_nonparametric(real x, array[] real params) {
-    int K = (size(params) - 1) %/% 2;
-    vector[2 * K] bins = meta_bins_nonparametric(params);
-    real total = 0;
-    for (i in 1:K) {
-      if (bins[i] <= x) {
-        total += bins[i] * bins[K + i];
-      }
-    }
-    return total;
-  }
-
-  /**
     * Partial expectation of the delay below `x`, the integral of t f(t) from
     * zero to x, in closed form for each family.
     */
   real meta_family_partial_expectation(real x, array[] real params) {
     if (x <= 0) {
       return 0;
-    }
-    if (dist_id == 27) {
-      return meta_partial_expectation_nonparametric(x, params);
     }
     if (dist_id == 1) {
       return meta_partial_expectation_lognormal(x, params);
@@ -1252,9 +1195,8 @@
     if (dist_id == 5) {
       return meta_partial_expectation_gengamma(x, params);
     }
-    reject("Meta model summary rows support lognormal, gamma, weibull, ",
-           "generalised gamma and non-parametric delay distributions ",
-           "only.");
+    reject("Meta model summary rows support lognormal, gamma, weibull and ",
+           "generalised gamma delay distributions only.");
   }
 
   /**
