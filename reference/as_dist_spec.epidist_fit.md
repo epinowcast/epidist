@@ -163,6 +163,6 @@ if (requireNamespace("distspec", quietly = TRUE)) {
 #>       mean:
 #>         0.59
 #>       sd:
-#>         0.0049
+#>         0.0048
 # }
 ```
