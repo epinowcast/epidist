@@ -410,10 +410,7 @@ head(predicted_parameters)
 ```
 
 ::: {.alert .alert-primary}
-`delay_summary_draws()` wraps three steps, each available on its own.
-`epidist_strata()` builds one row per unique combination of the predictors, which here is a single row since neither model has covariates.
-`delay_parameter_draws()` draws the delay distribution parameters for each row, and `add_summaries()` adds the mean, standard deviation and any quantiles of the delay.
-Use them directly to predict for other data, for example data built with `epidist_newdata()`.
+To predict for other data, for example data built with `epidist_newdata()`, use the steps `delay_summary_draws()` wraps directly: `epidist_strata()`, `delay_parameter_draws()` and `add_summaries()`.
 :::
 
 We can now plot posterior draws for the summary parameters from the two models.
