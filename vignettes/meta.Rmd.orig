@@ -489,7 +489,8 @@ p_compare <- predicted_parameters |>
   ) +
   facet_wrap(~parameter, scales = "free") +
   scale_fill_brewer(palette = "Set2") +
-  labs(x = "", y = "") +
+  labs(x = "", y = "", fill = NULL) +
+  guides(fill = guide_legend(nrow = 2)) +
   theme_minimal() +
   theme(legend.position = "bottom")
 ```
