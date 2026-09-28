@@ -13,13 +13,13 @@ integrates them out through `primarycensored`. It also provides an
 experimental meta model, which fits published summary estimates jointly
 with individual level data and adjusts each summary for how its study
 was estimated. Delays can follow a lognormal, gamma, Weibull or
-generalised gamma distribution, or a non-parametric distribution on a
-grid of bins. Every distributional parameter can take a `brms` formula,
-so delays can vary with covariates, over time or between groups with
-partial pooling. Tools for preparing data, setting priors, simulating
-data, summarising and plotting fitted delay distributions, and passing
-them on to other packages complete the workflow. The meta model is still
-experimental and its interface may change.
+generalised gamma distribution. Every distributional parameter can take
+a `brms` formula, so delays can vary with covariates, over time or
+between groups with partial pooling. Tools for preparing data, setting
+priors, simulating data, summarising and plotting fitted delay
+distributions, and passing them on to other packages complete the
+workflow. The meta model is still experimental and its interface may
+change.
 
 ### New features
 
@@ -30,25 +30,6 @@ experimental and its interface may change.
   for the naive, latent, marginal and meta models. The Weibull and gamma
   are special cases and the lognormal is its limit. Closes
   [\#644](https://github.com/epinowcast/epidist/issues/644).
-- Added
-  [`nonparametric()`](https://epidist.epinowcast.org/reference/nonparametric.md),
-  a delay distribution family with no parametric form, for the marginal
-  and meta models. The delay sits on a grid of bins, with its
-  probability at the right edge of each bin, and is written as the
-  discrete time hazard of each bin, using the non-parametric
-  distributions of `primarycensored`. The logit hazards are given by a
-  formula over the bins, such as a spline over the delay or a random
-  intercept per bin with `~ (1 | bin)`. The default is the spline, or
-  the random intercept when fewer than three bins have a free hazard.
-  Each coefficient of that formula is a distributional parameter, so it
-  takes a `brms` formula and prior. A covariate in the `mu` formula
-  shifts the logit hazard of every bin, a proportional odds model for
-  the hazard, and a covariate in the formula of a coefficient changes
-  the shape of the delay. In the meta model a study that fully adjusted
-  for censoring can only report the mean and standard deviation of the
-  whole delay, because the family has no density. See
-  [`vignette("nonparametric")`](https://epidist.epinowcast.org/articles/nonparametric.md)
-  and [\#557](https://github.com/epinowcast/epidist/issues/557).
 
 ### Documentation
 

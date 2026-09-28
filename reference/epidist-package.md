@@ -3,9 +3,9 @@
 Understanding and accurately estimating epidemiological delay
 distributions is important for public health policy. These estimates
 influence epidemic situational awareness, control strategies, and
-resource allocation. Provides methods to address the key challenges in
-estimating these distributions, including truncation, interval
-censoring, and dynamical biases, following Park et al. (2024)
+resource allocation. This package provides methods to address the key
+challenges in estimating these distributions, including truncation,
+interval censoring, and dynamical biases, following Park et al. (2024)
 [doi:10.1101/2024.01.12.24301247](https://doi.org/10.1101/2024.01.12.24301247)
 and Charniga et al. (2024)
 [doi:10.1371/journal.pcbi.1012520](https://doi.org/10.1371/journal.pcbi.1012520)

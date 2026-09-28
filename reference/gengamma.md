@@ -38,9 +38,7 @@ Other family:
 [`epidist_family_model.default()`](https://epidist.epinowcast.org/reference/epidist_family_model.default.md),
 [`epidist_family_param()`](https://epidist.epinowcast.org/reference/epidist_family_param.md),
 [`epidist_family_param.default()`](https://epidist.epinowcast.org/reference/epidist_family_param.default.md),
-[`epidist_family_param.gengamma()`](https://epidist.epinowcast.org/reference/epidist_family_param.gengamma.md),
-[`epidist_family_param.nonparametric()`](https://epidist.epinowcast.org/reference/epidist_family_param.nonparametric.md),
-[`nonparametric()`](https://epidist.epinowcast.org/reference/nonparametric.md)
+[`epidist_family_param.gengamma()`](https://epidist.epinowcast.org/reference/epidist_family_param.gengamma.md)
 
 ## Examples
 
