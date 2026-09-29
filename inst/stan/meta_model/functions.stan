@@ -279,6 +279,25 @@
   }
 
   /**
+    * Log primary censored distribution function without the check of the
+    * plain distribution function, for a delay above one that has already
+    * passed it. The plain distribution function only increases, so the check
+    * would pass again and only cost a distribution function evaluation.
+    */
+  real meta_family_pcens_live_lcdf(data real d, array[] real params,
+                                   data real pwindow_width, data int prim_id,
+                                   array[] real prim_params) {
+    real log_cdf = primarycensored_lcdf(
+      d | dist_id, params, pwindow_width, 0, positive_infinity(), prim_id,
+      prim_params
+    );
+    if (is_nan(log_cdf)) {
+      return negative_infinity();
+    }
+    return log_cdf;
+  }
+
+  /**
     * Log primary censored distribution function, guarded against underflow
     * and severed where the plain distribution function is, see
     * meta_family_dist_prob(). The primary censored distribution function is
@@ -287,21 +306,14 @@
   real meta_family_pcens_lcdf(data real d, array[] real params,
                               data real pwindow_width, data int prim_id,
                               array[] real prim_params) {
-    real log_cdf;
     if (d <= 0) {
       return negative_infinity();
     }
     if (meta_family_dist_prob(d, params) <= 0) {
       return negative_infinity();
     }
-    log_cdf = primarycensored_lcdf(
-      d | dist_id, params, pwindow_width, 0, positive_infinity(), prim_id,
-      prim_params
-    );
-    if (is_nan(log_cdf)) {
-      return negative_infinity();
-    }
-    return log_cdf;
+    return meta_family_pcens_live_lcdf(d | params, pwindow_width, prim_id,
+                                       prim_params);
   }
 
   /**
@@ -343,11 +355,22 @@
         ? 1 : 0;
       real log_partial = negative_infinity();
       real log_lo_partial = negative_infinity();
+      // The grid delays increase, so once one is above the severed lower
+      // tail every later one is too and skips the check.
+      int live = 0;
       for (j in 0:n_cell) {
-        log_cdf[j + 1] = meta_family_pcens_lcdf(
-          (first + j) * swindow_width | params, pwindow_width, prim_id,
-          prim_params
-        );
+        if (live == 1) {
+          log_cdf[j + 1] = meta_family_pcens_live_lcdf(
+            (first + j) * swindow_width | params, pwindow_width, prim_id,
+            prim_params
+          );
+        } else {
+          log_cdf[j + 1] = meta_family_pcens_lcdf(
+            (first + j) * swindow_width | params, pwindow_width, prim_id,
+            prim_params
+          );
+          live = log_cdf[j + 1] > negative_infinity();
+        }
       }
       for (j in 1:n_cell) {
         // Once the distribution function saturates its log stops increasing,
