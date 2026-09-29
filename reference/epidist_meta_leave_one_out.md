@@ -13,6 +13,7 @@ epidist_meta_leave_one_out(
   re_formula = NA,
   width = 0.95,
   keep_fits = FALSE,
+  studies = NULL,
   ...
 )
 ```
@@ -58,13 +59,22 @@ epidist_meta_leave_one_out(
   If `TRUE`, the refits are returned in the `fits` attribute of the
   result as a list named by the held out study. Defaults to `FALSE`.
 
+- studies:
+
+  A character vector of the studies to hold out, one refit each. If
+  `NULL`, the default, every study is held out in turn. Holding out a
+  few studies, such as the largest, keeps the cost down when a model has
+  many.
+
 - ...:
 
   Additional arguments passed to
   [`brms::update.brmsfit()`](https://paulbuerkner.com/brms/reference/update.brmsfit.html)
   and so to
   [`brms::brm()`](https://paulbuerkner.com/brms/reference/brm.html),
-  such as `cores`, `chains`, `iter`, `refresh` and `silent`.
+  such as `cores`, `chains`, `iter`, `refresh` and `silent`. `cores`
+  defaults to the `mc.cores` option where it is set, and otherwise to
+  one core per chain, so the chains of each refit run in parallel.
 
 ## Value
 
@@ -165,12 +175,12 @@ epidist_meta_leave_one_out(fit, data = meta, refresh = 0)
 #> # A tibble: 6 × 12
 #>   study  .row summary estimate lower upper full_estimate full_lower full_upper
 #>   <chr> <int> <chr>      <dbl> <dbl> <dbl>         <dbl>      <dbl>      <dbl>
-#> 1 A         1 mean        7.74  7.27  8.28          7.74       7.33       8.22
-#> 2 A         1 sd          4.01  3.42  5.09          4.08       3.57       4.92
-#> 3 B         1 mean        8.06  7.55  8.70          7.74       7.33       8.22
-#> 4 B         1 sd          4.22  3.58  5.34          4.08       3.57       4.92
-#> 5 C         1 mean        7.27  6.78  8.01          7.74       7.33       8.22
-#> 6 C         1 sd          3.84  3.18  4.84          4.08       3.57       4.92
+#> 1 A         1 mean        7.73  7.21  8.34          7.75       7.35       8.21
+#> 2 A         1 sd          4.02  3.41  5.28          4.09       3.58       4.85
+#> 3 B         1 mean        8.05  7.59  8.66          7.75       7.35       8.21
+#> 4 B         1 sd          4.23  3.57  5.28          4.09       3.58       4.85
+#> 5 C         1 mean        7.27  6.73  8.02          7.75       7.35       8.21
+#> 6 C         1 sd          3.85  3.18  4.88          4.09       3.58       4.85
 #> # ℹ 3 more variables: difference <dbl>, difference_lower <dbl>,
 #> #   difference_upper <dbl>
 # }

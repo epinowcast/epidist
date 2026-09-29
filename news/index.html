@@ -61,6 +61,9 @@
 <div class="section level3">
 <h3 id="new-features-1-0-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-0"></a></h3>
 <ul><li>Added <code><a href="../reference/gengamma.html">gengamma()</a></code>, a generalised gamma delay family in the Prentice parameterisation of <code><a href="http://chjackson.github.io/flexsurv-dev/reference/GenGamma.html" class="external-link">flexsurv::dgengamma()</a></code>, for the naive, latent, marginal and meta models. The Weibull and gamma are special cases and the lognormal is its limit. Closes <a href="https://github.com/epinowcast/epidist/issues/644" class="external-link">#644</a>.</li>
+<li>
+<code><a href="../reference/epidist_meta_leave_one_out.html">epidist_meta_leave_one_out()</a></code> gains a <code>studies</code> argument that holds out only the studies named, so a model with many studies can be checked against its largest few.</li>
+<li>Meta model summary rows of integer date differences are about 30% faster to fit for a gamma delay and 15% faster for a lognormal, with unchanged results.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-1-0-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-1-0-0"></a></h3>
@@ -71,6 +74,8 @@
 <div class="section level3">
 <h3 id="bug-fixes-1-0-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-0"></a></h3>
 <ul><li>Removed the remaining lookups of unexported <code>brms</code> functions, so <code><a href="https://mc-stan.org/rstantools/reference/log_lik.html" class="external-link">log_lik()</a></code>, <code><a href="https://mc-stan.org/rstantools/reference/posterior_predict.html" class="external-link">posterior_predict()</a></code> and <code><a href="https://mc-stan.org/rstantools/reference/posterior_epred.html" class="external-link">posterior_epred()</a></code> use <code>epidist</code>’s own functions for every family. These cover the lognormal, gamma, Weibull, exponential and generalised gamma families. For any other family these functions now give an error.</li>
+<li>
+<code><a href="../reference/epidist_meta_leave_one_out.html">epidist_meta_leave_one_out()</a></code> runs the chains of each refit in parallel by default, with the <code>mc.cores</code> option where it is set and otherwise one core per chain, where they previously ran one after another.</li>
 <li>
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> of an <code>epidist_multivariate</code> object writes its header as output rather than a message, so <code><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages()</a></code> no longer hides it.</li>
 </ul></div>

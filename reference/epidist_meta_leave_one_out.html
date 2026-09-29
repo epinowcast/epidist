@@ -72,6 +72,7 @@ the delay mean and standard deviation of each refit with the full fit.</p>
 <span>  re_formula <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  width <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  keep_fits <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  studies <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -117,10 +118,19 @@ of the result as a list named by the held out study.
 Defaults to <code>FALSE</code>.</p></dd>
 
 
+<dt id="arg-studies">studies<a class="anchor" aria-label="anchor" href="#arg-studies"></a></dt>
+<dd><p>A character vector of the studies to hold out, one refit
+each. If <code>NULL</code>, the default, every study is held out in turn.
+Holding out a few studies, such as the largest, keeps the cost down when
+a model has many.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to <code><a href="https://paulbuerkner.com/brms/reference/update.brmsfit.html" class="external-link">brms::update.brmsfit()</a></code> and so
 to <code><a href="https://paulbuerkner.com/brms/reference/brm.html" class="external-link">brms::brm()</a></code>, such as <code>cores</code>, <code>chains</code>, <code>iter</code>, <code>refresh</code> and
-<code>silent</code>.</p></dd>
+<code>silent</code>.
+<code>cores</code> defaults to the <code>mc.cores</code> option where it is set, and otherwise
+to one core per chain, so the chains of each refit run in parallel.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -215,12 +225,12 @@ The two fits share most of their data, so their draws are not differenced.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 12</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   study  .row summary estimate lower upper full_estimate full_lower full_upper</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> A         1 mean        7.74  7.27  8.28          7.74       7.33       8.22</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> A         1 sd          4.01  3.42  5.09          4.08       3.57       4.92</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> B         1 mean        8.06  7.55  8.70          7.74       7.33       8.22</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> B         1 sd          4.22  3.58  5.34          4.08       3.57       4.92</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> C         1 mean        7.27  6.78  8.01          7.74       7.33       8.22</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> C         1 sd          3.84  3.18  4.84          4.08       3.57       4.92</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> A         1 mean        7.73  7.21  8.34          7.75       7.35       8.21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> A         1 sd          4.02  3.41  5.28          4.09       3.58       4.85</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> B         1 mean        8.05  7.59  8.66          7.75       7.35       8.21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> B         1 sd          4.23  3.57  5.28          4.09       3.58       4.85</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> C         1 mean        7.27  6.73  8.02          7.75       7.35       8.21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> C         1 sd          3.85  3.18  4.88          4.09       3.58       4.85</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 3 more variables: difference &lt;dbl&gt;, difference_lower &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   difference_upper &lt;dbl&gt;</span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>

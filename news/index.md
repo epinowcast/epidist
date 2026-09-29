@@ -30,6 +30,12 @@ change.
   for the naive, latent, marginal and meta models. The Weibull and gamma
   are special cases and the lognormal is its limit. Closes
   [\#644](https://github.com/epinowcast/epidist/issues/644).
+- [`epidist_meta_leave_one_out()`](https://epidist.epinowcast.org/reference/epidist_meta_leave_one_out.md)
+  gains a `studies` argument that holds out only the studies named, so a
+  model with many studies can be checked against its largest few.
+- Meta model summary rows of integer date differences are about 30%
+  faster to fit for a gamma delay and 15% faster for a lognormal, with
+  unchanged results.
 
 ### Documentation
 
@@ -60,6 +66,10 @@ change.
   use `epidist`’s own functions for every family. These cover the
   lognormal, gamma, Weibull, exponential and generalised gamma families.
   For any other family these functions now give an error.
+- [`epidist_meta_leave_one_out()`](https://epidist.epinowcast.org/reference/epidist_meta_leave_one_out.md)
+  runs the chains of each refit in parallel by default, with the
+  `mc.cores` option where it is set and otherwise one core per chain,
+  where they previously ran one after another.
 - [`print()`](https://rdrr.io/r/base/print.html) of an
   `epidist_multivariate` object writes its header as output rather than
   a message, so
