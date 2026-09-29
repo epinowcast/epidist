@@ -1,11 +1,3 @@
-## Resubmission
-
-This is a resubmission.
-The Windows pre-test of the first submission stopped during "checking CRAN incoming feasibility", with the status "check log incomplete, web timeout?".
-win-builder stopped at the same point.
-The package then suggested `epireview`, which is not on CRAN, through `Additional_repositories`.
-It no longer does, so every dependency is on CRAN and the package names no other repository.
-
 ## Test environments
 
 - local macOS Tahoe 26.5, R 4.6.0, `R CMD check --as-cran` with the remote incoming checks
