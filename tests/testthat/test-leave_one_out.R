@@ -162,3 +162,20 @@ test_that(".leave_one_out_bind_predictors keeps study as the held out label", { 
   )
   expect_identical(bound$study, out$study)
 })
+
+test_that(".leave_one_out_update_args runs the refit chains in parallel", {
+  # brms does not store the cores a model was fitted with, so without this
+  # every refit would run its chains one after another.
+  expect_identical(.leave_one_out_update_args(2L, list()), list(cores = 2L))
+  expect_identical(
+    .leave_one_out_update_args(4L, list(refresh = 0)),
+    list(refresh = 0, cores = 4L)
+  )
+})
+
+test_that(".leave_one_out_update_args keeps cores passed by the user", {
+  expect_identical(
+    .leave_one_out_update_args(4L, list(cores = 1L)),
+    list(cores = 1L)
+  )
+})
