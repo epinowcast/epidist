@@ -357,16 +357,15 @@
       // The grid delays increase, so once one is above the severed lower
       // tail every later one is too and skips the check.
       int live = 0;
-      // Daily cells with an integer primary window put every grid delay and
-      // the delay a primary window below it on the integers, so the live
-      // cells come from primarycensored_lcdf_vectorized(), which shares the
-      // analytical terms at each delay between neighbouring cells. Its
-      // values are those of meta_family_pcens_live_lcdf() at each delay.
-      int shared = swindow_width == 1 &&
+      // Daily cells and an integer primary window put every delay the
+      // analytical solution needs on the integers, so primarycensored can
+      // share its terms between neighbouring cells. Element d of its result
+      // is the value at delay d, from the first live delay up.
+      int vectorised = swindow_width == 1 &&
         check_for_analytical_vectorized(dist_id, prim_id, pwindow_width);
       for (j in 0:n_cell) {
         if (live == 1) {
-          if (shared == 1) {
+          if (vectorised == 1) {
             vector[n_grid] log_live = primarycensored_lcdf_vectorized(
               first + j, n_grid, dist_id, params, pwindow_width, prim_id,
               prim_params
