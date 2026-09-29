@@ -211,6 +211,41 @@ test_that("R and Stan agree on a grid whose first cells are in the severed lower
   )
 })
 
+test_that("R and Stan agree on grids with and without shared primary censored terms", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_fits()
+  # Daily cells with a primary window of one or two days take the grid from
+  # primarycensored_lcdf_vectorized(). A fractional primary window or cells
+  # of two days fall back to the per cell loop.
+  windows <- data.frame(
+    pwindow = c(1, 2, 0.5, 2),
+    swindow = c(1, 1, 1, 2),
+    delay_min = c(0, 3, 0, 0)
+  )
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = rep(paste0("s", seq_len(nrow(windows))), each = 2),
+    type = rep(c("mean", "sd"), nrow(windows)),
+    value = rep(c(8, 4), nrow(windows)),
+    n = 200,
+    relative_obs_time = 40,
+    delay_min = rep(windows$delay_min, each = 2),
+    pwindow = rep(windows$pwindow, each = 2),
+    swindow = rep(windows$swindow, each = 2),
+    trunc_adjusted = FALSE,
+    cens_adjusted = 0,
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  program <- meta_log_lik_program(meta)
+  expect_setequal(program$standata$vreal2, windows$pwindow)
+  expect_setequal(program$standata$vreal3, windows$swindow)
+  mu <- c(2, 1.4)
+  sigma <- c(0.5, 0.2)
+  r_log_lik <- meta_r_log_lik(program, mu, sigma)
+  expect_true(all(is.finite(r_log_lik)))
+  expect_rows_close(meta_stan_log_lik(program, mu, sigma), r_log_lik, 1e-6)
+})
+
 test_that("R and Stan agree on midpoint imputed quantiles with an off grid delay_min", { # nolint: line_length_linter.
   skip_on_cran()
   skip_if_no_fits()
