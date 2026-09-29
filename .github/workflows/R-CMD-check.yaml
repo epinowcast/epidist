@@ -28,11 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The \donttest{} examples fit models through the rstan backend.
-        # rstan cannot compile a model on the macOS and Windows runners while
-        # the CRAN rstan and StanHeaders are built against different Stan
-        # versions, so those runners skip the examples and Linux keeps
-        # running them. See #687 and #688.
+        # macOS and Windows cannot compile Stan models through rstan, see #687.
         config:
           - {os: windows-latest, r: 'release', donttest: 'false'}
           - {os: ubuntu-latest,   r: 'release', donttest: 'true'}

@@ -42,9 +42,6 @@ jobs:
             any::remotes
             any::epireview
 
-      # cmdstanr is not a package dependency. It is installed here, on its
-      # own, so that the stan-dev r-universe is never consulted for rstan or
-      # StanHeaders, which must be built against each other. See #687.
       - name: Install cmdstanr
         run: |
           install.packages(
@@ -59,11 +56,7 @@ jobs:
           cmdstan-version: 'latest'
           num-cores: 2
 
-      # approx-inference uses pathfinder, which needs the path fix in
-      # paul-buerkner/brms#1831. That is merged but not in a CRAN release.
-      # It is only needed to generate the static output, not to build or use
-      # the package, so it is installed here and nowhere else. Drop this step
-      # once brms releases the fix.
+      # For pathfinder in approx-inference. Drop once brms releases #1831.
       - name: Install development brms for precomputing
         run: |
           remotes::install_github(
