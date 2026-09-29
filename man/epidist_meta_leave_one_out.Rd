@@ -11,6 +11,7 @@ epidist_meta_leave_one_out(
   re_formula = NA,
   width = 0.95,
   keep_fits = FALSE,
+  studies = NULL,
   ...
 )
 }
@@ -39,6 +40,11 @@ Defaults to \code{0.95}.}
 \item{keep_fits}{If \code{TRUE}, the refits are returned in the \code{fits} attribute
 of the result as a list named by the held out study.
 Defaults to \code{FALSE}.}
+
+\item{studies}{A character vector of the studies to hold out, one refit
+each. If \code{NULL}, the default, every study is held out in turn.
+Holding out a few studies, such as the largest, keeps the cost down when
+a model has many.}
 
 \item{...}{Additional arguments passed to \code{\link[brms:update.brmsfit]{brms::update.brmsfit()}} and so
 to \code{\link[brms:brm]{brms::brm()}}, such as \code{cores}, \code{chains}, \code{iter}, \code{refresh} and

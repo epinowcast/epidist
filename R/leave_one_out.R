@@ -46,6 +46,11 @@
 #'  of the result as a list named by the held out study.
 #'  Defaults to `FALSE`.
 #'
+#' @param studies A character vector of the studies to hold out, one refit
+#'  each. If `NULL`, the default, every study is held out in turn.
+#'  Holding out a few studies, such as the largest, keeps the cost down when
+#'  a model has many.
+#'
 #' @param ... Additional arguments passed to [brms::update.brmsfit()] and so
 #'  to [brms::brm()], such as `cores`, `chains`, `iter`, `refresh` and
 #'  `silent`.
@@ -94,13 +99,14 @@ epidist_meta_leave_one_out <- function(
   re_formula = NA,
   width = 0.95,
   keep_fits = FALSE,
+  studies = NULL,
   ...
 ) {
   .assert_meta_fit(fit)
   assert_number(width, lower = 0, upper = 1)
   assert_flag(keep_fits)
   model_data <- .leave_one_out_data(fit, data)
-  studies <- .leave_one_out_studies(model_data)
+  studies <- .leave_one_out_studies(model_data, studies)
   if (is.null(newdata)) {
     newdata <- .leave_one_out_newdata(fit)
   }
@@ -193,15 +199,17 @@ epidist_meta_leave_one_out <- function(
   return(data)
 }
 
-#' The studies of a meta model, in order of first appearance
+#' The studies of a meta model to hold out, in order of first appearance
 #'
 #' @param data An `epidist_meta_model` object or the model data of a meta
 #'  model fit, with a `study` column.
 #'
-#' @returns A character vector of study labels.
+#' @inheritParams epidist_meta_leave_one_out
+#'
+#' @returns A character vector of study labels, `studies` when it is given.
 #'
 #' @keywords internal
-.leave_one_out_studies <- function(data) {
+.leave_one_out_studies <- function(data, studies = NULL) {
   if (!hasName(data, "study")) {
     cli_abort(c(
       "{.arg data} has no {.var study} column, so there is nothing to hold
@@ -212,12 +220,28 @@ epidist_meta_leave_one_out <- function(
       )
     ))
   }
-  studies <- unique(as.character(data$study))
-  if (length(studies) < 2) {
+  all_studies <- unique(as.character(data$study))
+  if (!is.null(studies)) {
+    assert_character(studies, min.len = 1, any.missing = FALSE, unique = TRUE)
+    unknown <- setdiff(studies, all_studies)
+    if (length(unknown) > 0) {
+      cli_abort(c(
+        paste0(
+          "{.arg studies} holds studies the model data does not: ",
+          "{.val {unknown}}."
+        ),
+        i = "The studies are {.val {all_studies}}."
+      ))
+    }
+  }
+  if (length(all_studies) < 2) {
     cli_abort(paste0(
-      "The model data holds only the study {.val {studies}}, so there is ",
+      "The model data holds only the study {.val {all_studies}}, so there is ",
       "nothing to hold it out against."
     ))
+  }
+  if (is.null(studies)) {
+    return(all_studies)
   }
   return(studies)
 }
