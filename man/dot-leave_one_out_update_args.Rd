@@ -18,6 +18,8 @@
 \description{
 \code{brms} does not store the number of cores a model was fitted with, so
 \code{\link[brms:update.brmsfit]{brms::update.brmsfit()}} would run the chains of every refit one after
-another. Unless \code{cores} is given, each refit gets one core per chain.
+another. Unless \code{cores} is given, each refit uses the \code{mc.cores} option
+where it is set, and otherwise one core per chain, counting \code{chains} if it
+is given.
 }
 \keyword{internal}
