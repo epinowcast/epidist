@@ -1357,6 +1357,7 @@ epidist_stancode.epidist_meta_model <- function(
       c(
         "primarycensored_lpmf",
         "primarycensored_lcdf",
+        "primarycensored_lcdf_vectorized",
         "primarycensored_ode",
         "dist_lcdf",
         "primary_lpdf"
