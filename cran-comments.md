@@ -1,8 +1,17 @@
+## Resubmission
+
+This is a resubmission.
+The Windows pre-test of the first submission stopped during "checking CRAN incoming feasibility", with the status "check log incomplete, web timeout?".
+win-builder stopped at the same point.
+The package then suggested `epireview`, which is not on CRAN, through `Additional_repositories`.
+It no longer does, so every dependency is on CRAN and the package names no other repository.
+
 ## Test environments
 
 - local macOS Tahoe 26.5, R 4.6.0, `R CMD check --as-cran` with the remote incoming checks
 - GitHub Actions: ubuntu-latest (devel, release, oldrel-1), macOS-latest (release), windows-latest (release)
 - GitHub Actions: `R CMD check --as-cran` on ubuntu-latest (release)
+- CRAN incoming pre-test, Debian (R-devel)
 
 ## R CMD check results
 
@@ -14,16 +23,14 @@ Maintainer: 'Sam Abbott <contact@samabbott.co.uk>'
 
 New submission
 
-Suggests or Enhances not in mainstream repositories:
-  epireview
-Availability using Additional_repositories specification:
-  epireview   yes   https://mrc-ide.r-universe.dev
+Possibly misspelled words in DESCRIPTION:
+  Charniga (31:43)
+  al (30:65, 31:55)
+  et (30:62, 31:52)
 ```
 
 This is a new submission.
-
-`epireview` is used by one test, one example and a vignette section, and is not on CRAN.
-It is declared in `Suggests`, reached through `Additional_repositories`, and every use is conditional on it being installed.
+The flagged words are an author's name and "et al." in the references to the methods.
 
 The `\donttest{}` examples each fit a Stan model through `rstan`.
 They take under a minute each, mostly compiling the model, and about 3.5 minutes in total.
