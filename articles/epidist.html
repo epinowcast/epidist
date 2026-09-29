@@ -441,8 +441,8 @@ Any tool that supports <code>brms</code> fitted model objects will be compatible
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.42      0.03     1.35     1.48 1.00     3074     2498</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.75      0.05    -0.85    -0.65 1.00     2926     2275</span></span>
+<span><span class="co">#&gt; Intercept           1.42      0.03     1.35     1.48 1.00     3205     2475</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3373     2147</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -512,8 +512,8 @@ Note that because of the different <code>as_epidist_&lt;model&gt;_model()</code>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.55      0.05     1.47     1.65 1.00     1814     1772</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     1859     1931</span></span>
+<span><span class="co">#&gt; Intercept           1.55      0.05     1.46     1.65 1.00     2149     2176</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2292     2573</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -528,14 +528,12 @@ Note that because of the different <code>as_epidist_&lt;model&gt;_model()</code>
 <p>We can compare the two models by plotting the estimated parameters from the naive and marginal models.
 One way to do this is to use the <code><a href="../reference/delay_summary_draws.html">delay_summary_draws()</a></code> function.
 It draws one set of delay distribution parameters for each unique combination of the predictors, and adds the natural scale mean and standard deviation of the delay so that the numbers are easier to read.
-<code><a href="../reference/epidist_strata.html">epidist_strata()</a></code>, <code><a href="../reference/delay_parameter_draws.html">delay_parameter_draws()</a></code> and <code><a href="../reference/add_summaries.html">add_summaries()</a></code> are the three steps it wraps, and each is available on its own.
-Here we take them separately, so that the draws from both models can be combined before the summaries are added.</p>
+We call it on each fit and combine the draws.</p>
 <details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">predicted_parameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>marginal <span class="op">=</span> <span class="va">marginal_fit</span>, naive <span class="op">=</span> <span class="va">naive_fit</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span>\<span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="fu"><a href="../reference/delay_parameter_draws.html">delay_parameter_draws</a></span><span class="op">(</span><span class="va">fit</span>, newdata <span class="op">=</span> <span class="fu"><a href="../reference/epidist_strata.html">epidist_strata</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">delay_summary_draws</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span>.id <span class="op">=</span> <span class="st">"model"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">model</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"naive"</span>, <span class="st">"marginal"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/add_summaries.html">add_summaries</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">model</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"naive"</span>, <span class="st">"marginal"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">predicted_parameters</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 6 × 17</span></span>
@@ -550,12 +548,9 @@ Here we take them separately, so that the draws from both models can be combined
 <span><span class="co">#&gt; 5 marginal         8                10       1       1         9         0     3</span></span>
 <span><span class="co">#&gt; 6 marginal         8                10       1       1         9         0     3</span></span>
 <span><span class="co">#&gt; # ℹ 9 more variables: .row &lt;int&gt;, .chain &lt;int&gt;, .iteration &lt;int&gt;, .draw &lt;int&gt;,</span></span>
-<span><span class="co">#&gt; #   mu &lt;dbl&gt;, sigma &lt;dbl&gt;, delay &lt;dbl&gt;, mean &lt;dbl&gt;, sd &lt;dbl&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; #   mu &lt;dbl&gt;, sigma &lt;dbl&gt;, mean &lt;dbl&gt;, sd &lt;dbl&gt;, delay &lt;dbl&gt;</span></span></code></pre></div>
 </details><div class="alert alert-primary">
-<p>Note that by default <code><a href="../reference/delay_parameter_draws.html">add_delay_parameter_draws()</a></code> gives draws for every row of the data passed to it.
-Neither model here has covariates, so <code><a href="../reference/epidist_strata.html">epidist_strata()</a></code> reduces the data to the single row they all share.
-This prevents repeating the same draws for each row.</p>
-<p>Another approach to building the data to predict for is <code><a href="../reference/epidist_newdata.html">epidist_newdata()</a></code>, which adds the response and observation process columns the models expect.</p>
+<p><code><a href="../reference/delay_summary_draws.html">delay_summary_draws()</a></code> also takes <code>newdata</code>, for example data built with <code><a href="../reference/epidist_newdata.html">epidist_newdata()</a></code>, and the steps it wraps, <code><a href="../reference/epidist_strata.html">epidist_strata()</a></code>, <code><a href="../reference/delay_parameter_draws.html">delay_parameter_draws()</a></code> and <code><a href="../reference/add_summaries.html">add_summaries()</a></code>, are available on their own.</p>
 </div>
 <p>We can now plot posterior draws for the summary parameters from the two models.
 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the posterior density of each parameter in its own panel, coloured by a stratum of our choosing, and marks the true values.</p>

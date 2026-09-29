@@ -96,27 +96,23 @@
 <p>The meta model is experimental.
 Its interface may still change in future releases.</p>
 </div>
-<p>Systematic reviews of epidemiological delays mostly collect published summary values, such as a mean and standard deviation, or a median and interquartile range, rather than individual level data.
-Those summaries are usually biased, because studies often do not adjust for right truncation, treat day rounded delays as if they were continuous, or only partially correct for interval censoring.
-The meta model fits directly to these summarised, and potentially biased, published estimates, jointly with any individual level data we do have.
-It does this by forward modelling what each study’s own estimation procedure would have converged to.
-Jointly synthesising individual level data and published summaries in one hierarchical model overlaps with the federated analysis approach of the <a href="https://github.com/cm401/ddsynth" class="external-link">ddsynth</a> package.
-The meta model differs in adjusting each summary for the biases of the study’s own estimation procedure rather than treating it as an unbiased estimate of the continuous delay.
-It also builds on <code>brms</code>, so formulas, families, priors and post-processing all carry over.</p>
-<div class="alert alert-primary">
-<p>For a methodological overview of the biases in published delay estimates see <span class="citation">Park et al. (<a href="#ref-park2024estimating">2024</a>)</span>, and for a practical checklist aimed at applied users see <span class="citation">Charniga et al. (<a href="#ref-charniga2024best">2024</a>)</span>.
-For individual level rows the meta model reuses the likelihood of the marginal model (<code><a href="../articles/epidist.html">vignette("epidist")</a></code>), which relies on the <a href="https://primarycensored.epinowcast.org/" class="external-link"><code>primarycensored</code></a> package <span class="citation">(<a href="#ref-primarycensored">Abbott et al. 2025</a>)</span>.</p>
-</div>
+<p>Systematic reviews of epidemiological delays mostly collect published summaries, such as a mean and standard deviation or a median and interquartile range, rather than individual level data.
+Those summaries are often biased, because the studies behind them did not fully adjust for interval censoring or right truncation <span class="citation">(<a href="#ref-park2024estimating">Park et al. 2024</a>; <a href="#ref-charniga2024best">Charniga et al. 2024</a>)</span>.
+The meta model treats the delay as one latent distribution shared by every study.
+For each study it applies that study’s estimation procedure to the latent delay, which gives the distribution the study’s summaries estimate.
+It then fits each reported summary with a likelihood built from that distribution and the study’s sample size, and fits any individual level data with the likelihood of the marginal model <span class="citation">(<a href="#ref-primarycensored">Abbott et al. 2025</a>)</span>.
+<code><a href="../articles/model.html">vignette("model")</a></code> gives the maths.
+Because it is built on <code>brms</code>, formulas, priors and post-processing carry over, so differences between studies are a formula term such as <code>(1 | study)</code>.
+The <a href="https://github.com/cm401/ddsynth" class="external-link">ddsynth</a> package also combines individual level data and published summaries, but treats each summary as an unbiased estimate of the delay.</p>
 <div class="section level2" number="1">
 <h2 id="metadata">
 <span class="header-section-number">1</span> What we need from a study<a class="anchor" aria-label="anchor" href="#metadata"></a>
 </h2>
-<p>Reviews rarely record exactly how a study estimated its delay.
-To use a reported summary we need to know how the study handled the common biases, along with the data process it saw.
-The meta model supports the following approaches.</p>
+<p>To use a reported summary we need to know how the study estimated it, which reviews rarely record.
+The meta model needs the following for each study.</p>
 <ul>
 <li>
-<strong>How the study adjusted for censoring</strong> (<code>cens_adjusted</code>), one of <code>0</code> if it took integer date differences and summarised them directly (the most common case), <code>1</code> if it used a double interval censored likelihood targeting the continuous delay, <code>2</code> if it adjusted only the secondary interval assuming a uniform delay within it, <code>3</code> if it assigned each delay to the centre of the interval it was observed in, or <code>4</code> if it took the midpoint of the primary event’s window and integrated the secondary interval.</li>
+<strong>How the study adjusted for censoring</strong> (<code>cens_adjusted</code>), one of the codes in the table below.</li>
 <li>
 <strong>Whether it adjusted for right truncation</strong> (<code>trunc_adjusted</code>), and if not, <strong>the observation time</strong> (<code>relative_obs_time</code>) and <strong>how collection stopped</strong> (<code>trunc_design</code>).
 For a <code>"cohort"</code> design the observation time is the truncation point on the delay scale.
@@ -129,6 +125,38 @@ For an <code>"accrual"</code> design, where collection stopped at a calendar dat
 <strong>The smallest delay it counted</strong> (<code>delay_min</code>), where the study dropped shorter delays, so that its summaries describe a left truncated delay distribution.
 Defaults to 0, meaning it counted every delay.</li>
 </ul>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th><code>cens_adjusted</code></th>
+<th>The study</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>0</code></td>
+<td>summarised integer date differences directly, the most common case</td>
+</tr>
+<tr class="even">
+<td><code>1</code></td>
+<td>used a double interval censored likelihood targeting the continuous delay</td>
+</tr>
+<tr class="odd">
+<td><code>2</code></td>
+<td>adjusted only the secondary interval, assuming a uniform delay within it</td>
+</tr>
+<tr class="even">
+<td><code>3</code></td>
+<td>assigned each delay to the centre of the interval it was observed in</td>
+</tr>
+<tr class="odd">
+<td><code>4</code></td>
+<td>took the midpoint of the primary event’s window and integrated the secondary interval</td>
+</tr>
+</tbody>
+</table>
 <p>If you cannot tell which of these a study used, state the assumption you are making alongside any results.
 See <code><a href="../reference/as_epidist_estimates_data.html">?as_epidist_estimates_data</a></code> for the full details.</p>
 <p>Where the underlying delays are available and the cutoff that produced them is known, refitting them with the marginal model (<code><a href="../articles/epidist.html">vignette("epidist")</a></code>) is simpler and more reliable than reconstructing what a summary of them means.
@@ -454,10 +482,9 @@ The same pattern works for a review, with one function that converts a row of th
 <span><span class="co">#&gt; #   cens_adjusted &lt;int&gt;, delay_min &lt;dbl&gt;, growth_rate &lt;dbl&gt;,</span></span>
 <span><span class="co">#&gt; #   growth_rate_sd &lt;dbl&gt;, max_delay &lt;dbl&gt;, mvn_id &lt;chr&gt;</span></span></code></pre></div>
 </details><div class="alert alert-primary">
-<p><code>max_delay</code> sets how far the grid used to work out the implied naive summaries extends.
-By default it is the point beyond which one percent of the second moment of a lognormal matched to the study’s summaries lies, or five times the largest reported value where no lognormal can be matched.
-Raise it for a delay with a longer tail than that, and lower it to fit faster.
-<code><a href="../reference/simulate_study.html">simulate_study()</a></code> passes it through to <code><a href="../reference/as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code>, and we set it here rather than take the default.</p>
+<p><code>max_delay</code> sets how far the grid behind the implied summaries extends for a study that adjusted for right truncation, since nothing else bounds its delays.
+The default suits most delays, so raise it only for a delay with a long tail.
+We set it here, and <code><a href="../reference/simulate_study.html">simulate_study()</a></code> passes it on to <code><a href="../reference/as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code>, where <code><a href="../reference/as_epidist_estimates_data.data.frame.html">?as_epidist_estimates_data.data.frame</a></code> gives the default.</p>
 </div>
 </div>
 <div class="section level2" number="4">
@@ -491,8 +518,8 @@ Raise it for a delay with a longer tail than that, and lower it to fit faster.
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.81      0.01     1.79     1.84 1.00      944      731</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.74      0.02    -0.78    -0.70 1.00      582      602</span></span>
+<span><span class="co">#&gt; Intercept           1.81      0.01     1.79     1.84 1.00      938      747</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.74      0.02    -0.78    -0.69 1.00      898      630</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -509,7 +536,7 @@ Raise it for a delay with a longer tail than that, and lower it to fit faster.
 <span><span class="co">#&gt;   parameter value .lower .upper .width .point .interval</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;</span></span>
 <span><span class="co">#&gt; 1 mu        1.81   1.79   1.84    0.95 median qi</span></span>
-<span><span class="co">#&gt; 2 sigma     0.477  0.458  0.496   0.95 median qi</span></span></code></pre></div>
+<span><span class="co">#&gt; 2 sigma     0.477  0.458  0.499   0.95 median qi</span></span></code></pre></div>
 </details><p>Even though every study is individually biased, the meta model recovers the simulated log mean of 1.8 and log standard deviation of 0.5 closely.</p>
 </div>
 <div class="section level3" number="4.2">
@@ -519,9 +546,8 @@ Raise it for a delay with a longer tail than that, and lower it to fit faster.
 <p>These ten studies measured one outbreak, so a single <code>mu</code> and <code>sigma</code> is the right model for them.
 A real review pools studies of different outbreaks, and some of its metadata will be wrong.
 A study level random effect on both parameters, <code>(1 | study)</code>, lets each study depart from the population value.
-The meta model puts no restriction on the <code>brms</code> formula, so the term is written as it would be for any distributional parameter.
 The between study standard deviations get <code>normal(0, 0.25)</code> priors rather than the wide <code>brms</code> default.
-<code>init = 0.5</code> narrows the range the chains start from, because the default lets a study’s <code>sigma</code> start far outside where the model is finite.</p>
+<code>init = 0.5</code> narrows where the chains start, because the default can start a study’s <code>sigma</code> where the model is not finite.</p>
 <details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_meta_summary_study</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist.html">epidist</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">meta_summary_only</span>,</span>
@@ -547,13 +573,13 @@ The between study standard deviations get <code>normal(0, 0.25)</code> priors ra
 <span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
 <span><span class="co">#&gt; ~study (Number of levels: 10)</span></span>
 <span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)           0.03      0.03     0.00     0.09 1.00      302      436</span></span>
-<span><span class="co">#&gt; sd(sigma_Intercept)     0.08      0.06     0.00     0.22 1.00      314      281</span></span>
+<span><span class="co">#&gt; sd(Intercept)           0.03      0.02     0.00     0.09 1.00      297      357</span></span>
+<span><span class="co">#&gt; sd(sigma_Intercept)     0.08      0.05     0.00     0.21 1.00      296      307</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.82      0.02     1.78     1.86 1.00      517      378</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.72      0.04    -0.80    -0.63 1.00      418      574</span></span>
+<span><span class="co">#&gt; Intercept           1.82      0.02     1.77     1.86 1.00      499      445</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.73      0.04    -0.81    -0.63 1.01      480      494</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -648,8 +674,8 @@ Figure 4.1: The delay distribution implied by the fits with and without a study 
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.76      0.01     1.73     1.78 1.00      943      722</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.83      0.02    -0.87    -0.79 1.00      796      653</span></span>
+<span><span class="co">#&gt; Intercept           1.76      0.01     1.74     1.79 1.00      859      701</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.83      0.02    -0.87    -0.79 1.00      767      627</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -702,8 +728,8 @@ Individual records keep any <code>study</code> column they arrive with, and are 
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept           1.82      0.01     1.80     1.85 1.00      638      486</span></span>
-<span><span class="co">#&gt; sigma_Intercept    -0.73      0.02    -0.76    -0.69 1.00     1110      715</span></span>
+<span><span class="co">#&gt; Intercept           1.82      0.01     1.79     1.85 1.00      828      577</span></span>
+<span><span class="co">#&gt; sigma_Intercept    -0.73      0.02    -0.77    -0.69 1.01      631      447</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
@@ -771,7 +797,8 @@ Click to expand for code to prepare the comparison plot
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">parameter</span>, scales <span class="op">=</span> <span class="st">"free"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_fill_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Set2"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">""</span>, y <span class="op">=</span> <span class="st">""</span>, fill <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 </details></details><details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
@@ -880,26 +907,11 @@ The intercept is then the retrospective delay, and each coefficient is the shift
 <span><span class="co">#&gt; 1 post outbreak       7</span></span>
 <span><span class="co">#&gt; 2 during outbreak     2</span></span>
 <span><span class="co">#&gt; 3 unrecorded         20</span></span></code></pre></div>
-</details><div class="alert alert-warning">
-<p>Only two of these studies record having been made during an outbreak, so this contrast is weak.
-The <code>unrecorded</code> group mixes studies where the field is missing with studies where it is unspecified, and the term absorbs whatever separates the groups, which need not be truncation alone.
-See <span class="citation">Charniga et al. (<a href="#ref-charniga2024best">2024</a>)</span> for suggested reporting metadata for future estimation studies and reviews, and <a href="https://github.com/epiforecasts/andv-linelist-analysis" class="external-link">andv-linelist-analysis</a> (the Epuyén Andes virus outbreak) and <a href="https://github.com/epiforecasts/bdbv-linelist-analysis" class="external-link">bdbv-linelist-analysis</a> (the 2012 Isiro Bundibugyo Ebola outbreak) for examples of the checklist in use.</p>
-</div>
-<div class="alert alert-primary">
-<p>epireview does not record how, or whether, a study adjusted for censoring.
-Studies rarely adjusted correctly, the common mistakes being to discretise the secondary interval or to shift by the midpoint, so we treat every study as <code>cens_adjusted = 0</code>, integer date differences summarised directly.
-Observation times are not recorded either, so every study gets <code>trunc_adjusted = TRUE</code> and the <code>phase</code> term stands in.</p>
-</div>
-<p><code><a href="../reference/epidist_estimates_epireview.html">epidist_estimates_epireview()</a></code> maps each record of <code>onset_to_death</code> to the long format <code><a href="../reference/as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> expects.
-Means become <code>"mean"</code> rows, with a matching <code>"sd"</code> row where a standard deviation is reported, either as the study’s own spread or as the second parameter of a fitted Gamma.
-A reported standard error becomes an <code>se</code> on the mean row instead.
-Medians become <code>"quantile"</code> rows at <code>p = 0.5</code>, with further quantile rows at <code>p = 0.25</code> and <code>p = 0.75</code> where an interquartile range is reported.
-A study reporting a spread that does not match its own value type, such as a median alongside a standard deviation, keeps only the matching set, because the two kinds of summary from a study that reported integer date differences are fitted as though they were independent.
-A study that reports the natural parameters of a distribution it fitted is converted as <code><a href="../reference/epidist_estimates_parameters.html">epidist_estimates_parameters()</a></code> would convert it.
-The fitted distributions here are Gammas that epireview records as a mean and a standard deviation, which the function picks up as moments.</p>
-<p>The metadata we assume for every study is passed as arguments.
-Where we know the metadata of individual studies, from the papers or another source, the <code>metadata</code> argument takes a table with a row per study that overrides these, and the result is an <code>epidist_estimates_data</code> object that can be edited afterwards.
-<code>keep</code> carries the <code>phase</code> covariate onto the rows.</p>
+</details><p><code><a href="../reference/epidist_estimates_epireview.html">epidist_estimates_epireview()</a></code> turns each record into the rows <code><a href="../reference/as_epidist_estimates_data.html">as_epidist_estimates_data()</a></code> expects, such as a mean with its standard deviation or a median with its interquartile range.
+epireview does not record how a study adjusted for censoring either, so we assume every study summarised integer date differences (<code>cens_adjusted = 0</code>).
+Without observation times every study is treated as adjusted for right truncation, and the <code>phase</code> term stands in.
+The <code>metadata</code> argument overrides these assumptions for individual studies, and <code>keep</code> carries the <code>phase</code> covariate onto the rows.
+See <code><a href="../reference/epidist_estimates_epireview.html">?epidist_estimates_epireview</a></code> for how each kind of record is converted.</p>
 <details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ebola_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_estimates_epireview.html">epidist_estimates_epireview</a></span><span class="op">(</span></span>
 <span>  <span class="va">onset_to_death</span>,</span>
@@ -950,10 +962,8 @@ Where we know the metadata of individual studies, from the papers or another sou
 <span><span class="co">#&gt; #   growth_rate_sd &lt;dbl&gt;, max_delay &lt;dbl&gt;, mvn_id &lt;chr&gt;, phase &lt;fct&gt;</span></span></code></pre></div>
 </details><p>We fit a Gamma, which is the family most of these studies fitted, with a <code>(1 | study)</code> term on both the mean and the shape.
 The term allows for real heterogeneity across outbreaks and Ebola species, and for studies whose metadata we have got wrong.</p>
-<p>Ebola onset to death is thought to take roughly 7 to 14 days, so the intercept prior is centred on ten days with a standard deviation of 0.5 on the log link.
-A Gamma shape between about 1 and 5 covers the spreads reported, so the shape intercept gets <code>normal(log(2), 0.5)</code> on its log link.
-We assume that studies may differ by about a quarter on the log scale, so both between study standard deviations get <code>normal(0, 0.25)</code>.
-The phase coefficients get <code>normal(0, 0.5)</code>, so that two studies cannot move the contrast without limit.
+<p>Ebola onset to death is thought to take roughly 7 to 14 days, so the intercept prior is centred on ten days, and a prior on the log shape centred on <code>log(2)</code> covers the spreads reported.
+Studies may differ by about a quarter on the log scale, so the between study standard deviations get <code>normal(0, 0.25)</code>, and the phase coefficients get <code>normal(0, 0.5)</code> so that two studies cannot move the contrast without limit.
 <code><a href="../reference/epidist_prior.html">epidist_prior()</a></code> shows the priors the model will use.</p>
 <details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ebola_prior</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/set_prior.html" class="external-link">prior</a></span><span class="op">(</span><span class="fu">normal</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>, <span class="fl">0.5</span><span class="op">)</span>, class <span class="op">=</span> <span class="st">"Intercept"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -1010,23 +1020,25 @@ The phase coefficients get <code>normal(0, 0.5)</code>, so that two studies cann
 <span><span class="co">#&gt; Multilevel Hyperparameters:</span></span>
 <span><span class="co">#&gt; ~study (Number of levels: 29)</span></span>
 <span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; sd(Intercept)           0.14      0.03     0.08     0.22 1.01      345      401</span></span>
-<span><span class="co">#&gt; sd(shape_Intercept)     0.51      0.10     0.35     0.72 1.01      338      429</span></span>
+<span><span class="co">#&gt; sd(Intercept)           0.14      0.03     0.08     0.21 1.00      266      611</span></span>
+<span><span class="co">#&gt; sd(shape_Intercept)     0.53      0.10     0.35     0.76 1.00      398      543</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Regression Coefficients:</span></span>
 <span><span class="co">#&gt;                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS</span></span>
-<span><span class="co">#&gt; Intercept               2.24      0.06     2.11     2.37 1.00      483      531</span></span>
-<span><span class="co">#&gt; shape_Intercept         1.28      0.15     0.99     1.57 1.01      450      534</span></span>
-<span><span class="co">#&gt; phaseduringoutbreak     0.06      0.12    -0.19     0.29 1.01      450      748</span></span>
-<span><span class="co">#&gt; phaseunrecorded        -0.02      0.08    -0.18     0.14 1.00      420      388</span></span>
+<span><span class="co">#&gt; Intercept               2.24      0.06     2.12     2.36 1.01      478      717</span></span>
+<span><span class="co">#&gt; shape_Intercept         1.28      0.15     1.00     1.57 1.00      343      649</span></span>
+<span><span class="co">#&gt; phaseduringoutbreak     0.05      0.13    -0.18     0.33 1.00      635      552</span></span>
+<span><span class="co">#&gt; phaseunrecorded        -0.02      0.07    -0.16     0.11 1.00      492      572</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Draws were sampled using sample(hmc). For each parameter, Bulk_ESS</span></span>
 <span><span class="co">#&gt; and Tail_ESS are effective sample size measures, and Rhat is the potential</span></span>
 <span><span class="co">#&gt; scale reduction factor on split chains (at convergence, Rhat = 1).</span></span></code></pre></div>
 </details><div class="alert alert-warning">
 <p>These estimates should not be used as they stand.
-The estimation approach of every study was assumed rather than checked against the paper.
-A publication quality meta analysis would have to do that for each study.</p>
+The estimation approach of every study was assumed rather than checked against its paper, which a publication quality meta analysis would have to do.
+Only two studies record having been made during an outbreak, so the phase contrast is weak.
+The <code>unrecorded</code> group mixes studies where the field is missing with studies where it is unspecified, so the term absorbs whatever separates the groups, which need not be truncation alone.
+See <span class="citation">Charniga et al. (<a href="#ref-charniga2024best">2024</a>)</span> for the metadata future studies and reviews should report, and <a href="https://github.com/epiforecasts/andv-linelist-analysis" class="external-link">andv-linelist-analysis</a> (the Epuyén Andes virus outbreak) and <a href="https://github.com/epiforecasts/bdbv-linelist-analysis" class="external-link">bdbv-linelist-analysis</a> (the 2012 Isiro Bundibugyo Ebola outbreak) for examples of the checklist in use.</p>
 </div>
 </div>
 <div class="section level3" number="5.2">
@@ -1052,10 +1064,10 @@ We report the Gamma shape and scale alongside the mean and standard deviation th
 <span><span class="co">#&gt; # A tibble: 4 × 7</span></span>
 <span><span class="co">#&gt;   parameter value .lower .upper .width .point .interval</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;</span></span>
-<span><span class="co">#&gt; 1 mean       9.40   8.28  10.7    0.95 median qi</span></span>
-<span><span class="co">#&gt; 2 scale      2.65   1.89   3.55   0.95 median qi</span></span>
-<span><span class="co">#&gt; 3 sd         4.98   4.08   6.00   0.95 median qi</span></span>
-<span><span class="co">#&gt; 4 shape      3.57   2.69   4.81   0.95 median qi</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 mean       9.44   8.34  10.6    0.95 median qi</span></span>
+<span><span class="co">#&gt; 2 scale      2.65   1.90   3.59   0.95 median qi</span></span>
+<span><span class="co">#&gt; 3 sd         5.01   4.07   5.99   0.95 median qi</span></span>
+<span><span class="co">#&gt; 4 shape      3.56   2.72   4.80   0.95 median qi</span></span></code></pre></div>
 </details><p>The phase bias is the contrast between each phase and the retrospective reference.
 <code><a href="https://rdrr.io/pkg/marginaleffects/man/comparisons.html" class="external-link">marginaleffects::comparisons()</a></code> gives it as a ratio of mean delays, and its draws give the posterior probability that estimates made during an outbreak are shorter.</p>
 <details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
@@ -1069,8 +1081,8 @@ We report the Gamma shape and scale alongside the mean and standard deviation th
 <span><span class="va">phase_ratio</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt;                         Contrast Estimate 2.5 % 97.5 %</span></span>
-<span><span class="co">#&gt;  during outbreak / post outbreak    1.061 0.826   1.34</span></span>
-<span><span class="co">#&gt;  unrecorded / post outbreak         0.982 0.839   1.15</span></span>
+<span><span class="co">#&gt;  during outbreak / post outbreak    1.054 0.833   1.39</span></span>
+<span><span class="co">#&gt;  unrecorded / post outbreak         0.979 0.856   1.12</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Term: phase</span></span>
 <span><span class="co">#&gt; Type: response</span></span>
@@ -1082,20 +1094,78 @@ We report the Gamma shape and scale alongside the mean and standard deviation th
 <span>    .by <span class="op">=</span> <span class="st">"contrast"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="co">#&gt;                          contrast P(shorter) P(shorter by over 10%)</span></span>
-<span><span class="co">#&gt; 1 during outbreak / post outbreak      0.301                  0.076</span></span>
-<span><span class="co">#&gt; 2      unrecorded / post outbreak      0.591                  0.126</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 during outbreak / post outbreak      0.323                  0.089</span></span>
+<span><span class="co">#&gt; 2      unrecorded / post outbreak      0.624                  0.111</span></span></code></pre></div>
 </details>
 </div>
 <div class="section level3" number="5.3">
+<h3 id="leave-one-out">
+<span class="header-section-number">5.3</span> Does any one study drive the estimate?<a class="anchor" aria-label="anchor" href="#leave-one-out"></a>
+</h3>
+<p><code><a href="../reference/epidist_meta_leave_one_out.html">epidist_meta_leave_one_out()</a></code> refits the model once per study with that study removed.
+Each refit costs as much as the full fit, so we hold out only the five largest studies, which carry the most weight, and refit with 500 iterations.
+We compare the population level delay at the post outbreak reference level.</p>
+<details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">largest_studies</span> <span class="op">&lt;-</span> <span class="va">ebola_estimates</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">n</span><span class="op">)</span>, .by <span class="op">=</span> <span class="st">"study"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_max</a></span><span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">n</span>, n <span class="op">=</span> <span class="fl">5</span>, with_ties <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="st">"study"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ebola_leave_one_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epidist_meta_leave_one_out.html">epidist_meta_leave_one_out</a></span><span class="op">(</span></span>
+<span>  <span class="va">fit_ebola</span>,</span>
+<span>  newdata <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">phase_grid</span>, <span class="va">.data</span><span class="op">$</span><span class="va">phase</span> <span class="op">==</span> <span class="st">"post outbreak"</span><span class="op">)</span>,</span>
+<span>  studies <span class="op">=</span> <span class="va">largest_studies</span>,</span>
+<span>  iter <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  refresh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span>, <span class="fl">250</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</details><p><code>difference</code> is each refit’s posterior relative to the full fit’s median.</p>
+<details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ebola_leave_one_out</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="st">"study"</span>, <span class="st">"summary"</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"difference"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 10 × 5</span></span>
+<span><span class="co">#&gt;    study            summary difference difference_lower difference_upper</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;            &lt;chr&gt;        &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 Faye 2015 (b)    mean      -0.0263            -1.16             1.26</span></span>
+<span><span class="co">#&gt;  2 Faye 2015 (b)    sd         0.0104            -0.953            0.892</span></span>
+<span><span class="co">#&gt;  3 Aylward 2014     mean      -0.0920            -1.26             0.995</span></span>
+<span><span class="co">#&gt;  4 Aylward 2014     sd        -0.317             -1.01             0.538</span></span>
+<span><span class="co">#&gt;  5 Miglietta 2019   mean      -0.0523            -1.04             1.12</span></span>
+<span><span class="co">#&gt;  6 Miglietta 2019   sd        -0.111             -0.976            0.821</span></span>
+<span><span class="co">#&gt;  7 Rosello 2015 (1) mean      -0.0903            -1.18             1.46</span></span>
+<span><span class="co">#&gt;  8 Rosello 2015 (1) sd        -0.00997           -1.04             1.27</span></span>
+<span><span class="co">#&gt;  9 Khan 1999        mean      -0.180             -1.18             1.26</span></span>
+<span><span class="co">#&gt; 10 Khan 1999        sd        -0.111             -1.02             0.896</span></span></code></pre></div>
+</details><details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">ebola_leave_one_out</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html" class="external-link">geom_pointrange</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
+<span>      x <span class="op">=</span> <span class="va">difference</span>, xmin <span class="op">=</span> <span class="va">difference_lower</span>, xmax <span class="op">=</span> <span class="va">difference_upper</span>,</span>
+<span>      y <span class="op">=</span> <span class="va">study</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html" class="external-link">vars</a></span><span class="op">(</span><span class="va">summary</span><span class="op">)</span>, scales <span class="op">=</span> <span class="st">"free_x"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Difference from the full fit (days)"</span>, y <span class="op">=</span> <span class="st">"Study held out"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</details><div class="figure">
+<span style="display:block;" id="fig:leave-one-out"></span>
+<img src="figures/meta-leave-one-out-1.png" alt="Posterior median and 95% interval of the delay mean and standard deviation with each of the five largest studies held out, relative to the full fit's median."><p class="caption">
+Figure 5.1: Posterior median and 95% interval of the delay mean and standard deviation with each of the five largest studies held out, relative to the full fit’s median.
+</p>
+</div>
+</div>
+<div class="section level3" number="5.4">
 <h3 id="bdbv">
-<span class="header-section-number">5.3</span> Comparing with a modern re-analysis of the same line list<a class="anchor" aria-label="anchor" href="#bdbv"></a>
+<span class="header-section-number">5.4</span> Comparing with a modern re-analysis of the same line list<a class="anchor" aria-label="anchor" href="#bdbv"></a>
 </h3>
 <p><code>Rosello 2015 (3)</code> is the 2012 Isiro outbreak, and that line list has since been re-analysed in <a href="https://github.com/epiforecasts/bdbv-linelist-analysis" class="external-link">bdbv-linelist-analysis</a> from the individual records, adjusting for double interval censoring.
 The outbreak had closed before the line list was published, so the delays are not truncated and the re-analysis is the closest thing to a ground truth for any study we fitted to.
-It reports onset to death as a convolution of its fitted onset to admission and admission to death delays.
-<code>bdbv-onset-to-death.csv</code> holds 1000 draws of the convolution’s mean and standard deviation, subsampled from the posterior the project releases as <code>output/posterior_gamma.csv</code>, and we match a Gamma to each draw.</p>
-<details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bdbv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"bdbv-onset-to-death.csv"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+It reports onset to death as a convolution of its fitted onset to admission and admission to death delays, and we match a Gamma to each of 1000 posterior draws of that convolution.</p>
+<details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 1000 draws of the convolution's mean and standard deviation, subsampled</span></span>
+<span><span class="co"># from the output/posterior_gamma.csv the project releases</span></span>
+<span><span class="va">bdbv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"bdbv-onset-to-death.csv"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="op">(</span><span class="va">.data</span><span class="op">$</span><span class="va">mean</span> <span class="op">/</span> <span class="va">.data</span><span class="op">$</span><span class="va">sd</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span>, scale <span class="op">=</span> <span class="va">.data</span><span class="op">$</span><span class="va">sd</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="va">.data</span><span class="op">$</span><span class="va">mean</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">isiro_reported</span> <span class="op">&lt;-</span> <span class="va">ebola_estimates</span> <span class="op">|&gt;</span></span>
@@ -1110,7 +1180,7 @@ It reports onset to death as a convolution of its fitted onset to admission and 
 <span>  <span class="fu"><a href="../reference/delay_summary_draws.html">delay_summary_draws</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">fit_ebola</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </details><p>The mean and standard deviation of the delay, four ways.</p>
-<details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">interval</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">draws</span>, <span class="va">source</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">out</span> <span class="op">&lt;-</span> <span class="va">draws</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"sd"</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"parameter"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1142,12 +1212,12 @@ It reports onset to death as a convolution of its fitted onset to admission and 
 <span><span class="co">#&gt;   source                          mean                sd</span></span>
 <span><span class="co">#&gt;   &lt;chr&gt;                           &lt;chr&gt;               &lt;chr&gt;</span></span>
 <span><span class="co">#&gt; 1 as reported by Rosello 2015 (3) 11.37               5.41</span></span>
-<span><span class="co">#&gt; 2 Rosello 2015 (3), study level   10.69 (9.26, 12.67) 5.21 (4.09, 7.23)</span></span>
-<span><span class="co">#&gt; 3 meta model, population level    9.40 (8.28, 10.68)  4.98 (4.08, 6.00)</span></span>
+<span><span class="co">#&gt; 2 Rosello 2015 (3), study level   10.73 (9.34, 12.65) 5.27 (4.10, 7.16)</span></span>
+<span><span class="co">#&gt; 3 meta model, population level    9.44 (8.34, 10.60)  5.01 (4.07, 5.99)</span></span>
 <span><span class="co">#&gt; 4 re-analysis of the line list    11.76 (9.31, 15.06) 6.57 (4.88, 9.44)</span></span></code></pre></div>
 </details><details><summary>
 Click to expand for code to prepare the comparison plot
-</summary><details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+</summary><details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">density_band</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">draws</span>, <span class="va">source</span>, <span class="va">n</span> <span class="op">=</span> <span class="fl">200</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">out</span> <span class="op">&lt;-</span> <span class="va">draws</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">n</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -1205,12 +1275,12 @@ Click to expand for code to prepare the comparison plot
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span>, legend.box <span class="op">=</span> <span class="st">"vertical"</span><span class="op">)</span></span></code></pre></div>
-</details></details><details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+</details></details><details class="chunk-details" open><summary class="chunk-summary"><span class="chunk-summary-text">Code</span></summary><div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_bdbv</span></span></code></pre></div>
 </details><div class="figure">
 <span style="display:block;" id="fig:bdbv"></span>
 <img src="figures/meta-bdbv-1.png" alt="The Isiro onset to death delay, four ways. The dashed line is the Gamma reported by Rosello et al. (2015). The bands are 95% posterior intervals of the density from the meta model for the Rosello 2015 (3) study, from the meta model at population level with the (1 | study) term switched off, and from the re-analysis of the same line list."><p class="caption">
-Figure 5.1: The Isiro onset to death delay, four ways. The dashed line is the Gamma reported by <span class="citation">Rosello et al. (<a href="#ref-rosello2015ebola">2015</a>)</span>. The bands are 95% posterior intervals of the density from the meta model for the Rosello 2015 (3) study, from the meta model at population level with the <code>(1 | study)</code> term switched off, and from the re-analysis of the same line list.
+Figure 5.2: The Isiro onset to death delay, four ways. The dashed line is the Gamma reported by <span class="citation">Rosello et al. (<a href="#ref-rosello2015ebola">2015</a>)</span>. The bands are 95% posterior intervals of the density from the meta model for the Rosello 2015 (3) study, from the meta model at population level with the <code>(1 | study)</code> term switched off, and from the re-analysis of the same line list.
 </p>
 </div>
 <p>The study level estimate is shrunk from the reported Gamma towards the population mean by the <code>(1 | study)</code> term on the mean, and keeps the study’s own spread through the term on the shape.

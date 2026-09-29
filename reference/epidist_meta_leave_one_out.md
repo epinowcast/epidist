@@ -175,17 +175,29 @@ fit <- epidist(
 # The formula does not use study, so pass the model data
 epidist_meta_leave_one_out(fit, data = meta, refresh = 0)
 #> Start sampling
+#> Warning: There were 1000 transitions after warmup that exceeded the maximum treedepth. Increase max_treedepth above 10. See
+#> https://mc-stan.org/misc/warnings.html#maximum-treedepth-exceeded
+#> Warning: Examine the pairs() plot to diagnose sampling problems
+#> Warning: The largest R-hat is 2.23, indicating chains have not mixed.
+#> Running the chains for more iterations may help. See
+#> https://mc-stan.org/misc/warnings.html#r-hat
+#> Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+#> Running the chains for more iterations may help. See
+#> https://mc-stan.org/misc/warnings.html#bulk-ess
+#> Warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+#> Running the chains for more iterations may help. See
+#> https://mc-stan.org/misc/warnings.html#tail-ess
 #> Start sampling
 #> Start sampling
 #> # A tibble: 6 × 12
-#>   study  .row summary estimate lower upper full_estimate full_lower full_upper
-#>   <chr> <int> <chr>      <dbl> <dbl> <dbl>         <dbl>      <dbl>      <dbl>
-#> 1 A         1 mean        7.72  7.24  8.32          7.75       7.34       8.27
-#> 2 A         1 sd          4.00  3.42  5.05          4.11       3.55       4.90
-#> 3 B         1 mean        8.06  7.58  8.69          7.75       7.34       8.27
-#> 4 B         1 sd          4.22  3.62  5.22          4.11       3.55       4.90
-#> 5 C         1 mean        7.27  6.72  7.99          7.75       7.34       8.27
-#> 6 C         1 sd          3.85  3.19  4.84          4.11       3.55       4.90
+#>   study  .row summary estimate  lower upper full_estimate full_lower full_upper
+#>   <chr> <int> <chr>      <dbl>  <dbl> <dbl>         <dbl>      <dbl>      <dbl>
+#> 1 A         1 mean        3.68 0.301   8.18          7.74       7.34       8.23
+#> 2 A         1 sd          1.57 0.0825  4.94          4.10       3.55       4.89
+#> 3 B         1 mean        8.06 7.56    8.65          7.74       7.34       8.23
+#> 4 B         1 sd          4.23 3.58    5.27          4.10       3.55       4.89
+#> 5 C         1 mean        7.27 6.72    8.02          7.74       7.34       8.23
+#> 6 C         1 sd          3.85 3.17    5.02          4.10       3.55       4.89
 #> # ℹ 3 more variables: difference <dbl>, difference_lower <dbl>,
 #> #   difference_upper <dbl>
 # }

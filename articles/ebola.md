@@ -279,12 +279,12 @@ fit <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 9.1 seconds.
-#> Chain 1 finished in 9.6 seconds.
+#> Chain 1 finished in 10.6 seconds.
+#> Chain 2 finished in 11.3 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 9.3 seconds.
-#> Total execution time: 9.6 seconds.
+#> Mean chain execution time: 11.0 seconds.
+#> Total execution time: 11.4 seconds.
 ```
 
 The `fit` object is a
@@ -310,8 +310,8 @@ summary(fit)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.65      0.01     1.64     1.67 1.00     1935     1157
-#> sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1406     1202
+#> Intercept           1.65      0.01     1.64     1.67 1.00     2039      994
+#> sigma_Intercept    -0.56      0.01    -0.58    -0.54 1.00     1755     1216
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -340,12 +340,12 @@ fit_sex <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 1 finished in 17.7 seconds.
-#> Chain 2 finished in 17.7 seconds.
+#> Chain 1 finished in 21.8 seconds.
+#> Chain 2 finished in 22.6 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 17.7 seconds.
-#> Total execution time: 17.7 seconds.
+#> Mean chain execution time: 22.2 seconds.
+#> Total execution time: 22.7 seconds.
 ```
 
 A summary of the model shows that males tend to have longer delays (the
@@ -372,10 +372,10 @@ summary(fit_sex)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.63      0.01     1.61     1.65 1.00     2375     1418
-#> sigma_Intercept    -0.58      0.01    -0.60    -0.55 1.00     2010     1437
-#> sexMale             0.04      0.01     0.01     0.07 1.00     2401     1451
-#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2289     1570
+#> Intercept           1.63      0.01     1.61     1.65 1.00     1854     1306
+#> sigma_Intercept    -0.57      0.01    -0.60    -0.55 1.00     2412     1600
+#> sexMale             0.04      0.01     0.01     0.07 1.00     1932     1492
+#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     2162     1381
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -410,12 +410,12 @@ fit_sex_district <- epidist(
   backend = "cmdstanr"
 )
 #> Running MCMC with 2 parallel chains...
-#> Chain 2 finished in 245.5 seconds.
-#> Chain 1 finished in 248.3 seconds.
+#> Chain 2 finished in 296.0 seconds.
+#> Chain 1 finished in 306.8 seconds.
 #>
 #> Both chains finished successfully.
-#> Mean chain execution time: 246.9 seconds.
-#> Total execution time: 248.5 seconds.
+#> Mean chain execution time: 301.4 seconds.
+#> Total execution time: 306.9 seconds.
 ```
 
 **As this is a longer running model (~ 2 minutes) we have reduced the
@@ -443,15 +443,15 @@ summary(fit_sex_district)
 #> Multilevel Hyperparameters:
 #> ~district (Number of levels: 14)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.16      0.04     0.10     0.24 1.00      249      452
-#> sd(sigma_Intercept)     0.20      0.05     0.13     0.33 1.00      276      407
+#> sd(Intercept)           0.16      0.04     0.10     0.26 1.00      287      334
+#> sd(sigma_Intercept)     0.20      0.06     0.13     0.33 1.01      240      272
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.63      0.04     1.54     1.71 1.00      228      326
-#> sigma_Intercept    -0.67      0.06    -0.78    -0.56 1.01      343      528
-#> sexMale             0.04      0.01     0.01     0.07 1.00     1199      724
-#> sigma_sexMale       0.02      0.02    -0.01     0.06 1.00     1384      771
+#> Intercept           1.62      0.05     1.52     1.73 1.01      208      252
+#> sigma_Intercept    -0.67      0.06    -0.79    -0.57 1.00      276      422
+#> sexMale             0.04      0.01     0.02     0.07 1.00     1137      815
+#> sigma_sexMale       0.02      0.02    -0.02     0.06 1.00     1263      740
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -461,38 +461,38 @@ ranef(fit_sex_district)
 #> , , Intercept
 #>
 #>                   Estimate  Est.Error        Q2.5       Q97.5
-#> Bo            -0.005561097 0.05706448 -0.11035575  0.10943902
-#> Bombali        0.255485765 0.04629636  0.17176710  0.34501120
-#> Bonthe        -0.022784213 0.12131879 -0.26479419  0.20469375
-#> Kailahun      -0.003952666 0.04775880 -0.09294404  0.09131267
-#> Kambia        -0.060888157 0.06750369 -0.19201001  0.07260713
-#> Kenema        -0.250787145 0.05131084 -0.34328209 -0.14759471
-#> Koinadugu      0.178968458 0.07132135  0.04033937  0.31853674
-#> Kono          -0.081795214 0.05622214 -0.19838807  0.03486541
-#> Moyamba       -0.009323983 0.05979106 -0.12596475  0.10710027
-#> Port Loko      0.142443792 0.04627176  0.05697054  0.24313148
-#> Pujehun       -0.057834082 0.09859517 -0.25195641  0.13421540
-#> Tonkolili      0.078815642 0.04889342 -0.01208369  0.17978433
-#> Western Rural -0.023823792 0.04796506 -0.11444361  0.07714104
-#> Western Urban -0.154820062 0.04693254 -0.24506475 -0.06001742
+#> Bo             0.000435444 0.06088348 -0.12109725  0.12635936
+#> Bombali        0.262122333 0.04915757  0.16805341  0.36590605
+#> Bonthe        -0.013865147 0.12806424 -0.26301306  0.23648732
+#> Kailahun       0.002682374 0.05018158 -0.10031848  0.10947034
+#> Kambia        -0.054130240 0.06372515 -0.17344768  0.07256130
+#> Kenema        -0.245227482 0.05472105 -0.35593124 -0.13998063
+#> Koinadugu      0.187057348 0.07632733  0.04417153  0.34253770
+#> Kono          -0.074462344 0.05739603 -0.19233176  0.03456067
+#> Moyamba       -0.003316082 0.06370969 -0.12734753  0.12231912
+#> Port Loko      0.150994597 0.05053845  0.05218008  0.25942854
+#> Pujehun       -0.055873026 0.10047000 -0.27009790  0.13345330
+#> Tonkolili      0.086589128 0.05174677 -0.01528469  0.19444957
+#> Western Rural -0.016885602 0.05120606 -0.12052515  0.08448223
+#> Western Urban -0.147029751 0.05010690 -0.24866998 -0.04389046
 #>
 #> , , sigma_Intercept
 #>
 #>                  Estimate  Est.Error        Q2.5       Q97.5
-#> Bo             0.19687634 0.07217190  0.06543128  0.33535443
-#> Bombali       -0.21813541 0.06023717 -0.33230894 -0.10763316
-#> Bonthe        -0.13630132 0.20251358 -0.59353397  0.23798522
-#> Kailahun      -0.32763586 0.06465009 -0.45085586 -0.20562920
-#> Kambia         0.06592753 0.08160453 -0.09091753  0.23691711
-#> Kenema         0.11875335 0.06558067 -0.01639708  0.24562278
-#> Koinadugu      0.07738227 0.09889096 -0.11501531  0.26681214
-#> Kono           0.04088128 0.07252897 -0.10307151  0.18543238
-#> Moyamba        0.10497760 0.07306350 -0.03757349  0.25747690
-#> Port Loko     -0.01456683 0.05995553 -0.13081596  0.09491043
-#> Pujehun       -0.08913832 0.13767190 -0.37026409  0.17896683
-#> Tonkolili     -0.14534619 0.06563557 -0.27064688 -0.01735425
-#> Western Rural  0.08114856 0.06085888 -0.03694431  0.20271113
-#> Western Urban  0.27798870 0.05835323  0.16340678  0.39435379
+#> Bo             0.19412086 0.06990837  0.06386706  0.33324983
+#> Bombali       -0.22214341 0.06022252 -0.33515052 -0.09472961
+#> Bonthe        -0.13405741 0.22985842 -0.64071694  0.26990765
+#> Kailahun      -0.33102714 0.06576007 -0.46486520 -0.20290811
+#> Kambia         0.06324221 0.08003570 -0.08845973  0.22560241
+#> Kenema         0.11758957 0.06771467 -0.01445888  0.25304239
+#> Koinadugu      0.07518738 0.09710327 -0.11411968  0.27680653
+#> Kono           0.03815476 0.07323576 -0.10218529  0.18312958
+#> Moyamba        0.10316130 0.07612212 -0.03859924  0.25632108
+#> Port Loko     -0.01927734 0.06139071 -0.14042812  0.10660412
+#> Pujehun       -0.08194636 0.13992196 -0.34211119  0.21606928
+#> Tonkolili     -0.14760382 0.06368617 -0.26851921 -0.02566868
+#> Western Rural  0.07667745 0.06055470 -0.03324185  0.19790787
+#> Western Urban  0.27500923 0.05989511  0.16312849  0.39995647
 ```
 
 ### 3.3 Posterior expectations

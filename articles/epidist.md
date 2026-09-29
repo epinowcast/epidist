@@ -597,8 +597,8 @@ summary(naive_fit)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.42      0.03     1.35     1.48 1.00     3074     2498
-#> sigma_Intercept    -0.75      0.05    -0.85    -0.65 1.00     2926     2275
+#> Intercept           1.42      0.03     1.35     1.48 1.00     3205     2475
+#> sigma_Intercept    -0.76      0.05    -0.85    -0.66 1.00     3373     2147
 #>
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -703,8 +703,8 @@ summary(marginal_fit)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.55      0.05     1.47     1.65 1.00     1814     1772
-#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     1859     1931
+#> Intercept           1.55      0.05     1.46     1.65 1.00     2149     2176
+#> sigma_Intercept    -0.69      0.07    -0.82    -0.55 1.00     2292     2573
 #>
 #> Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -723,24 +723,16 @@ the naive and marginal models. One way to do this is to use the
 function. It draws one set of delay distribution parameters for each
 unique combination of the predictors, and adds the natural scale mean
 and standard deviation of the delay so that the numbers are easier to
-read.
-[`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md),
-[`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
-and
-[`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md)
-are the three steps it wraps, and each is available on its own. Here we
-take them separately, so that the draws from both models can be combined
-before the summaries are added.
+read. We call it on each fit and combine the draws.
 
 Code
 
 ``` r
 
 predicted_parameters <- list(marginal = marginal_fit, naive = naive_fit) |>
-  lapply(\(fit) delay_parameter_draws(fit, newdata = epidist_strata(fit))) |>
+  lapply(delay_summary_draws) |>
   bind_rows(.id = "model") |>
-  mutate(model = factor(model, levels = c("naive", "marginal"))) |>
-  add_summaries()
+  mutate(model = factor(model, levels = c("naive", "marginal")))
 
 head(predicted_parameters)
 #> # A tibble: 6 × 17
@@ -755,21 +747,18 @@ head(predicted_parameters)
 #> 5 marginal         8                10       1       1         9         0     3
 #> 6 marginal         8                10       1       1         9         0     3
 #> # ℹ 9 more variables: .row <int>, .chain <int>, .iteration <int>, .draw <int>,
-#> #   mu <dbl>, sigma <dbl>, delay <dbl>, mean <dbl>, sd <dbl>
+#> #   mu <dbl>, sigma <dbl>, mean <dbl>, sd <dbl>, delay <dbl>
 ```
 
-Note that by default
-[`add_delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
-gives draws for every row of the data passed to it. Neither model here
-has covariates, so
-[`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md)
-reduces the data to the single row they all share. This prevents
-repeating the same draws for each row.
-
-Another approach to building the data to predict for is
+[`delay_summary_draws()`](https://epidist.epinowcast.org/reference/delay_summary_draws.md)
+also takes `newdata`, for example data built with
 [`epidist_newdata()`](https://epidist.epinowcast.org/reference/epidist_newdata.md),
-which adds the response and observation process columns the models
-expect.
+and the steps it wraps,
+[`epidist_strata()`](https://epidist.epinowcast.org/reference/epidist_strata.md),
+[`delay_parameter_draws()`](https://epidist.epinowcast.org/reference/delay_parameter_draws.md)
+and
+[`add_summaries()`](https://epidist.epinowcast.org/reference/add_summaries.md),
+are available on their own.
 
 We can now plot posterior draws for the summary parameters from the two
 models. [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws
