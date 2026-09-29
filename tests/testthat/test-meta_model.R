@@ -277,14 +277,12 @@ test_that("the meta model grid uses the vectorised primarycensored lcdf", {
     prep_meta_obs,
     family = family, formula = formula
   )
+  scode <- paste(vapply(stancode, function(x) x$scode, ""), collapse = "\n")
   expect_true(grepl(
-    "primarycensored_lcdf_vectorized(", stancode[[2]]$scode,
+    "vector primarycensored_lcdf_vectorized(", scode,
     fixed = TRUE
   ))
-  expect_true(grepl(
-    "vector primarycensored_lcdf_vectorized(", stancode[[3]]$scode,
-    fixed = TRUE
-  ))
+  expect_true(grepl("= primarycensored_lcdf_vectorized(", scode, fixed = TRUE))
 })
 
 # Numerical checks of the implied biased summaries against Monte Carlo
