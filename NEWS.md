@@ -30,7 +30,8 @@ Closes #705.
 - Removed the remaining lookups of unexported `brms` functions, so `log_lik()`, `posterior_predict()` and `posterior_epred()` use `epidist`'s own functions for every family.
 These cover the lognormal, gamma, Weibull, exponential and generalised gamma families.
 For any other family these functions now give an error.
-- `epidist_meta_leave_one_out()` runs the chains of each refit in parallel by default, with the `mc.cores` option where it is set and otherwise one core per chain, where they previously ran one after another.
+- `epidist_meta_leave_one_out()` runs the chains of each refit in parallel by default, where they previously ran one after another.
+Its new `cores` argument defaults to the `mc.cores` option where it is set and otherwise to one core per chain.
 - `print()` of an `epidist_multivariate` object writes its header as output rather than a message, so `suppressMessages()` no longer hides it.
 
 ## Package
