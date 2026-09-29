@@ -180,12 +180,12 @@ epidist_meta_leave_one_out(fit, data = meta, refresh = 0)
 #> # A tibble: 6 × 12
 #>   study  .row summary estimate lower upper full_estimate full_lower full_upper
 #>   <chr> <int> <chr>      <dbl> <dbl> <dbl>         <dbl>      <dbl>      <dbl>
-#> 1 A         1 mean        7.74  7.27  8.41          7.75       7.35       8.31
-#> 2 A         1 sd          4.04  3.38  5.22          4.10       3.54       5.00
-#> 3 B         1 mean        8.06  7.56  8.67          7.75       7.35       8.31
-#> 4 B         1 sd          4.24  3.59  5.28          4.10       3.54       5.00
-#> 5 C         1 mean        7.27  6.75  7.97          7.75       7.35       8.31
-#> 6 C         1 sd          3.84  3.21  4.79          4.10       3.54       5.00
+#> 1 A         1 mean        7.73  7.27  8.33          7.74       7.32       8.27
+#> 2 A         1 sd          4.02  3.41  5.04          4.10       3.56       4.91
+#> 3 B         1 mean        8.04  7.55  8.68          7.74       7.32       8.27
+#> 4 B         1 sd          4.21  3.57  5.35          4.10       3.56       4.91
+#> 5 C         1 mean        7.27  6.74  7.97          7.74       7.32       8.27
+#> 6 C         1 sd          3.86  3.19  4.81          4.10       3.56       4.91
 #> # ℹ 3 more variables: difference <dbl>, difference_lower <dbl>,
 #> #   difference_upper <dbl>
 # }
