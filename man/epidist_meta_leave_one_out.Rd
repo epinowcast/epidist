@@ -42,7 +42,9 @@ Defaults to \code{FALSE}.}
 
 \item{...}{Additional arguments passed to \code{\link[brms:update.brmsfit]{brms::update.brmsfit()}} and so
 to \code{\link[brms:brm]{brms::brm()}}, such as \code{cores}, \code{chains}, \code{iter}, \code{refresh} and
-\code{silent}.}
+\code{silent}.
+\code{cores} defaults to the number of chains of \code{fit}, so the chains of each
+refit run in parallel.}
 }
 \value{
 A \code{tibble} with one row per held out study, row of \code{newdata} and
