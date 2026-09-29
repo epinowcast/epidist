@@ -2,18 +2,23 @@
 % Please edit documentation in R/leave_one_out.R
 \name{.leave_one_out_studies}
 \alias{.leave_one_out_studies}
-\title{The studies of a meta model, in order of first appearance}
+\title{The studies of a meta model to hold out, in order of first appearance}
 \usage{
-.leave_one_out_studies(data)
+.leave_one_out_studies(data, studies = NULL)
 }
 \arguments{
 \item{data}{An \code{epidist_meta_model} object or the model data of a meta
 model fit, with a \code{study} column.}
+
+\item{studies}{A character vector of the studies to hold out, one refit
+each. If \code{NULL}, the default, every study is held out in turn.
+Holding out a few studies, such as the largest, keeps the cost down when
+a model has many.}
 }
 \value{
-A character vector of study labels.
+A character vector of study labels, \code{studies} when it is given.
 }
 \description{
-The studies of a meta model, in order of first appearance
+The studies of a meta model to hold out, in order of first appearance
 }
 \keyword{internal}
