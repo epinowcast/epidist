@@ -417,11 +417,11 @@ test_that("epidist_estimates_epireview returns an object that can be edited afte
 })
 
 test_that("epidist_estimates_epireview maps the epireview Ebola onset to death estimates", { # nolint: line_length_linter.
-  skip_if_not_installed("epireview")
-  params <- suppressMessages(epireview::load_epidata("ebola"))$params
-  onset_to_death <- params[
-    params$parameter_type_short == "delay_onset_to_death",
-  ]
+  # An extract of epireview, which is not on CRAN. The script that makes it
+  # is epireview_fixture.R in data-raw.
+  onset_to_death <- readRDS(
+    test_path("fixtures", "epireview-ebola-onset-to-death.rds")
+  )
   expect_message(
     suppressWarnings(epidist_estimates_epireview(
       onset_to_death,
