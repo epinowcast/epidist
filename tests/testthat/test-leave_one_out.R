@@ -166,6 +166,7 @@ test_that(".leave_one_out_bind_predictors keeps study as the held out label", { 
 test_that(".leave_one_out_update_args runs the refit chains in parallel", {
   # brms does not store the cores a model was fitted with, so without this
   # every refit would run its chains one after another.
+  withr::local_options(mc.cores = NULL)
   expect_identical(.leave_one_out_update_args(2L, list()), list(cores = 2L))
   expect_identical(
     .leave_one_out_update_args(4L, list(refresh = 0)),
@@ -190,4 +191,17 @@ test_that(".leave_one_out_studies rejects studies not in the data", {
   data <- tibble::tibble(study = c("A", "B", "C"))
   expect_error(.leave_one_out_studies(data, c("A", "Z")), "Z")
   expect_error(.leave_one_out_studies(data, character(0)))
+})
+
+test_that(".leave_one_out_update_args follows chains passed by the user", {
+  withr::local_options(mc.cores = NULL)
+  expect_identical(
+    .leave_one_out_update_args(2L, list(chains = 4L)),
+    list(chains = 4L, cores = 4L)
+  )
+})
+
+test_that(".leave_one_out_update_args honours the mc.cores option", {
+  withr::local_options(mc.cores = 1L)
+  expect_identical(.leave_one_out_update_args(2L, list()), list(cores = 1L))
 })
