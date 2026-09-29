@@ -163,24 +163,6 @@ test_that(".leave_one_out_bind_predictors keeps study as the held out label", { 
   expect_identical(bound$study, out$study)
 })
 
-test_that(".leave_one_out_update_args runs the refit chains in parallel", {
-  # brms does not store the cores a model was fitted with, so without this
-  # every refit would run its chains one after another.
-  withr::local_options(mc.cores = NULL)
-  expect_identical(.leave_one_out_update_args(2L, list()), list(cores = 2L))
-  expect_identical(
-    .leave_one_out_update_args(4L, list(refresh = 0)),
-    list(refresh = 0, cores = 4L)
-  )
-})
-
-test_that(".leave_one_out_update_args keeps cores passed by the user", {
-  expect_identical(
-    .leave_one_out_update_args(4L, list(cores = 1L)),
-    list(cores = 1L)
-  )
-})
-
 test_that(".leave_one_out_studies holds out only the studies asked for", {
   data <- tibble::tibble(study = c("A", "A", "B", "C", "D"))
   expect_identical(.leave_one_out_studies(data), c("A", "B", "C", "D"))
@@ -193,15 +175,34 @@ test_that(".leave_one_out_studies rejects studies not in the data", {
   expect_error(.leave_one_out_studies(data, character(0)))
 })
 
-test_that(".leave_one_out_update_args follows chains passed by the user", {
+test_that(".leave_one_out_cores resolves the cores of each refit", {
   withr::local_options(mc.cores = NULL)
-  expect_identical(
-    .leave_one_out_update_args(2L, list(chains = 4L)),
-    list(chains = 4L, cores = 4L)
-  )
+  expect_identical(.leave_one_out_cores(NULL, 2L), 2L)
+  expect_identical(.leave_one_out_cores(1L, 4L), 1L)
+  withr::local_options(mc.cores = 3L)
+  expect_identical(.leave_one_out_cores(NULL, 2L), 3L)
 })
 
-test_that(".leave_one_out_update_args honours the mc.cores option", {
-  withr::local_options(mc.cores = 1L)
-  expect_identical(.leave_one_out_update_args(2L, list()), list(cores = 1L))
+test_that("epidist_meta_leave_one_out refits only the studies asked for", {
+  skip_on_cran()
+  skip_if_no_fits()
+  withr::local_options(mc.cores = NULL)
+  calls <- new.env()
+  calls$held <- list()
+  local_mocked_bindings(.refit = function(fit, newdata, ...) {
+    calls$held[[length(calls$held) + 1]] <- list(
+      studies = unique(as.character(newdata$study)), args = list(...)
+    )
+    return(fit)
+  })
+  studies <- unique(as.character(prep_meta_grid$study))
+  out <- suppressMessages(epidist_meta_leave_one_out(
+    fit_meta_grid,
+    data = prep_meta_grid, studies = studies[2], chains = 3
+  ))
+  expect_identical(unique(out$study), studies[2])
+  expect_length(calls$held, 1)
+  expect_false(studies[2] %in% calls$held[[1]]$studies)
+  expect_identical(calls$held[[1]]$args$cores, 3)
+  expect_identical(calls$held[[1]]$args$chains, 3)
 })
