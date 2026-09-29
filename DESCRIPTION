@@ -58,7 +58,6 @@ Suggests:
     bookdown,
     collapse,
     distspec (>= 0.2.0),
-    epireview,
     flexsurv,
     ggplot2,
     knitr,
@@ -74,8 +73,6 @@ Suggests:
     testthat (>= 3.0.0),
     tidybayes,
     withr
-Additional_repositories:
-    https://mrc-ide.r-universe.dev
 Config/Needs/website:
     r-lib/pkgdown,
     epinowcast/enwtheme

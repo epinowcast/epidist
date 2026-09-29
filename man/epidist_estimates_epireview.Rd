@@ -146,18 +146,6 @@ epidist_estimates_epireview(
   trunc_adjusted = TRUE,
   cens_adjusted = 0
 )
-\dontshow{if (requireNamespace("epireview", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-ebola <- suppressMessages(epireview::load_epidata("ebola"))$params
-onset_to_death <- ebola[
-  ebola$parameter_type_short == "delay_onset_to_death",
-]
-epidist_estimates_epireview(
-  onset_to_death,
-  trunc_adjusted = TRUE,
-  cens_adjusted = 0,
-  keep = "method_moment_value"
-)
-\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other estimates_data:

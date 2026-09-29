@@ -134,17 +134,6 @@
 #'   trunc_adjusted = TRUE,
 #'   cens_adjusted = 0
 #' )
-#' @examplesIf requireNamespace("epireview", quietly = TRUE)
-#' ebola <- suppressMessages(epireview::load_epidata("ebola"))$params
-#' onset_to_death <- ebola[
-#'   ebola$parameter_type_short == "delay_onset_to_death",
-#' ]
-#' epidist_estimates_epireview(
-#'   onset_to_death,
-#'   trunc_adjusted = TRUE,
-#'   cens_adjusted = 0,
-#'   keep = "method_moment_value"
-#' )
 epidist_estimates_epireview <- function(
   data,
   study = "article_label",
