@@ -22,8 +22,11 @@ Refit a model to new data, reusing the compiled model
 
 - ...:
 
-  Passed to
-  [`brms::update.brmsfit()`](https://paulbuerkner.com/brms/reference/update.brmsfit.html).
+  Additional arguments passed to
+  [`brms::update.brmsfit()`](https://paulbuerkner.com/brms/reference/update.brmsfit.html)
+  and so to
+  [`brms::brm()`](https://paulbuerkner.com/brms/reference/brm.html),
+  such as `chains`, `iter`, `refresh` and `silent`.
 
 ## Value
 

@@ -75,7 +75,7 @@
 <h3 id="bug-fixes-1-0-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-0"></a></h3>
 <ul><li>Removed the remaining lookups of unexported <code>brms</code> functions, so <code><a href="https://mc-stan.org/rstantools/reference/log_lik.html" class="external-link">log_lik()</a></code>, <code><a href="https://mc-stan.org/rstantools/reference/posterior_predict.html" class="external-link">posterior_predict()</a></code> and <code><a href="https://mc-stan.org/rstantools/reference/posterior_epred.html" class="external-link">posterior_epred()</a></code> use <code>epidist</code>’s own functions for every family. These cover the lognormal, gamma, Weibull, exponential and generalised gamma families. For any other family these functions now give an error.</li>
 <li>
-<code><a href="../reference/epidist_meta_leave_one_out.html">epidist_meta_leave_one_out()</a></code> runs the chains of each refit in parallel by default, with the <code>mc.cores</code> option where it is set and otherwise one core per chain, where they previously ran one after another.</li>
+<code><a href="../reference/epidist_meta_leave_one_out.html">epidist_meta_leave_one_out()</a></code> runs the chains of each refit in parallel by default, where they previously ran one after another. Its new <code>cores</code> argument defaults to the <code>mc.cores</code> option where it is set and otherwise to one core per chain.</li>
 <li>
 <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> of an <code>epidist_multivariate</code> object writes its header as output rather than a message, so <code><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages()</a></code> no longer hides it.</li>
 </ul></div>
