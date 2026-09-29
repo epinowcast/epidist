@@ -56,12 +56,10 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-          # epireview is suggested and is not on CRAN, so pak cannot resolve
-          # the dependencies without its r-universe. The stan-dev r-universe
-          # is deliberately absent: it also serves rstan and StanHeaders, and
-          # taking those from a continuously rebuilt source is what broke the
-          # macOS and Windows checks. See #687.
-          extra-repositories: 'https://mrc-ide.r-universe.dev'
+          # The stan-dev r-universe is deliberately absent: it also serves
+          # rstan and StanHeaders, and taking those from a continuously
+          # rebuilt source is what broke the macOS and Windows checks. See
+          # #687.
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

@@ -42,6 +42,8 @@ Its new `cores` argument defaults to the `mc.cores` option where it is set and o
 - The vignettes are built with `bookdown::html_vignette2`, which cuts the installed size of the package by about 4Mb.
 - Cited the `sierra_leone_ebola_data` source by its DOI and corrected its column descriptions.
 - Removed the unused `BH`, `Rcpp`, `RcppEigen`, `pkgdown` and `usethis` suggested dependencies.
+- `epireview` is no longer a suggested dependency, so the package needs no repository beyond CRAN.
+`epidist_estimates_epireview()` takes any table with the columns `epireview` uses.
 
 # epidist 0.5.0
 
