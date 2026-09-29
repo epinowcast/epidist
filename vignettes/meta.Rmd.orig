@@ -684,12 +684,21 @@ marginaleffects::get_draws(phase_ratio) |>
 ## Does any one study drive the estimate? {#leave-one-out}
 
 `epidist_meta_leave_one_out()` refits the model once per study with that study removed.
+Each refit costs as much as the full fit, so we hold out only the five largest studies, which carry the most weight, and refit with 500 iterations.
 We compare the population level delay at the post outbreak reference level.
 
 ```{r results='hide', message=FALSE}
+largest_studies <- ebola_estimates |>
+  as.data.frame() |>
+  summarise(n = max(.data$n), .by = "study") |>
+  slice_max(.data$n, n = 5, with_ties = FALSE) |>
+  pull("study")
+
 ebola_leave_one_out <- epidist_meta_leave_one_out(
   fit_ebola,
   newdata = filter(phase_grid, .data$phase == "post outbreak"),
+  studies = largest_studies,
+  iter = 500,
   refresh = ifelse(interactive(), 250, 0)
 )
 ```
@@ -701,7 +710,7 @@ ebola_leave_one_out |>
   select("study", "summary", starts_with("difference"))
 ```
 
-```{r leave-one-out, fig.cap="Posterior median and 95% interval of the delay mean and standard deviation with each study held out, relative to the full fit's median.", fig.width=8, fig.height=5}
+```{r leave-one-out, fig.cap="Posterior median and 95% interval of the delay mean and standard deviation with each of the five largest studies held out, relative to the full fit's median.", fig.width=8, fig.height=3.5}
 ggplot(ebola_leave_one_out) +
   geom_vline(xintercept = 0, linetype = "dashed") +
   geom_pointrange(
