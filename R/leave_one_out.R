@@ -51,11 +51,13 @@
 #'  Holding out a few studies, such as the largest, keeps the cost down when
 #'  a model has many.
 #'
+#' @param cores The number of cores each refit uses.
+#'  If `NULL`, the default, the `mc.cores` option where it is set, and
+#'  otherwise one core per chain, so the chains of each refit run in
+#'  parallel.
+#'
 #' @param ... Additional arguments passed to [brms::update.brmsfit()] and so
-#'  to [brms::brm()], such as `cores`, `chains`, `iter`, `refresh` and
-#'  `silent`.
-#'  `cores` defaults to the `mc.cores` option where it is set, and otherwise
-#'  to one core per chain, so the chains of each refit run in parallel.
+#'  to [brms::brm()], such as `chains`, `iter`, `refresh` and `silent`.
 #'
 #' @family meta_model
 #' @returns A `tibble` with one row per held out study, row of `newdata` and
@@ -100,6 +102,7 @@ epidist_meta_leave_one_out <- function(
   width = 0.95,
   keep_fits = FALSE,
   studies = NULL,
+  cores = NULL,
   ...
 ) {
   .assert_meta_fit(fit)
@@ -112,10 +115,14 @@ epidist_meta_leave_one_out <- function(
   }
   assert_data_frame(newdata, min.rows = 1)
   full <- .leave_one_out_summaries(fit, newdata, re_formula, width)
-  update_args <- .leave_one_out_update_args(brms::nchains(fit), list(...))
+  chains <- list(...)[["chains"]]
+  if (is.null(chains)) {
+    chains <- brms::nchains(fit)
+  }
+  cores <- .leave_one_out_cores(cores, chains)
   refits <- lapply(studies, function(study) {
     held_out <- .drop_study(model_data, study, fit)
-    return(do.call(.refit, c(list(fit, held_out), update_args)))
+    return(.refit(fit, held_out, cores = cores, ...))
   })
   names(refits) <- studies
   held <- lapply(refits, .leave_one_out_summaries, newdata, re_formula, width)
@@ -297,30 +304,23 @@ epidist_meta_leave_one_out <- function(
   return(held_out)
 }
 
-#' Arguments for the leave-one-out refits
+#' The cores of each leave-one-out refit
 #'
-#' `brms` does not store the number of cores a model was fitted with, so
-#' [brms::update.brmsfit()] would run the chains of every refit one after
-#' another. Unless `cores` is given, each refit uses the `mc.cores` option
-#' where it is set, and otherwise one core per chain, counting `chains` if it
-#' is given.
+#' `brms` does not store the cores a model was fitted with, so this gives
+#' `cores`, else the `mc.cores` option, else one core per chain.
 #'
-#' @param chains The number of chains of the full fit.
+#' @inheritParams epidist_meta_leave_one_out
 #'
-#' @param dots A list of the arguments passed to
-#'  [epidist_meta_leave_one_out()] through `...`.
+#' @param chains The number of chains of each refit.
 #'
-#' @returns `dots`, with `cores` added when it was not given.
+#' @returns An integer.
 #'
 #' @keywords internal
-.leave_one_out_update_args <- function(chains, dots) {
-  if (!is.null(dots$chains)) {
-    chains <- dots$chains
+.leave_one_out_cores <- function(cores, chains) {
+  if (!is.null(cores)) {
+    return(cores)
   }
-  if (is.null(dots$cores)) {
-    dots$cores <- getOption("mc.cores", chains)
-  }
-  return(dots)
+  return(getOption("mc.cores", chains))
 }
 
 #' Refit a model to new data, reusing the compiled model
@@ -328,8 +328,6 @@ epidist_meta_leave_one_out <- function(
 #' @inheritParams epidist_meta_leave_one_out
 #'
 #' @param newdata The data to refit to.
-#'
-#' @param ... Passed to [brms::update.brmsfit()].
 #'
 #' @returns A fit with the classes of `fit`.
 #'
