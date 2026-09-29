@@ -179,3 +179,15 @@ test_that(".leave_one_out_update_args keeps cores passed by the user", {
     list(cores = 1L)
   )
 })
+
+test_that(".leave_one_out_studies holds out only the studies asked for", {
+  data <- tibble::tibble(study = c("A", "A", "B", "C", "D"))
+  expect_identical(.leave_one_out_studies(data), c("A", "B", "C", "D"))
+  expect_identical(.leave_one_out_studies(data, c("C", "A")), c("C", "A"))
+})
+
+test_that(".leave_one_out_studies rejects studies not in the data", {
+  data <- tibble::tibble(study = c("A", "B", "C"))
+  expect_error(.leave_one_out_studies(data, c("A", "Z")), "Z")
+  expect_error(.leave_one_out_studies(data, character(0)))
+})
