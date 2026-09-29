@@ -64,6 +64,7 @@
 <li>
 <code><a href="../reference/epidist_meta_leave_one_out.html">epidist_meta_leave_one_out()</a></code> gains a <code>studies</code> argument that holds out only the studies named, so a model with many studies can be checked against its largest few.</li>
 <li>Meta model summary rows of integer date differences are about 30% faster to fit for a gamma delay and 15% faster for a lognormal, with unchanged results.</li>
+<li>Meta model summary rows of integer date differences with daily cells and a whole number of days in the primary window are about 1.7 times faster again, with unchanged results. <code>epidist</code> now needs <code>primarycensored</code> 1.6.0 or later. Closes <a href="https://github.com/epinowcast/epidist/issues/807" class="external-link">#807</a>.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-1-0-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-1-0-0"></a></h3>
