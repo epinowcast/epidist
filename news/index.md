@@ -91,6 +91,10 @@ change.
   its column descriptions.
 - Removed the unused `BH`, `Rcpp`, `RcppEigen`, `pkgdown` and `usethis`
   suggested dependencies.
+- `epireview` is no longer a suggested dependency, so the package needs
+  no repository beyond CRAN.
+  [`epidist_estimates_epireview()`](https://epidist.epinowcast.org/reference/epidist_estimates_epireview.md)
+  takes any table with the columns `epireview` uses.
 
 ## epidist 0.5.0
 
