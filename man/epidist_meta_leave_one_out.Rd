@@ -12,6 +12,7 @@ epidist_meta_leave_one_out(
   width = 0.95,
   keep_fits = FALSE,
   studies = NULL,
+  cores = NULL,
   ...
 )
 }
@@ -46,11 +47,13 @@ each. If \code{NULL}, the default, every study is held out in turn.
 Holding out a few studies, such as the largest, keeps the cost down when
 a model has many.}
 
+\item{cores}{The number of cores each refit uses.
+If \code{NULL}, the default, the \code{mc.cores} option where it is set, and
+otherwise one core per chain, so the chains of each refit run in
+parallel.}
+
 \item{...}{Additional arguments passed to \code{\link[brms:update.brmsfit]{brms::update.brmsfit()}} and so
-to \code{\link[brms:brm]{brms::brm()}}, such as \code{cores}, \code{chains}, \code{iter}, \code{refresh} and
-\code{silent}.
-\code{cores} defaults to the \code{mc.cores} option where it is set, and otherwise
-to one core per chain, so the chains of each refit run in parallel.}
+to \code{\link[brms:brm]{brms::brm()}}, such as \code{chains}, \code{iter}, \code{refresh} and \code{silent}.}
 }
 \value{
 A \code{tibble} with one row per held out study, row of \code{newdata} and
