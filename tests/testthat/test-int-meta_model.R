@@ -180,6 +180,37 @@ test_that("a quantile far beyond a narrow fitted delay keeps R and Stan in step"
   expect_true(all(r_log_lik < -30))
 })
 
+test_that("R and Stan agree on a grid whose first cells are in the severed lower tail", { # nolint: line_length_linter.
+  skip_on_cran()
+  skip_if_no_fits()
+  # A delay near 20 days with little spread has a log distribution function
+  # below -100 up to about day 5, so the grid starts at a delay of zero,
+  # passes through severed cells and then skips the lower tail check for
+  # the rest of its cells.
+  estimates <- suppressMessages(as_epidist_estimates_data(data.frame(
+    study = c("mean", "pair", "pair"),
+    type = c("mean", "mean", "sd"),
+    value = c(20, 20, 2),
+    n = 200,
+    relative_obs_time = 40,
+    trunc_adjusted = FALSE,
+    cens_adjusted = 0,
+    stringsAsFactors = FALSE
+  )))
+  meta <- suppressMessages(as_epidist_meta_model(estimates = estimates))
+  program <- meta_log_lik_program(meta)
+  r_log_lik <- meta_r_log_lik(program, 3, 0.1)
+  expect_true(all(is.finite(r_log_lik)))
+  expect_rows_close(meta_stan_log_lik(program, 3, 0.1), r_log_lik, 1e-6)
+  skip_if_not_installed("flexsurv")
+  gengamma_program <- meta_log_lik_program(meta, family = gengamma())
+  r_log_lik <- meta_r_log_lik(gengamma_program, 3, 0.1, 0.1)
+  expect_true(all(is.finite(r_log_lik)))
+  expect_rows_close(
+    meta_stan_log_lik(gengamma_program, 3, 0.1, 0.1), r_log_lik, 1e-6
+  )
+})
+
 test_that("R and Stan agree on midpoint imputed quantiles with an off grid delay_min", { # nolint: line_length_linter.
   skip_on_cran()
   skip_if_no_fits()
