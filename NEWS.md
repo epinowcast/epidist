@@ -17,7 +17,8 @@ The Weibull and gamma are special cases and the lognormal is its limit.
 Closes #644.
 - `epidist_meta_leave_one_out()` gains a `studies` argument that holds out only the studies named, so a model with many studies can be checked against its largest few.
 - Meta model summary rows of integer date differences are about 30% faster to fit for a gamma delay and 15% faster for a lognormal, with unchanged results.
-- Meta model summary rows of integer date differences with daily cells and a whole number of days in the primary window are about 1.7 times faster again, with unchanged results, and `epidist` now needs `primarycensored` 1.6.0 or later.
+- Meta model summary rows of integer date differences with daily cells and a whole number of days in the primary window are about 1.7 times faster again, with unchanged results.
+`epidist` now needs `primarycensored` 1.6.0 or later.
 Closes #807.
 
 ## Documentation
