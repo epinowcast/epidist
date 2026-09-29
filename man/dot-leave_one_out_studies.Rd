@@ -2,7 +2,7 @@
 % Please edit documentation in R/leave_one_out.R
 \name{.leave_one_out_studies}
 \alias{.leave_one_out_studies}
-\title{The studies of a meta model to hold out, in order of first appearance}
+\title{The studies of a meta model to hold out}
 \usage{
 .leave_one_out_studies(data, studies = NULL)
 }
@@ -16,9 +16,10 @@ Holding out a few studies, such as the largest, keeps the cost down when
 a model has many.}
 }
 \value{
-A character vector of study labels, \code{studies} when it is given.
+A character vector of study labels, in order of first appearance,
+or \code{studies} in the order given.
 }
 \description{
-The studies of a meta model to hold out, in order of first appearance
+The studies of a meta model to hold out
 }
 \keyword{internal}

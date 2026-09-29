@@ -54,8 +54,8 @@
 #' @param ... Additional arguments passed to [brms::update.brmsfit()] and so
 #'  to [brms::brm()], such as `cores`, `chains`, `iter`, `refresh` and
 #'  `silent`.
-#'  `cores` defaults to the number of chains of `fit`, so the chains of each
-#'  refit run in parallel.
+#'  `cores` defaults to the `mc.cores` option where it is set, and otherwise
+#'  to one core per chain, so the chains of each refit run in parallel.
 #'
 #' @family meta_model
 #' @returns A `tibble` with one row per held out study, row of `newdata` and
@@ -199,14 +199,15 @@ epidist_meta_leave_one_out <- function(
   return(data)
 }
 
-#' The studies of a meta model to hold out, in order of first appearance
+#' The studies of a meta model to hold out
 #'
 #' @param data An `epidist_meta_model` object or the model data of a meta
 #'  model fit, with a `study` column.
 #'
 #' @inheritParams epidist_meta_leave_one_out
 #'
-#' @returns A character vector of study labels, `studies` when it is given.
+#' @returns A character vector of study labels, in order of first appearance,
+#'  or `studies` in the order given.
 #'
 #' @keywords internal
 .leave_one_out_studies <- function(data, studies = NULL) {
@@ -300,7 +301,9 @@ epidist_meta_leave_one_out <- function(
 #'
 #' `brms` does not store the number of cores a model was fitted with, so
 #' [brms::update.brmsfit()] would run the chains of every refit one after
-#' another. Unless `cores` is given, each refit gets one core per chain.
+#' another. Unless `cores` is given, each refit uses the `mc.cores` option
+#' where it is set, and otherwise one core per chain, counting `chains` if it
+#' is given.
 #'
 #' @param chains The number of chains of the full fit.
 #'
@@ -311,8 +314,11 @@ epidist_meta_leave_one_out <- function(
 #'
 #' @keywords internal
 .leave_one_out_update_args <- function(chains, dots) {
+  if (!is.null(dots$chains)) {
+    chains <- dots$chains
+  }
   if (is.null(dots$cores)) {
-    dots$cores <- chains
+    dots$cores <- getOption("mc.cores", chains)
   }
   return(dots)
 }
