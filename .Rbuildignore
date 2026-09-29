@@ -31,3 +31,4 @@
 ^codemeta\.json$
 ^worktrees$
 ^vignettes/bdbv-onset-to-death\.csv$
+^CRAN-SUBMISSION$
