@@ -56,10 +56,6 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-          # The stan-dev r-universe is deliberately absent: it also serves
-          # rstan and StanHeaders, and taking those from a continuously
-          # rebuilt source is what broke the macOS and Windows checks. See
-          # #687.
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
