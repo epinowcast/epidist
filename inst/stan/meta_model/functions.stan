@@ -279,10 +279,9 @@
   }
 
   /**
-    * Log primary censored distribution function without the check of the
-    * plain distribution function, for a delay above one that has already
-    * passed it. The plain distribution function only increases, so the check
-    * would pass again and only cost a distribution function evaluation.
+    * As meta_family_pcens_lcdf(), without the check of the plain
+    * distribution function. Call only for a delay above one that has passed
+    * that check.
     */
   real meta_family_pcens_live_lcdf(data real d, array[] real params,
                                    data real pwindow_width, data int prim_id,
