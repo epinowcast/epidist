@@ -270,6 +270,23 @@ test_that("epidist_stancode.epidist_meta_model produces valid stanvars", {
   expect_false(grepl("2.0 * (study_n - 1)", scode, fixed = TRUE))
 })
 
+test_that("the meta model grid uses the vectorised primarycensored lcdf", {
+  family <- epidist_family(prep_meta_obs, family = lognormal())
+  formula <- epidist_formula(prep_meta_obs, family, formula = bf(mu ~ 1))
+  stancode <- epidist_stancode(
+    prep_meta_obs,
+    family = family, formula = formula
+  )
+  expect_true(grepl(
+    "primarycensored_lcdf_vectorized(", stancode[[2]]$scode,
+    fixed = TRUE
+  ))
+  expect_true(grepl(
+    "vector primarycensored_lcdf_vectorized(", stancode[[3]]$scode,
+    fixed = TRUE
+  ))
+})
+
 # Numerical checks of the implied biased summaries against Monte Carlo
 # simulation of the naive estimators they describe. The samples below are
 # shared by every check of the same study design.
