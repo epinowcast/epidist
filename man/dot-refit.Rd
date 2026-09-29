@@ -12,9 +12,7 @@ object.}
 
 \item{newdata}{The data to refit to.}
 
-\item{...}{Additional arguments passed to \code{\link[brms:update.brmsfit]{brms::update.brmsfit()}} and so
-to \code{\link[brms:brm]{brms::brm()}}, such as \code{cores}, \code{chains}, \code{iter}, \code{refresh} and
-\code{silent}.}
+\item{...}{Passed to \code{\link[brms:update.brmsfit]{brms::update.brmsfit()}}.}
 }
 \value{
 A fit with the classes of \code{fit}.
