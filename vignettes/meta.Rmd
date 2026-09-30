@@ -355,8 +355,8 @@ summary(fit_meta_summary)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.81      0.01     1.79     1.84 1.00      938      747
-#> sigma_Intercept    -0.74      0.02    -0.78    -0.69 1.00      898      630
+#> Intercept           1.82      0.02     1.79     1.85 1.00      915      765
+#> sigma_Intercept    -0.74      0.02    -0.78    -0.69 1.00      774      619
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -376,7 +376,7 @@ delay_parameter_draws(fit_meta_summary) |>
 #> # A tibble: 2 × 7
 #>   parameter value .lower .upper .width .point .interval
 #>   <chr>     <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>
-#> 1 mu        1.81   1.79   1.84    0.95 median qi
+#> 1 mu        1.82   1.79   1.85    0.95 median qi
 #> 2 sigma     0.477  0.458  0.499   0.95 median qi
 ```
 
@@ -419,13 +419,13 @@ fit_meta_summary_study
 #> Multilevel Hyperparameters:
 #> ~study (Number of levels: 10)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.03      0.02     0.00     0.09 1.00      297      357
-#> sd(sigma_Intercept)     0.08      0.05     0.00     0.21 1.00      296      307
+#> sd(Intercept)           0.03      0.02     0.00     0.09 1.02      220      494
+#> sd(sigma_Intercept)     0.08      0.05     0.00     0.21 1.00      297      444
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.82      0.02     1.77     1.86 1.00      499      445
-#> sigma_Intercept    -0.73      0.04    -0.81    -0.63 1.01      480      494
+#> Intercept           1.82      0.02     1.78     1.86 1.00      868      676
+#> sigma_Intercept    -0.72      0.04    -0.81    -0.62 1.00      644      583
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -538,8 +538,8 @@ summary(fit_meta_wrong_flags)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.76      0.01     1.74     1.79 1.00      859      701
-#> sigma_Intercept    -0.83      0.02    -0.87    -0.79 1.00      767      627
+#> Intercept           1.76      0.01     1.74     1.79 1.00      597      589
+#> sigma_Intercept    -0.83      0.02    -0.87    -0.79 1.00      732      604
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -600,8 +600,8 @@ summary(fit_meta_mixed)
 #>
 #> Regression Coefficients:
 #>                 Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept           1.82      0.01     1.79     1.85 1.00      828      577
-#> sigma_Intercept    -0.73      0.02    -0.77    -0.69 1.01      631      447
+#> Intercept           1.82      0.01     1.79     1.84 1.00      975      632
+#> sigma_Intercept    -0.73      0.02    -0.76    -0.69 1.00      943      541
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -924,15 +924,15 @@ summary(fit_ebola)
 #> Multilevel Hyperparameters:
 #> ~study (Number of levels: 29)
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> sd(Intercept)           0.14      0.03     0.08     0.21 1.00      266      611
-#> sd(shape_Intercept)     0.53      0.10     0.35     0.76 1.00      398      543
+#> sd(Intercept)           0.14      0.03     0.08     0.21 1.01      251      629
+#> sd(shape_Intercept)     0.52      0.10     0.35     0.74 1.00      385      623
 #>
 #> Regression Coefficients:
 #>                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-#> Intercept               2.24      0.06     2.12     2.36 1.01      478      717
-#> shape_Intercept         1.28      0.15     1.00     1.57 1.00      343      649
-#> phaseduringoutbreak     0.05      0.13    -0.18     0.33 1.00      635      552
-#> phaseunrecorded        -0.02      0.07    -0.16     0.11 1.00      492      572
+#> Intercept               2.24      0.06     2.12     2.36 1.00      534      616
+#> shape_Intercept         1.27      0.15     0.97     1.58 1.00      487      543
+#> phaseduringoutbreak     0.06      0.13    -0.19     0.32 1.01      576      401
+#> phaseunrecorded        -0.01      0.07    -0.16     0.13 1.00      569      480
 #>
 #> Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
 #> and Tail_ESS are effective sample size measures, and Rhat is the potential
@@ -970,10 +970,10 @@ population_draws |>
 #> # A tibble: 4 × 7
 #>   parameter value .lower .upper .width .point .interval
 #>   <chr>     <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>
-#> 1 mean       9.44   8.34  10.6    0.95 median qi
-#> 2 scale      2.65   1.90   3.59   0.95 median qi
-#> 3 sd         5.01   4.07   5.99   0.95 median qi
-#> 4 shape      3.56   2.72   4.80   0.95 median qi
+#> 1 mean       9.36   8.30  10.6    0.95 median qi
+#> 2 scale      2.64   1.90   3.65   0.95 median qi
+#> 3 sd         4.96   4.08   5.98   0.95 median qi
+#> 4 shape      3.55   2.63   4.88   0.95 median qi
 ```
 
 The phase bias is the contrast between each phase and the retrospective reference.
@@ -991,8 +991,8 @@ phase_ratio <- marginaleffects::comparisons(
 phase_ratio
 #>
 #>                         Contrast Estimate 2.5 % 97.5 %
-#>  during outbreak / post outbreak    1.054 0.833   1.39
-#>  unrecorded / post outbreak         0.979 0.856   1.12
+#>  during outbreak / post outbreak    1.064 0.831   1.37
+#>  unrecorded / post outbreak         0.988 0.854   1.14
 #>
 #> Term: phase
 #> Type: response
@@ -1004,8 +1004,8 @@ marginaleffects::get_draws(phase_ratio) |>
     .by = "contrast"
   )
 #>                          contrast P(shorter) P(shorter by over 10%)
-#> 1 during outbreak / post outbreak      0.323                  0.089
-#> 2      unrecorded / post outbreak      0.624                  0.111
+#> 1 during outbreak / post outbreak      0.302                  0.095
+#> 2      unrecorded / post outbreak      0.571                  0.097
 ```
 
 ## Does any one study drive the estimate? {#leave-one-out}
@@ -1040,16 +1040,16 @@ ebola_leave_one_out |>
 #> # A tibble: 10 × 5
 #>    study            summary difference difference_lower difference_upper
 #>    <chr>            <chr>        <dbl>            <dbl>            <dbl>
-#>  1 Faye 2015 (b)    mean      -0.0263            -1.16             1.26
-#>  2 Faye 2015 (b)    sd         0.0104            -0.953            0.892
-#>  3 Aylward 2014     mean      -0.0920            -1.26             0.995
-#>  4 Aylward 2014     sd        -0.317             -1.01             0.538
-#>  5 Miglietta 2019   mean      -0.0523            -1.04             1.12
-#>  6 Miglietta 2019   sd        -0.111             -0.976            0.821
-#>  7 Rosello 2015 (1) mean      -0.0903            -1.18             1.46
-#>  8 Rosello 2015 (1) sd        -0.00997           -1.04             1.27
-#>  9 Khan 1999        mean      -0.180             -1.18             1.26
-#> 10 Khan 1999        sd        -0.111             -1.02             0.896
+#>  1 Faye 2015 (b)    mean       0.00792           -1.11             1.35
+#>  2 Faye 2015 (b)    sd         0.0249            -0.812            1.13
+#>  3 Aylward 2014     mean      -0.0287            -1.27             1.09
+#>  4 Aylward 2014     sd        -0.299             -1.07             0.581
+#>  5 Miglietta 2019   mean       0.0566            -1.08             1.24
+#>  6 Miglietta 2019   sd        -0.0443            -0.941            0.928
+#>  7 Rosello 2015 (1) mean      -0.0238            -1.20             1.41
+#>  8 Rosello 2015 (1) sd         0.0115            -0.956            1.20
+#>  9 Khan 1999        mean      -0.134             -1.41             1.24
+#> 10 Khan 1999        sd        -0.0439            -0.927            1.08
 ```
 
 
@@ -1133,8 +1133,8 @@ bind_rows(
 #>   source                          mean                sd
 #>   <chr>                           <chr>               <chr>
 #> 1 as reported by Rosello 2015 (3) 11.37               5.41
-#> 2 Rosello 2015 (3), study level   10.73 (9.34, 12.65) 5.27 (4.10, 7.16)
-#> 3 meta model, population level    9.44 (8.34, 10.60)  5.01 (4.07, 5.99)
+#> 2 Rosello 2015 (3), study level   10.65 (9.29, 12.51) 5.22 (4.07, 7.11)
+#> 3 meta model, population level    9.36 (8.30, 10.61)  4.96 (4.08, 5.98)
 #> 4 re-analysis of the line list    11.76 (9.31, 15.06) 6.57 (4.88, 9.44)
 ```
 
