@@ -43,6 +43,7 @@ Its new `cores` argument defaults to the `mc.cores` option where it is set and o
 - Cited the `sierra_leone_ebola_data` source by its DOI and corrected its column descriptions.
 - Removed the unused `BH`, `Rcpp`, `RcppEigen`, `pkgdown` and `usethis` suggested dependencies.
 - `epireview` is no longer a suggested dependency, so the package needs no repository beyond CRAN.
+- The examples that fit a model are wrapped in `\dontrun{}`, as in `brms`, because they compile a Stan model.
 `epidist_estimates_epireview()` takes any table with the columns `epireview` uses.
 
 # epidist 0.5.0

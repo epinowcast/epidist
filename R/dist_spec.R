@@ -62,7 +62,7 @@
 #'
 #' @exportS3Method distspec::as_dist_spec
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' if (requireNamespace("distspec", quietly = TRUE)) {
 #'   fit <- sierra_leone_ebola_data |>
 #'     as_epidist_linelist_data(

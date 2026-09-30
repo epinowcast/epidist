@@ -67,7 +67,7 @@ row. A continuous predictor gets a row per distinct value, so pass
 \code{newdata} for such a model.
 }
 \examples{
-\donttest{
+\dontrun{
 if (requireNamespace("distspec", quietly = TRUE)) {
   fit <- sierra_leone_ebola_data |>
     as_epidist_linelist_data(

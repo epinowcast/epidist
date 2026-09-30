@@ -53,7 +53,7 @@ combinations of predictors. \code{\link[=epidist_strata]{epidist_strata()}} retu
 combination and is usually the better input.
 }
 \examples{
-\donttest{
+\dontrun{
 fit <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",

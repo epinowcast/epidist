@@ -48,7 +48,7 @@
 #'
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' fit <- sierra_leone_ebola_data |>
 #'   as_epidist_linelist_data(
 #'     pdate_lwr = "date_of_symptom_onset",
@@ -166,7 +166,7 @@ add_delay_parameter_draws <- function(newdata, object, ...) {
 #'
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' fit <- sierra_leone_ebola_data |>
 #'   as_epidist_linelist_data(
 #'     pdate_lwr = "date_of_symptom_onset",
@@ -393,7 +393,7 @@ delay_summary_draws <- function(
 #'
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' fit <- sierra_leone_ebola_data |>
 #'   as_epidist_linelist_data(
 #'     pdate_lwr = "date_of_symptom_onset",

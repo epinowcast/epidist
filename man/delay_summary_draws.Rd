@@ -52,7 +52,7 @@ Each of those three steps is available on its own where a step needs
 different arguments, or where \code{newdata} is built some other way.
 }
 \examples{
-\donttest{
+\dontrun{
 fit <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",

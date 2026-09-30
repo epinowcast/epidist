@@ -203,7 +203,7 @@ plot_delays.list <- function(
 #'
 #' @export
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
-#' \donttest{
+#' \dontrun{
 #' fit <- sierra_leone_ebola_data |>
 #'   as_epidist_linelist_data(
 #'     pdate_lwr = "date_of_symptom_onset",

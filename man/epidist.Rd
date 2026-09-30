@@ -57,7 +57,7 @@ A fitted model of class \code{epidist_fit}.
 Fit epidemiological delay distributions using a \code{brms} interface
 }
 \examples{
-\donttest{
+\dontrun{
 fit <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",

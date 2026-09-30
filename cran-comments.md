@@ -24,5 +24,7 @@ Possibly misspelled words in DESCRIPTION:
 This is a new submission.
 The flagged words are an author's name and "et al." in the references to the methods.
 
-The `\donttest{}` examples each fit a Stan model through `rstan`.
-They take under a minute each, mostly compiling the model, and about 3.5 minutes in total.
+The examples that fit a model are wrapped in `\dontrun{}`, as in `brms`, because fitting compiles a Stan model through `rstan`.
+That needs a C++ toolchain and an `rstan` and `StanHeaders` built against each other.
+On Windows the current CRAN binaries of `rstan` (2.32.7) and `StanHeaders` (2.39.1) do not compile a model, which we reproduced on GitHub Actions, so these examples would fail there for reasons outside the package.
+The remaining examples run in under five seconds.
