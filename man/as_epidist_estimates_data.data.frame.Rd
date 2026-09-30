@@ -185,7 +185,8 @@ to a few widely used approaches:
 \itemize{
 \item \code{0}: no adjustment. The study took integer date differences (for example
 date of onset subtracted from date of report) and summarised them
-directly. This is the most common case in the literature.
+directly. This is the most common case in the literature, and the one
+to use for summary statistics computed from the raw data.
 \item \code{1}: fully adjusted. The study used a method targeting the underlying
 continuous distribution, such as a double interval censored likelihood.
 \item \code{2}: uniform single interval approximation. The study adjusted the

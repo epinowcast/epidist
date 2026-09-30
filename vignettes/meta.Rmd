@@ -29,6 +29,7 @@ Those summaries are often biased, because the studies behind them did not fully 
 The meta model treats the delay as one latent distribution shared by every study.
 For each study it applies that study's estimation procedure to the latent delay, which gives the distribution the study's summaries estimate.
 It then fits each reported summary with a likelihood built from that distribution and the study's sample size, and fits any individual level data with the likelihood of the marginal model [@primarycensored].
+This covers the most common case, a study that summarised its raw date differences directly, as well as studies that adjusted for some biases.
 `vignette("model")` gives the maths.
 Because it is built on `brms`, formulas, priors and post-processing carry over, so differences between studies are a formula term such as `(1 | study)`.
 The [ddsynth](https://github.com/cm401/ddsynth) package also combines individual level data and published summaries, but treats each summary as an unbiased estimate of the delay.
@@ -49,7 +50,7 @@ The meta model needs the following for each study.
 
 | `cens_adjusted` | The study |
 |---|---|
-| `0` | summarised integer date differences directly, the most common case |
+| `0` | summarised integer date differences directly, the most common case and the one for summary statistics of raw data |
 | `1` | used a double interval censored likelihood targeting the continuous delay |
 | `2` | adjusted only the secondary interval, assuming a uniform delay within it |
 | `3` | assigned each delay to the centre of the interval it was observed in |
