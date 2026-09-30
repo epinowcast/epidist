@@ -60,8 +60,8 @@ The meta model needs the following for each study.
 
 | `cens_adjusted` | The study |
 |---|---|
-| `0` | summarised integer date differences directly, the most common case |
-| `1` | used a double interval censored likelihood targeting the continuous delay, or summarised exact, uncensored delays |
+| `0` | summarised integer date differences directly, the most common case and the one for summary statistics of raw data |
+| `1` | used a double interval censored likelihood targeting the continuous delay |
 | `2` | adjusted only the secondary interval, assuming a uniform delay within it |
 | `3` | assigned each delay to the centre of the interval it was observed in |
 | `4` | took the midpoint of the primary event's window and integrated the secondary interval |
