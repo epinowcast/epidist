@@ -388,7 +388,7 @@ $$
 \right), (\#eq:meta-joint-study)
 $$
 whose mean and standard deviation block is that of Equation \@ref(eq:meta-moment-pair).
-The rest follows from the Bahadur representation of a sample quantile, $\hat{Q}_p - Q_p \approx -(\hat{F}(Q_p) - p) / \tilde{f}(Q_p)$ with $\tilde{f}$ the density of $\tilde{F}$ [@bahadur1966],
+The rest follows from the Bahadur representation of a sample quantile, $\hat{Q}_p - Q_p \approx -(\hat{F}_n(Q_p) - p) / \tilde{f}(Q_p)$ with $\hat{F}_n$ the empirical distribution function of the study's delays and $\tilde{f}$ the density of $\tilde{F}$ [@bahadur1966],
 $$
 \Sigma_{q_i q_j} = \frac{p_i (1 - p_j)}{\tilde{f}(Q_{p_i}) \, \tilde{f}(Q_{p_j})}, \quad p_i \le p_j, \qquad
 \Sigma_{m q_i} = -\frac{\int_L^{Q_{p_i}} (x - m_1) \, \text{d}\tilde{F}(x)}{\tilde{f}(Q_{p_i})}, \qquad
@@ -466,8 +466,23 @@ Codes 0 and 3 give a discrete estimand on the study's reporting grid and codes 1
 
 ### Censoring adjustment
 
-Code 0, no adjustment, summarised integer date differences directly, so its estimand is discrete.
-It is the code for summary statistics computed from the raw data, because recorded delays are always censored to the day or coarser.
+`cens_adjusted` records how a study handled interval censoring, one of five codes.
+
+| Code | What the study did | Estimand |
+|---|---|---|
+| 0 | summarised integer date differences directly | discrete, on the reporting grid |
+| 1 | adjusted for both intervals, for example with a double interval censored likelihood | continuous, the delay itself |
+| 2 | adjusted the secondary interval only, assuming a uniform delay within it | continuous, the delay plus the primary offset |
+| 3 | assigned each delay to the centre of its interval | discrete, the code 0 grid moved up |
+| 4 | placed the primary event at the midpoint of its window and integrated the secondary interval | continuous, code 2 moved down |
+
+For each code below we give $\tilde{F}$ and its first four moments, $\mathbb{E}[\tau^k]$ for $k = 1, \dots, 4$, from which the variance, skewness and kurtosis follow.
+Its quantiles $Q_p$ are read off $\tilde{F}$ as in Section \@ref(quantiles-of-the-estimands).
+
+#### Code 0: integer date differences
+
+Code 0 is the code for summary statistics computed from the raw data, because recorded delays are always censored to the day or coarser.
+Its estimand is discrete.
 With $q_j$ the probability on the $j$th secondary window,
 $$
 q_j = \frac{F_{pc}(j w_s; \theta) - F_{pc}((j-1) w_s; \theta)}{F_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j = 1, \dots, \lfloor D / w_s \rfloor, (\#eq:meta-grid)
@@ -478,14 +493,18 @@ Summing over the grid gives the moments, and its cumulative sum gives $\tilde{F}
 For quantile rows $\tilde{F}$ is continuity corrected by interpolating $\tilde{F}_0$ linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise lands on a jump.
 The reported value is itself rounded to the grid, so a bias remains that does not shrink with $n$.
 
-Code 1, full adjustment, reported the moments of $f(\cdot \, ; \theta)$ itself, right truncated at $D$,
+#### Code 1: full adjustment
+
+A fully adjusted study reported the moments of $f(\cdot \, ; \theta)$ itself, right truncated at $D$,
 $$
 \mathbb{E}[\tau^k \mid \tau \le D] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4, (\#eq:meta-trunc-moments)
 $$
 which reduces to the family moments when $D = \infty$.
 Its distribution function is $F(y; \theta) / F(D; \theta)$.
 
-Code 2, the uniform single interval approximation, left the primary interval uncorrected and so observed $\tau^\star + U$, with the moments of $F_{pc}$ right truncated at $D$,
+#### Code 2: the uniform single interval approximation
+
+A study that left the primary interval uncorrected observed $\tau^\star + U$, with the moments of $F_{pc}$ right truncated at $D$,
 $$
 \mathbb{E}[(\tau^\star + U)^k \mid \tau^\star + U \le D] =
 \frac{\int_0^D k t^{k-1} \left(F_{pc}(D; \theta) - F_{pc}(t; \theta)\right) \text{d}t}{F_{pc}(D; \theta)},
@@ -501,8 +520,10 @@ $$
 $$
 with $\mu$, $\sigma^2$ and $\mu_4$ the mean, variance and fourth central moment of $f(\cdot \, ; \theta)$.
 
-Code 3, midpoint imputation, assigned each delay to the centre of its interval, so its estimand is the grid of Equation \@ref(eq:meta-grid) moved up by $w_s / 2$.
-Code 4, midpoint imputation with a uniform interval, placed the primary event at the midpoint of its window and integrated the secondary interval, so its estimand is that of code 2 moved down by $w_p / 2$.
+#### Codes 3 and 4: midpoint imputation
+
+The estimand of code 3 is the grid of Equation \@ref(eq:meta-grid) moved up by $w_s / 2$.
+The estimand of code 4 is that of code 2 moved down by $w_p / 2$.
 A shift changes the mean alone and moves the distribution function and quantiles with it.
 Under a uniform primary event code 4 therefore has the mean of code 1 and the variance of code 2 before truncation, because midpointing removes the mean of $U$ but not its spread.
 The mirror reading, a midpointed secondary event and an integrated primary interval, has variance $\sigma^2 + w_s^2 / 12$ and is not used, because the literature midpoints the wide exposure window of the primary event.
