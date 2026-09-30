@@ -1,0 +1,54 @@
+# Probes whether Stan models compile through rstan on Windows with the CRAN
+# binaries, as CRAN's incoming check needs for the \donttest{} examples.
+on:
+  push:
+    branches: [ci/windows-stan-probe]
+  workflow_dispatch:
+
+name: windows-stan-probe
+
+jobs:
+  probe:
+    runs-on: windows-latest
+    name: windows (${{ matrix.r }})
+    strategy:
+      fail-fast: false
+      matrix:
+        r: ['release', 'devel']
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.r }}
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: local::.
+
+      - name: Compile a Stan model with rstan
+        shell: Rscript {0}
+        run: |
+          for (p in c("rstan", "StanHeaders", "brms", "BH", "RcppEigen")) {
+            cat(p, format(packageVersion(p)), "\n")
+          }
+          cat("build tools:", pkgbuild::has_build_tools(debug = TRUE), "\n")
+          model <- rstan::stan_model(
+            model_code = "parameters { real y; } model { y ~ normal(0, 1); }",
+            verbose = TRUE
+          )
+          fit <- rstan::sampling(model, chains = 1, iter = 200, refresh = 0)
+          print(fit)
+
+      - name: Run the donttest examples
+        shell: Rscript {0}
+        run: |
+          library(epidist)
+          for (topic in c("epidist", "delay_summary_draws")) {
+            cat("=== example", topic, "\n")
+            utils::example(topic, package = "epidist", character.only = TRUE,
+                           run.donttest = TRUE, ask = FALSE)
+          }
