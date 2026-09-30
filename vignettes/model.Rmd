@@ -307,7 +307,7 @@ When $\sqrt{(\kappa - 1) / (4 n)}$ exceeds about a quarter it is inaccurate, and
 
 ### A reported quantile
 
-A reported quantile at probability $p$ is fitted through the number of delays at or below it, which is binomial on $\tilde{F}(y)$ and so avoids inverting $\tilde{F}$.
+A reported quantile at probability $p$ is fitted through the number of delays at or below it, which is binomial on $\tilde{F}(y)$.
 This is Equation \@ref(eq:meta-quantile-set) below, or Equations \@ref(eq:meta-quantile-crossing) and \@ref(eq:meta-quantile-box) for integer day delays.
 Posterior predictions for a quantile row are drawn from its normal approximation,
 $$
