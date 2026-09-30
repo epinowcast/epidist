@@ -302,9 +302,8 @@ y \sim \text{Normal}\left(\sigma, \; \text{se}_\sigma \right), \quad
 $$
 which follows from the asymptotic variance $(\mu_4 - \sigma^4)/n$ of the sample variance by the delta method [@cramer1946].
 The usual $\sigma / \sqrt{2(n-1)}$ assumes normal data, $\kappa = 3$, and is too narrow for right skewed delays.
-Equation \@ref(eq:meta-sd-lik), and Equation \@ref(eq:meta-moment-pair) built on it, should not be trusted once $\sqrt{(\kappa - 1) / (4 n)}$ exceeds about a quarter.
-For a lognormal with kurtosis 9 that is $n$ below about 30.
-`as_epidist_estimates_data()` warns when a reported mean and standard deviation imply this under a lognormal delay.
+Equations \@ref(eq:meta-sd-lik) and \@ref(eq:meta-moment-pair) are based on this approximation.
+When $\sqrt{(\kappa - 1) / (4 n)}$ exceeds about a quarter it is inaccurate, and so for a lognormal with kurtosis 9 they need $n$ of at least about 30.
 
 ### A reported quantile
 
