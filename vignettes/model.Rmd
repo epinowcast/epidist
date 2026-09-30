@@ -332,6 +332,30 @@ y \sim \text{Normal}\left(Q_p, \; \text{se}_y\right), (\#eq:meta-quantile-se)
 $$
 because moving $\text{se}_y$ onto the probability scale multiplies it by the density $\tilde{f}(y)$, which is close to zero when $y$ is far from the quantile the model implies.
 
+Several quantiles from one study at probabilities $p_1 < \dots < p_k$ with values $y_1 \le \dots \le y_k$ cut the delay axis into $k + 1$ cells, and the counts in them are multinomial,
+$$
+(c_1, \dots, c_{k+1}) \sim \text{Multinomial}\left(n, \; \left(\tilde{F}(y_1), \; \tilde{F}(y_2) - \tilde{F}(y_1), \; \dots, \; 1 - \tilde{F}(y_k)\right)\right), (\#eq:meta-quantile-set)
+$$
+with $c_j = \text{round}(n p_j) - \text{round}(n p_{j-1})$ and $c_{k+1} = n - \text{round}(n p_k)$.
+A single quantile reduces this to Equation \@ref(eq:meta-quantile-binomial).
+Two quantiles reported at the same value are merged into one cell.
+A cell whose probability underflows to zero while the study saw delays in it is floored at $10^{-300}$.
+
+Several quantiles of integer day delays from one study are fitted as the joint probability of the crossings they stand for.
+The counts $N_{e_1} \le N_{e_2} \le \dots \le N_{e_m}$ at the integer edges the reported quantiles name, the day below each and the day itself, form a Markov chain of binomial steps,
+$$
+N_{e_1} \sim \text{Binomial}\left(n, \; \tilde{F}_0(e_1)\right), \quad
+N_{e_{i+1}} \mid N_{e_i} \sim N_{e_i} + \text{Binomial}\left(n - N_{e_i}, \; \frac{\tilde{F}_0(e_{i+1}) - \tilde{F}_0(e_i)}{1 - \tilde{F}_0(e_i)}\right), (\#eq:meta-quantile-chain)
+$$
+and a quantile reported at $p$ landing on day $y$ puts the box $N_{\le y - w_s} \le \lceil n p \rceil - 1$ and $N_{\le y} \ge \lceil n p \rceil$ on two of them.
+The likelihood is the probability that every count fell in its box,
+$$
+P\left(l_i \le N_{e_i} \le u_i, \; i = 1, \dots, m\right), (\#eq:meta-quantile-box)
+$$
+computed by a forward pass over the counts, one binomial step per edge.
+Two quantiles reported at the same value are two constraints at one edge, and a single quantile reduces Equation \@ref(eq:meta-quantile-box) to Equation \@ref(eq:meta-quantile-crossing).
+It is used in place of the multinomial of Equation \@ref(eq:meta-quantile-set), which treats each quantile of integer day delays as a continuous cut point and so overstates what a large study reports.
+
 ### Summaries from the same study
 
 Summaries that one study computed from the same delays are correlated, so they are fitted jointly.
@@ -353,32 +377,6 @@ whose off diagonal is $\text{Cov}(\bar{x}, s^2) = \mu_3 / n$ carried onto the st
 The correlation is $\gamma_1 / \sqrt{\kappa - 1}$ with $\gamma_1 = \mu_3 / \sigma^3$ the skewness, which every distribution keeps inside $[-1, 1]$.
 Moments taken from a grid or quadrature can sit just outside, so the correlation is clipped.
 
-Several quantiles from one study at probabilities $p_1 < \dots < p_k$ with values $y_1 \le \dots \le y_k$ cut the delay axis into $k + 1$ cells, and the counts in them are multinomial,
-$$
-(c_1, \dots, c_{k+1}) \sim \text{Multinomial}\left(n, \; \left(\tilde{F}(y_1), \; \tilde{F}(y_2) - \tilde{F}(y_1), \; \dots, \; 1 - \tilde{F}(y_k)\right)\right), (\#eq:meta-quantile-set)
-$$
-with $c_j = \text{round}(n p_j) - \text{round}(n p_{j-1})$ and $c_{k+1} = n - \text{round}(n p_k)$.
-A single quantile reduces this to Equation \@ref(eq:meta-quantile-binomial).
-Two quantiles reported at the same value are merged into one cell.
-A cell whose probability underflows to zero while the study saw delays in it is floored at $10^{-300}$.
-
-Several quantiles of integer day delays from one study are fitted as the joint probability of the crossings they stand for.
-The counts $N_{e_1} \le N_{e_2} \le \dots \le N_{e_m}$ at the integer edges the reported quantiles name, the day below each and the day itself, form a Markov chain of binomial steps,
-$$
-N_{e_1} \sim \text{Binomial}\left(n, \; \tilde{F}_0(e_1)\right), \quad
-N_{e_{i+1}} \mid N_{e_i} \sim N_{e_i} + \text{Binomial}\left(n - N_{e_i}, \; \frac{\tilde{F}_0(e_{i+1}) - \tilde{F}_0(e_i)}{1 - \tilde{F}_0(e_i)}\right), (\#eq:meta-quantile-chain)
-$$
-and a quantile reported at $p$ landing on day $y$ puts the box $N_{\le y - w_s} \le \lceil n p \rceil - 1$ and $N_{\le y} \ge \lceil n p \rceil$ on two of them.
-The likelihood is the probability that every count fell in its box,
-$$
-P\left(l_i \le N_{e_i} \le u_i, \; i = 1, \dots, m\right), (\#eq:meta-quantile-box)
-$$
-computed by a forward pass over the counts $0, \dots, n$ on the log scale, one binomial step per edge.
-The pass is kept to a band of counts around the most likely path of the constrained chain, six standard deviations and a few counts wide, so its cost grows like $m n^{3/2}$ rather than $m n^2$ and it is exact to well within a millionth.
-Two quantiles reported at the same value are two constraints at one edge, and a single quantile reduces Equation \@ref(eq:meta-quantile-box) to Equation \@ref(eq:meta-quantile-crossing).
-The multinomial of Equation \@ref(eq:meta-quantile-set) on the continuity corrected $\tilde{F}$ treats each reported quantile as a continuous cut point, so its curvature grows like $n$ and it claims a standard error five times too small at a thousand delays, where Equation \@ref(eq:meta-quantile-box) is close to an indicator of the parameters that put the population quantiles in the reported cells.
-That is a box rather than a peak, so the posterior of such a study is described by its bounds rather than a standard error, and the sampler explores the box.
-
 A study with a continuous estimand, codes 1, 2 and 4 of Section \@ref(the-biased-estimands), that reports a mean or a standard deviation alongside quantiles has all of them fitted as one multivariate normal,
 $$
 \begin{pmatrix} y_m \\ y_\sigma \\ y_{p_1} \\ \vdots \\ y_{p_k} \end{pmatrix} \sim
@@ -396,12 +394,10 @@ $$
 $$
 with $L$ the smallest delay the study counted, and the last entry carried from the sample variance to the standard deviation by the delta method.
 The partial moments are integrated by parts over the nodes on which $\tilde{F}$ is evaluated, and $\tilde{f}(Q_p)$ is the closed form density of the estimand where its quantile is refined and the slope of $\tilde{F}$ between the bracketing nodes where it is not, see Section \@ref(quantiles-of-the-estimands).
-Against 4000 simulated lognormal studies of 200 delays the derived standard errors are within 3% and the correlations within 0.02 of their sampling values.
-Fitting the two kinds separately counts a study reporting a mean, a standard deviation and quartiles about twice for the location and 1.4 times for the spread, and a mean with a median 1.5 times at $n = 100$ and 3 times at $n = 30$.
+Fitting the two kinds separately would count the information they share twice.
 A continuous estimand reporting only a mean and a standard deviation, or only quantiles, keeps Equation \@ref(eq:meta-moment-pair) or \@ref(eq:meta-quantile-set), which the joint normal reduces to and which is exact for a single quantile.
 On the grid of codes 0 and 3 the quantiles are discrete statistics fitted by Equations \@ref(eq:meta-quantile-crossing) and \@ref(eq:meta-quantile-box), so the mean and standard deviation of such a study are fitted separately from its quantiles, and a study reporting both kinds is over weighted in the same way.
 Keep its mean and standard deviation and drop its quantiles.
-The normal approximations degrade for small study sample sizes.
 
 ### A vector of summaries with a covariance
 
