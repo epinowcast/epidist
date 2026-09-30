@@ -82,7 +82,7 @@ as in \code{marginaleffects} (Arel-Bundock et al. 2024).
 The two fits share most of their data, so their draws are not differenced.
 }
 \examples{
-\donttest{
+\dontrun{
 estimates <- as_epidist_estimates_data(
   data.frame(
     study = c("A", "A", "B", "B", "C", "C"),

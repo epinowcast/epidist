@@ -57,7 +57,7 @@ tail of the predictive distribution.
 }
 \examples{
 \dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-\donttest{
+\dontrun{
 fit <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",

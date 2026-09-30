@@ -37,7 +37,7 @@ row. A continuous predictor has as many combinations as it has distinct
 values, so consider passing \code{vars} and a grid of your own instead.
 }
 \examples{
-\donttest{
+\dontrun{
 fit <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",

@@ -35,7 +35,7 @@ When the fitting algorithm is not \code{"sampling"} (see \code{\link[brms:brm]{b
 possible algorithms) then diagnostics are yet to be implemented.
 }
 \examples{
-\donttest{
+\dontrun{
 fit <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",

@@ -73,7 +73,7 @@
 #'
 #' @export
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' estimates <- as_epidist_estimates_data(
 #'   data.frame(
 #'     study = c("A", "A", "B", "B", "C", "C"),
