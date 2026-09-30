@@ -491,7 +491,7 @@ A fixed number of steps from a fixed start keeps $Q_p$ differentiable in $\theta
 
 #### Code 0: summary statistics of the raw data
 
-A study that summarised its integer date differences directly is code 0, because recorded delays are always censored to the day or coarser.
+Code 0 is the code for summary statistics computed from the raw data, because recorded delays are always censored to the day or coarser.
 Its estimand is discrete, with probability $q_j$ on the $j$th secondary window,
 $$
 q_j = \frac{F_{pc}(j w_s; \theta) - F_{pc}((j-1) w_s; \theta)}{F_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j = 1, \dots, \lfloor D / w_s \rfloor, (\#eq:meta-grid)
