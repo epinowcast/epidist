@@ -516,6 +516,8 @@ $$
 \mathbb{E}[\tau^k \mid \tau \le D] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4, (\#eq:meta-trunc-moments)
 $$
 evaluated by Simpson's rule, which reduces to the family moments when $D = \infty$.
+Simpson's rule integrates numerically over an even number of equal intervals between $L$ and $D$, fitting a parabola to each pair.
+Each study gets enough intervals to resolve the spread it reported, at least 100 or the value of `options(epidist.meta_n_quad)`.
 
 **Distribution function.** $F(y; \theta) / F(D; \theta)$.
 
