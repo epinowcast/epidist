@@ -25,4 +25,3 @@ This is a new submission.
 The flagged words are an author's name and "et al." in the references to the methods.
 
 The examples that fit a model are wrapped in `\dontrun{}` because they compile a Stan model.
-The other examples run in under five seconds.
