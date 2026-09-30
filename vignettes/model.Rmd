@@ -276,10 +276,7 @@ The meta model fits one delay distribution to a mix of individual level data and
 3. Each reported summary is fitted with a sampling likelihood built from the estimand and the study's sample size or standard error (Section \@ref(sampling-likelihoods)).
    Individual level rows use the likelihood of the marginal model (Section \@ref(the-marginal-model)).
 
-Every row shares $\theta$, so the posterior combines all of them.
-The sampling likelihoods come first below, because they are the same for every estimand.
 If using the meta model, please cite `primarycensored` in addition to `epidist`.
-The meta model is experimental and its interface may still change.
 
 ## Sampling likelihoods {#sampling-likelihoods}
 
@@ -484,6 +481,7 @@ $$
 \mathbb{E}[\tau^k \mid \tau \le D] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4, (\#eq:meta-trunc-moments)
 $$
 which reduces to the family moments when $D = \infty$.
+Summaries of exact, uncensored delays estimate the same distribution, so they are code 1 too.
 Its distribution function is $F(y; \theta) / F(D; \theta)$.
 
 Code 2, the uniform single interval approximation, left the primary interval uncorrected and so observed $\tau^\star + U$, with the moments of $F_{pc}$ right truncated at $D$,
