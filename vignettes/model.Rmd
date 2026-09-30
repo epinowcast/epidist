@@ -309,7 +309,7 @@ When $\sqrt{(\kappa - 1) / (4 n)}$ exceeds about a quarter it is inaccurate, and
 
 A reported quantile $y$ at probability $p$ of a continuous estimand is fitted through the number of delays at or below it, which is binomial,
 $$
-\text{round}(n p) \sim \text{Binomial}\left(n, \; \tilde{F}(y)\right). (\#eq:meta-quantile-binom)
+\text{round}(n p) \sim \text{Binomial}\left(n, \; \tilde{F}(y)\right). (\#eq:meta-quantile-binomial)
 $$
 
 A single quantile of integer day delays is a discrete statistic.
@@ -321,7 +321,7 @@ $$
 where $w_s$ is the reporting resolution and $\tilde{F}_0$ the step distribution function of the discrete estimand of Section \@ref(the-biased-estimands), before continuity correction.
 The information this carries saturates as $n$ grows.
 
-Posterior predictions for a quantile row are drawn from the normal approximation of Equation \@ref(eq:meta-quantile-binom),
+Posterior predictions for a quantile row are drawn from the normal approximation of Equation \@ref(eq:meta-quantile-binomial),
 $$
 p \sim \text{Normal}\left(\tilde{F}(y), \; \text{se}_p\right), (\#eq:meta-quantile-lik)
 $$
@@ -330,7 +330,7 @@ A quantile supplied with a standard error $\text{se}_y$ on the delay scale is fi
 $$
 y \sim \text{Normal}\left(Q_p, \; \text{se}_y\right), (\#eq:meta-quantile-se)
 $$
-since the density that would carry $\text{se}_y$ onto the probability scale vanishes far from the implied quantile.
+because moving $\text{se}_y$ onto the probability scale multiplies it by the density $\tilde{f}(y)$, which is close to zero when $y$ is far from the quantile the model implies.
 
 ### Summaries from the same study
 
@@ -358,7 +358,7 @@ $$
 (c_1, \dots, c_{k+1}) \sim \text{Multinomial}\left(n, \; \left(\tilde{F}(y_1), \; \tilde{F}(y_2) - \tilde{F}(y_1), \; \dots, \; 1 - \tilde{F}(y_k)\right)\right), (\#eq:meta-quantile-set)
 $$
 with $c_j = \text{round}(n p_j) - \text{round}(n p_{j-1})$ and $c_{k+1} = n - \text{round}(n p_k)$.
-A single quantile reduces this to Equation \@ref(eq:meta-quantile-binom).
+A single quantile reduces this to Equation \@ref(eq:meta-quantile-binomial).
 Two quantiles reported at the same value are merged into one cell.
 A cell whose probability underflows to zero while the study saw delays in it is floored at $10^{-300}$.
 
