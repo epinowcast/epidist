@@ -544,7 +544,6 @@ $$
 which tends to $A - d$ as $r$ tends to zero and, for a long window and a growing epidemic, to an exponential tilt by $\exp(-r d)$.
 This is the dynamical bias of @park2024estimating.
 The estimand is $f(d; \theta) w(d)$ renormalised over $[0, A]$, so $A$ replaces the cohort cutoff $D$.
-Applying both at once double counts, so a study is one or the other.
 The weight multiplies the quadrature for Equations \@ref(eq:meta-trunc-moments) and \@ref(eq:meta-uniform-moments) at each node and renormalises.
 For Equation \@ref(eq:meta-uniform-moments) it is evaluated at $d - w_p / 2$, to average the primary offset back out.
 The correction is only as good as the growth rate supplied.
