@@ -287,7 +287,7 @@ A study reports a value $y$ computed from $n$ delays.
 
 ### A reported mean
 
-A reported mean is normal,
+A reported mean is approximately normal by the central limit theorem,
 $$
 y \sim \text{Normal}\left(m_1, \; \text{se}_{m_1} \right), (\#eq:meta-mean-lik)
 $$
@@ -295,13 +295,13 @@ with $\text{se}_{m_1}$ the reported standard error where given and $\sigma / \sq
 
 ### A reported standard deviation
 
-A reported standard deviation is normal with the kurtosis based standard error of a sample standard deviation,
+A reported standard deviation is given a normal likelihood, a large sample approximation to its sampling distribution, with the kurtosis based standard error of a sample standard deviation,
 $$
 y \sim \text{Normal}\left(\sigma, \; \text{se}_\sigma \right), \quad
 \text{se}_\sigma = \sigma \sqrt{\frac{\kappa - 1}{4 n}}, (\#eq:meta-sd-lik)
 $$
 which follows from the asymptotic variance $(\mu_4 - \sigma^4)/n$ of the sample variance by the delta method [@cramer1946].
-The usual $\sigma / \sqrt{2(n-1)}$ is the case $\kappa = 3$, which is too narrow for right skewed delays.
+The usual $\sigma / \sqrt{2(n-1)}$ assumes normal data, $\kappa = 3$, and is too narrow for right skewed delays.
 Equation \@ref(eq:meta-sd-lik), and Equation \@ref(eq:meta-moment-pair) built on it, should not be trusted once $\sqrt{(\kappa - 1) / (4 n)}$ exceeds about a quarter.
 For a lognormal with kurtosis 9 that is $n$ below about 30.
 `as_epidist_estimates_data()` warns when a reported mean and standard deviation imply this under a lognormal delay.
