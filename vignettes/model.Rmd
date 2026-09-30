@@ -470,7 +470,7 @@ Codes 0 and 3 give a discrete estimand on the study's reporting grid and codes 1
 
 | Code | What the study did | Estimand |
 |---|---|---|
-| 0 | summarised integer date differences directly | discrete, on the reporting grid |
+| 0 | summarised integer date differences directly, that is summary statistics of the raw data | discrete, on the reporting grid |
 | 1 | adjusted for both intervals, for example with a double interval censored likelihood | continuous, the delay itself |
 | 2 | adjusted the secondary interval only, assuming a uniform delay within it | continuous, the delay plus the primary offset |
 | 3 | assigned each delay to the centre of its interval | discrete, the code 0 grid moved up |
@@ -489,9 +489,9 @@ Q_p^{(k + 1)} = Q_p^{(k)} - \frac{\tilde{F}(Q_p^{(k)}) - p}{\tilde{f}(Q_p^{(k)})
 $$
 A fixed number of steps from a fixed start keeps $Q_p$ differentiable in $\theta$, which a root search would not.
 
-#### Code 0: integer date differences
+#### Code 0: summary statistics of the raw data
 
-Code 0 is the code for summary statistics computed from the raw data, because recorded delays are always censored to the day or coarser.
+A study that summarised its integer date differences directly is code 0, because recorded delays are always censored to the day or coarser.
 Its estimand is discrete, with probability $q_j$ on the $j$th secondary window,
 $$
 q_j = \frac{F_{pc}(j w_s; \theta) - F_{pc}((j-1) w_s; \theta)}{F_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j = 1, \dots, \lfloor D / w_s \rfloor, (\#eq:meta-grid)
