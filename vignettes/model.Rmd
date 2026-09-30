@@ -307,9 +307,21 @@ When $\sqrt{(\kappa - 1) / (4 n)}$ exceeds about a quarter it is inaccurate, and
 
 ### A reported quantile
 
-A reported quantile at probability $p$ is fitted through the number of delays at or below it, which is binomial on $\tilde{F}(y)$.
-This is Equation \@ref(eq:meta-quantile-set) below, or Equations \@ref(eq:meta-quantile-crossing) and \@ref(eq:meta-quantile-box) for integer day delays.
-Posterior predictions for a quantile row are drawn from its normal approximation,
+A reported quantile $y$ at probability $p$ of a continuous estimand is fitted through the number of delays at or below it, which is binomial,
+$$
+\text{round}(n p) \sim \text{Binomial}\left(n, \; \tilde{F}(y)\right). (\#eq:meta-quantile-binom)
+$$
+
+A single quantile of integer day delays is a discrete statistic.
+"The median is 5 days" says that the empirical distribution function crossed one half between 4 and 5 days, that is $N_{\le y - w_s} < \lceil n p \rceil \le N_{\le y}$ with $N_{\le y}$ the number of delays at or below $y$.
+It is fitted as the probability of that event,
+$$
+P(N_{\le y} \ge k) - P(N_{\le y - w_s} \ge k), \quad k = \lceil n p \rceil, \quad N_{\le y} \sim \text{Binomial}\left(n, \tilde{F}_0(y)\right), (\#eq:meta-quantile-crossing)
+$$
+where $w_s$ is the reporting resolution and $\tilde{F}_0$ the step distribution function of the discrete estimand of Section \@ref(the-biased-estimands), before continuity correction.
+The information this carries saturates as $n$ grows.
+
+Posterior predictions for a quantile row are drawn from the normal approximation of Equation \@ref(eq:meta-quantile-binom),
 $$
 p \sim \text{Normal}\left(\tilde{F}(y), \; \text{se}_p\right), (\#eq:meta-quantile-lik)
 $$
@@ -346,18 +358,9 @@ $$
 (c_1, \dots, c_{k+1}) \sim \text{Multinomial}\left(n, \; \left(\tilde{F}(y_1), \; \tilde{F}(y_2) - \tilde{F}(y_1), \; \dots, \; 1 - \tilde{F}(y_k)\right)\right), (\#eq:meta-quantile-set)
 $$
 with $c_j = \text{round}(n p_j) - \text{round}(n p_{j-1})$ and $c_{k+1} = n - \text{round}(n p_k)$.
-A single quantile reduces this to the binomial of which Equation \@ref(eq:meta-quantile-lik) is the normal approximation.
+A single quantile reduces this to Equation \@ref(eq:meta-quantile-binom).
 Two quantiles reported at the same value are merged into one cell.
 A cell whose probability underflows to zero while the study saw delays in it is floored at $10^{-300}$.
-
-A single quantile of integer day delays is a discrete statistic.
-"The median is 5 days" says that the empirical distribution function crossed one half between 4 and 5 days, that is $N_{\le y - w_s} < \lceil n p \rceil \le N_{\le y}$ with $N_{\le y}$ the number of delays at or below $y$.
-It is fitted as the probability of that event,
-$$
-P(N_{\le y} \ge k) - P(N_{\le y - w_s} \ge k), \quad k = \lceil n p \rceil, \quad N_{\le y} \sim \text{Binomial}\left(n, \tilde{F}_0(y)\right), (\#eq:meta-quantile-crossing)
-$$
-where $w_s$ is the reporting resolution and $\tilde{F}_0$ the step distribution function of the discrete estimand of Section \@ref(the-biased-estimands), before continuity correction.
-The information this carries saturates as $n$ grows.
 
 Several quantiles of integer day delays from one study are fitted as the joint probability of the crossings they stand for.
 The counts $N_{e_1} \le N_{e_2} \le \dots \le N_{e_m}$ at the integer edges the reported quantiles name, the day below each and the day itself, form a Markov chain of binomial steps,
