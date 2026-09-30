@@ -283,7 +283,7 @@ If using the meta model, please cite `primarycensored` in addition to `epidist`.
 ## Sampling likelihoods {#sampling-likelihoods}
 
 Write $m_1$, $\sigma$, $\mu_3$ and $\mu_4$ for the mean, standard deviation and third and fourth central moments of a study's estimand $\tilde{F}$, $\kappa = \mu_4 / \sigma^4$ for its kurtosis and $Q_p$ for its quantile at probability $p$.
-Section \@ref(the-biased-estimands) later gives these, and $\tilde{F}$ itself, for each censoring code, and Section \@ref(quantiles-of-the-estimands) gives $Q_p$.
+Section \@ref(the-biased-estimands) later gives these, and $\tilde{F}$ itself, for each censoring code.
 Each likelihood below uses only them, so it is the same whatever the estimand.
 A study reports a value $y$ computed from $n$ delays.
 
@@ -395,7 +395,7 @@ $$
 \Sigma_{\sigma q_i} = -\frac{\int_L^{Q_{p_i}} \left((x - m_1)^2 - \sigma^2\right) \text{d}\tilde{F}(x)}{2 \sigma \, \tilde{f}(Q_{p_i})}, (\#eq:meta-joint-cov)
 $$
 with $L$ the smallest delay the study counted, and the last entry carried from the sample variance to the standard deviation by the delta method.
-The partial moments are integrated by parts over the nodes on which $\tilde{F}$ is evaluated, and $\tilde{f}(Q_p)$ is the closed form density of the estimand where its quantile is refined and the slope of $\tilde{F}$ between the bracketing nodes where it is not, see Section \@ref(quantiles-of-the-estimands).
+The partial moments are integrated by parts over the nodes on which $\tilde{F}$ is evaluated, and $\tilde{f}(Q_p)$ is the closed form density of the estimand where its quantile is refined and the slope of $\tilde{F}$ between the bracketing nodes where it is not, see Section \@ref(censoring-adjustment).
 Fitting the two kinds separately would count the information they share twice.
 A continuous estimand reporting only a mean and a standard deviation, or only quantiles, keeps Equation \@ref(eq:meta-moment-pair) or \@ref(eq:meta-quantile-set), which the joint normal reduces to and which is exact for a single quantile.
 On the grid of codes 0 and 3 the quantiles are discrete statistics fitted by Equations \@ref(eq:meta-quantile-crossing) and \@ref(eq:meta-quantile-box), so the mean and standard deviation of such a study are fitted separately from its quantiles, and a study reporting both kinds is over weighted in the same way.
@@ -464,7 +464,7 @@ This distribution is the study's estimand $\tilde{F}$, and its moments, distribu
 Four moments are needed, because the kurtosis sets the sampling error of a reported standard deviation and the skewness its correlation with a reported mean.
 Codes 0 and 3 give a discrete estimand on the study's reporting grid and codes 1, 2 and 4 a continuous one, which is why the likelihoods for quantiles and for joint summaries differ between them.
 
-### Censoring adjustment
+### Censoring adjustment {#censoring-adjustment}
 
 `cens_adjusted` records how a study handled interval censoring, one of five codes.
 
@@ -476,42 +476,67 @@ Codes 0 and 3 give a discrete estimand on the study's reporting grid and codes 1
 | 3 | assigned each delay to the centre of its interval | discrete, the code 0 grid moved up |
 | 4 | placed the primary event at the midpoint of its window and integrated the secondary interval | continuous, code 2 moved down |
 
-For each code below we give $\tilde{F}$ and its first four moments, $\mathbb{E}[\tau^k]$ for $k = 1, \dots, 4$, from which the variance, skewness and kurtosis follow.
-Its quantiles $Q_p$ are read off $\tilde{F}$ as in Section \@ref(quantiles-of-the-estimands).
+Each code below gives the estimand's moments, $\mathbb{E}[\tau^k]$ for $k = 1, \dots, 4$, from which the mean, variance, skewness and kurtosis follow, its distribution function $\tilde{F}$ and its quantiles $Q_p$.
+$\tilde{F}$ is computed at a set of points $t_1 < \dots < t_m$, the grid cells for codes 0 and 3 and quadrature nodes otherwise.
+Every quantile starts from linear interpolation between the two points that bracket $p$,
+$$
+Q_p^{(0)} = t_i + \frac{p - \tilde{F}(t_i)}{\tilde{F}(t_{i+1}) - \tilde{F}(t_i)} \left(t_{i+1} - t_i\right), \quad \tilde{F}(t_i) \le p < \tilde{F}(t_{i+1}), (\#eq:meta-quantile-chord)
+$$
+which is exact on a grid and otherwise only as accurate as the spacing of the points.
+Where $\tilde{F}$ and its density $\tilde{f}$ have a closed form it is refined by two Newton steps,
+$$
+Q_p^{(k + 1)} = Q_p^{(k)} - \frac{\tilde{F}(Q_p^{(k)}) - p}{\tilde{f}(Q_p^{(k)})}. (\#eq:meta-quantile-newton)
+$$
+A fixed number of steps from a fixed start keeps $Q_p$ differentiable in $\theta$, which a root search would not.
 
 #### Code 0: integer date differences
 
 Code 0 is the code for summary statistics computed from the raw data, because recorded delays are always censored to the day or coarser.
-Its estimand is discrete.
-With $q_j$ the probability on the $j$th secondary window,
+Its estimand is discrete, with probability $q_j$ on the $j$th secondary window,
 $$
 q_j = \frac{F_{pc}(j w_s; \theta) - F_{pc}((j-1) w_s; \theta)}{F_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j = 1, \dots, \lfloor D / w_s \rfloor, (\#eq:meta-grid)
 $$
 where bin $j$ carries the delay $(j-1) w_s$ and the truncation point is discretised to the last full grid boundary.
 This is the doubly interval censored, right truncated probability mass function the marginal model of Section \@ref(the-marginal-model) uses for individual observations.
-Summing over the grid gives the moments, and its cumulative sum gives $\tilde{F}_0$.
-For quantile rows $\tilde{F}$ is continuity corrected by interpolating $\tilde{F}_0$ linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise lands on a jump.
+
+**Moments.** Sums over the grid.
+
+**Distribution function.** The cumulative sum of the grid gives $\tilde{F}_0$.
+For quantiles $\tilde{F}$ is continuity corrected by interpolating $\tilde{F}_0$ linearly through the mid points of its cells, because a reported quantile of day resolution data otherwise lands on a jump.
+
+**Quantiles.** Equation \@ref(eq:meta-quantile-chord) on the continuity corrected $\tilde{F}$ is exact.
 The reported value is itself rounded to the grid, so a bias remains that does not shrink with $n$.
 
 #### Code 1: full adjustment
 
-A fully adjusted study reported the moments of $f(\cdot \, ; \theta)$ itself, right truncated at $D$,
+A fully adjusted study estimated $f(\cdot \, ; \theta)$ itself, right truncated at $D$.
+
+**Moments.**
 $$
 \mathbb{E}[\tau^k \mid \tau \le D] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4, (\#eq:meta-trunc-moments)
 $$
-which reduces to the family moments when $D = \infty$.
-Its distribution function is $F(y; \theta) / F(D; \theta)$.
+evaluated by Simpson's rule, which reduces to the family moments when $D = \infty$.
+
+**Distribution function.** $F(y; \theta) / F(D; \theta)$.
+
+**Quantiles.** For a lognormal or Weibull delay without an accrual design the quantile has a closed form,
+$$
+Q_p = F^{-1}\left(F(L) + p \left(F(D) - F(L)\right)\right),
+$$
+with $L$ the smallest delay the study counted, see Section \@ref(left-truncation).
+Other families take the Newton steps of Equation \@ref(eq:meta-quantile-newton).
 
 #### Code 2: the uniform single interval approximation
 
-A study that left the primary interval uncorrected observed $\tau^\star + U$, with the moments of $F_{pc}$ right truncated at $D$,
+A study that left the primary interval uncorrected observed $\tau^\star + U$, right truncated at $D$.
+
+**Moments.**
 $$
 \mathbb{E}[(\tau^\star + U)^k \mid \tau^\star + U \le D] =
 \frac{\int_0^D k t^{k-1} \left(F_{pc}(D; \theta) - F_{pc}(t; \theta)\right) \text{d}t}{F_{pc}(D; \theta)},
-\quad k = 1, \dots, 4. (\#eq:meta-uniform-moments)
+\quad k = 1, \dots, 4, (\#eq:meta-uniform-moments)
 $$
-Its distribution function is $F_{pc}(y; \theta) / F_{pc}(D; \theta)$.
-Equations \@ref(eq:meta-trunc-moments) and \@ref(eq:meta-uniform-moments) are evaluated by Simpson's rule.
+evaluated by Simpson's rule.
 Where $D = \infty$ and the primary event is uniform the convolution is exact,
 $$
 \mu_{pc} = \mu + \frac{w_p}{2}, \quad
@@ -520,11 +545,22 @@ $$
 $$
 with $\mu$, $\sigma^2$ and $\mu_4$ the mean, variance and fourth central moment of $f(\cdot \, ; \theta)$.
 
+**Distribution function.** $F_{pc}(y; \theta) / F_{pc}(D; \theta)$.
+
+**Quantiles.** With a uniform primary event $\tilde{F}$ and $\tilde{f}$ have a closed form, so the quantile takes the Newton steps of Equation \@ref(eq:meta-quantile-newton).
+With a growing primary event they do not, and the quantile keeps Equation \@ref(eq:meta-quantile-chord).
+
 #### Codes 3 and 4: midpoint imputation
 
 The estimand of code 3 is the grid of Equation \@ref(eq:meta-grid) moved up by $w_s / 2$.
 The estimand of code 4 is that of code 2 moved down by $w_p / 2$.
-A shift changes the mean alone and moves the distribution function and quantiles with it.
+
+**Moments.** A shift changes the mean alone, by $+ w_s / 2$ for code 3 and $- w_p / 2$ for code 4, and leaves the central moments as they are.
+
+**Distribution function.** Shifted with the estimand.
+
+**Quantiles.** Shifted with the estimand, from those of code 0 for code 3 and those of code 2 for code 4.
+
 Under a uniform primary event code 4 therefore has the mean of code 1 and the variance of code 2 before truncation, because midpointing removes the mean of $U$ but not its spread.
 The mirror reading, a midpointed secondary event and an integrated primary interval, has variance $\sigma^2 + w_s^2 / 12$ and is not used, because the literature midpoints the wide exposure window of the primary event.
 A study that midpointed the secondary interval and left the primary alone is code 3.
@@ -548,6 +584,7 @@ The weight multiplies the quadrature for Equations \@ref(eq:meta-trunc-moments) 
 For Equation \@ref(eq:meta-uniform-moments) it is evaluated at $d - w_p / 2$, to average the primary offset back out.
 This is an approximation, because the study knows each primary event only to within its window, and it worsens as $r$ grows and as $w_p$ approaches $A$.
 The correction is only as good as the growth rate supplied.
+Its quantiles keep Equation \@ref(eq:meta-quantile-chord), because the estimand is defined by the interpolation between its points.
 
 On the grid of Equation \@ref(eq:meta-grid) the weight cannot be applied delay by delay, because a study that recorded dates knows each primary event only to its window.
 A delay is seen only if the whole primary window it came from was open long enough, so the weight is a step function of the delay that drops by one window's growth weighted mass at each point $A - j w_p$.
@@ -589,26 +626,5 @@ $$
 zero at or below $L$ and one above $D$.
 The accrual weight of Equation \@ref(eq:meta-accrual) is unchanged, since the cells and nodes it multiplies now start at $L$.
 Individual level rows pass $L$ to `primarycensored` as their left truncation point, as the marginal model does.
-
-### Quantiles of the estimands {#quantiles-of-the-estimands}
-
-$\tilde{F}$ is computed at a set of points $t_1 < \dots < t_m$, the grid cells for codes 0 and 3 and quadrature nodes otherwise.
-The quantile is first found by linear interpolation between the two points that bracket $p$,
-$$
-Q_p^{(0)} = t_i + \frac{p - \tilde{F}(t_i)}{\tilde{F}(t_{i+1}) - \tilde{F}(t_i)} \left(t_{i+1} - t_i\right), \quad \tilde{F}(t_i) \le p < \tilde{F}(t_{i+1}). (\#eq:meta-quantile-chord)
-$$
-For codes 0 and 3 this is the quantile of the continuity corrected $\tilde{F}$, so it is exact.
-For a continuous estimand it is only as accurate as the spacing of the points, and is refined.
-For a lognormal or Weibull delay under code 1 without an accrual design the quantile has a closed form,
-$$
-Q_p = F^{-1}\left(F(L) + p \left(F(D) - F(L)\right)\right),
-$$
-with $L$ the smallest delay the study counted.
-Other continuous estimands with a uniform primary event have $\tilde{F}$ and its density $\tilde{f}$ in closed form, and take two Newton steps from Equation \@ref(eq:meta-quantile-chord),
-$$
-Q_p^{(k + 1)} = Q_p^{(k)} - \frac{\tilde{F}(Q_p^{(k)}) - p}{\tilde{f}(Q_p^{(k)})}.
-$$
-An accrual estimand, and code 2 with a growing primary event, have no closed form and are defined by the interpolation between their points, so they keep Equation \@ref(eq:meta-quantile-chord).
-A fixed number of steps from a fixed start keeps $Q_p$ differentiable in $\theta$, which a root search would not.
 
 ## References {-}
