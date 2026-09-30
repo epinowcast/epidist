@@ -10,11 +10,15 @@ name: windows-stan-probe
 jobs:
   probe:
     runs-on: windows-latest
-    name: windows (${{ matrix.r }})
+    name: windows (${{ matrix.r }}, ${{ matrix.source }})
     strategy:
       fail-fast: false
       matrix:
-        r: ['release', 'devel']
+        include:
+          - {r: 'release', source: 'cran', rspm: 'false'}
+          - {r: 'devel', source: 'cran', rspm: 'false'}
+          - {r: 'release', source: 'rspm', rspm: 'true'}
+          - {r: 'release', source: 'rspm-stanheaders-2.32', rspm: 'true'}
     steps:
       - uses: actions/checkout@v7
 
@@ -23,18 +27,29 @@ jobs:
       - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.r }}
-          use-public-rspm: true
+          use-public-rspm: ${{ matrix.rspm }}
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: local::.
 
+      - name: Use the StanHeaders rstan was built against
+        if: matrix.source == 'rspm-stanheaders-2.32'
+        shell: Rscript {0}
+        run: |
+          install.packages(
+            "https://cran.r-project.org/src/contrib/Archive/StanHeaders/StanHeaders_2.32.10.tar.gz",
+            repos = NULL, type = "source"
+          )
+
       - name: Compile a Stan model with rstan
         shell: Rscript {0}
         run: |
           for (p in c("rstan", "StanHeaders", "brms", "BH", "RcppEigen")) {
-            cat(p, format(packageVersion(p)), "\n")
+            v <- tryCatch(format(packageVersion(p)), error = function(e) "none")
+            cat(p, v, "\n")
           }
+          print(getOption("repos"))
           cat("build tools:", pkgbuild::has_build_tools(debug = TRUE), "\n")
           model <- rstan::stan_model(
             model_code = "parameters { real y; } model { y ~ normal(0, 1); }",
