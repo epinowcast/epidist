@@ -1,3 +1,9 @@
+# epidist 1.0.0.9000
+
+## Documentation
+
+- The list of what `marginaleffects` can do in the FAQ now renders as a list.
+
 # epidist 1.0.0
 
 This is the first release of `epidist` on CRAN.
