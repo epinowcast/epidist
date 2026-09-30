@@ -28,6 +28,7 @@ Closes #705.
 - Added examples to the `simulate_*()` functions and to `epidist_family()`, `epidist_formula()`, `epidist_prior()` and `epidist_stancode()`.
 - The package description cites the methods it implements.
 - The list of what `marginaleffects` can do in the FAQ now renders as a list.
+- The examples that fit a model are wrapped in `\dontrun{}` because they compile a Stan model.
 
 ## Bug fixes
 
@@ -44,7 +45,6 @@ Its new `cores` argument defaults to the `mc.cores` option where it is set and o
 - Cited the `sierra_leone_ebola_data` source by its DOI and corrected its column descriptions.
 - Removed the unused `BH`, `Rcpp`, `RcppEigen`, `pkgdown` and `usethis` suggested dependencies.
 - `epireview` is no longer a suggested dependency, so the package needs no repository beyond CRAN.
-- The examples that fit a model are wrapped in `\dontrun{}` because they compile a Stan model.
 `epidist_estimates_epireview()` takes any table with the columns `epireview` uses.
 
 # epidist 0.5.0

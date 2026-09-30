@@ -611,8 +611,9 @@
 #' number of delays at or below \eqn{y}. The counts at the integer edges
 #' the reported quantiles name form a Markov chain,
 #' \deqn{N_{e_{i+1}} \mid N_{e_i} \sim N_{e_i} + \text{Binomial}\left(n -
-#' N_{e_i}, \frac{G_0(e_{i+1}) - G_0(e_i)}{1 - G_0(e_i)}\right),}
-#' with \eqn{G_0} the uncorrected grid distribution function, and the
+#' N_{e_i}, \frac{\tilde{F}_0(e_{i+1}) - \tilde{F}_0(e_i)}
+#' {1 - \tilde{F}_0(e_i)}\right),}
+#' with \eqn{\tilde{F}_0} the uncorrected grid distribution function, and the
 #' likelihood is the probability that every count fell in its box. It is a
 #' forward pass over the counts on the log scale, one step of
 #' [.meta_box_step()] per edge, kept to a band of [.meta_band_half_width()]
