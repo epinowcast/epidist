@@ -1,9 +1,3 @@
-# epidist 1.0.0.9000
-
-## Documentation
-
-- The list of what `marginaleffects` can do in the FAQ now renders as a list.
-
 # epidist 1.0.0
 
 This is the first release of `epidist` on CRAN.
@@ -33,6 +27,7 @@ Closes #807.
 Closes #705.
 - Added examples to the `simulate_*()` functions and to `epidist_family()`, `epidist_formula()`, `epidist_prior()` and `epidist_stancode()`.
 - The package description cites the methods it implements.
+- The list of what `marginaleffects` can do in the FAQ now renders as a list.
 
 ## Bug fixes
 
