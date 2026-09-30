@@ -50,6 +50,8 @@ as_epidist_estimates_data <- function(data, ...) {
 #'     directly. This is the most common case in the literature.
 #'   * `1`: fully adjusted. The study used a method targeting the underlying
 #'     continuous distribution, such as a double interval censored likelihood.
+#'     Use it too for summaries of exact, uncensored delays, which estimate
+#'     that distribution directly.
 #'   * `2`: uniform single interval approximation. The study adjusted the
 #'     secondary interval only, assuming a uniform delay within it, and left
 #'     the primary interval uncorrected.
