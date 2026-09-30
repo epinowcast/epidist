@@ -305,7 +305,7 @@ $$
 which follows from the asymptotic variance $(\mu_4 - \sigma^4)/n$ of the sample variance by the delta method [@cramer1946].
 The usual $\sigma / \sqrt{2(n-1)}$ assumes normal data, $\kappa = 3$, and is too narrow for right skewed delays.
 Equations \@ref(eq:meta-sd-lik) and \@ref(eq:meta-moment-pair) are based on this approximation.
-When $\sqrt{(\kappa - 1) / (4 n)}$ exceeds about a quarter it is inaccurate, and so for a lognormal with kurtosis 9 they need $n$ of at least about 30.
+When $\sqrt{(\kappa - 1) / (4 n)}$ exceeds about a quarter it is inaccurate.
 
 ### A reported quantile
 
@@ -420,9 +420,9 @@ $$
 \hat{F}_{L,D}(y) = \frac{\hat{F}(y) - \hat{F}(L)}{\hat{F}(D) - \hat{F}(L)}, \quad L < y \le D, (\#eq:meta-reported-cond)
 $$
 with $L$ the smallest delay it counted and $D$ its observation time, or $D = \infty$ for a study that adjusted for right truncation.
-Without this a study that did not correct for right truncation is charged with tail spread its data never had, which can reach tens of percent on a standard deviation.
+Without this a study that did not correct for right truncation is charged with tail spread its data never had.
 Reported parameter standard errors are carried onto the summaries by the delta method, as $J V J^\top$ with $V$ the diagonal matrix of squared standard errors and $J$ the Jacobian of the map from parameters to summaries, and fitted jointly through Equation \@ref(eq:meta-mvn).
-For $k$ summaries of a $k$ parameter fit this gives back the curvature $V^{-1}$, where fitting each with its own standard error would claim standard errors 1.4 to 1.5 times too wide for a lognormal mean and standard deviation.
+For $k$ summaries of a $k$ parameter fit this gives back the curvature $V^{-1}$, where fitting each with its own standard error would overstate their uncertainty.
 A full parameter covariance is better passed as draws to `as_epidist_multivariate()`.
 A study with no parameter uncertainty falls back to the sample size likelihoods above, and any number of its summaries may be reported.
 This route assumes the reported distribution has the shape of the study's estimand, which holds only approximately where a continuous family was fitted to integer date differences.
@@ -532,11 +532,11 @@ Each code integrates the interval it did not midpoint rather than drawing a rand
 
 ### Right truncation
 
-The truncation above conditions on the delay falling below one cutoff, which is what a cohort followed for a common observation time gives.
+The truncation above conditions on the delay falling below one cutoff, which is what a cohort followed for a common observation time gives, `trunc_design = "cohort"`.
 This is truncation rather than right censoring, where a case is known to exist and contributes a survival term rather than being absent from the study.
 Right censoring is not yet supported.
 
-A study that accrued primary events over a window of length $A$ and stopped at its calendar end saw a delay $d$ only for primary events at least $d$ before the stop.
+A study that accrued primary events over a window of length $A$ and stopped at a calendar date, `trunc_design = "accrual"`, saw a delay $d$ only for primary events at least $d$ before the stop.
 With primary events arriving at a rate proportional to $\exp(r t)$ the follow up available is
 $$
 w(d) = \int_0^{A - d} \exp(r t) \, \text{d}t = \frac{\exp(r (A - d)) - 1}{r}, \quad 0 \le d \le A, (\#eq:meta-accrual)
@@ -546,17 +546,14 @@ This is the dynamical bias of @park2024estimating.
 The estimand is $f(d; \theta) w(d)$ renormalised over $[0, A]$, so $A$ replaces the cohort cutoff $D$.
 The weight multiplies the quadrature for Equations \@ref(eq:meta-trunc-moments) and \@ref(eq:meta-uniform-moments) at each node and renormalises.
 For Equation \@ref(eq:meta-uniform-moments) it is evaluated at $d - w_p / 2$, to average the primary offset back out.
+This is an approximation, because the study knows each primary event only to within its window, and it worsens as $r$ grows and as $w_p$ approaches $A$.
 The correction is only as good as the growth rate supplied.
 
 On the grid of Equation \@ref(eq:meta-grid) the weight cannot be applied delay by delay, because a study that recorded dates knows each primary event only to its window.
 A delay is seen only if the whole primary window it came from was open long enough, so the weight is a step function of the delay that drops by one window's growth weighted mass at each point $A - j w_p$.
 Each grid cell is split at those points and each piece weighted by the mass left.
 When $A$ is not a whole number of primary windows the last one is partial, of length $l = A - w_p \lfloor A / w_p \rfloor$, and its cases are added separately, following $F_{pc}$ with a window of $l$.
-This keeps the grid exact for any $A$, $w_p$ and $w_s$, where weighting each cell at one point can put the mean tens of percent too low.
-
-One residual remains.
-Equation \@ref(eq:meta-uniform-moments) keeps the smooth weight, because the follow up available to a primary event is only known to within its window.
-The residual grows with $r$ and as $w_p$ grows towards $A$.
+This keeps the grid exact for any $A$, $w_p$ and $w_s$.
 
 ### An estimated growth rate {#estimated-growth}
 
