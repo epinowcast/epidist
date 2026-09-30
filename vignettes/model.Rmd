@@ -592,12 +592,23 @@ Individual level rows pass $L$ to `primarycensored` as their left truncation poi
 
 ### Quantiles of the estimands {#quantiles-of-the-estimands}
 
-$\tilde{F}$ is computed at a set of points, the grid cells for codes 0 and 3 and quadrature nodes otherwise.
-The quantile $Q_p$ is found from the two points whose $\tilde{F}$ brackets $p$, by linear interpolation between them.
+$\tilde{F}$ is computed at a set of points $t_1 < \dots < t_m$, the grid cells for codes 0 and 3 and quadrature nodes otherwise.
+The quantile is first found by linear interpolation between the two points that bracket $p$,
+$$
+Q_p^{(0)} = t_i + \frac{p - \tilde{F}(t_i)}{\tilde{F}(t_{i+1}) - \tilde{F}(t_i)} \left(t_{i+1} - t_i\right), \quad \tilde{F}(t_i) \le p < \tilde{F}(t_{i+1}). (\#eq:meta-quantile-chord)
+$$
 For codes 0 and 3 this is the quantile of the continuity corrected $\tilde{F}$, so it is exact.
-For a continuous estimand the interpolated value is an approximation and is refined.
-For a lognormal or Weibull delay under code 1 the family's quantile function gives $Q_p$ exactly, and otherwise two Newton steps using $\tilde{F}$ and its density move it to the quantile.
-An accrual estimand is defined only at its points, so its interpolated value is used as it is.
-Each of these is smooth in $\theta$, so $Q_p$ has the gradients the sampler needs.
+For a continuous estimand it is only as accurate as the spacing of the points, and is refined.
+For a lognormal or Weibull delay under code 1 without an accrual design the quantile has a closed form,
+$$
+Q_p = F^{-1}\left(F(L) + p \left(F(D) - F(L)\right)\right),
+$$
+with $L$ the smallest delay the study counted.
+Other continuous estimands with a uniform primary event have $\tilde{F}$ and its density $\tilde{f}$ in closed form, and take two Newton steps from Equation \@ref(eq:meta-quantile-chord),
+$$
+Q_p^{(k + 1)} = Q_p^{(k)} - \frac{\tilde{F}(Q_p^{(k)}) - p}{\tilde{f}(Q_p^{(k)})}.
+$$
+An accrual estimand, and code 2 with a growing primary event, have no closed form and are defined by the interpolation between their points, so they keep Equation \@ref(eq:meta-quantile-chord).
+A fixed number of steps from a fixed start keeps $Q_p$ differentiable in $\theta$, which a root search would not.
 
 ## References {-}
