@@ -269,20 +269,20 @@ For the mathematical details of primary event censored distributions, including 
 Published delay estimates are usually summary statistics, and the estimation procedure behind them is itself a source of bias [@charniga2024best; @park2024estimating].
 The meta model fits one delay distribution to a mix of individual level data and published summaries in three steps.
 
-1. The latent delay is the forward distribution $f(\cdot \, ; \theta)$ of Section \@ref(maths).
+1. The latent delay is the forward distribution of Section \@ref(maths), with density $f(\cdot \, ; \theta)$ and distribution function $F(\cdot \, ; \theta)$.
    Its parameters $\theta$ take a `brms` formula, so study level heterogeneity, for example `mu ~ 1 + (1 | study)`, is specified as for the other models.
-2. Each study's estimation procedure is applied to the latent delay.
-   How it adjusted for censoring and right truncation, its censoring windows and the smallest delay it counted give the distribution its procedure would converge to, its estimand, with moments, distribution function $\tilde{F}$ and quantiles $Q_p$ (Section \@ref(the-biased-estimands)).
-3. Each reported summary is fitted with a sampling likelihood built from the estimand and the study's sample size or standard error (Section \@ref(sampling-likelihoods)).
+2. Each study gets one representation of the delay, its estimand $\tilde{F}$, the distribution its reported summaries estimate.
+   For a study that estimated the delay without bias $\tilde{F}$ is $F$.
+   Otherwise $\tilde{F}$ is the result of applying the study's procedure to $F$: how it adjusted for censoring and right truncation, its censoring windows and the smallest delay it counted (Section \@ref(the-biased-estimands)).
+3. Every reported summary is read from $\tilde{F}$, a mean from its mean, a standard deviation from its standard deviation and a quantile from its distribution function, with a sampling likelihood set by the study's sample size or standard error (Section \@ref(sampling-likelihoods)).
    Individual level rows use the likelihood of the marginal model (Section \@ref(the-marginal-model)).
 
 If using the meta model, please cite `primarycensored` in addition to `epidist`.
 
 ## Sampling likelihoods {#sampling-likelihoods}
 
-Write $m_1$, $\sigma$, $\mu_3$ and $\mu_4$ for the mean, standard deviation and third and fourth central moments of a delay distribution, $\kappa = \mu_4 / \sigma^4$ for its kurtosis, $\tilde{F}$ for its distribution function and $Q_p$ for its quantile at probability $p$.
-For a study that estimated the delay without bias these are those of the forward delay distribution of Section \@ref(maths).
-Section \@ref(the-biased-estimands) replaces them with those of the distribution the study's procedure targeted, and the likelihoods below are unchanged.
+Write $m_1$, $\sigma$, $\mu_3$ and $\mu_4$ for the mean, standard deviation and third and fourth central moments of a study's estimand $\tilde{F}$, $\kappa = \mu_4 / \sigma^4$ for its kurtosis and $Q_p$ for its quantile at probability $p$.
+The likelihoods are the same whatever the estimand.
 A study reports a value $y$ computed from $n$ delays.
 
 ### A reported mean
@@ -458,7 +458,7 @@ $$
 for the primary event censored distribution function of `primarycensored` [@primarycensored].
 Each censoring code below defines a distribution, right truncated at the observation time $D$, with $D = \infty$ for a study that adjusted for right truncation itself.
 $D$ is on the delay scale, the truncation time $T$ of Section \@ref(right-truncation) less the time of the primary event.
-Its moments, distribution function $\tilde{F}$ and quantiles $Q_p$ replace those of the delay in the likelihoods of Section \@ref(sampling-likelihoods).
+This distribution is the study's estimand $\tilde{F}$, and its moments, distribution function and quantiles are what the likelihoods of Section \@ref(sampling-likelihoods) read.
 Four moments are needed, because the kurtosis sets the sampling error of a reported standard deviation and the skewness its correlation with a reported mean.
 
 ### Censoring adjustment
