@@ -15,7 +15,9 @@ that study’s estimation procedure to the latent delay, which gives the
 distribution the study’s summaries estimate. It then fits each reported
 summary with a likelihood built from that distribution and the study’s
 sample size, and fits any individual level data with the likelihood of
-the marginal model ([Abbott et al. 2025](#ref-primarycensored)).
+the marginal model ([Abbott et al. 2025](#ref-primarycensored)). This
+covers the most common case, a study that summarised its raw date
+differences directly, as well as studies that adjusted for some biases.
 [`vignette("model")`](https://epidist.epinowcast.org/articles/model.md)
 gives the maths. Because it is built on `brms`, formulas, priors and
 post-processing carry over, so differences between studies are a formula
@@ -49,7 +51,7 @@ study.
 
 | `cens_adjusted` | The study |
 |----|----|
-| `0` | summarised integer date differences directly, the most common case |
+| `0` | summarised integer date differences directly, the most common case and the one for summary statistics of raw data |
 | `1` | used a double interval censored likelihood targeting the continuous delay |
 | `2` | adjusted only the secondary interval, assuming a uniform delay within it |
 | `3` | assigned each delay to the centre of the interval it was observed in |

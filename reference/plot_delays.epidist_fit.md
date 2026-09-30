@@ -91,7 +91,7 @@ Other plot:
 ## Examples
 
 ``` r
-# \donttest{
+# \dontrun{
 fit <- sierra_leone_ebola_data |>
   as_epidist_linelist_data(
     pdate_lwr = "date_of_symptom_onset",

@@ -101,6 +101,7 @@ Those summaries are often biased, because the studies behind them did not fully 
 The meta model treats the delay as one latent distribution shared by every study.
 For each study it applies that study’s estimation procedure to the latent delay, which gives the distribution the study’s summaries estimate.
 It then fits each reported summary with a likelihood built from that distribution and the study’s sample size, and fits any individual level data with the likelihood of the marginal model <span class="citation">(<a href="#ref-primarycensored">Abbott et al. 2025</a>)</span>.
+This covers the most common case, a study that summarised its raw date differences directly, as well as studies that adjusted for some biases.
 <code><a href="../articles/model.html">vignette("model")</a></code> gives the maths.
 Because it is built on <code>brms</code>, formulas, priors and post-processing carry over, so differences between studies are a formula term such as <code>(1 | study)</code>.
 The <a href="https://github.com/cm401/ddsynth" class="external-link">ddsynth</a> package also combines individual level data and published summaries, but treats each summary as an unbiased estimate of the delay.</p>
@@ -137,7 +138,7 @@ Defaults to 0, meaning it counted every delay.</li>
 <tbody>
 <tr class="odd">
 <td><code>0</code></td>
-<td>summarised integer date differences directly, the most common case</td>
+<td>summarised integer date differences directly, the most common case and the one for summary statistics of raw data</td>
 </tr>
 <tr class="even">
 <td><code>1</code></td>

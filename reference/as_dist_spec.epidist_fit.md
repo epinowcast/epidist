@@ -106,7 +106,7 @@ Other postprocess:
 ## Examples
 
 ``` r
-# \donttest{
+# \dontrun{
 if (requireNamespace("distspec", quietly = TRUE)) {
   fit <- sierra_leone_ebola_data |>
     as_epidist_linelist_data(
@@ -157,12 +157,12 @@ if (requireNamespace("distspec", quietly = TRUE)) {
 #>       mean:
 #>         1.6
 #>       sd:
-#>         0.0067
+#>         0.0065
 #>   sdlog:
 #>     - normal distribution:
 #>       mean:
 #>         0.59
 #>       sd:
-#>         0.0048
+#>         0.0049
 # }
 ```

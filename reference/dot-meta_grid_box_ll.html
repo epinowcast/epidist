@@ -12,8 +12,9 @@ day below and the day itself, \(N_{\le y - w_s} \le \lceil n p \rceil
 number of delays at or below \(y\). The counts at the integer edges
 the reported quantiles name form a Markov chain,
 $$N_{e_{i+1}} \mid N_{e_i} \sim N_{e_i} + \text{Binomial}\left(n -
-N_{e_i}, \frac{G_0(e_{i+1}) - G_0(e_i)}{1 - G_0(e_i)}\right),$$
-with \(G_0\) the uncorrected grid distribution function, and the
+N_{e_i}, \frac{\tilde{F}_0(e_{i+1}) - \tilde{F}_0(e_i)}
+{1 - \tilde{F}_0(e_i)}\right),$$
+with \(\tilde{F}_0\) the uncorrected grid distribution function, and the
 likelihood is the probability that every count fell in its box. It is a
 forward pass over the counts on the log scale, one step of
 .meta_box_step() per edge, kept to a band of .meta_band_half_width()
@@ -28,8 +29,9 @@ day below and the day itself, \(N_{\le y - w_s} \le \lceil n p \rceil
 number of delays at or below \(y\). The counts at the integer edges
 the reported quantiles name form a Markov chain,
 $$N_{e_{i+1}} \mid N_{e_i} \sim N_{e_i} + \text{Binomial}\left(n -
-N_{e_i}, \frac{G_0(e_{i+1}) - G_0(e_i)}{1 - G_0(e_i)}\right),$$
-with \(G_0\) the uncorrected grid distribution function, and the
+N_{e_i}, \frac{\tilde{F}_0(e_{i+1}) - \tilde{F}_0(e_i)}
+{1 - \tilde{F}_0(e_i)}\right),$$
+with \(\tilde{F}_0\) the uncorrected grid distribution function, and the
 likelihood is the probability that every count fell in its box. It is a
 forward pass over the counts on the log scale, one step of
 .meta_box_step() per edge, kept to a band of .meta_band_half_width()
@@ -96,8 +98,9 @@ day below and the day itself, \(N_{\le y - w_s} \le \lceil n p \rceil
 number of delays at or below \(y\). The counts at the integer edges
 the reported quantiles name form a Markov chain,
 $$N_{e_{i+1}} \mid N_{e_i} \sim N_{e_i} + \text{Binomial}\left(n -
-N_{e_i}, \frac{G_0(e_{i+1}) - G_0(e_i)}{1 - G_0(e_i)}\right),$$
-with \(G_0\) the uncorrected grid distribution function, and the
+N_{e_i}, \frac{\tilde{F}_0(e_{i+1}) - \tilde{F}_0(e_i)}
+{1 - \tilde{F}_0(e_i)}\right),$$
+with \(\tilde{F}_0\) the uncorrected grid distribution function, and the
 likelihood is the probability that every count fell in its box. It is a
 forward pass over the counts on the log scale, one step of
 <code><a href="dot-meta_box_step.html">.meta_box_step()</a></code> per edge, kept to a band of <code><a href="dot-meta_band_half_width.html">.meta_band_half_width()</a></code>

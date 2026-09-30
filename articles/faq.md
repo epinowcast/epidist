@@ -532,10 +532,11 @@ tools for computing and visualising marginal effects, contrasts, and
 predictions from regression models. It works with `epidist` models
 because they are built on top of `brms`.
 
-For `epidist` models with covariates, you can use `marginaleffects`
-to: - Compute average marginal effects - Make comparisons between
-different covariate values - Visualise model predictions across the
-range of covariates
+For `epidist` models with covariates, you can use `marginaleffects` to:
+
+- Compute average marginal effects
+- Make comparisons between different covariate values
+- Visualise model predictions across the range of covariates
 
 Here’s a simple example using a model that includes location as a
 covariate:

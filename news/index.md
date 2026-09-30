@@ -60,6 +60,10 @@ change.
   and
   [`epidist_stancode()`](https://epidist.epinowcast.org/reference/epidist_stancode.md).
 - The package description cites the methods it implements.
+- The list of what `marginaleffects` can do in the FAQ now renders as a
+  list.
+- The examples that fit a model are wrapped in `\dontrun{}` because they
+  compile a Stan model.
 
 ### Bug fixes
 

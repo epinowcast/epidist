@@ -308,80 +308,127 @@ et al. 2024](#ref-charniga2024best); [Park et al.
 distribution to a mix of individual level data and published summaries
 in three steps.
 
-1.  The latent delay is the forward distribution \\f(\cdot \\ ;
-    \theta)\\ of Section [1](#maths). Its parameters \\\theta\\ take a
-    `brms` formula, so study level heterogeneity, for example
+1.  The latent delay is the forward distribution of Section [1](#maths),
+    with density \\f(\cdot \\ ; \theta)\\ and distribution function
+    \\F(\cdot \\ ; \theta)\\. Its parameters \\\theta\\ take a `brms`
+    formula, so study level heterogeneity, for example
     `mu ~ 1 + (1 | study)`, is specified as for the other models.
-2.  Each study’s estimation procedure is applied to the latent delay.
-    How it adjusted for censoring and right truncation, its censoring
-    windows and the smallest delay it counted give the distribution its
-    procedure would converge to, its estimand, with moments,
-    distribution function \\G\\ and quantiles \\Q_p\\ (Section
-    [5.3](#the-biased-estimands)).
-3.  Each reported summary is fitted with a sampling likelihood built
-    from the estimand and the study’s sample size or standard error
-    (Section [5.1](#sampling-likelihoods)). Individual level rows use
-    the likelihood of the marginal model (Section
-    [4](#the-marginal-model)).
+2.  Each study gets one representation of the delay, its estimand
+    \\\tilde{F}\\, the distribution its reported summaries estimate. For
+    a study that estimated the delay without bias \\\tilde{F}\\ is
+    \\F\\. Otherwise \\\tilde{F}\\ is the result of applying the study’s
+    procedure to \\F\\: how it adjusted for censoring and right
+    truncation, its censoring windows and the smallest delay it counted
+    (Section [5.3](#the-biased-estimands)).
+3.  Every reported summary is read from \\\tilde{F}\\, a mean from its
+    mean, a standard deviation from its standard deviation and a
+    quantile from its distribution function, with a sampling likelihood
+    set by the study’s sample size or standard error (Section
+    [5.1](#sampling-likelihoods)). Individual level rows use the
+    likelihood of the marginal model (Section [4](#the-marginal-model)).
 
-Every row shares \\\theta\\, so the posterior combines all of them. The
-sampling likelihoods come first below, because they are the same for
-every estimand. If using the meta model, please cite `primarycensored`
-in addition to `epidist`. The meta model is experimental and its
-interface may still change.
+The sections below start from step 3, what each reported summary needs
+from \\\tilde{F}\\, and then give how each kind of study gets there. If
+using the meta model, please cite `primarycensored` in addition to
+`epidist`.
 
 ### 5.1 Sampling likelihoods
 
 Write \\m_1\\, \\\sigma\\, \\\mu_3\\ and \\\mu_4\\ for the mean,
-standard deviation and third and fourth central moments of a delay
-distribution, \\\kappa = \mu_4 / \sigma^4\\ for its kurtosis, \\G\\ for
-its distribution function and \\Q_p\\ for its quantile at probability
-\\p\\. For a study that estimated the delay without bias these are those
-of the forward delay distribution of Section [1](#maths). Section
-[5.3](#the-biased-estimands) replaces them with those of the
-distribution the study’s procedure targeted, and the likelihoods below
-are unchanged. A study reports a value \\y\\ computed from \\n\\ delays.
+standard deviation and third and fourth central moments of a study’s
+estimand \\\tilde{F}\\, \\\kappa = \mu_4 / \sigma^4\\ for its kurtosis
+and \\Q_p\\ for its quantile at probability \\p\\. Section
+[5.3](#the-biased-estimands) later gives these, and \\\tilde{F}\\
+itself, for each censoring code. Each likelihood below uses only them,
+so it is the same whatever the estimand. A study reports a value \\y\\
+computed from \\n\\ delays.
 
 #### 5.1.1 A reported mean
 
-A reported mean is normal, \\ y \sim \text{Normal}\left(m_1, \\
-\text{se}\_{m_1} \right), \tag{5.1} \\ with \\\text{se}\_{m_1}\\ the
-reported standard error where given and \\\sigma / \sqrt{n}\\ otherwise.
+A reported mean is approximately normal by the central limit theorem, \\
+y \sim \text{Normal}\left(m_1, \\ \text{se}\_{m_1} \right), \tag{5.1} \\
+with \\\text{se}\_{m_1}\\ the reported standard error where given and
+\\\sigma / \sqrt{n}\\ otherwise.
 
 #### 5.1.2 A reported standard deviation
 
-A reported standard deviation is normal with the kurtosis based standard
-error of a sample standard deviation, \\ y \sim
+A reported standard deviation is given a normal likelihood, a large
+sample approximation to its sampling distribution, with the kurtosis
+based standard error of a sample standard deviation, \\ y \sim
 \text{Normal}\left(\sigma, \\ \text{se}\_\sigma \right), \quad
 \text{se}\_\sigma = \sigma \sqrt{\frac{\kappa - 1}{4 n}}, \tag{5.2} \\
 which follows from the asymptotic variance \\(\mu_4 - \sigma^4)/n\\ of
 the sample variance by the delta method ([Cramér
-1946](#ref-cramer1946)). The normal theory expression \\\sigma /
-\sqrt{2(n-1)}\\ is the case \\\kappa = 3\\ and is two to four times too
-narrow for the right skewed distributions delays follow. Equation
-[(5.2)](#eq:meta-sd-lik), and Equation [(5.5)](#eq:meta-moment-pair)
-built on it, should not be trusted once \\\sqrt{(\kappa - 1) / (4 n)}\\
-exceeds about a quarter. For a lognormal with kurtosis 9 that is \\n\\
-below about 30.
-[`as_epidist_estimates_data()`](https://epidist.epinowcast.org/reference/as_epidist_estimates_data.md)
-warns when a reported mean and standard deviation imply this under a
-lognormal delay.
+1946](#ref-cramer1946)). The usual \\\sigma / \sqrt{2(n-1)}\\ assumes
+normal data, \\\kappa = 3\\, and is too narrow for right skewed delays.
+Equations [(5.2)](#eq:meta-sd-lik) and [(5.10)](#eq:meta-moment-pair)
+are based on this approximation. When \\\sqrt{(\kappa - 1) / (4 n)}\\
+exceeds about a quarter it is inaccurate.
 
 #### 5.1.3 A reported quantile
 
-A reported quantile at probability \\p\\ is fitted through the number of
-delays at or below it, which is binomial on \\G(y)\\ and so avoids
-inverting \\G\\. This is Equation [(5.6)](#eq:meta-quantile-set) below,
-or Equations [(5.7)](#eq:meta-quantile-crossing) and
-[(5.9)](#eq:meta-quantile-box) for integer day delays. Posterior
-predictions for a quantile row are drawn from its normal approximation,
-\\ p \sim \text{Normal}\left(G(y), \\ \text{se}\_p\right), \tag{5.3} \\
+A reported quantile \\y\\ at probability \\p\\ of a continuous estimand
+is fitted through the number of delays at or below it, which is
+binomial, \\ \text{round}(n p) \sim \text{Binomial}\left(n, \\
+\tilde{F}(y)\right). \tag{5.3} \\
+
+A single quantile of integer day delays, codes 0 and 3, is a discrete
+statistic. “The median is 5 days” says that the empirical distribution
+function crossed one half between 4 and 5 days, that is \\N\_{\le y -
+w_s} \< \lceil n p \rceil \le N\_{\le y}\\ with \\N\_{\le y}\\ the
+number of delays at or below \\y\\. It is fitted as the probability of
+that event, \\ P(N\_{\le y} \ge k) - P(N\_{\le y - w_s} \ge k), \quad k
+= \lceil n p \rceil, \quad N\_{\le y} \sim \text{Binomial}\left(n,
+\tilde{F}\_0(y)\right), \tag{5.4} \\ where \\w_s\\ is the reporting
+resolution and \\\tilde{F}\_0\\ the step distribution function of the
+discrete estimand of Section [5.3](#the-biased-estimands), before
+continuity correction. The information this carries saturates as \\n\\
+grows.
+
+Posterior predictions for a quantile row are drawn from the normal
+approximation of Equation [(5.3)](#eq:meta-quantile-binomial), \\ p \sim
+\text{Normal}\left(\tilde{F}(y), \\ \text{se}\_p\right), \tag{5.5} \\
 with \\\text{se}\_p = \sqrt{p(1-p)/n}\\ the binomial standard error of
 an empirical distribution function. A quantile supplied with a standard
 error \\\text{se}\_y\\ on the delay scale is fitted on that scale
 instead, \\ y \sim \text{Normal}\left(Q_p, \\ \text{se}\_y\right),
-\tag{5.4} \\ since the density that would carry \\\text{se}\_y\\ onto
-the probability scale vanishes far from the implied quantile.
+\tag{5.6} \\ because moving \\\text{se}\_y\\ onto the probability scale
+multiplies it by the density \\\tilde{f}(y)\\, which is close to zero
+when \\y\\ is far from the quantile the model implies.
+
+Several quantiles from one study at probabilities \\p_1 \< \dots \<
+p_k\\ with values \\y_1 \le \dots \le y_k\\ cut the delay axis into
+\\k + 1\\ cells, and the counts in them are multinomial, \\ (c_1, \dots,
+c\_{k+1}) \sim \text{Multinomial}\left(n, \\ \left(\tilde{F}(y_1), \\
+\tilde{F}(y_2) - \tilde{F}(y_1), \\ \dots, \\ 1 -
+\tilde{F}(y_k)\right)\right), \tag{5.7} \\ with \\c_j = \text{round}(n
+p_j) - \text{round}(n p\_{j-1})\\ and \\c\_{k+1} = n - \text{round}(n
+p_k)\\. A single quantile reduces this to Equation
+[(5.3)](#eq:meta-quantile-binomial). Two quantiles reported at the same
+value are merged into one cell. A cell whose probability underflows to
+zero while the study saw delays in it is floored at \\10^{-300}\\.
+
+Several quantiles of integer day delays from one study are fitted as the
+joint probability of the crossings they stand for. The counts \\N\_{e_1}
+\le N\_{e_2} \le \dots \le N\_{e_m}\\ at the integer edges the reported
+quantiles name, the day below each and the day itself, form a Markov
+chain of binomial steps, \\ N\_{e_1} \sim \text{Binomial}\left(n, \\
+\tilde{F}\_0(e_1)\right), \quad N\_{e\_{i+1}} \mid N\_{e_i} \sim
+N\_{e_i} + \text{Binomial}\left(n - N\_{e_i}, \\
+\frac{\tilde{F}\_0(e\_{i+1}) - \tilde{F}\_0(e_i)}{1 -
+\tilde{F}\_0(e_i)}\right), \tag{5.8} \\ and a quantile reported at \\p\\
+landing on day \\y\\ puts the box \\N\_{\le y - w_s} \le \lceil n p
+\rceil - 1\\ and \\N\_{\le y} \ge \lceil n p \rceil\\ on two of them.
+The likelihood is the probability that every count fell in its box, \\
+P\left(l_i \le N\_{e_i} \le u_i, \\ i = 1, \dots, m\right), \tag{5.9} \\
+computed by a forward pass over the counts, one binomial step per edge.
+Two quantiles reported at the same value are two constraints at one
+edge, and a single quantile reduces Equation
+[(5.9)](#eq:meta-quantile-box) to Equation
+[(5.4)](#eq:meta-quantile-crossing). It is used in place of the
+multinomial of Equation [(5.7)](#eq:meta-quantile-set), which treats
+each quantile of integer day delays as a continuous cut point and so
+overstates what a large study reports.
 
 #### 5.1.4 Summaries from the same study
 
@@ -396,67 +443,13 @@ bivariate normal of the pair, \\ \begin{pmatrix} y\_{m} \\ y\_{\sigma}
 \end{pmatrix} \sim \text{Normal}\left( \begin{pmatrix} m_1 \\ \sigma
 \end{pmatrix}, \\ \frac{1}{n}\begin{pmatrix} \sigma^2 & \mu_3 / (2
 \sigma) \\ \mu_3 / (2 \sigma) & \sigma^2 (\kappa - 1) / 4 \end{pmatrix}
-\right), \tag{5.5} \\ whose off diagonal is \\\text{Cov}(\bar{x}, s^2) =
-\mu_3 / n\\ carried onto the standard deviation scale by the delta
+\right), \tag{5.10} \\ whose off diagonal is \\\text{Cov}(\bar{x}, s^2)
+= \mu_3 / n\\ carried onto the standard deviation scale by the delta
 method ([Cramér 1946](#ref-cramer1946)). The correlation is \\\gamma_1 /
 \sqrt{\kappa - 1}\\ with \\\gamma_1 = \mu_3 / \sigma^3\\ the skewness,
 which every distribution keeps inside \\\[-1, 1\]\\. Moments taken from
 a grid or quadrature can sit just outside, so the correlation is
 clipped.
-
-Several quantiles from one study at probabilities \\p_1 \< \dots \<
-p_k\\ with values \\y_1 \le \dots \le y_k\\ cut the delay axis into
-\\k + 1\\ cells, and the counts in them are multinomial, \\ (c_1, \dots,
-c\_{k+1}) \sim \text{Multinomial}\left(n, \\ \left(G(y_1), \\ G(y_2) -
-G(y_1), \\ \dots, \\ 1 - G(y_k)\right)\right), \tag{5.6} \\ with \\c_j =
-\text{round}(n p_j) - \text{round}(n p\_{j-1})\\ and \\c\_{k+1} = n -
-\text{round}(n p_k)\\. A single quantile reduces this to the binomial of
-which Equation [(5.3)](#eq:meta-quantile-lik) is the normal
-approximation. Two quantiles reported at the same value are merged into
-one cell. A cell whose probability underflows to zero while the study
-saw delays in it is floored at \\10^{-300}\\.
-
-A single quantile of integer day delays is a discrete statistic. “The
-median is 5 days” says that the empirical distribution function crossed
-one half between 4 and 5 days, that is \\N\_{\le y - w_s} \< \lceil n p
-\rceil \le N\_{\le y}\\ with \\N\_{\le y}\\ the number of delays at or
-below \\y\\. It is fitted as the probability of that event, \\ P(N\_{\le
-y} \ge k) - P(N\_{\le y - w_s} \ge k), \quad k = \lceil n p \rceil,
-\quad N\_{\le y} \sim \text{Binomial}\left(n, G_0(y)\right), \tag{5.7}
-\\ where \\w_s\\ is the reporting resolution and \\G_0\\ the step
-distribution function of the discrete estimand of Section
-[5.3](#the-biased-estimands), before continuity correction. The
-information this carries saturates as \\n\\ grows.
-
-Several quantiles of integer day delays from one study are fitted as the
-joint probability of the crossings they stand for. The counts \\N\_{e_1}
-\le N\_{e_2} \le \dots \le N\_{e_m}\\ at the integer edges the reported
-quantiles name, the day below each and the day itself, form a Markov
-chain of binomial steps, \\ N\_{e_1} \sim \text{Binomial}\left(n, \\
-G_0(e_1)\right), \quad N\_{e\_{i+1}} \mid N\_{e_i} \sim N\_{e_i} +
-\text{Binomial}\left(n - N\_{e_i}, \\ \frac{G_0(e\_{i+1}) -
-G_0(e_i)}{1 - G_0(e_i)}\right), \tag{5.8} \\ and a quantile reported at
-\\p\\ landing on day \\y\\ puts the box \\N\_{\le y - w_s} \le \lceil n
-p \rceil - 1\\ and \\N\_{\le y} \ge \lceil n p \rceil\\ on two of them.
-The likelihood is the probability that every count fell in its box, \\
-P\left(l_i \le N\_{e_i} \le u_i, \\ i = 1, \dots, m\right), \tag{5.9} \\
-computed by a forward pass over the counts \\0, \dots, n\\ on the log
-scale, one binomial step per edge. The pass is kept to a band of counts
-around the most likely path of the constrained chain, six standard
-deviations and a few counts wide, so its cost grows like \\m n^{3/2}\\
-rather than \\m n^2\\ and it is exact to well within a millionth. Two
-quantiles reported at the same value are two constraints at one edge,
-and a single quantile reduces Equation [(5.9)](#eq:meta-quantile-box) to
-Equation [(5.7)](#eq:meta-quantile-crossing). The multinomial of
-Equation [(5.6)](#eq:meta-quantile-set) on the continuity corrected
-\\G\\ treats each reported quantile as a continuous cut point, so its
-curvature grows like \\n\\ and it claims a standard error five times too
-small at a thousand delays, where Equation
-[(5.9)](#eq:meta-quantile-box) is close to an indicator of the
-parameters that put the population quantiles in the reported cells. That
-is a box rather than a peak, so the posterior of such a study is
-described by its bounds rather than a standard error, and the sampler
-explores the box.
 
 A study with a continuous estimand, codes 1, 2 and 4 of Section
 [5.3](#the-biased-estimands), that reports a mean or a standard
@@ -464,39 +457,36 @@ deviation alongside quantiles has all of them fitted as one multivariate
 normal, \\ \begin{pmatrix} y_m \\ y\_\sigma \\ y\_{p_1} \\ \vdots \\
 y\_{p_k} \end{pmatrix} \sim \text{Normal}\left( \begin{pmatrix} m_1 \\
 \sigma \\ Q\_{p_1} \\ \vdots \\ Q\_{p_k} \end{pmatrix}, \\ \frac{1}{n}
-\Sigma \right), \tag{5.10} \\ whose mean and standard deviation block is
-that of Equation [(5.5)](#eq:meta-moment-pair). The rest follows from
+\Sigma \right), \tag{5.11} \\ whose mean and standard deviation block is
+that of Equation [(5.10)](#eq:meta-moment-pair). The rest follows from
 the Bahadur representation of a sample quantile, \\\hat{Q}\_p - Q_p
-\approx -(\hat{G}(Q_p) - p) / g(Q_p)\\ with \\g\\ the density of \\G\\
-([Bahadur 1966](#ref-bahadur1966)), \\ \Sigma\_{q_i q_j} = \frac{p_i
-(1 - p_j)}{g(Q\_{p_i}) \\ g(Q\_{p_j})}, \quad p_i \le p_j, \qquad
-\Sigma\_{m q_i} = -\frac{\int_L^{Q\_{p_i}} (x - m_1) \\
-\text{d}G(x)}{g(Q\_{p_i})}, \qquad \Sigma\_{\sigma q_i} =
--\frac{\int_L^{Q\_{p_i}} \left((x - m_1)^2 - \sigma^2\right)
-\text{d}G(x)}{2 \sigma \\ g(Q\_{p_i})}, \tag{5.11} \\ with \\L\\ the
-smallest delay the study counted, and the last entry carried from the
-sample variance to the standard deviation by the delta method. The
-partial moments are integrated by parts over the nodes on which \\G\\ is
-evaluated, and \\g(Q_p)\\ is the closed form density of the estimand
-where its quantile is refined and the slope of \\G\\ between the
-bracketing nodes where it is not, see Section
-[5.3.5](#quantiles-of-the-estimands). Against 4000 simulated lognormal
-studies of 200 delays the derived standard errors are within 3% and the
-correlations within 0.02 of their sampling values. Fitting the two kinds
-separately counts a study reporting a mean, a standard deviation and
-quartiles about twice for the location and 1.4 times for the spread, and
-a mean with a median 1.5 times at \\n = 100\\ and 3 times at \\n = 30\\.
-A continuous estimand reporting only a mean and a standard deviation, or
-only quantiles, keeps Equation [(5.5)](#eq:meta-moment-pair) or
-[(5.6)](#eq:meta-quantile-set), which the joint normal reduces to and
+\approx -(\hat{F}\_n(Q_p) - p) / \tilde{f}(Q_p)\\ with \\\hat{F}\_n\\
+the empirical distribution function of the study’s delays and
+\\\tilde{f}\\ the density of \\\tilde{F}\\ ([Bahadur
+1966](#ref-bahadur1966)), \\ \Sigma\_{q_i q_j} = \frac{p_i (1 -
+p_j)}{\tilde{f}(Q\_{p_i}) \\ \tilde{f}(Q\_{p_j})}, \quad p_i \le p_j,
+\qquad \Sigma\_{m q_i} = -\frac{\int_L^{Q\_{p_i}} (x - m_1) \\
+\text{d}\tilde{F}(x)}{\tilde{f}(Q\_{p_i})}, \qquad \Sigma\_{\sigma q_i}
+= -\frac{\int_L^{Q\_{p_i}} \left((x - m_1)^2 - \sigma^2\right)
+\text{d}\tilde{F}(x)}{2 \sigma \\ \tilde{f}(Q\_{p_i})}, \tag{5.12} \\
+with \\L\\ the smallest delay the study counted, and the last entry
+carried from the sample variance to the standard deviation by the delta
+method. The partial moments are integrated by parts over the nodes on
+which \\\tilde{F}\\ is evaluated, and \\\tilde{f}(Q_p)\\ is the closed
+form density of the estimand where its quantile is refined and the slope
+of \\\tilde{F}\\ between the bracketing nodes where it is not, see
+Section [5.3.1](#censoring-adjustment). Fitting the two kinds separately
+would count the information they share twice. A continuous estimand
+reporting only a mean and a standard deviation, or only quantiles, keeps
+Equation [(5.10)](#eq:meta-moment-pair) or
+[(5.7)](#eq:meta-quantile-set), which the joint normal reduces to and
 which is exact for a single quantile. On the grid of codes 0 and 3 the
 quantiles are discrete statistics fitted by Equations
-[(5.7)](#eq:meta-quantile-crossing) and [(5.9)](#eq:meta-quantile-box),
+[(5.4)](#eq:meta-quantile-crossing) and [(5.9)](#eq:meta-quantile-box),
 so the mean and standard deviation of such a study are fitted separately
 from its quantiles, and a study reporting both kinds is over weighted in
 the same way. Keep its mean and standard deviation and drop its
-quantiles. The normal approximations degrade for small study sample
-sizes.
+quantiles.
 
 #### 5.1.5 A vector of summaries with a covariance
 
@@ -509,7 +499,7 @@ pushes through to the summaries the fitted distribution implies. This is
 the reporting format we recommend, because it keeps the correlation
 between the reported quantities. With \\y\\ the reported vector and
 \\\Sigma\\ the covariance over it, \\ y \sim
-\text{Normal}\left(m(\theta), \\ \Sigma\right), \tag{5.12} \\ where
+\text{Normal}\left(m(\theta), \\ \Sigma\right), \tag{5.13} \\ where
 \\m(\theta)\\ holds \\m_1\\ for a mean, \\\sigma\\ for a standard
 deviation and \\Q_p\\ for a quantile. Summaries of a \\k\\ parameter fit
 are functions of \\k\\ numbers, so at most \\k\\ may be reported with a
@@ -524,20 +514,18 @@ so the family it fitted need not match the family fitted to it. The
 summaries are taken over the range of delays the study could have seen,
 conditioning \\\hat{F}\\ on \\(L, D\]\\, \\ \hat{F}\_{L,D}(y) =
 \frac{\hat{F}(y) - \hat{F}(L)}{\hat{F}(D) - \hat{F}(L)}, \quad L \< y
-\le D, \tag{5.13} \\ with \\L\\ the smallest delay it counted and \\D\\
+\le D, \tag{5.14} \\ with \\L\\ the smallest delay it counted and \\D\\
 its observation time, or \\D = \infty\\ for a study that adjusted for
 right truncation. Without this a study that did not correct for right
-truncation is charged with tail spread its data never had, which can
-reach tens of percent on a standard deviation. Reported parameter
-standard errors are carried onto the summaries by the delta method, as
-\\J V J^\top\\ with \\V\\ the diagonal matrix of squared standard errors
-and \\J\\ the Jacobian of the map from parameters to summaries, and
-fitted jointly through Equation [(5.12)](#eq:meta-mvn). For \\k\\
-summaries of a \\k\\ parameter fit this gives back the curvature
-\\V^{-1}\\, where fitting each with its own standard error would claim
-standard errors 1.4 to 1.5 times too wide for a lognormal mean and
-standard deviation. A full parameter covariance is better passed as
-draws to
+truncation is charged with tail spread its data never had. Reported
+parameter standard errors are carried onto the summaries by the delta
+method, as \\J V J^\top\\ with \\V\\ the diagonal matrix of squared
+standard errors and \\J\\ the Jacobian of the map from parameters to
+summaries, and fitted jointly through Equation [(5.13)](#eq:meta-mvn).
+For \\k\\ summaries of a \\k\\ parameter fit this gives back the
+curvature \\V^{-1}\\, where fitting each with its own standard error
+would overstate their uncertainty. A full parameter covariance is better
+passed as draws to
 [`as_epidist_multivariate()`](https://epidist.epinowcast.org/reference/as_epidist_multivariate.md).
 A study with no parameter uncertainty falls back to the sample size
 likelihoods above, and any number of its summaries may be reported. This
@@ -589,76 +577,145 @@ meta-regression that estimates the residual bias instead.
 ### 5.3 The biased estimands
 
 Let \\f(\tau; \theta)\\ and \\F(\tau; \theta)\\ be the forward density
-and distribution function of Section [1](#maths), and \\g_p\\ the
+and distribution function of Section [1](#maths), and \\g_P\\ the
 distribution of a primary event within its window of width \\w_p\\,
 uniform under constant incidence and exponentially tilted towards more
 recent times otherwise. Write \\ F\_{pc}(\tau; \theta) =
 \mathbb{P}(\tau^\star + U \le \tau), \quad \tau^\star \sim f(\cdot \\ ;
-\theta), \\ U \sim g_p, \\ for the primary event censored distribution
+\theta), \\ U \sim g_P, \\ for the primary event censored distribution
 function of `primarycensored` ([Abbott et al.
 2025](#ref-primarycensored)). Each censoring code below defines a
 distribution, right truncated at the observation time \\D\\, with \\D =
-\infty\\ for a study that adjusted for right truncation itself. Its
-moments, distribution function \\G\\ and quantiles \\Q_p\\ replace those
-of the delay in the likelihoods of Section [5.1](#sampling-likelihoods).
-Four moments are needed, because the kurtosis sets the sampling error of
-a reported standard deviation and the skewness its correlation with a
-reported mean.
+\infty\\ for a study that adjusted for right truncation itself. \\D\\ is
+on the delay scale, the truncation time \\T\\ of Section
+[1.2](#right-truncation) less the time of the primary event. This
+distribution is the study’s estimand \\\tilde{F}\\, and its moments,
+distribution function and quantiles are what the likelihoods of Section
+[5.1](#sampling-likelihoods) read. Four moments are needed, because the
+kurtosis sets the sampling error of a reported standard deviation and
+the skewness its correlation with a reported mean. Codes 0 and 3 give a
+discrete estimand on the study’s reporting grid and codes 1, 2 and 4 a
+continuous one, which is why the likelihoods for quantiles and for joint
+summaries differ between them.
 
 #### 5.3.1 Censoring adjustment
 
-Code 0, no adjustment, summarised integer date differences directly, so
-its estimand is discrete. With \\q_j\\ the probability on the \\j\\th
-secondary window, \\ q_j = \frac{F\_{pc}(j w_s; \theta) - F\_{pc}((j-1)
-w_s; \theta)}{F\_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j =
-1, \dots, \lfloor D / w_s \rfloor, \tag{5.14} \\ where bin \\j\\ carries
+`cens_adjusted` records how a study handled interval censoring, one of
+five codes.
+
+| Code | What the study did | Estimand |
+|----|----|----|
+| 0 | summarised integer date differences directly, that is summary statistics of the raw data | discrete, on the reporting grid |
+| 1 | adjusted for both intervals, for example with a double interval censored likelihood | continuous, the delay itself |
+| 2 | adjusted the secondary interval only, assuming a uniform delay within it | continuous, the delay plus the primary offset |
+| 3 | assigned each delay to the centre of its interval | discrete, the code 0 grid moved up |
+| 4 | placed the primary event at the midpoint of its window and integrated the secondary interval | continuous, code 2 moved down |
+
+Each code below gives the estimand’s moments, \\\mathbb{E}\[\tau^k\]\\
+for \\k = 1, \dots, 4\\, from which the mean, variance, skewness and
+kurtosis follow, its distribution function \\\tilde{F}\\ and its
+quantiles \\Q_p\\. \\\tilde{F}\\ is computed at a set of points \\t_1 \<
+\dots \< t_m\\, the grid cells for codes 0 and 3 and quadrature nodes
+otherwise. Every quantile starts from linear interpolation between the
+two points that bracket \\p\\, \\ Q_p^{(0)} = t_i + \frac{p -
+\tilde{F}(t_i)}{\tilde{F}(t\_{i+1}) - \tilde{F}(t_i)} \left(t\_{i+1} -
+t_i\right), \quad \tilde{F}(t_i) \le p \< \tilde{F}(t\_{i+1}),
+\tag{5.15} \\ which is exact on a grid and otherwise only as accurate as
+the spacing of the points. Where \\\tilde{F}\\ and its density
+\\\tilde{f}\\ have a closed form it is refined by two Newton steps, \\
+Q_p^{(k + 1)} = Q_p^{(k)} - \frac{\tilde{F}(Q_p^{(k)}) -
+p}{\tilde{f}(Q_p^{(k)})}. \tag{5.16} \\ A fixed number of steps from a
+fixed start keeps \\Q_p\\ differentiable in \\\theta\\, which a root
+search would not.
+
+##### 5.3.1.1 Code 0: summary statistics of the raw data
+
+Code 0 is the code for summary statistics computed from the raw data,
+because recorded delays are always censored to the day or coarser. Its
+estimand is discrete, with probability \\q_j\\ on the \\j\\th secondary
+window, \\ q_j = \frac{F\_{pc}(j w_s; \theta) - F\_{pc}((j-1) w_s;
+\theta)}{F\_{pc}(w_s \lfloor D / w_s \rfloor; \theta)}, \quad j = 1,
+\dots, \lfloor D / w_s \rfloor, \tag{5.17} \\ where bin \\j\\ carries
 the delay \\(j-1) w_s\\ and the truncation point is discretised to the
 last full grid boundary. This is the doubly interval censored, right
 truncated probability mass function the marginal model of Section
-[4](#the-marginal-model) uses for individual observations. Summing over
-the grid gives the moments, and its cumulative sum gives \\G_0\\. For
-quantile rows \\G\\ is continuity corrected by interpolating \\G_0\\
-linearly through the mid points of its cells, because a reported
-quantile of day resolution data otherwise lands on a jump. Reported
-quantiles without a standard error use Equation
-[(5.7)](#eq:meta-quantile-crossing) or [(5.9)](#eq:meta-quantile-box) on
-\\G_0\\ instead. The reported value is itself rounded to the grid, so a
-bias remains that does not shrink with \\n\\.
+[4](#the-marginal-model) uses for individual observations.
 
-Code 1, full adjustment, reported the moments of \\f(\cdot \\ ;
-\theta)\\ itself, right truncated at \\D\\, \\ \mathbb{E}\[\tau^k \mid
-\tau \le D\] = \frac{\int_0^D k t^{k-1} \left(F(D; \theta) - F(t;
-\theta)\right) \text{d}t}{F(D; \theta)}, \quad k = 1, \dots, 4,
-\tag{5.15} \\ which reduces to the family moments when \\D = \infty\\.
-Its distribution function is \\F(y; \theta) / F(D; \theta)\\.
+**Moments.** Sums over the grid.
 
-Code 2, the uniform single interval approximation, left the primary
-interval uncorrected and so observed \\\tau^\star + U\\, with the
-moments of \\F\_{pc}\\ right truncated at \\D\\, \\
-\mathbb{E}\[(\tau^\star + U)^k \mid \tau^\star + U \le D\] =
-\frac{\int_0^D k t^{k-1} \left(F\_{pc}(D; \theta) - F\_{pc}(t;
-\theta)\right) \text{d}t}{F\_{pc}(D; \theta)}, \quad k = 1, \dots, 4.
-\tag{5.16} \\ Its distribution function is \\F\_{pc}(y; \theta) /
-F\_{pc}(D; \theta)\\. Equations [(5.15)](#eq:meta-trunc-moments) and
-[(5.16)](#eq:meta-uniform-moments) are evaluated by Simpson’s rule.
-Where \\D = \infty\\ and the primary event is uniform the convolution is
-exact, \\ \mu\_{pc} = \mu + \frac{w_p}{2}, \quad \sigma\_{pc}^2 =
-\sigma^2 + \frac{w_p^2}{12}, \quad \mu\_{4,pc} = \mu_4 + 6 \sigma^2
-\frac{w_p^2}{12} + \frac{w_p^4}{80}, \tag{5.17} \\ with \\\mu\\,
-\\\sigma^2\\ and \\\mu_4\\ the mean, variance and fourth central moment
-of \\f(\cdot \\ ; \theta)\\.
+**Distribution function.** The cumulative sum of the grid gives
+\\\tilde{F}\_0\\. For quantiles \\\tilde{F}\\ is continuity corrected by
+interpolating \\\tilde{F}\_0\\ linearly through the mid points of its
+cells, because a reported quantile of day resolution data otherwise
+lands on a jump.
 
-Code 3, midpoint imputation, assigned each delay to the centre of its
-interval, so its estimand is the grid of Equation
-[(5.14)](#eq:meta-grid) moved up by \\w_s / 2\\. Reported quantiles use
-Equations [(5.7)](#eq:meta-quantile-crossing) and
-[(5.9)](#eq:meta-quantile-box), as for code 0. Code 4, midpoint
-imputation with a uniform interval, placed the primary event at the
-midpoint of its window and integrated the secondary interval, so its
-estimand is that of code 2 moved down by \\w_p / 2\\. A shift changes
-the mean alone and moves the distribution function and quantiles with
-it. Under a uniform primary event code 4 therefore has the mean of code
-1 and the variance of code 2 before truncation, because midpointing
+**Quantiles.** Equation [(5.15)](#eq:meta-quantile-chord) on the
+continuity corrected \\\tilde{F}\\ is exact. The reported value is
+itself rounded to the grid, so a bias remains that does not shrink with
+\\n\\.
+
+##### 5.3.1.2 Code 1: full adjustment
+
+A fully adjusted study estimated \\f(\cdot \\ ; \theta)\\ itself, right
+truncated at \\D\\.
+
+**Moments.** \\ \mathbb{E}\[\tau^k \mid \tau \le D\] = \frac{\int_0^D k
+t^{k-1} \left(F(D; \theta) - F(t; \theta)\right) \text{d}t}{F(D;
+\theta)}, \quad k = 1, \dots, 4, \tag{5.18} \\ evaluated by Simpson’s
+rule, which reduces to the family moments when \\D = \infty\\. Simpson’s
+rule integrates numerically over an even number of equal intervals
+between \\L\\ and \\D\\, fitting a parabola to each pair. Each study
+gets enough intervals to resolve the spread it reported, at least 100 or
+the value of `options(epidist.meta_n_quad)`.
+
+**Distribution function.** \\F(y; \theta) / F(D; \theta)\\.
+
+**Quantiles.** For a lognormal or Weibull delay without an accrual
+design the quantile has a closed form, \\ Q_p = F^{-1}\left(F(L) + p
+\left(F(D) - F(L)\right)\right), \\ with \\L\\ the smallest delay the
+study counted, see Section [5.3.4](#left-truncation). Other families
+take the Newton steps of Equation [(5.16)](#eq:meta-quantile-newton).
+
+##### 5.3.1.3 Code 2: the uniform single interval approximation
+
+A study that left the primary interval uncorrected observed
+\\\tau^\star + U\\, right truncated at \\D\\.
+
+**Moments.** \\ \mathbb{E}\[(\tau^\star + U)^k \mid \tau^\star + U \le
+D\] = \frac{\int_0^D k t^{k-1} \left(F\_{pc}(D; \theta) - F\_{pc}(t;
+\theta)\right) \text{d}t}{F\_{pc}(D; \theta)}, \quad k = 1, \dots, 4,
+\tag{5.19} \\ evaluated by Simpson’s rule. Where \\D = \infty\\ and the
+primary event is uniform the convolution is exact, \\ \mu\_{pc} = \mu +
+\frac{w_p}{2}, \quad \sigma\_{pc}^2 = \sigma^2 + \frac{w_p^2}{12}, \quad
+\mu\_{4,pc} = \mu_4 + 6 \sigma^2 \frac{w_p^2}{12} + \frac{w_p^4}{80},
+\tag{5.20} \\ with \\\mu\\, \\\sigma^2\\ and \\\mu_4\\ the mean,
+variance and fourth central moment of \\f(\cdot \\ ; \theta)\\.
+
+**Distribution function.** \\F\_{pc}(y; \theta) / F\_{pc}(D; \theta)\\.
+
+**Quantiles.** With a uniform primary event \\\tilde{F}\\ and
+\\\tilde{f}\\ have a closed form, so the quantile takes the Newton steps
+of Equation [(5.16)](#eq:meta-quantile-newton). With a growing primary
+event they do not, and the quantile keeps Equation
+[(5.15)](#eq:meta-quantile-chord).
+
+##### 5.3.1.4 Codes 3 and 4: midpoint imputation
+
+The estimand of code 3 is the grid of Equation [(5.17)](#eq:meta-grid)
+moved up by \\w_s / 2\\. The estimand of code 4 is that of code 2 moved
+down by \\w_p / 2\\.
+
+**Moments.** A shift changes the mean alone, by \\+ w_s / 2\\ for code 3
+and \\- w_p / 2\\ for code 4, and leaves the central moments as they
+are.
+
+**Distribution function.** Shifted with the estimand.
+
+**Quantiles.** Shifted with the estimand, from those of code 0 for code
+3 and those of code 2 for code 4.
+
+Under a uniform primary event code 4 therefore has the mean of code 1
+and the variance of code 2 before truncation, because midpointing
 removes the mean of \\U\\ but not its spread. The mirror reading, a
 midpointed secondary event and an integrated primary interval, has
 variance \\\sigma^2 + w_s^2 / 12\\ and is not used, because the
@@ -671,60 +728,50 @@ variance.
 #### 5.3.2 Right truncation
 
 The truncation above conditions on the delay falling below one cutoff,
-which is what a cohort followed for a common observation time gives.
-This is truncation rather than right censoring, where a case is known to
-exist and contributes a survival term rather than being absent from the
-study. Right censoring is not yet supported.
+which is what a cohort followed for a common observation time gives,
+`trunc_design = "cohort"`. This is truncation rather than right
+censoring, where a case is known to exist and contributes a survival
+term rather than being absent from the study. Right censoring is not yet
+supported.
 
 A study that accrued primary events over a window of length \\A\\ and
-stopped at its calendar end saw a delay \\d\\ only for primary events at
-least \\d\\ before the stop. With primary events arriving at a rate
-proportional to \\\exp(r t)\\ the follow up available is \\ w(d) =
-\int_0^{A - d} \exp(r t) \\ \text{d}t = \frac{\exp(r (A - d)) - 1}{r},
-\quad 0 \le d \le A, \tag{5.18} \\ which tends to \\A - d\\ as \\r\\
-tends to zero and, for a long window and a growing epidemic, to an
-exponential tilt by \\\exp(-r d)\\. This is the dynamical bias of Park
-et al. ([2024](#ref-park2024estimating)). The estimand is \\f(d; \theta)
-w(d)\\ renormalised over \\\[0, A\]\\, so \\A\\ replaces the cohort
-cutoff \\D\\. Applying both at once double counts, so a study is one or
-the other. The weight multiplies the quadrature for Equations
-[(5.15)](#eq:meta-trunc-moments) and [(5.16)](#eq:meta-uniform-moments)
-at each node and renormalises. For Equation
-[(5.16)](#eq:meta-uniform-moments) it is evaluated at \\d - w_p / 2\\,
-to average the primary offset back out. The correction is only as good
-as the growth rate supplied.
+stopped at a calendar date, `trunc_design = "accrual"`, saw a delay
+\\d\\ only for primary events at least \\d\\ before the stop. With
+primary events arriving at a rate proportional to \\\exp(r t)\\ the
+follow up available is \\ w(d) = \int_0^{A - d} \exp(r t) \\ \text{d}t =
+\frac{\exp(r (A - d)) - 1}{r}, \quad 0 \le d \le A, \tag{5.21} \\ which
+tends to \\A - d\\ as \\r\\ tends to zero and, for a long window and a
+growing epidemic, to an exponential tilt by \\\exp(-r d)\\. This is the
+dynamical bias of Park et al. ([2024](#ref-park2024estimating)). The
+estimand is \\f(d; \theta) w(d)\\ renormalised over \\\[0, A\]\\, so
+\\A\\ replaces the cohort cutoff \\D\\. The weight multiplies the
+quadrature for Equations [(5.18)](#eq:meta-trunc-moments) and
+[(5.19)](#eq:meta-uniform-moments) at each node and renormalises. For
+Equation [(5.19)](#eq:meta-uniform-moments) it is evaluated at \\d - w_p
+/ 2\\, to average the primary offset back out. This is an approximation,
+because the study knows each primary event only to within its window,
+and it worsens as \\r\\ grows and as \\w_p\\ approaches \\A\\. The
+correction is only as good as the growth rate supplied. Its quantiles
+keep Equation [(5.15)](#eq:meta-quantile-chord), because the estimand is
+defined by the interpolation between its points.
 
-On the grid of Equation [(5.14)](#eq:meta-grid) the primary event is
-known only to its window, and a complete primary window starting at \\k
-w_p\\ holds a delay of \\x\\ from its start when \\k w_p + x \le A\\.
-The growth weighted mass of the complete windows eligible for \\x\\ is
-therefore a step function of \\x\\ that steps down at \\A - j w_p\\.
-Each cell of the grid is cut at those points, each piece is weighted by
-that mass, and the pieces are summed back before renormalising. When
-\\A\\ is not a multiple of \\w_p\\ the last primary window is partial,
-of length \\l = A - w_p \lfloor A / w_p \rfloor\\. It only holds delays
-up to \\l\\, and the offset of a primary event within it runs over \\l\\
-rather than \\w_p\\, so its cases follow \\F\_{pc}\\ with a window of
-\\l\\ in place of \\w_p\\, weighted by the growth weighted length of the
-window, and are added to the cells below \\l\\. The grid weight is then
-exact for any \\A\\, \\w_p\\ and \\w_s\\. Weighting each cell at its
-lower edge instead is exact only when \\w_p = w_s\\ and \\A\\ is a
-multiple of both, and for a daily primary and weekly secondary window
-puts the mean 36% low at \\r = 0.2\\ where the piecewise weight is
-within 0.2%. Treating the partial window as complete put the mean 27%
-low for weekly primary and secondary windows with \\A = 30\\ at \\r =
-0.2\\.
-
-One residual remains. Equation [(5.16)](#eq:meta-uniform-moments) keeps
-the smooth weight, because the follow up available to a primary event is
-only known to within its window. The residual grows with \\r\\ and as
-\\w_p\\ grows towards \\A\\.
+On the grid of Equation [(5.17)](#eq:meta-grid) the weight cannot be
+applied delay by delay, because a study that recorded dates knows each
+primary event only to its window. A delay is seen only if the whole
+primary window it came from was open long enough, so the weight is a
+step function of the delay that drops by one window’s growth weighted
+mass at each point \\A - j w_p\\. Each grid cell is split at those
+points and each piece weighted by the mass left. When \\A\\ is not a
+whole number of primary windows the last one is partial, of length \\l =
+A - w_p \lfloor A / w_p \rfloor\\, and its cases are added separately,
+following \\F\_{pc}\\ with a window of \\l\\. This keeps the grid exact
+for any \\A\\, \\w_p\\ and \\w_s\\.
 
 #### 5.3.3 An estimated growth rate
 
-The rate \\r_j\\ of study \\j\\ sets the tilt of \\g_p\\, which every
+The rate \\r_j\\ of study \\j\\ sets the tilt of \\g_P\\, which every
 code but code 1 uses. It also sets the weight of Equation
-[(5.18)](#eq:meta-accrual). Where the study’s `growth_rate` is `NA`, or
+[(5.21)](#eq:meta-accrual). Where the study’s `growth_rate` is `NA`, or
 is given with a `growth_rate_sd`, it is instead the distributional
 parameter `pgrowth` evaluated on the row, the parameter of Section
 [3.2](#primary-tilt), so it takes a `brms` formula and a prior and can
@@ -732,7 +779,7 @@ be shared with individual level rows from the same outbreak. Unless a
 formula is given for `pgrowth` the model uses `pgrowth ~ 0 + study`, one
 rate per study. A study that reported a rate \\\hat{r}\_j\\ with a
 standard deviation \\s_j\\ then gets \\ r_j \sim
-\text{Normal}(\hat{r}\_j, s_j^2), \tag{5.19} \\ so the reported rate is
+\text{Normal}(\hat{r}\_j, s_j^2), \tag{5.22} \\ so the reported rate is
 a prior rather than a constant and its uncertainty reaches the delay.
 Every other coefficient of `pgrowth` gets \\\text{Normal}(0, 0.25^2)\\,
 which is weakly informative for a delay measured in days.
@@ -743,37 +790,24 @@ A study that only counted delays of at least \\L\\ reported summaries
 conditioned on \\\tau \> L\\, the left truncation of survival analysis
 ([Klein and Moeschberger 2003](#ref-klein2003)). Each expression above
 reduces to its earlier form when \\L = 0\\. On the grid of Equation
-[(5.14)](#eq:meta-grid) the cells below \\L\\ are dropped and the rest
+[(5.17)](#eq:meta-grid) the cells below \\L\\ are dropped and the rest
 renormalised by their mass, which is \\F\_{pc}(D) - F\_{pc}(L)\\ when
 \\L\\ falls on a grid boundary. For codes 3 and 4, \\L\\ is on the
 reported scale, so the estimand they move is truncated at \\L\\ moved
 back by the same shift, \\L - w_s / 2\\ or \\L + w_p / 2\\. The
-truncated moments of Equation [(5.15)](#eq:meta-trunc-moments) pick up a
+truncated moments of Equation [(5.18)](#eq:meta-trunc-moments) pick up a
 boundary term, \\ \mathbb{E}\[\tau^k \mid L \< \tau \le D\] = \frac{L^k
 \left(F(D; \theta) - F(L; \theta)\right) + \int_L^D k t^{k-1} \left(F(D;
 \theta) - F(t; \theta)\right) \text{d}t} {F(D; \theta) - F(L; \theta)},
-\quad k = 1, \dots, 4, \tag{5.20} \\ and Equation
-[(5.16)](#eq:meta-uniform-moments) likewise with \\F\_{pc}\\ in place of
-\\F\\. The distribution function becomes \\ G(y) = \frac{F(y; \theta) -
-F(L; \theta)}{F(D; \theta) - F(L; \theta)}, \quad L \< y \le D,
-\tag{5.21} \\ zero at or below \\L\\ and one above \\D\\. The accrual
-weight of Equation [(5.18)](#eq:meta-accrual) is unchanged, since the
+\quad k = 1, \dots, 4, \tag{5.23} \\ and Equation
+[(5.19)](#eq:meta-uniform-moments) likewise with \\F\_{pc}\\ in place of
+\\F\\. The distribution function becomes \\ \tilde{F}(y) = \frac{F(y;
+\theta) - F(L; \theta)}{F(D; \theta) - F(L; \theta)}, \quad L \< y \le
+D, \tag{5.24} \\ zero at or below \\L\\ and one above \\D\\. The accrual
+weight of Equation [(5.21)](#eq:meta-accrual) is unchanged, since the
 cells and nodes it multiplies now start at \\L\\. Individual level rows
 pass \\L\\ to `primarycensored` as their left truncation point, as the
 marginal model does.
-
-#### 5.3.5 Quantiles of the estimands
-
-The quantile \\Q_p\\ of an estimand is read off by inverse linear
-interpolation between the two points of \\G\\ that bracket \\p\\. On the
-grid of Equation [(5.14)](#eq:meta-grid) that interpolant is the
-continuity corrected quantile, so it is exact. For a continuous estimand
-the chord is refined, exactly through the family quantile function for a
-lognormal or weibull delay under code 1, and otherwise by two Newton
-steps using the closed form distribution function and density of the
-estimand. An accrual estimand is defined by the interpolation between
-its nodes and keeps its chord. Both keep \\Q_p\\ differentiable in
-\\\theta\\.
 
 ### References
 

@@ -139,7 +139,7 @@ Other meta_model:
 ## Examples
 
 ``` r
-# \donttest{
+# \dontrun{
 estimates <- as_epidist_estimates_data(
   data.frame(
     study = c("A", "A", "B", "B", "C", "C"),
@@ -180,12 +180,12 @@ epidist_meta_leave_one_out(fit, data = meta, refresh = 0)
 #> # A tibble: 6 × 12
 #>   study  .row summary estimate lower upper full_estimate full_lower full_upper
 #>   <chr> <int> <chr>      <dbl> <dbl> <dbl>         <dbl>      <dbl>      <dbl>
-#> 1 A         1 mean        7.73  7.25  8.30          7.75       7.36       8.27
-#> 2 A         1 sd          4.03  3.41  5.18          4.10       3.55       5.05
-#> 3 B         1 mean        8.06  7.57  8.69          7.75       7.36       8.27
-#> 4 B         1 sd          4.22  3.62  5.37          4.10       3.55       5.05
-#> 5 C         1 mean        7.27  6.74  7.95          7.75       7.36       8.27
-#> 6 C         1 sd          3.85  3.19  4.76          4.10       3.55       5.05
+#> 1 A         1 mean        7.73  7.23  8.34          7.75       7.31       8.27
+#> 2 A         1 sd          4.03  3.42  5.14          4.09       3.53       4.91
+#> 3 B         1 mean        8.05  7.57  8.71          7.75       7.31       8.27
+#> 4 B         1 sd          4.23  3.61  5.24          4.09       3.53       4.91
+#> 5 C         1 mean        7.28  6.74  8.01          7.75       7.31       8.27
+#> 6 C         1 sd          3.88  3.21  4.90          4.09       3.53       4.91
 #> # ℹ 3 more variables: difference <dbl>, difference_lower <dbl>,
 #> #   difference_upper <dbl>
 # }

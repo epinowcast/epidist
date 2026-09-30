@@ -7,10 +7,11 @@ day below and the day itself, \\N\_{\le y - w_s} \le \lceil n p \rceil -
 number of delays at or below \\y\\. The counts at the integer edges the
 reported quantiles name form a Markov chain, \$\$N\_{e\_{i+1}} \mid
 N\_{e_i} \sim N\_{e_i} + \text{Binomial}\left(n - N\_{e_i},
-\frac{G_0(e\_{i+1}) - G_0(e_i)}{1 - G_0(e_i)}\right),\$\$ with \\G_0\\
-the uncorrected grid distribution function, and the likelihood is the
-probability that every count fell in its box. It is a forward pass over
-the counts on the log scale, one step of
+\frac{\tilde{F}\_0(e\_{i+1}) - \tilde{F}\_0(e_i)} {1 -
+\tilde{F}\_0(e_i)}\right),\$\$ with \\\tilde{F}\_0\\ the uncorrected
+grid distribution function, and the likelihood is the probability that
+every count fell in its box. It is a forward pass over the counts on the
+log scale, one step of
 [`.meta_box_step()`](https://epidist.epinowcast.org/reference/dot-meta_box_step.md)
 per edge, kept to a band of
 [`.meta_band_half_width()`](https://epidist.epinowcast.org/reference/dot-meta_band_half_width.md)
