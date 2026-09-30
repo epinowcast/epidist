@@ -592,10 +592,12 @@ Individual level rows pass $L$ to `primarycensored` as their left truncation poi
 
 ### Quantiles of the estimands {#quantiles-of-the-estimands}
 
-The quantile $Q_p$ of an estimand is read off by inverse linear interpolation between the two points of $\tilde{F}$ that bracket $p$.
-On the grid of Equation \@ref(eq:meta-grid) that interpolant is the continuity corrected quantile, so it is exact.
-For a continuous estimand the chord is refined, exactly through the family quantile function for a lognormal or weibull delay under code 1, and otherwise by two Newton steps using the closed form distribution function and density of the estimand.
-An accrual estimand is defined by the interpolation between its nodes and keeps its chord.
-Both keep $Q_p$ differentiable in $\theta$.
+$\tilde{F}$ is computed at a set of points, the grid cells for codes 0 and 3 and quadrature nodes otherwise.
+The quantile $Q_p$ is found from the two points whose $\tilde{F}$ brackets $p$, by linear interpolation between them.
+For codes 0 and 3 this is the quantile of the continuity corrected $\tilde{F}$, so it is exact.
+For a continuous estimand the interpolated value is an approximation and is refined.
+For a lognormal or Weibull delay under code 1 the family's quantile function gives $Q_p$ exactly, and otherwise two Newton steps using $\tilde{F}$ and its density move it to the quantile.
+An accrual estimand is defined only at its points, so its interpolated value is used as it is.
+Each of these is smooth in $\theta$, so $Q_p$ has the gradients the sampler needs.
 
 ## References {-}
