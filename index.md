@@ -1,6 +1,8 @@
 # Estimate epidemiological delay distributions with `brms`
 
 [![Universe](https://epinowcast.r-universe.dev/badges/epidist)](https://epinowcast.r-universe.dev/epidist)
+[![CRAN
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/epidist)](https://cran.r-project.org/package=epidist)
 [![MIT
 license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/epinowcast/epidist/blob/main/LICENSE.md)
 [![GitHub

@@ -56,7 +56,7 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.0" id="epidist-100">epidist 1.0.0<a class="anchor" aria-label="anchor" href="#epidist-100"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.0.0" id="epidist-100">epidist 1.0.0<a class="anchor" aria-label="anchor" href="#epidist-100"></a></h2><p class="text-muted">CRAN release: 2026-10-13</p>
 <p>This is the first release of <code>epidist</code> on CRAN. <code>epidist</code> estimates epidemiological delay distributions, such as the incubation period or the delay from onset to report, using <code>brms</code>. It corrects for the common biases in these data: interval censoring of the primary and secondary events, right truncation, left truncation, and the dynamical bias from a growing or shrinking epidemic. It provides a naive model, a latent model that samples the unobserved event times, and a marginal model that integrates them out through <code>primarycensored</code>. It also provides an experimental meta model, which fits published summary estimates jointly with individual level data and adjusts each summary for how its study was estimated. Delays can follow a lognormal, gamma, Weibull or generalised gamma distribution. Every distributional parameter can take a <code>brms</code> formula, so delays can vary with covariates, over time or between groups with partial pooling. Tools for preparing data, setting priors, simulating data, summarising and plotting fitted delay distributions, and passing them on to other packages complete the workflow. The meta model is still experimental and its interface may change.</p>
 <div class="section level3">
 <h3 id="new-features-1-0-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-0"></a></h3>

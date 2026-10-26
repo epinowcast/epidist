@@ -2,6 +2,8 @@
 
 ## epidist 1.0.0
 
+CRAN release: 2026-10-13
+
 This is the first release of `epidist` on CRAN. `epidist` estimates
 epidemiological delay distributions, such as the incubation period or
 the delay from onset to report, using `brms`. It corrects for the common
